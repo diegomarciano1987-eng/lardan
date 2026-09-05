@@ -1,24 +1,96 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteLayout } from "@/components/site/SiteLayout";
+import { HeroScroll } from "@/components/site/HeroScroll";
+import { CategoryScene } from "@/components/site/CategoryScene";
+import aneisAsset from "@/assets/lardan-categoria-aneis.jpg.asset.json";
+import colaresAsset from "@/assets/lardan-categoria-colares.jpg.asset.json";
+import editorialAsset from "@/assets/lardan-editorial-mulher.jpg.asset.json";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: HomePage,
+  head: () => ({
+    meta: [
+      { title: "LARDAN — Semijoias | Única. Como cada história." },
+      {
+        name: "description",
+        content:
+          "Semijoias Lardan: anéis, colares, pulseiras e brincos para acompanhar os seus momentos. Conheça a marca e a coleção.",
+      },
+      { property: "og:title", content: "LARDAN — Semijoias" },
+      {
+        property: "og:description",
+        content: "Semijoias para acompanhar os seus momentos.",
+      },
+      { property: "og:url", content: "/" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function HomePage() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
+    <SiteLayout>
+      <HeroScroll />
+
+      {/* Categorias: cenas enviadas nesta fase. Pulseiras e brincos aguardam imagens aprovadas (DECISOES-PENDENTES 8–9). */}
+      <CategoryScene
+        title="Anéis"
+        to="/semijoias/aneis"
+        image={aneisAsset}
+        imageAlt="Anel de semijoia sobre onda de vidro transparente"
       />
-    </div>
+      <CategoryScene
+        title="Colares"
+        to="/semijoias/colares"
+        image={colaresAsset}
+        imageAlt="Colar de semijoia sobre formas de vidro"
+        reverse
+      />
+
+      {/* Editorial de marca */}
+      <section className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-24 md:grid-cols-2">
+        <div>
+          <p className="brand-eyebrow mb-3">Editorial</p>
+          <h2 className="text-4xl text-foreground md:text-5xl">
+            Peças para os seus momentos
+          </h2>
+          <div className="rose-rule mt-6 w-16" />
+          <p className="mt-6 max-w-md text-base leading-relaxed text-muted-foreground">
+            Uma ambientação da marca Lardan: semijoias pensadas para acompanhar
+            o cotidiano com leveza e presença.
+          </p>
+        </div>
+        <div className="overflow-hidden rounded-2xl" style={{ boxShadow: "var(--shadow-soft)" }}>
+          <img
+            src={editorialAsset.url}
+            alt="Editorial Lardan: mulher usando colar, brincos e pulseira de semijoias"
+            loading="lazy"
+            width={1664}
+            height={928}
+            className="aspect-[16/10] w-full object-cover"
+          />
+        </div>
+      </section>
+
+      {/* Convite Seja Lardan */}
+      <section className="border-t border-border bg-secondary/40">
+        <div className="mx-auto max-w-3xl px-6 py-24 text-center">
+          <p className="brand-eyebrow mb-3">Seja Lardan</p>
+          <h2 className="text-4xl text-foreground md:text-5xl">
+            Construa a sua história com a Lardan
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground">
+            Candidate-se para conhecer a proposta de parceria da marca. Sem
+            promessa de renda garantida: cada candidatura passa por análise.
+          </p>
+          <Link
+            to="/seja-lardan"
+            className="mt-10 inline-flex items-center rounded-full bg-primary px-8 py-3 text-[0.75rem] tracking-[0.22em] uppercase text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+          >
+            Quero me candidatar
+          </Link>
+        </div>
+      </section>
+    </SiteLayout>
   );
 }

@@ -187,17 +187,23 @@ export interface MovementInput {
 
 /** Grava a movimentação e o saldo na mesma transação do banco. */
 export async function registerMovement(input: MovementInput) {
-  const { data, error } = await supabase.rpc("register_stock_movement", {
+  const args: Record<string, unknown> = {
     _kind: input.kind,
     _variant_id: input.variantId,
     _quantity: input.quantity,
-    _from_location_id: input.fromLocationId ?? undefined,
-    _to_location_id: input.toLocationId ?? undefined,
-    _reason_code: input.reasonCode ?? undefined,
-    _unit_cost_cents: input.unitCostCents ?? undefined,
-    _reference: input.reference ?? undefined,
-    _note: input.note ?? undefined,
-  });
+  };
+  if (input.fromLocationId) args["_from_location_id"] = input.fromLocationId;
+  if (input.toLocationId) args["_to_location_id"] = input.toLocationId;
+  if (input.reasonCode) args["_reason_code"] = input.reasonCode;
+  if (input.unitCostCents !== null && input.unitCostCents !== undefined)
+    args["_unit_cost_cents"] = input.unitCostCents;
+  if (input.reference) args["_reference"] = input.reference;
+  if (input.note) args["_note"] = input.note;
+
+  const { data, error } = await supabase.rpc(
+    "register_stock_movement",
+    args as never,
+  );
   if (error) throw error;
   return data as string;
 }

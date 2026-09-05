@@ -82,3 +82,9 @@ de RLS. Nenhuma delas expõe dados de terceiros.
 - Candidaturas e contatos: abas Candidaturas/Mensagens, estado vazio real. OK.
 - Estoque/Importação/Financeiro/Integrações: apenas especificação, nenhuma ação ativa. OK.
 - Console: sem erros de aplicação (apenas aviso React conhecido de state update fora do mount no fluxo de redirect).
+
+## L3.3 — Design system Livro-Razão Visual (verificado)
+- Playwright 1440x900 autenticado: `/admin` renderiza cabeçalho com marca, busca global, avatar com papel Master, grade 22/56/22, atalhos com estados honestos (Em construção / Em breve) e painéis "Sem dados" onde não há registro. Console sem erros.
+- Busca global (Ctrl+K): consulta ao servidor, retorno honesto "Nenhum resultado autorizado" quando não há registro.
+- Menu inferior flutuante: desktop com módulos por papel; mobile 390x844 com 5 itens + "Mais módulos".
+- Rotas novas: `/admin/site` e `/admin/configuracoes`. Tipos verificados sem erro.

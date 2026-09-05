@@ -23,11 +23,13 @@ import { Route as SemijoiasColaresRouteImport } from './routes/semijoias.colares
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminCadastrosRouteImport } from './routes/_authenticated/admin/cadastros'
+import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminEstoqueRouteImport } from './routes/_authenticated/admin/estoque'
 import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_authenticated/admin/financeiro'
 import { Route as AuthenticatedAdminImportacaoRouteImport } from './routes/_authenticated/admin/importacao'
 import { Route as AuthenticatedAdminIntegracoesRouteImport } from './routes/_authenticated/admin/integracoes'
 import { Route as AuthenticatedAdminLeadsRouteImport } from './routes/_authenticated/admin/leads'
+import { Route as AuthenticatedAdminSiteRouteImport } from './routes/_authenticated/admin/site'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 
 const IndexRoute = IndexRouteImport.update({
@@ -101,6 +103,12 @@ const AuthenticatedAdminCadastrosRoute =
     path: '/cadastros',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminConfiguracoesRoute =
+  AuthenticatedAdminConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminEstoqueRoute =
   AuthenticatedAdminEstoqueRouteImport.update({
     id: '/estoque',
@@ -130,6 +138,11 @@ const AuthenticatedAdminLeadsRoute = AuthenticatedAdminLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminSiteRoute = AuthenticatedAdminSiteRouteImport.update({
+  id: '/site',
+  path: '/site',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
 const AuthenticatedAdminUsuariosRoute =
   AuthenticatedAdminUsuariosRouteImport.update({
     id: '/usuarios',
@@ -150,11 +163,13 @@ export interface FileRoutesByFullPath {
   '/semijoias/colares': typeof SemijoiasColaresRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/cadastros': typeof AuthenticatedAdminCadastrosRoute
+  '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
+  '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -170,11 +185,13 @@ export interface FileRoutesByTo {
   '/semijoias/colares': typeof SemijoiasColaresRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/cadastros': typeof AuthenticatedAdminCadastrosRoute
+  '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
+  '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
@@ -193,11 +210,13 @@ export interface FileRoutesById {
   '/semijoias/colares': typeof SemijoiasColaresRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/cadastros': typeof AuthenticatedAdminCadastrosRoute
+  '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/_authenticated/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/_authenticated/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/_authenticated/admin/leads': typeof AuthenticatedAdminLeadsRoute
+  '/_authenticated/admin/site': typeof AuthenticatedAdminSiteRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -216,11 +235,13 @@ export interface FileRouteTypes {
     | '/semijoias/colares'
     | '/admin/auditoria'
     | '/admin/cadastros'
+    | '/admin/configuracoes'
     | '/admin/estoque'
     | '/admin/financeiro'
     | '/admin/importacao'
     | '/admin/integracoes'
     | '/admin/leads'
+    | '/admin/site'
     | '/admin/usuarios'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -236,11 +257,13 @@ export interface FileRouteTypes {
     | '/semijoias/colares'
     | '/admin/auditoria'
     | '/admin/cadastros'
+    | '/admin/configuracoes'
     | '/admin/estoque'
     | '/admin/financeiro'
     | '/admin/importacao'
     | '/admin/integracoes'
     | '/admin/leads'
+    | '/admin/site'
     | '/admin/usuarios'
     | '/admin'
   id:
@@ -258,11 +281,13 @@ export interface FileRouteTypes {
     | '/semijoias/colares'
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/cadastros'
+    | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/estoque'
     | '/_authenticated/admin/financeiro'
     | '/_authenticated/admin/importacao'
     | '/_authenticated/admin/integracoes'
     | '/_authenticated/admin/leads'
+    | '/_authenticated/admin/site'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
@@ -378,6 +403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCadastrosRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/configuracoes': {
+      id: '/_authenticated/admin/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/admin/configuracoes'
+      preLoaderRoute: typeof AuthenticatedAdminConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/estoque': {
       id: '/_authenticated/admin/estoque'
       path: '/estoque'
@@ -413,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminLeadsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/site': {
+      id: '/_authenticated/admin/site'
+      path: '/site'
+      fullPath: '/admin/site'
+      preLoaderRoute: typeof AuthenticatedAdminSiteRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/usuarios': {
       id: '/_authenticated/admin/usuarios'
       path: '/usuarios'
@@ -426,11 +465,13 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminCadastrosRoute: typeof AuthenticatedAdminCadastrosRoute
+  AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminEstoqueRoute: typeof AuthenticatedAdminEstoqueRoute
   AuthenticatedAdminFinanceiroRoute: typeof AuthenticatedAdminFinanceiroRoute
   AuthenticatedAdminImportacaoRoute: typeof AuthenticatedAdminImportacaoRoute
   AuthenticatedAdminIntegracoesRoute: typeof AuthenticatedAdminIntegracoesRoute
   AuthenticatedAdminLeadsRoute: typeof AuthenticatedAdminLeadsRoute
+  AuthenticatedAdminSiteRoute: typeof AuthenticatedAdminSiteRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -439,11 +480,13 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
   {
     AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
     AuthenticatedAdminCadastrosRoute: AuthenticatedAdminCadastrosRoute,
+    AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
     AuthenticatedAdminEstoqueRoute: AuthenticatedAdminEstoqueRoute,
     AuthenticatedAdminFinanceiroRoute: AuthenticatedAdminFinanceiroRoute,
     AuthenticatedAdminImportacaoRoute: AuthenticatedAdminImportacaoRoute,
     AuthenticatedAdminIntegracoesRoute: AuthenticatedAdminIntegracoesRoute,
     AuthenticatedAdminLeadsRoute: AuthenticatedAdminLeadsRoute,
+    AuthenticatedAdminSiteRoute: AuthenticatedAdminSiteRoute,
     AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   }

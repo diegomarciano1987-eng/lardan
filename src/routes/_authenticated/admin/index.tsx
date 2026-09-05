@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { hasAny, CONTENT_ROLES, LEAD_ROLES } from "@/lib/session";
-import { ADMIN_MODULES, StateBadge, useAdminRoles } from "@/components/admin/AdminShell";
+import { ADMIN_MODULES } from "@/lib/admin-modules";
+import { StateBadge, useAdminRoles } from "@/components/admin/AdminShell";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: VisaoGeral,

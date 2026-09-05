@@ -8,7 +8,7 @@ import { findModule } from "@/lib/admin-modules";
 import { BottomDock } from "@/components/admin/BottomDock";
 import { CommandPalette } from "@/components/admin/CommandPalette";
 import { ModuleAvailabilityBadge, PageHeader, Panel } from "@/components/admin/ui";
-import logo from "@/assets/logosfundo.png.asset.json";
+import logo from "@/assets/lardan-logo-completa.png.asset.json";
 
 const RolesContext = createContext<AppRole[]>([]);
 export const useAdminRoles = () => useContext(RolesContext);

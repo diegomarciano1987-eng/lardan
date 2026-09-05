@@ -1,0 +1,15 @@
+REVOKE ALL ON FUNCTION public.set_updated_at() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.gen_protocol(text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.block_page_version_mutation() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.guard_profile_update() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.guard_last_master() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.trg_sync_price_product() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.trg_sync_price_variant() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.can_manage_content(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.can_manage_leads(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.has_any_role(uuid, public.app_role[]) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.is_staff(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.my_roles() FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.master_exists() FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.ensure_profile() FROM PUBLIC, anon;

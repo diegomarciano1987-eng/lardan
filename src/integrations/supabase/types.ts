@@ -721,6 +721,7 @@ export type Database = {
     Functions: {
       can_manage_content: { Args: { _user_id: string }; Returns: boolean }
       can_manage_leads: { Args: { _user_id: string }; Returns: boolean }
+      claim_master_role: { Args: never; Returns: boolean }
       ensure_profile: {
         Args: never
         Returns: {
@@ -755,6 +756,11 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      master_exists: { Args: never; Returns: boolean }
+      my_roles: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"][]
+      }
     }
     Enums: {
       app_role:

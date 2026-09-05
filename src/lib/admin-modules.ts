@@ -112,7 +112,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     icon: Boxes,
     roles: STOCK,
     capability: "stock.view",
-    state: "em_construcao",
+    state: "ativo",
     spec: "Razão imutável de movimentações, saldo calculado em transação, recebimento com custo, kardex por item, transferência entre locais, reserva com prazo e inventário com divergência. Nenhum saldo é editado diretamente.",
   },
   {

@@ -110,7 +110,7 @@ export function AdminShell({
 
         </header>
 
-        <main className="mx-auto min-w-0 max-w-[1600px] px-5 pb-40 pt-8 md:px-8">{children}</main>
+        <main className="mx-auto min-w-0 max-w-[1600px] px-5 pb-40 pt-8 md:pl-[96px] md:pr-8">{children}</main>
 
         <QuickRail />
         <BottomDock roles={roles} />

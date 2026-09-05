@@ -36,6 +36,7 @@ import { Route as AuthenticatedAdminCadastrosColecoesRouteImport } from './route
 import { Route as AuthenticatedAdminCadastrosEntidadesRouteImport } from './routes/_authenticated/admin/cadastros/entidades'
 import { Route as AuthenticatedAdminCadastrosFornecedoresRouteImport } from './routes/_authenticated/admin/cadastros/fornecedores'
 import { Route as AuthenticatedAdminCadastrosLocaisRouteImport } from './routes/_authenticated/admin/cadastros/locais'
+import { Route as AuthenticatedAdminCadastrosProdutosRouteImport } from './routes/_authenticated/admin/cadastros/produtos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -184,6 +185,12 @@ const AuthenticatedAdminCadastrosLocaisRoute =
     path: '/cadastros/locais',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminCadastrosProdutosRoute =
+  AuthenticatedAdminCadastrosProdutosRouteImport.update({
+    id: '/cadastros/produtos',
+    path: '/cadastros/produtos',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/admin/cadastros/entidades': typeof AuthenticatedAdminCadastrosEntidadesRoute
   '/admin/cadastros/fornecedores': typeof AuthenticatedAdminCadastrosFornecedoresRoute
   '/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
+  '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
 }
 export interface FileRoutesByTo {
@@ -238,6 +246,7 @@ export interface FileRoutesByTo {
   '/admin/cadastros/entidades': typeof AuthenticatedAdminCadastrosEntidadesRoute
   '/admin/cadastros/fornecedores': typeof AuthenticatedAdminCadastrosFornecedoresRoute
   '/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
+  '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/admin/cadastros': typeof AuthenticatedAdminCadastrosIndexRoute
 }
 export interface FileRoutesById {
@@ -268,6 +277,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cadastros/entidades': typeof AuthenticatedAdminCadastrosEntidadesRoute
   '/_authenticated/admin/cadastros/fornecedores': typeof AuthenticatedAdminCadastrosFornecedoresRoute
   '/_authenticated/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
+  '/_authenticated/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/_authenticated/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
 }
 export interface FileRouteTypes {
@@ -298,6 +308,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/entidades'
     | '/admin/cadastros/fornecedores'
     | '/admin/cadastros/locais'
+    | '/admin/cadastros/produtos'
     | '/admin/cadastros/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -325,6 +336,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/entidades'
     | '/admin/cadastros/fornecedores'
     | '/admin/cadastros/locais'
+    | '/admin/cadastros/produtos'
     | '/admin/cadastros'
   id:
     | '__root__'
@@ -354,6 +366,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cadastros/entidades'
     | '/_authenticated/admin/cadastros/fornecedores'
     | '/_authenticated/admin/cadastros/locais'
+    | '/_authenticated/admin/cadastros/produtos'
     | '/_authenticated/admin/cadastros/'
   fileRoutesById: FileRoutesById
 }
@@ -559,6 +572,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCadastrosLocaisRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/cadastros/produtos': {
+      id: '/_authenticated/admin/cadastros/produtos'
+      path: '/cadastros/produtos'
+      fullPath: '/admin/cadastros/produtos'
+      preLoaderRoute: typeof AuthenticatedAdminCadastrosProdutosRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
@@ -578,6 +598,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCadastrosEntidadesRoute: typeof AuthenticatedAdminCadastrosEntidadesRoute
   AuthenticatedAdminCadastrosFornecedoresRoute: typeof AuthenticatedAdminCadastrosFornecedoresRoute
   AuthenticatedAdminCadastrosLocaisRoute: typeof AuthenticatedAdminCadastrosLocaisRoute
+  AuthenticatedAdminCadastrosProdutosRoute: typeof AuthenticatedAdminCadastrosProdutosRoute
   AuthenticatedAdminCadastrosIndexRoute: typeof AuthenticatedAdminCadastrosIndexRoute
 }
 
@@ -603,6 +624,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminCadastrosFornecedoresRoute,
     AuthenticatedAdminCadastrosLocaisRoute:
       AuthenticatedAdminCadastrosLocaisRoute,
+    AuthenticatedAdminCadastrosProdutosRoute:
+      AuthenticatedAdminCadastrosProdutosRoute,
     AuthenticatedAdminCadastrosIndexRoute:
       AuthenticatedAdminCadastrosIndexRoute,
   }

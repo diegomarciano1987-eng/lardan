@@ -27,3 +27,14 @@
 - resync_all_public_prices() executado (0 produtos publicados).
 - role_capabilities é a matriz única; leads.view adicionada (master, diretoria, marketing, suporte).
 - Painel passa a decidir menu, busca global e atalhos por capacidade (src/lib/capabilities.ts + moduleAllowed).
+
+## L3.5 — Central de Cadastros Unificada (2026-09-05)
+- Menu inferior: nova entrada **Cadastro** (ícone ContactRound) apontando para a rota canônica `/admin/cadastros`; o antigo item "Produtos" passou a ser módulo próprio em `/admin/cadastros/produtos`. Nenhum módulo foi removido.
+- Base canônica aditiva aplicada: `parties`, `party_roles`, `contact_points`, `party_addresses`, `party_links`, `consultant_profiles`, com `party_id` em suppliers/business_entities/profiles/leads e backfill. Nenhuma migração anterior alterada, nenhum ID trocado, nenhuma fusão automática.
+- RPCs: `search_registry`, `registry_counts`, `registry_duplicates`, `convert_lead_to_consultant` (transacional e idempotente).
+- Capacidades novas: registry.view, registry.manage, registry.doc.view, registry.finance.view (Marketing e Estoque só view; Financeiro/Cobrança com finance.view; Master/Diretoria completo).
+- Telas: Central (`/admin/cadastros`) com busca global, contadores reais e grupos Pessoas e rede / Empresas e parceiros / Catálogo / Estrutura operacional / Financeiro; listagem `/admin/cadastros/pessoas` (paginação, ordenação e filtros no servidor); ficha `/admin/cadastros/pessoas/$id` com 10 abas; `/admin/cadastros/duplicidades`.
+- Candidaturas: `<Select>` do shadcn substituído por SmartSelect (regra premium) e botão "Converter em consultora" ligado à RPC.
+- CPF/CNPJ 100% local em `src/lib/docs-br.ts`: máscara, normalização, validação matemática, sequências repetidas, duplicidade e mascaramento. Nunca afirma titularidade.
+- Detalhes em docs/lardan/CENTRAL-DE-CADASTROS.md.
+- Pendências honestas: revendedoras, representantes, clientes, prestadores, transportadoras, lojas, biblioteca de imagens, tabelas de preço, maletas, regiões, motivos de movimentação, códigos de barras e todo o bloco financeiro seguem com selo "Em implantação", sem botão que finja funcionar.

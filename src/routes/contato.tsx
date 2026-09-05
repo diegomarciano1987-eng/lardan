@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { PageHero, PendingNote } from "@/components/site/PageHero";
+import { PageHero } from "@/components/site/PageHero";
+import { ContatoForm } from "@/components/site/ContatoForm";
 
 export const Route = createFileRoute("/contato")({
   component: ContatoPage,
@@ -20,7 +21,7 @@ function ContatoPage() {
   return (
     <SiteLayout>
       <PageHero eyebrow="Atendimento" title="Contato" />
-      <PendingNote text="Os canais oficiais de atendimento estão em confirmação com a marca. O formulário de contato com registro e protocolo entra em operação na próxima etapa." />
+      <ContatoForm />
     </SiteLayout>
   );
 }

@@ -111,9 +111,6 @@ export function DateField({
               mode="single"
               locale={ptBR}
               captionLayout="dropdown"
-            formatters={{
-              formatMonthDropdown: (d) => format(d, "LLLL", { locale: ptBR }),
-            }}
               formatters={{
                 formatMonthDropdown: (d) => format(d, "LLLL", { locale: ptBR }),
               }}

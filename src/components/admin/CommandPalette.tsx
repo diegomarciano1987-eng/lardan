@@ -156,7 +156,7 @@ export function CommandPalette({
     return ALL_MODULES.filter(
       (m) =>
         m.path &&
-        (m.slug === "visao-geral" || hasAny(roles, m.roles)) &&
+        moduleAllowed(m, caps, roles) &&
         (t.length < 2 || m.label.toLowerCase().includes(t)),
     ).map<SearchHit>((m) => ({
       id: `mod-${m.slug}`,

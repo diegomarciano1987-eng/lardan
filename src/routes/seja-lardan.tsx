@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { PageHero, PendingNote } from "@/components/site/PageHero";
+import { PageHero } from "@/components/site/PageHero";
+import { SejaLardanForm } from "@/components/site/SejaLardanForm";
+
 
 export const Route = createFileRoute("/seja-lardan")({
   component: SejaLardanPage,

@@ -7,6 +7,7 @@ import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { findModule } from "@/lib/admin-modules";
 import { BottomDock } from "@/components/admin/BottomDock";
 import { CommandPalette } from "@/components/admin/CommandPalette";
+import { QuickRail } from "@/components/admin/QuickRail";
 import { ModuleAvailabilityBadge, PageHeader, Panel } from "@/components/admin/ui";
 import { UserMenu } from "@/components/admin/UserMenu";
 import { ROLE_LABEL } from "@/lib/roles";

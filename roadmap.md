@@ -3,7 +3,7 @@
 Contrato de execução: LARDAN-ETAPA1-ANALISE-E-PROMPT-LOVABLE.md (seção 2). Site aprovado: preservar.
 
 ## Lotes
-- [ ] L3.1 Segurança crítica: claim_master endurecido, is_active no servidor, preço privado fora da API pública, RPC de papéis, auditoria automática, storage de mídias/imports
+- [x] L3.1 Segurança crítica: claim_master endurecido, is_active no servidor, preço privado fora da API pública, RPC de papéis, auditoria automática, storage de mídias/imports
 - [ ] L3.2 Shell admin por módulos + gestão de usuários/papéis
 - [ ] L3.3 Cadastros-base: produtos/variantes, categorias, coleções, fornecedores, locais, responsáveis (+upload de mídia)
 - [ ] L3.4 Motor de estoque: razão imutável, saldos em transação, recebimento, kardex, transferência, reserva, inventário, bloqueios, maletas, etiquetas, painéis
@@ -14,4 +14,5 @@ Contrato de execução: LARDAN-ETAPA1-ANALISE-E-PROMPT-LOVABLE.md (seção 2). S
 - [ ] L3.9 Regressão, evidências, docs e devolução
 
 ## Estado
-- Lote atual: L3.1 em execução.
+- Lote atual: L3.1 concluído; L3.2 em execução.
+- Pendências de decisão: e-mail(s) autorizado(s) para bootstrap do primeiro Master (security.bootstrap); bucket `media` criado privado (política do workspace bloqueou público) — imagens públicas do site precisarão de URL assinada ou da liberação de buckets públicos no workspace.

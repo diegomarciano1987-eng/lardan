@@ -17,9 +17,8 @@ export function SessaoSemijoias() {
 
   const reveal = phase(p, 0.02, 0.55);
   const imgScale = 1.28 - 0.28 * ease(phase(p, 0, 0.7));
-  const lines = [0.42, 0.48, 0.54, 0.6, 0.66].map((start) =>
-    easeOut(phase(p, start, start + 0.16)),
-  );
+  const line = (start: number) => easeOut(phase(p, start, start + 0.16));
+  const lines = [line(0.42), line(0.48), line(0.54), line(0.6), line(0.66)] as const;
 
   return (
     <div ref={ref} className="relative h-[260vh]">

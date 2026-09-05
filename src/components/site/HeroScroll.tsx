@@ -71,18 +71,19 @@ export function HeroScroll() {
     <div ref={trackRef} className="relative h-[300vh]" aria-label={BRAND.name}>
       <div className="sticky top-0 h-screen overflow-hidden bg-background">
         {/* Fundo-base: onda de vidro original */}
-        <img
-          src={heroAsset.url}
-          srcSet={`${heroMobileAsset.url} 750w, ${heroAsset.url} 1664w`}
-          sizes="(max-width: 767px) 100vw, 100vw"
-          alt=""
-          aria-hidden
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ transform: `scale(${1 + out * 0.06})` }}
-          fetchPriority="high"
-          width={1664}
-          height={928}
-        />
+        <picture>
+          <source media="(max-width: 767px)" srcSet={heroMobileAsset.url} />
+          <img
+            src={heroAsset.url}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ transform: `scale(${1 + out * 0.06})` }}
+            fetchPriority="high"
+            width={1664}
+            height={928}
+          />
+        </picture>
 
         {/* Estado 1: diamante — avança na câmera e se desfaz em luz */}
         <div

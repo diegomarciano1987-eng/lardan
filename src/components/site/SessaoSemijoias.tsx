@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { BRAND } from "@/lib/brand";
 import { useScrollProgress, phase, ease, easeOut } from "@/hooks/use-scroll-progress";
 import sessao2Asset from "@/assets/lardan-sessao2.png.asset.json";
+import sessao2MobileAsset from "@/assets/lardan-mobile-sessao2.png.asset.json";
 
 const SLATS = 14;
 
@@ -23,15 +24,18 @@ export function SessaoSemijoias() {
   return (
     <div ref={ref} className="relative h-[260vh]">
       <section className="sticky top-0 h-screen overflow-hidden bg-background">
-        <img
-          src={sessao2Asset.url}
-          alt="Mulher usando colar, brincos e pulseira Lardan sobre ondas de vidro"
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ transform: `scale(${imgScale})` }}
-          loading="lazy"
-          width={1664}
-          height={928}
-        />
+        <picture>
+          <source media="(max-width: 767px)" srcSet={sessao2MobileAsset.url} />
+          <img
+            src={sessao2Asset.url}
+            alt="Mulher usando colar, brincos e pulseira Lardan sobre ondas de vidro"
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ transform: `scale(${imgScale})` }}
+            loading="lazy"
+            width={1664}
+            height={928}
+          />
+        </picture>
 
         {/* Lâminas de vidro que se retraem em cascata do centro para as bordas.
             Bordas laterais esfumaçadas e sombra sob a borda móvel: acabamento

@@ -31,3 +31,24 @@ Nenhuma screenshot, nota de Lighthouse, resultado de query ou teste E2E foi inve
 - Categorias Anéis, Colares, Pulseiras e Brincos em tela cheia com imagem de fundo, sem card nem sombra. EXECUTADO — 6_aneis.png, 7_pulseiras.png.
 - Menu sem cápsula/card: apenas linha fina sob o item ativo/hover. EXECUTADO (visível em todas as capturas).
 - Console do navegador sem erros. EXECUTADO.
+
+## Lote 2 — backend real (Playwright 1280x1800, http://localhost:8080)
+
+- `/admin` sem sessão → redirecionado para `/acesso` (rota agora sob `_authenticated`, `ssr: false`).
+- `/acesso` renderiza login por e-mail/senha e botão "Entrar com Google" (provedor Google configurado).
+- `/seja-lardan?utm_source=teste&utm_campaign=lote2` → candidatura gravada, protocolo devolvido (`CAP-AAAAMMDD-XXXXXXXX`).
+- `/contato` → mensagem gravada, protocolo devolvido (`CON-AAAAMMDD-XXXXXXXX`).
+- Console sem erros.
+- Registros de teste removidos do banco após a verificação.
+
+### Decisão técnica
+`INSERT ... RETURNING` é bloqueado pela RLS para visitantes (sem política de SELECT, por
+projeto). Os envios públicos passam a usar as funções `submit_lead` e
+`submit_contact_request` (SECURITY DEFINER, validação de nome/contato/UF/consentimento,
+truncamento de campos), que devolvem apenas o protocolo. Visitantes continuam sem
+qualquer leitura das tabelas `leads` e `contact_requests`.
+
+### Warnings do linter
+`Public/Signed-In Users Can Execute SECURITY DEFINER Function` — esperados: são as duas
+funções de envio público e as funções de verificação de permissão usadas pelas políticas
+de RLS. Nenhuma delas expõe dados de terceiros.

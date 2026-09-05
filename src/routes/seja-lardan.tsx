@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { PageHero, PendingNote } from "@/components/site/PageHero";
+import { PageHero } from "@/components/site/PageHero";
+import { SejaLardanForm } from "@/components/site/SejaLardanForm";
+
 
 export const Route = createFileRoute("/seja-lardan")({
   component: SejaLardanPage,
@@ -26,7 +28,10 @@ function SejaLardanPage() {
           aprovação ou retorno garantido.
         </p>
       </PageHero>
-      <PendingNote text="O formulário de candidatura (com registro seguro e protocolo) entra em operação na próxima etapa, junto com a administração do site." />
+      <div className="px-6 pb-24">
+        <SejaLardanForm />
+      </div>
+
     </SiteLayout>
   );
 }

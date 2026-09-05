@@ -10,19 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as ALardanRouteImport } from './routes/a-lardan'
 import { Route as AcessoRouteImport } from './routes/acesso'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
 import { Route as SemijoiasRouteImport } from './routes/semijoias'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as SemijoiasAneisRouteImport } from './routes/semijoias.aneis'
 import { Route as SemijoiasColaresRouteImport } from './routes/semijoias.colares'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ALardanRoute = ALardanRouteImport.update({
@@ -33,11 +38,6 @@ const ALardanRoute = ALardanRouteImport.update({
 const AcessoRoute = AcessoRouteImport.update({
   id: '/acesso',
   path: '/acesso',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ColecoesRoute = ColecoesRouteImport.update({
@@ -60,6 +60,11 @@ const SemijoiasRoute = SemijoiasRouteImport.update({
   path: '/semijoias',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const SemijoiasAneisRoute = SemijoiasAneisRouteImport.update({
   id: '/aneis',
   path: '/aneis',
@@ -75,11 +80,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
-  '/admin': typeof AdminRoute
   '/colecoes': typeof ColecoesRoute
   '/contato': typeof ContatoRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoias': typeof SemijoiasRouteWithChildren
+  '/admin': typeof AuthenticatedAdminRoute
   '/semijoias/aneis': typeof SemijoiasAneisRoute
   '/semijoias/colares': typeof SemijoiasColaresRoute
 }
@@ -87,24 +92,25 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
-  '/admin': typeof AdminRoute
   '/colecoes': typeof ColecoesRoute
   '/contato': typeof ContatoRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoias': typeof SemijoiasRouteWithChildren
+  '/admin': typeof AuthenticatedAdminRoute
   '/semijoias/aneis': typeof SemijoiasAneisRoute
   '/semijoias/colares': typeof SemijoiasColaresRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
-  '/admin': typeof AdminRoute
   '/colecoes': typeof ColecoesRoute
   '/contato': typeof ContatoRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoias': typeof SemijoiasRouteWithChildren
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/semijoias/aneis': typeof SemijoiasAneisRoute
   '/semijoias/colares': typeof SemijoiasColaresRoute
 }
@@ -114,11 +120,11 @@ export interface FileRouteTypes {
     | '/'
     | '/a-lardan'
     | '/acesso'
-    | '/admin'
     | '/colecoes'
     | '/contato'
     | '/seja-lardan'
     | '/semijoias'
+    | '/admin'
     | '/semijoias/aneis'
     | '/semijoias/colares'
   fileRoutesByTo: FileRoutesByTo
@@ -126,32 +132,33 @@ export interface FileRouteTypes {
     | '/'
     | '/a-lardan'
     | '/acesso'
-    | '/admin'
     | '/colecoes'
     | '/contato'
     | '/seja-lardan'
     | '/semijoias'
+    | '/admin'
     | '/semijoias/aneis'
     | '/semijoias/colares'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/a-lardan'
     | '/acesso'
-    | '/admin'
     | '/colecoes'
     | '/contato'
     | '/seja-lardan'
     | '/semijoias'
+    | '/_authenticated/admin'
     | '/semijoias/aneis'
     | '/semijoias/colares'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ALardanRoute: typeof ALardanRoute
   AcessoRoute: typeof AcessoRoute
-  AdminRoute: typeof AdminRoute
   ColecoesRoute: typeof ColecoesRoute
   ContatoRoute: typeof ContatoRoute
   SejaLardanRoute: typeof SejaLardanRoute
@@ -167,6 +174,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/a-lardan': {
       id: '/a-lardan'
       path: '/a-lardan'
@@ -179,13 +193,6 @@ declare module '@tanstack/react-router' {
       path: '/acesso'
       fullPath: '/acesso'
       preLoaderRoute: typeof AcessoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/colecoes': {
@@ -216,6 +223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SemijoiasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/semijoias/aneis': {
       id: '/semijoias/aneis'
       path: '/aneis'
@@ -233,6 +247,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 interface SemijoiasRouteChildren {
   SemijoiasAneisRoute: typeof SemijoiasAneisRoute
   SemijoiasColaresRoute: typeof SemijoiasColaresRoute
@@ -249,9 +274,9 @@ const SemijoiasRouteWithChildren = SemijoiasRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ALardanRoute: ALardanRoute,
   AcessoRoute: AcessoRoute,
-  AdminRoute: AdminRoute,
   ColecoesRoute: ColecoesRoute,
   ContatoRoute: ContatoRoute,
   SejaLardanRoute: SejaLardanRoute,

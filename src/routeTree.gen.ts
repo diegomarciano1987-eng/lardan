@@ -10,33 +10,152 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ALardanRouteImport } from './routes/a-lardan'
+import { Route as AcessoRouteImport } from './routes/acesso'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ColecoesRouteImport } from './routes/colecoes'
+import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
+import { Route as SemijoiasRouteImport } from './routes/semijoias'
+import { Route as SemijoiasAneisRouteImport } from './routes/semijoias.aneis'
+import { Route as SemijoiasColaresRouteImport } from './routes/semijoias.colares'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ALardanRoute = ALardanRouteImport.update({
+  id: '/a-lardan',
+  path: '/a-lardan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcessoRoute = AcessoRouteImport.update({
+  id: '/acesso',
+  path: '/acesso',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColecoesRoute = ColecoesRouteImport.update({
+  id: '/colecoes',
+  path: '/colecoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SejaLardanRoute = SejaLardanRouteImport.update({
+  id: '/seja-lardan',
+  path: '/seja-lardan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SemijoiasRoute = SemijoiasRouteImport.update({
+  id: '/semijoias',
+  path: '/semijoias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SemijoiasAneisRoute = SemijoiasAneisRouteImport.update({
+  id: '/aneis',
+  path: '/aneis',
+  getParentRoute: () => SemijoiasRoute,
+} as any)
+const SemijoiasColaresRoute = SemijoiasColaresRouteImport.update({
+  id: '/colares',
+  path: '/colares',
+  getParentRoute: () => SemijoiasRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/a-lardan': typeof ALardanRoute
+  '/acesso': typeof AcessoRoute
+  '/admin': typeof AdminRoute
+  '/colecoes': typeof ColecoesRoute
+  '/contato': typeof ContatoRoute
+  '/seja-lardan': typeof SejaLardanRoute
+  '/semijoias': typeof SemijoiasRouteWithChildren
+  '/semijoias/aneis': typeof SemijoiasAneisRoute
+  '/semijoias/colares': typeof SemijoiasColaresRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/a-lardan': typeof ALardanRoute
+  '/acesso': typeof AcessoRoute
+  '/admin': typeof AdminRoute
+  '/colecoes': typeof ColecoesRoute
+  '/contato': typeof ContatoRoute
+  '/seja-lardan': typeof SejaLardanRoute
+  '/semijoias': typeof SemijoiasRouteWithChildren
+  '/semijoias/aneis': typeof SemijoiasAneisRoute
+  '/semijoias/colares': typeof SemijoiasColaresRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/a-lardan': typeof ALardanRoute
+  '/acesso': typeof AcessoRoute
+  '/admin': typeof AdminRoute
+  '/colecoes': typeof ColecoesRoute
+  '/contato': typeof ContatoRoute
+  '/seja-lardan': typeof SejaLardanRoute
+  '/semijoias': typeof SemijoiasRouteWithChildren
+  '/semijoias/aneis': typeof SemijoiasAneisRoute
+  '/semijoias/colares': typeof SemijoiasColaresRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/a-lardan'
+    | '/acesso'
+    | '/admin'
+    | '/colecoes'
+    | '/contato'
+    | '/seja-lardan'
+    | '/semijoias'
+    | '/semijoias/aneis'
+    | '/semijoias/colares'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/a-lardan'
+    | '/acesso'
+    | '/admin'
+    | '/colecoes'
+    | '/contato'
+    | '/seja-lardan'
+    | '/semijoias'
+    | '/semijoias/aneis'
+    | '/semijoias/colares'
+  id:
+    | '__root__'
+    | '/'
+    | '/a-lardan'
+    | '/acesso'
+    | '/admin'
+    | '/colecoes'
+    | '/contato'
+    | '/seja-lardan'
+    | '/semijoias'
+    | '/semijoias/aneis'
+    | '/semijoias/colares'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ALardanRoute: typeof ALardanRoute
+  AcessoRoute: typeof AcessoRoute
+  AdminRoute: typeof AdminRoute
+  ColecoesRoute: typeof ColecoesRoute
+  ContatoRoute: typeof ContatoRoute
+  SejaLardanRoute: typeof SejaLardanRoute
+  SemijoiasRoute: typeof SemijoiasRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +167,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/a-lardan': {
+      id: '/a-lardan'
+      path: '/a-lardan'
+      fullPath: '/a-lardan'
+      preLoaderRoute: typeof ALardanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/acesso': {
+      id: '/acesso'
+      path: '/acesso'
+      fullPath: '/acesso'
+      preLoaderRoute: typeof AcessoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/colecoes': {
+      id: '/colecoes'
+      path: '/colecoes'
+      fullPath: '/colecoes'
+      preLoaderRoute: typeof ColecoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seja-lardan': {
+      id: '/seja-lardan'
+      path: '/seja-lardan'
+      fullPath: '/seja-lardan'
+      preLoaderRoute: typeof SejaLardanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/semijoias': {
+      id: '/semijoias'
+      path: '/semijoias'
+      fullPath: '/semijoias'
+      preLoaderRoute: typeof SemijoiasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/semijoias/aneis': {
+      id: '/semijoias/aneis'
+      path: '/aneis'
+      fullPath: '/semijoias/aneis'
+      preLoaderRoute: typeof SemijoiasAneisRouteImport
+      parentRoute: typeof SemijoiasRoute
+    }
+    '/semijoias/colares': {
+      id: '/semijoias/colares'
+      path: '/colares'
+      fullPath: '/semijoias/colares'
+      preLoaderRoute: typeof SemijoiasColaresRouteImport
+      parentRoute: typeof SemijoiasRoute
+    }
   }
 }
 
+interface SemijoiasRouteChildren {
+  SemijoiasAneisRoute: typeof SemijoiasAneisRoute
+  SemijoiasColaresRoute: typeof SemijoiasColaresRoute
+}
+
+const SemijoiasRouteChildren: SemijoiasRouteChildren = {
+  SemijoiasAneisRoute: SemijoiasAneisRoute,
+  SemijoiasColaresRoute: SemijoiasColaresRoute,
+}
+
+const SemijoiasRouteWithChildren = SemijoiasRoute._addFileChildren(
+  SemijoiasRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ALardanRoute: ALardanRoute,
+  AcessoRoute: AcessoRoute,
+  AdminRoute: AdminRoute,
+  ColecoesRoute: ColecoesRoute,
+  ContatoRoute: ContatoRoute,
+  SejaLardanRoute: SejaLardanRoute,
+  SemijoiasRoute: SemijoiasRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

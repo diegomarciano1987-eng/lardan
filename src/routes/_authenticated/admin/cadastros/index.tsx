@@ -64,7 +64,7 @@ function CadastrosHub() {
           <Link
             key={i.to}
             to={i.to}
-            className="ledger-panel flex flex-col gap-2 p-5 transition-colors hover:bg-surface-muted"
+            className="ledger-panel flex flex-col gap-2 p-6 transition-all hover:-translate-y-0.5 hover:shadow-lg"
           >
             <i.icon aria-hidden className="size-5 text-bronze" />
             <h2 className="text-base text-ledger-text">{i.label}</h2>

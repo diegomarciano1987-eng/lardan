@@ -57,19 +57,19 @@ function LedgerBalance({
   pending?: boolean;
 }) {
   return (
-    <div className="border-b border-line-soft px-5 py-4 last:border-b-0">
-      <p className="flex items-center gap-2 text-[0.75rem] text-ledger-muted">
-        <Icon aria-hidden className="size-4" />
+    <div className="border-b border-line-soft px-5 py-5 last:border-b-0">
+      <p className="flex items-center gap-2 text-[0.78rem] font-semibold tracking-wide text-ledger-muted">
+        <Icon aria-hidden className="size-4 text-bronze" />
         {label}
       </p>
       {pending ? (
-        <Skeleton className="mt-2 h-8 w-24" />
+        <Skeleton className="mt-2 h-9 w-24" />
       ) : (
-        <p className="num mt-1.5 text-[1.75rem] leading-none text-ledger-text">
+        <p className="num mt-2 font-display text-[2rem] font-semibold leading-none text-ledger-text">
           {value ?? "Sem dados"}
         </p>
       )}
-      <p className="mt-1.5 text-[0.6875rem] text-ledger-muted">{scope}</p>
+      <p className="mt-2 text-[0.72rem] font-medium leading-relaxed text-ledger-muted">{scope}</p>
     </div>
   );
 }

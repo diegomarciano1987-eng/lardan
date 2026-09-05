@@ -8,6 +8,7 @@ import colaresAsset from "@/assets/lardan-categoria-colares.jpg.asset.json";
 import pulseirasAsset from "@/assets/lardan-categoria-pulseiras.png.asset.json";
 import brincosAsset from "@/assets/lardan-categoria-brincos.png.asset.json";
 import aneisMobileAsset from "@/assets/lardan-mobile-aneis.png.asset.json";
+import colaresMobileAsset from "@/assets/sessao_colares_mobile.png.asset.json";
 import pulseirasMobileAsset from "@/assets/lardan-mobile-pulseiras.png.asset.json";
 import brincosMobileAsset from "@/assets/lardan-mobile-brincos.png.asset.json";
 
@@ -53,9 +54,10 @@ function HomePage() {
         title="Colares"
         to="/semijoias/colares"
         image={colaresAsset}
+        mobileImage={colaresMobileAsset}
         imageAlt="Colar de semijoia Lardan sobre formas de vidro"
         enterFrom="left"
-        align="left"
+        align="right"
       />
       <CategoryGuillotine
         title="Pulseiras"

@@ -12,15 +12,15 @@ export function ModuleAvailabilityBadge({
   className?: string;
 }) {
   const map: Record<ModuleState, { cls: string; icon: typeof Lock }> = {
-    ativo: { cls: "border-[--color-champagne] text-[--color-bronze]", icon: CircleDot },
-    em_construcao: { cls: "border-[--color-line] text-[--color-warning]", icon: Clock3 },
-    em_breve: { cls: "border-[--color-line] text-[--color-ledger-muted]", icon: Lock },
+    ativo: { cls: "border-champagne text-bronze", icon: CircleDot },
+    em_construcao: { cls: "border-line text-warning", icon: Clock3 },
+    em_breve: { cls: "border-line text-ledger-muted", icon: Lock },
   };
   const { cls, icon: Icon } = map[state];
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border bg-[--color-surface] px-2 py-0.5 text-[0.6875rem] tracking-[0.08em] uppercase",
+        "inline-flex items-center gap-1.5 rounded-lg border bg-surface px-2 py-0.5 text-[0.6875rem] tracking-[0.08em] uppercase",
         cls,
         className,
       )}
@@ -35,11 +35,11 @@ export type StatusTone = "success" | "warning" | "danger" | "info" | "neutral";
 
 export function StatusBadge({ tone, children }: { tone: StatusTone; children: ReactNode }) {
   const map: Record<StatusTone, string> = {
-    success: "border-[--color-success] text-[--color-success]",
-    warning: "border-[--color-warning] text-[--color-warning]",
-    danger: "border-[--color-danger] text-[--color-danger]",
-    info: "border-[--color-info] text-[--color-info]",
-    neutral: "border-[--color-line] text-[--color-ledger-muted]",
+    success: "border-success text-success",
+    warning: "border-warning text-warning",
+    danger: "border-danger text-danger",
+    info: "border-info text-info",
+    neutral: "border-line text-ledger-muted",
   };
   return (
     <span
@@ -67,8 +67,8 @@ export function Panel({
   return (
     <section className={cn("ledger-panel flex min-w-0 flex-col", className)}>
       {(title || action) && (
-        <header className="flex items-center justify-between gap-3 border-b border-[--color-line-soft] px-5 py-3">
-          {title && <h2 className="ledger-eyebrow">{title}</h2>}
+        <header className="flex items-center justify-between gap-3 border-b border-line-soft px-5 py-3">
+          {title ? <h2 className="ledger-eyebrow">{title}</h2> : <span />}
           {action}
         </header>
       )}
@@ -89,14 +89,14 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-6 border-b border-[--color-line-soft] pb-6">
+    <header className="flex flex-wrap items-end justify-between gap-6 border-b border-line-soft pb-6">
       <div className="min-w-0">
         <p className="ledger-eyebrow">{eyebrow}</p>
-        <h1 className="mt-2 font-[family-name:--font-display] text-[2.375rem] leading-[1.1] text-[--color-ledger-text] md:text-[2.75rem]">
+        <h1 className="mt-2 text-[2.375rem] leading-[1.1] text-ledger-text md:text-[2.75rem]">
           {title}
         </h1>
         {description && (
-          <p className="mt-2 max-w-2xl text-sm text-[--color-ledger-muted]">{description}</p>
+          <p className="mt-2 max-w-2xl text-sm text-ledger-muted">{description}</p>
         )}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -115,11 +115,11 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-start gap-2 px-5 py-10">
-      <p className="inline-flex items-center gap-2 text-sm text-[--color-ledger-text]">
-        <Info aria-hidden className="size-4 text-[--color-ledger-muted]" />
+      <p className="inline-flex items-center gap-2 text-sm text-ledger-text">
+        <Info aria-hidden className="size-4 text-ledger-muted" />
         {title}
       </p>
-      <p className="max-w-xl text-sm text-[--color-ledger-muted]">{description}</p>
+      <p className="max-w-xl text-sm text-ledger-muted">{description}</p>
       {action}
     </div>
   );
@@ -128,7 +128,7 @@ export function EmptyState({
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <div className="flex flex-col items-start gap-2 px-5 py-8">
-      <p className="inline-flex items-center gap-2 text-sm text-[--color-danger]">
+      <p className="inline-flex items-center gap-2 text-sm text-danger">
         <AlertTriangle aria-hidden className="size-4" />
         {message}
       </p>
@@ -143,10 +143,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
 
 export function Skeleton({ className }: { className?: string }) {
   return (
-    <div
-      className={cn("animate-pulse rounded-lg bg-[--color-surface-muted]", className)}
-      aria-hidden
-    />
+    <div className={cn("animate-pulse rounded-lg bg-surface-muted", className)} aria-hidden />
   );
 }
 

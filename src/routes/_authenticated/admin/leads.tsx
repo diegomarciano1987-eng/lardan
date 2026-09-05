@@ -12,13 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SmartSelect } from "@/components/premium/SmartSelect";
+import { convertLeadToConsultant } from "@/lib/registry";
+import { useNavigate } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/admin/leads")({
@@ -51,6 +47,18 @@ function LeadsPage() {
   const queryClient = useQueryClient();
   const roles = useAdminRoles();
   const permitido = hasAny(roles, LEAD_ROLES);
+  const navigate = useNavigate();
+
+  /** Conversão candidata -> consultora: transacional e idempotente no banco. */
+  const converter = useMutation({
+    mutationFn: (leadId: string) => convertLeadToConsultant(leadId),
+    onSuccess: async (partyId) => {
+      await queryClient.invalidateQueries({ queryKey: ["registry"] });
+      toast.success("Candidata vinculada à ficha de consultora.");
+      if (partyId) await navigate({ to: "/admin/cadastros/pessoas/$id", params: { id: String(partyId) } });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const leadsQuery = useQuery({
     queryKey: ["admin-leads"],
@@ -155,6 +163,7 @@ function LeadsPage() {
                     <TableHead>Cidade/UF</TableHead>
                     <TableHead>Marketing</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Cadastro</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -172,21 +181,22 @@ function LeadsPage() {
                         {l.marketing_consent ? "Aceito" : "Não"}
                       </TableCell>
                       <TableCell>
-                        <Select
+                        <SmartSelect
+                          className="w-40"
                           value={l.status}
-                          onValueChange={(v) => leadStatus.mutate({ id: l.id, status: v })}
+                          onChange={(v) => leadStatus.mutate({ id: l.id, status: v })}
+                          options={LEAD_STATUS.map(([v, label]) => ({ value: v, label }))}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          type="button"
+                          className="admin-btn"
+                          disabled={converter.isPending}
+                          onClick={() => converter.mutate(l.id)}
                         >
-                          <SelectTrigger className="h-8 w-36 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {LEAD_STATUS.map(([v, label]) => (
-                              <SelectItem key={v} value={v} className="text-xs">
-                                {label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          Converter em consultora
+                        </button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -225,21 +235,12 @@ function LeadsPage() {
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">{c.subject}</TableCell>
                       <TableCell>
-                        <Select
+                        <SmartSelect
+                          className="w-40"
                           value={c.status}
-                          onValueChange={(v) => contactStatus.mutate({ id: c.id, status: v })}
-                        >
-                          <SelectTrigger className="h-8 w-36 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CONTACT_STATUS.map(([v, label]) => (
-                              <SelectItem key={v} value={v} className="text-xs">
-                                {label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          onChange={(v) => contactStatus.mutate({ id: c.id, status: v })}
+                          options={CONTACT_STATUS.map(([v, label]) => ({ value: v, label }))}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}

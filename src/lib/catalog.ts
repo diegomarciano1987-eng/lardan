@@ -6,7 +6,9 @@ export type CadastroTable =
   | "business_entities"
   | "locations"
   | "categories"
-  | "collections";
+  | "collections"
+  | "products"
+  | "product_variants";
 
 export interface PagedResult<T> {
   rows: T[];
@@ -14,7 +16,7 @@ export interface PagedResult<T> {
 }
 
 export interface ListParams {
-  table: CadastroTable | "products";
+  table: CadastroTable;
   select: string;
   /** Colunas usadas na busca inteligente do servidor. */
   searchColumns: string[];

@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { BRAND } from "@/lib/brand";
 import heroAsset from "@/assets/lardan-hero-vidro.jpg.asset.json";
@@ -14,12 +13,17 @@ function phase(progress: number, a: number, b: number) {
   return clamp01((progress - a) / (b - a));
 }
 
+/** Suavização cinematográfica (ease-in-out cúbica). */
+function ease(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
 /**
- * Narrativa de scroll da home (V/4.1):
+ * Narrativa de scroll da home (V/4.2):
  * 1. Diamante nítido sobre a onda de vidro.
- * 2. Diamante dissolve em véu rosé sutil.
- * 3. Wordmark LARDAN isolado.
- * 4. Composição editorial: título, subtítulo e CTA.
+ * 2. Transição cinematográfica: o diamante avança na câmera, gira levemente,
+ *    estoura em luz e se dissolve — sem véu rosé, fundo limpo.
+ * 3. Wordmark LARDAN isolado sobre o fundo limpo.
  * Sem scroll hijacking: a rolagem é nativa; apenas as camadas reagem.
  */
 export function HeroScroll() {
@@ -55,46 +59,36 @@ export function HeroScroll() {
     };
   }, []);
 
-  // Com reduced motion, mostra o estado editorial final diretamente.
+  // Com reduced motion, mostra o wordmark final diretamente.
   const p = reduced ? 1 : progress;
 
-  const diamondIn = 1 - phase(p, 0.22, 0.42); // sai
-  const veil = phase(p, 0.22, 0.42) * (1 - phase(p, 0.55, 0.75)); // névoa rosé temporária
-  const wordmarkIn = phase(p, 0.38, 0.52) * (1 - phase(p, 0.6, 0.78)); // entra e sai
-  const editorialIn = phase(p, 0.66, 0.85);
+  const out = ease(phase(p, 0.18, 0.6)); // saída do diamante
+  const flash = phase(p, 0.42, 0.55) * (1 - phase(p, 0.55, 0.68)); // estouro de luz
+  const wordmarkIn = ease(phase(p, 0.5, 0.78));
 
   return (
-    <div ref={trackRef} className="relative h-[320vh]" aria-label={BRAND.name}>
-      <div className="sticky top-0 h-screen overflow-hidden">
-        {/* Fundo-base comum: onda de vidro original */}
+    <div ref={trackRef} className="relative h-[300vh]" aria-label={BRAND.name}>
+      <div className="sticky top-0 h-screen overflow-hidden bg-background">
+        {/* Fundo-base: onda de vidro original */}
         <img
           src={heroAsset.url}
           alt=""
           aria-hidden
           className="absolute inset-0 h-full w-full object-cover"
+          style={{ transform: `scale(${1 + out * 0.06})` }}
           fetchPriority="high"
           width={1664}
           height={928}
         />
 
-        {/* Véu rosé de dissolução */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            opacity: veil * 0.85,
-            background:
-              "radial-gradient(ellipse at 50% 60%, oklch(0.85 0.05 30 / 0.55), oklch(0.94 0.03 40 / 0.35) 55%, transparent 80%)",
-          }}
-        />
-
-        {/* Estado 1–2: diamante */}
+        {/* Estado 1: diamante — avança na câmera e se desfaz em luz */}
         <div
           className="absolute inset-0 flex items-center justify-center"
           style={{
-            opacity: diamondIn,
-            filter: `blur(${(1 - diamondIn) * 10}px)`,
-            transform: `scale(${1 + (1 - diamondIn) * 0.06})`,
+            opacity: 1 - clamp01(out * 1.35),
+            filter: `blur(${out * 26}px) brightness(${1 + out * 1.6}) contrast(${1 - out * 0.3})`,
+            transform: `scale(${1 + out * 1.9}) rotate(${out * 14}deg) translateY(${out * -6}vh)`,
+            transformOrigin: "50% 52%",
           }}
         >
           <img
@@ -104,14 +98,28 @@ export function HeroScroll() {
             width={624}
             height={416}
           />
-          {/* H1 acessível presente desde o início */}
           <h1 className="sr-only">Lardan — semijoias</h1>
         </div>
 
-        {/* Estado 3: wordmark isolado */}
+        {/* Estouro de luz no ponto de virada */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            opacity: flash,
+            background:
+              "radial-gradient(circle at 50% 50%, oklch(1 0 0 / 0.95), oklch(1 0 0 / 0.45) 35%, transparent 70%)",
+          }}
+        />
+
+        {/* Estado 2: wordmark isolado, fundo limpo, sem véu nem sombra */}
         <div
           className="absolute inset-0 flex items-center justify-center"
-          style={{ opacity: wordmarkIn }}
+          style={{
+            opacity: wordmarkIn,
+            transform: `scale(${0.94 + wordmarkIn * 0.06})`,
+            filter: `blur(${(1 - wordmarkIn) * 8}px)`,
+          }}
           aria-hidden={wordmarkIn < 0.5}
         >
           <img
@@ -122,39 +130,6 @@ export function HeroScroll() {
             width={650}
             height={210}
           />
-        </div>
-
-        {/* Estado 4: composição editorial */}
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
-          style={{
-            opacity: editorialIn,
-            transform: `translateY(${(1 - editorialIn) * 24}px)`,
-          }}
-          aria-hidden={editorialIn < 0.5}
-        >
-          <img
-            src={wordmarkAsset.url}
-            alt="Lardan"
-            className="mb-8 w-[clamp(180px,26vw,340px)]"
-            width={650}
-            height={210}
-            style={{ opacity: Math.min(1, editorialIn * 1.4) }}
-          />
-          <p className="brand-eyebrow mb-4">Semijoias</p>
-          <h2 className="max-w-2xl text-4xl leading-tight text-foreground md:text-6xl">
-            {BRAND.tagline}
-          </h2>
-          <p className="mt-4 max-w-md text-base text-muted-foreground md:text-lg">
-            {BRAND.subline}
-          </p>
-          <Link
-            to="/semijoias"
-            className="mt-10 inline-flex items-center rounded-full border border-primary/40 px-8 py-3 text-[0.75rem] tracking-[0.22em] uppercase text-foreground transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
-            tabIndex={editorialIn > 0.5 ? 0 : -1}
-          >
-            Conhecer semijoias
-          </Link>
         </div>
       </div>
     </div>

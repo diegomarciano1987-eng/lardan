@@ -31,7 +31,7 @@ export function SejaLardanForm() {
     const form = new FormData(e.currentTarget);
     const texto = (k: string) => {
       const v = form.get(k);
-      return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
+      return typeof v === "string" && v.trim() !== "" ? v.trim() : undefined;
     };
 
     const { data, error } = await supabase.rpc("submit_lead", {
@@ -40,7 +40,7 @@ export function SejaLardanForm() {
       p_city: texto("city") ?? "",
       p_uf: texto("uf") ?? "",
       p_street: texto("street"),
-      p_street_number: semNumero ? null : texto("street_number"),
+      p_street_number: semNumero ? undefined : texto("street_number"),
       p_no_number: semNumero,
       p_postal_code: texto("postal_code"),
       p_financial_goal: texto("financial_goal"),
@@ -49,7 +49,7 @@ export function SejaLardanForm() {
       p_audience: texto("audience"),
       p_motivation: texto("motivation"),
       p_source: "site/seja-lardan",
-      p_entry_url: entryUrl(),
+      p_entry_url: entryUrl() ?? undefined,
       p_utm: captureUtm(),
       p_privacy_version: PRIVACY_VERSION,
       p_marketing_consent: form.get("marketing_consent") === "on",

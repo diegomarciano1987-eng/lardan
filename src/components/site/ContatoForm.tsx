@@ -24,7 +24,7 @@ export function ContatoForm() {
       p_subject: texto("subject"),
       p_message: texto("message"),
       p_source: "site/contato",
-      p_entry_url: entryUrl(),
+      p_entry_url: entryUrl() ?? undefined,
       p_utm: captureUtm(),
       p_privacy_version: PRIVACY_VERSION,
       p_marketing_consent: form.get("marketing_consent") === "on",

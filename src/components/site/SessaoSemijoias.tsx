@@ -125,7 +125,7 @@ export function SessaoSemijoias() {
             </p>
             <Link
               to="/semijoias"
-              className="mt-10 inline-flex items-center border-b border-primary/50 pb-2 text-[0.75rem] tracking-[0.22em] uppercase text-foreground max-md:!text-background transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              className="btn-premium mt-10"
               style={{ opacity: lines[4], transform: `translateY(${(1 - lines[4]) * 18}px)` }}
               tabIndex={lines[4] > 0.5 ? 0 : -1}
             >

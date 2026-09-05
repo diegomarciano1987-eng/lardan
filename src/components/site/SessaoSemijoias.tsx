@@ -89,13 +89,12 @@ export function SessaoSemijoias() {
           className="pointer-events-none absolute inset-0 md:hidden"
           style={{
             background:
-              "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.3) 55%, transparent 85%)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
+              "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.45) 0%, oklch(0.18 0.01 30 / 0.2) 38%, transparent 62%)",
+            backdropFilter: "blur(3px)",
             maskImage:
-              "linear-gradient(90deg, black 0%, black 55%, transparent 85%)",
+              "linear-gradient(90deg, black 0%, black 38%, transparent 62%)",
             WebkitMaskImage:
-              "linear-gradient(90deg, black 0%, black 55%, transparent 85%)",
+              "linear-gradient(90deg, black 0%, black 38%, transparent 62%)",
             opacity: lines[0],
           }}
         />

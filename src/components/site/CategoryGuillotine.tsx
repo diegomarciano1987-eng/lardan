@@ -122,18 +122,17 @@ export function CategoryGuillotine({
           style={{
             background:
               align === "left"
-                ? "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.32) 55%, transparent 85%)"
-                : "linear-gradient(270deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.32) 55%, transparent 85%)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
+                ? "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.45) 0%, oklch(0.18 0.01 30 / 0.2) 38%, transparent 62%)"
+                : "linear-gradient(270deg, oklch(0.18 0.01 30 / 0.45) 0%, oklch(0.18 0.01 30 / 0.2) 38%, transparent 62%)",
+            backdropFilter: "blur(3px)",
             maskImage:
               align === "left"
-                ? "linear-gradient(90deg, black 0%, black 55%, transparent 85%)"
-                : "linear-gradient(270deg, black 0%, black 55%, transparent 85%)",
+                ? "linear-gradient(90deg, black 0%, black 38%, transparent 62%)"
+                : "linear-gradient(270deg, black 0%, black 38%, transparent 62%)",
             WebkitMaskImage:
               align === "left"
-                ? "linear-gradient(90deg, black 0%, black 55%, transparent 85%)"
-                : "linear-gradient(270deg, black 0%, black 55%, transparent 85%)",
+                ? "linear-gradient(90deg, black 0%, black 38%, transparent 62%)"
+                : "linear-gradient(270deg, black 0%, black 38%, transparent 62%)",
             opacity: textIn,
           }}
         />

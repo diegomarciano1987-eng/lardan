@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { PackagePlus } from "lucide-react";
+import { FileUp, PackagePlus } from "lucide-react";
 import {
   EmptyState,
   PageHeader,
@@ -14,6 +14,7 @@ import {
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { StockMovementDialog } from "@/components/admin/StockMovementDialog";
+import { ImportProductsDialog } from "@/components/admin/ImportProductsDialog";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   MOVE_LABEL,
@@ -54,6 +55,7 @@ function EstoquePage() {
 
   const [aba, setAba] = React.useState<"saldos" | "movimentos">("saldos");
   const [dialogo, setDialogo] = React.useState(false);
+  const [importacao, setImportacao] = React.useState(false);
 
   const [buscaSaldo, setBuscaSaldo] = React.useState("");
   const [paginaSaldo, setPaginaSaldo] = React.useState(0);
@@ -187,10 +189,16 @@ function EstoquePage() {
         description="Saldos por local e razão permanente de movimentações. Nenhum saldo é editado à mão."
         actions={
           podeOperar ? (
-            <button type="button" onClick={() => setDialogo(true)} className="admin-btn-primary">
-              <PackagePlus aria-hidden className="mr-2 inline size-4" />
-              Nova movimentação
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button type="button" onClick={() => setImportacao(true)} className="admin-btn-primary">
+                <FileUp aria-hidden className="mr-2 inline size-4" />
+                Importar planilha
+              </button>
+              <button type="button" onClick={() => setDialogo(true)} className="admin-btn-primary">
+                <PackagePlus aria-hidden className="mr-2 inline size-4" />
+                Nova movimentação
+              </button>
+            </div>
           ) : undefined
         }
       />
@@ -307,6 +315,7 @@ function EstoquePage() {
       )}
 
       <StockMovementDialog open={dialogo} onOpenChange={setDialogo} />
+      <ImportProductsDialog open={importacao} onOpenChange={setImportacao} />
     </div>
   );
 }

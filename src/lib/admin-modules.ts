@@ -225,7 +225,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     description: "Usuários e papéis, integrações e parâmetros do sistema.",
     icon: SlidersHorizontal,
     roles: ["master", "diretoria"],
-    capability: "users.manage",
+    capability: "audit.view",
     state: "ativo",
   },
   {
@@ -267,13 +267,24 @@ export const ADMIN_SUBMODULES: AdminModule[] = [
     description: "Asaas e demais conectores, preparados e desligados.",
     icon: SlidersHorizontal,
     roles: ["master", "diretoria"],
-    capability: "users.manage",
+    capability: "audit.view",
     state: "em_construcao",
     spec: "Integração Asaas preparada com sinalizador desligado: contratos internos, fila de saída e caixa de entrada de webhooks com verificação de assinatura. Nenhuma cobrança é emitida nesta etapa.",
   },
 ];
 
 export const ALL_MODULES = [...ADMIN_MODULES, ...ADMIN_SUBMODULES];
+
+/** Módulo visível: a permissão do banco decide; papéis são só o desenho antigo. */
+export function moduleAllowed(
+  m: AdminModule,
+  caps: string[],
+  roles: AppRole[],
+): boolean {
+  if (m.slug === "visao-geral") return true;
+  if (m.capability) return caps.includes(m.capability);
+  return m.roles.some((r) => roles.includes(r));
+}
 
 export function findModule(slug: string) {
   return ALL_MODULES.find((m) => m.slug === slug);

@@ -145,7 +145,8 @@ function CentralDeCadastros() {
       </div>
 
       {GRUPOS.map((g) => (
-        <Panel key={g.titulo} title={g.titulo} description={g.nota}>
+        <Panel key={g.titulo} title={g.titulo}>
+          <p className="px-5 pt-4 text-sm font-medium text-ledger-muted">{g.nota}</p>
           <div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-3">
             {g.itens.map((i) => {
               const total = n(i.contador);

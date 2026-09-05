@@ -276,3 +276,30 @@
 @utility num {
   font-variant-numeric: tabular-nums;
 }
+
+@utility admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-surface);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  color: var(--color-ledger-text);
+  transition: background-color 160ms ease;
+
+  &:hover {
+    background: var(--color-surface-muted);
+  }
+}
+
+@utility admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--color-bronze);
+  border-bottom: 1px solid color-mix(in oklab, var(--color-bronze) 40%, transparent);
+  padding-bottom: 1px;
+}

@@ -28,7 +28,10 @@ function SejaLardanPage() {
           aprovação ou retorno garantido.
         </p>
       </PageHero>
-      <PendingNote text="O formulário de candidatura (com registro seguro e protocolo) entra em operação na próxima etapa, junto com a administração do site." />
+      <div className="px-6 pb-24">
+        <SejaLardanForm />
+      </div>
+
     </SiteLayout>
   );
 }

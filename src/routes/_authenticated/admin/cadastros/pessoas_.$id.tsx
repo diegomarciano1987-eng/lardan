@@ -745,7 +745,7 @@ function ConsultoraForm({
       <div className="grid gap-4 p-5 md:grid-cols-2">
         {secao === "comercial" && (
           <Campo label="Data de entrada">
-            <DateField value={v("joined_at")} onChange={(x) => set("joined_at", x || null)} disabled={!podeEditar} />
+            <DateField value={isoParaData(v("joined_at"))} onChange={(x) => set("joined_at", dataParaIso(x))} disabled={!podeEditar} />
           </Campo>
         )}
         {campos.map(([k, label]) => (

@@ -816,19 +816,19 @@ export type Database = {
           id: string
           price_cents: number
           product_id: string
-          variant_id: string
+          variant_id: string | null
         }
         Insert: {
           id?: string
           price_cents: number
           product_id: string
-          variant_id: string
+          variant_id?: string | null
         }
         Update: {
           id?: string
           price_cents?: number
           product_id?: string
-          variant_id?: string
+          variant_id?: string | null
         }
         Relationships: [
           {

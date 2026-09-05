@@ -2,6 +2,12 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRIVACY_VERSION, captureUtm, entryUrl } from "@/lib/privacy";
 
+
+type Args = Record<string, unknown>;
+function semVazios<T extends Args>(o: T): T {
+  return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T;
+}
+
 const UFS = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB",
   "PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
@@ -34,7 +40,7 @@ export function SejaLardanForm() {
       return typeof v === "string" && v.trim() !== "" ? v.trim() : undefined;
     };
 
-    const { data, error } = await supabase.rpc("submit_lead", {
+    const { data, error } = await supabase.rpc("submit_lead", semVazios({
       p_full_name: texto("full_name") ?? "",
       p_whatsapp: texto("whatsapp") ?? "",
       p_city: texto("city") ?? "",
@@ -53,7 +59,7 @@ export function SejaLardanForm() {
       p_utm: captureUtm(),
       p_privacy_version: PRIVACY_VERSION,
       p_marketing_consent: form.get("marketing_consent") === "on",
-    });
+    }) as never);
 
     setBusy(false);
     if (error || !data) {

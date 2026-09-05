@@ -55,7 +55,7 @@ export function AdminShell({
 
   return (
     <RolesContext.Provider value={roles}>
-      <div className="min-h-screen bg-warm-ivory text-ledger-text">
+      <div className="admin-scope min-h-screen bg-warm-ivory text-ledger-text">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line-soft bg-surface pr-3">
           <Link
             to="/admin"

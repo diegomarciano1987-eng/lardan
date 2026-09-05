@@ -34,6 +34,7 @@ import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminCadastrosIndexRouteImport } from './routes/_authenticated/admin/cadastros/index'
 import { Route as AuthenticatedAdminCadastrosCategoriasRouteImport } from './routes/_authenticated/admin/cadastros/categorias'
 import { Route as AuthenticatedAdminCadastrosColecoesRouteImport } from './routes/_authenticated/admin/cadastros/colecoes'
+import { Route as AuthenticatedAdminCadastrosDuplicidadesRouteImport } from './routes/_authenticated/admin/cadastros/duplicidades'
 import { Route as AuthenticatedAdminCadastrosEntidadesRouteImport } from './routes/_authenticated/admin/cadastros/entidades'
 import { Route as AuthenticatedAdminCadastrosFornecedoresRouteImport } from './routes/_authenticated/admin/cadastros/fornecedores'
 import { Route as AuthenticatedAdminCadastrosLocaisRouteImport } from './routes/_authenticated/admin/cadastros/locais'
@@ -177,6 +178,12 @@ const AuthenticatedAdminCadastrosColecoesRoute =
     path: '/cadastros/colecoes',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminCadastrosDuplicidadesRoute =
+  AuthenticatedAdminCadastrosDuplicidadesRouteImport.update({
+    id: '/cadastros/duplicidades',
+    path: '/cadastros/duplicidades',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminCadastrosEntidadesRoute =
   AuthenticatedAdminCadastrosEntidadesRouteImport.update({
     id: '/cadastros/entidades',
@@ -244,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/cadastros/categorias': typeof AuthenticatedAdminCadastrosCategoriasRoute
   '/admin/cadastros/colecoes': typeof AuthenticatedAdminCadastrosColecoesRoute
+  '/admin/cadastros/duplicidades': typeof AuthenticatedAdminCadastrosDuplicidadesRoute
   '/admin/cadastros/entidades': typeof AuthenticatedAdminCadastrosEntidadesRoute
   '/admin/cadastros/fornecedores': typeof AuthenticatedAdminCadastrosFornecedoresRoute
   '/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
@@ -276,6 +284,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/cadastros/categorias': typeof AuthenticatedAdminCadastrosCategoriasRoute
   '/admin/cadastros/colecoes': typeof AuthenticatedAdminCadastrosColecoesRoute
+  '/admin/cadastros/duplicidades': typeof AuthenticatedAdminCadastrosDuplicidadesRoute
   '/admin/cadastros/entidades': typeof AuthenticatedAdminCadastrosEntidadesRoute
   '/admin/cadastros/fornecedores': typeof AuthenticatedAdminCadastrosFornecedoresRoute
   '/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
@@ -311,6 +320,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/cadastros/categorias': typeof AuthenticatedAdminCadastrosCategoriasRoute
   '/_authenticated/admin/cadastros/colecoes': typeof AuthenticatedAdminCadastrosColecoesRoute
+  '/_authenticated/admin/cadastros/duplicidades': typeof AuthenticatedAdminCadastrosDuplicidadesRoute
   '/_authenticated/admin/cadastros/entidades': typeof AuthenticatedAdminCadastrosEntidadesRoute
   '/_authenticated/admin/cadastros/fornecedores': typeof AuthenticatedAdminCadastrosFornecedoresRoute
   '/_authenticated/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/cadastros/categorias'
     | '/admin/cadastros/colecoes'
+    | '/admin/cadastros/duplicidades'
     | '/admin/cadastros/entidades'
     | '/admin/cadastros/fornecedores'
     | '/admin/cadastros/locais'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/cadastros/categorias'
     | '/admin/cadastros/colecoes'
+    | '/admin/cadastros/duplicidades'
     | '/admin/cadastros/entidades'
     | '/admin/cadastros/fornecedores'
     | '/admin/cadastros/locais'
@@ -412,6 +424,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/cadastros/categorias'
     | '/_authenticated/admin/cadastros/colecoes'
+    | '/_authenticated/admin/cadastros/duplicidades'
     | '/_authenticated/admin/cadastros/entidades'
     | '/_authenticated/admin/cadastros/fornecedores'
     | '/_authenticated/admin/cadastros/locais'
@@ -610,6 +623,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCadastrosColecoesRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/cadastros/duplicidades': {
+      id: '/_authenticated/admin/cadastros/duplicidades'
+      path: '/cadastros/duplicidades'
+      fullPath: '/admin/cadastros/duplicidades'
+      preLoaderRoute: typeof AuthenticatedAdminCadastrosDuplicidadesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/cadastros/entidades': {
       id: '/_authenticated/admin/cadastros/entidades'
       path: '/cadastros/entidades'
@@ -676,6 +696,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminCadastrosCategoriasRoute: typeof AuthenticatedAdminCadastrosCategoriasRoute
   AuthenticatedAdminCadastrosColecoesRoute: typeof AuthenticatedAdminCadastrosColecoesRoute
+  AuthenticatedAdminCadastrosDuplicidadesRoute: typeof AuthenticatedAdminCadastrosDuplicidadesRoute
   AuthenticatedAdminCadastrosEntidadesRoute: typeof AuthenticatedAdminCadastrosEntidadesRoute
   AuthenticatedAdminCadastrosFornecedoresRoute: typeof AuthenticatedAdminCadastrosFornecedoresRoute
   AuthenticatedAdminCadastrosLocaisRoute: typeof AuthenticatedAdminCadastrosLocaisRoute
@@ -703,6 +724,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminCadastrosCategoriasRoute,
     AuthenticatedAdminCadastrosColecoesRoute:
       AuthenticatedAdminCadastrosColecoesRoute,
+    AuthenticatedAdminCadastrosDuplicidadesRoute:
+      AuthenticatedAdminCadastrosDuplicidadesRoute,
     AuthenticatedAdminCadastrosEntidadesRoute:
       AuthenticatedAdminCadastrosEntidadesRoute,
     AuthenticatedAdminCadastrosFornecedoresRoute:

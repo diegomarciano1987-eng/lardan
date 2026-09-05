@@ -132,15 +132,22 @@ function CentralDeCadastros() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { rotulo: "Cadastros de pessoas e empresas", valor: (c["pessoas"] ?? 0) + (c["organizacoes"] ?? 0) },
+          { rotulo: "Cadastros de pessoas e empresas", to: undefined as string | undefined, valor: (c["pessoas"] ?? 0) + (c["organizacoes"] ?? 0) },
           { rotulo: "Cadastros incompletos", valor: c["incompletos"] ?? 0 },
-          { rotulo: "Possíveis duplicidades", valor: c["duplicidades"] ?? 0 },
+          { rotulo: "Possíveis duplicidades", valor: c["duplicidades"] ?? 0, to: "/admin/cadastros/duplicidades" },
           { rotulo: "Atualizados nos últimos 7 dias", valor: c["atualizados_7d"] ?? 0 },
         ].map((k) => (
-          <div key={k.rotulo} className="ledger-panel p-5">
-            <p className="ledger-eyebrow">{k.rotulo}</p>
-            <p className="num mt-2 text-3xl font-semibold text-ledger-text">{counts.isLoading ? "—" : k.valor}</p>
-          </div>
+          k.to ? (
+            <Link key={k.rotulo} to={k.to} className="ledger-panel p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+              <p className="ledger-eyebrow">{k.rotulo}</p>
+              <p className="num mt-2 text-3xl font-semibold text-ledger-text">{counts.isLoading ? "—" : k.valor}</p>
+            </Link>
+          ) : (
+            <div key={k.rotulo} className="ledger-panel p-5">
+              <p className="ledger-eyebrow">{k.rotulo}</p>
+              <p className="num mt-2 text-3xl font-semibold text-ledger-text">{counts.isLoading ? "—" : k.valor}</p>
+            </div>
+          )
         ))}
       </div>
 

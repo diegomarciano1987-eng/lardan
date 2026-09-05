@@ -85,7 +85,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     description: "Produtos, variantes, categorias, coleções e galeria de imagens.",
     icon: Tag,
     roles: [...CONTENT, "estoque"],
-    state: "em_construcao",
+    state: "ativo",
     spec: "Ficha completa do produto, variantes com SKU único, preço público autorizado item a item, galeria com texto alternativo e fluxo rascunho/publicar. Nada é excluído: tudo vira arquivo.",
   },
   {

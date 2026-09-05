@@ -21,3 +21,9 @@
 ## Comando de retomada
 
 "Continue o Lardan a partir de docs/lardan/PROGRESSO.md e roadmap.md. Confira MASTER-SPEC.md e MATRIZ-RASTREABILIDADE.md. Preserve tudo que já funciona (site aprovado). Execute o próximo lote verificável, atualize testes e checkpoint e informe o próximo passo. Não expanda o escopo nem ative módulos futuros."
+
+## L3.4-A concluído (2026-09-05)
+- public_price_list: PK id + índices parciais; variant_id agora aceita nulo. Teste publicar/despublicar OK.
+- resync_all_public_prices() executado (0 produtos publicados).
+- role_capabilities é a matriz única; leads.view adicionada (master, diretoria, marketing, suporte).
+- Painel passa a decidir menu, busca global e atalhos por capacidade (src/lib/capabilities.ts + moduleAllowed).

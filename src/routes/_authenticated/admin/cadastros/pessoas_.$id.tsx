@@ -632,12 +632,12 @@ function EnderecoForm({
   onSaved,
 }: {
   partyId: string;
-  inicial: { id?: string; [k: string]: unknown } | null;
+  inicial: PartyAddress | null;
   podeEditar: boolean;
   onSaved: () => void | Promise<unknown>;
 }) {
-  const [a, setA] = useState<Record<string, unknown>>(inicial ?? {});
-  useEffect(() => setA(inicial ?? {}), [inicial]);
+  const [a, setA] = useState<Record<string, unknown>>((inicial as unknown as Record<string, unknown>) ?? {});
+  useEffect(() => setA((inicial as unknown as Record<string, unknown>) ?? {}), [inicial]);
   const v = (k: string) => (a[k] as string) ?? "";
   const set = (k: string, val: unknown) => setA((s) => ({ ...s, [k]: val }));
 

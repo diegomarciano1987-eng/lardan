@@ -1642,6 +1642,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      import_products_stock: {
+        Args: { _location_id: string; _rows: Json }
+        Returns: Json
+      }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       mask_doc: { Args: { _doc: string }; Returns: string }
       master_exists: { Args: never; Returns: boolean }

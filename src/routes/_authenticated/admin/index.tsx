@@ -266,7 +266,7 @@ function VisaoGeral() {
                     {disponivel && mod.path ? (
                       <Link
                         to={mod.path}
-                        className="block rounded-[10px] border border-line-soft px-3 py-2.5 text-sm text-ledger-text transition-colors hover:bg-surface-muted"
+                        className="block rounded-[10px] border border-line bg-surface px-3.5 py-3 text-sm font-semibold text-ledger-text shadow-sm transition-all hover:-translate-y-px hover:bg-surface-muted hover:shadow"
                       >
                         {conteudo}
                       </Link>
@@ -274,10 +274,10 @@ function VisaoGeral() {
                       <span
                         aria-disabled="true"
                         title={`${s.label} — ${mod.state === "em_construcao" ? "em construção" : "em breve"}`}
-                        className="block cursor-not-allowed rounded-[10px] border border-dashed border-line-soft px-3 py-2.5 text-sm text-ledger-muted"
+                        className="block cursor-not-allowed rounded-[10px] border border-dashed border-line px-3.5 py-3 text-sm font-medium text-ledger-muted"
                       >
                         {conteudo}
-                        <span className="mt-1 block text-[0.625rem] uppercase tracking-[0.08em]">
+                        <span className="mt-1 block text-[0.625rem] font-semibold uppercase tracking-[0.1em]">
                           {mod.state === "em_construcao" ? "Em construção" : "Em breve"}
                         </span>
                       </span>
@@ -328,9 +328,9 @@ function VisaoGeral() {
                 ["Candidaturas", counts.data?.leads],
                 ["Mensagens de contato", counts.data?.mensagens],
               ].map(([label, value]) => (
-                <div key={String(label)} className="bg-surface px-5 py-4">
-                  <dt className="text-[0.75rem] text-ledger-muted">{label}</dt>
-                  <dd className="num mt-1 text-2xl text-ledger-text">
+                <div key={String(label)} className="bg-surface px-5 py-5">
+                  <dt className="text-[0.78rem] font-semibold tracking-wide text-ledger-muted">{label}</dt>
+                  <dd className="num mt-1.5 font-display text-[1.75rem] font-semibold leading-none text-ledger-text">
                     {typeof value === "number" ? formatInt(value) : "—"}
                   </dd>
                 </div>
@@ -369,10 +369,10 @@ function VisaoGeral() {
           ) : (
             <table className="w-full text-left text-sm">
               <thead className="sticky top-0 bg-surface">
-                <tr className="border-b border-line-soft text-[0.6875rem] uppercase tracking-[0.08em] text-ledger-muted">
-                  <th className="px-5 py-2 font-normal">Data</th>
-                  <th className="px-3 py-2 font-normal">Ação</th>
-                  <th className="px-3 py-2 font-normal">Entidade</th>
+                <tr className="border-b border-line text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-bronze">
+                  <th className="px-5 py-2.5">Data</th>
+                  <th className="px-3 py-2.5">Ação</th>
+                  <th className="px-3 py-2.5">Entidade</th>
                 </tr>
               </thead>
               <tbody>

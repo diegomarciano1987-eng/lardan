@@ -666,6 +666,39 @@ export type Database = {
         }
         Relationships: []
       }
+      public_price_list: {
+        Row: {
+          price_cents: number
+          product_id: string
+          variant_id: string
+        }
+        Insert: {
+          price_cents: number
+          product_id: string
+          variant_id: string
+        }
+        Update: {
+          price_cents?: number
+          product_id?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_price_list_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_price_list_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           is_public: boolean
@@ -741,6 +774,13 @@ export type Database = {
         }
       }
       gen_protocol: { Args: { prefix: string }; Returns: string }
+      grant_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_any_role: {
         Args: {
           _roles: Database["public"]["Enums"]["app_role"][]
@@ -760,6 +800,13 @@ export type Database = {
       my_roles: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      revoke_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       submit_contact_request: {
         Args: {
@@ -799,6 +846,7 @@ export type Database = {
         }
         Returns: string
       }
+      sync_public_prices: { Args: { _product_id: string }; Returns: undefined }
     }
     Enums: {
       app_role:

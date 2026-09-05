@@ -20,7 +20,6 @@ import {
   SlidersHorizontal,
   Store,
   type LucideIcon,
-  ContactRound,
 } from "lucide-react";
 
 /**

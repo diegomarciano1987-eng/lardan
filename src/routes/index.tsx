@@ -57,7 +57,7 @@ function HomePage() {
         mobileImage={colaresMobileAsset}
         imageAlt="Colar de semijoia Lardan sobre formas de vidro"
         enterFrom="left"
-        align="right"
+        align="left"
       />
       <CategoryGuillotine
         title="Pulseiras"

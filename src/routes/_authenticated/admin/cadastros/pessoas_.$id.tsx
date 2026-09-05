@@ -344,8 +344,8 @@ function FichaPessoa() {
                   </Campo>
                   <Campo label="Nascimento">
                     <DateField
-                      value={form.birth_date ?? ""}
-                      onChange={(v) => set("birth_date", v || null)}
+                      value={isoParaData(form.birth_date)}
+                      onChange={(v) => set("birth_date", dataParaIso(v))}
                       disabled={!podeEditar}
                     />
                   </Campo>

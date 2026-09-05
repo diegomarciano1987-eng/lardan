@@ -146,6 +146,14 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+@theme inline {
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  --color-rose: var(--rose);
+  --color-rose-deep: var(--rose-deep);
+  --color-ivory: var(--ivory);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -154,5 +162,51 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 300;
   }
 }
+
+/* Wordmark e rótulos da marca */
+@utility brand-eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: var(--tracking-brand);
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+@utility rose-rule {
+  background: var(--gradient-rose);
+  height: 1px;
+  width: 100%;
+}
+
+@utility text-rose-gradient {
+  background: var(--gradient-rose);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility surface-glass {
+  background: color-mix(in oklab, var(--ivory) 72%, transparent);
+  backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in oklab, var(--rose) 18%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+

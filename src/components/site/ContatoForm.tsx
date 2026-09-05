@@ -17,29 +17,25 @@ export function ContatoForm() {
     const form = new FormData(e.currentTarget);
     const texto = (k: string) => String(form.get(k) ?? "").trim();
 
-    const { data, error } = await supabase
-      .from("contact_requests")
-      .insert({
-        full_name: texto("full_name"),
-        contact_channel: texto("contact_channel"),
-        contact_value: texto("contact_value"),
-        subject: texto("subject"),
-        message: texto("message"),
-        source: "site/contato",
-        entry_url: entryUrl(),
-        utm: captureUtm(),
-        privacy_version: PRIVACY_VERSION,
-        marketing_consent: form.get("marketing_consent") === "on",
-      })
-      .select("protocol")
-      .single();
+    const { data, error } = await supabase.rpc("submit_contact_request", {
+      p_full_name: texto("full_name"),
+      p_contact_channel: texto("contact_channel"),
+      p_contact_value: texto("contact_value"),
+      p_subject: texto("subject"),
+      p_message: texto("message"),
+      p_source: "site/contato",
+      p_entry_url: entryUrl(),
+      p_utm: captureUtm(),
+      p_privacy_version: PRIVACY_VERSION,
+      p_marketing_consent: form.get("marketing_consent") === "on",
+    });
 
     setBusy(false);
     if (error || !data) {
       setErro("Não foi possível enviar a mensagem. Confira os campos e tente novamente.");
       return;
     }
-    setProtocolo(data.protocol);
+    setProtocolo(data);
   }
 
   if (protocolo) {

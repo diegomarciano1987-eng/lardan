@@ -34,30 +34,26 @@ export function SejaLardanForm() {
       return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
     };
 
-    const { data, error } = await supabase
-      .from("leads")
-      .insert({
-        full_name: texto("full_name") ?? "",
-        whatsapp: texto("whatsapp") ?? "",
-        street: texto("street"),
-        street_number: semNumero ? null : texto("street_number"),
-        no_number: semNumero,
-        city: texto("city") ?? "",
-        uf: texto("uf") ?? "",
-        postal_code: texto("postal_code"),
-        financial_goal: texto("financial_goal"),
-        availability: texto("availability"),
-        experience: texto("experience"),
-        audience: texto("audience"),
-        motivation: texto("motivation"),
-        source: "site/seja-lardan",
-        entry_url: entryUrl(),
-        utm: captureUtm(),
-        privacy_version: PRIVACY_VERSION,
-        marketing_consent: form.get("marketing_consent") === "on",
-      })
-      .select("protocol")
-      .single();
+    const { data, error } = await supabase.rpc("submit_lead", {
+      p_full_name: texto("full_name") ?? "",
+      p_whatsapp: texto("whatsapp") ?? "",
+      p_city: texto("city") ?? "",
+      p_uf: texto("uf") ?? "",
+      p_street: texto("street"),
+      p_street_number: semNumero ? null : texto("street_number"),
+      p_no_number: semNumero,
+      p_postal_code: texto("postal_code"),
+      p_financial_goal: texto("financial_goal"),
+      p_availability: texto("availability"),
+      p_experience: texto("experience"),
+      p_audience: texto("audience"),
+      p_motivation: texto("motivation"),
+      p_source: "site/seja-lardan",
+      p_entry_url: entryUrl(),
+      p_utm: captureUtm(),
+      p_privacy_version: PRIVACY_VERSION,
+      p_marketing_consent: form.get("marketing_consent") === "on",
+    });
 
     setBusy(false);
     if (error || !data) {
@@ -66,7 +62,7 @@ export function SejaLardanForm() {
       );
       return;
     }
-    setProtocolo(data.protocol);
+    setProtocolo(data);
   }
 
   if (protocolo) {

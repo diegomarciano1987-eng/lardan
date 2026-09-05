@@ -73,13 +73,29 @@ export function SessaoSemijoias() {
           }}
         />
 
-        {/* Leitura do texto sobre a imagem */}
+        {/* Leitura do texto sobre a imagem — desktop: véu marfim */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 hidden md:block"
           style={{
             background:
               "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.92) 0%, oklch(0.985 0.006 80 / 0.6) 38%, transparent 62%)",
+            opacity: lines[0],
+          }}
+        />
+        {/* Mobile: véu escuro suave atrás do texto, com desfoque */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 md:hidden"
+          style={{
+            background:
+              "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.3) 55%, transparent 85%)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            maskImage:
+              "linear-gradient(90deg, black 0%, black 55%, transparent 85%)",
+            WebkitMaskImage:
+              "linear-gradient(90deg, black 0%, black 55%, transparent 85%)",
             opacity: lines[0],
           }}
         />
@@ -87,13 +103,13 @@ export function SessaoSemijoias() {
         <div className="relative flex h-full max-w-6xl flex-col justify-center px-6 md:px-10 lg:mx-auto">
           <div className="max-w-xl">
             <p
-              className="brand-eyebrow mb-4"
+              className="brand-eyebrow mb-4 max-md:!text-background/80"
               style={{ opacity: lines[0], transform: `translateY(${(1 - lines[0]) * 18}px)` }}
             >
               Semijoias
             </p>
             <h2
-              className="text-4xl leading-tight text-foreground md:text-6xl"
+              className="text-4xl leading-tight text-foreground max-md:!text-background md:text-6xl"
               style={{ opacity: lines[1], transform: `translateY(${(1 - lines[1]) * 22}px)` }}
             >
               {BRAND.tagline}
@@ -103,14 +119,14 @@ export function SessaoSemijoias() {
               style={{ transform: `scaleX(${lines[2]})`, transformOrigin: "left" }}
             />
             <p
-              className="mt-6 max-w-md text-base text-muted-foreground md:text-lg"
+              className="mt-6 max-w-md text-base text-muted-foreground max-md:!text-background/85 md:text-lg"
               style={{ opacity: lines[3], transform: `translateY(${(1 - lines[3]) * 18}px)` }}
             >
               {BRAND.subline}
             </p>
             <Link
               to="/semijoias"
-              className="mt-10 inline-flex items-center border-b border-primary/50 pb-2 text-[0.75rem] tracking-[0.22em] uppercase text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              className="mt-10 inline-flex items-center border-b border-primary/50 pb-2 text-[0.75rem] tracking-[0.22em] uppercase text-foreground max-md:!text-background transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
               style={{ opacity: lines[4], transform: `translateY(${(1 - lines[4]) * 18}px)` }}
               tabIndex={lines[4] > 0.5 ? 0 : -1}
             >

@@ -55,7 +55,7 @@ function HomePage() {
         image={colaresAsset}
         imageAlt="Colar de semijoia Lardan sobre formas de vidro"
         enterFrom="left"
-        align="right"
+        align="left"
       />
       <CategoryGuillotine
         title="Pulseiras"
@@ -64,7 +64,7 @@ function HomePage() {
         mobileImage={pulseirasMobileAsset}
         imageAlt="Pulseira Lardan em ouro rosé sobre onda de vidro"
         enterFrom="right"
-        align="left"
+        align="right"
       />
       <CategoryGuillotine
         title="Brincos"
@@ -73,7 +73,7 @@ function HomePage() {
         mobileImage={brincosMobileAsset}
         imageAlt="Brinco Lardan em ouro rosé sobre base de vidro"
         enterFrom="left"
-        align="right"
+        align="left"
       />
 
       {/* Convite Seja Lardan */}

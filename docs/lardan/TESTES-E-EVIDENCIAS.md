@@ -57,3 +57,9 @@ de RLS. Nenhuma delas expõe dados de terceiros.
 - Hero, sessão 2 e categorias Anéis/Pulseiras/Brincos usam imagens verticais exclusivas no celular via `<picture>` + `media="(max-width: 767px)"`; Colares segue com a imagem padrão (sem versão mobile enviada).
 - Textos no mobile: véu escuro suave (gradiente oklch 0.18) com backdrop blur de 6px e máscara de fade, ativado junto com o texto; cor do texto clara só no mobile (`max-md:text-background`).
 - Desktop inalterado (véu marfim original). Console sem erros.
+
+## Refino mobile (392x719): menu, véu e lados do texto
+- Menu mobile: vidro fosco premium (bg-background/40 + backdrop-blur-2xl, borda fina, cantos arredondados, sombra suave).
+- Véu escuro dos textos: blur 6px→3px, área útil 55%→38% e fade em 62% (não invade mais a imagem); opacidade 0.62→0.45.
+- Lados invertidos nas categorias: Colares→esquerda, Pulseiras→direita, Brincos→esquerda (texto fora das peças). Anéis mantido à esquerda.
+- Verificado com Playwright, console sem erros.

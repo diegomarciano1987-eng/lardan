@@ -48,7 +48,7 @@ export function SiteHeader() {
         {open && (
           <div
             id="menu-mobile"
-            className="mt-4 flex flex-col items-center gap-1 bg-background/85 px-6 py-4 backdrop-blur-sm"
+            className="mt-4 flex flex-col items-center gap-1 rounded-2xl border border-foreground/10 bg-background/40 px-8 py-5 shadow-[0_18px_50px_-20px_oklch(0.3_0.02_30/0.35)] backdrop-blur-2xl"
           >
             {NAV_ITEMS.map((item) => (
               <NavLink

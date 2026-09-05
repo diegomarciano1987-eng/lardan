@@ -1288,6 +1288,154 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_balances: {
+        Row: {
+          created_at: string
+          id: string
+          location_id: string
+          quantity: number
+          reserved: number
+          updated_at: string
+          variant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_id: string
+          quantity?: number
+          reserved?: number
+          updated_at?: string
+          variant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_id?: string
+          quantity?: number
+          reserved?: number
+          updated_at?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_balances_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_balances_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          balance_after: number | null
+          created_at: string
+          created_by: string | null
+          from_location_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["stock_move_kind"]
+          note: string | null
+          quantity: number
+          reason_code: string | null
+          reference: string | null
+          to_location_id: string | null
+          unit_cost_cents: number | null
+          variant_id: string
+        }
+        Insert: {
+          balance_after?: number | null
+          created_at?: string
+          created_by?: string | null
+          from_location_id?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["stock_move_kind"]
+          note?: string | null
+          quantity: number
+          reason_code?: string | null
+          reference?: string | null
+          to_location_id?: string | null
+          unit_cost_cents?: number | null
+          variant_id: string
+        }
+        Update: {
+          balance_after?: number | null
+          created_at?: string
+          created_by?: string | null
+          from_location_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["stock_move_kind"]
+          note?: string | null
+          quantity?: number
+          reason_code?: string | null
+          reference?: string | null
+          to_location_id?: string | null
+          unit_cost_cents?: number | null
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_from_location_id_fkey"
+            columns: ["from_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_to_location_id_fkey"
+            columns: ["to_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_reasons: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["stock_move_kind"]
+          label: string
+          requires_adjust: boolean
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["stock_move_kind"]
+          label: string
+          requires_adjust?: boolean
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["stock_move_kind"]
+          label?: string
+          requires_adjust?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           city: string | null
@@ -1433,6 +1581,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_stock_delta: {
+        Args: { _delta: number; _location: string; _variant: string }
+        Returns: number
+      }
       can_manage_catalog: { Args: { _user_id: string }; Returns: boolean }
       can_manage_content: { Args: { _user_id: string }; Returns: boolean }
       can_manage_leads: { Args: { _user_id: string }; Returns: boolean }
@@ -1504,6 +1656,20 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"][]
       }
       only_digits: { Args: { _v: string }; Returns: string }
+      register_stock_movement: {
+        Args: {
+          _from_location_id?: string
+          _kind: Database["public"]["Enums"]["stock_move_kind"]
+          _note?: string
+          _quantity: number
+          _reason_code?: string
+          _reference?: string
+          _to_location_id?: string
+          _unit_cost_cents?: number
+          _variant_id: string
+        }
+        Returns: string
+      }
       registry_counts: { Args: never; Returns: Json }
       registry_duplicates: {
         Args: { _limit?: number }
@@ -1536,6 +1702,7 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      stock_overview: { Args: never; Returns: Json }
       submit_contact_request: {
         Args: {
           p_contact_channel: string
@@ -1622,6 +1789,12 @@ export type Database = {
         | "inativo"
         | "desligado"
       request_status: "novo" | "em_atendimento" | "respondido" | "arquivado"
+      stock_move_kind:
+        | "entrada"
+        | "saida"
+        | "transferencia"
+        | "ajuste"
+        | "inventario"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1798,6 +1971,13 @@ export const Constants = {
         "desligado",
       ],
       request_status: ["novo", "em_atendimento", "respondido", "arquivado"],
+      stock_move_kind: [
+        "entrada",
+        "saida",
+        "transferencia",
+        "ajuste",
+        "inventario",
+      ],
     },
   },
 } as const

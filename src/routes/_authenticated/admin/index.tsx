@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { hasAny, CONTENT_ROLES, LEAD_ROLES } from "@/lib/session";
-import { ADMIN_MODULES } from "@/lib/admin-modules";
+import { moduleAllowed, ADMIN_MODULES } from "@/lib/admin-modules";
+import { useCapabilities } from "@/lib/capabilities";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import {
   PageHeader,
@@ -89,9 +90,10 @@ const SHORTCUTS: { label: string; icon: LucideIcon; module: string }[] = [
 function VisaoGeral() {
   const queryClient = useQueryClient();
   const roles = useAdminRoles();
-  const podeConteudo = hasAny(roles, CONTENT_ROLES);
-  const podeLeads = hasAny(roles, LEAD_ROLES);
-  const podeAuditoria = hasAny(roles, ["master", "diretoria"]);
+  const caps = useCapabilities();
+  const podeConteudo = caps.includes("catalog.view");
+  const podeLeads = caps.includes("leads.view");
+  const podeAuditoria = caps.includes("audit.view");
 
   const masterQuery = useQuery({
     queryKey: ["master-exists"],
@@ -221,7 +223,7 @@ function VisaoGeral() {
             />
           </Panel>
 
-          {hasAny(roles, ["master", "diretoria", "financeiro"]) && (
+          {caps.includes("finance.view") && (
             <Panel title="Indicadores financeiros">
               <EmptyState
                 title="Nenhum título lançado"
@@ -252,7 +254,7 @@ function VisaoGeral() {
             <ul className="grid gap-2 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3">
               {SHORTCUTS.map((s) => {
                 const mod = ADMIN_MODULES.find((m) => m.slug === s.module);
-                if (!mod || !hasAny(roles, mod.roles)) return null;
+                if (!mod || !moduleAllowed(mod, caps, roles)) return null;
                 const Icon = s.icon;
                 const disponivel = mod.state === "ativo";
                 const conteudo = (

@@ -35,10 +35,10 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
 
   const itemClass = (m: AdminModule, active: boolean) =>
     cn(
-      "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[0.8125rem] whitespace-nowrap transition-colors duration-150",
+      "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[0.8125rem] font-semibold whitespace-nowrap transition-colors duration-150",
       active
         ? "bg-champagne-soft text-ink"
-        : "text-warm-ivory/80 hover:bg-white/8 hover:text-warm-ivory",
+        : "text-warm-ivory/85 hover:bg-white/8 hover:text-warm-ivory",
       m.state === "em_breve" && "cursor-not-allowed opacity-45 hover:bg-transparent",
     );
 

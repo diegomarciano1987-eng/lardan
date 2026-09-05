@@ -16,7 +16,7 @@ import {
 } from "@/components/admin/ui";
 import { RecordSheet, type RecordValues } from "@/components/admin/RecordSheet";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { useSession } from "@/lib/session";
+import { fetchMyRoles, hasAny, type AppRole } from "@/lib/session";
 import {
   saveRecord,
   uploadMedia,
@@ -43,10 +43,13 @@ const tone = (status: string) =>
 function ProdutoDetalhe() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
-  const { roles } = useSession();
-  const podeVerCustos = roles.some((r) =>
-    ["master", "diretoria", "financeiro", "estoque"].includes(r),
-  );
+  const papeis = useQuery({ queryKey: ["meus-papeis"], queryFn: fetchMyRoles });
+  const podeVerCustos = hasAny(papeis.data ?? [], [
+    "master",
+    "diretoria",
+    "financeiro",
+    "estoque",
+  ] as AppRole[]);
 
   const [editarFicha, setEditarFicha] = useState(false);
   const [variante, setVariante] = useState<VarianteRow | null>(null);
@@ -329,7 +332,7 @@ function ProdutoDetalhe() {
 
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
-          <Panel title="Variantes vendáveis" description="Cada variante é o que entra e sai do estoque.">
+          <Panel title="Variantes vendáveis">
             <div className="mb-4 flex justify-end">
               <button
                 type="button"
@@ -406,7 +409,7 @@ function ProdutoDetalhe() {
             )}
           </Panel>
 
-          <Panel title="Imagens" description="Guardadas em área privada; o site recebe links assinados.">
+          <Panel title="Imagens">
             <div className="mb-4 flex justify-end">
               <input
                 ref={fileRef}
@@ -455,7 +458,7 @@ function ProdutoDetalhe() {
             </p>
           </Panel>
 
-          <Panel title="Histórico" description="Últimos 20 registros de auditoria desta ficha.">
+          <Panel title="Histórico">
             {(historico.data?.length ?? 0) === 0 ? (
               <EmptyState title="Sem registros" description="Nenhuma alteração auditada até agora." />
             ) : (

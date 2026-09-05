@@ -3,7 +3,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Search, X, CornerDownLeft, Tag, Boxes, ContactRound, FileText, Compass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { ALL_MODULES } from "@/lib/admin-modules";
+import { ALL_MODULES, moduleAllowed } from "@/lib/admin-modules";
+import { useCapabilities, type Capability } from "@/lib/capabilities";
 import { hasAny, type AppRole } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -22,12 +23,12 @@ const LIMIT = 5;
  * Busca no servidor, sempre limitada. Nunca baixa a base inteira e nunca
  * filtra no navegador: cada grupo é uma consulta paginada com RLS ativa.
  */
-async function search(term: string, roles: AppRole[]): Promise<SearchHit[]> {
+async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
   const like = `%${term}%`;
   const hits: SearchHit[] = [];
 
-  const podeCatalogo = hasAny(roles, ["master", "diretoria", "marketing", "estoque"]);
-  const podeLeads = hasAny(roles, ["master", "diretoria", "marketing", "suporte"]);
+  const podeCatalogo = caps.includes("catalog.view");
+  const podeLeads = caps.includes("leads.view");
 
   if (podeCatalogo) {
     const [produtos, variantes, paginas] = await Promise.all([
@@ -123,6 +124,7 @@ export function CommandPalette({
   onClose: () => void;
   roles: AppRole[];
 }) {
+  const caps = useCapabilities();
   const navigate = useNavigate();
   const [term, setTerm] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -144,9 +146,9 @@ export function CommandPalette({
   }, [open]);
 
   const query = useQuery({
-    queryKey: ["global-search", debounced, roles.join(",")],
+    queryKey: ["global-search", debounced, caps.join(",")],
     enabled: open && debounced.length >= 2,
-    queryFn: () => search(debounced, roles),
+    queryFn: () => search(debounced, caps),
     staleTime: 15_000,
   });
 
@@ -156,7 +158,7 @@ export function CommandPalette({
     return ALL_MODULES.filter(
       (m) =>
         m.path &&
-        (m.slug === "visao-geral" || hasAny(roles, m.roles)) &&
+        moduleAllowed(m, caps, roles) &&
         (t.length < 2 || m.label.toLowerCase().includes(t)),
     ).map<SearchHit>((m) => ({
       id: `mod-${m.slug}`,
@@ -166,7 +168,7 @@ export function CommandPalette({
       context: m.description,
       to: m.path as string,
     }));
-  }, [debounced, roles]);
+  }, [debounced, caps, roles]);
 
   const hits = useMemo(
     () => [...(query.data ?? []), ...destinos].slice(0, 24),

@@ -813,19 +813,22 @@ export type Database = {
       }
       public_price_list: {
         Row: {
+          id: string
           price_cents: number
           product_id: string
-          variant_id: string
+          variant_id: string | null
         }
         Insert: {
+          id?: string
           price_cents: number
           product_id: string
-          variant_id: string
+          variant_id?: string | null
         }
         Update: {
+          id?: string
           price_cents?: number
           product_id?: string
-          variant_id?: string
+          variant_id?: string | null
         }
         Relationships: [
           {
@@ -843,6 +846,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      role_capabilities: {
+        Row: {
+          capability: string
+          created_at: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          capability: string
+          created_at?: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          capability?: string
+          created_at?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
       }
       site_settings: {
         Row: {
@@ -1043,6 +1064,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_capability: {
+        Args: { _cap: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1052,10 +1077,17 @@ export type Database = {
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       master_exists: { Args: never; Returns: boolean }
+      my_capabilities: {
+        Args: never
+        Returns: {
+          capability: string
+        }[]
+      }
       my_roles: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      resync_all_public_prices: { Args: never; Returns: number }
       revoke_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1063,6 +1095,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       submit_contact_request: {
         Args: {
           p_contact_channel: string

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { MoreHorizontal, Lock, Clock3, X } from "lucide-react";
-import { ADMIN_MODULES, type AdminModule } from "@/lib/admin-modules";
+import { ADMIN_MODULES, moduleAllowed, type AdminModule } from "@/lib/admin-modules";
+import { useCapabilities } from "@/lib/capabilities";
 import wordmark from "@/assets/lardan-wordmark.png.asset.json";
 import { hasAny, type AppRole } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -25,12 +26,11 @@ function ItemLabel({ m }: { m: AdminModule }) {
 
 /** Menu principal flutuante inferior: única navegação global do sistema. */
 export function BottomDock({ roles }: { roles: AppRole[] }) {
+  const caps = useCapabilities();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [drawer, setDrawer] = useState(false);
 
-  const permitted = ADMIN_MODULES.filter(
-    (m) => m.slug === "visao-geral" || hasAny(roles, m.roles),
-  );
+  const permitted = ADMIN_MODULES.filter((m) => moduleAllowed(m, caps, roles));
   const primary = permitted.slice(0, 5);
 
   const itemClass = (m: AdminModule, active: boolean) =>

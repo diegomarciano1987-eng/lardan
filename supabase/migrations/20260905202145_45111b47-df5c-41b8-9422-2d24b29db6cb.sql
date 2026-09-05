@@ -1,0 +1,1 @@
+ALTER TABLE public.public_price_list ALTER COLUMN variant_id DROP NOT NULL;

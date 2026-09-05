@@ -761,6 +761,44 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      submit_contact_request: {
+        Args: {
+          p_contact_channel: string
+          p_contact_value: string
+          p_entry_url?: string
+          p_full_name: string
+          p_marketing_consent?: boolean
+          p_message: string
+          p_privacy_version?: string
+          p_source?: string
+          p_subject: string
+          p_utm?: Json
+        }
+        Returns: string
+      }
+      submit_lead: {
+        Args: {
+          p_audience?: string
+          p_availability?: string
+          p_city: string
+          p_entry_url?: string
+          p_experience?: string
+          p_financial_goal?: string
+          p_full_name: string
+          p_marketing_consent?: boolean
+          p_motivation?: string
+          p_no_number?: boolean
+          p_postal_code?: string
+          p_privacy_version?: string
+          p_source?: string
+          p_street?: string
+          p_street_number?: string
+          p_uf: string
+          p_utm?: Json
+          p_whatsapp: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role:

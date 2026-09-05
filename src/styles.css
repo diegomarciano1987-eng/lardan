@@ -329,16 +329,17 @@
   color: var(--color-ledger-text);
 }
 
-/* Corpo de texto do painel: nunca fino, nunca lavado. */
-.admin-scope p,
-.admin-scope li,
-.admin-scope dt,
-.admin-scope dd,
-.admin-scope th,
-.admin-scope td,
-.admin-scope label,
-.admin-scope button,
-.admin-scope a,
+/* Corpo de texto do painel: nunca fino, nunca lavado.
+   O guarda :not([class*="font-"]) respeita pesos definidos manualmente. */
+.admin-scope p:not([class*="font-"]),
+.admin-scope li:not([class*="font-"]),
+.admin-scope dt:not([class*="font-"]),
+.admin-scope dd:not([class*="font-"]),
+.admin-scope th:not([class*="font-"]),
+.admin-scope td:not([class*="font-"]),
+.admin-scope label:not([class*="font-"]),
+.admin-scope button:not([class*="font-"]),
+.admin-scope a:not([class*="font-"]),
 .admin-scope input,
 .admin-scope select,
 .admin-scope textarea {
@@ -346,8 +347,8 @@
 }
 
 .admin-scope strong,
-.admin-scope dt,
-.admin-scope th {
+.admin-scope dt:not([class*="font-"]),
+.admin-scope th:not([class*="font-"]) {
   font-weight: 600;
 }
 

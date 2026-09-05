@@ -7,6 +7,7 @@ import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { findModule } from "@/lib/admin-modules";
 import { BottomDock } from "@/components/admin/BottomDock";
 import { CommandPalette } from "@/components/admin/CommandPalette";
+import { QuickRail } from "@/components/admin/QuickRail";
 import { ModuleAvailabilityBadge, PageHeader, Panel } from "@/components/admin/ui";
 import { UserMenu } from "@/components/admin/UserMenu";
 import { ROLE_LABEL } from "@/lib/roles";
@@ -109,8 +110,9 @@ export function AdminShell({
 
         </header>
 
-        <main className="mx-auto min-w-0 max-w-[1600px] px-5 pb-40 pt-8 md:px-8">{children}</main>
+        <main className="mx-auto min-w-0 max-w-[1600px] px-5 pb-40 pt-8 md:pl-[96px] md:pr-8">{children}</main>
 
+        <QuickRail />
         <BottomDock roles={roles} />
         <CommandPalette open={palette} onClose={() => setPalette(false)} roles={roles} />
       </div>

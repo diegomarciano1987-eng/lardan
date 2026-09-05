@@ -112,6 +112,7 @@ export function AdminShell({
 
         <main className="mx-auto min-w-0 max-w-[1600px] px-5 pb-40 pt-8 md:px-8">{children}</main>
 
+        <QuickRail />
         <BottomDock roles={roles} />
         <CommandPalette open={palette} onClose={() => setPalette(false)} roles={roles} />
       </div>

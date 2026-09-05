@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useScrollProgress, phase, ease, easeOut } from "@/hooks/use-scroll-progress";
 
-const SLATS = 12;
+const SLATS = 18;
 
 interface CategoryGuillotineProps {
   title: string;
@@ -56,13 +56,14 @@ export function CategoryGuillotine({
         {/* Lâminas que deslizam na horizontal, em cascata, com acabamento suave */}
         <div aria-hidden className="pointer-events-none absolute inset-0 flex">
           {Array.from({ length: SLATS }).map((_, i) => {
-            // Cascata começa pela borda de entrada e varre até o outro lado.
+            // Cascata larga: a frente de varredura atravessa a tela inteira,
+            // da borda de entrada até o lado oposto, lâmina a lâmina.
             const order =
               enterFrom === "right"
                 ? (SLATS - 1 - i) / (SLATS - 1)
                 : i / (SLATS - 1);
-            const start = 0.08 * order;
-            const t = easeOut(phase(reveal, start, start + 0.92));
+            const start = 0.5 * order;
+            const t = easeOut(phase(reveal, start, start + 0.5));
             const lead = 1 - t; // 1 = lâmina cobrindo, 0 = fora da cena
             const moving = t * (1 - t) * 4; // desfoque só enquanto desliza
             return (

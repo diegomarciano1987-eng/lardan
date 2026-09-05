@@ -145,13 +145,13 @@ export function CategoryGuillotine({
         >
           <div className="max-w-md">
             <p
-              className="brand-eyebrow mb-3"
+              className="brand-eyebrow mb-3 max-md:!text-background/80"
               style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 18}px)` }}
             >
               Categoria
             </p>
             <h2
-              className="text-4xl text-foreground md:text-6xl"
+              className="text-4xl text-foreground max-md:!text-background md:text-6xl"
               style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 24}px)` }}
             >
               {title}
@@ -162,7 +162,7 @@ export function CategoryGuillotine({
             />
             <Link
               to={to}
-              className="mt-8 inline-flex items-center border-b border-primary/50 pb-2 text-[0.75rem] tracking-[0.22em] uppercase text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              className="mt-8 inline-flex items-center border-b border-primary/50 pb-2 text-[0.75rem] tracking-[0.22em] uppercase text-foreground max-md:!text-background transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
               style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
               tabIndex={ctaIn > 0.5 ? 0 : -1}
             >

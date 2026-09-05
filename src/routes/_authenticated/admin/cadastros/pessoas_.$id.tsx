@@ -25,6 +25,7 @@ import {
   saveParty,
   type ConsultantProfile,
   type Party,
+  type PartyAddress,
   type PartyRoleKind,
   type PartyStatus,
 } from "@/lib/registry";

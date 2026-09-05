@@ -63,3 +63,13 @@ de RLS. Nenhuma delas expõe dados de terceiros.
 - Véu escuro dos textos: blur 6px→3px, área útil 55%→38% e fade em 62% (não invade mais a imagem); opacidade 0.62→0.45.
 - Lados invertidos nas categorias: Colares→esquerda, Pulseiras→direita, Brincos→esquerda (texto fora das peças). Anéis mantido à esquerda.
 - Verificado com Playwright, console sem erros.
+
+## L3.1 — Segurança crítica (migrações + linter)
+- is_active valendo no servidor: has_role/has_any_role/is_staff exigem conta ativa; guard_profile_update impede autoalteração de is_active e autodesativação do Master.
+- Bootstrap: claim_master_role com pg_advisory_xact_lock + allowlist security.bootstrap (privada); sem e-mail autorizado, retorna exceção. Masters existentes preservados (retorna false).
+- Papéis: grant_role/revoke_role só Master, com auditoria; guard_last_master protege o último Master ativo; policy de escrita direta em user_roles removida.
+- Preço privado: SELECT de anon revogado em products/product_variants; concessão por coluna (sem price_cents/cost); preços públicos servidos por public_price_list, sincronizada por trigger (publicar/despublicar/trocar preço reflete na hora).
+- Auditoria: audit_row_change em user_roles, profiles, products, product_variants, categories, collections, pages, site_settings, media_assets; audit_logs imutável.
+- API: funções internas (triggers, gen_protocol, set_updated_at, syncs) revogadas de PUBLIC/anon/authenticated. Superfície final: submit_lead + submit_contact_request (anon) e funções de perfil/papel (authenticated) — 15 warnings do linter esperados e justificados.
+- Views SECURITY DEFINER removidas (erro do linter eliminado na 2ª migração).
+- Storage: buckets media (privado, 10MB) e imports (privado, 50MB); policies por papel; tentativa de bucket público bloqueada pelo workspace (registrado em PROGRESSO.md).

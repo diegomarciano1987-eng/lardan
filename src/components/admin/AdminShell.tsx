@@ -75,8 +75,8 @@ export function AdminShell({
             className="flex h-16 w-[220px] shrink-0 items-center gap-3 bg-ink px-5 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-champagne lg:w-[320px]"
           >
             <img src={logo.url} alt="Lardan" className="h-6 w-auto" />
-            <span className="hidden text-[0.625rem] tracking-[0.28em] text-warm-ivory/70 sm:block">
-              LARDAN OS
+            <span className="hidden text-[0.625rem] tracking-[0.28em] text-warm-ivory/60 sm:block">
+              OS
             </span>
           </Link>
 

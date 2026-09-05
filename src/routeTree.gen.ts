@@ -28,6 +28,7 @@ import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminImportacaoRouteImport } from './routes/_authenticated/admin/importacao'
 import { Route as AuthenticatedAdminIntegracoesRouteImport } from './routes/_authenticated/admin/integracoes'
 import { Route as AuthenticatedAdminLeadsRouteImport } from './routes/_authenticated/admin/leads'
+import { Route as AuthenticatedAdminPerfilRouteImport } from './routes/_authenticated/admin/perfil'
 import { Route as AuthenticatedAdminSiteRouteImport } from './routes/_authenticated/admin/site'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminCadastrosIndexRouteImport } from './routes/_authenticated/admin/cadastros/index'
@@ -139,6 +140,12 @@ const AuthenticatedAdminLeadsRoute = AuthenticatedAdminLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminPerfilRoute =
+  AuthenticatedAdminPerfilRouteImport.update({
+    id: '/perfil',
+    path: '/perfil',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminSiteRoute = AuthenticatedAdminSiteRouteImport.update({
   id: '/site',
   path: '/site',
@@ -217,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
+  '/admin/perfil': typeof AuthenticatedAdminPerfilRoute
   '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -246,6 +254,7 @@ export interface FileRoutesByTo {
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
+  '/admin/perfil': typeof AuthenticatedAdminPerfilRoute
   '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -278,6 +287,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/_authenticated/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/_authenticated/admin/leads': typeof AuthenticatedAdminLeadsRoute
+  '/_authenticated/admin/perfil': typeof AuthenticatedAdminPerfilRoute
   '/_authenticated/admin/site': typeof AuthenticatedAdminSiteRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/admin/importacao'
     | '/admin/integracoes'
     | '/admin/leads'
+    | '/admin/perfil'
     | '/admin/site'
     | '/admin/usuarios'
     | '/admin/'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/admin/importacao'
     | '/admin/integracoes'
     | '/admin/leads'
+    | '/admin/perfil'
     | '/admin/site'
     | '/admin/usuarios'
     | '/admin'
@@ -370,6 +382,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/importacao'
     | '/_authenticated/admin/integracoes'
     | '/_authenticated/admin/leads'
+    | '/_authenticated/admin/perfil'
     | '/_authenticated/admin/site'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/admin/'
@@ -529,6 +542,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminLeadsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/perfil': {
+      id: '/_authenticated/admin/perfil'
+      path: '/perfil'
+      fullPath: '/admin/perfil'
+      preLoaderRoute: typeof AuthenticatedAdminPerfilRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/site': {
       id: '/_authenticated/admin/site'
       path: '/site'
@@ -610,6 +630,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminImportacaoRoute: typeof AuthenticatedAdminImportacaoRoute
   AuthenticatedAdminIntegracoesRoute: typeof AuthenticatedAdminIntegracoesRoute
   AuthenticatedAdminLeadsRoute: typeof AuthenticatedAdminLeadsRoute
+  AuthenticatedAdminPerfilRoute: typeof AuthenticatedAdminPerfilRoute
   AuthenticatedAdminSiteRoute: typeof AuthenticatedAdminSiteRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -632,6 +653,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminImportacaoRoute: AuthenticatedAdminImportacaoRoute,
     AuthenticatedAdminIntegracoesRoute: AuthenticatedAdminIntegracoesRoute,
     AuthenticatedAdminLeadsRoute: AuthenticatedAdminLeadsRoute,
+    AuthenticatedAdminPerfilRoute: AuthenticatedAdminPerfilRoute,
     AuthenticatedAdminSiteRoute: AuthenticatedAdminSiteRoute,
     AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,

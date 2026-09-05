@@ -1,35 +1,25 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, Bell, LogOut, ChevronDown } from "lucide-react";
+import { Search, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { findModule } from "@/lib/admin-modules";
 import { BottomDock } from "@/components/admin/BottomDock";
 import { CommandPalette } from "@/components/admin/CommandPalette";
 import { ModuleAvailabilityBadge, PageHeader, Panel } from "@/components/admin/ui";
+import { UserMenu } from "@/components/admin/UserMenu";
+import { ROLE_LABEL } from "@/lib/roles";
 import logo from "@/assets/lardan-logo-completa.png.asset.json";
 
 const RolesContext = createContext<AppRole[]>([]);
 export const useAdminRoles = () => useContext(RolesContext);
 
-export const ROLE_LABEL: Record<AppRole, string> = {
-  master: "Master",
-  diretoria: "Diretoria",
-  marketing: "Marketing",
-  suporte: "Suporte",
-  financeiro: "Financeiro",
-  cobranca: "Cobrança",
-  estoque: "Estoque",
-  montagem: "Montagem",
-  qualidade: "Qualidade",
-  representante: "Representante",
-  consultora: "Consultora",
-};
+export { ROLE_LABEL };
 
 export { ModuleAvailabilityBadge as StateBadge };
 
-/** Moldura global do Lardan OS: cabeçalho, busca e menu inferior flutuante. */
+/** Moldura global do Lardan Cloud: cabeçalho, busca e menu inferior flutuante. */
 export function AdminShell({
   email,
   children,
@@ -42,7 +32,6 @@ export function AdminShell({
   const rolesQuery = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles });
   const roles = rolesQuery.data ?? [];
   const [palette, setPalette] = useState(false);
-  const [menu, setMenu] = useState(false);
   const [mac, setMac] = useState(false);
 
   useEffect(() => {
@@ -64,8 +53,6 @@ export function AdminShell({
     void navigate({ to: "/acesso", replace: true });
   }
 
-  const initials = (email ?? "?").slice(0, 2).toUpperCase();
-
   return (
     <RolesContext.Provider value={roles}>
       <div className="min-h-screen bg-warm-ivory text-ledger-text">
@@ -74,9 +61,15 @@ export function AdminShell({
             to="/admin"
             className="flex h-16 w-[220px] shrink-0 items-center gap-3 bg-ink px-5 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-champagne lg:w-[320px]"
           >
-            <img src={logo.url} alt="Lardan" className="h-6 w-auto" />
-            <span className="hidden text-[0.625rem] tracking-[0.28em] text-warm-ivory/60 sm:block">
-              OS
+            <span className="relative flex items-center">
+              <span
+                aria-hidden
+                className="absolute -inset-x-4 -inset-y-3 rounded-full bg-white/55 blur-xl"
+              />
+              <img src={logo.url} alt="Lardan" className="relative h-7 w-auto drop-shadow-[0_0_10px_rgba(255,255,255,0.65)]" />
+            </span>
+            <span className="hidden text-[0.625rem] tracking-[0.28em] text-warm-ivory/70 sm:block">
+              CLOUD
             </span>
           </Link>
 
@@ -112,38 +105,8 @@ export function AdminShell({
             <Bell className="size-4" />
           </button>
 
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setMenu((v) => !v)}
-              className="flex items-center gap-2 rounded-[10px] border border-line-soft px-2 py-1.5 text-left"
-            >
-              <span className="grid size-7 place-items-center rounded-lg bg-ink text-[0.625rem] text-warm-ivory">
-                {initials}
-              </span>
-              <span className="hidden min-w-0 sm:block">
-                <span className="block max-w-36 truncate text-xs text-ledger-text">
-                  {email ?? "Conta"}
-                </span>
-                <span className="block text-[0.625rem] text-ledger-muted">
-                  {roles.length ? roles.map((r) => ROLE_LABEL[r]).join(" · ") : "Sem papel"}
-                </span>
-              </span>
-              <ChevronDown aria-hidden className="size-3.5 text-ledger-muted" />
-            </button>
-            {menu && (
-              <div className="absolute right-0 top-[calc(100%+8px)] w-56 rounded-xl border border-line-soft bg-surface p-2 shadow-xl">
-                <p className="px-2 py-1 text-[0.6875rem] text-ledger-muted">{email}</p>
-                <button
-                  type="button"
-                  onClick={sair}
-                  className="mt-1 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-ledger-text hover:bg-surface-muted"
-                >
-                  <LogOut aria-hidden className="size-4" /> Sair
-                </button>
-              </div>
-            )}
-          </div>
+          <UserMenu email={email} roles={roles} onSignOut={() => void sair()} />
+
         </header>
 
         <main className="mx-auto min-w-0 max-w-[1600px] px-5 pb-40 pt-8 md:px-8">{children}</main>

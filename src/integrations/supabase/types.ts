@@ -774,29 +774,38 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
+          display_name: string | null
           email: string | null
           full_name: string | null
           id: string
           is_active: boolean
+          job_title: string | null
           phone: string | null
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string | null
           full_name?: string | null
           id: string
           is_active?: boolean
+          job_title?: string | null
           phone?: string | null
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           is_active?: boolean
+          job_title?: string | null
           phone?: string | null
           updated_at?: string
         }
@@ -1001,11 +1010,14 @@ export type Database = {
       ensure_profile: {
         Args: never
         Returns: {
+          avatar_url: string | null
           created_at: string
+          display_name: string | null
           email: string | null
           full_name: string | null
           id: string
           is_active: boolean
+          job_title: string | null
           phone: string | null
           updated_at: string
         }

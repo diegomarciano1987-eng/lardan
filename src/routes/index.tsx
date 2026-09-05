@@ -66,7 +66,7 @@ function HomePage() {
         mobileImage={pulseirasMobileAsset}
         imageAlt="Pulseira Lardan em ouro rosé sobre onda de vidro"
         enterFrom="right"
-        align="right"
+        align="left"
       />
       <CategoryGuillotine
         title="Brincos"

@@ -20,12 +20,12 @@ export function ModuleAvailabilityBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border bg-surface px-2 py-0.5 text-[0.6875rem] tracking-[0.08em] uppercase",
+        "inline-flex items-center gap-1.5 rounded-lg border bg-surface px-2.5 py-1 text-[0.7rem] font-semibold tracking-[0.1em] uppercase shadow-sm",
         cls,
         className,
       )}
     >
-      <Icon aria-hidden className="size-3" />
+      <Icon aria-hidden className="size-3.5" />
       {STATE_LABEL[state]}
     </span>
   );
@@ -44,7 +44,7 @@ export function StatusBadge({ tone, children }: { tone: StatusTone; children: Re
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border px-2 py-0.5 text-[0.6875rem] uppercase tracking-[0.08em]",
+        "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.1em] shadow-sm",
         map[tone],
       )}
     >

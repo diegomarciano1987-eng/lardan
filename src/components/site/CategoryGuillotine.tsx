@@ -103,15 +103,37 @@ export function CategoryGuillotine({
           }}
         />
 
-        {/* Leitura do texto sobre a imagem */}
+        {/* Leitura do texto sobre a imagem — desktop: véu marfim */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 hidden md:block"
           style={{
             background:
               align === "left"
                 ? "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.88) 0%, oklch(0.985 0.006 80 / 0.45) 40%, transparent 65%)"
                 : "linear-gradient(270deg, oklch(0.985 0.006 80 / 0.88) 0%, oklch(0.985 0.006 80 / 0.45) 40%, transparent 65%)",
+            opacity: textIn,
+          }}
+        />
+        {/* Mobile: véu escuro suave atrás do texto, com desfoque */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 md:hidden"
+          style={{
+            background:
+              align === "left"
+                ? "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.32) 55%, transparent 85%)"
+                : "linear-gradient(270deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.32) 55%, transparent 85%)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            maskImage:
+              align === "left"
+                ? "linear-gradient(90deg, black 0%, black 55%, transparent 85%)"
+                : "linear-gradient(270deg, black 0%, black 55%, transparent 85%)",
+            WebkitMaskImage:
+              align === "left"
+                ? "linear-gradient(90deg, black 0%, black 55%, transparent 85%)"
+                : "linear-gradient(270deg, black 0%, black 55%, transparent 85%)",
             opacity: textIn,
           }}
         />

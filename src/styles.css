@@ -312,14 +312,64 @@
   padding-bottom: 1px;
 }
 
-/* Área administrativa: hierarquia mais robusta sem perder o charme editorial. */
-.admin-scope h1,
-.admin-scope h2,
-.admin-scope h3 {
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
+/* Área administrativa: hierarquia mais robusta sem perder o charme editorial.
+   Vale para todas as telas do painel, inclusive as que ainda serão criadas. */
 .admin-scope {
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-weight: 400;
+}
+
+.admin-scope h1,
+.admin-scope h2,
+.admin-scope h3,
+.admin-scope h4 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ledger-text);
+}
+
+/* Corpo de texto do painel: nunca fino, nunca lavado. */
+.admin-scope p,
+.admin-scope li,
+.admin-scope dt,
+.admin-scope dd,
+.admin-scope th,
+.admin-scope td,
+.admin-scope label,
+.admin-scope button,
+.admin-scope a,
+.admin-scope input,
+.admin-scope select,
+.admin-scope textarea {
+  font-weight: 500;
+}
+
+.admin-scope strong,
+.admin-scope dt,
+.admin-scope th {
+  font-weight: 600;
+}
+
+/* Rótulos auxiliares mantêm o charme, mas com contraste legível. */
+.admin-scope .text-ledger-muted {
+  color: var(--color-ledger-muted);
+}
+
+/* Campos de formulário do painel com presença de cartão. */
+.admin-scope input:not([type="checkbox"]):not([type="radio"]),
+.admin-scope textarea,
+.admin-scope select,
+.admin-scope [role="combobox"] {
+  border-color: var(--color-line);
+  box-shadow: 0 1px 2px rgb(24 24 23 / 0.05);
+}
+
+.admin-scope input:focus-visible,
+.admin-scope textarea:focus-visible,
+.admin-scope select:focus-visible,
+.admin-scope [role="combobox"]:focus-visible {
+  border-color: var(--color-champagne);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-champagne) 30%, transparent);
+  outline: none;
 }

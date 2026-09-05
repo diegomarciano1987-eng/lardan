@@ -33,24 +33,41 @@ export function SessaoSemijoias() {
           height={928}
         />
 
-        {/* Lâminas de vidro que se retraem em cascata do centro para as bordas */}
+        {/* Lâminas de vidro que se retraem em cascata do centro para as bordas.
+            Bordas laterais esfumaçadas e sombra sob a borda móvel: acabamento
+            fino, sem degraus visíveis entre lâminas vizinhas. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 flex">
           {Array.from({ length: SLATS }).map((_, i) => {
             const fromCenter = Math.abs(i - (SLATS - 1) / 2) / ((SLATS - 1) / 2);
             const start = 0.06 * (1 - fromCenter);
             const t = easeOut(phase(reveal, start, start + 0.9));
+            const lead = 1 - t;
+            const moving = t * (1 - t) * 4; // 0 parada → 1 no meio do movimento
             return (
               <div
                 key={i}
-                className="h-full flex-1 origin-top bg-background"
+                className="-mx-px h-full flex-1 origin-top bg-background"
                 style={{
-                  transform: `scaleY(${1 - t}) translateY(${t * -6}%)`,
+                  transform: `scaleY(${lead}) translateY(${t * -6}%)`,
                   opacity: 1 - t * 0.15,
+                  filter: `blur(${moving * 3.5}px)`,
+                  boxShadow: `0 ${30 * lead}px ${40 * lead}px -12px oklch(0.32 0.02 30 / ${0.32 * lead * (0.4 + 0.6 * moving)})`,
                 }}
               />
             );
           })}
         </div>
+
+        {/* Véu de sombra suave que acompanha a frente de abertura */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-[38vh]"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(0.985 0.006 80 / 0.9) 0%, transparent 100%)",
+            opacity: 1 - reveal,
+          }}
+        />
 
         {/* Leitura do texto sobre a imagem */}
         <div

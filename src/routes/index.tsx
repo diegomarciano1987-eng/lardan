@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { HeroScroll } from "@/components/site/HeroScroll";
 import { SessaoSemijoias } from "@/components/site/SessaoSemijoias";
-import { CategoryScene } from "@/components/site/CategoryScene";
+import { CategoryGuillotine } from "@/components/site/CategoryGuillotine";
 import aneisAsset from "@/assets/lardan-categoria-aneis.jpg.asset.json";
 import colaresAsset from "@/assets/lardan-categoria-colares.jpg.asset.json";
 import pulseirasAsset from "@/assets/lardan-categoria-pulseiras.png.asset.json";
@@ -37,33 +37,37 @@ function HomePage() {
       <HeroScroll />
       <SessaoSemijoias />
 
-      <CategoryScene
+      <CategoryGuillotine
         title="Anéis"
         to="/semijoias/aneis"
         image={aneisAsset}
         imageAlt="Anel de semijoia Lardan sobre onda de vidro transparente"
+        enterFrom="right"
         align="left"
       />
-      <CategoryScene
+      <CategoryGuillotine
         title="Colares"
         to="/semijoias/colares"
         image={colaresAsset}
         imageAlt="Colar de semijoia Lardan sobre formas de vidro"
-        align="left"
+        enterFrom="left"
+        align="right"
       />
-      <CategoryScene
+      <CategoryGuillotine
         title="Pulseiras"
         to="/semijoias"
         image={pulseirasAsset}
         imageAlt="Pulseira Lardan em ouro rosé sobre onda de vidro"
+        enterFrom="right"
         align="left"
       />
-      <CategoryScene
+      <CategoryGuillotine
         title="Brincos"
         to="/semijoias"
         image={brincosAsset}
         imageAlt="Brinco Lardan em ouro rosé sobre base de vidro"
-        align="left"
+        enterFrom="left"
+        align="right"
       />
 
       {/* Convite Seja Lardan */}

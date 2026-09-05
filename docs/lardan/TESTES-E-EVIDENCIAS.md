@@ -52,3 +52,8 @@ qualquer leitura das tabelas `leads` e `contact_requests`.
 `Public/Signed-In Users Can Execute SECURITY DEFINER Function` — esperados: são as duas
 funções de envio público e as funções de verificação de permissão usadas pelas políticas
 de RLS. Nenhuma delas expõe dados de terceiros.
+
+## Fundos mobile + véu de leitura (392x719, Playwright, dpr 2)
+- Hero, sessão 2 e categorias Anéis/Pulseiras/Brincos usam imagens verticais exclusivas no celular via `<picture>` + `media="(max-width: 767px)"`; Colares segue com a imagem padrão (sem versão mobile enviada).
+- Textos no mobile: véu escuro suave (gradiente oklch 0.18) com backdrop blur de 6px e máscara de fade, ativado junto com o texto; cor do texto clara só no mobile (`max-md:text-background`).
+- Desktop inalterado (véu marfim original). Console sem erros.

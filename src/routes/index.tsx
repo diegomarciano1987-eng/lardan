@@ -7,6 +7,9 @@ import aneisAsset from "@/assets/lardan-categoria-aneis.jpg.asset.json";
 import colaresAsset from "@/assets/lardan-categoria-colares.jpg.asset.json";
 import pulseirasAsset from "@/assets/lardan-categoria-pulseiras.png.asset.json";
 import brincosAsset from "@/assets/lardan-categoria-brincos.png.asset.json";
+import aneisMobileAsset from "@/assets/lardan-mobile-aneis.png.asset.json";
+import pulseirasMobileAsset from "@/assets/lardan-mobile-pulseiras.png.asset.json";
+import brincosMobileAsset from "@/assets/lardan-mobile-brincos.png.asset.json";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -41,6 +44,7 @@ function HomePage() {
         title="Anéis"
         to="/semijoias/aneis"
         image={aneisAsset}
+        mobileImage={aneisMobileAsset}
         imageAlt="Anel de semijoia Lardan sobre onda de vidro transparente"
         enterFrom="right"
         align="left"
@@ -57,6 +61,7 @@ function HomePage() {
         title="Pulseiras"
         to="/semijoias"
         image={pulseirasAsset}
+        mobileImage={pulseirasMobileAsset}
         imageAlt="Pulseira Lardan em ouro rosé sobre onda de vidro"
         enterFrom="right"
         align="left"
@@ -65,6 +70,7 @@ function HomePage() {
         title="Brincos"
         to="/semijoias"
         image={brincosAsset}
+        mobileImage={brincosMobileAsset}
         imageAlt="Brinco Lardan em ouro rosé sobre base de vidro"
         enterFrom="left"
         align="right"

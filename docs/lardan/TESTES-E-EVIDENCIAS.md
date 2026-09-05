@@ -88,3 +88,11 @@ de RLS. Nenhuma delas expõe dados de terceiros.
 - Busca global (Ctrl+K): consulta ao servidor, retorno honesto "Nenhum resultado autorizado" quando não há registro.
 - Menu inferior flutuante: desktop com módulos por papel; mobile 390x844 com 5 itens + "Mais módulos".
 - Rotas novas: `/admin/site` e `/admin/configuracoes`. Tipos verificados sem erro.
+
+## L3.5 — Central de Cadastros (Playwright 1280x1800, sessão Master)
+- `/admin/cadastros`: cabeçalho, busca global, 4 indicadores reais e 5 grupos renderizados; cartões sem rota exibem "Em implantação". Console sem erros.
+- `/admin/cadastros/pessoas`: listagem paginada pelo servidor com o registro real LC-000001 (Diego Marciano), documento mascarado, filtros premium (SmartSelect) de tipo, papel e situação.
+- `/admin/cadastros/pessoas/$id`: ficha aberta pela linha da tabela; 10 abas; completude 60% com lista honesta do que falta (Documento, Endereço); papéis Colaborador e Usuária do sistema já vinculados pelo backfill.
+- `registry_counts` respondeu 200 com números reais (1 pessoa, 1 produto, 1 usuário, 1 incompleto).
+- Typecheck `bunx tsgo --noEmit` limpo.
+- Não testado ainda: conversão candidata→consultora ponta a ponta (não há candidatura real na base) e perfis não-Master (só existe o Master).

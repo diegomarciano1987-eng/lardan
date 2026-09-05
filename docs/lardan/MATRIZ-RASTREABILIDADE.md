@@ -57,3 +57,16 @@ Cada ação separada por ponto e vírgula na MASTER-SPEC recebe ACTION-ID própr
 - FIN-01/LIQUIDAR — etapa posterior; nenhum botão ativo hoje.
 - PDV-18/SANGRIA — futuro; caixa aberto, permissão, valor, motivo, aprovação; não executar hoje.
 Padrão: recurso desativado no servidor **e** na UI; "Ver especificação" funciona; nenhuma ação finge sucesso; nunca HTTP 200 com falso sucesso.
+
+## Central de Cadastros (L3.5)
+| ID | Ação | Rota | Papéis | Regra | Estado |
+| --- | --- | --- | --- | --- | --- |
+| CAD-01 | CENTRAL-ABRIR | /admin/cadastros | registry.view | Porta única; nunca duplica registros | ATIVO |
+| CAD-02 | BUSCA-UNIFICADA | /admin/cadastros | registry.view | Servidor, debounce, cancelamento, RLS, mascaramento | ATIVO |
+| CAD-03 | PESSOA-LISTAR | /admin/cadastros/pessoas | registry.view | Paginação/ordenação/filtro no servidor | ATIVO |
+| CAD-04 | PESSOA-CRIAR/EDITAR | /admin/cadastros/pessoas/$id | registry.manage | Rascunho sem obrigatoriedade comercial; código automático | ATIVO |
+| CAD-05 | PAPEL-VINCULAR | /admin/cadastros/pessoas/$id | registry.manage | Papéis acumuláveis sem duplicar pessoa | ATIVO |
+| CAD-06 | DOC-VER-COMPLETO | /admin/cadastros/pessoas/$id | registry.doc.view | Validação apenas estrutural; nunca afirma titularidade | ATIVO |
+| CAD-07 | PIX-VER | /admin/cadastros/pessoas/$id | registry.finance.view | Marketing e Estoque nunca veem | ATIVO |
+| CAD-08 | DUPLICIDADE-REVISAR | /admin/cadastros/duplicidades | registry.view | Aponta, nunca funde automaticamente | ATIVO |
+| CAD-09 | CANDIDATA-CONVERTER | /admin/leads | registry.manage + leads.view | Transacional, idempotente, sem login automático, auditado | ATIVO |

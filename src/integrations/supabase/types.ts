@@ -53,6 +53,7 @@ export type Database = {
           is_active: boolean
           legal_name: string
           notes: string | null
+          party_id: string | null
           state_registration: string | null
           tax_id: string | null
           trade_name: string | null
@@ -67,6 +68,7 @@ export type Database = {
           is_active?: boolean
           legal_name: string
           notes?: string | null
+          party_id?: string | null
           state_registration?: string | null
           tax_id?: string | null
           trade_name?: string | null
@@ -81,13 +83,22 @@ export type Database = {
           is_active?: boolean
           legal_name?: string
           notes?: string | null
+          party_id?: string | null
           state_registration?: string | null
           tax_id?: string | null
           trade_name?: string | null
           uf?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "business_entities_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       categories: {
         Row: {
@@ -201,6 +212,156 @@ export type Database = {
           },
         ]
       }
+      consultant_profiles: {
+        Row: {
+          audience: string | null
+          availability: string | null
+          bank_info: string | null
+          block_reason: string | null
+          created_at: string
+          credit_limit_cents: number | null
+          cycle: string | null
+          experience: string | null
+          financial_status: string | null
+          goal_cents: number | null
+          joined_at: string | null
+          level: string | null
+          origin: string | null
+          party_id: string
+          pix_holder: string | null
+          pix_holder_doc: string | null
+          pix_key: string | null
+          pix_key_type: string | null
+          region: string | null
+          representative_party_id: string | null
+          restricted_notes: string | null
+          sale_profile: string | null
+          sponsor_party_id: string | null
+          updated_at: string
+          wallet: string | null
+        }
+        Insert: {
+          audience?: string | null
+          availability?: string | null
+          bank_info?: string | null
+          block_reason?: string | null
+          created_at?: string
+          credit_limit_cents?: number | null
+          cycle?: string | null
+          experience?: string | null
+          financial_status?: string | null
+          goal_cents?: number | null
+          joined_at?: string | null
+          level?: string | null
+          origin?: string | null
+          party_id: string
+          pix_holder?: string | null
+          pix_holder_doc?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          region?: string | null
+          representative_party_id?: string | null
+          restricted_notes?: string | null
+          sale_profile?: string | null
+          sponsor_party_id?: string | null
+          updated_at?: string
+          wallet?: string | null
+        }
+        Update: {
+          audience?: string | null
+          availability?: string | null
+          bank_info?: string | null
+          block_reason?: string | null
+          created_at?: string
+          credit_limit_cents?: number | null
+          cycle?: string | null
+          experience?: string | null
+          financial_status?: string | null
+          goal_cents?: number | null
+          joined_at?: string | null
+          level?: string | null
+          origin?: string | null
+          party_id?: string
+          pix_holder?: string | null
+          pix_holder_doc?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          region?: string | null
+          representative_party_id?: string | null
+          restricted_notes?: string | null
+          sale_profile?: string | null
+          sponsor_party_id?: string | null
+          updated_at?: string
+          wallet?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_sponsor_party_id_fkey"
+            columns: ["sponsor_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_points: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean
+          kind: Database["public"]["Enums"]["contact_kind"]
+          label: string | null
+          party_id: string
+          updated_at: string
+          value: string
+          value_norm: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          kind: Database["public"]["Enums"]["contact_kind"]
+          label?: string | null
+          party_id: string
+          updated_at?: string
+          value: string
+          value_norm?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          kind?: Database["public"]["Enums"]["contact_kind"]
+          label?: string | null
+          party_id?: string
+          updated_at?: string
+          value?: string
+          value_norm?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_points_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_requests: {
         Row: {
           contact_channel: string
@@ -305,6 +466,7 @@ export type Database = {
           marketing_consent: boolean
           motivation: string | null
           no_number: boolean
+          party_id: string | null
           postal_code: string | null
           privacy_version: string
           protocol: string
@@ -331,6 +493,7 @@ export type Database = {
           marketing_consent?: boolean
           motivation?: string | null
           no_number?: boolean
+          party_id?: string | null
           postal_code?: string | null
           privacy_version: string
           protocol?: string
@@ -357,6 +520,7 @@ export type Database = {
           marketing_consent?: boolean
           motivation?: string | null
           no_number?: boolean
+          party_id?: string | null
           postal_code?: string | null
           privacy_version?: string
           protocol?: string
@@ -369,7 +533,15 @@ export type Database = {
           utm?: Json
           whatsapp?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "leads_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       locations: {
         Row: {
@@ -557,6 +729,222 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      parties: {
+        Row: {
+          avatar_url: string | null
+          birth_date: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          display_name: string | null
+          doc: string | null
+          doc_digits: string | null
+          doc_verified_at: string | null
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["party_kind"]
+          legal_name: string | null
+          marital_status: string | null
+          notes: string | null
+          profession: string | null
+          rg: string | null
+          rg_issuer: string | null
+          social_name: string | null
+          status: Database["public"]["Enums"]["party_status"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          birth_date?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          display_name?: string | null
+          doc?: string | null
+          doc_digits?: string | null
+          doc_verified_at?: string | null
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["party_kind"]
+          legal_name?: string | null
+          marital_status?: string | null
+          notes?: string | null
+          profession?: string | null
+          rg?: string | null
+          rg_issuer?: string | null
+          social_name?: string | null
+          status?: Database["public"]["Enums"]["party_status"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          birth_date?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          display_name?: string | null
+          doc?: string | null
+          doc_digits?: string | null
+          doc_verified_at?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["party_kind"]
+          legal_name?: string | null
+          marital_status?: string | null
+          notes?: string | null
+          profession?: string | null
+          rg?: string | null
+          rg_issuer?: string | null
+          social_name?: string | null
+          status?: Database["public"]["Enums"]["party_status"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      party_addresses: {
+        Row: {
+          city: string | null
+          complement: string | null
+          created_at: string
+          district: string | null
+          id: string
+          is_primary: boolean
+          label: string | null
+          no_number: boolean
+          party_id: string
+          postal_code: string | null
+          reference: string | null
+          street: string | null
+          street_number: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          complement?: string | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          is_primary?: boolean
+          label?: string | null
+          no_number?: boolean
+          party_id: string
+          postal_code?: string | null
+          reference?: string | null
+          street?: string | null
+          street_number?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          complement?: string | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          is_primary?: boolean
+          label?: string | null
+          no_number?: boolean
+          party_id?: string
+          postal_code?: string | null
+          reference?: string | null
+          street?: string | null
+          street_number?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_addresses_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      party_links: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          party_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          party_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          party_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_links_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      party_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          ended_at: string | null
+          id: string
+          notes: string | null
+          party_id: string
+          role: Database["public"]["Enums"]["party_role_kind"]
+          started_at: string | null
+          status: Database["public"]["Enums"]["party_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          party_id: string
+          role: Database["public"]["Enums"]["party_role_kind"]
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["party_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          party_id?: string
+          role?: Database["public"]["Enums"]["party_role_kind"]
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["party_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_roles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_media: {
         Row: {
@@ -782,6 +1170,7 @@ export type Database = {
           id: string
           is_active: boolean
           job_title: string | null
+          party_id: string | null
           phone: string | null
           updated_at: string
         }
@@ -794,6 +1183,7 @@ export type Database = {
           id: string
           is_active?: boolean
           job_title?: string | null
+          party_id?: string | null
           phone?: string | null
           updated_at?: string
         }
@@ -806,10 +1196,19 @@ export type Database = {
           id?: string
           is_active?: boolean
           job_title?: string | null
+          party_id?: string | null
           phone?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_price_list: {
         Row: {
@@ -900,6 +1299,7 @@ export type Database = {
           is_active: boolean
           name: string
           notes: string | null
+          party_id: string | null
           phone: string | null
           tax_id: string | null
           trade_name: string | null
@@ -916,6 +1316,7 @@ export type Database = {
           is_active?: boolean
           name: string
           notes?: string | null
+          party_id?: string | null
           phone?: string | null
           tax_id?: string | null
           trade_name?: string | null
@@ -932,13 +1333,22 @@ export type Database = {
           is_active?: boolean
           name?: string
           notes?: string | null
+          party_id?: string | null
           phone?: string | null
           tax_id?: string | null
           trade_name?: string | null
           uf?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -1028,6 +1438,10 @@ export type Database = {
       can_manage_leads: { Args: { _user_id: string }; Returns: boolean }
       can_view_costs: { Args: { _user_id: string }; Returns: boolean }
       claim_master_role: { Args: never; Returns: boolean }
+      convert_lead_to_consultant: {
+        Args: { _lead_id: string; _party_id?: string }
+        Returns: string
+      }
       ensure_profile: {
         Args: never
         Returns: {
@@ -1039,6 +1453,7 @@ export type Database = {
           id: string
           is_active: boolean
           job_title: string | null
+          party_id: string | null
           phone: string | null
           updated_at: string
         }
@@ -1076,6 +1491,7 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      mask_doc: { Args: { _doc: string }; Returns: string }
       master_exists: { Args: never; Returns: boolean }
       my_capabilities: {
         Args: never
@@ -1087,6 +1503,17 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      only_digits: { Args: { _v: string }; Returns: string }
+      registry_counts: { Args: never; Returns: Json }
+      registry_duplicates: {
+        Args: { _limit?: number }
+        Returns: {
+          chave: string
+          ids: string[]
+          motivo: string
+          quantidade: number
+        }[]
+      }
       resync_all_public_prices: { Args: never; Returns: number }
       revoke_role: {
         Args: {
@@ -1094,6 +1521,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      search_registry: {
+        Args: { _limit?: number; _term: string }
+        Returns: {
+          entity_id: string
+          grupo: string
+          rota: string
+          selo: string
+          subtitulo: string
+          tipo: string
+          titulo: string
+        }[]
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
@@ -1150,6 +1589,7 @@ export type Database = {
         | "qualidade"
         | "representante"
         | "consultora"
+      contact_kind: "whatsapp" | "telefone" | "email"
       content_status: "rascunho" | "revisao" | "publicado" | "arquivado"
       lead_status:
         | "novo"
@@ -1159,6 +1599,28 @@ export type Database = {
         | "recusado"
         | "arquivado"
       location_type: "deposito" | "loja" | "maleta" | "transito" | "outro"
+      party_kind: "pessoa" | "organizacao"
+      party_role_kind:
+        | "candidata"
+        | "consultora"
+        | "revendedora"
+        | "representante"
+        | "colaborador"
+        | "cliente"
+        | "fornecedor"
+        | "entidade_grupo"
+        | "transportadora"
+        | "prestador"
+        | "custodiante"
+        | "usuario"
+      party_status:
+        | "rascunho"
+        | "em_analise"
+        | "aprovado"
+        | "ativo"
+        | "bloqueado"
+        | "inativo"
+        | "desligado"
       request_status: "novo" | "em_atendimento" | "respondido" | "arquivado"
     }
     CompositeTypes: {
@@ -1300,6 +1762,7 @@ export const Constants = {
         "representante",
         "consultora",
       ],
+      contact_kind: ["whatsapp", "telefone", "email"],
       content_status: ["rascunho", "revisao", "publicado", "arquivado"],
       lead_status: [
         "novo",
@@ -1310,6 +1773,30 @@ export const Constants = {
         "arquivado",
       ],
       location_type: ["deposito", "loja", "maleta", "transito", "outro"],
+      party_kind: ["pessoa", "organizacao"],
+      party_role_kind: [
+        "candidata",
+        "consultora",
+        "revendedora",
+        "representante",
+        "colaborador",
+        "cliente",
+        "fornecedor",
+        "entidade_grupo",
+        "transportadora",
+        "prestador",
+        "custodiante",
+        "usuario",
+      ],
+      party_status: [
+        "rascunho",
+        "em_analise",
+        "aprovado",
+        "ativo",
+        "bloqueado",
+        "inativo",
+        "desligado",
+      ],
       request_status: ["novo", "em_atendimento", "respondido", "arquivado"],
     },
   },

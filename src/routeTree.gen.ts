@@ -22,7 +22,6 @@ import { Route as SemijoiasAneisRouteImport } from './routes/semijoias.aneis'
 import { Route as SemijoiasColaresRouteImport } from './routes/semijoias.colares'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
-import { Route as AuthenticatedAdminCadastrosRouteImport } from './routes/_authenticated/admin/cadastros'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminEstoqueRouteImport } from './routes/_authenticated/admin/estoque'
 import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_authenticated/admin/financeiro'
@@ -97,12 +96,6 @@ const AuthenticatedAdminAuditoriaRoute =
     path: '/auditoria',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
-const AuthenticatedAdminCadastrosRoute =
-  AuthenticatedAdminCadastrosRouteImport.update({
-    id: '/cadastros',
-    path: '/cadastros',
-    getParentRoute: () => AuthenticatedAdminRouteRoute,
-  } as any)
 const AuthenticatedAdminConfiguracoesRoute =
   AuthenticatedAdminConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -162,7 +155,6 @@ export interface FileRoutesByFullPath {
   '/semijoias/aneis': typeof SemijoiasAneisRoute
   '/semijoias/colares': typeof SemijoiasColaresRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
-  '/admin/cadastros': typeof AuthenticatedAdminCadastrosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
@@ -184,7 +176,6 @@ export interface FileRoutesByTo {
   '/semijoias/aneis': typeof SemijoiasAneisRoute
   '/semijoias/colares': typeof SemijoiasColaresRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
-  '/admin/cadastros': typeof AuthenticatedAdminCadastrosRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
@@ -209,7 +200,6 @@ export interface FileRoutesById {
   '/semijoias/aneis': typeof SemijoiasAneisRoute
   '/semijoias/colares': typeof SemijoiasColaresRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
-  '/_authenticated/admin/cadastros': typeof AuthenticatedAdminCadastrosRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
@@ -234,7 +224,6 @@ export interface FileRouteTypes {
     | '/semijoias/aneis'
     | '/semijoias/colares'
     | '/admin/auditoria'
-    | '/admin/cadastros'
     | '/admin/configuracoes'
     | '/admin/estoque'
     | '/admin/financeiro'
@@ -256,7 +245,6 @@ export interface FileRouteTypes {
     | '/semijoias/aneis'
     | '/semijoias/colares'
     | '/admin/auditoria'
-    | '/admin/cadastros'
     | '/admin/configuracoes'
     | '/admin/estoque'
     | '/admin/financeiro'
@@ -280,7 +268,6 @@ export interface FileRouteTypes {
     | '/semijoias/aneis'
     | '/semijoias/colares'
     | '/_authenticated/admin/auditoria'
-    | '/_authenticated/admin/cadastros'
     | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/estoque'
     | '/_authenticated/admin/financeiro'
@@ -396,13 +383,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAuditoriaRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/admin/cadastros': {
-      id: '/_authenticated/admin/cadastros'
-      path: '/cadastros'
-      fullPath: '/admin/cadastros'
-      preLoaderRoute: typeof AuthenticatedAdminCadastrosRouteImport
-      parentRoute: typeof AuthenticatedAdminRouteRoute
-    }
     '/_authenticated/admin/configuracoes': {
       id: '/_authenticated/admin/configuracoes'
       path: '/configuracoes'
@@ -464,7 +444,6 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
-  AuthenticatedAdminCadastrosRoute: typeof AuthenticatedAdminCadastrosRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminEstoqueRoute: typeof AuthenticatedAdminEstoqueRoute
   AuthenticatedAdminFinanceiroRoute: typeof AuthenticatedAdminFinanceiroRoute
@@ -479,7 +458,6 @@ interface AuthenticatedAdminRouteRouteChildren {
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
     AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
-    AuthenticatedAdminCadastrosRoute: AuthenticatedAdminCadastrosRoute,
     AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
     AuthenticatedAdminEstoqueRoute: AuthenticatedAdminEstoqueRoute,
     AuthenticatedAdminFinanceiroRoute: AuthenticatedAdminFinanceiroRoute,

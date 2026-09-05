@@ -64,9 +64,9 @@ export function AdminShell({
             <span className="relative flex items-center">
               <span
                 aria-hidden
-                className="absolute -inset-x-3 -inset-y-2 rounded-full bg-white/25 blur-lg"
+                className="absolute -inset-x-4 -inset-y-3 rounded-full bg-white/55 blur-xl"
               />
-              <img src={logo.url} alt="Lardan" className="relative h-7 w-auto" />
+              <img src={logo.url} alt="Lardan" className="relative h-7 w-auto drop-shadow-[0_0_10px_rgba(255,255,255,0.65)]" />
             </span>
             <span className="hidden text-[0.625rem] tracking-[0.28em] text-warm-ivory/70 sm:block">
               CLOUD

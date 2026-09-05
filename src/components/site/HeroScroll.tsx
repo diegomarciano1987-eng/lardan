@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BRAND } from "@/lib/brand";
 import heroAsset from "@/assets/lardan-hero-vidro.jpg.asset.json";
+import heroMobileAsset from "@/assets/lardan-mobile-hero.png.asset.json";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 
@@ -72,6 +73,8 @@ export function HeroScroll() {
         {/* Fundo-base: onda de vidro original */}
         <img
           src={heroAsset.url}
+          srcSet={`${heroMobileAsset.url} 750w, ${heroAsset.url} 1664w`}
+          sizes="(max-width: 767px) 100vw, 100vw"
           alt=""
           aria-hidden
           className="absolute inset-0 h-full w-full object-cover"

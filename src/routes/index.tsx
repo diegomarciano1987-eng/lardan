@@ -91,7 +91,7 @@ function HomePage() {
           </p>
           <Link
             to="/seja-lardan"
-            className="mt-10 inline-flex items-center border-b border-primary/50 pb-2 text-[0.75rem] tracking-[0.22em] uppercase text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+            className="btn-premium mt-10"
           >
             Quero me candidatar
           </Link>

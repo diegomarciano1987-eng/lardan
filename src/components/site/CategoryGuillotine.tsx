@@ -161,7 +161,7 @@ export function CategoryGuillotine({
             />
             <Link
               to={to}
-              className="mt-8 inline-flex items-center border-b border-primary/50 pb-2 text-[0.75rem] tracking-[0.22em] uppercase text-foreground max-md:!text-background transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              className="btn-premium mt-8"
               style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
               tabIndex={ctaIn > 0.5 ? 0 : -1}
             >

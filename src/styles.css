@@ -201,6 +201,34 @@
   border: 1px solid color-mix(in oklab, var(--rose) 18%, transparent);
 }
 
+@utility btn-premium {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-rose);
+  color: var(--ivory);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 28px -10px oklch(0.47 0.06 25 / 0.45);
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 34px -10px oklch(0.47 0.06 25 / 0.55);
+    filter: brightness(1.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 4px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

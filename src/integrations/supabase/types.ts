@@ -44,6 +44,51 @@ export type Database = {
         }
         Relationships: []
       }
+      business_entities: {
+        Row: {
+          city: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          legal_name: string
+          notes: string | null
+          state_registration: string | null
+          tax_id: string | null
+          trade_name: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          legal_name: string
+          notes?: string | null
+          state_registration?: string | null
+          tax_id?: string | null
+          trade_name?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          legal_name?: string
+          notes?: string | null
+          state_registration?: string | null
+          tax_id?: string | null
+          trade_name?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -326,6 +371,65 @@ export type Database = {
         }
         Relationships: []
       }
+      locations: {
+        Row: {
+          address: string | null
+          business_entity_id: string | null
+          city: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["location_type"]
+          name: string
+          notes: string | null
+          responsible_user_id: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          business_entity_id?: string | null
+          city?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["location_type"]
+          name: string
+          notes?: string | null
+          responsible_user_id?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          business_entity_id?: string | null
+          city?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["location_type"]
+          name?: string
+          notes?: string | null
+          responsible_user_id?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_business_entity_id_fkey"
+            columns: ["business_entity_id"]
+            isOneToOne: false
+            referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_assets: {
         Row: {
           alt: string
@@ -495,11 +599,14 @@ export type Database = {
       }
       product_variants: {
         Row: {
+          barcode: string | null
           color: string | null
           created_at: string
           id: string
           is_active: boolean
+          is_default: boolean
           label: string
+          legacy_code: string | null
           position: number
           price_cents: number | null
           product_id: string
@@ -508,11 +615,14 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          barcode?: string | null
           color?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
+          is_default?: boolean
           label: string
+          legacy_code?: string | null
           position?: number
           price_cents?: number | null
           product_id: string
@@ -521,11 +631,14 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          barcode?: string | null
           color?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
+          is_default?: boolean
           label?: string
+          legacy_code?: string | null
           position?: number
           price_cents?: number | null
           product_id?: string
@@ -545,6 +658,7 @@ export type Database = {
       }
       products: {
         Row: {
+          business_entity_id: string | null
           care_instructions: string | null
           category_id: string | null
           collection_id: string | null
@@ -552,6 +666,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          legacy_code: string | null
           material: string | null
           measurements: string | null
           name: string
@@ -565,11 +680,13 @@ export type Database = {
           short_description: string | null
           slug: string
           status: Database["public"]["Enums"]["content_status"]
+          supplier_id: string | null
           updated_at: string
           warranty_text: string | null
           weight_grams: number | null
         }
         Insert: {
+          business_entity_id?: string | null
           care_instructions?: string | null
           category_id?: string | null
           collection_id?: string | null
@@ -577,6 +694,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          legacy_code?: string | null
           material?: string | null
           measurements?: string | null
           name: string
@@ -590,11 +708,13 @@ export type Database = {
           short_description?: string | null
           slug: string
           status?: Database["public"]["Enums"]["content_status"]
+          supplier_id?: string | null
           updated_at?: string
           warranty_text?: string | null
           weight_grams?: number | null
         }
         Update: {
+          business_entity_id?: string | null
           care_instructions?: string | null
           category_id?: string | null
           collection_id?: string | null
@@ -602,6 +722,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          legacy_code?: string | null
           material?: string | null
           measurements?: string | null
           name?: string
@@ -615,11 +736,19 @@ export type Database = {
           short_description?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["content_status"]
+          supplier_id?: string | null
           updated_at?: string
           warranty_text?: string | null
           weight_grams?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "products_business_entity_id_fkey"
+            columns: ["business_entity_id"]
+            isOneToOne: false
+            referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_category_id_fkey"
             columns: ["category_id"]
@@ -632,6 +761,13 @@ export type Database = {
             columns: ["collection_id"]
             isOneToOne: false
             referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -723,6 +859,57 @@ export type Database = {
         }
         Relationships: []
       }
+      suppliers: {
+        Row: {
+          city: string | null
+          contact_name: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          phone: string | null
+          tax_id: string | null
+          trade_name: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          phone?: string | null
+          tax_id?: string | null
+          trade_name?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          tax_id?: string | null
+          trade_name?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -747,13 +934,69 @@ export type Database = {
         }
         Relationships: []
       }
+      variant_costs: {
+        Row: {
+          cost_cents: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          effective_from: string
+          id: string
+          note: string | null
+          supplier_id: string | null
+          updated_at: string
+          variant_id: string
+        }
+        Insert: {
+          cost_cents: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          effective_from?: string
+          id?: string
+          note?: string | null
+          supplier_id?: string | null
+          updated_at?: string
+          variant_id: string
+        }
+        Update: {
+          cost_cents?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          effective_from?: string
+          id?: string
+          note?: string | null
+          supplier_id?: string | null
+          updated_at?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "variant_costs_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "variant_costs_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      can_manage_catalog: { Args: { _user_id: string }; Returns: boolean }
       can_manage_content: { Args: { _user_id: string }; Returns: boolean }
       can_manage_leads: { Args: { _user_id: string }; Returns: boolean }
+      can_view_costs: { Args: { _user_id: string }; Returns: boolean }
       claim_master_role: { Args: never; Returns: boolean }
       ensure_profile: {
         Args: never
@@ -869,6 +1112,7 @@ export type Database = {
         | "aprovado"
         | "recusado"
         | "arquivado"
+      location_type: "deposito" | "loja" | "maleta" | "transito" | "outro"
       request_status: "novo" | "em_atendimento" | "respondido" | "arquivado"
     }
     CompositeTypes: {
@@ -1019,6 +1263,7 @@ export const Constants = {
         "recusado",
         "arquivado",
       ],
+      location_type: ["deposito", "loja", "maleta", "transito", "outro"],
       request_status: ["novo", "em_atendimento", "respondido", "arquivado"],
     },
   },

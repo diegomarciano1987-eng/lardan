@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { MoreHorizontal, Lock, Clock3, X } from "lucide-react";
 import { ADMIN_MODULES, type AdminModule } from "@/lib/admin-modules";
+import wordmark from "@/assets/lardan-wordmark.png.asset.json";
 import { hasAny, type AppRole } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -113,11 +114,8 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
         className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(18px,env(safe-area-inset-bottom))]"
       >
         <div className="flex w-full max-w-[94vw] items-center gap-2 rounded-[24px] border border-white/8 bg-ink px-3 py-2 shadow-[0_18px_40px_-16px_rgba(24,24,23,0.65)]">
-          <Link
-            to="/admin"
-            className="hidden shrink-0 px-2 text-[0.6875rem] tracking-[0.3em] text-warm-ivory/70 lg:block"
-          >
-            LARDAN
+          <Link to="/admin" className="hidden shrink-0 px-2 lg:block" aria-label="Lardan — visão geral">
+            <img src={wordmark.url} alt="Lardan" className="h-4 w-auto opacity-80" />
           </Link>
 
           {/* Desktop: todos os módulos com rolagem controlada */}

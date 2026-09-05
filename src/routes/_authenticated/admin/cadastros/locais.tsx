@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute as _unused } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { CadastroPage } from "@/components/admin/CadastroPage";
 import { StatusBadge } from "@/components/admin/ui";
@@ -16,7 +15,6 @@ export const Route = createFileRoute("/_authenticated/admin/cadastros/locais")({
   }),
 });
 
-void _unused;
 
 interface Local {
   id: string;

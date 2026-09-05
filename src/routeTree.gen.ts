@@ -33,6 +33,7 @@ import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminCadastrosIndexRouteImport } from './routes/_authenticated/admin/cadastros/index'
 import { Route as AuthenticatedAdminCadastrosEntidadesRouteImport } from './routes/_authenticated/admin/cadastros/entidades'
 import { Route as AuthenticatedAdminCadastrosFornecedoresRouteImport } from './routes/_authenticated/admin/cadastros/fornecedores'
+import { Route as AuthenticatedAdminCadastrosLocaisRouteImport } from './routes/_authenticated/admin/cadastros/locais'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -163,6 +164,12 @@ const AuthenticatedAdminCadastrosFornecedoresRoute =
     path: '/cadastros/fornecedores',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminCadastrosLocaisRoute =
+  AuthenticatedAdminCadastrosLocaisRouteImport.update({
+    id: '/cadastros/locais',
+    path: '/cadastros/locais',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/cadastros/entidades': typeof AuthenticatedAdminCadastrosEntidadesRoute
   '/admin/cadastros/fornecedores': typeof AuthenticatedAdminCadastrosFornecedoresRoute
+  '/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
   '/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
 }
 export interface FileRoutesByTo {
@@ -211,6 +219,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/cadastros/entidades': typeof AuthenticatedAdminCadastrosEntidadesRoute
   '/admin/cadastros/fornecedores': typeof AuthenticatedAdminCadastrosFornecedoresRoute
+  '/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
   '/admin/cadastros': typeof AuthenticatedAdminCadastrosIndexRoute
 }
 export interface FileRoutesById {
@@ -238,6 +247,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/cadastros/entidades': typeof AuthenticatedAdminCadastrosEntidadesRoute
   '/_authenticated/admin/cadastros/fornecedores': typeof AuthenticatedAdminCadastrosFornecedoresRoute
+  '/_authenticated/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
   '/_authenticated/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
 }
 export interface FileRouteTypes {
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/cadastros/entidades'
     | '/admin/cadastros/fornecedores'
+    | '/admin/cadastros/locais'
     | '/admin/cadastros/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/cadastros/entidades'
     | '/admin/cadastros/fornecedores'
+    | '/admin/cadastros/locais'
     | '/admin/cadastros'
   id:
     | '__root__'
@@ -315,6 +327,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/cadastros/entidades'
     | '/_authenticated/admin/cadastros/fornecedores'
+    | '/_authenticated/admin/cadastros/locais'
     | '/_authenticated/admin/cadastros/'
   fileRoutesById: FileRoutesById
 }
@@ -499,6 +512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCadastrosFornecedoresRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/cadastros/locais': {
+      id: '/_authenticated/admin/cadastros/locais'
+      path: '/cadastros/locais'
+      fullPath: '/admin/cadastros/locais'
+      preLoaderRoute: typeof AuthenticatedAdminCadastrosLocaisRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
@@ -515,6 +535,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminCadastrosEntidadesRoute: typeof AuthenticatedAdminCadastrosEntidadesRoute
   AuthenticatedAdminCadastrosFornecedoresRoute: typeof AuthenticatedAdminCadastrosFornecedoresRoute
+  AuthenticatedAdminCadastrosLocaisRoute: typeof AuthenticatedAdminCadastrosLocaisRoute
   AuthenticatedAdminCadastrosIndexRoute: typeof AuthenticatedAdminCadastrosIndexRoute
 }
 
@@ -534,6 +555,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminCadastrosEntidadesRoute,
     AuthenticatedAdminCadastrosFornecedoresRoute:
       AuthenticatedAdminCadastrosFornecedoresRoute,
+    AuthenticatedAdminCadastrosLocaisRoute:
+      AuthenticatedAdminCadastrosLocaisRoute,
     AuthenticatedAdminCadastrosIndexRoute:
       AuthenticatedAdminCadastrosIndexRoute,
   }

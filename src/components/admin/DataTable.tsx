@@ -58,14 +58,14 @@ export function DataTable<T>({
 
   return (
     <div className="ledger-panel flex min-w-0 flex-col">
-      <div className="flex flex-wrap items-center gap-3 border-b border-line-soft px-4 py-3">
+      <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-3.5">
         <label className="relative flex-1 min-w-56">
           <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ledger-muted" />
           <input
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="h-11 w-full rounded-[10px] border border-line bg-surface pr-3 pl-9 text-sm text-ledger-text outline-none placeholder:text-ledger-muted focus:border-champagne"
+            className="h-11 w-full rounded-[10px] border border-line bg-surface pr-3 pl-9 text-sm font-medium text-ledger-text shadow-sm outline-none placeholder:font-normal placeholder:text-ledger-muted focus:border-champagne focus:ring-2 focus:ring-champagne/25"
           />
         </label>
         {filters}
@@ -89,12 +89,12 @@ export function DataTable<T>({
         <div className="min-w-0 overflow-x-auto">
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b border-line-soft">
+              <tr className="border-b border-line bg-surface-muted/60">
                 {columns.map((c) => (
                   <th
                     key={c.key}
                     className={cn(
-                      "px-4 py-2.5 text-left text-[0.6875rem] font-normal tracking-[0.12em] text-ledger-muted uppercase",
+                      "px-4 py-3 text-left text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase",
                       c.className,
                     )}
                   >
@@ -109,12 +109,12 @@ export function DataTable<T>({
                   key={rowKey(row)}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   className={cn(
-                    "border-b border-line-soft last:border-0",
+                    "border-b border-line-soft last:border-0 transition-colors",
                     onRowClick && "cursor-pointer hover:bg-surface-muted",
                   )}
                 >
                   {columns.map((c) => (
-                    <td key={c.key} className={cn("px-4 py-3 text-ledger-text", c.className)}>
+                    <td key={c.key} className={cn("px-4 py-3.5 font-medium text-ledger-text", c.className)}>
                       {c.render(row)}
                     </td>
                   ))}
@@ -125,8 +125,8 @@ export function DataTable<T>({
         </div>
       )}
 
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line-soft px-4 py-3">
-        <p className="num text-xs text-ledger-muted">
+      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3.5">
+        <p className="num text-xs font-semibold text-ledger-muted">
           {total === 0 ? "Sem registros" : `${primeiro}–${ultimo} de ${total}`}
         </p>
         <div className="flex items-center gap-2">

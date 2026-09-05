@@ -20,12 +20,12 @@ export function ModuleAvailabilityBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border bg-surface px-2 py-0.5 text-[0.6875rem] tracking-[0.08em] uppercase",
+        "inline-flex items-center gap-1.5 rounded-lg border bg-surface px-2.5 py-1 text-[0.7rem] font-semibold tracking-[0.1em] uppercase shadow-sm",
         cls,
         className,
       )}
     >
-      <Icon aria-hidden className="size-3" />
+      <Icon aria-hidden className="size-3.5" />
       {STATE_LABEL[state]}
     </span>
   );
@@ -44,7 +44,7 @@ export function StatusBadge({ tone, children }: { tone: StatusTone; children: Re
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg border px-2 py-0.5 text-[0.6875rem] uppercase tracking-[0.08em]",
+        "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.1em] shadow-sm",
         map[tone],
       )}
     >
@@ -67,7 +67,7 @@ export function Panel({
   return (
     <section className={cn("ledger-panel flex min-w-0 flex-col", className)}>
       {(title || action) && (
-        <header className="flex items-center justify-between gap-3 border-b border-line-soft px-5 py-3">
+        <header className="flex items-center justify-between gap-3 border-b border-line-soft px-5 py-3.5">
           {title ? <h2 className="ledger-eyebrow">{title}</h2> : <span />}
           {action}
         </header>
@@ -89,14 +89,14 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-6 border-b border-line-soft pb-6">
+    <header className="flex flex-wrap items-end justify-between gap-6 border-b border-line pb-7">
       <div className="min-w-0">
         <p className="ledger-eyebrow">{eyebrow}</p>
-        <h1 className="mt-2 text-[2.375rem] leading-[1.1] text-ledger-text md:text-[2.75rem]">
+        <h1 className="mt-2 text-[2.375rem] leading-[1.08] font-semibold text-ledger-text md:text-[2.875rem]">
           {title}
         </h1>
         {description && (
-          <p className="mt-2 max-w-2xl text-sm text-ledger-muted">{description}</p>
+          <p className="mt-2 max-w-2xl text-[0.9375rem] font-medium text-ledger-muted">{description}</p>
         )}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -115,11 +115,11 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-start gap-2 px-5 py-10">
-      <p className="inline-flex items-center gap-2 text-sm text-ledger-text">
-        <Info aria-hidden className="size-4 text-ledger-muted" />
+      <p className="inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-ledger-text">
+        <Info aria-hidden className="size-4 text-bronze" />
         {title}
       </p>
-      <p className="max-w-xl text-sm text-ledger-muted">{description}</p>
+      <p className="max-w-xl text-sm font-medium leading-relaxed text-ledger-muted">{description}</p>
       {action}
     </div>
   );

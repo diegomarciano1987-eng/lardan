@@ -243,34 +243,37 @@
 @theme {
   --color-ink: #181817;
   --color-graphite: #242321;
-  --color-warm-ivory: #f7f4ef;
+  --color-warm-ivory: #f5f1ea;
   --color-surface: #fffdf9;
-  --color-surface-muted: #f1ede7;
-  --color-line: #ddd6cd;
-  --color-line-soft: #ebe6df;
+  --color-surface-muted: #efe9e0;
+  --color-line: #cfc5b7;
+  --color-line-soft: #e2dacd;
   --color-champagne: #c5a17e;
   --color-champagne-soft: #e5d2c1;
-  --color-bronze: #8a624b;
-  --color-ledger-text: #1c1b1a;
-  --color-ledger-muted: #706b65;
-  --color-success: #2f8f69;
-  --color-warning: #bd812a;
-  --color-danger: #c45151;
-  --color-info: #4e7898;
+  --color-bronze: #7c5540;
+  --color-ledger-text: #171512;
+  --color-ledger-muted: #57514a;
+  --color-success: #267a58;
+  --color-warning: #a96f1c;
+  --color-danger: #b23f3f;
+  --color-info: #3f6a8c;
 }
 
 @utility ledger-panel {
   background: var(--color-surface);
-  border: 1px solid var(--color-line-soft);
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgb(24 24 23 / 0.04);
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  box-shadow:
+    0 1px 2px rgb(24 24 23 / 0.05),
+    0 16px 36px -22px rgb(60 45 35 / 0.28);
 }
 
 @utility ledger-eyebrow {
-  font-size: 0.6875rem;
-  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-ledger-muted);
+  color: var(--color-bronze);
 }
 
 @utility num {
@@ -286,11 +289,15 @@
   background: var(--color-surface);
   padding: 0.5rem 0.875rem;
   font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--color-ledger-text);
-  transition: background-color 160ms ease;
+  box-shadow: 0 1px 2px rgb(24 24 23 / 0.06);
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 
   &:hover {
     background: var(--color-surface-muted);
+    box-shadow: 0 3px 8px -3px rgb(24 24 23 / 0.18);
+    transform: translateY(-1px);
   }
 }
 
@@ -299,7 +306,71 @@
   align-items: center;
   gap: 0.375rem;
   font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--color-bronze);
-  border-bottom: 1px solid color-mix(in oklab, var(--color-bronze) 40%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--color-bronze) 45%, transparent);
   padding-bottom: 1px;
+}
+
+/* Área administrativa: hierarquia mais robusta sem perder o charme editorial.
+   Vale para todas as telas do painel, inclusive as que ainda serão criadas. */
+.admin-scope {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-weight: 400;
+}
+
+.admin-scope h1,
+.admin-scope h2,
+.admin-scope h3,
+.admin-scope h4 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ledger-text);
+}
+
+/* Corpo de texto do painel: nunca fino, nunca lavado.
+   O guarda :not([class*="font-"]) respeita pesos definidos manualmente. */
+.admin-scope p:not([class*="font-"]),
+.admin-scope li:not([class*="font-"]),
+.admin-scope dt:not([class*="font-"]),
+.admin-scope dd:not([class*="font-"]),
+.admin-scope th:not([class*="font-"]),
+.admin-scope td:not([class*="font-"]),
+.admin-scope label:not([class*="font-"]),
+.admin-scope button:not([class*="font-"]),
+.admin-scope a:not([class*="font-"]),
+.admin-scope input,
+.admin-scope select,
+.admin-scope textarea {
+  font-weight: 500;
+}
+
+.admin-scope strong,
+.admin-scope dt:not([class*="font-"]),
+.admin-scope th:not([class*="font-"]) {
+  font-weight: 600;
+}
+
+/* Rótulos auxiliares mantêm o charme, mas com contraste legível. */
+.admin-scope .text-ledger-muted {
+  color: var(--color-ledger-muted);
+}
+
+/* Campos de formulário do painel com presença de cartão. */
+.admin-scope input:not([type="checkbox"]):not([type="radio"]),
+.admin-scope textarea,
+.admin-scope select,
+.admin-scope [role="combobox"] {
+  border-color: var(--color-line);
+  box-shadow: 0 1px 2px rgb(24 24 23 / 0.05);
+}
+
+.admin-scope input:focus-visible,
+.admin-scope textarea:focus-visible,
+.admin-scope select:focus-visible,
+.admin-scope [role="combobox"]:focus-visible {
+  border-color: var(--color-champagne);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-champagne) 30%, transparent);
+  outline: none;
 }

@@ -59,7 +59,7 @@ async function search(term: string, roles: AppRole[]): Promise<SearchHit[]> {
         id: `var-${v.id}`,
         group: "SKUs",
         icon: Boxes,
-        title: v.sku,
+        title: v.sku ?? v.label ?? "Variante",
         context: v.label ?? "Variante",
         to: "/admin/cadastros",
       });

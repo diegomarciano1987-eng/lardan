@@ -238,3 +238,41 @@
   }
 }
 
+
+/* ===== LARDAN OS — tokens da área administrativa (Livro-Razão Visual) ===== */
+@theme {
+  --color-ink: #181817;
+  --color-graphite: #242321;
+  --color-warm-ivory: #f7f4ef;
+  --color-surface: #fffdf9;
+  --color-surface-muted: #f1ede7;
+  --color-line: #ddd6cd;
+  --color-line-soft: #ebe6df;
+  --color-champagne: #c5a17e;
+  --color-champagne-soft: #e5d2c1;
+  --color-bronze: #8a624b;
+  --color-ledger-text: #1c1b1a;
+  --color-ledger-muted: #706b65;
+  --color-success: #2f8f69;
+  --color-warning: #bd812a;
+  --color-danger: #c45151;
+  --color-info: #4e7898;
+}
+
+@utility ledger-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line-soft);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgb(24 24 23 / 0.04);
+}
+
+@utility ledger-eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ledger-muted);
+}
+
+@utility num {
+  font-variant-numeric: tabular-nums;
+}

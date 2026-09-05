@@ -22,7 +22,11 @@ export type Capability =
   | "audit.view"
   | "partners.view"
   | "partners.manage"
-  | "leads.view";
+  | "leads.view"
+  | "registry.view"
+  | "registry.manage"
+  | "registry.doc.view"
+  | "registry.finance.view";
 
 /** Capacidades do usuário logado, decididas pelo banco (my_capabilities). */
 export async function fetchMyCapabilities(): Promise<Capability[]> {

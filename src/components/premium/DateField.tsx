@@ -111,6 +111,12 @@ export function DateField({
               mode="single"
               locale={ptBR}
               captionLayout="dropdown"
+            formatters={{
+              formatMonthDropdown: (d) => format(d, "LLLL", { locale: ptBR }),
+            }}
+              formatters={{
+                formatMonthDropdown: (d) => format(d, "LLLL", { locale: ptBR }),
+              }}
               startMonth={new Date(fromYear, 0)}
               endMonth={new Date(toYear, 11)}
               defaultMonth={value ?? new Date()}

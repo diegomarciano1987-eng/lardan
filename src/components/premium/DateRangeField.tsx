@@ -115,6 +115,9 @@ export function DateRangeField({
             mode="range"
             locale={ptBR}
             captionLayout="dropdown"
+            formatters={{
+              formatMonthDropdown: (d) => format(d, "LLLL", { locale: ptBR }),
+            }}
             numberOfMonths={1}
             startMonth={new Date(fromYear, 0)}
             endMonth={new Date(toYear, 11)}

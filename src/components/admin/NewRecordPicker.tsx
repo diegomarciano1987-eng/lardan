@@ -83,7 +83,7 @@ export function NewRecordPicker() {
 
   return (
     <>
-      <button type="button" className="btn-premium" onClick={() => setAberto(true)}>
+      <button type="button" className="admin-btn-primary" onClick={() => setAberto(true)}>
         <Plus aria-hidden className="size-4" /> Novo cadastro
       </button>
 

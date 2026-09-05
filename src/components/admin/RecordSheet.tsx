@@ -146,7 +146,7 @@ export function RecordSheet({
             <button
               type="submit"
               disabled={salvando}
-              className="btn-premium disabled:opacity-50"
+              className="admin-btn-primary"
             >
               {salvando && <Loader2 aria-hidden className="size-4 animate-spin" />}
               Salvar

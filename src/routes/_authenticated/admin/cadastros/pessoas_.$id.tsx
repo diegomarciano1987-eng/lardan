@@ -197,7 +197,7 @@ function FichaPessoa() {
           <>
             {sujo && <StatusBadge tone="warning">Alterações não salvas</StatusBadge>}
             {podeEditar && (
-              <button type="button" className="btn-premium" disabled={salvar.isPending} onClick={() => salvar.mutate()}>
+              <button type="button" className="admin-btn-primary" disabled={salvar.isPending} onClick={() => salvar.mutate()}>
                 {salvar.isPending && <Loader2 aria-hidden className="size-4 animate-spin" />} Salvar
               </button>
             )}
@@ -683,7 +683,7 @@ function EnderecoForm({
         <div className="md:col-span-2">
           <button
             type="button"
-            className="btn-premium"
+            className="admin-btn-primary"
             onClick={async () => {
               await saveAddress(partyId, a as never);
               await onSaved();
@@ -758,7 +758,7 @@ function ConsultoraForm({
           <div className="md:col-span-2">
             <button
               type="button"
-              className="btn-premium"
+              className="admin-btn-primary"
               onClick={async () => {
                 await saveConsultant(partyId, p);
                 await onSaved();

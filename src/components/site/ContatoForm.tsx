@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRIVACY_VERSION, captureUtm, entryUrl } from "@/lib/privacy";
+import { SmartSelect } from "@/components/premium/SmartSelect";
 
 
 type Args = Record<string, unknown>;
@@ -15,6 +16,7 @@ export function ContatoForm() {
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);
+  const [canal, setCanal] = useState("WhatsApp");
 
   async function enviar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -73,11 +75,18 @@ export function ContatoForm() {
           <label htmlFor="contact_channel" className="brand-eyebrow mb-2 block">
             Canal de retorno
           </label>
-          <select id="contact_channel" name="contact_channel" required defaultValue="WhatsApp" className={field}>
-            <option value="WhatsApp">WhatsApp</option>
-            <option value="E-mail">E-mail</option>
-            <option value="Telefone">Telefone</option>
-          </select>
+          <SmartSelect
+            id="contact_channel"
+            name="contact_channel"
+            required
+            value={canal}
+            onChange={setCanal}
+            options={[
+              { value: "WhatsApp", label: "WhatsApp" },
+              { value: "E-mail", label: "E-mail" },
+              { value: "Telefone", label: "Telefone" },
+            ]}
+          />
         </div>
         <div>
           <label htmlFor="contact_value" className="brand-eyebrow mb-2 block">

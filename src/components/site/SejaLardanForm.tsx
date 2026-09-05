@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRIVACY_VERSION, captureUtm, entryUrl } from "@/lib/privacy";
+import { SmartSelect } from "@/components/premium/SmartSelect";
 
 
 type Args = Record<string, unknown>;
@@ -29,6 +30,7 @@ export function SejaLardanForm() {
   const [erro, setErro] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);
   const [semNumero, setSemNumero] = useState(false);
+  const [uf, setUf] = useState("");
 
   async function enviar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -152,16 +154,17 @@ export function SejaLardanForm() {
           </div>
           <div>
             <Label htmlFor="uf">UF</Label>
-            <select id="uf" name="uf" required defaultValue="" className={field}>
-              <option value="" disabled>
-                —
-              </option>
-              {UFS.map((uf) => (
-                <option key={uf} value={uf}>
-                  {uf}
-                </option>
-              ))}
-            </select>
+            <SmartSelect
+              id="uf"
+              name="uf"
+              required
+              value={uf}
+              onChange={setUf}
+              placeholder="UF"
+              searchPlaceholder="Buscar estado..."
+              searchThreshold={1}
+              options={UFS.map((u) => ({ value: u, label: u }))}
+            />
           </div>
         </div>
       </fieldset>

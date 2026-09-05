@@ -58,6 +58,19 @@ function Campo({
     </label>
   );
 }
+function isoParaData(v?: string | null): Date | undefined {
+  if (!v) return undefined;
+  const d = new Date(`${v}T12:00:00`);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+}
+
+function dataParaIso(d?: Date): string | null {
+  if (!d) return null;
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
 
 const inputCls =
   "h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm font-medium text-ledger-text shadow-sm outline-none placeholder:font-normal placeholder:text-ledger-muted focus:border-champagne focus:ring-2 focus:ring-champagne/25";

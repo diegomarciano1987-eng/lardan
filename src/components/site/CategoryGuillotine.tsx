@@ -7,6 +7,8 @@ interface CategoryGuillotineProps {
   title: string;
   to: string;
   image: { url: string };
+  /** Versão vertical da imagem, usada só em telas de celular. */
+  mobileImage?: { url: string };
   imageAlt: string;
   /** Lado por onde a guilhotina entra: "right" = da direita para a esquerda. */
   enterFrom: "left" | "right";
@@ -25,6 +27,7 @@ export function CategoryGuillotine({
   title,
   to,
   image,
+  mobileImage,
   imageAlt,
   enterFrom,
   align = "left",
@@ -43,15 +46,20 @@ export function CategoryGuillotine({
   return (
     <div ref={ref} className="relative h-[240vh]">
       <section className="sticky top-0 h-screen overflow-hidden bg-background">
-        <img
-          src={image.url}
-          alt={imageAlt}
-          loading="lazy"
-          width={1664}
-          height={928}
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ transform: `scale(${imgScale})` }}
-        />
+        <picture>
+          {mobileImage && (
+            <source media="(max-width: 767px)" srcSet={mobileImage.url} />
+          )}
+          <img
+            src={image.url}
+            alt={imageAlt}
+            loading="lazy"
+            width={1664}
+            height={928}
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ transform: `scale(${imgScale})` }}
+          />
+        </picture>
 
         {/* Lâminas que deslizam na horizontal, em cascata, com acabamento suave */}
         <div aria-hidden className="pointer-events-none absolute inset-0 flex">

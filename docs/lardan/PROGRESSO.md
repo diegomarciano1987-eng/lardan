@@ -16,7 +16,7 @@
   1. E-mail(s) autorizado(s) ao primeiro Master precisam ser gravados em `security.bootstrap` antes de alguém assumir — aguardando definição do usuário.
   2. Imagens do site público vindas do bucket `media` exigirão URL assinada ou liberação de buckets públicos (Settings → Privacy & Security do workspace).
   3. Conteúdo institucional, catálogo real e dados empresariais pendentes (DECISOES-PENDENTES.md).
-- **Próxima ação segura**: L3.2 — shell administrativo por módulos (Visão geral, Cadastros, Estoque, Importação, Financeiro, Integrações, Sistema) com estado explícito (ativo/desativado/em implantação), gestão de usuários e papéis, filtros na auditoria. Módulos sem dados: "nenhum registro", nunca número fictício.
+- **Próxima ação segura**: L3.3 — cadastros-base no admin: produtos/variantes, categorias, coleções, fornecedores, locais e responsáveis, com upload de mídia, validação no servidor, auditoria e estados vazios reais.
 
 ## Comando de retomada
 

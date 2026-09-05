@@ -73,3 +73,12 @@ de RLS. Nenhuma delas expõe dados de terceiros.
 - API: funções internas (triggers, gen_protocol, set_updated_at, syncs) revogadas de PUBLIC/anon/authenticated. Superfície final: submit_lead + submit_contact_request (anon) e funções de perfil/papel (authenticated) — 15 warnings do linter esperados e justificados.
 - Views SECURITY DEFINER removidas (erro do linter eliminado na 2ª migração).
 - Storage: buckets media (privado, 10MB) e imports (privado, 50MB); policies por papel; tentativa de bucket público bloqueada pelo workspace (registrado em PROGRESSO.md).
+
+## L3.2 — Shell admin por módulos (Playwright, 1280x900, sessão autenticada)
+- /admin sem sessão redireciona para /acesso. OK.
+- Visão geral: contagens reais (0/0/0/0, sem números fictícios) e cartões de módulo com estado (ATIVO / EM IMPLANTAÇÃO / DESATIVADO). OK.
+- Usuários e papéis: lista real (Master diegomarciano1987@gmail.com), conceder/revogar papel, ativar/desativar. Antes do ajuste, a ficha (profile) não existia — corrigido com ensure_profile automático no beforeLoad autenticado. OK.
+- Auditoria: consulta com filtros (Master/Diretoria). OK.
+- Candidaturas e contatos: abas Candidaturas/Mensagens, estado vazio real. OK.
+- Estoque/Importação/Financeiro/Integrações: apenas especificação, nenhuma ação ativa. OK.
+- Console: sem erros de aplicação (apenas aviso React conhecido de state update fora do mount no fluxo de redirect).

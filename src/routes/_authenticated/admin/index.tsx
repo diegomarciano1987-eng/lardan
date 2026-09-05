@@ -177,7 +177,7 @@ function VisaoGeral() {
               conteúdo ou das candidaturas fica visível.
             </p>
             {masterQuery.data === false && (
-              <button type="button" onClick={assumirMaster} className="btn-premium">
+              <button type="button" onClick={assumirMaster} className="admin-btn-primary">
                 Assumir o perfil Master
               </button>
             )}

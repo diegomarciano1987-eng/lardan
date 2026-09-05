@@ -216,17 +216,17 @@
   text-transform: uppercase;
   box-shadow: 0 10px 28px -10px oklch(0.47 0.06 25 / 0.45);
   transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
-}
 
-@utility btn-premium:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 34px -10px oklch(0.47 0.06 25 / 0.55);
-  filter: brightness(1.06);
-}
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 34px -10px oklch(0.47 0.06 25 / 0.55);
+    filter: brightness(1.06);
+  }
 
-@utility btn-premium:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 4px;
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 4px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

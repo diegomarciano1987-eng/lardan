@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/admin/")({
   component: VisaoGeral,
   head: () => ({
     meta: [
-      { title: "Livro-Razão Visual — Administração LARDAN" },
+      { title: "Inteligência Operacional — Administração LARDAN" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -148,7 +148,7 @@ function VisaoGeral() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="VISÃO GERAL"
-        title="Livro-Razão Visual"
+        title="Inteligência Operacional"
         description="Movimentação de estoque, finanças e operações da rede em um só lugar."
         actions={
           <button

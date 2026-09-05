@@ -352,7 +352,7 @@ export async function findPossibleDuplicates(input: {
   if (c && c.length >= 5) {
     const norm = c.includes("@") ? c.toLowerCase() : onlyDigits(c);
     const { data } = await supabase.from("contact_points").select("party_id").eq("value_norm", norm).limit(10);
-    const ids = (data ?? []).map((r) => r.party_id).filter((id) => id !== input.ideNull);
+    const ids = (data ?? []).map((r) => r.party_id).filter((id) => id !== input.ignoreId);
     if (ids.length) {
       const { data: ps } = await supabase.from("parties").select("*").in("id", ids);
       for (const p of (ps ?? []) as unknown as Party[]) encontrados.set(p.id, p);

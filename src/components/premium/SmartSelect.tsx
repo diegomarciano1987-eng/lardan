@@ -12,13 +12,13 @@ export type SmartOption = {
 
 type Props = {
   options: SmartOption[];
-  value?: string;
+  value?: string | undefined;
   onChange: (value: string) => void;
   placeholder?: string;
   searchPlaceholder?: string;
   emptyLabel?: string;
-  id?: string;
-  name?: string;
+  id?: string | undefined;
+  name?: string | undefined;
   disabled?: boolean;
   required?: boolean;
   className?: string;

@@ -7,10 +7,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type Props = {
-  value?: Date;
+  value?: Date | undefined;
   onChange: (value?: Date) => void;
-  id?: string;
-  name?: string;
+  id?: string | undefined;
+  name?: string | undefined;
   placeholder?: string;
   disabled?: boolean;
   fromYear?: number;

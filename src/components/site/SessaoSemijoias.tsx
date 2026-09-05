@@ -41,16 +41,17 @@ export function SessaoSemijoias() {
             const fromCenter = Math.abs(i - (SLATS - 1) / 2) / ((SLATS - 1) / 2);
             const start = 0.06 * (1 - fromCenter);
             const t = easeOut(phase(reveal, start, start + 0.9));
+            const lead = 1 - t;
+            const moving = t * (1 - t) * 4; // 0 parada → 1 no meio do movimento
             return (
               <div
                 key={i}
-                className="-mx-px h-full flex-1 origin-top"
+                className="-mx-px h-full flex-1 origin-top bg-background"
                 style={{
-                  transform: `scaleY(${1 - t}) translateY(${t * -6}%)`,
+                  transform: `scaleY(${lead}) translateY(${t * -6}%)`,
                   opacity: 1 - t * 0.15,
-                  background:
-                    "linear-gradient(90deg, transparent 0%, var(--background) 18%, var(--background) 82%, transparent 100%)",
-                  boxShadow: `0 ${26 * (1 - t)}px ${34 * (1 - t)}px -14px oklch(0.32 0.02 30 / ${0.35 * (1 - t)})`,
+                  filter: `blur(${moving * 3.5}px)`,
+                  boxShadow: `0 ${30 * lead}px ${40 * lead}px -12px oklch(0.32 0.02 30 / ${0.32 * lead * (0.4 + 0.6 * moving)})`,
                 }}
               />
             );

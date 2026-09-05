@@ -64,16 +64,15 @@ export function CategoryGuillotine({
             const start = 0.08 * order;
             const t = easeOut(phase(reveal, start, start + 0.92));
             const lead = 1 - t; // 1 = lâmina cobrindo, 0 = fora da cena
+            const moving = t * (1 - t) * 4; // desfoque só enquanto desliza
             return (
               <div
                 key={i}
-                className="-mx-px h-full flex-1"
+                className="-mx-px h-full flex-1 bg-background"
                 style={{
                   transform: `translateX(${dir * t * 130}%)`,
                   opacity: lead < 0.02 ? 0 : 1,
-                  background:
-                    "linear-gradient(180deg, transparent 0%, var(--background) 14%, var(--background) 86%, transparent 100%)",
-                  boxShadow: `${dir * -30 * lead}px 0 ${44 * lead}px -10px oklch(0.32 0.02 30 / ${0.4 * lead})`,
+                  filter: `blur(${moving * 4}px)`,
                 }}
               />
             );

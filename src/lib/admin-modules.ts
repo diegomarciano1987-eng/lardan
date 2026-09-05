@@ -85,6 +85,17 @@ export const ADMIN_MODULES: AdminModule[] = [
   {
     slug: "cadastros",
     path: "/admin/cadastros",
+    label: "Cadastro",
+    description: "Porta única de pessoas, empresas, produtos e estruturas da operação.",
+    icon: ContactRound,
+    roles: [...CONTENT, "estoque", "financeiro", "suporte"],
+    capability: "registry.view",
+    state: "ativo",
+    spec: "Central de Cadastros: identidade canônica de pessoas e organizações, papéis acumuláveis, busca inteligente no servidor, detecção de duplicidades e conversão de candidata em consultora. Nunca duplica registros dos módulos especializados.",
+  },
+  {
+    slug: "produtos",
+    path: "/admin/cadastros/produtos",
     label: "Produtos",
     description: "Produtos, variantes, categorias, coleções e galeria de imagens.",
     icon: Tag,

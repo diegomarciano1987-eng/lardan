@@ -491,6 +491,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_media_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "public_products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       product_variants: {
@@ -539,6 +546,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "public_products"
             referencedColumns: ["id"]
           },
         ]
@@ -716,7 +730,115 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_product_variants: {
+        Row: {
+          color: string | null
+          id: string | null
+          label: string | null
+          position: number | null
+          price_cents: number | null
+          product_id: string | null
+          size: string | null
+          sku: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "public_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_products: {
+        Row: {
+          care_instructions: string | null
+          category_id: string | null
+          collection_id: string | null
+          description: string | null
+          id: string | null
+          material: string | null
+          measurements: string | null
+          name: string | null
+          plating: string | null
+          position: number | null
+          price_cents: number | null
+          price_is_public: boolean | null
+          published_at: string | null
+          seo_description: string | null
+          seo_title: string | null
+          short_description: string | null
+          slug: string | null
+          warranty_text: string | null
+          weight_grams: number | null
+        }
+        Insert: {
+          care_instructions?: string | null
+          category_id?: string | null
+          collection_id?: string | null
+          description?: string | null
+          id?: string | null
+          material?: string | null
+          measurements?: string | null
+          name?: string | null
+          plating?: string | null
+          position?: number | null
+          price_cents?: never
+          price_is_public?: boolean | null
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          short_description?: string | null
+          slug?: string | null
+          warranty_text?: string | null
+          weight_grams?: number | null
+        }
+        Update: {
+          care_instructions?: string | null
+          category_id?: string | null
+          collection_id?: string | null
+          description?: string | null
+          id?: string | null
+          material?: string | null
+          measurements?: string | null
+          name?: string | null
+          plating?: string | null
+          position?: number | null
+          price_cents?: never
+          price_is_public?: boolean | null
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          short_description?: string | null
+          slug?: string | null
+          warranty_text?: string | null
+          weight_grams?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       can_manage_content: { Args: { _user_id: string }; Returns: boolean }
@@ -741,6 +863,13 @@ export type Database = {
         }
       }
       gen_protocol: { Args: { prefix: string }; Returns: string }
+      grant_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_any_role: {
         Args: {
           _roles: Database["public"]["Enums"]["app_role"][]
@@ -760,6 +889,13 @@ export type Database = {
       my_roles: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      revoke_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       submit_contact_request: {
         Args: {

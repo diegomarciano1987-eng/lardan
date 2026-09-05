@@ -181,7 +181,7 @@ export function ImportProductsDialog({
 
         <div className="space-y-5">
           <div className="flex flex-wrap items-end gap-4">
-            <div>
+            <div className="w-64">
               <span className="text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase">
                 Planilha
               </span>

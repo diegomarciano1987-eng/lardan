@@ -159,11 +159,32 @@ function ProdutoDetalhe() {
     void qc.invalidateQueries({ queryKey: ["products"] });
   };
 
+  /** Publica/despublica sempre pela operação canônica do banco. */
+  const aplicarSituacao = async (status: string) => {
+    if (status === "publicado") {
+      const r = await publicarProdutos([id], "ficha do produto");
+      if (r.afetados === 0) {
+        const faltando = r.itens_rejeitados[0]?.faltando ?? (await impedimentosPublicacao(id));
+        throw new Error(
+          `Ainda não é possível publicar. Falta: ${faltando
+            .map((f) => ROTULO_IMPEDIMENTO[f] ?? f)
+            .join(", ")}.`,
+        );
+      }
+      return;
+    }
+    if (p?.status === "publicado") {
+      await despublicarProdutos([id], "ficha do produto", status as "rascunho" | "revisao" | "arquivado");
+      return;
+    }
+    await saveRecord("products", { status }, id);
+  };
+
   const salvarFicha = useMutation({
     mutationFn: async (v: RecordValues) => {
       const nome = String(v["name"] ?? "").trim();
       const status = String(v["status"] || "rascunho");
-      return saveRecord(
+      const gravado = await saveRecord(
         "products",
         {
           name: nome,
@@ -185,12 +206,11 @@ function ProdutoDetalhe() {
           seo_title: v["seo_title"] || null,
           seo_description: v["seo_description"] || null,
           is_featured: v["is_featured"] === true,
-          status,
-          published_at:
-            status === "publicado" ? (p?.published_at ?? new Date().toISOString()) : null,
         },
         id,
       );
+      if (status !== (p?.status ?? "rascunho")) await aplicarSituacao(status);
+      return gravado;
     },
     onSuccess: () => {
       toast.success("Ficha salva.");
@@ -200,18 +220,14 @@ function ProdutoDetalhe() {
   });
 
   const mudarStatus = useMutation({
-    mutationFn: async (status: string) =>
-      saveRecord(
-        "products",
-        { status, published_at: status === "publicado" ? new Date().toISOString() : null },
-        id,
-      ),
+    mutationFn: async (status: string) => aplicarSituacao(status),
     onSuccess: () => {
       toast.success("Situação atualizada.");
       invalidar();
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível atualizar."),
   });
+
 
   const salvarVariante = useMutation({
     mutationFn: async (v: RecordValues) => {

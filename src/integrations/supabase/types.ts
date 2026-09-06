@@ -2237,6 +2237,7 @@ export type Database = {
       parse_cents_any: { Args: { _v: string }; Returns: number }
       parse_decimal_any: { Args: { _v: string }; Returns: number }
       phone_canon: { Args: { v: string }; Returns: string }
+      product_publish_blockers: { Args: { _id: string }; Returns: string[] }
       public_catalog_browse: {
         Args: {
           _category_slug?: string
@@ -2311,6 +2312,10 @@ export type Database = {
       }
       public_category: { Args: { _slug: string }; Returns: Json }
       public_product: { Args: { _slug: string }; Returns: Json }
+      publish_products: {
+        Args: { _ids: string[]; _note?: string }
+        Returns: Json
+      }
       register_stock_movement:
         | {
             Args: {
@@ -2456,6 +2461,10 @@ export type Database = {
         Returns: string
       }
       sync_public_prices: { Args: { _product_id: string }; Returns: undefined }
+      unpublish_products: {
+        Args: { _ids: string[]; _note?: string; _para?: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role:

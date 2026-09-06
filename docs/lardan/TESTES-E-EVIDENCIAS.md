@@ -134,7 +134,7 @@ Método de cada linha declarado. Nada marcado como testado por leitura de códig
 | `SELECT` direto em `parties` e `stock_movements` pela API | EXECUTADO (pg_catalog) | Revogado para `anon` e `authenticated`; leitura só por RPC |
 | Custo em `variant_costs` | EXECUTADO (pg_policies) | Leitura condicionada a `can_view_costs` |
 | Funções administrativas abertas a visitante | EXECUTADO (linter + aclexplode) | 21 → 7; as 7 restantes são as legítimas (candidatura, contato e catálogo publicado) |
-| Papéis com acesso a custo / documento / identidade da rede | EXECUTADO (consulta) | custo: master, diretoria, financeiro, estoque · documento: master, diretoria, financeiro · rede: master, diretoria · consultora: nenhuma das três |
+| Papéis com acesso a custo / documento / identidade da rede | SUPERADO — ver CHECKPOINT VIGENTE no topo | A leitura desta rodada ainda incluía Estoque em custo; corrigido depois (Estoque perdeu `stock.cost.view` e `catalog.cost.view`) |
 | Máscara de CPF/CNPJ/CEP em `integration_lookups` | INSPECIONADO (trigger criado na migração) | Não exercitado ponta a ponta nesta sessão |
 | Telas `/admin/estoque` e `/admin/cadastros/pessoas` | NÃO TESTADO NO NAVEGADOR | Sem sessão disponível no ambiente de verificação (`signed_out`); typecheck limpo, mas a tela não foi exercitada |
 | Regressão completa da seção 10 do documento enviado | NÃO TESTADO | Depende de sessão autenticada |

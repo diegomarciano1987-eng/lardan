@@ -319,7 +319,7 @@ export function ImportProductsDialog({
               <button
                 type="button"
                 className="admin-btn-primary"
-                disabled={linhas.length === 0 || !localId || importar.isPending}
+                disabled={linhas.length === 0 || (modo === "entrada" && !localId) || importar.isPending}
                 onClick={() => importar.mutate()}
               >
                 <Upload aria-hidden className="mr-2 inline size-4" />

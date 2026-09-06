@@ -19,11 +19,14 @@ import sessao2MobileAsset from "@/assets/lardan-mobile-sessao2.png.asset.json";
 export function SessaoSemijoias() {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const tier = useDeviceTier();
-  const slats = tier === "leve" ? 8 : 14;
+  const leve = tier === "leve";
+  const slats = leve ? 8 : 18;
   const p = reduced ? 1 : progress;
 
   const reveal = phase(p, 0.02, 0.55);
   const imgScale = 1.28 - 0.28 * ease(phase(p, 0, 0.7));
+  // Desfoque da foto que se dissolve conforme as lâminas se retraem (só desktop).
+  const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0, 0.5))) * 8);
   const line = (start: number) => easeOut(phase(p, start, start + 0.16));
   const lines = [line(0.42), line(0.48), line(0.54), line(0.6), line(0.66)] as const;
   const emMovimento = reveal > 0.001 && reveal < 0.999;

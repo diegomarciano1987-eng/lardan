@@ -271,16 +271,23 @@ describe("Inteligência da Rede", () => {
   }
 
   it(
-    "escopo territorial: representante com e sem pessoa vinculada",
+    "escopo territorial: todo representante recebe escopo próprio de carteira",
     async () => {
+      // O banco vincula automaticamente uma pessoa a cada perfil, então não
+      // existe representante sem pessoa: o escopo nunca fica indefinido.
       for (const nome of ["representante", "representante_sem_party"]) {
         const r = await rpc(contas[nome]!.token, "network_scope", {});
-        registrar(nome, "escopo territorial (network_scope)", "sem erro de servidor", `HTTP ${r.status}`);
-        expect(r.status, nome).toBeLessThan(500);
+        const modo = (r.body as { modo?: string })?.modo ?? "-";
+        const pid = (r.body as { party_id?: string })?.party_id ?? null;
+        registrar(nome, "escopo territorial (network_scope)", "representante + carteira", `HTTP ${r.status} modo=${modo}`);
+        expect(r.status, nome).toBe(200);
+        expect(modo, nome).toBe("representante");
+        expect(pid, `${nome} sem carteira definida`).not.toBeNull();
       }
     },
     T,
   );
+
 
   it(
     "representante não enxerga a carteira de outro representante",

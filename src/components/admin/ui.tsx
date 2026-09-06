@@ -110,11 +110,13 @@ export function PageHeader({
 }) {
   return (
     <header className="flex flex-wrap items-end justify-between gap-6 border-b border-line pb-7">
-      <div className="min-w-0">
-        <p className="ledger-eyebrow">{eyebrow}</p>
-        <h1 className="mt-2 text-[2.375rem] leading-[1.08] font-semibold text-ledger-text md:text-[2.875rem]">
-          {title}
-        </h1>
+      <div className="flex min-w-0 items-start gap-4">
+        <BackButton className="mt-1" />
+        <div className="min-w-0">
+          <p className="ledger-eyebrow">{eyebrow}</p>
+          <h1 className="mt-2 text-[2.375rem] leading-[1.08] font-semibold text-ledger-text md:text-[2.875rem]">
+            {title}
+          </h1>
         {description && (
           <p className="mt-2 max-w-2xl text-[0.9375rem] font-medium text-ledger-muted">{description}</p>
         )}

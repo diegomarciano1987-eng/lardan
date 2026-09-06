@@ -35,7 +35,7 @@ export function PieceCard({
     <Link
       to="/produto/$slug"
       params={{ slug: peca.slug }}
-      state={contexto ? ({ voltarPara: contexto } as never) : undefined}
+      {...(contexto ? { state: { voltarPara: contexto } as never } : {})}
       className={cn(
         "group relative block focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-ring",
         escala === "discreta" && "opacity-95",

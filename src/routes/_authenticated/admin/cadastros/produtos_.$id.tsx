@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, ImagePlus, Plus, Star } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, ImagePlus, Plus, Star, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   PageHeader,
@@ -184,8 +184,10 @@ function ProdutoDetalhe() {
           price_is_public: v["price_is_public"] !== false,
           seo_title: v["seo_title"] || null,
           seo_description: v["seo_description"] || null,
+          is_featured: v["is_featured"] === true,
           status,
-          published_at: status === "publicado" ? new Date().toISOString() : null,
+          published_at:
+            status === "publicado" ? (p?.published_at ?? new Date().toISOString()) : null,
         },
         id,
       );
@@ -267,6 +269,63 @@ function ProdutoDetalhe() {
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível enviar."),
   });
 
+  /** Reescreve a ordem inteira: a primeira imagem é sempre a principal. */
+  const reordenar = useMutation({
+    mutationFn: async (ids: string[]) => {
+      for (let i = 0; i < ids.length; i++) {
+        const { error } = await supabase
+          .from("product_media")
+          .update({ position: i })
+          .eq("id", ids[i] as string);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => invalidar(),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível reordenar."),
+  });
+
+  const removerImagem = useMutation({
+    mutationFn: async (vinculoId: string) => {
+      const { error } = await supabase.from("product_media").delete().eq("id", vinculoId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Imagem removida do produto.");
+      invalidar();
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível remover."),
+  });
+
+  const salvarAlt = useMutation({
+    mutationFn: async ({ mediaId, alt }: { mediaId: string; alt: string }) => {
+      const { error } = await supabase.from("media_assets").update({ alt }).eq("id", mediaId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Descrição da imagem atualizada.");
+      invalidar();
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível salvar."),
+  });
+
+  const ordemAtual = (imagens.data ?? []).map((m) => m.id);
+  const moverImagem = (index: number, direcao: -1 | 1) => {
+    const destino = index + direcao;
+    if (destino < 0 || destino >= ordemAtual.length) return;
+    const nova = [...ordemAtual];
+    const a = nova[index] as string;
+    nova[index] = nova[destino] as string;
+    nova[destino] = a;
+    reordenar.mutate(nova);
+  };
+  const tornarPrincipal = (index: number) => {
+    if (index === 0) return;
+    const nova = [...ordemAtual];
+    const [alvo] = nova.splice(index, 1);
+    nova.unshift(alvo as string);
+    reordenar.mutate(nova);
+  };
+
   const p = produto.data;
 
   const fichaInicial = useMemo<RecordValues>(() => {
@@ -290,6 +349,7 @@ function ProdutoDetalhe() {
       price_is_public: p.price_is_public,
       seo_title: p.seo_title ?? "",
       seo_description: p.seo_description ?? "",
+      is_featured: p.is_featured,
       status: p.status,
     };
   }, [p]);
@@ -316,6 +376,11 @@ function ProdutoDetalhe() {
         actions={
           <div className="flex flex-wrap items-center gap-3">
             <StatusBadge tone={tone(p.status)}>{p.status}</StatusBadge>
+            {p.status === "publicado" ? (
+              <Link to="/produto/$slug" params={{ slug: p.slug }} target="_blank" className="admin-btn">
+                <ExternalLink aria-hidden className="size-4" /> Ver no site
+              </Link>
+            ) : null}
             <SmartSelect
               value={p.status}
               onChange={(v) => mudarStatus.mutate(v)}
@@ -436,13 +501,24 @@ function ProdutoDetalhe() {
               <EmptyState title="Sem imagens" description="Envie as fotos da peça para exibir no site." />
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {(imagens.data ?? []).map((m) => (
-                  <ImagemCard
-                    key={m.id}
-                    path={(m.media as { storage_path: string | null } | null)?.storage_path ?? null}
-                    alt={(m.media as { alt: string } | null)?.alt ?? "Imagem do produto"}
-                  />
-                ))}
+                {(imagens.data ?? []).map((m, i) => {
+                  const media = m.media as { id: string; alt: string; storage_path: string | null } | null;
+                  return (
+                    <ImagemCard
+                      key={m.id}
+                      path={media?.storage_path ?? null}
+                      alt={media?.alt ?? "Imagem do produto"}
+                      principal={i === 0}
+                      podeVoltar={i > 0}
+                      podeAvancar={i < (imagens.data?.length ?? 0) - 1}
+                      onVoltar={() => moverImagem(i, -1)}
+                      onAvancar={() => moverImagem(i, 1)}
+                      onPrincipal={() => tornarPrincipal(i)}
+                      onRemover={() => removerImagem.mutate(m.id)}
+                      onAlt={(alt) => media && salvarAlt.mutate({ mediaId: media.id, alt })}
+                    />
+                  );
+                })}
               </div>
             )}
           </Panel>
@@ -455,6 +531,9 @@ function ProdutoDetalhe() {
             </p>
             <p className="mt-1 text-sm text-ledger-muted">
               {p.price_is_public ? "Visível no site quando publicado." : "Uso interno: não aparece no site."}
+            </p>
+            <p className="mt-2 text-sm text-ledger-muted">
+              {p.is_featured ? "Peça marcada como destaque na vitrine." : "Sem destaque na vitrine."}
             </p>
           </Panel>
 
@@ -506,6 +585,7 @@ function ProdutoDetalhe() {
           { name: "status", label: "Situação", type: "select", options: STATUS_OPTIONS, required: true },
           { name: "preco", label: "Preço (R$)", type: "text", placeholder: "0,00" },
           { name: "price_is_public", label: "Mostrar preço no site", type: "switch" },
+          { name: "is_featured", label: "Destaque na vitrine", type: "switch" },
           { name: "material", label: "Material", type: "text" },
           { name: "plating", label: "Banho", type: "text" },
           { name: "measurements", label: "Medidas", type: "text" },
@@ -595,8 +675,32 @@ interface VarianteRow {
   is_active: boolean;
 }
 
-function ImagemCard({ path, alt }: { path: string | null; alt: string }) {
+function ImagemCard({
+  path,
+  alt,
+  principal,
+  podeVoltar,
+  podeAvancar,
+  onVoltar,
+  onAvancar,
+  onPrincipal,
+  onRemover,
+  onAlt,
+}: {
+  path: string | null;
+  alt: string;
+  principal: boolean;
+  podeVoltar: boolean;
+  podeAvancar: boolean;
+  onVoltar: () => void;
+  onAvancar: () => void;
+  onPrincipal: () => void;
+  onRemover: () => void;
+  onAlt: (alt: string) => void;
+}) {
   const [url, setUrl] = useState<string | null>(null);
+  const [texto, setTexto] = useState(alt);
+  useEffect(() => setTexto(alt), [alt]);
   useEffect(() => {
     let vivo = true;
     if (!path) return;
@@ -609,11 +713,76 @@ function ImagemCard({ path, alt }: { path: string | null; alt: string }) {
   }, [path]);
   return (
     <figure className="overflow-hidden rounded-lg border border-line-soft bg-surface-muted">
-      {url ? (
-        <img src={url} alt={alt} loading="lazy" className="aspect-square w-full object-cover" />
-      ) : (
-        <div className="aspect-square w-full animate-pulse bg-surface-muted" />
-      )}
+      <div className="relative">
+        {url ? (
+          <img src={url} alt={alt} loading="lazy" className="aspect-square w-full object-cover" />
+        ) : (
+          <div className="aspect-square w-full animate-pulse bg-surface-muted" />
+        )}
+        {principal ? (
+          <span className="absolute left-2 top-2 rounded-full bg-ink px-2 py-0.5 text-[11px] font-semibold text-champagne">
+            Principal
+          </span>
+        ) : null}
+      </div>
+      <figcaption className="space-y-2 p-2">
+        <label className="sr-only" htmlFor={`alt-${path ?? "sem"}`}>
+          Descrição da imagem
+        </label>
+        <input
+          id={`alt-${path ?? "sem"}`}
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          onBlur={() => {
+            const limpo = texto.trim();
+            if (limpo && limpo !== alt) onAlt(limpo);
+          }}
+          placeholder="Descreva a imagem"
+          className="w-full rounded-md border border-line-soft bg-paper px-2 py-1 text-xs text-ledger-text outline-none focus-visible:ring-2 focus-visible:ring-champagne"
+        />
+        <div className="flex items-center justify-between gap-1">
+          <div className="flex gap-1">
+            <button
+              type="button"
+              className="admin-btn px-2 py-1"
+              onClick={onVoltar}
+              disabled={!podeVoltar}
+              aria-label="Mover para trás"
+            >
+              <ChevronLeft aria-hidden className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              className="admin-btn px-2 py-1"
+              onClick={onAvancar}
+              disabled={!podeAvancar}
+              aria-label="Mover para frente"
+            >
+              <ChevronRight aria-hidden className="size-3.5" />
+            </button>
+          </div>
+          <div className="flex gap-1">
+            {!principal ? (
+              <button
+                type="button"
+                className="admin-btn px-2 py-1"
+                onClick={onPrincipal}
+                aria-label="Tornar principal"
+              >
+                <Star aria-hidden className="size-3.5" />
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="admin-btn px-2 py-1"
+              onClick={onRemover}
+              aria-label="Remover imagem do produto"
+            >
+              <Trash2 aria-hidden className="size-3.5" />
+            </button>
+          </div>
+        </div>
+      </figcaption>
     </figure>
   );
 }

@@ -45,6 +45,7 @@ export function CategoryGuillotine({
   const reveal = phase(p, 0.04, 0.62);
   const imgScale = 1.22 - 0.22 * ease(phase(p, 0, 0.75));
   const dir = enterFrom === "right" ? 1 : -1;
+  const mobileSide = mobileAlign ?? align;
 
   const textIn = easeOut(phase(p, 0.5, 0.8));
   const ruleIn = easeOut(phase(p, 0.56, 0.84));

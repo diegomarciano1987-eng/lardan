@@ -61,21 +61,22 @@ function HomePage() {
       />
       <CategoryGuillotine
         title="Pulseiras"
+        subtitle="braceletes"
         categoria="pulseiras"
-        image={pulseirasAsset}
+        image={pulseirasFundoAsset}
         mobileImage={pulseirasMobileAsset}
-        imageAlt="Pulseira Lardan em ouro rosé sobre onda de vidro"
+        imageAlt="Pulseiras e bracelete Lardan em ouro sobre bandeja de vidro"
         enterFrom="right"
         align="left"
       />
       <CategoryGuillotine
         title="Brincos"
         categoria="brincos"
-        image={brincosAsset}
+        image={brincosFundoAsset}
         mobileImage={brincosMobileAsset}
-        imageAlt="Brinco Lardan em ouro rosé sobre base de vidro"
+        imageAlt="Brincos Lardan em ouro com brilhantes sobre onda de vidro"
         enterFrom="left"
-        align="left"
+        align="right"
       />
 
       {/* Convite Seja Lardan */}

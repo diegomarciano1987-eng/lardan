@@ -35,7 +35,7 @@ export async function listPartners(params: {
 }): Promise<PartnerPage> {
   const { data, error } = await supabase.rpc("partners_list", {
     _kind: params.kind,
-    _search: params.search.trim() || null,
+    _search: params.search.trim() || undefined,
     _page: params.page,
     _size: params.pageSize,
   });
@@ -78,8 +78,8 @@ export async function savePartner(
 ): Promise<string> {
   const { data, error } = await supabase.rpc("partner_save", {
     _kind: kind,
-    _id: id ?? null,
-    _values: draft as unknown as Record<string, unknown>,
+    ...(id ? { _id: id } : {}),
+    _values: draft as unknown as never,
   });
   if (error) throw error;
   return data as string;

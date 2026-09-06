@@ -119,7 +119,7 @@ export function ShowcaseHome({ podeEditar }: { podeEditar: boolean }) {
                         onClick={() => alternarItem(b.chave, o.id)}
                         className={
                           ativo
-                            ? "rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-ink-foreground"
+                            ? "rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-warm-ivory"
                             : "rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ledger-muted hover:border-champagne"
                         }
                       >

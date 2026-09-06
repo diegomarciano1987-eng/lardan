@@ -343,7 +343,7 @@ function CentralVitrinePage() {
             onClick={() => setAba(a.value)}
             className={
               aba === a.value
-                ? "rounded-full bg-ink px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-ink-foreground"
+                ? "rounded-full bg-ink px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-warm-ivory"
                 : "rounded-full border border-line px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-ledger-muted hover:border-champagne"
             }
           >

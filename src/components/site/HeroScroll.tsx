@@ -4,6 +4,8 @@ import heroAsset from "@/assets/lardan-hero-vidro.jpg.asset.json";
 import heroMobileAsset from "@/assets/lardan-mobile-hero.png.asset.json";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
+import sessao2Asset from "@/assets/lardan-sessao2.png.asset.json";
+import sessao2MobileAsset from "@/assets/lardan-mobile-sessao2.png.asset.json";
 
 function clamp01(v: number) {
   return Math.min(1, Math.max(0, v));
@@ -38,6 +40,10 @@ export function HeroScroll() {
   const varredura = phase(p, 0.52, 0.86); // fio de luz percorrendo as letras
   const mostrarBrilho = !reduced && out < 0.35;
   const sombra = (1 - wordmarkIn) * 26; // sombra longa que encurta ao assentar
+  // Cena final: a foto da segunda sessão já entra por trás do wordmark, em
+  // penumbra e fora de foco, e ganha nitidez conforme o quadro avança.
+  const cena = ease(phase(p, 0.44, 0.92));
+  const penumbra = cena * (1 - 0.35 * sai);
 
   return (
     <div ref={trackRef} className="relative h-[300vh]" aria-label={BRAND.name}>
@@ -63,6 +69,49 @@ export function HeroScroll() {
             height={928}
           />
         </picture>
+
+        {/* Cena da segunda sessão surgindo em penumbra por trás do wordmark */}
+        {cena > 0.002 && (
+          <>
+            <picture>
+              <source
+                media="(max-width: 767px)"
+                srcSet="/img/lardan-mobile-sessao2.webp"
+                type="image/webp"
+              />
+              <source media="(max-width: 767px)" srcSet={sessao2MobileAsset.url} />
+              <source srcSet="/img/lardan-sessao2.webp" type="image/webp" />
+              <img
+                src={sessao2Asset.url}
+                alt=""
+                aria-hidden
+                className="gpu-layer absolute inset-0 h-full w-full object-cover"
+                style={{
+                  opacity: cena,
+                  transform: `scale(${(1.34 - 0.26 * cena - 0.06 * sai).toFixed(3)}) translateZ(0)`,
+                  filter: leve
+                    ? undefined
+                    : `blur(${stepBlur((1 - cena) * 26 + sai * 6, 2)}px) saturate(${(0.75 + cena * 0.35).toFixed(2)})`,
+                }}
+                loading="lazy"
+                decoding="async"
+                width={1664}
+                height={928}
+              />
+            </picture>
+            {/* Penumbra cinematográfica + vinheta: o wordmark passa a brilhar
+                dentro de um quadro escuro, nunca sobre uma tela branca. */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0"
+              style={{
+                opacity: penumbra,
+                background:
+                  "radial-gradient(120% 90% at 50% 50%, oklch(0.16 0.015 25 / 0.55) 0%, oklch(0.11 0.015 25 / 0.86) 62%, oklch(0.08 0.01 25 / 0.96) 100%)",
+              }}
+            />
+          </>
+        )}
 
         {/* Estado 1: diamante — avança na câmera e se desfaz em luz */}
         <div
@@ -161,7 +210,7 @@ export function HeroScroll() {
                 style={{
                   filter: leve
                     ? undefined
-                    : `drop-shadow(0 ${(10 + sombra).toFixed(0)}px ${(28 + sombra * 2.4).toFixed(0)}px oklch(0.2 0.02 30 / ${(0.16 + wordmarkIn * 0.24).toFixed(2)}))`,
+                    : `drop-shadow(0 ${(10 + sombra).toFixed(0)}px ${(28 + sombra * 2.4).toFixed(0)}px oklch(0.06 0.01 30 / ${(0.3 + wordmarkIn * 0.35).toFixed(2)})) drop-shadow(0 0 ${(30 + wordmarkIn * 40).toFixed(0)}px oklch(0.85 0.06 40 / ${(0.18 * wordmarkIn).toFixed(2)})) brightness(${(1 + cena * 0.25).toFixed(2)})`,
                 }}
               />
             </picture>
@@ -180,12 +229,17 @@ export function HeroScroll() {
           </div>
         </div>
 
-        {/* Marfim final: o quadro do hero se abre direto na segunda sessão */}
+        {/* Passagem final: um clarão quente atravessa o quadro e entrega a
+            cena já escurecida para a segunda sessão — sem corte, sem branco. */}
         {sai > 0.001 && (
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-background"
-            style={{ opacity: ease(sai) }}
+            className="pointer-events-none absolute inset-0"
+            style={{
+              opacity: ease(sai),
+              background:
+                "linear-gradient(180deg, oklch(0.1 0.012 25 / 0.9) 0%, oklch(0.12 0.015 25 / 0.75) 45%, oklch(0.1 0.012 25 / 0.92) 100%)",
+            }}
           />
         )}
       </div>

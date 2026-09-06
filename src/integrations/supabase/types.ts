@@ -426,6 +426,74 @@ export type Database = {
         }
         Relationships: []
       }
+      external_data_applications: {
+        Row: {
+          applied_at: string
+          applied_by: string | null
+          applied_fields: Json
+          id: string
+          identifier: string
+          mapping_version: string
+          party_id: string | null
+          provider: string
+          response_hash: string | null
+        }
+        Insert: {
+          applied_at?: string
+          applied_by?: string | null
+          applied_fields?: Json
+          id?: string
+          identifier: string
+          mapping_version?: string
+          party_id?: string | null
+          provider: string
+          response_hash?: string | null
+        }
+        Update: {
+          applied_at?: string
+          applied_by?: string | null
+          applied_fields?: Json
+          id?: string
+          identifier?: string
+          mapping_version?: string
+          party_id?: string | null
+          provider?: string
+          response_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_data_applications_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ibge_municipios: {
+        Row: {
+          codigo_ibge: string
+          nome: string
+          nome_norm: string | null
+          synced_at: string
+          uf: string
+        }
+        Insert: {
+          codigo_ibge: string
+          nome: string
+          nome_norm?: string | null
+          synced_at?: string
+          uf: string
+        }
+        Update: {
+          codigo_ibge?: string
+          nome?: string
+          nome_norm?: string | null
+          synced_at?: string
+          uf?: string
+        }
+        Relationships: []
+      }
       import_jobs: {
         Row: {
           created_at: string
@@ -633,6 +701,75 @@ export type Database = {
           mapping?: Json
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      integration_cache: {
+        Row: {
+          chave: string
+          expires_at: string
+          fetched_at: string
+          payload: Json
+          provider: string
+          response_hash: string | null
+        }
+        Insert: {
+          chave: string
+          expires_at: string
+          fetched_at?: string
+          payload: Json
+          provider: string
+          response_hash?: string | null
+        }
+        Update: {
+          chave?: string
+          expires_at?: string
+          fetched_at?: string
+          payload?: Json
+          provider?: string
+          response_hash?: string | null
+        }
+        Relationships: []
+      }
+      integration_lookups: {
+        Row: {
+          cache_hit: boolean
+          created_at: string
+          error_code: string | null
+          http_status: number | null
+          id: string
+          kind: string
+          latency_ms: number | null
+          provider: string
+          referencia: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          cache_hit?: boolean
+          created_at?: string
+          error_code?: string | null
+          http_status?: number | null
+          id?: string
+          kind: string
+          latency_ms?: number | null
+          provider: string
+          referencia?: string | null
+          status: string
+          user_id?: string | null
+        }
+        Update: {
+          cache_hit?: boolean
+          created_at?: string
+          error_code?: string | null
+          http_status?: number | null
+          id?: string
+          kind?: string
+          latency_ms?: number | null
+          provider?: string
+          referencia?: string | null
+          status?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -959,8 +1096,11 @@ export type Database = {
           created_by: string | null
           display_name: string | null
           doc: string | null
+          doc_canon: string | null
+          doc_checked_at: string | null
           doc_digits: string | null
           doc_masked: string | null
+          doc_source: string | null
           doc_verified_at: string | null
           id: string
           is_active: boolean
@@ -984,8 +1124,11 @@ export type Database = {
           created_by?: string | null
           display_name?: string | null
           doc?: string | null
+          doc_canon?: string | null
+          doc_checked_at?: string | null
           doc_digits?: string | null
           doc_masked?: string | null
+          doc_source?: string | null
           doc_verified_at?: string | null
           id?: string
           is_active?: boolean
@@ -1009,8 +1152,11 @@ export type Database = {
           created_by?: string | null
           display_name?: string | null
           doc?: string | null
+          doc_canon?: string | null
+          doc_checked_at?: string | null
           doc_digits?: string | null
           doc_masked?: string | null
+          doc_source?: string | null
           doc_verified_at?: string | null
           id?: string
           is_active?: boolean
@@ -1030,13 +1176,19 @@ export type Database = {
       }
       party_addresses: {
         Row: {
+          address_source: string | null
           city: string | null
           complement: string | null
+          country: string
           created_at: string
+          ddd: string | null
           district: string | null
+          ibge_city_code: string | null
           id: string
           is_primary: boolean
           label: string | null
+          latitude: number | null
+          longitude: number | null
           no_number: boolean
           party_id: string
           postal_code: string | null
@@ -1045,15 +1197,22 @@ export type Database = {
           street_number: string | null
           uf: string | null
           updated_at: string
+          verified_at: string | null
         }
         Insert: {
+          address_source?: string | null
           city?: string | null
           complement?: string | null
+          country?: string
           created_at?: string
+          ddd?: string | null
           district?: string | null
+          ibge_city_code?: string | null
           id?: string
           is_primary?: boolean
           label?: string | null
+          latitude?: number | null
+          longitude?: number | null
           no_number?: boolean
           party_id: string
           postal_code?: string | null
@@ -1062,15 +1221,22 @@ export type Database = {
           street_number?: string | null
           uf?: string | null
           updated_at?: string
+          verified_at?: string | null
         }
         Update: {
+          address_source?: string | null
           city?: string | null
           complement?: string | null
+          country?: string
           created_at?: string
+          ddd?: string | null
           district?: string | null
+          ibge_city_code?: string | null
           id?: string
           is_primary?: boolean
           label?: string | null
+          latitude?: number | null
+          longitude?: number | null
           no_number?: boolean
           party_id?: string
           postal_code?: string | null
@@ -1079,6 +1245,7 @@ export type Database = {
           street_number?: string | null
           uf?: string | null
           updated_at?: string
+          verified_at?: string | null
         }
         Relationships: [
           {
@@ -1903,11 +2070,14 @@ export type Database = {
       can_manage_leads: { Args: { _user_id: string }; Returns: boolean }
       can_view_costs: { Args: { _user_id: string }; Returns: boolean }
       claim_master_role: { Args: never; Returns: boolean }
+      cnpj_is_valid: { Args: { c: string }; Returns: boolean }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string
       }
-      doc_is_valid: { Args: { _digits: string }; Returns: boolean }
+      cpf_is_valid: { Args: { d: string }; Returns: boolean }
+      doc_canon: { Args: { v: string }; Returns: string }
+      doc_is_valid: { Args: { v: string }; Returns: boolean }
       ensure_profile: {
         Args: never
         Returns: {
@@ -2010,6 +2180,20 @@ export type Database = {
         Args: { _job: string; _rows: Json }
         Returns: number
       }
+      integration_health: {
+        Args: never
+        Returns: {
+          cache_hits_24h: number
+          erros_24h: number
+          latencia_media_ms: number
+          provider: string
+          sucessos_24h: number
+          total_24h: number
+          ultima_ok: string
+          ultimo_erro: string
+          ultimo_erro_codigo: string
+        }[]
+      }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       list_parties: {
         Args: {
@@ -2052,6 +2236,7 @@ export type Database = {
       only_digits: { Args: { _v: string }; Returns: string }
       parse_cents_any: { Args: { _v: string }; Returns: number }
       parse_decimal_any: { Args: { _v: string }; Returns: number }
+      phone_canon: { Args: { v: string }; Returns: string }
       public_catalog_browse: {
         Args: {
           _category_slug?: string

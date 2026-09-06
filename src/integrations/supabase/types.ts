@@ -44,6 +44,180 @@ export type Database = {
         }
         Relationships: []
       }
+      award_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          id: string
+          media_id: string | null
+          nome: string
+          periodo_fim: string | null
+          periodo_inicio: string | null
+          program_id: string | null
+          regulamento: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          media_id?: string | null
+          nome: string
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          program_id?: string | null
+          regulamento?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          media_id?: string | null
+          nome?: string
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          program_id?: string | null
+          regulamento?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "award_campaigns_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      award_grants: {
+        Row: {
+          aceito_em: string | null
+          aprovado_em: string | null
+          aprovado_por: string | null
+          created_at: string
+          created_by: string | null
+          entregue_em: string | null
+          id: string
+          motivo: string | null
+          party_id: string
+          prize_id: string
+          snapshot_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          aceito_em?: string | null
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          created_at?: string
+          created_by?: string | null
+          entregue_em?: string | null
+          id?: string
+          motivo?: string | null
+          party_id: string
+          prize_id: string
+          snapshot_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          aceito_em?: string | null
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          created_at?: string
+          created_by?: string | null
+          entregue_em?: string | null
+          id?: string
+          motivo?: string | null
+          party_id?: string
+          prize_id?: string
+          snapshot_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "award_grants_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "award_grants_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "award_grants_prize_id_fkey"
+            columns: ["prize_id"]
+            isOneToOne: false
+            referencedRelation: "award_prizes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "award_grants_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      award_prizes: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          descricao: string | null
+          faixa: string | null
+          id: string
+          nome: string
+          posicao_fim: number | null
+          posicao_inicio: number | null
+          quantidade: number
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          descricao?: string | null
+          faixa?: string | null
+          id?: string
+          nome: string
+          posicao_fim?: number | null
+          posicao_inicio?: number | null
+          quantidade?: number
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          descricao?: string | null
+          faixa?: string | null
+          id?: string
+          nome?: string
+          posicao_fim?: number | null
+          posicao_inicio?: number | null
+          quantidade?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "award_prizes_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "award_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_entities: {
         Row: {
           city: string | null
@@ -1841,6 +2015,122 @@ export type Database = {
             columns: ["variant_id"]
             isOneToOne: false
             referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ranking_programs: {
+        Row: {
+          aprovado_em: string | null
+          aprovado_por: string | null
+          created_at: string
+          created_by: string | null
+          criterios_desclassificacao: Json
+          criterios_minimos: Json
+          descricao: string | null
+          desempate: Json
+          escopo: string
+          escopo_valor: string | null
+          id: string
+          metricas: Json
+          nome: string
+          periodo_fim: string | null
+          periodo_inicio: string | null
+          pesos: Json
+          publicado_em: string | null
+          publico_elegivel: Json
+          status: string
+          updated_at: string
+          versao: number
+        }
+        Insert: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          created_at?: string
+          created_by?: string | null
+          criterios_desclassificacao?: Json
+          criterios_minimos?: Json
+          descricao?: string | null
+          desempate?: Json
+          escopo?: string
+          escopo_valor?: string | null
+          id?: string
+          metricas?: Json
+          nome: string
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          pesos?: Json
+          publicado_em?: string | null
+          publico_elegivel?: Json
+          status?: string
+          updated_at?: string
+          versao?: number
+        }
+        Update: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          created_at?: string
+          created_by?: string | null
+          criterios_desclassificacao?: Json
+          criterios_minimos?: Json
+          descricao?: string | null
+          desempate?: Json
+          escopo?: string
+          escopo_valor?: string | null
+          id?: string
+          metricas?: Json
+          nome?: string
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          pesos?: Json
+          publicado_em?: string | null
+          publico_elegivel?: Json
+          status?: string
+          updated_at?: string
+          versao?: number
+        }
+        Relationships: []
+      }
+      ranking_snapshots: {
+        Row: {
+          apurado_em: string
+          created_at: string
+          created_by: string | null
+          id: string
+          imutavel: boolean
+          posicoes: Json
+          program_id: string
+          regra: Json
+          versao: number
+        }
+        Insert: {
+          apurado_em?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          imutavel?: boolean
+          posicoes?: Json
+          program_id: string
+          regra?: Json
+          versao: number
+        }
+        Update: {
+          apurado_em?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          imutavel?: boolean
+          posicoes?: Json
+          program_id?: string
+          regra?: Json
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_snapshots_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_programs"
             referencedColumns: ["id"]
           },
         ]

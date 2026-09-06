@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
+    "test:seg": "vitest run tests/security",
     "format": "prettier --write ."
   },
   "overrides": {

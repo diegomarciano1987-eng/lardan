@@ -111,3 +111,42 @@ Método de cada linha declarado. Nada marcado como testado por leitura de códig
 | Máscara de CPF/CNPJ/CEP em `integration_lookups` | INSPECIONADO (trigger criado na migração) | Não exercitado ponta a ponta nesta sessão |
 | Telas `/admin/estoque` e `/admin/cadastros/pessoas` | NÃO TESTADO NO NAVEGADOR | Sem sessão disponível no ambiente de verificação (`signed_out`); typecheck limpo, mas a tela não foi exercitada |
 | Regressão completa da seção 10 do documento enviado | NÃO TESTADO | Depende de sessão autenticada |
+
+## Bateria automática de permissões (tests/security)
+
+Comando: `bun run test:seg` (vitest). Cria contas sintéticas `homolog.*@lardan.test`
+via API de administração, atribui um papel a cada uma, executa as provas contra o
+banco real e apaga as contas ao final. Nenhum usuário real é usado.
+
+Resultado da última execução: 8 de 8 aprovadas.
+
+| Prova | Resultado |
+| --- | --- |
+| Visitante não lê parties/stock_movements/variant_costs/profiles pela Data API | passou (sem dado) |
+| Visitante não executa stock_movements_list, list_parties, publish_products, my_roles | passou (bloqueado) |
+| Visitante lê catálogo publicado (public_categories) | passou |
+| Papel Estoque: custo unitário ausente na resposta (chave removida, não nula) | passou |
+| Master e Financeiro: custo unitário presente | passou |
+| Consultora: estoque bloqueado (42501) | passou |
+| Consultora: documento não sai aberto e revelação é negada | passou |
+| Master com perfil desativado: zero capacidades | passou |
+
+### Correções provadas nesta rodada
+
+- `stock.cost.view` removida do papel **Estoque** (custo agora só Master, Diretoria, Financeiro).
+- `stock_movements_list` estava **quebrada em produção** (`CREATE TABLE AS is not allowed in a
+  non-volatile function`): a aba Movimentações nunca carregava. Reescrita sem tabela temporária.
+- Verificação de permissão da Inteligência da Rede era feita com o cliente de serviço, e
+  `has_capability` exige `auth.uid()` — retornava sempre falso e barrava até o Master.
+  Passou a usar o cliente do próprio usuário.
+
+### Homologação de tela (Playwright, sessão real do Master)
+
+- `/admin/rede`: carrega, sem erro de permissão, indicadores em zero (base sem dados).
+- `/admin/estoque` aba Movimentações: carrega sem erro.
+- Console sem erros nas duas telas.
+
+### Funções acessíveis a visitante (7, todas legítimas)
+
+`public_catalog_browse`, `public_catalog_list`, `public_categories`, `public_category`,
+`public_product`, `submit_contact_request`, `submit_lead`.

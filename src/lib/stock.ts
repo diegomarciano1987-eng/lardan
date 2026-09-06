@@ -183,14 +183,20 @@ export interface MovementInput {
   unitCostCents?: number | null;
   reference?: string | null;
   note?: string | null;
+  /** Chave de repetição: reenviar a mesma operação não cria outro movimento. */
+  idempotencyKey?: string | null;
 }
 
-/** Grava a movimentação e o saldo na mesma transação do banco. */
+/**
+ * Grava a movimentação e o saldo na mesma transação do banco.
+ * A chave de repetição evita duplicar o lançamento em clique duplo ou reenvio.
+ */
 export async function registerMovement(input: MovementInput) {
   const args: Record<string, unknown> = {
     _kind: input.kind,
     _variant_id: input.variantId,
     _quantity: input.quantity,
+    _idempotency_key: input.idempotencyKey ?? crypto.randomUUID(),
   };
   if (input.fromLocationId) args["_from_location_id"] = input.fromLocationId;
   if (input.toLocationId) args["_to_location_id"] = input.toLocationId;
@@ -207,3 +213,4 @@ export async function registerMovement(input: MovementInput) {
   if (error) throw error;
   return data as string;
 }
+

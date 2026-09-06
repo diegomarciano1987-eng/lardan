@@ -15,6 +15,7 @@ import {
   type PartnerRow,
 } from "@/lib/partners";
 import { formatarDocumento, normalizarDocumento } from "@/lib/br/canonico";
+import { consultarCnpj } from "@/lib/br/lookup.functions";
 import { UFS } from "@/lib/catalog";
 
 const PAGE_SIZE = 20;
@@ -178,18 +179,53 @@ export function PartnersPage({
   }, [docLabel, kind, nomeLabel, podeRevelar, revelados]);
 
   const campos = useMemo<FieldSpec[]>(() => {
-    const lista: FieldSpec[] = [
-      { name: "nome", label: nomeLabel, type: "text", required: true, full: true },
-      { name: "fantasia", label: "Nome fantasia", type: "text" },
-    ];
+    const lista: FieldSpec[] = [];
     if (podeRevelar) {
       lista.push({
         name: "doc",
         label: docLabel,
         type: "text",
-        help: "Somente perfis autorizados veem e alteram o documento.",
+        full: true,
+        placeholder: "Digite o CNPJ ou CPF e clique na lupa",
+        help: "A lupa consulta a base pública e preenche os dados encontrados.",
+        action: {
+          label: "Conferir documento",
+          run: async (valor, aplicar) => {
+            const c = normalizarDocumento(valor);
+            if (c.estado !== "valido") {
+              toast.error(c.erro ?? "Documento inválido.");
+              return;
+            }
+            aplicar({ doc: formatarDocumento(c.canonico ?? valor) });
+            if ((c.canonico ?? "").length !== 14) {
+              toast.success("CPF estruturalmente válido. Não há consulta pública de CPF.");
+              return;
+            }
+            const r = await consultarCnpj({ data: { cnpj: c.canonico as string, comQsa: false } });
+            if (r.status !== "ok" || !r.dados) {
+              toast.error(r.mensagem ?? "Não foi possível consultar agora.");
+              return;
+            }
+            const d = r.dados;
+            aplicar({
+              nome: d.razao_social ?? "",
+              fantasia: d.nome_fantasia ?? "",
+              email: d.email ?? "",
+              telefone: d.telefone ?? "",
+              cidade: d.cidade ?? "",
+              uf: d.uf ?? "",
+            });
+            toast.success(
+              `Dados de ${d.razao_social ?? "empresa"} preenchidos${d.situacao ? ` · situação ${d.situacao}` : ""}.`,
+            );
+          },
+        },
       });
     }
+    lista.push(
+      { name: "nome", label: nomeLabel, type: "text", required: true, full: true },
+      { name: "fantasia", label: "Nome fantasia", type: "text" },
+    );
     if (kind === "entidade") {
       lista.push({ name: "inscricao_estadual", label: "Inscrição estadual", type: "text" });
     } else {

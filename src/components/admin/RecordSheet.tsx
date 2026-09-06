@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -23,6 +23,11 @@ export interface FieldSpec {
   placeholder?: string;
   /** ocupa a linha inteira */
   full?: boolean;
+  /** botão de conferência ao lado do campo (lupa) */
+  action?: {
+    label: string;
+    run: (valor: string, aplicar: (patch: RecordValues) => void) => Promise<void>;
+  };
 }
 
 export type RecordValues = Record<string, unknown>;
@@ -51,6 +56,7 @@ export function RecordSheet({
 }: Props) {
   const [values, setValues] = useState<RecordValues>(initial ?? {});
   const [salvando, setSalvando] = useState(false);
+  const [rodando, setRodando] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) setValues(initial ?? {});
@@ -126,14 +132,41 @@ export function RecordSheet({
                     onChange={(d) => set(f.name, d ? d.toISOString().slice(0, 10) : "")}
                   />
                 ) : (
-                  <input
-                    id={f.name}
-                    inputMode={f.type === "number" ? "decimal" : "text"}
-                    value={String(values[f.name] ?? "")}
-                    onChange={(e) => set(f.name, e.target.value)}
-                    placeholder={f.placeholder ?? ""}
-                    className="h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm text-ledger-text outline-none placeholder:text-ledger-muted focus:border-champagne"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      id={f.name}
+                      inputMode={f.type === "number" ? "decimal" : "text"}
+                      value={String(values[f.name] ?? "")}
+                      onChange={(e) => set(f.name, e.target.value)}
+                      placeholder={f.placeholder ?? ""}
+                      className="h-11 w-full min-w-0 rounded-[10px] border border-line bg-surface px-3 text-sm text-ledger-text outline-none placeholder:text-ledger-muted focus:border-champagne"
+                    />
+                    {f.action && (
+                      <button
+                        type="button"
+                        title={f.action.label}
+                        aria-label={f.action.label}
+                        disabled={rodando === f.name}
+                        className="admin-btn h-11 shrink-0 px-3"
+                        onClick={async () => {
+                          setRodando(f.name);
+                          try {
+                            await f.action!.run(String(values[f.name] ?? ""), (patch) =>
+                              setValues((v) => ({ ...v, ...patch })),
+                            );
+                          } finally {
+                            setRodando(null);
+                          }
+                        }}
+                      >
+                        {rodando === f.name ? (
+                          <Loader2 aria-hidden className="size-4 animate-spin" />
+                        ) : (
+                          <Search aria-hidden className="size-4" />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
               {f.help && <p className="mt-1 text-xs text-ledger-muted">{f.help}</p>}

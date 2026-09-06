@@ -4,8 +4,6 @@ import heroAsset from "@/assets/lardan-hero-vidro.jpg.asset.json";
 import heroMobileAsset from "@/assets/lardan-mobile-hero.png.asset.json";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
-import sessao2Asset from "@/assets/lardan-sessao2.png.asset.json";
-import sessao2MobileAsset from "@/assets/lardan-mobile-sessao2.png.asset.json";
 
 function clamp01(v: number) {
   return Math.min(1, Math.max(0, v));
@@ -17,11 +15,13 @@ function stepBlur(v: number, passo = 3) {
 }
 
 /**
- * Narrativa de scroll da home (V/4.2):
+ * Narrativa de scroll da home (V/5):
  * 1. Diamante nítido sobre a onda de vidro.
- * 2. Transição cinematográfica: o diamante avança na câmera, gira levemente,
- *    estoura em luz e se dissolve — sem véu rosé, fundo limpo.
- * 3. Wordmark LARDAN isolado sobre o fundo limpo.
+ * 2. O diamante avança na câmera, estoura em luz e se dissolve.
+ * 3. Wordmark LARDAN surge com sombra longa dentro de um quadro em penumbra
+ *    — apenas marca, nenhuma modelo — e um fio de luz percorre as letras.
+ * 4. Clarão quente atravessa o quadro e entrega a cena à segunda sessão,
+ *    sem trechos de rolagem vazios.
  * Sem scroll hijacking: a rolagem é nativa; apenas as camadas reagem.
  */
 export function HeroScroll() {

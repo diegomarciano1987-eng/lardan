@@ -37,7 +37,7 @@ function booleano(v: unknown) {
 }
 
 export const Route = createFileRoute("/semijoias/$categoria")({
-  validateSearch: (search: Record<string, unknown>): BuscaCategoria => {
+  validateSearch: (search: Partial<Record<keyof BuscaCategoria, unknown>>): BuscaCategoria => {
     const ordem = texto(search["ordem"]) as OrdemVitrine;
     return {
       q: texto(search["q"]).slice(0, 120),
@@ -111,7 +111,7 @@ export const Route = createFileRoute("/semijoias/$categoria")({
     <SiteLayout>
       <AvisoEditorial
         titulo="Categoria não encontrada"
-        texto="Talvez ela tenha saído do ar. Conheça as demais семijoias da casa."
+        texto="Talvez ela tenha saído do ar. Conheça as demais semijoias da casa."
       />
     </SiteLayout>
   ),

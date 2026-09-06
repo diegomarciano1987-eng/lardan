@@ -1,7 +1,27 @@
 import type { ReactNode } from "react";
-import { AlertTriangle, Info, Lock, Clock3, CircleDot } from "lucide-react";
+import { useRouter } from "@tanstack/react-router";
+import { AlertTriangle, Info, Lock, Clock3, CircleDot, ArrowLeft } from "lucide-react";
 import { STATE_LABEL, type ModuleState } from "@/lib/admin-modules";
 import { cn } from "@/lib/utils";
+
+/** Botão Voltar — retorna para a última tela visitada. */
+export function BackButton({ className }: { className?: string }) {
+  const router = useRouter();
+  return (
+    <button
+      type="button"
+      onClick={() => router.history.back()}
+      aria-label="Voltar para a tela anterior"
+      title="Voltar"
+      className={cn(
+        "inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-line bg-cream-2 text-ledger-text transition hover:border-bronze hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bronze",
+        className,
+      )}
+    >
+      <ArrowLeft aria-hidden className="size-4.5" />
+    </button>
+  );
+}
 
 /** Selo de disponibilidade do módulo. Estado nunca depende só de cor. */
 export function ModuleAvailabilityBadge({

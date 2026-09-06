@@ -77,6 +77,7 @@ function HomePage() {
         imageAlt="Brincos Lardan em ouro com brilhantes sobre onda de vidro"
         enterFrom="left"
         align="right"
+        mobileAlign="left"
       />
 
       {/* Convite Seja Lardan */}

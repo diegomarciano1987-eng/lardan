@@ -2699,6 +2699,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      homolog_purge: { Args: { _prefix?: string }; Returns: Json }
+      homolog_purge_movimentos: { Args: { _prefix: string }; Returns: number }
       import_job_cancel: { Args: { _job: string }; Returns: undefined }
       import_job_open: {
         Args: {

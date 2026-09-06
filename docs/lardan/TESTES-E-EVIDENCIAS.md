@@ -27,6 +27,31 @@ tabelas `parties`, `suppliers` e `business_entities` por **nenhum** perfil: as
 colunas `doc`, `doc_canon`, `doc_digits` e `tax_id` foram retiradas da concessão
 de leitura; o valor completo só sai pelas funções de revelação auditada.
 
+`stock_movements` deixou de ter política de leitura: **nenhum** perfil lê a
+tabela direto pela Data API; o histórico só sai por `stock_movements_list`, que
+omite o custo de quem não pode vê-lo. `variant_costs` só é legível por Master,
+Diretoria e Financeiro (Estoque perdeu o acesso).
+
+## P1-A — massa de homologação e cadastro ponta a ponta (rodada atual)
+
+| Caso | Método | Resultado |
+| --- | --- | --- |
+| CEP/CNPJ: 21 cenários (ViaCEP, fallback BrasilAPI, inexistente, timeout, rate limit, cache hit/miss, alfanumérico, QSA autorizada/negada) | EXECUTADO com provedor simulado (`bun run test:integracoes`) | 21/21 aprovados |
+| Máscara/HMAC em `integration_lookups` | EXECUTADO (conteúdo persistido inspecionado no teste) | referência gravada como hash + 2 últimos caracteres |
+| Matriz de segurança por perfil | EXECUTADO (`bun run test:seg`) | 45/45 aprovados |
+| Leitura direta de `stock_movements` | EXECUTADO | bloqueada para todos os 12 perfis testados |
+| Leitura direta de `variant_costs` | EXECUTADO | permitida só para Master, Diretoria, Financeiro |
+| Massa sintética (40 pessoas, 25 consultoras, 4 representantes, 8 fornecedores, 4 entidades, 4 categorias, 6 coleções, 150 produtos, 300 variantes, 4 locais, 201 movimentações) | EXECUTADO (`bun run massa:criar`, idempotente) | criada e conferida |
+| Publicação só pela operação canônica | EXECUTADO | escrita direta de `status=publicado` recusada pelo banco; 103 peças publicadas via `publish_products` |
+| Central, Estoque, Rede e Vitrine com dados | EXECUTADO no navegador, sessão real do Master | 362 cadastros, 657 unidades, 201 movimentos, 25 consultoras em 6 estados, 152 produtos / 103 publicados |
+| Catálogo público com contagem real | EXECUTADO no navegador | Anéis 29, Pulseiras 28, Colares 31, Brincos 15 |
+| Pessoas: busca no servidor, ficha, recarga, documento mascarado | EXECUTADO no navegador (Master) | mesmo ID após recarga; documento exibido como `***.086.419-**`; console sem erros |
+| Candidata → consultora: conversão, repetição, dois cliques simultâneos, auditoria | EXECUTADO (`bun run test:cadastros`) | 5/5 aprovados; sem segunda pessoa, sem segundo perfil, sem login automático |
+| Fluxo de fornecedor/entidade no navegador | NÃO TESTADO | pendente da próxima rodada |
+| 404 público das categorias reais (`/aneis`) | INSPECIONADO | rota pública é `/semijoias/<categoria>`; não há categoria real publicada, só as sintéticas |
+
+
+
 
 
 ## Lote 0/1

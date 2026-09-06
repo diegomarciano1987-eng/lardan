@@ -35,7 +35,8 @@ export function SessaoSemijoias() {
   const penumbra = reduced ? 0 : 1 - ease(phase(p, 0, 0.3));
 
   return (
-    <div ref={ref} className="relative h-[260vh]">
+    // -mt-[100vh]: a sessão sobe uma tela inteira, abrindo as lâminas enquanto
+    // o hero ainda está saindo — a passagem vira uma cena só, sem trecho vazio.
       <section className="sticky top-0 h-screen overflow-hidden bg-background">
         <picture>
           <source

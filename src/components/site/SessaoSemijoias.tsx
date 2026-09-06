@@ -35,7 +35,9 @@ export function SessaoSemijoias() {
   const penumbra = reduced ? 0 : 1 - ease(phase(p, 0, 0.3));
 
   return (
-    <div ref={ref} className="relative h-[260vh]">
+    // -mt-[100vh] sobe a sessão uma tela: as lâminas abrem enquanto o hero
+    // ainda está saindo — a passagem vira uma cena só, sem trecho vazio.
+    <div ref={ref} className="relative -mt-[100vh] h-[260vh]">
       <section className="sticky top-0 h-screen overflow-hidden bg-background">
         <picture>
           <source
@@ -77,7 +79,7 @@ export function SessaoSemijoias() {
                   className="-mx-px h-full flex-1 origin-top"
                   style={{
                     background:
-                      "linear-gradient(180deg, oklch(0.995 0.004 80) 0%, oklch(0.965 0.008 70) 100%)",
+                      "linear-gradient(180deg, oklch(0.99 0.005 80 / 0.9) 0%, oklch(0.95 0.01 70 / 0.86) 100%)",
                     transform: `scaleY(${lead}) translate3d(0, ${t * -6}%, 0) translateZ(0)`,
                     opacity: 1 - t * 0.15,
                     filter: !leve && emMovimento ? `blur(${(lead * 6).toFixed(1)}px)` : undefined,

@@ -414,3 +414,68 @@
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-champagne) 30%, transparent);
   outline: none;
 }
+
+/* ===== Reflexo dourado do diamante no hero ===== */
+/* Uma lâmina de luz ouro/champagne percorre as bordas da joia em laço lento,
+   com pausa entre as passadas — mascarada pela própria silhueta do diamante. */
+.hero-gleam,
+.hero-gleam-spark {
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.hero-gleam {
+  background: linear-gradient(
+    115deg,
+    transparent 32%,
+    oklch(0.82 0.09 85 / 0.55) 44%,
+    oklch(0.97 0.04 95 / 0.95) 50%,
+    oklch(0.82 0.09 85 / 0.55) 56%,
+    transparent 68%
+  );
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  mix-blend-mode: screen;
+  filter: brightness(1.15) saturate(1.1);
+  animation: hero-gleam-run 7.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+/* Faísca pontual: facho estreito e mais quente, defasado do reflexo. */
+.hero-gleam-spark {
+  background: linear-gradient(
+    100deg,
+    transparent 44%,
+    oklch(0.99 0.02 100 / 0.9) 49.5%,
+    oklch(0.9 0.12 80 / 0.8) 50.5%,
+    transparent 56%
+  );
+  background-size: 340% 100%;
+  background-position: 160% 0;
+  mix-blend-mode: plus-lighter;
+  filter: blur(0.6px);
+  animation: hero-gleam-run 7.5s cubic-bezier(0.45, 0, 0.25, 1) 0.35s infinite;
+}
+
+@keyframes hero-gleam-run {
+  0% {
+    background-position: 135% 0;
+  }
+  38% {
+    background-position: -35% 0;
+  }
+  100% {
+    background-position: -35% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-gleam,
+  .hero-gleam-spark {
+    animation: none;
+    opacity: 0;
+  }
+}

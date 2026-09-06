@@ -174,7 +174,11 @@ export function CategoryGuillotine({
               </p>
             )}
             <div
-              className={`rose-rule mt-6 w-16 ${align === "right" ? "ml-auto origin-right" : "origin-left"}`}
+              className={`rose-rule mt-6 w-16 ${
+                mobileSide === "right" ? "origin-right" : "origin-left"
+              } ${
+                align === "right" ? "md:origin-right md:ml-auto" : "md:origin-left"
+              }`}
               style={{ transform: `scaleX(${ruleIn})` }}
             />
             <Link

@@ -237,12 +237,22 @@ describe("Inteligência da Rede", () => {
     it(
       `${papel}: visão agregada e identidade individual`,
       async () => {
-        const podeAgregado = VERDADE.redeAgregada.includes(papel as never);
+        const escopoEsperado = VERDADE.redeEscopo[papel];
         const podeIdentidade = VERDADE.redeIdentidade.includes(papel as never);
         const overview = await rpc(contas[papel]!.token, "network_geo_overview", { _filtros: {} });
-        if (podeAgregado) expect(overview.status, papel).toBe(200);
-        else expect(overview.status, papel).toBeGreaterThanOrEqual(400);
-        registrar(papel, "rede — visão agregada", podeAgregado ? "200" : "bloqueada", `HTTP ${overview.status}`);
+        if (escopoEsperado) {
+          expect(overview.status, papel).toBe(200);
+          expect((overview.body as { escopo?: string }).escopo, papel).toBe(escopoEsperado);
+        } else {
+          expect(overview.status, papel).toBeGreaterThanOrEqual(400);
+        }
+        registrar(
+          papel,
+          "rede — escopo da visão",
+          escopoEsperado ?? "bloqueada",
+          `HTTP ${overview.status} escopo=${(overview.body as { escopo?: string })?.escopo ?? "-"}`,
+        );
+
 
         const caps = capsDe.get(papel) ?? [];
         expect(caps.includes("network.identity.view"), papel).toBe(podeIdentidade);

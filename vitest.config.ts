@@ -7,6 +7,9 @@ import { defineConfig } from "vitest/config";
  * os dados da outra, então a execução é sempre sequencial.
  */
 export default defineConfig({
+  resolve: {
+    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+  },
   test: {
     fileParallelism: false,
     sequence: { concurrent: false },

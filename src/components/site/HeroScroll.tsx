@@ -36,7 +36,9 @@ export function HeroScroll() {
   const flash = phase(p, 0.3, 0.42) * (1 - phase(p, 0.42, 0.56)); // estouro de luz
   const wordmarkIn = ease(phase(p, 0.36, 0.62));
   // Passagem final: o wordmark avança na câmera e se dissolve na segunda sessão.
-  const sai = reduced ? 0 : ease(phase(p, 0.82, 1));
+  const sai = reduced ? 0 : ease(phase(p, 0.78, 0.98));
+  // O clarão se dissolve junto com o hero, para nunca deixar trecho em branco.
+  const claraoSai = phase(p, 0.9, 1);
   const varredura = phase(p, 0.46, 0.8); // fio de luz percorrendo as letras
   const mostrarBrilho = !reduced && out < 0.35;
   const sombra = (1 - wordmarkIn) * 30; // sombra longa que encurta ao assentar

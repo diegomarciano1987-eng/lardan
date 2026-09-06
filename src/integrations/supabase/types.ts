@@ -1057,6 +1057,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          is_featured: boolean
           legacy_code: string | null
           material: string | null
           measurements: string | null
@@ -1085,6 +1086,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_featured?: boolean
           legacy_code?: string | null
           material?: string | null
           measurements?: string | null
@@ -1113,6 +1115,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_featured?: boolean
           legacy_code?: string | null
           material?: string | null
           measurements?: string | null
@@ -1712,6 +1715,42 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"][]
       }
       only_digits: { Args: { _v: string }; Returns: string }
+      public_catalog_list: {
+        Args: {
+          _category_slug?: string
+          _collection_slug?: string
+          _featured?: boolean
+          _limit?: number
+          _offset?: number
+          _search?: string
+        }
+        Returns: {
+          category_name: string
+          category_slug: string
+          collection_slug: string
+          cover_alt: string
+          cover_media_id: string
+          id: string
+          is_featured: boolean
+          name: string
+          price_cents: number
+          short_description: string
+          slug: string
+          total: number
+        }[]
+      }
+      public_categories: {
+        Args: never
+        Returns: {
+          description: string
+          id: string
+          name: string
+          ordem: number
+          produtos: number
+          slug: string
+        }[]
+      }
+      public_product: { Args: { _slug: string }; Returns: Json }
       register_stock_movement:
         | {
             Args: {

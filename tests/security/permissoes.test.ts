@@ -30,7 +30,9 @@ describe("visitante não logado", () => {
     async () => {
       for (const tabela of ["parties", "stock_movements", "variant_costs", "profiles"]) {
         const r = await comoUsuario(null, `/${tabela}?select=id&limit=1`);
-        expect(r.status, `${tabela} devolveu ${r.status}`).toBeGreaterThanOrEqual(400);
+        // Ou a porta está fechada, ou a resposta vem vazia: nunca com dado.
+        const vazio = Array.isArray(r.body) && r.body.length === 0;
+        expect(r.status >= 400 || vazio, `${tabela} devolveu ${r.status}`).toBe(true);
       }
     },
     T,

@@ -17,6 +17,8 @@ interface CategoryGuillotineProps {
   enterFrom: "left" | "right";
   /** Lado onde o texto fica, para não cobrir a peça na foto. */
   align?: "left" | "right";
+  /** Lado do texto apenas no mobile (quando diferente do desktop). */
+  mobileAlign?: "left" | "right";
 }
 
 /**
@@ -35,6 +37,7 @@ export function CategoryGuillotine({
   imageAlt,
   enterFrom,
   align = "left",
+  mobileAlign,
 }: CategoryGuillotineProps) {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const p = reduced ? 1 : progress;

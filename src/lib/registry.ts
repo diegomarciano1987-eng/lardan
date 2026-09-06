@@ -329,34 +329,29 @@ export async function convertLeadToConsultant(leadId: string, partyId?: string) 
   return data as string;
 }
 
-/** Possíveis pessoas iguais, por documento ou contato. Nunca funde sozinho. */
+/**
+ * Possíveis pessoas iguais, por documento ou contato. Nunca funde sozinho e
+ * nunca devolve o documento completo para quem não tem permissão.
+ */
 export async function findPossibleDuplicates(input: {
   doc?: string | null;
   contact?: string | null;
   ignoreId?: string;
 }) {
-  const encontrados = new Map<string, Party>();
-
   const d = onlyDigits(input.doc);
-  if (d.length >= 11) {
-    const { data } = await supabase.from("parties").select("*").eq("doc_digits", d).limit(10);
-    for (const p of (data ?? []) as unknown as Party[]) encontrados.set(p.id, p);
-  }
+  const c = input.contact?.trim() ?? "";
+  if (d.length < 11 && c.length < 5) return [];
 
-  const c = input.contact?.trim();
-  if (c && c.length >= 5) {
-    const norm = c.includes("@") ? c.toLowerCase() : onlyDigits(c);
-    const { data } = await supabase.from("contact_points").select("party_id").eq("value_norm", norm).limit(10);
-    const ids = (data ?? []).map((r) => r.party_id).filter((id) => id !== input.ignoreId);
-    if (ids.length) {
-      const { data: ps } = await supabase.from("parties").select("*").in("id", ids);
-      for (const p of (ps ?? []) as unknown as Party[]) encontrados.set(p.id, p);
-    }
-  }
+  const args: Record<string, unknown> = {};
+  if (d.length >= 11) args["_doc"] = d;
+  if (c.length >= 5) args["_contact"] = c;
+  if (input.ignoreId) args["_ignore"] = input.ignoreId;
 
-  if (input.ignoreId) encontrados.delete(input.ignoreId);
-  return [...encontrados.values()];
+  const { data, error } = await supabase.rpc("find_party_duplicates", args);
+  if (error) throw error;
+  return (data ?? []) as unknown as Party[];
 }
+
 
 /** Percentual de completude honesto: só conta o que realmente existe. */
 export function completude(p: {

@@ -95,13 +95,33 @@ export function HeroScroll() {
             transformOrigin: "50% 52%",
           }}
         >
-          <img
-            src={diamanteAsset.url}
-            alt="Lardan"
-            className="w-[clamp(180px,32vw,420px)]"
-            width={624}
-            height={416}
-          />
+          <div className="relative w-[clamp(180px,32vw,420px)]">
+            <img
+              src={diamanteAsset.url}
+              alt="Lardan"
+              className="w-full"
+              width={624}
+              height={416}
+            />
+            {/* Reflexo dourado percorrendo as bordas do diamante */}
+            <div
+              aria-hidden
+              className="hero-gleam pointer-events-none absolute inset-0"
+              style={{
+                WebkitMaskImage: `url(${diamanteAsset.url})`,
+                maskImage: `url(${diamanteAsset.url})`,
+              }}
+            />
+            {/* Faísca quente que acompanha o reflexo, só nas arestas */}
+            <div
+              aria-hidden
+              className="hero-gleam-spark pointer-events-none absolute inset-0"
+              style={{
+                WebkitMaskImage: `url(${diamanteAsset.url})`,
+                maskImage: `url(${diamanteAsset.url})`,
+              }}
+            />
+          </div>
           <h1 className="sr-only">Lardan — semijoias</h1>
         </div>
 

@@ -117,9 +117,10 @@ export function PageHeader({
           <h1 className="mt-2 text-[2.375rem] leading-[1.08] font-semibold text-ledger-text md:text-[2.875rem]">
             {title}
           </h1>
-        {description && (
-          <p className="mt-2 max-w-2xl text-[0.9375rem] font-medium text-ledger-muted">{description}</p>
-        )}
+          {description && (
+            <p className="mt-2 max-w-2xl text-[0.9375rem] font-medium text-ledger-muted">{description}</p>
+          )}
+        </div>
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>

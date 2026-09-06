@@ -187,73 +187,66 @@ export interface ListPartiesParams {
   status?: PartyStatus | "todos";
 }
 
-/** Listagem paginada e ordenada no servidor. Nunca baixa a base inteira. */
+/**
+ * Listagem paginada e ordenada no servidor. O documento chega mascarado para
+ * quem não tem `registry.doc.view` — o banco decide, não a tela.
+ */
 export async function listParties(params: ListPartiesParams) {
   const { search, page, pageSize, kind, role, status } = params;
-  let ids: string[] | null = null;
-
-  if (role && role !== "todos") {
-    const { data, error } = await supabase
-      .from("party_roles")
-      .select("party_id")
-      .eq("role", role)
-      .limit(5000);
-    if (error) throw error;
-    ids = (data ?? []).map((r) => r.party_id);
-    if (ids.length === 0) return { rows: [] as Party[], total: 0 };
-  }
-
-  let q = supabase
-    .from("parties")
-    .select(
-      "id, kind, code, display_name, legal_name, social_name, doc, doc_digits, rg, rg_issuer, birth_date, profession, marital_status, notes, status, is_active, created_at, updated_at",
-      { count: "exact" },
-    )
-    .order("updated_at", { ascending: false })
-    .range(page * pageSize, page * pageSize + pageSize - 1);
-
-  if (ids) q = q.in("id", ids);
-  if (kind && kind !== "todos") q = q.eq("kind", kind);
-  if (status && status !== "todos") q = q.eq("status", status);
-
-  const termo = search.trim();
-  if (termo.length >= 2) {
-    const d = onlyDigits(termo);
-    const partes = [
-      `display_name.ilike.%${termo}%`,
-      `legal_name.ilike.%${termo}%`,
-      `social_name.ilike.%${termo}%`,
-      `code.ilike.%${termo}%`,
-    ];
-    if (d) partes.push(`doc_digits.ilike.%${d}%`);
-    q = q.or(partes.join(","));
-  }
-
-  const { data, error, count } = await q;
+  const { data, error } = await supabase.rpc("list_parties", {
+    _search: search.trim() || null,
+    _kind: kind && kind !== "todos" ? kind : null,
+    _role: role && role !== "todos" ? role : null,
+    _status: status && status !== "todos" ? status : null,
+    _limit: pageSize,
+    _offset: page * pageSize,
+  });
   if (error) throw error;
-  return { rows: (data ?? []) as unknown as Party[], total: count ?? 0 };
-}
-
-export async function getParty(id: string) {
-  const [party, contatos, enderecos, papeis, consultora, vinculos] = await Promise.all([
-    supabase.from("parties").select("*").eq("id", id).maybeSingle(),
-    supabase.from("contact_points").select("*").eq("party_id", id).order("is_primary", { ascending: false }),
-    supabase.from("party_addresses").select("*").eq("party_id", id),
-    supabase.from("party_roles").select("*").eq("party_id", id),
-    supabase.from("consultant_profiles").select("*").eq("party_id", id).maybeSingle(),
-    supabase.from("party_links").select("*").eq("party_id", id),
-  ]);
-  if (party.error) throw party.error;
-  if (!party.data) throw new Error("Cadastro não encontrado.");
+  const linhas = (data ?? []) as unknown as (Party & { total: number })[];
   return {
-    party: party.data as unknown as Party,
-    contatos: (contatos.data ?? []) as unknown as ContactPoint[],
-    enderecos: (enderecos.data ?? []) as unknown as PartyAddress[],
-    papeis: (papeis.data ?? []) as unknown as PartyRoleRow[],
-    consultora: (consultora.data ?? null) as unknown as ConsultantProfile | null,
-    vinculos: (vinculos.data ?? []) as { entity_type: string; entity_id: string }[],
+    rows: linhas.map(({ total: _total, ...p }) => p as Party),
+    total: linhas.length > 0 ? Number(linhas[0]!.total) : 0,
   };
 }
+
+export interface PartyFull {
+  party: Party & { doc_masked: string | null; doc_visivel: boolean };
+  contatos: ContactPoint[];
+  enderecos: PartyAddress[];
+  papeis: PartyRoleRow[];
+  consultora: ConsultantProfile | null;
+  vinculos: { entity_type: string; entity_id: string }[];
+  financeiroVisivel: boolean;
+}
+
+/**
+ * Ficha completa. Documento, PIX e dados bancários só saem do servidor para
+ * quem tem a permissão específica; a leitura sensível é auditada no banco.
+ */
+export async function getParty(id: string): Promise<PartyFull> {
+  const { data, error } = await supabase.rpc("get_party_full", { _id: id });
+  if (error) throw error;
+  const d = data as unknown as {
+    party: PartyFull["party"];
+    contatos: ContactPoint[];
+    enderecos: PartyAddress[];
+    papeis: PartyRoleRow[];
+    consultora: ConsultantProfile | null;
+    vinculos: { entity_type: string; entity_id: string }[];
+    financeiro_visivel: boolean;
+  } | null;
+  if (!d) throw new Error("Cadastro não encontrado.");
+  return {
+    party: d.party,
+    contatos: d.contatos ?? [],
+    enderecos: d.enderecos ?? [],
+    papeis: d.papeis ?? [],
+    consultora: d.consultora ?? null,
+    vinculos: d.vinculos ?? [],
+    financeiroVisivel: Boolean(d.financeiro_visivel),
+  };
+}
+
 
 export type PartyDraft = Partial<Omit<Party, "id" | "code" | "created_at" | "updated_at" | "doc_digits">>;
 

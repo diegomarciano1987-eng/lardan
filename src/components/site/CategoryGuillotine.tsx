@@ -147,7 +147,9 @@ export function CategoryGuillotine({
 
         <div
           className={`relative mx-auto flex h-full max-w-6xl flex-col justify-center px-6 md:px-10 ${
-            align === "right" ? "items-end text-right" : "items-start"
+            mobileSide === "right" ? "items-end text-right" : "items-start text-left"
+          } ${
+            align === "right" ? "md:items-end md:text-right" : "md:items-start md:text-left"
           }`}
         >
           <div className="max-w-md">

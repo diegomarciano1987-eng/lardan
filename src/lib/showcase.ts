@@ -403,3 +403,57 @@ export async function saveHomeCuration(blocos: HomeBloco[]) {
   );
   if (error) throw error;
 }
+
+/* ---------------------------------------------------------------------------
+ * Publicação canônica (R0.1)
+ * Nenhuma tela grava status='publicado' diretamente: o banco recusa. Toda
+ * publicação e despublicação passa por estas duas funções.
+ * ------------------------------------------------------------------------ */
+
+export interface ResultadoPublicacao {
+  afetados: number;
+  rejeitados: number;
+  itens_rejeitados: { id: string; nome: string; faltando: string[] }[];
+}
+
+export async function publicarProdutos(ids: string[], motivo?: string): Promise<ResultadoPublicacao> {
+  const { data, error } = await supabase.rpc("publish_products", {
+    _ids: ids,
+    _note: motivo ?? null,
+  } as never);
+  if (error) throw error;
+  const r = data as unknown as ResultadoPublicacao;
+  return { itens_rejeitados: [], ...r };
+}
+
+export async function despublicarProdutos(
+  ids: string[],
+  motivo?: string,
+  destino: "rascunho" | "revisao" | "arquivado" = "rascunho",
+): Promise<{ afetados: number }> {
+  const { data, error } = await supabase.rpc("unpublish_products", {
+    _ids: ids,
+    _note: motivo ?? null,
+    _para: destino,
+  } as never);
+  if (error) throw error;
+  return data as unknown as { afetados: number };
+}
+
+/** Impedimentos calculados pelo servidor para um produto. */
+export async function impedimentosPublicacao(id: string): Promise<string[]> {
+  const { data, error } = await supabase.rpc("product_publish_blockers", { _id: id } as never);
+  if (error) throw error;
+  return (data as unknown as string[] | null) ?? [];
+}
+
+export const ROTULO_IMPEDIMENTO: Record<string, string> = {
+  nome: "nome da peça",
+  slug: "endereço da página",
+  categoria: "categoria",
+  categoria_nao_publicada: "categoria ainda não publicada",
+  descricao: "descrição",
+  imagem: "imagem principal",
+  texto_alternativo: "texto alternativo da imagem",
+  preco: "preço (marcado como visível no site)",
+};

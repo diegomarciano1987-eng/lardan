@@ -187,7 +187,9 @@ function CategoriaPage() {
   }, [navigate]);
 
   const contexto = useMemo(() => ({ de: `/semijoias/${slug}`, busca }), [slug, busca]);
-  const cat = detalhe.data;
+  // Categoria ainda não publicada na Central: mantemos a composição editorial,
+  // sem inventar dados — apenas nome derivado do endereço e estado vazio honesto.
+  const cat = detalhe.data ?? (detalhe.isSuccess ? categoriaProvisoria(slug) : null);
   const ativos = contarFiltrosAtivos(busca);
 
   return (
@@ -272,6 +274,29 @@ function CategoriaPage() {
       {cat && pecas.length ? <DadosEstruturados categoria={cat} pecas={pecas} /> : null}
     </SiteLayout>
   );
+}
+
+function categoriaProvisoria(slug: string): CategoriaDetalhe {
+  const nome = slug.charAt(0).toUpperCase() + slug.slice(1);
+  return {
+    id: slug,
+    slug,
+    name: nome,
+    description: null,
+    seo_title: null,
+    seo_description: null,
+    hero_media_id: null,
+    hero_alt: null,
+    fallback_media_id: null,
+    total: 0,
+    destaques: 0,
+    tem_preco_publico: false,
+    preco_min: null,
+    preco_max: null,
+    colecoes: [],
+    materiais: [],
+    banhos: [],
+  };
 }
 
 /** Ritmo editorial: abertura ampla, pares, peça ampla, trio — sem grade repetitiva. */

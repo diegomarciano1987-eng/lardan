@@ -16,3 +16,17 @@ Contrato de execução: LARDAN-ETAPA1-ANALISE-E-PROMPT-LOVABLE.md (seção 2). S
 ## Estado
 - Lote atual: L3.2 concluído; L3.3 (cadastros-base) é o próximo.
 - Pendências de decisão: e-mail(s) autorizado(s) para bootstrap do primeiro Master (security.bootstrap); bucket `media` criado privado (política do workspace bloqueou público) — imagens públicas do site precisarão de URL assinada ou da liberação de buckets públicos no workspace.
+
+## Lote corretivo R0/R1 (prompt de 06/09/2026)
+- [x] R0.1 Publicação canônica (publish_products/unpublish_products + trava no banco + ficha e ações em massa usando a operação única)
+- [x] R0.2a get_party_full VOLATILE (registro de leitura sensível funcionando) e duplicidades sem CPF/CNPJ cru
+- [ ] R0.2b tax_id de fornecedores/entidades mascarado por RPC; unit_cost_cents oculto sem capacidade de custo
+- [ ] R0.3 elegibilidade pública única (404 real, mídia sem prazo estendido, URLs absolutas, teto de paginação, agendamento honesto)
+- [ ] R0.4 home consumindo home_curation com fallback
+- [ ] R1.1 identidade real do lote de importação (hashes/fingerprints, arquivo no bucket imports)
+- [ ] R1.2 retomada real de importação
+- [ ] R1.3 de-para completo (24 campos)
+- [ ] R1.4 escala/segurança da importação
+- [ ] R1.5 estoque: busca real, custo mascarado, promessas honestas
+- [ ] R1.6 scripts/CI e bateria de testes
+- [ ] Limpeza documental (PROGRESSO, ROADMAP-RASTREAVEL, Matriz, Evidências)

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -51,6 +52,12 @@ function ProdutosPage() {
   const [status, setStatus] = useState("todos");
   const [categoria, setCategoria] = useState("todos");
   const [novo, setNovo] = useState(false);
+
+  // Vindo de "Novo cadastro": abre o formulário de criação imediatamente.
+  const buscaUrl = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
+  useEffect(() => {
+    if (buscaUrl?.['novo']) setNovo(true);
+  }, [buscaUrl]);
 
   const categorias = useQuery({
     queryKey: ["opcoes-categorias"],

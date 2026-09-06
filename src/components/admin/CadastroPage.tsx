@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
@@ -45,6 +46,15 @@ export function CadastroPage<T extends { id: string }>({
   const [pagina, setPagina] = useState(0);
   const [aberto, setAberto] = useState(false);
   const [editando, setEditando] = useState<T | null>(null);
+
+  // Vindo de "Novo cadastro": abre o formulário de criação imediatamente.
+  const buscaUrl = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
+  useEffect(() => {
+    if (buscaUrl?.['novo']) {
+      setEditando(null);
+      setAberto(true);
+    }
+  }, [buscaUrl]);
 
   const query = useQuery({
     queryKey: [table, busca, pagina],

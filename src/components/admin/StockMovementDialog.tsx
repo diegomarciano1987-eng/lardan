@@ -176,16 +176,30 @@ export function StockMovementDialog({
             </Campo>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Campo label={kind === "inventario" ? "Quantidade contada" : "Quantidade"}>
+              <Campo
+                label={
+                  kind === "inventario"
+                    ? "Quantidade contada"
+                    : aceitaNegativo
+                      ? "Quantidade (use - para corrigir para menos)"
+                      : "Quantidade"
+                }
+              >
                 <input
-                  inputMode="numeric"
+                  inputMode={aceitaNegativo ? "text" : "numeric"}
                   value={quantidade}
-                  onChange={(e) => setQuantidade(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) =>
+                    setQuantidade(
+                      aceitaNegativo
+                        ? e.target.value.replace(/[^\d-]/g, "").replace(/(?!^)-/g, "")
+                        : e.target.value.replace(/\D/g, ""),
+                    )
+                  }
                   placeholder="0"
                   className={inputCls}
                 />
               </Campo>
-              <Campo label="Motivo">
+              <Campo label={motivoObrigatorio ? "Motivo" : "Motivo (opcional)"}>
                 <SmartSelect
                   options={opcoesMotivos}
                   value={motivo}
@@ -194,6 +208,7 @@ export function StockMovementDialog({
                   emptyLabel="Sem motivos para este tipo"
                 />
               </Campo>
+
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

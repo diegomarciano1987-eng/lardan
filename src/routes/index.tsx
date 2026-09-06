@@ -45,7 +45,9 @@ function HomePage() {
         title="Anéis"
         categoria="aneis"
         image={aneisAsset}
+        imageWebp="/img/lardan-categoria-aneis.webp"
         mobileImage={aneisMobileAsset}
+        mobileImageWebp="/img/lardan-mobile-aneis.webp"
         imageAlt="Anel de semijoia Lardan sobre onda de vidro transparente"
         enterFrom="right"
         align="left"
@@ -54,7 +56,9 @@ function HomePage() {
         title="Colares"
         categoria="colares"
         image={colaresAsset}
+        imageWebp="/img/lardan-categoria-colares.webp"
         mobileImage={colaresMobileAsset}
+        mobileImageWebp="/img/sessao_colares_mobile.webp"
         imageAlt="Colar de semijoia Lardan sobre formas de vidro"
         enterFrom="left"
         align="left"
@@ -64,7 +68,9 @@ function HomePage() {
         subtitle="braceletes"
         categoria="pulseiras"
         image={pulseirasFundoAsset}
+        imageWebp="/img/lardan-pulseiras-fundo-novo.webp"
         mobileImage={pulseirasMobileAsset}
+        mobileImageWebp="/img/lardan-mobile-pulseiras.webp"
         imageAlt="Pulseiras e bracelete Lardan em ouro sobre bandeja de vidro"
         enterFrom="right"
         align="right"
@@ -73,7 +79,9 @@ function HomePage() {
         title="Brincos"
         categoria="brincos"
         image={brincosFundoAsset}
+        imageWebp="/img/lardan-brincos-fundo-novo.webp"
         mobileImage={brincosMobileAsset}
+        mobileImageWebp="/img/lardan-mobile-brincos.webp"
         imageAlt="Brincos Lardan em ouro com brilhantes sobre onda de vidro"
         enterFrom="left"
         align="right"

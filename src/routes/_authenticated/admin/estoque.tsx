@@ -165,12 +165,18 @@ function EstoquePage() {
       className: "text-right tabular-nums",
       render: (r) => formatInt(r.quantity),
     },
-    {
-      key: "custo",
-      header: "Custo unit.",
-      className: "text-right tabular-nums",
-      render: (r) => (r.unit_cost_cents ? formatBRLFromCents(r.unit_cost_cents) : "—"),
-    },
+    // O custo só existe na tela quando o servidor autorizou (stock.cost.view).
+    ...(movimentos.data?.podeVerCusto
+      ? [
+          {
+            key: "custo",
+            header: "Custo unit.",
+            className: "text-right tabular-nums",
+            render: (r: MovementRow) =>
+              r.unit_cost_cents ? formatBRLFromCents(r.unit_cost_cents) : "—",
+          },
+        ]
+      : []),
     {
       key: "saldo",
       header: "Saldo após",

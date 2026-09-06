@@ -161,7 +161,7 @@ export function CategoryGuillotine({
             </h2>
             {subtitle && (
               <p
-                className="mt-2 text-sm font-light uppercase tracking-[0.35em] text-foreground/60 max-md:!text-background/70"
+                className="mt-3 text-xs font-extralight uppercase tracking-[0.45em] text-foreground/50 max-md:!text-background/60"
                 style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 20}px)` }}
               >
                 {subtitle}

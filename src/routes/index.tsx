@@ -67,7 +67,7 @@ function HomePage() {
         mobileImage={pulseirasMobileAsset}
         imageAlt="Pulseiras e bracelete Lardan em ouro sobre bandeja de vidro"
         enterFrom="right"
-        align="left"
+        align="right"
       />
       <CategoryGuillotine
         title="Brincos"

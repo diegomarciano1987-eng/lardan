@@ -19,11 +19,14 @@ import sessao2MobileAsset from "@/assets/lardan-mobile-sessao2.png.asset.json";
 export function SessaoSemijoias() {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const tier = useDeviceTier();
-  const slats = tier === "leve" ? 8 : 14;
+  const leve = tier === "leve";
+  const slats = leve ? 8 : 18;
   const p = reduced ? 1 : progress;
 
   const reveal = phase(p, 0.02, 0.55);
   const imgScale = 1.28 - 0.28 * ease(phase(p, 0, 0.7));
+  // Desfoque da foto que se dissolve conforme as lâminas se retraem (só desktop).
+  const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0, 0.5))) * 8);
   const line = (start: number) => easeOut(phase(p, start, start + 0.16));
   const lines = [line(0.42), line(0.48), line(0.54), line(0.6), line(0.66)] as const;
   const emMovimento = reveal > 0.001 && reveal < 0.999;
@@ -43,7 +46,10 @@ export function SessaoSemijoias() {
             src={sessao2Asset.url}
             alt="Mulher usando colar, brincos e pulseira Lardan sobre ondas de vidro"
             className="gpu-layer absolute inset-0 h-full w-full object-cover"
-            style={{ transform: `scale(${imgScale}) translateZ(0)` }}
+            style={{
+              transform: `scale(${imgScale}) translateZ(0)`,
+              filter: imgBlur > 0 ? `blur(${imgBlur}px)` : undefined,
+            }}
             loading="lazy"
             decoding="async"
             width={1664}
@@ -52,8 +58,8 @@ export function SessaoSemijoias() {
         </picture>
 
         {/* Lâminas de vidro que se retraem em cascata do centro para as bordas.
-            Só transform e opacidade: nada de desfoque ou sombra por lâmina,
-            que é o que trava a rolagem no Safari e em máquinas mais fracas. */}
+            No desktop ganham borda esfumaçada e fio de luz no topo; em
+            aparelhos fracos, só transform/opacidade para não travar a rolagem. */}
         {reveal < 0.999 && (
           <div aria-hidden className="pointer-events-none absolute inset-0 flex">
             {Array.from({ length: slats }).map((_, i) => {
@@ -61,13 +67,19 @@ export function SessaoSemijoias() {
               const start = 0.06 * (1 - fromCenter);
               const t = easeOut(phase(reveal, start, start + 0.9));
               const lead = 1 - t;
+              const fio = Math.max(0, lead * (1 - lead)) * 4; // brilho na frente de recolhimento
               return (
                 <div
                   key={i}
                   className="-mx-px h-full flex-1 origin-top bg-background"
                   style={{
-                    transform: `scaleY(${lead}) translate3d(0, ${t * -6}%, 0)`,
+                    transform: `scaleY(${lead}) translate3d(0, ${t * -6}%, 0) translateZ(0)`,
                     opacity: 1 - t * 0.15,
+                    filter: !leve && emMovimento ? `blur(${(lead * 6).toFixed(1)}px)` : undefined,
+                    boxShadow:
+                      !leve && fio > 0.02
+                        ? `0 -14px 32px -14px oklch(0.25 0.015 30 / ${(0.4 * fio).toFixed(2)}), inset 0 -1px 0 oklch(1 0 0 / ${(0.25 * fio).toFixed(2)})`
+                        : undefined,
                     willChange: emMovimento ? "transform" : "auto",
                   }}
                 />

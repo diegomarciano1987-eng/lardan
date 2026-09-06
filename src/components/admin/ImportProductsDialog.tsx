@@ -1,8 +1,7 @@
 import * as React from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, FileSpreadsheet, Upload } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Download, FileSpreadsheet, Upload } from "lucide-react";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
 import {
   Dialog,
   DialogContent,
@@ -11,118 +10,45 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { supabase } from "@/integrations/supabase/client";
-import { listStockLocations } from "@/lib/stock";
-import { parseCentavos } from "@/lib/catalog";
+import { DateField } from "@/components/premium/DateField";
+import { listStockLocations, listStockReasons } from "@/lib/stock";
 import { formatInt } from "@/components/admin/ui";
+import {
+  CAMPOS,
+  type CampoKey,
+  type JobResumo,
+  type LinhaProblema,
+  abrirLote,
+  baixarModelo,
+  baixarPlanilhaDeErros,
+  cancelarLote,
+  enviarLinhas,
+  lerLote,
+  lerPlanilha,
+  listarProblemas,
+  processarLote,
+  sugerirMapeamento,
+  validarLote,
+} from "@/lib/imports";
 
-interface LinhaImport {
-  nome: string;
-  sku: string;
-  codigo_barras: string;
-  categoria: string;
-  colecao: string;
-  quantidade: number;
-  custo_cents: number | null;
-  preco_cents: number | null;
-  cor: string;
-  tamanho: string;
+type Etapa = "arquivo" | "mapa" | "conferencia" | "processando" | "fim";
+
+const inputCls =
+  "h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm font-medium text-ledger-text shadow-sm outline-none placeholder:font-normal placeholder:text-ledger-muted focus:border-champagne focus:ring-2 focus:ring-champagne/25";
+
+const LOTE_ENVIO = 400;
+const LOTE_VALIDA = 500;
+const LOTE_PROCESSA = 150;
+
+function Rotulo({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase">
+      {children}
+    </span>
+  );
 }
 
-interface ResultadoImport {
-  produtos_criados: number;
-  variantes_criadas: number;
-  variantes_atualizadas: number;
-  unidades_entradas: number;
-  erros: { linha: number; erro: string }[];
-}
-
-/** Reconhece cabeçalhos com ou sem acento, maiúsculas ou variações comuns. */
-function normalizarCabecalho(h: string) {
-  return h
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-const MAPA_COLUNAS: [keyof LinhaImport, string[]][] = [
-  ["nome", ["nome", "produto", "nome do produto", "descricao", "peca"]],
-  ["sku", ["sku", "codigo", "codigo interno", "referencia", "ref"]],
-  ["codigo_barras", ["codigo de barras", "barcode", "ean", "gtin", "cod barras"]],
-  ["categoria", ["categoria"]],
-  ["colecao", ["colecao", "linha"]],
-  ["quantidade", ["quantidade", "qtd", "estoque", "saldo", "quantidades"]],
-  ["custo_cents", ["valor de custo", "custo", "preco de custo", "valor custo"]],
-  ["preco_cents", ["preco", "valor", "preco de venda", "valor de venda", "preco venda"]],
-  ["cor", ["cor"]],
-  ["tamanho", ["tamanho", "tam"]],
-];
-
-function parsePlanilha(buffer: ArrayBuffer): LinhaImport[] {
-  const wb = XLSX.read(buffer, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]!];
-  if (!sheet) return [];
-  const bruto = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });
-  const linhas: LinhaImport[] = [];
-
-  for (const reg of bruto) {
-    const porCabecalho = new Map<string, unknown>();
-    for (const [k, v] of Object.entries(reg)) porCabecalho.set(normalizarCabecalho(k), v);
-
-    const pega = (chave: keyof LinhaImport): string => {
-      const aliases = MAPA_COLUNAS.find(([c]) => c === chave)?.[1] ?? [];
-      for (const a of aliases) {
-        const v = porCabecalho.get(a);
-        if (v !== undefined && v !== null && String(v).trim() !== "") return String(v).trim();
-      }
-      return "";
-    };
-
-    const nome = pega("nome");
-    if (!nome) continue;
-    const qtd = Number(String(pega("quantidade")).replace(",", "."));
-    linhas.push({
-      nome,
-      sku: pega("sku"),
-      codigo_barras: pega("codigo_barras"),
-      categoria: pega("categoria"),
-      colecao: pega("colecao"),
-      quantidade: Number.isFinite(qtd) && qtd > 0 ? Math.floor(qtd) : 0,
-      custo_cents: parseCentavos(pega("custo_cents")),
-      preco_cents: parseCentavos(pega("preco_cents")),
-      cor: pega("cor"),
-      tamanho: pega("tamanho"),
-    });
-  }
-  return linhas;
-}
-
-/** Gera e baixa a planilha-modelo com cabeçalhos oficiais e uma linha de exemplo. */
-function baixarModelo() {
-  const dados = [
-    {
-      "Nome do produto": "Anel Solitário Cristal",
-      SKU: "AN-001",
-      "Código de barras": "7890000000017",
-      Categoria: "Anéis",
-      "Coleção": "Clássicos",
-      Quantidade: 10,
-      "Valor de custo": "29,90",
-      "Preço de venda": "79,90",
-      Cor: "Dourado",
-      Tamanho: "17",
-    },
-  ];
-  const ws = XLSX.utils.json_to_sheet(dados);
-  ws["!cols"] = [32, 12, 18, 14, 14, 11, 14, 15, 12, 10].map((w) => ({ wch: w }));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Produtos");
-  XLSX.writeFile(wb, "modelo-importacao-produtos-lardan.xlsx");
-}
-
-/** Importação em massa de produtos com entrada de estoque, tudo gravado pelo banco. */
+/** Importação industrial: arquivo → de-para → conferência → gravação em lotes. */
 export function ImportProductsDialog({
   open,
   onOpenChange,
@@ -131,235 +57,462 @@ export function ImportProductsDialog({
   onOpenChange: (v: boolean) => void;
 }) {
   const qc = useQueryClient();
-  const [linhas, setLinhas] = React.useState<LinhaImport[]>([]);
-  const [arquivo, setArquivo] = React.useState("");
-  const [localId, setLocalId] = React.useState("");
-  const [resultado, setResultado] = React.useState<ResultadoImport | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  /** "entrada" também lança estoque; "catalogo" só cadastra as peças. */
+  const cancelar = React.useRef(false);
+
+  const [etapa, setEtapa] = React.useState<Etapa>("arquivo");
+  const [arquivo, setArquivo] = React.useState<File | null>(null);
+  const [cabecalhos, setCabecalhos] = React.useState<string[]>([]);
+  const [linhas, setLinhas] = React.useState<Record<string, string>[]>([]);
+  const [mapa, setMapa] = React.useState<Partial<Record<CampoKey, string>>>({});
+
   const [modo, setModo] = React.useState<"entrada" | "catalogo">("entrada");
-  /** Chave do lote: reenviar a mesma planilha não duplica entradas. */
+  const [simular, setSimular] = React.useState(false);
+  const [localId, setLocalId] = React.useState("");
+  const [dataOp, setDataOp] = React.useState<Date | undefined>(new Date());
+  const [motivo, setMotivo] = React.useState("");
+  const [documento, setDocumento] = React.useState("");
+
+  const [jobId, setJobId] = React.useState<string | null>(null);
+  const [resumo, setResumo] = React.useState<JobResumo | null>(null);
+  const [problemas, setProblemas] = React.useState<LinhaProblema[]>([]);
+  const [progresso, setProgresso] = React.useState({ feitas: 0, total: 0 });
+  const [ocupado, setOcupado] = React.useState<string | null>(null);
+
   const chave = React.useRef(crypto.randomUUID());
   React.useEffect(() => {
     if (open) chave.current = crypto.randomUUID();
   }, [open]);
 
   const locais = useQuery({ queryKey: ["stock-locations"], queryFn: listStockLocations });
+  const motivos = useQuery({ queryKey: ["stock-reasons"], queryFn: listStockReasons });
 
+  function reiniciar() {
+    setEtapa("arquivo");
+    setArquivo(null);
+    setCabecalhos([]);
+    setLinhas([]);
+    setMapa({});
+    setJobId(null);
+    setResumo(null);
+    setProblemas([]);
+    setProgresso({ feitas: 0, total: 0 });
+    setOcupado(null);
+    cancelar.current = false;
+    chave.current = crypto.randomUUID();
+  }
 
-  const importar = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.rpc("import_products_stock" as never, {
-        _rows: linhas,
-        _location_id: localId || null,
-        _mode: modo,
-        _job_key: chave.current,
-      } as never);
-      if (error) throw error;
-      return data as unknown as ResultadoImport;
-    },
-    onSuccess: (r) => {
-      setResultado(r);
-      void qc.invalidateQueries({ queryKey: ["stock"] });
-      void qc.invalidateQueries({ queryKey: ["products"] });
-      if (r.erros.length === 0) {
-        toast.success(
-          `Importação concluída: ${formatInt(r.produtos_criados)} produtos, ${formatInt(r.unidades_entradas)} unidades.`,
-        );
-      } else {
-        toast.warning(`Importação parcial: ${r.erros.length} linha(s) com erro.`);
-      }
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const aoEscolherArquivo = async (file: File) => {
-    setArquivo(file.name);
-    setResultado(null);
-    try {
-      const buf = await file.arrayBuffer();
-      const lidas = parsePlanilha(buf);
-      setLinhas(lidas);
-      if (lidas.length === 0) {
-        toast.error("Nenhuma linha com nome de produto foi encontrada na planilha.");
-      }
-    } catch {
-      toast.error("Não consegui ler este arquivo. Use .xlsx ou .csv.");
-      setLinhas([]);
-    }
-  };
-
-  const fechar = (v: boolean) => {
+  function fechar(v: boolean) {
     if (!v) {
-      setLinhas([]);
-      setArquivo("");
-      setResultado(null);
+      cancelar.current = true;
+      reiniciar();
     }
     onOpenChange(v);
-  };
+  }
 
-  const totalUnidades = linhas.reduce((acc, l) => acc + l.quantidade, 0);
+  async function aoEscolherArquivo(file: File) {
+    try {
+      const lida = lerPlanilha(await file.arrayBuffer());
+      if (lida.linhas.length === 0) {
+        toast.error("Não encontrei nenhuma linha preenchida nesta planilha.");
+        return;
+      }
+      setArquivo(file);
+      setCabecalhos(lida.cabecalhos);
+      setLinhas(lida.linhas);
+      setMapa(sugerirMapeamento(lida.cabecalhos));
+      setEtapa("mapa");
+    } catch {
+      toast.error("Não consegui ler este arquivo. Use .xlsx, .xls ou .csv.");
+    }
+  }
+
+  async function conferir() {
+    if (!arquivo) return;
+    if (!mapa.nome) {
+      toast.error("Indique qual coluna tem o nome do produto.");
+      return;
+    }
+    if (!mapa.sku && !mapa.ean && !mapa.codigo_legado) {
+      toast.error("Indique ao menos uma coluna de código: SKU, código legado ou código de barras.");
+      return;
+    }
+    if (modo === "entrada" && (!localId || !dataOp || !documento.trim())) {
+      toast.error("Para dar entrada informe local, data da operação e documento.");
+      return;
+    }
+    try {
+      setOcupado("Preparando o lote…");
+      const id = await abrirLote({
+        jobKey: chave.current,
+        fileName: arquivo.name,
+        fileSize: arquivo.size,
+        mode: modo,
+        mapping: mapa as Record<string, string>,
+        defaults: {},
+        locationId: modo === "entrada" ? localId : null,
+        operationDate: modo === "entrada" && dataOp ? dataOp.toISOString().slice(0, 10) : null,
+        reasonCode: motivo || null,
+        reference: documento.trim() || null,
+        dryRun: simular,
+      });
+      setJobId(id);
+
+      for (let i = 0; i < linhas.length; i += LOTE_ENVIO) {
+        setOcupado(`Enviando linhas ${formatInt(i + 1)}–${formatInt(Math.min(i + LOTE_ENVIO, linhas.length))}…`);
+        await enviarLinhas(
+          id,
+          linhas.slice(i, i + LOTE_ENVIO).map((raw, k) => ({ n: i + k + 1, raw })),
+        );
+      }
+
+      let restantes = 1;
+      while (restantes > 0 && !cancelar.current) {
+        const r = await validarLote(id, LOTE_VALIDA);
+        restantes = r.restantes;
+        setOcupado(`Conferindo… ${formatInt(linhas.length - restantes)} de ${formatInt(linhas.length)}`);
+      }
+
+      setResumo(await lerLote(id));
+      setProblemas(await listarProblemas(id));
+      setEtapa("conferencia");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setOcupado(null);
+    }
+  }
+
+  async function gravar() {
+    if (!jobId || !resumo) return;
+    cancelar.current = false;
+    setEtapa("processando");
+    const total = resumo.ok_rows + resumo.warn_rows;
+    setProgresso({ feitas: 0, total });
+    let feitas = 0;
+    try {
+      let restantes = 1;
+      while (restantes > 0 && !cancelar.current) {
+        const r = await processarLote(jobId, LOTE_PROCESSA);
+        feitas += r.processadas + r.erros_no_lote;
+        restantes = r.restantes;
+        setProgresso({ feitas, total });
+      }
+      setResumo(await lerLote(jobId));
+      setProblemas(await listarProblemas(jobId));
+      setEtapa("fim");
+      void qc.invalidateQueries({ queryKey: ["stock"] });
+      void qc.invalidateQueries({ queryKey: ["products"] });
+      void qc.invalidateQueries({ queryKey: ["catalog"] });
+      toast.success(simular ? "Simulação concluída." : "Importação concluída.");
+    } catch (e) {
+      toast.error((e as Error).message);
+      setEtapa("conferencia");
+    }
+  }
+
+  async function interromper() {
+    cancelar.current = true;
+    if (jobId) {
+      try {
+        await cancelarLote(jobId);
+        setResumo(await lerLote(jobId));
+      } catch (e) {
+        toast.error((e as Error).message);
+      }
+    }
+    setEtapa("fim");
+  }
+
+  const aptas = (resumo?.ok_rows ?? 0) + (resumo?.warn_rows ?? 0);
 
   return (
     <Dialog open={open} onOpenChange={fechar}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="admin-scope max-h-[88vh] max-w-4xl overflow-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">Importar produtos por planilha</DialogTitle>
           <DialogDescription>
-            Envie um Excel (.xlsx) ou CSV com as colunas: nome do produto, SKU, categoria, coleção,
-            código de barras, quantidade, valor de custo e preço. Peças com SKU ou código de barras
-            já cadastrados são apenas atualizadas — nada é duplicado.
+            Quatro passos: enviar o arquivo, conferir o de-para das colunas, revisar o que o sistema
+            entendeu e só então gravar. Peças já cadastradas são atualizadas — nada é duplicado, e
+            reenviar o mesmo lote não lança estoque duas vezes.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5">
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="w-64">
-              <span className="text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase">
-                Planilha
-              </span>
-              <input
-                ref={inputRef}
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void aoEscolherArquivo(f);
-                  e.target.value = "";
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                className="admin-btn mt-1.5"
-              >
-                <FileSpreadsheet aria-hidden className="mr-2 inline size-4" />
-                {arquivo || "Escolher arquivo"}
-              </button>
-              <button
-                type="button"
-                onClick={baixarModelo}
-                className="admin-btn mt-1.5 ml-2"
-                title="Baixa uma planilha pronta com as colunas certas e um exemplo preenchido"
-              >
-                <Download aria-hidden className="mr-2 inline size-4" />
-                Baixar modelo
-              </button>
+        {/* Passo 1 — arquivo */}
+        {etapa === "arquivo" && (
+          <div className="space-y-4">
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void aoEscolherArquivo(f);
+                e.target.value = "";
+              }}
+            />
+            <div className="ledger-panel flex flex-col items-center gap-3 px-6 py-10 text-center">
+              <FileSpreadsheet aria-hidden className="size-8 text-bronze" />
+              <p className="text-sm text-ledger-muted">
+                Excel (.xlsx, .xls) ou CSV. Códigos com zeros à esquerda são preservados.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <button type="button" className="admin-btn-primary" onClick={() => inputRef.current?.click()}>
+                  <Upload aria-hidden className="mr-2 inline size-4" />
+                  Escolher arquivo
+                </button>
+                <button type="button" className="admin-btn" onClick={baixarModelo}>
+                  <Download aria-hidden className="mr-2 inline size-4" />
+                  Baixar modelo
+                </button>
+              </div>
             </div>
-            <label className="block w-56 space-y-1.5">
-              <span className="text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase">
-                O que a planilha faz
-              </span>
-              <SmartSelect
-                options={[
-                  { value: "entrada", label: "Cadastrar e dar entrada no estoque" },
-                  { value: "catalogo", label: "Somente cadastrar as peças" },
-                ]}
-                value={modo}
-                onChange={(v) => setModo(v as "entrada" | "catalogo")}
-              />
-            </label>
-            {modo === "entrada" && (
+          </div>
+        )}
+
+        {/* Passo 2 — de-para e regras do lote */}
+        {etapa === "mapa" && (
+          <div className="space-y-5">
+            <p className="text-sm text-ledger-muted">
+              <strong className="text-ledger-text">{arquivo?.name}</strong> · {formatInt(linhas.length)}{" "}
+              linhas · {formatInt(cabecalhos.length)} colunas.
+            </p>
+
+            <div className="flex flex-wrap gap-4">
               <label className="block w-64 space-y-1.5">
-                <span className="text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase">
-                  Local de entrada do estoque
-                </span>
+                <Rotulo>O que a planilha faz</Rotulo>
                 <SmartSelect
-                  options={(locais.data ?? []).map((l) => ({
-                    value: l.id,
-                    label: l.name,
-                    hint: l.code,
-                  }))}
-                  value={localId}
-                  onChange={setLocalId}
-                  placeholder="Escolha o local…"
+                  options={[
+                    { value: "entrada", label: "Cadastrar e dar entrada no estoque" },
+                    { value: "catalogo", label: "Somente cadastrar as peças" },
+                  ]}
+                  value={modo}
+                  onChange={(v) => setModo(v as "entrada" | "catalogo")}
                 />
               </label>
-            )}
+              <label className="block w-56 space-y-1.5">
+                <Rotulo>Modo</Rotulo>
+                <SmartSelect
+                  options={[
+                    { value: "real", label: "Gravar de verdade" },
+                    { value: "simular", label: "Simular (não grava nada)" },
+                  ]}
+                  value={simular ? "simular" : "real"}
+                  onChange={(v) => setSimular(v === "simular")}
+                />
+              </label>
+              {modo === "entrada" && (
+                <>
+                  <label className="block w-56 space-y-1.5">
+                    <Rotulo>Local de entrada</Rotulo>
+                    <SmartSelect
+                      options={(locais.data ?? []).map((l) => ({ value: l.id, label: l.name, hint: l.code }))}
+                      value={localId}
+                      onChange={setLocalId}
+                      placeholder="Escolha o local…"
+                    />
+                  </label>
+                  <label className="block w-48 space-y-1.5">
+                    <Rotulo>Data da operação</Rotulo>
+                    <DateField value={dataOp} onChange={setDataOp} />
+                  </label>
+                  <label className="block w-56 space-y-1.5">
+                    <Rotulo>Motivo</Rotulo>
+                    <SmartSelect
+                      options={(motivos.data ?? [])
+                        .filter((m) => m.kind === "entrada")
+                        .map((m) => ({ value: m.code, label: m.label }))}
+                      value={motivo}
+                      onChange={setMotivo}
+                      placeholder="Opcional"
+                    />
+                  </label>
+                  <label className="block w-56 space-y-1.5">
+                    <Rotulo>Documento / referência</Rotulo>
+                    <input
+                      className={inputCls}
+                      value={documento}
+                      onChange={(e) => setDocumento(e.target.value)}
+                      placeholder="Nota, pedido ou remessa"
+                    />
+                  </label>
+                </>
+              )}
+            </div>
 
+            <div className="ledger-panel max-h-72 overflow-auto p-4">
+              <p className="mb-3 text-sm font-semibold text-ledger-text">
+                De-para das colunas — confira antes de seguir
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {CAMPOS.map((c) => (
+                  <label key={c.key} className="space-y-1">
+                    <Rotulo>
+                      {c.label}
+                      {"obrigatorio" in c && c.obrigatorio ? " *" : ""}
+                    </Rotulo>
+                    <SmartSelect
+                      options={[
+                        { value: "", label: "— não usar —" },
+                        ...cabecalhos.map((h) => ({ value: h, label: h })),
+                      ]}
+                      value={mapa[c.key] ?? ""}
+                      onChange={(v) => setMapa((m) => ({ ...m, [c.key]: v }))}
+                      placeholder="Escolha a coluna…"
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button type="button" className="admin-btn" onClick={reiniciar} disabled={!!ocupado}>
+                Trocar arquivo
+              </button>
+              <button type="button" className="admin-btn-primary" onClick={() => void conferir()} disabled={!!ocupado}>
+                {ocupado ?? "Conferir planilha"}
+              </button>
+            </div>
           </div>
+        )}
 
-          {linhas.length > 0 && !resultado && (
-            <>
-              <div className="ledger-panel max-h-72 overflow-auto">
+        {/* Passo 3 — conferência */}
+        {etapa === "conferencia" && resumo && (
+          <div className="space-y-4">
+            <div className="ledger-panel grid grid-cols-2 gap-4 px-5 py-4 sm:grid-cols-4">
+              <div>
+                <Rotulo>Linhas lidas</Rotulo>
+                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(resumo.total_rows)}</p>
+              </div>
+              <div>
+                <Rotulo>Prontas</Rotulo>
+                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(resumo.ok_rows)}</p>
+              </div>
+              <div>
+                <Rotulo>Com aviso</Rotulo>
+                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(resumo.warn_rows)}</p>
+              </div>
+              <div>
+                <Rotulo>Recusadas</Rotulo>
+                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(resumo.error_rows)}</p>
+              </div>
+            </div>
+
+            {problemas.length > 0 && (
+              <div className="ledger-panel max-h-64 overflow-auto">
+                <p className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-ledger-text">
+                  <AlertTriangle aria-hidden className="size-4 text-bronze" />
+                  Linhas que não serão gravadas
+                </p>
                 <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase">
-                      <th className="px-3 py-2">Produto</th>
-                      <th className="px-3 py-2">SKU</th>
-                      <th className="px-3 py-2">Categoria</th>
-                      <th className="px-3 py-2 text-right">Qtd.</th>
-                      <th className="px-3 py-2 text-right">Custo</th>
-                    </tr>
-                  </thead>
                   <tbody>
-                    {linhas.slice(0, 50).map((l, i) => (
-                      <tr key={i} className="border-t border-line/60">
-                        <td className="px-3 py-2 font-medium text-ledger-text">{l.nome}</td>
-                        <td className="px-3 py-2 text-ledger-muted">{l.sku || "—"}</td>
-                        <td className="px-3 py-2 text-ledger-muted">{l.categoria || "—"}</td>
-                        <td className="px-3 py-2 text-right tabular-nums">{formatInt(l.quantidade)}</td>
-                        <td className="px-3 py-2 text-right tabular-nums text-ledger-muted">
-                          {l.custo_cents !== null
-                            ? `R$ ${(l.custo_cents / 100).toFixed(2).replace(".", ",")}`
-                            : "—"}
+                    {problemas.slice(0, 60).map((p) => (
+                      <tr key={p.line_no} className="border-t border-line/60">
+                        <td className="w-16 px-4 py-2 tabular-nums text-ledger-muted">#{p.line_no}</td>
+                        <td className="px-4 py-2 text-ledger-text">
+                          {(p.messages ?? []).map((m) => m.erro ?? m.aviso).filter(Boolean).join(" · ")}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                {linhas.length > 50 && (
-                  <p className="px-3 py-2 text-xs text-ledger-muted">
-                    … e mais {formatInt(linhas.length - 50)} linhas.
+                {problemas.length > 60 && (
+                  <p className="px-4 py-2 text-xs text-ledger-muted">
+                    … e mais {formatInt(problemas.length - 60)} linhas na planilha de recusadas.
                   </p>
                 )}
               </div>
-              <p className="text-sm text-ledger-muted">
-                {formatInt(linhas.length)} produtos lidos · {formatInt(totalUnidades)} unidades
-                entrarão no local escolhido.
-              </p>
-            </>
-          )}
-
-          {resultado && (
-            <div className="ledger-panel space-y-2 px-5 py-4 text-sm">
-              <p className="font-semibold text-ledger-text">Resultado da importação</p>
-              <p className="text-ledger-muted">
-                {formatInt(resultado.produtos_criados)} produtos criados ·{" "}
-                {formatInt(resultado.variantes_criadas)} variações novas ·{" "}
-                {formatInt(resultado.variantes_atualizadas)} variações atualizadas ·{" "}
-                {formatInt(resultado.unidades_entradas)} unidades lançadas no estoque.
-              </p>
-              {resultado.erros.length > 0 && (
-                <ul className="list-inside list-disc text-xs text-red-700">
-                  {resultado.erros.slice(0, 10).map((e, i) => (
-                    <li key={i}>
-                      Linha {e.linha + 1}: {e.erro}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-
-          <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => fechar(false)} className="admin-btn">
-              {resultado ? "Fechar" : "Cancelar"}
-            </button>
-            {!resultado && (
-              <button
-                type="button"
-                className="admin-btn-primary"
-                disabled={linhas.length === 0 || (modo === "entrada" && !localId) || importar.isPending}
-                onClick={() => importar.mutate()}
-              >
-                <Upload aria-hidden className="mr-2 inline size-4" />
-                {importar.isPending ? "Importando…" : "Importar agora"}
-              </button>
             )}
+
+            <div className="flex flex-wrap justify-end gap-3">
+              {problemas.length > 0 && (
+                <button
+                  type="button"
+                  className="admin-btn"
+                  onClick={() => baixarPlanilhaDeErros(problemas, "linhas-recusadas-lardan.xlsx")}
+                >
+                  <Download aria-hidden className="mr-2 inline size-4" />
+                  Baixar linhas recusadas
+                </button>
+              )}
+              <button type="button" className="admin-btn" onClick={() => setEtapa("mapa")}>
+                Voltar ao de-para
+              </button>
+              <button type="button" className="admin-btn-primary" disabled={aptas === 0} onClick={() => void gravar()}>
+                {simular
+                  ? `Simular ${formatInt(aptas)} linhas`
+                  : `Gravar ${formatInt(aptas)} linhas`}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Passo 4 — gravando */}
+        {etapa === "processando" && (
+          <div className="space-y-4">
+            <p className="text-sm text-ledger-muted">
+              Gravando em lotes de {LOTE_PROCESSA} linhas. Uma linha com problema não derruba as
+              demais e você pode interromper a qualquer momento.
+            </p>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-line/60">
+              <div
+                className="h-full bg-ink transition-all"
+                style={{
+                  width: `${progresso.total ? Math.min(100, (progresso.feitas / progresso.total) * 100) : 0}%`,
+                }}
+              />
+            </div>
+            <p className="text-sm text-ledger-text">
+              {formatInt(progresso.feitas)} de {formatInt(progresso.total)} linhas.
+            </p>
+            <div className="flex justify-end">
+              <button type="button" className="admin-btn" onClick={() => void interromper()}>
+                Interromper
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Resultado */}
+        {etapa === "fim" && resumo && (
+          <div className="space-y-4">
+            <div className="ledger-panel space-y-2 px-5 py-4 text-sm">
+              <p className="font-semibold text-ledger-text">
+                {resumo.dry_run ? "Resultado da simulação" : "Resultado da importação"}
+              </p>
+              <p className="text-ledger-muted">
+                {formatInt(resumo.products_created)} produtos criados ·{" "}
+                {formatInt(resumo.products_updated)} atualizados ·{" "}
+                {formatInt(resumo.variants_created)} variações novas ·{" "}
+                {formatInt(resumo.variants_updated)} variações atualizadas ·{" "}
+                {formatInt(resumo.stock_entries)} entradas · {formatInt(resumo.units_in)} unidades.
+              </p>
+              <p className="text-ledger-muted">
+                {formatInt(resumo.processed_rows)} linhas gravadas · {formatInt(resumo.error_rows)}{" "}
+                recusadas.
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-end gap-3">
+              {problemas.length > 0 && (
+                <button
+                  type="button"
+                  className="admin-btn"
+                  onClick={() => baixarPlanilhaDeErros(problemas, "linhas-recusadas-lardan.xlsx")}
+                >
+                  <Download aria-hidden className="mr-2 inline size-4" />
+                  Baixar linhas recusadas
+                </button>
+              )}
+              <button type="button" className="admin-btn" onClick={reiniciar}>
+                Importar outra planilha
+              </button>
+              <button type="button" className="admin-btn-primary" onClick={() => fechar(false)}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

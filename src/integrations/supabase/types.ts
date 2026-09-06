@@ -416,6 +416,216 @@ export type Database = {
         }
         Relationships: []
       }
+      import_jobs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          defaults: Json
+          dry_run: boolean
+          error_rows: number
+          file_name: string
+          file_size: number | null
+          finished_at: string | null
+          id: string
+          job_key: string
+          last_error: string | null
+          location_id: string | null
+          mapping: Json
+          mode: string
+          ok_rows: number
+          operation_date: string | null
+          processed_rows: number
+          products_created: number
+          products_updated: number
+          reason_code: string | null
+          reference: string | null
+          responsible_user_id: string | null
+          started_at: string | null
+          status: string
+          stock_entries: number
+          total_rows: number
+          units_in: number
+          updated_at: string
+          variants_created: number
+          variants_updated: number
+          warn_rows: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          defaults?: Json
+          dry_run?: boolean
+          error_rows?: number
+          file_name: string
+          file_size?: number | null
+          finished_at?: string | null
+          id?: string
+          job_key: string
+          last_error?: string | null
+          location_id?: string | null
+          mapping?: Json
+          mode?: string
+          ok_rows?: number
+          operation_date?: string | null
+          processed_rows?: number
+          products_created?: number
+          products_updated?: number
+          reason_code?: string | null
+          reference?: string | null
+          responsible_user_id?: string | null
+          started_at?: string | null
+          status?: string
+          stock_entries?: number
+          total_rows?: number
+          units_in?: number
+          updated_at?: string
+          variants_created?: number
+          variants_updated?: number
+          warn_rows?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          defaults?: Json
+          dry_run?: boolean
+          error_rows?: number
+          file_name?: string
+          file_size?: number | null
+          finished_at?: string | null
+          id?: string
+          job_key?: string
+          last_error?: string | null
+          location_id?: string | null
+          mapping?: Json
+          mode?: string
+          ok_rows?: number
+          operation_date?: string | null
+          processed_rows?: number
+          products_created?: number
+          products_updated?: number
+          reason_code?: string | null
+          reference?: string | null
+          responsible_user_id?: string | null
+          started_at?: string | null
+          status?: string
+          stock_entries?: number
+          total_rows?: number
+          units_in?: number
+          updated_at?: string
+          variants_created?: number
+          variants_updated?: number
+          warn_rows?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_jobs_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_rows: {
+        Row: {
+          attempts: number
+          created_at: string
+          id: string
+          job_id: string
+          line_no: number
+          messages: Json
+          movement_id: string | null
+          parsed: Json | null
+          processed_at: string | null
+          product_id: string | null
+          raw: Json
+          status: string
+          variant_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          id?: string
+          job_id: string
+          line_no: number
+          messages?: Json
+          movement_id?: string | null
+          parsed?: Json | null
+          processed_at?: string | null
+          product_id?: string | null
+          raw: Json
+          status?: string
+          variant_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          id?: string
+          job_id?: string
+          line_no?: number
+          messages?: Json
+          movement_id?: string | null
+          parsed?: Json | null
+          processed_at?: string | null
+          product_id?: string | null
+          raw?: Json
+          status?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_rows_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_rows_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_rows_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          defaults: Json
+          id: string
+          mapping: Json
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          defaults?: Json
+          id?: string
+          mapping?: Json
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          defaults?: Json
+          id?: string
+          mapping?: Json
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lead_events: {
         Row: {
           actor_id: string | null
@@ -1665,6 +1875,32 @@ export type Database = {
         }
         Returns: boolean
       }
+      import_job_cancel: { Args: { _job: string }; Returns: undefined }
+      import_job_open: {
+        Args: {
+          _defaults: Json
+          _dry_run?: boolean
+          _file_name: string
+          _file_size?: number
+          _job_key: string
+          _location_id?: string
+          _mapping: Json
+          _mode: string
+          _operation_date?: string
+          _reason_code?: string
+          _reference?: string
+          _responsible?: string
+        }
+        Returns: string
+      }
+      import_job_process: {
+        Args: { _job: string; _limit?: number }
+        Returns: Json
+      }
+      import_job_validate: {
+        Args: { _job: string; _limit?: number }
+        Returns: Json
+      }
       import_products_stock:
         | { Args: { _location_id: string; _rows: Json }; Returns: Json }
         | {
@@ -1676,6 +1912,10 @@ export type Database = {
             }
             Returns: Json
           }
+      import_rows_stage: {
+        Args: { _job: string; _rows: Json }
+        Returns: number
+      }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       list_parties: {
         Args: {
@@ -1714,7 +1954,10 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      norm_code: { Args: { _v: string }; Returns: string }
       only_digits: { Args: { _v: string }; Returns: string }
+      parse_cents_any: { Args: { _v: string }; Returns: number }
+      parse_decimal_any: { Args: { _v: string }; Returns: number }
       public_catalog_list: {
         Args: {
           _category_slug?: string

@@ -44,7 +44,9 @@ export const Route = createFileRoute("/api/public/midia/$id")({
         return new Response(await arquivo.arrayBuffer(), {
           headers: {
             "content-type": media.content_type ?? "image/jpeg",
-            "cache-control": "public, max-age=300, s-maxage=86400, stale-while-revalidate=604800",
+            // janela curta: uma peça despublicada some do público em no máximo 60s
+            "cache-control": "public, max-age=60, s-maxage=60, stale-while-revalidate=120",
+            "x-content-type-options": "nosniff",
           },
         });
       },

@@ -43,7 +43,7 @@ function HomePage() {
 
       <CategoryGuillotine
         title="Anéis"
-        to="/semijoias/aneis"
+        to="/semijoias/$categoria" params={{ categoria: "aneis" }}
         image={aneisAsset}
         mobileImage={aneisMobileAsset}
         imageAlt="Anel de semijoia Lardan sobre onda de vidro transparente"
@@ -52,7 +52,7 @@ function HomePage() {
       />
       <CategoryGuillotine
         title="Colares"
-        to="/semijoias/colares"
+        to="/semijoias/$categoria" params={{ categoria: "colares" }}
         image={colaresAsset}
         mobileImage={colaresMobileAsset}
         imageAlt="Colar de semijoia Lardan sobre formas de vidro"

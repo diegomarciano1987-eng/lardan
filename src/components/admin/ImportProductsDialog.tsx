@@ -279,8 +279,8 @@ export function ImportProductsDialog({
               linhas · {formatInt(cabecalhos.length)} colunas.
             </p>
 
-            <div className="flex flex-wrap gap-4">
-              <label className="block w-64 space-y-1.5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block space-y-1.5">
                 <Rotulo>O que a planilha faz</Rotulo>
                 <SmartSelect
                   options={[
@@ -291,7 +291,7 @@ export function ImportProductsDialog({
                   onChange={(v) => setModo(v as "entrada" | "catalogo")}
                 />
               </label>
-              <label className="block w-56 space-y-1.5">
+              <label className="block space-y-1.5">
                 <Rotulo>Modo</Rotulo>
                 <SmartSelect
                   options={[
@@ -304,7 +304,7 @@ export function ImportProductsDialog({
               </label>
               {modo === "entrada" && (
                 <>
-                  <label className="block w-56 space-y-1.5">
+                  <label className="block space-y-1.5">
                     <Rotulo>Local de entrada</Rotulo>
                     <SmartSelect
                       options={(locais.data ?? []).map((l) => ({ value: l.id, label: l.name, hint: l.code }))}
@@ -313,11 +313,11 @@ export function ImportProductsDialog({
                       placeholder="Escolha o local…"
                     />
                   </label>
-                  <label className="block w-48 space-y-1.5">
+                  <label className="block space-y-1.5">
                     <Rotulo>Data da operação</Rotulo>
                     <DateField value={dataOp} onChange={setDataOp} />
                   </label>
-                  <label className="block w-56 space-y-1.5">
+                  <label className="block space-y-1.5">
                     <Rotulo>Motivo</Rotulo>
                     <SmartSelect
                       options={(motivos.data ?? [])
@@ -328,7 +328,7 @@ export function ImportProductsDialog({
                       placeholder="Opcional"
                     />
                   </label>
-                  <label className="block w-56 space-y-1.5">
+                  <label className="block space-y-1.5">
                     <Rotulo>Documento / referência</Rotulo>
                     <input
                       className={inputCls}

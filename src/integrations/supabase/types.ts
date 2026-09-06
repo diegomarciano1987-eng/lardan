@@ -108,6 +108,7 @@ export type Database = {
           hero_media_id: string | null
           id: string
           name: string
+          parent_id: string | null
           position: number
           published_at: string | null
           seo_description: string | null
@@ -123,6 +124,7 @@ export type Database = {
           hero_media_id?: string | null
           id?: string
           name: string
+          parent_id?: string | null
           position?: number
           published_at?: string | null
           seo_description?: string | null
@@ -138,6 +140,7 @@ export type Database = {
           hero_media_id?: string | null
           id?: string
           name?: string
+          parent_id?: string | null
           position?: number
           published_at?: string | null
           seo_description?: string | null
@@ -152,6 +155,13 @@ export type Database = {
             columns: ["hero_media_id"]
             isOneToOne: false
             referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
         ]
@@ -1268,6 +1278,7 @@ export type Database = {
           description: string | null
           id: string
           is_featured: boolean
+          is_new_arrival: boolean
           legacy_code: string | null
           material: string | null
           measurements: string | null
@@ -1277,12 +1288,15 @@ export type Database = {
           price_cents: number | null
           price_is_public: boolean
           published_at: string | null
+          scheduled_publish_at: string | null
           seo_description: string | null
           seo_title: string | null
           short_description: string | null
           slug: string
           status: Database["public"]["Enums"]["content_status"]
+          stock_visibility: string
           supplier_id: string | null
+          tags: string[]
           updated_at: string
           warranty_text: string | null
           weight_grams: number | null
@@ -1297,6 +1311,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_featured?: boolean
+          is_new_arrival?: boolean
           legacy_code?: string | null
           material?: string | null
           measurements?: string | null
@@ -1306,12 +1321,15 @@ export type Database = {
           price_cents?: number | null
           price_is_public?: boolean
           published_at?: string | null
+          scheduled_publish_at?: string | null
           seo_description?: string | null
           seo_title?: string | null
           short_description?: string | null
           slug: string
           status?: Database["public"]["Enums"]["content_status"]
+          stock_visibility?: string
           supplier_id?: string | null
+          tags?: string[]
           updated_at?: string
           warranty_text?: string | null
           weight_grams?: number | null
@@ -1326,6 +1344,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_featured?: boolean
+          is_new_arrival?: boolean
           legacy_code?: string | null
           material?: string | null
           measurements?: string | null
@@ -1335,12 +1354,15 @@ export type Database = {
           price_cents?: number | null
           price_is_public?: boolean
           published_at?: string | null
+          scheduled_publish_at?: string | null
           seo_description?: string | null
           seo_title?: string | null
           short_description?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["content_status"]
+          stock_visibility?: string
           supplier_id?: string | null
+          tags?: string[]
           updated_at?: string
           warranty_text?: string | null
           weight_grams?: number | null
@@ -1477,6 +1499,78 @@ export type Database = {
           capability?: string
           created_at?: string
           role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      showcase_batches: {
+        Row: {
+          action: string
+          actor_id: string | null
+          affected: number
+          created_at: string
+          filters: Json
+          id: string
+          idempotency_key: string
+          note: string | null
+          params: Json
+          rejected: number
+          rejected_items: Json
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          affected?: number
+          created_at?: string
+          filters?: Json
+          id?: string
+          idempotency_key: string
+          note?: string | null
+          params?: Json
+          rejected?: number
+          rejected_items?: Json
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          affected?: number
+          created_at?: string
+          filters?: Json
+          id?: string
+          idempotency_key?: string
+          note?: string | null
+          params?: Json
+          rejected?: number
+          rejected_items?: Json
+        }
+        Relationships: []
+      }
+      showcase_views: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          filters: Json
+          id: string
+          is_shared: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          filters?: Json
+          id?: string
+          is_shared?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          filters?: Json
+          id?: string
+          is_shared?: boolean
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2056,6 +2150,49 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      showcase_bulk: {
+        Args: {
+          _action: string
+          _filters?: Json
+          _idempotency_key?: string
+          _ids: string[]
+          _note?: string
+          _params?: Json
+        }
+        Returns: Json
+      }
+      showcase_counts: { Args: never; Returns: Json }
+      showcase_ids: { Args: { _f?: Json; _max?: number }; Returns: string[] }
+      showcase_list: {
+        Args: { _f?: Json; _limit?: number; _offset?: number; _sort?: string }
+        Returns: {
+          category_id: string
+          category_name: string
+          collection_id: string
+          collection_name: string
+          cover_alt: string
+          cover_media_id: string
+          created_at: string
+          estoque: number
+          faltando: string[]
+          id: string
+          is_featured: boolean
+          is_new_arrival: boolean
+          material: string
+          name: string
+          plating: string
+          price_cents: number
+          price_is_public: boolean
+          scheduled_publish_at: string
+          sku: string
+          slug: string
+          status: Database["public"]["Enums"]["content_status"]
+          supplier_name: string
+          tags: string[]
+          total: number
+          updated_at: string
+        }[]
+      }
       stock_overview: { Args: never; Returns: Json }
       submit_contact_request: {
         Args: {

@@ -215,21 +215,37 @@ export function ImportProductsDialog({
                 {arquivo || "Escolher arquivo"}
               </button>
             </div>
-            <label className="block w-64 space-y-1.5">
+            <label className="block w-56 space-y-1.5">
               <span className="text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase">
-                Local de entrada do estoque
+                O que a planilha faz
               </span>
               <SmartSelect
-                options={(locais.data ?? []).map((l) => ({
-                  value: l.id,
-                  label: l.name,
-                  hint: l.code,
-                }))}
-                value={localId}
-                onChange={setLocalId}
-                placeholder="Escolha o local…"
+                options={[
+                  { value: "entrada", label: "Cadastrar e dar entrada no estoque" },
+                  { value: "catalogo", label: "Somente cadastrar as peças" },
+                ]}
+                value={modo}
+                onChange={(v) => setModo(v as "entrada" | "catalogo")}
               />
             </label>
+            {modo === "entrada" && (
+              <label className="block w-64 space-y-1.5">
+                <span className="text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase">
+                  Local de entrada do estoque
+                </span>
+                <SmartSelect
+                  options={(locais.data ?? []).map((l) => ({
+                    value: l.id,
+                    label: l.name,
+                    hint: l.code,
+                  }))}
+                  value={localId}
+                  onChange={setLocalId}
+                  placeholder="Escolha o local…"
+                />
+              </label>
+            )}
+
           </div>
 
           {linhas.length > 0 && !resultado && (

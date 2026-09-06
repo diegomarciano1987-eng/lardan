@@ -31,17 +31,30 @@ let tokenMaster: string | null = null;
 let leadId = "";
 let protocolo = "";
 const criados: string[] = [];
+const NOME = `${TEST_PREFIX} Candidata ${Date.now()}`;
 
 beforeAll(async () => {
   const master = await criarConta({ nome: "conv-master", papeis: ["master"] });
   tokenMaster = master.token;
+
+  // Restos de execuções anteriores não podem contaminar a prova.
+  const velhos = await admin(`/parties?select=id&display_name=like.${encodeURIComponent(`${TEST_PREFIX} Candidata%`)}`);
+  for (const v of (await velhos.json()) as { id: string }[]) {
+    await admin(`/consultant_profiles?party_id=eq.${v.id}`, { method: "DELETE" });
+    await admin(`/party_roles?party_id=eq.${v.id}`, { method: "DELETE" });
+    await admin(`/contact_points?party_id=eq.${v.id}`, { method: "DELETE" });
+    await admin(`/party_addresses?party_id=eq.${v.id}`, { method: "DELETE" });
+    await admin(`/leads?party_id=eq.${v.id}`, { method: "PATCH", body: JSON.stringify({ party_id: null }) });
+    await admin(`/parties?id=eq.${v.id}`, { method: "DELETE" });
+  }
+  await admin(`/leads?full_name=like.${encodeURIComponent(`${TEST_PREFIX} Candidata%`)}`, { method: "DELETE" });
 
   // Candidatura pelo mesmo caminho público usado pelo formulário do site.
   const r = await fetch(`${URL}/rest/v1/rpc/submit_lead`, {
     method: "POST",
     headers: { apikey: ANON, "Content-Type": "application/json" },
     body: JSON.stringify({
-      p_full_name: `${TEST_PREFIX} Candidata Conversão`,
+      p_full_name: NOME,
       p_whatsapp: "+5511990001122",
       p_city: "São Paulo",
       p_uf: "SP",
@@ -62,7 +75,7 @@ beforeAll(async () => {
   protocolo = typeof body === "string" ? body : (body?.protocol ?? "");
 
   const lista = await admin(
-    `/leads?select=id,protocol,source,utm,privacy_version,marketing_consent,party_id&full_name=eq.${encodeURIComponent(`${TEST_PREFIX} Candidata Conversão`)}`,
+    `/leads?select=id,protocol,source,utm,privacy_version,marketing_consent,party_id&full_name=eq.${encodeURIComponent(NOME)}`,
   );
   const leads = (await lista.json()) as { id: string; protocol: string }[];
   leadId = leads[0]?.id ?? "";
@@ -125,7 +138,7 @@ describe("candidata → consultora", () => {
       expect(String(de_novo.body)).toBe(antes);
 
       const pessoas = await admin(
-        `/parties?select=id&display_name=eq.${encodeURIComponent(`${TEST_PREFIX} Candidata Conversão`)}`,
+        `/parties?select=id&display_name=eq.${encodeURIComponent(NOME)}`,
       );
       expect(((await pessoas.json()) as unknown[]).length).toBeLessThanOrEqual(1);
 

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { BackButton } from "@/components/admin/ui";
 import { ROLE_LABEL, useAdminRoles } from "@/components/admin/AdminShell";
 import type { AppRole } from "@/lib/session";
 import {
@@ -117,7 +118,7 @@ function UsuariosPage() {
   if (!souMaster) {
     return (
       <div className="max-w-xl">
-        <h1 className="text-3xl text-foreground">Usuários e papéis</h1>
+        <div className="flex items-center gap-4"><BackButton /><h1 className="text-3xl text-foreground">Usuários e papéis</h1></div>
         <p className="mt-4 text-sm text-muted-foreground">
           Este módulo é exclusivo do perfil Master.
         </p>
@@ -127,7 +128,7 @@ function UsuariosPage() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="text-3xl text-foreground">Usuários e papéis</h1>
+      <div className="flex items-center gap-4"><BackButton /><h1 className="text-3xl text-foreground">Usuários e papéis</h1></div>
       <p className="mt-2 text-sm text-muted-foreground">
         Papéis vivem em tabela separada e toda alteração passa por operação
         autorizada com auditoria. O último Master ativo não pode ser removido.

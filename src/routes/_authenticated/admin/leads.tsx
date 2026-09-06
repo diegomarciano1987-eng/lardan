@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { BackButton } from "@/components/admin/ui";
 import { hasAny, LEAD_ROLES } from "@/lib/session";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import {
@@ -126,7 +127,7 @@ function LeadsPage() {
   if (!permitido) {
     return (
       <div className="max-w-xl">
-        <h1 className="text-3xl text-foreground">Candidaturas e contatos</h1>
+        <div className="flex items-center gap-4"><BackButton /><h1 className="text-3xl text-foreground">Candidaturas e contatos</h1></div>
         <p className="mt-4 text-sm text-muted-foreground">
           Sem perfil de acesso a este módulo.
         </p>
@@ -136,7 +137,7 @@ function LeadsPage() {
 
   return (
     <div className="max-w-6xl">
-      <h1 className="text-3xl text-foreground">Candidaturas e contatos</h1>
+      <div className="flex items-center gap-4"><BackButton /><h1 className="text-3xl text-foreground">Candidaturas e contatos</h1></div>
       <p className="mt-2 text-sm text-muted-foreground">
         Dados reais enviados pelo site, com protocolo e consentimento registrados.
       </p>

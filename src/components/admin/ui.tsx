@@ -1,7 +1,27 @@
 import type { ReactNode } from "react";
-import { AlertTriangle, Info, Lock, Clock3, CircleDot } from "lucide-react";
+import { useRouter } from "@tanstack/react-router";
+import { AlertTriangle, Info, Lock, Clock3, CircleDot, ArrowLeft } from "lucide-react";
 import { STATE_LABEL, type ModuleState } from "@/lib/admin-modules";
 import { cn } from "@/lib/utils";
+
+/** Botão Voltar — retorna para a última tela visitada. */
+export function BackButton({ className }: { className?: string }) {
+  const router = useRouter();
+  return (
+    <button
+      type="button"
+      onClick={() => router.history.back()}
+      aria-label="Voltar para a tela anterior"
+      title="Voltar"
+      className={cn(
+        "inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-line bg-cream-2 text-ledger-text transition hover:border-bronze hover:text-bronze focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bronze",
+        className,
+      )}
+    >
+      <ArrowLeft aria-hidden className="size-4.5" />
+    </button>
+  );
+}
 
 /** Selo de disponibilidade do módulo. Estado nunca depende só de cor. */
 export function ModuleAvailabilityBadge({
@@ -90,14 +110,17 @@ export function PageHeader({
 }) {
   return (
     <header className="flex flex-wrap items-end justify-between gap-6 border-b border-line pb-7">
-      <div className="min-w-0">
-        <p className="ledger-eyebrow">{eyebrow}</p>
-        <h1 className="mt-2 text-[2.375rem] leading-[1.08] font-semibold text-ledger-text md:text-[2.875rem]">
-          {title}
-        </h1>
-        {description && (
-          <p className="mt-2 max-w-2xl text-[0.9375rem] font-medium text-ledger-muted">{description}</p>
-        )}
+      <div className="flex min-w-0 items-start gap-4">
+        <BackButton className="mt-1" />
+        <div className="min-w-0">
+          <p className="ledger-eyebrow">{eyebrow}</p>
+          <h1 className="mt-2 text-[2.375rem] leading-[1.08] font-semibold text-ledger-text md:text-[2.875rem]">
+            {title}
+          </h1>
+          {description && (
+            <p className="mt-2 max-w-2xl text-[0.9375rem] font-medium text-ledger-muted">{description}</p>
+          )}
+        </div>
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>

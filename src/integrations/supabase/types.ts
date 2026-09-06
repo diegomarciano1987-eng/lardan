@@ -98,6 +98,13 @@ export type Database = {
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "business_entities_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
         ]
       }
       categories: {
@@ -313,8 +320,29 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "consultant_profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
             foreignKeyName: "consultant_profiles_representative_party_id_fkey"
             columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_sponsor_party_id_fkey"
+            columns: ["sponsor_party_id"]
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
@@ -323,8 +351,8 @@ export type Database = {
             foreignKeyName: "consultant_profiles_sponsor_party_id_fkey"
             columns: ["sponsor_party_id"]
             isOneToOne: false
-            referencedRelation: "parties"
-            referencedColumns: ["id"]
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -369,6 +397,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_points_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -467,6 +502,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_data_applications_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -991,6 +1033,13 @@ export type Database = {
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "leads_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
         ]
       }
       locations: {
@@ -1372,6 +1421,13 @@ export type Database = {
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "party_addresses_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
         ]
       }
       party_links: {
@@ -1403,6 +1459,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_links_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -1450,6 +1513,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_roles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -1729,6 +1799,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -2093,6 +2170,13 @@ export type Database = {
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "suppliers_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
         ]
       }
       uf_centroides: {
@@ -2196,7 +2280,44 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_network_consultants: {
+        Row: {
+          city: string | null
+          code: string | null
+          created_at: string | null
+          display_name: string | null
+          endereco_completo: boolean | null
+          geo_precision: string | null
+          geo_status: string | null
+          ibge_city_code: string | null
+          latitude: number | null
+          level: string | null
+          longitude: number | null
+          party_id: string | null
+          region: string | null
+          representative_party_id: string | null
+          status: Database["public"]["Enums"]["party_status"] | null
+          tem_endereco: boolean | null
+          uf: string | null
+          wallet: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
     }
     Functions: {
       address_geo_fingerprint: {
@@ -2381,6 +2502,33 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      network_cobertura: { Args: { _filtros?: Json }; Returns: Json }
+      network_geo_municipios: {
+        Args: { _filtros?: Json; _uf: string }
+        Returns: {
+          ativas: number
+          codigo_ibge: string
+          localizadas: number
+          municipio: string
+          total: number
+        }[]
+      }
+      network_geo_overview: { Args: { _filtros?: Json }; Returns: Json }
+      network_geo_pontos: {
+        Args: { _filtros?: Json }
+        Returns: {
+          aproximado: boolean
+          ativas: number
+          lat: number
+          lng: number
+          total: number
+        }[]
+      }
+      network_geo_territorio: {
+        Args: { _filtros?: Json; _ibge?: string; _uf?: string }
+        Returns: Json
+      }
+      network_scope_party: { Args: never; Returns: string }
       norm_code: { Args: { _v: string }; Returns: string }
       only_digits: { Args: { _v: string }; Returns: string }
       parse_cents_any: { Args: { _v: string }; Returns: number }

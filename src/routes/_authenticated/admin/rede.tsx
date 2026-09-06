@@ -59,10 +59,14 @@ function RedePage() {
 
   const malha = useQuery({
     queryKey: ["rede-malha", uf],
-    queryFn: () =>
-      buscarMalha({
-        data: uf ? { nivel: "estado" as const, codigoUf: UF_CODIGO_IBGE[uf]! } : { nivel: "brasil" as const },
-      }) as Promise<Malha>,
+    queryFn: async () => {
+      const r = (await buscarMalha({
+        data: uf
+          ? { nivel: "estado" as const, codigoUf: UF_CODIGO_IBGE[uf]! }
+          : { nivel: "brasil" as const },
+      })) as unknown as { malha: Malha };
+      return r.malha;
+    },
     enabled: podeVer,
     staleTime: 1000 * 60 * 60,
   });

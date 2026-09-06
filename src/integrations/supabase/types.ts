@@ -2781,6 +2781,7 @@ export type Database = {
         }[]
       }
       mask_doc: { Args: { _doc: string }; Returns: string }
+      mask_reference: { Args: { v: string }; Returns: string }
       master_exists: { Args: never; Returns: boolean }
       my_capabilities: {
         Args: never
@@ -2818,6 +2819,7 @@ export type Database = {
         Args: { _filtros?: Json; _ibge?: string; _uf?: string }
         Returns: Json
       }
+      network_scope: { Args: never; Returns: Json }
       network_scope_party: { Args: never; Returns: string }
       norm_code: { Args: { _v: string }; Returns: string }
       only_digits: { Args: { _v: string }; Returns: string }
@@ -2840,6 +2842,7 @@ export type Database = {
         }
         Returns: Json
       }
+      party_doc_reveal: { Args: { _id: string }; Returns: string }
       phone_canon: { Args: { v: string }; Returns: string }
       product_publish_blockers: { Args: { _id: string }; Returns: string[] }
       public_catalog_browse: {
@@ -2920,6 +2923,7 @@ export type Database = {
         Args: { _ids: string[]; _note?: string }
         Returns: Json
       }
+      purge_integration_data: { Args: never; Returns: Json }
       register_stock_movement:
         | {
             Args: {
@@ -3024,6 +3028,16 @@ export type Database = {
           total: number
           updated_at: string
         }[]
+      }
+      stock_movements_list: {
+        Args: {
+          _kind?: string
+          _page?: number
+          _search?: string
+          _size?: number
+          _variant?: string
+        }
+        Returns: Json
       }
       stock_overview: { Args: never; Returns: Json }
       submit_contact_request: {

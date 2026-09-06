@@ -84,27 +84,36 @@ export function CategoryGuillotine({
             width={1664}
             height={928}
             className="gpu-layer absolute inset-0 h-full w-full object-cover"
-            style={{ transform: `scale(${imgScale}) translateZ(0)` }}
+            style={{
+              transform: `scale(${imgScale}) translateZ(0)`,
+              filter: imgBlur > 0 ? `blur(${imgBlur}px)` : undefined,
+            }}
           />
         </picture>
 
         {/* Lâminas que deslizam na horizontal, em cascata.
-            Apenas transform/opacidade — sem desfoque por lâmina, para manter
-            a rolagem fluida no Safari e em aparelhos mais simples. */}
+            No desktop elas têm borda esfumaçada e um filete de luz na frente
+            de varredura; em aparelhos fracos, só transform/opacidade. */}
         {reveal < 0.999 && (
           <div aria-hidden className="pointer-events-none absolute inset-0 flex">
             {Array.from({ length: slats }).map((_, i) => {
               const order = enterFrom === "right" ? (slats - 1 - i) / (slats - 1) : i / (slats - 1);
-              const start = 0.5 * order;
-              const t = easeOut(phase(reveal, start, start + 0.5));
+              const start = 0.55 * order;
+              const t = easeOut(phase(reveal, start, start + 0.45));
               const lead = 1 - t; // 1 = lâmina cobrindo, 0 = fora da cena
+              const fio = Math.max(0, lead * (1 - lead)) * 4; // brilho na frente de varredura
               return (
                 <div
                   key={i}
                   className="-mx-px h-full flex-1 bg-background"
                   style={{
-                    transform: `translate3d(${dir * t * 130}%, 0, 0)`,
+                    transform: `translate3d(${dir * t * 130}%, 0, 0) translateZ(0)`,
                     opacity: lead < 0.02 ? 0 : 1,
+                    filter: !leve && emMovimento ? `blur(${(lead * 5).toFixed(1)}px)` : undefined,
+                    boxShadow:
+                      !leve && fio > 0.02
+                        ? `${dir * -10}px 0 26px -12px oklch(0.25 0.015 30 / ${(0.35 * fio).toFixed(2)})`
+                        : undefined,
                     willChange: emMovimento ? "transform" : "auto",
                   }}
                 />

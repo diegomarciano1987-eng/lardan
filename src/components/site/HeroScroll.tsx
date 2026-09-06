@@ -30,10 +30,14 @@ export function HeroScroll() {
   // Com reduced motion, mostra o wordmark final diretamente.
   const p = reduced ? 1 : progress;
 
-  const out = ease(phase(p, 0.18, 0.6)); // saída do diamante
-  const flash = phase(p, 0.42, 0.55) * (1 - phase(p, 0.55, 0.68)); // estouro de luz
-  const wordmarkIn = ease(phase(p, 0.5, 0.78));
+  const out = ease(phase(p, 0.18, 0.55)); // saída do diamante
+  const flash = phase(p, 0.4, 0.52) * (1 - phase(p, 0.52, 0.66)); // estouro de luz
+  const wordmarkIn = ease(phase(p, 0.46, 0.74));
+  // Passagem final: o wordmark avança na câmera e se dissolve na segunda sessão.
+  const sai = reduced ? 0 : ease(phase(p, 0.86, 1));
+  const varredura = phase(p, 0.52, 0.86); // fio de luz percorrendo as letras
   const mostrarBrilho = !reduced && out < 0.35;
+  const sombra = (1 - wordmarkIn) * 26; // sombra longa que encurta ao assentar
 
   return (
     <div ref={trackRef} className="relative h-[300vh]" aria-label={BRAND.name}>
@@ -127,31 +131,63 @@ export function HeroScroll() {
           />
         )}
 
-        {/* Estado 2: wordmark isolado, fundo limpo, sem véu nem sombra */}
+        {/* Estado 2: wordmark isolado — entra com sombra longa e sai fundindo
+            com a segunda sessão (avança na câmera e se dissolve em marfim). */}
         <div
-          className="absolute inset-0 flex items-center justify-center"
+          className="gpu-layer absolute inset-0 flex items-center justify-center"
           style={{
-            opacity: wordmarkIn,
-            transform: `scale(${0.94 + wordmarkIn * 0.06})`,
+            opacity: clamp01(wordmarkIn - sai * 1.15),
+            transform: `scale(${(0.9 + wordmarkIn * 0.1) * (1 + sai * 1.5)}) translate3d(0, ${sai * -4}vh, 0)`,
             filter:
-              leve || wordmarkIn === 1 ? undefined : `blur(${stepBlur((1 - wordmarkIn) * 8, 2)}px)`,
+              leve || (wordmarkIn === 1 && sai === 0)
+                ? undefined
+                : `blur(${stepBlur((1 - wordmarkIn) * 10 + sai * 18, 2)}px)`,
+            willChange: wordmarkIn > 0 && sai < 1 ? "transform, opacity" : "auto",
           }}
           aria-hidden={wordmarkIn < 0.5}
         >
-          <picture>
-            <source srcSet="/img/lardan-wordmark.webp" type="image/webp" />
-            <img
-              src={wordmarkAsset.url}
-              alt=""
-              aria-hidden
-              className="w-[clamp(240px,42vw,560px)]"
-              loading="lazy"
-              decoding="async"
-              width={650}
-              height={210}
-            />
-          </picture>
+          <div className="relative w-[clamp(240px,42vw,560px)]">
+            <picture>
+              <source srcSet="/img/lardan-wordmark.webp" type="image/webp" />
+              <img
+                src={wordmarkAsset.url}
+                alt=""
+                aria-hidden
+                className="w-full"
+                loading="lazy"
+                decoding="async"
+                width={650}
+                height={210}
+                style={{
+                  filter: leve
+                    ? undefined
+                    : `drop-shadow(0 ${(10 + sombra).toFixed(0)}px ${(28 + sombra * 2.4).toFixed(0)}px oklch(0.2 0.02 30 / ${(0.16 + wordmarkIn * 0.24).toFixed(2)}))`,
+                }}
+              />
+            </picture>
+            {!leve && !reduced && varredura > 0.001 && varredura < 0.999 && (
+              <div
+                aria-hidden
+                className="hero-wordmark-sweep pointer-events-none absolute inset-0"
+                style={{
+                  WebkitMaskImage: `url(${wordmarkAsset.url})`,
+                  maskImage: `url(${wordmarkAsset.url})`,
+                  backgroundPosition: `${(130 - varredura * 190).toFixed(1)}% 0`,
+                  opacity: Math.min(1, varredura * 4) * (1 - varredura) * 1.6,
+                }}
+              />
+            )}
+          </div>
         </div>
+
+        {/* Marfim final: o quadro do hero se abre direto na segunda sessão */}
+        {sai > 0.001 && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-background"
+            style={{ opacity: ease(sai) }}
+          />
+        )}
       </div>
     </div>
   );

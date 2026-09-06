@@ -431,40 +431,40 @@
 .hero-gleam {
   background: linear-gradient(
     115deg,
-    transparent 32%,
-    oklch(0.82 0.09 85 / 0.55) 44%,
+    transparent 36%,
+    oklch(0.82 0.09 85 / 0.55) 45%,
     oklch(0.97 0.04 95 / 0.95) 50%,
-    oklch(0.82 0.09 85 / 0.55) 56%,
-    transparent 68%
+    oklch(0.82 0.09 85 / 0.55) 55%,
+    transparent 64%
   );
   background-size: 260% 100%;
   background-position: 130% 0;
   mix-blend-mode: screen;
   filter: brightness(1.15) saturate(1.1);
-  animation: hero-gleam-run 7.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  animation: hero-gleam-run 12s cubic-bezier(0.45, 0, 0.25, 1) infinite;
 }
 
-/* Faísca pontual: facho estreito e mais quente, defasado do reflexo. */
+/* Faísca pontual: eco suave do reflexo principal, quase imperceptível. */
 .hero-gleam-spark {
   background: linear-gradient(
     100deg,
-    transparent 44%,
-    oklch(0.99 0.02 100 / 0.9) 49.5%,
-    oklch(0.9 0.12 80 / 0.8) 50.5%,
-    transparent 56%
+    transparent 46%,
+    oklch(0.99 0.02 100 / 0.75) 49.5%,
+    oklch(0.9 0.12 80 / 0.65) 50.5%,
+    transparent 54%
   );
   background-size: 340% 100%;
   background-position: 160% 0;
   mix-blend-mode: plus-lighter;
   filter: blur(0.6px);
-  animation: hero-gleam-run 7.5s cubic-bezier(0.45, 0, 0.25, 1) 0.35s infinite;
+  animation: hero-gleam-run 12s cubic-bezier(0.45, 0, 0.25, 1) 0.6s infinite;
 }
 
 @keyframes hero-gleam-run {
   0% {
     background-position: 135% 0;
   }
-  38% {
+  45% {
     background-position: -35% 0;
   }
   100% {

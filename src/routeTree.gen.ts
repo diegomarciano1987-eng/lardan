@@ -18,6 +18,8 @@ import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
 import { Route as SemijoiasRouteImport } from './routes/semijoias'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
+import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
+import { Route as SemijoiasCategoriaRouteImport } from './routes/semijoias.$categoria'
 import { Route as SemijoiasAneisRouteImport } from './routes/semijoias.aneis'
 import { Route as SemijoiasColaresRouteImport } from './routes/semijoias.colares'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
@@ -87,6 +89,16 @@ const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ProdutoSlugRoute = ProdutoSlugRouteImport.update({
+  id: '/produto/$slug',
+  path: '/produto/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SemijoiasCategoriaRoute = SemijoiasCategoriaRouteImport.update({
+  id: '/$categoria',
+  path: '/$categoria',
+  getParentRoute: () => SemijoiasRoute,
 } as any)
 const SemijoiasAneisRoute = SemijoiasAneisRouteImport.update({
   id: '/aneis',
@@ -242,6 +254,8 @@ export interface FileRoutesByFullPath {
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoias': typeof SemijoiasRouteWithChildren
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/produto/$slug': typeof ProdutoSlugRoute
+  '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/semijoias/aneis': typeof SemijoiasAneisRoute
   '/semijoias/colares': typeof SemijoiasColaresRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -276,6 +290,8 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoias': typeof SemijoiasRouteWithChildren
+  '/produto/$slug': typeof ProdutoSlugRoute
+  '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/semijoias/aneis': typeof SemijoiasAneisRoute
   '/semijoias/colares': typeof SemijoiasColaresRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -313,6 +329,8 @@ export interface FileRoutesById {
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoias': typeof SemijoiasRouteWithChildren
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/produto/$slug': typeof ProdutoSlugRoute
+  '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/semijoias/aneis': typeof SemijoiasAneisRoute
   '/semijoias/colares': typeof SemijoiasColaresRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -350,6 +368,8 @@ export interface FileRouteTypes {
     | '/seja-lardan'
     | '/semijoias'
     | '/admin'
+    | '/produto/$slug'
+    | '/semijoias/$categoria'
     | '/semijoias/aneis'
     | '/semijoias/colares'
     | '/admin/auditoria'
@@ -384,6 +404,8 @@ export interface FileRouteTypes {
     | '/contato'
     | '/seja-lardan'
     | '/semijoias'
+    | '/produto/$slug'
+    | '/semijoias/$categoria'
     | '/semijoias/aneis'
     | '/semijoias/colares'
     | '/admin/auditoria'
@@ -420,6 +442,8 @@ export interface FileRouteTypes {
     | '/seja-lardan'
     | '/semijoias'
     | '/_authenticated/admin'
+    | '/produto/$slug'
+    | '/semijoias/$categoria'
     | '/semijoias/aneis'
     | '/semijoias/colares'
     | '/_authenticated/admin/auditoria'
@@ -456,6 +480,7 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   SejaLardanRoute: typeof SejaLardanRoute
   SemijoiasRoute: typeof SemijoiasRouteWithChildren
+  ProdutoSlugRoute: typeof ProdutoSlugRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
 }
 
@@ -523,6 +548,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/produto/$slug': {
+      id: '/produto/$slug'
+      path: '/produto/$slug'
+      fullPath: '/produto/$slug'
+      preLoaderRoute: typeof ProdutoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/semijoias/$categoria': {
+      id: '/semijoias/$categoria'
+      path: '/$categoria'
+      fullPath: '/semijoias/$categoria'
+      preLoaderRoute: typeof SemijoiasCategoriaRouteImport
+      parentRoute: typeof SemijoiasRoute
     }
     '/semijoias/aneis': {
       id: '/semijoias/aneis'
@@ -781,11 +820,13 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface SemijoiasRouteChildren {
+  SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
   SemijoiasAneisRoute: typeof SemijoiasAneisRoute
   SemijoiasColaresRoute: typeof SemijoiasColaresRoute
 }
 
 const SemijoiasRouteChildren: SemijoiasRouteChildren = {
+  SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,
   SemijoiasAneisRoute: SemijoiasAneisRoute,
   SemijoiasColaresRoute: SemijoiasColaresRoute,
 }
@@ -803,6 +844,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   SejaLardanRoute: SejaLardanRoute,
   SemijoiasRoute: SemijoiasRouteWithChildren,
+  ProdutoSlugRoute: ProdutoSlugRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,
 }
 export const routeTree = rootRouteImport

@@ -120,7 +120,9 @@ export function ImportProductsDialog({
     mutationFn: async () => {
       const { data, error } = await supabase.rpc("import_products_stock" as never, {
         _rows: linhas,
-        _location_id: localId,
+        _location_id: localId || null,
+        _mode: modo,
+        _job_key: chave.current,
       } as never);
       if (error) throw error;
       return data as unknown as ResultadoImport;

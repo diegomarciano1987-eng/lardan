@@ -15,6 +15,7 @@ import {
   type PartnerRow,
 } from "@/lib/partners";
 import { formatarDocumento, normalizarDocumento } from "@/lib/br/canonico";
+import { consultarCnpj } from "@/lib/br/lookup.functions";
 import { UFS } from "@/lib/catalog";
 
 const PAGE_SIZE = 20;

@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { CategoryHero } from "@/components/site/categoria/CategoryHero";
@@ -37,7 +37,7 @@ function booleano(v: unknown) {
 }
 
 export const Route = createFileRoute("/semijoias/$categoria")({
-  validateSearch: (search: Partial<Record<keyof BuscaCategoria, unknown>>): BuscaCategoria => {
+  validateSearch: (search: Record<string, unknown> & SearchSchemaInput): BuscaCategoria => {
     const ordem = texto(search["ordem"]) as OrdemVitrine;
     return {
       q: texto(search["q"]).slice(0, 120),

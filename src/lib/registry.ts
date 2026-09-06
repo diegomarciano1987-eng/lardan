@@ -194,10 +194,10 @@ export interface ListPartiesParams {
 export async function listParties(params: ListPartiesParams) {
   const { search, page, pageSize, kind, role, status } = params;
   const { data, error } = await supabase.rpc("list_parties", {
-    _search: search.trim() || null,
-    _kind: kind && kind !== "todos" ? kind : null,
-    _role: role && role !== "todos" ? role : null,
-    _status: status && status !== "todos" ? status : null,
+    _search: search.trim() || undefined,
+    _kind: kind && kind !== "todos" ? kind : undefined,
+    _role: role && role !== "todos" ? role : undefined,
+    _status: status && status !== "todos" ? status : undefined,
     _limit: pageSize,
     _offset: page * pageSize,
   });

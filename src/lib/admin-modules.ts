@@ -2,6 +2,7 @@ import type { AppRole } from "@/lib/session";
 import type { Capability } from "@/lib/capabilities";
 import {
   LayoutDashboard,
+  MapPinned,
   Globe2,
   Tag,
   Boxes,

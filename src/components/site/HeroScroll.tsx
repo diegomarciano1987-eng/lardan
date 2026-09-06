@@ -79,15 +79,18 @@ export function HeroScroll() {
           }}
         >
           <div className="relative w-[clamp(180px,32vw,420px)]">
-            <img
-              src="/img/lardan-diamante.webp"
-              alt="Lardan"
-              className="w-full"
-              decoding="async"
-              fetchPriority="high"
-              width={624}
-              height={416}
-            />
+            <picture>
+              <source srcSet="/img/lardan-diamante.webp" type="image/webp" />
+              <img
+                src={diamanteAsset.url}
+                alt="Lardan"
+                className="w-full"
+                decoding="async"
+                fetchPriority="high"
+                width={624}
+                height={416}
+              />
+            </picture>
             {mostrarBrilho && (
               <>
                 {/* Reflexo dourado percorrendo as bordas do diamante */}
@@ -142,15 +145,19 @@ export function HeroScroll() {
           }}
           aria-hidden={wordmarkIn < 0.5}
         >
-          <img
-            src="/img/lardan-wordmark.webp"
-            alt=""
-            aria-hidden
-            className="w-[clamp(240px,42vw,560px)]"
-            decoding="async"
-            width={650}
-            height={210}
-          />
+          <picture>
+            <source srcSet="/img/lardan-wordmark.webp" type="image/webp" />
+            <img
+              src={wordmarkAsset.url}
+              alt=""
+              aria-hidden
+              className="w-[clamp(240px,42vw,560px)]"
+              loading="lazy"
+              decoding="async"
+              width={650}
+              height={210}
+            />
+          </picture>
         </div>
       </div>
     </div>

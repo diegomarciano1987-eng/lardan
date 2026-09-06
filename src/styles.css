@@ -479,3 +479,19 @@
     opacity: 0;
   }
 }
+
+/* Camada promovida à GPU: mantém as imagens em movimento suaves no Safari
+   (iPhone/Mac) sem repintar a cada quadro. */
+.gpu-layer {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* iOS não anima background-attachment/position bem; garante rolagem nativa. */
+@supports (-webkit-touch-callout: none) {
+  .gpu-layer {
+    will-change: auto;
+  }
+}

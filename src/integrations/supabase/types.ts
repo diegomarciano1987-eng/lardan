@@ -2052,6 +2052,43 @@ export type Database = {
       only_digits: { Args: { _v: string }; Returns: string }
       parse_cents_any: { Args: { _v: string }; Returns: number }
       parse_decimal_any: { Args: { _v: string }; Returns: number }
+      public_catalog_browse: {
+        Args: {
+          _category_slug?: string
+          _collection_slug?: string
+          _featured?: boolean
+          _in_stock?: boolean
+          _limit?: number
+          _material?: string
+          _new_arrival?: boolean
+          _offset?: number
+          _plating?: string
+          _price_max?: number
+          _price_min?: number
+          _search?: string
+          _sort?: string
+        }
+        Returns: {
+          category_name: string
+          category_slug: string
+          collection_name: string
+          collection_slug: string
+          cover_alt: string
+          cover_media_id: string
+          em_estoque: boolean
+          hover_media_id: string
+          id: string
+          is_featured: boolean
+          is_new_arrival: boolean
+          material: string
+          name: string
+          plating: string
+          price_cents: number
+          short_description: string
+          slug: string
+          total: number
+        }[]
+      }
       public_catalog_list: {
         Args: {
           _category_slug?: string
@@ -2087,6 +2124,7 @@ export type Database = {
           slug: string
         }[]
       }
+      public_category: { Args: { _slug: string }; Returns: Json }
       public_product: { Args: { _slug: string }; Returns: Json }
       register_stock_movement:
         | {

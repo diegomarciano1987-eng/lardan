@@ -7,6 +7,7 @@ import {
   ease,
   easeOut,
 } from "@/hooks/use-scroll-progress";
+import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import sessao2Asset from "@/assets/lardan-sessao2.png.asset.json";
 import sessao2MobileAsset from "@/assets/lardan-mobile-sessao2.png.asset.json";
 
@@ -30,6 +31,9 @@ export function SessaoSemijoias() {
   const line = (start: number) => easeOut(phase(p, start, start + 0.16));
   const lines = [line(0.42), line(0.48), line(0.54), line(0.6), line(0.66)] as const;
   const emMovimento = reveal > 0.001 && reveal < 0.999;
+  // Continuidade com o hero: o wordmark chega ainda enorme e se dissolve
+  // exatamente enquanto as lâminas abrem a foto.
+  const heranca = reduced ? 0 : 1 - ease(phase(p, 0, 0.26));
 
   return (
     <div ref={ref} className="relative h-[260vh]">
@@ -99,6 +103,29 @@ export function SessaoSemijoias() {
               transform: `translate3d(0, ${(1 - reveal) * 30}vh, 0)`,
             }}
           />
+        )}
+
+        {/* Wordmark herdado do hero: fecha a passagem entre as duas sessões */}
+        {heranca > 0.01 && (
+          <div
+            aria-hidden
+            className="gpu-layer pointer-events-none absolute inset-0 flex items-center justify-center"
+            style={{
+              opacity: heranca,
+              transform: `scale(${1 + (1 - heranca) * 0.5}) translate3d(0, ${(1 - heranca) * -3}vh, 0)`,
+              filter: leve ? undefined : `blur(${Math.round((1 - heranca) * 14)}px)`,
+            }}
+          >
+            <img
+              src={wordmarkAsset.url}
+              alt=""
+              aria-hidden
+              className="w-[clamp(260px,46vw,600px)]"
+              decoding="async"
+              width={650}
+              height={210}
+            />
+          </div>
         )}
 
         {/* Véu de sombra suave que acompanha a frente de abertura */}

@@ -33,6 +33,9 @@ import {
 
 type Etapa = "arquivo" | "mapa" | "conferencia" | "processando" | "fim";
 
+const inputCls =
+  "h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm font-medium text-ledger-text shadow-sm outline-none placeholder:font-normal placeholder:text-ledger-muted focus:border-champagne focus:ring-2 focus:ring-champagne/25";
+
 const LOTE_ENVIO = 400;
 const LOTE_VALIDA = 500;
 const LOTE_PROCESSA = 150;
@@ -225,7 +228,7 @@ export function ImportProductsDialog({
 
   return (
     <Dialog open={open} onOpenChange={fechar}>
-      <DialogContent className="max-h-[88vh] max-w-4xl overflow-auto">
+      <DialogContent className="admin-scope max-h-[88vh] max-w-4xl overflow-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">Importar produtos por planilha</DialogTitle>
           <DialogDescription>
@@ -328,7 +331,7 @@ export function ImportProductsDialog({
                   <label className="block w-56 space-y-1.5">
                     <Rotulo>Documento / referência</Rotulo>
                     <input
-                      className="admin-input w-full"
+                      className={inputCls}
                       value={documento}
                       onChange={(e) => setDocumento(e.target.value)}
                       placeholder="Nota, pedido ou remessa"

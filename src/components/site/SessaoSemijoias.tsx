@@ -7,7 +7,6 @@ import {
   ease,
   easeOut,
 } from "@/hooks/use-scroll-progress";
-import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import sessao2Asset from "@/assets/lardan-sessao2.png.asset.json";
 import sessao2MobileAsset from "@/assets/lardan-mobile-sessao2.png.asset.json";
 
@@ -31,9 +30,9 @@ export function SessaoSemijoias() {
   const line = (start: number) => easeOut(phase(p, start, start + 0.16));
   const lines = [line(0.42), line(0.48), line(0.54), line(0.6), line(0.66)] as const;
   const emMovimento = reveal > 0.001 && reveal < 0.999;
-  // Continuidade com o hero: o wordmark chega ainda enorme e se dissolve
-  // exatamente enquanto as lâminas abrem a foto.
-  const heranca = reduced ? 0 : 1 - ease(phase(p, 0, 0.26));
+  // Continuidade com o hero: a sessão começa na mesma penumbra em que o
+  // quadro anterior terminou e ganha luz conforme as lâminas abrem.
+  const penumbra = reduced ? 0 : 1 - ease(phase(p, 0, 0.42));
 
   return (
     <div ref={ref} className="relative h-[260vh]">
@@ -75,14 +74,16 @@ export function SessaoSemijoias() {
               return (
                 <div
                   key={i}
-                  className="-mx-px h-full flex-1 origin-top bg-background"
+                  className="-mx-px h-full flex-1 origin-top"
                   style={{
+                    background:
+                      "linear-gradient(180deg, oklch(0.13 0.014 25 / 0.98) 0%, oklch(0.09 0.01 25 / 0.99) 100%)",
                     transform: `scaleY(${lead}) translate3d(0, ${t * -6}%, 0) translateZ(0)`,
                     opacity: 1 - t * 0.15,
                     filter: !leve && emMovimento ? `blur(${(lead * 6).toFixed(1)}px)` : undefined,
                     boxShadow:
                       !leve && fio > 0.02
-                        ? `0 -14px 32px -14px oklch(0.25 0.015 30 / ${(0.4 * fio).toFixed(2)}), inset 0 -1px 0 oklch(1 0 0 / ${(0.25 * fio).toFixed(2)})`
+                        ? `0 -14px 40px -12px oklch(0.05 0.01 25 / ${(0.6 * fio).toFixed(2)}), inset 0 -1px 0 oklch(0.92 0.05 45 / ${(0.5 * fio).toFixed(2)})`
                         : undefined,
                     willChange: emMovimento ? "transform" : "auto",
                   }}
@@ -105,38 +106,18 @@ export function SessaoSemijoias() {
           />
         )}
 
-        {/* Wordmark herdado do hero: fecha a passagem entre as duas sessões */}
-        {heranca > 0.01 && (
+        {/* Penumbra herdada do hero, que se dissipa com a abertura */}
+        {penumbra > 0.01 && (
           <div
             aria-hidden
-            className="gpu-layer pointer-events-none absolute inset-0 flex items-center justify-center"
+            className="pointer-events-none absolute inset-0"
             style={{
-              opacity: heranca,
-              transform: `scale(${1 + (1 - heranca) * 0.5}) translate3d(0, ${(1 - heranca) * -3}vh, 0)`,
-              filter: leve ? undefined : `blur(${Math.round((1 - heranca) * 14)}px)`,
+              opacity: penumbra,
+              background:
+                "radial-gradient(120% 90% at 50% 50%, oklch(0.16 0.015 25 / 0.5) 0%, oklch(0.1 0.012 25 / 0.9) 65%, oklch(0.08 0.01 25 / 0.97) 100%)",
             }}
-          >
-            <img
-              src={wordmarkAsset.url}
-              alt=""
-              aria-hidden
-              className="w-[clamp(260px,46vw,600px)]"
-              decoding="async"
-              width={650}
-              height={210}
-            />
-          </div>
+          />
         )}
-
-        {/* Véu de sombra suave que acompanha a frente de abertura */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-[38vh]"
-          style={{
-            background: "linear-gradient(180deg, oklch(0.985 0.006 80 / 0.9) 0%, transparent 100%)",
-            opacity: 1 - reveal,
-          }}
-        />
 
         {/* Leitura do texto sobre a imagem — desktop: véu marfim */}
         <div
@@ -144,7 +125,7 @@ export function SessaoSemijoias() {
           className="pointer-events-none absolute inset-0 hidden md:block"
           style={{
             background:
-              "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.92) 0%, oklch(0.985 0.006 80 / 0.6) 38%, transparent 62%)",
+              "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.7) 0%, oklch(0.985 0.006 80 / 0.32) 30%, transparent 52%)",
             opacity: lines[0],
           }}
         />
@@ -155,7 +136,7 @@ export function SessaoSemijoias() {
           className="pointer-events-none absolute inset-0 md:hidden"
           style={{
             background:
-              "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.34) 40%, transparent 66%)",
+              "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.5) 0%, oklch(0.18 0.01 30 / 0.24) 32%, transparent 56%)",
             opacity: lines[0],
           }}
         />

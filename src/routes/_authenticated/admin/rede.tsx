@@ -209,7 +209,9 @@ function RedePage() {
               ]}
               value={filtros.situacao ?? "todas"}
               searchThreshold={99}
-              onChange={(v) => setFiltros((f) => ({ ...f, situacao: v as FiltrosRede["situacao"] }))}
+              onChange={(v) =>
+                setFiltros((f) => ({ ...f, situacao: (v || "todas") as "todas" | "ativa" | "inativa" }))
+              }
             />
           </Campo>
           <Campo rotulo="Camada do mapa">

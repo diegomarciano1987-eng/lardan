@@ -5,6 +5,8 @@ const SLATS = 18;
 
 interface CategoryGuillotineProps {
   title: string;
+  /** Texto leve opcional exibido abaixo do título. */
+  subtitle?: string;
   /** Slug da categoria no catálogo publicado. */
   categoria: string;
   image: { url: string };
@@ -26,6 +28,7 @@ interface CategoryGuillotineProps {
  */
 export function CategoryGuillotine({
   title,
+  subtitle,
   categoria,
   image,
   mobileImage,
@@ -156,6 +159,14 @@ export function CategoryGuillotine({
             >
               {title}
             </h2>
+            {subtitle && (
+              <p
+                className="mt-2 text-sm font-light uppercase tracking-[0.35em] text-foreground/60 max-md:!text-background/70"
+                style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 20}px)` }}
+              >
+                {subtitle}
+              </p>
+            )}
             <div
               className={`rose-rule mt-6 w-16 ${align === "right" ? "ml-auto origin-right" : "origin-left"}`}
               style={{ transform: `scaleX(${ruleIn})` }}

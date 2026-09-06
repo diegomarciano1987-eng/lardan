@@ -5,8 +5,8 @@ import { SessaoSemijoias } from "@/components/site/SessaoSemijoias";
 import { CategoryGuillotine } from "@/components/site/CategoryGuillotine";
 import aneisAsset from "@/assets/lardan-categoria-aneis.jpg.asset.json";
 import colaresAsset from "@/assets/lardan-categoria-colares.jpg.asset.json";
-import pulseirasAsset from "@/assets/lardan-categoria-pulseiras.png.asset.json";
-import brincosAsset from "@/assets/lardan-categoria-brincos.png.asset.json";
+import pulseirasFundoAsset from "@/assets/lardan-pulseiras-fundo-novo.jpg.asset.json";
+import brincosFundoAsset from "@/assets/lardan-brincos-fundo-novo.jpg.asset.json";
 import aneisMobileAsset from "@/assets/lardan-mobile-aneis.png.asset.json";
 import colaresMobileAsset from "@/assets/sessao_colares_mobile.png.asset.json";
 import pulseirasMobileAsset from "@/assets/lardan-mobile-pulseiras.png.asset.json";
@@ -61,21 +61,22 @@ function HomePage() {
       />
       <CategoryGuillotine
         title="Pulseiras"
+        subtitle="braceletes"
         categoria="pulseiras"
-        image={pulseirasAsset}
+        image={pulseirasFundoAsset}
         mobileImage={pulseirasMobileAsset}
-        imageAlt="Pulseira Lardan em ouro rosé sobre onda de vidro"
+        imageAlt="Pulseiras e bracelete Lardan em ouro sobre bandeja de vidro"
         enterFrom="right"
         align="left"
       />
       <CategoryGuillotine
         title="Brincos"
         categoria="brincos"
-        image={brincosAsset}
+        image={brincosFundoAsset}
         mobileImage={brincosMobileAsset}
-        imageAlt="Brinco Lardan em ouro rosé sobre base de vidro"
+        imageAlt="Brincos Lardan em ouro com brilhantes sobre onda de vidro"
         enterFrom="left"
-        align="left"
+        align="right"
       />
 
       {/* Convite Seja Lardan */}

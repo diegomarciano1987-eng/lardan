@@ -115,6 +115,17 @@ export const ADMIN_MODULES: AdminModule[] = [
     spec: "Razão imutável de movimentações, saldo calculado em transação, recebimento com custo, kardex por item, transferência entre locais, reserva com prazo e inventário com divergência. Nenhum saldo é editado diretamente.",
   },
   {
+    slug: "rede",
+    path: "/admin/rede",
+    label: "Inteligência da Rede",
+    description: "Mapa territorial da rede: onde a Lardan está, onde concentra e onde ainda não chegou.",
+    icon: MapPinned,
+    roles: [...CONTENT, "suporte"],
+    capability: "partners.view",
+    state: "ativo",
+    spec: "Mapa por estado e município com dados reais de cadastro, camadas de quantidade, ativas e concentração aproximada, painel de território e leitura de cobertura. Endereço residencial nunca é exibido.",
+  },
+  {
     slug: "maletas",
     label: "Maletas",
     description: "Montagem, expedição, retorno e composição das maletas.",

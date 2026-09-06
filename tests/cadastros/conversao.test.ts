@@ -38,16 +38,23 @@ beforeAll(async () => {
   tokenMaster = master.token;
 
   // Restos de execuções anteriores não podem contaminar a prova.
-  const velhos = await admin(`/parties?select=id&display_name=like.${encodeURIComponent(`${TEST_PREFIX} Candidata%`)}`);
+  const velhos = await admin(
+    `/parties?select=id&display_name=like.${encodeURIComponent(`${TEST_PREFIX} Candidata%`)}`,
+  );
   for (const v of (await velhos.json()) as { id: string }[]) {
     await admin(`/consultant_profiles?party_id=eq.${v.id}`, { method: "DELETE" });
     await admin(`/party_roles?party_id=eq.${v.id}`, { method: "DELETE" });
     await admin(`/contact_points?party_id=eq.${v.id}`, { method: "DELETE" });
     await admin(`/party_addresses?party_id=eq.${v.id}`, { method: "DELETE" });
-    await admin(`/leads?party_id=eq.${v.id}`, { method: "PATCH", body: JSON.stringify({ party_id: null }) });
+    await admin(`/leads?party_id=eq.${v.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ party_id: null }),
+    });
     await admin(`/parties?id=eq.${v.id}`, { method: "DELETE" });
   }
-  await admin(`/leads?full_name=like.${encodeURIComponent(`${TEST_PREFIX} Candidata%`)}`, { method: "DELETE" });
+  await admin(`/leads?full_name=like.${encodeURIComponent(`${TEST_PREFIX} Candidata%`)}`, {
+    method: "DELETE",
+  });
 
   // Candidatura pelo mesmo caminho público usado pelo formulário do site.
   const r = await fetch(`${URL}/rest/v1/rpc/submit_lead`, {
@@ -137,9 +144,7 @@ describe("candidata → consultora", () => {
       expect(de_novo.status).toBeLessThan(400);
       expect(String(de_novo.body)).toBe(antes);
 
-      const pessoas = await admin(
-        `/parties?select=id&display_name=eq.${encodeURIComponent(NOME)}`,
-      );
+      const pessoas = await admin(`/parties?select=id&display_name=eq.${encodeURIComponent(NOME)}`);
       expect(((await pessoas.json()) as unknown[]).length).toBeLessThanOrEqual(1);
 
       const papeis = await admin(`/party_roles?select=id&party_id=eq.${antes}&role=eq.consultora`);

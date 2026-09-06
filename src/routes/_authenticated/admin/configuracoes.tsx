@@ -27,7 +27,7 @@ function Configuracoes() {
       />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {itens.map((m) => (
-          <Panel key={m.slug}>
+          <Panel key={m.slug} flush>
             <div className="space-y-3 px-5 py-5">
               <div className="flex items-start justify-between gap-3">
                 <h2 className="text-lg text-ledger-text">{m.label}</h2>

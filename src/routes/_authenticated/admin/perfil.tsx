@@ -139,7 +139,7 @@ function FotoCard({
   });
 
   return (
-    <Panel title="Foto do perfil">
+    <Panel title="Foto do perfil" flush>
       <div id={id} className="scroll-mt-24 space-y-4 px-5 py-5">
         <div className="flex items-center gap-4">
           <Avatar url={url} initials={initials} className="size-20 text-lg" />
@@ -239,7 +239,7 @@ function DadosCard({
   );
 
   return (
-    <Panel title="Meus dados">
+    <Panel title="Meus dados" flush>
       <form
         className="space-y-4 px-5 py-5"
         onSubmit={(e) => {
@@ -299,7 +299,7 @@ function SenhaCard({ id }: { id: string }) {
   });
 
   return (
-    <Panel title="Trocar senha">
+    <Panel title="Trocar senha" flush>
       <form
         id={id}
         className="scroll-mt-24 space-y-4 px-5 py-5"
@@ -387,7 +387,7 @@ function AcessoCard({
   desde: string | null;
 }) {
   return (
-    <Panel title="Acesso e papéis">
+    <Panel title="Acesso e papéis" flush>
       <div id={id} className="scroll-mt-24 space-y-4 px-5 py-5">
         <Linha rotulo="E-mail" valor={email ?? "—"} />
         <Linha rotulo="Situação" valor={ativo ? "Conta ativa" : "Conta desativada"} />

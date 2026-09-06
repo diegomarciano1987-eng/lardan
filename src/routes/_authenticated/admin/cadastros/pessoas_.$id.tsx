@@ -242,7 +242,7 @@ function FichaPessoa() {
 
         {/* RESUMO */}
         <TabsContent value="resumo" className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-          <Panel title="Completude da ficha">
+          <Panel title="Completude da ficha" flush>
             <div className="space-y-3 p-5">
               <div className="h-2 w-full overflow-hidden rounded-full bg-surface-muted">
                 <div className="h-full rounded-full bg-bronze" style={{ width: `${progresso?.pct ?? 0}%` }} />
@@ -266,7 +266,7 @@ function FichaPessoa() {
             </div>
           </Panel>
 
-          <Panel title="Papéis desta pessoa">
+          <Panel title="Papéis desta pessoa" flush>
             <div className="space-y-3 p-5">
               {d.papeis.length === 0 ? (
                 <p className="text-sm font-medium text-ledger-muted">Nenhum papel atribuído ainda.</p>
@@ -308,7 +308,7 @@ function FichaPessoa() {
 
         {/* IDENTIFICAÇÃO */}
         <TabsContent value="identificacao" className="mt-4">
-          <Panel title="Identificação">
+          <Panel title="Identificação" flush>
             <div className="grid gap-4 p-5 md:grid-cols-2">
               <Campo label="Nome completo / razão social">
                 <input
@@ -390,7 +390,7 @@ function FichaPessoa() {
 
         {/* CONTATOS */}
         <TabsContent value="contatos" className="mt-4">
-          <Panel title="Contatos">
+          <Panel title="Contatos" flush>
             <div className="space-y-3 p-5">
               {d.contatos.length === 0 && (
                 <p className="text-sm font-medium text-ledger-muted">Nenhum contato registrado.</p>
@@ -484,7 +484,7 @@ function FichaPessoa() {
 
         {/* VÍNCULOS */}
         <TabsContent value="vinculos" className="mt-4">
-          <Panel title="Onde este cadastro é usado">
+          <Panel title="Onde este cadastro é usado" flush>
             <div className="p-5">
               {d.vinculos.length === 0 ? (
                 <p className="text-sm font-medium text-ledger-muted">Nenhum módulo especializado usa este cadastro ainda.</p>
@@ -506,7 +506,7 @@ function FichaPessoa() {
         </TabsContent>
 
         <TabsContent value="operacao" className="mt-4">
-          <Panel title="Estoque e maletas">
+          <Panel title="Estoque e maletas" flush>
             <EmptyState
               title="Em implantação"
               description="Maletas, peças sob custódia, acertos e devoluções dependem do motor de estoque. Nada é exibido aqui até existir movimento real."
@@ -515,7 +515,7 @@ function FichaPessoa() {
         </TabsContent>
 
         <TabsContent value="acesso" className="mt-4">
-          <Panel title="Acesso ao sistema">
+          <Panel title="Acesso ao sistema" flush>
             <div className="p-5">
               {d.vinculos.some((v) => v.entity_type === "profile") ? (
                 <p className="text-sm font-medium text-ledger-text">
@@ -535,7 +535,7 @@ function FichaPessoa() {
         </TabsContent>
 
         <TabsContent value="historico" className="mt-4">
-          <Panel title="Histórico e auditoria">
+          <Panel title="Histórico e auditoria" flush>
             <div className="p-5">
               {!caps.includes("audit.view") ? (
                 <p className="text-sm font-medium text-ledger-muted">Seu perfil não consulta a auditoria.</p>
@@ -742,7 +742,7 @@ function ConsultoraForm({
   const campos = secao === "comercial" ? comercial : financeiro;
 
   return (
-    <Panel title={secao === "comercial" ? "Relacionamento comercial" : "Financeiro e PIX"}>
+    <Panel flush title={secao === "comercial" ? "Relacionamento comercial" : "Financeiro e PIX"}>
       <div className="grid gap-4 p-5 md:grid-cols-2">
         {secao === "comercial" && (
           <Campo label="Data de entrada">

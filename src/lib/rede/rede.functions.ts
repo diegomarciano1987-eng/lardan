@@ -27,8 +27,8 @@ export const localizarEnderecos = createServerFn({ method: "POST" })
     z.object({ limite: z.number().int().min(1).max(200).default(40) }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: pode } = await supabaseAdmin.rpc("has_capability", {
+    // A checagem precisa correr como o próprio usuário: has_capability exige auth.uid().
+    const { data: pode } = await context.supabase.rpc("has_capability", {
       _user_id: context.userId!,
       _cap: "partners.manage",
     });
@@ -40,8 +40,7 @@ export const localizarEnderecos = createServerFn({ method: "POST" })
 export const situacaoDaLocalizacao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: pode } = await supabaseAdmin.rpc("has_capability", {
+    const { data: pode } = await context.supabase.rpc("has_capability", {
       _user_id: context.userId!,
       _cap: "partners.view",
     });

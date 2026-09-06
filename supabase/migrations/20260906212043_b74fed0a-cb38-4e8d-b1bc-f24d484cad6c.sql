@@ -1,0 +1,1 @@
+DELETE FROM public.role_capabilities WHERE role = 'estoque' AND capability IN ('catalog.cost.view','stock.cost.view');

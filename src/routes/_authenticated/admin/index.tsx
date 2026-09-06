@@ -170,7 +170,7 @@ function VisaoGeral() {
       />
 
       {roles.length === 0 && (
-        <Panel title="Acesso">
+        <Panel title="Acesso" flush>
           <div className="space-y-4 px-5 py-6">
             <p className="text-sm text-ledger-muted">
               A sua conta ainda não tem nenhum perfil de acesso. Sem perfil, nada do
@@ -250,7 +250,7 @@ function VisaoGeral() {
             />
           </Panel>
 
-          <Panel title="Atalhos operacionais">
+          <Panel title="Atalhos operacionais" flush>
             <ul className="grid gap-2 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3">
               {SHORTCUTS.map((s) => {
                 const mod = ADMIN_MODULES.find((m) => m.slug === s.module);
@@ -293,7 +293,7 @@ function VisaoGeral() {
 
         {/* Coluna direita */}
         <div className="flex flex-col gap-3">
-          <Panel title="Conciliação e status">
+          <Panel title="Conciliação e status" flush>
             <div className="px-5 py-5">
               <p className="text-sm text-ledger-text">Ainda não conciliado</p>
               <p className="mt-2 text-xs leading-relaxed text-ledger-muted">
@@ -346,7 +346,7 @@ function VisaoGeral() {
           )}
         </Panel>
 
-        <Panel title="Trilha de auditoria recente">
+        <Panel title="Trilha de auditoria recente" flush>
           {!podeAuditoria ? (
             <EmptyState
               title="Restrito"

@@ -193,14 +193,16 @@ export interface ListPartiesParams {
  */
 export async function listParties(params: ListPartiesParams) {
   const { search, page, pageSize, kind, role, status } = params;
-  const { data, error } = await supabase.rpc("list_parties", {
-    _search: search.trim() || undefined,
-    _kind: kind && kind !== "todos" ? kind : undefined,
-    _role: role && role !== "todos" ? role : undefined,
-    _status: status && status !== "todos" ? status : undefined,
-    _limit: pageSize,
-    _offset: page * pageSize,
-  });
+  const args: Record<string, unknown> = { _limit: pageSize, _offset: page * pageSize };
+  const termo = search.trim();
+  if (termo) args["_search"] = termo;
+  if (kind && kind !== "todos") args["_kind"] = kind;
+  if (role && role !== "todos") args["_role"] = role;
+  if (status && status !== "todos") args["_status"] = status;
+  const { data, error } = await supabase.rpc(
+    "list_parties",
+    args as { _limit: number; _offset: number },
+  );
   if (error) throw error;
   const linhas = (data ?? []) as unknown as (Party & { total: number })[];
   return {

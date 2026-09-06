@@ -139,24 +139,41 @@ Método de cada linha declarado. Nada marcado como testado por leitura de códig
 | Telas `/admin/estoque` e `/admin/cadastros/pessoas` | NÃO TESTADO NO NAVEGADOR | Sem sessão disponível no ambiente de verificação (`signed_out`); typecheck limpo, mas a tela não foi exercitada |
 | Regressão completa da seção 10 do documento enviado | NÃO TESTADO | Depende de sessão autenticada |
 
-## Bateria automática de permissões (tests/security)
+## Matriz automática de permissões (tests/security) — vigente
 
 Comando: `bun run test:seg` (vitest). Cria contas sintéticas `homolog.*@lardan.test`
-via API de administração, atribui um papel a cada uma, executa as provas contra o
-banco real e apaga as contas ao final. Nenhum usuário real é usado.
+via API de administração, monta os papéis, executa as provas contra o banco real e
+apaga contas e pessoas sintéticas ao final. Nenhum usuário real é usado.
 
-Resultado da última execução: 8 de 8 aprovadas.
+Resultado da última execução: **45 cenários, 45 aprovados**. A saída do teste imprime
+uma tabela perfil × cenário × resultado (não apenas o total).
 
-| Prova | Resultado |
-| --- | --- |
-| Visitante não lê parties/stock_movements/variant_costs/profiles pela Data API | passou (sem dado) |
-| Visitante não executa stock_movements_list, list_parties, publish_products, my_roles | passou (bloqueado) |
-| Visitante lê catálogo publicado (public_categories) | passou |
-| Papel Estoque: custo unitário ausente na resposta (chave removida, não nula) | passou |
-| Master e Financeiro: custo unitário presente | passou |
-| Consultora: estoque bloqueado (42501) | passou |
-| Consultora: documento não sai aberto e revelação é negada | passou |
-| Master com perfil desativado: zero capacidades | passou |
+Perfis testados individualmente: Master, Diretoria, Financeiro, Estoque, Marketing,
+Suporte, Representante, Consultora, usuário autenticado sem papel, Master desativado,
+usuário com dois papéis (Marketing+Financeiro) e visitante.
+
+| Cenário | Cobertura | Resultado |
+| --- | --- | --- |
+| Leitura direta de `stock_movements` e `variant_costs` | 12 identidades | bloqueada/vazia em todas |
+| Leitura direta de `parties.doc`, `parties.doc_canon`, `parties.doc_digits`, `suppliers.tax_id`, `business_entities.tax_id` | 12 identidades × 5 colunas | negada em todas (concessão por coluna) |
+| Custo na resposta de `stock_movements_list` | 8 perfis | presente só em Master, Diretoria e Financeiro; chave ausente para os demais |
+| Capacidade `*.cost.view` | 12 identidades | só Master, Diretoria, Financeiro |
+| Documento mascarado em `list_parties` + `party_doc_reveal` | 8 perfis | revelação permitida só a Master, Diretoria, Financeiro |
+| Escopo da Rede (`network_geo_overview`) | 8 perfis | nacional (Master/Diretoria), agregado (Marketing), representante, próprio (Consultora), negado (Financeiro/Estoque/Suporte) |
+| Escopo territorial (`network_scope`) | Representante | modo `representante` com carteira sempre definida |
+| Representante consultando carteira de terceiro | Representante | sem dados |
+| Consultora pesquisando o cadastro geral | Consultora | sem resultados |
+| Publicação, importação, auditoria e PIX | 8 perfis | conforme a verdade única do checkpoint |
+| Usuário sem papel / Master desativado | 2 identidades | zero capacidades |
+| Dois papéis (Marketing+Financeiro) | 1 identidade | união correta das capacidades |
+| Autopromoção de papel (tabela direta e `grant_role`) | 4 identidades | negada nas duas vias |
+| Conta desativada tentando se reativar | 1 identidade | negada, segue com zero capacidades |
+| Visitante em funções internas e no catálogo público | visitante | internas bloqueadas; catálogo aberto |
+
+Observação de arquitetura registrada pelo teste: o banco vincula automaticamente uma
+pessoa a cada perfil (`ensure_profile_party`), portanto não existe representante sem
+carteira — o caso "representante sem `party_id`" é estruturalmente impossível.
+
 
 ### Correções provadas nesta rodada
 

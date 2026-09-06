@@ -83,8 +83,8 @@ afterAll(async () => {
 
 /* ------------------------------------------------------- leitura direta --- */
 
-describe("leitura direta pela Data API (nenhum perfil pode)", () => {
-  for (const tabela of ["parties", "stock_movements", "variant_costs"] as const) {
+describe("leitura direta pela Data API", () => {
+  for (const tabela of ["stock_movements", "variant_costs"] as const) {
     it(
       `${tabela} fechada para todos os perfis, sem papel, inativo e visitante`,
       async () => {
@@ -103,7 +103,35 @@ describe("leitura direta pela Data API (nenhum perfil pode)", () => {
       T,
     );
   }
+
+  it(
+    "parties/suppliers/business_entities: nenhum perfil lê o documento completo direto da tabela",
+    async () => {
+      const alvos: [string, string | null][] = [
+        ...Object.entries(contas).map(([n, c]) => [n, c.token] as [string, string | null]),
+        ["visitante", null],
+      ];
+      const colunas: [string, string][] = [
+        ["parties", "doc"],
+        ["parties", "doc_canon"],
+        ["parties", "doc_digits"],
+        ["suppliers", "tax_id"],
+        ["business_entities", "tax_id"],
+      ];
+      for (const [nome, token] of alvos) {
+        for (const [tabela, coluna] of colunas) {
+          const r = await comoUsuario(token, `/${tabela}?select=${coluna}&limit=1`);
+          const vazio = Array.isArray(r.body) && r.body.length === 0;
+          const ok = r.status >= 400 || vazio;
+          registrar(nome, `${tabela}.${coluna} direto`, "negada", ok ? "OK" : `VAZOU ${r.status}`);
+          expect(ok, `${nome} leu ${tabela}.${coluna} (${r.status})`).toBe(true);
+        }
+      }
+    },
+    T,
+  );
 });
+
 
 /* ---------------------------------------------------------------- custo --- */
 

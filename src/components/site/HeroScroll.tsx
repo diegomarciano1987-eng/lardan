@@ -203,12 +203,12 @@ export function HeroScroll() {
 
         {/* Passagem final: um clarão quente atravessa o quadro e entrega a
             cena já escurecida para a segunda sessão — sem corte, sem branco. */}
-        {sai > 0.001 && (
+        {sai > 0.001 && claraoSai < 1 && (
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
             style={{
-              opacity: ease(sai),
+              opacity: ease(sai) * (1 - ease(claraoSai)),
               background:
                 "radial-gradient(120% 90% at 50% 46%, oklch(1 0 0 / 0.98) 0%, oklch(0.99 0.01 70 / 0.92) 45%, oklch(0.985 0.006 80 / 0.98) 100%)",
             }}

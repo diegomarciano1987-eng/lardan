@@ -92,25 +92,29 @@ afterAll(async () => {
 /* ------------------------------------------------------- leitura direta --- */
 
 describe("leitura direta pela Data API", () => {
+  // variant_costs continua legível na tela do produto, mas só para quem pode
+  // ver custo; stock_movements não pode ser lido direto por ninguém.
+  const PODEM_CUSTO = new Set(["master", "diretoria", "financeiro", "duplo"]);
   for (const tabela of ["stock_movements", "variant_costs"] as const) {
     it(
-      `${tabela} fechada para todos os perfis, sem papel, inativo e visitante`,
+      `${tabela} fechada para quem não pode`,
       async () => {
         const alvos: [string, string | null][] = [
           ...Object.entries(contas).map(([n, c]) => [n, c.token] as [string, string | null]),
           ["visitante", null],
         ];
         for (const [nome, token] of alvos) {
+          const permitido = tabela === "variant_costs" && PODEM_CUSTO.has(nome);
           const r = await comoUsuario(token, `/${tabela}?select=id&limit=1`);
           const vazio = Array.isArray(r.body) && r.body.length === 0;
-          const ok = r.status >= 400 || vazio;
+          const ok = permitido ? r.status < 400 : r.status >= 400 || vazio;
           registrar(
             nome,
             `leitura direta ${tabela}`,
-            "bloqueada/vazia",
-            ok ? "OK" : `VAZOU ${r.status}`,
+            permitido ? "permitida" : "bloqueada/vazia",
+            ok ? "OK" : `FALHOU ${r.status}`,
           );
-          expect(ok, `${nome} leu ${tabela} (${r.status})`).toBe(true);
+          expect(ok, `${nome} em ${tabela} (${r.status})`).toBe(true);
         }
       },
       T,

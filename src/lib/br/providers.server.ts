@@ -44,16 +44,28 @@ export interface Resultado<T> {
 
 /* ----------------------------------------------------------- infraestrutura */
 
+/**
+ * Costura de teste: a bancada de homologação substitui o transporte para
+ * simular 404, 429, timeout e queda de provedor sem depender da internet.
+ * Em produção nada chama isto e o valor permanece o `fetch` do runtime.
+ */
+type Transporte = (url: string, init: RequestInit) => Promise<Response>;
+let transporte: Transporte | null = null;
+export function __definirTransporteDeTeste(t: Transporte | null) {
+  transporte = t;
+}
+
 async function buscar(url: string, timeout = TIMEOUT_MS): Promise<Response> {
   const host = new URL(url).hostname;
   if (!HOSTS_PERMITIDOS.has(host)) throw new Error(`Host não permitido: ${host}`);
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeout);
+  const init: RequestInit = {
+    signal: ctrl.signal,
+    headers: { accept: "application/json", "user-agent": "LardanCloud/1.0" },
+  };
   try {
-    return await fetch(url, {
-      signal: ctrl.signal,
-      headers: { accept: "application/json", "user-agent": "LardanCloud/1.0" },
-    });
+    return await (transporte ? transporte(url, init) : fetch(url, init));
   } finally {
     clearTimeout(t);
   }

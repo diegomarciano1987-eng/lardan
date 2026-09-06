@@ -1875,6 +1875,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      import_job_cancel: { Args: { _job: string }; Returns: undefined }
       import_job_open: {
         Args: {
           _defaults: Json
@@ -1891,6 +1892,10 @@ export type Database = {
           _responsible?: string
         }
         Returns: string
+      }
+      import_job_process: {
+        Args: { _job: string; _limit?: number }
+        Returns: Json
       }
       import_job_validate: {
         Args: { _job: string; _limit?: number }

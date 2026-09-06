@@ -144,8 +144,8 @@ export function CategoryGuillotine({
           style={{
             background:
               align === "left"
-                ? "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.88) 0%, oklch(0.985 0.006 80 / 0.45) 40%, transparent 65%)"
-                : "linear-gradient(270deg, oklch(0.985 0.006 80 / 0.88) 0%, oklch(0.985 0.006 80 / 0.45) 40%, transparent 65%)",
+                ? "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.66) 0%, oklch(0.985 0.006 80 / 0.26) 28%, transparent 50%)"
+                : "linear-gradient(270deg, oklch(0.985 0.006 80 / 0.66) 0%, oklch(0.985 0.006 80 / 0.26) 28%, transparent 50%)",
             opacity: textIn,
           }}
         />
@@ -157,8 +157,8 @@ export function CategoryGuillotine({
           style={{
             background:
               mobileSide === "left"
-                ? "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.34) 40%, transparent 66%)"
-                : "linear-gradient(270deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.34) 40%, transparent 66%)",
+                ? "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.5) 0%, oklch(0.18 0.01 30 / 0.22) 30%, transparent 54%)"
+                : "linear-gradient(270deg, oklch(0.18 0.01 30 / 0.5) 0%, oklch(0.18 0.01 30 / 0.22) 30%, transparent 54%)",
             opacity: textIn,
           }}
         />

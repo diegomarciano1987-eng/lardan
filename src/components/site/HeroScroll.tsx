@@ -180,7 +180,7 @@ export function HeroScroll() {
                 style={{
                   filter: leve
                     ? undefined
-                    : `drop-shadow(0 ${(10 + sombra).toFixed(0)}px ${(28 + sombra * 2.4).toFixed(0)}px oklch(0.06 0.01 30 / ${(0.3 + wordmarkIn * 0.35).toFixed(2)})) drop-shadow(0 0 ${(30 + wordmarkIn * 40).toFixed(0)}px oklch(0.85 0.06 40 / ${(0.18 * wordmarkIn).toFixed(2)})) brightness(${(1 + cena * 0.25).toFixed(2)})`,
+                    : `drop-shadow(0 ${(10 + sombra).toFixed(0)}px ${(28 + sombra * 2.4).toFixed(0)}px oklch(0.06 0.01 30 / ${(0.3 + wordmarkIn * 0.35).toFixed(2)})) drop-shadow(0 0 ${(30 + wordmarkIn * 40).toFixed(0)}px oklch(0.85 0.06 40 / ${(0.18 * wordmarkIn).toFixed(2)})) brightness(${(1 + penumbra * 0.28).toFixed(2)})`,
                 }}
               />
             </picture>

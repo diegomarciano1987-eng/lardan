@@ -5,7 +5,8 @@ const SLATS = 18;
 
 interface CategoryGuillotineProps {
   title: string;
-  to: string;
+  /** Slug da categoria no catálogo publicado. */
+  categoria: string;
   image: { url: string };
   /** Versão vertical da imagem, usada só em telas de celular. */
   mobileImage?: { url: string };
@@ -25,7 +26,7 @@ interface CategoryGuillotineProps {
  */
 export function CategoryGuillotine({
   title,
-  to,
+  categoria,
   image,
   mobileImage,
   imageAlt,
@@ -160,7 +161,8 @@ export function CategoryGuillotine({
               style={{ transform: `scaleX(${ruleIn})` }}
             />
             <Link
-              to={to}
+              to="/semijoias/$categoria"
+              params={{ categoria }}
               className="btn-premium mt-8"
               style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
               tabIndex={ctaIn > 0.5 ? 0 : -1}

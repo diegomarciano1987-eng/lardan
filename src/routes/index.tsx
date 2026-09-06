@@ -43,7 +43,7 @@ function HomePage() {
 
       <CategoryGuillotine
         title="Anéis"
-        to="/semijoias/$categoria" params={{ categoria: "aneis" }}
+        categoria="aneis"
         image={aneisAsset}
         mobileImage={aneisMobileAsset}
         imageAlt="Anel de semijoia Lardan sobre onda de vidro transparente"
@@ -52,7 +52,7 @@ function HomePage() {
       />
       <CategoryGuillotine
         title="Colares"
-        to="/semijoias/$categoria" params={{ categoria: "colares" }}
+        categoria="colares"
         image={colaresAsset}
         mobileImage={colaresMobileAsset}
         imageAlt="Colar de semijoia Lardan sobre formas de vidro"
@@ -61,7 +61,7 @@ function HomePage() {
       />
       <CategoryGuillotine
         title="Pulseiras"
-        to="/semijoias"
+        categoria="pulseiras"
         image={pulseirasAsset}
         mobileImage={pulseirasMobileAsset}
         imageAlt="Pulseira Lardan em ouro rosé sobre onda de vidro"
@@ -70,7 +70,7 @@ function HomePage() {
       />
       <CategoryGuillotine
         title="Brincos"
-        to="/semijoias"
+        categoria="brincos"
         image={brincosAsset}
         mobileImage={brincosMobileAsset}
         imageAlt="Brinco Lardan em ouro rosé sobre base de vidro"

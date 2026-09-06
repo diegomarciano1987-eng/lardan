@@ -11,8 +11,8 @@ import {
 import type { PartyRoleKind } from "@/lib/registry";
 
 type Destino =
-  | { tipo: "pessoa"; role: PartyRoleKind }
-  | { tipo: "organizacao"; role: PartyRoleKind }
+  | { tipo: "pessoa"; role?: PartyRoleKind }
+  | { tipo: "organizacao"; role?: PartyRoleKind }
   | { tipo: "rota"; to: string }
   | { tipo: "em_implantacao" };
 
@@ -24,7 +24,7 @@ interface Opcao {
 }
 
 const OPCOES: Opcao[] = [
-  { grupo: "Pessoas e rede", label: "Pessoa", descricao: "Identidade central, sem papel definido ainda.", destino: { tipo: "pessoa", role: "cliente" } },
+  { grupo: "Pessoas e rede", label: "Pessoa", descricao: "Identidade central, sem papel definido ainda.", destino: { tipo: "pessoa" } },
   { grupo: "Pessoas e rede", label: "Consultora", descricao: "Pessoa com papel de consultora e ficha comercial.", destino: { tipo: "pessoa", role: "consultora" } },
   { grupo: "Pessoas e rede", label: "Representante", descricao: "Responsável por região e carteira de consultoras.", destino: { tipo: "pessoa", role: "representante" } },
   { grupo: "Pessoas e rede", label: "Revendedora", descricao: "Revenda vinculada à rede.", destino: { tipo: "pessoa", role: "revendedora" } },
@@ -57,7 +57,7 @@ export function NewRecordPicker() {
     setAberto(false);
     if (o.destino.tipo === "rota") {
       // Abre a lista já com o formulário de criação aberto.
-      void navigate({ to: o.destino.to as never, search: { novo: "1" } as never });
+      void navigate({ to: o.destino.to as never, search: { novo: true } as never });
       return;
     }
     // Nada é gravado agora: o formulário canônico abre vazio e grava só ao salvar.

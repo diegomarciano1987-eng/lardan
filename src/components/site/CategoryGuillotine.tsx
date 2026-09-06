@@ -129,16 +129,16 @@ export function CategoryGuillotine({
           className="pointer-events-none absolute inset-0 md:hidden"
           style={{
             background:
-              align === "left"
+              mobileSide === "left"
                 ? "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.45) 0%, oklch(0.18 0.01 30 / 0.2) 38%, transparent 62%)"
                 : "linear-gradient(270deg, oklch(0.18 0.01 30 / 0.45) 0%, oklch(0.18 0.01 30 / 0.2) 38%, transparent 62%)",
             backdropFilter: "blur(3px)",
             maskImage:
-              align === "left"
+              mobileSide === "left"
                 ? "linear-gradient(90deg, black 0%, black 38%, transparent 62%)"
                 : "linear-gradient(270deg, black 0%, black 38%, transparent 62%)",
             WebkitMaskImage:
-              align === "left"
+              mobileSide === "left"
                 ? "linear-gradient(90deg, black 0%, black 38%, transparent 62%)"
                 : "linear-gradient(270deg, black 0%, black 38%, transparent 62%)",
             opacity: textIn,

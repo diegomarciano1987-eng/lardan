@@ -112,8 +112,8 @@ export async function territorioRede(
   filtros: FiltrosRede,
 ): Promise<Territorio> {
   const { data, error } = await supabase.rpc("network_geo_territorio", {
-    _uf: uf,
-    _ibge: ibge,
+    _uf: uf ?? undefined,
+    _ibge: ibge ?? undefined,
     _filtros: limparFiltros(filtros),
   });
   if (error) throw error;

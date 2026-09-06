@@ -32,7 +32,7 @@ export function SessaoSemijoias() {
   const emMovimento = reveal > 0.001 && reveal < 0.999;
   // Continuidade com o hero: a sessão começa na mesma penumbra em que o
   // quadro anterior terminou e ganha luz conforme as lâminas abrem.
-  const penumbra = reduced ? 0 : 1 - ease(phase(p, 0, 0.42));
+  const penumbra = reduced ? 0 : 1 - ease(phase(p, 0, 0.3));
 
   return (
     <div ref={ref} className="relative h-[260vh]">
@@ -77,7 +77,7 @@ export function SessaoSemijoias() {
                   className="-mx-px h-full flex-1 origin-top"
                   style={{
                     background:
-                      "linear-gradient(180deg, oklch(0.13 0.014 25 / 0.98) 0%, oklch(0.09 0.01 25 / 0.99) 100%)",
+                      "linear-gradient(180deg, oklch(0.17 0.016 25 / 0.98) 0%, oklch(0.11 0.012 25 / 0.99) 100%)",
                     transform: `scaleY(${lead}) translate3d(0, ${t * -6}%, 0) translateZ(0)`,
                     opacity: 1 - t * 0.15,
                     filter: !leve && emMovimento ? `blur(${(lead * 6).toFixed(1)}px)` : undefined,
@@ -114,7 +114,7 @@ export function SessaoSemijoias() {
             style={{
               opacity: penumbra,
               background:
-                "radial-gradient(120% 90% at 50% 50%, oklch(0.16 0.015 25 / 0.5) 0%, oklch(0.1 0.012 25 / 0.9) 65%, oklch(0.08 0.01 25 / 0.97) 100%)",
+                "radial-gradient(120% 90% at 50% 50%, oklch(0.2 0.02 25 / 0.26) 0%, oklch(0.13 0.015 25 / 0.58) 65%, oklch(0.1 0.012 25 / 0.76) 100%)",
             }}
           />
         )}

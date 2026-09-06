@@ -107,7 +107,7 @@ export function HeroScroll() {
               style={{
                 opacity: penumbra,
                 background:
-                  "radial-gradient(120% 90% at 50% 50%, oklch(0.16 0.015 25 / 0.55) 0%, oklch(0.11 0.015 25 / 0.86) 62%, oklch(0.08 0.01 25 / 0.96) 100%)",
+                  "radial-gradient(120% 90% at 50% 50%, oklch(0.2 0.02 25 / 0.28) 0%, oklch(0.13 0.015 25 / 0.6) 62%, oklch(0.1 0.012 25 / 0.78) 100%)",
               }}
             />
           </>
@@ -238,7 +238,7 @@ export function HeroScroll() {
             style={{
               opacity: ease(sai),
               background:
-                "linear-gradient(180deg, oklch(0.1 0.012 25 / 0.9) 0%, oklch(0.12 0.015 25 / 0.75) 45%, oklch(0.1 0.012 25 / 0.92) 100%)",
+                "linear-gradient(180deg, oklch(0.12 0.015 25 / 0.6) 0%, oklch(0.14 0.015 25 / 0.4) 45%, oklch(0.12 0.015 25 / 0.62) 100%)",
             }}
           />
         )}

@@ -27,6 +27,7 @@ import {
 import { PageHeader, Panel, StatusBadge } from "@/components/admin/ui";
 import { GlobalRegistrySearch } from "@/components/admin/GlobalRegistrySearch";
 import { NewRecordPicker } from "@/components/admin/NewRecordPicker";
+import { ConsultaPublicaDialog } from "@/components/admin/ConsultaPublicaDialog";
 import { registryCounts } from "@/lib/registry";
 
 export const Route = createFileRoute("/_authenticated/admin/cadastros/")({
@@ -125,7 +126,12 @@ function CentralDeCadastros() {
         eyebrow="Base operacional · Cadastros"
         title="Central de Cadastros"
         description="Pessoas, empresas, produtos e estruturas que sustentam toda a operação LARDAN."
-        actions={<NewRecordPicker />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <ConsultaPublicaDialog />
+            <NewRecordPicker />
+          </div>
+        }
       />
 
       <GlobalRegistrySearch />

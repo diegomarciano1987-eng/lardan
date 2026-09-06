@@ -740,6 +740,7 @@ export type Database = {
           display_name: string | null
           doc: string | null
           doc_digits: string | null
+          doc_masked: string | null
           doc_verified_at: string | null
           id: string
           is_active: boolean
@@ -764,6 +765,7 @@ export type Database = {
           display_name?: string | null
           doc?: string | null
           doc_digits?: string | null
+          doc_masked?: string | null
           doc_verified_at?: string | null
           id?: string
           is_active?: boolean
@@ -788,6 +790,7 @@ export type Database = {
           display_name?: string | null
           doc?: string | null
           doc_digits?: string | null
+          doc_masked?: string | null
           doc_verified_at?: string | null
           id?: string
           is_active?: boolean
@@ -1340,6 +1343,7 @@ export type Database = {
           created_by: string | null
           from_location_id: string | null
           id: string
+          idempotency_key: string | null
           kind: Database["public"]["Enums"]["stock_move_kind"]
           note: string | null
           quantity: number
@@ -1355,6 +1359,7 @@ export type Database = {
           created_by?: string | null
           from_location_id?: string | null
           id?: string
+          idempotency_key?: string | null
           kind: Database["public"]["Enums"]["stock_move_kind"]
           note?: string | null
           quantity: number
@@ -1370,6 +1375,7 @@ export type Database = {
           created_by?: string | null
           from_location_id?: string | null
           id?: string
+          idempotency_key?: string | null
           kind?: Database["public"]["Enums"]["stock_move_kind"]
           note?: string | null
           quantity?: number
@@ -1594,6 +1600,7 @@ export type Database = {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string
       }
+      doc_is_valid: { Args: { _digits: string }; Returns: boolean }
       ensure_profile: {
         Args: never
         Returns: {
@@ -1616,7 +1623,20 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      find_party_duplicates: {
+        Args: { _contact?: string; _doc?: string; _ignore?: string }
+        Returns: {
+          code: string
+          display_name: string
+          doc_masked: string
+          id: string
+          legal_name: string
+          motivo: string
+          status: Database["public"]["Enums"]["party_status"]
+        }[]
+      }
       gen_protocol: { Args: { prefix: string }; Returns: string }
+      get_party_full: { Args: { _id: string }; Returns: Json }
       grant_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1642,11 +1662,43 @@ export type Database = {
         }
         Returns: boolean
       }
-      import_products_stock: {
-        Args: { _location_id: string; _rows: Json }
-        Returns: Json
-      }
+      import_products_stock:
+        | { Args: { _location_id: string; _rows: Json }; Returns: Json }
+        | {
+            Args: {
+              _job_key?: string
+              _location_id: string
+              _mode?: string
+              _rows: Json
+            }
+            Returns: Json
+          }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      list_parties: {
+        Args: {
+          _kind?: string
+          _limit?: number
+          _offset?: number
+          _role?: string
+          _search?: string
+          _status?: string
+        }
+        Returns: {
+          birth_date: string
+          code: string
+          created_at: string
+          display_name: string
+          doc: string
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["party_kind"]
+          legal_name: string
+          social_name: string
+          status: Database["public"]["Enums"]["party_status"]
+          total: number
+          updated_at: string
+        }[]
+      }
       mask_doc: { Args: { _doc: string }; Returns: string }
       master_exists: { Args: never; Returns: boolean }
       my_capabilities: {
@@ -1660,20 +1712,36 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"][]
       }
       only_digits: { Args: { _v: string }; Returns: string }
-      register_stock_movement: {
-        Args: {
-          _from_location_id?: string
-          _kind: Database["public"]["Enums"]["stock_move_kind"]
-          _note?: string
-          _quantity: number
-          _reason_code?: string
-          _reference?: string
-          _to_location_id?: string
-          _unit_cost_cents?: number
-          _variant_id: string
-        }
-        Returns: string
-      }
+      register_stock_movement:
+        | {
+            Args: {
+              _from_location_id?: string
+              _kind: Database["public"]["Enums"]["stock_move_kind"]
+              _note?: string
+              _quantity: number
+              _reason_code?: string
+              _reference?: string
+              _to_location_id?: string
+              _unit_cost_cents?: number
+              _variant_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _from_location_id?: string
+              _idempotency_key?: string
+              _kind: Database["public"]["Enums"]["stock_move_kind"]
+              _note?: string
+              _quantity: number
+              _reason_code?: string
+              _reference?: string
+              _to_location_id?: string
+              _unit_cost_cents?: number
+              _variant_id: string
+            }
+            Returns: string
+          }
       registry_counts: { Args: never; Returns: Json }
       registry_duplicates: {
         Args: { _limit?: number }

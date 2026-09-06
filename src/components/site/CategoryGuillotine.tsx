@@ -51,11 +51,14 @@ export function CategoryGuillotine({
 }: CategoryGuillotineProps) {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const tier = useDeviceTier();
-  const slats = tier === "leve" ? 10 : 18;
+  const leve = tier === "leve";
+  const slats = leve ? 10 : 24;
   const p = reduced ? 1 : progress;
 
   const reveal = phase(p, 0.04, 0.62);
   const imgScale = 1.22 - 0.22 * ease(phase(p, 0, 0.75));
+  // Desfoque da foto que se dissolve conforme a guilhotina abre (só desktop).
+  const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0, 0.55))) * 7);
   const dir = enterFrom === "right" ? 1 : -1;
   const mobileSide = mobileAlign ?? align;
 

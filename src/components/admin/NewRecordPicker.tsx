@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Plus, Loader2, Lock } from "lucide-react";
+import { Plus, Lock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { addRole, saveParty, type PartyRoleKind } from "@/lib/registry";
+import type { PartyRoleKind } from "@/lib/registry";
 
 type Destino =
   | { tipo: "pessoa"; role: PartyRoleKind }
@@ -50,35 +48,23 @@ const OPCOES: Opcao[] = [
 /** Seletor único de “o que você deseja cadastrar”. Abre sempre o formulário canônico. */
 export function NewRecordPicker() {
   const [aberto, setAberto] = useState(false);
-  const [criando, setCriando] = useState<string | null>(null);
   const navigate = useNavigate();
-  const qc = useQueryClient();
 
   const grupos = [...new Set(OPCOES.map((o) => o.grupo))];
 
-  async function escolher(o: Opcao) {
+  function escolher(o: Opcao) {
     if (o.destino.tipo === "em_implantacao") return;
+    setAberto(false);
     if (o.destino.tipo === "rota") {
-      setAberto(false);
-      void navigate({ to: o.destino.to as never });
+      // Abre a lista já com o formulário de criação aberto.
+      void navigate({ to: o.destino.to as never, search: { novo: "1" } as never });
       return;
     }
-    try {
-      setCriando(o.label);
-      const id = await saveParty({
-        kind: o.destino.tipo === "pessoa" ? "pessoa" : "organizacao",
-        status: "rascunho",
-      });
-      if (o.destino.role) await addRole(id, o.destino.role);
-      await qc.invalidateQueries({ queryKey: ["registry"] });
-      setAberto(false);
-      toast.success("Rascunho criado. Complete quando quiser.");
-      void navigate({ to: "/admin/cadastros/pessoas/$id", params: { id } });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Não foi possível criar o cadastro.");
-    } finally {
-      setCriando(null);
-    }
+    // Nada é gravado agora: o formulário canônico abre vazio e grava só ao salvar.
+    void navigate({
+      to: "/admin/cadastros/pessoas/novo",
+      search: { kind: o.destino.tipo, papel: o.destino.role },
+    });
   }
 
   return (
@@ -107,13 +93,12 @@ export function NewRecordPicker() {
                       <li key={o.label}>
                         <button
                           type="button"
-                          disabled={bloqueado || criando !== null}
-                          onClick={() => void escolher(o)}
+                          disabled={bloqueado}
+                          onClick={() => escolher(o)}
                           className="flex w-full flex-col items-start gap-1 rounded-xl border border-line bg-surface p-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-champagne hover:shadow-md disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:translate-y-0 disabled:hover:border-line disabled:hover:shadow-sm"
                         >
                           <span className="flex w-full items-center gap-2 text-sm font-semibold text-ledger-text">
                             {o.label}
-                            {criando === o.label && <Loader2 aria-hidden className="size-3.5 animate-spin" />}
                             {bloqueado && (
                               <span className="ml-auto inline-flex items-center gap-1 text-[0.625rem] font-semibold tracking-[0.08em] text-ledger-muted uppercase">
                                 <Lock aria-hidden className="size-3" /> Em implantação

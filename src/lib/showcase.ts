@@ -422,8 +422,12 @@ export async function publicarProdutos(ids: string[], motivo?: string): Promise<
     _note: motivo ?? null,
   } as never);
   if (error) throw error;
-  const r = data as unknown as ResultadoPublicacao;
-  return { itens_rejeitados: [], ...r };
+  const r = (data ?? {}) as Partial<ResultadoPublicacao>;
+  return {
+    afetados: r.afetados ?? 0,
+    rejeitados: r.rejeitados ?? 0,
+    itens_rejeitados: r.itens_rejeitados ?? [],
+  };
 }
 
 export async function despublicarProdutos(

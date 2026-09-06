@@ -23,6 +23,11 @@ export interface FieldSpec {
   placeholder?: string;
   /** ocupa a linha inteira */
   full?: boolean;
+  /** botão de conferência ao lado do campo (lupa) */
+  action?: {
+    label: string;
+    run: (valor: string, aplicar: (patch: RecordValues) => void) => Promise<void>;
+  };
 }
 
 export type RecordValues = Record<string, unknown>;

@@ -98,9 +98,28 @@ export async function listBalances(params: {
   return { rows: (data ?? []) as unknown as BalanceRow[], total: count ?? 0 };
 }
 
-const MOVEMENT_SELECT =
-  "id, kind, quantity, unit_cost_cents, reason_code, reference, note, balance_after, created_at, product_variants!inner(label, sku, products!inner(name)), origem:locations!stock_movements_from_location_id_fkey(name), destino:locations!stock_movements_to_location_id_fkey(name)";
+/** Linha crua devolvida por public.stock_movements_list. */
+interface MovementRaw {
+  id: string;
+  kind: StockMoveKind;
+  quantity: number;
+  unit_cost_cents: number | null;
+  reason_code: string | null;
+  reference: string | null;
+  note: string | null;
+  balance_after: number | null;
+  created_at: string;
+  variante: string | null;
+  sku: string | null;
+  produto: string | null;
+  origem: string | null;
+  destino: string | null;
+}
 
+/**
+ * Movimentações sempre pelo servidor. O custo unitário não é mais legível na
+ * Data API: só volta preenchido para quem tem `stock.cost.view`.
+ */
 export async function listMovements(params: {
   search: string;
   page: number;
@@ -109,25 +128,38 @@ export async function listMovements(params: {
   variantId?: string | undefined;
 }) {
   const { search, page, pageSize, kind, variantId } = params;
-  let query = supabase
-    .from("stock_movements")
-    .select(MOVEMENT_SELECT, { count: "exact" })
-    .order("created_at", { ascending: false })
-    .range(page * pageSize, page * pageSize + pageSize - 1);
+  const args: Record<string, unknown> = { _page: page, _size: pageSize };
+  const termo = search.trim();
+  if (termo.length >= 2) args["_search"] = termo;
+  if (kind && kind !== "todos") args["_kind"] = kind;
+  if (variantId) args["_variant"] = variantId;
 
-  if (kind && kind !== "todos") query = query.eq("kind", kind as StockMoveKind);
-  if (variantId) query = query.eq("variant_id", variantId);
-
-  const termo = search.trim().replace(/[,()]/g, " ");
-  if (termo.length >= 2) {
-    query = query.or(`label.ilike.%${termo}%,sku.ilike.%${termo}%`, {
-      referencedTable: "product_variants",
-    });
-  }
-
-  const { data, error, count } = await query;
+  const { data, error } = await supabase.rpc("stock_movements_list", args as never);
   if (error) throw error;
-  return { rows: (data ?? []) as unknown as MovementRow[], total: count ?? 0 };
+  const payload = (data ?? {}) as {
+    rows?: MovementRaw[];
+    total?: number;
+    pode_ver_custo?: boolean;
+  };
+  const rows: MovementRow[] = (payload.rows ?? []).map((r) => ({
+    id: r.id,
+    kind: r.kind,
+    quantity: r.quantity,
+    unit_cost_cents: r.unit_cost_cents,
+    reason_code: r.reason_code,
+    reference: r.reference,
+    note: r.note,
+    balance_after: r.balance_after,
+    created_at: r.created_at,
+    product_variants: {
+      label: r.variante ?? "",
+      sku: r.sku,
+      products: r.produto ? { name: r.produto } : null,
+    },
+    origem: r.origem ? { name: r.origem } : null,
+    destino: r.destino ? { name: r.destino } : null,
+  }));
+  return { rows, total: Number(payload.total ?? 0), podeVerCusto: payload.pode_ver_custo ?? false };
 }
 
 export async function listStockReasons(): Promise<StockReason[]> {

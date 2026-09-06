@@ -21,7 +21,16 @@ export const consultarCnpj = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { lookupCompanyByTaxId } = await import("./providers.server");
-    return lookupCompanyByTaxId(data.cnpj, context.userId ?? null, { comQsa: data.comQsa });
+    // O quadro societário é dado pessoal de terceiros: só sai com permissão.
+    let comQsa = false;
+    if (data.comQsa) {
+      const { data: autorizado } = await context.supabase.rpc("has_capability", {
+        _user_id: context.userId,
+        _cap: "registry.doc.view",
+      });
+      comQsa = autorizado === true;
+    }
+    return lookupCompanyByTaxId(data.cnpj, context.userId ?? null, { comQsa });
   });
 
 export const listarMunicipios = createServerFn({ method: "POST" })

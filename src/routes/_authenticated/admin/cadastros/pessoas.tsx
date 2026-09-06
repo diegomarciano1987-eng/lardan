@@ -114,8 +114,15 @@ function PessoasPage() {
           {
             key: "doc",
             header: "Documento",
+            // O banco já entrega mascarado para quem não tem registry.doc.view.
             render: (r) => (
-              <span className="num">{r.doc_digits ? (podeVerDoc ? formatDoc(r.doc_digits) : maskDoc(r.doc_digits)) : "—"}</span>
+              <span className="num">
+                {r.doc?.trim()
+                  ? podeVerDoc
+                    ? formatDoc(r.doc)
+                    : maskDoc(r.doc)
+                  : "—"}
+              </span>
             ),
           },
           {

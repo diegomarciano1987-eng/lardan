@@ -470,6 +470,99 @@ export type Database = {
           },
         ]
       }
+      geocode_batches: {
+        Row: {
+          aproximados: number
+          checkpoint: string | null
+          created_at: string
+          created_by: string | null
+          escopo: Json
+          falhas: number
+          finished_at: string | null
+          id: string
+          localizados: number
+          mensagem: string | null
+          processados: number
+          started_at: string | null
+          status: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          aproximados?: number
+          checkpoint?: string | null
+          created_at?: string
+          created_by?: string | null
+          escopo?: Json
+          falhas?: number
+          finished_at?: string | null
+          id?: string
+          localizados?: number
+          mensagem?: string | null
+          processados?: number
+          started_at?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          aproximados?: number
+          checkpoint?: string | null
+          created_at?: string
+          created_by?: string | null
+          escopo?: Json
+          falhas?: number
+          finished_at?: string | null
+          id?: string
+          localizados?: number
+          mensagem?: string | null
+          processados?: number
+          started_at?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      geocode_cache: {
+        Row: {
+          expires_at: string
+          fetched_at: string
+          geo_hash: string
+          ibge_city_code: string | null
+          latitude: number | null
+          longitude: number | null
+          postal_digits: string | null
+          precision: string
+          source: string
+          uf: string | null
+        }
+        Insert: {
+          expires_at?: string
+          fetched_at?: string
+          geo_hash: string
+          ibge_city_code?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          postal_digits?: string | null
+          precision: string
+          source: string
+          uf?: string | null
+        }
+        Update: {
+          expires_at?: string
+          fetched_at?: string
+          geo_hash?: string
+          ibge_city_code?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          postal_digits?: string | null
+          precision?: string
+          source?: string
+          uf?: string | null
+        }
+        Relationships: []
+      }
       ibge_municipios: {
         Row: {
           codigo_ibge: string
@@ -1183,6 +1276,14 @@ export type Database = {
           created_at: string
           ddd: string | null
           district: string | null
+          geo_attempted_at: string | null
+          geo_error: string | null
+          geo_hash: string | null
+          geo_located_at: string | null
+          geo_normalizer_version: string | null
+          geo_precision: string | null
+          geo_source: string | null
+          geo_status: string
           ibge_city_code: string | null
           id: string
           is_primary: boolean
@@ -1207,6 +1308,14 @@ export type Database = {
           created_at?: string
           ddd?: string | null
           district?: string | null
+          geo_attempted_at?: string | null
+          geo_error?: string | null
+          geo_hash?: string | null
+          geo_located_at?: string | null
+          geo_normalizer_version?: string | null
+          geo_precision?: string | null
+          geo_source?: string | null
+          geo_status?: string
           ibge_city_code?: string | null
           id?: string
           is_primary?: boolean
@@ -1231,6 +1340,14 @@ export type Database = {
           created_at?: string
           ddd?: string | null
           district?: string | null
+          geo_attempted_at?: string | null
+          geo_error?: string | null
+          geo_hash?: string | null
+          geo_located_at?: string | null
+          geo_normalizer_version?: string | null
+          geo_precision?: string | null
+          geo_source?: string | null
+          geo_status?: string
           ibge_city_code?: string | null
           id?: string
           is_primary?: boolean
@@ -1978,6 +2095,27 @@ export type Database = {
           },
         ]
       }
+      uf_centroides: {
+        Row: {
+          latitude: number
+          longitude: number
+          nome: string
+          uf: string
+        }
+        Insert: {
+          latitude: number
+          longitude: number
+          nome: string
+          uf: string
+        }
+        Update: {
+          latitude?: number
+          longitude?: number
+          nome?: string
+          uf?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2061,6 +2199,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      address_geo_fingerprint: {
+        Args: {
+          _city: string
+          _district: string
+          _number: string
+          _postal: string
+          _street: string
+          _uf: string
+        }
+        Returns: string
+      }
       apply_stock_delta: {
         Args: { _delta: number; _location: string; _variant: string }
         Returns: number

@@ -431,7 +431,7 @@ function FichaPessoa() {
 
         {/* ENDEREÇOS */}
         <TabsContent value="enderecos" className="mt-4">
-          <Panel title="Endereço principal">
+          <Panel title="Endereço principal" flush>
             <EnderecoForm
               partyId={id}
               inicial={d.enderecos[0] ?? null}

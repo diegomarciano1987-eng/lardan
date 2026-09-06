@@ -1,7 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { useScrollProgress, phase, ease, easeOut } from "@/hooks/use-scroll-progress";
-
-const SLATS = 18;
+import {
+  useScrollProgress,
+  useDeviceTier,
+  phase,
+  ease,
+  easeOut,
+} from "@/hooks/use-scroll-progress";
 
 interface CategoryGuillotineProps {
   title: string;
@@ -10,8 +14,12 @@ interface CategoryGuillotineProps {
   /** Slug da categoria no catálogo publicado. */
   categoria: string;
   image: { url: string };
+  /** Versão leve (webp) da imagem de desktop. */
+  imageWebp?: string;
   /** Versão vertical da imagem, usada só em telas de celular. */
   mobileImage?: { url: string };
+  /** Versão leve (webp) da imagem de celular. */
+  mobileImageWebp?: string;
   imageAlt: string;
   /** Lado por onde a guilhotina entra: "right" = da direita para a esquerda. */
   enterFrom: "left" | "right";
@@ -33,13 +41,17 @@ export function CategoryGuillotine({
   subtitle,
   categoria,
   image,
+  imageWebp,
   mobileImage,
+  mobileImageWebp,
   imageAlt,
   enterFrom,
   align = "left",
   mobileAlign,
 }: CategoryGuillotineProps) {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
+  const tier = useDeviceTier();
+  const slats = tier === "leve" ? 10 : 18;
   const p = reduced ? 1 : progress;
 
   const reveal = phase(p, 0.04, 0.62);
@@ -50,51 +62,53 @@ export function CategoryGuillotine({
   const textIn = easeOut(phase(p, 0.5, 0.8));
   const ruleIn = easeOut(phase(p, 0.56, 0.84));
   const ctaIn = easeOut(phase(p, 0.62, 0.9));
+  const emMovimento = reveal > 0.001 && reveal < 0.999;
 
   return (
     <div ref={ref} className="relative h-[240vh]">
       <section className="sticky top-0 h-screen overflow-hidden bg-background">
         <picture>
-          {mobileImage && (
-            <source media="(max-width: 767px)" srcSet={mobileImage.url} />
+          {mobileImageWebp && (
+            <source media="(max-width: 767px)" srcSet={mobileImageWebp} type="image/webp" />
           )}
+          {mobileImage && <source media="(max-width: 767px)" srcSet={mobileImage.url} />}
+          {imageWebp && <source srcSet={imageWebp} type="image/webp" />}
           <img
             src={image.url}
             alt={imageAlt}
             loading="lazy"
+            decoding="async"
             width={1664}
             height={928}
-            className="absolute inset-0 h-full w-full object-cover"
-            style={{ transform: `scale(${imgScale})` }}
+            className="gpu-layer absolute inset-0 h-full w-full object-cover"
+            style={{ transform: `scale(${imgScale}) translateZ(0)` }}
           />
         </picture>
 
-        {/* Lâminas que deslizam na horizontal, em cascata, com acabamento suave */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 flex">
-          {Array.from({ length: SLATS }).map((_, i) => {
-            // Cascata larga: a frente de varredura atravessa a tela inteira,
-            // da borda de entrada até o lado oposto, lâmina a lâmina.
-            const order =
-              enterFrom === "right"
-                ? (SLATS - 1 - i) / (SLATS - 1)
-                : i / (SLATS - 1);
-            const start = 0.5 * order;
-            const t = easeOut(phase(reveal, start, start + 0.5));
-            const lead = 1 - t; // 1 = lâmina cobrindo, 0 = fora da cena
-            const moving = t * (1 - t) * 4; // desfoque só enquanto desliza
-            return (
-              <div
-                key={i}
-                className="-mx-px h-full flex-1 bg-background"
-                style={{
-                  transform: `translateX(${dir * t * 130}%)`,
-                  opacity: lead < 0.02 ? 0 : 1,
-                  filter: `blur(${moving * 4}px)`,
-                }}
-              />
-            );
-          })}
-        </div>
+        {/* Lâminas que deslizam na horizontal, em cascata.
+            Apenas transform/opacidade — sem desfoque por lâmina, para manter
+            a rolagem fluida no Safari e em aparelhos mais simples. */}
+        {reveal < 0.999 && (
+          <div aria-hidden className="pointer-events-none absolute inset-0 flex">
+            {Array.from({ length: slats }).map((_, i) => {
+              const order = enterFrom === "right" ? (slats - 1 - i) / (slats - 1) : i / (slats - 1);
+              const start = 0.5 * order;
+              const t = easeOut(phase(reveal, start, start + 0.5));
+              const lead = 1 - t; // 1 = lâmina cobrindo, 0 = fora da cena
+              return (
+                <div
+                  key={i}
+                  className="-mx-px h-full flex-1 bg-background"
+                  style={{
+                    transform: `translate3d(${dir * t * 130}%, 0, 0)`,
+                    opacity: lead < 0.02 ? 0 : 1,
+                    willChange: emMovimento ? "transform" : "auto",
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
 
         {/* Sombra de varredura que acompanha a frente da guilhotina */}
         <div
@@ -107,7 +121,7 @@ export function CategoryGuillotine({
                 ? "linear-gradient(270deg, oklch(0.2 0.015 30 / 0.28) 0%, transparent 100%)"
                 : "linear-gradient(90deg, oklch(0.2 0.015 30 / 0.28) 0%, transparent 100%)",
             opacity: reveal * (1 - reveal) * 4,
-            transform: `translateX(${dir * -1 * (1 - reveal) * 40}%)`,
+            transform: `translate3d(${dir * -1 * (1 - reveal) * 40}%, 0, 0)`,
           }}
         />
 
@@ -123,24 +137,16 @@ export function CategoryGuillotine({
             opacity: textIn,
           }}
         />
-        {/* Mobile: véu escuro suave atrás do texto, com desfoque */}
+        {/* Mobile: véu escuro suave atrás do texto (sem desfoque de fundo,
+            que é o efeito mais pesado no Safari do iPhone) */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 md:hidden"
           style={{
             background:
               mobileSide === "left"
-                ? "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.45) 0%, oklch(0.18 0.01 30 / 0.2) 38%, transparent 62%)"
-                : "linear-gradient(270deg, oklch(0.18 0.01 30 / 0.45) 0%, oklch(0.18 0.01 30 / 0.2) 38%, transparent 62%)",
-            backdropFilter: "blur(3px)",
-            maskImage:
-              mobileSide === "left"
-                ? "linear-gradient(90deg, black 0%, black 38%, transparent 62%)"
-                : "linear-gradient(270deg, black 0%, black 38%, transparent 62%)",
-            WebkitMaskImage:
-              mobileSide === "left"
-                ? "linear-gradient(90deg, black 0%, black 38%, transparent 62%)"
-                : "linear-gradient(270deg, black 0%, black 38%, transparent 62%)",
+                ? "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.34) 40%, transparent 66%)"
+                : "linear-gradient(270deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.34) 40%, transparent 66%)",
             opacity: textIn,
           }}
         />
@@ -148,9 +154,7 @@ export function CategoryGuillotine({
         <div
           className={`relative mx-auto flex h-full max-w-6xl flex-col justify-center px-6 md:px-10 ${
             mobileSide === "right" ? "items-end text-right" : "items-start text-left"
-          } ${
-            align === "right" ? "md:items-end md:text-right" : "md:items-start md:text-left"
-          }`}
+          } ${align === "right" ? "md:items-end md:text-right" : "md:items-start md:text-left"}`}
         >
           <div className="max-w-md">
             <p
@@ -176,9 +180,7 @@ export function CategoryGuillotine({
             <div
               className={`rose-rule mt-6 w-16 ${
                 mobileSide === "right" ? "origin-right" : "origin-left"
-              } ${
-                align === "right" ? "md:origin-right md:ml-auto" : "md:origin-left"
-              }`}
+              } ${align === "right" ? "md:origin-right md:ml-auto" : "md:origin-left"}`}
               style={{ transform: `scaleX(${ruleIn})` }}
             />
             <Link

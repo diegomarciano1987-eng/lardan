@@ -3,15 +3,39 @@ import { supabase } from "@/integrations/supabase/client";
 import { PRIVACY_VERSION, captureUtm, entryUrl } from "@/lib/privacy";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 
-
 type Args = Record<string, unknown>;
 function semVazios<T extends Args>(o: T): T {
   return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T;
 }
 
 const UFS = [
-  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB",
-  "PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO",
 ];
 
 const field =
@@ -42,26 +66,29 @@ export function SejaLardanForm() {
       return typeof v === "string" && v.trim() !== "" ? v.trim() : undefined;
     };
 
-    const { data, error } = await supabase.rpc("submit_lead", semVazios({
-      p_full_name: texto("full_name") ?? "",
-      p_whatsapp: texto("whatsapp") ?? "",
-      p_city: texto("city") ?? "",
-      p_uf: texto("uf") ?? "",
-      p_street: texto("street"),
-      p_street_number: semNumero ? undefined : texto("street_number"),
-      p_no_number: semNumero,
-      p_postal_code: texto("postal_code"),
-      p_financial_goal: texto("financial_goal"),
-      p_availability: texto("availability"),
-      p_experience: texto("experience"),
-      p_audience: texto("audience"),
-      p_motivation: texto("motivation"),
-      p_source: "site/seja-lardan",
-      p_entry_url: entryUrl() ?? undefined,
-      p_utm: captureUtm(),
-      p_privacy_version: PRIVACY_VERSION,
-      p_marketing_consent: form.get("marketing_consent") === "on",
-    }) as never);
+    const { data, error } = await supabase.rpc(
+      "submit_lead",
+      semVazios({
+        p_full_name: texto("full_name") ?? "",
+        p_whatsapp: texto("whatsapp") ?? "",
+        p_city: texto("city") ?? "",
+        p_uf: texto("uf") ?? "",
+        p_street: texto("street"),
+        p_street_number: semNumero ? undefined : texto("street_number"),
+        p_no_number: semNumero,
+        p_postal_code: texto("postal_code"),
+        p_financial_goal: texto("financial_goal"),
+        p_availability: texto("availability"),
+        p_experience: texto("experience"),
+        p_audience: texto("audience"),
+        p_motivation: texto("motivation"),
+        p_source: "site/seja-lardan",
+        p_entry_url: entryUrl() ?? undefined,
+        p_utm: captureUtm(),
+        p_privacy_version: PRIVACY_VERSION,
+        p_marketing_consent: form.get("marketing_consent") === "on",
+      }) as never,
+    );
 
     setBusy(false);
     if (error || !data) {
@@ -82,9 +109,9 @@ export function SejaLardanForm() {
         <p className="brand-eyebrow mb-3">Candidatura registrada</p>
         <h2 className="text-3xl text-foreground">Recebemos os seus dados</h2>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-          O seu protocolo é <strong className="text-foreground">{protocolo}</strong>.
-          Guarde este número. A equipe Lardan analisa cada candidatura; não há
-          promessa de aprovação, prazo ou renda.
+          O seu protocolo é <strong className="text-foreground">{protocolo}</strong>. Guarde este
+          número. A equipe Lardan analisa cada candidatura; não há promessa de aprovação, prazo ou
+          renda.
         </p>
       </div>
     );
@@ -199,13 +226,13 @@ export function SejaLardanForm() {
           name="marketing_consent"
           className="mt-0.5 h-4 w-4 rounded border-input"
         />
-        Aceito receber comunicações da Lardan sobre novidades e oportunidades
-        (opcional, pode ser cancelado a qualquer momento).
+        Aceito receber comunicações da Lardan sobre novidades e oportunidades (opcional, pode ser
+        cancelado a qualquer momento).
       </label>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Ao enviar, os dados acima são registrados para análise da candidatura,
-        sob o aviso de privacidade versão {PRIVACY_VERSION}.
+        Ao enviar, os dados acima são registrados para análise da candidatura, sob o aviso de
+        privacidade versão {PRIVACY_VERSION}.
       </p>
 
       {erro && (

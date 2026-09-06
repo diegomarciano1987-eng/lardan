@@ -18,10 +18,9 @@ export function CategoryScene({ title, to, image, imageAlt, align = "left" }: Ca
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => entry && setVisible(entry.isIntersecting),
-      { threshold: 0.35 },
-    );
+    const io = new IntersectionObserver(([entry]) => entry && setVisible(entry.isIntersecting), {
+      threshold: 0.35,
+    });
     io.observe(el);
     return () => io.disconnect();
   }, []);

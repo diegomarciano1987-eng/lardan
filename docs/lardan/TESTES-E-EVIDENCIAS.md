@@ -48,6 +48,8 @@ Diretoria e Financeiro (Estoque perdeu o acesso).
 | Pessoas: busca no servidor, ficha, recarga, documento mascarado | EXECUTADO no navegador (Master) | mesmo ID após recarga; documento exibido como `***.086.419-**`; console sem erros |
 | Candidata → consultora: conversão, repetição, dois cliques simultâneos, auditoria | EXECUTADO (`bun run test:cadastros`) | 5/5 aprovados; sem segunda pessoa, sem segundo perfil, sem login automático |
 | Fluxo de fornecedor/entidade no navegador | NÃO TESTADO | pendente da próxima rodada |
+| Remoção da massa (`bun run massa:limpar`) | EXECUTADO | banco volta a zero sintético; auditoria preservada |
+| Provas em sequência (`bun run test`) | EXECUTADO | 71/71 aprovados (45 segurança + 21 integrações + 5 cadastro) |
 | 404 público das categorias reais (`/aneis`) | INSPECIONADO | rota pública é `/semijoias/<categoria>`; não há categoria real publicada, só as sintéticas |
 
 

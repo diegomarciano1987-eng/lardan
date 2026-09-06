@@ -2,6 +2,33 @@
 
 Distinção obrigatória: EXECUTADO | INSPECIONADO | NÃO TESTADO. Nada aqui é marcado como testado por leitura de código.
 
+## CHECKPOINT VIGENTE — verdade única de permissões
+
+Este bloco vale sobre qualquer tabela anterior deste arquivo. As seções abaixo
+são histórico cronológico e não devem ser lidas como estado atual.
+
+| Dado sensível | Quem tem acesso |
+| --- | --- |
+| Custo (produto e movimentação) | Master, Diretoria, Financeiro |
+| Documento completo (CPF/CNPJ) | Master, Diretoria, Financeiro |
+| Identidade individual na Rede | Master, Diretoria |
+| Visão agregada nacional da Rede | Master, Diretoria, Marketing |
+| Escopo próprio na Rede | Representante (carteira), Consultora (só a si) |
+| Dados financeiros/PIX do cadastro | Master, Diretoria, Financeiro |
+| Auditoria | Master, Diretoria |
+| Publicação da vitrine | Master, Diretoria, Marketing |
+| Importação industrial | Master, Diretoria, Estoque |
+
+Estoque **não** vê custo (nem de produto, nem de movimentação). Consultora e
+Representante não têm nenhuma dessas permissões administrativas.
+
+O número completo do documento não é mais legível pela leitura direta das
+tabelas `parties`, `suppliers` e `business_entities` por **nenhum** perfil: as
+colunas `doc`, `doc_canon`, `doc_digits` e `tax_id` foram retiradas da concessão
+de leitura; o valor completo só sai pelas funções de revelação auditada.
+
+
+
 ## Lote 0/1
 
 | Caso | Método | Resultado |

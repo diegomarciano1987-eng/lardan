@@ -69,47 +69,18 @@ export function HeroScroll() {
           />
         </picture>
 
-        {/* Cena da segunda sessão surgindo em penumbra por trás do wordmark */}
-        {cena > 0.002 && (
-          <>
-            <picture>
-              <source
-                media="(max-width: 767px)"
-                srcSet="/img/lardan-mobile-sessao2.webp"
-                type="image/webp"
-              />
-              <source media="(max-width: 767px)" srcSet={sessao2MobileAsset.url} />
-              <source srcSet="/img/lardan-sessao2.webp" type="image/webp" />
-              <img
-                src={sessao2Asset.url}
-                alt=""
-                aria-hidden
-                className="gpu-layer absolute inset-0 h-full w-full object-cover"
-                style={{
-                  opacity: cena,
-                  transform: `scale(${(1.34 - 0.26 * cena - 0.06 * sai).toFixed(3)}) translateZ(0)`,
-                  filter: leve
-                    ? undefined
-                    : `blur(${stepBlur((1 - cena) * 26 + sai * 6, 2)}px) saturate(${(0.75 + cena * 0.35).toFixed(2)})`,
-                }}
-                loading="lazy"
-                decoding="async"
-                width={1664}
-                height={928}
-              />
-            </picture>
-            {/* Penumbra cinematográfica + vinheta: o wordmark passa a brilhar
-                dentro de um quadro escuro, nunca sobre uma tela branca. */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0"
-              style={{
-                opacity: penumbra,
-                background:
-                  "radial-gradient(120% 90% at 50% 50%, oklch(0.2 0.02 25 / 0.28) 0%, oklch(0.13 0.015 25 / 0.6) 62%, oklch(0.1 0.012 25 / 0.78) 100%)",
-              }}
-            />
-          </>
+        {/* Penumbra cinematográfica + vinheta sobre a onda de vidro: o
+            wordmark brilha dentro de um quadro escuro — só a marca. */}
+        {penumbra > 0.002 && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              opacity: penumbra,
+              background:
+                "radial-gradient(110% 85% at 50% 50%, oklch(0.24 0.02 30 / 0.32) 0%, oklch(0.15 0.016 28 / 0.64) 60%, oklch(0.11 0.012 26 / 0.82) 100%)",
+            }}
+          />
         )}
 
         {/* Estado 1: diamante — avança na câmera e se desfaz em luz */}

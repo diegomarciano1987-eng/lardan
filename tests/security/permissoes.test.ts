@@ -104,7 +104,12 @@ describe("leitura direta pela Data API", () => {
           const r = await comoUsuario(token, `/${tabela}?select=id&limit=1`);
           const vazio = Array.isArray(r.body) && r.body.length === 0;
           const ok = r.status >= 400 || vazio;
-          registrar(nome, `leitura direta ${tabela}`, "bloqueada/vazia", ok ? "OK" : `VAZOU ${r.status}`);
+          registrar(
+            nome,
+            `leitura direta ${tabela}`,
+            "bloqueada/vazia",
+            ok ? "OK" : `VAZOU ${r.status}`,
+          );
           expect(ok, `${nome} leu ${tabela} (${r.status})`).toBe(true);
         }
       },
@@ -140,7 +145,6 @@ describe("leitura direta pela Data API", () => {
   );
 });
 
-
 /* ---------------------------------------------------------------- custo --- */
 
 describe("custo unitário", () => {
@@ -152,7 +156,12 @@ describe("custo unitário", () => {
         const podeCusto = VERDADE.custo.includes(papel as never);
         const r = await rpc(contas[papel]!.token, "stock_movements_list", { _size: 5 });
         if (!podeEstoque) {
-          registrar(papel, "custo em stock_movements_list", "sem acesso ao estoque", `HTTP ${r.status}`);
+          registrar(
+            papel,
+            "custo em stock_movements_list",
+            "sem acesso ao estoque",
+            `HTTP ${r.status}`,
+          );
           expect(r.status).toBeGreaterThanOrEqual(400);
           return;
         }
@@ -206,7 +215,8 @@ describe("documento (CPF/CNPJ)", () => {
         const pode = VERDADE.documento.includes(papel as never);
         const lista = await rpc(contas[papel]!.token, "list_parties", { _limit: 5 });
         if (lista.status === 200) {
-          const corpo = lista.body as { rows?: Record<string, unknown>[] } | Record<string, unknown>[];
+          const corpo = lista.body as
+            { rows?: Record<string, unknown>[] } | Record<string, unknown>[];
           const rows = Array.isArray(corpo) ? corpo : (corpo.rows ?? []);
           for (const linha of rows) {
             if (!pode) expect(linha["doc"] ?? null).toBeNull();
@@ -253,7 +263,6 @@ describe("Inteligência da Rede", () => {
           `HTTP ${overview.status} escopo=${(overview.body as { escopo?: string })?.escopo ?? "-"}`,
         );
 
-
         const caps = capsDe.get(papel) ?? [];
         expect(caps.includes("network.identity.view"), papel).toBe(podeIdentidade);
         expect(caps.includes("network.export"), papel).toBe(
@@ -279,7 +288,12 @@ describe("Inteligência da Rede", () => {
         const r = await rpc(contas[nome]!.token, "network_scope", {});
         const modo = (r.body as { modo?: string })?.modo ?? "-";
         const pid = (r.body as { party_id?: string })?.party_id ?? null;
-        registrar(nome, "escopo territorial (network_scope)", "representante + carteira", `HTTP ${r.status} modo=${modo}`);
+        registrar(
+          nome,
+          "escopo territorial (network_scope)",
+          "representante + carteira",
+          `HTTP ${r.status} modo=${modo}`,
+        );
         expect(r.status, nome).toBe(200);
         expect(modo, nome).toBe("representante");
         expect(pid, `${nome} sem carteira definida`).not.toBeNull();
@@ -287,7 +301,6 @@ describe("Inteligência da Rede", () => {
     },
     T,
   );
-
 
   it(
     "representante não enxerga a carteira de outro representante",
@@ -310,8 +323,7 @@ describe("Inteligência da Rede", () => {
     "consultora não pesquisa outras consultoras",
     async () => {
       const r = await rpc(contas["consultora"]!.token, "search_registry", { _term: "HOMOLOG" });
-      const vazio =
-        r.status >= 400 || !Array.isArray(r.body) || (r.body as unknown[]).length === 0;
+      const vazio = r.status >= 400 || !Array.isArray(r.body) || (r.body as unknown[]).length === 0;
       registrar("consultora", "busca no cadastro geral", "sem resultados", vazio ? "OK" : "VAZOU");
       expect(vazio).toBe(true);
     },
@@ -335,7 +347,9 @@ describe("operações administrativas", () => {
         expect(caps.includes("showcase.publish"), `${papel} publicar`).toBe(esperaPublicar);
         expect(caps.includes("imports.run"), `${papel} importar`).toBe(esperaImportar);
         expect(caps.includes("audit.view"), `${papel} auditoria`).toBe(esperaAuditoria);
-        expect(caps.includes("registry.finance.view"), `${papel} financeiro`).toBe(esperaFinanceiro);
+        expect(caps.includes("registry.finance.view"), `${papel} financeiro`).toBe(
+          esperaFinanceiro,
+        );
 
         const pub = await rpc(contas[papel]!.token, "publish_products", { _ids: [], _note: null });
         if (esperaPublicar) expect(pub.status, papel).toBeLessThan(400);
@@ -396,7 +410,12 @@ describe("casos especiais", () => {
       expect(caps).toContain("showcase.publish"); // marketing
       expect(caps).toContain("finance.view"); // financeiro
       expect(caps).toContain("stock.cost.view"); // financeiro vê custo
-      registrar("marketing+financeiro", "união de capacidades", "união", `${caps.length} capacidades`);
+      registrar(
+        "marketing+financeiro",
+        "união de capacidades",
+        "união",
+        `${caps.length} capacidades`,
+      );
     },
     T,
   );

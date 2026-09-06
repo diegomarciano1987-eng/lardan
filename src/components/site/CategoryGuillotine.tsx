@@ -146,7 +146,8 @@ export function CategoryGuillotine({
             opacity: textIn,
           }}
         />
-        {/* Mobile: véu escuro suave atrás do texto, com desfoque */}
+        {/* Mobile: véu escuro suave atrás do texto (sem desfoque de fundo,
+            que é o efeito mais pesado no Safari do iPhone) */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 md:hidden"
@@ -155,14 +156,6 @@ export function CategoryGuillotine({
               mobileSide === "left"
                 ? "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.34) 40%, transparent 66%)"
                 : "linear-gradient(270deg, oklch(0.18 0.01 30 / 0.62) 0%, oklch(0.18 0.01 30 / 0.34) 40%, transparent 66%)",
-            maskImage:
-              mobileSide === "left"
-                ? "linear-gradient(90deg, black 0%, black 38%, transparent 62%)"
-                : "linear-gradient(270deg, black 0%, black 38%, transparent 62%)",
-            WebkitMaskImage:
-              mobileSide === "left"
-                ? "linear-gradient(90deg, black 0%, black 38%, transparent 62%)"
-                : "linear-gradient(270deg, black 0%, black 38%, transparent 62%)",
             opacity: textIn,
           }}
         />

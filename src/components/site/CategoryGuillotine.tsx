@@ -69,15 +69,9 @@ export function CategoryGuillotine({
       <section className="sticky top-0 h-screen overflow-hidden bg-background">
         <picture>
           {mobileImageWebp && (
-            <source
-              media="(max-width: 767px)"
-              srcSet={mobileImageWebp}
-              type="image/webp"
-            />
+            <source media="(max-width: 767px)" srcSet={mobileImageWebp} type="image/webp" />
           )}
-          {mobileImage && (
-            <source media="(max-width: 767px)" srcSet={mobileImage.url} />
-          )}
+          {mobileImage && <source media="(max-width: 767px)" srcSet={mobileImage.url} />}
           {imageWebp && <source srcSet={imageWebp} type="image/webp" />}
           <img
             src={image.url}
@@ -97,10 +91,7 @@ export function CategoryGuillotine({
         {reveal < 0.999 && (
           <div aria-hidden className="pointer-events-none absolute inset-0 flex">
             {Array.from({ length: slats }).map((_, i) => {
-              const order =
-                enterFrom === "right"
-                  ? (slats - 1 - i) / (slats - 1)
-                  : i / (slats - 1);
+              const order = enterFrom === "right" ? (slats - 1 - i) / (slats - 1) : i / (slats - 1);
               const start = 0.5 * order;
               const t = easeOut(phase(reveal, start, start + 0.5));
               const lead = 1 - t; // 1 = lâmina cobrindo, 0 = fora da cena
@@ -163,9 +154,7 @@ export function CategoryGuillotine({
         <div
           className={`relative mx-auto flex h-full max-w-6xl flex-col justify-center px-6 md:px-10 ${
             mobileSide === "right" ? "items-end text-right" : "items-start text-left"
-          } ${
-            align === "right" ? "md:items-end md:text-right" : "md:items-start md:text-left"
-          }`}
+          } ${align === "right" ? "md:items-end md:text-right" : "md:items-start md:text-left"}`}
         >
           <div className="max-w-md">
             <p
@@ -191,9 +180,7 @@ export function CategoryGuillotine({
             <div
               className={`rose-rule mt-6 w-16 ${
                 mobileSide === "right" ? "origin-right" : "origin-left"
-              } ${
-                align === "right" ? "md:origin-right md:ml-auto" : "md:origin-left"
-              }`}
+              } ${align === "right" ? "md:origin-right md:ml-auto" : "md:origin-left"}`}
               style={{ transform: `scaleX(${ruleIn})` }}
             />
             <Link

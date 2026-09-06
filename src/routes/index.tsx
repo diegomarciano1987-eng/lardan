@@ -96,13 +96,10 @@ function HomePage() {
             Construa a sua história com a Lardan
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground">
-            Candidate-se para conhecer a proposta de parceria da marca. Sem
-            promessa de renda garantida: cada candidatura passa por análise.
+            Candidate-se para conhecer a proposta de parceria da marca. Sem promessa de renda
+            garantida: cada candidatura passa por análise.
           </p>
-          <Link
-            to="/seja-lardan"
-            className="btn-premium mt-10"
-          >
+          <Link to="/seja-lardan" className="btn-premium mt-10">
             Quero me candidatar
           </Link>
         </div>

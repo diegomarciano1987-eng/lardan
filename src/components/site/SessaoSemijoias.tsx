@@ -82,8 +82,7 @@ export function SessaoSemijoias() {
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 h-[26vh]"
             style={{
-              background:
-                "linear-gradient(180deg, oklch(0.32 0.02 30 / 0.3) 0%, transparent 100%)",
+              background: "linear-gradient(180deg, oklch(0.32 0.02 30 / 0.3) 0%, transparent 100%)",
               opacity: reveal * (1 - reveal) * 4,
               transform: `translate3d(0, ${(1 - reveal) * 30}vh, 0)`,
             }}
@@ -95,8 +94,7 @@ export function SessaoSemijoias() {
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-[38vh]"
           style={{
-            background:
-              "linear-gradient(180deg, oklch(0.985 0.006 80 / 0.9) 0%, transparent 100%)",
+            background: "linear-gradient(180deg, oklch(0.985 0.006 80 / 0.9) 0%, transparent 100%)",
             opacity: 1 - reveal,
           }}
         />
@@ -122,7 +120,6 @@ export function SessaoSemijoias() {
             opacity: lines[0],
           }}
         />
-
 
         <div className="relative flex h-full max-w-6xl flex-col justify-center px-6 md:px-10 lg:mx-auto">
           <div className="max-w-xl">

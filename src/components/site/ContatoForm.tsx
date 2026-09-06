@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { PRIVACY_VERSION, captureUtm, entryUrl } from "@/lib/privacy";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 
-
 type Args = Record<string, unknown>;
 function semVazios<T extends Args>(o: T): T {
   return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T;
@@ -25,18 +24,21 @@ export function ContatoForm() {
     const form = new FormData(e.currentTarget);
     const texto = (k: string) => String(form.get(k) ?? "").trim();
 
-    const { data, error } = await supabase.rpc("submit_contact_request", semVazios({
-      p_full_name: texto("full_name"),
-      p_contact_channel: texto("contact_channel"),
-      p_contact_value: texto("contact_value"),
-      p_subject: texto("subject"),
-      p_message: texto("message"),
-      p_source: "site/contato",
-      p_entry_url: entryUrl() ?? undefined,
-      p_utm: captureUtm(),
-      p_privacy_version: PRIVACY_VERSION,
-      p_marketing_consent: form.get("marketing_consent") === "on",
-    }) as never);
+    const { data, error } = await supabase.rpc(
+      "submit_contact_request",
+      semVazios({
+        p_full_name: texto("full_name"),
+        p_contact_channel: texto("contact_channel"),
+        p_contact_value: texto("contact_value"),
+        p_subject: texto("subject"),
+        p_message: texto("message"),
+        p_source: "site/contato",
+        p_entry_url: entryUrl() ?? undefined,
+        p_utm: captureUtm(),
+        p_privacy_version: PRIVACY_VERSION,
+        p_marketing_consent: form.get("marketing_consent") === "on",
+      }) as never,
+    );
 
     setBusy(false);
     if (error || !data) {
@@ -54,9 +56,8 @@ export function ContatoForm() {
       >
         <p className="brand-eyebrow mb-3">Mensagem registrada</p>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          O seu protocolo é <strong className="text-foreground">{protocolo}</strong>.
-          A equipe responde pelo canal informado. Não há prazo de retorno
-          declarado.
+          O seu protocolo é <strong className="text-foreground">{protocolo}</strong>. A equipe
+          responde pelo canal informado. Não há prazo de retorno declarado.
         </p>
       </div>
     );

@@ -59,7 +59,9 @@ export function CategoryHero({ categoria }: { categoria: CategoriaDetalhe }) {
             {imagem ? (
               <img
                 src={imagem}
-                alt={categoria.hero_alt?.trim() || `Semijoias Lardan da categoria ${categoria.name}`}
+                alt={
+                  categoria.hero_alt?.trim() || `Semijoias Lardan da categoria ${categoria.name}`
+                }
                 loading="eager"
                 fetchPriority="high"
                 decoding="sync"

@@ -17,8 +17,8 @@ export function SiteFooter() {
               height={40}
             />
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Lardan — semijoias para acompanhar os seus momentos. Informações
-              empresariais oficiais em confirmação com a marca.
+              Lardan — semijoias para acompanhar os seus momentos. Informações empresariais oficiais
+              em confirmação com a marca.
             </p>
           </div>
           <nav aria-label="Rodapé" className="grid grid-cols-2 gap-x-12 gap-y-2">

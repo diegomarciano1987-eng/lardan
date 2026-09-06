@@ -189,13 +189,22 @@ function Painel({
 
       <Grupo titulo="Seleção">
         <div className="flex flex-wrap gap-2">
-          <Opcao ativo={filtros.disponivel} onClick={() => aplicar({ disponivel: !filtros.disponivel })}>
+          <Opcao
+            ativo={filtros.disponivel}
+            onClick={() => aplicar({ disponivel: !filtros.disponivel })}
+          >
             Disponíveis
           </Opcao>
-          <Opcao ativo={filtros.lancamentos} onClick={() => aplicar({ lancamentos: !filtros.lancamentos })}>
+          <Opcao
+            ativo={filtros.lancamentos}
+            onClick={() => aplicar({ lancamentos: !filtros.lancamentos })}
+          >
             Lançamentos
           </Opcao>
-          <Opcao ativo={filtros.destaques} onClick={() => aplicar({ destaques: !filtros.destaques })}>
+          <Opcao
+            ativo={filtros.destaques}
+            onClick={() => aplicar({ destaques: !filtros.destaques })}
+          >
             Destaques
           </Opcao>
         </div>
@@ -203,11 +212,17 @@ function Painel({
 
       <Grupo titulo="Ordenar por">
         <div className="flex flex-wrap gap-2">
-          {ORDENS.filter((o) => categoria.tem_preco_publico || !o.valor.startsWith("preco")).map((o) => (
-            <Opcao key={o.valor} ativo={filtros.ordem === o.valor} onClick={() => aplicar({ ordem: o.valor })}>
-              {o.rotulo}
-            </Opcao>
-          ))}
+          {ORDENS.filter((o) => categoria.tem_preco_publico || !o.valor.startsWith("preco")).map(
+            (o) => (
+              <Opcao
+                key={o.valor}
+                ativo={filtros.ordem === o.valor}
+                onClick={() => aplicar({ ordem: o.valor })}
+              >
+                {o.rotulo}
+              </Opcao>
+            ),
+          )}
         </div>
       </Grupo>
 
@@ -232,7 +247,8 @@ function Grupo({ titulo, children }: { titulo: string; children: React.ReactNode
 }
 
 function faixasDePreco(categoria: CategoriaDetalhe) {
-  if (!categoria.tem_preco_publico || categoria.preco_min == null || categoria.preco_max == null) return [];
+  if (!categoria.tem_preco_publico || categoria.preco_min == null || categoria.preco_max == null)
+    return [];
   const min = categoria.preco_min;
   const max = categoria.preco_max;
   if (max <= min) return [];
@@ -312,7 +328,10 @@ export function CategoryFilters({
         ) : null}
       </div>
 
-      <p className="text-[0.7rem] uppercase tracking-[0.26em] text-muted-foreground" aria-live="polite">
+      <p
+        className="text-[0.7rem] uppercase tracking-[0.26em] text-muted-foreground"
+        aria-live="polite"
+      >
         {encontrados === 1 ? "1 peça" : `${encontrados} peças`} · {ordemAtual}
       </p>
     </div>

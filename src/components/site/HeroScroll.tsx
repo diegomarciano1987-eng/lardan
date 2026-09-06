@@ -1,10 +1,5 @@
 import { BRAND } from "@/lib/brand";
-import {
-  useScrollProgress,
-  useDeviceTier,
-  phase,
-  ease,
-} from "@/hooks/use-scroll-progress";
+import { useScrollProgress, useDeviceTier, phase, ease } from "@/hooks/use-scroll-progress";
 import heroAsset from "@/assets/lardan-hero-vidro.jpg.asset.json";
 import heroMobileAsset from "@/assets/lardan-mobile-hero.png.asset.json";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
@@ -139,9 +134,7 @@ export function HeroScroll() {
             opacity: wordmarkIn,
             transform: `scale(${0.94 + wordmarkIn * 0.06})`,
             filter:
-              leve || wordmarkIn === 1
-                ? undefined
-                : `blur(${stepBlur((1 - wordmarkIn) * 8, 2)}px)`,
+              leve || wordmarkIn === 1 ? undefined : `blur(${stepBlur((1 - wordmarkIn) * 8, 2)}px)`,
           }}
           aria-hidden={wordmarkIn < 0.5}
         >

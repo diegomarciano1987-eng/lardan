@@ -2,10 +2,17 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { NAV_ITEMS } from "@/lib/brand";
 
-function NavLink({ to, label, onNavigate }: { to: string; label: string; onNavigate?: () => void }) {
+function NavLink({
+  to,
+  label,
+  onNavigate,
+}: {
+  to: string;
+  label: string;
+  onNavigate?: () => void;
+}) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const active =
-    to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`);
+  const active = to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`);
   return (
     <Link
       to={to}

@@ -96,7 +96,11 @@ export function PieceCard({
           <h3
             className={cn(
               "font-display leading-tight text-foreground",
-              escala === "abertura" ? "text-3xl md:text-4xl" : grande ? "text-2xl md:text-3xl" : "text-xl md:text-2xl",
+              escala === "abertura"
+                ? "text-3xl md:text-4xl"
+                : grande
+                  ? "text-2xl md:text-3xl"
+                  : "text-xl md:text-2xl",
             )}
           >
             {peca.name}
@@ -130,7 +134,10 @@ export function PieceSkeleton({ proporcao, moldura }: { proporcao: string; moldu
   return (
     <div>
       <div
-        className={cn("animate-pulse bg-[color-mix(in_oklab,var(--muted)_70%,transparent)]", moldura)}
+        className={cn(
+          "animate-pulse bg-[color-mix(in_oklab,var(--muted)_70%,transparent)]",
+          moldura,
+        )}
         style={{ aspectRatio: proporcao }}
       />
       <div className="mt-6 h-4 w-1/2 animate-pulse rounded bg-[color-mix(in_oklab,var(--muted)_70%,transparent)]" />

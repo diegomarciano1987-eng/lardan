@@ -96,3 +96,18 @@ de RLS. Nenhuma delas expõe dados de terceiros.
 - `registry_counts` respondeu 200 com números reais (1 pessoa, 1 produto, 1 usuário, 1 incompleto).
 - Typecheck `bunx tsgo --noEmit` limpo.
 - Não testado ainda: conversão candidata→consultora ponta a ponta (não há candidatura real na base) e perfis não-Master (só existe o Master).
+
+## P0 — Fechamento de segurança (migrações aplicadas + provas)
+
+Método de cada linha declarado. Nada marcado como testado por leitura de código.
+
+| Item | Método | Resultado |
+| --- | --- | --- |
+| Migração P0 (documento, custo, escopo de rede, logs de integração) | EXECUTADO | Aplicada com sucesso após corrigir o nome da coluna de retorno de `network_geo_municipios` (a tentativa anterior falhou inteira e nada tinha sido gravado) |
+| `SELECT` direto em `parties` e `stock_movements` pela API | EXECUTADO (pg_catalog) | Revogado para `anon` e `authenticated`; leitura só por RPC |
+| Custo em `variant_costs` | EXECUTADO (pg_policies) | Leitura condicionada a `can_view_costs` |
+| Funções administrativas abertas a visitante | EXECUTADO (linter + aclexplode) | 21 → 7; as 7 restantes são as legítimas (candidatura, contato e catálogo publicado) |
+| Papéis com acesso a custo / documento / identidade da rede | EXECUTADO (consulta) | custo: master, diretoria, financeiro, estoque · documento: master, diretoria, financeiro · rede: master, diretoria · consultora: nenhuma das três |
+| Máscara de CPF/CNPJ/CEP em `integration_lookups` | INSPECIONADO (trigger criado na migração) | Não exercitado ponta a ponta nesta sessão |
+| Telas `/admin/estoque` e `/admin/cadastros/pessoas` | NÃO TESTADO NO NAVEGADOR | Sem sessão disponível no ambiente de verificação (`signed_out`); typecheck limpo, mas a tela não foi exercitada |
+| Regressão completa da seção 10 do documento enviado | NÃO TESTADO | Depende de sessão autenticada |

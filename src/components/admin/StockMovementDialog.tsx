@@ -74,6 +74,16 @@ export function StockMovementDialog({
 
   const precisaOrigem = kind === "saida" || kind === "transferencia";
   const precisaDestino = kind !== "saida";
+  /** Ajuste aceita correção para menos; inventário aceita contagem zero. */
+  const aceitaNegativo = kind === "ajuste";
+  const aceitaZero = kind === "inventario";
+  const motivoObrigatorio = kind === "ajuste" || kind === "saida" || kind === "inventario";
+
+  /** Uma chave por abertura do formulário: reenvio não duplica o lançamento. */
+  const chave = React.useRef(crypto.randomUUID());
+  React.useEffect(() => {
+    if (open) chave.current = crypto.randomUUID();
+  }, [open]);
 
   function limpar() {
     setVariant(null);
@@ -87,10 +97,20 @@ export function StockMovementDialog({
   const salvar = useMutation({
     mutationFn: async () => {
       if (!variant) throw new Error("Escolha a peça.");
-      const qtd = Number(quantidade.replace(/\D/g, ""));
-      if (!qtd || qtd <= 0) throw new Error("Informe uma quantidade maior que zero.");
+      const bruto = quantidade.trim();
+      const qtd = Number(bruto);
+      if (bruto === "" || Number.isNaN(qtd) || !Number.isInteger(qtd))
+        throw new Error("Informe uma quantidade em número inteiro.");
+      if (qtd === 0 && !aceitaZero)
+        throw new Error("A quantidade precisa ser diferente de zero.");
+      if (qtd < 0 && !aceitaNegativo)
+        throw new Error("Quantidade negativa só é permitida em ajuste.");
       if (precisaOrigem && !origem) throw new Error("Informe o local de origem.");
       if (precisaDestino && !destino) throw new Error("Informe o local de destino.");
+      if (origem && destino && origem === destino)
+        throw new Error("Origem e destino precisam ser locais diferentes.");
+      if (motivoObrigatorio && !motivo)
+        throw new Error("Escolha o motivo desta movimentação.");
       return registerMovement({
         kind,
         variantId: variant.id,
@@ -101,16 +121,19 @@ export function StockMovementDialog({
         unitCostCents: custo ? parseCentavos(custo) : null,
         reference: referencia || null,
         note: nota || null,
+        idempotencyKey: chave.current,
       });
     },
     onSuccess: () => {
       toast.success(`${MOVE_LABEL[kind]} registrada.`);
       qc.invalidateQueries({ queryKey: ["stock"] });
+      chave.current = crypto.randomUUID();
       limpar();
       onOpenChange(false);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível registrar."),
   });
+
 
   const semLocais = !locais.isLoading && (locais.data ?? []).length === 0;
 
@@ -153,16 +176,30 @@ export function StockMovementDialog({
             </Campo>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Campo label={kind === "inventario" ? "Quantidade contada" : "Quantidade"}>
+              <Campo
+                label={
+                  kind === "inventario"
+                    ? "Quantidade contada"
+                    : aceitaNegativo
+                      ? "Quantidade (use - para corrigir para menos)"
+                      : "Quantidade"
+                }
+              >
                 <input
-                  inputMode="numeric"
+                  inputMode={aceitaNegativo ? "text" : "numeric"}
                   value={quantidade}
-                  onChange={(e) => setQuantidade(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) =>
+                    setQuantidade(
+                      aceitaNegativo
+                        ? e.target.value.replace(/[^\d-]/g, "").replace(/(?!^)-/g, "")
+                        : e.target.value.replace(/\D/g, ""),
+                    )
+                  }
                   placeholder="0"
                   className={inputCls}
                 />
               </Campo>
-              <Campo label="Motivo">
+              <Campo label={motivoObrigatorio ? "Motivo" : "Motivo (opcional)"}>
                 <SmartSelect
                   options={opcoesMotivos}
                   value={motivo}
@@ -171,6 +208,7 @@ export function StockMovementDialog({
                   emptyLabel="Sem motivos para este tipo"
                 />
               </Campo>
+
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

@@ -113,14 +113,24 @@ export function ImportProductsDialog({
   const [localId, setLocalId] = React.useState("");
   const [resultado, setResultado] = React.useState<ResultadoImport | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  /** "entrada" também lança estoque; "catalogo" só cadastra as peças. */
+  const [modo, setModo] = React.useState<"entrada" | "catalogo">("entrada");
+  /** Chave do lote: reenviar a mesma planilha não duplica entradas. */
+  const chave = React.useRef(crypto.randomUUID());
+  React.useEffect(() => {
+    if (open) chave.current = crypto.randomUUID();
+  }, [open]);
 
   const locais = useQuery({ queryKey: ["stock-locations"], queryFn: listStockLocations });
+
 
   const importar = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.rpc("import_products_stock" as never, {
         _rows: linhas,
-        _location_id: localId,
+        _location_id: localId || null,
+        _mode: modo,
+        _job_key: chave.current,
       } as never);
       if (error) throw error;
       return data as unknown as ResultadoImport;
@@ -205,21 +215,37 @@ export function ImportProductsDialog({
                 {arquivo || "Escolher arquivo"}
               </button>
             </div>
-            <label className="block w-64 space-y-1.5">
+            <label className="block w-56 space-y-1.5">
               <span className="text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase">
-                Local de entrada do estoque
+                O que a planilha faz
               </span>
               <SmartSelect
-                options={(locais.data ?? []).map((l) => ({
-                  value: l.id,
-                  label: l.name,
-                  hint: l.code,
-                }))}
-                value={localId}
-                onChange={setLocalId}
-                placeholder="Escolha o local…"
+                options={[
+                  { value: "entrada", label: "Cadastrar e dar entrada no estoque" },
+                  { value: "catalogo", label: "Somente cadastrar as peças" },
+                ]}
+                value={modo}
+                onChange={(v) => setModo(v as "entrada" | "catalogo")}
               />
             </label>
+            {modo === "entrada" && (
+              <label className="block w-64 space-y-1.5">
+                <span className="text-[0.72rem] font-semibold tracking-[0.12em] text-bronze uppercase">
+                  Local de entrada do estoque
+                </span>
+                <SmartSelect
+                  options={(locais.data ?? []).map((l) => ({
+                    value: l.id,
+                    label: l.name,
+                    hint: l.code,
+                  }))}
+                  value={localId}
+                  onChange={setLocalId}
+                  placeholder="Escolha o local…"
+                />
+              </label>
+            )}
+
           </div>
 
           {linhas.length > 0 && !resultado && (
@@ -293,7 +319,7 @@ export function ImportProductsDialog({
               <button
                 type="button"
                 className="admin-btn-primary"
-                disabled={linhas.length === 0 || !localId || importar.isPending}
+                disabled={linhas.length === 0 || (modo === "entrada" && !localId) || importar.isPending}
                 onClick={() => importar.mutate()}
               >
                 <Upload aria-hidden className="mr-2 inline size-4" />

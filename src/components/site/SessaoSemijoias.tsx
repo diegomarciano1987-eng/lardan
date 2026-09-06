@@ -30,14 +30,8 @@ export function SessaoSemijoias() {
   const line = (start: number) => easeOut(phase(p, start, start + 0.16));
   const lines = [line(0.42), line(0.48), line(0.54), line(0.6), line(0.66)] as const;
   const emMovimento = reveal > 0.001 && reveal < 0.999;
-  // Continuidade com o hero: a sessão começa na mesma penumbra em que o
-  // quadro anterior terminou e ganha luz conforme as lâminas abrem.
-  const penumbra = reduced ? 0 : 1 - ease(phase(p, 0, 0.3));
-
   return (
-    // -mt-[100vh] sobe a sessão uma tela: as lâminas abrem enquanto o hero
-    // ainda está saindo — a passagem vira uma cena só, sem trecho vazio.
-    <div ref={ref} className="relative -mt-[100vh] h-[260vh]">
+    <div ref={ref} className="relative h-[260vh]">
       <section className="sticky top-0 h-screen overflow-hidden bg-background">
         <picture>
           <source
@@ -104,19 +98,6 @@ export function SessaoSemijoias() {
               background: "linear-gradient(180deg, oklch(0.32 0.02 30 / 0.3) 0%, transparent 100%)",
               opacity: reveal * (1 - reveal) * 4,
               transform: `translate3d(0, ${(1 - reveal) * 30}vh, 0)`,
-            }}
-          />
-        )}
-
-        {/* Penumbra herdada do hero, que se dissipa com a abertura */}
-        {penumbra > 0.01 && (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              opacity: penumbra,
-              background:
-                "radial-gradient(120% 90% at 50% 46%, oklch(1 0 0 / 0.95) 0%, oklch(0.99 0.01 70 / 0.7) 45%, oklch(0.985 0.006 80 / 0.85) 100%)",
             }}
           />
         )}

@@ -67,14 +67,12 @@ export async function listPublicProducts(params: {
 }): Promise<{ rows: ProdutoVitrine[]; total: number }> {
   const porPagina = params.porPagina ?? 24;
   const pagina = params.pagina ?? 0;
-  const { data, error } = await supabase.rpc("public_catalog_list", {
-    _category_slug: params.categoria ?? null,
-    _collection_slug: params.colecao ?? null,
-    _search: params.busca ?? null,
-    _featured: params.destaque ?? null,
-    _limit: porPagina,
-    _offset: pagina * porPagina,
-  });
+  const args: Record<string, unknown> = { _limit: porPagina, _offset: pagina * porPagina };
+  if (params.categoria) args["_category_slug"] = params.categoria;
+  if (params.colecao) args["_collection_slug"] = params.colecao;
+  if (params.busca) args["_search"] = params.busca;
+  if (params.destaque != null) args["_featured"] = params.destaque;
+  const { data, error } = await supabase.rpc("public_catalog_list", args as never);
   if (error) throw error;
   const rows = (data ?? []) as ProdutoVitrine[];
   return { rows, total: rows[0]?.total ? Number(rows[0].total) : 0 };

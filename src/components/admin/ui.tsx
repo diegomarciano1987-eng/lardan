@@ -78,21 +78,24 @@ export function Panel({
   action,
   children,
   className,
+  flush,
 }: {
   title?: string;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
+  /** true = sem respiro interno (tabelas/listas que tocam as bordas intencionalmente) */
+  flush?: boolean;
 }) {
   return (
     <section className={cn("ledger-panel flex min-w-0 flex-col", className)}>
       {(title || action) && (
-        <header className="flex items-center justify-between gap-3 border-b border-line-soft px-5 py-3.5">
+        <header className="flex items-center justify-between gap-3 border-b border-line-soft px-6 py-4">
           {title ? <h2 className="ledger-eyebrow">{title}</h2> : <span />}
           {action}
         </header>
       )}
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className={cn("min-w-0 flex-1", flush ? undefined : "px-6 py-5")}>{children}</div>
     </section>
   );
 }
@@ -137,7 +140,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-start gap-2 px-5 py-10">
+    <div className="flex flex-col items-start gap-2 py-8">
       <p className="inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-ledger-text">
         <Info aria-hidden className="size-4 text-bronze" />
         {title}
@@ -150,7 +153,7 @@ export function EmptyState({
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div className="flex flex-col items-start gap-2 px-5 py-8">
+    <div className="flex flex-col items-start gap-2 py-6">
       <p className="inline-flex items-center gap-2 text-sm text-danger">
         <AlertTriangle aria-hidden className="size-4" />
         {message}

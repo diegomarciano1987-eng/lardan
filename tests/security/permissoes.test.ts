@@ -27,7 +27,15 @@ const VERDADE = {
   custo: ["master", "diretoria", "financeiro"],
   documento: ["master", "diretoria", "financeiro"],
   redeIdentidade: ["master", "diretoria"],
-  redeAgregada: ["master", "diretoria", "marketing"],
+  /** Escopo esperado na Inteligência da Rede; ausente = acesso negado. */
+  redeEscopo: {
+    master: "nacional",
+    diretoria: "nacional",
+    marketing: "agregado",
+    representante: "representante",
+    consultora: "proprio",
+  } as Record<string, string | undefined>,
+
   estoqueVer: ["master", "diretoria", "financeiro", "estoque", "suporte"],
   publicar: ["master", "diretoria", "marketing"],
   importar: ["master", "diretoria", "estoque"],

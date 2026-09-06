@@ -495,3 +495,29 @@
     will-change: auto;
   }
 }
+
+/* Entrada do wordmark: fio de luz que varre as letras uma única vez. */
+.hero-wordmark-sweep {
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  background: linear-gradient(
+    108deg,
+    transparent 38%,
+    oklch(0.98 0.03 90 / 0.55) 47%,
+    oklch(1 0 0 / 0.95) 50%,
+    oklch(0.98 0.03 90 / 0.55) 53%,
+    transparent 62%
+  );
+  background-size: 280% 100%;
+  mix-blend-mode: screen;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-wordmark-sweep {
+    opacity: 0;
+  }
+}

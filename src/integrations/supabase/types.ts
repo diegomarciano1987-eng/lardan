@@ -2823,6 +2823,23 @@ export type Database = {
       only_digits: { Args: { _v: string }; Returns: string }
       parse_cents_any: { Args: { _v: string }; Returns: number }
       parse_decimal_any: { Args: { _v: string }; Returns: number }
+      partner_doc_reveal: {
+        Args: { _id: string; _kind: string }
+        Returns: string
+      }
+      partner_save: {
+        Args: { _id: string; _kind: string; _values: Json }
+        Returns: string
+      }
+      partners_list: {
+        Args: {
+          _kind: string
+          _page?: number
+          _search?: string
+          _size?: number
+        }
+        Returns: Json
+      }
       phone_canon: { Args: { v: string }; Returns: string }
       product_publish_blockers: { Args: { _id: string }; Returns: string[] }
       public_catalog_browse: {

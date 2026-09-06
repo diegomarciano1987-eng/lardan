@@ -1,6 +1,14 @@
 # LARDAN — PROGRESSO (ponto de retomada)
 
-## Checkpoint atual
+## CHECKPOINT VIGENTE (sobrepõe os checkpoints históricos abaixo)
+
+- **Permissões sensíveis — verdade única**: custo (produto e movimentação), documento completo e dados financeiros/PIX só para **Master, Diretoria e Financeiro**; identidade individual da Rede só Master e Diretoria; visão agregada nacional também para Marketing; Representante vê a própria carteira e Consultora só a si; Estoque **não** vê custo; Consultora e Representante não têm permissão administrativa dessas listas.
+- **Documento fechado na origem**: `parties.doc`, `parties.doc_canon`, `parties.doc_digits`, `suppliers.tax_id` e `business_entities.tax_id` saíram da concessão de leitura para `authenticated`/`anon`; o número completo só sai por revelação auditada.
+- **Prova**: `bun run test:seg` — 45 cenários, 45 aprovados, com saída perfil × cenário. Detalhe em `docs/lardan/TESTES-E-EVIDENCIAS.md`.
+- **Pendente**: exercício ponta a ponta de CEP/CNPJ com máscara nos registros, massa sintética de homologação, invariantes permanentes da vitrine, 404 público real, home obedecendo à Central e importação industrial.
+
+## Checkpoint anterior (histórico)
+
 
 - **Lote**: Etapa 1 — L3.1 (segurança crítica) e L3.2 (shell admin por módulos) concluídos; L3.3 (cadastros-base) é o próximo.
 - **Último trabalho concluído**: L3.2 — área administrativa reorganizada em módulos com estado explícito: Visão geral (contagens reais), Candidaturas e contatos (leitura com protocolo), Cadastros (em implantação), Estoque/Importação/Financeiro/Integrações (desativados, só especificação visível, nenhuma ação ativa), Usuários e papéis (lista real, conceder/revogar via grant_role/revoke_role, ativar/desativar — tudo auditado), Auditoria (consulta com filtros, somente Master/Diretoria). Perfil do usuário criado automaticamente no primeiro acesso (ensure_profile no beforeLoad autenticado). Master atual: diegomarciano1987@gmail.com (bootstrap já consumido).

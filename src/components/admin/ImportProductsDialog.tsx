@@ -113,8 +113,16 @@ export function ImportProductsDialog({
   const [localId, setLocalId] = React.useState("");
   const [resultado, setResultado] = React.useState<ResultadoImport | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  /** "entrada" também lança estoque; "catalogo" só cadastra as peças. */
+  const [modo, setModo] = React.useState<"entrada" | "catalogo">("entrada");
+  /** Chave do lote: reenviar a mesma planilha não duplica entradas. */
+  const chave = React.useRef(crypto.randomUUID());
+  React.useEffect(() => {
+    if (open) chave.current = crypto.randomUUID();
+  }, [open]);
 
   const locais = useQuery({ queryKey: ["stock-locations"], queryFn: listStockLocations });
+
 
   const importar = useMutation({
     mutationFn: async () => {

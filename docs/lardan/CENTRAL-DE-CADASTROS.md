@@ -56,9 +56,14 @@ número completo apenas com `registry.doc.view`.
 | `registry.doc.view` | ver documento completo |
 | `registry.finance.view` | ver PIX e dados financeiros |
 
-Marketing tem apenas `registry.view`. Estoque idem. Financeiro e Cobrança veem
-dados financeiros. Master e Diretoria têm tudo. Exclusão física de pessoa com
-histórico não existe — só inativação.
+Verdade única (checkpoint vigente): documento completo, dados financeiros/PIX e
+custo apenas para **Master, Diretoria e Financeiro**. Marketing, Suporte e Estoque
+têm somente `registry.view` (documento sempre mascarado, sem custo). Cobrança vê
+dados financeiros do cadastro, sem documento e sem custo. Consultora e
+Representante não têm nenhuma dessas permissões. O número completo não é legível
+nem pela leitura direta da tabela: sai apenas pela revelação auditada. Exclusão
+física de pessoa com histórico não existe — só inativação.
+
 
 ## Conversão candidata → consultora
 `convert_lead_to_consultant(_lead_id, _party_id)` é transacional e idempotente:

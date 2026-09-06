@@ -16,6 +16,8 @@ const SERVICE = process.env["SUPABASE_SERVICE_ROLE_KEY"]!;
 
 export const TEST_DOMAIN = "@lardan.test";
 export const TEST_PASSWORD = "Homolog#2026!Lardan";
+/** Prefixo obrigatório de todo dado sintético criado por esta bancada. */
+export const TEST_PREFIX = "HOMOLOG";
 
 export type Papel =
   | "master"
@@ -24,6 +26,9 @@ export type Papel =
   | "estoque"
   | "marketing"
   | "suporte"
+  | "cobranca"
+  | "montagem"
+  | "qualidade"
   | "representante"
   | "consultora";
 
@@ -32,8 +37,9 @@ export interface Conta {
   email: string;
   userId: string;
   token: string | null;
-  papel: Papel | null;
+  papeis: Papel[];
   ativo: boolean;
+  partyId: string | null;
 }
 
 async function req(
@@ -78,10 +84,27 @@ async function acharUsuario(email: string): Promise<string | null> {
   return users.find((u) => u.email?.toLowerCase() === email.toLowerCase())?.id ?? null;
 }
 
+/** Cria uma pessoa sintética (prefixo HOMOLOG) e devolve o id. */
+export async function criarPartySintetica(rotulo: string): Promise<string | null> {
+  const r = await adm(`/rest/v1/parties`, {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({
+      kind: "pessoa",
+      display_name: `${TEST_PREFIX} ${rotulo}`,
+      legal_name: `${TEST_PREFIX} ${rotulo}`,
+      status: "ativo",
+    }),
+  });
+  const linhas = Array.isArray(r.body) ? (r.body as { id: string }[]) : [];
+  return linhas[0]?.id ?? null;
+}
+
 export async function criarConta(opts: {
   nome: string;
-  papel: Papel | null;
+  papeis: Papel[];
   ativo?: boolean;
+  comParty?: boolean;
 }): Promise<Conta> {
   const email = `homolog.${opts.nome}${TEST_DOMAIN}`;
   let userId = await acharUsuario(email);
@@ -92,7 +115,7 @@ export async function criarConta(opts: {
         email,
         password: TEST_PASSWORD,
         email_confirm: true,
-        user_metadata: { homologacao: true, full_name: `HOMOLOG ${opts.nome}` },
+        user_metadata: { homologacao: true, full_name: `${TEST_PREFIX} ${opts.nome}` },
       }),
     });
     userId = (r.body as { id?: string }).id ?? null;
@@ -100,16 +123,24 @@ export async function criarConta(opts: {
   }
 
   const ativo = opts.ativo ?? true;
+  const partyId = opts.comParty ? await criarPartySintetica(opts.nome) : null;
+
   await adm(`/rest/v1/profiles?on_conflict=id`, {
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates" },
-    body: JSON.stringify({ id: userId, full_name: `HOMOLOG ${opts.nome}`, email, is_active: ativo }),
+    body: JSON.stringify({
+      id: userId,
+      full_name: `${TEST_PREFIX} ${opts.nome}`,
+      email,
+      is_active: ativo,
+      party_id: partyId,
+    }),
   });
   await adm(`/rest/v1/user_roles?user_id=eq.${userId}`, { method: "DELETE" });
-  if (opts.papel) {
+  for (const papel of opts.papeis) {
     await adm(`/rest/v1/user_roles`, {
       method: "POST",
-      body: JSON.stringify({ user_id: userId, role: opts.papel }),
+      body: JSON.stringify({ user_id: userId, role: papel }),
     });
   }
 
@@ -125,12 +156,13 @@ export async function criarConta(opts: {
     email,
     userId,
     token: sessao.access_token ?? null,
-    papel: opts.papel,
+    papeis: opts.papeis,
     ativo,
+    partyId,
   };
 }
 
-/** Remove as contas sintéticas ao fim da bateria. */
+/** Remove as contas e as pessoas sintéticas ao fim da bateria. */
 export async function limpar() {
   const r = await adm(`/auth/v1/admin/users?page=1&per_page=200`);
   const users = (r.body as { users?: { id: string; email: string }[] }).users ?? [];
@@ -139,9 +171,10 @@ export async function limpar() {
       await adm(`/rest/v1/user_roles?user_id=eq.${u.id}`, { method: "DELETE" });
       await adm(`/rest/v1/profiles?id=eq.${u.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ is_active: false }),
+        body: JSON.stringify({ is_active: false, party_id: null }),
       });
       await adm(`/auth/v1/admin/users/${u.id}`, { method: "DELETE" });
     }
   }
+  await adm(`/rest/v1/parties?display_name=like.${TEST_PREFIX}%25`, { method: "DELETE" });
 }

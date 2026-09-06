@@ -60,6 +60,23 @@ Estado: DOCUMENTADO. Conteúdo original por pauta; sem promessa de renda garanti
 Master, Diretoria, Financeiro, Cobrança, Estoque, Montagem, Qualidade, Representante, Consultora, Marketing, Suporte.
 Regras: editor não se autopromove nem vê credenciais/custos/documentos; escopo por recurso e operação; sem "admin global" por conveniência; primeiro administrador por procedimento seguro documentado, sem senha padrão; proibida autoelevação por campo de formulário, metadata de cliente ou endpoint público.
 
+Verdade única de dados sensíveis (checkpoint vigente, provada em `bun run test:seg`):
+
+| Dado | Perfis com acesso |
+| --- | --- |
+| Custo (produto e movimentação) | Master, Diretoria, Financeiro |
+| Documento completo (CPF/CNPJ) | Master, Diretoria, Financeiro |
+| Identidade individual na Rede | Master, Diretoria |
+| Visão agregada nacional da Rede | Master, Diretoria, Marketing |
+| Escopo próprio na Rede | Representante (carteira), Consultora (só a si) |
+| Financeiro/PIX do cadastro | Master, Diretoria, Financeiro |
+| Auditoria | Master, Diretoria |
+| Publicação da vitrine | Master, Diretoria, Marketing |
+| Importação industrial | Master, Diretoria, Estoque |
+
+Estoque não vê custo. Consultora e Representante não têm nenhuma permissão administrativa dessa lista.
+
+
 ## SEO/indexação
 
 /admin, /sistema, /app, /loja, rascunhos e testes: sem indexação. robots/noindex não substitui autenticação. Sitemap somente com URLs públicas publicadas.

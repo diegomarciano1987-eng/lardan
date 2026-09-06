@@ -33,12 +33,13 @@ export async function listPartners(params: {
   page: number;
   pageSize: number;
 }): Promise<PartnerPage> {
-  const { data, error } = await supabase.rpc("partners_list", {
+  const args: Record<string, unknown> = {
     _kind: params.kind,
-    _search: params.search.trim() || undefined,
     _page: params.page,
     _size: params.pageSize,
-  });
+  };
+  if (params.search.trim()) args["_search"] = params.search.trim();
+  const { data, error } = await supabase.rpc("partners_list", args as never);
   if (error) throw error;
   const payload = (data ?? {}) as Partial<PartnerPage>;
   return {
@@ -51,7 +52,7 @@ export async function listPartners(params: {
 
 /** Revela o documento completo. Cada revelação fica registrada na auditoria. */
 export async function revealPartnerDoc(kind: PartnerKind, id: string): Promise<string | null> {
-  const { data, error } = await supabase.rpc("partner_doc_reveal", { _kind: kind, _id: id });
+  const { data, error } = await supabase.rpc("partner_doc_reveal", { _kind: kind, _id: id } as never);
   if (error) throw error;
   return (data as string | null) ?? null;
 }
@@ -76,11 +77,9 @@ export async function savePartner(
   draft: PartnerDraft,
   id?: string | null,
 ): Promise<string> {
-  const { data, error } = await supabase.rpc("partner_save", {
-    _kind: kind,
-    ...(id ? { _id: id } : {}),
-    _values: draft as unknown as never,
-  });
+  const args: Record<string, unknown> = { _kind: kind, _values: draft };
+  if (id) args["_id"] = id;
+  const { data, error } = await supabase.rpc("partner_save", args as never);
   if (error) throw error;
   return data as string;
 }

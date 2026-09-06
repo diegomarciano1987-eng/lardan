@@ -42,6 +42,7 @@ import { Route as AuthenticatedAdminCadastrosPessoasRouteImport } from './routes
 import { Route as AuthenticatedAdminCadastrosProdutosRouteImport } from './routes/_authenticated/admin/cadastros/produtos'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
 import { Route as AuthenticatedAdminCadastrosPessoasIdRouteImport } from './routes/_authenticated/admin/cadastros/pessoas_.$id'
+import { Route as AuthenticatedAdminCadastrosPessoasNovoRouteImport } from './routes/_authenticated/admin/cadastros/pessoas_.novo'
 import { Route as AuthenticatedAdminCadastrosProdutosIdRouteImport } from './routes/_authenticated/admin/cadastros/produtos_.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -226,6 +227,12 @@ const AuthenticatedAdminCadastrosPessoasIdRoute =
     path: '/cadastros/pessoas/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminCadastrosPessoasNovoRoute =
+  AuthenticatedAdminCadastrosPessoasNovoRouteImport.update({
+    id: '/cadastros/pessoas_/novo',
+    path: '/cadastros/pessoas/novo',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminCadastrosProdutosIdRoute =
   AuthenticatedAdminCadastrosProdutosIdRouteImport.update({
     id: '/cadastros/produtos_/$id',
@@ -266,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
   '/admin/cadastros/pessoas/$id': typeof AuthenticatedAdminCadastrosPessoasIdRoute
+  '/admin/cadastros/pessoas/novo': typeof AuthenticatedAdminCadastrosPessoasNovoRoute
   '/admin/cadastros/produtos/$id': typeof AuthenticatedAdminCadastrosProdutosIdRoute
 }
 export interface FileRoutesByTo {
@@ -300,6 +308,7 @@ export interface FileRoutesByTo {
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/admin/cadastros': typeof AuthenticatedAdminCadastrosIndexRoute
   '/admin/cadastros/pessoas/$id': typeof AuthenticatedAdminCadastrosPessoasIdRoute
+  '/admin/cadastros/pessoas/novo': typeof AuthenticatedAdminCadastrosPessoasNovoRoute
   '/admin/cadastros/produtos/$id': typeof AuthenticatedAdminCadastrosProdutosIdRoute
 }
 export interface FileRoutesById {
@@ -337,6 +346,7 @@ export interface FileRoutesById {
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/_authenticated/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
   '/_authenticated/admin/cadastros/pessoas_/$id': typeof AuthenticatedAdminCadastrosPessoasIdRoute
+  '/_authenticated/admin/cadastros/pessoas_/novo': typeof AuthenticatedAdminCadastrosPessoasNovoRoute
   '/_authenticated/admin/cadastros/produtos_/$id': typeof AuthenticatedAdminCadastrosProdutosIdRoute
 }
 export interface FileRouteTypes {
@@ -374,6 +384,7 @@ export interface FileRouteTypes {
     | '/api/public/midia/$id'
     | '/admin/cadastros/'
     | '/admin/cadastros/pessoas/$id'
+    | '/admin/cadastros/pessoas/novo'
     | '/admin/cadastros/produtos/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -408,6 +419,7 @@ export interface FileRouteTypes {
     | '/api/public/midia/$id'
     | '/admin/cadastros'
     | '/admin/cadastros/pessoas/$id'
+    | '/admin/cadastros/pessoas/novo'
     | '/admin/cadastros/produtos/$id'
   id:
     | '__root__'
@@ -444,6 +456,7 @@ export interface FileRouteTypes {
     | '/api/public/midia/$id'
     | '/_authenticated/admin/cadastros/'
     | '/_authenticated/admin/cadastros/pessoas_/$id'
+    | '/_authenticated/admin/cadastros/pessoas_/novo'
     | '/_authenticated/admin/cadastros/produtos_/$id'
   fileRoutesById: FileRoutesById
 }
@@ -694,6 +707,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCadastrosPessoasIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/cadastros/pessoas_/novo': {
+      id: '/_authenticated/admin/cadastros/pessoas_/novo'
+      path: '/cadastros/pessoas/novo'
+      fullPath: '/admin/cadastros/pessoas/novo'
+      preLoaderRoute: typeof AuthenticatedAdminCadastrosPessoasNovoRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/cadastros/produtos_/$id': {
       id: '/_authenticated/admin/cadastros/produtos_/$id'
       path: '/cadastros/produtos/$id'
@@ -726,6 +746,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCadastrosProdutosRoute: typeof AuthenticatedAdminCadastrosProdutosRoute
   AuthenticatedAdminCadastrosIndexRoute: typeof AuthenticatedAdminCadastrosIndexRoute
   AuthenticatedAdminCadastrosPessoasIdRoute: typeof AuthenticatedAdminCadastrosPessoasIdRoute
+  AuthenticatedAdminCadastrosPessoasNovoRoute: typeof AuthenticatedAdminCadastrosPessoasNovoRoute
   AuthenticatedAdminCadastrosProdutosIdRoute: typeof AuthenticatedAdminCadastrosProdutosIdRoute
 }
 
@@ -762,6 +783,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminCadastrosIndexRoute,
     AuthenticatedAdminCadastrosPessoasIdRoute:
       AuthenticatedAdminCadastrosPessoasIdRoute,
+    AuthenticatedAdminCadastrosPessoasNovoRoute:
+      AuthenticatedAdminCadastrosPessoasNovoRoute,
     AuthenticatedAdminCadastrosProdutosIdRoute:
       AuthenticatedAdminCadastrosProdutosIdRoute,
   }

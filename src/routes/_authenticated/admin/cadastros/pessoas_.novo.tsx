@@ -20,9 +20,10 @@ import { maskCepInput, maskDocInput, maskPhoneInput } from "@/lib/docs-br";
 import { UFS } from "@/lib/catalog";
 
 interface Busca {
-  kind?: PartyKind;
-  papel?: PartyRoleKind;
+  kind?: PartyKind | undefined;
+  papel?: PartyRoleKind | undefined;
 }
+
 
 export const Route = createFileRoute("/_authenticated/admin/cadastros/pessoas_/novo")({
   validateSearch: (s: Record<string, unknown>): Busca => ({

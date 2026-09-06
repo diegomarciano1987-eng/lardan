@@ -32,21 +32,20 @@ export function HeroScroll() {
   // Com reduced motion, mostra o wordmark final diretamente.
   const p = reduced ? 1 : progress;
 
-  const out = ease(phase(p, 0.18, 0.55)); // saída do diamante
-  const flash = phase(p, 0.4, 0.52) * (1 - phase(p, 0.52, 0.66)); // estouro de luz
-  const wordmarkIn = ease(phase(p, 0.46, 0.74));
+  const out = ease(phase(p, 0.12, 0.44)); // saída do diamante
+  const flash = phase(p, 0.3, 0.42) * (1 - phase(p, 0.42, 0.56)); // estouro de luz
+  const wordmarkIn = ease(phase(p, 0.36, 0.62));
   // Passagem final: o wordmark avança na câmera e se dissolve na segunda sessão.
-  const sai = reduced ? 0 : ease(phase(p, 0.86, 1));
-  const varredura = phase(p, 0.52, 0.86); // fio de luz percorrendo as letras
+  const sai = reduced ? 0 : ease(phase(p, 0.82, 1));
+  const varredura = phase(p, 0.46, 0.8); // fio de luz percorrendo as letras
   const mostrarBrilho = !reduced && out < 0.35;
-  const sombra = (1 - wordmarkIn) * 26; // sombra longa que encurta ao assentar
-  // Cena final: a foto da segunda sessão já entra por trás do wordmark, em
-  // penumbra e fora de foco, e ganha nitidez conforme o quadro avança.
-  const cena = ease(phase(p, 0.44, 0.92));
-  const penumbra = cena * (1 - sai);
+  const sombra = (1 - wordmarkIn) * 30; // sombra longa que encurta ao assentar
+  // Penumbra cinematográfica sobre a onda de vidro: o wordmark brilha dentro
+  // de um quadro escuro — apenas a marca, nenhuma modelo no hero.
+  const penumbra = ease(phase(p, 0.34, 0.66)) * (1 - sai);
 
   return (
-    <div ref={trackRef} className="relative h-[300vh]" aria-label={BRAND.name}>
+    <div ref={trackRef} className="relative h-[230vh]" aria-label={BRAND.name}>
       <div className="sticky top-0 h-screen overflow-hidden bg-background">
         {/* Fundo-base: onda de vidro original */}
         <picture>

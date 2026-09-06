@@ -43,7 +43,7 @@ export function HeroScroll() {
   // Cena final: a foto da segunda sessão já entra por trás do wordmark, em
   // penumbra e fora de foco, e ganha nitidez conforme o quadro avança.
   const cena = ease(phase(p, 0.44, 0.92));
-  const penumbra = cena * (1 - 0.35 * sai);
+  const penumbra = cena * (1 - sai);
 
   return (
     <div ref={trackRef} className="relative h-[300vh]" aria-label={BRAND.name}>
@@ -238,7 +238,7 @@ export function HeroScroll() {
             style={{
               opacity: ease(sai),
               background:
-                "linear-gradient(180deg, oklch(0.12 0.015 25 / 0.6) 0%, oklch(0.14 0.015 25 / 0.4) 45%, oklch(0.12 0.015 25 / 0.62) 100%)",
+                "radial-gradient(120% 90% at 50% 46%, oklch(1 0 0 / 0.98) 0%, oklch(0.99 0.01 70 / 0.92) 45%, oklch(0.985 0.006 80 / 0.98) 100%)",
             }}
           />
         )}

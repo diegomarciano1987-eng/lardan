@@ -77,13 +77,13 @@ export function SessaoSemijoias() {
                   className="-mx-px h-full flex-1 origin-top"
                   style={{
                     background:
-                      "linear-gradient(180deg, oklch(0.17 0.016 25 / 0.98) 0%, oklch(0.11 0.012 25 / 0.99) 100%)",
+                      "linear-gradient(180deg, oklch(0.995 0.004 80) 0%, oklch(0.965 0.008 70) 100%)",
                     transform: `scaleY(${lead}) translate3d(0, ${t * -6}%, 0) translateZ(0)`,
                     opacity: 1 - t * 0.15,
                     filter: !leve && emMovimento ? `blur(${(lead * 6).toFixed(1)}px)` : undefined,
                     boxShadow:
                       !leve && fio > 0.02
-                        ? `0 -14px 40px -12px oklch(0.05 0.01 25 / ${(0.6 * fio).toFixed(2)}), inset 0 -1px 0 oklch(0.92 0.05 45 / ${(0.5 * fio).toFixed(2)})`
+                        ? `0 -16px 40px -14px oklch(0.25 0.015 30 / ${(0.45 * fio).toFixed(2)}), inset 0 -1px 0 oklch(0.98 0.03 60 / ${(0.6 * fio).toFixed(2)})`
                         : undefined,
                     willChange: emMovimento ? "transform" : "auto",
                   }}
@@ -114,7 +114,7 @@ export function SessaoSemijoias() {
             style={{
               opacity: penumbra,
               background:
-                "radial-gradient(120% 90% at 50% 50%, oklch(0.2 0.02 25 / 0.26) 0%, oklch(0.13 0.015 25 / 0.58) 65%, oklch(0.1 0.012 25 / 0.76) 100%)",
+                "radial-gradient(120% 90% at 50% 46%, oklch(1 0 0 / 0.95) 0%, oklch(0.99 0.01 70 / 0.7) 45%, oklch(0.985 0.006 80 / 0.85) 100%)",
             }}
           />
         )}

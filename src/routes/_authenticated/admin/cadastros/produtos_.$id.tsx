@@ -26,6 +26,13 @@ import {
   slugify,
   STATUS_OPTIONS,
 } from "@/lib/catalog";
+import {
+  publicarProdutos,
+  despublicarProdutos,
+  impedimentosPublicacao,
+  ROTULO_IMPEDIMENTO,
+} from "@/lib/showcase";
+
 
 export const Route = createFileRoute("/_authenticated/admin/cadastros/produtos_/$id")({
   component: ProdutoDetalhe,

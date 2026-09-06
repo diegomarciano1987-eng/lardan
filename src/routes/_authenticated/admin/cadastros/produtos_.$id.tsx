@@ -267,6 +267,63 @@ function ProdutoDetalhe() {
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível enviar."),
   });
 
+  /** Reescreve a ordem inteira: a primeira imagem é sempre a principal. */
+  const reordenar = useMutation({
+    mutationFn: async (ids: string[]) => {
+      for (let i = 0; i < ids.length; i++) {
+        const { error } = await supabase
+          .from("product_media")
+          .update({ position: i })
+          .eq("id", ids[i] as string);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => invalidar(),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível reordenar."),
+  });
+
+  const removerImagem = useMutation({
+    mutationFn: async (vinculoId: string) => {
+      const { error } = await supabase.from("product_media").delete().eq("id", vinculoId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Imagem removida do produto.");
+      invalidar();
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível remover."),
+  });
+
+  const salvarAlt = useMutation({
+    mutationFn: async ({ mediaId, alt }: { mediaId: string; alt: string }) => {
+      const { error } = await supabase.from("media_assets").update({ alt }).eq("id", mediaId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Descrição da imagem atualizada.");
+      invalidar();
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível salvar."),
+  });
+
+  const ordemAtual = (imagens.data ?? []).map((m) => m.id);
+  const moverImagem = (index: number, direcao: -1 | 1) => {
+    const destino = index + direcao;
+    if (destino < 0 || destino >= ordemAtual.length) return;
+    const nova = [...ordemAtual];
+    const a = nova[index] as string;
+    nova[index] = nova[destino] as string;
+    nova[destino] = a;
+    reordenar.mutate(nova);
+  };
+  const tornarPrincipal = (index: number) => {
+    if (index === 0) return;
+    const nova = [...ordemAtual];
+    const [alvo] = nova.splice(index, 1);
+    nova.unshift(alvo as string);
+    reordenar.mutate(nova);
+  };
+
   const p = produto.data;
 
   const fichaInicial = useMemo<RecordValues>(() => {

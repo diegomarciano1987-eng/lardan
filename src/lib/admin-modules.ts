@@ -2,6 +2,7 @@ import type { AppRole } from "@/lib/session";
 import type { Capability } from "@/lib/capabilities";
 import {
   LayoutDashboard,
+  MapPinned,
   Globe2,
   Tag,
   Boxes,
@@ -113,6 +114,17 @@ export const ADMIN_MODULES: AdminModule[] = [
     capability: "stock.view",
     state: "ativo",
     spec: "Razão imutável de movimentações, saldo calculado em transação, recebimento com custo, kardex por item, transferência entre locais, reserva com prazo e inventário com divergência. Nenhum saldo é editado diretamente.",
+  },
+  {
+    slug: "rede",
+    path: "/admin/rede",
+    label: "Inteligência da Rede",
+    description: "Mapa territorial da rede: onde a Lardan está, onde concentra e onde ainda não chegou.",
+    icon: MapPinned,
+    roles: [...CONTENT, "suporte"],
+    capability: "partners.view",
+    state: "ativo",
+    spec: "Mapa por estado e município com dados reais de cadastro, camadas de quantidade, ativas e concentração aproximada, painel de território e leitura de cobertura. Endereço residencial nunca é exibido.",
   },
   {
     slug: "maletas",

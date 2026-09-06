@@ -44,6 +44,180 @@ export type Database = {
         }
         Relationships: []
       }
+      award_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          id: string
+          media_id: string | null
+          nome: string
+          periodo_fim: string | null
+          periodo_inicio: string | null
+          program_id: string | null
+          regulamento: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          media_id?: string | null
+          nome: string
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          program_id?: string | null
+          regulamento?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          media_id?: string | null
+          nome?: string
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          program_id?: string | null
+          regulamento?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "award_campaigns_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      award_grants: {
+        Row: {
+          aceito_em: string | null
+          aprovado_em: string | null
+          aprovado_por: string | null
+          created_at: string
+          created_by: string | null
+          entregue_em: string | null
+          id: string
+          motivo: string | null
+          party_id: string
+          prize_id: string
+          snapshot_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          aceito_em?: string | null
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          created_at?: string
+          created_by?: string | null
+          entregue_em?: string | null
+          id?: string
+          motivo?: string | null
+          party_id: string
+          prize_id: string
+          snapshot_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          aceito_em?: string | null
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          created_at?: string
+          created_by?: string | null
+          entregue_em?: string | null
+          id?: string
+          motivo?: string | null
+          party_id?: string
+          prize_id?: string
+          snapshot_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "award_grants_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "award_grants_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "award_grants_prize_id_fkey"
+            columns: ["prize_id"]
+            isOneToOne: false
+            referencedRelation: "award_prizes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "award_grants_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      award_prizes: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          descricao: string | null
+          faixa: string | null
+          id: string
+          nome: string
+          posicao_fim: number | null
+          posicao_inicio: number | null
+          quantidade: number
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          descricao?: string | null
+          faixa?: string | null
+          id?: string
+          nome: string
+          posicao_fim?: number | null
+          posicao_inicio?: number | null
+          quantidade?: number
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          descricao?: string | null
+          faixa?: string | null
+          id?: string
+          nome?: string
+          posicao_fim?: number | null
+          posicao_inicio?: number | null
+          quantidade?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "award_prizes_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "award_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_entities: {
         Row: {
           city: string | null
@@ -97,6 +271,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_entities_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -313,8 +494,29 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "consultant_profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
             foreignKeyName: "consultant_profiles_representative_party_id_fkey"
             columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_sponsor_party_id_fkey"
+            columns: ["sponsor_party_id"]
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
@@ -323,8 +525,8 @@ export type Database = {
             foreignKeyName: "consultant_profiles_sponsor_party_id_fkey"
             columns: ["sponsor_party_id"]
             isOneToOne: false
-            referencedRelation: "parties"
-            referencedColumns: ["id"]
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -369,6 +571,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_points_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -468,7 +677,107 @@ export type Database = {
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "external_data_applications_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
         ]
+      }
+      geocode_batches: {
+        Row: {
+          aproximados: number
+          checkpoint: string | null
+          created_at: string
+          created_by: string | null
+          escopo: Json
+          falhas: number
+          finished_at: string | null
+          id: string
+          localizados: number
+          mensagem: string | null
+          processados: number
+          started_at: string | null
+          status: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          aproximados?: number
+          checkpoint?: string | null
+          created_at?: string
+          created_by?: string | null
+          escopo?: Json
+          falhas?: number
+          finished_at?: string | null
+          id?: string
+          localizados?: number
+          mensagem?: string | null
+          processados?: number
+          started_at?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          aproximados?: number
+          checkpoint?: string | null
+          created_at?: string
+          created_by?: string | null
+          escopo?: Json
+          falhas?: number
+          finished_at?: string | null
+          id?: string
+          localizados?: number
+          mensagem?: string | null
+          processados?: number
+          started_at?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      geocode_cache: {
+        Row: {
+          expires_at: string
+          fetched_at: string
+          geo_hash: string
+          ibge_city_code: string | null
+          latitude: number | null
+          longitude: number | null
+          postal_digits: string | null
+          precision: string
+          source: string
+          uf: string | null
+        }
+        Insert: {
+          expires_at?: string
+          fetched_at?: string
+          geo_hash: string
+          ibge_city_code?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          postal_digits?: string | null
+          precision: string
+          source: string
+          uf?: string | null
+        }
+        Update: {
+          expires_at?: string
+          fetched_at?: string
+          geo_hash?: string
+          ibge_city_code?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          postal_digits?: string | null
+          precision?: string
+          source?: string
+          uf?: string | null
+        }
+        Relationships: []
       }
       ibge_municipios: {
         Row: {
@@ -898,6 +1207,13 @@ export type Database = {
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "leads_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
         ]
       }
       locations: {
@@ -1183,6 +1499,14 @@ export type Database = {
           created_at: string
           ddd: string | null
           district: string | null
+          geo_attempted_at: string | null
+          geo_error: string | null
+          geo_hash: string | null
+          geo_located_at: string | null
+          geo_normalizer_version: string | null
+          geo_precision: string | null
+          geo_source: string | null
+          geo_status: string
           ibge_city_code: string | null
           id: string
           is_primary: boolean
@@ -1207,6 +1531,14 @@ export type Database = {
           created_at?: string
           ddd?: string | null
           district?: string | null
+          geo_attempted_at?: string | null
+          geo_error?: string | null
+          geo_hash?: string | null
+          geo_located_at?: string | null
+          geo_normalizer_version?: string | null
+          geo_precision?: string | null
+          geo_source?: string | null
+          geo_status?: string
           ibge_city_code?: string | null
           id?: string
           is_primary?: boolean
@@ -1231,6 +1563,14 @@ export type Database = {
           created_at?: string
           ddd?: string | null
           district?: string | null
+          geo_attempted_at?: string | null
+          geo_error?: string | null
+          geo_hash?: string | null
+          geo_located_at?: string | null
+          geo_normalizer_version?: string | null
+          geo_precision?: string | null
+          geo_source?: string | null
+          geo_status?: string
           ibge_city_code?: string | null
           id?: string
           is_primary?: boolean
@@ -1254,6 +1594,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_addresses_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -1286,6 +1633,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_links_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -1333,6 +1687,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_roles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -1613,6 +1974,13 @@ export type Database = {
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
         ]
       }
       public_price_list: {
@@ -1647,6 +2015,122 @@ export type Database = {
             columns: ["variant_id"]
             isOneToOne: false
             referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ranking_programs: {
+        Row: {
+          aprovado_em: string | null
+          aprovado_por: string | null
+          created_at: string
+          created_by: string | null
+          criterios_desclassificacao: Json
+          criterios_minimos: Json
+          descricao: string | null
+          desempate: Json
+          escopo: string
+          escopo_valor: string | null
+          id: string
+          metricas: Json
+          nome: string
+          periodo_fim: string | null
+          periodo_inicio: string | null
+          pesos: Json
+          publicado_em: string | null
+          publico_elegivel: Json
+          status: string
+          updated_at: string
+          versao: number
+        }
+        Insert: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          created_at?: string
+          created_by?: string | null
+          criterios_desclassificacao?: Json
+          criterios_minimos?: Json
+          descricao?: string | null
+          desempate?: Json
+          escopo?: string
+          escopo_valor?: string | null
+          id?: string
+          metricas?: Json
+          nome: string
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          pesos?: Json
+          publicado_em?: string | null
+          publico_elegivel?: Json
+          status?: string
+          updated_at?: string
+          versao?: number
+        }
+        Update: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
+          created_at?: string
+          created_by?: string | null
+          criterios_desclassificacao?: Json
+          criterios_minimos?: Json
+          descricao?: string | null
+          desempate?: Json
+          escopo?: string
+          escopo_valor?: string | null
+          id?: string
+          metricas?: Json
+          nome?: string
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          pesos?: Json
+          publicado_em?: string | null
+          publico_elegivel?: Json
+          status?: string
+          updated_at?: string
+          versao?: number
+        }
+        Relationships: []
+      }
+      ranking_snapshots: {
+        Row: {
+          apurado_em: string
+          created_at: string
+          created_by: string | null
+          id: string
+          imutavel: boolean
+          posicoes: Json
+          program_id: string
+          regra: Json
+          versao: number
+        }
+        Insert: {
+          apurado_em?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          imutavel?: boolean
+          posicoes?: Json
+          program_id: string
+          regra?: Json
+          versao: number
+        }
+        Update: {
+          apurado_em?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          imutavel?: boolean
+          posicoes?: Json
+          program_id?: string
+          regra?: Json
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_snapshots_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_programs"
             referencedColumns: ["id"]
           },
         ]
@@ -1976,7 +2460,35 @@ export type Database = {
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "suppliers_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
         ]
+      }
+      uf_centroides: {
+        Row: {
+          latitude: number
+          longitude: number
+          nome: string
+          uf: string
+        }
+        Insert: {
+          latitude: number
+          longitude: number
+          nome: string
+          uf: string
+        }
+        Update: {
+          latitude?: number
+          longitude?: number
+          nome?: string
+          uf?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -2058,9 +2570,57 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_network_consultants: {
+        Row: {
+          city: string | null
+          code: string | null
+          created_at: string | null
+          display_name: string | null
+          endereco_completo: boolean | null
+          geo_precision: string | null
+          geo_status: string | null
+          ibge_city_code: string | null
+          latitude: number | null
+          level: string | null
+          longitude: number | null
+          party_id: string | null
+          region: string | null
+          representative_party_id: string | null
+          status: Database["public"]["Enums"]["party_status"] | null
+          tem_endereco: boolean | null
+          uf: string | null
+          wallet: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
     }
     Functions: {
+      address_geo_fingerprint: {
+        Args: {
+          _city: string
+          _district: string
+          _number: string
+          _postal: string
+          _street: string
+          _uf: string
+        }
+        Returns: string
+      }
       apply_stock_delta: {
         Args: { _delta: number; _location: string; _variant: string }
         Returns: number
@@ -2232,6 +2792,33 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      network_cobertura: { Args: { _filtros?: Json }; Returns: Json }
+      network_geo_municipios: {
+        Args: { _filtros?: Json; _uf: string }
+        Returns: {
+          ativas: number
+          codigo_ibge: string
+          localizadas: number
+          municipio: string
+          total: number
+        }[]
+      }
+      network_geo_overview: { Args: { _filtros?: Json }; Returns: Json }
+      network_geo_pontos: {
+        Args: { _filtros?: Json }
+        Returns: {
+          aproximado: boolean
+          ativas: number
+          lat: number
+          lng: number
+          total: number
+        }[]
+      }
+      network_geo_territorio: {
+        Args: { _filtros?: Json; _ibge?: string; _uf?: string }
+        Returns: Json
+      }
+      network_scope_party: { Args: never; Returns: string }
       norm_code: { Args: { _v: string }; Returns: string }
       only_digits: { Args: { _v: string }; Returns: string }
       parse_cents_any: { Args: { _v: string }; Returns: number }

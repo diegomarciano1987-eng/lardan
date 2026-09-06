@@ -5,6 +5,8 @@ const SLATS = 18;
 
 interface CategoryGuillotineProps {
   title: string;
+  /** Texto leve opcional exibido abaixo do título. */
+  subtitle?: string;
   /** Slug da categoria no catálogo publicado. */
   categoria: string;
   image: { url: string };
@@ -26,6 +28,7 @@ interface CategoryGuillotineProps {
  */
 export function CategoryGuillotine({
   title,
+  subtitle,
   categoria,
   image,
   mobileImage,

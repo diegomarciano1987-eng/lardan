@@ -17,6 +17,8 @@ interface CategoryGuillotineProps {
   enterFrom: "left" | "right";
   /** Lado onde o texto fica, para não cobrir a peça na foto. */
   align?: "left" | "right";
+  /** Lado do texto apenas no mobile (quando diferente do desktop). */
+  mobileAlign?: "left" | "right";
 }
 
 /**
@@ -35,6 +37,7 @@ export function CategoryGuillotine({
   imageAlt,
   enterFrom,
   align = "left",
+  mobileAlign,
 }: CategoryGuillotineProps) {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const p = reduced ? 1 : progress;
@@ -42,6 +45,7 @@ export function CategoryGuillotine({
   const reveal = phase(p, 0.04, 0.62);
   const imgScale = 1.22 - 0.22 * ease(phase(p, 0, 0.75));
   const dir = enterFrom === "right" ? 1 : -1;
+  const mobileSide = mobileAlign ?? align;
 
   const textIn = easeOut(phase(p, 0.5, 0.8));
   const ruleIn = easeOut(phase(p, 0.56, 0.84));
@@ -125,16 +129,16 @@ export function CategoryGuillotine({
           className="pointer-events-none absolute inset-0 md:hidden"
           style={{
             background:
-              align === "left"
+              mobileSide === "left"
                 ? "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.45) 0%, oklch(0.18 0.01 30 / 0.2) 38%, transparent 62%)"
                 : "linear-gradient(270deg, oklch(0.18 0.01 30 / 0.45) 0%, oklch(0.18 0.01 30 / 0.2) 38%, transparent 62%)",
             backdropFilter: "blur(3px)",
             maskImage:
-              align === "left"
+              mobileSide === "left"
                 ? "linear-gradient(90deg, black 0%, black 38%, transparent 62%)"
                 : "linear-gradient(270deg, black 0%, black 38%, transparent 62%)",
             WebkitMaskImage:
-              align === "left"
+              mobileSide === "left"
                 ? "linear-gradient(90deg, black 0%, black 38%, transparent 62%)"
                 : "linear-gradient(270deg, black 0%, black 38%, transparent 62%)",
             opacity: textIn,
@@ -143,7 +147,9 @@ export function CategoryGuillotine({
 
         <div
           className={`relative mx-auto flex h-full max-w-6xl flex-col justify-center px-6 md:px-10 ${
-            align === "right" ? "items-end text-right" : "items-start"
+            mobileSide === "right" ? "items-end text-right" : "items-start text-left"
+          } ${
+            align === "right" ? "md:items-end md:text-right" : "md:items-start md:text-left"
           }`}
         >
           <div className="max-w-md">
@@ -168,7 +174,11 @@ export function CategoryGuillotine({
               </p>
             )}
             <div
-              className={`rose-rule mt-6 w-16 ${align === "right" ? "ml-auto origin-right" : "origin-left"}`}
+              className={`rose-rule mt-6 w-16 ${
+                mobileSide === "right" ? "origin-right" : "origin-left"
+              } ${
+                align === "right" ? "md:origin-right md:ml-auto" : "md:origin-left"
+              }`}
               style={{ transform: `scaleX(${ruleIn})` }}
             />
             <Link

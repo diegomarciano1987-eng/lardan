@@ -66,7 +66,8 @@ Padrão: recurso desativado no servidor **e** na UI; "Ver especificação" funci
 | CAD-03 | PESSOA-LISTAR | /admin/cadastros/pessoas | registry.view | Paginação/ordenação/filtro no servidor | ATIVO |
 | CAD-04 | PESSOA-CRIAR/EDITAR | /admin/cadastros/pessoas/$id | registry.manage | Rascunho sem obrigatoriedade comercial; código automático | ATIVO |
 | CAD-05 | PAPEL-VINCULAR | /admin/cadastros/pessoas/$id | registry.manage | Papéis acumuláveis sem duplicar pessoa | ATIVO |
-| CAD-06 | DOC-VER-COMPLETO | /admin/cadastros/pessoas/$id | registry.doc.view | Validação apenas estrutural; nunca afirma titularidade | ATIVO |
-| CAD-07 | PIX-VER | /admin/cadastros/pessoas/$id | registry.finance.view | Marketing e Estoque nunca veem | ATIVO |
+| CAD-06 | DOC-VER-COMPLETO | /admin/cadastros/pessoas/$id | registry.doc.view (Master, Diretoria, Financeiro) | Só por revelação auditada; coluna do documento não é legível direto na tabela; validação apenas estrutural, nunca afirma titularidade | ATIVO |
+| CAD-07 | PIX-VER | /admin/cadastros/pessoas/$id | registry.finance.view (Master, Diretoria, Financeiro, Cobrança) | Marketing, Suporte e Estoque nunca veem | ATIVO |
+
 | CAD-08 | DUPLICIDADE-REVISAR | /admin/cadastros/duplicidades | registry.view | Aponta, nunca funde automaticamente | ATIVO |
 | CAD-09 | CANDIDATA-CONVERTER | /admin/leads | registry.manage + leads.view | Transacional, idempotente, sem login automático, auditado | ATIVO |

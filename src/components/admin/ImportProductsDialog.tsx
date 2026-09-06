@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileSpreadsheet, Upload } from "lucide-react";
+import { Download, FileSpreadsheet, Upload } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import {
@@ -97,6 +97,29 @@ function parsePlanilha(buffer: ArrayBuffer): LinhaImport[] {
     });
   }
   return linhas;
+}
+
+/** Gera e baixa a planilha-modelo com cabeçalhos oficiais e uma linha de exemplo. */
+function baixarModelo() {
+  const dados = [
+    {
+      "Nome do produto": "Anel Solitário Cristal",
+      SKU: "AN-001",
+      "Código de barras": "7890000000017",
+      Categoria: "Anéis",
+      "Coleção": "Clássicos",
+      Quantidade: 10,
+      "Valor de custo": "29,90",
+      "Preço de venda": "79,90",
+      Cor: "Dourado",
+      Tamanho: "17",
+    },
+  ];
+  const ws = XLSX.utils.json_to_sheet(dados);
+  ws["!cols"] = [32, 12, 18, 14, 14, 11, 14, 15, 12, 10].map((w) => ({ wch: w }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Produtos");
+  XLSX.writeFile(wb, "modelo-importacao-produtos-lardan.xlsx");
 }
 
 /** Importação em massa de produtos com entrada de estoque, tudo gravado pelo banco. */
@@ -213,6 +236,15 @@ export function ImportProductsDialog({
               >
                 <FileSpreadsheet aria-hidden className="mr-2 inline size-4" />
                 {arquivo || "Escolher arquivo"}
+              </button>
+              <button
+                type="button"
+                onClick={baixarModelo}
+                className="admin-btn mt-1.5 ml-2"
+                title="Baixa uma planilha pronta com as colunas certas e um exemplo preenchido"
+              >
+                <Download aria-hidden className="mr-2 inline size-4" />
+                Baixar modelo
               </button>
             </div>
             <label className="block w-56 space-y-1.5">

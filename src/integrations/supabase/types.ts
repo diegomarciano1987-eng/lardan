@@ -2430,6 +2430,10 @@ export type Database = {
       stock_movements: {
         Row: {
           balance_after: number | null
+          balance_from_after: number | null
+          balance_from_before: number | null
+          balance_to_after: number | null
+          balance_to_before: number | null
           created_at: string
           created_by: string | null
           from_location_id: string | null
@@ -2446,6 +2450,10 @@ export type Database = {
         }
         Insert: {
           balance_after?: number | null
+          balance_from_after?: number | null
+          balance_from_before?: number | null
+          balance_to_after?: number | null
+          balance_to_before?: number | null
           created_at?: string
           created_by?: string | null
           from_location_id?: string | null
@@ -2462,6 +2470,10 @@ export type Database = {
         }
         Update: {
           balance_after?: number | null
+          balance_from_after?: number | null
+          balance_from_before?: number | null
+          balance_to_after?: number | null
+          balance_to_before?: number | null
           created_at?: string
           created_by?: string | null
           from_location_id?: string | null
@@ -3282,6 +3294,17 @@ export type Database = {
           updated_at: string
         }[]
       }
+      stock_balances_list: {
+        Args: {
+          _location?: string
+          _only_positive?: boolean
+          _page?: number
+          _search?: string
+          _size?: number
+        }
+        Returns: Json
+      }
+      stock_item_detail: { Args: { _variant: string }; Returns: Json }
       stock_movements_list: {
         Args: {
           _kind?: string

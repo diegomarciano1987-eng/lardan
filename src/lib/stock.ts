@@ -23,14 +23,19 @@ export interface BalanceRow {
   quantity: number;
   reserved: number;
   updated_at: string;
-  locations: { id: string; name: string; code: string } | null;
-  product_variants: {
-    id: string;
-    label: string;
-    sku: string | null;
-    barcode: string | null;
-    products: { id: string; name: string } | null;
-  } | null;
+  local_id: string;
+  local_nome: string;
+  local_codigo: string;
+  variant_id: string;
+  variante: string;
+  sku: string | null;
+  barcode: string | null;
+  legacy_code: string | null;
+  produto_id: string;
+  produto: string;
+  produto_slug: string;
+  media_id: string | null;
+  media_path: string | null;
 }
 
 export interface MovementRow {
@@ -39,17 +44,63 @@ export interface MovementRow {
   quantity: number;
   unit_cost_cents: number | null;
   reason_code: string | null;
+  motivo: string | null;
   reference: string | null;
   note: string | null;
   balance_after: number | null;
+  balance_from_before: number | null;
+  balance_from_after: number | null;
+  balance_to_before: number | null;
+  balance_to_after: number | null;
   created_at: string;
-  product_variants: {
-    label: string;
-    sku: string | null;
-    products: { name: string } | null;
+  autor: string | null;
+  variant_id: string;
+  variante: string | null;
+  sku: string | null;
+  produto: string | null;
+  media_id: string | null;
+  media_path: string | null;
+  origem: string | null;
+  destino: string | null;
+}
+
+export interface StockItemDetail {
+  variant_id: string;
+  variante: string;
+  sku: string | null;
+  barcode: string | null;
+  legacy_code: string | null;
+  is_active: boolean;
+  produto_id: string;
+  produto: string;
+  produto_slug: string;
+  produto_status: string;
+  categoria: string | null;
+  colecao: string | null;
+  reservas_ativas: boolean;
+  pode_ver_custo: boolean;
+  custo_cents: number | null;
+  midias: { id: string; path: string | null; alt: string | null }[];
+  saldos: {
+    local_id: string;
+    local: string;
+    codigo: string;
+    quantity: number;
+    reserved: number;
+    updated_at: string;
+  }[];
+  ultima_movimentacao: {
+    id: string;
+    kind: StockMoveKind;
+    quantity: number;
+    created_at: string;
+    reason_code: string | null;
+    reference: string | null;
+    unit_cost_cents?: number | null;
+    origem: string | null;
+    destino: string | null;
+    autor: string | null;
   } | null;
-  origem: { name: string } | null;
-  destino: { name: string } | null;
 }
 
 export interface StockReason {
@@ -66,58 +117,68 @@ export async function fetchStockOverview(): Promise<StockOverview> {
   return (data ?? {}) as StockOverview;
 }
 
-const BALANCE_SELECT =
-  "id, quantity, reserved, updated_at, locations!inner(id, name, code), product_variants!inner(id, label, sku, barcode, products!inner(id, name))";
-
+/**
+ * Saldos resolvidos no servidor: busca por produto, variação, SKU, código
+ * legado e código de barras, já trazendo a foto principal de cada peça.
+ */
 export async function listBalances(params: {
   search: string;
   page: number;
   pageSize: number;
   locationId?: string | undefined;
   onlyPositive?: boolean;
+  signal?: AbortSignal;
 }) {
-  const { search, page, pageSize, locationId, onlyPositive } = params;
-  let query = supabase
-    .from("stock_balances")
-    .select(BALANCE_SELECT, { count: "exact" })
-    .order("updated_at", { ascending: false })
-    .range(page * pageSize, page * pageSize + pageSize - 1);
+  const { search, page, pageSize, locationId, onlyPositive, signal } = params;
+  const termo = search.trim();
+  const args: Record<string, unknown> = {
+    _page: page,
+    _size: pageSize,
+    _only_positive: onlyPositive ?? false,
+  };
+  if (termo.length >= 2) args["_search"] = termo;
+  if (locationId) args["_location"] = locationId;
 
-  if (locationId) query = query.eq("location_id", locationId);
-  if (onlyPositive) query = query.gt("quantity", 0);
-
-  const termo = search.trim().replace(/[,()]/g, " ");
-  if (termo.length >= 2) {
-    query = query.or(`label.ilike.%${termo}%,sku.ilike.%${termo}%,barcode.ilike.%${termo}%`, {
-      referencedTable: "product_variants",
-    });
-  }
-
-  const { data, error, count } = await query;
+  let req = supabase.rpc("stock_balances_list", args as never);
+  if (signal) req = req.abortSignal(signal);
+  const { data, error } = await req;
   if (error) throw error;
-  return { rows: (data ?? []) as unknown as BalanceRow[], total: count ?? 0 };
+  const payload = (data ?? {}) as {
+    rows?: BalanceRow[];
+    total?: number;
+    reservas_ativas?: boolean;
+  };
+  return {
+    rows: payload.rows ?? [],
+    total: Number(payload.total ?? 0),
+    reservasAtivas: payload.reservas_ativas ?? false,
+  };
 }
 
-/** Linha crua devolvida por public.stock_movements_list. */
-interface MovementRaw {
-  id: string;
-  kind: StockMoveKind;
-  quantity: number;
-  unit_cost_cents: number | null;
-  reason_code: string | null;
-  reference: string | null;
-  note: string | null;
-  balance_after: number | null;
-  created_at: string;
-  variante: string | null;
-  sku: string | null;
-  produto: string | null;
-  origem: string | null;
-  destino: string | null;
+/** Uma única chamada assinada por página; nunca uma URL por linha. */
+export async function signedMediaMap(paths: (string | null | undefined)[]) {
+  const limpos = Array.from(new Set(paths.filter((p): p is string => Boolean(p))));
+  const mapa: Record<string, string> = {};
+  if (limpos.length === 0) return mapa;
+  const { data } = await supabase.storage.from("media").createSignedUrls(limpos, 3600);
+  (data ?? []).forEach((u, i) => {
+    const caminho = limpos[i];
+    if (caminho && u.signedUrl) mapa[caminho] = u.signedUrl;
+  });
+  return mapa;
+}
+
+/** Ficha completa do item de estoque (painel lateral). */
+export async function fetchStockItem(variantId: string): Promise<StockItemDetail> {
+  const { data, error } = await supabase.rpc("stock_item_detail", {
+    _variant: variantId,
+  } as never);
+  if (error) throw error;
+  return data as unknown as StockItemDetail;
 }
 
 /**
- * Movimentações sempre pelo servidor. O custo unitário não é mais legível na
+ * Movimentações sempre pelo servidor. O custo unitário não é legível na
  * Data API: só volta preenchido para quem tem `stock.cost.view`.
  */
 export async function listMovements(params: {
@@ -126,38 +187,27 @@ export async function listMovements(params: {
   pageSize: number;
   kind?: string | undefined;
   variantId?: string | undefined;
+  signal?: AbortSignal;
 }) {
-  const { search, page, pageSize, kind, variantId } = params;
+  const { search, page, pageSize, kind, variantId, signal } = params;
   const args: Record<string, unknown> = { _page: page, _size: pageSize };
   const termo = search.trim();
   if (termo.length >= 2) args["_search"] = termo;
   if (kind && kind !== "todos") args["_kind"] = kind;
   if (variantId) args["_variant"] = variantId;
 
-  const { data, error } = await supabase.rpc("stock_movements_list", args as never);
+  let req = supabase.rpc("stock_movements_list", args as never);
+  if (signal) req = req.abortSignal(signal);
+  const { data, error } = await req;
   if (error) throw error;
   const payload = (data ?? {}) as {
-    rows?: MovementRaw[];
+    rows?: MovementRow[];
     total?: number;
     pode_ver_custo?: boolean;
   };
   const rows: MovementRow[] = (payload.rows ?? []).map((r) => ({
-    id: r.id,
-    kind: r.kind,
-    quantity: r.quantity,
-    unit_cost_cents: r.unit_cost_cents,
-    reason_code: r.reason_code,
-    reference: r.reference,
-    note: r.note,
-    balance_after: r.balance_after,
-    created_at: r.created_at,
-    product_variants: {
-      label: r.variante ?? "",
-      sku: r.sku,
-      products: r.produto ? { name: r.produto } : null,
-    },
-    origem: r.origem ? { name: r.origem } : null,
-    destino: r.destino ? { name: r.destino } : null,
+    ...r,
+    unit_cost_cents: r.unit_cost_cents ?? null,
   }));
   return { rows, total: Number(payload.total ?? 0), podeVerCusto: payload.pode_ver_custo ?? false };
 }

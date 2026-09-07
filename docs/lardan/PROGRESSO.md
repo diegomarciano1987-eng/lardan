@@ -64,3 +64,19 @@
 - Correção de banco: `ensure_profile_party` criava uma ficha de pessoa órfã a cada carregamento autenticado; corrigida e as fichas órfãs removidas (nenhum perfil, candidatura ou consultora afetada).
 - Dados sintéticos removidos ao fim (fornecedor, entidade, fichas e contas de teste); auditoria preservada.
 - Verificação: 93 testes verdes, tipagem limpa, build de produção concluído. `bun run lint` segue vermelho por formatação Prettier pré-existente em todo o repositório (3.743 apontamentos, nenhum introduzido por este lote).
+
+## Pausa para auditoria externa do ZIP (2026-09-07)
+
+- Nenhum recurso novo ligado para empresa alguma até aprovação.
+- Nenhum backfill, massa de homologação ou automação disparada neste momento.
+- Módulo em questão **não classificado como aprovado para homologação** — aguardando validação do código.
+
+### Pendências conhecidas registradas
+
+1. **Comportamento real do banco ainda não provado** — precisa de execução de cenários reais e conferência dos efeitos.
+2. **Montador deve ser escolhido por lista de colaboradores ativos da mesma empresa, com perfil/capacidade adequada** — nunca por UUID digitado.
+3. **Vendedor precisa ter leitura do pós-venda exclusivamente dos clientes da própria carteira**, sem acesso a custos, qualidade interna, comissão ou dados sensíveis.
+4. **Termo em PDF versionado e verificável ainda não foi entregue**.
+5. **Conversão de assistência fora da garantia para o fluxo Comercial existente ainda não foi entregue**.
+6. **Integração com Estoque, Requisições e Compras precisa ser comprovada sem criar pedido de compra pelo Pós-venda**.
+7. **Tokens públicos, assinatura, satisfação, fotos privadas, comissão, agenda e isolamento multiempresa ainda precisam de prova comportamental**.

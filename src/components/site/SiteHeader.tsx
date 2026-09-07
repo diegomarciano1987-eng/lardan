@@ -71,14 +71,14 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
 
       <HeaderAcoes className="absolute right-4 top-1/2 z-50 -translate-y-1/2 [&_a]:h-9 [&_a]:w-9 md:hidden" />
 
-      <div className="relative z-50 flex flex-col items-center md:hidden">
+      <div className="absolute bottom-2.5 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center md:hidden">
         <button
           type="button"
           aria-expanded={open}
           aria-label={open ? "Fechar menu" : "Abrir menu"}
           aria-controls="menu-mobile"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-4 py-2.5 text-[0.5625rem] tracking-[0.24em] uppercase text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+          className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-4 py-2 text-[0.5625rem] tracking-[0.24em] uppercase text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
           {open ? <X className="h-3.5 w-3.5" strokeWidth={1.4} /> : <Menu className="h-3.5 w-3.5" strokeWidth={1.4} />}
           Menu

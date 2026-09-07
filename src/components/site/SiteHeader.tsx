@@ -36,6 +36,8 @@ function NavLink({
 
 export function SiteHeader({ branded = false }: { branded?: boolean }) {
   const [open, setOpen] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isHome = pathname === "/";
 
   return (
     <header

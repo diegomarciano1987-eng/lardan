@@ -18,7 +18,11 @@
     "test:e2e": "bun scripts/e2e-cadastros.ts",
     "massa:criar": "bun scripts/massa-homologacao.ts criar",
     "massa:limpar": "bun scripts/massa-homologacao.ts limpar",
-    "massa:relatorio": "bun scripts/massa-homologacao.ts relatorio"
+    "massa:relatorio": "bun scripts/massa-homologacao.ts relatorio",
+    "massa:importacao:criar": "bun scripts/massa-importacao.ts criar",
+    "massa:importacao:limpar": "bun scripts/massa-importacao.ts limpar",
+    "test:importacao": "bun scripts/massa-importacao.ts funcional",
+    "test:importacao:carga": "bun scripts/massa-importacao.ts carga"
   },
   "overrides": {
     "rolldown": "1.2.1"

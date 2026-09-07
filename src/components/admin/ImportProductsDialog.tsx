@@ -15,19 +15,29 @@ import { listStockLocations, listStockReasons } from "@/lib/stock";
 import { formatInt } from "@/components/admin/ui";
 import {
   CAMPOS,
+  ROTULO_ESTADO,
   type CampoKey,
+  type EstadoLote,
+  type Indicadores,
   type JobResumo,
   type LinhaProblema,
-  abrirLote,
+  abrirExecucao,
   baixarModelo,
   baixarPlanilhaDeErros,
   cancelarLote,
+  colunasAmbiguas,
   enviarLinhas,
+  indicadoresLote,
   lerLote,
   lerPlanilha,
   listarProblemas,
+  pausarLote,
   processarLote,
-  sugerirMapeamento,
+  promoverSimulacao,
+  registrarArquivoNoServidor,
+  retomarLote,
+  selarLote,
+  sugerirMapeamentoDetalhado,
   validarLote,
 } from "@/lib/imports";
 
@@ -48,7 +58,17 @@ function Rotulo({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Importação industrial: arquivo → de-para → conferência → gravação em lotes. */
+function duracao(ms: number) {
+  const s = Math.max(0, Math.round(ms / 1000));
+  if (s < 60) return `${s}s`;
+  return `${Math.floor(s / 60)}min ${String(s % 60).padStart(2, "0")}s`;
+}
+
+/**
+ * Importação industrial: arquivo (identidade no servidor) → de-para →
+ * conferência → simulação ou gravação em blocos, com pausa, retomada e
+ * cancelamento com motivo.
+ */
 export function ImportProductsDialog({
   open,
   onOpenChange,
@@ -58,13 +78,18 @@ export function ImportProductsDialog({
 }) {
   const qc = useQueryClient();
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const cancelar = React.useRef(false);
+  const parar = React.useRef(false);
+  const worker = React.useRef(crypto.randomUUID());
 
   const [etapa, setEtapa] = React.useState<Etapa>("arquivo");
   const [arquivo, setArquivo] = React.useState<File | null>(null);
+  const [fileId, setFileId] = React.useState<string | null>(null);
+  const [sha, setSha] = React.useState("");
   const [cabecalhos, setCabecalhos] = React.useState<string[]>([]);
   const [linhas, setLinhas] = React.useState<Record<string, string>[]>([]);
   const [mapa, setMapa] = React.useState<Partial<Record<CampoKey, string>>>({});
+  const [confianca, setConfianca] = React.useState<Partial<Record<CampoKey, string>>>({});
+  const [avisosArquivo, setAvisosArquivo] = React.useState<string[]>([]);
 
   const [modo, setModo] = React.useState<"entrada" | "catalogo">("entrada");
   const [simular, setSimular] = React.useState(false);
@@ -75,14 +100,12 @@ export function ImportProductsDialog({
 
   const [jobId, setJobId] = React.useState<string | null>(null);
   const [resumo, setResumo] = React.useState<JobResumo | null>(null);
+  const [indicadores, setIndicadores] = React.useState<Indicadores | null>(null);
   const [problemas, setProblemas] = React.useState<LinhaProblema[]>([]);
-  const [progresso, setProgresso] = React.useState({ feitas: 0, total: 0 });
+  const [progresso, setProgresso] = React.useState({ feitas: 0, total: 0, inicio: 0 });
   const [ocupado, setOcupado] = React.useState<string | null>(null);
-
-  const chave = React.useRef(crypto.randomUUID());
-  React.useEffect(() => {
-    if (open) chave.current = crypto.randomUUID();
-  }, [open]);
+  const [motivoCancelar, setMotivoCancelar] = React.useState("");
+  const [pedirMotivo, setPedirMotivo] = React.useState(false);
 
   const locais = useQuery({ queryKey: ["stock-locations"], queryFn: listStockLocations });
   const motivos = useQuery({ queryKey: ["stock-reasons"], queryFn: listStockReasons });
@@ -90,21 +113,28 @@ export function ImportProductsDialog({
   function reiniciar() {
     setEtapa("arquivo");
     setArquivo(null);
+    setFileId(null);
+    setSha("");
     setCabecalhos([]);
     setLinhas([]);
     setMapa({});
+    setConfianca({});
+    setAvisosArquivo([]);
     setJobId(null);
     setResumo(null);
+    setIndicadores(null);
     setProblemas([]);
-    setProgresso({ feitas: 0, total: 0 });
+    setProgresso({ feitas: 0, total: 0, inicio: 0 });
     setOcupado(null);
-    cancelar.current = false;
-    chave.current = crypto.randomUUID();
+    setPedirMotivo(false);
+    setMotivoCancelar("");
+    parar.current = false;
+    worker.current = crypto.randomUUID();
   }
 
   function fechar(v: boolean) {
     if (!v) {
-      cancelar.current = true;
+      parar.current = true;
       reiniciar();
     }
     onOpenChange(v);
@@ -112,23 +142,35 @@ export function ImportProductsDialog({
 
   async function aoEscolherArquivo(file: File) {
     try {
-      const lida = lerPlanilha(await file.arrayBuffer());
+      setOcupado("Registrando o arquivo no servidor…");
+      const lida = await lerPlanilha(await file.arrayBuffer());
       if (lida.linhas.length === 0) {
         toast.error("Não encontrei nenhuma linha preenchida nesta planilha.");
         return;
       }
+      const registro = await registrarArquivoNoServidor(file);
+      const sugestoes = sugerirMapeamentoDetalhado(lida.cabecalhos);
       setArquivo(file);
+      setFileId(registro.id);
+      setSha(registro.sha256);
       setCabecalhos(lida.cabecalhos);
       setLinhas(lida.linhas);
-      setMapa(sugerirMapeamento(lida.cabecalhos));
+      setMapa(Object.fromEntries(sugestoes.map((s) => [s.campo, s.coluna])));
+      setConfianca(Object.fromEntries(sugestoes.map((s) => [s.campo, s.confianca])));
+      setAvisosArquivo([...lida.avisos, ...registro.avisos]);
+      if (!registro.novo) {
+        toast.info("Este arquivo já foi enviado antes. O histórico dele será mantido.");
+      }
       setEtapa("mapa");
-    } catch {
-      toast.error("Não consegui ler este arquivo. Use .xlsx, .xls ou .csv.");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setOcupado(null);
     }
   }
 
   async function conferir() {
-    if (!arquivo) return;
+    if (!arquivo || !fileId) return;
     if (!mapa.nome) {
       toast.error("Indique qual coluna tem o nome do produto.");
       return;
@@ -137,44 +179,56 @@ export function ImportProductsDialog({
       toast.error("Indique ao menos uma coluna de código: SKU, código legado ou código de barras.");
       return;
     }
+    const ambiguas = colunasAmbiguas(mapa);
+    if (ambiguas.length > 0) {
+      toast.error(`A coluna "${ambiguas[0]}" está apontada para mais de um campo.`);
+      return;
+    }
     if (modo === "entrada" && (!localId || !dataOp || !documento.trim())) {
       toast.error("Para dar entrada informe local, data da operação e documento.");
       return;
     }
     try {
-      setOcupado("Preparando o lote…");
-      const id = await abrirLote({
-        jobKey: chave.current,
-        fileName: arquivo.name,
-        fileSize: arquivo.size,
+      parar.current = false;
+      setOcupado("Preparando a execução…");
+      const aberta = await abrirExecucao({
+        fileId,
         mode: modo,
         mapping: mapa as Record<string, string>,
         defaults: {},
+        dryRun: simular,
         locationId: modo === "entrada" ? localId : null,
         operationDate: modo === "entrada" && dataOp ? dataOp.toISOString().slice(0, 10) : null,
         reasonCode: motivo || null,
         reference: documento.trim() || null,
-        dryRun: simular,
       });
-      setJobId(id);
+      setJobId(aberta.id);
 
-      for (let i = 0; i < linhas.length; i += LOTE_ENVIO) {
-        setOcupado(`Enviando linhas ${formatInt(i + 1)}–${formatInt(Math.min(i + LOTE_ENVIO, linhas.length))}…`);
-        await enviarLinhas(
-          id,
-          linhas.slice(i, i + LOTE_ENVIO).map((raw, k) => ({ n: i + k + 1, raw })),
-        );
+      if (!aberta.reaproveitado) {
+        for (let i = 0; i < linhas.length; i += LOTE_ENVIO) {
+          if (parar.current) return;
+          setOcupado(
+            `Recebendo linhas ${formatInt(i + 1)}–${formatInt(Math.min(i + LOTE_ENVIO, linhas.length))}…`,
+          );
+          await enviarLinhas(
+            aberta.id,
+            linhas.slice(i, i + LOTE_ENVIO).map((raw, k) => ({ n: i + k + 1, raw })),
+          );
+        }
+        await selarLote(aberta.id);
       }
 
       let restantes = 1;
-      while (restantes > 0 && !cancelar.current) {
-        const r = await validarLote(id, LOTE_VALIDA);
+      while (restantes > 0 && !parar.current) {
+        const r = await validarLote(aberta.id, LOTE_VALIDA);
         restantes = r.restantes;
+        setIndicadores(r.indicadores);
         setOcupado(`Conferindo… ${formatInt(linhas.length - restantes)} de ${formatInt(linhas.length)}`);
       }
 
-      setResumo(await lerLote(id));
-      setProblemas(await listarProblemas(id));
+      setResumo(await lerLote(aberta.id));
+      setIndicadores(await indicadoresLote(aberta.id));
+      setProblemas(await listarProblemas(aberta.id));
       setEtapa("conferencia");
     } catch (e) {
       toast.error((e as Error).message);
@@ -183,23 +237,27 @@ export function ImportProductsDialog({
     }
   }
 
-  async function gravar() {
-    if (!jobId || !resumo) return;
-    cancelar.current = false;
+  async function executar(idExecucao?: string) {
+    const alvo = idExecucao ?? jobId;
+    if (!alvo || !indicadores) return;
+    parar.current = false;
     setEtapa("processando");
-    const total = resumo.ok_rows + resumo.warn_rows;
-    setProgresso({ feitas: 0, total });
+    const total = indicadores.prontas + indicadores.avisos + indicadores.em_curso;
+    setProgresso({ feitas: 0, total, inicio: Date.now() });
     let feitas = 0;
     try {
       let restantes = 1;
-      while (restantes > 0 && !cancelar.current) {
-        const r = await processarLote(jobId, LOTE_PROCESSA);
+      while (restantes > 0 && !parar.current) {
+        const r = await processarLote(alvo, LOTE_PROCESSA, worker.current);
         feitas += r.processadas + r.erros_no_lote;
         restantes = r.restantes;
-        setProgresso({ feitas, total });
+        setIndicadores(r.indicadores);
+        setProgresso((p) => ({ ...p, feitas, total: Math.max(total, feitas) }));
+        if (r.pausado) break;
       }
-      setResumo(await lerLote(jobId));
-      setProblemas(await listarProblemas(jobId));
+      setResumo(await lerLote(alvo));
+      setIndicadores(await indicadoresLote(alvo));
+      setProblemas(await listarProblemas(alvo));
       setEtapa("fim");
       void qc.invalidateQueries({ queryKey: ["stock"] });
       void qc.invalidateQueries({ queryKey: ["products"] });
@@ -207,24 +265,76 @@ export function ImportProductsDialog({
       toast.success(simular ? "Simulação concluída." : "Importação concluída.");
     } catch (e) {
       toast.error((e as Error).message);
+      setResumo(await lerLote(alvo).catch(() => null));
       setEtapa("conferencia");
     }
   }
 
-  async function interromper() {
-    cancelar.current = true;
-    if (jobId) {
-      try {
-        await cancelarLote(jobId);
-        setResumo(await lerLote(jobId));
-      } catch (e) {
-        toast.error((e as Error).message);
-      }
+  async function pausar() {
+    if (!jobId) return;
+    parar.current = true;
+    try {
+      await pausarLote(jobId);
+      setResumo(await lerLote(jobId));
+      setEtapa("fim");
+      toast.info("Lote pausado. Você pode retomar de onde parou.");
+    } catch (e) {
+      toast.error((e as Error).message);
     }
-    setEtapa("fim");
   }
 
-  const aptas = (resumo?.ok_rows ?? 0) + (resumo?.warn_rows ?? 0);
+  async function retomar() {
+    if (!jobId) return;
+    try {
+      await retomarLote(jobId);
+      setIndicadores(await indicadoresLote(jobId));
+      await executar(jobId);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  async function confirmarCancelamento() {
+    if (!jobId) return;
+    if (motivoCancelar.trim().length < 5) {
+      toast.error("Escreva o motivo do cancelamento.");
+      return;
+    }
+    parar.current = true;
+    try {
+      await cancelarLote(jobId, motivoCancelar.trim());
+      setResumo(await lerLote(jobId));
+      setIndicadores(await indicadoresLote(jobId));
+      setPedirMotivo(false);
+      setEtapa("fim");
+      toast.info("Lote cancelado. O que já foi gravado permanece registrado.");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  async function promover() {
+    if (!jobId) return;
+    try {
+      const r = await promoverSimulacao(jobId);
+      if (r.base_mudou) toast.warning("A base mudou desde a simulação — confira o resultado no fim.");
+      setJobId(r.id);
+      setSimular(false);
+      setResumo(await lerLote(r.id));
+      setIndicadores(await indicadoresLote(r.id));
+      setEtapa("conferencia");
+      toast.success("Execução real criada a partir da simulação.");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  const aptas = (indicadores?.prontas ?? 0) + (indicadores?.avisos ?? 0);
+  const decorrido = progresso.inicio ? Date.now() - progresso.inicio : 0;
+  const velocidade = decorrido > 0 ? progresso.feitas / (decorrido / 1000) : 0;
+  const estimativa =
+    velocidade > 0 ? duracao(((progresso.total - progresso.feitas) / velocidade) * 1000) : "—";
+  const estado = (resumo?.status ?? "rascunho") as EstadoLote;
 
   return (
     <Dialog open={open} onOpenChange={fechar}>
@@ -232,9 +342,9 @@ export function ImportProductsDialog({
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">Importar produtos por planilha</DialogTitle>
           <DialogDescription>
-            Quatro passos: enviar o arquivo, conferir o de-para das colunas, revisar o que o sistema
-            entendeu e só então gravar. Peças já cadastradas são atualizadas — nada é duplicado, e
-            reenviar o mesmo lote não lança estoque duas vezes.
+            O arquivo ganha uma impressão digital no servidor; depois vêm o de-para, a conferência e
+            só então a gravação. Peças já cadastradas são atualizadas — nada é duplicado, e reenviar o
+            mesmo lote não lança estoque duas vezes.
           </DialogDescription>
         </DialogHeader>
 
@@ -255,14 +365,20 @@ export function ImportProductsDialog({
             <div className="ledger-panel flex flex-col items-center gap-3 px-6 py-10 text-center">
               <FileSpreadsheet aria-hidden className="size-8 text-bronze" />
               <p className="text-sm text-ledger-muted">
-                Excel (.xlsx, .xls) ou CSV. Códigos com zeros à esquerda são preservados.
+                Excel (.xlsx, .xls) ou CSV, até 20 MB e 50.000 linhas. Códigos com zeros à esquerda são
+                preservados.
               </p>
               <div className="flex flex-wrap justify-center gap-3">
-                <button type="button" className="admin-btn-primary" onClick={() => inputRef.current?.click()}>
+                <button
+                  type="button"
+                  className="admin-btn-primary"
+                  disabled={!!ocupado}
+                  onClick={() => inputRef.current?.click()}
+                >
                   <Upload aria-hidden className="mr-2 inline size-4" />
-                  Escolher arquivo
+                  {ocupado ?? "Escolher arquivo"}
                 </button>
-                <button type="button" className="admin-btn" onClick={baixarModelo}>
+                <button type="button" className="admin-btn" onClick={() => void baixarModelo()}>
                   <Download aria-hidden className="mr-2 inline size-4" />
                   Baixar modelo
                 </button>
@@ -276,8 +392,15 @@ export function ImportProductsDialog({
           <div className="space-y-5">
             <p className="text-sm text-ledger-muted">
               <strong className="text-ledger-text">{arquivo?.name}</strong> · {formatInt(linhas.length)}{" "}
-              linhas · {formatInt(cabecalhos.length)} colunas.
+              linhas · {formatInt(cabecalhos.length)} colunas · impressão digital {sha.slice(0, 12)}
             </p>
+            {avisosArquivo.length > 0 && (
+              <ul className="ledger-panel space-y-1 px-4 py-3 text-sm text-ledger-muted">
+                {avisosArquivo.map((a) => (
+                  <li key={a}>• {a}</li>
+                ))}
+              </ul>
+            )}
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block space-y-1.5">
@@ -351,6 +474,7 @@ export function ImportProductsDialog({
                     <Rotulo>
                       {c.label}
                       {"obrigatorio" in c && c.obrigatorio ? " *" : ""}
+                      {confianca[c.key] === "parecida" ? " · palpite" : ""}
                     </Rotulo>
                     <SmartSelect
                       options={[
@@ -378,24 +502,28 @@ export function ImportProductsDialog({
         )}
 
         {/* Passo 3 — conferência */}
-        {etapa === "conferencia" && resumo && (
+        {etapa === "conferencia" && indicadores && (
           <div className="space-y-4">
-            <div className="ledger-panel grid grid-cols-2 gap-4 px-5 py-4 sm:grid-cols-4">
+            <div className="ledger-panel grid grid-cols-2 gap-4 px-5 py-4 sm:grid-cols-5">
               <div>
                 <Rotulo>Linhas lidas</Rotulo>
-                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(resumo.total_rows)}</p>
+                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(indicadores.total)}</p>
               </div>
               <div>
                 <Rotulo>Prontas</Rotulo>
-                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(resumo.ok_rows)}</p>
+                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(indicadores.prontas)}</p>
               </div>
               <div>
                 <Rotulo>Com aviso</Rotulo>
-                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(resumo.warn_rows)}</p>
+                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(indicadores.avisos)}</p>
               </div>
               <div>
                 <Rotulo>Recusadas</Rotulo>
-                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(resumo.error_rows)}</p>
+                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(indicadores.recusadas)}</p>
+              </div>
+              <div>
+                <Rotulo>Conflitos</Rotulo>
+                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(indicadores.conflitos)}</p>
               </div>
             </div>
 
@@ -411,7 +539,10 @@ export function ImportProductsDialog({
                       <tr key={p.line_no} className="border-t border-line/60">
                         <td className="w-16 px-4 py-2 tabular-nums text-ledger-muted">#{p.line_no}</td>
                         <td className="px-4 py-2 text-ledger-text">
-                          {(p.messages ?? []).map((m) => m.erro ?? m.aviso).filter(Boolean).join(" · ")}
+                          {(p.messages ?? [])
+                            .map((m) => m.erro ?? m.aviso)
+                            .filter(Boolean)
+                            .join(" · ")}
                         </td>
                       </tr>
                     ))}
@@ -430,7 +561,7 @@ export function ImportProductsDialog({
                 <button
                   type="button"
                   className="admin-btn"
-                  onClick={() => baixarPlanilhaDeErros(problemas, "linhas-recusadas-lardan.xlsx")}
+                  onClick={() => void baixarPlanilhaDeErros(problemas, "linhas-recusadas-lardan.xlsx")}
                 >
                   <Download aria-hidden className="mr-2 inline size-4" />
                   Baixar linhas recusadas
@@ -439,21 +570,24 @@ export function ImportProductsDialog({
               <button type="button" className="admin-btn" onClick={() => setEtapa("mapa")}>
                 Voltar ao de-para
               </button>
-              <button type="button" className="admin-btn-primary" disabled={aptas === 0} onClick={() => void gravar()}>
-                {simular
-                  ? `Simular ${formatInt(aptas)} linhas`
-                  : `Gravar ${formatInt(aptas)} linhas`}
+              <button
+                type="button"
+                className="admin-btn-primary"
+                disabled={aptas === 0}
+                onClick={() => void executar()}
+              >
+                {simular ? `Simular ${formatInt(aptas)} linhas` : `Gravar ${formatInt(aptas)} linhas`}
               </button>
             </div>
           </div>
         )}
 
-        {/* Passo 4 — gravando */}
+        {/* Passo 4 — processando */}
         {etapa === "processando" && (
           <div className="space-y-4">
             <p className="text-sm text-ledger-muted">
-              Gravando em lotes de {LOTE_PROCESSA} linhas. Uma linha com problema não derruba as
-              demais e você pode interromper a qualquer momento.
+              Gravando em blocos de {LOTE_PROCESSA} linhas. Uma linha com problema não derruba as
+              demais; você pode pausar e retomar de onde parou.
             </p>
             <div className="h-2 w-full overflow-hidden rounded-full bg-line/60">
               <div
@@ -464,44 +598,84 @@ export function ImportProductsDialog({
               />
             </div>
             <p className="text-sm text-ledger-text">
-              {formatInt(progresso.feitas)} de {formatInt(progresso.total)} linhas.
+              {formatInt(progresso.feitas)} de {formatInt(progresso.total)} linhas ·{" "}
+              {velocidade.toFixed(0)} linhas/s · decorrido {duracao(decorrido)} · faltam ~{estimativa}
             </p>
-            <div className="flex justify-end">
-              <button type="button" className="admin-btn" onClick={() => void interromper()}>
-                Interromper
-              </button>
-            </div>
+            {pedirMotivo ? (
+              <div className="flex flex-wrap items-end gap-3">
+                <label className="min-w-[16rem] flex-1 space-y-1.5">
+                  <Rotulo>Motivo do cancelamento</Rotulo>
+                  <input
+                    className={inputCls}
+                    value={motivoCancelar}
+                    onChange={(e) => setMotivoCancelar(e.target.value)}
+                    placeholder="Explique por que este lote foi cancelado"
+                  />
+                </label>
+                <button type="button" className="admin-btn" onClick={() => setPedirMotivo(false)}>
+                  Voltar
+                </button>
+                <button type="button" className="admin-btn-primary" onClick={() => void confirmarCancelamento()}>
+                  Confirmar cancelamento
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-end gap-3">
+                <button type="button" className="admin-btn" onClick={() => void pausar()}>
+                  Pausar
+                </button>
+                <button type="button" className="admin-btn" onClick={() => setPedirMotivo(true)}>
+                  Cancelar lote
+                </button>
+              </div>
+            )}
           </div>
         )}
 
         {/* Resultado */}
-        {etapa === "fim" && resumo && (
+        {etapa === "fim" && resumo && indicadores && (
           <div className="space-y-4">
             <div className="ledger-panel space-y-2 px-5 py-4 text-sm">
               <p className="font-semibold text-ledger-text">
-                {resumo.dry_run ? "Resultado da simulação" : "Resultado da importação"}
+                {resumo.dry_run ? "Resultado da simulação" : "Resultado da importação"} ·{" "}
+                {ROTULO_ESTADO[estado]}
               </p>
               <p className="text-ledger-muted">
-                {formatInt(resumo.products_created)} produtos criados ·{" "}
-                {formatInt(resumo.products_updated)} atualizados ·{" "}
-                {formatInt(resumo.variants_created)} variações novas ·{" "}
-                {formatInt(resumo.variants_updated)} variações atualizadas ·{" "}
-                {formatInt(resumo.stock_entries)} entradas · {formatInt(resumo.units_in)} unidades.
+                {formatInt(indicadores.produtos_criados)} produtos criados ·{" "}
+                {formatInt(indicadores.produtos_atualizados)} atualizados ·{" "}
+                {formatInt(indicadores.variantes_criadas)} variações novas ·{" "}
+                {formatInt(indicadores.variantes_atualizadas)} variações atualizadas ·{" "}
+                {formatInt(indicadores.entradas)} entradas · {formatInt(indicadores.unidades)} unidades.
               </p>
               <p className="text-ledger-muted">
-                {formatInt(resumo.processed_rows)} linhas gravadas · {formatInt(resumo.error_rows)}{" "}
-                recusadas.
+                {formatInt(indicadores.processadas + indicadores.simuladas)} linhas concluídas ·{" "}
+                {formatInt(indicadores.recusadas)} recusadas · {formatInt(indicadores.conflitos)}{" "}
+                conflitos · {formatInt(indicadores.publicacoes)} publicações ·{" "}
+                {formatInt(indicadores.publicacoes_recusadas)} publicações impedidas.
               </p>
+              {resumo.cancel_reason && (
+                <p className="text-ledger-muted">Motivo do cancelamento: {resumo.cancel_reason}</p>
+              )}
             </div>
             <div className="flex flex-wrap justify-end gap-3">
               {problemas.length > 0 && (
                 <button
                   type="button"
                   className="admin-btn"
-                  onClick={() => baixarPlanilhaDeErros(problemas, "linhas-recusadas-lardan.xlsx")}
+                  onClick={() => void baixarPlanilhaDeErros(problemas, "linhas-recusadas-lardan.xlsx")}
                 >
                   <Download aria-hidden className="mr-2 inline size-4" />
                   Baixar linhas recusadas
+                </button>
+              )}
+              {estado === "pausado" && (
+                <button type="button" className="admin-btn-primary" onClick={() => void retomar()}>
+                  Retomar de onde parou
+                </button>
+              )}
+              {resumo.dry_run && (estado === "simulado" || estado === "concluido") && (
+                <button type="button" className="admin-btn-primary" onClick={() => void promover()}>
+                  Executar de verdade
                 </button>
               )}
               <button type="button" className="admin-btn" onClick={reiniciar}>

@@ -779,6 +779,69 @@ export type Database = {
         }
         Relationships: []
       }
+      homolog_purge_runs: {
+        Row: {
+          antes: Json
+          ator: string | null
+          depois: Json
+          finished_at: string | null
+          id: string
+          idempotency_key: string
+          modo: string
+          motivo: string | null
+          prefixo: string
+          resultado: Json
+          rollback_id: string
+          started_at: string
+        }
+        Insert: {
+          antes?: Json
+          ator?: string | null
+          depois?: Json
+          finished_at?: string | null
+          id?: string
+          idempotency_key: string
+          modo: string
+          motivo?: string | null
+          prefixo: string
+          resultado?: Json
+          rollback_id: string
+          started_at?: string
+        }
+        Update: {
+          antes?: Json
+          ator?: string | null
+          depois?: Json
+          finished_at?: string | null
+          id?: string
+          idempotency_key?: string
+          modo?: string
+          motivo?: string | null
+          prefixo?: string
+          resultado?: Json
+          rollback_id?: string
+          started_at?: string
+        }
+        Relationships: []
+      }
+      homolog_purge_scope: {
+        Row: {
+          created_at: string
+          movement_id: string
+          run_id: string
+        }
+        Insert: {
+          created_at?: string
+          movement_id: string
+          run_id: string
+        }
+        Update: {
+          created_at?: string
+          movement_id?: string
+          run_id?: string
+        }
+        Relationships: []
+      }
       ibge_municipios: {
         Row: {
           codigo_ibge: string
@@ -3042,15 +3105,19 @@ export type Database = {
         }
         Returns: boolean
       }
-      homolog_purge: { Args: { _prefix?: string }; Returns: Json }
-      homolog_purge_catalogo: {
-        Args: { _limite?: number; _prefix: string }
-        Returns: number
-      }
-      homolog_purge_movimentos: { Args: { _prefix: string }; Returns: number }
-      homolog_purge_stock: {
-        Args: { _limite?: number; _prefix: string }
-        Returns: number
+      homolog_purge_v2: {
+        Args: {
+          _ator: string
+          _confirmacao: string
+          _idempotency_key: string
+          _limites: Json
+          _modo: string
+          _motivo: string
+          _prefixo: string
+          _protegidos: string[]
+          _rollback_id: string
+        }
+        Returns: Json
       }
       import_audit: {
         Args: { _acao: string; _job: string; _payload: Json }

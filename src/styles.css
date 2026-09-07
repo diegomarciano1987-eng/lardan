@@ -521,3 +521,172 @@
     opacity: 0;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Avisos LARDAN — vidro escuro, fio champagne e serifa. Nenhum aviso do
+   sistema aparece com estilo padrão de navegador.
+   --------------------------------------------------------------------------- */
+.lardan-toaster {
+  --width: min(26rem, calc(100vw - 2rem));
+}
+
+.lardan-toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 1.05rem 2.6rem 1.05rem 1.15rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--color-champagne) 42%, transparent);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-ink) 94%, transparent),
+      color-mix(in oklab, #241f1b 92%, transparent)
+    );
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow:
+    0 24px 60px -24px rgba(0, 0, 0, 0.65),
+    0 1px 0 0 color-mix(in oklab, var(--color-champagne-soft) 30%, transparent) inset;
+  color: var(--color-warm-ivory);
+  overflow: hidden;
+}
+
+/* fio de luz champagne na borda superior */
+.lardan-toast::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--color-champagne) 85%, transparent),
+    transparent
+  );
+}
+
+.lardan-toast__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  margin-top: 0.1rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--color-champagne) 55%, transparent);
+  background: color-mix(in oklab, var(--color-champagne) 16%, transparent);
+  color: var(--color-champagne-soft);
+}
+
+.lardan-toast--error .lardan-toast__icon {
+  border-color: color-mix(in oklab, var(--color-rose) 70%, transparent);
+  background: color-mix(in oklab, var(--color-rose) 20%, transparent);
+  color: color-mix(in oklab, var(--color-rose) 80%, white);
+}
+
+.lardan-toast__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.lardan-toast__title {
+  font-family: var(--font-display, "Cormorant Garamond", serif);
+  font-size: 1.15rem;
+  line-height: 1.25;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--color-warm-ivory);
+}
+
+.lardan-toast__desc {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--color-warm-ivory) 62%, transparent);
+}
+
+.lardan-toast__close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--color-warm-ivory) 18%, transparent);
+  background: transparent;
+  color: color-mix(in oklab, var(--color-warm-ivory) 65%, transparent);
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.lardan-toast__close:hover {
+  color: var(--color-warm-ivory);
+  border-color: color-mix(in oklab, var(--color-champagne) 70%, transparent);
+  background: color-mix(in oklab, var(--color-champagne) 14%, transparent);
+}
+
+.lardan-toast__action,
+.lardan-toast__cancel {
+  align-self: center;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+.lardan-toast__action {
+  background: var(--color-champagne);
+  color: var(--color-ink);
+}
+
+.lardan-toast__action:hover {
+  background: var(--color-champagne-soft);
+}
+
+.lardan-toast__cancel {
+  border: 1px solid color-mix(in oklab, var(--color-warm-ivory) 25%, transparent);
+  color: color-mix(in oklab, var(--color-warm-ivory) 75%, transparent);
+}
+
+.lardan-toast__spin {
+  display: block;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in oklab, var(--color-champagne) 35%, transparent);
+  border-top-color: var(--color-champagne);
+  animation: lardan-toast-spin 0.9s linear infinite;
+}
+
+@keyframes lardan-toast-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Aviso da sacola: cartão maior com a foto real da peça. */
+.lardan-toast--sacola {
+  padding: 0.85rem 2.4rem 0.85rem 0.85rem;
+  align-items: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lardan-toast__spin {
+    animation: none;
+  }
+}

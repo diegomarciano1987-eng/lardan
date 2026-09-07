@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShoppingBag, Sparkles } from "lucide-react";
-import { toast } from "sonner";
+import { avisarSacola } from "@/lib/aviso";
 import { adicionarAoCarrinho } from "@/lib/carrinho";
 
 type Variante = { id: string; label: string };
@@ -70,7 +70,7 @@ export function CompraProduto({
           type="button"
           onClick={() => {
             guardar();
-            toast.success("Peça adicionada à sacola", { description: nome });
+            avisarSacola({ nome, variante: tamanho, mediaId });
           }}
           className="inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] border border-foreground/25 px-7 py-[0.875rem] text-xs tracking-[0.22em] uppercase text-foreground transition-all duration-300 hover:border-foreground/60 hover:bg-foreground/[0.04] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring sm:w-auto"
         >

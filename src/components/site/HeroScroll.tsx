@@ -24,10 +24,13 @@ export function HeroScroll() {
   //  0.12–0.26  feixe horizontal atravessa a tela
   //  0.14–0.30  o nome LARDAN emerge do clarão e assenta
   const iconOut = ease(phase(p, 0.05, 0.14));
-  const flash = reduced ? 0 : phase(p, 0.09, 0.155) * (1 - ease(phase(p, 0.155, 0.24)));
-  const beam = reduced ? 0 : phase(p, 0.11, 0.17) * (1 - easeOut(phase(p, 0.17, 0.27)));
-  const wordmarkIn = easeOut(phase(p, 0.14, 0.3));
-  const halo = reduced ? 0 : phase(p, 0.14, 0.22) * (1 - ease(phase(p, 0.24, 0.34)));
+  // Eclipse: a cena mergulha numa penumbra curta — é ela que dá contraste
+  // ao clarão e ao feixe, como num corte de cinema.
+  const eclipse = reduced ? 0 : ease(phase(p, 0.07, 0.13)) * (1 - ease(phase(p, 0.16, 0.27)));
+  const flash = reduced ? 0 : phase(p, 0.1, 0.155) * (1 - ease(phase(p, 0.155, 0.22)));
+  const beam = reduced ? 0 : phase(p, 0.11, 0.17) * (1 - easeOut(phase(p, 0.17, 0.26)));
+  const wordmarkIn = easeOut(phase(p, 0.14, 0.27));
+  const halo = reduced ? 0 : phase(p, 0.14, 0.21) * (1 - ease(phase(p, 0.23, 0.32)));
   const mostrarReflexo = !reduced && iconOut < 0.65;
 
   // O ícone "implode em luz": acende por dentro antes de ceder.

@@ -221,3 +221,23 @@ carteira — o caso "representante sem `party_id`" é estruturalmente impossíve
 
 `public_catalog_browse`, `public_catalog_list`, `public_categories`, `public_category`,
 `public_product`, `submit_contact_request`, `submit_lead`.
+
+## Vitrine — contrato definitivo (`bun run test:vitrine`)
+
+`tests/vitrine/contratos.test.ts` — 22 cenários, todos aprovados:
+
+- categoria/coleção: publicação direta na tabela recusada; pendências reais listadas; publicação recusada com conteúdo incompleto; publicação aceita com contrato completo; endereço inválido recusado; endereço antigo redireciona.
+- produto publicado: nome, descrição, endereço, categoria, preço visível, status, última imagem, texto alternativo, arquivamento da única imagem e última variante ativa — todos bloqueados enquanto no ar.
+- despublicação: exige motivo, conta só o que mudou, é idempotente; categoria com produto publicado não sai do ar em modo "bloquear".
+- leitura pública: categoria em rascunho e peça fora do ar não existem para o visitante.
+
+Bateria completa: `bunx vitest run tests` → 93/93 aprovados (segurança 45, integrações 21, cadastros 5, vitrine 22).
+
+### Endereços públicos verificados por HTTP
+| Endereço | Resposta |
+| --- | --- |
+| `/` | 200 |
+| `/semijoias/nao-existe` | 404 |
+| `/semijoias/aneis` (categoria não publicada) | 404 |
+| `/produto/nao-existe` | 404 |
+| `/aneis` | 301 → `/semijoias/aneis` |

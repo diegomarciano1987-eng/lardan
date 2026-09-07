@@ -46,3 +46,14 @@
 - CPF/CNPJ 100% local em `src/lib/docs-br.ts`: máscara, normalização, validação matemática, sequências repetidas, duplicidade e mascaramento. Nunca afirma titularidade.
 - Detalhes em docs/lardan/CENTRAL-DE-CADASTROS.md.
 - Pendências honestas: revendedoras, representantes, clientes, prestadores, transportadoras, lojas, biblioteca de imagens, tabelas de preço, maletas, regiões, motivos de movimentação, códigos de barras e todo o bloco financeiro seguem com selo "Em implantação", sem botão que finja funcionar.
+
+## P1-B — Contrato definitivo da vitrine (parcial)
+
+- Home governada pela Central: `/` lê `home_curation` (`site_settings`, público) e monta as cenas na ordem curada; bloco oculto some, bloco vazio ou leitura com falha cai no fallback editorial aprovado; cena cuja categoria não está publicada perde o botão e exibe "Em breve no catálogo".
+- Endereços públicos honestos: categoria inexistente/rascunho/arquivada e produto fora do ar respondem 404 real; `/aneis`, `/colares`, `/pulseiras`, `/brincos` respondem 301 para `/semijoias/<slug>`; slug antigo de categoria redireciona 301 pelo histórico.
+- Filtros de categoria não poluem mais o endereço (fim do 307 de normalização em `/semijoias/<slug>`).
+- Correção de banco: `taxonomy_publish_blockers` montava o array de pendências de forma inválida e derrubava `publish_taxonomy` com erro de tipo; agora lista as pendências e a publicação recusa com motivo.
+- CEP/CNPJ com provedor real conferidos servidor-a-servidor: ViaCEP `01310-100` (miss 577 ms, depois cache) e BrasilAPI CNPJ `00.000.000/0001-91` (miss 205 ms, depois cache). `integration_lookups` registrou miss e hit separados, com referência mascarada.
+
+### Pendente do lote
+- Homologação de Fornecedores e Entidades no navegador (Master, Marketing, Estoque, Financeiro, Suporte): depende de sessão ativa na pré-visualização.

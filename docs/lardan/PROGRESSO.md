@@ -80,3 +80,11 @@
 5. **Conversão de assistência fora da garantia para o fluxo Comercial existente ainda não foi entregue**.
 6. **Integração com Estoque, Requisições e Compras precisa ser comprovada sem criar pedido de compra pelo Pós-venda**.
 7. **Tokens públicos, assinatura, satisfação, fotos privadas, comissão, agenda e isolamento multiempresa ainda precisam de prova comportamental**.
+
+## Vitrine visível (correção urgente)
+
+- Central da Vitrine reorganizada: **Visão geral · Produtos · Categorias · Página inicial** (`src/routes/_authenticated/admin/site.tsx`, `src/components/admin/ShowcaseOverview.tsx`).
+- Categoria: cada linha mostra endereço público, quantidade de produtos, pendências e os botões **Editar / Publicar no site / Ver no site / Retirar do ar** (`src/components/admin/ShowcaseTaxonomy.tsx`).
+- Produto: publicação individual por linha e por card (**Publicar / Corrigir pendências / Ver no site / Retirar do ar**), sem depender de ação em massa.
+- Categorias Brincos e Colares publicadas pelo botão do painel (`publish_taxonomy`); 10 peças reais (5 brincos, 5 colares) com duas imagens cada, preço público, estoque de 12 unidades no Depósito Principal (entrada canônica idempotente `vitrine:<slug>`), publicadas pelo botão por peça (`publish_products`).
+- Conferido em janela anônima: `/semijoias/brincos` e `/semijoias/colares` com 5 peças cada, ficha do produto com imagens, e os quatro CTAs da home funcionando em desktop e celular.

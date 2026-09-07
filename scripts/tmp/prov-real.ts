@@ -1,4 +1,4 @@
-import { lookupAddressByPostalCode, lookupCompanyByTaxId } from "../src/lib/br/providers.server";
+import { lookupAddressByPostalCode, lookupCompanyByTaxId } from "../../src/lib/br/providers.server";
 const t = (x: unknown) => JSON.stringify(x, null, 1);
 const m1 = Date.now();
 const cep1 = await lookupAddressByPostalCode("01310-100", null);

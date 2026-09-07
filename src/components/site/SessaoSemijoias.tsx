@@ -90,17 +90,19 @@ export function SessaoSemijoias() {
                   className="-mx-px h-full flex-1"
                   style={{
                     background: leve
-                      ? "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.98) 0%, oklch(0.985 0.006 80 / 0.92) 48%, oklch(0.985 0.006 80 / 0.98) 100%)"
+                      ? "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.74) 0%, oklch(0.99 0.008 80 / 0.5) 26%, oklch(0.985 0.006 80 / 0.6) 62%, oklch(0.97 0.008 30 / 0.72) 100%)"
                       : "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.62) 0%, oklch(0.985 0.006 80 / 0.5) 48%, oklch(0.985 0.006 80 / 0.62) 100%)",
-                    // Vidro fosco de verdade no desktop: a imagem transparece
-                    // desfocada por trás de cada lâmina enquanto ela se retrai.
-                    backdropFilter: leve ? undefined : "blur(26px) saturate(1.15)",
-                    WebkitBackdropFilter: leve ? undefined : "blur(26px) saturate(1.15)",
+                    // Vidro fosco de verdade em todas as telas: a imagem
+                    // transparece desfocada por trás de cada lâmina enquanto
+                    // ela se retrai. No celular o desfoque é mais curto para
+                    // manter a rolagem fluida.
+                    backdropFilter: leve ? "blur(14px) saturate(1.1)" : "blur(26px) saturate(1.15)",
+                    WebkitBackdropFilter: leve ? "blur(14px) saturate(1.1)" : "blur(26px) saturate(1.15)",
                     transform: `translate3d(${dir * t * 130}%, 0, 0) translateZ(0)`,
                     opacity: lead < 0.02 ? 0 : 1,
                     boxShadow:
-                      !leve && fio > 0.02
-                        ? `${dir * -10}px 0 34px -10px oklch(0.22 0.015 30 / ${(0.42 * fio).toFixed(2)})`
+                      fio > 0.02
+                        ? `${dir * -10}px 0 ${leve ? 22 : 34}px -10px oklch(0.22 0.015 30 / ${((leve ? 0.3 : 0.42) * fio).toFixed(2)})`
                         : undefined,
                     willChange: emMovimento ? "transform" : "auto",
                   }}

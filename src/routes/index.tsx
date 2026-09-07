@@ -138,7 +138,7 @@ function HomePage() {
           enterFrom={i % 2 === 0 ? "right" : "left"}
           align={cena.align}
           {...(cena.mobileAlign ? { mobileAlign: cena.mobileAlign } : {})}
-          disponivel={publicadas.has(cena.categoria)}
+          disponivel
         />
       ))}
 

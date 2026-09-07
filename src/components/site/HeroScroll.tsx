@@ -16,28 +16,29 @@ function clamp01(v: number) {
 export function HeroScroll() {
   const { ref: trackRef, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const leve = useDeviceTier() === "leve";
-  const p = reduced ? 0.5 : progress;
+  const p = reduced ? 0.55 : progress;
 
-  // Coreografia da transição:
-  //  0.05–0.13  o ícone se entrega à luz (cresce, desfoca, acende)
-  //  0.10–0.18  clarão central — o "corte" de cinema
-  //  0.12–0.26  feixe horizontal atravessa a tela
-  //  0.14–0.30  o nome LARDAN emerge do clarão e assenta
-  const iconOut = ease(phase(p, 0.05, 0.14));
-  // Eclipse: a cena mergulha numa penumbra curta — é ela que dá contraste
-  // ao clarão e ao feixe, como num corte de cinema.
-  const eclipse = reduced ? 0 : ease(phase(p, 0.07, 0.13)) * (1 - ease(phase(p, 0.16, 0.27)));
-  const flash = reduced ? 0 : phase(p, 0.1, 0.155) * (1 - ease(phase(p, 0.155, 0.22)));
-  const beam = reduced ? 0 : phase(p, 0.11, 0.17) * (1 - easeOut(phase(p, 0.17, 0.26)));
-  const wordmarkIn = easeOut(phase(p, 0.14, 0.27));
-  const halo = reduced ? 0 : phase(p, 0.14, 0.21) * (1 - ease(phase(p, 0.23, 0.32)));
+  // Coreografia longa da transição — cerca de três rolagens de tela entre o
+  // primeiro movimento do diamante e o nome LARDAN completamente assentado:
+  //  0.05–0.24  o ícone se entrega à luz (cresce, desfoca, acende)
+  //  0.10–0.45  eclipse: a cena mergulha em penumbra e volta devagar
+  //  0.16–0.36  clarão central — o "corte" de cinema
+  //  0.20–0.40  feixe horizontal atravessa a tela
+  //  0.26–0.50  o nome LARDAN emerge do clarão e assenta
+  const iconOut = ease(phase(p, 0.05, 0.24));
+  // Eclipse: a penumbra é o que dá contraste ao clarão e ao feixe.
+  const eclipse = reduced ? 0 : ease(phase(p, 0.1, 0.17)) * (1 - ease(phase(p, 0.32, 0.46)));
+  const flash = reduced ? 0 : phase(p, 0.16, 0.27) * (1 - ease(phase(p, 0.27, 0.37)));
+  const beam = reduced ? 0 : phase(p, 0.2, 0.29) * (1 - easeOut(phase(p, 0.29, 0.41)));
+  const wordmarkIn = easeOut(phase(p, 0.26, 0.5));
+  const halo = reduced ? 0 : phase(p, 0.26, 0.36) * (1 - ease(phase(p, 0.42, 0.56)));
   const mostrarReflexo = !reduced && iconOut < 0.65;
 
   // O ícone "implode em luz": acende por dentro antes de ceder.
-  const brilhoIcone = reduced ? 0 : phase(p, 0.06, 0.13);
+  const brilhoIcone = reduced ? 0 : phase(p, 0.08, 0.22);
 
   return (
-    <div ref={trackRef} className="relative h-[260vh]" aria-label={BRAND.name}>
+    <div ref={trackRef} className="relative h-[760vh]" aria-label={BRAND.name}>
       <div className="sticky top-0 h-screen overflow-hidden bg-background">
         {/* Único cenário do hero: não recebe escala, blur, filtro ou overlay. */}
         <img

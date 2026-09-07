@@ -28,13 +28,13 @@ export function SessaoSemijoias() {
   // majestosa e sem buracos entre o hero e esta sessão.
   const reveal = phase(p, 0.02, 0.58);
   // A foto começa mais próxima e recua suavemente à medida que o véu se abre.
-  const imgScale = 1.30 - 0.30 * ease(phase(p, 0, 0.80));
+  const imgScale = 1.3 - 0.3 * ease(phase(p, 0, 0.8));
   // Desfoque da foto que se dissolve conforme as lâminas se retraem (só desktop).
   const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0, 0.55))) * 8);
 
-  const textIn = easeOut(phase(p, 0.50, 0.78));
+  const textIn = easeOut(phase(p, 0.5, 0.78));
   const ruleIn = easeOut(phase(p, 0.58, 0.84));
-  const ctaIn = easeOut(phase(p, 0.66, 0.90));
+  const ctaIn = easeOut(phase(p, 0.66, 0.9));
 
   const emMovimento = reveal > 0.001 && reveal < 0.999;
   const dir = 1; // da direita para a esquerda
@@ -122,9 +122,7 @@ export function SessaoSemijoias() {
               background:
                 "linear-gradient(90deg, transparent 0%, oklch(0.99 0.01 80 / 0.42) 44%, oklch(1 0 0 / 0.78) 56%, transparent 100%)",
               filter: leve ? "blur(6px)" : "blur(11px)",
-              boxShadow: leve
-                ? undefined
-                : "22px 0 54px -18px oklch(0.18 0.015 30 / 0.52)",
+              boxShadow: leve ? undefined : "22px 0 54px -18px oklch(0.18 0.015 30 / 0.52)",
             }}
           />
         )}

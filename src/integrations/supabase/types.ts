@@ -2863,8 +2863,15 @@ export type Database = {
         Returns: boolean
       }
       homolog_purge: { Args: { _prefix?: string }; Returns: Json }
+      homolog_purge_catalogo: {
+        Args: { _limite?: number; _prefix: string }
+        Returns: number
+      }
       homolog_purge_movimentos: { Args: { _prefix: string }; Returns: number }
-      homolog_purge_stock: { Args: { _prefix: string }; Returns: number }
+      homolog_purge_stock: {
+        Args: { _limite?: number; _prefix: string }
+        Returns: number
+      }
       import_audit: {
         Args: { _acao: string; _job: string; _payload: Json }
         Returns: undefined

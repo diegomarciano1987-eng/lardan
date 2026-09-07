@@ -40,7 +40,7 @@ export function avisarSacola({
             <p className="lardan-toast__title mt-1 truncate">{nome}</p>
             {variante ? (
               <p className="mt-0.5 font-sans text-[0.68rem] tracking-[0.18em] uppercase text-[color-mix(in_oklab,var(--color-warm-ivory)_55%,transparent)]">
-                {variante}
+                Tamanho {variante}
               </p>
             ) : null}
           </div>

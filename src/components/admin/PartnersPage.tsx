@@ -3,7 +3,9 @@ import { useRouterState } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Eye, Plus } from "lucide-react";
-import { PageHeader, StatusBadge } from "@/components/admin/ui";
+import { PageHeader, StatusBadge, EmptyState } from "@/components/admin/ui";
+import { can, useCapabilities } from "@/lib/capabilities";
+
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { RecordSheet, type FieldSpec, type RecordValues } from "@/components/admin/RecordSheet";
 import {
@@ -60,13 +62,18 @@ export function PartnersPage({
     }
   }, [buscaUrl]);
 
+  const capacidades = useCapabilities();
+  const podeVer = can(capacidades, "partners.view");
+
   const query = useQuery({
     queryKey: ["parceiros", kind, busca, pagina],
     queryFn: () => listPartners({ kind, search: busca, page: pagina, pageSize: PAGE_SIZE }),
+    enabled: podeVer,
   });
 
   const podeRevelar = query.data?.pode_revelar ?? false;
   const podeGerir = query.data?.pode_gerir ?? false;
+
 
   const revelar = async (row: PartnerRow) => {
     try {
@@ -261,8 +268,21 @@ export function PartnersPage({
     };
   }, [docEdicao, editando]);
 
+  if (!podeVer) {
+    return (
+      <div className="space-y-6">
+        <PageHeader eyebrow={eyebrow} title={title} description={description} />
+        <EmptyState
+          title="Sem permissão para ver estes cadastros"
+          description="Seu perfil não tem acesso a fornecedores e entidades. Fale com a administração se precisar deste acesso."
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+
       <PageHeader
         eyebrow={eyebrow}
         title={title}

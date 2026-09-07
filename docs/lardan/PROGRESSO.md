@@ -55,5 +55,12 @@
 - Correção de banco: `taxonomy_publish_blockers` montava o array de pendências de forma inválida e derrubava `publish_taxonomy` com erro de tipo; agora lista as pendências e a publicação recusa com motivo.
 - CEP/CNPJ com provedor real conferidos servidor-a-servidor: ViaCEP `01310-100` (miss 577 ms, depois cache) e BrasilAPI CNPJ `00.000.000/0001-91` (miss 205 ms, depois cache). `integration_lookups` registrou miss e hit separados, com referência mascarada.
 
-### Pendente do lote
-- Homologação de Fornecedores e Entidades no navegador (Master, Marketing, Estoque, Financeiro, Suporte): depende de sessão ativa na pré-visualização.
+### Fornecedores e Entidades homologados no navegador (2026-09-06)
+- Cinco perfis exercitados com sessão real (Master, Marketing, Estoque, Financeiro, Suporte) nas telas `/admin/cadastros/fornecedores` e `/admin/cadastros/entidades`.
+- Cadastro por CNPJ com consulta pública, gravação pelo servidor (`partner_save` passou a receber `_id` explícito), edição e reabertura conferidas; nenhuma duplicidade gerada.
+- Documento: Master e Financeiro revelam (cada revelação gravada como `doc.reveal` na auditoria); Estoque vê apenas mascarado, sem botão de revelação.
+- Correção: Marketing e Suporte (sem `partners.view`) recebiam "Sem registros", estado desonesto. Agora a tela declara falta de permissão e não consulta o servidor.
+- Correção: a ficha do produto liberava "Custo atual" por papel (incluindo Estoque). Passou a obedecer à matriz única, capacidade `catalog.cost.view`; Estoque não vê mais custo em nenhum ponto da ficha.
+- Correção de banco: `ensure_profile_party` criava uma ficha de pessoa órfã a cada carregamento autenticado; corrigida e as fichas órfãs removidas (nenhum perfil, candidatura ou consultora afetada).
+- Dados sintéticos removidos ao fim (fornecedor, entidade, fichas e contas de teste); auditoria preservada.
+- Verificação: 93 testes verdes, tipagem limpa, build de produção concluído. `bun run lint` segue vermelho por formatação Prettier pré-existente em todo o repositório (3.743 apontamentos, nenhum introduzido por este lote).

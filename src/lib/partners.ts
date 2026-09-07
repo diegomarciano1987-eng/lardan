@@ -77,8 +77,8 @@ export async function savePartner(
   draft: PartnerDraft,
   id?: string | null,
 ): Promise<string> {
-  const args: Record<string, unknown> = { _kind: kind, _values: draft };
-  if (id) args["_id"] = id;
+  const args: Record<string, unknown> = { _kind: kind, _values: draft, _id: id ?? null };
+
   const { data, error } = await supabase.rpc("partner_save", args as never);
   if (error) throw error;
   return data as string;

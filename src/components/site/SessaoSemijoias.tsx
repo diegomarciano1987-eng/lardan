@@ -24,9 +24,12 @@ export function SessaoSemijoias() {
   const slats = leve ? 10 : 28;
   const p = reduced ? 1 : progress;
 
-  // A revelação começa depois de uma breve pausa e desliza até ~55% do
-  // trilho: lenta, majestosa e sem roubar o momento da logo.
-  const reveal = phase(p, 0.08, 0.55);
+  // Entrada da sessão: enquanto o trilho sobe por trás do hero, a sessão
+  // inteira permanece oculta; assim que ela trava no topo, uma guilhotina
+  // a revela da direita para a esquerda — sem nenhum corte horizontal.
+  const wipe = easeOut(phase(p, 0.01, 0.2));
+  // A revelação em lâminas emenda na guilhotina: lenta e majestosa.
+  const reveal = phase(p, 0.12, 0.6);
   // A foto começa mais próxima e recua suavemente à medida que o véu se abre.
   const imgScale = 1.3 - 0.3 * ease(phase(p, 0.04, 0.72));
   // Desfoque da foto que se dissolve conforme as lâminas se retraem (só desktop).

@@ -134,3 +134,15 @@ Rodada somente de inspeção. Nada foi excluído, arquivado, despublicado ou alt
 Relatório completo em `docs/lardan/PRE-LIMPEZA.md`; exportações de rollback em `/mnt/documents/lardan-prelimpeza/`.
 Conclusão principal: as rotinas `homolog_purge*` são inadequadas porque ignoram `stock_reservations`,
 `stock_balances.reserved` e `stock_movements.reservation_id`. Especificação de `homolog_purge_v2` registrada.
+
+
+## Limpeza controlada definitiva — 2026-09-07
+
+Executada com sucesso. Detalhes completos em `docs/lardan/LIMPEZA-CONTROLADA.md`.
+Resumo: 10.101 produtos sintéticos, 8.485 movimentos, 8.471 saldos, 63.300 linhas de
+importação, 3 categorias, 2 coleções, 2 fornecedores, 1 depósito e 3 mídias órfãs removidos;
+165 pessoas removidas e 27 anonimizadas; 28 contas de teste encerradas. Preservados os 20
+produtos publicados, 38 variantes, 40 fotos, 4 categorias publicadas, 240 unidades no
+Depósito Principal e a auditoria integral. `brinco01` arquivado como registro histórico.
+Contraprovas: site público conferido em janela anônima (computador e celular) e
+`bun run test:seg` com 67 de 67 cenários aprovados.

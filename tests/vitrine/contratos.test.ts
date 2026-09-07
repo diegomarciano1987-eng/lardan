@@ -79,16 +79,27 @@ beforeAll(async () => {
   });
   produtoId = prod.id;
 
-  const vinculo = await criar("product_media", { product_id: produtoId, media_id: mediaId, position: 1 });
+  const vinculo = await criar("product_media", {
+    product_id: produtoId,
+    media_id: mediaId,
+    position: 1,
+  });
   vinculoId = vinculo.id;
 
-  const variantes = await comoUsuario(tok(), `/product_variants?product_id=eq.${produtoId}&select=id`);
+  const variantes = await comoUsuario(
+    tok(),
+    `/product_variants?product_id=eq.${produtoId}&select=id`,
+  );
   varianteId = (variantes.body as { id: string }[])[0]?.id ?? "";
 });
 
 afterAll(async () => {
   if (produtoId) {
-    await rpc(tok(), "unpublish_products", { _ids: [produtoId], _note: "fim da homologação", _para: "rascunho" });
+    await rpc(tok(), "unpublish_products", {
+      _ids: [produtoId],
+      _note: "fim da homologação",
+      _para: "rascunho",
+    });
     await apagar("product_media", `product_id=eq.${produtoId}`);
     await apagar("product_variants", `product_id=eq.${produtoId}`);
     await apagar("products", `id=eq.${produtoId}`);
@@ -119,12 +130,19 @@ describe("categoria e coleção: porta canônica", () => {
   });
 
   it("lista os impedimentos reais antes de publicar", async () => {
-    const r = await rpc(tok(), "taxonomy_publish_blockers", { _tipo: "categories", _id: categoriaId });
+    const r = await rpc(tok(), "taxonomy_publish_blockers", {
+      _tipo: "categories",
+      _id: categoriaId,
+    });
     expect(r.body).toEqual(expect.arrayContaining(["descricao", "titulo_publico", "seo"]));
   });
 
   it("recusa publicar enquanto o conteúdo público estiver incompleto", async () => {
-    const r = await rpc(tok(), "publish_taxonomy", { _tipo: "categories", _ids: [categoriaId], _note: null });
+    const r = await rpc(tok(), "publish_taxonomy", {
+      _tipo: "categories",
+      _ids: [categoriaId],
+      _note: null,
+    });
     expect((r.body as { afetados: number }).afetados).toBe(0);
     expect((r.body as { rejeitados: number }).rejeitados).toBe(1);
   });
@@ -139,7 +157,11 @@ describe("categoria e coleção: porta canônica", () => {
         seo_description: "Categoria sintética usada apenas em homologação.",
       },
     });
-    const r = await rpc(tok(), "publish_taxonomy", { _tipo: "categories", _ids: [categoriaId], _note: "homologação" });
+    const r = await rpc(tok(), "publish_taxonomy", {
+      _tipo: "categories",
+      _ids: [categoriaId],
+      _note: "homologação",
+    });
     expect((r.body as { afetados: number }).afetados).toBe(1);
   });
 
@@ -172,15 +194,20 @@ describe("produto publicado: invariantes permanentes", () => {
     expect((r.body as { afetados: number }).afetados).toBe(1);
   });
 
-  const recusa = async (rotulo: string, executar: () => Promise<{ status: number; body: unknown }>) => {
+  const recusa = async (
+    rotulo: string,
+    executar: () => Promise<{ status: number; body: unknown }>,
+  ) => {
     const r = await executar();
     expect(r.status, `${rotulo} deveria ser recusado`).toBeGreaterThanOrEqual(400);
   };
 
-  it("recusa esvaziar o nome", () => recusa("nome", () => alterar("products", produtoId, { name: "  " })));
+  it("recusa esvaziar o nome", () =>
+    recusa("nome", () => alterar("products", produtoId, { name: "  " })));
   it("recusa esvaziar a descrição", () =>
     recusa("descrição", () => alterar("products", produtoId, { description: "" })));
-  it("recusa esvaziar o endereço", () => recusa("slug", () => alterar("products", produtoId, { slug: "" })));
+  it("recusa esvaziar o endereço", () =>
+    recusa("slug", () => alterar("products", produtoId, { slug: "" })));
   it("recusa remover a categoria", () =>
     recusa("categoria", () => alterar("products", produtoId, { category_id: null })));
   it("recusa preço vazio com preço visível", () =>
@@ -208,7 +235,11 @@ describe("produto publicado: invariantes permanentes", () => {
   });
 
   it("exige motivo para retirar a peça do ar", async () => {
-    const r = await rpc(tok(), "unpublish_products", { _ids: [produtoId], _note: "", _para: "rascunho" });
+    const r = await rpc(tok(), "unpublish_products", {
+      _ids: [produtoId],
+      _note: "",
+      _para: "rascunho",
+    });
     expect(r.status).toBeGreaterThanOrEqual(400);
   });
 

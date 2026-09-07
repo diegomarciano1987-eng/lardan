@@ -29,7 +29,13 @@ import {
 } from "@/lib/storefront";
 
 const POR_PAGINA = 12;
-const ORDENS_VALIDAS: OrdemVitrine[] = ["curadoria", "lancamentos", "nome", "preco_asc", "preco_desc"];
+const ORDENS_VALIDAS: OrdemVitrine[] = [
+  "curadoria",
+  "lancamentos",
+  "nome",
+  "preco_asc",
+  "preco_desc",
+];
 
 /** Só os filtros realmente escolhidos entram no endereço. */
 type BuscaCategoria = Partial<FiltrosCategoria>;
@@ -158,10 +164,7 @@ function AvisoEditorial({ titulo, texto: t }: { titulo: string; texto: string })
 function CategoriaPage() {
   const { categoria: slug } = Route.useParams();
   const buscaUrl = Route.useSearch();
-  const busca: FiltrosCategoria = React.useMemo(
-    () => ({ ...FILTROS_VAZIOS, ...buscaUrl }),
-    [buscaUrl],
-  );
+  const busca: FiltrosCategoria = useMemo(() => ({ ...FILTROS_VAZIOS, ...buscaUrl }), [buscaUrl]);
   const navigate = useNavigate({ from: "/semijoias/$categoria" });
   const p = personalidade(slug);
 

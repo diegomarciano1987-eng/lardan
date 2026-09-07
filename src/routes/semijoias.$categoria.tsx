@@ -1,5 +1,12 @@
 import { useCallback, useMemo } from "react";
-import { createFileRoute, Link, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  redirect,
+  useNavigate,
+  type SearchSchemaInput,
+} from "@tanstack/react-router";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { CategoryHero } from "@/components/site/categoria/CategoryHero";
@@ -15,6 +22,7 @@ import {
   browsePublicProducts,
   getPublicCategory,
   mediaUrl,
+  taxonomyRedirect,
   type CategoriaDetalhe,
   type OrdemVitrine,
   type PecaVitrine,
@@ -53,11 +61,20 @@ export const Route = createFileRoute("/semijoias/$categoria")({
     };
   },
   loader: async ({ params }) => {
-    try {
-      return { categoria: await getPublicCategory(params.categoria) };
-    } catch {
-      return { categoria: null };
+    // Erro de banco continua sendo erro (500), nunca vira "não existe".
+    const categoria = await getPublicCategory(params.categoria);
+    if (categoria) return { categoria };
+
+    // Endereço antigo com histórico → redirecionamento permanente.
+    const destino = await taxonomyRedirect("categories", params.categoria);
+    if (destino) {
+      throw redirect({
+        to: "/semijoias/$categoria",
+        params: { categoria: destino },
+        statusCode: 301,
+      });
     }
+    throw notFound();
   },
   head: ({ params, loaderData }) => {
     const c = loaderData?.categoria ?? null;

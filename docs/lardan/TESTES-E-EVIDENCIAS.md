@@ -275,3 +275,35 @@ exibida vazia com o aviso "Reservas em implantação", e o saldo disponível só
 passará a ser calculado (físico menos reservado) quando esse motor existir.
 Inventário completo, recebimentos formais, maletas e rastreamento físico não
 foram entregues.
+
+## Motor de reservas — 07/09/2026
+
+Bateria `tests/security/reservas.test.ts`, executada contra o banco real com
+contas sintéticas (@lardan.test) e uma peça existente. Resultado: 12 de 12
+aprovadas. Massa pequena; as unidades usadas foram devolvidas por ajuste
+identificado como HOMOLOG ao final.
+
+| # | Perfil | Cenário | Esperado | Obtido |
+| --- | --- | --- | --- | --- |
+| 1 | master | criar reserva | físico igual, reservado +2, disponível −2 | físico 20, reservado 3 |
+| 2 | master | reserva acima do disponível | recusada | HTTP 400 |
+| 3 | master | duas reservas simultâneas na última unidade | apenas uma aprovada | aprovadas 1, disponível 0 |
+| 4 | master | liberar e repetir a liberação | disponível volta, repetição sem efeito | ok |
+| 5 | master | cancelar sem motivo / com motivo | recusado / aceito | ok |
+| 6 | master | confirmar e repetir | uma única saída física | físico 20→18, repetição devolve o mesmo movimento |
+| 7 | master | expirar vencida e repetir | libera o disponível, repetição sem efeito | ok |
+| 8 | master | saída comum e contagem sobre reservado | ambas recusadas | HTTP 400 / HTTP 400 |
+| 9 | master | alterar/apagar reserva pela API | sem efeito | quantidade e situação intactas |
+| 10 | estoque | reservar e confirmar | permitido, sem custo em nenhuma resposta | ok |
+| 11 | financeiro | listar / criar reserva | lê / não cria | 200 / 403 |
+| 12 | consultora e visitante | ler reservas | negado | 403 / 401 |
+
+Conferência no navegador (master, 1280×1800, com sessão real): `/admin/estoque`
+com as três áreas, aba Reservas listando protocolo, peça, local, quantidade,
+origem, autor, criação, validade, situação e as ações Confirmar saída, Liberar,
+Cancelar e Ver histórico; formulário de nova reserva abrindo com peça, local,
+quantidade, validade, origem, referência e pessoa. Zero erros de console.
+
+Limitação registrada: a varredura periódica de vencimento ainda não tem
+agendador ligado — a expiração ocorre dentro de cada operação de estoque e sob
+demanda, conforme `ESTOQUE-E-RESERVAS.md`.

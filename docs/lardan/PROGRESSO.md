@@ -106,3 +106,25 @@
   recebimento e resumo de confirmação antes de gravar.
 - Pendências: motor de reservas, inventário completo, recebimentos, maletas e
   rastreamento físico continuam não entregues.
+
+## Motor de reservas de estoque (07/09/2026)
+
+- Migração aditiva: tabela `stock_reservations` (protocolo, peça, local,
+  quantidade, situação, origem, referência, pessoa, validade, autor, motivo de
+  cancelamento, movimento gerado, chave de repetição), enum
+  `stock_reservation_status`, coluna `stock_movements.reservation_id`,
+  restrição `stock_balances_reserved_nonneg` e seis capacidades de reserva.
+- Disponível passou a ser calculado no servidor: físico menos reservado ativo.
+  A coluna Disponível aparece nos saldos e na ficha lateral; o aviso "Reservas
+  em implantação" foi removido de toda a tela.
+- Operações oficiais: criar, confirmar (vira saída física única), liberar,
+  cancelar com motivo e expirar. Todas idempotentes e auditadas; escrita direta
+  em saldos e reservas continua impossível pela API.
+- Saída, transferência, ajuste e contagem recusam consumir unidade reservada.
+- Nova área Reservas em `/admin/estoque` com busca no servidor, filtros,
+  paginação e ações por linha; formulário de nova reserva mostra físico,
+  reservado e disponível antes de gravar.
+- Bateria `tests/security/reservas.test.ts`: 12 provas contra o banco real, todas
+  aprovadas. `tests/security/estoque.test.ts` continua 10/10.
+- Pendências: agendador periódico da expiração, escopo próprio do Representante,
+  maleta, venda, inventário por sessão e recebimentos.

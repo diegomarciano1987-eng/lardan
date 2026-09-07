@@ -803,107 +803,208 @@ export type Database = {
         }
         Relationships: []
       }
+      import_files: {
+        Row: {
+          byte_size: number
+          column_count: number
+          content_type: string | null
+          created_at: string
+          created_by: string | null
+          file_name: string
+          header_hash: string | null
+          headers: Json
+          id: string
+          parser_version: string
+          row_count: number
+          sha256: string
+        }
+        Insert: {
+          byte_size?: number
+          column_count?: number
+          content_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_name: string
+          header_hash?: string | null
+          headers?: Json
+          id?: string
+          parser_version?: string
+          row_count?: number
+          sha256: string
+        }
+        Update: {
+          byte_size?: number
+          column_count?: number
+          content_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_name?: string
+          header_hash?: string | null
+          headers?: Json
+          id?: string
+          parser_version?: string
+          row_count?: number
+          sha256?: string
+        }
+        Relationships: []
+      }
       import_jobs: {
         Row: {
+          base_fingerprint: string | null
+          cancel_reason: string | null
+          checkpoint_line: number
+          correction_of: string | null
           created_at: string
           created_by: string | null
           defaults: Json
           dry_run: boolean
           error_rows: number
+          file_id: string | null
           file_name: string
           file_size: number | null
           finished_at: string | null
           id: string
           job_key: string
           last_error: string | null
+          lease_until: string | null
           location_id: string | null
           mapping: Json
           mode: string
           ok_rows: number
           operation_date: string | null
+          paused_at: string | null
           processed_rows: number
           products_created: number
           products_updated: number
           reason_code: string | null
           reference: string | null
           responsible_user_id: string | null
+          rules_version: string
+          sealed_at: string | null
+          simulated_at: string | null
+          simulation_of: string | null
           started_at: string | null
           status: string
           stock_entries: number
+          template_id: string | null
+          template_version: number | null
           total_rows: number
           units_in: number
           updated_at: string
           variants_created: number
           variants_updated: number
           warn_rows: number
+          worker_token: string | null
         }
         Insert: {
+          base_fingerprint?: string | null
+          cancel_reason?: string | null
+          checkpoint_line?: number
+          correction_of?: string | null
           created_at?: string
           created_by?: string | null
           defaults?: Json
           dry_run?: boolean
           error_rows?: number
+          file_id?: string | null
           file_name: string
           file_size?: number | null
           finished_at?: string | null
           id?: string
           job_key: string
           last_error?: string | null
+          lease_until?: string | null
           location_id?: string | null
           mapping?: Json
           mode?: string
           ok_rows?: number
           operation_date?: string | null
+          paused_at?: string | null
           processed_rows?: number
           products_created?: number
           products_updated?: number
           reason_code?: string | null
           reference?: string | null
           responsible_user_id?: string | null
+          rules_version?: string
+          sealed_at?: string | null
+          simulated_at?: string | null
+          simulation_of?: string | null
           started_at?: string | null
           status?: string
           stock_entries?: number
+          template_id?: string | null
+          template_version?: number | null
           total_rows?: number
           units_in?: number
           updated_at?: string
           variants_created?: number
           variants_updated?: number
           warn_rows?: number
+          worker_token?: string | null
         }
         Update: {
+          base_fingerprint?: string | null
+          cancel_reason?: string | null
+          checkpoint_line?: number
+          correction_of?: string | null
           created_at?: string
           created_by?: string | null
           defaults?: Json
           dry_run?: boolean
           error_rows?: number
+          file_id?: string | null
           file_name?: string
           file_size?: number | null
           finished_at?: string | null
           id?: string
           job_key?: string
           last_error?: string | null
+          lease_until?: string | null
           location_id?: string | null
           mapping?: Json
           mode?: string
           ok_rows?: number
           operation_date?: string | null
+          paused_at?: string | null
           processed_rows?: number
           products_created?: number
           products_updated?: number
           reason_code?: string | null
           reference?: string | null
           responsible_user_id?: string | null
+          rules_version?: string
+          sealed_at?: string | null
+          simulated_at?: string | null
+          simulation_of?: string | null
           started_at?: string | null
           status?: string
           stock_entries?: number
+          template_id?: string | null
+          template_version?: number | null
           total_rows?: number
           units_in?: number
           updated_at?: string
           variants_created?: number
           variants_updated?: number
           warn_rows?: number
+          worker_token?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "import_jobs_correction_of_fkey"
+            columns: ["correction_of"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_jobs_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "import_files"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "import_jobs_location_id_fkey"
             columns: ["location_id"]
@@ -911,12 +1012,30 @@ export type Database = {
             referencedRelation: "locations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "import_jobs_simulation_of_fkey"
+            columns: ["simulation_of"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_jobs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "import_templates"
+            referencedColumns: ["id"]
+          },
         ]
       }
       import_rows: {
         Row: {
           attempts: number
+          claim_until: string | null
+          claimed_by: string | null
           created_at: string
+          effects: Json
+          error_code: string | null
           id: string
           job_id: string
           line_no: number
@@ -925,13 +1044,18 @@ export type Database = {
           parsed: Json | null
           processed_at: string | null
           product_id: string | null
+          publish_status: string | null
           raw: Json
           status: string
           variant_id: string | null
         }
         Insert: {
           attempts?: number
+          claim_until?: string | null
+          claimed_by?: string | null
           created_at?: string
+          effects?: Json
+          error_code?: string | null
           id?: string
           job_id: string
           line_no: number
@@ -940,13 +1064,18 @@ export type Database = {
           parsed?: Json | null
           processed_at?: string | null
           product_id?: string | null
+          publish_status?: string | null
           raw: Json
           status?: string
           variant_id?: string | null
         }
         Update: {
           attempts?: number
+          claim_until?: string | null
+          claimed_by?: string | null
           created_at?: string
+          effects?: Json
+          error_code?: string | null
           id?: string
           job_id?: string
           line_no?: number
@@ -955,6 +1084,7 @@ export type Database = {
           parsed?: Json | null
           processed_at?: string | null
           product_id?: string | null
+          publish_status?: string | null
           raw?: Json
           status?: string
           variant_id?: string | null
@@ -2731,7 +2861,28 @@ export type Database = {
       }
       homolog_purge: { Args: { _prefix?: string }; Returns: Json }
       homolog_purge_movimentos: { Args: { _prefix: string }; Returns: number }
-      import_job_cancel: { Args: { _job: string }; Returns: undefined }
+      import_audit: {
+        Args: { _acao: string; _job: string; _payload: Json }
+        Returns: undefined
+      }
+      import_file_register: {
+        Args: {
+          _byte_size: number
+          _column_count: number
+          _content_type: string
+          _file_name: string
+          _headers: Json
+          _parser: string
+          _row_count: number
+          _sha: string
+        }
+        Returns: Json
+      }
+      import_job_cancel: {
+        Args: { _job: string; _motivo?: string }
+        Returns: Json
+      }
+      import_job_counters: { Args: { _job: string }; Returns: Json }
       import_job_open: {
         Args: {
           _defaults: Json
@@ -2749,10 +2900,32 @@ export type Database = {
         }
         Returns: string
       }
-      import_job_process: {
-        Args: { _job: string; _limit?: number }
+      import_job_open2: {
+        Args: {
+          _correction_of?: string
+          _defaults: Json
+          _dry_run: boolean
+          _file: string
+          _location_id?: string
+          _mapping: Json
+          _mode: string
+          _operation_date?: string
+          _reason_code?: string
+          _reference?: string
+          _simulation_of?: string
+          _template_id?: string
+          _template_version?: number
+        }
         Returns: Json
       }
+      import_job_pause: { Args: { _job: string }; Returns: Json }
+      import_job_process: {
+        Args: { _job: string; _limit?: number; _worker?: string }
+        Returns: Json
+      }
+      import_job_promote: { Args: { _job: string }; Returns: Json }
+      import_job_resume: { Args: { _job: string }; Returns: Json }
+      import_job_seal: { Args: { _job: string }; Returns: Json }
       import_job_validate: {
         Args: { _job: string; _limit?: number }
         Returns: Json
@@ -2771,6 +2944,10 @@ export type Database = {
       import_rows_stage: {
         Args: { _job: string; _rows: Json }
         Returns: number
+      }
+      import_state_can: {
+        Args: { _de: string; _para: string }
+        Returns: boolean
       }
       integration_health: {
         Args: never
@@ -2854,6 +3031,7 @@ export type Database = {
       network_scope: { Args: never; Returns: Json }
       network_scope_party: { Args: never; Returns: string }
       norm_code: { Args: { _v: string }; Returns: string }
+      norm_name: { Args: { _v: string }; Returns: string }
       only_digits: { Args: { _v: string }; Returns: string }
       parse_cents_any: { Args: { _v: string }; Returns: number }
       parse_decimal_any: { Args: { _v: string }; Returns: number }

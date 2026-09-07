@@ -33,7 +33,7 @@ export function SessaoSemijoias() {
   const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0.04, 0.52))) * 8);
 
   const textIn = easeOut(phase(p, 0.42, 0.72));
-  const ruleIn = easeOut(phase(p, 0.50, 0.78));
+  const ruleIn = easeOut(phase(p, 0.5, 0.78));
   const ctaIn = easeOut(phase(p, 0.58, 0.84));
 
   const emMovimento = reveal > 0.001 && reveal < 0.999;

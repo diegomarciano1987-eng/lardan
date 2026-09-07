@@ -20,8 +20,8 @@ export function HeroScroll() {
   // permanece em cena por uma rolagem inteira — depois disso a segunda
   // sessão começa a subir suavemente por cima.
   const iconOut = ease(phase(p, 0.06, 0.16));
-  const wordmarkIn = ease(phase(p, 0.10, 0.20));
-  const nevoa = reduced ? 0 : phase(p, 0.07, 0.14) * (1 - phase(p, 0.14, 0.20));
+  const wordmarkIn = ease(phase(p, 0.1, 0.2));
+  const nevoa = reduced ? 0 : phase(p, 0.07, 0.14) * (1 - phase(p, 0.14, 0.2));
   const mostrarReflexo = !reduced && iconOut < 0.65;
 
   return (
@@ -106,7 +106,8 @@ export function HeroScroll() {
           style={{
             opacity: clamp01(wordmarkIn),
             transform: `translate3d(0, ${(1 - wordmarkIn) * 1.5}vh, 0) scale(${1.04 - wordmarkIn * 0.04})`,
-            filter: leve || wordmarkIn === 1 ? undefined : `blur(${Math.round((1 - wordmarkIn) * 18)}px)`,
+            filter:
+              leve || wordmarkIn === 1 ? undefined : `blur(${Math.round((1 - wordmarkIn) * 18)}px)`,
             willChange: wordmarkIn > 0 && wordmarkIn < 1 ? "transform, opacity, filter" : "auto",
           }}
           aria-hidden={wordmarkIn < 0.5}

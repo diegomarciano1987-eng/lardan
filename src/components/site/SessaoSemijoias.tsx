@@ -20,7 +20,6 @@ export function SessaoSemijoias() {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const tier = useDeviceTier();
   const leve = tier === "leve";
-  const slats = leve ? 8 : 18;
   const p = reduced ? 1 : progress;
 
   const reveal = easeOut(phase(p, 0.01, 0.34));

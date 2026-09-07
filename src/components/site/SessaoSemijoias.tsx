@@ -11,34 +11,36 @@ import sessao2Asset from "@/assets/lardan-sessao2.png.asset.json";
 import sessao2MobileAsset from "@/assets/lardan-mobile-sessao2.png.asset.json";
 
 /**
- * Segunda sessão (V/4.2) — revelação em lâminas de vidro.
- * A imagem entra atrás de lâminas verticais marfim que se retraem do centro
- * para as bordas, em cascata, enquanto a própria imagem recua do zoom.
- * Depois, o texto sobe linha a linha.
+ * Segunda sessão (V/5) — revelação triunfal em lâminas de vidro.
+ * A imagem da mulher é desvelada devagar, da direita para a esquerda,
+ * por uma guilhotina de vidro com bordas esfumaçadas e sombra de varredura.
+ * A fotografia começa levemente ampliada e vai assentando enquanto o véu se abre;
+ * só depois o texto sobe, linha a linha, para não roubar o momento da revelação.
  */
 export function SessaoSemijoias() {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const tier = useDeviceTier();
   const leve = tier === "leve";
+  const slats = leve ? 10 : 28;
   const p = reduced ? 1 : progress;
 
-  const reveal = easeOut(phase(p, 0.01, 0.34));
-  const imgScale = 1.28 - 0.28 * ease(phase(p, 0, 0.7));
+  // A revelação agora ocupa quase 60% do trilho: lenta, majestosa, premium.
+  const reveal = phase(p, 0.06, 0.62);
+  // A foto começa mais próxima e recua suavemente à medida que o véu se abre.
+  const imgScale = 1.34 - 0.34 * ease(phase(p, 0, 0.85));
   // Desfoque da foto que se dissolve conforme as lâminas se retraem (só desktop).
-  const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0, 0.5))) * 8);
-  const line = (start: number) => easeOut(phase(p, start, start + 0.16));
-  const lines = [line(0.42), line(0.48), line(0.54), line(0.6), line(0.66)] as const;
+  const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0, 0.55))) * 8);
+
+  const textIn = easeOut(phase(p, 0.56, 0.82));
+  const ruleIn = easeOut(phase(p, 0.64, 0.88));
+  const ctaIn = easeOut(phase(p, 0.72, 0.94));
+
   const emMovimento = reveal > 0.001 && reveal < 0.999;
+  const dir = 1; // da direita para a esquerda
+
   return (
-    <div ref={ref} className="relative -mt-[100vh] h-[270vh]">
-      <section className="sticky top-0 h-screen overflow-hidden bg-transparent">
-        <div
-          className="absolute inset-0 overflow-hidden bg-background"
-          style={{
-            clipPath: `inset(0 0 0 ${(1 - reveal) * 100}%)`,
-            willChange: emMovimento ? "clip-path" : "auto",
-          }}
-        >
+    <div ref={ref} className="relative -mt-[100vh] h-[320vh]">
+      <section className="sticky top-0 h-screen overflow-hidden bg-background">
         <picture>
           <source
             media="(max-width: 767px)"
@@ -62,6 +64,68 @@ export function SessaoSemijoias() {
           />
         </picture>
 
+        {/* Lâminas verticais que deslizam da direita para a esquerda, em cascata.
+            No desktop elas têm borda esfumaçada e um filete de luz na frente
+            de varredura; em aparelhos fracos, só transform/opacidade. */}
+        {reveal < 0.999 && (
+          <div aria-hidden className="pointer-events-none absolute inset-0 flex">
+            {Array.from({ length: slats }).map((_, i) => {
+              const order = (slats - 1 - i) / (slats - 1);
+              const start = 0.5 * order;
+              const t = easeOut(phase(reveal, start, start + 0.5));
+              const lead = 1 - t;
+              const fio = Math.max(0, lead * (1 - lead)) * 4;
+              return (
+                <div
+                  key={i}
+                  className="-mx-px h-full flex-1 bg-background"
+                  style={{
+                    transform: `translate3d(${dir * t * 130}%, 0, 0) translateZ(0)`,
+                    opacity: lead < 0.02 ? 0 : 1,
+                    filter: !leve && emMovimento ? `blur(${(lead * 5).toFixed(1)}px)` : undefined,
+                    boxShadow:
+                      !leve && fio > 0.02
+                        ? `${dir * -10}px 0 30px -10px oklch(0.22 0.015 30 / ${(0.42 * fio).toFixed(2)})`
+                        : undefined,
+                    willChange: emMovimento ? "transform" : "auto",
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
+
+        {/* Sombra de varredura que acompanha a frente da guilhotina */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 w-[34vw]"
+          style={{
+            right: 0,
+            background:
+              "linear-gradient(270deg, oklch(0.18 0.015 30 / 0.32) 0%, oklch(0.18 0.015 30 / 0.14) 42%, transparent 100%)",
+            opacity: reveal * (1 - reveal) * 4,
+            transform: `translate3d(${-1 * (1 - reveal) * 45}%, 0, 0)`,
+          }}
+        />
+
+        {/* Frente da guilhotina: filete de vidro e luz percorrem a tela. */}
+        {emMovimento && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 w-[clamp(32px,5.5vw,84px)]"
+            style={{
+              left: `calc(${(1 - reveal) * 100}% - clamp(16px, 2.75vw, 42px))`,
+              opacity: Math.min(1, reveal * 8) * (1 - reveal),
+              background:
+                "linear-gradient(90deg, transparent 0%, oklch(0.99 0.01 80 / 0.42) 44%, oklch(1 0 0 / 0.78) 56%, transparent 100%)",
+              filter: leve ? "blur(6px)" : "blur(11px)",
+              boxShadow: leve
+                ? undefined
+                : "22px 0 54px -18px oklch(0.18 0.015 30 / 0.52)",
+            }}
+          />
+        )}
+
         {/* Leitura do texto sobre a imagem — desktop: véu marfim */}
         <div
           aria-hidden
@@ -69,7 +133,7 @@ export function SessaoSemijoias() {
           style={{
             background:
               "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.7) 0%, oklch(0.985 0.006 80 / 0.32) 30%, transparent 52%)",
-            opacity: lines[0],
+            opacity: textIn,
           }}
         />
         {/* Mobile: véu escuro suave atrás do texto (sem backdrop-filter, que
@@ -80,7 +144,7 @@ export function SessaoSemijoias() {
           style={{
             background:
               "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.5) 0%, oklch(0.18 0.01 30 / 0.24) 32%, transparent 56%)",
-            opacity: lines[0],
+            opacity: textIn,
           }}
         />
 
@@ -88,54 +152,36 @@ export function SessaoSemijoias() {
           <div className="max-w-xl">
             <p
               className="brand-eyebrow mb-4 max-md:!text-background/80"
-              style={{ opacity: lines[0], transform: `translateY(${(1 - lines[0]) * 18}px)` }}
+              style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 18}px)` }}
             >
               Semijoias
             </p>
             <h2
               className="text-4xl leading-tight text-foreground max-md:!text-background md:text-6xl"
-              style={{ opacity: lines[1], transform: `translateY(${(1 - lines[1]) * 22}px)` }}
+              style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 24}px)` }}
             >
               {BRAND.tagline}
             </h2>
             <div
-              className="rose-rule mt-6 w-20"
-              style={{ transform: `scaleX(${lines[2]})`, transformOrigin: "left" }}
+              className="rose-rule mt-6 w-20 origin-left"
+              style={{ transform: `scaleX(${ruleIn})` }}
             />
             <p
               className="mt-6 max-w-md text-base text-muted-foreground max-md:!text-background/85 md:text-lg"
-              style={{ opacity: lines[3], transform: `translateY(${(1 - lines[3]) * 18}px)` }}
+              style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 18}px)` }}
             >
               {BRAND.subline}
             </p>
             <Link
               to="/semijoias"
               className="btn-premium mt-10"
-              style={{ opacity: lines[4], transform: `translateY(${(1 - lines[4]) * 18}px)` }}
-              tabIndex={lines[4] > 0.5 ? 0 : -1}
+              style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
+              tabIndex={ctaIn > 0.5 ? 0 : -1}
             >
               Conhecer semijoias
             </Link>
           </div>
         </div>
-        </div>
-
-        {/* Frente da guilhotina: vidro e sombra percorrem a tela da direita
-            para a esquerda, sem contaminar o brilho da fotografia revelada. */}
-        {emMovimento && (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 w-[clamp(28px,5vw,74px)]"
-            style={{
-              left: `calc(${(1 - reveal) * 100}% - clamp(14px, 2.5vw, 37px))`,
-              opacity: Math.min(1, reveal * 8) * (1 - reveal),
-              background:
-                "linear-gradient(90deg, transparent 0%, oklch(0.99 0.01 80 / 0.5) 48%, oklch(1 0 0 / 0.82) 58%, transparent 100%)",
-              filter: leve ? "blur(5px)" : "blur(9px)",
-              boxShadow: leve ? undefined : "18px 0 42px -16px oklch(0.18 0.015 30 / 0.48)",
-            }}
-          />
-        )}
       </section>
     </div>
   );

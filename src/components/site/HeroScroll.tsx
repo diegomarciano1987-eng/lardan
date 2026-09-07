@@ -1,5 +1,5 @@
 import { BRAND } from "@/lib/brand";
-import { useScrollProgress, useDeviceTier, phase, ease } from "@/hooks/use-scroll-progress";
+import { useScrollProgress, useDeviceTier, phase, ease, easeOut } from "@/hooks/use-scroll-progress";
 import heroAsset from "@/assets/lardan-hero-vidro.jpg.asset.json";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
@@ -10,19 +10,28 @@ function clamp01(v: number) {
 
 /**
  * Hero de marca: uma única imagem permanece absolutamente imóvel durante toda
- * a sequência. O ícone cede lugar ao nome LARDAN sem alterar o cenário.
+ * a sequência. O ícone cede lugar ao nome LARDAN numa transição de luz —
+ * como um corte de cinema, sem tocar no cenário.
  */
 export function HeroScroll() {
   const { ref: trackRef, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const leve = useDeviceTier() === "leve";
   const p = reduced ? 0.5 : progress;
-  // Sequência curta: o ícone cede cedo, o nome LARDAN assenta rápido e
-  // permanece em cena por uma rolagem inteira — depois disso a segunda
-  // sessão começa a subir suavemente por cima.
-  const iconOut = ease(phase(p, 0.06, 0.16));
-  const wordmarkIn = ease(phase(p, 0.1, 0.2));
-  const nevoa = reduced ? 0 : phase(p, 0.07, 0.14) * (1 - phase(p, 0.14, 0.2));
+
+  // Coreografia da transição:
+  //  0.05–0.13  o ícone se entrega à luz (cresce, desfoca, acende)
+  //  0.10–0.18  clarão central — o "corte" de cinema
+  //  0.12–0.26  feixe horizontal atravessa a tela
+  //  0.14–0.30  o nome LARDAN emerge do clarão e assenta
+  const iconOut = ease(phase(p, 0.05, 0.14));
+  const flash = reduced ? 0 : phase(p, 0.09, 0.155) * (1 - ease(phase(p, 0.155, 0.24)));
+  const beam = reduced ? 0 : phase(p, 0.11, 0.17) * (1 - easeOut(phase(p, 0.17, 0.27)));
+  const wordmarkIn = easeOut(phase(p, 0.14, 0.3));
+  const halo = reduced ? 0 : phase(p, 0.14, 0.22) * (1 - ease(phase(p, 0.24, 0.34)));
   const mostrarReflexo = !reduced && iconOut < 0.65;
+
+  // O ícone "implode em luz": acende por dentro antes de ceder.
+  const brilhoIcone = reduced ? 0 : phase(p, 0.06, 0.13);
 
   return (
     <div ref={trackRef} className="relative h-[260vh]" aria-label={BRAND.name}>
@@ -44,8 +53,8 @@ export function HeroScroll() {
           className="gpu-layer absolute inset-0 flex items-center justify-center"
           style={{
             opacity: 1 - iconOut,
-            transform: `scale(${1 + iconOut * 0.1}) translate3d(0, ${iconOut * -1.5}vh, 0)`,
-            filter: leve || iconOut === 0 ? undefined : `blur(${Math.round(iconOut * 18)}px)`,
+            transform: `scale(${1 + iconOut * 0.22}) translate3d(0, ${iconOut * -2}vh, 0)`,
+            filter: leve || iconOut === 0 ? undefined : `blur(${Math.round(iconOut * 26)}px)`,
             willChange: iconOut > 0 && iconOut < 1 ? "transform, opacity, filter" : "auto",
           }}
         >
@@ -59,6 +68,21 @@ export function HeroScroll() {
               width={624}
               height={416}
             />
+            {/* O diamante acende por dentro instantes antes de ceder. */}
+            {brilhoIcone > 0.005 && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  opacity: brilhoIcone * 0.9,
+                  background:
+                    "radial-gradient(circle, oklch(1 0 0 / 0.95) 0%, oklch(0.97 0.03 75 / 0.5) 42%, transparent 72%)",
+                  WebkitMaskImage: `url(${diamanteAsset.url})`,
+                  maskImage: `url(${diamanteAsset.url})`,
+                  mixBlendMode: "screen",
+                }}
+              />
+            )}
             {mostrarReflexo && (
               <>
                 <div
@@ -85,45 +109,80 @@ export function HeroScroll() {
           <h1 className="sr-only">Lardan — semijoias</h1>
         </div>
 
-        {/* Névoa óptica localizada: transforma a marca sem tocar no cenário. */}
-        {nevoa > 0.005 && (
+        {/* Clarão central: o "corte" de cinema entre ícone e nome. */}
+        {flash > 0.005 && (
           <div
             aria-hidden
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[30vh] w-[min(72vw,820px)] -translate-x-1/2 -translate-y-1/2 rounded-[50%]"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[56vh] w-[min(110vw,1400px)] -translate-x-1/2 -translate-y-1/2"
             style={{
-              opacity: nevoa * 0.72,
+              opacity: flash,
               background:
-                "radial-gradient(ellipse, oklch(0.99 0.008 80 / 0.48) 0%, oklch(0.96 0.014 55 / 0.2) 38%, transparent 74%)",
-              filter: leve ? "blur(18px)" : "blur(34px)",
-              transform: `translate3d(-50%, -50%, 0) scaleX(${0.72 + nevoa * 0.38})`,
+                "radial-gradient(ellipse, oklch(1 0 0 / 0.92) 0%, oklch(0.98 0.02 75 / 0.55) 30%, oklch(0.95 0.03 60 / 0.18) 55%, transparent 78%)",
+              filter: leve ? "blur(14px)" : "blur(28px)",
+              transform: `translate3d(-50%, -50%, 0) scale(${0.55 + flash * 0.75})`,
+              mixBlendMode: "screen",
             }}
           />
         )}
 
-        {/* Estado 2: nome LARDAN, no mesmo cenário intacto. */}
+        {/* Feixe de luz horizontal que atravessa a tela no auge da troca. */}
+        {beam > 0.005 && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={{
+              width: "120vw",
+              height: "2px",
+              opacity: beam,
+              background:
+                "linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.85) 18%, oklch(1 0 0) 50%, oklch(1 0 0 / 0.85) 82%, transparent 100%)",
+              boxShadow: leve
+                ? undefined
+                : "0 0 26px 8px oklch(0.99 0.01 75 / 0.55), 0 0 90px 30px oklch(0.96 0.03 60 / 0.3)",
+              transform: `translate3d(-50%, -50%, 0) scaleX(${0.25 + easeOut(beam) * 0.95})`,
+              mixBlendMode: "screen",
+            }}
+          />
+        )}
+
+        {/* Estado 2: nome LARDAN emerge do clarão, no mesmo cenário intacto. */}
         <div
           className="gpu-layer absolute inset-0 flex items-center justify-center"
           style={{
             opacity: clamp01(wordmarkIn),
-            transform: `translate3d(0, ${(1 - wordmarkIn) * 1.5}vh, 0) scale(${1.04 - wordmarkIn * 0.04})`,
+            transform: `translate3d(0, ${(1 - wordmarkIn) * 2}vh, 0) scale(${1.12 - wordmarkIn * 0.12})`,
             filter:
-              leve || wordmarkIn === 1 ? undefined : `blur(${Math.round((1 - wordmarkIn) * 18)}px)`,
+              leve || wordmarkIn === 1 ? undefined : `blur(${Math.round((1 - wordmarkIn) * 22)}px)`,
             willChange: wordmarkIn > 0 && wordmarkIn < 1 ? "transform, opacity, filter" : "auto",
           }}
           aria-hidden={wordmarkIn < 0.5}
         >
           <div className="relative w-[clamp(240px,42vw,560px)]">
+            {/* Halo de chegada: o nome nasce dentro da própria luz. */}
+            {halo > 0.005 && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -inset-[38%]"
+                style={{
+                  opacity: halo,
+                  background:
+                    "radial-gradient(ellipse, oklch(1 0 0 / 0.85) 0%, oklch(0.97 0.02 72 / 0.4) 45%, transparent 75%)",
+                  filter: leve ? "blur(12px)" : "blur(24px)",
+                  mixBlendMode: "screen",
+                }}
+              />
+            )}
             <img
               src={wordmarkAsset.url}
               alt=""
               aria-hidden
-              className="w-full"
+              className="relative w-full"
               loading="eager"
               decoding="async"
               width={650}
               height={210}
               style={{
-                filter: `drop-shadow(0 ${(42 - wordmarkIn * 22).toFixed(0)}px ${(76 - wordmarkIn * 30).toFixed(0)}px oklch(0.06 0.01 30 / 0.46))`,
+                filter: `drop-shadow(0 ${(46 - wordmarkIn * 26).toFixed(0)}px ${(80 - wordmarkIn * 32).toFixed(0)}px oklch(0.06 0.01 30 / 0.46))`,
               }}
             />
           </div>

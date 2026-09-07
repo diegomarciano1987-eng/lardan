@@ -858,6 +858,7 @@ export type Database = {
           created_by: string | null
           defaults: Json
           dry_run: boolean
+          entry_key: string | null
           error_rows: number
           file_id: string | null
           file_name: string
@@ -905,6 +906,7 @@ export type Database = {
           created_by?: string | null
           defaults?: Json
           dry_run?: boolean
+          entry_key?: string | null
           error_rows?: number
           file_id?: string | null
           file_name: string
@@ -952,6 +954,7 @@ export type Database = {
           created_by?: string | null
           defaults?: Json
           dry_run?: boolean
+          entry_key?: string | null
           error_rows?: number
           file_id?: string | null
           file_name?: string
@@ -2861,9 +2864,20 @@ export type Database = {
       }
       homolog_purge: { Args: { _prefix?: string }; Returns: Json }
       homolog_purge_movimentos: { Args: { _prefix: string }; Returns: number }
+      homolog_purge_stock: { Args: { _prefix: string }; Returns: number }
       import_audit: {
         Args: { _acao: string; _job: string; _payload: Json }
         Returns: undefined
+      }
+      import_entry_key: {
+        Args: {
+          _data: string
+          _file: string
+          _location: string
+          _mode: string
+          _ref: string
+        }
+        Returns: string
       }
       import_file_register: {
         Args: {
@@ -2941,6 +2955,20 @@ export type Database = {
             }
             Returns: Json
           }
+      import_row_conflict: {
+        Args: { _legado: string; _v: string }
+        Returns: boolean
+      }
+      import_row_dup_in_file: {
+        Args: {
+          _ean: string
+          _job: string
+          _line: number
+          _row: string
+          _sku: string
+        }
+        Returns: boolean
+      }
       import_rows_stage: {
         Args: { _job: string; _rows: Json }
         Returns: number

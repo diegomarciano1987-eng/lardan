@@ -27,6 +27,8 @@ interface CategoryGuillotineProps {
   align?: "left" | "right";
   /** Lado do texto apenas no mobile (quando diferente do desktop). */
   mobileAlign?: "left" | "right";
+  /** A categoria está publicada? Quando não, o botão vira aviso honesto. */
+  disponivel?: boolean;
 }
 
 /**
@@ -48,6 +50,7 @@ export function CategoryGuillotine({
   enterFrom,
   align = "left",
   mobileAlign,
+  disponivel = true,
 }: CategoryGuillotineProps) {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const tier = useDeviceTier();
@@ -195,15 +198,25 @@ export function CategoryGuillotine({
               } ${align === "right" ? "md:origin-right md:ml-auto" : "md:origin-left"}`}
               style={{ transform: `scaleX(${ruleIn})` }}
             />
-            <Link
-              to="/semijoias/$categoria"
-              params={{ categoria }}
-              className="btn-premium mt-8"
-              style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
-              tabIndex={ctaIn > 0.5 ? 0 : -1}
-            >
-              Ver {title.toLowerCase()}
-            </Link>
+            {disponivel ? (
+              <Link
+                to="/semijoias/$categoria"
+                params={{ categoria }}
+                className="btn-premium mt-8"
+                style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
+                tabIndex={ctaIn > 0.5 ? 0 : -1}
+              >
+                Ver {title.toLowerCase()}
+              </Link>
+            ) : (
+              <p
+                className="mt-8 text-xs uppercase tracking-[0.32em] text-foreground/60 max-md:!text-background/70"
+                style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
+              >
+                Em breve no catálogo
+              </p>
+            )}
+
           </div>
         </div>
       </section>

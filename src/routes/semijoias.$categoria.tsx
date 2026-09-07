@@ -1,5 +1,12 @@
 import { useCallback, useMemo } from "react";
-import { createFileRoute, Link, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  redirect,
+  useNavigate,
+  type SearchSchemaInput,
+} from "@tanstack/react-router";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { CategoryHero } from "@/components/site/categoria/CategoryHero";
@@ -15,15 +22,23 @@ import {
   browsePublicProducts,
   getPublicCategory,
   mediaUrl,
+  taxonomyRedirect,
   type CategoriaDetalhe,
   type OrdemVitrine,
   type PecaVitrine,
 } from "@/lib/storefront";
 
 const POR_PAGINA = 12;
-const ORDENS_VALIDAS: OrdemVitrine[] = ["curadoria", "lancamentos", "nome", "preco_asc", "preco_desc"];
+const ORDENS_VALIDAS: OrdemVitrine[] = [
+  "curadoria",
+  "lancamentos",
+  "nome",
+  "preco_asc",
+  "preco_desc",
+];
 
-interface BuscaCategoria extends FiltrosCategoria {}
+/** Só os filtros realmente escolhidos entram no endereço. */
+type BuscaCategoria = Partial<FiltrosCategoria>;
 
 function texto(v: unknown) {
   return typeof v === "string" ? v : "";
@@ -39,25 +54,40 @@ function booleano(v: unknown) {
 export const Route = createFileRoute("/semijoias/$categoria")({
   validateSearch: (search: Record<string, unknown> & SearchSchemaInput): BuscaCategoria => {
     const ordem = texto(search["ordem"]) as OrdemVitrine;
-    return {
-      q: texto(search["q"]).slice(0, 120),
-      colecao: texto(search["colecao"]),
-      material: texto(search["material"]),
-      banho: texto(search["banho"]),
-      preco_min: numero(search["preco_min"]),
-      preco_max: numero(search["preco_max"]),
-      disponivel: booleano(search["disponivel"]),
-      lancamentos: booleano(search["lancamentos"]),
-      destaques: booleano(search["destaques"]),
-      ordem: ORDENS_VALIDAS.includes(ordem) ? ordem : "curadoria",
-    };
+    const saida: BuscaCategoria = {};
+    const q = texto(search["q"]).slice(0, 120);
+    if (q) saida.q = q;
+    const colecao = texto(search["colecao"]);
+    if (colecao) saida.colecao = colecao;
+    const material = texto(search["material"]);
+    if (material) saida.material = material;
+    const banho = texto(search["banho"]);
+    if (banho) saida.banho = banho;
+    const min = numero(search["preco_min"]);
+    if (min !== null) saida.preco_min = min;
+    const max = numero(search["preco_max"]);
+    if (max !== null) saida.preco_max = max;
+    if (booleano(search["disponivel"])) saida.disponivel = true;
+    if (booleano(search["lancamentos"])) saida.lancamentos = true;
+    if (booleano(search["destaques"])) saida.destaques = true;
+    if (ORDENS_VALIDAS.includes(ordem) && ordem !== "curadoria") saida.ordem = ordem;
+    return saida;
   },
   loader: async ({ params }) => {
-    try {
-      return { categoria: await getPublicCategory(params.categoria) };
-    } catch {
-      return { categoria: null };
+    // Erro de banco continua sendo erro (500), nunca vira "não existe".
+    const categoria = await getPublicCategory(params.categoria);
+    if (categoria) return { categoria };
+
+    // Endereço antigo com histórico → redirecionamento permanente.
+    const destino = await taxonomyRedirect("categories", params.categoria);
+    if (destino) {
+      throw redirect({
+        to: "/semijoias/$categoria",
+        params: { categoria: destino },
+        statusCode: 301,
+      });
     }
+    throw notFound();
   },
   head: ({ params, loaderData }) => {
     const c = loaderData?.categoria ?? null;
@@ -133,7 +163,8 @@ function AvisoEditorial({ titulo, texto: t }: { titulo: string; texto: string })
 
 function CategoriaPage() {
   const { categoria: slug } = Route.useParams();
-  const busca = Route.useSearch();
+  const buscaUrl = Route.useSearch();
+  const busca: FiltrosCategoria = useMemo(() => ({ ...FILTROS_VAZIOS, ...buscaUrl }), [buscaUrl]);
   const navigate = useNavigate({ from: "/semijoias/$categoria" });
   const p = personalidade(slug);
 
@@ -183,7 +214,7 @@ function CategoriaPage() {
   );
 
   const limpar = useCallback(() => {
-    void navigate({ search: () => ({ ...FILTROS_VAZIOS }), replace: true, resetScroll: false });
+    void navigate({ search: () => ({}), replace: true, resetScroll: false });
   }, [navigate]);
 
   const contexto = useMemo(() => ({ de: `/semijoias/${slug}`, busca }), [slug, busca]);

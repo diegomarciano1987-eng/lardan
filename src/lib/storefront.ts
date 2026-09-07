@@ -182,3 +182,36 @@ export async function browsePublicProducts(
   const rows = (data ?? []) as PecaVitrine[];
   return { rows, total: rows[0]?.total ? Number(rows[0].total) : 0 };
 }
+
+/* ---------- Home governada pela Central da Vitrine ---------- */
+
+export interface HomeBlocoPublico {
+  chave: "lancamentos" | "destaques" | "colecoes" | "categorias";
+  titulo: string;
+  visivel: boolean;
+  ordem: number;
+  itens: string[];
+}
+
+/** Curadoria vigente da página inicial (leitura pública, sem segredo algum). */
+export async function getHomeConfig(): Promise<HomeBlocoPublico[] | null> {
+  const { data, error } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", "home_curation")
+    .eq("is_public", true)
+    .maybeSingle();
+  if (error) throw error;
+  const valor = (data?.value ?? null) as unknown as { blocos?: HomeBlocoPublico[] } | null;
+  return valor?.blocos?.length ? valor.blocos : null;
+}
+
+/** Endereço antigo de categoria/coleção → endereço atual publicado. */
+export async function taxonomyRedirect(
+  tipo: "categories" | "collections",
+  slug: string,
+): Promise<string | null> {
+  const { data, error } = await supabase.rpc("public_taxonomy_redirect", { _tipo: tipo, _slug: slug });
+  if (error) return null;
+  return (data as string | null) ?? null;
+}

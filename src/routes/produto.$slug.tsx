@@ -1,55 +1,54 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { StateNote } from "@/components/site/ProductGrid";
 import { formatPreco, getPublicProduct, mediaUrl } from "@/lib/storefront";
 
 export const Route = createFileRoute("/produto/$slug")({
   component: ProdutoPage,
-  head: ({ params }) => ({
-    meta: [
-      { title: `Peça ${params.slug} — Semijoias LARDAN` },
-      { name: "description", content: "Peça de semijoia Lardan publicada no catálogo oficial." },
-      { property: "og:title", content: `Peça ${params.slug} — Semijoias LARDAN` },
-      { property: "og:description", content: "Peça de semijoia Lardan publicada no catálogo oficial." },
-      { property: "og:type", content: "product" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [{ rel: "canonical", href: `/produto/${params.slug}` }],
-  }),
+  // Peça inexistente, em rascunho, arquivada ou fora do ar responde 404 de verdade.
+  loader: async ({ params }) => {
+    const peca = await getPublicProduct(params.slug);
+    if (!peca) throw notFound();
+    return { peca };
+  },
+  head: ({ params, loaderData }) => {
+    const p = loaderData?.peca ?? null;
+    const titulo = p?.seo_title?.trim() || (p ? `${p.name} — Semijoias LARDAN` : "Peça indisponível — LARDAN");
+    const descricao =
+      p?.seo_description?.trim() ||
+      p?.short_description?.trim() ||
+      "Peça de semijoia Lardan publicada no catálogo oficial.";
+    return {
+      meta: [
+        { title: titulo },
+        { name: "description", content: descricao },
+        ...(p ? [] : [{ name: "robots", content: "noindex" }]),
+        { property: "og:title", content: titulo },
+        { property: "og:description", content: descricao },
+        { property: "og:type", content: "product" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [{ rel: "canonical", href: `/produto/${params.slug}` }],
+    };
+  },
+  errorComponent: () => (
+    <SiteLayout>
+      <div className="mx-auto max-w-3xl px-6 pb-24 pt-36">
+        <StateNote text="Não conseguimos carregar esta peça agora. Tente novamente em instantes." />
+      </div>
+    </SiteLayout>
+  ),
+  notFoundComponent: () => (
+    <SiteLayout>
+      <div className="mx-auto max-w-3xl px-6 pb-24 pt-36">
+        <StateNote text="Esta peça não está disponível no catálogo." />
+      </div>
+    </SiteLayout>
+  ),
 });
 
 function ProdutoPage() {
-  const { slug } = Route.useParams();
-  const consulta = useQuery({
-    queryKey: ["produto-publico", slug],
-    queryFn: () => getPublicProduct(slug),
-  });
-
-  if (consulta.isLoading) {
-    return (
-      <SiteLayout>
-        <div className="mx-auto max-w-5xl px-6 pb-24 pt-36">
-          <div className="aspect-[4/3] w-full animate-pulse rounded-2xl bg-muted" />
-        </div>
-      </SiteLayout>
-    );
-  }
-
-  if (consulta.error) {
-    return (
-      <SiteLayout>
-        <div className="mx-auto max-w-3xl px-6 pb-24 pt-36">
-          <StateNote text="Não conseguimos carregar esta peça agora. Tente novamente em instantes." />
-        </div>
-      </SiteLayout>
-    );
-  }
-
-  const p = consulta.data;
-  if (!p) {
-    throw notFound();
-  }
+  const { peca: p } = Route.useLoaderData();
 
   const preco = formatPreco(p.price_cents);
 

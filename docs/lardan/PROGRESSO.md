@@ -88,3 +88,21 @@
 - Produto: publicação individual por linha e por card (**Publicar / Corrigir pendências / Ver no site / Retirar do ar**), sem depender de ação em massa.
 - Categorias Brincos e Colares publicadas pelo botão do painel (`publish_taxonomy`); 10 peças reais (5 brincos, 5 colares) com duas imagens cada, preço público, estoque de 12 unidades no Depósito Principal (entrada canônica idempotente `vitrine:<slug>`), publicadas pelo botão por peça (`publish_products`).
 - Conferido em janela anônima: `/semijoias/brincos` e `/semijoias/colares` com 5 peças cada, ficha do produto com imagens, e os quatro CTAs da home funcionando em desktop e celular.
+
+## Estoque operacional — lote 1 (07/09/2026)
+
+- Custo corrigido nas duas camadas: o campo não existe no formulário sem
+  `stock.cost.view` e a função de registro descarta custo enviado sem a
+  capacidade, registrando o descarte em auditoria; custo negativo é recusado.
+- Saldos com foto real da peça (URL assinada em lote, uma chamada por página) e
+  ficha lateral do item.
+- Busca de saldos e de movimentações resolvida no servidor, com espera na
+  digitação e cancelamento da consulta anterior.
+- Reservas não são simuladas: coluna vazia com aviso "Reservas em implantação".
+- Histórico com motivo por extenso, autor, referência e saldo antes → depois
+  separado por origem e destino nas transferências.
+- Nova movimentação com fluxo por tipo, limpeza de campos ao trocar o tipo,
+  justificativa obrigatória em ajuste/perda/avaria, referência obrigatória em
+  recebimento e resumo de confirmação antes de gravar.
+- Pendências: motor de reservas, inventário completo, recebimentos, maletas e
+  rastreamento físico continuam não entregues.

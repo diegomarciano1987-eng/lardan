@@ -70,7 +70,7 @@ function CarrinhoPage() {
             </div>
           ) : (
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
-              <ul className="space-y-6">
+              <ul className="min-w-0 space-y-6">
                 {itens.map((i) => {
                   const url = i.mediaId ? mediaUrl(i.mediaId) : null;
                   return (
@@ -149,7 +149,7 @@ function CarrinhoPage() {
                 })}
               </ul>
 
-              <aside className="space-y-6 lg:sticky lg:top-32">
+              <aside className="min-w-0 space-y-6 lg:sticky lg:top-32">
                 <SimuladorFrete />
 
                 <div className="rounded-3xl border border-foreground/10 bg-background/70 p-7 backdrop-blur-xl">

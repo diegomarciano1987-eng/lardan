@@ -56,7 +56,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
             alt="Lardan"
             width={200}
             height={56}
-            className="h-8 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
+            className="h-6 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
           />
         </Link>
       ) : null}
@@ -69,22 +69,24 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
 
       <HeaderAcoes className="absolute right-5 top-1/2 hidden -translate-y-1/2 md:flex md:right-10" />
 
-      <div className="absolute right-4 top-1/2 z-50 flex -translate-y-1/2 items-center gap-1.5 md:hidden">
-        <HeaderAcoes className="[&_a]:h-9 [&_a]:w-9" />
+      <HeaderAcoes className="absolute right-4 top-1/2 z-50 -translate-y-1/2 [&_a]:h-9 [&_a]:w-9 md:hidden" />
+
+      <div className="relative z-50 flex flex-col items-center md:hidden">
         <button
           type="button"
           aria-expanded={open}
           aria-label={open ? "Fechar menu" : "Abrir menu"}
           aria-controls="menu-mobile"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-foreground/10 bg-background/55 text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+          className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-4 py-2.5 text-[0.5625rem] tracking-[0.24em] uppercase text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
-          {open ? <X className="h-[1.05rem] w-[1.05rem]" strokeWidth={1.4} /> : <Menu className="h-[1.05rem] w-[1.05rem]" strokeWidth={1.4} />}
+          {open ? <X className="h-3.5 w-3.5" strokeWidth={1.4} /> : <Menu className="h-3.5 w-3.5" strokeWidth={1.4} />}
+          Menu
         </button>
         {open && (
           <div
             id="menu-mobile"
-            className="absolute right-0 top-full mt-3 flex max-h-[calc(100vh-6rem)] w-56 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-foreground/10 bg-background/70 px-7 py-7 shadow-[0_28px_70px_-30px_color-mix(in_oklab,var(--foreground)_55%,transparent)] backdrop-blur-2xl"
+            className="absolute left-1/2 top-full mt-3 flex max-h-[calc(100vh-8rem)] w-56 -translate-x-1/2 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-foreground/10 bg-background/70 px-7 py-7 shadow-[0_28px_70px_-30px_color-mix(in_oklab,var(--foreground)_55%,transparent)] backdrop-blur-2xl"
           >
             {NAV_ITEMS.map((item) => (
               <NavLink

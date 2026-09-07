@@ -143,11 +143,11 @@ describe("categoria e coleção: porta canônica", () => {
     expect((r.body as { afetados: number }).afetados).toBe(1);
   });
 
-  it("recusa endereço duplicado", async () => {
+  it("recusa endereço inválido", async () => {
     const r = await rpc(tok(), "taxonomy_save_public", {
       _tipo: "collections",
       _id: colecaoId,
-      _values: { slug: `${marca}-categoria` },
+      _values: { slug: "AB C!" },
     });
     expect(r.status).toBeGreaterThanOrEqual(400);
   });

@@ -24,15 +24,34 @@ export const Route = createFileRoute("/api/public/midia/$id")({
           return new Response("Not found", { status: 404 });
         }
 
-        // só imagens de produto publicado saem daqui
-        const { data: vinculo } = await supabaseAdmin
-          .from("product_media")
-          .select("product_id, products!inner(status)")
-          .eq("media_id", id)
-          .eq("products.status", "publicado")
-          .limit(1);
+        // só imagens ligadas a algo publicado saem daqui
+        const [vinculo, heroCategoria, heroColecao] = await Promise.all([
+          supabaseAdmin
+            .from("product_media")
+            .select("product_id, products!inner(status)")
+            .eq("media_id", id)
+            .eq("products.status", "publicado")
+            .limit(1),
+          supabaseAdmin
+            .from("categories")
+            .select("id")
+            .eq("hero_media_id", id)
+            .eq("status", "publicado")
+            .limit(1),
+          supabaseAdmin
+            .from("collections")
+            .select("id")
+            .eq("hero_media_id", id)
+            .eq("status", "publicado")
+            .limit(1),
+        ]);
 
-        if (!vinculo || vinculo.length === 0) {
+        const publicoAgora =
+          (vinculo.data?.length ?? 0) > 0 ||
+          (heroCategoria.data?.length ?? 0) > 0 ||
+          (heroColecao.data?.length ?? 0) > 0;
+
+        if (!publicoAgora) {
           return new Response("Not found", { status: 404 });
         }
 
@@ -44,8 +63,9 @@ export const Route = createFileRoute("/api/public/midia/$id")({
         return new Response(await arquivo.arrayBuffer(), {
           headers: {
             "content-type": media.content_type ?? "image/jpeg",
-            // janela curta: uma peça despublicada some do público em no máximo 60s
-            "cache-control": "public, max-age=60, s-maxage=60, stale-while-revalidate=120",
+            // janela curta e honesta: sem revalidação obsoleta, a retirada do ar
+            // vale em no máximo 60 segundos em qualquer cache.
+            "cache-control": "public, max-age=60, s-maxage=60, must-revalidate",
             "x-content-type-options": "nosniff",
           },
         });

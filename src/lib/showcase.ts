@@ -353,11 +353,89 @@ export async function listTaxonomia(tipo: TipoTaxonomia): Promise<Taxonomia[]> {
   return (data ?? []) as unknown as Taxonomia[];
 }
 
+/** Conteúdo público de categoria/coleção — porta única no servidor. */
 export async function saveTaxonomia(tipo: TipoTaxonomia, id: string, valores: Partial<Taxonomia>) {
-  const { error } = await supabase
-    .from(tipo)
-    .update({ ...valores, updated_at: new Date().toISOString() } as never)
-    .eq("id", id);
+  const corpo: Record<string, unknown> = {};
+  for (const chave of ["name", "slug", "description", "seo_title", "seo_description", "hero_media_id"] as const) {
+    if (chave in valores) corpo[chave] = (valores as Record<string, unknown>)[chave] ?? "";
+  }
+  const { error } = await supabase.rpc("taxonomy_save_public", {
+    _tipo: tipo,
+    _id: id,
+    _values: corpo as never,
+  } as never);
+  if (error) throw error;
+}
+
+/** Impedimentos de publicação de uma categoria ou coleção. */
+export async function impedimentosTaxonomia(tipo: TipoTaxonomia, id: string): Promise<string[]> {
+  const { data, error } = await supabase.rpc("taxonomy_publish_blockers", { _tipo: tipo, _id: id } as never);
+  if (error) throw error;
+  return (data as unknown as string[] | null) ?? [];
+}
+
+export const ROTULO_IMPEDIMENTO_TAXONOMIA: Record<string, string> = {
+  inexistente: "registro inexistente",
+  nome: "nome",
+  slug: "endereço no site",
+  slug_invalido: "endereço inválido (use letras minúsculas, números e hífen)",
+  slug_duplicado: "endereço já usado por outro registro",
+  descricao: "descrição pública",
+  titulo_publico: "título público",
+  seo: "descrição para buscadores",
+  texto_alternativo: "texto alternativo da imagem",
+};
+
+export async function dependentesTaxonomia(
+  tipo: TipoTaxonomia,
+  id: string,
+): Promise<{ produtos_publicados: number; produtos_total: number }> {
+  const { data, error } = await supabase.rpc("taxonomy_dependents", { _tipo: tipo, _id: id } as never);
+  if (error) throw error;
+  const r = (data ?? {}) as Partial<{ produtos_publicados: number; produtos_total: number }>;
+  return { produtos_publicados: r.produtos_publicados ?? 0, produtos_total: r.produtos_total ?? 0 };
+}
+
+export async function publicarTaxonomia(
+  tipo: TipoTaxonomia,
+  ids: string[],
+  motivo?: string,
+): Promise<ResultadoPublicacao> {
+  const { data, error } = await supabase.rpc("publish_taxonomy", {
+    _tipo: tipo,
+    _ids: ids,
+    _note: motivo ?? null,
+  } as never);
+  if (error) throw error;
+  const r = (data ?? {}) as Partial<ResultadoPublicacao>;
+  return {
+    afetados: r.afetados ?? 0,
+    rejeitados: r.rejeitados ?? 0,
+    itens_rejeitados: r.itens_rejeitados ?? [],
+  };
+}
+
+export async function despublicarTaxonomia(params: {
+  tipo: TipoTaxonomia;
+  ids: string[];
+  motivo: string;
+  destino?: "rascunho" | "revisao" | "arquivado";
+  produtos?: "bloquear" | "despublicar";
+}): Promise<{ afetados: number; produtos_afetados: number }> {
+  const { data, error } = await supabase.rpc("unpublish_taxonomy", {
+    _tipo: params.tipo,
+    _ids: params.ids,
+    _note: params.motivo,
+    _para: params.destino ?? "rascunho",
+    _produtos: params.produtos ?? "bloquear",
+  } as never);
+  if (error) throw error;
+  const r = (data ?? {}) as Partial<{ afetados: number; produtos_afetados: number }>;
+  return { afetados: r.afetados ?? 0, produtos_afetados: r.produtos_afetados ?? 0 };
+}
+
+export async function reordenarTaxonomia(tipo: TipoTaxonomia, ids: string[]) {
+  const { error } = await supabase.rpc("taxonomy_reorder", { _tipo: tipo, _ids: ids } as never);
   if (error) throw error;
 }
 

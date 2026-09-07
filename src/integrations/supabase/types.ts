@@ -2469,6 +2469,36 @@ export type Database = {
           },
         ]
       }
+      taxonomy_slug_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          new_slug: string
+          old_slug: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          new_slug: string
+          old_slug: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          new_slug?: string
+          old_slug?: string
+        }
+        Relationships: []
+      }
       uf_centroides: {
         Row: {
           latitude: number
@@ -2921,8 +2951,16 @@ export type Database = {
       }
       public_category: { Args: { _slug: string }; Returns: Json }
       public_product: { Args: { _slug: string }; Returns: Json }
+      public_taxonomy_redirect: {
+        Args: { _slug: string; _tipo: string }
+        Returns: string
+      }
       publish_products: {
         Args: { _ids: string[]; _note?: string }
+        Returns: Json
+      }
+      publish_taxonomy: {
+        Args: { _ids: string[]; _note?: string; _tipo: string }
         Returns: Json
       }
       purge_integration_data: { Args: never; Returns: Json }
@@ -3081,8 +3119,34 @@ export type Database = {
         Returns: string
       }
       sync_public_prices: { Args: { _product_id: string }; Returns: undefined }
+      taxonomy_dependents: {
+        Args: { _id: string; _tipo: string }
+        Returns: Json
+      }
+      taxonomy_publish_blockers: {
+        Args: { _id: string; _tipo: string }
+        Returns: string[]
+      }
+      taxonomy_reorder: {
+        Args: { _ids: string[]; _tipo: string }
+        Returns: Json
+      }
+      taxonomy_save_public: {
+        Args: { _id: string; _tipo: string; _values: Json }
+        Returns: Json
+      }
       unpublish_products: {
         Args: { _ids: string[]; _note?: string; _para?: string }
+        Returns: Json
+      }
+      unpublish_taxonomy: {
+        Args: {
+          _ids: string[]
+          _note: string
+          _para?: string
+          _produtos?: string
+          _tipo: string
+        }
         Returns: Json
       }
     }

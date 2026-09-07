@@ -65,7 +65,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         ))}
       </nav>
 
-      <div className={`relative md:hidden ${branded ? "ml-auto" : ""}`}>
+      <div className="absolute right-5 top-1/2 z-50 -translate-y-1/2 md:hidden">
         <button
           type="button"
           aria-expanded={open}
@@ -78,7 +78,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         {open && (
           <div
             id="menu-mobile"
-            className="absolute right-0 top-full z-50 mt-3 flex max-h-[calc(100vh-6rem)] w-56 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-white/15 bg-white/[0.06] px-7 py-7 shadow-[0_24px_60px_-24px_oklch(0.25_0.02_30/0.22)] backdrop-blur-xl"
+            className="absolute right-0 top-full mt-3 flex max-h-[calc(100vh-6rem)] w-56 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-white/10 bg-white/[0.03] px-7 py-7 shadow-[0_24px_60px_-24px_oklch(0.25_0.02_30/0.18)] backdrop-blur-2xl"
           >
             {NAV_ITEMS.map((item) => (
               <NavLink

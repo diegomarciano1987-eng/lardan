@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 
-export function SiteLayout({ children }: { children: ReactNode }) {
+export function SiteLayout({ children, brandedHeader = false }: { children: ReactNode; brandedHeader?: boolean }) {
   return (
     <div className="min-h-screen bg-background">
       <a
@@ -11,7 +11,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
       >
         Ir para o conteúdo
       </a>
-      <SiteHeader />
+      <SiteHeader branded={brandedHeader} />
       <main id="conteudo">{children}</main>
       <SiteFooter />
     </div>

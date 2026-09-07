@@ -130,7 +130,7 @@ export const Route = createFileRoute("/semijoias/$categoria")({
   },
   component: CategoriaPage,
   errorComponent: () => (
-    <SiteLayout>
+    <SiteLayout brandedHeader>
       <AvisoEditorial
         titulo="Não conseguimos abrir esta categoria"
         texto="Tente novamente em instantes — as peças continuam publicadas."
@@ -138,7 +138,7 @@ export const Route = createFileRoute("/semijoias/$categoria")({
     </SiteLayout>
   ),
   notFoundComponent: () => (
-    <SiteLayout>
+    <SiteLayout brandedHeader>
       <AvisoEditorial
         titulo="Categoria não encontrada"
         texto="Talvez ela tenha saído do ar. Conheça as demais semijoias da casa."
@@ -224,7 +224,7 @@ function CategoriaPage() {
   const ativos = contarFiltrosAtivos(busca);
 
   return (
-    <SiteLayout>
+    <SiteLayout brandedHeader>
       {cat ? (
         <CategoryHero categoria={cat} />
       ) : (

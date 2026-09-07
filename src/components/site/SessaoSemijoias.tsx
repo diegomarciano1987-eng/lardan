@@ -24,23 +24,23 @@ export function SessaoSemijoias() {
   const slats = leve ? 10 : 28;
   const p = reduced ? 1 : progress;
 
-  // A revelação começa quase logo e desliza até ~58% do trilho: lenta,
-  // majestosa e sem buracos entre o hero e esta sessão.
-  const reveal = phase(p, 0.02, 0.58);
+  // A revelação começa depois de uma breve pausa e desliza até ~55% do
+  // trilho: lenta, majestosa e sem roubar o momento da logo.
+  const reveal = phase(p, 0.08, 0.55);
   // A foto começa mais próxima e recua suavemente à medida que o véu se abre.
-  const imgScale = 1.3 - 0.3 * ease(phase(p, 0, 0.8));
+  const imgScale = 1.3 - 0.3 * ease(phase(p, 0.04, 0.72));
   // Desfoque da foto que se dissolve conforme as lâminas se retraem (só desktop).
-  const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0, 0.55))) * 8);
+  const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0.04, 0.52))) * 8);
 
-  const textIn = easeOut(phase(p, 0.5, 0.78));
-  const ruleIn = easeOut(phase(p, 0.58, 0.84));
-  const ctaIn = easeOut(phase(p, 0.66, 0.9));
+  const textIn = easeOut(phase(p, 0.42, 0.72));
+  const ruleIn = easeOut(phase(p, 0.5, 0.78));
+  const ctaIn = easeOut(phase(p, 0.58, 0.84));
 
   const emMovimento = reveal > 0.001 && reveal < 0.999;
   const dir = 1; // da direita para a esquerda
 
   return (
-    <div ref={ref} className="relative -mt-[100vh] h-[300vh]">
+    <div ref={ref} className="relative -mt-[100vh] h-[280vh]">
       <section className="sticky top-0 h-screen overflow-hidden bg-background">
         <picture>
           <source

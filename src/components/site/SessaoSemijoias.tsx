@@ -81,11 +81,15 @@ export function SessaoSemijoias() {
                   key={i}
                   className="-mx-px h-full flex-1"
                   style={{
-                    background:
-                      "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.98) 0%, oklch(0.985 0.006 80 / 0.92) 48%, oklch(0.985 0.006 80 / 0.98) 100%)",
+                    background: leve
+                      ? "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.98) 0%, oklch(0.985 0.006 80 / 0.92) 48%, oklch(0.985 0.006 80 / 0.98) 100%)"
+                      : "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.62) 0%, oklch(0.985 0.006 80 / 0.5) 48%, oklch(0.985 0.006 80 / 0.62) 100%)",
+                    // Vidro fosco de verdade no desktop: a imagem transparece
+                    // desfocada por trás de cada lâmina enquanto ela se retrai.
+                    backdropFilter: leve ? undefined : "blur(26px) saturate(1.15)",
+                    WebkitBackdropFilter: leve ? undefined : "blur(26px) saturate(1.15)",
                     transform: `translate3d(${dir * t * 130}%, 0, 0) translateZ(0)`,
                     opacity: lead < 0.02 ? 0 : 1,
-                    filter: !leve && emMovimento ? `blur(${(lead * 5).toFixed(1)}px)` : undefined,
                     boxShadow:
                       !leve && fio > 0.02
                         ? `${dir * -10}px 0 34px -10px oklch(0.22 0.015 30 / ${(0.42 * fio).toFixed(2)})`

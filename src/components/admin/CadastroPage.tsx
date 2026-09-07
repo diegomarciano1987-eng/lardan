@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { PageHeader } from "@/components/admin/ui";
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { RecordSheet, type FieldSpec, type RecordValues } from "@/components/admin/RecordSheet";
-import { listPaged, saveRecord, type CadastroTable } from "@/lib/catalog";
+import { listPaged, mensagemDeErro, saveRecord, type CadastroTable } from "@/lib/catalog";
 
 const PAGE_SIZE = 20;
 
@@ -18,7 +18,9 @@ interface Props<T extends { id: string }> {
   select: string;
   searchColumns: string[];
   columns: Column<T>[];
-  fields: FieldSpec[];
+  fields?: FieldSpec[];
+  /** Campos que dependem do registro aberto (ex.: situação de um item já publicado). */
+  fieldsFor?: (row: T | null) => FieldSpec[];
   /** Transformação antes de gravar (slug, maiúsculas, etc.). */
   prepare?: (values: RecordValues) => RecordValues;
   toForm?: (row: T) => RecordValues;
@@ -36,6 +38,7 @@ export function CadastroPage<T extends { id: string }>({
   searchColumns,
   columns,
   fields,
+  fieldsFor,
   prepare,
   toForm,
   novoLabel = "Novo registro",
@@ -79,6 +82,7 @@ export function CadastroPage<T extends { id: string }>({
       toast.success("Registro salvo.");
       void qc.invalidateQueries({ queryKey: [table] });
     },
+    onError: (erro) => toast.error(mensagemDeErro(erro)),
   });
 
   const initial = useMemo<RecordValues>(() => {
@@ -134,7 +138,7 @@ export function CadastroPage<T extends { id: string }>({
         onOpenChange={setAberto}
         title={editando ? `Editar — ${title}` : novoLabel}
         description="Toda alteração é registrada na auditoria com autor, data e valores anterior e novo."
-        fields={fields}
+        fields={fieldsFor ? fieldsFor(editando) : (fields ?? [])}
         initial={initial}
         onSubmit={async (values) => {
           await salvar.mutateAsync(values);

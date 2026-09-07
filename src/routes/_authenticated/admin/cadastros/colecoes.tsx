@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CadastroPage } from "@/components/admin/CadastroPage";
 import { StatusBadge } from "@/components/admin/ui";
-import { STATUS_OPTIONS, slugify } from "@/lib/catalog";
+import { STATUS_OPTIONS_EDICAO, slugify } from "@/lib/catalog";
 
 export const Route = createFileRoute("/_authenticated/admin/cadastros/colecoes")({
   component: ColecoesPage,
@@ -48,14 +48,31 @@ function ColecoesPage() {
           render: (r) => <StatusBadge tone={tone(r.status)}>{r.status}</StatusBadge>,
         },
       ]}
-      fields={[
+      fieldsFor={(atual) => [
         { name: "name", label: "Nome", type: "text", required: true },
         { name: "slug", label: "Endereço (slug)", type: "text", help: "Deixe vazio para gerar pelo nome." },
         { name: "position", label: "Ordem", type: "number" },
-        { name: "status", label: "Situação", type: "select", options: STATUS_OPTIONS, required: true },
         { name: "description", label: "Descrição", type: "textarea" },
         { name: "seo_title", label: "Título para buscadores", type: "text", full: true },
         { name: "seo_description", label: "Descrição para buscadores", type: "textarea" },
+        atual && atual.status === "publicado"
+          ? {
+              name: "status",
+              label: "Situação",
+              type: "select",
+              options: [{ value: "publicado", label: "Publicado (visível no site)" }],
+              help: "Está no ar. Para retirar do site, use Site › Categorias e coleções e informe o motivo.",
+              full: true,
+            }
+          : {
+              name: "status",
+              label: "Situação",
+              type: "select",
+              options: STATUS_OPTIONS_EDICAO,
+              required: true,
+              help: "Publicar é feito em Site › Categorias e coleções, onde o sistema confere descrição, título público, texto para buscadores e imagem de capa antes de liberar a página.",
+              full: true,
+            },
       ]}
       prepare={(v) => {
         const nome = String(v["name"] ?? "").trim();
@@ -64,11 +81,10 @@ function ColecoesPage() {
           name: nome,
           slug: String(v["slug"] || "").trim() || slugify(nome),
           position: Number(v["position"] ?? 0) || 0,
-          status,
+          ...(status === "publicado" ? {} : { status }),
           description: v["description"] || null,
           seo_title: v["seo_title"] || null,
           seo_description: v["seo_description"] || null,
-          published_at: status === "publicado" ? new Date().toISOString() : null,
         };
       }}
     />

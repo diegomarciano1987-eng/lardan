@@ -135,6 +135,43 @@ export async function signedMediaUrl(path: string, seconds = 3600) {
   return data.signedUrl;
 }
 
+/** Situações escolhíveis no cadastro-base. Publicar/retirar do ar só pela Central da Vitrine. */
+export const STATUS_OPTIONS_EDICAO = [
+  { value: "rascunho", label: "Rascunho" },
+  { value: "revisao", label: "Em revisão" },
+  { value: "arquivado", label: "Arquivado" },
+];
+
+/**
+ * Traduz recusas do banco para uma frase que diz o que falta, onde resolver e por quê.
+ * Nunca devolve código, SQL ou termo interno.
+ */
+export function mensagemDeErro(erro: unknown): string {
+  const e = erro as { code?: string; message?: string } | null;
+  const bruto = (e?.message ?? "").toString();
+  const codigo = e?.code ?? "";
+  if (bruto.includes("publish_taxonomy")) {
+    return "Publicar uma categoria ou coleção é feito em Site › Categorias e coleções, no botão Publicar no site — é lá que o sistema confere descrição, título público e texto para buscadores antes de deixar a página visível.";
+  }
+  if (bruto.includes("unpublish_taxonomy")) {
+    return "Para tirar do ar, use Site › Categorias e coleções e informe o motivo: o sistema precisa saber o que fazer com os produtos que dependem dela.";
+  }
+  if (bruto.includes("publish_products")) {
+    return "Publicar uma peça é feito em Site › Produtos da vitrine, pelo botão Publicar, que confere foto, preço e descrição antes de liberar no site.";
+  }
+  if (codigo === "42501") {
+    return "Seu perfil não tem permissão para esta ação. Peça a um administrador ou use a tela indicada para a operação.";
+  }
+  if (codigo === "23505") {
+    return "Já existe outro registro com este endereço (slug) ou código. Escolha outro para não conflitar no site.";
+  }
+  if (codigo === "23514") {
+    return "Faltam informações obrigatórias para salvar. Revise os campos destacados e tente de novo.";
+  }
+  if (!bruto) return "Não foi possível concluir. Tente novamente.";
+  return bruto;
+}
+
 export const STATUS_OPTIONS = [
   { value: "rascunho", label: "Rascunho" },
   { value: "revisao", label: "Em revisão" },

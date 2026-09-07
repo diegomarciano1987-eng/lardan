@@ -78,7 +78,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         {open && (
           <div
             id="menu-mobile"
-            className="absolute right-0 top-full z-50 mt-3 flex max-h-[calc(100vh-6rem)] w-56 flex-col items-center gap-2 overflow-y-auto rounded-2xl border border-foreground/10 bg-background/22 px-6 py-6 shadow-[0_18px_50px_-20px_oklch(0.3_0.02_30/0.35)] backdrop-blur-2xl"
+            className="absolute right-0 top-full z-50 mt-3 flex max-h-[calc(100vh-6rem)] w-56 flex-col items-center gap-2 overflow-y-auto rounded-2xl border border-foreground/[0.07] bg-background/10 px-6 py-6 shadow-[0_18px_50px_-20px_oklch(0.3_0.02_30/0.25)] ring-1 ring-inset ring-white/15 backdrop-blur-2xl"
           >
             {NAV_ITEMS.map((item) => (
               <NavLink

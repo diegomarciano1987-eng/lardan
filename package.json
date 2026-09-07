@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:integracoes": "vitest run tests/integracoes",
     "test:cadastros": "vitest run tests/cadastros",
+    "test:vitrine": "vitest run tests/vitrine",
     "test:e2e": "bun scripts/e2e-cadastros.ts",
     "massa:criar": "bun scripts/massa-homologacao.ts criar",
     "massa:limpar": "bun scripts/massa-homologacao.ts limpar",

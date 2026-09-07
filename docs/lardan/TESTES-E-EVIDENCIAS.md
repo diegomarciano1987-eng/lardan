@@ -241,3 +241,37 @@ Bateria completa: `bunx vitest run tests` → 93/93 aprovados (segurança 45, in
 | `/semijoias/aneis` (categoria não publicada) | 404 |
 | `/produto/nao-existe` | 404 |
 | `/aneis` | 301 → `/semijoias/aneis` |
+
+## Estoque operacional — lote 1 (07/09/2026)
+
+Bateria automática: `bun run test:seg` (arquivo `tests/security/estoque.test.ts`),
+executada contra o banco real com contas sintéticas `@lardan.test`.
+Resultado: 10 de 10 cenários aprovados.
+
+| Perfil | Cenário | Esperado | Obtido |
+| --- | --- | --- | --- |
+| estoque | injetar custo pela RPC | custo descartado | movimento gravado com custo nulo |
+| financeiro | ver custo / movimentar | vê custo, não movimenta | `stock.cost.view` presente, movimentação HTTP 403 |
+| master | custo negativo | recusado | HTTP 400 |
+| master | saída maior que o saldo | recusada | HTTP 400, saldo intacto |
+| master | duplo clique (mesma chave) | um único efeito | 200/200, mesma resposta, saldo +2 |
+| master | duas saídas simultâneas | cada unidade sai uma vez | saldo caiu exatamente pelas saídas aceitas |
+| master | transferência | origem −1 e destino +1 | atômica, dois lados registrados |
+| consultora | leitura de estoque | negada | saldos 403, movimentos 403, tabela sem linhas |
+| visitante | leitura de estoque | negada | saldos 401, movimentos 401, tabela sem linhas |
+| master | alterar/apagar movimentação | negado | PATCH 400 / DELETE 400 |
+| master | ajuste sem justificativa | recusado | HTTP 400 |
+
+Homologação visual (Playwright, 1280×1800, perfil Master, sem erros de console):
+saldos com foto real das peças e "Sem foto" honesto para as que não têm imagem;
+busca no servidor por produto, variação, SKU, código legado e código de barras;
+clique na linha abre a ficha lateral (fotos, identificação, categoria, coleção,
+saldo por local, custo autorizado, última movimentação e link para a ficha do
+produto); histórico com foto, motivo por extenso, autor, sinal correto de
+entrada/saída e saldo antes → depois separado por origem e destino.
+
+Limitações desta rodada: não existe motor de reservas — a coluna Reservado é
+exibida vazia com o aviso "Reservas em implantação", e o saldo disponível só
+passará a ser calculado (físico menos reservado) quando esse motor existir.
+Inventário completo, recebimentos formais, maletas e rastreamento físico não
+foram entregues.

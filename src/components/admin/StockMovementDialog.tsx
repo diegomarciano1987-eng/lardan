@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { VariantPicker, type VariantOption } from "@/components/admin/VariantPicker";
+import { useCapabilities } from "@/lib/capabilities";
 import {
   MOVE_LABEL,
   listStockLocations,
@@ -18,14 +19,20 @@ import {
   type StockMoveKind,
 } from "@/lib/stock";
 import { parseCentavos } from "@/lib/catalog";
+import { formatBRLFromCents } from "@/components/admin/ui";
 
 const TIPOS: { value: StockMoveKind; label: string; hint: string }[] = [
   { value: "entrada", label: "Entrada", hint: "recebimento, devolução, retorno" },
   { value: "saida", label: "Saída", hint: "venda, envio, perda" },
   { value: "transferencia", label: "Transferência", hint: "entre dois locais" },
   { value: "ajuste", label: "Ajuste", hint: "correção pontual" },
-  { value: "inventario", label: "Inventário", hint: "define a quantidade contada" },
+  { value: "inventario", label: "Contagem pontual", hint: "define a quantidade contada" },
 ];
+
+/** Motivos que exigem justificativa escrita. */
+const MOTIVO_ESCRITO = ["perda", "avaria"];
+/** Motivos que exigem documento de referência. */
+const MOTIVO_COM_DOCUMENTO = ["compra"];
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -50,6 +57,10 @@ export function StockMovementDialog({
   onOpenChange: (v: boolean) => void;
 }) {
   const qc = useQueryClient();
+  const caps = useCapabilities();
+  /** Custo só existe na tela para Master, Diretoria e Financeiro. */
+  const podeCusto = caps.includes("stock.cost.view");
+
   const [kind, setKind] = React.useState<StockMoveKind>("entrada");
   const [variant, setVariant] = React.useState<VariantOption | null>(null);
   const [quantidade, setQuantidade] = React.useState("");
@@ -59,6 +70,7 @@ export function StockMovementDialog({
   const [custo, setCusto] = React.useState("");
   const [referencia, setReferencia] = React.useState("");
   const [nota, setNota] = React.useState("");
+  const [confirmar, setConfirmar] = React.useState(false);
 
   const locais = useQuery({ queryKey: ["stock-locations"], queryFn: listStockLocations });
   const motivos = useQuery({ queryKey: ["stock-reasons"], queryFn: listStockReasons });
@@ -74,15 +86,20 @@ export function StockMovementDialog({
 
   const precisaOrigem = kind === "saida" || kind === "transferencia";
   const precisaDestino = kind !== "saida";
-  /** Ajuste aceita correção para menos; inventário aceita contagem zero. */
+  /** Ajuste aceita correção para menos; contagem aceita zero. */
   const aceitaNegativo = kind === "ajuste";
   const aceitaZero = kind === "inventario";
   const motivoObrigatorio = kind === "ajuste" || kind === "saida" || kind === "inventario";
+  const notaObrigatoria = kind === "ajuste" || MOTIVO_ESCRITO.includes(motivo);
+  const referenciaObrigatoria = MOTIVO_COM_DOCUMENTO.includes(motivo);
 
   /** Uma chave por abertura do formulário: reenvio não duplica o lançamento. */
   const chave = React.useRef(crypto.randomUUID());
   React.useEffect(() => {
-    if (open) chave.current = crypto.randomUUID();
+    if (open) {
+      chave.current = crypto.randomUUID();
+      setConfirmar(false);
+    }
   }, [open]);
 
   function limpar() {
@@ -92,33 +109,56 @@ export function StockMovementDialog({
     setCusto("");
     setReferencia("");
     setNota("");
+    setOrigem("");
+    setDestino("");
+    setConfirmar(false);
+  }
+
+  /** Trocar o tipo apaga origem, destino e todo campo incompatível. */
+  function trocarTipo(novo: StockMoveKind) {
+    setKind(novo);
+    setMotivo("");
+    setOrigem("");
+    setDestino("");
+    setQuantidade("");
+    setCusto("");
+    setConfirmar(false);
+  }
+
+  function validar(): string | null {
+    if (!variant) return "Escolha a peça.";
+    const bruto = quantidade.trim();
+    const qtd = Number(bruto);
+    if (bruto === "" || Number.isNaN(qtd) || !Number.isInteger(qtd))
+      return "Informe uma quantidade em número inteiro.";
+    if (qtd === 0 && !aceitaZero) return "A quantidade precisa ser diferente de zero.";
+    if (qtd < 0 && !aceitaNegativo) return "Quantidade negativa só é permitida em ajuste.";
+    if (precisaOrigem && !origem) return "Informe o local de origem.";
+    if (precisaDestino && !destino) return "Informe o local de destino.";
+    if (origem && destino && origem === destino)
+      return "Origem e destino precisam ser locais diferentes.";
+    if (motivoObrigatorio && !motivo) return "Escolha o motivo desta movimentação.";
+    if (notaObrigatoria && !nota.trim()) return "Escreva a justificativa desta operação.";
+    if (referenciaObrigatoria && !referencia.trim())
+      return "Informe a referência do recebimento (nota, pedido ou protocolo).";
+    if (podeCusto && custo.trim() && (parseCentavos(custo) ?? 0) < 0)
+      return "O custo unitário não pode ser negativo.";
+    return null;
   }
 
   const salvar = useMutation({
     mutationFn: async () => {
-      if (!variant) throw new Error("Escolha a peça.");
-      const bruto = quantidade.trim();
-      const qtd = Number(bruto);
-      if (bruto === "" || Number.isNaN(qtd) || !Number.isInteger(qtd))
-        throw new Error("Informe uma quantidade em número inteiro.");
-      if (qtd === 0 && !aceitaZero)
-        throw new Error("A quantidade precisa ser diferente de zero.");
-      if (qtd < 0 && !aceitaNegativo)
-        throw new Error("Quantidade negativa só é permitida em ajuste.");
-      if (precisaOrigem && !origem) throw new Error("Informe o local de origem.");
-      if (precisaDestino && !destino) throw new Error("Informe o local de destino.");
-      if (origem && destino && origem === destino)
-        throw new Error("Origem e destino precisam ser locais diferentes.");
-      if (motivoObrigatorio && !motivo)
-        throw new Error("Escolha o motivo desta movimentação.");
+      const erro = validar();
+      if (erro) throw new Error(erro);
       return registerMovement({
         kind,
-        variantId: variant.id,
-        quantity: qtd,
+        variantId: (variant as VariantOption).id,
+        quantity: Number(quantidade),
         fromLocationId: precisaOrigem ? origem : null,
         toLocationId: precisaDestino ? destino : null,
         reasonCode: motivo || null,
-        unitCostCents: custo ? parseCentavos(custo) : null,
+        // sem a capacidade, o custo nem sai do navegador
+        unitCostCents: podeCusto && custo ? parseCentavos(custo) : null,
         reference: referencia || null,
         note: nota || null,
         idempotencyKey: chave.current,
@@ -131,11 +171,16 @@ export function StockMovementDialog({
       limpar();
       onOpenChange(false);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível registrar."),
+    onError: (e) => {
+      setConfirmar(false);
+      toast.error(e instanceof Error ? e.message : "Não foi possível registrar.");
+    },
   });
 
-
   const semLocais = !locais.isLoading && (locais.data ?? []).length === 0;
+  const nomeLocal = (id: string) => opcoesLocais.find((l) => l.value === id)?.label ?? "—";
+  const nomeMotivo = (code: string) =>
+    opcoesMotivos.find((m) => m.value === code)?.label ?? code ?? "—";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -152,22 +197,64 @@ export function StockMovementDialog({
             Nenhum local ativo cadastrado. Cadastre depósitos, lojas ou maletas em Cadastros ›
             Locais antes de movimentar o estoque.
           </p>
+        ) : confirmar ? (
+          <div className="space-y-4">
+            <p className="text-sm font-medium text-ledger-muted">
+              Confira antes de gravar. Depois de registrada, a movimentação não pode ser
+              alterada nem apagada.
+            </p>
+            <dl className="rounded-[10px] border border-line divide-y divide-line">
+              {[
+                ["Tipo", MOVE_LABEL[kind]],
+                ["Peça", `${variant?.produto ?? ""} · ${variant?.label ?? ""}`],
+                ["Quantidade", quantidade],
+                ...(precisaOrigem ? [["Origem", nomeLocal(origem)]] : []),
+                ...(precisaDestino ? [["Destino", nomeLocal(destino)]] : []),
+                ...(motivo ? [["Motivo", nomeMotivo(motivo)]] : []),
+                ...(referencia ? [["Referência", referencia]] : []),
+                ...(nota ? [["Justificativa", nota]] : []),
+                ...(podeCusto && custo
+                  ? [["Custo unitário", formatBRLFromCents(parseCentavos(custo) ?? 0)]]
+                  : []),
+              ].map(([r, v]) => (
+                <div key={r as string} className="flex justify-between gap-6 px-4 py-2.5 text-sm">
+                  <dt className="font-semibold text-ledger-muted">{r}</dt>
+                  <dd className="text-right font-medium text-ledger-text">{v}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="flex justify-end gap-2 pt-1">
+              <button type="button" onClick={() => setConfirmar(false)} className="admin-btn">
+                Voltar e corrigir
+              </button>
+              <button
+                type="button"
+                disabled={salvar.isPending}
+                onClick={() => salvar.mutate()}
+                className="admin-btn-primary"
+              >
+                {salvar.isPending ? "Registrando…" : "Confirmar e registrar"}
+              </button>
+            </div>
+          </div>
         ) : (
           <form
             className="space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
-              salvar.mutate();
+              const erro = validar();
+              if (erro) {
+                toast.error(erro);
+                return;
+              }
+              setConfirmar(true);
             }}
           >
             <Campo label="Tipo de movimentação">
               <SmartSelect
                 options={TIPOS}
                 value={kind}
-                onChange={(v) => {
-                  setKind(v as StockMoveKind);
-                  setMotivo("");
-                }}
+                onChange={(v) => trocarTipo(v as StockMoveKind)}
               />
             </Campo>
 
@@ -208,7 +295,6 @@ export function StockMovementDialog({
                   emptyLabel="Sem motivos para este tipo"
                 />
               </Campo>
-
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -235,15 +321,20 @@ export function StockMovementDialog({
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Campo label="Custo unitário (opcional)">
-                <input
-                  value={custo}
-                  onChange={(e) => setCusto(e.target.value)}
-                  placeholder="0,00"
-                  className={inputCls}
-                />
-              </Campo>
-              <Campo label="Referência (opcional)">
+              {/* O campo de custo nem existe na tela sem a capacidade. */}
+              {podeCusto && (
+                <Campo label="Custo unitário (opcional)">
+                  <input
+                    value={custo}
+                    onChange={(e) => setCusto(e.target.value)}
+                    placeholder="0,00"
+                    className={inputCls}
+                  />
+                </Campo>
+              )}
+              <Campo
+                label={referenciaObrigatoria ? "Referência do documento" : "Referência (opcional)"}
+              >
                 <input
                   value={referencia}
                   onChange={(e) => setReferencia(e.target.value)}
@@ -253,11 +344,14 @@ export function StockMovementDialog({
               </Campo>
             </div>
 
-            <Campo label="Observação (opcional)">
+            <Campo label={notaObrigatoria ? "Justificativa" : "Observação (opcional)"}>
               <textarea
                 value={nota}
                 onChange={(e) => setNota(e.target.value)}
                 rows={2}
+                placeholder={
+                  notaObrigatoria ? "Explique o que aconteceu com estas peças" : undefined
+                }
                 className="w-full rounded-[10px] border border-line bg-surface px-3 py-2 text-sm font-medium text-ledger-text shadow-sm outline-none focus:border-champagne focus:ring-2 focus:ring-champagne/25"
               />
             </Campo>
@@ -266,8 +360,8 @@ export function StockMovementDialog({
               <button type="button" onClick={() => onOpenChange(false)} className="admin-btn">
                 Cancelar
               </button>
-              <button type="submit" disabled={salvar.isPending} className="admin-btn-primary">
-                {salvar.isPending ? "Registrando…" : "Registrar movimentação"}
+              <button type="submit" className="admin-btn-primary">
+                Revisar e confirmar
               </button>
             </div>
           </form>

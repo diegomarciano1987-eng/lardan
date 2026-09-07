@@ -13,6 +13,7 @@ export type Capability =
   | "stock.view"
   | "stock.operate"
   | "stock.adjust"
+  | "stock.cost.view"
   | "imports.run"
   | "finance.view"
   | "finance.operate"

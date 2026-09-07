@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { FileUp, PackagePlus } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, FileUp, PackagePlus } from "lucide-react";
 import {
   EmptyState,
   PageHeader,
@@ -14,6 +14,8 @@ import {
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { StockMovementDialog } from "@/components/admin/StockMovementDialog";
+import { StockItemPanel } from "@/components/admin/StockItemPanel";
+import { StockThumb } from "@/components/admin/StockThumb";
 import { ImportProductsDialog } from "@/components/admin/ImportProductsDialog";
 import { useCapabilities } from "@/lib/capabilities";
 import {
@@ -22,6 +24,7 @@ import {
   listBalances,
   listMovements,
   listStockLocations,
+  signedMediaMap,
   type BalanceRow,
   type MovementRow,
 } from "@/lib/stock";
@@ -37,6 +40,16 @@ export const Route = createFileRoute("/_authenticated/admin/estoque")({
 });
 
 const PAGE_SIZE = 20;
+
+/** Atraso curto na digitação: a consulta anterior é cancelada pelo React Query. */
+function useDebounce<T>(valor: T, ms = 350) {
+  const [saida, setSaida] = React.useState(valor);
+  React.useEffect(() => {
+    const t = setTimeout(() => setSaida(valor), ms);
+    return () => clearTimeout(t);
+  }, [valor, ms]);
+  return saida;
+}
 
 function Indicador({ rotulo, valor }: { rotulo: string; valor: number | undefined }) {
   return (
@@ -56,6 +69,7 @@ function EstoquePage() {
   const [aba, setAba] = React.useState<"saldos" | "movimentos">("saldos");
   const [dialogo, setDialogo] = React.useState(false);
   const [importacao, setImportacao] = React.useState(false);
+  const [itemAberto, setItemAberto] = React.useState<string | null>(null);
 
   const [buscaSaldo, setBuscaSaldo] = React.useState("");
   const [paginaSaldo, setPaginaSaldo] = React.useState(0);
@@ -65,48 +79,86 @@ function EstoquePage() {
   const [paginaMov, setPaginaMov] = React.useState(0);
   const [tipo, setTipo] = React.useState("todos");
 
+  const termoSaldo = useDebounce(buscaSaldo);
+  const termoMov = useDebounce(buscaMov);
+
   const resumo = useQuery({ queryKey: ["stock", "overview"], queryFn: fetchStockOverview });
   const locais = useQuery({ queryKey: ["stock-locations"], queryFn: listStockLocations });
 
   const saldos = useQuery({
-    queryKey: ["stock", "balances", buscaSaldo, paginaSaldo, local],
-    queryFn: () =>
+    queryKey: ["stock", "balances", termoSaldo, paginaSaldo, local],
+    queryFn: ({ signal }) =>
       listBalances({
-        search: buscaSaldo,
+        search: termoSaldo,
         page: paginaSaldo,
         pageSize: PAGE_SIZE,
         locationId: local === "todos" ? undefined : local,
+        signal,
       }),
     enabled: aba === "saldos",
+    placeholderData: (anterior) => anterior,
   });
 
   const movimentos = useQuery({
-    queryKey: ["stock", "movements", buscaMov, paginaMov, tipo],
-    queryFn: () =>
-      listMovements({ search: buscaMov, page: paginaMov, pageSize: PAGE_SIZE, kind: tipo }),
+    queryKey: ["stock", "movements", termoMov, paginaMov, tipo],
+    queryFn: ({ signal }) =>
+      listMovements({
+        search: termoMov,
+        page: paginaMov,
+        pageSize: PAGE_SIZE,
+        kind: tipo,
+        signal,
+      }),
     enabled: aba === "movimentos",
+    placeholderData: (anterior) => anterior,
   });
 
+  /** Uma única chamada assinada por página exibida. */
+  const caminhosSaldo = (saldos.data?.rows ?? []).map((r) => r.media_path);
+  const fotosSaldo = useQuery({
+    queryKey: ["stock", "fotos-saldos", caminhosSaldo.join(",")],
+    queryFn: () => signedMediaMap(caminhosSaldo),
+    enabled: caminhosSaldo.filter(Boolean).length > 0,
+  });
+
+  const caminhosMov = (movimentos.data?.rows ?? []).map((r) => r.media_path);
+  const fotosMov = useQuery({
+    queryKey: ["stock", "fotos-movs", caminhosMov.join(",")],
+    queryFn: () => signedMediaMap(caminhosMov),
+    enabled: caminhosMov.filter(Boolean).length > 0,
+  });
+
+  const reservasAtivas = saldos.data?.reservasAtivas ?? false;
+
   const colunasSaldo: Column<BalanceRow>[] = [
+    {
+      key: "foto",
+      header: "Foto",
+      render: (r) => (
+        <StockThumb
+          url={r.media_path ? fotosSaldo.data?.[r.media_path] : null}
+          alt={r.produto}
+        />
+      ),
+    },
     {
       key: "peca",
       header: "Peça",
       render: (r) => (
         <div className="min-w-0">
-          <p className="truncate font-semibold text-ledger-text">
-            {r.product_variants?.products?.name ?? "—"}
-          </p>
+          <p className="truncate font-semibold text-ledger-text">{r.produto}</p>
           <p className="truncate text-xs text-ledger-muted">
-            {r.product_variants?.label}
-            {r.product_variants?.sku ? ` · ${r.product_variants.sku}` : ""}
+            {r.variante}
+            {r.sku ? ` · ${r.sku}` : ""}
+            {r.barcode ? ` · ${r.barcode}` : ""}
           </p>
         </div>
       ),
     },
-    { key: "local", header: "Local", render: (r) => r.locations?.name ?? "—" },
+    { key: "local", header: "Local", render: (r) => r.local_nome },
     {
       key: "qtd",
-      header: "Saldo",
+      header: "Saldo físico",
       className: "text-right tabular-nums",
       render: (r) =>
         r.quantity < 0 ? (
@@ -117,14 +169,21 @@ function EstoquePage() {
     },
     {
       key: "reservado",
-      header: "Reservado",
+      header: reservasAtivas ? "Reservado" : "Reservado (em implantação)",
       className: "text-right tabular-nums",
-      render: (r) => formatInt(r.reserved),
+      render: (r) =>
+        reservasAtivas ? (
+          formatInt(r.reserved)
+        ) : (
+          <span className="text-xs text-ledger-muted">—</span>
+        ),
     },
     {
       key: "atualizado",
       header: "Atualizado",
-      render: (r) => <span className="text-xs text-ledger-muted">{formatDateTime(r.updated_at)}</span>,
+      render: (r) => (
+        <span className="text-xs text-ledger-muted">{formatDateTime(r.updated_at)}</span>
+      ),
     },
   ];
 
@@ -132,21 +191,27 @@ function EstoquePage() {
     {
       key: "quando",
       header: "Quando",
-      render: (r) => <span className="text-xs text-ledger-muted">{formatDateTime(r.created_at)}</span>,
+      render: (r) => (
+        <span className="text-xs text-ledger-muted">{formatDateTime(r.created_at)}</span>
+      ),
     },
     { key: "tipo", header: "Tipo", render: (r) => MOVE_LABEL[r.kind] },
     {
       key: "peca",
       header: "Peça",
       render: (r) => (
-        <div className="min-w-0">
-          <p className="truncate font-semibold text-ledger-text">
-            {r.product_variants?.products?.name ?? "—"}
-          </p>
-          <p className="truncate text-xs text-ledger-muted">
-            {r.product_variants?.label}
-            {r.product_variants?.sku ? ` · ${r.product_variants.sku}` : ""}
-          </p>
+        <div className="flex min-w-0 items-center gap-3">
+          <StockThumb
+            url={r.media_path ? fotosMov.data?.[r.media_path] : null}
+            alt={r.produto ?? "Peça"}
+          />
+          <div className="min-w-0">
+            <p className="truncate font-semibold text-ledger-text">{r.produto ?? "—"}</p>
+            <p className="truncate text-xs text-ledger-muted">
+              {r.variante}
+              {r.sku ? ` · ${r.sku}` : ""}
+            </p>
+          </div>
         </div>
       ),
     },
@@ -155,7 +220,7 @@ function EstoquePage() {
       header: "Origem → destino",
       render: (r) => (
         <span className="text-sm">
-          {r.origem?.name ?? "—"} → {r.destino?.name ?? "—"}
+          {r.origem ?? "—"} → {r.destino ?? "—"}
         </span>
       ),
     },
@@ -163,8 +228,35 @@ function EstoquePage() {
       key: "qtd",
       header: "Qtd.",
       className: "text-right tabular-nums",
-      render: (r) => formatInt(r.quantity),
+      render: (r) => {
+        const saida = r.kind === "saida" || (r.kind === "ajuste" && r.quantity < 0);
+        const Icone = saida ? ArrowDownLeft : ArrowUpRight;
+        return (
+          <span
+            className={
+              saida
+                ? "inline-flex items-center gap-1 font-semibold text-rose-700"
+                : "inline-flex items-center gap-1 font-semibold text-emerald-700"
+            }
+          >
+            <Icone aria-hidden className="size-3.5" />
+            {saida ? "−" : "+"}
+            {formatInt(Math.abs(r.quantity))}
+          </span>
+        );
+      },
     },
+    {
+      key: "motivo",
+      header: "Motivo",
+      render: (r) => (
+        <div className="min-w-0">
+          <p className="truncate text-sm">{r.motivo ?? r.reason_code ?? "—"}</p>
+          {r.reference && <p className="truncate text-xs text-ledger-muted">{r.reference}</p>}
+        </div>
+      ),
+    },
+    { key: "autor", header: "Autor", render: (r) => r.autor ?? "—" },
     // O custo só existe na tela quando o servidor autorizou (stock.cost.view).
     ...(movimentos.data?.podeVerCusto
       ? [
@@ -179,9 +271,28 @@ function EstoquePage() {
       : []),
     {
       key: "saldo",
-      header: "Saldo após",
+      header: "Saldo antes → depois",
       className: "text-right tabular-nums",
-      render: (r) => (r.balance_after === null ? "—" : formatInt(r.balance_after)),
+      render: (r) => {
+        const partes: string[] = [];
+        if (r.balance_from_after !== null && r.balance_from_after !== undefined)
+          partes.push(
+            `Origem: ${formatInt(r.balance_from_before ?? 0)} → ${formatInt(r.balance_from_after)}`,
+          );
+        if (r.balance_to_after !== null && r.balance_to_after !== undefined)
+          partes.push(
+            `Destino: ${formatInt(r.balance_to_before ?? 0)} → ${formatInt(r.balance_to_after)}`,
+          );
+        if (partes.length === 0)
+          return r.balance_after === null ? "—" : formatInt(r.balance_after);
+        return (
+          <div className="text-xs leading-relaxed text-ledger-muted">
+            {partes.map((p) => (
+              <p key={p}>{p}</p>
+            ))}
+          </div>
+        );
+      },
     },
   ];
 
@@ -244,41 +355,51 @@ function EstoquePage() {
       </div>
 
       {aba === "saldos" ? (
-        <DataTable
-          columns={colunasSaldo}
-          rows={saldos.data?.rows ?? []}
-          rowKey={(r) => r.id}
-          total={saldos.data?.total ?? 0}
-          page={paginaSaldo}
-          pageSize={PAGE_SIZE}
-          onPageChange={setPaginaSaldo}
-          search={buscaSaldo}
-          onSearchChange={(v) => {
-            setBuscaSaldo(v);
-            setPaginaSaldo(0);
-          }}
-          searchPlaceholder="Buscar por produto, variação, SKU ou código de barras…"
-          filters={
-            <div className="w-56">
-              <SmartSelect
-                options={[
-                  { value: "todos", label: "Todos os locais" },
-                  ...(locais.data ?? []).map((l) => ({ value: l.id, label: l.name, hint: l.code })),
-                ]}
-                value={local}
-                onChange={(v) => {
-                  setLocal(v);
-                  setPaginaSaldo(0);
-                }}
-              />
-            </div>
-          }
-          isLoading={saldos.isLoading}
-          error={saldos.error}
-          onRetry={() => void saldos.refetch()}
-          emptyTitle="Sem saldo registrado"
-          emptyDescription="Nenhuma peça possui saldo com os filtros atuais. Registre uma entrada para começar."
-        />
+        <>
+          {!reservasAtivas && (
+            <p className="rounded-[10px] border border-line bg-surface-muted px-4 py-3 text-sm font-medium text-ledger-muted">
+              Reservas em implantação: o sistema ainda não reserva peças. A coluna Reservado
+              permanece vazia e o saldo disponível só passará a ser calculado (físico menos
+              reservado) quando o motor de reservas estiver pronto.
+            </p>
+          )}
+          <DataTable
+            columns={colunasSaldo}
+            rows={saldos.data?.rows ?? []}
+            rowKey={(r) => r.id}
+            total={saldos.data?.total ?? 0}
+            page={paginaSaldo}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPaginaSaldo}
+            search={buscaSaldo}
+            onSearchChange={(v) => {
+              setBuscaSaldo(v);
+              setPaginaSaldo(0);
+            }}
+            searchPlaceholder="Buscar por produto, variação, SKU, código legado ou código de barras…"
+            onRowClick={(r) => setItemAberto(r.variant_id)}
+            filters={
+              <div className="w-56">
+                <SmartSelect
+                  options={[
+                    { value: "todos", label: "Todos os locais" },
+                    ...(locais.data ?? []).map((l) => ({ value: l.id, label: l.name, hint: l.code })),
+                  ]}
+                  value={local}
+                  onChange={(v) => {
+                    setLocal(v);
+                    setPaginaSaldo(0);
+                  }}
+                />
+              </div>
+            }
+            isLoading={saldos.isLoading}
+            error={saldos.error}
+            onRetry={() => void saldos.refetch()}
+            emptyTitle="Sem saldo registrado"
+            emptyDescription="Nenhuma peça possui saldo com os filtros atuais. Registre uma entrada para começar."
+          />
+        </>
       ) : (
         <DataTable
           columns={colunasMov}
@@ -293,7 +414,8 @@ function EstoquePage() {
             setBuscaMov(v);
             setPaginaMov(0);
           }}
-          searchPlaceholder="Buscar por produto, variação ou SKU…"
+          searchPlaceholder="Buscar por produto, variação, SKU ou código de barras…"
+          onRowClick={(r) => setItemAberto(r.variant_id)}
           filters={
             <div className="w-52">
               <SmartSelect
@@ -320,6 +442,7 @@ function EstoquePage() {
         />
       )}
 
+      <StockItemPanel variantId={itemAberto} onClose={() => setItemAberto(null)} />
       <StockMovementDialog open={dialogo} onOpenChange={setDialogo} />
       <ImportProductsDialog open={importacao} onOpenChange={setImportacao} />
     </div>

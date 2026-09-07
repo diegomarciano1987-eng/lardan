@@ -157,7 +157,11 @@ function AvisoEditorial({ titulo, texto: t }: { titulo: string; texto: string })
 
 function CategoriaPage() {
   const { categoria: slug } = Route.useParams();
-  const busca: FiltrosCategoria = { ...FILTROS_VAZIOS, ...Route.useSearch() };
+  const buscaUrl = Route.useSearch();
+  const busca: FiltrosCategoria = React.useMemo(
+    () => ({ ...FILTROS_VAZIOS, ...buscaUrl }),
+    [buscaUrl],
+  );
   const navigate = useNavigate({ from: "/semijoias/$categoria" });
   const p = personalidade(slug);
 

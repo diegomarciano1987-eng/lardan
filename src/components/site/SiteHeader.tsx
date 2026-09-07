@@ -41,22 +41,22 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
     <header
       className={`fixed inset-x-0 z-50 flex items-center justify-center px-5 ${
         branded
-          ? "top-0 h-24 border-b border-foreground/10 bg-background/82 shadow-[0_16px_42px_-34px_color-mix(in_oklab,var(--foreground)_28%,transparent)] backdrop-blur-xl"
-          : "top-6 h-16"
+          ? "top-0 h-[4.5rem] border-b border-foreground/10 bg-background/82 shadow-[0_16px_42px_-34px_color-mix(in_oklab,var(--foreground)_28%,transparent)] backdrop-blur-xl md:h-24"
+          : "top-6 h-[4.5rem] md:h-16"
       }`}
     >
       {branded ? (
         <Link
           to="/"
           aria-label="Lardan — página inicial"
-          className="absolute left-5 flex h-16 items-center px-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring md:left-10"
+          className="absolute left-5 flex h-[4.5rem] items-center px-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring md:left-10 md:h-24"
         >
           <img
             src={logo.url}
             alt="Lardan"
             width={200}
             height={56}
-            className="h-6 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
+            className="h-5 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
           />
         </Link>
       ) : null}
@@ -71,14 +71,14 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
 
       <HeaderAcoes className="absolute right-4 top-1/2 z-50 -translate-y-1/2 [&_a]:h-9 [&_a]:w-9 md:hidden" />
 
-      <div className="relative z-50 flex flex-col items-center md:hidden">
+      <div className="absolute bottom-2.5 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center md:hidden">
         <button
           type="button"
           aria-expanded={open}
           aria-label={open ? "Fechar menu" : "Abrir menu"}
           aria-controls="menu-mobile"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-4 py-2.5 text-[0.5625rem] tracking-[0.24em] uppercase text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+          className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-4 py-2 text-[0.5625rem] tracking-[0.24em] uppercase text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
           {open ? <X className="h-3.5 w-3.5" strokeWidth={1.4} /> : <Menu className="h-3.5 w-3.5" strokeWidth={1.4} />}
           Menu

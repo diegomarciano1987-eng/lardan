@@ -1,5 +1,5 @@
 import { Toaster as Sonner, type ToasterProps } from "sonner";
-import { Check, Info, TriangleAlert, X } from "lucide-react";
+import { Check, Info, TriangleAlert } from "lucide-react";
 
 /**
  * Avisos no idioma visual da LARDAN: cartão de vidro escuro, fio champagne,

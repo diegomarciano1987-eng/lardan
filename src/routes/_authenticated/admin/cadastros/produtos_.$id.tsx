@@ -16,7 +16,7 @@ import {
 } from "@/components/admin/ui";
 import { RecordSheet, type RecordValues } from "@/components/admin/RecordSheet";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { fetchMyRoles, hasAny, type AppRole } from "@/lib/session";
+import { can, useCapabilities } from "@/lib/capabilities";
 import {
   saveRecord,
   uploadMedia,
@@ -50,13 +50,9 @@ const tone = (status: string) =>
 function ProdutoDetalhe() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
-  const papeis = useQuery({ queryKey: ["meus-papeis"], queryFn: fetchMyRoles });
-  const podeVerCustos = hasAny(papeis.data ?? [], [
-    "master",
-    "diretoria",
-    "financeiro",
-    "estoque",
-  ] as AppRole[]);
+  const capacidades = useCapabilities();
+  const podeVerCustos = can(capacidades, "catalog.cost.view");
+
 
   const [editarFicha, setEditarFicha] = useState(false);
   const [variante, setVariante] = useState<VarianteRow | null>(null);

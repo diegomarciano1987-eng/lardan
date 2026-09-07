@@ -31,10 +31,13 @@ import { useCapabilities } from "@/lib/capabilities";
 import { ShowcaseTaxonomy } from "@/components/admin/ShowcaseTaxonomy";
 import { ShowcaseHome } from "@/components/admin/ShowcaseHome";
 
-type AbaVitrine = "produtos" | "taxonomia" | "home";
+import { ShowcaseOverview } from "@/components/admin/ShowcaseOverview";
+
+type AbaVitrine = "visao" | "produtos" | "taxonomia" | "home";
 const ABAS: { value: AbaVitrine; label: string }[] = [
-  { value: "produtos", label: "Produtos da vitrine" },
-  { value: "taxonomia", label: "Categorias e coleções" },
+  { value: "visao", label: "Visão geral" },
+  { value: "produtos", label: "Produtos" },
+  { value: "taxonomia", label: "Categorias" },
   { value: "home", label: "Página inicial" },
 ];
 import { supabase } from "@/integrations/supabase/client";
@@ -54,6 +57,8 @@ import {
   prontidao,
   saveView,
   showcaseIds,
+  publicarProdutos,
+  despublicarProdutos,
   type BulkAction,
   type Prontidao,
   type ShowcaseFilters,
@@ -176,7 +181,7 @@ function Indicador({
 }
 
 function CentralVitrinePage() {
-  const [aba, setAba] = React.useState<AbaVitrine>("produtos");
+  const [aba, setAba] = React.useState<AbaVitrine>("visao");
   const caps = useCapabilities();
   const qc = useQueryClient();
   const podeVer = caps.includes("showcase.view") || caps.includes("catalog.view");
@@ -352,6 +357,12 @@ function CentralVitrinePage() {
         ))}
       </nav>
 
+      {aba === "visao" && (
+        <ShowcaseOverview
+          onIrParaProdutos={() => setAba("produtos")}
+          onIrParaCategorias={() => setAba("taxonomia")}
+        />
+      )}
       {aba === "taxonomia" && <ShowcaseTaxonomy podePublicar={podePublicar} />}
       {aba === "home" && <ShowcaseHome podeEditar={podePublicar} />}
 
@@ -620,6 +631,7 @@ function CentralVitrinePage() {
                 url={r.cover_media_id ? miniaturas.data?.[r.cover_media_id] : undefined}
                 selecionado={Boolean(selecao[r.id])}
                 onToggle={() => alternar(r.id)}
+                podePublicar={podePublicar}
               />
             ))}
           </div>
@@ -643,7 +655,7 @@ function CentralVitrinePage() {
                       }
                     />
                   </th>
-                  {["Produto", "Situação", "Completude", "Preço", "Estoque", "Categoria", "Coleção", "Alterado"].map((h) => (
+                  {["Produto", "Situação", "Completude", "Preço", "Estoque", "Categoria", "Coleção", "Alterado", "Ações"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-bronze">
                       {h}
                     </th>
@@ -713,6 +725,9 @@ function CentralVitrinePage() {
                       <td className="px-4 py-4 align-top text-sm">{r.collection_name ?? "—"}</td>
                       <td className="px-4 py-4 align-top text-xs text-ledger-muted">
                         {formatDateTime(r.updated_at)}
+                      </td>
+                      <td className="px-4 py-4 align-top">
+                        <AcoesProduto row={r} falta={falta} podePublicar={podePublicar} />
                       </td>
                     </tr>
                   );
@@ -815,11 +830,13 @@ function CartaoProduto({
   url,
   selecionado,
   onToggle,
+  podePublicar,
 }: {
   row: ShowcaseRow;
   url?: string | undefined;
   selecionado: boolean;
   onToggle: () => void;
+  podePublicar: boolean;
 }) {
   const p = prontidao(row);
   return (
@@ -848,6 +865,108 @@ function CartaoProduto({
         </span>
       </div>
       <p className="text-xs text-ledger-muted">Estoque {formatInt(row.estoque)}</p>
+      <AcoesProduto row={row} falta={bloqueios(row)} podePublicar={podePublicar} />
     </article>
+  );
+}
+
+/** Publicação evidente, peça por peça: sem depender de ação em massa. */
+function AcoesProduto({
+  row,
+  falta,
+  podePublicar,
+}: {
+  row: ShowcaseRow;
+  falta: string[];
+  podePublicar: boolean;
+}) {
+  const qc = useQueryClient();
+  const [checklist, setChecklist] = React.useState(false);
+  const [aviso, setAviso] = React.useState<string | null>(null);
+
+  const recarregar = () => void qc.invalidateQueries({ queryKey: ["vitrine"] });
+
+  const publicar = useMutation({
+    mutationFn: () => publicarProdutos([row.id]),
+    onSuccess: (r) => {
+      if (r.afetados > 0) {
+        setAviso("No ar");
+        setChecklist(false);
+      } else {
+        setAviso("Recusado");
+        setChecklist(true);
+      }
+      recarregar();
+    },
+    onError: (e) => setAviso(e instanceof Error ? e.message : "Falhou"),
+  });
+
+  const despublicar = useMutation({
+    mutationFn: () => despublicarProdutos([row.id], "Retirado do ar pelo painel"),
+    onSuccess: () => {
+      setAviso("Fora do ar");
+      recarregar();
+    },
+    onError: (e) => setAviso(e instanceof Error ? e.message : "Falhou"),
+  });
+
+  const publicado = row.status === "publicado";
+
+  return (
+    <div className="flex min-w-52 flex-col gap-2">
+      <div className="flex flex-wrap gap-2">
+        <Link
+          to="/admin/cadastros/produtos/$id"
+          params={{ id: row.id }}
+          className="admin-btn"
+        >
+          Editar
+        </Link>
+
+        {podePublicar && !publicado && falta.length === 0 && (
+          <button
+            type="button"
+            className="admin-btn-primary"
+            disabled={publicar.isPending}
+            onClick={() => publicar.mutate()}
+          >
+            Publicar
+          </button>
+        )}
+
+        {podePublicar && !publicado && falta.length > 0 && (
+          <button type="button" className="admin-btn" onClick={() => setChecklist((v) => !v)}>
+            Corrigir pendências
+          </button>
+        )}
+
+        {publicado && (
+          <a href={`/produto/${row.slug}`} target="_blank" rel="noreferrer" className="admin-btn">
+            Ver no site
+          </a>
+        )}
+
+        {podePublicar && publicado && (
+          <button
+            type="button"
+            className="admin-btn"
+            disabled={despublicar.isPending}
+            onClick={() => despublicar.mutate()}
+          >
+            Retirar do ar
+          </button>
+        )}
+      </div>
+
+      {checklist && falta.length > 0 && (
+        <ul className="rounded-[10px] border border-warning/40 bg-surface-muted px-3 py-2 text-xs text-ledger-text">
+          {falta.map((f) => (
+            <li key={f}>• {CHECKLIST_LABEL[f] ?? f}</li>
+          ))}
+        </ul>
+      )}
+
+      {aviso && <p className="text-xs font-semibold text-ledger-muted">{aviso}</p>}
+    </div>
   );
 }

@@ -1,6 +1,13 @@
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, CheckCircle2, PencilLine, TriangleAlert } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  CheckCircle2,
+  ExternalLink,
+  PencilLine,
+  TriangleAlert,
+} from "lucide-react";
 import { EmptyState, Panel, StatusBadge, formatInt } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import {
@@ -86,45 +93,21 @@ export function ShowcaseTaxonomy({ podePublicar }: { podePublicar: boolean }) {
             description="Cadastre categorias e coleções em Cadastros para organizá-las aqui."
           />
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {itens.map((t, i) => (
-              <li
+              <LinhaTaxonomia
                 key={t.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-line px-4 py-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-semibold text-ledger-text">{t.name}</p>
-                  <p className="truncate text-xs text-ledger-muted">
-                    /{t.slug} · posição {i + 1}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <StatusBadge tone={t.status === "publicado" ? "success" : "neutral"}>
-                    {t.status === "publicado" ? "Publicada" : "Oculta"}
-                  </StatusBadge>
-                  <button
-                    type="button"
-                    className="admin-btn"
-                    disabled={i === 0 || ordenar.isPending}
-                    onClick={() => mover(i, -1)}
-                    aria-label="Subir"
-                  >
-                    <ArrowUp aria-hidden className="size-4" />
-                  </button>
-                  <button
-                    type="button"
-                    className="admin-btn"
-                    disabled={i === itens.length - 1 || ordenar.isPending}
-                    onClick={() => mover(i, 1)}
-                    aria-label="Descer"
-                  >
-                    <ArrowDown aria-hidden className="size-4" />
-                  </button>
-                  <button type="button" className="admin-btn" onClick={() => setEditando(t)}>
-                    <PencilLine aria-hidden className="size-4" /> Administrar
-                  </button>
-                </div>
-              </li>
+                tipo={tipo}
+                item={t}
+                posicao={i + 1}
+                primeiro={i === 0}
+                ultimo={i === itens.length - 1}
+                podePublicar={podePublicar}
+                ocupado={ordenar.isPending}
+                onSubir={() => mover(i, -1)}
+                onDescer={() => mover(i, 1)}
+                onEditar={() => setEditando(t)}
+              />
             ))}
           </ul>
         )}
@@ -142,6 +125,183 @@ export function ShowcaseTaxonomy({ podePublicar }: { podePublicar: boolean }) {
     </div>
   );
 }
+
+/** Uma categoria/coleção com status, pendências e publicação em um clique. */
+function LinhaTaxonomia({
+  tipo,
+  item,
+  posicao,
+  primeiro,
+  ultimo,
+  podePublicar,
+  ocupado,
+  onSubir,
+  onDescer,
+  onEditar,
+}: {
+  tipo: TipoTaxonomia;
+  item: Taxonomia;
+  posicao: number;
+  primeiro: boolean;
+  ultimo: boolean;
+  podePublicar: boolean;
+  ocupado: boolean;
+  onSubir: () => void;
+  onDescer: () => void;
+  onEditar: () => void;
+}) {
+  const qc = useQueryClient();
+  const [checklist, setChecklist] = React.useState(false);
+  const [retirar, setRetirar] = React.useState(false);
+  const [motivo, setMotivo] = React.useState("");
+  const [aviso, setAviso] = React.useState<string | null>(null);
+
+  const filtro: ShowcaseFilters = tipo === "categories" ? { categoria_id: item.id } : { colecao_id: item.id };
+
+  const produtos = useQuery({
+    queryKey: ["vitrine", "taxonomia-contagem", tipo, item.id],
+    queryFn: () => listShowcase({ filtros: filtro, ordem: "nome_asc", pagina: 0, porPagina: 1 }),
+  });
+
+  const impedimentos = useQuery({
+    queryKey: ["vitrine", "taxonomia-impedimentos", tipo, item.id],
+    queryFn: () => impedimentosTaxonomia(tipo, item.id),
+  });
+
+  const recarregar = () => void qc.invalidateQueries({ queryKey: ["vitrine"] });
+
+  const publicar = useMutation({
+    mutationFn: () => publicarTaxonomia(tipo, [item.id]),
+    onSuccess: (r) => {
+      if (r.afetados > 0) {
+        setAviso("Publicada. Já aparece no site.");
+        setChecklist(false);
+      } else {
+        setAviso("Recusada: complete os campos abaixo.");
+        setChecklist(true);
+      }
+      recarregar();
+    },
+    onError: (e) => setAviso(mensagem(e)),
+  });
+
+  const despublicar = useMutation({
+    mutationFn: () => despublicarTaxonomia({ tipo, ids: [item.id], motivo, destino: "rascunho", produtos: "bloquear" }),
+    onSuccess: () => {
+      setAviso("Retirada do ar.");
+      setRetirar(false);
+      setMotivo("");
+      recarregar();
+    },
+    onError: (e) => setAviso(mensagem(e)),
+  });
+
+  const falta = impedimentos.data ?? [];
+  const publicada = item.status === "publicado";
+  const endereco = tipo === "categories" ? `/semijoias/${item.slug}` : `/colecoes`;
+
+  return (
+    <li className="rounded-[12px] border border-line px-4 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-base font-semibold text-ledger-text">{item.name}</p>
+          <p className="truncate text-xs text-ledger-muted">
+            {endereco} · posição {posicao} · {formatInt(produtos.data?.total ?? 0)} produto(s)
+          </p>
+          <p className="mt-1 text-xs text-ledger-muted">
+            {falta.length === 0
+              ? "Conteúdo público completo."
+              : `Pendências: ${falta.map((f) => ROTULO_IMPEDIMENTO_TAXONOMIA[f] ?? f).join(", ")}.`}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge tone={publicada ? "success" : "neutral"}>
+            {publicada ? "No ar" : "Fora do ar"}
+          </StatusBadge>
+
+          <button type="button" className="admin-btn" onClick={onEditar}>
+            <PencilLine aria-hidden className="size-4" /> Editar
+          </button>
+
+          {podePublicar && !publicada && (
+            <button
+              type="button"
+              className="admin-btn-primary"
+              disabled={publicar.isPending}
+              onClick={() => (falta.length > 0 ? setChecklist(true) : publicar.mutate())}
+            >
+              Publicar no site
+            </button>
+          )}
+
+          {publicada && tipo === "categories" && (
+            <a href={endereco} target="_blank" rel="noreferrer" className="admin-btn">
+              <ExternalLink aria-hidden className="size-4" /> Ver no site
+            </a>
+          )}
+
+          {podePublicar && publicada && (
+            <button type="button" className="admin-btn" onClick={() => setRetirar((v) => !v)}>
+              Retirar do ar
+            </button>
+          )}
+
+          <button type="button" className="admin-btn" disabled={primeiro || ocupado} onClick={onSubir} aria-label="Subir">
+            <ArrowUp aria-hidden className="size-4" />
+          </button>
+          <button type="button" className="admin-btn" disabled={ultimo || ocupado} onClick={onDescer} aria-label="Descer">
+            <ArrowDown aria-hidden className="size-4" />
+          </button>
+        </div>
+      </div>
+
+      {checklist && falta.length > 0 && (
+        <div className="mt-4 rounded-[10px] border border-warning/40 bg-surface-muted px-4 py-3">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-warning">
+            <TriangleAlert aria-hidden className="size-4" /> Falta preencher para publicar
+          </p>
+          <ul className="mt-2 space-y-1 text-sm text-ledger-text">
+            {falta.map((f) => (
+              <li key={f}>• {ROTULO_IMPEDIMENTO_TAXONOMIA[f] ?? f} — preencha em Editar, nesta mesma tela.</li>
+            ))}
+          </ul>
+          <button type="button" className="admin-btn mt-3" onClick={onEditar}>
+            Corrigir agora
+          </button>
+        </div>
+      )}
+
+      {retirar && (
+        <div className="mt-4 flex flex-wrap items-end gap-3 rounded-[10px] border border-line bg-surface-muted px-4 py-3">
+          <label className="flex min-w-64 flex-1 flex-col gap-2">
+            <span className="ledger-eyebrow">Motivo (obrigatório)</span>
+            <input
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+              className="h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm font-medium text-ledger-text shadow-sm outline-none focus:border-champagne focus:ring-2 focus:ring-champagne/25"
+            />
+          </label>
+          <button
+            type="button"
+            className="admin-btn"
+            disabled={motivo.trim() === "" || despublicar.isPending}
+            onClick={() => despublicar.mutate()}
+          >
+            Confirmar retirada
+          </button>
+        </div>
+      )}
+
+      {aviso && (
+        <p className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-ledger-text">
+          <CheckCircle2 aria-hidden className="size-4 text-success" /> {aviso}
+        </p>
+      )}
+    </li>
+  );
+}
+
 
 function EditorTaxonomia({
   tipo,

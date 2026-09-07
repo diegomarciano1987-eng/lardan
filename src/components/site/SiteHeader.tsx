@@ -65,15 +65,19 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         ))}
       </nav>
 
-      <div className="absolute right-5 top-1/2 z-50 -translate-y-1/2 md:hidden">
+      <HeaderAcoes className="absolute right-5 top-1/2 hidden -translate-y-1/2 md:flex md:right-10" />
+
+      <div className="absolute right-5 top-1/2 z-50 flex -translate-y-1/2 items-center gap-2 md:hidden">
+        <HeaderAcoes />
         <button
           type="button"
           aria-expanded={open}
+          aria-label={open ? "Fechar menu" : "Abrir menu"}
           aria-controls="menu-mobile"
           onClick={() => setOpen((v) => !v)}
-          className="border-b border-foreground/40 px-2 pb-1 text-[0.6875rem] tracking-[0.22em] uppercase text-foreground/80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 bg-background/55 text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
-          {open ? "Fechar" : "Menu"}
+          {open ? <X className="h-[1.15rem] w-[1.15rem]" strokeWidth={1.4} /> : <Menu className="h-[1.15rem] w-[1.15rem]" strokeWidth={1.4} />}
         </button>
         {open && (
           <div

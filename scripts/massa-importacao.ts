@@ -229,7 +229,9 @@ async function carga(escalas: readonly number[]) {
   }
 
   const ms = (v: number) => `${(v / 1000).toFixed(1)}s`;
-  console.log("\n| Escala | Arquivo | Leitura | Recepção | Validação | Processamento | Total | Criados | Atualizados | Recusadas | Conflitos | Entradas | Unidades |");
+  console.log(
+    "\n| Escala | Arquivo | Leitura | Recepção | Validação | Processamento | Total | Criados | Atualizados | Recusadas | Conflitos | Entradas | Unidades |",
+  );
   console.log("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
   for (const m of medidas) {
     console.log(

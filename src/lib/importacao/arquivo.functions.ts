@@ -43,9 +43,13 @@ export const registrarArquivo = createServerFn({ method: "POST" })
     const { createHash } = await import("node:crypto");
     const sha = createHash("sha256").update(bytes).digest("hex");
 
-    const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+    const ab = bytes.buffer.slice(
+      bytes.byteOffset,
+      bytes.byteOffset + bytes.byteLength,
+    ) as ArrayBuffer;
     const lida = await lerPlanilha(ab);
-    if (lida.linhas.length === 0) throw new Error("Não encontrei nenhuma linha preenchida nesta planilha.");
+    if (lida.linhas.length === 0)
+      throw new Error("Não encontrei nenhuma linha preenchida nesta planilha.");
 
     const { data: reg, error } = await context.supabase.rpc("import_file_register", {
       _sha: sha,

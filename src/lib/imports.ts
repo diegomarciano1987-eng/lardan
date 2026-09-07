@@ -294,7 +294,10 @@ export async function abrirExecucao(p: AberturaLote) {
   );
 }
 
-export async function enviarLinhas(jobId: string, linhas: { n: number; raw: Record<string, string> }[]) {
+export async function enviarLinhas(
+  jobId: string,
+  linhas: { n: number; raw: Record<string, string> }[],
+) {
   return chamar<number>("import_rows_stage", { _job: jobId, _rows: linhas });
 }
 
@@ -325,7 +328,9 @@ export async function pausarLote(jobId: string) {
 }
 
 export async function retomarLote(jobId: string) {
-  return chamar<{ status: EstadoLote; linhas_liberadas: number }>("import_job_resume", { _job: jobId });
+  return chamar<{ status: EstadoLote; linhas_liberadas: number }>("import_job_resume", {
+    _job: jobId,
+  });
 }
 
 export async function cancelarLote(jobId: string, motivo: string) {
@@ -346,7 +351,11 @@ export async function indicadoresLote(jobId: string) {
 }
 
 export async function lerLote(jobId: string): Promise<JobResumo> {
-  const { data, error } = await supabase.from("import_jobs").select("*").eq("id", jobId).maybeSingle();
+  const { data, error } = await supabase
+    .from("import_jobs")
+    .select("*")
+    .eq("id", jobId)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return data as unknown as JobResumo;
 }
@@ -410,9 +419,22 @@ export async function baixarPlanilhaDeErros(
     return {
       "Linha original": p.line_no,
       Situação: p.status === "conflito" ? "Conflito de código" : "Recusada",
-      Campo: msgs.map((m) => m.campo ?? "").filter(Boolean).join(" | "),
-      Motivo: celulaSegura(msgs.map((m) => m.erro ?? m.aviso ?? "").filter(Boolean).join(" | ")),
-      "O que fazer": celulaSegura(msgs.map((m) => m.correcao ?? "").filter(Boolean).join(" | ")),
+      Campo: msgs
+        .map((m) => m.campo ?? "")
+        .filter(Boolean)
+        .join(" | "),
+      Motivo: celulaSegura(
+        msgs
+          .map((m) => m.erro ?? m.aviso ?? "")
+          .filter(Boolean)
+          .join(" | "),
+      ),
+      "O que fazer": celulaSegura(
+        msgs
+          .map((m) => m.correcao ?? "")
+          .filter(Boolean)
+          .join(" | "),
+      ),
       ...bruto,
     };
   });

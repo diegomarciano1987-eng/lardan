@@ -44,7 +44,9 @@ export async function lerPlanilha(buffer: ArrayBuffer): Promise<PlanilhaLida> {
   try {
     wb = XLSX.read(buffer, { type: "array", raw: false, cellDates: false, cellFormula: false });
   } catch {
-    throw new Error("Não consegui abrir este arquivo. Ele pode estar corrompido ou protegido por senha.");
+    throw new Error(
+      "Não consegui abrir este arquivo. Ele pode estar corrompido ou protegido por senha.",
+    );
   }
   const avisos: string[] = [];
   if (wb.SheetNames.length > 1) {
@@ -65,7 +67,9 @@ export async function lerPlanilha(buffer: ArrayBuffer): Promise<PlanilhaLida> {
 
   const cabecalhosBrutos = (matriz[0] ?? []).map(limpar);
   if (cabecalhosBrutos.length > LIMITES.colunas) {
-    throw new Error(`A planilha tem ${cabecalhosBrutos.length} colunas. O limite é ${LIMITES.colunas}.`);
+    throw new Error(
+      `A planilha tem ${cabecalhosBrutos.length} colunas. O limite é ${LIMITES.colunas}.`,
+    );
   }
   const vistos = new Set<string>();
   const cabecalhos = cabecalhosBrutos.map((c, i) => {
@@ -81,7 +85,9 @@ export async function lerPlanilha(buffer: ArrayBuffer): Promise<PlanilhaLida> {
   const linhas: Record<string, string>[] = [];
   for (let i = 1; i < matriz.length; i += 1) {
     if (linhas.length >= LIMITES.linhas) {
-      throw new Error(`A planilha passa de ${LIMITES.linhas.toLocaleString("pt-BR")} linhas. Divida o arquivo.`);
+      throw new Error(
+        `A planilha passa de ${LIMITES.linhas.toLocaleString("pt-BR")} linhas. Divida o arquivo.`,
+      );
     }
     const bruta = matriz[i] ?? [];
     const registro: Record<string, string> = {};

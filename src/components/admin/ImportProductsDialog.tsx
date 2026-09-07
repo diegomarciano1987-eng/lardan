@@ -223,7 +223,9 @@ export function ImportProductsDialog({
         const r = await validarLote(aberta.id, LOTE_VALIDA);
         restantes = r.restantes;
         setIndicadores(r.indicadores);
-        setOcupado(`Conferindo… ${formatInt(linhas.length - restantes)} de ${formatInt(linhas.length)}`);
+        setOcupado(
+          `Conferindo… ${formatInt(linhas.length - restantes)} de ${formatInt(linhas.length)}`,
+        );
       }
 
       setResumo(await lerLote(aberta.id));
@@ -317,7 +319,8 @@ export function ImportProductsDialog({
     if (!jobId) return;
     try {
       const r = await promoverSimulacao(jobId);
-      if (r.base_mudou) toast.warning("A base mudou desde a simulação — confira o resultado no fim.");
+      if (r.base_mudou)
+        toast.warning("A base mudou desde a simulação — confira o resultado no fim.");
       setJobId(r.id);
       setSimular(false);
       setResumo(await lerLote(r.id));
@@ -340,11 +343,13 @@ export function ImportProductsDialog({
     <Dialog open={open} onOpenChange={fechar}>
       <DialogContent className="admin-scope max-h-[88vh] max-w-4xl overflow-auto">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl">Importar produtos por planilha</DialogTitle>
+          <DialogTitle className="font-display text-2xl">
+            Importar produtos por planilha
+          </DialogTitle>
           <DialogDescription>
             O arquivo ganha uma impressão digital no servidor; depois vêm o de-para, a conferência e
-            só então a gravação. Peças já cadastradas são atualizadas — nada é duplicado, e reenviar o
-            mesmo lote não lança estoque duas vezes.
+            só então a gravação. Peças já cadastradas são atualizadas — nada é duplicado, e reenviar
+            o mesmo lote não lança estoque duas vezes.
           </DialogDescription>
         </DialogHeader>
 
@@ -365,8 +370,8 @@ export function ImportProductsDialog({
             <div className="ledger-panel flex flex-col items-center gap-3 px-6 py-10 text-center">
               <FileSpreadsheet aria-hidden className="size-8 text-bronze" />
               <p className="text-sm text-ledger-muted">
-                Excel (.xlsx, .xls) ou CSV, até 20 MB e 50.000 linhas. Códigos com zeros à esquerda são
-                preservados.
+                Excel (.xlsx, .xls) ou CSV, até 20 MB e 50.000 linhas. Códigos com zeros à esquerda
+                são preservados.
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <button
@@ -391,8 +396,9 @@ export function ImportProductsDialog({
         {etapa === "mapa" && (
           <div className="space-y-5">
             <p className="text-sm text-ledger-muted">
-              <strong className="text-ledger-text">{arquivo?.name}</strong> · {formatInt(linhas.length)}{" "}
-              linhas · {formatInt(cabecalhos.length)} colunas · impressão digital {sha.slice(0, 12)}
+              <strong className="text-ledger-text">{arquivo?.name}</strong> ·{" "}
+              {formatInt(linhas.length)} linhas · {formatInt(cabecalhos.length)} colunas · impressão
+              digital {sha.slice(0, 12)}
             </p>
             {avisosArquivo.length > 0 && (
               <ul className="ledger-panel space-y-1 px-4 py-3 text-sm text-ledger-muted">
@@ -430,7 +436,11 @@ export function ImportProductsDialog({
                   <label className="block space-y-1.5">
                     <Rotulo>Local de entrada</Rotulo>
                     <SmartSelect
-                      options={(locais.data ?? []).map((l) => ({ value: l.id, label: l.name, hint: l.code }))}
+                      options={(locais.data ?? []).map((l) => ({
+                        value: l.id,
+                        label: l.name,
+                        hint: l.code,
+                      }))}
                       value={localId}
                       onChange={setLocalId}
                       placeholder="Escolha o local…"
@@ -494,7 +504,12 @@ export function ImportProductsDialog({
               <button type="button" className="admin-btn" onClick={reiniciar} disabled={!!ocupado}>
                 Trocar arquivo
               </button>
-              <button type="button" className="admin-btn-primary" onClick={() => void conferir()} disabled={!!ocupado}>
+              <button
+                type="button"
+                className="admin-btn-primary"
+                onClick={() => void conferir()}
+                disabled={!!ocupado}
+              >
                 {ocupado ?? "Conferir planilha"}
               </button>
             </div>
@@ -507,23 +522,33 @@ export function ImportProductsDialog({
             <div className="ledger-panel grid grid-cols-2 gap-4 px-5 py-4 sm:grid-cols-5">
               <div>
                 <Rotulo>Linhas lidas</Rotulo>
-                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(indicadores.total)}</p>
+                <p className="font-display text-2xl font-bold text-ledger-text">
+                  {formatInt(indicadores.total)}
+                </p>
               </div>
               <div>
                 <Rotulo>Prontas</Rotulo>
-                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(indicadores.prontas)}</p>
+                <p className="font-display text-2xl font-bold text-ledger-text">
+                  {formatInt(indicadores.prontas)}
+                </p>
               </div>
               <div>
                 <Rotulo>Com aviso</Rotulo>
-                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(indicadores.avisos)}</p>
+                <p className="font-display text-2xl font-bold text-ledger-text">
+                  {formatInt(indicadores.avisos)}
+                </p>
               </div>
               <div>
                 <Rotulo>Recusadas</Rotulo>
-                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(indicadores.recusadas)}</p>
+                <p className="font-display text-2xl font-bold text-ledger-text">
+                  {formatInt(indicadores.recusadas)}
+                </p>
               </div>
               <div>
                 <Rotulo>Conflitos</Rotulo>
-                <p className="font-display text-2xl font-bold text-ledger-text">{formatInt(indicadores.conflitos)}</p>
+                <p className="font-display text-2xl font-bold text-ledger-text">
+                  {formatInt(indicadores.conflitos)}
+                </p>
               </div>
             </div>
 
@@ -537,7 +562,9 @@ export function ImportProductsDialog({
                   <tbody>
                     {problemas.slice(0, 60).map((p) => (
                       <tr key={p.line_no} className="border-t border-line/60">
-                        <td className="w-16 px-4 py-2 tabular-nums text-ledger-muted">#{p.line_no}</td>
+                        <td className="w-16 px-4 py-2 tabular-nums text-ledger-muted">
+                          #{p.line_no}
+                        </td>
                         <td className="px-4 py-2 text-ledger-text">
                           {(p.messages ?? [])
                             .map((m) => m.erro ?? m.aviso)
@@ -561,7 +588,9 @@ export function ImportProductsDialog({
                 <button
                   type="button"
                   className="admin-btn"
-                  onClick={() => void baixarPlanilhaDeErros(problemas, "linhas-recusadas-lardan.xlsx")}
+                  onClick={() =>
+                    void baixarPlanilhaDeErros(problemas, "linhas-recusadas-lardan.xlsx")
+                  }
                 >
                   <Download aria-hidden className="mr-2 inline size-4" />
                   Baixar linhas recusadas
@@ -576,7 +605,9 @@ export function ImportProductsDialog({
                 disabled={aptas === 0}
                 onClick={() => void executar()}
               >
-                {simular ? `Simular ${formatInt(aptas)} linhas` : `Gravar ${formatInt(aptas)} linhas`}
+                {simular
+                  ? `Simular ${formatInt(aptas)} linhas`
+                  : `Gravar ${formatInt(aptas)} linhas`}
               </button>
             </div>
           </div>
@@ -599,7 +630,8 @@ export function ImportProductsDialog({
             </div>
             <p className="text-sm text-ledger-text">
               {formatInt(progresso.feitas)} de {formatInt(progresso.total)} linhas ·{" "}
-              {velocidade.toFixed(0)} linhas/s · decorrido {duracao(decorrido)} · faltam ~{estimativa}
+              {velocidade.toFixed(0)} linhas/s · decorrido {duracao(decorrido)} · faltam ~
+              {estimativa}
             </p>
             {pedirMotivo ? (
               <div className="flex flex-wrap items-end gap-3">
@@ -615,7 +647,11 @@ export function ImportProductsDialog({
                 <button type="button" className="admin-btn" onClick={() => setPedirMotivo(false)}>
                   Voltar
                 </button>
-                <button type="button" className="admin-btn-primary" onClick={() => void confirmarCancelamento()}>
+                <button
+                  type="button"
+                  className="admin-btn-primary"
+                  onClick={() => void confirmarCancelamento()}
+                >
                   Confirmar cancelamento
                 </button>
               </div>
@@ -645,7 +681,8 @@ export function ImportProductsDialog({
                 {formatInt(indicadores.produtos_atualizados)} atualizados ·{" "}
                 {formatInt(indicadores.variantes_criadas)} variações novas ·{" "}
                 {formatInt(indicadores.variantes_atualizadas)} variações atualizadas ·{" "}
-                {formatInt(indicadores.entradas)} entradas · {formatInt(indicadores.unidades)} unidades.
+                {formatInt(indicadores.entradas)} entradas · {formatInt(indicadores.unidades)}{" "}
+                unidades.
               </p>
               <p className="text-ledger-muted">
                 {formatInt(indicadores.processadas + indicadores.simuladas)} linhas concluídas ·{" "}
@@ -662,7 +699,9 @@ export function ImportProductsDialog({
                 <button
                   type="button"
                   className="admin-btn"
-                  onClick={() => void baixarPlanilhaDeErros(problemas, "linhas-recusadas-lardan.xlsx")}
+                  onClick={() =>
+                    void baixarPlanilhaDeErros(problemas, "linhas-recusadas-lardan.xlsx")
+                  }
                 >
                   <Download aria-hidden className="mr-2 inline size-4" />
                   Baixar linhas recusadas

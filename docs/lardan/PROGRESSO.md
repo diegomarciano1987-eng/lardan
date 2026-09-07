@@ -128,3 +128,9 @@
   aprovadas. `tests/security/estoque.test.ts` continua 10/10.
 - Pendências: agendador periódico da expiração, escopo próprio do Representante,
   maleta, venda, inventário por sessão e recebimentos.
+
+## Pré-limpeza controlada do banco (07/09/2026)
+Rodada somente de inspeção. Nada foi excluído, arquivado, despublicado ou alterado.
+Relatório completo em `docs/lardan/PRE-LIMPEZA.md`; exportações de rollback em `/mnt/documents/lardan-prelimpeza/`.
+Conclusão principal: as rotinas `homolog_purge*` são inadequadas porque ignoram `stock_reservations`,
+`stock_balances.reserved` e `stock_movements.reservation_id`. Especificação de `homolog_purge_v2` registrada.

@@ -787,28 +787,33 @@ async function limpar(marcador: string): Promise<boolean> {
   for (const j of jobs) await del(`/import_rows?job_id=eq.${j.id}`);
   await del(`/import_jobs?reference=${alvo}`);
   await del(`/import_files?file_name=like.importacao-%25`);
+  const chamar = async (fn: string, args: Record<string, unknown>) => {
+    const res = await fetch(`${URL}/rest/v1/rpc/${fn}`, {
+      method: "POST",
+      headers: { ...cab, "Content-Type": "application/json" },
+      body: JSON.stringify(args),
+    });
+    const txt = await res.text();
+    if (res.status >= 400) throw new Error(`${fn}: ${txt}`);
+    return Number(txt);
+  };
   // Movimentações de estoque são imutáveis: só a rotina oficial de homologação,
-  // que exige o marcador, pode remover a massa sintética.
-  const estoqueRes = await fetch(`${URL}/rest/v1/rpc/homolog_purge_stock`, {
-    method: "POST",
-    headers: { ...cab, "Content-Type": "application/json" },
-    body: JSON.stringify({ _prefix: marcador }),
-  });
-  if (estoqueRes.status >= 400) {
-    console.error("limpeza de estoque recusada:", await estoqueRes.text());
-    return false;
+  // que exige o marcador, remove a massa sintética — e sempre em blocos.
+  let movimentos = 0;
+  for (let v = 0; v < 500; v += 1) {
+    const n = await chamar("homolog_purge_stock", { _prefix: marcador, _limite: 5000 });
+    movimentos += n;
+    if (n === 0) break;
   }
-  const res = await fetch(`${URL}/rest/v1/rpc/homolog_purge`, {
-    method: "POST",
-    headers: { ...cab, "Content-Type": "application/json" },
-    body: JSON.stringify({ _prefix: marcador }),
-  });
-  const corpo = await res.text();
-  if (res.status >= 400) {
-    console.error("limpeza recusada pelo banco:", corpo);
-    return false;
+  let pecas = 0;
+  for (let v = 0; v < 500; v += 1) {
+    const n = await chamar("homolog_purge_catalogo", { _prefix: marcador, _limite: 1000 });
+    pecas += n;
+    if (n === 0) break;
   }
-  console.log("limpeza concluída:", corpo);
+  console.log(
+    `limpeza concluída: ${movimentos} movimentações e ${pecas} peças da massa ${marcador} removidas.`,
+  );
   return true;
 }
 

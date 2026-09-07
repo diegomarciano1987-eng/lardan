@@ -27,6 +27,8 @@ interface CategoryGuillotineProps {
   align?: "left" | "right";
   /** Lado do texto apenas no mobile (quando diferente do desktop). */
   mobileAlign?: "left" | "right";
+  /** A categoria está publicada? Quando não, o botão vira aviso honesto. */
+  disponivel?: boolean;
 }
 
 /**
@@ -48,6 +50,7 @@ export function CategoryGuillotine({
   enterFrom,
   align = "left",
   mobileAlign,
+  disponivel = true,
 }: CategoryGuillotineProps) {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const tier = useDeviceTier();

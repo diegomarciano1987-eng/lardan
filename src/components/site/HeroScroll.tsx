@@ -112,17 +112,30 @@ export function HeroScroll() {
           <h1 className="sr-only">Lardan — semijoias</h1>
         </div>
 
+        {/* Eclipse cinematográfico: a cena escurece nas bordas no instante da troca. */}
+        {eclipse > 0.005 && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              opacity: eclipse * 0.62,
+              background:
+                "radial-gradient(ellipse at center, oklch(0.24 0.02 45 / 0.55) 0%, oklch(0.2 0.02 45 / 0.85) 72%, oklch(0.18 0.02 45 / 0.95) 100%)",
+            }}
+          />
+        )}
+
         {/* Clarão central: o "corte" de cinema entre ícone e nome. */}
         {flash > 0.005 && (
           <div
             aria-hidden
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[56vh] w-[min(110vw,1400px)] -translate-x-1/2 -translate-y-1/2"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[42vh] w-[min(86vw,1080px)] -translate-x-1/2 -translate-y-1/2"
             style={{
-              opacity: flash,
+              opacity: flash * 0.9,
               background:
-                "radial-gradient(ellipse, oklch(1 0 0 / 0.92) 0%, oklch(0.98 0.02 75 / 0.55) 30%, oklch(0.95 0.03 60 / 0.18) 55%, transparent 78%)",
-              filter: leve ? "blur(14px)" : "blur(28px)",
-              transform: `translate3d(-50%, -50%, 0) scale(${0.55 + flash * 0.75})`,
+                "radial-gradient(ellipse, oklch(1 0 0 / 0.95) 0%, oklch(0.98 0.02 75 / 0.5) 32%, oklch(0.95 0.03 60 / 0.15) 56%, transparent 78%)",
+              filter: leve ? "blur(12px)" : "blur(24px)",
+              transform: `translate3d(-50%, -50%, 0) scale(${0.55 + flash * 0.8})`,
               mixBlendMode: "screen",
             }}
           />

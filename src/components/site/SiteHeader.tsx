@@ -1,5 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import { Menu, X } from "lucide-react";
+import { HeaderAcoes } from "./HeaderAcoes";
 import { NAV_ITEMS } from "@/lib/brand";
 import logo from "@/assets/lardan-logo-completa.png.asset.json";
 

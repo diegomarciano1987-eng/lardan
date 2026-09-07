@@ -51,7 +51,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         <Link
           to="/"
           aria-label="Lardan — página inicial"
-          className="absolute left-5 flex h-[4.5rem] items-center px-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring md:left-10 md:h-24"
+          className="absolute left-5 bottom-2.5 flex h-9 items-center px-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring md:bottom-auto md:left-10 md:h-24"
         >
           <img
             src={logo.url}

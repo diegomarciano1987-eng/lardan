@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { NAV_ITEMS } from "@/lib/brand";
+import logo from "@/assets/lardan-logo-completa.png.asset.json";
 
 function NavLink({
   to,
@@ -31,18 +32,40 @@ function NavLink({
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ branded = false }: { branded?: boolean }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="fixed inset-x-0 top-6 z-50 flex justify-center px-4">
+    <header
+      className={`fixed inset-x-0 z-50 flex items-center justify-center px-5 ${
+        branded
+          ? "top-0 h-24 border-b border-foreground/10 bg-background/82 shadow-[0_16px_42px_-34px_color-mix(in_oklab,var(--foreground)_28%,transparent)] backdrop-blur-xl"
+          : "top-6"
+      }`}
+    >
+      {branded ? (
+        <Link
+          to="/"
+          aria-label="Lardan — página inicial"
+          className="absolute left-5 flex h-16 items-center px-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring md:left-10"
+        >
+          <img
+            src={logo.url}
+            alt="Lardan"
+            width={200}
+            height={56}
+            className="h-10 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
+          />
+        </Link>
+      ) : null}
+
       <nav aria-label="Navegação principal" className="hidden items-center gap-2 md:flex">
         {NAV_ITEMS.map((item) => (
           <NavLink key={item.to} to={item.to} label={item.label} />
         ))}
       </nav>
 
-      <div className="md:hidden">
+      <div className={`md:hidden ${branded ? "ml-auto" : ""}`}>
         <button
           type="button"
           aria-expanded={open}

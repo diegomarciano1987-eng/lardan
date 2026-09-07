@@ -56,7 +56,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
             alt="Lardan"
             width={200}
             height={56}
-            className="h-8 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
+            className="h-7 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
           />
         </Link>
       ) : null}

@@ -1,9 +1,13 @@
 import type { ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { VoltarLink } from "./VoltarLink";
 
 export function SiteLayout({ children, brandedHeader = false }: { children: ReactNode; brandedHeader?: boolean }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const comVoltar = pathname !== "/";
+
   return (
     <div className="min-h-screen bg-background">
       <a
@@ -14,7 +18,9 @@ export function SiteLayout({ children, brandedHeader = false }: { children: Reac
       </a>
       <SiteHeader branded={brandedHeader} />
       <VoltarLink />
-      <main id="conteudo" className="min-w-0">{children}</main>
+      <main id="conteudo" className={`min-w-0 ${comVoltar ? "pt-10 md:pt-0" : ""}`}>
+        {children}
+      </main>
       <SiteFooter />
     </div>
   );

@@ -67,9 +67,10 @@ function chave(i: { slug: string; variante: string | null }) {
 export function adicionarAoCarrinho(item: Omit<ItemCarrinho, "quantidade">, quantidade = 1) {
   const atual = snapshot();
   const idx = atual.findIndex((i) => chave(i) === chave(item));
-  if (idx >= 0) {
+  const existente = idx >= 0 ? atual[idx] : undefined;
+  if (existente) {
     const copia = atual.slice();
-    copia[idx] = { ...copia[idx], quantidade: copia[idx].quantidade + quantidade };
+    copia[idx] = { ...existente, quantidade: existente.quantidade + quantidade };
     gravar(copia);
   } else {
     gravar([...atual, { ...item, quantidade }]);

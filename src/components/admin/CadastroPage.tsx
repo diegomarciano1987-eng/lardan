@@ -18,7 +18,7 @@ interface Props<T extends { id: string }> {
   select: string;
   searchColumns: string[];
   columns: Column<T>[];
-  fields: FieldSpec[];
+  fields?: FieldSpec[];
   /** Campos que dependem do registro aberto (ex.: situação de um item já publicado). */
   fieldsFor?: (row: T | null) => FieldSpec[];
   /** Transformação antes de gravar (slug, maiúsculas, etc.). */
@@ -138,7 +138,7 @@ export function CadastroPage<T extends { id: string }>({
         onOpenChange={setAberto}
         title={editando ? `Editar — ${title}` : novoLabel}
         description="Toda alteração é registrada na auditoria com autor, data e valores anterior e novo."
-        fields={fieldsFor ? fieldsFor(editando) : fields}
+        fields={fieldsFor ? fieldsFor(editando) : (fields ?? [])}
         initial={initial}
         onSubmit={async (values) => {
           await salvar.mutateAsync(values);

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { HeroScroll } from "@/components/site/HeroScroll";
+import { IntroProgress } from "@/components/site/IntroProgress";
 import { SessaoSemijoias } from "@/components/site/SessaoSemijoias";
 import { CategoryGuillotine } from "@/components/site/CategoryGuillotine";
 import { getHomeConfig, listPublicCategories } from "@/lib/storefront";
@@ -119,6 +120,7 @@ function HomePage() {
 
   return (
     <SiteLayout>
+      <IntroProgress />
       <HeroScroll />
       <SessaoSemijoias />
 

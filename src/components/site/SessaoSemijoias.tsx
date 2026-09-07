@@ -43,7 +43,7 @@ export function SessaoSemijoias() {
   const dir = 1; // da direita para a esquerda
 
   return (
-    <div ref={ref} className="relative -mt-[140vh] h-[280vh]">
+    <div ref={ref} className="relative -mt-[260vh] h-[280vh]">
       <section
         className="sticky top-0 h-screen overflow-hidden bg-background"
         style={{

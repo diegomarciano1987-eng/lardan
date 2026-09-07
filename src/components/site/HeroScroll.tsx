@@ -148,13 +148,15 @@ export function HeroScroll() {
             className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
             style={{
               width: "120vw",
-              height: "2px",
-              opacity: beam,
+              height: "3px",
+              borderRadius: "999px",
+              opacity: beam * 0.85,
               background:
-                "linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.85) 18%, oklch(1 0 0) 50%, oklch(1 0 0 / 0.85) 82%, transparent 100%)",
+                "linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.7) 20%, oklch(1 0 0) 50%, oklch(1 0 0 / 0.7) 80%, transparent 100%)",
+              filter: "blur(1.5px)",
               boxShadow: leve
                 ? undefined
-                : "0 0 26px 8px oklch(0.99 0.01 75 / 0.55), 0 0 90px 30px oklch(0.96 0.03 60 / 0.3)",
+                : "0 0 30px 10px oklch(0.99 0.01 75 / 0.5), 0 0 110px 40px oklch(0.96 0.03 60 / 0.28)",
               transform: `translate3d(-50%, -50%, 0) scaleX(${0.25 + easeOut(beam) * 0.95})`,
               mixBlendMode: "screen",
             }}

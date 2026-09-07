@@ -1,18 +1,42 @@
-import { Toaster as Sonner } from "sonner";
+import { Toaster as Sonner, type ToasterProps } from "sonner";
+import { Check, Info, TriangleAlert, X } from "lucide-react";
 
-type ToasterProps = React.ComponentProps<typeof Sonner>;
-
-const Toaster = ({ ...props }: ToasterProps) => {
+/**
+ * Avisos no idioma visual da LARDAN: cartão de vidro escuro, fio champagne,
+ * título em serifa e selo losango. Nada de estilo padrão de navegador.
+ */
+const Toaster = (props: ToasterProps) => {
   return (
     <Sonner
-      className="toaster group"
+      className="lardan-toaster"
+      position="top-center"
+      offset={24}
+      gap={14}
+      duration={4200}
+      closeButton
+      icons={{
+        success: <Check className="size-4" strokeWidth={2} aria-hidden />,
+        error: <TriangleAlert className="size-4" strokeWidth={2} aria-hidden />,
+        warning: <TriangleAlert className="size-4" strokeWidth={2} aria-hidden />,
+        info: <Info className="size-4" strokeWidth={2} aria-hidden />,
+        loading: <span className="lardan-toast__spin" aria-hidden />,
+      }}
       toastOptions={{
+        unstyled: true,
+        closeButton: true,
         classNames: {
-          toast:
-            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
-          description: "group-[.toast]:text-muted-foreground",
-          actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
-          cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+          toast: "lardan-toast",
+          title: "lardan-toast__title",
+          description: "lardan-toast__desc",
+          icon: "lardan-toast__icon",
+          content: "lardan-toast__content",
+          closeButton: "lardan-toast__close",
+          actionButton: "lardan-toast__action",
+          cancelButton: "lardan-toast__cancel",
+          success: "lardan-toast--success",
+          error: "lardan-toast--error",
+          warning: "lardan-toast--warning",
+          info: "lardan-toast--info",
         },
       }}
       {...props}
@@ -20,4 +44,4 @@ const Toaster = ({ ...props }: ToasterProps) => {
   );
 };
 
-export { Toaster };
+export { Toaster, X };

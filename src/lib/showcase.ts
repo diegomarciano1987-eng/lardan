@@ -84,6 +84,7 @@ export const ESSENCIAIS = [
   "nome",
   "slug",
   "categoria",
+  "categoria_nao_publicada",
   "descricao",
   "imagem",
   "texto_alternativo",

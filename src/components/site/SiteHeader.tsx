@@ -40,7 +40,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
       className={`fixed inset-x-0 z-50 flex items-center justify-center px-5 ${
         branded
           ? "top-0 h-24 border-b border-foreground/10 bg-background/82 shadow-[0_16px_42px_-34px_color-mix(in_oklab,var(--foreground)_28%,transparent)] backdrop-blur-xl"
-          : "top-6"
+          : "top-6 h-16"
       }`}
     >
       {branded ? (
@@ -65,7 +65,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         ))}
       </nav>
 
-      <div className={`md:hidden ${branded ? "ml-auto" : ""}`}>
+      <div className={`relative md:hidden ${branded ? "ml-auto" : ""}`}>
         <button
           type="button"
           aria-expanded={open}
@@ -78,7 +78,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         {open && (
           <div
             id="menu-mobile"
-            className="mt-4 flex flex-col items-center gap-1 rounded-2xl border border-foreground/10 bg-background/40 px-8 py-5 shadow-[0_18px_50px_-20px_oklch(0.3_0.02_30/0.35)] backdrop-blur-2xl"
+            className="absolute right-0 top-full z-50 mt-3 flex max-h-[calc(100vh-6rem)] w-56 flex-col items-center gap-2 overflow-y-auto rounded-2xl border border-foreground/10 bg-background/22 px-6 py-6 shadow-[0_18px_50px_-20px_oklch(0.3_0.02_30/0.35)] backdrop-blur-2xl"
           >
             {NAV_ITEMS.map((item) => (
               <NavLink

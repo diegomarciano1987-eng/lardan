@@ -88,7 +88,11 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         {open && (
           <div
             id="menu-mobile"
-            className="absolute left-1/2 top-full mt-3 flex max-h-[calc(100vh-8rem)] w-56 -translate-x-1/2 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-foreground/10 bg-background/70 px-7 py-7 shadow-[0_28px_70px_-30px_color-mix(in_oklab,var(--foreground)_55%,transparent)] backdrop-blur-2xl"
+            className={`absolute left-1/2 top-full mt-3 flex max-h-[calc(100vh-8rem)] w-56 -translate-x-1/2 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-foreground/10 px-7 py-7 shadow-[0_28px_70px_-30px_color-mix(in_oklab,var(--foreground)_55%,transparent)] ${
+              isHome
+                ? "bg-background/70 backdrop-blur-2xl"
+                : "bg-background"
+            }`}
           >
             {NAV_ITEMS.map((item) => (
               <NavLink

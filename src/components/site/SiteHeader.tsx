@@ -71,40 +71,43 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
 
       <HeaderAcoes className="absolute right-5 top-1/2 hidden -translate-y-1/2 md:flex md:right-10" />
 
-      <HeaderAcoes className="absolute right-4 top-1/2 z-50 -translate-y-1/2 [&_a]:h-9 [&_a]:w-9 md:hidden" />
+      <div className="absolute inset-x-5 bottom-2.5 z-50 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center md:hidden">
+        <span aria-hidden />
 
-      <div className="absolute bottom-2.5 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center md:hidden">
-        <button
-          type="button"
-          aria-expanded={open}
-          aria-label={open ? "Fechar menu" : "Abrir menu"}
-          aria-controls="menu-mobile"
-          onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-4 py-2 text-[0.5625rem] tracking-[0.24em] uppercase text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
-        >
-          {open ? <X className="h-3.5 w-3.5" strokeWidth={1.4} /> : <Menu className="h-3.5 w-3.5" strokeWidth={1.4} />}
-          Menu
-        </button>
-        {open && (
-          <div
-            id="menu-mobile"
-            className={`absolute left-1/2 top-full mt-3 flex max-h-[calc(100vh-8rem)] w-56 -translate-x-1/2 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-foreground/10 px-7 py-7 shadow-[0_28px_70px_-30px_color-mix(in_oklab,var(--foreground)_55%,transparent)] ${
-              isHome
-                ? "bg-background/70 backdrop-blur-2xl"
-                : "bg-background"
-            }`}
+        <div className="relative flex flex-col items-center">
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-label={open ? "Fechar menu" : "Abrir menu"}
+            aria-controls="menu-mobile"
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-4 text-[0.5625rem] tracking-[0.24em] uppercase text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
           >
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                label={item.label}
-                onNavigate={() => setOpen(false)}
-              />
-            ))}
-          </div>
-        )}
+            {open ? <X className="h-3.5 w-3.5" strokeWidth={1.4} /> : <Menu className="h-3.5 w-3.5" strokeWidth={1.4} />}
+            Menu
+          </button>
+          {open && (
+            <div
+              id="menu-mobile"
+              className={`absolute left-1/2 top-full mt-3 flex max-h-[calc(100vh-8rem)] w-56 -translate-x-1/2 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-foreground/10 px-7 py-7 shadow-[0_28px_70px_-30px_color-mix(in_oklab,var(--foreground)_55%,transparent)] ${
+                isHome ? "bg-background/70 backdrop-blur-2xl" : "bg-background"
+              }`}
+            >
+              {NAV_ITEMS.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  label={item.label}
+                  onNavigate={() => setOpen(false)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <HeaderAcoes className="justify-self-end [&_a]:h-9 [&_a]:w-9" />
       </div>
+
     </header>
   );
 }

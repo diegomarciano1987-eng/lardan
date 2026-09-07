@@ -31,7 +31,8 @@ import {
 const POR_PAGINA = 12;
 const ORDENS_VALIDAS: OrdemVitrine[] = ["curadoria", "lancamentos", "nome", "preco_asc", "preco_desc"];
 
-interface BuscaCategoria extends FiltrosCategoria {}
+/** Só os filtros realmente escolhidos entram no endereço. */
+type BuscaCategoria = Partial<FiltrosCategoria>;
 
 function texto(v: unknown) {
   return typeof v === "string" ? v : "";
@@ -47,18 +48,24 @@ function booleano(v: unknown) {
 export const Route = createFileRoute("/semijoias/$categoria")({
   validateSearch: (search: Record<string, unknown> & SearchSchemaInput): BuscaCategoria => {
     const ordem = texto(search["ordem"]) as OrdemVitrine;
-    return {
-      q: texto(search["q"]).slice(0, 120),
-      colecao: texto(search["colecao"]),
-      material: texto(search["material"]),
-      banho: texto(search["banho"]),
-      preco_min: numero(search["preco_min"]),
-      preco_max: numero(search["preco_max"]),
-      disponivel: booleano(search["disponivel"]),
-      lancamentos: booleano(search["lancamentos"]),
-      destaques: booleano(search["destaques"]),
-      ordem: ORDENS_VALIDAS.includes(ordem) ? ordem : "curadoria",
-    };
+    const saida: BuscaCategoria = {};
+    const q = texto(search["q"]).slice(0, 120);
+    if (q) saida.q = q;
+    const colecao = texto(search["colecao"]);
+    if (colecao) saida.colecao = colecao;
+    const material = texto(search["material"]);
+    if (material) saida.material = material;
+    const banho = texto(search["banho"]);
+    if (banho) saida.banho = banho;
+    const min = numero(search["preco_min"]);
+    if (min !== null) saida.preco_min = min;
+    const max = numero(search["preco_max"]);
+    if (max !== null) saida.preco_max = max;
+    if (booleano(search["disponivel"])) saida.disponivel = true;
+    if (booleano(search["lancamentos"])) saida.lancamentos = true;
+    if (booleano(search["destaques"])) saida.destaques = true;
+    if (ORDENS_VALIDAS.includes(ordem) && ordem !== "curadoria") saida.ordem = ordem;
+    return saida;
   },
   loader: async ({ params }) => {
     // Erro de banco continua sendo erro (500), nunca vira "não existe".
@@ -150,7 +157,7 @@ function AvisoEditorial({ titulo, texto: t }: { titulo: string; texto: string })
 
 function CategoriaPage() {
   const { categoria: slug } = Route.useParams();
-  const busca = Route.useSearch();
+  const busca: FiltrosCategoria = { ...FILTROS_VAZIOS, ...Route.useSearch() };
   const navigate = useNavigate({ from: "/semijoias/$categoria" });
   const p = personalidade(slug);
 
@@ -200,7 +207,7 @@ function CategoriaPage() {
   );
 
   const limpar = useCallback(() => {
-    void navigate({ search: () => ({ ...FILTROS_VAZIOS }), replace: true, resetScroll: false });
+    void navigate({ search: () => ({}), replace: true, resetScroll: false });
   }, [navigate]);
 
   const contexto = useMemo(() => ({ de: `/semijoias/${slug}`, busca }), [slug, busca]);

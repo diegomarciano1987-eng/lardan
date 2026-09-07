@@ -2444,6 +2444,7 @@ export type Database = {
           quantity: number
           reason_code: string | null
           reference: string | null
+          reservation_id: string | null
           to_location_id: string | null
           unit_cost_cents: number | null
           variant_id: string
@@ -2464,6 +2465,7 @@ export type Database = {
           quantity: number
           reason_code?: string | null
           reference?: string | null
+          reservation_id?: string | null
           to_location_id?: string | null
           unit_cost_cents?: number | null
           variant_id: string
@@ -2484,6 +2486,7 @@ export type Database = {
           quantity?: number
           reason_code?: string | null
           reference?: string | null
+          reservation_id?: string | null
           to_location_id?: string | null
           unit_cost_cents?: number | null
           variant_id?: string
@@ -2494,6 +2497,13 @@ export type Database = {
             columns: ["from_location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "stock_reservations"
             referencedColumns: ["id"]
           },
           {
@@ -2544,6 +2554,135 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      stock_reservations: {
+        Row: {
+          cancel_reason: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          external_reference: string | null
+          id: string
+          idempotency_key: string | null
+          location_id: string
+          metadata: Json
+          movement_id: string | null
+          note: string | null
+          origin: string
+          party_id: string | null
+          protocol: string
+          quantity: number
+          released_at: string | null
+          released_by: string | null
+          status: Database["public"]["Enums"]["stock_reservation_status"]
+          variant_id: string
+        }
+        Insert: {
+          cancel_reason?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          external_reference?: string | null
+          id?: string
+          idempotency_key?: string | null
+          location_id: string
+          metadata?: Json
+          movement_id?: string | null
+          note?: string | null
+          origin?: string
+          party_id?: string | null
+          protocol: string
+          quantity: number
+          released_at?: string | null
+          released_by?: string | null
+          status?: Database["public"]["Enums"]["stock_reservation_status"]
+          variant_id: string
+        }
+        Update: {
+          cancel_reason?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          external_reference?: string | null
+          id?: string
+          idempotency_key?: string | null
+          location_id?: string
+          metadata?: Json
+          movement_id?: string | null
+          note?: string | null
+          origin?: string
+          party_id?: string | null
+          protocol?: string
+          quantity?: number
+          released_at?: string | null
+          released_by?: string | null
+          status?: Database["public"]["Enums"]["stock_reservation_status"]
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_reservations_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_movement_id_fkey"
+            columns: ["movement_id"]
+            isOneToOne: false
+            referencedRelation: "stock_movements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_released_by_fkey"
+            columns: ["released_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppliers: {
         Row: {
@@ -2806,11 +2945,35 @@ export type Database = {
       can_view_costs: { Args: { _user_id: string }; Returns: boolean }
       claim_master_role: { Args: never; Returns: boolean }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }
+      confirm_stock_reservation: {
+        Args: {
+          _idempotency_key?: string
+          _note?: string
+          _reason_code?: string
+          _reference?: string
+          _reservation_id: string
+        }
+        Returns: Json
+      }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string
       }
       cpf_is_valid: { Args: { d: string }; Returns: boolean }
+      create_stock_reservation: {
+        Args: {
+          _expires_at: string
+          _idempotency_key?: string
+          _location_id: string
+          _note?: string
+          _origin?: string
+          _party_id?: string
+          _quantity: number
+          _reference?: string
+          _variant_id: string
+        }
+        Returns: Json
+      }
       doc_canon: { Args: { v: string }; Returns: string }
       doc_is_valid: { Args: { v: string }; Returns: boolean }
       ensure_profile: {
@@ -2835,6 +2998,11 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      expire_reservations_internal: {
+        Args: { _location?: string; _variant?: string }
+        Returns: number
+      }
+      expire_stock_reservations: { Args: never; Returns: number }
       find_party_duplicates: {
         Args: { _contact?: string; _doc?: string; _ignore?: string }
         Returns: {
@@ -3189,36 +3357,22 @@ export type Database = {
         Returns: Json
       }
       purge_integration_data: { Args: never; Returns: Json }
-      register_stock_movement:
-        | {
-            Args: {
-              _from_location_id?: string
-              _kind: Database["public"]["Enums"]["stock_move_kind"]
-              _note?: string
-              _quantity: number
-              _reason_code?: string
-              _reference?: string
-              _to_location_id?: string
-              _unit_cost_cents?: number
-              _variant_id: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              _from_location_id?: string
-              _idempotency_key?: string
-              _kind: Database["public"]["Enums"]["stock_move_kind"]
-              _note?: string
-              _quantity: number
-              _reason_code?: string
-              _reference?: string
-              _to_location_id?: string
-              _unit_cost_cents?: number
-              _variant_id: string
-            }
-            Returns: string
-          }
+      register_stock_movement: {
+        Args: {
+          _from_location_id?: string
+          _idempotency_key?: string
+          _kind: Database["public"]["Enums"]["stock_move_kind"]
+          _note?: string
+          _quantity: number
+          _reason_code?: string
+          _reference?: string
+          _reservation_id?: string
+          _to_location_id?: string
+          _unit_cost_cents?: number
+          _variant_id: string
+        }
+        Returns: string
+      }
       registry_counts: { Args: never; Returns: Json }
       registry_duplicates: {
         Args: { _limit?: number }
@@ -3228,6 +3382,15 @@ export type Database = {
           motivo: string
           quantidade: number
         }[]
+      }
+      release_stock_reservation: {
+        Args: {
+          _cancelar?: boolean
+          _idempotency_key?: string
+          _reason?: string
+          _reservation_id: string
+        }
+        Returns: Json
       }
       resync_all_public_prices: { Args: never; Returns: number }
       revoke_role: {
@@ -3294,6 +3457,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      stock_available: {
+        Args: { _location: string; _variant: string }
+        Returns: number
+      }
       stock_balances_list: {
         Args: {
           _location?: string
@@ -3316,6 +3483,23 @@ export type Database = {
         Returns: Json
       }
       stock_overview: { Args: never; Returns: Json }
+      stock_reservation_detail: {
+        Args: { _reservation_id: string }
+        Returns: Json
+      }
+      stock_reservations_list: {
+        Args: {
+          _location?: string
+          _origin?: string
+          _page?: number
+          _search?: string
+          _size?: number
+          _status?: string
+          _validade?: string
+          _variant?: string
+        }
+        Returns: Json
+      }
       submit_contact_request: {
         Args: {
           p_contact_channel: string
@@ -3438,6 +3622,12 @@ export type Database = {
         | "transferencia"
         | "ajuste"
         | "inventario"
+      stock_reservation_status:
+        | "ativa"
+        | "confirmada"
+        | "liberada"
+        | "vencida"
+        | "cancelada"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3620,6 +3810,13 @@ export const Constants = {
         "transferencia",
         "ajuste",
         "inventario",
+      ],
+      stock_reservation_status: [
+        "ativa",
+        "confirmada",
+        "liberada",
+        "vencida",
+        "cancelada",
       ],
     },
   },

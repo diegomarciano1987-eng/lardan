@@ -16,16 +16,16 @@ export function HeroScroll() {
   const { ref: trackRef, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const leve = useDeviceTier() === "leve";
   const p = reduced ? 0.5 : progress;
-  // Sequência longa: o ícone cede cedo, o nome LARDAN assenta rápido e
-  // permanece em cena por pelo menos três rolagens inteiras — só no fim
-  // do trilho a segunda sessão começa a entrar.
-  const iconOut = ease(phase(p, 0.09, 0.18));
-  const wordmarkIn = ease(phase(p, 0.13, 0.22));
-  const nevoa = reduced ? 0 : phase(p, 0.1, 0.15) * (1 - phase(p, 0.15, 0.22));
+  // Sequência curta: o ícone cede cedo, o nome LARDAN assenta rápido e
+  // permanece em cena por uma rolagem inteira — depois disso a segunda
+  // sessão começa a subir suavemente por cima.
+  const iconOut = ease(phase(p, 0.06, 0.16));
+  const wordmarkIn = ease(phase(p, 0.10, 0.20));
+  const nevoa = reduced ? 0 : phase(p, 0.07, 0.14) * (1 - phase(p, 0.14, 0.20));
   const mostrarReflexo = !reduced && iconOut < 0.65;
 
   return (
-    <div ref={trackRef} className="relative h-[560vh]" aria-label={BRAND.name}>
+    <div ref={trackRef} className="relative h-[260vh]" aria-label={BRAND.name}>
       <div className="sticky top-0 h-screen overflow-hidden bg-background">
         {/* Único cenário do hero: não recebe escala, blur, filtro ou overlay. */}
         <img

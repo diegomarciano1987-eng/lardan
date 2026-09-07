@@ -307,3 +307,9 @@ quantidade, validade, origem, referência e pessoa. Zero erros de console.
 Limitação registrada: a varredura periódica de vencimento ainda não tem
 agendador ligado — a expiração ocorre dentro de cada operação de estoque e sob
 demanda, conforme `ESTOQUE-E-RESERVAS.md`.
+
+## Linha de base pública antes da limpeza (07/09/2026)
+Janela anônima, viewport 1280x1800. Home com os 4 CTAs (anéis, colares, pulseiras, brincos);
+5 produtos publicados em cada uma das 4 categorias; 20 páginas de produto respondendo 200 com
+2 imagens e preço visível; estoque não exposto ao público. Registro em
+`/mnt/documents/lardan-prelimpeza/baseline-site.json`.

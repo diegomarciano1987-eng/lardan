@@ -1,0 +1,14 @@
+import { lookupAddressByPostalCode, lookupCompanyByTaxId } from "../src/lib/br/providers.server";
+const t = (x: unknown) => JSON.stringify(x, null, 1);
+const m1 = Date.now();
+const cep1 = await lookupAddressByPostalCode("01310-100", null);
+console.log("CEP miss", Date.now() - m1, "ms", t(cep1));
+const m2 = Date.now();
+const cep2 = await lookupAddressByPostalCode("01310-100", null);
+console.log("CEP hit", Date.now() - m2, "ms", t(cep2));
+const m3 = Date.now();
+const cnpj1 = await lookupCompanyByTaxId("00000000000191", null, { comQsa: false });
+console.log("CNPJ miss", Date.now() - m3, "ms", t(cnpj1));
+const m4 = Date.now();
+const cnpj2 = await lookupCompanyByTaxId("00000000000191", null, { comQsa: false });
+console.log("CNPJ hit", Date.now() - m4, "ms", t(cnpj2));

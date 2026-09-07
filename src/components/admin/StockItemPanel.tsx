@@ -10,7 +10,12 @@ import {
 } from "@/components/ui/sheet";
 import { StockThumb } from "@/components/admin/StockThumb";
 import { formatBRLFromCents, formatDateTime, formatInt } from "@/components/admin/ui";
-import { MOVE_LABEL, fetchStockItem, signedMediaMap } from "@/lib/stock";
+import {
+  MOVE_LABEL,
+  RESERVATION_LABEL,
+  fetchStockItem,
+  signedMediaMap,
+} from "@/lib/stock";
 
 function Linha({ rotulo, valor }: { rotulo: string; valor: React.ReactNode }) {
   return (
@@ -109,6 +114,7 @@ export function StockItemPanel({
                         <th className="px-3 py-2 text-left">Local</th>
                         <th className="px-3 py-2 text-right">Físico</th>
                         <th className="px-3 py-2 text-right">Reservado</th>
+                        <th className="px-3 py-2 text-right">Disponível</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -121,20 +127,50 @@ export function StockItemPanel({
                           <td className="px-3 py-2 text-right tabular-nums text-ledger-muted">
                             {formatInt(s.reserved)}
                           </td>
+                          <td className="px-3 py-2 text-right font-semibold tabular-nums">
+                            {formatInt(s.available ?? s.quantity - s.reserved)}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               )}
-              {!d.reservas_ativas && (
-                <p className="mt-2 text-xs font-medium text-ledger-muted">
-                  Reservas em implantação: nenhuma reserva é criada pelo sistema nesta versão.
-                  O saldo disponível passará a ser físico menos reservado quando o motor de
-                  reservas entrar em operação.
-                </p>
-              )}
             </div>
+
+            {d.pode_ver_reserva !== false && (
+              <div>
+                <p className="ledger-eyebrow mb-2">Reservas</p>
+                <p className="text-sm font-medium text-ledger-muted">
+                  {formatInt(d.reservas_ativas_qtd ?? 0)} unidades comprometidas por reservas
+                  ativas.
+                  {d.proxima_a_vencer
+                    ? ` Próxima a vencer: ${d.proxima_a_vencer.protocolo} em ${formatDateTime(
+                        d.proxima_a_vencer.validade,
+                      )}.`
+                    : ""}
+                </p>
+                {(d.reservas ?? []).length > 0 && (
+                  <ul className="mt-3 space-y-2">
+                    {(d.reservas ?? []).slice(0, 6).map((r) => (
+                      <li
+                        key={r.id}
+                        className="rounded-[10px] border border-line px-4 py-2.5 text-sm"
+                      >
+                        <p className="font-semibold text-ledger-text">
+                          {r.protocolo} · {formatInt(r.quantidade)} un ·{" "}
+                          {RESERVATION_LABEL[r.situacao] ?? r.situacao}
+                        </p>
+                        <p className="text-xs text-ledger-muted">
+                          {r.local ?? "—"} · vence {formatDateTime(r.validade)}
+                          {r.pessoa ? ` · ${r.pessoa}` : ""}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
 
             <div>
               <p className="ledger-eyebrow mb-2">Última movimentação</p>

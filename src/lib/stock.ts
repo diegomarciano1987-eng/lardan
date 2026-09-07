@@ -22,6 +22,8 @@ export interface BalanceRow {
   id: string;
   quantity: number;
   reserved: number;
+  /** Disponível = físico − reservado, calculado no servidor. */
+  available: number;
   updated_at: string;
   local_id: string;
   local_nome: string;
@@ -78,6 +80,10 @@ export interface StockItemDetail {
   categoria: string | null;
   colecao: string | null;
   reservas_ativas: boolean;
+  pode_ver_reserva?: boolean;
+  reservas_ativas_qtd?: number | null;
+  proxima_a_vencer?: { id: string; protocolo: string; validade: string; quantidade: number } | null;
+  reservas?: ReservationRow[];
   pode_ver_custo: boolean;
   custo_cents: number | null;
   midias: { id: string; path: string | null; alt: string | null }[];
@@ -87,6 +93,7 @@ export interface StockItemDetail {
     codigo: string;
     quantity: number;
     reserved: number;
+    available: number;
     updated_at: string;
   }[];
   ultima_movimentacao: {
@@ -296,3 +303,163 @@ export async function registerMovement(input: MovementInput) {
   return data as string;
 }
 
+
+/* ============================================================
+ * Reservas de estoque
+ * físico = quantidade no local · reservado = reservas ativas
+ * disponível = físico − reservado (sempre calculado no servidor)
+ * ============================================================ */
+
+export type ReservationStatus =
+  | "ativa"
+  | "confirmada"
+  | "liberada"
+  | "vencida"
+  | "cancelada";
+
+export const RESERVATION_LABEL: Record<ReservationStatus, string> = {
+  ativa: "Ativa",
+  confirmada: "Confirmada",
+  liberada: "Liberada",
+  vencida: "Vencida",
+  cancelada: "Cancelada",
+};
+
+export interface ReservationRow {
+  id: string;
+  protocolo: string;
+  situacao: ReservationStatus;
+  quantidade: number;
+  origem: string;
+  referencia: string | null;
+  pessoa: string | null;
+  party_id: string | null;
+  observacao: string | null;
+  criada_em: string;
+  validade: string;
+  confirmada_em: string | null;
+  liberada_em: string | null;
+  motivo_cancelamento: string | null;
+  movimento_id: string | null;
+  autor: string | null;
+  variant_id: string;
+  variante: string | null;
+  sku: string | null;
+  produto_id?: string;
+  produto: string | null;
+  local_id?: string;
+  local: string | null;
+  local_codigo?: string | null;
+  media_path?: string | null;
+}
+
+export interface ReservationDetail extends ReservationRow {
+  historico: { acao: string; em: string; autor: string | null; dados: unknown }[];
+}
+
+/** Lista de reservas resolvida no servidor: busca, filtros e paginação. */
+export async function listReservations(params: {
+  search?: string;
+  status?: string;
+  locationId?: string;
+  origin?: string;
+  validade?: string;
+  variantId?: string;
+  page: number;
+  pageSize: number;
+  signal?: AbortSignal;
+}) {
+  const args: Record<string, unknown> = { _page: params.page, _size: params.pageSize };
+  const termo = (params.search ?? "").trim();
+  if (termo.length >= 2) args["_search"] = termo;
+  if (params.status && params.status !== "todas") args["_status"] = params.status;
+  if (params.locationId && params.locationId !== "todos") args["_location"] = params.locationId;
+  if (params.origin && params.origin !== "todas") args["_origin"] = params.origin;
+  if (params.validade && params.validade !== "todas") args["_validade"] = params.validade;
+  if (params.variantId) args["_variant"] = params.variantId;
+
+  let req = supabase.rpc("stock_reservations_list", args as never);
+  if (params.signal) req = req.abortSignal(params.signal);
+  const { data, error } = await req;
+  if (error) throw error;
+  const payload = (data ?? {}) as { rows?: ReservationRow[]; total?: number };
+  return { rows: payload.rows ?? [], total: Number(payload.total ?? 0) };
+}
+
+export async function fetchReservation(id: string): Promise<ReservationDetail> {
+  const { data, error } = await supabase.rpc("stock_reservation_detail", {
+    _reservation_id: id,
+  } as never);
+  if (error) throw error;
+  return data as unknown as ReservationDetail;
+}
+
+export interface ReservationInput {
+  variantId: string;
+  locationId: string;
+  quantity: number;
+  expiresAt: string;
+  origin?: string;
+  reference?: string | null;
+  partyId?: string | null;
+  note?: string | null;
+  idempotencyKey?: string | null;
+}
+
+/** Cria a reserva na mesma transação em que o disponível é calculado. */
+export async function createReservation(input: ReservationInput) {
+  const args: Record<string, unknown> = {
+    _variant_id: input.variantId,
+    _location_id: input.locationId,
+    _quantity: input.quantity,
+    _expires_at: input.expiresAt,
+    _origin: input.origin ?? "manual",
+    _idempotency_key: input.idempotencyKey ?? crypto.randomUUID(),
+  };
+  if (input.reference) args["_reference"] = input.reference;
+  if (input.partyId) args["_party_id"] = input.partyId;
+  if (input.note) args["_note"] = input.note;
+  const { data, error } = await supabase.rpc("create_stock_reservation", args as never);
+  if (error) throw error;
+  return data as unknown as { id: string; protocolo: string; situacao: string };
+}
+
+/** Confirma a reserva: vira saída física única, mesmo se o clique repetir. */
+export async function confirmReservation(id: string, opts?: { reference?: string; note?: string }) {
+  const args: Record<string, unknown> = { _reservation_id: id };
+  if (opts?.reference) args["_reference"] = opts.reference;
+  if (opts?.note) args["_note"] = opts.note;
+  const { data, error } = await supabase.rpc("confirm_stock_reservation", args as never);
+  if (error) throw error;
+  return data as unknown as { protocolo: string; situacao: string; movimento_id: string };
+}
+
+/** Libera (sem motivo) ou cancela (com motivo obrigatório). */
+export async function releaseReservation(id: string, cancelar: boolean, motivo?: string) {
+  const args: Record<string, unknown> = { _reservation_id: id, _cancelar: cancelar };
+  if (motivo) args["_reason"] = motivo;
+  const { data, error } = await supabase.rpc("release_stock_reservation", args as never);
+  if (error) throw error;
+  return data as unknown as { protocolo: string; situacao: string };
+}
+
+/** Saldo de um local para a peça escolhida (físico, reservado e disponível). */
+export async function fetchVariantBalances(variantId: string) {
+  const d = await fetchStockItem(variantId);
+  return d.saldos ?? [];
+}
+
+/** Busca de pessoas para vincular a reserva (opcional). */
+export async function searchParties(term: string, limit = 20) {
+  const termo = term.trim();
+  let q = supabase
+    .from("parties")
+    .select("id, display_name, doc_masked")
+    .eq("is_active", true)
+    .order("display_name")
+    .limit(limit);
+  if (termo.length >= 2) q = q.ilike("display_name", `%${termo}%`);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as { id: string; display_name: string; doc_masked: string | null }[];
+}

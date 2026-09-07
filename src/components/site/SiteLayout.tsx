@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
+import { VoltarLink } from "./VoltarLink";
 
 export function SiteLayout({ children, brandedHeader = false }: { children: ReactNode; brandedHeader?: boolean }) {
   return (
@@ -12,6 +13,7 @@ export function SiteLayout({ children, brandedHeader = false }: { children: Reac
         Ir para o conteúdo
       </a>
       <SiteHeader branded={brandedHeader} />
+      <VoltarLink />
       <main id="conteudo">{children}</main>
       <SiteFooter />
     </div>

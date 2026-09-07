@@ -1,5 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import { Menu, X } from "lucide-react";
+import { HeaderAcoes } from "./HeaderAcoes";
 import { NAV_ITEMS } from "@/lib/brand";
 import logo from "@/assets/lardan-logo-completa.png.asset.json";
 
@@ -54,7 +56,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
             alt="Lardan"
             width={200}
             height={56}
-            className="h-10 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
+            className="h-8 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
           />
         </Link>
       ) : null}
@@ -65,20 +67,24 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         ))}
       </nav>
 
-      <div className="absolute right-5 top-1/2 z-50 -translate-y-1/2 md:hidden">
+      <HeaderAcoes className="absolute right-5 top-1/2 hidden -translate-y-1/2 md:flex md:right-10" />
+
+      <div className="absolute right-4 top-1/2 z-50 flex -translate-y-1/2 items-center gap-1.5 md:hidden">
+        <HeaderAcoes className="[&_a]:h-9 [&_a]:w-9" />
         <button
           type="button"
           aria-expanded={open}
+          aria-label={open ? "Fechar menu" : "Abrir menu"}
           aria-controls="menu-mobile"
           onClick={() => setOpen((v) => !v)}
-          className="border-b border-foreground/40 px-2 pb-1 text-[0.6875rem] tracking-[0.22em] uppercase text-foreground/80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-foreground/10 bg-background/55 text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
-          {open ? "Fechar" : "Menu"}
+          {open ? <X className="h-[1.05rem] w-[1.05rem]" strokeWidth={1.4} /> : <Menu className="h-[1.05rem] w-[1.05rem]" strokeWidth={1.4} />}
         </button>
         {open && (
           <div
             id="menu-mobile"
-            className="absolute right-0 top-full mt-3 flex max-h-[calc(100vh-6rem)] w-56 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-white/10 bg-white/[0.03] px-7 py-7 shadow-[0_24px_60px_-24px_oklch(0.25_0.02_30/0.18)] backdrop-blur-2xl"
+            className="absolute right-0 top-full mt-3 flex max-h-[calc(100vh-6rem)] w-56 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-foreground/10 bg-background/70 px-7 py-7 shadow-[0_28px_70px_-30px_color-mix(in_oklab,var(--foreground)_55%,transparent)] backdrop-blur-2xl"
           >
             {NAV_ITEMS.map((item) => (
               <NavLink

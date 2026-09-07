@@ -15,6 +15,7 @@ import { Route as ALardanRouteImport } from './routes/a-lardan'
 import { Route as AcessoRouteImport } from './routes/acesso'
 import { Route as AneisRouteImport } from './routes/aneis'
 import { Route as BrincosRouteImport } from './routes/brincos'
+import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as ColaresRouteImport } from './routes/colares'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as ContatoRouteImport } from './routes/contato'
@@ -77,6 +78,11 @@ const AneisRoute = AneisRouteImport.update({
 const BrincosRoute = BrincosRouteImport.update({
   id: '/brincos',
   path: '/brincos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarrinhoRoute = CarrinhoRouteImport.update({
+  id: '/carrinho',
+  path: '/carrinho',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ColaresRoute = ColaresRouteImport.update({
@@ -276,6 +282,7 @@ export interface FileRoutesByFullPath {
   '/acesso': typeof AcessoRoute
   '/aneis': typeof AneisRoute
   '/brincos': typeof BrincosRoute
+  '/carrinho': typeof CarrinhoRoute
   '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
   '/contato': typeof ContatoRoute
@@ -317,6 +324,7 @@ export interface FileRoutesByTo {
   '/acesso': typeof AcessoRoute
   '/aneis': typeof AneisRoute
   '/brincos': typeof BrincosRoute
+  '/carrinho': typeof CarrinhoRoute
   '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
   '/contato': typeof ContatoRoute
@@ -359,6 +367,7 @@ export interface FileRoutesById {
   '/acesso': typeof AcessoRoute
   '/aneis': typeof AneisRoute
   '/brincos': typeof BrincosRoute
+  '/carrinho': typeof CarrinhoRoute
   '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
   '/contato': typeof ContatoRoute
@@ -402,6 +411,7 @@ export interface FileRouteTypes {
     | '/acesso'
     | '/aneis'
     | '/brincos'
+    | '/carrinho'
     | '/colares'
     | '/colecoes'
     | '/contato'
@@ -443,6 +453,7 @@ export interface FileRouteTypes {
     | '/acesso'
     | '/aneis'
     | '/brincos'
+    | '/carrinho'
     | '/colares'
     | '/colecoes'
     | '/contato'
@@ -484,6 +495,7 @@ export interface FileRouteTypes {
     | '/acesso'
     | '/aneis'
     | '/brincos'
+    | '/carrinho'
     | '/colares'
     | '/colecoes'
     | '/contato'
@@ -527,6 +539,7 @@ export interface RootRouteChildren {
   AcessoRoute: typeof AcessoRoute
   AneisRoute: typeof AneisRoute
   BrincosRoute: typeof BrincosRoute
+  CarrinhoRoute: typeof CarrinhoRoute
   ColaresRoute: typeof ColaresRoute
   ColecoesRoute: typeof ColecoesRoute
   ContatoRoute: typeof ContatoRoute
@@ -580,6 +593,13 @@ declare module '@tanstack/react-router' {
       path: '/brincos'
       fullPath: '/brincos'
       preLoaderRoute: typeof BrincosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrinho': {
+      id: '/carrinho'
+      path: '/carrinho'
+      fullPath: '/carrinho'
+      preLoaderRoute: typeof CarrinhoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/colares': {
@@ -913,6 +933,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcessoRoute: AcessoRoute,
   AneisRoute: AneisRoute,
   BrincosRoute: BrincosRoute,
+  CarrinhoRoute: CarrinhoRoute,
   ColaresRoute: ColaresRoute,
   ColecoesRoute: ColecoesRoute,
   ContatoRoute: ContatoRoute,

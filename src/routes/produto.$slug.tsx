@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { StateNote } from "@/components/site/ProductGrid";
+import { CompraProduto } from "@/components/site/CompraProduto";
 import { formatPreco, getPublicProduct, mediaUrl } from "@/lib/storefront";
 
 export const Route = createFileRoute("/produto/$slug")({
@@ -93,15 +94,13 @@ function ProdutoPage() {
             ) : null}
             <p className="mt-6 text-2xl text-foreground">{preco ?? "Consulte sua consultora"}</p>
 
-            {p.variantes.length > 1 ? (
-              <ul className="mt-6 flex flex-wrap gap-2">
-                {p.variantes.map((v) => (
-                  <li key={v.id} className="rounded-full border border-border px-4 py-1 text-sm text-foreground">
-                    {v.label}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
+            <CompraProduto
+              slug={p.slug}
+              nome={p.name}
+              precoCents={p.price_cents}
+              mediaId={p.imagens[0]?.media_id ?? null}
+              variantes={p.variantes.map((v) => ({ id: v.id, label: v.label }))}
+            />
 
             {p.description ? (
               <p className="mt-8 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">

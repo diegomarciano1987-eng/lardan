@@ -1,0 +1,18 @@
+CREATE INDEX IF NOT EXISTS import_rows_product_idx ON public.import_rows (product_id) WHERE product_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS import_rows_variant_idx ON public.import_rows (variant_id) WHERE variant_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS import_rows_movement_idx ON public.import_rows (movement_id) WHERE movement_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS stock_movements_from_loc_idx ON public.stock_movements (from_location_id);
+CREATE INDEX IF NOT EXISTS stock_movements_to_loc_idx ON public.stock_movements (to_location_id);
+CREATE INDEX IF NOT EXISTS stock_movements_reservation_idx ON public.stock_movements (reservation_id) WHERE reservation_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS stock_reservations_movement_idx ON public.stock_reservations (movement_id) WHERE movement_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS stock_reservations_variant_idx ON public.stock_reservations (variant_id);
+CREATE INDEX IF NOT EXISTS stock_reservations_location_idx ON public.stock_reservations (location_id);
+CREATE INDEX IF NOT EXISTS stock_reservations_party_idx ON public.stock_reservations (party_id) WHERE party_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS products_supplier_idx ON public.products (supplier_id) WHERE supplier_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS products_business_entity_idx ON public.products (business_entity_id) WHERE business_entity_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS variant_costs_supplier_idx ON public.variant_costs (supplier_id) WHERE supplier_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS profiles_party_idx ON public.profiles (party_id) WHERE party_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS suppliers_party_idx ON public.suppliers (party_id) WHERE party_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS business_entities_party_idx ON public.business_entities (party_id) WHERE party_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS leads_party_idx ON public.leads (party_id) WHERE party_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS import_jobs_file_idx ON public.import_jobs (file_id) WHERE file_id IS NOT NULL;

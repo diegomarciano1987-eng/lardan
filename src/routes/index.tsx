@@ -101,7 +101,7 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const { config, categorias } = Route.useLoaderData();
 
-  const publicadas = new Map(categorias.map((c) => [c.slug, c]));
+  
   const bloco = (config ?? []).find((b) => b.chave === "categorias");
 
   // Curadoria vazia ou ausente → fallback editorial aprovado (as quatro cenas).
@@ -138,7 +138,7 @@ function HomePage() {
           enterFrom={i % 2 === 0 ? "right" : "left"}
           align={cena.align}
           {...(cena.mobileAlign ? { mobileAlign: cena.mobileAlign } : {})}
-          disponivel={publicadas.has(cena.categoria)}
+          disponivel
         />
       ))}
 

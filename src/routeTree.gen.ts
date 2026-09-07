@@ -13,8 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as ALardanRouteImport } from './routes/a-lardan'
 import { Route as AcessoRouteImport } from './routes/acesso'
+import { Route as AneisRouteImport } from './routes/aneis'
+import { Route as BrincosRouteImport } from './routes/brincos'
+import { Route as ColaresRouteImport } from './routes/colares'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as PulseirasRouteImport } from './routes/pulseiras'
 import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
@@ -65,6 +69,21 @@ const AcessoRoute = AcessoRouteImport.update({
   path: '/acesso',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AneisRoute = AneisRouteImport.update({
+  id: '/aneis',
+  path: '/aneis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrincosRoute = BrincosRouteImport.update({
+  id: '/brincos',
+  path: '/brincos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColaresRoute = ColaresRouteImport.update({
+  id: '/colares',
+  path: '/colares',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ColecoesRoute = ColecoesRouteImport.update({
   id: '/colecoes',
   path: '/colecoes',
@@ -73,6 +92,11 @@ const ColecoesRoute = ColecoesRouteImport.update({
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PulseirasRoute = PulseirasRouteImport.update({
+  id: '/pulseiras',
+  path: '/pulseiras',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SejaLardanRoute = SejaLardanRouteImport.update({
@@ -250,8 +274,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
+  '/aneis': typeof AneisRoute
+  '/brincos': typeof BrincosRoute
+  '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
   '/contato': typeof ContatoRoute
+  '/pulseiras': typeof PulseirasRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -287,8 +315,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
+  '/aneis': typeof AneisRoute
+  '/brincos': typeof BrincosRoute
+  '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
   '/contato': typeof ContatoRoute
+  '/pulseiras': typeof PulseirasRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
@@ -325,8 +357,12 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
+  '/aneis': typeof AneisRoute
+  '/brincos': typeof BrincosRoute
+  '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
   '/contato': typeof ContatoRoute
+  '/pulseiras': typeof PulseirasRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -364,8 +400,12 @@ export interface FileRouteTypes {
     | '/'
     | '/a-lardan'
     | '/acesso'
+    | '/aneis'
+    | '/brincos'
+    | '/colares'
     | '/colecoes'
     | '/contato'
+    | '/pulseiras'
     | '/seja-lardan'
     | '/admin'
     | '/produto/$slug'
@@ -401,8 +441,12 @@ export interface FileRouteTypes {
     | '/'
     | '/a-lardan'
     | '/acesso'
+    | '/aneis'
+    | '/brincos'
+    | '/colares'
     | '/colecoes'
     | '/contato'
+    | '/pulseiras'
     | '/seja-lardan'
     | '/produto/$slug'
     | '/semijoias/$categoria'
@@ -438,8 +482,12 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/a-lardan'
     | '/acesso'
+    | '/aneis'
+    | '/brincos'
+    | '/colares'
     | '/colecoes'
     | '/contato'
+    | '/pulseiras'
     | '/seja-lardan'
     | '/_authenticated/admin'
     | '/produto/$slug'
@@ -477,8 +525,12 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ALardanRoute: typeof ALardanRoute
   AcessoRoute: typeof AcessoRoute
+  AneisRoute: typeof AneisRoute
+  BrincosRoute: typeof BrincosRoute
+  ColaresRoute: typeof ColaresRoute
   ColecoesRoute: typeof ColecoesRoute
   ContatoRoute: typeof ContatoRoute
+  PulseirasRoute: typeof PulseirasRoute
   SejaLardanRoute: typeof SejaLardanRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
@@ -516,6 +568,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcessoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aneis': {
+      id: '/aneis'
+      path: '/aneis'
+      fullPath: '/aneis'
+      preLoaderRoute: typeof AneisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brincos': {
+      id: '/brincos'
+      path: '/brincos'
+      fullPath: '/brincos'
+      preLoaderRoute: typeof BrincosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/colares': {
+      id: '/colares'
+      path: '/colares'
+      fullPath: '/colares'
+      preLoaderRoute: typeof ColaresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/colecoes': {
       id: '/colecoes'
       path: '/colecoes'
@@ -528,6 +601,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pulseiras': {
+      id: '/pulseiras'
+      path: '/pulseiras'
+      fullPath: '/pulseiras'
+      preLoaderRoute: typeof PulseirasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/seja-lardan': {
@@ -831,8 +911,12 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ALardanRoute: ALardanRoute,
   AcessoRoute: AcessoRoute,
+  AneisRoute: AneisRoute,
+  BrincosRoute: BrincosRoute,
+  ColaresRoute: ColaresRoute,
   ColecoesRoute: ColecoesRoute,
   ContatoRoute: ContatoRoute,
+  PulseirasRoute: PulseirasRoute,
   SejaLardanRoute: SejaLardanRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,

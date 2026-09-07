@@ -34,12 +34,12 @@ export function avisarSacola({
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="text-[0.6rem] tracking-[0.28em] uppercase text-[color-mix(in_oklab,var(--color-champagne-soft)_85%,transparent)]">
+            <p className="font-sans text-[0.6rem] tracking-[0.28em] uppercase text-[color-mix(in_oklab,var(--color-champagne-soft)_85%,transparent)]">
               Adicionado à sacola
             </p>
             <p className="lardan-toast__title mt-1 truncate">{nome}</p>
             {variante ? (
-              <p className="mt-0.5 text-[0.68rem] tracking-[0.18em] uppercase text-[color-mix(in_oklab,var(--color-warm-ivory)_55%,transparent)]">
+              <p className="mt-0.5 font-sans text-[0.68rem] tracking-[0.18em] uppercase text-[color-mix(in_oklab,var(--color-warm-ivory)_55%,transparent)]">
                 {variante}
               </p>
             ) : null}
@@ -48,7 +48,7 @@ export function avisarSacola({
           <Link
             to="/carrinho"
             onClick={() => toast.dismiss(id)}
-            className="lardan-toast__action shrink-0 no-underline"
+            className="lardan-toast__action shrink-0 font-sans no-underline"
           >
             Ver sacola
           </Link>

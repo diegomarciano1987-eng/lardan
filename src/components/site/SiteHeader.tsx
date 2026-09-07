@@ -56,7 +56,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
             alt="Lardan"
             width={200}
             height={56}
-            className="h-7 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
+            className="h-6 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
           />
         </Link>
       ) : null}
@@ -78,7 +78,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
           aria-label={open ? "Fechar menu" : "Abrir menu"}
           aria-controls="menu-mobile"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-5 py-2.5 text-[0.625rem] tracking-[0.28em] uppercase text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+          className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-4 py-2.5 text-[0.5625rem] tracking-[0.24em] uppercase text-foreground/75 backdrop-blur-xl transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
           {open ? <X className="h-3.5 w-3.5" strokeWidth={1.4} /> : <Menu className="h-3.5 w-3.5" strokeWidth={1.4} />}
           Menu

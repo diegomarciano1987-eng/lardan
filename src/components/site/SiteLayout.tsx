@@ -14,7 +14,7 @@ export function SiteLayout({ children, brandedHeader = false }: { children: Reac
       </a>
       <SiteHeader branded={brandedHeader} />
       <VoltarLink />
-      <main id="conteudo">{children}</main>
+      <main id="conteudo" className="min-w-0">{children}</main>
       <SiteFooter />
     </div>
   );

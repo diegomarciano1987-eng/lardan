@@ -24,22 +24,23 @@ export function SessaoSemijoias() {
   const slats = leve ? 10 : 28;
   const p = reduced ? 1 : progress;
 
-  // A revelação agora ocupa quase 60% do trilho: lenta, majestosa, premium.
-  const reveal = phase(p, 0.06, 0.62);
+  // A revelação começa quase logo e desliza até ~58% do trilho: lenta,
+  // majestosa e sem buracos entre o hero e esta sessão.
+  const reveal = phase(p, 0.02, 0.58);
   // A foto começa mais próxima e recua suavemente à medida que o véu se abre.
-  const imgScale = 1.34 - 0.34 * ease(phase(p, 0, 0.85));
+  const imgScale = 1.30 - 0.30 * ease(phase(p, 0, 0.80));
   // Desfoque da foto que se dissolve conforme as lâminas se retraem (só desktop).
   const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0, 0.55))) * 8);
 
-  const textIn = easeOut(phase(p, 0.56, 0.82));
-  const ruleIn = easeOut(phase(p, 0.64, 0.88));
-  const ctaIn = easeOut(phase(p, 0.72, 0.94));
+  const textIn = easeOut(phase(p, 0.50, 0.78));
+  const ruleIn = easeOut(phase(p, 0.58, 0.84));
+  const ctaIn = easeOut(phase(p, 0.66, 0.90));
 
   const emMovimento = reveal > 0.001 && reveal < 0.999;
   const dir = 1; // da direita para a esquerda
 
   return (
-    <div ref={ref} className="relative -mt-[100vh] h-[320vh]">
+    <div ref={ref} className="relative -mt-[100vh] h-[300vh]">
       <section className="sticky top-0 h-screen overflow-hidden bg-background">
         <picture>
           <source
@@ -65,27 +66,29 @@ export function SessaoSemijoias() {
         </picture>
 
         {/* Lâminas verticais que deslizam da direita para a esquerda, em cascata.
-            No desktop elas têm borda esfumaçada e um filete de luz na frente
-            de varredura; em aparelhos fracos, só transform/opacidade. */}
+            Cada lâmina tem um gradiente de vidro fosco para que a imagem se
+            desvele por trás de forma suave, nunca brusca. */}
         {reveal < 0.999 && (
           <div aria-hidden className="pointer-events-none absolute inset-0 flex">
             {Array.from({ length: slats }).map((_, i) => {
               const order = (slats - 1 - i) / (slats - 1);
-              const start = 0.5 * order;
-              const t = easeOut(phase(reveal, start, start + 0.5));
+              const start = 0.48 * order;
+              const t = easeOut(phase(reveal, start, start + 0.52));
               const lead = 1 - t;
               const fio = Math.max(0, lead * (1 - lead)) * 4;
               return (
                 <div
                   key={i}
-                  className="-mx-px h-full flex-1 bg-background"
+                  className="-mx-px h-full flex-1"
                   style={{
+                    background:
+                      "linear-gradient(90deg, oklch(0.985 0.006 80 / 0.98) 0%, oklch(0.985 0.006 80 / 0.92) 48%, oklch(0.985 0.006 80 / 0.98) 100%)",
                     transform: `translate3d(${dir * t * 130}%, 0, 0) translateZ(0)`,
                     opacity: lead < 0.02 ? 0 : 1,
                     filter: !leve && emMovimento ? `blur(${(lead * 5).toFixed(1)}px)` : undefined,
                     boxShadow:
                       !leve && fio > 0.02
-                        ? `${dir * -10}px 0 30px -10px oklch(0.22 0.015 30 / ${(0.42 * fio).toFixed(2)})`
+                        ? `${dir * -10}px 0 34px -10px oklch(0.22 0.015 30 / ${(0.42 * fio).toFixed(2)})`
                         : undefined,
                     willChange: emMovimento ? "transform" : "auto",
                   }}

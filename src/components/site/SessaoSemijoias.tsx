@@ -20,10 +20,9 @@ export function SessaoSemijoias() {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const tier = useDeviceTier();
   const leve = tier === "leve";
-  const slats = leve ? 8 : 18;
   const p = reduced ? 1 : progress;
 
-  const reveal = phase(p, 0.02, 0.55);
+  const reveal = easeOut(phase(p, 0.01, 0.34));
   const imgScale = 1.28 - 0.28 * ease(phase(p, 0, 0.7));
   // Desfoque da foto que se dissolve conforme as lâminas se retraem (só desktop).
   const imgBlur = leve ? 0 : Math.round((1 - ease(phase(p, 0, 0.5))) * 8);
@@ -31,8 +30,15 @@ export function SessaoSemijoias() {
   const lines = [line(0.42), line(0.48), line(0.54), line(0.6), line(0.66)] as const;
   const emMovimento = reveal > 0.001 && reveal < 0.999;
   return (
-    <div ref={ref} className="relative h-[260vh]">
-      <section className="sticky top-0 h-screen overflow-hidden bg-background">
+    <div ref={ref} className="relative -mt-[100vh] h-[270vh]">
+      <section className="sticky top-0 h-screen overflow-hidden bg-transparent">
+        <div
+          className="absolute inset-0 overflow-hidden bg-background"
+          style={{
+            clipPath: `inset(0 0 0 ${(1 - reveal) * 100}%)`,
+            willChange: emMovimento ? "clip-path" : "auto",
+          }}
+        >
         <picture>
           <source
             media="(max-width: 767px)"
@@ -55,52 +61,6 @@ export function SessaoSemijoias() {
             height={928}
           />
         </picture>
-
-        {/* Lâminas de vidro que se retraem em cascata do centro para as bordas.
-            No desktop ganham borda esfumaçada e fio de luz no topo; em
-            aparelhos fracos, só transform/opacidade para não travar a rolagem. */}
-        {reveal < 0.999 && (
-          <div aria-hidden className="pointer-events-none absolute inset-0 flex">
-            {Array.from({ length: slats }).map((_, i) => {
-              const fromCenter = Math.abs(i - (slats - 1) / 2) / ((slats - 1) / 2);
-              const start = 0.06 * (1 - fromCenter);
-              const t = easeOut(phase(reveal, start, start + 0.9));
-              const lead = 1 - t;
-              const fio = Math.max(0, lead * (1 - lead)) * 4; // brilho na frente de recolhimento
-              return (
-                <div
-                  key={i}
-                  className="-mx-px h-full flex-1 origin-top"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, oklch(0.99 0.005 80 / 0.9) 0%, oklch(0.95 0.01 70 / 0.86) 100%)",
-                    transform: `scaleY(${lead}) translate3d(0, ${t * -6}%, 0) translateZ(0)`,
-                    opacity: 1 - t * 0.15,
-                    filter: !leve && emMovimento ? `blur(${(lead * 6).toFixed(1)}px)` : undefined,
-                    boxShadow:
-                      !leve && fio > 0.02
-                        ? `0 -16px 40px -14px oklch(0.25 0.015 30 / ${(0.45 * fio).toFixed(2)}), inset 0 -1px 0 oklch(0.98 0.03 60 / ${(0.6 * fio).toFixed(2)})`
-                        : undefined,
-                    willChange: emMovimento ? "transform" : "auto",
-                  }}
-                />
-              );
-            })}
-          </div>
-        )}
-
-        {/* Sombra única que acompanha a frente de abertura (uma camada, não uma por lâmina) */}
-        {emMovimento && (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-[26vh]"
-            style={{
-              background: "linear-gradient(180deg, oklch(0.32 0.02 30 / 0.3) 0%, transparent 100%)",
-              opacity: reveal * (1 - reveal) * 4,
-              transform: `translate3d(0, ${(1 - reveal) * 30}vh, 0)`,
-            }}
-          />
-        )}
 
         {/* Leitura do texto sobre a imagem — desktop: véu marfim */}
         <div
@@ -158,6 +118,24 @@ export function SessaoSemijoias() {
             </Link>
           </div>
         </div>
+        </div>
+
+        {/* Frente da guilhotina: vidro e sombra percorrem a tela da direita
+            para a esquerda, sem contaminar o brilho da fotografia revelada. */}
+        {emMovimento && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 w-[clamp(28px,5vw,74px)]"
+            style={{
+              left: `calc(${(1 - reveal) * 100}% - clamp(14px, 2.5vw, 37px))`,
+              opacity: Math.min(1, reveal * 8) * (1 - reveal),
+              background:
+                "linear-gradient(90deg, transparent 0%, oklch(0.99 0.01 80 / 0.5) 48%, oklch(1 0 0 / 0.82) 58%, transparent 100%)",
+              filter: leve ? "blur(5px)" : "blur(9px)",
+              boxShadow: leve ? undefined : "18px 0 42px -16px oklch(0.18 0.015 30 / 0.48)",
+            }}
+          />
+        )}
       </section>
     </div>
   );

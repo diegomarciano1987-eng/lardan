@@ -681,9 +681,8 @@
 
 /* Aviso da sacola: cartão maior com a foto real da peça. */
 .lardan-toast--sacola {
-  padding: 0;
-  gap: 0;
-  align-items: stretch;
+  padding: 0.85rem 2.4rem 0.85rem 0.85rem;
+  align-items: center;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -17,8 +17,7 @@ export function avisarSacola({
 }) {
   toast.custom(
     (id) => (
-      <div className="lardan-toast lardan-toast--sacola">
-        <div className="flex w-full items-center gap-4 p-3.5 pr-12">
+      <div className="flex w-full items-center gap-4">
           <div className="size-[4.25rem] shrink-0 overflow-hidden rounded-[12px] border border-[color-mix(in_oklab,var(--color-champagne)_45%,transparent)] bg-[color-mix(in_oklab,var(--color-champagne)_12%,transparent)]">
             {mediaId ? (
               <img
@@ -53,9 +52,12 @@ export function avisarSacola({
           >
             Ver sacola
           </Link>
-        </div>
       </div>
     ),
-    { duration: 5200 },
+    {
+      duration: 5200,
+      className: "lardan-toast--sacola",
+      style: { width: "min(30rem, calc(100vw - 2rem))" },
+    },
   );
 }

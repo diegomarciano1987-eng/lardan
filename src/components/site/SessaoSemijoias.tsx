@@ -44,7 +44,12 @@ export function SessaoSemijoias() {
 
   return (
     <div ref={ref} className="relative -mt-[100vh] h-[280vh]">
-      <section className="sticky top-0 h-screen overflow-hidden bg-background">
+      <section
+        className="sticky top-0 h-screen overflow-hidden bg-background"
+        style={{
+          clipPath: wipe >= 0.999 ? undefined : `inset(-2% -2% -2% ${(1 - wipe) * 100}%)`,
+        }}
+      >
         <picture>
           <source
             media="(max-width: 767px)"

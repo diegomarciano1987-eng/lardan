@@ -15,14 +15,17 @@ function clamp01(v: number) {
 export function HeroScroll() {
   const { ref: trackRef, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const leve = useDeviceTier() === "leve";
-  const p = reduced ? 0.62 : progress;
-  const iconOut = ease(phase(p, 0.27, 0.48));
-  const wordmarkIn = ease(phase(p, 0.38, 0.58));
-  const nevoa = reduced ? 0 : phase(p, 0.29, 0.4) * (1 - phase(p, 0.4, 0.57));
+  const p = reduced ? 0.6 : progress;
+  // Sequência longa: o ícone cede cedo, o nome LARDAN assenta por volta de
+  // 36% do trilho e permanece em cena por vários giros de rolagem — só no
+  // fim do trilho a segunda sessão começa a entrar.
+  const iconOut = ease(phase(p, 0.15, 0.3));
+  const wordmarkIn = ease(phase(p, 0.22, 0.36));
+  const nevoa = reduced ? 0 : phase(p, 0.17, 0.26) * (1 - phase(p, 0.26, 0.36));
   const mostrarReflexo = !reduced && iconOut < 0.65;
 
   return (
-    <div ref={trackRef} className="relative h-[270vh]" aria-label={BRAND.name}>
+    <div ref={trackRef} className="relative h-[420vh]" aria-label={BRAND.name}>
       <div className="sticky top-0 h-screen overflow-hidden bg-background">
         {/* Único cenário do hero: não recebe escala, blur, filtro ou overlay. */}
         <img

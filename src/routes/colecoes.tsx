@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero, PendingNote } from "@/components/site/PageHero";
+import { ogImageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/colecoes")({
   component: ColecoesPage,
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/colecoes")({
       { property: "og:title", content: "Coleção — LARDAN" },
       { property: "og:description", content: "Coleções de semijoias Lardan." },
       { property: "og:url", content: "/colecoes" },
+      ...ogImageMeta(),
     ],
     links: [{ rel: "canonical", href: "/colecoes" }],
   }),

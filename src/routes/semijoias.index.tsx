@@ -5,6 +5,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import { ProductGrid, StateNote } from "@/components/site/ProductGrid";
 import { listPublicCategories, listPublicProducts } from "@/lib/storefront";
+import { ogImageMeta } from "@/lib/seo";
 
 const POR_PAGINA = 12;
 
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/semijoias/")({
       { property: "og:description", content: "Catálogo de semijoias Lardan por categoria." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      ...ogImageMeta(),
     ],
     links: [{ rel: "canonical", href: "/semijoias" }],
   }),

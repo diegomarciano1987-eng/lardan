@@ -27,6 +27,7 @@ import {
   type OrdemVitrine,
   type PecaVitrine,
 } from "@/lib/storefront";
+import { ogImageMeta } from "@/lib/seo";
 
 const POR_PAGINA = 12;
 const ORDENS_VALIDAS: OrdemVitrine[] = [
@@ -118,12 +119,7 @@ export const Route = createFileRoute("/semijoias/$categoria")({
         { property: "og:type", content: "website" },
         { property: "og:url", content: canonical },
         { name: "twitter:card", content: "summary_large_image" },
-        ...(absoluta
-          ? [
-              { property: "og:image", content: absoluta },
-              { name: "twitter:image", content: absoluta },
-            ]
-          : []),
+        ...ogImageMeta(absoluta),
       ],
       links: [{ rel: "canonical", href: canonical }],
     };

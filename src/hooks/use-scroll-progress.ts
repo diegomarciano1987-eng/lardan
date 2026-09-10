@@ -111,7 +111,8 @@ export function useDeviceTier(): "leve" | "pleno" {
     const poucaCPU = (nav.hardwareConcurrency ?? 8) <= 4;
     const poucaMemoria = (nav.deviceMemory ?? 8) <= 4;
     const telaPequena = window.matchMedia("(max-width: 900px)").matches;
-    setTier(poucaCPU || poucaMemoria || telaPequena ? "leve" : "pleno");
+    // Safari/iOS entram sempre na versão leve: mesma coreografia, menos camadas.
+    setTier(poucaCPU || poucaMemoria || telaPequena || isAppleWebKit() ? "leve" : "pleno");
   }, []);
   return tier;
 }

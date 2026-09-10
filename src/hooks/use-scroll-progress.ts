@@ -55,8 +55,10 @@ export function useScrollProgress<T extends HTMLElement>() {
       const rect = el.getBoundingClientRect();
       const total = el.offsetHeight - window.innerHeight;
       const bruto = total > 0 ? clamp01(-rect.top / total) : 0;
-      // ~1/150 de passo: imperceptível ao olho, muito mais leve para o navegador.
-      const q = Math.round(bruto * 150) / 150;
+      // Passo imperceptível ao olho e muito mais leve para o navegador.
+      // No Safari usamos um passo maior: menos repinturas por rolagem.
+      const passos = isAppleWebKit() ? 90 : 150;
+      const q = Math.round(bruto * passos) / passos;
       if (q !== ultimo) {
         ultimo = q;
         setProgress(q);

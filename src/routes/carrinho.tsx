@@ -4,13 +4,13 @@ import { Minus, Plus, ShoppingBag, Sparkles, Truck, X } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { formatPreco, mediaUrl } from "@/lib/storefront";
 import {
-import { ogImageMeta } from "@/lib/seo";
   alterarQuantidade,
   removerDoCarrinho,
   subtotalCents,
   totalItens,
   useCarrinho,
 } from "@/lib/carrinho";
+import { ogImageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/carrinho")({
   component: CarrinhoPage,

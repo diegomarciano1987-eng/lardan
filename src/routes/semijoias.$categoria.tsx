@@ -19,7 +19,6 @@ import {
 } from "@/components/site/categoria/CategoryFilters";
 import { personalidade } from "@/components/site/categoria/personalidade";
 import {
-import { ogImageMeta } from "@/lib/seo";
   browsePublicProducts,
   getPublicCategory,
   mediaUrl,
@@ -28,6 +27,7 @@ import { ogImageMeta } from "@/lib/seo";
   type OrdemVitrine,
   type PecaVitrine,
 } from "@/lib/storefront";
+import { ogImageMeta } from "@/lib/seo";
 
 const POR_PAGINA = 12;
 const ORDENS_VALIDAS: OrdemVitrine[] = [

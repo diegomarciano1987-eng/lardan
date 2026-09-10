@@ -47,7 +47,7 @@ export function SessaoSemijoias() {
   const dir = 1; // da direita para a esquerda
 
   return (
-    <div ref={ref} data-intro-scroll className="relative -mt-[130vh] h-[280vh]">
+    <div ref={ref} data-intro-scroll className="relative -mt-[300vh] h-[300vh]">
       <section
         className="sticky top-0 h-screen overflow-hidden bg-background"
         style={{

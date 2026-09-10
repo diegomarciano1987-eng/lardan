@@ -125,3 +125,34 @@ export function ease(t: number) {
 export function easeOut(t: number) {
   return 1 - Math.pow(1 - t, 4);
 }
+
+/* -------------------------------------------------------------------------
+ * Aparelhos Apple (Safari no iPhone, iPad e Mac) pintam desfoque de fundo,
+ * blur animado e mistura de camadas por CPU. Detectamos o motor WebKit para
+ * trocar esses efeitos por versões equivalentes e baratas — o Windows e o
+ * Android continuam com a versão completa.
+ * ---------------------------------------------------------------------- */
+let appleCache: boolean | null = null;
+
+export function isAppleWebKit(): boolean {
+  if (appleCache !== null) return appleCache;
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  const iOS = /iP(hone|ad|od)/.test(ua);
+  const macTouch =
+    /Macintosh/.test(ua) && typeof document !== "undefined" && navigator.maxTouchPoints > 1;
+  const safari = /^((?!chrome|android|crios|fxios|edg).)*safari/i.test(ua);
+  appleCache = iOS || macTouch || safari;
+  return appleCache;
+}
+
+/** true em Safari/iOS. Também marca <html class="is-apple"> para ajustes de CSS. */
+export function useAppleWebKit(): boolean {
+  const [apple, setApple] = useState(false);
+  useEffect(() => {
+    const v = isAppleWebKit();
+    setApple(v);
+    if (v) document.documentElement.classList.add("is-apple");
+  }, []);
+  return apple;
+}

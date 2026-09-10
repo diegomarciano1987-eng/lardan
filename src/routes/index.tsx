@@ -88,8 +88,8 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "/" },
-          ...ogImageMeta(),
-],
+      ...ogImageMeta(),
+    ],
     links: [{ rel: "canonical", href: "/" }],
   }),
   errorComponent: () => (

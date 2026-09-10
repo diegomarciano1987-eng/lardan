@@ -26,8 +26,8 @@ export const Route = createFileRoute("/carrinho")({
       { property: "og:description", content: "Revise as peças escolhidas e simule o frete." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-          ...ogImageMeta(),
-],
+      ...ogImageMeta(),
+    ],
   }),
 });
 

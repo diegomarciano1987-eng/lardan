@@ -14,8 +14,8 @@ export const Route = createFileRoute("/seja-lardan")({
       { property: "og:title", content: "Seja Lardan — candidate-se" },
       { property: "og:description", content: "Candidate-se para ser consultora Lardan." },
       { property: "og:url", content: "/seja-lardan" },
-          ...ogImageMeta(),
-],
+      ...ogImageMeta(),
+    ],
     links: [{ rel: "canonical", href: "/seja-lardan" }],
   }),
 });

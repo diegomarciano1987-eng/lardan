@@ -12,8 +12,8 @@ export const Route = createFileRoute("/colecoes")({
       { property: "og:title", content: "Coleção — LARDAN" },
       { property: "og:description", content: "Coleções de semijoias Lardan." },
       { property: "og:url", content: "/colecoes" },
-          ...ogImageMeta(),
-],
+      ...ogImageMeta(),
+    ],
     links: [{ rel: "canonical", href: "/colecoes" }],
   }),
 });

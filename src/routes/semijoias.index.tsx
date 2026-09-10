@@ -19,8 +19,8 @@ export const Route = createFileRoute("/semijoias/")({
       { property: "og:description", content: "Catálogo de semijoias Lardan por categoria." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-          ...ogImageMeta(),
-],
+      ...ogImageMeta(),
+    ],
     links: [{ rel: "canonical", href: "/semijoias" }],
   }),
 });

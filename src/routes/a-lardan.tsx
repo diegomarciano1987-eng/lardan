@@ -13,8 +13,8 @@ export const Route = createFileRoute("/a-lardan")({
       { property: "og:title", content: "A Lardan — a marca" },
       { property: "og:description", content: "Conheça a marca de semijoias Lardan." },
       { property: "og:url", content: "/a-lardan" },
-          ...ogImageMeta(),
-],
+      ...ogImageMeta(),
+    ],
     links: [{ rel: "canonical", href: "/a-lardan" }],
   }),
 });

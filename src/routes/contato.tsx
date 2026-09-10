@@ -13,8 +13,8 @@ export const Route = createFileRoute("/contato")({
       { property: "og:title", content: "Contato — LARDAN" },
       { property: "og:description", content: "Fale com a Lardan." },
       { property: "og:url", content: "/contato" },
-          ...ogImageMeta(),
-],
+      ...ogImageMeta(),
+    ],
     links: [{ rel: "canonical", href: "/contato" }],
   }),
 });

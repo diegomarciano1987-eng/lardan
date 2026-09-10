@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import {
   useScrollProgress,
   useDeviceTier,
+  useAppleWebKit,
   phase,
   ease,
   easeOut,
@@ -55,7 +56,8 @@ export function CategoryGuillotine({
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const tier = useDeviceTier();
   const leve = tier === "leve";
-  const slats = leve ? 10 : 24;
+  const apple = useAppleWebKit();
+  const slats = apple ? 7 : leve ? 10 : 24;
   const p = reduced ? 1 : progress;
 
   const reveal = phase(p, 0.04, 0.62);

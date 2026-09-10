@@ -3,6 +3,7 @@ import { BRAND } from "@/lib/brand";
 import {
   useScrollProgress,
   useDeviceTier,
+  useAppleWebKit,
   phase,
   ease,
   easeOut,
@@ -21,7 +22,10 @@ export function SessaoSemijoias() {
   const { ref, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const tier = useDeviceTier();
   const leve = tier === "leve";
-  const slats = leve ? 10 : 28;
+  const apple = useAppleWebKit();
+  // Safari pinta desfoque de fundo por CPU: usamos menos lâminas e vidro
+  // pintado (gradiente), que dá o mesmo aspecto sem travar a rolagem.
+  const slats = apple ? 7 : leve ? 10 : 28;
   const p = reduced ? 1 : progress;
 
   // Entrada da sessão: enquanto o trilho sobe por trás do hero, a sessão
@@ -96,12 +100,20 @@ export function SessaoSemijoias() {
                     // transparece desfocada por trás de cada lâmina enquanto
                     // ela se retrai. No celular o desfoque é mais curto para
                     // manter a rolagem fluida.
-                    backdropFilter: leve ? "blur(14px) saturate(1.1)" : "blur(26px) saturate(1.15)",
-                    WebkitBackdropFilter: leve ? "blur(14px) saturate(1.1)" : "blur(26px) saturate(1.15)",
+                    backdropFilter: apple
+                      ? undefined
+                      : leve
+                        ? "blur(14px) saturate(1.1)"
+                        : "blur(26px) saturate(1.15)",
+                    WebkitBackdropFilter: apple
+                      ? undefined
+                      : leve
+                        ? "blur(14px) saturate(1.1)"
+                        : "blur(26px) saturate(1.15)",
                     transform: `translate3d(${dir * t * 130}%, 0, 0) translateZ(0)`,
                     opacity: lead < 0.02 ? 0 : 1,
                     boxShadow:
-                      fio > 0.02
+                      !apple && fio > 0.02
                         ? `${dir * -10}px 0 ${leve ? 22 : 34}px -10px oklch(0.22 0.015 30 / ${((leve ? 0.3 : 0.42) * fio).toFixed(2)})`
                         : undefined,
                     willChange: emMovimento ? "transform" : "auto",
@@ -135,7 +147,7 @@ export function SessaoSemijoias() {
               opacity: Math.min(1, reveal * 8) * (1 - reveal),
               background:
                 "linear-gradient(90deg, transparent 0%, oklch(0.99 0.01 80 / 0.42) 44%, oklch(1 0 0 / 0.78) 56%, transparent 100%)",
-              filter: leve ? "blur(6px)" : "blur(11px)",
+              filter: apple ? undefined : leve ? "blur(6px)" : "blur(11px)",
               boxShadow: leve ? undefined : "22px 0 54px -18px oklch(0.18 0.015 30 / 0.52)",
             }}
           />

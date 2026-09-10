@@ -1,5 +1,12 @@
 import { BRAND } from "@/lib/brand";
-import { useScrollProgress, useDeviceTier, phase, ease, easeOut } from "@/hooks/use-scroll-progress";
+import {
+  useScrollProgress,
+  useDeviceTier,
+  useAppleWebKit,
+  phase,
+  ease,
+  easeOut,
+} from "@/hooks/use-scroll-progress";
 import heroAsset from "@/assets/lardan-hero-vidro.jpg.asset.json";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
@@ -16,6 +23,7 @@ function clamp01(v: number) {
 export function HeroScroll() {
   const { ref: trackRef, progress, reduced } = useScrollProgress<HTMLDivElement>();
   const leve = useDeviceTier() === "leve";
+  const apple = useAppleWebKit();
   const p = reduced ? 0.55 : progress;
 
   // Coreografia longa da transição — cerca de três rolagens de tela entre o
@@ -135,7 +143,7 @@ export function HeroScroll() {
               opacity: flash * 0.9,
               background:
                 "radial-gradient(ellipse, oklch(1 0 0 / 0.95) 0%, oklch(0.98 0.02 75 / 0.5) 32%, oklch(0.95 0.03 60 / 0.15) 56%, transparent 78%)",
-              filter: leve ? "blur(12px)" : "blur(24px)",
+              filter: apple ? "blur(6px)" : leve ? "blur(12px)" : "blur(24px)",
               transform: `translate3d(-50%, -50%, 0) scale(${0.55 + flash * 0.8})`,
               mixBlendMode: "screen",
             }}
@@ -186,7 +194,7 @@ export function HeroScroll() {
                   opacity: halo,
                   background:
                     "radial-gradient(ellipse, oklch(1 0 0 / 0.85) 0%, oklch(0.97 0.02 72 / 0.4) 45%, transparent 75%)",
-                  filter: leve ? "blur(12px)" : "blur(24px)",
+                  filter: apple ? "blur(6px)" : leve ? "blur(12px)" : "blur(24px)",
                   mixBlendMode: "screen",
                 }}
               />
@@ -201,7 +209,9 @@ export function HeroScroll() {
               width={650}
               height={210}
               style={{
-                filter: `drop-shadow(0 ${(46 - wordmarkIn * 26).toFixed(0)}px ${(80 - wordmarkIn * 32).toFixed(0)}px oklch(0.06 0.01 30 / 0.46))`,
+                filter: apple
+                  ? "drop-shadow(0 22px 48px oklch(0.06 0.01 30 / 0.42))"
+                  : `drop-shadow(0 ${(46 - wordmarkIn * 26).toFixed(0)}px ${(80 - wordmarkIn * 32).toFixed(0)}px oklch(0.06 0.01 30 / 0.46))`,
               }}
             />
           </div>

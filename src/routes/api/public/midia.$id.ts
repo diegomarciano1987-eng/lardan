@@ -8,7 +8,7 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api/public/midia/$id")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params, request }) => {
         const id = params.id;
         if (!/^[0-9a-f-]{36}$/i.test(id)) return new Response("Not found", { status: 404 });
 
@@ -55,6 +55,11 @@ export const Route = createFileRoute("/api/public/midia/$id")({
           return new Response("Not found", { status: 404 });
         }
 
+        const etag = `"${media.id}-${media.storage_path.length}"`;
+        if (request.headers.get("if-none-match") === etag) {
+          return new Response(null, { status: 304, headers: { etag } });
+        }
+
         const { data: arquivo, error } = await supabaseAdmin.storage
           .from("media")
           .download(media.storage_path);
@@ -63,12 +68,14 @@ export const Route = createFileRoute("/api/public/midia/$id")({
         return new Response(await arquivo.arrayBuffer(), {
           headers: {
             "content-type": media.content_type ?? "image/jpeg",
-            // janela curta e honesta: sem revalidação obsoleta, a retirada do ar
-            // vale em no máximo 60 segundos em qualquer cache.
-            "cache-control": "public, max-age=60, s-maxage=60, must-revalidate",
+            etag,
+            // guarda no navegador e na borda: a foto abre instantânea na
+            // segunda visita, e a retirada do ar vale em até 5 minutos.
+            "cache-control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
             "x-content-type-options": "nosniff",
           },
         });
+
       },
     },
   },

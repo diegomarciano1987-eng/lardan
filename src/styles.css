@@ -690,3 +690,31 @@
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Aparelhos Apple (Safari no iPhone, iPad e Mac): o desenho é o mesmo, mas o
+   desfoque de fundo e as camadas de mistura são reduzidos, porque o Safari os
+   pinta por CPU e a rolagem trava. Windows/Android seguem com a versão cheia.
+   --------------------------------------------------------------------------- */
+.is-apple .backdrop-blur-2xl,
+.is-apple .backdrop-blur-xl,
+.is-apple .backdrop-blur-lg {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+/* Faísca extra do diamante: eco quase invisível, mas caro no Safari. */
+.is-apple .hero-gleam-spark {
+  display: none;
+}
+
+/* Reflexo principal continua, com passada mais longa e sem saturação extra. */
+.is-apple .hero-gleam {
+  filter: none;
+  animation-duration: 16s;
+}
+
+/* Sem promoção permanente de camada: o Safari guarda menos texturas na memória. */
+.is-apple .gpu-layer {
+  will-change: auto;
+}

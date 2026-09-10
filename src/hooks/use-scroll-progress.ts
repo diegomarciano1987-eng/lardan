@@ -55,8 +55,10 @@ export function useScrollProgress<T extends HTMLElement>() {
       const rect = el.getBoundingClientRect();
       const total = el.offsetHeight - window.innerHeight;
       const bruto = total > 0 ? clamp01(-rect.top / total) : 0;
-      // ~1/150 de passo: imperceptível ao olho, muito mais leve para o navegador.
-      const q = Math.round(bruto * 150) / 150;
+      // Passo imperceptível ao olho e muito mais leve para o navegador.
+      // No Safari usamos um passo maior: menos repinturas por rolagem.
+      const passos = isAppleWebKit() ? 90 : 150;
+      const q = Math.round(bruto * passos) / passos;
       if (q !== ultimo) {
         ultimo = q;
         setProgress(q);
@@ -109,7 +111,8 @@ export function useDeviceTier(): "leve" | "pleno" {
     const poucaCPU = (nav.hardwareConcurrency ?? 8) <= 4;
     const poucaMemoria = (nav.deviceMemory ?? 8) <= 4;
     const telaPequena = window.matchMedia("(max-width: 900px)").matches;
-    setTier(poucaCPU || poucaMemoria || telaPequena ? "leve" : "pleno");
+    // Safari/iOS entram sempre na versão leve: mesma coreografia, menos camadas.
+    setTier(poucaCPU || poucaMemoria || telaPequena || isAppleWebKit() ? "leve" : "pleno");
   }, []);
   return tier;
 }
@@ -124,4 +127,35 @@ export function ease(t: number) {
 
 export function easeOut(t: number) {
   return 1 - Math.pow(1 - t, 4);
+}
+
+/* -------------------------------------------------------------------------
+ * Aparelhos Apple (Safari no iPhone, iPad e Mac) pintam desfoque de fundo,
+ * blur animado e mistura de camadas por CPU. Detectamos o motor WebKit para
+ * trocar esses efeitos por versões equivalentes e baratas — o Windows e o
+ * Android continuam com a versão completa.
+ * ---------------------------------------------------------------------- */
+let appleCache: boolean | null = null;
+
+export function isAppleWebKit(): boolean {
+  if (appleCache !== null) return appleCache;
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  const iOS = /iP(hone|ad|od)/.test(ua);
+  const macTouch =
+    /Macintosh/.test(ua) && typeof document !== "undefined" && navigator.maxTouchPoints > 1;
+  const safari = /^((?!chrome|android|crios|fxios|edg).)*safari/i.test(ua);
+  appleCache = iOS || macTouch || safari;
+  return appleCache;
+}
+
+/** true em Safari/iOS. Também marca <html class="is-apple"> para ajustes de CSS. */
+export function useAppleWebKit(): boolean {
+  const [apple, setApple] = useState(false);
+  useEffect(() => {
+    const v = isAppleWebKit();
+    setApple(v);
+    if (v) document.documentElement.classList.add("is-apple");
+  }, []);
+  return apple;
 }

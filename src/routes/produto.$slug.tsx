@@ -3,6 +3,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { StateNote } from "@/components/site/ProductGrid";
 import { CompraProduto } from "@/components/site/CompraProduto";
 import { formatPreco, getPublicProduct, mediaUrl } from "@/lib/storefront";
+import { ogImageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/produto/$slug")({
   component: ProdutoPage,
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/produto/$slug")({
         { property: "og:description", content: descricao },
         { property: "og:type", content: "product" },
         { name: "twitter:card", content: "summary_large_image" },
+        ...ogImageMeta(p ? mediaUrl(p.hero_media_id ?? null) : null),
       ],
       links: [{ rel: "canonical", href: `/produto/${params.slug}` }],
     };

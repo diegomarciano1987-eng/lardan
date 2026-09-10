@@ -19,6 +19,7 @@ import {
 } from "@/components/site/categoria/CategoryFilters";
 import { personalidade } from "@/components/site/categoria/personalidade";
 import {
+import { ogImageMeta } from "@/lib/seo";
   browsePublicProducts,
   getPublicCategory,
   mediaUrl,
@@ -118,12 +119,7 @@ export const Route = createFileRoute("/semijoias/$categoria")({
         { property: "og:type", content: "website" },
         { property: "og:url", content: canonical },
         { name: "twitter:card", content: "summary_large_image" },
-        ...(absoluta
-          ? [
-              { property: "og:image", content: absoluta },
-              { name: "twitter:image", content: absoluta },
-            ]
-          : []),
+        ...ogImageMeta(absoluta),
       ],
       links: [{ rel: "canonical", href: canonical }],
     };

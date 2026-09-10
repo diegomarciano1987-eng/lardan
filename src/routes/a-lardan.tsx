@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero, PendingNote } from "@/components/site/PageHero";
 import editorialAsset from "@/assets/lardan-editorial-mulher.jpg.asset.json";
+import { ogImageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/a-lardan")({
   component: ALardanPage,
@@ -12,7 +13,8 @@ export const Route = createFileRoute("/a-lardan")({
       { property: "og:title", content: "A Lardan — a marca" },
       { property: "og:description", content: "Conheça a marca de semijoias Lardan." },
       { property: "og:url", content: "/a-lardan" },
-    ],
+          ...ogImageMeta(),
+],
     links: [{ rel: "canonical", href: "/a-lardan" }],
   }),
 });

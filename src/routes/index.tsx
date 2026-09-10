@@ -13,6 +13,7 @@ import aneisMobileAsset from "@/assets/lardan-mobile-aneis.png.asset.json";
 import colaresMobileAsset from "@/assets/sessao_colares_mobile.png.asset.json";
 import pulseirasMobileAsset from "@/assets/lardan-mobile-pulseiras.png.asset.json";
 import brincosMobileAsset from "@/assets/lardan-mobile-brincos.png.asset.json";
+import { ogImageMeta } from "@/lib/seo";
 
 /** Cenas aprovadas da página inicial — o desenho não muda, só a curadoria. */
 const CENAS = [
@@ -87,7 +88,8 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "/" },
-    ],
+          ...ogImageMeta(),
+],
     links: [{ rel: "canonical", href: "/" }],
   }),
   errorComponent: () => (

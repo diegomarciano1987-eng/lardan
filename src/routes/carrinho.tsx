@@ -4,6 +4,7 @@ import { Minus, Plus, ShoppingBag, Sparkles, Truck, X } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { formatPreco, mediaUrl } from "@/lib/storefront";
 import {
+import { ogImageMeta } from "@/lib/seo";
   alterarQuantidade,
   removerDoCarrinho,
   subtotalCents,
@@ -25,7 +26,8 @@ export const Route = createFileRoute("/carrinho")({
       { property: "og:description", content: "Revise as peças escolhidas e simule o frete." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-    ],
+          ...ogImageMeta(),
+],
   }),
 });
 

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import { SejaLardanForm } from "@/components/site/SejaLardanForm";
+import { ogImageMeta } from "@/lib/seo";
 
 
 export const Route = createFileRoute("/seja-lardan")({
@@ -13,7 +14,8 @@ export const Route = createFileRoute("/seja-lardan")({
       { property: "og:title", content: "Seja Lardan — candidate-se" },
       { property: "og:description", content: "Candidate-se para ser consultora Lardan." },
       { property: "og:url", content: "/seja-lardan" },
-    ],
+          ...ogImageMeta(),
+],
     links: [{ rel: "canonical", href: "/seja-lardan" }],
   }),
 });

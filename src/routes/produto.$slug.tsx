@@ -29,7 +29,7 @@ export const Route = createFileRoute("/produto/$slug")({
         { property: "og:description", content: descricao },
         { property: "og:type", content: "product" },
         { name: "twitter:card", content: "summary_large_image" },
-        ...ogImageMeta(p ? mediaUrl(p.hero_media_id ?? null) : null),
+        ...ogImageMeta(p?.imagens?.[0] ? mediaUrl(p.imagens[0].media_id) : null),
       ],
       links: [{ rel: "canonical", href: `/produto/${params.slug}` }],
     };

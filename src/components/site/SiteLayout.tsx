@@ -3,10 +3,13 @@ import { useRouterState } from "@tanstack/react-router";
 import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { VoltarLink } from "./VoltarLink";
+import { useAppleWebKit } from "@/hooks/use-scroll-progress";
 
 export function SiteLayout({ children, brandedHeader = false }: { children: ReactNode; brandedHeader?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const comVoltar = pathname !== "/";
+  // Marca <html class="is-apple"> em Safari/iOS para os ajustes de desempenho.
+  useAppleWebKit();
 
   return (
     <div className="min-h-screen bg-background">

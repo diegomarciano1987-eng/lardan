@@ -32,6 +32,7 @@ export const PARTY_STATUS_LABEL: Record<PartyStatus, string> = {
 export type PartyRoleKind =
   | "candidata"
   | "consultora"
+  | "loja"
   | "revendedora"
   | "representante"
   | "colaborador"
@@ -46,7 +47,8 @@ export type PartyRoleKind =
 export const PARTY_ROLE_LABEL: Record<PartyRoleKind, string> = {
   candidata: "Candidata",
   consultora: "Consultora",
-  revendedora: "Revendedora",
+  loja: "Loja",
+  revendedora: "Revendedora (legado)",
   representante: "Representante",
   colaborador: "Colaborador",
   cliente: "Cliente",
@@ -57,6 +59,26 @@ export const PARTY_ROLE_LABEL: Record<PartyRoleKind, string> = {
   custodiante: "Custodiante",
   usuario: "Usuária do sistema",
 };
+
+/**
+ * Papéis oferecidos em novas telas e seletores. "Revendedora" virou "Loja":
+ * o papel antigo continua existindo no banco como histórico, mas não é mais
+ * ofertado em lugar nenhum da interface.
+ */
+export const PARTY_ROLE_OPTIONS: PartyRoleKind[] = [
+  "candidata",
+  "consultora",
+  "representante",
+  "colaborador",
+  "cliente",
+  "loja",
+  "fornecedor",
+  "entidade_grupo",
+  "transportadora",
+  "prestador",
+  "custodiante",
+  "usuario",
+];
 
 export interface Party {
   id: string;

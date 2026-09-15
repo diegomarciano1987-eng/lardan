@@ -1,0 +1,1 @@
+alter type public.party_role_kind add value if not exists 'loja';

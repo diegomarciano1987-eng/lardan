@@ -113,8 +113,11 @@ function PessoasPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Base operacional · Cadastros"
-        title="Pessoas e empresas"
-        description="Identidade única: a mesma pessoa pode ser candidata, consultora, cliente e colaboradora sem cadastro repetido."
+        title={cabecalho?.titulo ?? "Pessoas e empresas"}
+        description={
+          cabecalho?.descricao ??
+          "Identidade única: a mesma pessoa pode ser candidata, consultora, cliente e colaboradora sem cadastro repetido."
+        }
         actions={<NewRecordPicker />}
       />
 

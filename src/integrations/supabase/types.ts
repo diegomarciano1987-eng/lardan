@@ -3957,6 +3957,48 @@ export type Database = {
         Returns: number
       }
       expire_stock_reservations: { Args: never; Returns: number }
+      fin_accounts_overview: { Args: never; Returns: Json }
+      fin_acknowledge: {
+        Args: {
+          _contestado: number
+          _motivo: string
+          _reconhecido: number
+          _title: string
+        }
+        Returns: string
+      }
+      fin_installment_refresh: {
+        Args: { _installment: string }
+        Returns: undefined
+      }
+      fin_overview: { Args: { _ate?: string; _de?: string }; Returns: Json }
+      fin_settlement_create: { Args: { _payload: Json }; Returns: Json }
+      fin_settlement_reverse: {
+        Args: { _motivo: string; _settlement: string }
+        Returns: string
+      }
+      fin_title_approve: {
+        Args: { _motivo?: string; _title: string }
+        Returns: undefined
+      }
+      fin_title_cancel: {
+        Args: { _motivo: string; _title: string }
+        Returns: undefined
+      }
+      fin_title_create: { Args: { _payload: Json }; Returns: string }
+      fin_title_detail: { Args: { _title: string }; Returns: Json }
+      fin_titles_list: {
+        Args: {
+          _direction: string
+          _limit?: number
+          _offset?: number
+          _search?: string
+          _situacao?: string
+          _status?: string
+        }
+        Returns: Json
+      }
+      fin_transfer_create: { Args: { _payload: Json }; Returns: string }
       find_party_duplicates: {
         Args: { _contact?: string; _doc?: string; _ignore?: string }
         Returns: {

@@ -120,9 +120,10 @@ export async function listFinTitles(params: {
 }): Promise<{ rows: FinTitleRow[]; total: number; soma_cents: number }> {
   const { data, error } = await supabase.rpc("fin_titles_list", {
     _direction: params.direction,
-    _search: params.search ?? null,
-    _status: null,
-    _situacao: params.situacao && params.situacao !== "todos" ? params.situacao : null,
+    _search: params.search || undefined,
+    _status: undefined,
+    _situacao:
+      params.situacao && params.situacao !== "todos" ? params.situacao : undefined,
     _limit: params.limit,
     _offset: params.offset,
   });
@@ -219,10 +220,10 @@ export async function buscarContrapartes(
   termo: string,
 ): Promise<{ id: string; nome: string; hint: string }[]> {
   const { data, error } = await supabase.rpc("list_parties", {
-    _search: termo || null,
-    _kind: null,
-    _role: null,
-    _status: null,
+    _search: termo || undefined,
+    _kind: undefined,
+    _role: undefined,
+    _status: undefined,
     _limit: 20,
     _offset: 0,
   });

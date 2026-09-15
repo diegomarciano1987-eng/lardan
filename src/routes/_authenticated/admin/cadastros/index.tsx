@@ -61,11 +61,11 @@ const GRUPOS: { titulo: string; nota: string; itens: Card[] }[] = [
     itens: [
       { label: "Pessoas", icon: Users, texto: "Base canônica de pessoas físicas e empresas.", to: "/admin/cadastros/pessoas", contador: "pessoas" },
       { label: "Candidaturas", icon: UserPlus, texto: "Quem veio do Seja LARDAN ou foi cadastrada por um representante.", to: "/admin/leads", contador: "candidaturas" },
-      { label: "Consultoras", icon: Gem, texto: "Pessoas aprovadas que trabalham com maletas LARDAN.", to: "/admin/cadastros/pessoas?papel=consultora", contador: "consultoras" },
-      { label: "Representantes", icon: Handshake, texto: "Quem leva, acompanha e recolhe as maletas.", to: "/admin/cadastros/pessoas?papel=representante", contador: "representantes" },
-      { label: "Colaboradores", icon: IdCard, texto: "Time interno da LARDAN.", to: "/admin/cadastros/pessoas?papel=colaborador", contador: "colaboradores" },
-      { label: "Clientes", icon: Users, texto: "Consumidoras finais atendidas pela rede.", to: "/admin/cadastros/pessoas?papel=cliente", contador: "clientes" },
-      { label: "Lojas", icon: Store, texto: "Empresas e pontos comerciais parceiros.", to: "/admin/cadastros/pessoas?papel=loja", contador: "lojas" },
+      { label: "Consultoras", icon: Gem, texto: "Pessoas aprovadas que trabalham com maletas LARDAN.", to: "/admin/cadastros/pessoas", papel: "consultora", contador: "consultoras" },
+      { label: "Representantes", icon: Handshake, texto: "Quem leva, acompanha e recolhe as maletas.", to: "/admin/cadastros/pessoas", papel: "representante", contador: "representantes" },
+      { label: "Colaboradores", icon: IdCard, texto: "Time interno da LARDAN.", to: "/admin/cadastros/pessoas", papel: "colaborador", contador: "colaboradores" },
+      { label: "Clientes", icon: Users, texto: "Consumidoras finais atendidas pela rede.", to: "/admin/cadastros/pessoas", papel: "cliente", contador: "clientes" },
+      { label: "Lojas", icon: Store, texto: "Empresas e pontos comerciais parceiros.", to: "/admin/cadastros/pessoas", papel: "loja", contador: "lojas" },
       { label: "Usuários e acessos", icon: ShieldCheck, texto: "Logins vinculados a pessoas e papéis.", to: "/admin/usuarios", contador: "usuarios" },
     ],
   },
@@ -77,7 +77,7 @@ const GRUPOS: { titulo: string; nota: string; itens: Card[] }[] = [
       { label: "Entidades do grupo", icon: Building2, texto: "Empresas às quais estoque e financeiro pertencem.", to: "/admin/cadastros/entidades", contador: "entidades" },
       { label: "Prestadores", icon: Briefcase, texto: "Serviços contratados pela operação." },
       { label: "Transportadoras", icon: RouteIcon, texto: "Quem leva a peça até a consultora." },
-      { label: "Lojas e parceiros", icon: Store, texto: "Pontos físicos e parcerias comerciais." },
+      
     ],
   },
   {

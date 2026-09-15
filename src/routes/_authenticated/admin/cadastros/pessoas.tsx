@@ -10,6 +10,7 @@ import { maskDoc, formatDoc } from "@/lib/docs-br";
 import {
   listParties,
   PARTY_ROLE_LABEL,
+  PARTY_ROLE_OPTIONS,
   PARTY_STATUS_LABEL,
   type Party,
   type PartyKind,

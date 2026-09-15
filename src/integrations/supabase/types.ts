@@ -347,6 +347,66 @@ export type Database = {
           },
         ]
       }
+      chart_of_accounts: {
+        Row: {
+          aceita_lancamento: boolean
+          business_entity_id: string | null
+          codigo: string
+          created_at: string
+          id: string
+          is_active: boolean
+          natureza: Database["public"]["Enums"]["fin_account_nature"]
+          nome: string
+          parent_id: string | null
+          updated_at: string
+          vigencia_fim: string | null
+          vigencia_inicio: string | null
+        }
+        Insert: {
+          aceita_lancamento?: boolean
+          business_entity_id?: string | null
+          codigo: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          natureza: Database["public"]["Enums"]["fin_account_nature"]
+          nome: string
+          parent_id?: string | null
+          updated_at?: string
+          vigencia_fim?: string | null
+          vigencia_inicio?: string | null
+        }
+        Update: {
+          aceita_lancamento?: boolean
+          business_entity_id?: string | null
+          codigo?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          natureza?: Database["public"]["Enums"]["fin_account_nature"]
+          nome?: string
+          parent_id?: string | null
+          updated_at?: string
+          vigencia_fim?: string | null
+          vigencia_inicio?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_business_entity_id_fkey"
+            columns: ["business_entity_id"]
+            isOneToOne: false
+            referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collections: {
         Row: {
           created_at: string
@@ -635,6 +695,77 @@ export type Database = {
         }
         Relationships: []
       }
+      cost_centers: {
+        Row: {
+          business_entity_id: string | null
+          codigo: string
+          created_at: string
+          id: string
+          is_active: boolean
+          nome: string
+          parent_id: string | null
+          responsavel_party_id: string | null
+          updated_at: string
+          vigencia_fim: string | null
+          vigencia_inicio: string | null
+        }
+        Insert: {
+          business_entity_id?: string | null
+          codigo: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          nome: string
+          parent_id?: string | null
+          responsavel_party_id?: string | null
+          updated_at?: string
+          vigencia_fim?: string | null
+          vigencia_inicio?: string | null
+        }
+        Update: {
+          business_entity_id?: string | null
+          codigo?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          nome?: string
+          parent_id?: string | null
+          responsavel_party_id?: string | null
+          updated_at?: string
+          vigencia_fim?: string | null
+          vigencia_inicio?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_centers_business_entity_id_fkey"
+            columns: ["business_entity_id"]
+            isOneToOne: false
+            referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_centers_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_centers_responsavel_party_id_fkey"
+            columns: ["responsavel_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_centers_responsavel_party_id_fkey"
+            columns: ["responsavel_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       external_data_applications: {
         Row: {
           applied_at: string
@@ -683,6 +814,742 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      financial_account_movements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data: string
+          descricao: string | null
+          financial_account_id: string
+          id: string
+          kind: Database["public"]["Enums"]["fin_movement_kind"]
+          settlement_id: string | null
+          transfer_id: string | null
+          valor_cents: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data?: string
+          descricao?: string | null
+          financial_account_id: string
+          id?: string
+          kind: Database["public"]["Enums"]["fin_movement_kind"]
+          settlement_id?: string | null
+          transfer_id?: string | null
+          valor_cents: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data?: string
+          descricao?: string | null
+          financial_account_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["fin_movement_kind"]
+          settlement_id?: string | null
+          transfer_id?: string | null
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_account_movements_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_account_movements_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_account_movements_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "financial_transfers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_accounts: {
+        Row: {
+          agencia_masked: string | null
+          apelido: string | null
+          banco: string | null
+          business_entity_id: string | null
+          conta_masked: string | null
+          created_at: string
+          created_by: string | null
+          data_corte: string | null
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["fin_account_kind"]
+          moeda: string
+          nome: string
+          notes: string | null
+          saldo_inicial_cents: number
+          updated_at: string
+        }
+        Insert: {
+          agencia_masked?: string | null
+          apelido?: string | null
+          banco?: string | null
+          business_entity_id?: string | null
+          conta_masked?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_corte?: string | null
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["fin_account_kind"]
+          moeda?: string
+          nome: string
+          notes?: string | null
+          saldo_inicial_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          agencia_masked?: string | null
+          apelido?: string | null
+          banco?: string | null
+          business_entity_id?: string | null
+          conta_masked?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_corte?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["fin_account_kind"]
+          moeda?: string
+          nome?: string
+          notes?: string | null
+          saldo_inicial_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_accounts_business_entity_id_fkey"
+            columns: ["business_entity_id"]
+            isOneToOne: false
+            referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_acknowledgements: {
+        Row: {
+          approved_by: string | null
+          contestado_cents: number
+          created_at: string
+          created_by: string | null
+          evidencia: string | null
+          id: string
+          motivo: string | null
+          reconhecido_cents: number
+          title_id: string
+        }
+        Insert: {
+          approved_by?: string | null
+          contestado_cents?: number
+          created_at?: string
+          created_by?: string | null
+          evidencia?: string | null
+          id?: string
+          motivo?: string | null
+          reconhecido_cents?: number
+          title_id: string
+        }
+        Update: {
+          approved_by?: string | null
+          contestado_cents?: number
+          created_at?: string
+          created_by?: string | null
+          evidencia?: string | null
+          id?: string
+          motivo?: string | null
+          reconhecido_cents?: number
+          title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_acknowledgements_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_adjustments: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          installment_id: string | null
+          kind: Database["public"]["Enums"]["fin_adjustment_kind"]
+          motivo: string | null
+          settlement_id: string | null
+          valor_cents: number
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          installment_id?: string | null
+          kind: Database["public"]["Enums"]["fin_adjustment_kind"]
+          motivo?: string | null
+          settlement_id?: string | null
+          valor_cents: number
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          installment_id?: string | null
+          kind?: Database["public"]["Enums"]["fin_adjustment_kind"]
+          motivo?: string | null
+          settlement_id?: string | null
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_adjustments_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_adjustments_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_allocation_targets: {
+        Row: {
+          chart_account_id: string | null
+          cost_center_id: string | null
+          created_at: string
+          id: string
+          installment_id: string
+          valor_cents: number
+        }
+        Insert: {
+          chart_account_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          id?: string
+          installment_id: string
+          valor_cents: number
+        }
+        Update: {
+          chart_account_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          id?: string
+          installment_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_allocation_targets_chart_account_id_fkey"
+            columns: ["chart_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_allocation_targets_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_allocation_targets_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_allocations: {
+        Row: {
+          created_at: string
+          id: string
+          installment_id: string
+          settlement_id: string
+          valor_cents: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          installment_id: string
+          settlement_id: string
+          valor_cents: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          installment_id?: string
+          settlement_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_allocations_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_allocations_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_attachments: {
+        Row: {
+          byte_size: number | null
+          content_type: string | null
+          created_at: string
+          created_by: string | null
+          file_name: string
+          id: string
+          settlement_id: string | null
+          storage_path: string
+          title_id: string | null
+        }
+        Insert: {
+          byte_size?: number | null
+          content_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_name: string
+          id?: string
+          settlement_id?: string | null
+          storage_path: string
+          title_id?: string | null
+        }
+        Update: {
+          byte_size?: number | null
+          content_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_name?: string
+          id?: string
+          settlement_id?: string | null
+          storage_path?: string
+          title_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_attachments_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_attachments_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_installments: {
+        Row: {
+          created_at: string
+          id: string
+          numero: number
+          reconcile_status: Database["public"]["Enums"]["fin_reconcile_status"]
+          settlement_status: Database["public"]["Enums"]["fin_settlement_status"]
+          title_id: string
+          total_parcelas: number
+          updated_at: string
+          valor_cents: number
+          vencimento: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          numero: number
+          reconcile_status?: Database["public"]["Enums"]["fin_reconcile_status"]
+          settlement_status?: Database["public"]["Enums"]["fin_settlement_status"]
+          title_id: string
+          total_parcelas?: number
+          updated_at?: string
+          valor_cents: number
+          vencimento: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          numero?: number
+          reconcile_status?: Database["public"]["Enums"]["fin_reconcile_status"]
+          settlement_status?: Database["public"]["Enums"]["fin_settlement_status"]
+          title_id?: string
+          total_parcelas?: number
+          updated_at?: string
+          valor_cents?: number
+          vencimento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_installments_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_settlements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data: string
+          direction: Database["public"]["Enums"]["fin_direction"]
+          financial_account_id: string
+          id: string
+          idempotency_key: string | null
+          is_reversal: boolean
+          observacao: string | null
+          payment_method_id: string | null
+          referencia: string | null
+          reversal_reason: string | null
+          reversed_of: string | null
+          valor_cents: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data?: string
+          direction: Database["public"]["Enums"]["fin_direction"]
+          financial_account_id: string
+          id?: string
+          idempotency_key?: string | null
+          is_reversal?: boolean
+          observacao?: string | null
+          payment_method_id?: string | null
+          referencia?: string | null
+          reversal_reason?: string | null
+          reversed_of?: string | null
+          valor_cents: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data?: string
+          direction?: Database["public"]["Enums"]["fin_direction"]
+          financial_account_id?: string
+          id?: string
+          idempotency_key?: string | null
+          is_reversal?: boolean
+          observacao?: string | null
+          payment_method_id?: string | null
+          referencia?: string | null
+          reversal_reason?: string | null
+          reversed_of?: string | null
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_settlements_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_settlements_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_settlements_reversed_of_fkey"
+            columns: ["reversed_of"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_title_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          evento: string
+          id: string
+          motivo: string | null
+          payload: Json
+          title_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          evento: string
+          id?: string
+          motivo?: string | null
+          payload?: Json
+          title_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          evento?: string
+          id?: string
+          motivo?: string | null
+          payload?: Json
+          title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_title_events_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_titles: {
+        Row: {
+          approval_status: Database["public"]["Enums"]["fin_approval_status"]
+          business_entity_id: string | null
+          cancel_reason: string | null
+          chart_account_id: string | null
+          competencia: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          descricao: string
+          direction: Database["public"]["Enums"]["fin_direction"]
+          documento: string | null
+          emissao: string
+          financial_account_id: string | null
+          id: string
+          id_externo: string | null
+          moeda: string
+          observacao: string | null
+          origem: string
+          origem_id: string | null
+          pagador_party_id: string | null
+          party_id: string
+          payment_method_id: string | null
+          sistema_origem: string | null
+          status: Database["public"]["Enums"]["fin_title_status"]
+          updated_at: string
+          valor_cents: number
+        }
+        Insert: {
+          approval_status?: Database["public"]["Enums"]["fin_approval_status"]
+          business_entity_id?: string | null
+          cancel_reason?: string | null
+          chart_account_id?: string | null
+          competencia?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          descricao: string
+          direction: Database["public"]["Enums"]["fin_direction"]
+          documento?: string | null
+          emissao?: string
+          financial_account_id?: string | null
+          id?: string
+          id_externo?: string | null
+          moeda?: string
+          observacao?: string | null
+          origem?: string
+          origem_id?: string | null
+          pagador_party_id?: string | null
+          party_id: string
+          payment_method_id?: string | null
+          sistema_origem?: string | null
+          status?: Database["public"]["Enums"]["fin_title_status"]
+          updated_at?: string
+          valor_cents: number
+        }
+        Update: {
+          approval_status?: Database["public"]["Enums"]["fin_approval_status"]
+          business_entity_id?: string | null
+          cancel_reason?: string | null
+          chart_account_id?: string | null
+          competencia?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          descricao?: string
+          direction?: Database["public"]["Enums"]["fin_direction"]
+          documento?: string | null
+          emissao?: string
+          financial_account_id?: string | null
+          id?: string
+          id_externo?: string | null
+          moeda?: string
+          observacao?: string | null
+          origem?: string
+          origem_id?: string | null
+          pagador_party_id?: string | null
+          party_id?: string
+          payment_method_id?: string | null
+          sistema_origem?: string | null
+          status?: Database["public"]["Enums"]["fin_title_status"]
+          updated_at?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_titles_business_entity_id_fkey"
+            columns: ["business_entity_id"]
+            isOneToOne: false
+            referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_titles_chart_account_id_fkey"
+            columns: ["chart_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_titles_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_titles_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_titles_pagador_party_id_fkey"
+            columns: ["pagador_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_titles_pagador_party_id_fkey"
+            columns: ["pagador_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "financial_titles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_titles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "financial_titles_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_transfers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data: string
+          from_account_id: string
+          id: string
+          idempotency_key: string | null
+          is_reversal: boolean
+          motivo: string | null
+          referencia: string | null
+          reversed_of: string | null
+          to_account_id: string
+          valor_cents: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data?: string
+          from_account_id: string
+          id?: string
+          idempotency_key?: string | null
+          is_reversal?: boolean
+          motivo?: string | null
+          referencia?: string | null
+          reversed_of?: string | null
+          to_account_id: string
+          valor_cents: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data?: string
+          from_account_id?: string
+          id?: string
+          idempotency_key?: string | null
+          is_reversal?: boolean
+          motivo?: string | null
+          referencia?: string | null
+          reversed_of?: string | null
+          to_account_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transfers_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transfers_reversed_of_fkey"
+            columns: ["reversed_of"]
+            isOneToOne: false
+            referencedRelation: "financial_transfers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transfers_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1892,6 +2759,30 @@ export type Database = {
             referencedColumns: ["party_id"]
           },
         ]
+      }
+      payment_methods: {
+        Row: {
+          codigo: string
+          created_at: string
+          id: string
+          is_active: boolean
+          nome: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          nome: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          nome?: string
+        }
+        Relationships: []
       }
       product_media: {
         Row: {
@@ -3652,6 +4543,57 @@ export type Database = {
         | "consultora"
       contact_kind: "whatsapp" | "telefone" | "email"
       content_status: "rascunho" | "revisao" | "publicado" | "arquivado"
+      fin_account_kind:
+        | "conta_corrente"
+        | "poupanca"
+        | "caixa"
+        | "carteira"
+        | "compensacao"
+        | "provedor"
+        | "investimento"
+      fin_account_nature:
+        | "receita"
+        | "deducao"
+        | "custo"
+        | "despesa"
+        | "ativo"
+        | "passivo"
+        | "resultado"
+      fin_adjustment_kind:
+        | "juros"
+        | "multa"
+        | "desconto"
+        | "abatimento"
+        | "tarifa"
+        | "imposto_retido"
+        | "perda"
+        | "chargeback"
+        | "outro"
+      fin_approval_status: "nao_exigida" | "pendente" | "aprovada" | "recusada"
+      fin_direction: "receivable" | "payable"
+      fin_movement_kind:
+        | "entrada"
+        | "saida"
+        | "transferencia_entrada"
+        | "transferencia_saida"
+        | "ajuste"
+        | "saldo_inicial"
+      fin_reconcile_status:
+        | "nao_conciliado"
+        | "parcial"
+        | "conciliado"
+        | "divergente"
+      fin_settlement_status:
+        | "nao_liquidado"
+        | "parcial"
+        | "liquidado"
+        | "excedente"
+      fin_title_status:
+        | "rascunho"
+        | "submetido"
+        | "aprovado"
+        | "ativo"
+        | "cancelado"
       lead_status:
         | "novo"
         | "em_analise"
@@ -3837,6 +4779,64 @@ export const Constants = {
       ],
       contact_kind: ["whatsapp", "telefone", "email"],
       content_status: ["rascunho", "revisao", "publicado", "arquivado"],
+      fin_account_kind: [
+        "conta_corrente",
+        "poupanca",
+        "caixa",
+        "carteira",
+        "compensacao",
+        "provedor",
+        "investimento",
+      ],
+      fin_account_nature: [
+        "receita",
+        "deducao",
+        "custo",
+        "despesa",
+        "ativo",
+        "passivo",
+        "resultado",
+      ],
+      fin_adjustment_kind: [
+        "juros",
+        "multa",
+        "desconto",
+        "abatimento",
+        "tarifa",
+        "imposto_retido",
+        "perda",
+        "chargeback",
+        "outro",
+      ],
+      fin_approval_status: ["nao_exigida", "pendente", "aprovada", "recusada"],
+      fin_direction: ["receivable", "payable"],
+      fin_movement_kind: [
+        "entrada",
+        "saida",
+        "transferencia_entrada",
+        "transferencia_saida",
+        "ajuste",
+        "saldo_inicial",
+      ],
+      fin_reconcile_status: [
+        "nao_conciliado",
+        "parcial",
+        "conciliado",
+        "divergente",
+      ],
+      fin_settlement_status: [
+        "nao_liquidado",
+        "parcial",
+        "liquidado",
+        "excedente",
+      ],
+      fin_title_status: [
+        "rascunho",
+        "submetido",
+        "aprovado",
+        "ativo",
+        "cancelado",
+      ],
       lead_status: [
         "novo",
         "em_analise",

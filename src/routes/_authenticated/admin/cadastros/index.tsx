@@ -6,7 +6,7 @@ import {
   Gem,
   Handshake,
   IdCard,
-  ShoppingBag,
+  
   ShieldCheck,
   Truck,
   Building2,
@@ -49,6 +49,8 @@ type Card = {
   icon: LucideIcon;
   texto: string;
   to?: string;
+  /** Abre a base canônica já filtrada por este papel. */
+  papel?: string;
   contador?: string;
 };
 

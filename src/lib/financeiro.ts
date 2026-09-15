@@ -118,15 +118,16 @@ export async function listFinTitles(params: {
   limit: number;
   offset: number;
 }): Promise<{ rows: FinTitleRow[]; total: number; soma_cents: number }> {
-  const { data, error } = await supabase.rpc("fin_titles_list", {
-    _direction: params.direction,
-    _search: params.search || undefined,
-    _status: undefined,
-    _situacao:
-      params.situacao && params.situacao !== "todos" ? params.situacao : undefined,
-    _limit: params.limit,
-    _offset: params.offset,
-  });
+  const args: {
+    _direction: string;
+    _limit: number;
+    _offset: number;
+    _search?: string;
+    _situacao?: string;
+  } = { _direction: params.direction, _limit: params.limit, _offset: params.offset };
+  if (params.search) args._search = params.search;
+  if (params.situacao && params.situacao !== "todos") args._situacao = params.situacao;
+  const { data, error } = await supabase.rpc("fin_titles_list", args);
   if (error) throw error;
   return data as unknown as { rows: FinTitleRow[]; total: number; soma_cents: number };
 }
@@ -219,14 +220,12 @@ export async function registrarReconhecimento(
 export async function buscarContrapartes(
   termo: string,
 ): Promise<{ id: string; nome: string; hint: string }[]> {
-  const { data, error } = await supabase.rpc("list_parties", {
-    _search: termo || undefined,
-    _kind: undefined,
-    _role: undefined,
-    _status: undefined,
+  const args: { _limit: number; _offset: number; _search?: string } = {
     _limit: 20,
     _offset: 0,
-  });
+  };
+  if (termo) args._search = termo;
+  const { data, error } = await supabase.rpc("list_parties", args);
   if (error) throw error;
   return ((data as { id: string; display_name: string | null; legal_name: string | null; code: string }[]) ?? []).map(
     (p) => ({

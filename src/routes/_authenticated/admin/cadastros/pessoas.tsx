@@ -20,6 +20,9 @@ import { formatDateTime } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/_authenticated/admin/cadastros/pessoas")({
   component: PessoasPage,
+  // O papel escolhido vive na URL: o filtro sobrevive ao recarregar a página.
+  validateSearch: (s: Record<string, unknown>): { papel?: string } =>
+    typeof s["papel"] === "string" && s["papel"] ? { papel: s["papel"] } : {},
   head: () => ({
     meta: [
       { title: "Pessoas e empresas — Central de Cadastros LARDAN" },

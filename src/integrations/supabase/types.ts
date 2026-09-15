@@ -3957,6 +3957,7 @@ export type Database = {
         Returns: number
       }
       expire_stock_reservations: { Args: never; Returns: number }
+      fin_account_create: { Args: { _payload: Json }; Returns: string }
       fin_accounts_overview: { Args: never; Returns: Json }
       fin_acknowledge: {
         Args: {

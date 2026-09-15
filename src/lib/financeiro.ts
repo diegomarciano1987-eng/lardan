@@ -247,3 +247,17 @@ export function reaisParaCentavos(texto: string): number | null {
   if (!Number.isFinite(n)) return null;
   return Math.round(n * 100);
 }
+
+/** Cadastro de conta ou caixa. O saldo inicial é marco auditado. */
+export async function criarConta(input: {
+  nome: string;
+  kind: string;
+  banco?: string;
+  saldo_inicial_cents: number;
+}): Promise<string> {
+  const { data, error } = await supabase.rpc("fin_account_create", {
+    _payload: input as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as string;
+}

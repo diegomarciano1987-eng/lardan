@@ -183,6 +183,8 @@ function CentralDeCadastros() {
                 <Link
                   key={i.label}
                   to={i.to}
+                  search={i.papel ? { papel: i.papel } : {}}
+
                   className="rounded-xl border border-line bg-surface p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   {conteudo}

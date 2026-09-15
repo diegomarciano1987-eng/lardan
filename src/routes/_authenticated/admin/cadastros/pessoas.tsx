@@ -33,16 +33,36 @@ export const Route = createFileRoute("/_authenticated/admin/cadastros/pessoas")(
 
 const PAGE_SIZE = 20;
 
+const TITULO_POR_PAPEL: Record<string, { titulo: string; descricao: string }> = {
+  consultora: { titulo: "Consultoras", descricao: "Pessoas aprovadas que trabalham com maletas LARDAN. É a mesma ficha da base de pessoas." },
+  representante: { titulo: "Representantes", descricao: "Quem leva, acompanha e recolhe as maletas. É a mesma ficha da base de pessoas." },
+  colaborador: { titulo: "Colaboradores", descricao: "Time interno da LARDAN. É a mesma ficha da base de pessoas." },
+  cliente: { titulo: "Clientes", descricao: "Consumidoras finais atendidas pela rede. É a mesma ficha da base de pessoas." },
+  loja: { titulo: "Lojas", descricao: "Empresas e pontos comerciais parceiros. É a mesma ficha da base de pessoas e empresas." },
+  candidata: { titulo: "Candidaturas", descricao: "Pessoas que se candidataram e ainda não foram aprovadas." },
+};
+
 function PessoasPage() {
   const caps = useCapabilities();
   const podeVerDoc = caps.includes("registry.doc.view");
   const navigate = useNavigate();
+  const { papel } = Route.useSearch();
 
   const [busca, setBusca] = useState("");
   const [pagina, setPagina] = useState(0);
   const [kind, setKind] = useState<PartyKind | "todos">("todos");
-  const [role, setRole] = useState<PartyRoleKind | "todos">("todos");
   const [status, setStatus] = useState<PartyStatus | "todos">("todos");
+
+  const role = (papel ?? "todos") as PartyRoleKind | "todos";
+  const setRole = (v: PartyRoleKind | "todos") => {
+    setPagina(0);
+    void navigate({
+      to: "/admin/cadastros/pessoas",
+      search: v === "todos" ? {} : { papel: v },
+      replace: true,
+    });
+  };
+  const cabecalho = papel ? TITULO_POR_PAPEL[papel] : undefined;
 
   const query = useQuery({
     queryKey: ["registry", "parties", busca, pagina, kind, role, status],
@@ -65,15 +85,12 @@ function PessoasPage() {
         ]}
       />
       <SmartSelect
-        className="w-40"
+        className="w-44"
         value={role}
-        onChange={(v) => {
-          setRole(v as PartyRoleKind | "todos");
-          setPagina(0);
-        }}
+        onChange={(v) => setRole(v as PartyRoleKind | "todos")}
         options={[
           { value: "todos", label: "Todos os papéis" },
-          ...Object.entries(PARTY_ROLE_LABEL).map(([value, label]) => ({ value, label })),
+          ...PARTY_ROLE_OPTIONS.map((value) => ({ value, label: PARTY_ROLE_LABEL[value] })),
         ]}
       />
       <SmartSelect

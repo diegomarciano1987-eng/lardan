@@ -209,9 +209,12 @@ export function duvidasDeMapeamento(cabecalhos: string[]): SugestaoCampo[] {
 
 export function sugerirMapeamento(cabecalhos: string[]): Partial<Record<CampoKey, string>> {
   const mapa: Partial<Record<CampoKey, string>> = {};
-  for (const s of sugerirMapeamentoDetalhado(cabecalhos)) mapa[s.campo] = s.coluna;
+  for (const s of sugerirMapeamentoDetalhado(cabecalhos)) {
+    if (s.confianca === "exata") mapa[s.campo] = s.coluna;
+  }
   return mapa;
 }
+
 
 /** Colunas apontadas por mais de um campo — ambiguidade nunca é silenciosa. */
 export function colunasAmbiguas(mapa: Partial<Record<CampoKey, string>>): string[] {

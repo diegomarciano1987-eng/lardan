@@ -4751,6 +4751,7 @@ export type Database = {
         Args: { _acao: string; _job: string; _payload: Json }
         Returns: undefined
       }
+      import_barcode: { Args: { _v: string }; Returns: Json }
       import_entry_key: {
         Args: {
           _data: string
@@ -4826,6 +4827,8 @@ export type Database = {
         Args: { _job: string; _limit?: number }
         Returns: Json
       }
+      import_money: { Args: { _v: string }; Returns: Json }
+      import_plating: { Args: { _v: string }; Returns: string }
       import_products_stock:
         | { Args: { _location_id: string; _rows: Json }; Returns: Json }
         | {
@@ -4859,6 +4862,7 @@ export type Database = {
         Args: { _de: string; _para: string }
         Returns: boolean
       }
+      import_supplier: { Args: { _v: string }; Returns: string }
       integration_health: {
         Args: never
         Returns: {

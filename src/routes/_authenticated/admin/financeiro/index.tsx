@@ -88,29 +88,6 @@ function VisaoGeral() {
 
         {q.data ? (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <Kpi
-                rotulo="Saldo em contas"
-                valor={formatBRLFromCents(q.data.saldo_contas_cents)}
-                nota="Calculado pelo razão"
-              />
-              <Kpi
-                rotulo="A receber em aberto"
-                valor={formatBRLFromCents(q.data.a_receber_cents)}
-                tom="entrada"
-              />
-              <Kpi
-                rotulo="A pagar em aberto"
-                valor={formatBRLFromCents(q.data.a_pagar_cents)}
-                tom="saida"
-              />
-              <Kpi
-                rotulo="Aguardando aprovação"
-                valor={formatInt(q.data.titulos_pendentes_aprovacao)}
-                nota="Títulos submetidos"
-              />
-            </div>
-
             <Panel title="No período selecionado">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Kpi

@@ -16,6 +16,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { NovoTituloDialog } from "@/components/admin/financeiro/NovoTituloDialog";
 import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
 import { ContasCaixas } from "@/components/admin/financeiro/ContasCaixas";
+import { Conciliacao } from "@/components/admin/financeiro/Conciliacao";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   fetchFinOverview,
@@ -236,6 +237,7 @@ const ABAS = [
   { id: "pagar", label: "Contas a pagar" },
   { id: "receber", label: "Contas a receber" },
   { id: "contas", label: "Contas e caixas" },
+  { id: "conciliacao", label: "Conciliação" },
 ] as const;
 
 function FinanceiroPage() {
@@ -286,10 +288,11 @@ function FinanceiroPage() {
       {aba === "pagar" && <ListaTitulos direction="payable" />}
       {aba === "receber" && <ListaTitulos direction="receivable" />}
       {aba === "contas" && <ContasCaixas />}
+      {aba === "conciliacao" && <Conciliacao />}
 
       <Panel title="Ainda em construção">
         <ul className="list-disc space-y-1 pl-5 text-sm font-medium text-ledger-muted">
-          <li>Conciliação por arquivo (CSV e OFX).</li>
+          <li>Conciliação por arquivo CNAB (CSV e OFX já disponíveis).</li>
           <li>Importação de contas a pagar e a receber.</li>
           <li>DRE gerencial e relatórios exportáveis.</li>
           <li>Módulo de Cobranças com régua e negociações.</li>

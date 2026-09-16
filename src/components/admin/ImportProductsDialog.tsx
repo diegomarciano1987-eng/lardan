@@ -21,17 +21,23 @@ import {
   type Indicadores,
   type JobResumo,
   type LinhaProblema,
+  type Previa,
+  type SugestaoCampo,
   abrirExecucao,
   baixarModelo,
+  baixarModeloNovo,
   baixarPlanilhaDeErros,
   cancelarLote,
   colunasAmbiguas,
+  duvidasDeMapeamento,
   enviarLinhas,
+  formatoDaPlanilha,
   indicadoresLote,
   lerLote,
   lerPlanilha,
   listarProblemas,
   pausarLote,
+  previaLote,
   processarLote,
   promoverSimulacao,
   registrarArquivoNoServidor,
@@ -40,6 +46,7 @@ import {
   sugerirMapeamentoDetalhado,
   validarLote,
 } from "@/lib/imports";
+
 
 type Etapa = "arquivo" | "mapa" | "conferencia" | "processando" | "fim";
 

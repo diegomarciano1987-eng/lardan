@@ -36,7 +36,15 @@
       registro antigo; "Revendedora" some dos seletores (fica só como legado)
 - [x] C1 — subcategorias: hierarquia de dois níveis com proteção contra ciclo,
       tela de categorias com nível e caminho, contadores separados
-- [ ] B1 — "Novo produto" abre a ficha completa, sem criar rascunho vazio
+- [x] B1 — "Novo produto" abre a ficha completa em /admin/cadastros/produtos/novo; abrir não grava nada
+- [x] B2 — produto-base + variantes (banho, aro) com tipos de banho controlados
+- [x] B3 — código interno LAR-XXX-000000, SKU e nome de variante automáticos, slug com histórico
+- [x] B4 — custos por vigência em variant_costs (bruto, banho, verniz, final) com justificativa da diferença
+- [x] B5 — checklist de publicação no servidor agrupado, legado publicado preservado
+- [x] B6 — edição de produto restrita ao Master (product.manage / product.publish)
+- [ ] B19 — importação de produtos ainda não reconhece as novas colunas (banho, verniz, custos, subcategoria)
+- [ ] Padrões do cadastro de produto (cuidados, garantia, modelos de SEO) — aguardando os textos oficiais do Daniel
+- [ ] antigo B1 — "Novo produto" abre a ficha completa, sem criar rascunho vazio
 - [ ] B2 — produto-base (código interno, material/peso/fornecedor/valor do bruto,
       subcategoria) e variante (banho, fornecedor do banho, verniz, custos)
 - [ ] B3 — checklist de publicação no servidor devolvendo todas as pendências

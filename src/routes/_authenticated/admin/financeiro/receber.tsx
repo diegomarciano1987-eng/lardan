@@ -10,6 +10,8 @@ interface Busca {
 export const Route = createFileRoute("/_authenticated/admin/financeiro/receber")({
   component: Receber,
   validateSearch: (s: Record<string, unknown>): Busca => ({
+    ...(typeof s["de"] === "string" ? { de: s["de"] } : {}),
+    ...(typeof s["ate"] === "string" ? { ate: s["ate"] } : {}),
     ...(typeof s["busca"] === "string" ? { busca: s["busca"] } : {}),
     ...(typeof s["situacao"] === "string" ? { situacao: s["situacao"] } : {}),
   }),

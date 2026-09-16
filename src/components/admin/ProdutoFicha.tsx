@@ -15,6 +15,9 @@ import {
   completude,
   gerarResumo,
   salvarProduto,
+  lerMarkupGlobal,
+  margemPraticada,
+  precoSugerido,
   type Impedimento,
   type ProdutoBase,
 } from "@/lib/produto";
@@ -49,6 +52,8 @@ const VAZIO: Form = {
   seo_title: "",
   seo_description: "",
   preco: "",
+  custo: "",
+  markup: "",
   price_is_public: true,
   is_featured: false,
 };
@@ -123,6 +128,8 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     },
   });
 
+  const markupGlobal = useQuery({ queryKey: ["catalog-markup"], queryFn: lerMarkupGlobal });
+
   const p = produto.data;
 
   // Carrega a ficha salva no formulário (uma vez por produto).
@@ -147,6 +154,8 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       seo_title: p.seo_title ?? "",
       seo_description: p.seo_description ?? "",
       preco: centavosParaTexto(p.price_cents),
+      custo: centavosParaTexto(p.cost_price_cents),
+      markup: p.markup_percent == null ? "" : String(p.markup_percent),
       price_is_public: p.price_is_public,
       is_featured: p.is_featured,
     });
@@ -210,6 +219,8 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     seo_title: String(form["seo_title"] ?? "").trim(),
     seo_description: String(form["seo_description"] ?? "").trim(),
     price_cents: parseCentavos(String(form["preco"] ?? "")) ?? "",
+    cost_price_cents: parseCentavos(String(form["custo"] ?? "")) ?? "",
+    markup_percent: String(form["markup"] ?? "").trim().replace(",", "."),
     price_is_public: form["price_is_public"] !== false,
     is_featured: form["is_featured"] === true,
   });
@@ -217,6 +228,9 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
   const salvar = useMutation({
     mutationFn: async () => {
       if (salvandoRef.current) throw new Error("Salvamento em andamento.");
+      if (!parseCentavos(String(form["custo"] || ""))) {
+        throw new Error("Informe o preço de custo do produto antes de salvar.");
+      }
       salvandoRef.current = true;
       try {
         return await salvarProduto(id, payload());
@@ -298,6 +312,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       raw_weight_grams: Number(String(form["raw_weight_grams"] || "0").replace(",", ".")) || null,
       raw_supplier_id: String(form["raw_supplier_id"] || "") || null,
       raw_piece_cost_cents: parseCentavos(String(form["raw_piece_cost"] || "")),
+      cost_price_cents: parseCentavos(String(form["custo"] || "")),
       measurements: String(form["measurements"] || ""),
       short_description: String(form["short_description"] || ""),
       description: String(form["description"] || ""),
@@ -309,6 +324,13 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     temImagem,
     contagemVariantes > 0,
   );
+
+  const custoCents = parseCentavos(String(form["custo"] || ""));
+  const margemIndividual = String(form["markup"] || "").trim().replace(",", ".");
+  const margemAplicada =
+    margemIndividual === "" ? Number(markupGlobal.data ?? 0) : Number(margemIndividual) || 0;
+  const sugerido = precoSugerido(custoCents, margemAplicada);
+  const margemAtual = margemPraticada(custoCents, parseCentavos(String(form["preco"] || "")));
 
   const somente = !podeEditar;
 
@@ -452,7 +474,48 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
 
         <Panel title="Preço">
           <div className="grid gap-4 sm:grid-cols-2">
+            <Campo
+              label="Preço de custo (R$) *"
+              valor={form["custo"]}
+              onChange={(v) => set("custo", v)}
+              disabled={somente}
+              ajuda="Obrigatório: é a base do cálculo de margem."
+            />
+            <Campo
+              label="Margem deste produto (%)"
+              valor={form["markup"]}
+              onChange={(v) => set("markup", v)}
+              disabled={somente}
+              ajuda={`Em branco usa a margem padrão do sistema (${markupGlobal.data ?? 0}%).`}
+            />
             <Campo label="Preço de venda (R$)" valor={form["preco"]} onChange={(v) => set("preco", v)} disabled={somente} />
+            <div className="flex flex-col justify-center gap-2 text-sm">
+              <p className="text-ledger-muted">
+                Preço sugerido:{" "}
+                <span className="text-ledger-text">
+                  {sugerido == null ? "—" : `R$ ${centavosParaTexto(sugerido)}`}
+                </span>
+                {` (margem aplicada ${margemAplicada}%)`}
+              </p>
+              <p className="text-ledger-muted">
+                Margem praticada hoje:{" "}
+                <span className="text-ledger-text">
+                  {margemAtual == null ? "—" : `${margemAtual.toFixed(1)}%`}
+                </span>
+              </p>
+              <button
+                type="button"
+                className="admin-btn w-fit"
+                disabled={somente || sugerido == null}
+                onClick={() => {
+                  if (sugerido == null) return;
+                  set("preco", centavosParaTexto(sugerido));
+                  toast.success("Preço sugerido aplicado. Revise antes de salvar.");
+                }}
+              >
+                Aplicar preço sugerido
+              </button>
+            </div>
             <Chave label="Mostrar preço no site" valor={form["price_is_public"] !== false} onChange={(v) => set("price_is_public", v)} disabled={somente} />
             <Chave label="Destaque na vitrine" valor={form["is_featured"] === true} onChange={(v) => set("is_featured", v)} disabled={somente} />
           </div>

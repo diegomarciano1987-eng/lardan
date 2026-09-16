@@ -4659,6 +4659,7 @@ export type Database = {
         | "prestador"
         | "custodiante"
         | "usuario"
+        | "loja"
       party_status:
         | "rascunho"
         | "em_analise"
@@ -4903,6 +4904,7 @@ export const Constants = {
         "prestador",
         "custodiante",
         "usuario",
+        "loja",
       ],
       party_status: [
         "rascunho",

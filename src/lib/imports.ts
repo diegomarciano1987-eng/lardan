@@ -450,6 +450,31 @@ export async function indicadoresLote(jobId: string) {
   return chamar<Indicadores>("import_job_counters", { _job: jobId });
 }
 
+/** Conferência detalhada do lote: o que entra, o que muda e o que é recusado. */
+export interface Previa {
+  formato: "novo" | "legado";
+  banhos_nao_reconhecidos: number;
+  subcategorias_invalidas: number;
+  categorias_invalidas: number;
+  fornecedores_nao_encontrados: number;
+  barcodes_duplicados: number;
+  skus_duplicados: number;
+  duplicadas_no_arquivo: number;
+  valores_invalidos: number;
+  custos_novos: number;
+  sem_alteracao: number;
+  publicacoes_solicitadas: number;
+  publicacoes_bloqueadas: number;
+  recusadas: number;
+  avisos: number;
+  unidades_previstas: number;
+}
+
+export async function previaLote(jobId: string) {
+  return chamar<Previa>("import_job_preview", { _job: jobId });
+}
+
+
 export async function lerLote(jobId: string): Promise<JobResumo> {
   const { data, error } = await supabase
     .from("import_jobs")

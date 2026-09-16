@@ -134,7 +134,7 @@ const CARDS: Card[] = [
 ];
 
 function CentralDeImportacao() {
-  const { capabilities } = useCapabilities();
+  const capabilities = useCapabilities();
   const [destino, setDestino] = React.useState<DestinoImportacao | null>(null);
   const [produtos, setProdutos] = React.useState(false);
 

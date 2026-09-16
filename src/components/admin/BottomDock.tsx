@@ -241,7 +241,10 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
 
           <button
             type="button"
-            onClick={() => setDrawer((v) => !v)}
+            onClick={() => {
+              setDrawer((v) => !v);
+              setSubmenu("modulos");
+            }}
             className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-[0.75rem] text-warm-ivory/85 transition-colors hover:bg-white/8"
           >
             <MoreHorizontal aria-hidden className="size-4" />

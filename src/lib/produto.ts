@@ -59,7 +59,7 @@ export async function salvarProduto(
   payload: Record<string, unknown>,
 ): Promise<{ id: string; internal_code: string | null; slug: string; status: string }> {
   const { data, error } = await supabase.rpc("product_save", {
-    _id: id,
+    _id: id as unknown as string,
     _payload: payload as never,
   });
   if (error) throw error;
@@ -71,7 +71,7 @@ export async function salvarVariante(
   payload: Record<string, unknown>,
 ): Promise<{ id: string; sku: string | null; label: string; barcode: string | null }> {
   const { data, error } = await supabase.rpc("variant_save", {
-    _id: id,
+    _id: id as unknown as string,
     _payload: payload as never,
   });
   if (error) throw error;

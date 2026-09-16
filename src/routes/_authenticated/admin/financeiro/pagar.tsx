@@ -3,6 +3,8 @@ import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShe
 import { ListaTitulos } from "@/components/admin/financeiro/ListaTitulos";
 
 interface Busca {
+  de?: string;
+  ate?: string;
   busca?: string;
   situacao?: string;
 }

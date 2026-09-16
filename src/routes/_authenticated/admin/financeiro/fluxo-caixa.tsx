@@ -6,6 +6,8 @@ import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShe
 import { fetchFinAccounts, fetchFinCashflow } from "@/lib/financeiro";
 
 interface Busca {
+  de?: string;
+  ate?: string;
   dias?: string;
   agrupamento?: string;
   conta?: string;

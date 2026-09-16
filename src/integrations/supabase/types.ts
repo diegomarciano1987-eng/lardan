@@ -281,8 +281,45 @@ export type Database = {
           },
         ]
       }
+      catalog_defaults: {
+        Row: {
+          care_instructions: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          seo_description_template: string | null
+          seo_title_template: string | null
+          version: number
+          warranty_text: string | null
+        }
+        Insert: {
+          care_instructions?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          seo_description_template?: string | null
+          seo_title_template?: string | null
+          version: number
+          warranty_text?: string | null
+        }
+        Update: {
+          care_instructions?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          seo_description_template?: string | null
+          seo_title_template?: string | null
+          version?: number
+          warranty_text?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
+          code_abbrev: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -299,6 +336,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          code_abbrev?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -315,6 +353,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          code_abbrev?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2784,6 +2823,57 @@ export type Database = {
         }
         Relationships: []
       }
+      plating_types: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          position: number
+          sku_token: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          position?: number
+          sku_token: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          position?: number
+          sku_token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_code_counters: {
+        Row: {
+          last_value: number
+          prefix: string
+          updated_at: string
+        }
+        Insert: {
+          last_value?: number
+          prefix: string
+          updated_at?: string
+        }
+        Update: {
+          last_value?: number
+          prefix?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_media: {
         Row: {
           created_at: string
@@ -2823,56 +2913,126 @@ export type Database = {
           },
         ]
       }
+      product_slug_history: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          new_slug: string
+          old_slug: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_slug: string
+          old_slug: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          new_slug?: string
+          old_slug?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_slug_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_variants: {
         Row: {
           barcode: string | null
           color: string | null
           created_at: string
+          final_weight_grams: number | null
+          finished_piece_cost_cents: number | null
           id: string
           is_active: boolean
           is_default: boolean
           label: string
           legacy_code: string | null
+          plating_material_cost_cents: number | null
+          plating_supplier_id: string | null
+          plating_type_id: string | null
           position: number
           price_cents: number | null
           product_id: string
           size: string | null
           sku: string | null
           updated_at: string
+          varnish_cost_cents: number | null
+          varnish_name: string | null
         }
         Insert: {
           barcode?: string | null
           color?: string | null
           created_at?: string
+          final_weight_grams?: number | null
+          finished_piece_cost_cents?: number | null
           id?: string
           is_active?: boolean
           is_default?: boolean
           label: string
           legacy_code?: string | null
+          plating_material_cost_cents?: number | null
+          plating_supplier_id?: string | null
+          plating_type_id?: string | null
           position?: number
           price_cents?: number | null
           product_id: string
           size?: string | null
           sku?: string | null
           updated_at?: string
+          varnish_cost_cents?: number | null
+          varnish_name?: string | null
         }
         Update: {
           barcode?: string | null
           color?: string | null
           created_at?: string
+          final_weight_grams?: number | null
+          finished_piece_cost_cents?: number | null
           id?: string
           is_active?: boolean
           is_default?: boolean
           label?: string
           legacy_code?: string | null
+          plating_material_cost_cents?: number | null
+          plating_supplier_id?: string | null
+          plating_type_id?: string | null
           position?: number
           price_cents?: number | null
           product_id?: string
           size?: string | null
           sku?: string | null
           updated_at?: string
+          varnish_cost_cents?: number | null
+          varnish_name?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "product_variants_plating_supplier_id_fkey"
+            columns: ["plating_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_plating_type_id_fkey"
+            columns: ["plating_type_id"]
+            isOneToOne: false
+            referencedRelation: "plating_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "product_variants_product_id_fkey"
             columns: ["product_id"]
@@ -2886,13 +3046,16 @@ export type Database = {
         Row: {
           business_entity_id: string | null
           care_instructions: string | null
+          catalog_defaults_version: number | null
           category_id: string | null
           collection_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
           id: string
+          internal_code: string | null
           is_featured: boolean
+          is_legacy: boolean
           is_new_arrival: boolean
           legacy_code: string | null
           material: string | null
@@ -2903,6 +3066,11 @@ export type Database = {
           price_cents: number | null
           price_is_public: boolean
           published_at: string | null
+          raw_material: string | null
+          raw_piece_cost_cents: number | null
+          raw_supplier_id: string | null
+          raw_weight_grams: number | null
+          requires_catalog_review: boolean
           scheduled_publish_at: string | null
           seo_description: string | null
           seo_title: string | null
@@ -2910,6 +3078,7 @@ export type Database = {
           slug: string
           status: Database["public"]["Enums"]["content_status"]
           stock_visibility: string
+          subcategory_id: string | null
           supplier_id: string | null
           tags: string[]
           updated_at: string
@@ -2919,13 +3088,16 @@ export type Database = {
         Insert: {
           business_entity_id?: string | null
           care_instructions?: string | null
+          catalog_defaults_version?: number | null
           category_id?: string | null
           collection_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           id?: string
+          internal_code?: string | null
           is_featured?: boolean
+          is_legacy?: boolean
           is_new_arrival?: boolean
           legacy_code?: string | null
           material?: string | null
@@ -2936,6 +3108,11 @@ export type Database = {
           price_cents?: number | null
           price_is_public?: boolean
           published_at?: string | null
+          raw_material?: string | null
+          raw_piece_cost_cents?: number | null
+          raw_supplier_id?: string | null
+          raw_weight_grams?: number | null
+          requires_catalog_review?: boolean
           scheduled_publish_at?: string | null
           seo_description?: string | null
           seo_title?: string | null
@@ -2943,6 +3120,7 @@ export type Database = {
           slug: string
           status?: Database["public"]["Enums"]["content_status"]
           stock_visibility?: string
+          subcategory_id?: string | null
           supplier_id?: string | null
           tags?: string[]
           updated_at?: string
@@ -2952,13 +3130,16 @@ export type Database = {
         Update: {
           business_entity_id?: string | null
           care_instructions?: string | null
+          catalog_defaults_version?: number | null
           category_id?: string | null
           collection_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           id?: string
+          internal_code?: string | null
           is_featured?: boolean
+          is_legacy?: boolean
           is_new_arrival?: boolean
           legacy_code?: string | null
           material?: string | null
@@ -2969,6 +3150,11 @@ export type Database = {
           price_cents?: number | null
           price_is_public?: boolean
           published_at?: string | null
+          raw_material?: string | null
+          raw_piece_cost_cents?: number | null
+          raw_supplier_id?: string | null
+          raw_weight_grams?: number | null
+          requires_catalog_review?: boolean
           scheduled_publish_at?: string | null
           seo_description?: string | null
           seo_title?: string | null
@@ -2976,6 +3162,7 @@ export type Database = {
           slug?: string
           status?: Database["public"]["Enums"]["content_status"]
           stock_visibility?: string
+          subcategory_id?: string | null
           supplier_id?: string | null
           tags?: string[]
           updated_at?: string
@@ -3002,6 +3189,20 @@ export type Database = {
             columns: ["collection_id"]
             isOneToOne: false
             referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_raw_supplier_id_fkey"
+            columns: ["raw_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
           {
@@ -3784,42 +3985,83 @@ export type Database = {
       }
       variant_costs: {
         Row: {
+          components_total_cents: number | null
           cost_cents: number
           created_at: string
           created_by: string | null
           currency: string
           effective_from: string
+          finished_piece_cost_cents: number | null
           id: string
+          justification: string | null
           note: string | null
+          plating_material_cost_cents: number | null
+          plating_supplier_id: string | null
+          raw_piece_cost_cents: number | null
+          raw_supplier_id: string | null
           supplier_id: string | null
           updated_at: string
           variant_id: string
+          varnish_cost_cents: number | null
+          varnish_name: string | null
         }
         Insert: {
+          components_total_cents?: number | null
           cost_cents: number
           created_at?: string
           created_by?: string | null
           currency?: string
           effective_from?: string
+          finished_piece_cost_cents?: number | null
           id?: string
+          justification?: string | null
           note?: string | null
+          plating_material_cost_cents?: number | null
+          plating_supplier_id?: string | null
+          raw_piece_cost_cents?: number | null
+          raw_supplier_id?: string | null
           supplier_id?: string | null
           updated_at?: string
           variant_id: string
+          varnish_cost_cents?: number | null
+          varnish_name?: string | null
         }
         Update: {
+          components_total_cents?: number | null
           cost_cents?: number
           created_at?: string
           created_by?: string | null
           currency?: string
           effective_from?: string
+          finished_piece_cost_cents?: number | null
           id?: string
+          justification?: string | null
           note?: string | null
+          plating_material_cost_cents?: number | null
+          plating_supplier_id?: string | null
+          raw_piece_cost_cents?: number | null
+          raw_supplier_id?: string | null
           supplier_id?: string | null
           updated_at?: string
           variant_id?: string
+          varnish_cost_cents?: number | null
+          varnish_name?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "variant_costs_plating_supplier_id_fkey"
+            columns: ["plating_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "variant_costs_raw_supplier_id_fkey"
+            columns: ["raw_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "variant_costs_supplier_id_fkey"
             columns: ["supplier_id"]
@@ -3893,6 +4135,7 @@ export type Database = {
         Args: { _delta: number; _location: string; _variant: string }
         Returns: number
       }
+      barcode_lookup: { Args: { _code: string }; Returns: Json }
       can_manage_catalog: { Args: { _user_id: string }; Returns: boolean }
       can_manage_content: { Args: { _user_id: string }; Returns: boolean }
       can_manage_leads: { Args: { _user_id: string }; Returns: boolean }
@@ -4270,7 +4513,13 @@ export type Database = {
       }
       party_doc_reveal: { Args: { _id: string }; Returns: string }
       phone_canon: { Args: { v: string }; Returns: string }
+      product_next_internal_code: {
+        Args: { _category_id: string }
+        Returns: string
+      }
       product_publish_blockers: { Args: { _id: string }; Returns: string[] }
+      product_publish_checklist: { Args: { _id: string }; Returns: Json }
+      product_save: { Args: { _id: string; _payload: Json }; Returns: Json }
       public_catalog_browse: {
         Args: {
           _category_slug?: string
@@ -4570,6 +4819,11 @@ export type Database = {
         }
         Returns: Json
       }
+      variant_cost_set: {
+        Args: { _payload: Json; _variant_id: string }
+        Returns: Json
+      }
+      variant_save: { Args: { _id: string; _payload: Json }; Returns: Json }
     }
     Enums: {
       app_role:

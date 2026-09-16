@@ -4693,6 +4693,7 @@ export type Database = {
         Args: { _motivo: string; _transfer: string }
         Returns: string
       }
+      fin_unaccent_lower: { Args: { _t: string }; Returns: string }
       find_party_duplicates: {
         Args: { _contact?: string; _doc?: string; _ignore?: string }
         Returns: {

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { MoreHorizontal, Lock, Clock3, X } from "lucide-react";
+import { MoreHorizontal, Lock, Clock3, X, ChevronRight, ArrowLeft } from "lucide-react";
 import { ADMIN_MODULES, moduleAllowed, type AdminModule } from "@/lib/admin-modules";
 import { useCapabilities } from "@/lib/capabilities";
+import { AREAS_FINANCEIRAS } from "@/components/admin/financeiro/FinanceiroShell";
 import wordmark from "@/assets/lardan-wordmark.png.asset.json";
 import { hasAny, type AppRole } from "@/lib/session";
 import { cn } from "@/lib/utils";

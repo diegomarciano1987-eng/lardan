@@ -406,10 +406,15 @@ export function ImportProductsDialog({
                   <Upload aria-hidden className="mr-2 inline size-4" />
                   {ocupado ?? "Escolher arquivo"}
                 </button>
+                <button type="button" className="admin-btn" onClick={() => void baixarModeloNovo()}>
+                  <Download aria-hidden className="mr-2 inline size-4" />
+                  Baixar modelo de produto
+                </button>
                 <button type="button" className="admin-btn" onClick={() => void baixarModelo()}>
                   <Download aria-hidden className="mr-2 inline size-4" />
-                  Baixar modelo
+                  Baixar modelo antigo
                 </button>
+
               </div>
             </div>
           </div>

@@ -49,3 +49,14 @@
       representante, documentos em armazenamento privado, madrinha, contrato e
       promissória versionados, painel de análise sem decisão automática
 - [ ] E — rótulos dos 11 perfis e prova da matriz de acesso por perfil
+- [x] F1 — fundação financeira selada: impressão digital de idempotência, razão e baixas
+      imutáveis, estorno de transferência atômico, matriz de perfis provada no banco
+- [x] F2 — conciliação bancária CSV e OFX em /admin/financeiro (aba Conciliação):
+      tabelas, RPCs, bucket privado, sugestões, 1:1, 1:N, N:1, parcial e desfazer por estorno
+- [x] F3 — contraprova contratual (26.469 / 16.955 / 11.783 / 5.172 / 5.000 / 172 / 9.514)
+      executada e massa removida, auditoria preservada
+- [ ] F4 — conciliação por arquivo CNAB (não implementada; sem botão funcional)
+- [ ] F5 — falhas encontradas na bateria existente, anteriores a esta rodada e ainda abertas:
+      register_stock_movement devolve 409 quando dois cliques simultâneos usam a mesma chave;
+      publish_products recusa Diretoria e Marketing desde a regra "só Master edita produto";
+      parties.doc segue legível pelo Master na leitura direta da tabela

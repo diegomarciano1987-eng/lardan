@@ -146,3 +146,26 @@ produtos publicados, 38 variantes, 40 fotos, 4 categorias publicadas, 240 unidad
 Depósito Principal e a auditoria integral. `brinco01` arquivado como registro histórico.
 Contraprovas: site público conferido em janela anônima (computador e celular) e
 `bun run test:seg` com 67 de 67 cenários aprovados.
+
+## Conciliação bancária (CSV e OFX) — entregue
+
+Fundação financeira selada antes da conciliação: impressão digital canônica da intenção
+em pagamentos, transferências e estornos (mesma chave com conteúdo diferente é recusada
+por colisão), razão e baixas imutáveis, estorno de transferência atômico e fluxo de
+submissão/aprovação/recusa de título. Matriz de perfis provada contra o banco: Master,
+Diretoria, Financeiro, Cobrança, Estoque, Marketing, Suporte, visitante e `anon`.
+
+Conciliação criada em `/admin/financeiro` → aba **Conciliação**: sete tabelas, oito RPCs,
+bucket privado `extratos-bancarios`, leitura de CSV e OFX no servidor, sugestões com
+pontuação e motivos, conciliação 1:1, 1:N, N:1 e parcial, tarifa/juros/desconto,
+excedente explícito, linha ignorada e divergente, e desfazer por estorno com motivo.
+CNAB segue marcado como futuro, sem botão funcional. Detalhes em `CONCILIACAO-BANCARIA.md`.
+
+Contraprova contratual executada e removida ao final, com auditoria preservada:
+devido R$ 26.469,00; reconhecido R$ 16.955,00; recebido R$ 11.783,00; reconhecido em
+aberto R$ 5.172,00; novo recebimento R$ 5.000,00; reconhecido em aberto final R$ 172,00;
+não reconhecido em divergência R$ 9.514,00 — que permaneceu como divergência, sem virar
+desconto, perda, cancelamento ou recebimento. Saldo do razão R$ 16.783,00 e parcela em
+situação "parcial". Preservação conferida antes e depois: 20 produtos publicados,
+40 fotos, 4 categorias, 240 unidades no Depósito Principal, 56 movimentos de estoque,
+30 reservas e a auditoria integral.

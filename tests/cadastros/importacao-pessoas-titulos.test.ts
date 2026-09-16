@@ -64,7 +64,7 @@ const NOME_A = `${TEST_PREFIX} Pessoa A ${SUFIXO}`;
 const NOME_B = `${TEST_PREFIX} Pessoa B ${SUFIXO}`;
 
 const pessoas = (rows: Record<string, string>[], papel: string, dry: boolean) =>
-  rpc(master, "import_pessoas", { _rows: rows, _papel: papel, _dry_run: dry });
+  rpc(master.token, "import_pessoas", { _rows: rows, _papel: papel, _dry_run: dry });
 
 const titulos = (
   rows: Record<string, string>[],
@@ -72,7 +72,7 @@ const titulos = (
   dry: boolean,
   criar = true,
 ) =>
-  rpc(master, "import_titulos", {
+  rpc(master.token, "import_titulos", {
     _rows: rows,
     _direction: direction,
     _dry_run: dry,

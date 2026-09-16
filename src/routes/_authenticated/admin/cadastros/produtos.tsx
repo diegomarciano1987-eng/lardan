@@ -7,7 +7,6 @@ import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, StatusBadge } from "@/components/admin/ui";
 import { DataTable, type Column } from "@/components/admin/DataTable";
-import { RecordSheet } from "@/components/admin/RecordSheet";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import {
   listPaged,
@@ -51,27 +50,17 @@ function ProdutosPage() {
   const [pagina, setPagina] = useState(0);
   const [status, setStatus] = useState("todos");
   const [categoria, setCategoria] = useState("todos");
-  const [novo, setNovo] = useState(false);
 
-  // Vindo de "Novo cadastro": abre o formulário de criação imediatamente.
+  // Vindo de "Novo cadastro": abre direto a ficha completa do novo produto.
   const buscaUrl = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   useEffect(() => {
-    if (buscaUrl?.['novo']) setNovo(true);
-  }, [buscaUrl]);
+    if (buscaUrl?.['novo']) void navigate({ to: "/admin/cadastros/produtos/novo" });
+  }, [buscaUrl, navigate]);
 
   const categorias = useQuery({
     queryKey: ["opcoes-categorias"],
     queryFn: async () => {
       const { data, error } = await supabase.from("categories").select("id, name").order("name");
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  const colecoes = useQuery({
-    queryKey: ["opcoes-colecoes"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("collections").select("id, name").order("name");
       if (error) throw error;
       return data ?? [];
     },
@@ -90,28 +79,6 @@ function ProdutosPage() {
         orderBy: "created_at",
         filters: { status, category_id: categoria },
       }),
-  });
-
-  const criar = useMutation({
-    mutationFn: async (values: Record<string, unknown>) => {
-      const nome = String(values["name"] ?? "").trim();
-      const row = await saveRecord("products", {
-        name: nome,
-        slug: String(values["slug"] || "").trim() || slugify(nome),
-        legacy_code: values["legacy_code"] || null,
-        category_id: values["category_id"] || null,
-        collection_id: values["collection_id"] || null,
-        short_description: values["short_description"] || null,
-        status: "rascunho",
-      });
-      return row as { id: string };
-    },
-    onSuccess: (row) => {
-      toast.success("Produto criado como rascunho.");
-      void qc.invalidateQueries({ queryKey: ["products"] });
-      void navigate({ to: "/admin/cadastros/produtos/$id", params: { id: row.id } });
-    },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível criar."),
   });
 
   const nomeCategoria = (id: string | null) =>
@@ -149,9 +116,9 @@ function ProdutosPage() {
         title="Produtos"
         description="Ficha da peça, variantes vendáveis, imagens e publicação no site."
         actions={
-          <button type="button" className="admin-btn border-champagne" onClick={() => setNovo(true)}>
+          <Link to="/admin/cadastros/produtos/novo" className="admin-btn border-champagne">
             <Plus aria-hidden className="size-4" /> Novo produto
-          </button>
+          </Link>
         }
       />
 
@@ -202,34 +169,6 @@ function ProdutosPage() {
         }
       />
 
-      <RecordSheet
-        open={novo}
-        onOpenChange={setNovo}
-        title="Novo produto"
-        description="Crie a ficha básica; variantes, imagens e preço são definidos na página do produto."
-        fields={[
-          { name: "name", label: "Nome do produto", type: "text", required: true, full: true },
-          { name: "legacy_code", label: "Código legado", type: "text" },
-          { name: "slug", label: "Endereço (slug)", type: "text", help: "Deixe vazio para gerar pelo nome." },
-          {
-            name: "category_id",
-            label: "Categoria",
-            type: "select",
-            options: (categorias.data ?? []).map((c) => ({ value: c.id, label: c.name })),
-          },
-          {
-            name: "collection_id",
-            label: "Coleção",
-            type: "select",
-            options: (colecoes.data ?? []).map((c) => ({ value: c.id, label: c.name })),
-          },
-          { name: "short_description", label: "Resumo", type: "textarea", full: true },
-        ]}
-        initial={{}}
-        onSubmit={async (values) => {
-          await criar.mutateAsync(values);
-        }}
-      />
     </div>
   );
 }

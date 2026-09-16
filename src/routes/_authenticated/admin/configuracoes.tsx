@@ -74,7 +74,8 @@ function MargemPadrao() {
   const salvar = useMutation({
     mutationFn: async () => {
       const n = Number(valor.replace(/\./g, "").replace(",", "."));
-      if (!Number.isFinite(n) || n < 0) throw new Error("Informe uma margem válida, por exemplo 180.");
+      if (!Number.isFinite(n) || n < 0)
+        throw new Error("Informe uma margem válida, por exemplo 180.");
       return salvarMarkupGlobal(n);
     },
     onSuccess: () => {

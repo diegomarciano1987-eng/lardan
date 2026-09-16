@@ -117,7 +117,10 @@ export function precoSugerido(custoCents: number | null, margem: number | null):
 }
 
 /** Margem real praticada: (venda - custo) / custo. */
-export function margemPraticada(custoCents: number | null, vendaCents: number | null): number | null {
+export function margemPraticada(
+  custoCents: number | null,
+  vendaCents: number | null,
+): number | null {
   if (!custoCents || custoCents <= 0 || !vendaCents || vendaCents <= 0) return null;
   return ((vendaCents - custoCents) / custoCents) * 100;
 }

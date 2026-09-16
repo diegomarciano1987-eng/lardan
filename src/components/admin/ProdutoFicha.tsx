@@ -220,7 +220,9 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     seo_description: String(form["seo_description"] ?? "").trim(),
     price_cents: parseCentavos(String(form["preco"] ?? "")) ?? "",
     cost_price_cents: parseCentavos(String(form["custo"] ?? "")) ?? "",
-    markup_percent: String(form["markup"] ?? "").trim().replace(",", "."),
+    markup_percent: String(form["markup"] ?? "")
+      .trim()
+      .replace(",", "."),
     price_is_public: form["price_is_public"] !== false,
     is_featured: form["is_featured"] === true,
   });
@@ -290,7 +292,10 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       if (p?.status === "publicado") {
         await despublicarProdutos([id], "arquivado pela ficha do produto", "arquivado");
       } else {
-        const { error } = await supabase.from("products").update({ status: "arquivado" }).eq("id", id);
+        const { error } = await supabase
+          .from("products")
+          .update({ status: "arquivado" })
+          .eq("id", id);
         if (error) throw error;
       }
     },
@@ -326,7 +331,9 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
   );
 
   const custoCents = parseCentavos(String(form["custo"] || ""));
-  const margemIndividual = String(form["markup"] || "").trim().replace(",", ".");
+  const margemIndividual = String(form["markup"] || "")
+    .trim()
+    .replace(",", ".");
   const margemAplicada =
     margemIndividual === "" ? Number(markupGlobal.data ?? 0) : Number(margemIndividual) || 0;
   const sugerido = precoSugerido(custoCents, margemAplicada);
@@ -342,12 +349,27 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
         description={`Código interno: ${p?.internal_code ?? "gerado no primeiro salvamento"} · Endereço: /${slugPrevia || "—"} · ${contagemVariantes} variante(s) · ${pct}% concluído`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge tone={p?.status === "publicado" ? "success" : p?.status === "arquivado" ? "neutral" : "warning"}>
+            <StatusBadge
+              tone={
+                p?.status === "publicado"
+                  ? "success"
+                  : p?.status === "arquivado"
+                    ? "neutral"
+                    : "warning"
+              }
+            >
               {p?.status ?? "rascunho"}
             </StatusBadge>
-            {p?.is_legacy ? <StatusBadge tone="warning">Produto legado — revisão pendente</StatusBadge> : null}
+            {p?.is_legacy ? (
+              <StatusBadge tone="warning">Produto legado — revisão pendente</StatusBadge>
+            ) : null}
             {p?.status === "publicado" ? (
-              <Link to="/produto/$slug" params={{ slug: p.slug }} target="_blank" className="admin-btn">
+              <Link
+                to="/produto/$slug"
+                params={{ slug: p.slug }}
+                target="_blank"
+                className="admin-btn"
+              >
                 <ExternalLink aria-hidden className="size-4" /> Ver no site
               </Link>
             ) : null}
@@ -405,7 +427,10 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
         <Panel title="Falta para publicar">
           <ul className="space-y-2 text-sm">
             {impedimentos.map((i) => (
-              <li key={i.codigo} className="flex justify-between gap-4 border-b border-line-soft pb-2">
+              <li
+                key={i.codigo}
+                className="flex justify-between gap-4 border-b border-line-soft pb-2"
+              >
                 <span className="text-ledger-text">{i.rotulo}</span>
                 <span className="text-ledger-muted">{i.grupo}</span>
               </li>
@@ -417,9 +442,27 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       <div className="grid gap-6 xl:grid-cols-2">
         <Panel title="Identificação">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Campo full label="Nome comercial do produto-base" valor={form["name"]} onChange={(v) => set("name", v)} disabled={somente} ajuda="Sem banho e sem aro quando esses dados variarem entre versões." />
-            <Campo label="Endereço da página (slug)" valor={form["slug"]} onChange={(v) => set("slug", v)} disabled={somente} ajuda={`Prévia: /produto/${slugPrevia || "—"}`} />
-            <Campo label="Código legado" valor={form["legacy_code"]} onChange={(v) => set("legacy_code", v)} disabled={somente} />
+            <Campo
+              full
+              label="Nome comercial do produto-base"
+              valor={form["name"]}
+              onChange={(v) => set("name", v)}
+              disabled={somente}
+              ajuda="Sem banho e sem aro quando esses dados variarem entre versões."
+            />
+            <Campo
+              label="Endereço da página (slug)"
+              valor={form["slug"]}
+              onChange={(v) => set("slug", v)}
+              disabled={somente}
+              ajuda={`Prévia: /produto/${slugPrevia || "—"}`}
+            />
+            <Campo
+              label="Código legado"
+              valor={form["legacy_code"]}
+              onChange={(v) => set("legacy_code", v)}
+              disabled={somente}
+            />
           </div>
         </Panel>
 
@@ -441,7 +484,11 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
               onChange={(v) => set("subcategory_id", v)}
               disabled={somente || filhas.length === 0}
               opcoes={filhas.map((c) => ({ value: c.id, label: c.name }))}
-              ajuda={filhas.length === 0 ? "Esta categoria não tem subcategorias." : "Obrigatória para publicar."}
+              ajuda={
+                filhas.length === 0
+                  ? "Esta categoria não tem subcategorias."
+                  : "Obrigatória para publicar."
+              }
             />
             <Selecao
               label="Coleção"
@@ -458,8 +505,18 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
 
         <Panel title="Material bruto">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Campo label="Material bruto" valor={form["raw_material"]} onChange={(v) => set("raw_material", v)} disabled={somente} />
-            <Campo label="Peso bruto (g)" valor={form["raw_weight_grams"]} onChange={(v) => set("raw_weight_grams", v)} disabled={somente} />
+            <Campo
+              label="Material bruto"
+              valor={form["raw_material"]}
+              onChange={(v) => set("raw_material", v)}
+              disabled={somente}
+            />
+            <Campo
+              label="Peso bruto (g)"
+              valor={form["raw_weight_grams"]}
+              onChange={(v) => set("raw_weight_grams", v)}
+              disabled={somente}
+            />
             <Selecao
               label="Fornecedor do bruto"
               valor={String(form["raw_supplier_id"] || "")}
@@ -467,8 +524,19 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
               disabled={somente}
               opcoes={(fornecedores.data ?? []).map((f) => ({ value: f.id, label: f.name }))}
             />
-            <Campo label="Valor da peça no bruto (R$)" valor={form["raw_piece_cost"]} onChange={(v) => set("raw_piece_cost", v)} disabled={somente} />
-            <Campo full label="Medidas" valor={form["measurements"]} onChange={(v) => set("measurements", v)} disabled={somente} />
+            <Campo
+              label="Valor da peça no bruto (R$)"
+              valor={form["raw_piece_cost"]}
+              onChange={(v) => set("raw_piece_cost", v)}
+              disabled={somente}
+            />
+            <Campo
+              full
+              label="Medidas"
+              valor={form["measurements"]}
+              onChange={(v) => set("measurements", v)}
+              disabled={somente}
+            />
           </div>
         </Panel>
 
@@ -488,7 +556,12 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
               disabled={somente}
               ajuda={`Em branco usa a margem padrão do sistema (${markupGlobal.data ?? 0}%).`}
             />
-            <Campo label="Preço de venda (R$)" valor={form["preco"]} onChange={(v) => set("preco", v)} disabled={somente} />
+            <Campo
+              label="Preço de venda (R$)"
+              valor={form["preco"]}
+              onChange={(v) => set("preco", v)}
+              disabled={somente}
+            />
             <div className="flex flex-col justify-center gap-2 text-sm">
               <p className="text-ledger-muted">
                 Preço sugerido:{" "}
@@ -516,14 +589,30 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
                 Aplicar preço sugerido
               </button>
             </div>
-            <Chave label="Mostrar preço no site" valor={form["price_is_public"] !== false} onChange={(v) => set("price_is_public", v)} disabled={somente} />
-            <Chave label="Destaque na vitrine" valor={form["is_featured"] === true} onChange={(v) => set("is_featured", v)} disabled={somente} />
+            <Chave
+              label="Mostrar preço no site"
+              valor={form["price_is_public"] !== false}
+              onChange={(v) => set("price_is_public", v)}
+              disabled={somente}
+            />
+            <Chave
+              label="Destaque na vitrine"
+              valor={form["is_featured"] === true}
+              onChange={(v) => set("is_featured", v)}
+              disabled={somente}
+            />
           </div>
         </Panel>
 
         <Panel title="Conteúdo">
           <div className="space-y-4">
-            <Area label="Descrição completa" valor={form["description"]} onChange={(v) => set("description", v)} disabled={somente} linhas={6} />
+            <Area
+              label="Descrição completa"
+              valor={form["description"]}
+              onChange={(v) => set("description", v)}
+              disabled={somente}
+              linhas={6}
+            />
             <div className="flex justify-end">
               <button
                 type="button"
@@ -536,7 +625,11 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
                     return;
                   }
                   const atual = String(form["short_description"] || "").trim();
-                  if (atual && !window.confirm("Já existe um resumo escrito. Substituir pelo resumo gerado?")) return;
+                  if (
+                    atual &&
+                    !window.confirm("Já existe um resumo escrito. Substituir pelo resumo gerado?")
+                  )
+                    return;
                   set("short_description", gerarResumo(base));
                   toast.success("Resumo gerado. Revise antes de salvar.");
                 }}
@@ -544,9 +637,27 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
                 <Sparkles aria-hidden className="size-4" /> Gerar resumo a partir da descrição
               </button>
             </div>
-            <Area label="Resumo" valor={form["short_description"]} onChange={(v) => set("short_description", v)} disabled={somente} linhas={3} />
-            <Area label="Cuidados" valor={form["care_instructions"]} onChange={(v) => set("care_instructions", v)} disabled={somente} linhas={3} />
-            <Area label="Garantia" valor={form["warranty_text"]} onChange={(v) => set("warranty_text", v)} disabled={somente} linhas={3} />
+            <Area
+              label="Resumo"
+              valor={form["short_description"]}
+              onChange={(v) => set("short_description", v)}
+              disabled={somente}
+              linhas={3}
+            />
+            <Area
+              label="Cuidados"
+              valor={form["care_instructions"]}
+              onChange={(v) => set("care_instructions", v)}
+              disabled={somente}
+              linhas={3}
+            />
+            <Area
+              label="Garantia"
+              valor={form["warranty_text"]}
+              onChange={(v) => set("warranty_text", v)}
+              disabled={somente}
+              linhas={3}
+            />
             {!padroes.data ? (
               <p className="text-sm text-ledger-muted">
                 Padrões do cadastro de produto ainda não configurados (cuidados, garantia e modelos
@@ -558,8 +669,20 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
 
         <Panel title="SEO">
           <div className="space-y-4">
-            <Campo full label="Título para buscadores" valor={form["seo_title"]} onChange={(v) => set("seo_title", v)} disabled={somente} />
-            <Area label="Descrição para buscadores" valor={form["seo_description"]} onChange={(v) => set("seo_description", v)} disabled={somente} linhas={3} />
+            <Campo
+              full
+              label="Título para buscadores"
+              valor={form["seo_title"]}
+              onChange={(v) => set("seo_title", v)}
+              disabled={somente}
+            />
+            <Area
+              label="Descrição para buscadores"
+              valor={form["seo_description"]}
+              onChange={(v) => set("seo_description", v)}
+              disabled={somente}
+              linhas={3}
+            />
           </div>
         </Panel>
       </div>

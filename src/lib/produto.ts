@@ -19,6 +19,8 @@ export interface ProdutoBase {
   raw_weight_grams: number | null;
   raw_supplier_id: string | null;
   raw_piece_cost_cents: number | null;
+  cost_price_cents: number | null;
+  markup_percent: number | null;
   measurements: string | null;
   short_description: string | null;
   description: string | null;
@@ -93,6 +95,33 @@ export async function checklistPublicacao(id: string): Promise<Impedimento[]> {
   return (data as unknown as Impedimento[]) ?? [];
 }
 
+/** Margem padrão do catálogo (%), usada quando o produto não tem margem própria. */
+export async function lerMarkupGlobal(): Promise<number> {
+  const { data, error } = await supabase.rpc("catalog_markup_get");
+  if (error) throw error;
+  return Number(data ?? 0);
+}
+
+export async function salvarMarkupGlobal(percent: number): Promise<number> {
+  const { data, error } = await supabase.rpc("catalog_markup_set", { _percent: percent });
+  if (error) throw error;
+  return Number(data ?? 0);
+}
+
+/** Preço sugerido a partir do custo e da margem aplicada (custo + margem%). */
+export function precoSugerido(custoCents: number | null, margem: number | null): number | null {
+  if (!custoCents || custoCents <= 0) return null;
+  const m = Number(margem ?? 0);
+  if (!Number.isFinite(m) || m < 0) return null;
+  return Math.round(custoCents * (1 + m / 100));
+}
+
+/** Margem real praticada: (venda - custo) / custo. */
+export function margemPraticada(custoCents: number | null, vendaCents: number | null): number | null {
+  if (!custoCents || custoCents <= 0 || !vendaCents || vendaCents <= 0) return null;
+  return ((vendaCents - custoCents) / custoCents) * 100;
+}
+
 export async function consultarCodigoBarras(codigo: string) {
   const { data, error } = await supabase.rpc("barcode_lookup", { _code: codigo.trim() });
   if (error) throw error;
@@ -146,6 +175,7 @@ export function completude(p: Partial<ProdutoBase>, temImagem: boolean, temVaria
     !!(p.raw_weight_grams && p.raw_weight_grams > 0),
     !!p.raw_supplier_id,
     !!(p.raw_piece_cost_cents && p.raw_piece_cost_cents > 0),
+    !!(p.cost_price_cents && p.cost_price_cents > 0),
     !!p.measurements?.trim(),
     !!p.short_description?.trim(),
     !!p.description?.trim(),

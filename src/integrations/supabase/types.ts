@@ -1263,6 +1263,222 @@ export type Database = {
           },
         ]
       }
+      financial_match_suggestions: {
+        Row: {
+          created_at: string
+          id: string
+          installment_id: string
+          line_id: string
+          reasons: Json
+          score: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          installment_id: string
+          line_id: string
+          reasons?: Json
+          score?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          installment_id?: string
+          line_id?: string
+          reasons?: Json
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_match_suggestions_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_match_suggestions_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "financial_statement_lines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_reconciliation_allocations: {
+        Row: {
+          created_at: string
+          id: string
+          installment_id: string | null
+          line_id: string
+          reconciliation_id: string
+          valor_cents: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          installment_id?: string | null
+          line_id: string
+          reconciliation_id: string
+          valor_cents: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          installment_id?: string | null
+          line_id?: string
+          reconciliation_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_reconciliation_allocations_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_reconciliation_allocations_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "financial_statement_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_reconciliation_allocations_reconciliation_id_fkey"
+            columns: ["reconciliation_id"]
+            isOneToOne: false
+            referencedRelation: "financial_reconciliations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_reconciliation_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          evento: string
+          id: string
+          import_id: string | null
+          line_id: string | null
+          motivo: string | null
+          payload: Json
+          reconciliation_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          evento: string
+          id?: string
+          import_id?: string | null
+          line_id?: string | null
+          motivo?: string | null
+          payload?: Json
+          reconciliation_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          evento?: string
+          id?: string
+          import_id?: string | null
+          line_id?: string | null
+          motivo?: string | null
+          payload?: Json
+          reconciliation_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_reconciliation_events_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "financial_statement_imports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_reconciliation_events_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "financial_statement_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_reconciliation_events_reconciliation_id_fkey"
+            columns: ["reconciliation_id"]
+            isOneToOne: false
+            referencedRelation: "financial_reconciliations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_reconciliations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          financial_account_id: string
+          id: string
+          idempotency_key: string | null
+          is_reversal: boolean
+          motivo: string | null
+          observacao: string | null
+          payload_fingerprint: string | null
+          reversed_of: string | null
+          settlement_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          financial_account_id: string
+          id?: string
+          idempotency_key?: string | null
+          is_reversal?: boolean
+          motivo?: string | null
+          observacao?: string | null
+          payload_fingerprint?: string | null
+          reversed_of?: string | null
+          settlement_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          financial_account_id?: string
+          id?: string
+          idempotency_key?: string | null
+          is_reversal?: boolean
+          motivo?: string | null
+          observacao?: string | null
+          payload_fingerprint?: string | null
+          reversed_of?: string | null
+          settlement_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_reconciliations_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_reconciliations_reversed_of_fkey"
+            columns: ["reversed_of"]
+            isOneToOne: false
+            referencedRelation: "financial_reconciliations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_reconciliations_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_settlements: {
         Row: {
           created_at: string
@@ -1335,6 +1551,207 @@ export type Database = {
             columns: ["reversed_of"]
             isOneToOne: false
             referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_statement_files: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          financial_account_id: string
+          format: Database["public"]["Enums"]["fin_statement_format"]
+          id: string
+          original_name: string
+          sha256: string
+          size_bytes: number
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          financial_account_id: string
+          format: Database["public"]["Enums"]["fin_statement_format"]
+          id?: string
+          original_name: string
+          sha256: string
+          size_bytes?: number
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          financial_account_id?: string
+          format?: Database["public"]["Enums"]["fin_statement_format"]
+          id?: string
+          original_name?: string
+          sha256?: string
+          size_bytes?: number
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_statement_files_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_statement_imports: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          diagnostico: Json
+          file_id: string
+          financial_account_id: string
+          id: string
+          invalidas: number
+          pendentes: number
+          repetidas: number
+          status: string
+          total_linhas: number
+          updated_at: string
+          validas: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          diagnostico?: Json
+          file_id: string
+          financial_account_id: string
+          id?: string
+          invalidas?: number
+          pendentes?: number
+          repetidas?: number
+          status?: string
+          total_linhas?: number
+          updated_at?: string
+          validas?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          diagnostico?: Json
+          file_id?: string
+          financial_account_id?: string
+          id?: string
+          invalidas?: number
+          pendentes?: number
+          repetidas?: number
+          status?: string
+          total_linhas?: number
+          updated_at?: string
+          validas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_statement_imports_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "financial_statement_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_statement_imports_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_statement_lines: {
+        Row: {
+          bank_id: string | null
+          conciliado_cents: number
+          created_at: string
+          created_by: string | null
+          data: string | null
+          documento: string | null
+          error_reason: string | null
+          file_id: string
+          financial_account_id: string
+          flag_reason: string | null
+          hash: string | null
+          historico: string | null
+          id: string
+          import_id: string
+          kind: string | null
+          line_no: number
+          raw: Json
+          raw_text: string | null
+          status: Database["public"]["Enums"]["fin_statement_line_status"]
+          updated_at: string
+          valor_cents: number | null
+        }
+        Insert: {
+          bank_id?: string | null
+          conciliado_cents?: number
+          created_at?: string
+          created_by?: string | null
+          data?: string | null
+          documento?: string | null
+          error_reason?: string | null
+          file_id: string
+          financial_account_id: string
+          flag_reason?: string | null
+          hash?: string | null
+          historico?: string | null
+          id?: string
+          import_id: string
+          kind?: string | null
+          line_no: number
+          raw?: Json
+          raw_text?: string | null
+          status?: Database["public"]["Enums"]["fin_statement_line_status"]
+          updated_at?: string
+          valor_cents?: number | null
+        }
+        Update: {
+          bank_id?: string | null
+          conciliado_cents?: number
+          created_at?: string
+          created_by?: string | null
+          data?: string | null
+          documento?: string | null
+          error_reason?: string | null
+          file_id?: string
+          financial_account_id?: string
+          flag_reason?: string | null
+          hash?: string | null
+          historico?: string | null
+          id?: string
+          import_id?: string
+          kind?: string | null
+          line_no?: number
+          raw?: Json
+          raw_text?: string | null
+          status?: Database["public"]["Enums"]["fin_statement_line_status"]
+          updated_at?: string
+          valor_cents?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_statement_lines_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "financial_statement_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_statement_lines_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_statement_lines_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "financial_statement_imports"
             referencedColumns: ["id"]
           },
         ]
@@ -4901,6 +5318,15 @@ export type Database = {
         | "parcial"
         | "liquidado"
         | "excedente"
+      fin_statement_format: "csv" | "ofx"
+      fin_statement_line_status:
+        | "pendente"
+        | "invalida"
+        | "repetida"
+        | "parcial"
+        | "conciliada"
+        | "ignorada"
+        | "divergente"
       fin_title_status:
         | "rascunho"
         | "submetido"
@@ -5143,6 +5569,16 @@ export const Constants = {
         "parcial",
         "liquidado",
         "excedente",
+      ],
+      fin_statement_format: ["csv", "ofx"],
+      fin_statement_line_status: [
+        "pendente",
+        "invalida",
+        "repetida",
+        "parcial",
+        "conciliada",
+        "ignorada",
+        "divergente",
       ],
       fin_title_status: [
         "rascunho",

@@ -161,8 +161,6 @@ export function FinanceiroShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const visiveis = AREAS_FINANCEIRAS.filter((a) => caps.includes(a.capacidade));
-
   return (
     <div className="space-y-6 pb-4">
       <PageHeader

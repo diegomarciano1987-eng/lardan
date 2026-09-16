@@ -133,7 +133,7 @@ describe("importação e campos novos", () => {
       "Valor da peça no bruto": "4,00",
       Tamanho: "16",
       "Código legado": LEGADO,
-      "Valor final da peça banhada": "10,00",
+      "Valor final da peça banhada": "4,00",
     });
     expect(r.status, JSON.stringify(r.messages)).toBe("processado");
     expect(r.effects.produto).toBe("criado");
@@ -148,7 +148,7 @@ describe("importação e campos novos", () => {
       "Valor da peça no bruto": "4,00",
       Tamanho: "16",
       "Código legado": LEGADO,
-      "Valor final da peça banhada": "10,00",
+      "Valor final da peça banhada": "4,00",
     });
     expect(r.effects.produto).toBe("sem_alteracao");
     expect(r.effects.custo).toBe("sem_alteracao");
@@ -161,7 +161,7 @@ describe("importação e campos novos", () => {
       "Valor da peça no bruto": "6,00",
       Tamanho: "16",
       "Código legado": LEGADO,
-      "Valor final da peça banhada": "13,50",
+      "Valor final da peça banhada": "6,00",
     });
     expect(r.effects.produto).toBe("alterado");
     const custos = await rpc(master.token, "product_costs_read", { _product: produtoId });
@@ -178,7 +178,7 @@ describe("importação e campos novos", () => {
       "Valor da peça no bruto": "6,00",
       Tamanho: "18",
       "Código legado": LEGADO,
-      "Valor final da peça banhada": "13,50",
+      "Valor final da peça banhada": "6,00",
     });
     expect(r.effects.variante).toBe("alterada");
     const v = await admin(`/product_variants?id=eq.${r.variant_id}&select=size`);

@@ -162,12 +162,8 @@ export function FinanceiroShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="space-y-6 pb-4">
-      <PageHeader
-        eyebrow="Lardan Cloud"
-        title="Financeiro"
-        description="Títulos, parcelas, baixas, contas e conciliação — gravados no servidor, com histórico que não se apaga."
-      />
+    <div className="space-y-4 pb-4">
+      <PageHeader eyebrow="Lardan Cloud" title="Financeiro" />
 
       <ResumoFinanceiro />
 

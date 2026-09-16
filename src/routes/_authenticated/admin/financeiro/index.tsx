@@ -9,6 +9,7 @@ import {
   formatInt,
 } from "@/components/admin/ui";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
+import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
 import { supabase } from "@/integrations/supabase/client";
 

@@ -44,16 +44,8 @@
 - [x] B6 — edição de produto restrita ao Master (product.manage / product.publish)
 - [ ] B19 — importação de produtos ainda não reconhece as novas colunas (banho, verniz, custos, subcategoria)
 - [ ] Padrões do cadastro de produto (cuidados, garantia, modelos de SEO) — aguardando os textos oficiais do Daniel
-- [ ] antigo B1 — "Novo produto" abre a ficha completa, sem criar rascunho vazio
-- [ ] B2 — produto-base (código interno, material/peso/fornecedor/valor do bruto,
-      subcategoria) e variante (banho, fornecedor do banho, verniz, custos)
-- [ ] B3 — checklist de publicação no servidor devolvendo todas as pendências
-- [ ] B4 — código interno, SKU, nome e slug automáticos + resumo automático
-- [ ] B5 — histórico de custos com composição em variant_costs
-- [ ] B6 — permissão temporária: só Master cria/edita/publica produto
-- [ ] C2 — subcategoria obrigatória na publicação quando a categoria tiver filhas
+- [x] C2 — subcategoria obrigatória na publicação quando a categoria tiver filhas
 - [ ] D — candidaturas: questionários configuráveis, cadastro completo pelo
       representante, documentos em armazenamento privado, madrinha, contrato e
       promissória versionados, painel de análise sem decisão automática
 - [ ] E — rótulos dos 11 perfis e prova da matriz de acesso por perfil
-- [ ] F — importação entendendo produto-base + banho + custos

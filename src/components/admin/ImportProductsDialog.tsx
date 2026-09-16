@@ -604,6 +604,9 @@ export function ImportProductsDialog({
                   {formatInt(indicadores.conflitos)}
                 </p>
               </div>
+            </div>
+
+
 
             {previa && (
               <div className="ledger-panel space-y-3 px-5 py-4">

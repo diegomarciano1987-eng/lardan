@@ -604,7 +604,45 @@ export function ImportProductsDialog({
                   {formatInt(indicadores.conflitos)}
                 </p>
               </div>
-            </div>
+
+            {previa && (
+              <div className="ledger-panel space-y-3 px-5 py-4">
+                <p className="text-sm font-semibold text-ledger-text">
+                  Conferência detalhada ·{" "}
+                  {previa.formato === "novo" ? "planilha nova" : "planilha antiga"}
+                </p>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+                  {(
+                    [
+                      ["Sem alteração", previa.sem_alteracao],
+                      ["Novos custos", previa.custos_novos],
+                      ["Unidades previstas", previa.unidades_previstas],
+                      ["Banhos não reconhecidos", previa.banhos_nao_reconhecidos],
+                      ["Subcategorias inválidas", previa.subcategorias_invalidas],
+                      ["Categorias inválidas", previa.categorias_invalidas],
+                      ["Fornecedores não encontrados", previa.fornecedores_nao_encontrados],
+                      ["Códigos de barras repetidos", previa.barcodes_duplicados],
+                      ["SKUs repetidos", previa.skus_duplicados],
+                      ["Repetidas no arquivo", previa.duplicadas_no_arquivo],
+                      ["Valores inválidos", previa.valores_invalidos],
+                      ["Publicações pedidas", previa.publicacoes_solicitadas],
+                      ["Publicações bloqueadas", previa.publicacoes_bloqueadas],
+                      ["Avisos", previa.avisos],
+                      ["Recusadas", previa.recusadas],
+                    ] as const
+                  ).map(([rotulo, valor]) => (
+                    <p key={rotulo} className="flex justify-between gap-3">
+                      <span className="text-ledger-muted">{rotulo}</span>
+                      <span className="tabular-nums text-ledger-text">{formatInt(valor ?? 0)}</span>
+                    </p>
+                  ))}
+                </div>
+                <p className="text-xs text-ledger-muted">
+                  Nada foi gravado até aqui. A gravação só acontece quando você confirma.
+                </p>
+              </div>
+            )}
+
 
             {problemas.length > 0 && (
               <div className="ledger-panel max-h-64 overflow-auto">

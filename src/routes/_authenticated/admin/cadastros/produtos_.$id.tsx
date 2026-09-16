@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -15,10 +15,8 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { RecordSheet, type RecordValues } from "@/components/admin/RecordSheet";
-import { SmartSelect } from "@/components/premium/SmartSelect";
 import { can, useCapabilities } from "@/lib/capabilities";
 import {
-  saveRecord,
   uploadMedia,
   signedMediaUrl,
   parseCentavos,
@@ -54,7 +52,6 @@ function ProdutoDetalhe() {
   const podeVerCustos = can(capacidades, "catalog.cost.view");
 
 
-  const [editarFicha, setEditarFicha] = useState(false);
   const [variante, setVariante] = useState<VarianteRow | null>(null);
   const [varianteAberta, setVarianteAberta] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -118,15 +115,6 @@ function ProdutoDetalhe() {
         .eq("entity_id", id)
         .order("created_at", { ascending: false })
         .limit(20);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  const categorias = useQuery({
-    queryKey: ["opcoes-categorias"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("categories").select("id, name").order("name");
       if (error) throw error;
       return data ?? [];
     },

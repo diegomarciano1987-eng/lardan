@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState, PageHeader, Panel, formatBRLFromCents } from "@/components/admin/ui";
 import { useCapabilities, type Capability } from "@/lib/capabilities";
@@ -147,7 +146,6 @@ function ResumoFinanceiro() {
  */
 export function FinanceiroShell({ children }: { children: React.ReactNode }) {
   const caps = useCapabilities();
-  const rota = useRouterState({ select: (s) => s.location.pathname });
 
   if (!caps.includes("finance.view") && !caps.includes("finance.dashboard.view")) {
     return (
@@ -163,8 +161,6 @@ export function FinanceiroShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const visiveis = AREAS_FINANCEIRAS.filter((a) => caps.includes(a.capacidade));
-
   return (
     <div className="space-y-6 pb-4">
       <PageHeader
@@ -174,39 +170,6 @@ export function FinanceiroShell({ children }: { children: React.ReactNode }) {
       />
 
       <ResumoFinanceiro />
-
-      <nav
-        aria-label="Áreas do Financeiro"
-        className="sticky top-[4.5rem] z-20 -mx-1 rounded-[12px] border border-line-soft bg-surface/95 px-1 py-2 backdrop-blur-none"
-      >
-        <ul className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] lg:flex-wrap lg:overflow-visible">
-          {visiveis.map((a) => {
-            const ativo = a.to === "/admin/financeiro" ? rota === a.to : rota.startsWith(a.to);
-            return (
-              <li key={a.to} className="snap-start">
-                <Link
-                  to={a.to}
-                  title={a.descricao}
-                  aria-current={ativo ? "page" : undefined}
-                  className={
-                    "flex min-h-11 items-center gap-2 whitespace-nowrap rounded-[10px] border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-champagne " +
-                    (ativo
-                      ? "border-bronze bg-cream-2 text-bronze shadow-sm"
-                      : "border-line-soft bg-surface text-ledger-muted hover:border-line hover:text-ledger-text")
-                  }
-                >
-                  {a.label}
-                  {a.emImplantacao ? (
-                    <span className="rounded-full border border-line-soft px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-ledger-muted">
-                      em implantação
-                    </span>
-                  ) : null}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
 
       {children}
     </div>

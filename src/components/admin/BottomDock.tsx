@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { MoreHorizontal, Lock, Clock3, X } from "lucide-react";
+import { MoreHorizontal, Lock, Clock3, X, ChevronRight, ArrowLeft } from "lucide-react";
 import { ADMIN_MODULES, moduleAllowed, type AdminModule } from "@/lib/admin-modules";
 import { useCapabilities } from "@/lib/capabilities";
+import { AREAS_FINANCEIRAS } from "@/components/admin/financeiro/FinanceiroShell";
 import wordmark from "@/assets/lardan-wordmark.png.asset.json";
 import { hasAny, type AppRole } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -29,9 +30,15 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
   const caps = useCapabilities();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [drawer, setDrawer] = useState(false);
+  const [submenu, setSubmenu] = useState<"modulos" | "financeiro">("modulos");
 
   const permitted = ADMIN_MODULES.filter((m) => moduleAllowed(m, caps, roles));
   const primary = permitted.slice(0, 5);
+  const areasFinanceiras = AREAS_FINANCEIRAS.filter((a) => caps.includes(a.capacidade));
+  const fecharGaveta = () => {
+    setDrawer(false);
+    setSubmenu("modulos");
+  };
 
   const itemClass = (m: AdminModule, active: boolean) =>
     cn(
@@ -49,62 +56,119 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-4 pb-28">
           <div className="w-full max-w-3xl rounded-2xl border border-line-soft bg-surface p-5 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <p className="ledger-eyebrow">Todos os módulos</p>
+              {submenu === "financeiro" ? (
+                <button
+                  type="button"
+                  onClick={() => setSubmenu("modulos")}
+                  className="inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-semibold text-ledger-text hover:bg-surface-muted"
+                >
+                  <ArrowLeft aria-hidden className="size-4" />
+                  <span className="ledger-eyebrow">Financeiro</span>
+                </button>
+              ) : (
+                <p className="ledger-eyebrow">Todos os módulos</p>
+              )}
               <button
                 type="button"
-                onClick={() => setDrawer(false)}
+                onClick={fecharGaveta}
                 aria-label="Fechar módulos"
                 className="rounded-lg p-1 text-ledger-muted hover:bg-surface-muted"
               >
                 <X className="size-4" />
               </button>
             </div>
-            <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
-              {permitted.map((m) => {
-                const active = isActive(pathname, m.path);
-                const Icon = m.icon;
-                const body = (
-                  <span className="flex items-center gap-2.5">
-                    <Icon aria-hidden className="size-[18px] shrink-0" />
-                    <span className="truncate">{m.label}</span>
-                    {m.state === "em_breve" && (
-                      <span className="ml-auto text-[0.625rem] uppercase tracking-[0.08em] text-ledger-muted">
-                        Em breve
-                      </span>
-                    )}
-                    {m.state === "em_construcao" && (
-                      <span className="ml-auto text-[0.625rem] uppercase tracking-[0.08em] text-warning">
-                        Em construção
-                      </span>
-                    )}
-                  </span>
-                );
-                return (
-                  <li key={m.slug}>
-                    {m.path ? (
+
+            {submenu === "financeiro" ? (
+              <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+                {areasFinanceiras.map((a) => {
+                  const active =
+                    a.to === "/admin/financeiro" ? pathname === a.to : pathname.startsWith(a.to);
+                  return (
+                    <li key={a.to}>
                       <Link
-                        to={m.path}
-                        onClick={() => setDrawer(false)}
+                        to={a.to}
+                        onClick={fecharGaveta}
+                        title={a.descricao}
+                        aria-current={active ? "page" : undefined}
                         className={cn(
-                          "block rounded-lg px-3 py-2.5 text-sm text-ledger-text transition-colors hover:bg-surface-muted",
+                          "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-ledger-text transition-colors hover:bg-surface-muted",
                           active && "bg-champagne-soft",
                         )}
                       >
-                        {body}
+                        <span className="truncate">{a.label}</span>
+                        {a.emImplantacao && (
+                          <span className="ml-auto shrink-0 text-[0.625rem] uppercase tracking-[0.08em] text-warning">
+                            Em implantação
+                          </span>
+                        )}
                       </Link>
-                    ) : (
-                      <span
-                        aria-disabled="true"
-                        title={`${m.label}: ${m.description}`}
-                        className="block cursor-not-allowed rounded-lg px-3 py-2.5 text-sm text-ledger-muted opacity-60"
-                      >
-                        {body}
-                      </span>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+                {permitted.map((m) => {
+                  const active = isActive(pathname, m.path);
+                  const Icon = m.icon;
+                  const body = (
+                    <span className="flex items-center gap-2.5">
+                      <Icon aria-hidden className="size-[18px] shrink-0" />
+                      <span className="truncate">{m.label}</span>
+                      {m.slug === "financeiro" && (
+                        <ChevronRight aria-hidden className="ml-auto size-4 shrink-0 opacity-70" />
+                      )}
+                      {m.state === "em_breve" && (
+                        <span className="ml-auto text-[0.625rem] uppercase tracking-[0.08em] text-ledger-muted">
+                          Em breve
+                        </span>
+                      )}
+                      {m.state === "em_construcao" && (
+                        <span className="ml-auto text-[0.625rem] uppercase tracking-[0.08em] text-warning">
+                          Em construção
+                        </span>
+                      )}
+                    </span>
+                  );
+                  return (
+                    <li key={m.slug}>
+                      {m.slug === "financeiro" ? (
+                        <button
+                          type="button"
+                          onClick={() => setSubmenu("financeiro")}
+                          aria-haspopup="true"
+                          className={cn(
+                            "block w-full rounded-lg px-3 py-2.5 text-left text-sm text-ledger-text transition-colors hover:bg-surface-muted",
+                            active && "bg-champagne-soft",
+                          )}
+                        >
+                          {body}
+                        </button>
+                      ) : m.path ? (
+                        <Link
+                          to={m.path}
+                          onClick={fecharGaveta}
+                          className={cn(
+                            "block rounded-lg px-3 py-2.5 text-sm text-ledger-text transition-colors hover:bg-surface-muted",
+                            active && "bg-champagne-soft",
+                          )}
+                        >
+                          {body}
+                        </Link>
+                      ) : (
+                        <span
+                          aria-disabled="true"
+                          title={`${m.label}: ${m.description}`}
+                          className="block cursor-not-allowed rounded-lg px-3 py-2.5 text-sm text-ledger-muted opacity-60"
+                        >
+                          {body}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </div>
       )}
@@ -177,7 +241,10 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
 
           <button
             type="button"
-            onClick={() => setDrawer((v) => !v)}
+            onClick={() => {
+              setDrawer((v) => !v);
+              setSubmenu("modulos");
+            }}
             className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-[0.75rem] text-warm-ivory/85 transition-colors hover:bg-white/8"
           >
             <MoreHorizontal aria-hidden className="size-4" />

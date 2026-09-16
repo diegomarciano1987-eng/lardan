@@ -133,6 +133,9 @@ export function PeriodoGlobal() {
         <Calendar
           mode="range"
           locale={ptBR}
+          formatters={{
+            formatMonthDropdown: (d: Date) => d.toLocaleString("pt-BR", { month: "long" }),
+          }}
           selected={intervalo}
           month={mesVisivel}
           onMonthChange={setMesVisivel}

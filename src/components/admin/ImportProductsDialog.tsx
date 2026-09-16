@@ -346,7 +346,9 @@ export function ImportProductsDialog({
       setSimular(false);
       setResumo(await lerLote(r.id));
       setIndicadores(await indicadoresLote(r.id));
+      setPrevia(await previaLote(r.id).catch(() => null));
       setEtapa("conferencia");
+
       toast.success("Execução real criada a partir da simulação.");
     } catch (e) {
       toast.error((e as Error).message);

@@ -49,8 +49,9 @@ const MAPA = {
 };
 
 let master: Conta;
-const NOME = `${TEST_PREFIX} Peça importada`;
-const LEGADO = `${TEST_PREFIX}-IMP-1`;
+const SUFIXO = crypto.randomUUID().slice(0, 8);
+const NOME = `${TEST_PREFIX} Peça importada ${SUFIXO}`;
+const LEGADO = `${TEST_PREFIX}-IMP-${SUFIXO}`;
 let produtoId = "";
 
 /** Sobe um arquivo sintético, abre o lote, envia a linha e processa de verdade. */

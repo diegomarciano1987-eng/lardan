@@ -4640,11 +4640,28 @@ export type Database = {
         Returns: undefined
       }
       fin_overview: { Args: { _ate?: string; _de?: string }; Returns: Json }
+      fin_reconcile: { Args: { _payload: Json }; Returns: Json }
+      fin_reconcile_undo: {
+        Args: { _motivo: string; _reconciliation: string }
+        Returns: string
+      }
       fin_settlement_create: { Args: { _payload: Json }; Returns: Json }
       fin_settlement_reverse: {
         Args: { _motivo: string; _settlement: string }
         Returns: string
       }
+      fin_statement_file_register: { Args: { _payload: Json }; Returns: Json }
+      fin_statement_line_flag: {
+        Args: { _line: string; _motivo: string; _status: string }
+        Returns: undefined
+      }
+      fin_statement_lines_list: { Args: { _filtros: Json }; Returns: Json }
+      fin_statement_lines_stage: {
+        Args: { _import: string; _lines: Json }
+        Returns: Json
+      }
+      fin_statement_overview: { Args: { _filtros: Json }; Returns: Json }
+      fin_statement_suggest: { Args: { _line: string }; Returns: Json }
       fin_title_approve: {
         Args: { _motivo?: string; _title: string }
         Returns: undefined

@@ -97,7 +97,7 @@ export function ContasCaixas() {
         title="Contas e caixas"
         action={
           podeGerir ? (
-            <button type="button" className="admin-btn admin-btn--primary" onClick={() => setNova(true)}>
+            <button type="button" className="admin-btn-primary" onClick={() => setNova(true)}>
               <Plus aria-hidden className="size-4" /> Nova conta
             </button>
           ) : undefined
@@ -159,7 +159,7 @@ export function ContasCaixas() {
           </div>
           <button
             type="button"
-            className="admin-btn admin-btn--primary mt-3"
+            className="admin-btn-primary mt-3"
             disabled={transferir.isPending}
             onClick={() => transferir.mutate()}
           >

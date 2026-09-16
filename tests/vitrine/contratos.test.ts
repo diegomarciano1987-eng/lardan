@@ -16,11 +16,12 @@ let produtoId = "";
 let mediaId = "";
 let vinculoId = "";
 let varianteId = "";
+let fornecedorId = "";
 
 const tok = () => master.token;
 
 async function criar(tabela: string, corpo: Record<string, unknown>) {
-  const r = await comoUsuario(tok(), `/${tabela}`, {
+  const r = await comoUsuario(tok(), `/${tabela}?select=id`, {
     method: "POST",
     headers: { Prefer: "return=representation" },
     body: JSON.stringify(corpo),
@@ -74,6 +75,7 @@ beforeAll(async () => {
     description: "Peça sintética de homologação.",
     category_id: categoriaId,
     price_cents: 12900,
+    cost_price_cents: 6000,
     price_is_public: true,
     status: "rascunho",
   });
@@ -119,6 +121,7 @@ afterAll(async () => {
     await apagar(tabela, `id=eq.${id}`);
   }
   if (mediaId) await apagar("media_assets", `id=eq.${mediaId}`);
+  if (fornecedorId) await apagar("suppliers", `id=eq.${fornecedorId}`);
   await limpar();
 });
 
@@ -189,9 +192,55 @@ describe("categoria e coleção: porta canônica", () => {
 });
 
 describe("produto publicado: invariantes permanentes", () => {
-  it("publica pela porta canônica", async () => {
+  it("completa a ficha exigida e publica pela porta canônica", async () => {
+    const fornecedor = await criar("suppliers", {
+      name: "HOMOLOG Fornecedor",
+      trade_name: "HOMOLOG",
+    });
+    fornecedorId = fornecedor.id;
+
+    const banhos = await comoUsuario(
+      tok(),
+      "/plating_types?select=id&is_active=eq.true&order=position&limit=1",
+    );
+    const banhoId = (banhos.body as { id: string }[])[0]?.id ?? "";
+    expect(banhoId).toBeTruthy();
+
+    const ficha = await alterar("products", produtoId, {
+      internal_code: `HML-${marca.slice(-6)}`,
+      raw_material: "Latão",
+      raw_weight_grams: 12,
+      raw_supplier_id: fornecedorId,
+      raw_piece_cost_cents: 3000,
+      cost_price_cents: 6000,
+      measurements: "2 cm x 1 cm",
+      short_description: "Peça sintética de homologação.",
+      care_instructions: "Guardar em local seco.",
+      warranty_text: "Garantia de homologação.",
+      seo_title: "HOMOLOG Peça",
+      seo_description: "Peça sintética usada apenas em homologação.",
+    });
+    expect(ficha.status, JSON.stringify(ficha.body)).toBeLessThan(400);
+
+    const variante = await alterar("product_variants", varianteId, {
+      label: "Único",
+      sku: `HML-${marca.slice(-6)}-U`,
+      barcode: `789${Date.now().toString().slice(-10)}`,
+      plating_type_id: banhoId,
+      plating_supplier_id: fornecedorId,
+      plating_material_cost_cents: 800,
+      varnish_name: "Verniz homologação",
+      varnish_cost_cents: 200,
+      finished_piece_cost_cents: 6000,
+      price_cents: 12900,
+    });
+    expect(variante.status, JSON.stringify(variante.body)).toBeLessThan(400);
+
     const r = await rpc(tok(), "publish_products", { _ids: [produtoId], _note: "homologação" });
-    expect((r.body as { afetados: number }).afetados).toBe(1);
+    expect(
+      (r.body as { afetados: number }).afetados,
+      JSON.stringify((r.body as { itens_rejeitados?: unknown }).itens_rejeitados),
+    ).toBe(1);
   });
 
   const recusa = async (

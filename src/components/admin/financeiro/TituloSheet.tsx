@@ -18,6 +18,7 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { useCapabilities } from "@/lib/capabilities";
+import { PedirDadosDialog } from "@/components/admin/financeiro/PedirDadosDialog";
 import {
   cancelarTitulo,
   estornarBaixa,
@@ -25,6 +26,7 @@ import {
   fetchFinTitle,
   registrarBaixa,
   registrarReconhecimento,
+  submeterTitulo,
   reaisParaCentavos,
   TITLE_STATUS_LABEL,
   type FinInstallment,
@@ -68,6 +70,9 @@ export function TituloSheet({
   const [valor, setValor] = React.useState("");
   const [referencia, setReferencia] = React.useState("");
   const [chave] = React.useState(() => crypto.randomUUID());
+  const [estornando, setEstornando] = React.useState<string | null>(null);
+  const [cancelando, setCancelando] = React.useState(false);
+  const [reconhecendo, setReconhecendo] = React.useState(false);
 
   const t = detalhe.data;
 
@@ -99,13 +104,13 @@ export function TituloSheet({
   });
 
   const estornar = useMutation({
-    mutationFn: async (settlementId: string) => {
-      const motivo = window.prompt("Motivo do estorno (obrigatório):")?.trim();
-      if (!motivo) throw new Error("Estorno exige motivo.");
-      return estornarBaixa(settlementId, motivo);
+    mutationFn: async (v: { settlementId: string; motivo: string }) => {
+      if (!v.motivo.trim()) throw new Error("Estorno exige motivo.");
+      return estornarBaixa(v.settlementId, v.motivo.trim());
     },
     onSuccess: () => {
       toast.success("Estorno registrado com lançamento compensatório.");
+      setEstornando(null);
       void qc.invalidateQueries({ queryKey: ["fin-title", id] });
       void qc.invalidateQueries({ queryKey: ["fin-overview"] });
       void qc.invalidateQueries({ queryKey: ["fin-accounts"] });
@@ -114,33 +119,40 @@ export function TituloSheet({
   });
 
   const cancelar = useMutation({
-    mutationFn: async () => {
-      const motivo = window.prompt("Motivo do cancelamento (obrigatório):")?.trim();
-      if (!motivo) throw new Error("Cancelamento exige motivo.");
-      return cancelarTitulo(id as string, motivo);
+    mutationFn: async (motivo: string) => {
+      if (!motivo.trim()) throw new Error("Cancelamento exige motivo.");
+      return cancelarTitulo(id as string, motivo.trim());
     },
     onSuccess: () => {
       toast.success("Título cancelado. O histórico permanece.");
+      setCancelando(false);
       void qc.invalidateQueries({ queryKey: ["fin-title", id] });
       void qc.invalidateQueries({ queryKey: ["fin-titles"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const submeter = useMutation({
+    mutationFn: async () => submeterTitulo(id as string),
+    onSuccess: () => {
+      toast.success("Título enviado para aprovação.");
+      void qc.invalidateQueries({ queryKey: ["fin-title", id] });
+      void qc.invalidateQueries({ queryKey: ["fin-titles"] });
+      void qc.invalidateQueries({ queryKey: ["fin-pending"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const reconhecer = useMutation({
-    mutationFn: async () => {
-      const rec = window.prompt("Valor reconhecido pela contraparte (R$):")?.trim();
-      if (!rec) throw new Error("Informe o valor reconhecido.");
-      const cents = reaisParaCentavos(rec);
-      if (cents === null || cents < 0) throw new Error("Valor inválido.");
-      const contest = reaisParaCentavos(
-        window.prompt("Valor contestado / não reconhecido (R$):")?.trim() ?? "0",
-      );
-      const motivo = window.prompt("Motivo do reconhecimento:")?.trim() ?? "";
-      return registrarReconhecimento(id as string, cents, contest ?? 0, motivo);
+    mutationFn: async (v: Record<string, string>) => {
+      const cents = reaisParaCentavos(v["reconhecido"] ?? "");
+      if (cents === null || cents < 0) throw new Error("Valor reconhecido inválido.");
+      const contest = reaisParaCentavos(v["contestado"] ?? "0");
+      return registrarReconhecimento(id as string, cents, contest ?? 0, (v["motivo"] ?? "").trim());
     },
     onSuccess: () => {
       toast.success("Reconhecimento registrado.");
+      setReconhecendo(false);
       void qc.invalidateQueries({ queryKey: ["fin-title", id] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -232,7 +244,7 @@ export function TituloSheet({
                 </div>
                 <button
                   type="button"
-                  className="admin-btn admin-btn--primary mt-3"
+                  className="admin-btn-primary mt-3"
                   disabled={baixar.isPending}
                   onClick={() => baixar.mutate()}
                 >
@@ -267,7 +279,7 @@ export function TituloSheet({
                           <button
                             type="button"
                             className="admin-btn"
-                            onClick={() => estornar.mutate(b.settlement_id)}
+                            onClick={() => setEstornando(b.settlement_id)}
                           >
                             Estornar
                           </button>
@@ -290,7 +302,7 @@ export function TituloSheet({
                 <button
                   type="button"
                   className="admin-btn mt-3"
-                  onClick={() => reconhecer.mutate()}
+                  onClick={() => setReconhecendo(true)}
                 >
                   Registrar reconhecimento
                 </button>
@@ -310,12 +322,61 @@ export function TituloSheet({
             </section>
 
             {t.titulo.status !== "cancelado" && (
-              <button type="button" className="admin-btn" onClick={() => cancelar.mutate()}>
-                Cancelar título
-              </button>
+              <div className="flex flex-wrap gap-2">
+                {t.titulo.status === "rascunho" && (
+                  <button
+                    type="button"
+                    className="admin-btn-primary"
+                    disabled={submeter.isPending}
+                    onClick={() => submeter.mutate()}
+                  >
+                    Enviar para aprovação
+                  </button>
+                )}
+                <button type="button" className="admin-btn" onClick={() => setCancelando(true)}>
+                  Cancelar título
+                </button>
+              </div>
             )}
           </div>
         )}
+        <PedirDadosDialog
+          open={!!estornando}
+          titulo="Estornar baixa"
+          descricao="O estorno gera lançamento compensatório e fica registrado no histórico."
+          campos={[{ nome: "motivo", rotulo: "Motivo do estorno", tipo: "area", obrigatorio: true }]}
+          confirmar="Estornar"
+          onOpenChange={(v) => !v && setEstornando(null)}
+          onConfirmar={(vals) =>
+            estornar.mutate({
+              settlementId: estornando as string,
+              motivo: vals["motivo"] ?? "",
+            })
+          }
+        />
+
+        <PedirDadosDialog
+          open={cancelando}
+          titulo="Cancelar título"
+          descricao="O título deixa de ser cobrado, mas o histórico permanece."
+          campos={[{ nome: "motivo", rotulo: "Motivo do cancelamento", tipo: "area", obrigatorio: true }]}
+          confirmar="Cancelar título"
+          onOpenChange={setCancelando}
+          onConfirmar={(vals) => cancelar.mutate(vals["motivo"] ?? "")}
+        />
+
+        <PedirDadosDialog
+          open={reconhecendo}
+          titulo="Registrar reconhecimento"
+          descricao="Informe quanto a contraparte reconhece e quanto contesta."
+          campos={[
+            { nome: "reconhecido", rotulo: "Valor reconhecido (R$)", tipo: "valor", obrigatorio: true },
+            { nome: "contestado", rotulo: "Valor contestado (R$)", tipo: "valor", padrao: "0" },
+            { nome: "motivo", rotulo: "Motivo", tipo: "area" },
+          ]}
+          onOpenChange={setReconhecendo}
+          onConfirmar={(vals) => reconhecer.mutate(vals)}
+        />
       </SheetContent>
     </Sheet>
   );

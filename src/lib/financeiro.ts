@@ -261,3 +261,259 @@ export async function criarConta(input: {
   if (error) throw error;
   return data as unknown as string;
 }
+
+/* ===================== Departamento financeiro ===================== */
+
+export interface FinAccountDetail {
+  conta: {
+    id: string;
+    nome: string;
+    apelido: string | null;
+    kind: string;
+    banco: string | null;
+    agencia_masked: string | null;
+    conta_masked: string | null;
+    is_active: boolean;
+    moeda: string | null;
+    data_corte: string | null;
+    entidade: string | null;
+    saldo_inicial_cents: number;
+    saldo_cents: number;
+  };
+  movimentos: {
+    id: string;
+    data: string;
+    kind: string;
+    valor_cents: number;
+    descricao: string | null;
+    created_at: string;
+  }[];
+  extratos: {
+    id: string;
+    competencia_inicio: string | null;
+    competencia_fim: string | null;
+    status: string;
+    created_at: string;
+  }[];
+}
+
+export async function fetchFinAccountDetail(id: string): Promise<FinAccountDetail> {
+  const { data, error } = await supabase.rpc("fin_account_detail", { _account: id });
+  if (error) throw error;
+  return data as unknown as FinAccountDetail;
+}
+
+export async function fetchFinOverviewPeriodo(de?: string, ate?: string): Promise<FinOverview> {
+  const args: { _de?: string; _ate?: string } = {};
+  if (de) args._de = de;
+  if (ate) args._ate = ate;
+  const { data, error } = await supabase.rpc("fin_overview", args);
+  if (error) throw error;
+  return data as unknown as FinOverview;
+}
+
+export interface FinCashflow {
+  periodo: { de: string; ate: string; agrupamento: string };
+  saldo_inicial_cents: number;
+  totais: {
+    entradas_realizadas_cents: number;
+    saidas_realizadas_cents: number;
+    entradas_previstas_cents: number;
+    saidas_previstas_cents: number;
+    saldo_final_realizado_cents: number;
+    saldo_final_projetado_cents: number;
+  };
+  linhas: {
+    bucket: string;
+    entradas_realizadas_cents: number;
+    saidas_realizadas_cents: number;
+    entradas_previstas_cents: number;
+    saidas_previstas_cents: number;
+    saldo_realizado_cents: number;
+    saldo_projetado_cents: number;
+  }[];
+}
+
+export async function fetchFinCashflow(filtros: {
+  de: string;
+  ate: string;
+  agrupamento?: string;
+  conta_id?: string;
+  centro_custo_id?: string;
+  entidade_id?: string;
+}): Promise<FinCashflow> {
+  const { data, error } = await supabase.rpc("fin_cashflow", {
+    _filtros: filtros as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as FinCashflow;
+}
+
+export interface FinChartRow {
+  id: string;
+  codigo: string;
+  nome: string;
+  natureza: string;
+  parent_id: string | null;
+  parent_label: string | null;
+  aceita_lancamento: boolean;
+  is_active: boolean;
+  vigencia_inicio: string | null;
+  vigencia_fim: string | null;
+  em_uso: boolean;
+}
+
+export async function listChartAccounts(filtros: {
+  busca?: string;
+  situacao?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ total: number; pode_gerenciar: boolean; rows: FinChartRow[] }> {
+  const { data, error } = await supabase.rpc("fin_chart_list", {
+    _filtros: filtros as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as { total: number; pode_gerenciar: boolean; rows: FinChartRow[] };
+}
+
+export async function salvarContaContabil(payload: Record<string, unknown>): Promise<string> {
+  const { data, error } = await supabase.rpc("fin_chart_save", {
+    _payload: payload as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as string;
+}
+
+export async function alternarContaContabil(id: string, ativo: boolean) {
+  const { error } = await supabase.rpc("fin_chart_toggle", { _id: id, _ativo: ativo });
+  if (error) throw error;
+}
+
+export interface FinCostCenterRow {
+  id: string;
+  codigo: string;
+  nome: string;
+  parent_id: string | null;
+  parent_label: string | null;
+  entidade: string | null;
+  responsavel: string | null;
+  is_active: boolean;
+  em_uso: boolean;
+}
+
+export async function listCostCenters(filtros: {
+  busca?: string;
+  situacao?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ total: number; pode_gerenciar: boolean; rows: FinCostCenterRow[] }> {
+  const { data, error } = await supabase.rpc("fin_cost_center_list", {
+    _filtros: filtros as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as { total: number; pode_gerenciar: boolean; rows: FinCostCenterRow[] };
+}
+
+export async function salvarCentroDeCusto(payload: Record<string, unknown>): Promise<string> {
+  const { data, error } = await supabase.rpc("fin_cost_center_save", {
+    _payload: payload as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as string;
+}
+
+export async function alternarCentroDeCusto(id: string, ativo: boolean) {
+  const { error } = await supabase.rpc("fin_cost_center_toggle", { _id: id, _ativo: ativo });
+  if (error) throw error;
+}
+
+export interface FinPendingTitle {
+  id: string;
+  descricao: string;
+  direction: FinDirection;
+  documento: string | null;
+  valor_cents: number;
+  emissao: string;
+  status: FinTitleStatus;
+  contraparte: string;
+  submetido_em: string | null;
+}
+
+export async function listTitulosPendentes(): Promise<{
+  total: number;
+  pode_decidir: boolean;
+  rows: FinPendingTitle[];
+}> {
+  const { data, error } = await supabase.rpc("fin_titles_pending", { _limit: 100, _offset: 0 });
+  if (error) throw error;
+  return data as unknown as { total: number; pode_decidir: boolean; rows: FinPendingTitle[] };
+}
+
+export async function submeterTitulo(id: string) {
+  const { error } = await supabase.rpc("fin_title_submit", { _title: id });
+  if (error) throw error;
+}
+
+export async function aprovarTitulo(id: string, motivo?: string) {
+  const { error } = await supabase.rpc("fin_title_approve", {
+    _title: id,
+    _motivo: motivo ?? "",
+  });
+  if (error) throw error;
+}
+
+export async function recusarTitulo(id: string, motivo: string) {
+  const { error } = await supabase.rpc("fin_title_reject", { _title: id, _motivo: motivo });
+  if (error) throw error;
+}
+
+export interface FinAuditRow {
+  id: string;
+  created_at: string;
+  action: string;
+  entity: string | null;
+  entity_id: string | null;
+  payload: unknown;
+  autor: string;
+}
+
+export async function listFinAudit(filtros: {
+  de?: string;
+  ate?: string;
+  acao?: string;
+  busca?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ total: number; acoes: string[]; rows: FinAuditRow[] }> {
+  const { data, error } = await supabase.rpc("fin_audit_list", {
+    _filtros: filtros as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as { total: number; acoes: string[]; rows: FinAuditRow[] };
+}
+
+export interface FinSettings {
+  pode_gerenciar: boolean;
+  formas_pagamento: { id: string; codigo: string; nome: string; is_active: boolean }[];
+  aprovacao: { regra: string; parametrizacao_por_valor: boolean };
+  integracoes: { nome: string; status: string; observacao: string }[];
+}
+
+export async function fetchFinSettings(): Promise<FinSettings> {
+  const { data, error } = await supabase.rpc("fin_settings_overview");
+  if (error) throw error;
+  return data as unknown as FinSettings;
+}
+
+export async function salvarFormaPagamento(payload: Record<string, unknown>): Promise<string> {
+  const { data, error } = await supabase.rpc("fin_payment_method_save", {
+    _payload: payload as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as string;
+}
+
+export async function alternarFormaPagamento(id: string, ativo: boolean) {
+  const { error } = await supabase.rpc("fin_payment_method_toggle", { _id: id, _ativo: ativo });
+  if (error) throw error;
+}

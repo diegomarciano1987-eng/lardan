@@ -1,7 +1,8 @@
 # LARDAN — Financeiro: arquitetura
 
 Documento vivo. Checkpoint: fundação canônica entregue e provada no banco;
-conciliação, importação, DRE, Cobranças e preparação Asaas ainda pendentes.
+conciliação bancária entregue e operacional; importação financeira, DRE, Cobranças e
+preparação Asaas seguem em implantação.
 
 ## 1. Diagnóstico inicial (confirmado no banco em 15/09/2026)
 
@@ -99,7 +100,8 @@ toca em catálogo nem em estoque.
 
 ## 7. Ainda desligado / pendente
 
-- Conciliação bancária (CSV/OFX) e CNAB.
+- CNAB (sem botão funcional).
+- Importação financeira e DRE (áreas marcadas "em implantação" na própria tela).
 - Importação de contas a pagar e a receber.
 - DRE gerencial e fluxo de caixa com drill-down completo.
 - Módulo Cobranças (`/admin/cobrancas`) com régua, promessas e negociações.
@@ -113,3 +115,31 @@ toca em catálogo nem em estoque.
 Implementada como área da própria tela do Financeiro, reaproveitando o motor de
 liquidação e o razão. Estrutura, RPCs, formatos aceitos, permissões e testes estão
 documentados em `CONCILIACAO-BANCARIA.md`.
+
+
+## Departamento operacional (rodada F6)
+
+Rotas canônicas, todas com URL própria, recarga direta, voltar/avançar e capacidade
+verificada no servidor:
+
+`/admin/financeiro` (visão geral), `/pagar`, `/receber`, `/fluxo-caixa`, `/contas`,
+`/conciliacao`, `/plano-contas`, `/centros-custo`, `/aprovacoes`, `/auditoria`,
+`/configuracoes` — ativas; `/importacoes` e `/dre` — em implantação, sem botão que
+finja importar, calcular ou exportar.
+
+Navegação compartilhada: `src/components/admin/financeiro/FinanceiroShell.tsx`
+(cabeçalho, indicadores reais pelo razão, abas com área ativa destacada, filtro de
+capacidade, estado "Em implantação", responsivo e navegável por teclado).
+
+Regras endurecidas no banco:
+
+- saldo inicial da conta grava movimento real e imutável (`saldo_inicial`); o saldo é
+  sempre calculado pelo razão, sem contagem dupla com `saldo_inicial_cents`;
+- títulos: rascunho → submetido → aprovado/ativo ou recusado (com motivo, volta a
+  rascunho); cancelado não ressuscita; aprovar de novo é idempotente e não gera segundo
+  evento; nascer "ativo" depende da regra `financeiro.aprovacao`;
+- plano de contas e centros de custo por RPC, com busca e paginação no servidor, hierarquia
+  sem ciclos, código único e inativação em vez de exclusão física;
+- fluxo de caixa apurado no servidor: realizado pelo razão, previsto pelas parcelas.
+
+Testes versionados: `tests/financeiro/departamento.test.ts` (`bun run test:financeiro`).

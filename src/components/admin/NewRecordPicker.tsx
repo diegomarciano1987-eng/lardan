@@ -13,7 +13,7 @@ import type { PartyRoleKind } from "@/lib/registry";
 type Destino =
   | { tipo: "pessoa"; role?: PartyRoleKind }
   | { tipo: "organizacao"; role?: PartyRoleKind }
-  | { tipo: "rota"; to: string }
+  | { tipo: "rota"; to: string; semNovo?: boolean }
   | { tipo: "em_implantacao" };
 
 interface Opcao {
@@ -24,25 +24,106 @@ interface Opcao {
 }
 
 const OPCOES: Opcao[] = [
-  { grupo: "Pessoas e rede", label: "Pessoa", descricao: "Identidade central, sem papel definido ainda.", destino: { tipo: "pessoa" } },
-  { grupo: "Pessoas e rede", label: "Consultora", descricao: "Pessoa com papel de consultora e ficha comercial.", destino: { tipo: "pessoa", role: "consultora" } },
-  { grupo: "Pessoas e rede", label: "Representante", descricao: "Responsável por região e carteira de consultoras.", destino: { tipo: "pessoa", role: "representante" } },
-  { grupo: "Pessoas e rede", label: "Revendedora", descricao: "Revenda vinculada à rede.", destino: { tipo: "pessoa", role: "revendedora" } },
-  { grupo: "Pessoas e rede", label: "Colaborador", descricao: "Equipe interna; o acesso é vinculado depois.", destino: { tipo: "pessoa", role: "colaborador" } },
-  { grupo: "Pessoas e rede", label: "Cliente", descricao: "Cliente final com dados mínimos autorizados.", destino: { tipo: "pessoa", role: "cliente" } },
+  {
+    grupo: "Pessoas e rede",
+    label: "Pessoa",
+    descricao: "Identidade central, sem papel definido ainda.",
+    destino: { tipo: "pessoa" },
+  },
+  {
+    grupo: "Pessoas e rede",
+    label: "Consultora",
+    descricao: "Pessoa com papel de consultora e ficha comercial.",
+    destino: { tipo: "pessoa", role: "consultora" },
+  },
+  {
+    grupo: "Pessoas e rede",
+    label: "Representante",
+    descricao: "Responsável por região e carteira de consultoras.",
+    destino: { tipo: "pessoa", role: "representante" },
+  },
+  {
+    grupo: "Pessoas e rede",
+    label: "Revendedora",
+    descricao: "Revenda vinculada à rede.",
+    destino: { tipo: "pessoa", role: "revendedora" },
+  },
+  {
+    grupo: "Pessoas e rede",
+    label: "Colaborador",
+    descricao: "Equipe interna; o acesso é vinculado depois.",
+    destino: { tipo: "pessoa", role: "colaborador" },
+  },
+  {
+    grupo: "Pessoas e rede",
+    label: "Cliente",
+    descricao: "Cliente final com dados mínimos autorizados.",
+    destino: { tipo: "pessoa", role: "cliente" },
+  },
 
-  { grupo: "Empresas e parceiros", label: "Fornecedor", descricao: "Mesmo cadastro usado em Produtos, Compras e Financeiro.", destino: { tipo: "rota", to: "/admin/cadastros/fornecedores" } },
-  { grupo: "Empresas e parceiros", label: "Empresa / entidade do grupo", descricao: "Empresa à qual estoque e financeiro pertencem.", destino: { tipo: "rota", to: "/admin/cadastros/entidades" } },
+  {
+    grupo: "Empresas e parceiros",
+    label: "Fornecedor",
+    descricao: "Mesmo cadastro usado em Produtos, Compras e Financeiro.",
+    destino: { tipo: "rota", to: "/admin/cadastros/fornecedores" },
+  },
+  {
+    grupo: "Empresas e parceiros",
+    label: "Empresa / entidade do grupo",
+    descricao: "Empresa à qual estoque e financeiro pertencem.",
+    destino: { tipo: "rota", to: "/admin/cadastros/entidades" },
+  },
 
-  { grupo: "Catálogo", label: "Produto", descricao: "Mesmo produto usado no site, estoque e vendas.", destino: { tipo: "rota", to: "/admin/cadastros/produtos" } },
-  { grupo: "Catálogo", label: "Categoria", descricao: "Organização do catálogo público.", destino: { tipo: "rota", to: "/admin/cadastros/categorias" } },
-  { grupo: "Catálogo", label: "Coleção", descricao: "Agrupamento temático ou sazonal.", destino: { tipo: "rota", to: "/admin/cadastros/colecoes" } },
+  {
+    grupo: "Catálogo",
+    label: "Produto",
+    descricao: "Mesmo produto usado no site, estoque e vendas.",
+    destino: { tipo: "rota", to: "/admin/cadastros/produtos" },
+  },
+  {
+    grupo: "Catálogo",
+    label: "Categoria",
+    descricao: "Organização do catálogo público.",
+    destino: { tipo: "rota", to: "/admin/cadastros/categorias" },
+  },
+  {
+    grupo: "Catálogo",
+    label: "Coleção",
+    descricao: "Agrupamento temático ou sazonal.",
+    destino: { tipo: "rota", to: "/admin/cadastros/colecoes" },
+  },
 
-  { grupo: "Estrutura operacional", label: "Local (depósito ou loja)", descricao: "Onde o estoque existe de verdade.", destino: { tipo: "rota", to: "/admin/cadastros/locais" } },
-  { grupo: "Estrutura operacional", label: "Maleta", descricao: "Cadastrada como local do tipo maleta.", destino: { tipo: "rota", to: "/admin/cadastros/locais" } },
+  {
+    grupo: "Estrutura operacional",
+    label: "Local (depósito ou loja)",
+    descricao: "Onde o estoque existe de verdade.",
+    destino: { tipo: "rota", to: "/admin/cadastros/locais" },
+  },
+  {
+    grupo: "Estrutura operacional",
+    label: "Maleta",
+    descricao: "Cadastrada como local do tipo maleta.",
+    destino: { tipo: "rota", to: "/admin/cadastros/locais" },
+  },
 
-  { grupo: "Financeiro", label: "Conta financeira", descricao: "Depende do motor financeiro.", destino: { tipo: "em_implantacao" } },
-  { grupo: "Financeiro", label: "Centro de custo", descricao: "Depende do motor financeiro.", destino: { tipo: "em_implantacao" } },
+  {
+    grupo: "Financeiro",
+    label: "Conta financeira",
+    descricao: "Conta, caixa ou carteira; o saldo vem do razão.",
+    destino: { tipo: "rota", to: "/admin/financeiro/contas", semNovo: true },
+  },
+  {
+    grupo: "Financeiro",
+    label: "Centro de custo",
+    descricao: "Estrutura usada para classificar despesas e receitas.",
+    destino: { tipo: "rota", to: "/admin/financeiro/centros-custo", semNovo: true },
+  },
+  {
+    grupo: "Financeiro",
+    label: "Conta do plano de contas",
+    descricao: "Classificação contábil usada nos títulos.",
+    destino: { tipo: "rota", to: "/admin/financeiro/plano-contas", semNovo: true },
+  },
 ];
 
 /** Seletor único de “o que você deseja cadastrar”. Abre sempre o formulário canônico. */
@@ -57,7 +138,10 @@ export function NewRecordPicker() {
     setAberto(false);
     if (o.destino.tipo === "rota") {
       // Abre a lista já com o formulário de criação aberto.
-      void navigate({ to: o.destino.to as never, search: { novo: true } as never });
+      void navigate({
+        to: o.destino.to as never,
+        ...(o.destino.semNovo ? {} : { search: { novo: true } as never }),
+      });
       return;
     }
     // Nada é gravado agora: o formulário canônico abre vazio e grava só ao salvar.
@@ -76,7 +160,9 @@ export function NewRecordPicker() {
       <Dialog open={aberto} onOpenChange={setAberto}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-semibold">O que você deseja cadastrar?</DialogTitle>
+            <DialogTitle className="text-2xl font-semibold">
+              O que você deseja cadastrar?
+            </DialogTitle>
             <DialogDescription className="font-medium">
               Cada opção abre o mesmo formulário usado pelo módulo especializado. Nada é duplicado.
             </DialogDescription>
@@ -105,7 +191,9 @@ export function NewRecordPicker() {
                               </span>
                             )}
                           </span>
-                          <span className="text-xs font-medium text-ledger-muted">{o.descricao}</span>
+                          <span className="text-xs font-medium text-ledger-muted">
+                            {o.descricao}
+                          </span>
                         </button>
                       </li>
                     );

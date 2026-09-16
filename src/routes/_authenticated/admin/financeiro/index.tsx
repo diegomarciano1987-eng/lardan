@@ -18,14 +18,6 @@ interface Busca {
   ate?: string;
 }
 
-const primeiroDiaDoMes = () => {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
-};
-const ultimoDiaDoMes = () => {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10);
-};
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/")({
   component: VisaoGeral,

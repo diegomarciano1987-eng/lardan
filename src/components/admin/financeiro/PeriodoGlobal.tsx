@@ -121,7 +121,9 @@ export function PeriodoGlobal() {
           <span
             className={cn(
               "min-h-9 rounded-[8px] border px-3 text-sm font-semibold leading-9",
-              ativo ? "border-line-soft text-ledger-muted" : "border-bronze bg-cream-2 text-ledger-text",
+              ativo
+                ? "border-line-soft text-ledger-muted"
+                : "border-bronze bg-cream-2 text-ledger-text",
             )}
           >
             Personalizado

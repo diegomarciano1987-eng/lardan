@@ -1,13 +1,7 @@
 import * as React from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ErrorState,
-  Panel,
-  Skeleton,
-  formatBRLFromCents,
-  formatInt,
-} from "@/components/admin/ui";
+import { ErrorState, Panel, Skeleton, formatBRLFromCents, formatInt } from "@/components/admin/ui";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
 import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
@@ -17,7 +11,6 @@ interface Busca {
   de?: string;
   ate?: string;
 }
-
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/")({
   component: VisaoGeral,
@@ -44,7 +37,11 @@ function Kpi({
       <p
         className={
           "mt-1 font-display text-[1.6rem] font-bold tabular-nums " +
-          (tom === "saida" ? "text-red-700" : tom === "entrada" ? "text-emerald-700" : "text-ledger-text")
+          (tom === "saida"
+            ? "text-red-700"
+            : tom === "entrada"
+              ? "text-emerald-700"
+              : "text-ledger-text")
         }
       >
         {valor}
@@ -121,7 +118,11 @@ function VisaoGeral() {
                   valor={formatBRLFromCents(q.data.recebido_periodo_cents)}
                   tom="entrada"
                 />
-                <Kpi rotulo="Pago" valor={formatBRLFromCents(q.data.pago_periodo_cents)} tom="saida" />
+                <Kpi
+                  rotulo="Pago"
+                  valor={formatBRLFromCents(q.data.pago_periodo_cents)}
+                  tom="saida"
+                />
               </div>
             </Panel>
 

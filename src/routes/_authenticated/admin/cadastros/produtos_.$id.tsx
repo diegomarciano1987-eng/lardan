@@ -162,104 +162,40 @@ function ProdutoDetalhe() {
     void qc.invalidateQueries({ queryKey: ["products"] });
   };
 
-  /** Publica/despublica sempre pela operação canônica do banco. */
-  const aplicarSituacao = async (status: string) => {
-    if (status === "publicado") {
-      const r = await publicarProdutos([id], "ficha do produto");
-      if (r.afetados === 0) {
-        const faltando = r.itens_rejeitados[0]?.faltando ?? (await impedimentosPublicacao(id));
-        throw new Error(
-          `Ainda não é possível publicar. Falta: ${faltando
-            .map((f) => ROTULO_IMPEDIMENTO[f] ?? f)
-            .join(", ")}.`,
-        );
-      }
-      return;
-    }
-    if (p?.status === "publicado") {
-      await despublicarProdutos([id], "ficha do produto", status as "rascunho" | "revisao" | "arquivado");
-      return;
-    }
-    await saveRecord("products", { status }, id);
-  };
-
-  const salvarFicha = useMutation({
-    mutationFn: async (v: RecordValues) => {
-      const nome = String(v["name"] ?? "").trim();
-      const status = String(v["status"] || "rascunho");
-      const gravado = await saveRecord(
-        "products",
-        {
-          name: nome,
-          slug: String(v["slug"] || "").trim() || slugify(nome),
-          legacy_code: v["legacy_code"] || null,
-          category_id: v["category_id"] || null,
-          collection_id: v["collection_id"] || null,
-          supplier_id: v["supplier_id"] || null,
-          short_description: v["short_description"] || null,
-          description: v["description"] || null,
-          material: v["material"] || null,
-          plating: v["plating"] || null,
-          measurements: v["measurements"] || null,
-          weight_grams: v["weight_grams"] === "" || v["weight_grams"] == null ? null : Number(v["weight_grams"]),
-          care_instructions: v["care_instructions"] || null,
-          warranty_text: v["warranty_text"] || null,
-          price_cents: parseCentavos(String(v["preco"] ?? "")),
-          price_is_public: v["price_is_public"] !== false,
-          seo_title: v["seo_title"] || null,
-          seo_description: v["seo_description"] || null,
-          is_featured: v["is_featured"] === true,
-        },
-        id,
-      );
-      if (status !== (p?.status ?? "rascunho")) await aplicarSituacao(status);
-      return gravado;
-    },
-    onSuccess: () => {
-      toast.success("Ficha salva.");
-      invalidar();
-    },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível salvar."),
-  });
-
-  const mudarStatus = useMutation({
-    mutationFn: async (status: string) => aplicarSituacao(status),
-    onSuccess: () => {
-      toast.success("Situação atualizada.");
-      invalidar();
-    },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível atualizar."),
-  });
 
 
+  /** Grava a variante pela operação canônica: SKU/nome automáticos e unicidade no banco. */
   const salvarVariante = useMutation({
     mutationFn: async (v: RecordValues) => {
-      const payload = {
+      const row = await salvarVarianteRpc(variante?.id ?? null, {
         product_id: id,
         label: String(v["label"] ?? "").trim(),
-        sku: v["sku"] || null,
-        barcode: v["barcode"] || null,
-        legacy_code: v["legacy_code"] || null,
-        size: v["size"] || null,
-        color: v["color"] || null,
-        price_cents: parseCentavos(String(v["preco"] ?? "")),
+        sku: String(v["sku"] ?? "").trim(),
+        barcode: String(v["barcode"] ?? "").trim(),
+        legacy_code: String(v["legacy_code"] ?? "").trim(),
+        size: String(v["size"] ?? "").trim(),
+        color: String(v["color"] ?? "").trim(),
+        plating_type_id: String(v["plating_type_id"] ?? ""),
+        price_cents: parseCentavos(String(v["preco"] ?? "")) ?? "",
         position: Number(v["position"] ?? 0) || 0,
         is_default: v["is_default"] === true,
         is_active: v["is_active"] !== false,
-      };
-      const row = await saveRecord<VarianteRow>("product_variants", payload, variante?.id);
-      const custoTexto = String(v["custo"] ?? "").trim();
-      if (podeVerCustos && custoTexto) {
-        const centavos = parseCentavos(custoTexto);
-        if (centavos != null) {
-          const { error } = await supabase.from("variant_costs").insert({
-            variant_id: row.id,
-            cost_cents: centavos,
-            ...(v["supplier_id"] ? { supplier_id: String(v["supplier_id"]) } : {}),
-            ...(v["custo_nota"] ? { note: String(v["custo_nota"]) } : {}),
-          });
-          if (error) throw error;
-        }
+        final_weight_grams: String(v["final_weight_grams"] ?? "").replace(",", "."),
+        sku_justificativa: String(v["sku_justificativa"] ?? "").trim(),
+      });
+      const finalTexto = String(v["custo_final"] ?? "").trim();
+      if (podeVerCustos && finalTexto) {
+        await registrarCusto(row.id, {
+          raw_supplier_id: String(v["raw_supplier_id"] ?? ""),
+          raw_piece_cost_cents: parseCentavos(String(v["custo_bruto"] ?? "")) ?? "",
+          plating_supplier_id: String(v["plating_supplier_id"] ?? ""),
+          plating_material_cost_cents: parseCentavos(String(v["custo_banho"] ?? "")) ?? "",
+          varnish_name: String(v["varnish_name"] ?? "").trim(),
+          varnish_cost_cents: parseCentavos(String(v["custo_verniz"] ?? "")) ?? "",
+          finished_piece_cost_cents: parseCentavos(finalTexto) ?? "",
+          justification: String(v["custo_justificativa"] ?? "").trim(),
+          note: String(v["custo_nota"] ?? "").trim(),
+        });
       }
       return row;
     },
@@ -268,7 +204,7 @@ function ProdutoDetalhe() {
       invalidar();
       void qc.invalidateQueries({ queryKey: ["produto-custos", id] });
     },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível salvar."),
+    onError: (e: unknown) => toast.error(mensagemDeErro(e)),
   });
 
   const enviarImagem = useMutation({

@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState, PageHeader, Panel, formatBRLFromCents } from "@/components/admin/ui";
 import { useCapabilities, type Capability } from "@/lib/capabilities";
@@ -147,7 +146,6 @@ function ResumoFinanceiro() {
  */
 export function FinanceiroShell({ children }: { children: React.ReactNode }) {
   const caps = useCapabilities();
-  const rota = useRouterState({ select: (s) => s.location.pathname });
 
   if (!caps.includes("finance.view") && !caps.includes("finance.dashboard.view")) {
     return (

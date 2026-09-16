@@ -108,6 +108,9 @@ export function ImportProductsDialog({
   const [jobId, setJobId] = React.useState<string | null>(null);
   const [resumo, setResumo] = React.useState<JobResumo | null>(null);
   const [indicadores, setIndicadores] = React.useState<Indicadores | null>(null);
+  const [previa, setPrevia] = React.useState<Previa | null>(null);
+  const [duvidas, setDuvidas] = React.useState<SugestaoCampo[]>([]);
+
   const [problemas, setProblemas] = React.useState<LinhaProblema[]>([]);
   const [progresso, setProgresso] = React.useState({ feitas: 0, total: 0, inicio: 0 });
   const [ocupado, setOcupado] = React.useState<string | null>(null);

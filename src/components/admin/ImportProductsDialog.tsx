@@ -133,6 +133,9 @@ export function ImportProductsDialog({
     setJobId(null);
     setResumo(null);
     setIndicadores(null);
+    setPrevia(null);
+    setDuvidas([]);
+
     setProblemas([]);
     setProgresso({ feitas: 0, total: 0, inicio: 0 });
     setOcupado(null);

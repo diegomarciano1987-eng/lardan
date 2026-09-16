@@ -95,7 +95,7 @@ function MargemPadrao() {
           <label className="text-sm text-ledger-muted">
             <span className="mb-1 block">Margem padrão (%)</span>
             <input
-              className="admin-input w-40"
+              className="w-40 rounded-md border border-line-soft bg-paper px-3 py-2 text-sm text-ledger-text outline-none focus-visible:ring-2 focus-visible:ring-champagne disabled:opacity-60"
               value={valor}
               inputMode="decimal"
               disabled={!pode}

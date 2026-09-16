@@ -355,8 +355,10 @@ describe("operações administrativas", () => {
           esperaFinanceiro,
         );
 
+        // Publicar produto passou a ser exclusivo do Master: a vitrine pode
+        // destacar peças, mas nenhum outro perfil grava no cadastro.
         const pub = await rpc(contas[papel]!.token, "publish_products", { _ids: [], _note: null });
-        if (esperaPublicar) expect(pub.status, papel).toBeLessThan(400);
+        if (papel === "master") expect(pub.status, papel).toBeLessThan(400);
         else expect(pub.status, papel).toBeGreaterThanOrEqual(400);
 
         const audit = await comoUsuario(contas[papel]!.token, "/audit_logs?select=id&limit=1");

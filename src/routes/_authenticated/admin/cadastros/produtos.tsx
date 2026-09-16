@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { useRouterState } from "@tanstack/react-router";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, StatusBadge } from "@/components/admin/ui";
@@ -10,8 +8,6 @@ import { DataTable, type Column } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import {
   listPaged,
-  saveRecord,
-  slugify,
   centavosParaTexto,
   STATUS_OPTIONS,
 } from "@/lib/catalog";
@@ -45,7 +41,6 @@ const tone = (status: string) =>
 
 function ProdutosPage() {
   const navigate = useNavigate();
-  const qc = useQueryClient();
   const [busca, setBusca] = useState("");
   const [pagina, setPagina] = useState(0);
   const [status, setStatus] = useState("todos");

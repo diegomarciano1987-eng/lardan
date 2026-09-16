@@ -76,7 +76,8 @@ export const ADMIN_MODULES: AdminModule[] = [
     slug: "site",
     path: "/admin/site",
     label: "Site",
-    description: "Central da Vitrine: curadoria, publicação e ações em massa sobre o catálogo do site.",
+    description:
+      "Central da Vitrine: curadoria, publicação e ações em massa sobre o catálogo do site.",
     icon: Globe2,
     roles: CONTENT,
     capability: "site.manage",
@@ -119,7 +120,8 @@ export const ADMIN_MODULES: AdminModule[] = [
     slug: "rede",
     path: "/admin/rede",
     label: "Inteligência da Rede",
-    description: "Mapa territorial da rede: onde a Lardan está, onde concentra e onde ainda não chegou.",
+    description:
+      "Mapa territorial da rede: onde a Lardan está, onde concentra e onde ainda não chegou.",
     icon: MapPinned,
     roles: [...CONTENT, "suporte"],
     capability: "partners.view",
@@ -144,7 +146,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     icon: WalletCards,
     roles: FINANCE,
     capability: "finance.view",
-    state: "em_construcao",
+    state: "ativo",
     spec: "Contas a pagar e a receber com parcelas, baixas parciais, estorno com motivo, conciliação manual e painéis de aging. Valores sempre em centavos; cancelamento é evento registrado.",
   },
   {
@@ -298,11 +300,7 @@ export const ADMIN_SUBMODULES: AdminModule[] = [
 export const ALL_MODULES = [...ADMIN_MODULES, ...ADMIN_SUBMODULES];
 
 /** Módulo visível: a permissão do banco decide; papéis são só o desenho antigo. */
-export function moduleAllowed(
-  m: AdminModule,
-  caps: string[],
-  roles: AppRole[],
-): boolean {
+export function moduleAllowed(m: AdminModule, caps: string[], roles: AppRole[]): boolean {
   if (m.slug === "visao-geral") return true;
   if (m.capability) return caps.includes(m.capability);
   return m.roles.some((r) => roles.includes(r));

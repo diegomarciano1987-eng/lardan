@@ -247,7 +247,7 @@ export function NovoTituloDialog({
           </button>
           <button
             type="button"
-            className="admin-btn admin-btn--primary"
+            className="admin-btn-primary"
             disabled={salvar.isPending}
             onClick={() => salvar.mutate()}
           >

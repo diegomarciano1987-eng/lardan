@@ -4632,6 +4632,7 @@ export type Database = {
       }
       expire_stock_reservations: { Args: never; Returns: number }
       fin_account_create: { Args: { _payload: Json }; Returns: string }
+      fin_account_detail: { Args: { _account: string }; Returns: Json }
       fin_accounts_overview: { Args: never; Returns: Json }
       fin_acknowledge: {
         Args: {
@@ -4642,17 +4643,39 @@ export type Database = {
         }
         Returns: string
       }
+      fin_approval_rule: { Args: never; Returns: Json }
+      fin_audit_list: { Args: { _filtros?: Json }; Returns: Json }
+      fin_cashflow: { Args: { _filtros?: Json }; Returns: Json }
+      fin_chart_list: { Args: { _filtros?: Json }; Returns: Json }
+      fin_chart_save: { Args: { _payload: Json }; Returns: string }
+      fin_chart_toggle: {
+        Args: { _ativo: boolean; _id: string }
+        Returns: undefined
+      }
+      fin_cost_center_list: { Args: { _filtros?: Json }; Returns: Json }
+      fin_cost_center_save: { Args: { _payload: Json }; Returns: string }
+      fin_cost_center_toggle: {
+        Args: { _ativo: boolean; _id: string }
+        Returns: undefined
+      }
       fin_fingerprint: { Args: { _intent: Json }; Returns: string }
+      fin_homolog_purge: { Args: never; Returns: Json }
       fin_installment_refresh: {
         Args: { _installment: string }
         Returns: undefined
       }
       fin_overview: { Args: { _ate?: string; _de?: string }; Returns: Json }
+      fin_payment_method_save: { Args: { _payload: Json }; Returns: string }
+      fin_payment_method_toggle: {
+        Args: { _ativo: boolean; _id: string }
+        Returns: undefined
+      }
       fin_reconcile: { Args: { _payload: Json }; Returns: Json }
       fin_reconcile_undo: {
         Args: { _motivo: string; _reconciliation: string }
         Returns: string
       }
+      fin_settings_overview: { Args: never; Returns: Json }
       fin_settlement_create: { Args: { _payload: Json }; Returns: Json }
       fin_settlement_reverse: {
         Args: { _motivo: string; _settlement: string }
@@ -4694,6 +4717,10 @@ export type Database = {
           _situacao?: string
           _status?: string
         }
+        Returns: Json
+      }
+      fin_titles_pending: {
+        Args: { _limit?: number; _offset?: number }
         Returns: Json
       }
       fin_transfer_create: { Args: { _payload: Json }; Returns: string }

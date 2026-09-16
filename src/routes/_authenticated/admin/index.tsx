@@ -20,6 +20,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { hasAny, CONTENT_ROLES, LEAD_ROLES } from "@/lib/session";
 import { moduleAllowed, ADMIN_MODULES } from "@/lib/admin-modules";
 import { useCapabilities } from "@/lib/capabilities";
+import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
+
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import {
   PageHeader,
@@ -31,6 +33,7 @@ import {
   ModuleAvailabilityBadge,
   formatInt,
   formatDateTime,
+  formatBRLFromCents,
 } from "@/components/admin/ui";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -75,7 +78,7 @@ function LedgerBalance({
   );
 }
 
-const SHORTCUTS: { label: string; icon: LucideIcon; module: string }[] = [
+const SHORTCUTS: { label: string; icon: LucideIcon; module: string; to?: string }[] = [
   { label: "Nova maleta", icon: BriefcaseBusiness, module: "maletas" },
   { label: "Lançar entrada", icon: PackagePlus, module: "estoque" },
   { label: "Transferir estoque", icon: ArrowRightLeft, module: "estoque" },
@@ -83,8 +86,18 @@ const SHORTCUTS: { label: string; icon: LucideIcon; module: string }[] = [
   { label: "Novo produto", icon: BadgePlus, module: "cadastros" },
   { label: "Nova consultora", icon: UserRoundPlus, module: "consultoras" },
   { label: "Importar planilha", icon: CloudUpload, module: "importacao" },
-  { label: "Novo título", icon: FilePlus2, module: "financeiro" },
-  { label: "Registrar recebimento", icon: CircleDollarSign, module: "financeiro" },
+  {
+    label: "Novo título a pagar",
+    icon: FilePlus2,
+    module: "financeiro",
+    to: "/admin/financeiro/pagar",
+  },
+  {
+    label: "Registrar recebimento",
+    icon: CircleDollarSign,
+    module: "financeiro",
+    to: "/admin/financeiro/receber",
+  },
 ];
 
 function VisaoGeral() {
@@ -173,8 +186,8 @@ function VisaoGeral() {
         <Panel title="Acesso" flush>
           <div className="space-y-4 px-5 py-6">
             <p className="text-sm text-ledger-muted">
-              A sua conta ainda não tem nenhum perfil de acesso. Sem perfil, nada do
-              conteúdo ou das candidaturas fica visível.
+              A sua conta ainda não tem nenhum perfil de acesso. Sem perfil, nada do conteúdo ou das
+              candidaturas fica visível.
             </p>
             {masterQuery.data === false && (
               <button type="button" onClick={assumirMaster} className="admin-btn-primary">
@@ -215,22 +228,13 @@ function VisaoGeral() {
             <LedgerBalance
               icon={UsersRound}
               label="Candidaturas recebidas"
-              value={
-                podeLeads && counts.data?.leads != null ? formatInt(counts.data.leads) : null
-              }
+              value={podeLeads && counts.data?.leads != null ? formatInt(counts.data.leads) : null}
               pending={podeLeads && counts.isPending}
               scope={podeLeads ? "Seja Lardan — total no banco." : "Sem autorização."}
             />
           </Panel>
 
-          {caps.includes("finance.view") && (
-            <Panel title="Indicadores financeiros">
-              <EmptyState
-                title="Nenhum título lançado"
-                description="Recebimentos, contas a receber, inadimplência e contas a pagar aparecem aqui assim que o módulo Financeiro entrar em operação. Nada é estimado."
-              />
-            </Panel>
-          )}
+          {caps.includes("finance.view") && <IndicadoresFinanceiros />}
         </div>
 
         {/* Coluna central */}
@@ -267,7 +271,7 @@ function VisaoGeral() {
                   <li key={s.label}>
                     {disponivel && mod.path ? (
                       <Link
-                        to={mod.path}
+                        to={s.to ?? mod.path}
                         className="block rounded-[10px] border border-line bg-surface px-3.5 py-3 text-sm font-semibold text-ledger-text shadow-sm transition-all hover:-translate-y-px hover:bg-surface-muted hover:shadow"
                       >
                         {conteudo}
@@ -297,8 +301,8 @@ function VisaoGeral() {
             <div className="px-5 py-5">
               <p className="text-sm text-ledger-text">Ainda não conciliado</p>
               <p className="mt-2 text-xs leading-relaxed text-ledger-muted">
-                Não há inventário nem contagem registrada, portanto nenhum percentual
-                de conciliação pode ser apurado.
+                Não há inventário nem contagem registrada, portanto nenhum percentual de conciliação
+                pode ser apurado.
               </p>
             </div>
           </Panel>
@@ -331,7 +335,9 @@ function VisaoGeral() {
                 ["Mensagens de contato", counts.data?.mensagens],
               ].map(([label, value]) => (
                 <div key={String(label)} className="bg-surface px-5 py-5">
-                  <dt className="text-[0.78rem] font-semibold tracking-wide text-ledger-muted">{label}</dt>
+                  <dt className="text-[0.78rem] font-semibold tracking-wide text-ledger-muted">
+                    {label}
+                  </dt>
                   <dd className="num mt-1.5 font-display text-[1.75rem] font-semibold leading-none text-ledger-text">
                     {typeof value === "number" ? formatInt(value) : "—"}
                   </dd>
@@ -395,5 +401,42 @@ function VisaoGeral() {
         </Panel>
       </div>
     </div>
+  );
+}
+
+/** Indicadores reais do Financeiro no painel inicial. Zero continua zero. */
+function IndicadoresFinanceiros() {
+  const q = useQuery({
+    queryKey: ["fin-overview", "admin-home"],
+    queryFn: () => fetchFinOverviewPeriodo(),
+    staleTime: 60_000,
+  });
+  const d = q.data;
+  const linhas: [string, number][] = [
+    ["Saldo em contas", d?.saldo_contas_cents ?? 0],
+    ["A receber em aberto", d?.a_receber_cents ?? 0],
+    ["A pagar em aberto", d?.a_pagar_cents ?? 0],
+    ["Vencido a receber", d?.vencido_receber_cents ?? 0],
+    ["Vencido a pagar", d?.vencido_pagar_cents ?? 0],
+  ];
+  return (
+    <Panel title="Indicadores financeiros">
+      <ul className="space-y-2">
+        {linhas.map(([rotulo, valor]) => (
+          <li key={rotulo} className="flex items-center justify-between gap-3">
+            <span className="text-sm font-medium text-ledger-muted">{rotulo}</span>
+            <span className="num text-sm font-semibold text-ledger-text">
+              {q.isLoading ? "—" : formatBRLFromCents(valor)}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <Link
+        to="/admin/financeiro"
+        className="mt-4 inline-flex text-sm font-semibold text-bronze underline-offset-4 hover:underline"
+      >
+        Abrir o Financeiro
+      </Link>
+    </Panel>
   );
 }

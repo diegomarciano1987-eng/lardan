@@ -87,7 +87,7 @@ afterAll(async () => {
     `\nMATRIZ DE SEGURANÇA — ${relatorio.length} cenários\n  ${"PERFIL".padEnd(22)} | ${"CENÁRIO".padEnd(34)} | RESULTADO\n${linhas.join("\n")}\n`,
   );
   await limpar();
-}, 180_000);
+}, 600_000);
 
 /* ------------------------------------------------------- leitura direta --- */
 

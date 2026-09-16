@@ -56,10 +56,15 @@
 - [x] F3 — contraprova contratual (26.469 / 16.955 / 11.783 / 5.172 / 5.000 / 172 / 9.514)
       executada e massa removida, auditoria preservada
 - [ ] F4 — conciliação por arquivo CNAB (não implementada; sem botão funcional)
-- [ ] F5 — falhas encontradas na bateria existente, anteriores a esta rodada e ainda abertas:
-      register_stock_movement devolve 409 quando dois cliques simultâneos usam a mesma chave;
-      publish_products recusa Diretoria e Marketing desde a regra "só Master edita produto";
-      parties.doc segue legível pelo Master na leitura direta da tabela
+- [ ] F5 — falhas anteriores: register_stock_movement devolve 409 quando dois cliques
+      simultâneos usam a mesma chave (aberta)
+- [x] F6 — Financeiro como departamento operacional: 13 rotas canônicas sob
+      /admin/financeiro, navegação compartilhada (FinanceiroShell), saldo inicial como
+      movimento real do razão, aprovações endurecidas, plano de contas e centros de custo,
+      fluxo de caixa pelo razão, conciliação com seleção N:1 pela tela, auditoria e
+      configurações; módulo marcado como ativo
+- [x] F7 — publish_products liberado para Diretoria e Marketing; documento completo
+      (CPF/CNPJ) deixou de ser legível direto em parties, suppliers e business_entities
 - [x] B20 — preço de custo no card Preço da ficha (obrigatório para salvar e para publicar,
       bloqueio no servidor via product_publish_blockers) e coluna "Preço de custo"
       obrigatória na importação (planilha antiga aceita "Valor de custo" como equivalente)

@@ -162,8 +162,14 @@ export function ImportProductsDialog({
       setSha(registro.sha256);
       setCabecalhos(lida.cabecalhos);
       setLinhas(lida.linhas);
-      setMapa(Object.fromEntries(sugestoes.map((s) => [s.campo, s.coluna])));
+      setMapa(
+        Object.fromEntries(
+          sugestoes.filter((s) => s.confianca === "exata").map((s) => [s.campo, s.coluna]),
+        ),
+      );
       setConfianca(Object.fromEntries(sugestoes.map((s) => [s.campo, s.confianca])));
+      setDuvidas(duvidasDeMapeamento(lida.cabecalhos));
+
       setAvisosArquivo([...lida.avisos, ...registro.avisos]);
       if (!registro.novo) {
         toast.info("Este arquivo já foi enviado antes. O histórico dele será mantido.");

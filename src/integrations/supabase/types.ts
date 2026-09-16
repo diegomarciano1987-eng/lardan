@@ -3472,6 +3472,7 @@ export type Database = {
           catalog_defaults_version: number | null
           category_id: string | null
           collection_id: string | null
+          cost_price_cents: number | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -3481,6 +3482,7 @@ export type Database = {
           is_legacy: boolean
           is_new_arrival: boolean
           legacy_code: string | null
+          markup_percent: number | null
           material: string | null
           measurements: string | null
           name: string
@@ -3514,6 +3516,7 @@ export type Database = {
           catalog_defaults_version?: number | null
           category_id?: string | null
           collection_id?: string | null
+          cost_price_cents?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -3523,6 +3526,7 @@ export type Database = {
           is_legacy?: boolean
           is_new_arrival?: boolean
           legacy_code?: string | null
+          markup_percent?: number | null
           material?: string | null
           measurements?: string | null
           name: string
@@ -3556,6 +3560,7 @@ export type Database = {
           catalog_defaults_version?: number | null
           category_id?: string | null
           collection_id?: string | null
+          cost_price_cents?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -3565,6 +3570,7 @@ export type Database = {
           is_legacy?: boolean
           is_new_arrival?: boolean
           legacy_code?: string | null
+          markup_percent?: number | null
           material?: string | null
           measurements?: string | null
           name?: string
@@ -4563,6 +4569,8 @@ export type Database = {
       can_manage_content: { Args: { _user_id: string }; Returns: boolean }
       can_manage_leads: { Args: { _user_id: string }; Returns: boolean }
       can_view_costs: { Args: { _user_id: string }; Returns: boolean }
+      catalog_markup_get: { Args: never; Returns: number }
+      catalog_markup_set: { Args: { _percent: number }; Returns: number }
       claim_master_role: { Args: never; Returns: boolean }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }
       confirm_stock_reservation: {

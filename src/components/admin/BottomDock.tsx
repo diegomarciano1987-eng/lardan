@@ -39,6 +39,10 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
     setDrawer(false);
     setSubmenu("modulos");
   };
+  const abrirFinanceiro = () => {
+    setSubmenu("financeiro");
+    setDrawer(true);
+  };
 
   const itemClass = (m: AdminModule, active: boolean) =>
     cn(
@@ -188,7 +192,18 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
               const active = isActive(pathname, m.path);
               return (
                 <li key={m.slug}>
-                  {m.path ? (
+                  {m.slug === "financeiro" ? (
+                    <button
+                      type="button"
+                      onClick={abrirFinanceiro}
+                      aria-haspopup="dialog"
+                      aria-expanded={drawer && submenu === "financeiro"}
+                      className={itemClass(m, active)}
+                      title="Abrir áreas do Financeiro"
+                    >
+                      <ItemLabel m={m} />
+                    </button>
+                  ) : m.path ? (
                     <Link to={m.path} className={itemClass(m, active)} title={m.description}>
                       <ItemLabel m={m} />
                     </Link>
@@ -213,7 +228,22 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
               const Icon = m.icon;
               return (
                 <li key={m.slug}>
-                  {m.path ? (
+                  {m.slug === "financeiro" ? (
+                    <button
+                      type="button"
+                      onClick={abrirFinanceiro}
+                      aria-label="Abrir áreas do Financeiro"
+                      aria-haspopup="dialog"
+                      aria-expanded={drawer && submenu === "financeiro"}
+                      className={cn(
+                        "flex flex-col items-center gap-1 rounded-xl px-2.5 py-1.5 text-[0.625rem]",
+                        active ? "bg-champagne-soft text-ink" : "text-warm-ivory/80",
+                      )}
+                    >
+                      <Icon aria-hidden className="size-[18px]" />
+                      <span className="max-w-14 truncate">{m.label}</span>
+                    </button>
+                  ) : m.path ? (
                     <Link
                       to={m.path}
                       aria-label={m.label}

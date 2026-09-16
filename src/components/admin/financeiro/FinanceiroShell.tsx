@@ -163,7 +163,7 @@ export function FinanceiroShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="space-y-4 pb-4">
-      <PageHeader eyebrow="Lardan Cloud" title="Financeiro" />
+      <PageHeader eyebrow="Lardan Cloud" title="Financeiro" actions={<PeriodoGlobal />} />
 
       <ResumoFinanceiro />
 

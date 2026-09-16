@@ -60,3 +60,7 @@
       register_stock_movement devolve 409 quando dois cliques simultâneos usam a mesma chave;
       publish_products recusa Diretoria e Marketing desde a regra "só Master edita produto";
       parties.doc segue legível pelo Master na leitura direta da tabela
+- [ ] B20 — preço de custo obrigatório no cadastro de produto (card Preço) e coluna
+      obrigatória na planilha de importação
+- [ ] B21 — markup global em Configurações do sistema, com margem padrão para todos os
+      produtos e ajuste individual por produto

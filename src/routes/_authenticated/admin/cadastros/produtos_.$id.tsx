@@ -23,15 +23,15 @@ import {
   signedMediaUrl,
   parseCentavos,
   centavosParaTexto,
-  slugify,
-  STATUS_OPTIONS,
+  mensagemDeErro,
 } from "@/lib/catalog";
+import { ProdutoFicha } from "@/components/admin/ProdutoFicha";
 import {
-  publicarProdutos,
-  despublicarProdutos,
-  impedimentosPublicacao,
-  ROTULO_IMPEDIMENTO,
-} from "@/lib/showcase";
+  salvarVariante as salvarVarianteRpc,
+  registrarCusto,
+  consultarCodigoBarras,
+  listarTiposDeBanho,
+} from "@/lib/produto";
 
 
 export const Route = createFileRoute("/_authenticated/admin/cadastros/produtos_/$id")({
@@ -139,6 +139,11 @@ function ProdutoDetalhe() {
       if (error) throw error;
       return data ?? [];
     },
+  });
+
+  const banhos = useQuery({
+    queryKey: ["tipos-de-banho"],
+    queryFn: listarTiposDeBanho,
   });
 
   const fornecedores = useQuery({
@@ -595,6 +600,8 @@ interface VarianteRow {
   legacy_code: string | null;
   size: string | null;
   color: string | null;
+  plating_type_id: string | null;
+  final_weight_grams: number | null;
   price_cents: number | null;
   position: number;
   is_default: boolean;

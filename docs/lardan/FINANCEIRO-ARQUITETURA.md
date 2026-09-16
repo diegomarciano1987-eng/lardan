@@ -107,3 +107,9 @@ toca em catálogo nem em estoque.
 - Preparação Asaas: **nenhuma tabela, nenhuma credencial e nenhuma chamada
   externa existem hoje**. A tela informa que a cobrança externa não está
   configurada e não oferece botão que finja funcionar.
+
+## Conciliação bancária
+
+Implementada como área da própria tela do Financeiro, reaproveitando o motor de
+liquidação e o razão. Estrutura, RPCs, formatos aceitos, permissões e testes estão
+documentados em `CONCILIACAO-BANCARIA.md`.

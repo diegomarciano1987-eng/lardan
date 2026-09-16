@@ -76,3 +76,9 @@ Padrão: recurso desativado no servidor **e** na UI; "Ver especificação" funci
 | EST-12 | RESERVA-LIBERAR/CANCELAR | /admin/estoque | stock.reservation.cancel | Devolve disponível sem mexer no físico; cancelamento exige motivo | ATIVO |
 | EST-13 | RESERVA-EXPIRAR | função `expire_stock_reservations` | stock.reservation.expire (Master, Diretoria) | Vencida deixa de comprometer; repetição sem efeito; agendador pendente | PARCIAL |
 | EST-14 | RESERVA-CONSULTAR | /admin/estoque | stock.reservation.view (inclui Financeiro) | Busca, filtros e paginação no servidor; nunca devolve custo | ATIVO |
+| FIN-20 | EXTRATO-IMPORTAR | /admin/financeiro (Conciliação) | finance.statement.import | Hash no servidor; arquivo repetido não duplica; linha inválida com motivo; zeros à esquerda preservados | ATIVO |
+| FIN-21 | EXTRATO-CONSULTAR | /admin/financeiro (Conciliação) | finance.statement.view | Busca, filtros, totais e paginação no servidor | ATIVO |
+| FIN-22 | CONCILIAR | /admin/financeiro (Conciliação) | finance.reconcile | 1:1, 1:N, N:1 e parcial; soma precisa fechar; usa fin_settlement_create; idempotente | ATIVO |
+| FIN-23 | CONCILIAÇÃO-DESFAZER | /admin/financeiro (Conciliação) | finance.reconcile.undo | Exige motivo; estorno compensatório; nada é apagado | ATIVO |
+| FIN-24 | LINHA-MARCAR | /admin/financeiro (Conciliação) | finance.statement.flag | Ignorar/divergente com motivo; linha conciliada protegida | ATIVO |
+| FIN-25 | CONCILIAÇÃO-CNAB | — | — | Formato ainda não implementado; sem botão funcional | FUTURO |

@@ -18,6 +18,11 @@ import {
   reaisParaCentavos,
   type FinDirection,
 } from "@/lib/financeiro";
+import {
+  CLASSIFICACAO_VAZIA,
+  CamposClassificacao,
+  type ValoresClassificacao,
+} from "@/components/admin/financeiro/ClassificacaoCampos";
 
 const inputCls =
   "h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm font-medium text-ledger-text shadow-sm outline-none placeholder:font-normal placeholder:text-ledger-muted focus:border-champagne focus:ring-2 focus:ring-champagne/25";
@@ -59,6 +64,8 @@ export function NovoTituloDialog({
   const [emissao, setEmissao] = React.useState<Date | undefined>(new Date());
   const [competencia, setCompetencia] = React.useState<Date | undefined>(new Date());
   const [observacao, setObservacao] = React.useState("");
+  const [classificacao, setClassificacao] =
+    React.useState<ValoresClassificacao>(CLASSIFICACAO_VAZIA);
   const [parcelas, setParcelas] = React.useState<ParcelaForm[]>([
     { vencimento: undefined, valor: "" },
   ]);
@@ -69,6 +76,7 @@ export function NovoTituloDialog({
       setDescricao("");
       setDocumento("");
       setObservacao("");
+      setClassificacao(CLASSIFICACAO_VAZIA);
       setParcelas([{ vencimento: undefined, valor: "" }]);
     }
   }, [open]);
@@ -99,6 +107,21 @@ export function NovoTituloDialog({
         ...(emissao ? { emissao: iso(emissao) } : {}),
         ...(competencia ? { competencia: iso(competencia) } : {}),
         ...(observacao.trim() ? { observacao: observacao.trim() } : {}),
+        ...(classificacao.business_entity_id
+          ? { business_entity_id: classificacao.business_entity_id }
+          : {}),
+        ...(classificacao.chart_account_id
+          ? { chart_account_id: classificacao.chart_account_id }
+          : {}),
+        ...(classificacao.cost_center_id
+          ? { cost_center_id: classificacao.cost_center_id }
+          : {}),
+        ...(classificacao.payment_method_id
+          ? { payment_method_id: classificacao.payment_method_id }
+          : {}),
+        ...(classificacao.financial_account_id
+          ? { financial_account_id: classificacao.financial_account_id }
+          : {}),
         valor_cents: linhas.reduce((s, l) => s + l.valor_cents, 0),
         parcelas: linhas,
       });
@@ -181,6 +204,20 @@ export function NovoTituloDialog({
             />
           </Campo>
         </div>
+
+        <div className="mt-2 rounded-[12px] border border-line-soft bg-cream-2 p-4">
+          <p className="ledger-eyebrow">Classificação</p>
+          <p className="mt-1 mb-3 text-xs font-medium text-ledger-muted">
+            Opcional agora. O que ficar em branco aparece como “Pendente de classificação” e pode
+            ser definido depois, com registro no histórico.
+          </p>
+          <CamposClassificacao
+            direction={direction}
+            valores={classificacao}
+            onChange={setClassificacao}
+          />
+        </div>
+
 
         <div className="mt-2 rounded-[12px] border border-line-soft bg-cream-2 p-4">
           <div className="flex items-center justify-between">

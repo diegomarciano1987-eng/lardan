@@ -1,16 +1,33 @@
+import * as React from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ErrorState, Panel, Skeleton, formatBRLFromCents } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
-import { fetchFinAccounts, fetchFinCashflow } from "@/lib/financeiro";
+import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
+import {
+  fetchClassificacoes,
+  fetchFinAccounts,
+  fetchFinCashflow,
+  fetchFinCashflowDetalhe,
+  type FiltrosCashflow,
+  type TipoDetalheFluxo,
+} from "@/lib/financeiro";
 
 interface Busca {
   de?: string;
   ate?: string;
-  dias?: string;
   agrupamento?: string;
   conta?: string;
+  centro?: string;
+  entidade?: string;
 }
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/fluxo-caixa")({
@@ -18,36 +35,56 @@ export const Route = createFileRoute("/_authenticated/admin/financeiro/fluxo-cai
   validateSearch: (s: Record<string, unknown>): Busca => ({
     ...(typeof s["de"] === "string" ? { de: s["de"] } : {}),
     ...(typeof s["ate"] === "string" ? { ate: s["ate"] } : {}),
-    ...(typeof s["dias"] === "string" ? { dias: s["dias"] } : {}),
     ...(typeof s["agrupamento"] === "string" ? { agrupamento: s["agrupamento"] } : {}),
     ...(typeof s["conta"] === "string" ? { conta: s["conta"] } : {}),
+    ...(typeof s["centro"] === "string" ? { centro: s["centro"] } : {}),
+    ...(typeof s["entidade"] === "string" ? { entidade: s["entidade"] } : {}),
   }),
 });
 
-const iso = (d: Date) => d.toISOString().slice(0, 10);
+const TITULO_DETALHE: Record<TipoDetalheFluxo, string> = {
+  realizado: "Movimentos realizados",
+  transferencia: "Transferências entre contas",
+  nao_classificado: "Movimentos sem classificação suficiente",
+  previsto_entrada: "Entradas previstas em aberto",
+  previsto_saida: "Saídas previstas em aberto",
+};
 
 function FluxoCaixa() {
   const navigate = useNavigate();
   const s = Route.useSearch();
-  const dias = Number(s.dias ?? 30);
+  const periodo = usePeriodoFinanceiro();
   const agrupamento = s.agrupamento ?? "dia";
   const conta = s.conta ?? "";
+  const centro = s.centro ?? "";
+  const entidade = s.entidade ?? "";
+  const [detalhe, setDetalhe] = React.useState<TipoDetalheFluxo | null>(null);
 
-  const hoje = new Date();
-  const de = iso(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - dias));
-  const ate = iso(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + dias));
+  const filtros: FiltrosCashflow = {
+    de: periodo.de,
+    ate: periodo.ate,
+    agrupamento,
+    ...(conta ? { conta_id: conta } : {}),
+    ...(centro ? { centro_custo_id: centro } : {}),
+    ...(entidade ? { entidade_id: entidade } : {}),
+  };
 
   const contas = useQuery({ queryKey: ["fin-accounts"], queryFn: fetchFinAccounts });
+  const classif = useQuery({
+    queryKey: ["fin-classificacoes", "fluxo"],
+    queryFn: () => fetchClassificacoes({}),
+    staleTime: 60_000,
+  });
 
   const q = useQuery({
-    queryKey: ["fin-cashflow", de, ate, agrupamento, conta],
-    queryFn: () =>
-      fetchFinCashflow({
-        de,
-        ate,
-        agrupamento,
-        ...(conta ? { conta_id: conta } : {}),
-      }),
+    queryKey: ["fin-cashflow", filtros],
+    queryFn: () => fetchFinCashflow(filtros),
+  });
+
+  const det = useQuery({
+    queryKey: ["fin-cashflow-detalhe", filtros, detalhe],
+    queryFn: () => fetchFinCashflowDetalhe({ ...filtros, tipo: detalhe as TipoDetalheFluxo }),
+    enabled: detalhe !== null,
   });
 
   const trocar = (campo: keyof Busca, valor: string) =>
@@ -58,21 +95,19 @@ function FluxoCaixa() {
     });
 
   const rotuloBucket = (b: string) =>
-    new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" }).format(
-      new Date(`${b}T12:00:00`),
-    );
+    new Intl.DateTimeFormat("pt-BR", {
+      day: agrupamento === "mes" ? undefined : "2-digit",
+      month: "2-digit",
+      year: agrupamento === "mes" ? "numeric" : undefined,
+    }).format(new Date(`${b}T12:00:00`));
+
+  const d = q.data;
 
   return (
     <AreaFinanceiraGuard capacidade="finance.dashboard.view">
       <div className="space-y-6">
         <Panel title="Filtros">
           <div className="flex flex-wrap items-center gap-3">
-            <SmartSelect
-              options={[7, 30, 60, 90].map((d) => ({ value: String(d), label: `${d} dias` }))}
-              value={String(dias)}
-              onChange={(v) => trocar("dias", v)}
-              className="w-40"
-            />
             <SmartSelect
               options={[
                 { value: "dia", label: "Por dia" },
@@ -92,54 +127,136 @@ function FluxoCaixa() {
               onChange={(v) => trocar("conta", v)}
               className="w-60"
             />
+            <SmartSelect
+              options={[
+                { value: "", label: "Todos os centros de custo" },
+                ...(classif.data?.centros ?? []).map((c) => ({
+                  value: c.id,
+                  label: `${c.codigo} · ${c.nome}`,
+                })),
+              ]}
+              value={centro}
+              onChange={(v) => trocar("centro", v)}
+              className="w-64"
+            />
+            <SmartSelect
+              options={[
+                { value: "", label: "Todas as entidades" },
+                ...(classif.data?.entidades ?? []).map((e) => ({ value: e.id, label: e.nome })),
+              ]}
+              value={entidade}
+              onChange={(v) => trocar("entidade", v)}
+              className="w-56"
+            />
           </div>
           <p className="mt-3 text-xs font-medium text-ledger-muted">
-            O saldo realizado vem exclusivamente do razão. O previsto vem das parcelas em aberto.
+            O realizado vem exclusivamente dos movimentos das contas; o previsto, do saldo ainda em
+            aberto das parcelas. O saldo de abertura fica separado das entradas e saídas do
+            período. Transferências entre contas não inflam o consolidado. Ao filtrar por centro de
+            custo ou entidade, movimentos sem classificação suficiente aparecem à parte, e não
+            somem.
           </p>
         </Panel>
 
         {q.isLoading ? <Skeleton className="h-48 w-full" /> : null}
         {q.error ? <ErrorState message="Não foi possível carregar o fluxo de caixa." /> : null}
 
-        {q.data ? (
+        {d ? (
           <>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <Resumo rotulo="Saldo inicial" valor={q.data.saldo_inicial_cents} />
-              <Resumo rotulo="Entradas realizadas" valor={q.data.totais.entradas_realizadas_cents} />
-              <Resumo rotulo="Saídas realizadas" valor={q.data.totais.saidas_realizadas_cents} />
+              <Resumo rotulo="Saldo de abertura" valor={d.saldo_abertura_cents} />
               <Resumo
-                rotulo="Saldo realizado"
-                valor={q.data.totais.saldo_final_realizado_cents}
+                rotulo="Entradas realizadas"
+                valor={d.totais.entradas_realizadas_cents}
+                onClick={() => setDetalhe("realizado")}
+              />
+              <Resumo
+                rotulo="Saídas realizadas"
+                valor={d.totais.saidas_realizadas_cents}
+                onClick={() => setDetalhe("realizado")}
+              />
+              <Resumo rotulo="Saldo realizado" valor={d.totais.saldo_final_realizado_cents} />
+              <Resumo
+                rotulo="Entradas previstas"
+                valor={d.totais.entradas_previstas_cents}
+                onClick={() => setDetalhe("previsto_entrada")}
+              />
+              <Resumo
+                rotulo="Saídas previstas"
+                valor={d.totais.saidas_previstas_cents}
+                onClick={() => setDetalhe("previsto_saida")}
+              />
+              <Resumo
+                rotulo="Transferências entre contas"
+                valor={d.totais.transferencias_cents}
+                nota="Não entram no consolidado"
+                onClick={() => setDetalhe("transferencia")}
+              />
+              <Resumo
+                rotulo="Saldo projetado"
+                valor={d.totais.saldo_final_projetado_cents}
+                nota="Realizado + previsto"
               />
             </div>
 
+            {d.filtros.classificacao_aplicada &&
+            (d.totais.nao_classificado_entradas_cents > 0 ||
+              d.totais.nao_classificado_saidas_cents > 0) ? (
+              <Panel title="Sem classificação suficiente para o filtro">
+                <div className="flex flex-wrap items-center gap-6">
+                  <p className="text-sm font-medium text-ledger-text">
+                    Entradas{" "}
+                    <strong className="tabular-nums">
+                      {formatBRLFromCents(d.totais.nao_classificado_entradas_cents)}
+                    </strong>{" "}
+                    · Saídas{" "}
+                    <strong className="tabular-nums">
+                      {formatBRLFromCents(d.totais.nao_classificado_saidas_cents)}
+                    </strong>
+                  </p>
+                  <button
+                    type="button"
+                    className="admin-btn"
+                    onClick={() => setDetalhe("nao_classificado")}
+                  >
+                    Ver lançamentos
+                  </button>
+                </div>
+              </Panel>
+            ) : null}
+
             <Panel title="Posição por período" flush>
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[720px] text-sm">
+                <table className="w-full min-w-[820px] text-sm">
                   <thead>
                     <tr className="border-b border-line-soft text-left">
                       <th className="px-5 py-3 font-semibold text-ledger-muted">Período</th>
                       <th className="px-5 py-3 text-right font-semibold text-ledger-muted">
                         Entradas
                       </th>
-                      <th className="px-5 py-3 text-right font-semibold text-ledger-muted">Saídas</th>
                       <th className="px-5 py-3 text-right font-semibold text-ledger-muted">
-                        Previstas
+                        Saídas
                       </th>
                       <th className="px-5 py-3 text-right font-semibold text-ledger-muted">
-                        Saldo acumulado
+                        Previsto líquido
+                      </th>
+                      <th className="px-5 py-3 text-right font-semibold text-ledger-muted">
+                        Saldo realizado
+                      </th>
+                      <th className="px-5 py-3 text-right font-semibold text-ledger-muted">
+                        Saldo projetado
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {q.data.linhas.length === 0 ? (
+                    {d.linhas.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-5 py-8 text-center text-ledger-muted">
-                          Nenhum movimento no período.
+                        <td colSpan={6} className="px-5 py-8 text-center text-ledger-muted">
+                          Nenhum movimento ou parcela no período.
                         </td>
                       </tr>
                     ) : (
-                      q.data.linhas.map((l) => (
+                      d.linhas.map((l) => (
                         <tr key={l.bucket} className="border-b border-line-soft/60">
                           <td className="px-5 py-3 font-semibold text-ledger-text">
                             {rotuloBucket(l.bucket)}
@@ -158,6 +275,9 @@ function FluxoCaixa() {
                           <td className="px-5 py-3 text-right font-semibold tabular-nums text-ledger-text">
                             {formatBRLFromCents(l.saldo_realizado_cents)}
                           </td>
+                          <td className="px-5 py-3 text-right tabular-nums text-ledger-muted">
+                            {formatBRLFromCents(l.saldo_projetado_cents)}
+                          </td>
                         </tr>
                       ))
                     )}
@@ -167,18 +287,79 @@ function FluxoCaixa() {
             </Panel>
           </>
         ) : null}
+
+        <Dialog open={detalhe !== null} onOpenChange={(v) => !v && setDetalhe(null)}>
+          <DialogContent className="admin-scope max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{detalhe ? TITULO_DETALHE[detalhe] : ""}</DialogTitle>
+              <DialogDescription>
+                Mesmos filtros e período da tela. A soma abaixo fecha com o total apresentado.
+              </DialogDescription>
+            </DialogHeader>
+            {det.isLoading ? <Skeleton className="h-32 w-full" /> : null}
+            {det.error ? <ErrorState message="Não foi possível abrir o detalhamento." /> : null}
+            {det.data ? (
+              <div className="space-y-3">
+                <p className="text-sm font-semibold tabular-nums text-ledger-text">
+                  Soma: {formatBRLFromCents(det.data.soma_cents)} · {det.data.rows.length}{" "}
+                  lançamento(s)
+                </p>
+                <ul className="divide-y divide-line-soft/60 text-sm">
+                  {det.data.rows.map((r) => (
+                    <li key={r.id} className="flex items-center justify-between gap-4 py-2">
+                      <span className="text-ledger-text">
+                        {new Date(`${r.data}T12:00:00`).toLocaleDateString("pt-BR")} ·{" "}
+                        {r.descricao ?? r.contraparte ?? r.kind ?? "—"}
+                        {r.conta ? (
+                          <span className="text-ledger-muted"> · {r.conta}</span>
+                        ) : null}
+                      </span>
+                      <span className="tabular-nums font-semibold">
+                        {formatBRLFromCents(r.valor_cents)}
+                      </span>
+                    </li>
+                  ))}
+                  {det.data.rows.length === 0 ? (
+                    <li className="py-4 text-center text-ledger-muted">Nenhum lançamento.</li>
+                  ) : null}
+                </ul>
+              </div>
+            ) : null}
+          </DialogContent>
+        </Dialog>
       </div>
     </AreaFinanceiraGuard>
   );
 }
 
-function Resumo({ rotulo, valor }: { rotulo: string; valor: number }) {
-  return (
-    <div className="ledger-panel px-5 py-4">
+function Resumo({
+  rotulo,
+  valor,
+  nota,
+  onClick,
+}: {
+  rotulo: string;
+  valor: number;
+  nota?: string;
+  onClick?: () => void;
+}) {
+  const conteudo = (
+    <>
       <p className="ledger-eyebrow">{rotulo}</p>
       <p className="mt-1 font-display text-xl font-bold tabular-nums text-ledger-text">
         {formatBRLFromCents(valor)}
       </p>
-    </div>
+      {nota ? <p className="mt-0.5 text-xs font-medium text-ledger-muted">{nota}</p> : null}
+    </>
+  );
+  if (!onClick) return <div className="ledger-panel px-5 py-4">{conteudo}</div>;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="ledger-panel px-5 py-4 text-left transition-colors hover:border-champagne focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none"
+    >
+      {conteudo}
+    </button>
   );
 }

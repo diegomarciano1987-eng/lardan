@@ -43,6 +43,18 @@ export interface FinTitleRow {
   proximo_vencimento: string | null;
   pago_cents: number;
   parcelas: number;
+  chart_account_id?: string | null;
+  cost_center_id?: string | null;
+  business_entity_id?: string | null;
+  payment_method_id?: string | null;
+  financial_account_id?: string | null;
+  plano_label?: string | null;
+  centro_label?: string | null;
+  entidade_label?: string | null;
+  forma_label?: string | null;
+  conta_label?: string | null;
+  pendente_classificacao?: boolean;
+  updated_at?: string;
 }
 
 export interface FinAccount {
@@ -73,6 +85,7 @@ export interface FinTitleDetail {
     cancel_reason: string | null;
     direction: FinDirection;
   };
+  pode_classificar?: boolean;
   parcelas: FinInstallment[];
   baixas: {
     id: string;
@@ -117,17 +130,23 @@ export async function listFinTitles(params: {
   situacao?: string;
   limit: number;
   offset: number;
+  chart?: string;
+  centro?: string;
+  entidade?: string;
+  semClassificacao?: boolean;
 }): Promise<{ rows: FinTitleRow[]; total: number; soma_cents: number }> {
-  const args: {
-    _direction: string;
-    _limit: number;
-    _offset: number;
-    _search?: string;
-    _situacao?: string;
-  } = { _direction: params.direction, _limit: params.limit, _offset: params.offset };
-  if (params.search) args._search = params.search;
-  if (params.situacao && params.situacao !== "todos") args._situacao = params.situacao;
-  const { data, error } = await supabase.rpc("fin_titles_list", args);
+  const args: Record<string, unknown> = {
+    _direction: params.direction,
+    _limit: params.limit,
+    _offset: params.offset,
+  };
+  if (params.search) args["_search"] = params.search;
+  if (params.situacao && params.situacao !== "todos") args["_situacao"] = params.situacao;
+  if (params.chart) args["_chart"] = params.chart;
+  if (params.centro) args["_cc"] = params.centro;
+  if (params.entidade) args["_entidade"] = params.entidade;
+  if (params.semClassificacao) args["_sem_classificacao"] = true;
+  const { data, error } = await supabase.rpc("fin_titles_list", args as never);
   if (error) throw error;
   return data as unknown as { rows: FinTitleRow[]; total: number; soma_cents: number };
 }
@@ -147,6 +166,11 @@ export interface NovoTituloInput {
   competencia?: string;
   valor_cents: number;
   observacao?: string;
+  business_entity_id?: string;
+  chart_account_id?: string;
+  cost_center_id?: string;
+  payment_method_id?: string;
+  financial_account_id?: string;
   parcelas: { vencimento: string; valor_cents: number }[];
 }
 
@@ -312,41 +336,130 @@ export async function fetchFinOverviewPeriodo(de?: string, ate?: string): Promis
   return data as unknown as FinOverview;
 }
 
+export interface FinCashflowLinha {
+  bucket: string;
+  entradas_realizadas_cents: number;
+  saidas_realizadas_cents: number;
+  transferencias_cents: number;
+  nao_classificado_entradas_cents: number;
+  nao_classificado_saidas_cents: number;
+  entradas_previstas_cents: number;
+  saidas_previstas_cents: number;
+  saldo_realizado_cents: number;
+  saldo_projetado_cents: number;
+}
+
 export interface FinCashflow {
   periodo: { de: string; ate: string; agrupamento: string };
+  saldo_abertura_cents: number;
   saldo_inicial_cents: number;
+  filtros: {
+    conta_id: string | null;
+    centro_custo_id: string | null;
+    entidade_id: string | null;
+    classificacao_aplicada: boolean;
+  };
   totais: {
     entradas_realizadas_cents: number;
     saidas_realizadas_cents: number;
+    transferencias_cents: number;
+    nao_classificado_entradas_cents: number;
+    nao_classificado_saidas_cents: number;
     entradas_previstas_cents: number;
     saidas_previstas_cents: number;
     saldo_final_realizado_cents: number;
     saldo_final_projetado_cents: number;
   };
-  linhas: {
-    bucket: string;
-    entradas_realizadas_cents: number;
-    saidas_realizadas_cents: number;
-    entradas_previstas_cents: number;
-    saidas_previstas_cents: number;
-    saldo_realizado_cents: number;
-    saldo_projetado_cents: number;
-  }[];
+  linhas: FinCashflowLinha[];
 }
 
-export async function fetchFinCashflow(filtros: {
+export interface FiltrosCashflow {
   de: string;
   ate: string;
   agrupamento?: string;
   conta_id?: string;
   centro_custo_id?: string;
   entidade_id?: string;
-}): Promise<FinCashflow> {
+}
+
+export async function fetchFinCashflow(filtros: FiltrosCashflow): Promise<FinCashflow> {
   const { data, error } = await supabase.rpc("fin_cashflow", {
     _filtros: filtros as unknown as never,
   });
   if (error) throw error;
   return data as unknown as FinCashflow;
+}
+
+export type TipoDetalheFluxo =
+  | "realizado"
+  | "transferencia"
+  | "nao_classificado"
+  | "previsto_entrada"
+  | "previsto_saida";
+
+export interface FinCashflowDetalhe {
+  tipo: TipoDetalheFluxo;
+  soma_cents: number;
+  rows: {
+    id: string;
+    data: string;
+    valor_cents: number;
+    kind?: string;
+    descricao: string | null;
+    conta?: string | null;
+    contraparte?: string | null;
+    direction?: string;
+  }[];
+}
+
+/** Lançamentos que compõem um valor do fluxo de caixa. */
+export async function fetchFinCashflowDetalhe(
+  filtros: FiltrosCashflow & { tipo: TipoDetalheFluxo },
+): Promise<FinCashflowDetalhe> {
+  const { data, error } = await supabase.rpc("fin_cashflow_detail", {
+    _filtros: filtros as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as FinCashflowDetalhe;
+}
+
+export interface FinClassificacoes {
+  planos: { id: string; codigo: string; nome: string; natureza: string }[];
+  centros: { id: string; codigo: string; nome: string }[];
+  entidades: { id: string; nome: string }[];
+  formas: { id: string; codigo: string | null; nome: string }[];
+  contas: { id: string; nome: string; kind: string }[];
+}
+
+/** Opções válidas de classificação, filtradas e buscadas no servidor. */
+export async function fetchClassificacoes(filtros: {
+  busca?: string;
+  entidade_id?: string;
+  direction?: FinDirection;
+}): Promise<FinClassificacoes> {
+  const { data, error } = await supabase.rpc("fin_classificacoes", {
+    _filtros: filtros as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as FinClassificacoes;
+}
+
+/** Classificação posterior de um título já gravado, com histórico. */
+export async function classificarTitulo(payload: {
+  title_id: string;
+  motivo?: string;
+  esperado_updated_at?: string;
+  business_entity_id?: string | null;
+  chart_account_id?: string | null;
+  cost_center_id?: string | null;
+  payment_method_id?: string | null;
+  financial_account_id?: string | null;
+}): Promise<{ id: string; updated_at: string }> {
+  const { data, error } = await supabase.rpc("fin_title_classify", {
+    _payload: payload as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as { id: string; updated_at: string };
 }
 
 export interface FinChartRow {
@@ -516,4 +629,75 @@ export async function salvarFormaPagamento(payload: Record<string, unknown>): Pr
 export async function alternarFormaPagamento(id: string, ativo: boolean) {
   const { error } = await supabase.rpc("fin_payment_method_toggle", { _id: id, _ativo: ativo });
   if (error) throw error;
+}
+
+export interface FinDreLinha {
+  natureza: string;
+  chart_id: string;
+  codigo: string;
+  nome: string;
+  valor_cents: number;
+}
+
+export interface FinDre {
+  periodo: { de: string; ate: string; regime: "competencia" | "caixa" };
+  fonte: string;
+  linhas: FinDreLinha[];
+  totais: {
+    receita_bruta_cents: number;
+    deducoes_cents: number;
+    receita_liquida_cents: number;
+    custos_cents: number;
+    resultado_bruto_cents: number;
+    despesas_cents: number;
+    resultado_cents: number;
+  };
+  pendentes_classificacao: { quantidade: number; valor_cents: number };
+}
+
+export interface FiltrosDre {
+  de: string;
+  ate: string;
+  regime: "competencia" | "caixa";
+  centro_custo_id?: string;
+  entidade_id?: string;
+}
+
+/** DRE gerencial — não é demonstração contábil nem fiscal oficial. */
+export async function fetchFinDre(filtros: FiltrosDre): Promise<FinDre> {
+  const { data, error } = await supabase.rpc("fin_dre", {
+    _filtros: filtros as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as FinDre;
+}
+
+export async function fetchFinDreDetalhe(
+  filtros: FiltrosDre & { chart_id?: string; sem_classificacao?: boolean },
+): Promise<{
+  soma_cents: number;
+  rows: {
+    id: string;
+    data: string;
+    descricao: string | null;
+    contraparte: string;
+    direction: string;
+    valor_cents: number;
+  }[];
+}> {
+  const { data, error } = await supabase.rpc("fin_dre_detalhe", {
+    _filtros: filtros as unknown as never,
+  });
+  if (error) throw error;
+  return data as unknown as {
+    soma_cents: number;
+    rows: {
+      id: string;
+      data: string;
+      descricao: string | null;
+      contraparte: string;
+      direction: string;
+      valor_cents: number;
+    }[];
+  };
 }

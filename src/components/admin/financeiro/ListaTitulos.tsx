@@ -48,17 +48,18 @@ export function ListaTitulos({
   const buscaLenta = useDebounce(busca);
   const [pagina, setPagina] = React.useState(0);
   const [situacao, setSituacao] = React.useState(situacaoInicial);
+  const [classificacao, setClassificacao] = React.useState("todos");
   const [novo, setNovo] = React.useState(false);
   const [aberto, setAberto] = React.useState<string | null>(null);
 
-  React.useEffect(() => setPagina(0), [buscaLenta, situacao]);
+  React.useEffect(() => setPagina(0), [buscaLenta, situacao, classificacao]);
   React.useEffect(() => {
     onFiltrosChange?.({ busca: buscaLenta, situacao });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buscaLenta, situacao]);
 
   const q = useQuery({
-    queryKey: ["fin-titles", direction, buscaLenta, situacao, pagina],
+    queryKey: ["fin-titles", direction, buscaLenta, situacao, classificacao, pagina],
     queryFn: () =>
       listFinTitles({
         direction,
@@ -66,6 +67,7 @@ export function ListaTitulos({
         situacao,
         limit: PAGE_SIZE,
         offset: pagina * PAGE_SIZE,
+        ...(classificacao === "pendentes" ? { semClassificacao: true } : {}),
       }),
   });
 
@@ -101,6 +103,19 @@ export function ListaTitulos({
           {formatBRLFromCents(r.pago_cents)} / {formatBRLFromCents(r.valor_cents)}
         </span>
       ),
+    },
+    {
+      key: "classificacao",
+      header: "Classificação",
+      render: (r) =>
+        r.pendente_classificacao ? (
+          <StatusBadge tone="warning">Pendente de classificação</StatusBadge>
+        ) : (
+          <div className="min-w-0 text-xs">
+            <p className="truncate text-ledger-text">{r.plano_label ?? "—"}</p>
+            <p className="truncate text-ledger-muted">{r.centro_label ?? "—"}</p>
+          </div>
+        ),
     },
     {
       key: "status",
@@ -147,6 +162,7 @@ export function ListaTitulos({
             : "Cadastre a primeira conta a receber para começar."
         }
         filters={
+          <>
           <SmartSelect
             options={[
               { value: "todos", label: "Todas as situações" },
@@ -158,6 +174,16 @@ export function ListaTitulos({
             onChange={setSituacao}
             className="w-52"
           />
+          <SmartSelect
+            options={[
+              { value: "todos", label: "Toda a classificação" },
+              { value: "pendentes", label: "Pendentes de classificação" },
+            ]}
+            value={classificacao}
+            onChange={setClassificacao}
+            className="w-64"
+          />
+          </>
         }
         actions={
           podeCriar ? (

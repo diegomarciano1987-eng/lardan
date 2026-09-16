@@ -929,6 +929,7 @@ export type Database = {
           data_corte: string | null
           id: string
           is_active: boolean
+          is_homologacao: boolean
           kind: Database["public"]["Enums"]["fin_account_kind"]
           moeda: string
           nome: string
@@ -947,6 +948,7 @@ export type Database = {
           data_corte?: string | null
           id?: string
           is_active?: boolean
+          is_homologacao?: boolean
           kind: Database["public"]["Enums"]["fin_account_kind"]
           moeda?: string
           nome: string
@@ -965,6 +967,7 @@ export type Database = {
           data_corte?: string | null
           id?: string
           is_active?: boolean
+          is_homologacao?: boolean
           kind?: Database["public"]["Enums"]["fin_account_kind"]
           moeda?: string
           nome?: string
@@ -4646,20 +4649,23 @@ export type Database = {
       fin_approval_rule: { Args: never; Returns: Json }
       fin_audit_list: { Args: { _filtros?: Json }; Returns: Json }
       fin_cashflow: { Args: { _filtros?: Json }; Returns: Json }
+      fin_cashflow_detail: { Args: { _filtros: Json }; Returns: Json }
       fin_chart_list: { Args: { _filtros?: Json }; Returns: Json }
       fin_chart_save: { Args: { _payload: Json }; Returns: string }
       fin_chart_toggle: {
         Args: { _ativo: boolean; _id: string }
         Returns: undefined
       }
+      fin_classificacoes: { Args: { _filtros?: Json }; Returns: Json }
       fin_cost_center_list: { Args: { _filtros?: Json }; Returns: Json }
       fin_cost_center_save: { Args: { _payload: Json }; Returns: string }
       fin_cost_center_toggle: {
         Args: { _ativo: boolean; _id: string }
         Returns: undefined
       }
+      fin_dre: { Args: { _filtros?: Json }; Returns: Json }
+      fin_dre_detalhe: { Args: { _filtros: Json }; Returns: Json }
       fin_fingerprint: { Args: { _intent: Json }; Returns: string }
-      fin_homolog_purge: { Args: never; Returns: Json }
       fin_installment_refresh: {
         Args: { _installment: string }
         Returns: undefined
@@ -4693,6 +4699,10 @@ export type Database = {
       }
       fin_statement_overview: { Args: { _filtros: Json }; Returns: Json }
       fin_statement_suggest: { Args: { _line: string }; Returns: Json }
+      fin_test_isolate_accounts: {
+        Args: { _ids: string[]; _marca: string }
+        Returns: Json
+      }
       fin_title_approve: {
         Args: { _motivo?: string; _title: string }
         Returns: undefined
@@ -4701,6 +4711,7 @@ export type Database = {
         Args: { _motivo: string; _title: string }
         Returns: undefined
       }
+      fin_title_classify: { Args: { _payload: Json }; Returns: Json }
       fin_title_create: { Args: { _payload: Json }; Returns: string }
       fin_title_detail: { Args: { _title: string }; Returns: Json }
       fin_title_reject: {
@@ -4708,17 +4719,33 @@ export type Database = {
         Returns: undefined
       }
       fin_title_submit: { Args: { _title: string }; Returns: undefined }
-      fin_titles_list: {
-        Args: {
-          _direction: string
-          _limit?: number
-          _offset?: number
-          _search?: string
-          _situacao?: string
-          _status?: string
-        }
-        Returns: Json
-      }
+      fin_titles_list:
+        | {
+            Args: {
+              _direction: string
+              _limit?: number
+              _offset?: number
+              _search?: string
+              _situacao?: string
+              _status?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              _cc?: string
+              _chart?: string
+              _direction: string
+              _entidade?: string
+              _limit?: number
+              _offset?: number
+              _search?: string
+              _sem_classificacao?: boolean
+              _situacao?: string
+              _status?: string
+            }
+            Returns: Json
+          }
       fin_titles_pending: {
         Args: { _limit?: number; _offset?: number }
         Returns: Json
@@ -4729,6 +4756,17 @@ export type Database = {
         Returns: string
       }
       fin_unaccent_lower: { Args: { _t: string }; Returns: string }
+      fin_validar_classificacao: {
+        Args: {
+          _cc: string
+          _chart: string
+          _conta: string
+          _dir: Database["public"]["Enums"]["fin_direction"]
+          _entidade: string
+          _pm: string
+        }
+        Returns: undefined
+      }
       find_party_duplicates: {
         Args: { _contact?: string; _doc?: string; _ignore?: string }
         Returns: {

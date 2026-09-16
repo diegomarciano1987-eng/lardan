@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { EmptyState, PageHeader, Panel, formatBRLFromCents } from "@/components/admin/ui";
 import { useCapabilities, type Capability } from "@/lib/capabilities";
 import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
@@ -78,16 +79,14 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
   {
     to: "/admin/financeiro/importacoes",
     label: "Importações",
-    descricao: "Em implantação",
+    descricao: "Títulos a pagar e a receber",
     capacidade: "finance.view",
-    emImplantacao: true,
   },
   {
     to: "/admin/financeiro/dre",
     label: "DRE e relatórios",
-    descricao: "Em implantação",
+    descricao: "Apuração gerencial",
     capacidade: "finance.dre.view",
-    emImplantacao: true,
   },
   {
     to: "/admin/financeiro/configuracoes",
@@ -141,6 +140,44 @@ function ResumoFinanceiro() {
   );
 }
 
+/** Navegação contextual das áreas do Financeiro, filtrada por capacidade. */
+function NavegacaoFinanceira() {
+  const caps = useCapabilities();
+  const areas = AREAS_FINANCEIRAS.filter((a) => caps.includes(a.capacidade));
+  if (areas.length <= 1) return null;
+  return (
+    <nav aria-label="Áreas do Financeiro" className="-mx-1 overflow-x-auto pb-1">
+      <ul className="flex min-w-max items-center gap-1.5 px-1">
+        {areas.map((a) => (
+          <li key={a.to}>
+            <Link
+              to={a.to}
+              search={(prev: Record<string, unknown>) => ({
+                ...(typeof prev["de"] === "string" ? { de: prev["de"] } : {}),
+                ...(typeof prev["ate"] === "string" ? { ate: prev["ate"] } : {}),
+              })}
+              activeOptions={{ exact: a.to === "/admin/financeiro" }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-line-soft bg-cream-2 px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-ledger-muted transition-colors hover:text-ledger-text focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none"
+              activeProps={{
+                className:
+                  "inline-flex items-center gap-1.5 rounded-full border border-champagne bg-surface px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-ledger-text shadow-sm focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none",
+                "aria-current": "page",
+              }}
+            >
+              {a.label}
+              {a.emImplantacao ? (
+                <span className="rounded-full bg-line-soft px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-ledger-muted uppercase">
+                  em implantação
+                </span>
+              ) : null}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
 /**
  * Cabeçalho, indicadores e navegação interna compartilhados por todas
  * as páginas financeiras. Fica sempre abaixo do cabeçalho da página e
@@ -166,6 +203,8 @@ export function FinanceiroShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="space-y-4 pb-4">
       <PageHeader eyebrow="Lardan Cloud" title="Financeiro" actions={<PeriodoGlobal />} />
+
+      <NavegacaoFinanceira />
 
       <ResumoFinanceiro />
 

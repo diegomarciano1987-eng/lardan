@@ -162,19 +162,30 @@ export async function criarConta(opts: {
   };
 }
 
-/** Remove as contas e as pessoas sintéticas ao fim da bateria. */
+/**
+ * Neutraliza as contas e remove as pessoas sintéticas ao fim da bateria.
+ *
+ * A conta de teste NÃO é apagada: o registro de auditoria é imutável e aponta
+ * para o autor, então apagar o usuário derruba a trilha. Em vez disso a conta
+ * perde os papéis, é desativada no perfil e fica bloqueada no login — sem
+ * acesso a nada e sem apagar histórico.
+ */
 export async function limpar() {
   const r = await adm(`/auth/v1/admin/users?page=1&per_page=200`);
   const users = (r.body as { users?: { id: string; email: string }[] }).users ?? [];
-  for (const u of users) {
-    if (u.email?.endsWith(TEST_DOMAIN)) {
+  const alvos = users.filter((u) => u.email?.endsWith(TEST_DOMAIN));
+  await Promise.all(
+    alvos.map(async (u) => {
       await adm(`/rest/v1/user_roles?user_id=eq.${u.id}`, { method: "DELETE" });
       await adm(`/rest/v1/profiles?id=eq.${u.id}`, {
         method: "PATCH",
         body: JSON.stringify({ is_active: false, party_id: null }),
       });
-      await adm(`/auth/v1/admin/users/${u.id}`, { method: "DELETE" });
-    }
-  }
+      await adm(`/auth/v1/admin/users/${u.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ ban_duration: "876000h" }),
+      });
+    }),
+  );
   await adm(`/rest/v1/parties?display_name=like.${TEST_PREFIX}%25`, { method: "DELETE" });
 }

@@ -4816,6 +4816,7 @@ export type Database = {
         Returns: Json
       }
       import_job_pause: { Args: { _job: string }; Returns: Json }
+      import_job_preview: { Args: { _job: string }; Returns: Json }
       import_job_process: {
         Args: { _job: string; _limit?: number; _worker?: string }
         Returns: Json
@@ -4829,6 +4830,7 @@ export type Database = {
       }
       import_money: { Args: { _v: string }; Returns: Json }
       import_plating: { Args: { _v: string }; Returns: string }
+      import_pode_produto: { Args: { _uid: string }; Returns: boolean }
       import_products_stock:
         | { Args: { _location_id: string; _rows: Json }; Returns: Json }
         | {

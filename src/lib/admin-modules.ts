@@ -189,11 +189,12 @@ export const ADMIN_MODULES: AdminModule[] = [
     slug: "importacao",
     path: "/admin/importacao",
     label: "Importações",
-    description: "Planilhas CSV/XLSX de catálogo, com validação e homologação.",
+    description:
+      "Pessoas, consultoras, representantes, colaboradores, lojas, produtos e títulos, com simulação antes de gravar.",
     icon: CloudUpload,
     roles: STOCK,
     capability: "imports.run",
-    state: "em_construcao",
+    state: "ativo",
     spec: "Assistente em etapas: envio, mapa de colunas, validação linha a linha, simulação e execução em lotes transacionais com retomada. Nada entra no catálogo sem homologação com arquivo de prova.",
   },
   {

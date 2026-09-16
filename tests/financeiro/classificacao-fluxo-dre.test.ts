@@ -311,7 +311,10 @@ describe("DRE gerencial", () => {
       // O resultado é sempre receitas menos despesas do período, mesmo quando
       // há outras linhas classificadas no mesmo dia.
       expect(d.totais["resultado_cents"]).toBe(
-        (d.totais["receitas_cents"] ?? 0) - (d.totais["despesas_cents"] ?? 0),
+        (d.totais["receita_bruta_cents"] ?? 0) -
+          (d.totais["deducoes_cents"] ?? 0) -
+          (d.totais["custos_cents"] ?? 0) -
+          (d.totais["despesas_cents"] ?? 0),
       );
       expect(d.pendentes_classificacao.quantidade).toBeGreaterThanOrEqual(0);
     },

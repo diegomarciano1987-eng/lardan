@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -15,23 +15,21 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { RecordSheet, type RecordValues } from "@/components/admin/RecordSheet";
-import { SmartSelect } from "@/components/premium/SmartSelect";
 import { can, useCapabilities } from "@/lib/capabilities";
 import {
-  saveRecord,
   uploadMedia,
   signedMediaUrl,
   parseCentavos,
   centavosParaTexto,
-  slugify,
-  STATUS_OPTIONS,
+  mensagemDeErro,
 } from "@/lib/catalog";
+import { ProdutoFicha } from "@/components/admin/ProdutoFicha";
 import {
-  publicarProdutos,
-  despublicarProdutos,
-  impedimentosPublicacao,
-  ROTULO_IMPEDIMENTO,
-} from "@/lib/showcase";
+  salvarVariante as salvarVarianteRpc,
+  registrarCusto,
+  consultarCodigoBarras,
+  listarTiposDeBanho,
+} from "@/lib/produto";
 
 
 export const Route = createFileRoute("/_authenticated/admin/cadastros/produtos_/$id")({
@@ -54,7 +52,6 @@ function ProdutoDetalhe() {
   const podeVerCustos = can(capacidades, "catalog.cost.view");
 
 
-  const [editarFicha, setEditarFicha] = useState(false);
   const [variante, setVariante] = useState<VarianteRow | null>(null);
   const [varianteAberta, setVarianteAberta] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -123,15 +120,6 @@ function ProdutoDetalhe() {
     },
   });
 
-  const categorias = useQuery({
-    queryKey: ["opcoes-categorias"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("categories").select("id, name").order("name");
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
   const colecoes = useQuery({
     queryKey: ["opcoes-colecoes"],
     queryFn: async () => {
@@ -139,6 +127,11 @@ function ProdutoDetalhe() {
       if (error) throw error;
       return data ?? [];
     },
+  });
+
+  const banhos = useQuery({
+    queryKey: ["tipos-de-banho"],
+    queryFn: listarTiposDeBanho,
   });
 
   const fornecedores = useQuery({
@@ -162,104 +155,40 @@ function ProdutoDetalhe() {
     void qc.invalidateQueries({ queryKey: ["products"] });
   };
 
-  /** Publica/despublica sempre pela operação canônica do banco. */
-  const aplicarSituacao = async (status: string) => {
-    if (status === "publicado") {
-      const r = await publicarProdutos([id], "ficha do produto");
-      if (r.afetados === 0) {
-        const faltando = r.itens_rejeitados[0]?.faltando ?? (await impedimentosPublicacao(id));
-        throw new Error(
-          `Ainda não é possível publicar. Falta: ${faltando
-            .map((f) => ROTULO_IMPEDIMENTO[f] ?? f)
-            .join(", ")}.`,
-        );
-      }
-      return;
-    }
-    if (p?.status === "publicado") {
-      await despublicarProdutos([id], "ficha do produto", status as "rascunho" | "revisao" | "arquivado");
-      return;
-    }
-    await saveRecord("products", { status }, id);
-  };
-
-  const salvarFicha = useMutation({
-    mutationFn: async (v: RecordValues) => {
-      const nome = String(v["name"] ?? "").trim();
-      const status = String(v["status"] || "rascunho");
-      const gravado = await saveRecord(
-        "products",
-        {
-          name: nome,
-          slug: String(v["slug"] || "").trim() || slugify(nome),
-          legacy_code: v["legacy_code"] || null,
-          category_id: v["category_id"] || null,
-          collection_id: v["collection_id"] || null,
-          supplier_id: v["supplier_id"] || null,
-          short_description: v["short_description"] || null,
-          description: v["description"] || null,
-          material: v["material"] || null,
-          plating: v["plating"] || null,
-          measurements: v["measurements"] || null,
-          weight_grams: v["weight_grams"] === "" || v["weight_grams"] == null ? null : Number(v["weight_grams"]),
-          care_instructions: v["care_instructions"] || null,
-          warranty_text: v["warranty_text"] || null,
-          price_cents: parseCentavos(String(v["preco"] ?? "")),
-          price_is_public: v["price_is_public"] !== false,
-          seo_title: v["seo_title"] || null,
-          seo_description: v["seo_description"] || null,
-          is_featured: v["is_featured"] === true,
-        },
-        id,
-      );
-      if (status !== (p?.status ?? "rascunho")) await aplicarSituacao(status);
-      return gravado;
-    },
-    onSuccess: () => {
-      toast.success("Ficha salva.");
-      invalidar();
-    },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível salvar."),
-  });
-
-  const mudarStatus = useMutation({
-    mutationFn: async (status: string) => aplicarSituacao(status),
-    onSuccess: () => {
-      toast.success("Situação atualizada.");
-      invalidar();
-    },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível atualizar."),
-  });
 
 
+  /** Grava a variante pela operação canônica: SKU/nome automáticos e unicidade no banco. */
   const salvarVariante = useMutation({
     mutationFn: async (v: RecordValues) => {
-      const payload = {
+      const row = await salvarVarianteRpc(variante?.id ?? null, {
         product_id: id,
         label: String(v["label"] ?? "").trim(),
-        sku: v["sku"] || null,
-        barcode: v["barcode"] || null,
-        legacy_code: v["legacy_code"] || null,
-        size: v["size"] || null,
-        color: v["color"] || null,
-        price_cents: parseCentavos(String(v["preco"] ?? "")),
+        sku: String(v["sku"] ?? "").trim(),
+        barcode: String(v["barcode"] ?? "").trim(),
+        legacy_code: String(v["legacy_code"] ?? "").trim(),
+        size: String(v["size"] ?? "").trim(),
+        color: String(v["color"] ?? "").trim(),
+        plating_type_id: String(v["plating_type_id"] ?? ""),
+        price_cents: parseCentavos(String(v["preco"] ?? "")) ?? "",
         position: Number(v["position"] ?? 0) || 0,
         is_default: v["is_default"] === true,
         is_active: v["is_active"] !== false,
-      };
-      const row = await saveRecord<VarianteRow>("product_variants", payload, variante?.id);
-      const custoTexto = String(v["custo"] ?? "").trim();
-      if (podeVerCustos && custoTexto) {
-        const centavos = parseCentavos(custoTexto);
-        if (centavos != null) {
-          const { error } = await supabase.from("variant_costs").insert({
-            variant_id: row.id,
-            cost_cents: centavos,
-            ...(v["supplier_id"] ? { supplier_id: String(v["supplier_id"]) } : {}),
-            ...(v["custo_nota"] ? { note: String(v["custo_nota"]) } : {}),
-          });
-          if (error) throw error;
-        }
+        final_weight_grams: String(v["final_weight_grams"] ?? "").replace(",", "."),
+        sku_justificativa: String(v["sku_justificativa"] ?? "").trim(),
+      });
+      const finalTexto = String(v["custo_final"] ?? "").trim();
+      if (podeVerCustos && finalTexto) {
+        await registrarCusto(row.id, {
+          raw_supplier_id: String(v["raw_supplier_id"] ?? ""),
+          raw_piece_cost_cents: parseCentavos(String(v["custo_bruto"] ?? "")) ?? "",
+          plating_supplier_id: String(v["plating_supplier_id"] ?? ""),
+          plating_material_cost_cents: parseCentavos(String(v["custo_banho"] ?? "")) ?? "",
+          varnish_name: String(v["varnish_name"] ?? "").trim(),
+          varnish_cost_cents: parseCentavos(String(v["custo_verniz"] ?? "")) ?? "",
+          finished_piece_cost_cents: parseCentavos(finalTexto) ?? "",
+          justification: String(v["custo_justificativa"] ?? "").trim(),
+          note: String(v["custo_nota"] ?? "").trim(),
+        });
       }
       return row;
     },
@@ -268,7 +197,7 @@ function ProdutoDetalhe() {
       invalidar();
       void qc.invalidateQueries({ queryKey: ["produto-custos", id] });
     },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Não foi possível salvar."),
+    onError: (e: unknown) => toast.error(mensagemDeErro(e)),
   });
 
   const enviarImagem = useMutation({
@@ -347,31 +276,6 @@ function ProdutoDetalhe() {
 
   const p = produto.data;
 
-  const fichaInicial = useMemo<RecordValues>(() => {
-    if (!p) return {};
-    return {
-      name: p.name,
-      slug: p.slug,
-      legacy_code: p.legacy_code ?? "",
-      category_id: p.category_id ?? "",
-      collection_id: p.collection_id ?? "",
-      supplier_id: p.supplier_id ?? "",
-      short_description: p.short_description ?? "",
-      description: p.description ?? "",
-      material: p.material ?? "",
-      plating: p.plating ?? "",
-      measurements: p.measurements ?? "",
-      weight_grams: p.weight_grams ?? "",
-      care_instructions: p.care_instructions ?? "",
-      warranty_text: p.warranty_text ?? "",
-      preco: p.price_cents == null ? "" : centavosParaTexto(p.price_cents),
-      price_is_public: p.price_is_public,
-      seo_title: p.seo_title ?? "",
-      seo_description: p.seo_description ?? "",
-      is_featured: p.is_featured,
-      status: p.status,
-    };
-  }, [p]);
 
   if (produto.isLoading) return <Skeleton className="h-64 w-full" />;
   if (produto.error || !p)
@@ -388,31 +292,12 @@ function ProdutoDetalhe() {
         <ArrowLeft aria-hidden className="size-4" /> Voltar aos produtos
       </Link>
 
-      <PageHeader
-        eyebrow="Produto"
-        title={p.name}
-        description={`Endereço no site: /${p.slug}`}
-        actions={
-          <div className="flex flex-wrap items-center gap-3">
-            <StatusBadge tone={tone(p.status)}>{p.status}</StatusBadge>
-            {p.status === "publicado" ? (
-              <Link to="/produto/$slug" params={{ slug: p.slug }} target="_blank" className="admin-btn">
-                <ExternalLink aria-hidden className="size-4" /> Ver no site
-              </Link>
-            ) : null}
-            <SmartSelect
-              value={p.status}
-              onChange={(v) => mudarStatus.mutate(v)}
-              options={STATUS_OPTIONS}
-              placeholder="Situação"
-              className="w-48"
-            />
-            <button type="button" className="admin-btn border-champagne" onClick={() => setEditarFicha(true)}>
-              Editar ficha
-            </button>
-          </div>
-        }
-      />
+      <ProdutoFicha
+        id={id}
+        contagemVariantes={variantes.data?.length ?? 0}
+        temImagem={(imagens.data?.length ?? 0) > 0}
+      >
+
 
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
@@ -572,54 +457,8 @@ function ProdutoDetalhe() {
           </Panel>
         </div>
       </div>
+      </ProdutoFicha>
 
-      <RecordSheet
-        open={editarFicha}
-        onOpenChange={setEditarFicha}
-        title="Editar ficha do produto"
-        description="Toda alteração fica registrada na auditoria."
-        initial={fichaInicial}
-        fields={[
-          { name: "name", label: "Nome", type: "text", required: true, full: true },
-          { name: "slug", label: "Endereço (slug)", type: "text" },
-          { name: "legacy_code", label: "Código legado", type: "text" },
-          {
-            name: "category_id",
-            label: "Categoria",
-            type: "select",
-            options: (categorias.data ?? []).map((c) => ({ value: c.id, label: c.name })),
-          },
-          {
-            name: "collection_id",
-            label: "Coleção",
-            type: "select",
-            options: (colecoes.data ?? []).map((c) => ({ value: c.id, label: c.name })),
-          },
-          {
-            name: "supplier_id",
-            label: "Fornecedor",
-            type: "select",
-            options: (fornecedores.data ?? []).map((f) => ({ value: f.id, label: f.name })),
-          },
-          { name: "status", label: "Situação", type: "select", options: STATUS_OPTIONS, required: true },
-          { name: "preco", label: "Preço (R$)", type: "text", placeholder: "0,00" },
-          { name: "price_is_public", label: "Mostrar preço no site", type: "switch" },
-          { name: "is_featured", label: "Destaque na vitrine", type: "switch" },
-          { name: "material", label: "Material", type: "text" },
-          { name: "plating", label: "Banho", type: "text" },
-          { name: "measurements", label: "Medidas", type: "text" },
-          { name: "weight_grams", label: "Peso (g)", type: "number" },
-          { name: "short_description", label: "Resumo", type: "textarea", full: true },
-          { name: "description", label: "Descrição completa", type: "textarea", full: true },
-          { name: "care_instructions", label: "Cuidados", type: "textarea" },
-          { name: "warranty_text", label: "Garantia", type: "textarea" },
-          { name: "seo_title", label: "Título para buscadores", type: "text", full: true },
-          { name: "seo_description", label: "Descrição para buscadores", type: "textarea", full: true },
-        ]}
-        onSubmit={async (v) => {
-          await salvarFicha.mutateAsync(v);
-        }}
-      />
 
       <RecordSheet
         open={varianteAberta}
@@ -635,38 +474,99 @@ function ProdutoDetalhe() {
                 legacy_code: variante.legacy_code ?? "",
                 size: variante.size ?? "",
                 color: variante.color ?? "",
+                plating_type_id: variante.plating_type_id ?? "",
                 preco: variante.price_cents == null ? "" : centavosParaTexto(variante.price_cents),
                 position: variante.position,
                 is_default: variante.is_default,
                 is_active: variante.is_active,
+                final_weight_grams: variante.final_weight_grams ?? "",
               }
             : { is_active: true }
         }
         fields={[
-          { name: "label", label: "Nome da variante", type: "text", required: true, full: true },
-          { name: "sku", label: "SKU", type: "text" },
-          { name: "barcode", label: "Código de barras", type: "text" },
+          {
+            name: "plating_type_id",
+            label: "Tipo de banho",
+            type: "select",
+            options: (banhos.data ?? []).map((b) => ({ value: b.id, label: b.name })),
+            help: "Fonte controlada — evita Ouro/ouro/Dourado como coisas diferentes.",
+          },
+          { name: "size", label: "Tamanho / aro", type: "text" },
+          {
+            name: "label",
+            label: "Nome da variante",
+            type: "text",
+            full: true,
+            help: "Deixe vazio para o sistema montar: produto + banho + tamanho.",
+          },
+          { name: "sku", label: "SKU", type: "text", help: "Vazio = gerado a partir do código interno." },
+          {
+            name: "barcode",
+            label: "Código de barras",
+            type: "text",
+            help: "Etiqueta existente: digite ou leia com o leitor. Zeros à esquerda são preservados.",
+            action: {
+              label: "Consultar código de barras",
+              run: async (valor) => {
+                if (!valor.trim()) {
+                  toast.error("Informe um código para consultar.");
+                  return;
+                }
+                const r = await consultarCodigoBarras(valor);
+                if (r.encontrado) toast.error(`Já usado por ${r.produto} — ${r.variante}.`);
+                else toast.success("Código livre.");
+              },
+            },
+          },
           { name: "legacy_code", label: "Código legado", type: "text" },
-          { name: "size", label: "Tamanho", type: "text" },
-          { name: "color", label: "Cor", type: "text" },
+          { name: "color", label: "Cor comercial", type: "text" },
           { name: "preco", label: "Preço (R$)", type: "text", placeholder: "0,00" },
+          { name: "final_weight_grams", label: "Peso final (g)", type: "text" },
           { name: "position", label: "Ordem", type: "number" },
           { name: "is_default", label: "Variante padrão", type: "switch" },
           { name: "is_active", label: "Ativa", type: "switch" },
+          {
+            name: "sku_justificativa",
+            label: "Justificativa para mudar o SKU",
+            type: "text",
+            full: true,
+            help: "Obrigatória quando a variante já tem movimentação de estoque.",
+          },
           ...(podeVerCustos
             ? ([
                 {
-                  name: "custo",
-                  label: "Novo custo (R$)",
+                  name: "custo_bruto",
+                  label: "Valor da peça no bruto (R$)",
                   type: "text" as const,
                   placeholder: "0,00",
-                  help: "Deixe vazio para não registrar custo agora.",
                 },
                 {
-                  name: "supplier_id",
-                  label: "Fornecedor do custo",
+                  name: "raw_supplier_id",
+                  label: "Fornecedor do bruto",
                   type: "select" as const,
                   options: (fornecedores.data ?? []).map((f) => ({ value: f.id, label: f.name })),
+                },
+                { name: "custo_banho", label: "Valor do material do banho (R$)", type: "text" as const },
+                {
+                  name: "plating_supplier_id",
+                  label: "Fornecedor do banho",
+                  type: "select" as const,
+                  options: (fornecedores.data ?? []).map((f) => ({ value: f.id, label: f.name })),
+                },
+                { name: "varnish_name", label: "Verniz utilizado", type: "text" as const },
+                { name: "custo_verniz", label: "Valor do verniz (R$)", type: "text" as const },
+                {
+                  name: "custo_final",
+                  label: "Valor final da peça banhada (R$)",
+                  type: "text" as const,
+                  help: "Preencher cria uma nova vigência de custo; o histórico anterior é mantido.",
+                },
+                {
+                  name: "custo_justificativa",
+                  label: "Justificativa da diferença",
+                  type: "text" as const,
+                  full: true,
+                  help: "Obrigatória quando o valor final difere da soma dos componentes.",
                 },
                 { name: "custo_nota", label: "Observação do custo", type: "text" as const },
               ])
@@ -688,6 +588,8 @@ interface VarianteRow {
   legacy_code: string | null;
   size: string | null;
   color: string | null;
+  plating_type_id: string | null;
+  final_weight_grams: number | null;
   price_cents: number | null;
   position: number;
   is_default: boolean;

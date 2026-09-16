@@ -1,0 +1,12 @@
+revoke all on function public.product_save(uuid, jsonb) from public, anon;
+revoke all on function public.variant_save(uuid, jsonb) from public, anon;
+revoke all on function public.variant_cost_set(uuid, jsonb) from public, anon;
+revoke all on function public.barcode_lookup(text) from public, anon;
+revoke all on function public.product_publish_checklist(uuid) from public, anon;
+revoke all on function public.product_next_internal_code(uuid) from public, anon;
+grant execute on function public.product_save(uuid, jsonb) to authenticated, service_role;
+grant execute on function public.variant_save(uuid, jsonb) to authenticated, service_role;
+grant execute on function public.variant_cost_set(uuid, jsonb) to authenticated, service_role;
+grant execute on function public.barcode_lookup(text) to authenticated, service_role;
+grant execute on function public.product_publish_checklist(uuid) to authenticated, service_role;
+grant execute on function public.product_next_internal_code(uuid) to authenticated, service_role;

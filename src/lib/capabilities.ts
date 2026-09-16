@@ -10,6 +10,8 @@ export type Capability =
   | "catalog.manage"
   | "catalog.publish"
   | "catalog.cost.view"
+  | "product.manage"
+  | "product.publish"
   | "stock.view"
   | "stock.operate"
   | "stock.adjust"

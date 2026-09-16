@@ -569,7 +569,7 @@ export async function baixarPlanilhaDeErros(
   XLSX.writeFile(wb, nomeArquivo);
 }
 
-/** Planilha-modelo com os cabeçalhos oficiais e uma linha de exemplo. */
+/** Planilha-modelo no formato legado — continua aceito pela importação. */
 export async function baixarModelo() {
   const XLSX = await import("xlsx");
   const exemplo: Record<string, string> = {
@@ -581,7 +581,7 @@ export async function baixarModelo() {
     Coleção: "Clássicos",
     Fornecedor: "Fornecedor Exemplo",
     Material: "Latão",
-    Banho: "Ouro 18k",
+    Banho: "Ouro",
     Cor: "Dourado",
     Tamanho: "17",
     "Peso (gramas)": "3,5",
@@ -594,6 +594,65 @@ export async function baixarModelo() {
   };
   const ws = XLSX.utils.json_to_sheet([exemplo]);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Modelo LARDAN");
-  XLSX.writeFile(wb, "modelo-importacao-lardan.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, "Modelo legado");
+  XLSX.writeFile(wb, "modelo-importacao-lardan-legado.xlsx");
 }
+
+/** Planilha-modelo no formato novo: produto-base + variante, uma linha por peça. */
+export async function baixarModeloNovo() {
+  const XLSX = await import("xlsx");
+  const base = {
+    "Nome do produto": "Brinco Gota",
+    "Código interno": "",
+    "Código legado do produto": "",
+    Categoria: "Brincos",
+    Subcategoria: "Gotas",
+    Coleção: "Clássicos",
+    "Material bruto": "Latão",
+    "Peso bruto (gramas)": "2,80",
+    "Fornecedor do bruto": "Fundição Exemplo",
+    "Valor da peça no bruto": "4,50",
+    Medidas: "18 mm",
+    Resumo: "Brinco em gota, leve e discreto.",
+    "Descrição completa": "Brinco em formato de gota com acabamento espelhado.",
+    Cuidados: "",
+    Garantia: "",
+    "Título para buscadores": "",
+    "Descrição para buscadores": "",
+    "Preço-base": "89,90",
+    "Publicar preço": "sim",
+    Destaque: "não",
+    "Publicar no site": "não",
+  };
+  const variante = (banho: string, tamanho: string, barcode: string) => ({
+    ...base,
+    "Nome da variante": "",
+    SKU: "",
+    "Código de barras": barcode,
+    "Código legado da variante": "",
+    "Tipo de banho": banho,
+    Cor: "",
+    "Tamanho / aro": tamanho,
+    "Fornecedor do banho": "Banhos Exemplo",
+    "Valor do material do banho": "3,20",
+    Verniz: "Verniz incolor",
+    "Valor do verniz": "0,80",
+    "Valor final da peça banhada": "8,50",
+    "Peso final (gramas)": "3,00",
+    "Preço da variante": "89,90",
+    "Variante padrão": banho === "Ouro" ? "sim" : "não",
+    "Variante ativa": "sim",
+    "Justificativa do custo": "",
+    "Observação do custo": "",
+    Quantidade: "0",
+  });
+  const ws = XLSX.utils.json_to_sheet([
+    variante("Ouro", "", "0007890001234"),
+    variante("Prata", "", "0007890001235"),
+    variante("Ródio Branco", "", "0007890001236"),
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Modelo produto LARDAN");
+  XLSX.writeFile(wb, "modelo-importacao-lardan-produto.xlsx");
+}
+

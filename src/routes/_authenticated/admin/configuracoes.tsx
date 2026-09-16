@@ -1,8 +1,14 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { ADMIN_SUBMODULES } from "@/lib/admin-modules";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import { hasAny } from "@/lib/session";
 import { ModuleAvailabilityBadge, PageHeader, Panel } from "@/components/admin/ui";
+import { can, useCapabilities } from "@/lib/capabilities";
+import { lerMarkupGlobal, salvarMarkupGlobal } from "@/lib/produto";
+import { mensagemDeErro } from "@/lib/catalog";
 
 export const Route = createFileRoute("/_authenticated/admin/configuracoes")({
   component: Configuracoes,

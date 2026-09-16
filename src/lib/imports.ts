@@ -164,36 +164,48 @@ export function normalizarCabecalho(h: string) {
 export interface SugestaoCampo {
   campo: CampoKey;
   coluna: string;
-  confianca: "exata" | "parecida";
+  confianca: "exata" | "duvida";
 }
 
-/** Sugere o de-para e diz o quanto confia em cada palpite. */
+/**
+ * Sugere o de-para apenas por correspondência exata de apelido. Quando uma
+ * coluna serve a mais de um campo, ela vira dúvida e não é preenchida sozinha:
+ * a pessoa confirma na tela.
+ */
 export function sugerirMapeamentoDetalhado(cabecalhos: string[]): SugestaoCampo[] {
   const porNorma = new Map<string, string>();
   for (const c of cabecalhos) porNorma.set(normalizarCabecalho(c), c);
-  const usados = new Set<string>();
-  const saida: SugestaoCampo[] = [];
+
+  const candidatos = new Map<string, CampoKey[]>();
   for (const campo of CAMPOS) {
     for (const apelido of APELIDOS[campo.key]) {
-      const exata = porNorma.get(apelido);
-      if (exata && !usados.has(exata)) {
-        usados.add(exata);
-        saida.push({ campo: campo.key, coluna: exata, confianca: "exata" });
-        break;
-      }
+      const coluna = porNorma.get(apelido);
+      if (!coluna) continue;
+      candidatos.set(coluna, [...(candidatos.get(coluna) ?? []), campo.key]);
+      break;
     }
-    if (saida.some((s) => s.campo === campo.key)) continue;
-    for (const [norma, original] of porNorma) {
-      if (usados.has(original)) continue;
-      if (APELIDOS[campo.key].some((a) => norma.includes(a) || a.includes(norma))) {
-        usados.add(original);
-        saida.push({ campo: campo.key, coluna: original, confianca: "parecida" });
-        break;
-      }
+  }
+
+  const saida: SugestaoCampo[] = [];
+  const usados = new Set<CampoKey>();
+  for (const [coluna, campos] of candidatos) {
+    if (campos.length === 1) {
+      const c = campos[0]!;
+      if (usados.has(c)) continue;
+      usados.add(c);
+      saida.push({ campo: c, coluna, confianca: "exata" });
+    } else {
+      for (const c of campos) saida.push({ campo: c, coluna, confianca: "duvida" });
     }
   }
   return saida;
 }
+
+/** Campos em que a planilha deixou dúvida: a coluna serve a mais de um campo. */
+export function duvidasDeMapeamento(cabecalhos: string[]): SugestaoCampo[] {
+  return sugerirMapeamentoDetalhado(cabecalhos).filter((s) => s.confianca === "duvida");
+}
+
 
 export function sugerirMapeamento(cabecalhos: string[]): Partial<Record<CampoKey, string>> {
   const mapa: Partial<Record<CampoKey, string>> = {};

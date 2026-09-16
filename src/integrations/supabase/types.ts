@@ -734,6 +734,21 @@ export type Database = {
         }
         Relationships: []
       }
+      contraprova_tmp: {
+        Row: {
+          chave: string | null
+          valor: string | null
+        }
+        Insert: {
+          chave?: string | null
+          valor?: string | null
+        }
+        Update: {
+          chave?: string | null
+          valor?: string | null
+        }
+        Relationships: []
+      }
       cost_centers: {
         Row: {
           business_entity_id: string | null

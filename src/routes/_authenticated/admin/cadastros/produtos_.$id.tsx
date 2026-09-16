@@ -283,31 +283,6 @@ function ProdutoDetalhe() {
 
   const p = produto.data;
 
-  const fichaInicial = useMemo<RecordValues>(() => {
-    if (!p) return {};
-    return {
-      name: p.name,
-      slug: p.slug,
-      legacy_code: p.legacy_code ?? "",
-      category_id: p.category_id ?? "",
-      collection_id: p.collection_id ?? "",
-      supplier_id: p.supplier_id ?? "",
-      short_description: p.short_description ?? "",
-      description: p.description ?? "",
-      material: p.material ?? "",
-      plating: p.plating ?? "",
-      measurements: p.measurements ?? "",
-      weight_grams: p.weight_grams ?? "",
-      care_instructions: p.care_instructions ?? "",
-      warranty_text: p.warranty_text ?? "",
-      preco: p.price_cents == null ? "" : centavosParaTexto(p.price_cents),
-      price_is_public: p.price_is_public,
-      seo_title: p.seo_title ?? "",
-      seo_description: p.seo_description ?? "",
-      is_featured: p.is_featured,
-      status: p.status,
-    };
-  }, [p]);
 
   if (produto.isLoading) return <Skeleton className="h-64 w-full" />;
   if (produto.error || !p)

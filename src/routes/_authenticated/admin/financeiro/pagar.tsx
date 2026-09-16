@@ -31,10 +31,11 @@ function Pagar() {
         onFiltrosChange={(f) =>
           void navigate({
             to: "/admin/financeiro/pagar",
-            search: {
-              ...(f.busca ? { busca: f.busca } : {}),
+            search: (prev: Busca) => ({
+              ...prev,
+              ...(f.busca ? { busca: f.busca } : { busca: undefined }),
               situacao: f.situacao,
-            },
+            }),
             replace: true,
           })
         }

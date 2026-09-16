@@ -31,10 +31,11 @@ function Receber() {
         onFiltrosChange={(f) =>
           void navigate({
             to: "/admin/financeiro/receber",
-            search: {
-              ...(f.busca ? { busca: f.busca } : {}),
+            search: (prev: Busca) => ({
+              ...prev,
+              ...(f.busca ? { busca: f.busca } : { busca: undefined }),
               situacao: f.situacao,
-            },
+            }),
             replace: true,
           })
         }

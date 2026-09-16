@@ -4782,6 +4782,9 @@ export type Database = {
         }
         Returns: Json
       }
+      imp_data: { Args: { _v: string }; Returns: string }
+      imp_texto: { Args: { _v: string }; Returns: string }
+      imp_valor_cents: { Args: { _v: string }; Returns: number }
       import_audit: {
         Args: { _acao: string; _job: string; _payload: Json }
         Returns: undefined
@@ -4864,6 +4867,10 @@ export type Database = {
         Returns: Json
       }
       import_money: { Args: { _v: string }; Returns: Json }
+      import_pessoas: {
+        Args: { _dry_run?: boolean; _papel: string; _rows: Json }
+        Returns: Json
+      }
       import_plating: { Args: { _v: string }; Returns: string }
       import_pode_produto: { Args: { _uid: string }; Returns: boolean }
       import_products_stock:
@@ -4900,6 +4907,15 @@ export type Database = {
         Returns: boolean
       }
       import_supplier: { Args: { _v: string }; Returns: string }
+      import_titulos: {
+        Args: {
+          _criar_contraparte?: boolean
+          _direction: string
+          _dry_run?: boolean
+          _rows: Json
+        }
+        Returns: Json
+      }
       integration_health: {
         Args: never
         Returns: {

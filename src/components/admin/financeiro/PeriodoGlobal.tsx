@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { ptBR } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -131,6 +132,7 @@ export function PeriodoGlobal() {
         </div>
         <Calendar
           mode="range"
+          locale={ptBR}
           selected={intervalo}
           month={mesVisivel}
           onMonthChange={setMesVisivel}

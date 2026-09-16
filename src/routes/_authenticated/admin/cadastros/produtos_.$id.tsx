@@ -29,6 +29,7 @@ import {
   registrarCusto,
   consultarCodigoBarras,
   listarTiposDeBanho,
+  lerCustos,
 } from "@/lib/produto";
 
 
@@ -59,7 +60,13 @@ function ProdutoDetalhe() {
   const produto = useQuery({
     queryKey: ["produto", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          "id, name, slug, internal_code, legacy_code, status, category_id, subcategory_id, collection_id, supplier_id, short_description, description, material, plating, measurements, weight_grams, raw_material, raw_weight_grams, raw_supplier_id, price_cents, price_is_public, is_featured, is_new_arrival, stock_visibility, seo_title, seo_description, care_instructions, warranty_text, published_at, scheduled_publish_at, requires_catalog_review, is_legacy, created_at, updated_at",
+        )
+        .eq("id", id)
+        .single();
       if (error) throw error;
       return data;
     },
@@ -70,12 +77,21 @@ function ProdutoDetalhe() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("product_variants")
-        .select("*")
+        .select(
+          "id, product_id, label, sku, barcode, legacy_code, size, color, plating_type_id, plating_supplier_id, varnish_name, final_weight_grams, price_cents, position, is_default, is_active, created_at, updated_at",
+        )
         .eq("product_id", id)
         .order("position");
       if (error) throw error;
       return data ?? [];
     },
+  });
+
+  /** Custos vigentes: leitura autorizada no servidor (Master, Diretoria, Financeiro). */
+  const custosVigentes = useQuery({
+    queryKey: ["produto-custos-vigentes", id],
+    enabled: podeVerCustos,
+    queryFn: () => lerCustos(id),
   });
 
   const custos = useQuery({
@@ -147,6 +163,10 @@ function ProdutoDetalhe() {
     },
   });
 
+  /** Custos vigentes de uma variante, lidos pela consulta autorizada. */
+  const custoDaVariante = (varianteId: string) =>
+    (custosVigentes.data?.variantes ?? []).find((v) => v.id === varianteId) ?? null;
+
   const invalidar = () => {
     void qc.invalidateQueries({ queryKey: ["produto", id] });
     void qc.invalidateQueries({ queryKey: ["produto-variantes", id] });
@@ -160,6 +180,22 @@ function ProdutoDetalhe() {
   /** Grava a variante pela operação canônica: SKU/nome automáticos e unicidade no banco. */
   const salvarVariante = useMutation({
     mutationFn: async (v: RecordValues) => {
+      const finalTexto = String(v["custo_final"] ?? "").trim();
+      const custo =
+        podeVerCustos && finalTexto
+          ? {
+              raw_supplier_id: String(v["raw_supplier_id"] ?? ""),
+              raw_piece_cost_cents: parseCentavos(String(v["custo_bruto"] ?? "")) ?? "",
+              plating_supplier_id: String(v["plating_supplier_id"] ?? ""),
+              plating_material_cost_cents: parseCentavos(String(v["custo_banho"] ?? "")) ?? "",
+              varnish_name: String(v["varnish_name"] ?? "").trim(),
+              varnish_cost_cents: parseCentavos(String(v["custo_verniz"] ?? "")) ?? "",
+              finished_piece_cost_cents: parseCentavos(finalTexto) ?? "",
+              justification: String(v["custo_justificativa"] ?? "").trim(),
+              note: String(v["custo_nota"] ?? "").trim(),
+            }
+          : null;
+      // Variante e custo gravam na mesma operação: ou tudo, ou nada.
       const row = await salvarVarianteRpc(variante?.id ?? null, {
         product_id: id,
         label: String(v["label"] ?? "").trim(),
@@ -175,27 +211,15 @@ function ProdutoDetalhe() {
         is_active: v["is_active"] !== false,
         final_weight_grams: String(v["final_weight_grams"] ?? "").replace(",", "."),
         sku_justificativa: String(v["sku_justificativa"] ?? "").trim(),
+        ...(custo ? { custo } : {}),
       });
-      const finalTexto = String(v["custo_final"] ?? "").trim();
-      if (podeVerCustos && finalTexto) {
-        await registrarCusto(row.id, {
-          raw_supplier_id: String(v["raw_supplier_id"] ?? ""),
-          raw_piece_cost_cents: parseCentavos(String(v["custo_bruto"] ?? "")) ?? "",
-          plating_supplier_id: String(v["plating_supplier_id"] ?? ""),
-          plating_material_cost_cents: parseCentavos(String(v["custo_banho"] ?? "")) ?? "",
-          varnish_name: String(v["varnish_name"] ?? "").trim(),
-          varnish_cost_cents: parseCentavos(String(v["custo_verniz"] ?? "")) ?? "",
-          finished_piece_cost_cents: parseCentavos(finalTexto) ?? "",
-          justification: String(v["custo_justificativa"] ?? "").trim(),
-          note: String(v["custo_nota"] ?? "").trim(),
-        });
-      }
       return row;
     },
     onSuccess: () => {
       toast.success("Variante salva.");
       invalidar();
       void qc.invalidateQueries({ queryKey: ["produto-custos", id] });
+      void qc.invalidateQueries({ queryKey: ["produto-custos-vigentes", id] });
     },
     onError: (e: unknown) => toast.error(mensagemDeErro(e)),
   });
@@ -480,6 +504,15 @@ function ProdutoDetalhe() {
                 is_default: variante.is_default,
                 is_active: variante.is_active,
                 final_weight_grams: variante.final_weight_grams ?? "",
+                plating_supplier_id: variante.plating_supplier_id ?? "",
+                varnish_name: variante.varnish_name ?? "",
+                custo_bruto: centavosParaTexto(
+                  custosVigentes.data?.produto.raw_piece_cost_cents ?? null,
+                ),
+                raw_supplier_id: produto.data?.raw_supplier_id ?? "",
+                custo_banho: centavosParaTexto(custoDaVariante(variante.id)?.plating_material_cost_cents ?? null),
+                custo_verniz: centavosParaTexto(custoDaVariante(variante.id)?.varnish_cost_cents ?? null),
+                custo_final: centavosParaTexto(custoDaVariante(variante.id)?.finished_piece_cost_cents ?? null),
               }
             : { is_active: true }
         }
@@ -589,6 +622,8 @@ interface VarianteRow {
   size: string | null;
   color: string | null;
   plating_type_id: string | null;
+  plating_supplier_id: string | null;
+  varnish_name: string | null;
   final_weight_grams: number | null;
   price_cents: number | null;
   position: number;

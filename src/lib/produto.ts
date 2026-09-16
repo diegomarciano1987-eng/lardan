@@ -199,3 +199,25 @@ export function nomeVariante(produto: string, banho: string | null, tamanho: str
     .filter(Boolean)
     .join(" — ");
 }
+
+/** Custos do produto e das variantes — leitura autorizada no servidor. */
+export interface CustosProduto {
+  produto: {
+    id: string;
+    raw_piece_cost_cents: number | null;
+    cost_price_cents: number | null;
+    markup_percent: number | null;
+  };
+  variantes: Array<{
+    id: string;
+    plating_material_cost_cents: number | null;
+    varnish_cost_cents: number | null;
+    finished_piece_cost_cents: number | null;
+  }>;
+}
+
+export async function lerCustos(produtoId: string): Promise<CustosProduto> {
+  const { data, error } = await supabase.rpc("product_costs_read", { _product: produtoId } as never);
+  if (error) throw error;
+  return data as unknown as CustosProduto;
+}

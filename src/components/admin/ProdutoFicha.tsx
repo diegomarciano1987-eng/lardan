@@ -16,6 +16,7 @@ import {
   gerarResumo,
   salvarProduto,
   lerMarkupGlobal,
+  lerCustos,
   margemPraticada,
   precoSugerido,
   type Impedimento,
@@ -64,6 +65,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
   const caps = useCapabilities();
   const podeEditar = can(caps, "product.manage");
   const podePublicar = can(caps, "product.publish");
+  const podeVerCustos = can(caps, "catalog.cost.view");
 
   const [form, setForm] = useState<Form>(VAZIO);
   const [sujo, setSujo] = useState(false);
@@ -74,7 +76,13 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     queryKey: ["produto", id],
     enabled: !!id,
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("id", id!).single();
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          "id, name, slug, internal_code, legacy_code, status, category_id, subcategory_id, collection_id, short_description, description, raw_material, raw_weight_grams, raw_supplier_id, measurements, care_instructions, warranty_text, seo_title, seo_description, price_cents, price_is_public, is_featured, is_legacy, requires_catalog_review, updated_at",
+        )
+        .eq("id", id!)
+        .single();
       if (error) throw error;
       return data as unknown as ProdutoBase;
     },
@@ -130,6 +138,13 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
 
   const markupGlobal = useQuery({ queryKey: ["catalog-markup"], queryFn: lerMarkupGlobal });
 
+  /** Custos só chegam ao navegador por consulta autorizada (Master, Diretoria, Financeiro). */
+  const custos = useQuery({
+    queryKey: ["produto-custos-vigentes", id],
+    enabled: !!id && podeVerCustos,
+    queryFn: () => lerCustos(id!),
+  });
+
   const p = produto.data;
 
   // Carrega a ficha salva no formulário (uma vez por produto).
@@ -145,7 +160,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       raw_material: p.raw_material ?? "",
       raw_weight_grams: p.raw_weight_grams == null ? "" : String(p.raw_weight_grams),
       raw_supplier_id: p.raw_supplier_id ?? "",
-      raw_piece_cost: centavosParaTexto(p.raw_piece_cost_cents),
+      raw_piece_cost: "",
       measurements: p.measurements ?? "",
       short_description: p.short_description ?? "",
       description: p.description ?? "",
@@ -154,13 +169,25 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       seo_title: p.seo_title ?? "",
       seo_description: p.seo_description ?? "",
       preco: centavosParaTexto(p.price_cents),
-      custo: centavosParaTexto(p.cost_price_cents),
-      markup: p.markup_percent == null ? "" : String(p.markup_percent),
+      custo: "",
+      markup: "",
       price_is_public: p.price_is_public,
       is_featured: p.is_featured,
     });
     setSujo(false);
   }, [p]);
+
+  // Custos vigentes entram no formulário só quando o perfil pode vê-los.
+  useEffect(() => {
+    const c = custos.data?.produto;
+    if (!c) return;
+    setForm((f) => ({
+      ...f,
+      raw_piece_cost: centavosParaTexto(c.raw_piece_cost_cents),
+      custo: centavosParaTexto(c.cost_price_cents),
+      markup: c.markup_percent == null ? "" : String(c.markup_percent),
+    }));
+  }, [custos.data]);
 
   // Ficha nova: aplica os padrões vigentes do cadastro, quando existirem.
   useEffect(() => {
@@ -210,7 +237,9 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     raw_material: String(form["raw_material"] ?? "").trim(),
     raw_weight_grams: String(form["raw_weight_grams"] ?? "").replace(",", "."),
     raw_supplier_id: String(form["raw_supplier_id"] ?? ""),
-    raw_piece_cost_cents: parseCentavos(String(form["raw_piece_cost"] ?? "")) ?? "",
+    ...(podeVerCustos
+      ? { raw_piece_cost_cents: parseCentavos(String(form["raw_piece_cost"] ?? "")) ?? "" }
+      : {}),
     measurements: String(form["measurements"] ?? "").trim(),
     short_description: String(form["short_description"] ?? "").trim(),
     description: String(form["description"] ?? "").trim(),
@@ -219,10 +248,14 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     seo_title: String(form["seo_title"] ?? "").trim(),
     seo_description: String(form["seo_description"] ?? "").trim(),
     price_cents: parseCentavos(String(form["preco"] ?? "")) ?? "",
-    cost_price_cents: parseCentavos(String(form["custo"] ?? "")) ?? "",
-    markup_percent: String(form["markup"] ?? "")
-      .trim()
-      .replace(",", "."),
+    ...(podeVerCustos
+      ? {
+          cost_price_cents: parseCentavos(String(form["custo"] ?? "")) ?? "",
+          markup_percent: String(form["markup"] ?? "")
+            .trim()
+            .replace(",", "."),
+        }
+      : {}),
     price_is_public: form["price_is_public"] !== false,
     is_featured: form["is_featured"] === true,
   });
@@ -230,9 +263,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
   const salvar = useMutation({
     mutationFn: async () => {
       if (salvandoRef.current) throw new Error("Salvamento em andamento.");
-      if (!parseCentavos(String(form["custo"] || ""))) {
-        throw new Error("Informe o preço de custo do produto antes de salvar.");
-      }
+      // Rascunho pode ficar incompleto: o preço de custo só é exigido para publicar.
       salvandoRef.current = true;
       try {
         return await salvarProduto(id, payload());

@@ -5005,6 +5005,7 @@ export type Database = {
       }
       party_doc_reveal: { Args: { _id: string }; Returns: string }
       phone_canon: { Args: { v: string }; Returns: string }
+      product_costs_read: { Args: { _product: string }; Returns: Json }
       product_next_internal_code: {
         Args: { _category_id: string }
         Returns: string
@@ -5309,6 +5310,10 @@ export type Database = {
           _produtos?: string
           _tipo: string
         }
+        Returns: Json
+      }
+      variant_cost_apply: {
+        Args: { _payload: Json; _variant_id: string }
         Returns: Json
       }
       variant_cost_set: {

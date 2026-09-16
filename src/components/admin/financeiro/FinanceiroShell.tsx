@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { EmptyState, PageHeader, Panel, formatBRLFromCents } from "@/components/admin/ui";
 import { useCapabilities, type Capability } from "@/lib/capabilities";
 import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
+import { PeriodoGlobal, usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 
 export interface AreaFinanceira {
   to: string;
@@ -107,9 +108,10 @@ function Indicador({ rotulo, valor, nota }: { rotulo: string; valor: string; not
 }
 
 function ResumoFinanceiro() {
+  const { de, ate } = usePeriodoFinanceiro();
   const q = useQuery({
-    queryKey: ["fin-overview", "shell"],
-    queryFn: () => fetchFinOverviewPeriodo(),
+    queryKey: ["fin-overview", "shell", de, ate],
+    queryFn: () => fetchFinOverviewPeriodo(de, ate),
     staleTime: 60_000,
   });
   const d = q.data;
@@ -163,7 +165,7 @@ export function FinanceiroShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="space-y-4 pb-4">
-      <PageHeader eyebrow="Lardan Cloud" title="Financeiro" />
+      <PageHeader eyebrow="Lardan Cloud" title="Financeiro" actions={<PeriodoGlobal />} />
 
       <ResumoFinanceiro />
 

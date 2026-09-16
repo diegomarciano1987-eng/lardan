@@ -1,14 +1,9 @@
 import * as React from "react";
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ErrorState,
-  Panel,
-  Skeleton,
-  formatBRLFromCents,
-  formatInt,
-} from "@/components/admin/ui";
+import { ErrorState, Panel, Skeleton, formatBRLFromCents, formatInt } from "@/components/admin/ui";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
+import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,15 +11,6 @@ interface Busca {
   de?: string;
   ate?: string;
 }
-
-const primeiroDiaDoMes = () => {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
-};
-const ultimoDiaDoMes = () => {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10);
-};
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/")({
   component: VisaoGeral,
@@ -51,7 +37,11 @@ function Kpi({
       <p
         className={
           "mt-1 font-display text-[1.6rem] font-bold tabular-nums " +
-          (tom === "saida" ? "text-red-700" : tom === "entrada" ? "text-emerald-700" : "text-ledger-text")
+          (tom === "saida"
+            ? "text-red-700"
+            : tom === "entrada"
+              ? "text-emerald-700"
+              : "text-ledger-text")
         }
       >
         {valor}
@@ -82,10 +72,7 @@ function usePendenciasConciliacao() {
 }
 
 function VisaoGeral() {
-  const navigate = useNavigate();
-  const busca = Route.useSearch();
-  const de = busca.de ?? primeiroDiaDoMes();
-  const ate = busca.ate ?? ultimoDiaDoMes();
+  const { de, ate } = usePeriodoFinanceiro();
 
   const q = useQuery({
     queryKey: ["fin-overview", de, ate],
@@ -93,71 +80,14 @@ function VisaoGeral() {
   });
   const conc = usePendenciasConciliacao();
 
-  const aplicar = (campo: "de" | "ate", valor: string) => {
-    void navigate({
-      to: "/admin/financeiro",
-      search: (s: Busca) => ({ ...s, [campo]: valor }),
-      replace: true,
-    });
-  };
-
   return (
     <AreaFinanceiraGuard capacidade="finance.dashboard.view">
       <div className="space-y-6">
-        <Panel title="Período">
-          <div className="flex flex-wrap items-end gap-3">
-            <label className="text-sm font-medium text-ledger-muted">
-              <span className="mb-1 block">De</span>
-              <input
-                type="date"
-                value={de}
-                onChange={(e) => aplicar("de", e.target.value)}
-                className="h-11 rounded-[10px] border border-line bg-surface px-3 text-sm text-ledger-text"
-              />
-            </label>
-            <label className="text-sm font-medium text-ledger-muted">
-              <span className="mb-1 block">Até</span>
-              <input
-                type="date"
-                value={ate}
-                onChange={(e) => aplicar("ate", e.target.value)}
-                className="h-11 rounded-[10px] border border-line bg-surface px-3 text-sm text-ledger-text"
-              />
-            </label>
-            <p className="text-xs font-medium text-ledger-muted">
-              O período fica na barra de endereço e pode ser salvo nos favoritos.
-            </p>
-          </div>
-        </Panel>
-
         {q.isLoading ? <Skeleton className="h-40 w-full" /> : null}
         {q.error ? <ErrorState message="Não foi possível carregar o painel financeiro." /> : null}
 
         {q.data ? (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <Kpi
-                rotulo="Saldo em contas"
-                valor={formatBRLFromCents(q.data.saldo_contas_cents)}
-                nota="Calculado pelo razão"
-              />
-              <Kpi
-                rotulo="A receber em aberto"
-                valor={formatBRLFromCents(q.data.a_receber_cents)}
-                tom="entrada"
-              />
-              <Kpi
-                rotulo="A pagar em aberto"
-                valor={formatBRLFromCents(q.data.a_pagar_cents)}
-                tom="saida"
-              />
-              <Kpi
-                rotulo="Aguardando aprovação"
-                valor={formatInt(q.data.titulos_pendentes_aprovacao)}
-                nota="Títulos submetidos"
-              />
-            </div>
-
             <Panel title="No período selecionado">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Kpi
@@ -165,7 +95,11 @@ function VisaoGeral() {
                   valor={formatBRLFromCents(q.data.recebido_periodo_cents)}
                   tom="entrada"
                 />
-                <Kpi rotulo="Pago" valor={formatBRLFromCents(q.data.pago_periodo_cents)} tom="saida" />
+                <Kpi
+                  rotulo="Pago"
+                  valor={formatBRLFromCents(q.data.pago_periodo_cents)}
+                  tom="saida"
+                />
               </div>
             </Panel>
 

@@ -6,6 +6,8 @@ import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShe
 import { fetchFinAccounts, fetchFinCashflow } from "@/lib/financeiro";
 
 interface Busca {
+  de?: string;
+  ate?: string;
   dias?: string;
   agrupamento?: string;
   conta?: string;
@@ -14,6 +16,8 @@ interface Busca {
 export const Route = createFileRoute("/_authenticated/admin/financeiro/fluxo-caixa")({
   component: FluxoCaixa,
   validateSearch: (s: Record<string, unknown>): Busca => ({
+    ...(typeof s["de"] === "string" ? { de: s["de"] } : {}),
+    ...(typeof s["ate"] === "string" ? { ate: s["ate"] } : {}),
     ...(typeof s["dias"] === "string" ? { dias: s["dias"] } : {}),
     ...(typeof s["agrupamento"] === "string" ? { agrupamento: s["agrupamento"] } : {}),
     ...(typeof s["conta"] === "string" ? { conta: s["conta"] } : {}),

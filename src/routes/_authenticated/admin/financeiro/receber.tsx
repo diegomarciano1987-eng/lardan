@@ -3,6 +3,8 @@ import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShe
 import { ListaTitulos } from "@/components/admin/financeiro/ListaTitulos";
 
 interface Busca {
+  de?: string;
+  ate?: string;
   busca?: string;
   situacao?: string;
 }
@@ -10,6 +12,8 @@ interface Busca {
 export const Route = createFileRoute("/_authenticated/admin/financeiro/receber")({
   component: Receber,
   validateSearch: (s: Record<string, unknown>): Busca => ({
+    ...(typeof s["de"] === "string" ? { de: s["de"] } : {}),
+    ...(typeof s["ate"] === "string" ? { ate: s["ate"] } : {}),
     ...(typeof s["busca"] === "string" ? { busca: s["busca"] } : {}),
     ...(typeof s["situacao"] === "string" ? { situacao: s["situacao"] } : {}),
   }),
@@ -27,9 +31,13 @@ function Receber() {
         onFiltrosChange={(f) =>
           void navigate({
             to: "/admin/financeiro/receber",
-            search: {
-              ...(f.busca ? { busca: f.busca } : {}),
-              situacao: f.situacao,
+            search: (prev: Busca): Busca => {
+              const { busca: _anterior, ...resto } = prev;
+              return {
+                ...resto,
+                ...(f.busca ? { busca: f.busca } : {}),
+                situacao: f.situacao,
+              };
             },
             replace: true,
           })

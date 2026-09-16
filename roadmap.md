@@ -26,3 +26,26 @@
 - [ ] Gate 6 — Cobranças (`/admin/cobrancas`)
 - [ ] Gate 7 — preparação de cobrança externa (desligada)
 - [ ] Gate 8 — homologação final e matriz de permissões provada por perfil
+
+## Central de Cadastros — correção e evolução (2026-09-15)
+
+- [x] A1 — grupo "Pessoas e rede" reordenado; cartões Consultoras, Representantes,
+      Colaboradores, Clientes e Lojas abrem a base canônica já filtrada (?papel=...),
+      e o filtro sobrevive ao recarregar
+- [x] A2 — papel "Loja" criado; vínculos de "Revendedora" migrados sem apagar o
+      registro antigo; "Revendedora" some dos seletores (fica só como legado)
+- [x] C1 — subcategorias: hierarquia de dois níveis com proteção contra ciclo,
+      tela de categorias com nível e caminho, contadores separados
+- [ ] B1 — "Novo produto" abre a ficha completa, sem criar rascunho vazio
+- [ ] B2 — produto-base (código interno, material/peso/fornecedor/valor do bruto,
+      subcategoria) e variante (banho, fornecedor do banho, verniz, custos)
+- [ ] B3 — checklist de publicação no servidor devolvendo todas as pendências
+- [ ] B4 — código interno, SKU, nome e slug automáticos + resumo automático
+- [ ] B5 — histórico de custos com composição em variant_costs
+- [ ] B6 — permissão temporária: só Master cria/edita/publica produto
+- [ ] C2 — subcategoria obrigatória na publicação quando a categoria tiver filhas
+- [ ] D — candidaturas: questionários configuráveis, cadastro completo pelo
+      representante, documentos em armazenamento privado, madrinha, contrato e
+      promissória versionados, painel de análise sem decisão automática
+- [ ] E — rótulos dos 11 perfis e prova da matriz de acesso por perfil
+- [ ] F — importação entendendo produto-base + banho + custos

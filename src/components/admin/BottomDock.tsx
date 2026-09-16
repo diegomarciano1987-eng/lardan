@@ -30,9 +30,15 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
   const caps = useCapabilities();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [drawer, setDrawer] = useState(false);
+  const [submenu, setSubmenu] = useState<"modulos" | "financeiro">("modulos");
 
   const permitted = ADMIN_MODULES.filter((m) => moduleAllowed(m, caps, roles));
   const primary = permitted.slice(0, 5);
+  const areasFinanceiras = AREAS_FINANCEIRAS.filter((a) => caps.includes(a.capacidade));
+  const fecharGaveta = () => {
+    setDrawer(false);
+    setSubmenu("modulos");
+  };
 
   const itemClass = (m: AdminModule, active: boolean) =>
     cn(

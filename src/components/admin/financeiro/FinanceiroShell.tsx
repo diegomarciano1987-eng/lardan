@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { EmptyState, PageHeader, Panel, formatBRLFromCents } from "@/components/admin/ui";
 import { useCapabilities, type Capability } from "@/lib/capabilities";
 import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
+import { PeriodoGlobal, usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 
 export interface AreaFinanceira {
   to: string;

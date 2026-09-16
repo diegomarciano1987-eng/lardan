@@ -58,3 +58,65 @@ function Configuracoes() {
     </div>
   );
 }
+
+function MargemPadrao() {
+  const qc = useQueryClient();
+  const caps = useCapabilities();
+  const pode = can(caps, "product.manage");
+  const [valor, setValor] = useState("");
+
+  const atual = useQuery({ queryKey: ["catalog-markup"], queryFn: lerMarkupGlobal });
+
+  useEffect(() => {
+    if (atual.data != null) setValor(String(atual.data).replace(".", ","));
+  }, [atual.data]);
+
+  const salvar = useMutation({
+    mutationFn: async () => {
+      const n = Number(valor.replace(/\./g, "").replace(",", "."));
+      if (!Number.isFinite(n) || n < 0) throw new Error("Informe uma margem válida, por exemplo 180.");
+      return salvarMarkupGlobal(n);
+    },
+    onSuccess: () => {
+      toast.success("Margem padrão atualizada.");
+      void qc.invalidateQueries({ queryKey: ["catalog-markup"] });
+    },
+    onError: (e) => toast.error(mensagemDeErro(e)),
+  });
+
+  return (
+    <Panel title="Margem padrão do catálogo (markup)">
+      <div className="space-y-3">
+        <p className="text-sm text-ledger-muted">
+          Margem aplicada sobre o preço de custo para sugerir o preço de venda de todos os produtos.
+          Cada produto pode ter uma margem própria na sua ficha, que prevalece sobre esta.
+        </p>
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="text-sm text-ledger-muted">
+            <span className="mb-1 block">Margem padrão (%)</span>
+            <input
+              className="admin-input w-40"
+              value={valor}
+              inputMode="decimal"
+              disabled={!pode}
+              onChange={(e) => setValor(e.target.value)}
+            />
+          </label>
+          <button
+            type="button"
+            className="admin-btn border-champagne"
+            disabled={!pode || salvar.isPending}
+            onClick={() => salvar.mutate()}
+          >
+            {salvar.isPending ? "Salvando…" : "Salvar margem"}
+          </button>
+        </div>
+        {!pode ? (
+          <p className="text-sm text-ledger-muted">
+            Somente o perfil Master altera a margem padrão.
+          </p>
+        ) : null}
+      </div>
+    </Panel>
+  );
+}

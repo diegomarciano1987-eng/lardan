@@ -87,7 +87,7 @@ async function contarPessoas() {
 }
 
 beforeAll(async () => {
-  master = await criarConta("master");
+  master = await criarConta({ nome: "import-cadastros-master", papeis: ["master"] });
 }, 120_000);
 
 afterAll(async () => {

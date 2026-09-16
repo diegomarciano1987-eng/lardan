@@ -1274,6 +1274,7 @@ export type Database = {
           idempotency_key: string | null
           is_reversal: boolean
           observacao: string | null
+          payload_fingerprint: string | null
           payment_method_id: string | null
           referencia: string | null
           reversal_reason: string | null
@@ -1290,6 +1291,7 @@ export type Database = {
           idempotency_key?: string | null
           is_reversal?: boolean
           observacao?: string | null
+          payload_fingerprint?: string | null
           payment_method_id?: string | null
           referencia?: string | null
           reversal_reason?: string | null
@@ -1306,6 +1308,7 @@ export type Database = {
           idempotency_key?: string | null
           is_reversal?: boolean
           observacao?: string | null
+          payload_fingerprint?: string | null
           payment_method_id?: string | null
           referencia?: string | null
           reversal_reason?: string | null
@@ -1535,6 +1538,7 @@ export type Database = {
           idempotency_key: string | null
           is_reversal: boolean
           motivo: string | null
+          payload_fingerprint: string | null
           referencia: string | null
           reversed_of: string | null
           to_account_id: string
@@ -1549,6 +1553,7 @@ export type Database = {
           idempotency_key?: string | null
           is_reversal?: boolean
           motivo?: string | null
+          payload_fingerprint?: string | null
           referencia?: string | null
           reversed_of?: string | null
           to_account_id: string
@@ -1563,6 +1568,7 @@ export type Database = {
           idempotency_key?: string | null
           is_reversal?: boolean
           motivo?: string | null
+          payload_fingerprint?: string | null
           referencia?: string | null
           reversed_of?: string | null
           to_account_id?: string
@@ -4211,6 +4217,7 @@ export type Database = {
         }
         Returns: string
       }
+      fin_fingerprint: { Args: { _intent: Json }; Returns: string }
       fin_installment_refresh: {
         Args: { _installment: string }
         Returns: undefined
@@ -4231,6 +4238,11 @@ export type Database = {
       }
       fin_title_create: { Args: { _payload: Json }; Returns: string }
       fin_title_detail: { Args: { _title: string }; Returns: Json }
+      fin_title_reject: {
+        Args: { _motivo: string; _title: string }
+        Returns: undefined
+      }
+      fin_title_submit: { Args: { _title: string }; Returns: undefined }
       fin_titles_list: {
         Args: {
           _direction: string
@@ -4243,6 +4255,10 @@ export type Database = {
         Returns: Json
       }
       fin_transfer_create: { Args: { _payload: Json }; Returns: string }
+      fin_transfer_reverse: {
+        Args: { _motivo: string; _transfer: string }
+        Returns: string
+      }
       find_party_duplicates: {
         Args: { _contact?: string; _doc?: string; _ignore?: string }
         Returns: {

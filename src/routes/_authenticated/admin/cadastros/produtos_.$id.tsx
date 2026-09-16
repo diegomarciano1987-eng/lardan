@@ -481,38 +481,99 @@ function ProdutoDetalhe() {
                 legacy_code: variante.legacy_code ?? "",
                 size: variante.size ?? "",
                 color: variante.color ?? "",
+                plating_type_id: variante.plating_type_id ?? "",
                 preco: variante.price_cents == null ? "" : centavosParaTexto(variante.price_cents),
                 position: variante.position,
                 is_default: variante.is_default,
                 is_active: variante.is_active,
+                final_weight_grams: variante.final_weight_grams ?? "",
               }
             : { is_active: true }
         }
         fields={[
-          { name: "label", label: "Nome da variante", type: "text", required: true, full: true },
-          { name: "sku", label: "SKU", type: "text" },
-          { name: "barcode", label: "Código de barras", type: "text" },
+          {
+            name: "plating_type_id",
+            label: "Tipo de banho",
+            type: "select",
+            options: (banhos.data ?? []).map((b) => ({ value: b.id, label: b.name })),
+            help: "Fonte controlada — evita Ouro/ouro/Dourado como coisas diferentes.",
+          },
+          { name: "size", label: "Tamanho / aro", type: "text" },
+          {
+            name: "label",
+            label: "Nome da variante",
+            type: "text",
+            full: true,
+            help: "Deixe vazio para o sistema montar: produto + banho + tamanho.",
+          },
+          { name: "sku", label: "SKU", type: "text", help: "Vazio = gerado a partir do código interno." },
+          {
+            name: "barcode",
+            label: "Código de barras",
+            type: "text",
+            help: "Etiqueta existente: digite ou leia com o leitor. Zeros à esquerda são preservados.",
+            action: {
+              label: "Consultar código de barras",
+              run: async (valor) => {
+                if (!valor.trim()) {
+                  toast.error("Informe um código para consultar.");
+                  return;
+                }
+                const r = await consultarCodigoBarras(valor);
+                if (r.encontrado) toast.error(`Já usado por ${r.produto} — ${r.variante}.`);
+                else toast.success("Código livre.");
+              },
+            },
+          },
           { name: "legacy_code", label: "Código legado", type: "text" },
-          { name: "size", label: "Tamanho", type: "text" },
-          { name: "color", label: "Cor", type: "text" },
+          { name: "color", label: "Cor comercial", type: "text" },
           { name: "preco", label: "Preço (R$)", type: "text", placeholder: "0,00" },
+          { name: "final_weight_grams", label: "Peso final (g)", type: "text" },
           { name: "position", label: "Ordem", type: "number" },
           { name: "is_default", label: "Variante padrão", type: "switch" },
           { name: "is_active", label: "Ativa", type: "switch" },
+          {
+            name: "sku_justificativa",
+            label: "Justificativa para mudar o SKU",
+            type: "text",
+            full: true,
+            help: "Obrigatória quando a variante já tem movimentação de estoque.",
+          },
           ...(podeVerCustos
             ? ([
                 {
-                  name: "custo",
-                  label: "Novo custo (R$)",
+                  name: "custo_bruto",
+                  label: "Valor da peça no bruto (R$)",
                   type: "text" as const,
                   placeholder: "0,00",
-                  help: "Deixe vazio para não registrar custo agora.",
                 },
                 {
-                  name: "supplier_id",
-                  label: "Fornecedor do custo",
+                  name: "raw_supplier_id",
+                  label: "Fornecedor do bruto",
                   type: "select" as const,
                   options: (fornecedores.data ?? []).map((f) => ({ value: f.id, label: f.name })),
+                },
+                { name: "custo_banho", label: "Valor do material do banho (R$)", type: "text" as const },
+                {
+                  name: "plating_supplier_id",
+                  label: "Fornecedor do banho",
+                  type: "select" as const,
+                  options: (fornecedores.data ?? []).map((f) => ({ value: f.id, label: f.name })),
+                },
+                { name: "varnish_name", label: "Verniz utilizado", type: "text" as const },
+                { name: "custo_verniz", label: "Valor do verniz (R$)", type: "text" as const },
+                {
+                  name: "custo_final",
+                  label: "Valor final da peça banhada (R$)",
+                  type: "text" as const,
+                  help: "Preencher cria uma nova vigência de custo; o histórico anterior é mantido.",
+                },
+                {
+                  name: "custo_justificativa",
+                  label: "Justificativa da diferença",
+                  type: "text" as const,
+                  full: true,
+                  help: "Obrigatória quando o valor final difere da soma dos componentes.",
                 },
                 { name: "custo_nota", label: "Observação do custo", type: "text" as const },
               ])

@@ -21,17 +21,23 @@ import {
   type Indicadores,
   type JobResumo,
   type LinhaProblema,
+  type Previa,
+  type SugestaoCampo,
   abrirExecucao,
   baixarModelo,
+  baixarModeloNovo,
   baixarPlanilhaDeErros,
   cancelarLote,
   colunasAmbiguas,
+  duvidasDeMapeamento,
   enviarLinhas,
+  formatoDaPlanilha,
   indicadoresLote,
   lerLote,
   lerPlanilha,
   listarProblemas,
   pausarLote,
+  previaLote,
   processarLote,
   promoverSimulacao,
   registrarArquivoNoServidor,
@@ -40,6 +46,7 @@ import {
   sugerirMapeamentoDetalhado,
   validarLote,
 } from "@/lib/imports";
+
 
 type Etapa = "arquivo" | "mapa" | "conferencia" | "processando" | "fim";
 
@@ -101,6 +108,9 @@ export function ImportProductsDialog({
   const [jobId, setJobId] = React.useState<string | null>(null);
   const [resumo, setResumo] = React.useState<JobResumo | null>(null);
   const [indicadores, setIndicadores] = React.useState<Indicadores | null>(null);
+  const [previa, setPrevia] = React.useState<Previa | null>(null);
+  const [duvidas, setDuvidas] = React.useState<SugestaoCampo[]>([]);
+
   const [problemas, setProblemas] = React.useState<LinhaProblema[]>([]);
   const [progresso, setProgresso] = React.useState({ feitas: 0, total: 0, inicio: 0 });
   const [ocupado, setOcupado] = React.useState<string | null>(null);
@@ -123,6 +133,9 @@ export function ImportProductsDialog({
     setJobId(null);
     setResumo(null);
     setIndicadores(null);
+    setPrevia(null);
+    setDuvidas([]);
+
     setProblemas([]);
     setProgresso({ feitas: 0, total: 0, inicio: 0 });
     setOcupado(null);
@@ -155,8 +168,14 @@ export function ImportProductsDialog({
       setSha(registro.sha256);
       setCabecalhos(lida.cabecalhos);
       setLinhas(lida.linhas);
-      setMapa(Object.fromEntries(sugestoes.map((s) => [s.campo, s.coluna])));
+      setMapa(
+        Object.fromEntries(
+          sugestoes.filter((s) => s.confianca === "exata").map((s) => [s.campo, s.coluna]),
+        ),
+      );
       setConfianca(Object.fromEntries(sugestoes.map((s) => [s.campo, s.confianca])));
+      setDuvidas(duvidasDeMapeamento(lida.cabecalhos));
+
       setAvisosArquivo([...lida.avisos, ...registro.avisos]);
       if (!registro.novo) {
         toast.info("Este arquivo já foi enviado antes. O histórico dele será mantido.");
@@ -230,8 +249,10 @@ export function ImportProductsDialog({
 
       setResumo(await lerLote(aberta.id));
       setIndicadores(await indicadoresLote(aberta.id));
+      setPrevia(await previaLote(aberta.id).catch(() => null));
       setProblemas(await listarProblemas(aberta.id));
       setEtapa("conferencia");
+
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -325,7 +346,9 @@ export function ImportProductsDialog({
       setSimular(false);
       setResumo(await lerLote(r.id));
       setIndicadores(await indicadoresLote(r.id));
+      setPrevia(await previaLote(r.id).catch(() => null));
       setEtapa("conferencia");
+
       toast.success("Execução real criada a partir da simulação.");
     } catch (e) {
       toast.error((e as Error).message);
@@ -383,10 +406,15 @@ export function ImportProductsDialog({
                   <Upload aria-hidden className="mr-2 inline size-4" />
                   {ocupado ?? "Escolher arquivo"}
                 </button>
+                <button type="button" className="admin-btn" onClick={() => void baixarModeloNovo()}>
+                  <Download aria-hidden className="mr-2 inline size-4" />
+                  Baixar modelo de produto
+                </button>
                 <button type="button" className="admin-btn" onClick={() => void baixarModelo()}>
                   <Download aria-hidden className="mr-2 inline size-4" />
-                  Baixar modelo
+                  Baixar modelo antigo
                 </button>
+
               </div>
             </div>
           </div>
@@ -474,6 +502,31 @@ export function ImportProductsDialog({
               )}
             </div>
 
+            <div className="ledger-panel space-y-2 px-4 py-3 text-sm">
+              <p className="text-ledger-text">
+                Formato reconhecido:{" "}
+                <strong>
+                  {formatoDaPlanilha(mapa) === "novo"
+                    ? "planilha nova (produto e variantes)"
+                    : "planilha antiga"}
+                </strong>
+              </p>
+              {duvidas.length > 0 && (
+                <div className="space-y-1 text-ledger-muted">
+                  <p className="text-ledger-text">
+                    Algumas colunas podem significar mais de uma coisa. Escolha você mesmo antes de
+                    seguir:
+                  </p>
+                  {duvidas.map((d) => (
+                    <p key={`${d.campo}-${d.coluna}`}>
+                      • a coluna “{d.coluna}” pode ser{" "}
+                      {CAMPOS.find((c) => c.key === d.campo)?.label ?? d.campo}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="ledger-panel max-h-72 overflow-auto p-4">
               <p className="mb-3 text-sm font-semibold text-ledger-text">
                 De-para das colunas — confira antes de seguir
@@ -484,7 +537,7 @@ export function ImportProductsDialog({
                     <Rotulo>
                       {c.label}
                       {"obrigatorio" in c && c.obrigatorio ? " *" : ""}
-                      {confianca[c.key] === "parecida" ? " · palpite" : ""}
+                      {confianca[c.key] === "duvida" && !mapa[c.key] ? " · confirme" : ""}
                     </Rotulo>
                     <SmartSelect
                       options={[
@@ -499,6 +552,7 @@ export function ImportProductsDialog({
                 ))}
               </div>
             </div>
+
 
             <div className="flex justify-end gap-3">
               <button type="button" className="admin-btn" onClick={reiniciar} disabled={!!ocupado}>
@@ -551,6 +605,47 @@ export function ImportProductsDialog({
                 </p>
               </div>
             </div>
+
+
+
+            {previa && (
+              <div className="ledger-panel space-y-3 px-5 py-4">
+                <p className="text-sm font-semibold text-ledger-text">
+                  Conferência detalhada ·{" "}
+                  {previa.formato === "novo" ? "planilha nova" : "planilha antiga"}
+                </p>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+                  {(
+                    [
+                      ["Sem alteração", previa.sem_alteracao],
+                      ["Novos custos", previa.custos_novos],
+                      ["Unidades previstas", previa.unidades_previstas],
+                      ["Banhos não reconhecidos", previa.banhos_nao_reconhecidos],
+                      ["Subcategorias inválidas", previa.subcategorias_invalidas],
+                      ["Categorias inválidas", previa.categorias_invalidas],
+                      ["Fornecedores não encontrados", previa.fornecedores_nao_encontrados],
+                      ["Códigos de barras repetidos", previa.barcodes_duplicados],
+                      ["SKUs repetidos", previa.skus_duplicados],
+                      ["Repetidas no arquivo", previa.duplicadas_no_arquivo],
+                      ["Valores inválidos", previa.valores_invalidos],
+                      ["Publicações pedidas", previa.publicacoes_solicitadas],
+                      ["Publicações bloqueadas", previa.publicacoes_bloqueadas],
+                      ["Avisos", previa.avisos],
+                      ["Recusadas", previa.recusadas],
+                    ] as const
+                  ).map(([rotulo, valor]) => (
+                    <p key={rotulo} className="flex justify-between gap-3">
+                      <span className="text-ledger-muted">{rotulo}</span>
+                      <span className="tabular-nums text-ledger-text">{formatInt(valor ?? 0)}</span>
+                    </p>
+                  ))}
+                </div>
+                <p className="text-xs text-ledger-muted">
+                  Nada foi gravado até aqui. A gravação só acontece quando você confirma.
+                </p>
+              </div>
+            )}
+
 
             {problemas.length > 0 && (
               <div className="ledger-panel max-h-64 overflow-auto">

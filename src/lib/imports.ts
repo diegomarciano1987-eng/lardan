@@ -16,56 +16,141 @@ export type { PlanilhaLida } from "./importacao/parser";
 
 /** Campos canônicos que o sistema entende. */
 export const CAMPOS = [
+  // produto-base
   { key: "nome", label: "Nome do produto", obrigatorio: true, alvo: "produto" },
-  { key: "sku", label: "SKU / referência", alvo: "variante" },
-  { key: "codigo_legado", label: "Código legado (sistema antigo)", alvo: "variante" },
-  { key: "ean", label: "Código de barras (EAN/GTIN)", alvo: "variante" },
+  { key: "codigo_interno", label: "Código interno (LAR-…)", alvo: "produto" },
+  { key: "codigo_legado_produto", label: "Código legado do produto", alvo: "produto" },
   { key: "categoria", label: "Categoria", alvo: "produto" },
+  { key: "subcategoria", label: "Subcategoria", alvo: "produto" },
   { key: "colecao", label: "Coleção / linha", alvo: "produto" },
-  { key: "fornecedor", label: "Fornecedor", alvo: "produto" },
-  { key: "material", label: "Material", alvo: "produto" },
-  { key: "banho", label: "Banho", alvo: "produto" },
-  { key: "cor", label: "Cor", alvo: "variante" },
-  { key: "tamanho", label: "Tamanho", alvo: "variante" },
-  { key: "peso", label: "Peso (gramas)", alvo: "produto" },
+  { key: "material_bruto", label: "Material bruto", alvo: "produto" },
+  { key: "peso_bruto", label: "Peso bruto (gramas)", alvo: "produto" },
+  { key: "fornecedor_bruto", label: "Fornecedor do bruto", alvo: "produto" },
+  { key: "valor_bruto", label: "Valor da peça no bruto", alvo: "produto" },
   { key: "medidas", label: "Medidas", alvo: "produto" },
-  { key: "descricao_curta", label: "Descrição curta", alvo: "produto" },
+  { key: "resumo", label: "Resumo", alvo: "produto" },
   { key: "descricao", label: "Descrição completa", alvo: "produto" },
-  { key: "custo", label: "Valor de custo", alvo: "variante" },
-  { key: "preco", label: "Preço de venda", alvo: "variante" },
-  { key: "quantidade", label: "Quantidade", alvo: "estoque" },
+  { key: "cuidados", label: "Cuidados", alvo: "produto" },
+  { key: "garantia", label: "Garantia", alvo: "produto" },
+  { key: "seo_titulo", label: "Título para buscadores", alvo: "produto" },
+  { key: "seo_descricao", label: "Descrição para buscadores", alvo: "produto" },
+  { key: "preco", label: "Preço-base", alvo: "produto" },
+  { key: "publicar_preco", label: "Publicar preço (sim/não)", alvo: "produto" },
   { key: "destaque", label: "Destaque (sim/não)", alvo: "produto" },
   { key: "publicar", label: "Publicar no site (sim/não)", alvo: "produto" },
-  { key: "mostrar_preco", label: "Mostrar preço no site (sim/não)", alvo: "produto" },
+  // variante
+  { key: "nome_variante", label: "Nome da variante", alvo: "variante" },
+  { key: "sku", label: "SKU / referência", alvo: "variante" },
+  { key: "ean", label: "Código de barras (EAN/GTIN)", alvo: "variante" },
+  { key: "codigo_legado", label: "Código legado da variante", alvo: "variante" },
+  { key: "tipo_banho", label: "Tipo de banho", alvo: "variante" },
+  { key: "cor", label: "Cor", alvo: "variante" },
+  { key: "tamanho", label: "Tamanho / aro", alvo: "variante" },
+  { key: "fornecedor_banho", label: "Fornecedor do banho", alvo: "variante" },
+  { key: "valor_banho", label: "Valor do material do banho", alvo: "variante" },
+  { key: "verniz", label: "Verniz", alvo: "variante" },
+  { key: "valor_verniz", label: "Valor do verniz", alvo: "variante" },
+  { key: "valor_final", label: "Valor final da peça banhada", alvo: "variante" },
+  { key: "peso_final", label: "Peso final (gramas)", alvo: "variante" },
+  { key: "preco_variante", label: "Preço da variante", alvo: "variante" },
+  { key: "variante_padrao", label: "Variante padrão (sim/não)", alvo: "variante" },
+  { key: "variante_ativa", label: "Variante ativa (sim/não)", alvo: "variante" },
+  { key: "justificativa_custo", label: "Justificativa do custo", alvo: "variante" },
+  { key: "observacao_custo", label: "Observação do custo", alvo: "variante" },
+  // legado — continuam aceitos nas planilhas antigas
+  { key: "material", label: "Material (planilha antiga)", alvo: "produto" },
+  { key: "banho", label: "Banho (planilha antiga)", alvo: "produto" },
+  { key: "peso", label: "Peso em gramas (planilha antiga)", alvo: "produto" },
+  { key: "fornecedor", label: "Fornecedor (planilha antiga)", alvo: "produto" },
+  { key: "descricao_curta", label: "Descrição curta (planilha antiga)", alvo: "produto" },
+  { key: "custo", label: "Valor de custo (planilha antiga)", alvo: "variante" },
+  { key: "mostrar_preco", label: "Mostrar preço (planilha antiga)", alvo: "produto" },
+  { key: "quantidade", label: "Quantidade", alvo: "estoque" },
   { key: "imagem_url", label: "Endereço da imagem", alvo: "produto" },
 ] as const;
 
 export type CampoKey = (typeof CAMPOS)[number]["key"];
 
+/** Campos que só existem no modelo novo — servem para reconhecer o formato. */
+export const CAMPOS_NOVOS: CampoKey[] = [
+  "codigo_interno",
+  "subcategoria",
+  "material_bruto",
+  "peso_bruto",
+  "fornecedor_bruto",
+  "valor_bruto",
+  "cuidados",
+  "garantia",
+  "seo_titulo",
+  "seo_descricao",
+  "nome_variante",
+  "fornecedor_banho",
+  "valor_banho",
+  "verniz",
+  "valor_verniz",
+  "valor_final",
+  "peso_final",
+  "preco_variante",
+  "variante_padrao",
+  "variante_ativa",
+  "codigo_legado_produto",
+];
+
+export function formatoDaPlanilha(mapa: Partial<Record<CampoKey, string>>): "novo" | "legado" {
+  return CAMPOS_NOVOS.some((k) => (mapa[k] ?? "").trim() !== "") ? "novo" : "legado";
+}
+
 const APELIDOS: Record<CampoKey, string[]> = {
-  nome: ["nome", "produto", "nome do produto", "descricao do produto", "peca", "titulo"],
-  sku: ["sku", "codigo", "codigo interno", "referencia", "ref", "cod"],
-  codigo_legado: ["codigo legado", "codigo antigo", "id antigo", "codigo sistema antigo", "legado"],
-  ean: ["codigo de barras", "barcode", "ean", "ean13", "gtin", "cod barras"],
+  nome: ["nome", "produto", "nome produto", "nome do produto", "descricao do produto", "peca", "titulo"],
+  codigo_interno: ["codigo interno", "codigo lardan", "cod interno"],
+  codigo_legado_produto: ["codigo legado do produto", "codigo legado produto", "legado produto"],
   categoria: ["categoria", "grupo"],
+  subcategoria: ["subcategoria", "sub categoria", "subgrupo"],
   colecao: ["colecao", "linha", "familia"],
-  fornecedor: ["fornecedor", "supplier"],
-  material: ["material", "materia prima"],
-  banho: ["banho", "acabamento", "plating"],
-  cor: ["cor", "cores"],
-  tamanho: ["tamanho", "tam", "aro", "numero"],
-  peso: ["peso", "peso gramas", "peso g", "gramas"],
+  material_bruto: ["material bruto", "materia prima bruta"],
+  peso_bruto: ["peso bruto", "peso do bruto"],
+  fornecedor_bruto: ["fornecedor bruto", "fornecedor do bruto"],
+  valor_bruto: ["valor bruto", "custo bruto", "valor da peca no bruto", "valor do bruto"],
   medidas: ["medidas", "dimensoes", "medida"],
-  descricao_curta: ["descricao curta", "resumo", "chamada"],
+  resumo: ["resumo", "chamada"],
   descricao: ["descricao", "descricao completa", "detalhes"],
-  custo: ["valor de custo", "custo", "preco de custo", "valor custo", "custo unitario"],
-  preco: ["preco", "valor", "preco de venda", "valor de venda", "preco venda"],
-  quantidade: ["quantidade", "qtd", "estoque", "saldo", "quantidades", "qtde"],
+  cuidados: ["cuidados", "como cuidar", "conservacao"],
+  garantia: ["garantia"],
+  seo_titulo: ["titulo para buscadores", "seo titulo", "titulo seo"],
+  seo_descricao: ["descricao para buscadores", "seo descricao", "descricao seo"],
+  preco: ["preco", "valor", "preco base", "preco de venda", "valor de venda", "preco venda"],
+  publicar_preco: ["publicar preco", "preco publico", "exibir preco"],
   destaque: ["destaque", "featured"],
   publicar: ["publicar", "publicado", "ativo no site"],
-  mostrar_preco: ["mostrar preco", "preco publico", "exibir preco"],
+  nome_variante: ["nome da variante", "nome variante", "variante"],
+  sku: ["sku", "codigo", "referencia", "ref", "cod"],
+  ean: ["codigo de barras", "barcode", "ean", "ean13", "gtin", "cod barras"],
+  codigo_legado: ["codigo legado", "codigo antigo", "id antigo", "codigo sistema antigo", "legado"],
+  tipo_banho: ["tipo de banho", "tipo banho"],
+  cor: ["cor", "cores"],
+  tamanho: ["tamanho", "tam", "aro", "numero"],
+  fornecedor_banho: ["fornecedor banho", "fornecedor do banho"],
+  valor_banho: ["valor banho", "custo banho", "valor do banho", "valor do material do banho"],
+  verniz: ["verniz"],
+  valor_verniz: ["valor verniz", "custo verniz", "valor do verniz"],
+  valor_final: ["valor final", "custo final", "valor banhada", "valor final da peca banhada"],
+  peso_final: ["peso final", "peso da peca banhada"],
+  preco_variante: ["preco da variante", "preco variante"],
+  variante_padrao: ["variante padrao", "padrao"],
+  variante_ativa: ["variante ativa", "ativa"],
+  justificativa_custo: ["justificativa do custo", "justificativa custo", "justificativa"],
+  observacao_custo: ["observacao do custo", "observacao custo", "obs custo"],
+  material: ["material", "materia prima"],
+  banho: ["banho", "acabamento", "plating"],
+  peso: ["peso", "peso gramas", "peso g", "gramas"],
+  fornecedor: ["fornecedor", "supplier"],
+  descricao_curta: ["descricao curta"],
+  custo: ["valor de custo", "custo", "preco de custo", "valor custo", "custo unitario"],
+  mostrar_preco: ["mostrar preco"],
+  quantidade: ["quantidade", "qtd", "estoque", "saldo", "quantidades", "qtde"],
   imagem_url: ["imagem", "imagem url", "foto", "url da imagem", "link da imagem"],
 };
+
 
 export function normalizarCabecalho(h: string) {
   return h
@@ -79,42 +164,57 @@ export function normalizarCabecalho(h: string) {
 export interface SugestaoCampo {
   campo: CampoKey;
   coluna: string;
-  confianca: "exata" | "parecida";
+  confianca: "exata" | "duvida";
 }
 
-/** Sugere o de-para e diz o quanto confia em cada palpite. */
+/**
+ * Sugere o de-para apenas por correspondência exata de apelido. Quando uma
+ * coluna serve a mais de um campo, ela vira dúvida e não é preenchida sozinha:
+ * a pessoa confirma na tela.
+ */
 export function sugerirMapeamentoDetalhado(cabecalhos: string[]): SugestaoCampo[] {
   const porNorma = new Map<string, string>();
   for (const c of cabecalhos) porNorma.set(normalizarCabecalho(c), c);
-  const usados = new Set<string>();
-  const saida: SugestaoCampo[] = [];
+
+  const candidatos = new Map<string, CampoKey[]>();
   for (const campo of CAMPOS) {
     for (const apelido of APELIDOS[campo.key]) {
-      const exata = porNorma.get(apelido);
-      if (exata && !usados.has(exata)) {
-        usados.add(exata);
-        saida.push({ campo: campo.key, coluna: exata, confianca: "exata" });
-        break;
-      }
+      const coluna = porNorma.get(apelido);
+      if (!coluna) continue;
+      candidatos.set(coluna, [...(candidatos.get(coluna) ?? []), campo.key]);
+      break;
     }
-    if (saida.some((s) => s.campo === campo.key)) continue;
-    for (const [norma, original] of porNorma) {
-      if (usados.has(original)) continue;
-      if (APELIDOS[campo.key].some((a) => norma.includes(a) || a.includes(norma))) {
-        usados.add(original);
-        saida.push({ campo: campo.key, coluna: original, confianca: "parecida" });
-        break;
-      }
+  }
+
+  const saida: SugestaoCampo[] = [];
+  const usados = new Set<CampoKey>();
+  for (const [coluna, campos] of candidatos) {
+    if (campos.length === 1) {
+      const c = campos[0]!;
+      if (usados.has(c)) continue;
+      usados.add(c);
+      saida.push({ campo: c, coluna, confianca: "exata" });
+    } else {
+      for (const c of campos) saida.push({ campo: c, coluna, confianca: "duvida" });
     }
   }
   return saida;
 }
 
+/** Campos em que a planilha deixou dúvida: a coluna serve a mais de um campo. */
+export function duvidasDeMapeamento(cabecalhos: string[]): SugestaoCampo[] {
+  return sugerirMapeamentoDetalhado(cabecalhos).filter((s) => s.confianca === "duvida");
+}
+
+
 export function sugerirMapeamento(cabecalhos: string[]): Partial<Record<CampoKey, string>> {
   const mapa: Partial<Record<CampoKey, string>> = {};
-  for (const s of sugerirMapeamentoDetalhado(cabecalhos)) mapa[s.campo] = s.coluna;
+  for (const s of sugerirMapeamentoDetalhado(cabecalhos)) {
+    if (s.confianca === "exata") mapa[s.campo] = s.coluna;
+  }
   return mapa;
 }
+
 
 /** Colunas apontadas por mais de um campo — ambiguidade nunca é silenciosa. */
 export function colunasAmbiguas(mapa: Partial<Record<CampoKey, string>>): string[] {
@@ -350,6 +450,31 @@ export async function indicadoresLote(jobId: string) {
   return chamar<Indicadores>("import_job_counters", { _job: jobId });
 }
 
+/** Conferência detalhada do lote: o que entra, o que muda e o que é recusado. */
+export interface Previa {
+  formato: "novo" | "legado";
+  banhos_nao_reconhecidos: number;
+  subcategorias_invalidas: number;
+  categorias_invalidas: number;
+  fornecedores_nao_encontrados: number;
+  barcodes_duplicados: number;
+  skus_duplicados: number;
+  duplicadas_no_arquivo: number;
+  valores_invalidos: number;
+  custos_novos: number;
+  sem_alteracao: number;
+  publicacoes_solicitadas: number;
+  publicacoes_bloqueadas: number;
+  recusadas: number;
+  avisos: number;
+  unidades_previstas: number;
+}
+
+export async function previaLote(jobId: string) {
+  return chamar<Previa>("import_job_preview", { _job: jobId });
+}
+
+
 export async function lerLote(jobId: string): Promise<JobResumo> {
   const { data, error } = await supabase
     .from("import_jobs")
@@ -444,7 +569,7 @@ export async function baixarPlanilhaDeErros(
   XLSX.writeFile(wb, nomeArquivo);
 }
 
-/** Planilha-modelo com os cabeçalhos oficiais e uma linha de exemplo. */
+/** Planilha-modelo no formato legado — continua aceito pela importação. */
 export async function baixarModelo() {
   const XLSX = await import("xlsx");
   const exemplo: Record<string, string> = {
@@ -456,7 +581,7 @@ export async function baixarModelo() {
     Coleção: "Clássicos",
     Fornecedor: "Fornecedor Exemplo",
     Material: "Latão",
-    Banho: "Ouro 18k",
+    Banho: "Ouro",
     Cor: "Dourado",
     Tamanho: "17",
     "Peso (gramas)": "3,5",
@@ -469,6 +594,65 @@ export async function baixarModelo() {
   };
   const ws = XLSX.utils.json_to_sheet([exemplo]);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Modelo LARDAN");
-  XLSX.writeFile(wb, "modelo-importacao-lardan.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, "Modelo legado");
+  XLSX.writeFile(wb, "modelo-importacao-lardan-legado.xlsx");
 }
+
+/** Planilha-modelo no formato novo: produto-base + variante, uma linha por peça. */
+export async function baixarModeloNovo() {
+  const XLSX = await import("xlsx");
+  const base = {
+    "Nome do produto": "Brinco Gota",
+    "Código interno": "",
+    "Código legado do produto": "",
+    Categoria: "Brincos",
+    Subcategoria: "Gotas",
+    Coleção: "Clássicos",
+    "Material bruto": "Latão",
+    "Peso bruto (gramas)": "2,80",
+    "Fornecedor do bruto": "Fundição Exemplo",
+    "Valor da peça no bruto": "4,50",
+    Medidas: "18 mm",
+    Resumo: "Brinco em gota, leve e discreto.",
+    "Descrição completa": "Brinco em formato de gota com acabamento espelhado.",
+    Cuidados: "",
+    Garantia: "",
+    "Título para buscadores": "",
+    "Descrição para buscadores": "",
+    "Preço-base": "89,90",
+    "Publicar preço": "sim",
+    Destaque: "não",
+    "Publicar no site": "não",
+  };
+  const variante = (banho: string, tamanho: string, barcode: string) => ({
+    ...base,
+    "Nome da variante": "",
+    SKU: "",
+    "Código de barras": barcode,
+    "Código legado da variante": "",
+    "Tipo de banho": banho,
+    Cor: "",
+    "Tamanho / aro": tamanho,
+    "Fornecedor do banho": "Banhos Exemplo",
+    "Valor do material do banho": "3,20",
+    Verniz: "Verniz incolor",
+    "Valor do verniz": "0,80",
+    "Valor final da peça banhada": "8,50",
+    "Peso final (gramas)": "3,00",
+    "Preço da variante": "89,90",
+    "Variante padrão": banho === "Ouro" ? "sim" : "não",
+    "Variante ativa": "sim",
+    "Justificativa do custo": "",
+    "Observação do custo": "",
+    Quantidade: "0",
+  });
+  const ws = XLSX.utils.json_to_sheet([
+    variante("Ouro", "", "0007890001234"),
+    variante("Prata", "", "0007890001235"),
+    variante("Ródio Branco", "", "0007890001236"),
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Modelo produto LARDAN");
+  XLSX.writeFile(wb, "modelo-importacao-lardan-produto.xlsx");
+}
+

@@ -734,21 +734,6 @@ export type Database = {
         }
         Relationships: []
       }
-      contraprova_tmp: {
-        Row: {
-          chave: string | null
-          valor: string | null
-        }
-        Insert: {
-          chave?: string | null
-          valor?: string | null
-        }
-        Update: {
-          chave?: string | null
-          valor?: string | null
-        }
-        Relationships: []
-      }
       cost_centers: {
         Row: {
           business_entity_id: string | null
@@ -4766,6 +4751,7 @@ export type Database = {
         Args: { _acao: string; _job: string; _payload: Json }
         Returns: undefined
       }
+      import_barcode: { Args: { _v: string }; Returns: Json }
       import_entry_key: {
         Args: {
           _data: string
@@ -4830,6 +4816,7 @@ export type Database = {
         Returns: Json
       }
       import_job_pause: { Args: { _job: string }; Returns: Json }
+      import_job_preview: { Args: { _job: string }; Returns: Json }
       import_job_process: {
         Args: { _job: string; _limit?: number; _worker?: string }
         Returns: Json
@@ -4841,6 +4828,9 @@ export type Database = {
         Args: { _job: string; _limit?: number }
         Returns: Json
       }
+      import_money: { Args: { _v: string }; Returns: Json }
+      import_plating: { Args: { _v: string }; Returns: string }
+      import_pode_produto: { Args: { _uid: string }; Returns: boolean }
       import_products_stock:
         | { Args: { _location_id: string; _rows: Json }; Returns: Json }
         | {
@@ -4874,6 +4864,7 @@ export type Database = {
         Args: { _de: string; _para: string }
         Returns: boolean
       }
+      import_supplier: { Args: { _v: string }; Returns: string }
       integration_health: {
         Args: never
         Returns: {

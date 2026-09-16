@@ -502,6 +502,31 @@ export function ImportProductsDialog({
               )}
             </div>
 
+            <div className="ledger-panel space-y-2 px-4 py-3 text-sm">
+              <p className="text-ledger-text">
+                Formato reconhecido:{" "}
+                <strong>
+                  {formatoDaPlanilha(mapa) === "novo"
+                    ? "planilha nova (produto e variantes)"
+                    : "planilha antiga"}
+                </strong>
+              </p>
+              {duvidas.length > 0 && (
+                <div className="space-y-1 text-ledger-muted">
+                  <p className="text-ledger-text">
+                    Algumas colunas podem significar mais de uma coisa. Escolha você mesmo antes de
+                    seguir:
+                  </p>
+                  {duvidas.map((d) => (
+                    <p key={`${d.campo}-${d.coluna}`}>
+                      • a coluna “{d.coluna}” pode ser{" "}
+                      {CAMPOS.find((c) => c.key === d.campo)?.label ?? d.campo}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="ledger-panel max-h-72 overflow-auto p-4">
               <p className="mb-3 text-sm font-semibold text-ledger-text">
                 De-para das colunas — confira antes de seguir
@@ -512,7 +537,7 @@ export function ImportProductsDialog({
                     <Rotulo>
                       {c.label}
                       {"obrigatorio" in c && c.obrigatorio ? " *" : ""}
-                      {confianca[c.key] === "parecida" ? " · palpite" : ""}
+                      {confianca[c.key] === "duvida" && !mapa[c.key] ? " · confirme" : ""}
                     </Rotulo>
                     <SmartSelect
                       options={[
@@ -527,6 +552,7 @@ export function ImportProductsDialog({
                 ))}
               </div>
             </div>
+
 
             <div className="flex justify-end gap-3">
               <button type="button" className="admin-btn" onClick={reiniciar} disabled={!!ocupado}>

@@ -158,8 +158,8 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     if (id || !padroes.data) return;
     setForm((f) => ({
       ...f,
-      care_instructions: f.care_instructions || (padroes.data?.care_instructions ?? ""),
-      warranty_text: f.warranty_text || (padroes.data?.warranty_text ?? ""),
+      care_instructions: f["care_instructions"] || (padroes.data?.care_instructions ?? ""),
+      warranty_text: f["warranty_text"] || (padroes.data?.warranty_text ?? ""),
     }));
   }, [id, padroes.data]);
 
@@ -585,7 +585,7 @@ function Selecao({
         onChange={onChange}
         options={[{ value: "", label: "— não informado —" }, ...opcoes]}
         placeholder={label}
-        disabled={disabled}
+        disabled={disabled ?? false}
       />
       {ajuda ? <span className="mt-1 block text-xs text-ledger-muted">{ajuda}</span> : null}
     </div>

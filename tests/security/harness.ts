@@ -120,6 +120,12 @@ export async function criarConta(opts: {
     });
     userId = (r.body as { id?: string }).id ?? null;
     if (!userId) throw new Error(`falha ao criar ${email}: ${JSON.stringify(r.body)}`);
+  } else {
+    // a bateria anterior deixa a conta bloqueada; reabre para esta execução
+    await adm(`/auth/v1/admin/users/${userId}`, {
+      method: "PUT",
+      body: JSON.stringify({ ban_duration: "none", password: TEST_PASSWORD }),
+    });
   }
 
   const ativo = opts.ativo ?? true;

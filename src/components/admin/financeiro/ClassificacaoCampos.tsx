@@ -9,11 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import {
-  classificarTitulo,
-  fetchClassificacoes,
-  type FinDirection,
-} from "@/lib/financeiro";
+import { classificarTitulo, fetchClassificacoes, type FinDirection } from "@/lib/financeiro";
 
 export interface ValoresClassificacao {
   business_entity_id: string;

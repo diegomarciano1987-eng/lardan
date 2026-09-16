@@ -163,35 +163,31 @@ export function ListaTitulos({
         }
         filters={
           <>
-          <SmartSelect
-            options={[
-              { value: "todos", label: "Todas as situações" },
-              { value: "aberto", label: "Em aberto" },
-              { value: "vencido", label: "Vencidas" },
-              { value: "liquidado", label: "Liquidadas" },
-            ]}
-            value={situacao}
-            onChange={setSituacao}
-            className="w-52"
-          />
-          <SmartSelect
-            options={[
-              { value: "todos", label: "Toda a classificação" },
-              { value: "pendentes", label: "Pendentes de classificação" },
-            ]}
-            value={classificacao}
-            onChange={setClassificacao}
-            className="w-64"
-          />
+            <SmartSelect
+              options={[
+                { value: "todos", label: "Todas as situações" },
+                { value: "aberto", label: "Em aberto" },
+                { value: "vencido", label: "Vencidas" },
+                { value: "liquidado", label: "Liquidadas" },
+              ]}
+              value={situacao}
+              onChange={setSituacao}
+              className="w-52"
+            />
+            <SmartSelect
+              options={[
+                { value: "todos", label: "Toda a classificação" },
+                { value: "pendentes", label: "Pendentes de classificação" },
+              ]}
+              value={classificacao}
+              onChange={setClassificacao}
+              className="w-64"
+            />
           </>
         }
         actions={
           podeCriar ? (
-            <button
-              type="button"
-              className="admin-btn-primary"
-              onClick={() => setNovo(true)}
-            >
+            <button type="button" className="admin-btn-primary" onClick={() => setNovo(true)}>
               <Plus aria-hidden className="size-4" />
               {direction === "payable" ? "Nova conta a pagar" : "Nova conta a receber"}
             </button>

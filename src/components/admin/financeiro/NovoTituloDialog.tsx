@@ -113,9 +113,7 @@ export function NovoTituloDialog({
         ...(classificacao.chart_account_id
           ? { chart_account_id: classificacao.chart_account_id }
           : {}),
-        ...(classificacao.cost_center_id
-          ? { cost_center_id: classificacao.cost_center_id }
-          : {}),
+        ...(classificacao.cost_center_id ? { cost_center_id: classificacao.cost_center_id } : {}),
         ...(classificacao.payment_method_id
           ? { payment_method_id: classificacao.payment_method_id }
           : {}),
@@ -217,7 +215,6 @@ export function NovoTituloDialog({
             onChange={setClassificacao}
           />
         </div>
-
 
         <div className="mt-2 rounded-[12px] border border-line-soft bg-cream-2 p-4">
           <div className="flex items-center justify-between">

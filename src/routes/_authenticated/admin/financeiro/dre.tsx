@@ -55,9 +55,11 @@ function Dre() {
   const regime: "competencia" | "caixa" = s.regime === "caixa" ? "caixa" : "competencia";
   const centro = s.centro ?? "";
   const entidade = s.entidade ?? "";
-  const [aberto, setAberto] = React.useState<
-    { chart_id?: string; sem_classificacao?: boolean; rotulo: string } | null
-  >(null);
+  const [aberto, setAberto] = React.useState<{
+    chart_id?: string;
+    sem_classificacao?: boolean;
+    rotulo: string;
+  } | null>(null);
 
   const filtros: FiltrosDre = {
     de: periodo.de,

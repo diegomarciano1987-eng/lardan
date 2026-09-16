@@ -152,9 +152,9 @@ describe("Classificação do título", () => {
       tituloSemClasse = r.body as string;
 
       const d = await rpc(master, "fin_title_detail", { _title: tituloSemClasse });
-      expect(
-        (d.body as { titulo: Record<string, unknown> }).titulo["pendente_classificacao"],
-      ).toBe(true);
+      expect((d.body as { titulo: Record<string, unknown> }).titulo["pendente_classificacao"]).toBe(
+        true,
+      );
     },
     T,
   );

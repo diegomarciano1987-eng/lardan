@@ -4,11 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ErrorState, Panel, Skeleton, StatusBadge } from "@/components/admin/ui";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
-import {
-  alternarFormaPagamento,
-  fetchFinSettings,
-  salvarFormaPagamento,
-} from "@/lib/financeiro";
+import { alternarFormaPagamento, fetchFinSettings, salvarFormaPagamento } from "@/lib/financeiro";
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/configuracoes")({
   component: ConfiguracoesFinanceiras,
@@ -116,11 +112,7 @@ function ConfiguracoesFinanceiras() {
                       className={`${inputCls} w-64`}
                     />
                   </label>
-                  <button
-                    type="submit"
-                    className="admin-btn-primary"
-                    disabled={salvar.isPending}
-                  >
+                  <button type="submit" className="admin-btn-primary" disabled={salvar.isPending}>
                     Adicionar
                   </button>
                 </form>

@@ -151,10 +151,9 @@ function FluxoCaixa() {
           </div>
           <p className="mt-3 text-xs font-medium text-ledger-muted">
             O realizado vem exclusivamente dos movimentos das contas; o previsto, do saldo ainda em
-            aberto das parcelas. O saldo de abertura fica separado das entradas e saídas do
-            período. Transferências entre contas não inflam o consolidado. Ao filtrar por centro de
-            custo ou entidade, movimentos sem classificação suficiente aparecem à parte, e não
-            somem.
+            aberto das parcelas. O saldo de abertura fica separado das entradas e saídas do período.
+            Transferências entre contas não inflam o consolidado. Ao filtrar por centro de custo ou
+            entidade, movimentos sem classificação suficiente aparecem à parte, e não somem.
           </p>
         </Panel>
 
@@ -310,9 +309,7 @@ function FluxoCaixa() {
                       <span className="text-ledger-text">
                         {new Date(`${r.data}T12:00:00`).toLocaleDateString("pt-BR")} ·{" "}
                         {r.descricao ?? r.contraparte ?? r.kind ?? "—"}
-                        {r.conta ? (
-                          <span className="text-ledger-muted"> · {r.conta}</span>
-                        ) : null}
+                        {r.conta ? <span className="text-ledger-muted"> · {r.conta}</span> : null}
                       </span>
                       <span className="tabular-nums font-semibold">
                         {formatBRLFromCents(r.valor_cents)}

@@ -93,9 +93,7 @@ function Importacoes() {
                 <p className="font-display text-base font-bold text-ledger-text">
                   {c.destino.titulo}
                 </p>
-                <p className="mt-1 text-xs font-medium text-ledger-muted">
-                  {c.destino.descricao}
-                </p>
+                <p className="mt-1 text-xs font-medium text-ledger-muted">{c.destino.descricao}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button
                     type="button"

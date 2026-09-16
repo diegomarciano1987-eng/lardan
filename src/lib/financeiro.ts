@@ -251,22 +251,25 @@ export async function buscarContrapartes(
   if (termo) args._search = termo;
   const { data, error } = await supabase.rpc("list_parties", args);
   if (error) throw error;
-  return ((data as { id: string; display_name: string | null; legal_name: string | null; code: string }[]) ?? []).map(
-    (p) => ({
-      id: p.id,
-      nome: p.display_name || p.legal_name || p.code,
-      hint: p.code,
-    }),
-  );
+  return (
+    (data as {
+      id: string;
+      display_name: string | null;
+      legal_name: string | null;
+      code: string;
+    }[]) ?? []
+  ).map((p) => ({
+    id: p.id,
+    nome: p.display_name || p.legal_name || p.code,
+    hint: p.code,
+  }));
 }
 
 /** "1.234,56" → 123456 centavos. Nunca usa ponto flutuante na persistência. */
 export function reaisParaCentavos(texto: string): number | null {
   const limpo = texto.replace(/[^\d,.-]/g, "").trim();
   if (!limpo) return null;
-  const normalizado = limpo.includes(",")
-    ? limpo.replace(/\./g, "").replace(",", ".")
-    : limpo;
+  const normalizado = limpo.includes(",") ? limpo.replace(/\./g, "").replace(",", ".") : limpo;
   const n = Number(normalizado);
   if (!Number.isFinite(n)) return null;
   return Math.round(n * 100);
@@ -391,11 +394,7 @@ export async function fetchFinCashflow(filtros: FiltrosCashflow): Promise<FinCas
 }
 
 export type TipoDetalheFluxo =
-  | "realizado"
-  | "transferencia"
-  | "nao_classificado"
-  | "previsto_entrada"
-  | "previsto_saida";
+  "realizado" | "transferencia" | "nao_classificado" | "previsto_entrada" | "previsto_saida";
 
 export interface FinCashflowDetalhe {
   tipo: TipoDetalheFluxo;

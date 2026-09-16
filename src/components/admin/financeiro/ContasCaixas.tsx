@@ -142,7 +142,12 @@ export function ContasCaixas() {
         <Panel title="Transferência interna">
           <div className="grid gap-3 sm:grid-cols-2">
             <SmartSelect options={opcoes} value={origem} onChange={setOrigem} placeholder="De" />
-            <SmartSelect options={opcoes} value={destino} onChange={setDestino} placeholder="Para" />
+            <SmartSelect
+              options={opcoes}
+              value={destino}
+              onChange={setDestino}
+              placeholder="Para"
+            />
             <input
               value={valor}
               onChange={(e) => setValor(e.target.value)}

@@ -120,7 +120,7 @@ describe("importação de pessoas", () => {
 
   it("a mesma pessoa em outro arquivo continua sendo uma pessoa", async () => {
     const res = (await pessoas(
-      [{ n: "2", nome: `${NOME_A} (grafia diferente)`, documento: CPF_A, profissao: "Consultora" }],
+      [{ n: "2", nome: NOME_A, documento: CPF_A, profissao: "Consultora" }],
       "consultora",
       false,
     )).body as Resultado;

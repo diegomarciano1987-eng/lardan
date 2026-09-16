@@ -119,8 +119,16 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (produtoId) {
-    await admin(`/product_variants?product_id=eq.${produtoId}`, { method: "DELETE" });
-    await admin(`/products?id=eq.${produtoId}`, { method: "DELETE" });
+    // Estoque e importação guardam histórico imutável ligado à variante, então
+    // a massa é arquivada em vez de apagada.
+    await admin(`/product_variants?product_id=eq.${produtoId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ is_active: false }),
+    });
+    await admin(`/products?id=eq.${produtoId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: "arquivado" }),
+    });
   }
   await admin(`/import_files?file_name=like.${TEST_PREFIX}%25`, { method: "DELETE" });
   await limpar();

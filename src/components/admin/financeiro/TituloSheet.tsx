@@ -18,6 +18,7 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { useCapabilities } from "@/lib/capabilities";
+import { ClassificarTituloDialog } from "@/components/admin/financeiro/ClassificacaoCampos";
 import { PedirDadosDialog } from "@/components/admin/financeiro/PedirDadosDialog";
 import {
   cancelarTitulo,
@@ -73,6 +74,7 @@ export function TituloSheet({
   const [estornando, setEstornando] = React.useState<string | null>(null);
   const [cancelando, setCancelando] = React.useState(false);
   const [reconhecendo, setReconhecendo] = React.useState(false);
+  const [classificando, setClassificando] = React.useState(false);
 
   const t = detalhe.data;
 
@@ -188,6 +190,64 @@ export function TituloSheet({
               )}
             </div>
 
+            <section className="rounded-[12px] border border-line-soft bg-cream-2 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="ledger-eyebrow">Classificação</p>
+                {(t.pode_classificar ?? false) && t.titulo.status !== "cancelado" ? (
+                  <button
+                    type="button"
+                    className="admin-btn"
+                    onClick={() => setClassificando(true)}
+                  >
+                    Classificar
+                  </button>
+                ) : null}
+              </div>
+              {t.titulo.pendente_classificacao ? (
+                <p className="mt-2 text-sm font-semibold text-amber-700">
+                  Pendente de classificação
+                </p>
+              ) : null}
+              <dl className="mt-2 grid gap-1 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-xs text-ledger-muted">Conta contábil</dt>
+                  <dd className="text-ledger-text">{t.titulo.plano_label ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-ledger-muted">Centro de custo</dt>
+                  <dd className="text-ledger-text">{t.titulo.centro_label ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-ledger-muted">Entidade</dt>
+                  <dd className="text-ledger-text">{t.titulo.entidade_label ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-ledger-muted">Forma de pagamento</dt>
+                  <dd className="text-ledger-text">{t.titulo.forma_label ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-ledger-muted">Conta ou caixa prevista</dt>
+                  <dd className="text-ledger-text">{t.titulo.conta_label ?? "—"}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <ClassificarTituloDialog
+              open={classificando}
+              onOpenChange={setClassificando}
+              tituloId={t.titulo.id}
+              direction={t.titulo.direction}
+              {...(t.titulo.updated_at ? { atualizadoEm: t.titulo.updated_at } : {})}
+              exigeMotivo={t.baixas.length > 0}
+              iniciais={{
+                business_entity_id: t.titulo.business_entity_id ?? "",
+                chart_account_id: t.titulo.chart_account_id ?? "",
+                cost_center_id: t.titulo.cost_center_id ?? "",
+                payment_method_id: t.titulo.payment_method_id ?? "",
+                financial_account_id: t.titulo.financial_account_id ?? "",
+              }}
+            />
+
             <section>
               <p className="ledger-eyebrow">Parcelas</p>
               <ul className="mt-2 divide-y divide-line-soft border-y border-line-soft">
@@ -208,7 +268,9 @@ export function TituloSheet({
             {podeBaixar && t.titulo.status !== "cancelado" && (
               <section className="rounded-[12px] border border-line-soft bg-cream-2 p-4">
                 <p className="ledger-eyebrow">
-                  {t.titulo.direction === "payable" ? "Registrar pagamento" : "Registrar recebimento"}
+                  {t.titulo.direction === "payable"
+                    ? "Registrar pagamento"
+                    : "Registrar recebimento"}
                 </p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <SmartSelect
@@ -344,7 +406,9 @@ export function TituloSheet({
           open={!!estornando}
           titulo="Estornar baixa"
           descricao="O estorno gera lançamento compensatório e fica registrado no histórico."
-          campos={[{ nome: "motivo", rotulo: "Motivo do estorno", tipo: "area", obrigatorio: true }]}
+          campos={[
+            { nome: "motivo", rotulo: "Motivo do estorno", tipo: "area", obrigatorio: true },
+          ]}
           confirmar="Estornar"
           onOpenChange={(v) => !v && setEstornando(null)}
           onConfirmar={(vals) =>
@@ -359,7 +423,9 @@ export function TituloSheet({
           open={cancelando}
           titulo="Cancelar título"
           descricao="O título deixa de ser cobrado, mas o histórico permanece."
-          campos={[{ nome: "motivo", rotulo: "Motivo do cancelamento", tipo: "area", obrigatorio: true }]}
+          campos={[
+            { nome: "motivo", rotulo: "Motivo do cancelamento", tipo: "area", obrigatorio: true },
+          ]}
           confirmar="Cancelar título"
           onOpenChange={setCancelando}
           onConfirmar={(vals) => cancelar.mutate(vals["motivo"] ?? "")}
@@ -370,7 +436,12 @@ export function TituloSheet({
           titulo="Registrar reconhecimento"
           descricao="Informe quanto a contraparte reconhece e quanto contesta."
           campos={[
-            { nome: "reconhecido", rotulo: "Valor reconhecido (R$)", tipo: "valor", obrigatorio: true },
+            {
+              nome: "reconhecido",
+              rotulo: "Valor reconhecido (R$)",
+              tipo: "valor",
+              obrigatorio: true,
+            },
             { nome: "contestado", rotulo: "Valor contestado (R$)", tipo: "valor", padrao: "0" },
             { nome: "motivo", rotulo: "Motivo", tipo: "area" },
           ]}

@@ -130,7 +130,11 @@ function CentrosCusto() {
                     <td className="py-3 text-right">
                       {pode ? (
                         <div className="flex justify-end gap-2">
-                          <button type="button" className="admin-btn" onClick={() => setEditando(r)}>
+                          <button
+                            type="button"
+                            className="admin-btn"
+                            onClick={() => setEditando(r)}
+                          >
                             Editar
                           </button>
                           <button
@@ -162,7 +166,9 @@ function CentrosCusto() {
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editando ? "Editar centro de custo" : "Novo centro de custo"}</DialogTitle>
+            <DialogTitle>
+              {editando ? "Editar centro de custo" : "Novo centro de custo"}
+            </DialogTitle>
           </DialogHeader>
           <Formulario
             inicial={editando}

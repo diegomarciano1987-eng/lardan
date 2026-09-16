@@ -65,8 +65,16 @@ afterAll(async () => {
     await admin(`/financial_installments?title_id=eq.${t.id}`, { method: "DELETE" });
     await admin(`/financial_titles?id=eq.${t.id}`, { method: "DELETE" });
   }
-  // O razão é imutável: a massa sintética sai pela rotina técnica de homologação.
-  await admin(`/rpc/fin_homolog_purge`, { method: "POST", body: "{}" });
+  // O razão é imutável: as contas desta execução são isoladas pelos IDs que
+  // este próprio teste criou — nada é escolhido por nome nem apagado do razão.
+  const idsDaExecucao = [contaPositiva, contaNegativa, contaZero].filter(Boolean);
+  if (idsDaExecucao.length > 0) {
+    const iso = await admin(`/rpc/fin_test_isolate_accounts`, {
+      method: "POST",
+      body: JSON.stringify({ _ids: idsDaExecucao, _marca: marca }),
+    });
+    if (!iso.ok) throw new Error(`Isolamento da massa falhou: ${await iso.text()}`);
+  }
   await admin(`/chart_of_accounts?codigo=like.HOMOLOG-FIN*`, { method: "DELETE" });
   await admin(`/cost_centers?codigo=like.HOMOLOG-FIN*`, { method: "DELETE" });
   if (planoFilho) await admin(`/chart_of_accounts?id=eq.${planoFilho}`, { method: "DELETE" });

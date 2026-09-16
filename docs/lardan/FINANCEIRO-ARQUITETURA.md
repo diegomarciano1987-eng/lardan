@@ -143,3 +143,58 @@ Regras endurecidas no banco:
 - fluxo de caixa apurado no servidor: realizado pelo razão, previsto pelas parcelas.
 
 Testes versionados: `tests/financeiro/departamento.test.ts` (`bun run test:financeiro`).
+
+## Departamento operacional — rodada de organização
+
+### Homologação segura
+- A rotina antiga `fin_homolog_purge()` foi **removida**: ela selecionava contas por
+  nome, desligava a imutabilidade do razão e apagava lançamentos. Nada de migração
+  antiga foi editado; a correção é aditiva.
+- Em seu lugar existe `fin_test_isolate_accounts(_ids uuid[], _marca text)`:
+  - executável **somente** pelo serviço interno (`service_role`);
+  - aceita apenas IDs criados pela própria execução, com nome iniciado pela marca
+    `HOMOLOG...` e criados há menos de 24h;
+  - **não apaga nada**: apenas desativa a conta, marca `is_homologacao = true` e
+    grava auditoria. Razão, baixas e histórico permanecem intactos.
+- `fin_accounts_overview()` oculta contas isoladas.
+
+### Classificação de títulos
+- `fin_classificacoes` entrega, com busca no servidor, as opções ativas de plano de
+  contas, centros de custo, entidades, formas de pagamento e contas.
+- `fin_validar_classificacao` recusa natureza incompatível com a direção do título e
+  contas contábeis inativas ou que não aceitam lançamento.
+- Classificar é opcional na criação; o título fica `pendente_classificacao`.
+- `fin_title_classify` reclassifica com controle de concorrência (`esperado_updated_at`),
+  motivo obrigatório quando já houve baixa, evento no histórico e registro em `audit_logs`.
+
+### Fluxo de caixa
+- Saldo de abertura é apresentado separado; nunca entra como entrada do período.
+- Realizado vem dos movimentos do razão; previsto vem das parcelas em aberto.
+- Transferências entre contas não inflam o consolidado.
+- Ao filtrar por centro/entidade, movimentos sem classificação suficiente aparecem à
+  parte, em vez de sumirem. `fin_cashflow_detail` abre qualquer valor.
+
+### DRE gerencial
+- `fin_dre` / `fin_dre_detalhe` em regime de competência ou caixa, por plano de contas,
+  com filtros de centro e entidade, bloco de pendências de classificação e origem de
+  cada linha. Sem tabela temporária (compatível com leitura).
+
+### Navegação
+- `FinanceiroShell` tem navegação contextual pelas 13 áreas, filtrada por capacidade,
+  preservando as URLs e o período global.
+
+### Provas desta rodada
+- `bun run test:financeiro`: **18 testes, 18 aprovados** (departamento + classificação,
+  fluxo em centavos e DRE), com massa criada e isolada pela própria execução.
+- Typecheck: limpo. Lint: arquivos desta rodada sem erros (a base do repositório tem
+  pendências de formatação anteriores, não tocadas aqui).
+- Catálogo e estoque conferidos pelo teste de preservação.
+
+### Pendências honestas (não declarar concluído)
+- **Importação AP/AR**: a tela e os modelos existem, mas o processamento em lote no
+  servidor, com arquivo privado, hash de origem e promoção canônica, ainda precisa ser
+  implementado e provado. Hoje é apenas entrada assistida.
+- Nenhuma conta bancária real ou fictícia foi criada; o Financeiro conectado segue vazio.
+- Avisos do linter de segurança (176) são o padrão preexistente do projeto:
+  funções SECURITY DEFINER expostas, 6 tabelas com RLS sem política e uma extensão no
+  schema público. Continuam registrados para tratamento próprio.

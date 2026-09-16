@@ -99,17 +99,10 @@ export function PedirDadosDialog({
             </label>
           ))}
           <DialogFooter>
-            <button
-              type="button"
-              className="admin-btn"
-              onClick={() => onOpenChange(false)}
-            >
+            <button type="button" className="admin-btn" onClick={() => onOpenChange(false)}>
               Voltar
             </button>
-            <button
-              type="submit"
-              className={"admin-btn-primary"}
-            >
+            <button type="submit" className={"admin-btn-primary"}>
               {confirmar}
             </button>
           </DialogFooter>

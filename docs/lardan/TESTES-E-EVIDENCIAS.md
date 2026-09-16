@@ -347,3 +347,26 @@ desconto, perda, cancelamento ou recebimento. Saldo do razão R$ 16.783,00 e par
 situação "parcial". Preservação conferida antes e depois: 20 produtos publicados,
 40 fotos, 4 categorias, 240 unidades no Depósito Principal, 56 movimentos de estoque,
 30 reservas e a auditoria integral.
+
+## Financeiro — organização como departamento (rodada atual)
+
+Comando: `bun run test:financeiro` — **18/18 aprovados**.
+
+- `tests/financeiro/departamento.test.ts` (10): saldo inicial sem contagem dupla,
+  imutabilidade do marco, hierarquia e códigos do plano de contas, máquina de estados
+  dos títulos, título cancelado que não ressuscita, permissões e catálogo preservado.
+- `tests/financeiro/classificacao-fluxo-dre.test.ts` (8):
+  - título gravado com plano e centro e recarregado igual;
+  - título sem classificação marcado como pendente;
+  - recusa de natureza incompatível e de conta contábil inativa;
+  - classificação posterior com histórico e bloqueio de alteração concorrente;
+  - fluxo de caixa em centavos: abertura separada, realizado e saldo final exatos,
+    detalhamento que fecha com o total;
+  - filtro por centro mantém à parte o que não tem classificação suficiente;
+  - DRE em competência (soma por natureza, resultado coerente) e em caixa
+    (apenas o efetivamente movimentado).
+
+Limpeza: nenhuma rotina apaga o razão. Cada suíte isola, pelos IDs que ela mesma criou,
+as contas marcadas com o prefixo de homologação.
+
+Typecheck limpo. Lint sem erros nos arquivos desta rodada.

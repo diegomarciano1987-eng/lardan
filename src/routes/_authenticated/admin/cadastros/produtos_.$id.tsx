@@ -299,31 +299,12 @@ function ProdutoDetalhe() {
         <ArrowLeft aria-hidden className="size-4" /> Voltar aos produtos
       </Link>
 
-      <PageHeader
-        eyebrow="Produto"
-        title={p.name}
-        description={`Endereço no site: /${p.slug}`}
-        actions={
-          <div className="flex flex-wrap items-center gap-3">
-            <StatusBadge tone={tone(p.status)}>{p.status}</StatusBadge>
-            {p.status === "publicado" ? (
-              <Link to="/produto/$slug" params={{ slug: p.slug }} target="_blank" className="admin-btn">
-                <ExternalLink aria-hidden className="size-4" /> Ver no site
-              </Link>
-            ) : null}
-            <SmartSelect
-              value={p.status}
-              onChange={(v) => mudarStatus.mutate(v)}
-              options={STATUS_OPTIONS}
-              placeholder="Situação"
-              className="w-48"
-            />
-            <button type="button" className="admin-btn border-champagne" onClick={() => setEditarFicha(true)}>
-              Editar ficha
-            </button>
-          </div>
-        }
-      />
+      <ProdutoFicha
+        id={id}
+        contagemVariantes={variantes.data?.length ?? 0}
+        temImagem={(imagens.data?.length ?? 0) > 0}
+      >
+
 
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
@@ -483,54 +464,8 @@ function ProdutoDetalhe() {
           </Panel>
         </div>
       </div>
+      </ProdutoFicha>
 
-      <RecordSheet
-        open={editarFicha}
-        onOpenChange={setEditarFicha}
-        title="Editar ficha do produto"
-        description="Toda alteração fica registrada na auditoria."
-        initial={fichaInicial}
-        fields={[
-          { name: "name", label: "Nome", type: "text", required: true, full: true },
-          { name: "slug", label: "Endereço (slug)", type: "text" },
-          { name: "legacy_code", label: "Código legado", type: "text" },
-          {
-            name: "category_id",
-            label: "Categoria",
-            type: "select",
-            options: (categorias.data ?? []).map((c) => ({ value: c.id, label: c.name })),
-          },
-          {
-            name: "collection_id",
-            label: "Coleção",
-            type: "select",
-            options: (colecoes.data ?? []).map((c) => ({ value: c.id, label: c.name })),
-          },
-          {
-            name: "supplier_id",
-            label: "Fornecedor",
-            type: "select",
-            options: (fornecedores.data ?? []).map((f) => ({ value: f.id, label: f.name })),
-          },
-          { name: "status", label: "Situação", type: "select", options: STATUS_OPTIONS, required: true },
-          { name: "preco", label: "Preço (R$)", type: "text", placeholder: "0,00" },
-          { name: "price_is_public", label: "Mostrar preço no site", type: "switch" },
-          { name: "is_featured", label: "Destaque na vitrine", type: "switch" },
-          { name: "material", label: "Material", type: "text" },
-          { name: "plating", label: "Banho", type: "text" },
-          { name: "measurements", label: "Medidas", type: "text" },
-          { name: "weight_grams", label: "Peso (g)", type: "number" },
-          { name: "short_description", label: "Resumo", type: "textarea", full: true },
-          { name: "description", label: "Descrição completa", type: "textarea", full: true },
-          { name: "care_instructions", label: "Cuidados", type: "textarea" },
-          { name: "warranty_text", label: "Garantia", type: "textarea" },
-          { name: "seo_title", label: "Título para buscadores", type: "text", full: true },
-          { name: "seo_description", label: "Descrição para buscadores", type: "textarea", full: true },
-        ]}
-        onSubmit={async (v) => {
-          await salvarFicha.mutateAsync(v);
-        }}
-      />
 
       <RecordSheet
         open={varianteAberta}

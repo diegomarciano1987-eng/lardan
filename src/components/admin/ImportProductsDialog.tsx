@@ -249,8 +249,10 @@ export function ImportProductsDialog({
 
       setResumo(await lerLote(aberta.id));
       setIndicadores(await indicadoresLote(aberta.id));
+      setPrevia(await previaLote(aberta.id).catch(() => null));
       setProblemas(await listarProblemas(aberta.id));
       setEtapa("conferencia");
+
     } catch (e) {
       toast.error((e as Error).message);
     } finally {

@@ -108,9 +108,10 @@ function Indicador({ rotulo, valor, nota }: { rotulo: string; valor: string; not
 }
 
 function ResumoFinanceiro() {
+  const { de, ate } = usePeriodoFinanceiro();
   const q = useQuery({
-    queryKey: ["fin-overview", "shell"],
-    queryFn: () => fetchFinOverviewPeriodo(),
+    queryKey: ["fin-overview", "shell", de, ate],
+    queryFn: () => fetchFinOverviewPeriodo(de, ate),
     staleTime: 60_000,
   });
   const d = q.data;

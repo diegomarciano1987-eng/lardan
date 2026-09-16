@@ -102,7 +102,15 @@ export function formatoDaPlanilha(mapa: Partial<Record<CampoKey, string>>): "nov
 }
 
 const APELIDOS: Record<CampoKey, string[]> = {
-  nome: ["nome", "produto", "nome produto", "nome do produto", "descricao do produto", "peca", "titulo"],
+  nome: [
+    "nome",
+    "produto",
+    "nome produto",
+    "nome do produto",
+    "descricao do produto",
+    "peca",
+    "titulo",
+  ],
   codigo_interno: ["codigo interno", "codigo lardan", "cod interno"],
   codigo_legado_produto: ["codigo legado do produto", "codigo legado produto", "legado produto"],
   categoria: ["categoria", "grupo"],
@@ -159,7 +167,6 @@ const APELIDOS: Record<CampoKey, string[]> = {
   imagem_url: ["imagem", "imagem url", "foto", "url da imagem", "link da imagem"],
 };
 
-
 export function normalizarCabecalho(h: string) {
   return h
     .normalize("NFD")
@@ -214,7 +221,6 @@ export function duvidasDeMapeamento(cabecalhos: string[]): SugestaoCampo[] {
   return sugerirMapeamentoDetalhado(cabecalhos).filter((s) => s.confianca === "duvida");
 }
 
-
 export function sugerirMapeamento(cabecalhos: string[]): Partial<Record<CampoKey, string>> {
   const mapa: Partial<Record<CampoKey, string>> = {};
   for (const s of sugerirMapeamentoDetalhado(cabecalhos)) {
@@ -222,7 +228,6 @@ export function sugerirMapeamento(cabecalhos: string[]): Partial<Record<CampoKey
   }
   return mapa;
 }
-
 
 /** Colunas apontadas por mais de um campo — ambiguidade nunca é silenciosa. */
 export function colunasAmbiguas(mapa: Partial<Record<CampoKey, string>>): string[] {
@@ -482,7 +487,6 @@ export async function previaLote(jobId: string) {
   return chamar<Previa>("import_job_preview", { _job: jobId });
 }
 
-
 export async function lerLote(jobId: string): Promise<JobResumo> {
   const { data, error } = await supabase
     .from("import_jobs")
@@ -665,4 +669,3 @@ export async function baixarModeloNovo() {
   XLSX.utils.book_append_sheet(wb, ws, "Modelo produto LARDAN");
   XLSX.writeFile(wb, "modelo-importacao-lardan-produto.xlsx");
 }
-

@@ -317,6 +317,8 @@ function RedePage() {
                   else setUf(chave);
                 }}
                 pontos={pontos.data ?? []}
+                candidaturas={mostrarCandidaturas ? (candidaturas.data?.pontos ?? []) : []}
+                candidaturasPorChave={candidaturasPorChave}
                 camada={camada}
                 totalRede={ind?.total ?? 0}
               />

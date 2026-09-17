@@ -54,10 +54,10 @@ function ALardanPage() {
       {/* Abertura institucional: sem título de marca, com a fundação em destaque. */}
       <section className="mx-auto max-w-4xl px-6 pb-12 pt-36 text-center md:pt-44">
         <p className="brand-eyebrow mb-8">A marca</p>
-        <h1 className="font-display text-[2.1rem] leading-[1.1] tracking-tight text-foreground sm:text-5xl md:text-6xl">
+        <h1 className="font-display whitespace-nowrap text-[clamp(1.05rem,2.4vw,1.875rem)] leading-[1.1] tracking-tight text-foreground">
           {EMPRESA.fundacao}
         </h1>
-        <div className="rose-rule mx-auto mt-9 w-20" />
+        <div className="rose-rule mx-auto mt-6 w-16" />
       </section>
 
 

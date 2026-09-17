@@ -30,6 +30,10 @@ interface Props {
   selecionado?: string | null;
   onSelecionar: (chave: string) => void;
   pontos?: PontoRede[];
+  /** Candidaturas do site, posicionadas pelo endereço informado no formulário. */
+  candidaturas?: PontoCandidatura[];
+  /** Quantidade de candidaturas por território, para leitura ao passar o mouse. */
+  candidaturasPorChave?: Map<string, number>;
   camada: "quantidade" | "ativas" | "concentracao";
   totalRede: number;
 }

@@ -4719,33 +4719,21 @@ export type Database = {
         Returns: undefined
       }
       fin_title_submit: { Args: { _title: string }; Returns: undefined }
-      fin_titles_list:
-        | {
-            Args: {
-              _direction: string
-              _limit?: number
-              _offset?: number
-              _search?: string
-              _situacao?: string
-              _status?: string
-            }
-            Returns: Json
-          }
-        | {
-            Args: {
-              _cc?: string
-              _chart?: string
-              _direction: string
-              _entidade?: string
-              _limit?: number
-              _offset?: number
-              _search?: string
-              _sem_classificacao?: boolean
-              _situacao?: string
-              _status?: string
-            }
-            Returns: Json
-          }
+      fin_titles_list: {
+        Args: {
+          _cc?: string
+          _chart?: string
+          _direction: string
+          _entidade?: string
+          _limit?: number
+          _offset?: number
+          _search?: string
+          _sem_classificacao?: boolean
+          _situacao?: string
+          _status?: string
+        }
+        Returns: Json
+      }
       fin_titles_pending: {
         Args: { _limit?: number; _offset?: number }
         Returns: Json

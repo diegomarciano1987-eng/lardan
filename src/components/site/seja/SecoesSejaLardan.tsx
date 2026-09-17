@@ -2,7 +2,10 @@ import { Link } from "@tanstack/react-router";
 import heroImg from "@/assets/lardan-consultora-hero.jpg";
 import vidaRealImg from "@/assets/lardan-consultora-vida-real.jpg";
 import ferramentasImg from "@/assets/lardan-consultora-ferramentas.jpg";
+import cinematicVideo from "@/assets/lardan-seja-cinematico.mp4.asset.json";
+import cinematicPoster from "@/assets/lardan-seja-cinematico-poster.webp.asset.json";
 import { ATRIBUTOS, FAQ, FERRAMENTAS, PROCESSO, TREINAMENTOS } from "@/lib/seja-lardan-conteudo";
+import { CinematicTitle } from "./CinematicTitle";
 
 /* ---------------------------------- Hero --------------------------------- */
 
@@ -14,12 +17,13 @@ export function SejaHero() {
     >
       <div>
         <p className="brand-eyebrow mb-4">Seja Lardan</p>
-        <h1
+        <CinematicTitle
+          as="h1"
           id="seja-lardan-titulo"
           className="text-4xl leading-[1.05] text-foreground md:text-6xl"
         >
           Seu próximo capítulo pode começar com você.
-        </h1>
+        </CinematicTitle>
         <div className="rose-rule mt-8 w-20" />
         <p className="mt-8 max-w-lg text-base leading-relaxed text-muted-foreground">
           Seja Consultora Lardan e tenha produto, tecnologia, treinamento e ferramentas para
@@ -64,14 +68,28 @@ export function SejaEmocional() {
   return (
     <section
       aria-labelledby="nao-e-so-vender"
-      className="border-t border-border bg-secondary/40"
+      className="seja-cinematic-band relative isolate overflow-hidden border-t border-border"
     >
-      <div className="mx-auto max-w-3xl px-6 py-24 md:py-32">
-        <h2 id="nao-e-so-vender" className="text-3xl leading-tight text-foreground md:text-5xl">
+      <video
+        aria-hidden="true"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        poster={cinematicPoster.url}
+        className="absolute inset-0 -z-30 h-full w-full object-cover"
+      >
+        <source src={cinematicVideo.url} type="video/mp4" />
+      </video>
+      <div aria-hidden="true" className="seja-cinematic-band__veil absolute inset-0 -z-20" />
+      <div aria-hidden="true" className="seja-cinematic-band__light absolute inset-0 -z-10" />
+      <div className="mx-auto max-w-3xl px-6 py-24 md:py-36">
+        <CinematicTitle id="nao-e-so-vender" className="text-3xl leading-tight text-ivory md:text-5xl">
           Não é apenas sobre vender semijoias.
-        </h2>
+        </CinematicTitle>
         <div className="rose-rule mt-8 w-20" />
-        <div className="mt-8 space-y-5 text-base leading-relaxed text-muted-foreground">
+        <div className="mt-8 space-y-5 text-base leading-relaxed text-ivory/72">
           <p>
             É sobre ter liberdade para criar novas possibilidades com aquilo que você sabe fazer de
             melhor: se conectar com pessoas.
@@ -81,7 +99,7 @@ export function SejaEmocional() {
             depois. Pode ser para contribuir ainda mais com a sua família. Ou pode ser o começo de
             um negócio que você ainda nem imaginou construir.
           </p>
-          <p className="text-foreground">
+          <p className="text-ivory">
             A sua motivação é sua. A estrutura para começar pode ser Lardan.
           </p>
         </div>
@@ -96,9 +114,9 @@ export function SejaDefinicao() {
   return (
     <section aria-labelledby="o-que-e-consultora" className="border-t border-border">
       <div className="mx-auto max-w-3xl px-6 py-20">
-        <h2 id="o-que-e-consultora" className="text-2xl text-foreground md:text-4xl">
+        <CinematicTitle id="o-que-e-consultora" className="text-2xl text-foreground md:text-4xl">
           O que é uma Consultora Lardan?
-        </h2>
+        </CinematicTitle>
         <p className="mt-6 text-base leading-relaxed text-foreground">
           Uma Consultora Lardan comercializa semijoias da marca e utiliza a estrutura comercial e
           tecnológica disponibilizada pela Lardan para organizar produtos, clientes, vendas e seu
@@ -135,12 +153,12 @@ export function SejaFerramentas() {
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
         <div className="max-w-2xl">
           <p className="brand-eyebrow mb-4">Estrutura Lardan</p>
-          <h2
+          <CinematicTitle
             id="estrutura-para-vender"
             className="text-3xl leading-tight text-foreground md:text-5xl"
           >
             Você não recebe apenas produtos. Recebe uma estrutura para vender.
-          </h2>
+          </CinematicTitle>
           <p className="mt-6 text-base leading-relaxed text-muted-foreground">
             Tecnologia por trás. Simplicidade na sua mão. Abaixo, o que o ecossistema Lardan
             está preparado para colocar na mão da consultora.
@@ -162,7 +180,7 @@ export function SejaFerramentas() {
             {FERRAMENTAS.map((f) => (
               <li key={f.chave} className="border-b border-border pb-10 last:border-b-0">
                 <p className="brand-eyebrow mb-3">{f.eyebrow}</p>
-                <h3 className="text-xl leading-snug text-foreground md:text-2xl">{f.titulo}</h3>
+                <CinematicTitle as="h3" className="text-xl leading-snug text-foreground md:text-2xl">{f.titulo}</CinematicTitle>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.texto}</p>
                 <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs tracking-wide text-muted-foreground">
                   {f.itens.map((item) => (
@@ -190,9 +208,9 @@ export function SejaAcademy() {
     <section aria-labelledby="lardan-academy" className="border-t border-border bg-secondary/40">
       <div className="mx-auto max-w-4xl px-6 py-24 text-center md:py-32">
         <p className="brand-eyebrow mb-4">Lardan Academy</p>
-        <h2 id="lardan-academy" className="text-3xl leading-tight text-foreground md:text-5xl">
+        <CinematicTitle id="lardan-academy" className="text-3xl leading-tight text-foreground md:text-5xl">
           Quem cresce precisa continuar aprendendo.
-        </h2>
+        </CinematicTitle>
         <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
           Produto é apenas uma parte da venda. Atendimento, relacionamento, imagem, organização e
           conhecimento também fazem diferença.
@@ -217,9 +235,9 @@ export function SejaProduto() {
     <section aria-labelledby="produto-que-vende" className="border-t border-border">
       <div className="mx-auto max-w-4xl px-6 py-24 text-center md:py-32">
         <p className="brand-eyebrow mb-4">Produto Lardan</p>
-        <h2 id="produto-que-vende" className="text-3xl leading-tight text-foreground md:text-5xl">
+        <CinematicTitle id="produto-que-vende" className="text-3xl leading-tight text-foreground md:text-5xl">
           Tecnologia ajuda. Mas tudo começa com um produto que dá orgulho de apresentar.
-        </h2>
+        </CinematicTitle>
         <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
           Design autoral, acabamento cuidadoso, variedade de peças e coleções pensadas para
           acompanhar momentos reais — com <strong className="text-foreground">2 anos de
@@ -257,9 +275,9 @@ export function SejaVidaReal() {
           className="w-full rounded-sm object-cover"
         />
         <div>
-          <h2 id="vida-real" className="text-3xl leading-tight text-foreground md:text-5xl">
+          <CinematicTitle id="vida-real" className="text-3xl leading-tight text-foreground md:text-5xl">
             Seu negócio precisa caber na sua vida — e não o contrário.
-          </h2>
+          </CinematicTitle>
           <div className="rose-rule mt-8 w-20" />
           <div className="mt-8 space-y-5 text-base leading-relaxed text-muted-foreground">
             <p>Cada consultora tem uma história, uma rotina e um motivo para começar.</p>
@@ -283,12 +301,12 @@ export function SejaPerfil() {
       className="border-t border-border bg-foreground text-background"
     >
       <div className="mx-auto max-w-4xl px-6 py-24 text-center md:py-32">
-        <h2
+        <CinematicTitle
           id="nao-e-para-qualquer-um"
           className="text-3xl leading-tight md:text-5xl"
         >
           Ser Lardan não é para qualquer pessoa.
-        </h2>
+        </CinematicTitle>
         <p className="mt-4 text-lg opacity-80">É para quem quer construir.</p>
         <div className="mx-auto mt-8 max-w-xl space-y-4 text-base leading-relaxed opacity-75">
           <p>
@@ -321,9 +339,9 @@ export function SejaProcesso() {
   return (
     <section aria-labelledby="como-funciona" className="border-t border-border">
       <div className="mx-auto max-w-5xl px-6 py-24 md:py-32">
-        <h2 id="como-funciona" className="max-w-2xl text-3xl leading-tight text-foreground md:text-5xl">
+        <CinematicTitle id="como-funciona" className="max-w-2xl text-3xl leading-tight text-foreground md:text-5xl">
           Como funciona para se tornar Consultora Lardan?
-        </h2>
+        </CinematicTitle>
         <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
           Queremos construir uma rede forte. Por isso, cada candidatura passa por uma análise —
           feita por pessoas, sem decisão automática.
@@ -332,7 +350,7 @@ export function SejaProcesso() {
           {PROCESSO.map((p, i) => (
             <li key={p.passo} className="border-t border-border pt-5">
               <span className="brand-eyebrow">{String(i + 1).padStart(2, "0")}</span>
-              <h3 className="mt-2 text-lg text-foreground">{p.passo}</h3>
+              <CinematicTitle as="h3" className="mt-2 text-lg text-foreground">{p.passo}</CinematicTitle>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{p.texto}</p>
             </li>
           ))}
@@ -349,9 +367,9 @@ export function SejaFaq() {
     <section aria-labelledby="faq" className="border-t border-border bg-secondary/40">
       <div className="mx-auto max-w-3xl px-6 py-24 md:py-32">
         <p className="brand-eyebrow mb-4">Perguntas frequentes</p>
-        <h2 id="faq" className="text-3xl leading-tight text-foreground md:text-5xl">
+        <CinematicTitle id="faq" className="text-3xl leading-tight text-foreground md:text-5xl">
           Dúvidas sobre ser Consultora Lardan
-        </h2>
+        </CinematicTitle>
         <dl className="mt-12 divide-y divide-border border-t border-border">
           {FAQ.map((item) => (
             <div key={item.pergunta} className="py-6">

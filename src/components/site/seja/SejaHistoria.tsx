@@ -1,7 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { HISTORIA_RESUMO } from "@/lib/institucional";
 import { RetratoOficial } from "@/components/site/RetratoOficial";
-import { larissaPortraitSeja } from "@/components/site/retratos";
+import origemFamilia from "@/assets/lardan-origem-familia.webp.asset.json";
+import { CinematicTitle } from "./CinematicTitle";
+
+const retratoFamiliaOrigem = {
+  src: origemFamilia.url,
+  alt: "Daniel e Larissa com a filha, família fundadora da Lardan",
+  width: 762,
+  height: 820,
+};
 
 /**
  * /seja-lardan — resumo emocional da origem da Lardan.
@@ -19,15 +27,15 @@ export function SejaHistoria() {
     >
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-32">
         <RetratoOficial
-          retrato={larissaPortraitSeja}
-          rotulo="Foto oficial de Larissa"
+          retrato={retratoFamiliaOrigem}
+          rotulo="Foto oficial da família fundadora da Lardan"
         />
 
         <div className="max-w-prose">
           <p className="brand-eyebrow mb-4">Nossa origem</p>
-          <h2 id="seja-historia-titulo" className="text-3xl leading-tight text-foreground md:text-5xl">
+          <CinematicTitle id="seja-historia-titulo" className="text-3xl leading-tight text-foreground md:text-5xl">
             {HISTORIA_RESUMO.titulo}
-          </h2>
+          </CinematicTitle>
           <div className="rose-rule mt-8 w-20" />
           <div className="mt-8 space-y-5 text-base leading-relaxed text-muted-foreground">
             {HISTORIA_RESUMO.paragrafos.map((p) => (

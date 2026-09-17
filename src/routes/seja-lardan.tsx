@@ -14,6 +14,7 @@ import {
   SejaVidaReal,
 } from "@/components/site/seja/SecoesSejaLardan";
 import { SejaHistoria } from "@/components/site/seja/SejaHistoria";
+import { CinematicTitle } from "@/components/site/seja/CinematicTitle";
 import { FAQ } from "@/lib/seja-lardan-conteudo";
 import {
   breadcrumbLd,
@@ -67,9 +68,9 @@ function SejaLardanPage() {
       >
         <div className="mx-auto max-w-3xl px-6 pt-24 text-center md:pt-32">
           <p className="brand-eyebrow mb-4">Candidatura</p>
-          <h2 id="candidatura-titulo" className="text-3xl leading-tight text-foreground md:text-5xl">
+          <CinematicTitle id="candidatura-titulo" className="text-3xl leading-tight text-foreground md:text-5xl">
             Conte um pouco sobre você
-          </h2>
+          </CinematicTitle>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
             A candidatura é registrada com um número de protocolo e analisada pela equipe Lardan.
             Não há promessa de aprovação, prazo ou renda.

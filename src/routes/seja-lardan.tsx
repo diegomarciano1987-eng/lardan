@@ -1,39 +1,84 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { PageHero } from "@/components/site/PageHero";
 import { SejaLardanForm } from "@/components/site/SejaLardanForm";
-import { ogImageMeta } from "@/lib/seo";
+import {
+  SejaAcademy,
+  SejaDefinicao,
+  SejaEmocional,
+  SejaFaq,
+  SejaFerramentas,
+  SejaHero,
+  SejaPerfil,
+  SejaProcesso,
+  SejaProduto,
+  SejaVidaReal,
+} from "@/components/site/seja/SecoesSejaLardan";
+import { FAQ } from "@/lib/seja-lardan-conteudo";
+import {
+  breadcrumbLd,
+  canonical,
+  faqLd,
+  jsonLdScript,
+  pageMeta,
+  webPageLd,
+} from "@/lib/seo";
 
+const TITLE = "Seja Consultora Lardan | Venda Semijoias com Tecnologia e Suporte";
+const DESCRIPTION =
+  "Conheça a oportunidade de ser Consultora Lardan e conte com semijoias, CRM, ferramentas de vendas, organização financeira, treinamento e suporte para desenvolver seu negócio.";
 
 export const Route = createFileRoute("/seja-lardan")({
   component: SejaLardanPage,
   head: () => ({
-    meta: [
-      { title: "Seja Lardan — candidate-se" },
-      { name: "description", content: "Candidate-se para ser consultora Lardan. Proposta de parceria sem promessa de renda garantida; cada candidatura passa por análise." },
-      { property: "og:title", content: "Seja Lardan — candidate-se" },
-      { property: "og:description", content: "Candidate-se para ser consultora Lardan." },
-      { property: "og:url", content: "/seja-lardan" },
-      ...ogImageMeta(),
+    meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/seja-lardan" }),
+    links: canonical("/seja-lardan"),
+    scripts: [
+      jsonLdScript([
+        webPageLd({ path: "/seja-lardan", name: TITLE, description: DESCRIPTION }),
+        breadcrumbLd([
+          { name: "Início", path: "/" },
+          { name: "Seja Lardan", path: "/seja-lardan" },
+        ]),
+        faqLd(FAQ),
+      ]),
     ],
-    links: [{ rel: "canonical", href: "/seja-lardan" }],
   }),
 });
 
 function SejaLardanPage() {
   return (
     <SiteLayout>
-      <PageHero eyebrow="Seja Lardan" title="Uma parceria com a marca">
-        <p>
-          A Lardan está estruturando sua rede de consultoras. A candidatura
-          será registrada e analisada pela equipe — sem promessa de renda,
-          aprovação ou retorno garantido.
-        </p>
-      </PageHero>
-      <div className="px-6 pb-24">
-        <SejaLardanForm />
-      </div>
+      <SejaHero />
+      <SejaEmocional />
+      <SejaDefinicao />
+      <SejaFerramentas />
+      <SejaAcademy />
+      <SejaProduto />
+      <SejaVidaReal />
+      <SejaPerfil />
+      <SejaProcesso />
 
+      <section
+        id="candidatura"
+        aria-labelledby="candidatura-titulo"
+        className="scroll-mt-24 border-t border-border"
+      >
+        <div className="mx-auto max-w-3xl px-6 pt-24 text-center md:pt-32">
+          <p className="brand-eyebrow mb-4">Candidatura</p>
+          <h2 id="candidatura-titulo" className="text-3xl leading-tight text-foreground md:text-5xl">
+            Conte um pouco sobre você
+          </h2>
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
+            A candidatura é registrada com um número de protocolo e analisada pela equipe Lardan.
+            Não há promessa de aprovação, prazo ou renda.
+          </p>
+        </div>
+        <div className="px-6 py-16">
+          <SejaLardanForm />
+        </div>
+      </section>
+
+      <SejaFaq />
     </SiteLayout>
   );
 }

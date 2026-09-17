@@ -13,7 +13,15 @@ import aneisMobileAsset from "@/assets/lardan-mobile-aneis.png.asset.json";
 import colaresMobileAsset from "@/assets/sessao_colares_mobile.png.asset.json";
 import pulseirasMobileAsset from "@/assets/lardan-mobile-pulseiras.png.asset.json";
 import brincosMobileAsset from "@/assets/lardan-mobile-brincos.png.asset.json";
-import { ogImageMeta } from "@/lib/seo";
+import { Fundadores } from "@/components/site/Fundadores";
+import {
+  canonical,
+  jsonLdScript,
+  organizationLd,
+  pageMeta,
+  webPageLd,
+  webSiteLd,
+} from "@/lib/seo";
 
 /** Cenas aprovadas da página inicial — o desenho não muda, só a curadoria. */
 const CENAS = [
@@ -73,24 +81,25 @@ export const Route = createFileRoute("/")({
     }
   },
   head: () => ({
-    meta: [
-      { title: "LARDAN — Semijoias | Única. Como cada história." },
-      {
-        name: "description",
-        content:
-          "Semijoias Lardan: anéis, colares, pulseiras e brincos para acompanhar os seus momentos. Conheça a marca e a coleção.",
-      },
-      { property: "og:title", content: "LARDAN — Semijoias" },
-      {
-        property: "og:description",
-        content: "Semijoias para acompanhar os seus momentos.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:url", content: "/" },
-      ...ogImageMeta(),
+    meta: pageMeta({
+      title: "Lardan Semijoias | Elegância, Qualidade e 2 Anos de Garantia",
+      description:
+        "Conheça a Lardan, suas coleções de semijoias, qualidade, garantia de 2 anos e uma rede de consultoras apoiada por tecnologia, relacionamento e experiência.",
+      path: "/",
+    }),
+    links: canonical("/"),
+    scripts: [
+      jsonLdScript([
+        organizationLd(),
+        webSiteLd(),
+        webPageLd({
+          path: "/",
+          name: "Lardan Semijoias",
+          description:
+            "Semijoias Lardan: anéis, colares, pulseiras e brincos, com 2 anos de garantia e uma rede de consultoras apoiada por tecnologia.",
+        }),
+      ]),
     ],
-    links: [{ rel: "canonical", href: "/" }],
   }),
   errorComponent: () => (
     <SiteLayout>
@@ -145,21 +154,40 @@ function HomePage() {
       ))}
 
       {/* Convite Seja Lardan */}
-      <section className="border-t border-border bg-secondary/40">
+      <section aria-labelledby="home-seja-lardan" className="border-t border-border bg-secondary/40">
         <div className="mx-auto max-w-3xl px-6 py-24 text-center">
           <p className="brand-eyebrow mb-3">Seja Lardan</p>
-          <h2 className="text-4xl text-foreground md:text-5xl">
+          <h2 id="home-seja-lardan" className="text-4xl text-foreground md:text-5xl">
             Construa a sua história com a Lardan
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground">
-            Candidate-se para conhecer a proposta de parceria da marca. Sem promessa de renda
-            garantida: cada candidatura passa por análise.
+          <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
+            A Consultora Lardan vende semijoias da marca e conta com produto, garantia de 2 anos,
+            treinamento e tecnologia para organizar clientes, vendas e recebimentos. Cada
+            candidatura passa por análise — sem promessa de renda garantida.
           </p>
           <Link to="/seja-lardan" className="btn-premium mt-10">
             Quero me candidatar
           </Link>
+          <p className="mt-8 text-sm text-muted-foreground">
+            Antes de decidir, conheça{" "}
+            <Link to="/a-lardan" className="underline underline-offset-4 hover:text-foreground">
+              a história da marca
+            </Link>
+            ,{" "}
+            <Link to="/semijoias" className="underline underline-offset-4 hover:text-foreground">
+              as semijoias Lardan
+            </Link>{" "}
+            e{" "}
+            <Link to="/colecoes" className="underline underline-offset-4 hover:text-foreground">
+              as coleções
+            </Link>
+            .
+          </p>
         </div>
       </section>
+
+      <Fundadores />
+
     </SiteLayout>
   );
 }

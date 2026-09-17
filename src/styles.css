@@ -299,10 +299,32 @@
 
 /* Wordmark e rótulos da marca */
 @utility brand-eyebrow {
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   letter-spacing: var(--tracking-brand);
   text-transform: uppercase;
   color: var(--muted-foreground);
+}
+
+/* Legibilidade editorial no celular: textos auxiliares nunca ficam menores
+   que 13px, sem alterar títulos nem a escala aprovada para desktop. */
+@media (max-width: 767px) {
+  .site-scope .btn-premium,
+  .site-scope .text-xs,
+  .site-scope [class*="text-[0.5rem]"],
+  .site-scope [class*="text-[0.5625rem]"],
+  .site-scope [class*="text-[0.625rem]"],
+  .site-scope [class*="text-[0.66rem]"],
+  .site-scope [class*="text-[0.6875rem]"],
+  .site-scope [class*="text-[0.7rem]"] {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+}
+
+@media (min-width: 768px) {
+  .brand-eyebrow {
+    font-size: 0.6875rem;
+  }
 }
 
 @utility rose-rule {

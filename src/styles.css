@@ -308,7 +308,10 @@
 /* Legibilidade editorial no celular: textos auxiliares nunca ficam menores
    que 13px, sem alterar títulos nem a escala aprovada para desktop. */
 @media (max-width: 767px) {
+  .site-scope .btn-premium,
   .site-scope .text-xs,
+  .site-scope [class*="text-[0.5rem]"],
+  .site-scope [class*="text-[0.5625rem]"],
   .site-scope [class*="text-[0.625rem]"],
   .site-scope [class*="text-[0.66rem]"],
   .site-scope [class*="text-[0.6875rem]"],

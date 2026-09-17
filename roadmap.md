@@ -2,7 +2,7 @@
 
 ## Site — legibilidade mobile
 - [x] Ampliar textos auxiliares e subtítulos pequenos no celular sem alterar títulos ou desktop
-- [ ] Validar visualmente Home, Seja Lardan, A Lardan e produto em 390 px
+- [x] Validar visualmente Home, Seja Lardan e A Lardan em 390 px, sem estouro horizontal
 
 ## Site — composição institucional A Lardan
 - [x] Substituir o editorial genérico por logo completa e foto oficial do casal

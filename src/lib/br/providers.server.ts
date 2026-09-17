@@ -188,6 +188,11 @@ function mapearBrasilApiCep(j: Record<string, unknown>): EnderecoConsultado | nu
     return typeof v === "string" && v.trim() ? v.trim().slice(0, 120) : null;
   };
   const uf = texto("state")?.toUpperCase() ?? null;
+  const ibgeBruto = j["ibge"];
+  const ibge =
+    ibgeBruto && typeof ibgeBruto === "object"
+      ? (String((ibgeBruto as Record<string, unknown>)["city"] ?? "").replace(/\D/g, "") || null)
+      : null;
   return {
     cep,
     logradouro: texto("street"),
@@ -195,7 +200,7 @@ function mapearBrasilApiCep(j: Record<string, unknown>): EnderecoConsultado | nu
     bairro: texto("neighborhood"),
     cidade: texto("city"),
     uf: uf && SIGLAS_UF.includes(uf) ? uf : null,
-    ibge: null,
+    ibge,
     ddd: null,
   };
 }

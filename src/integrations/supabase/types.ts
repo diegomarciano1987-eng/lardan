@@ -1072,6 +1072,64 @@ export type Database = {
           },
         ]
       }
+      consultant_showcases: {
+        Row: {
+          avatar_media_id: string | null
+          bio: string | null
+          created_at: string
+          headline: string | null
+          is_public: boolean
+          party_id: string
+          slug: string
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          avatar_media_id?: string | null
+          bio?: string | null
+          created_at?: string
+          headline?: string | null
+          is_public?: boolean
+          party_id: string
+          slug: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          avatar_media_id?: string | null
+          bio?: string | null
+          created_at?: string
+          headline?: string | null
+          is_public?: boolean
+          party_id?: string
+          slug?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_showcases_avatar_media_id_fkey"
+            columns: ["avatar_media_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_showcases_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_showcases_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       contact_points: {
         Row: {
           created_at: string
@@ -3179,6 +3237,7 @@ export type Database = {
         Row: {
           cycle_id: string
           id: string
+          is_published: boolean
           qty_accepted: number
           qty_allocated: number
           qty_available: number | null
@@ -3196,6 +3255,7 @@ export type Database = {
         Insert: {
           cycle_id: string
           id?: string
+          is_published?: boolean
           qty_accepted?: number
           qty_allocated?: number
           qty_available?: number | null
@@ -3213,6 +3273,7 @@ export type Database = {
         Update: {
           cycle_id?: string
           id?: string
+          is_published?: boolean
           qty_accepted?: number
           qty_allocated?: number
           qty_available?: number | null
@@ -5082,6 +5143,212 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_order_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          kind: string
+          note: string | null
+          order_id: string
+          payload: Json
+          to_status: string | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          kind: string
+          note?: string | null
+          order_id: string
+          payload?: Json
+          to_status?: string | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          kind?: string
+          note?: string | null
+          order_id?: string
+          payload?: Json
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_order_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_order_items: {
+        Row: {
+          created_at: string
+          cycle_id: string | null
+          id: string
+          order_id: string
+          product_name: string
+          quantity: number
+          unit_price_cents: number
+          variant_id: string
+          variant_label: string | null
+        }
+        Insert: {
+          created_at?: string
+          cycle_id?: string | null
+          id?: string
+          order_id: string
+          product_name: string
+          quantity: number
+          unit_price_cents: number
+          variant_id: string
+          variant_label?: string | null
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string | null
+          id?: string
+          order_id?: string
+          product_name?: string
+          quantity?: number
+          unit_price_cents?: number
+          variant_id?: string
+          variant_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_order_items_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_order_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_orders: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          channel: string
+          closed_at: string | null
+          code: string
+          consultora_party_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_note: string | null
+          customer_party_id: string | null
+          customer_phone: string | null
+          delivery_status: Database["public"]["Enums"]["sales_delivery_status"]
+          id: string
+          idempotency_key: string | null
+          items_count: number
+          offer_valid_until: string | null
+          payment_status: Database["public"]["Enums"]["sales_payment_status"]
+          reserve_expires_at: string | null
+          status: Database["public"]["Enums"]["sales_order_status"]
+          subtotal_cents: number
+          updated_at: string
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          channel?: string
+          closed_at?: string | null
+          code?: string
+          consultora_party_id: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_note?: string | null
+          customer_party_id?: string | null
+          customer_phone?: string | null
+          delivery_status?: Database["public"]["Enums"]["sales_delivery_status"]
+          id?: string
+          idempotency_key?: string | null
+          items_count?: number
+          offer_valid_until?: string | null
+          payment_status?: Database["public"]["Enums"]["sales_payment_status"]
+          reserve_expires_at?: string | null
+          status?: Database["public"]["Enums"]["sales_order_status"]
+          subtotal_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          channel?: string
+          closed_at?: string | null
+          code?: string
+          consultora_party_id?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_note?: string | null
+          customer_party_id?: string | null
+          customer_phone?: string | null
+          delivery_status?: Database["public"]["Enums"]["sales_delivery_status"]
+          id?: string
+          idempotency_key?: string | null
+          items_count?: number
+          offer_valid_until?: string | null
+          payment_status?: Database["public"]["Enums"]["sales_payment_status"]
+          reserve_expires_at?: string | null
+          status?: Database["public"]["Enums"]["sales_order_status"]
+          subtotal_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_orders_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "sales_orders_customer_party_id_fkey"
+            columns: ["customer_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_customer_party_id_fkey"
+            columns: ["customer_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       showcase_batches: {
         Row: {
           action: string
@@ -6259,10 +6526,16 @@ export type Database = {
         Args: { _cycle: string; _idempotency_key?: string; _itens: Json }
         Returns: Json
       }
+      kit_board: { Args: { _filtros?: Json }; Returns: Json }
       kit_conferir: { Args: { _cycle: string; _note?: string }; Returns: Json }
       kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
+      kit_detail: { Args: { _cycle: string }; Returns: Json }
       kit_expedir: { Args: { _cycle: string; _payload?: Json }; Returns: Json }
+      kit_item_publish: {
+        Args: { _cycle: string; _publicar: boolean; _variant: string }
+        Returns: Json
+      }
       kit_item_upsert: {
         Args: { _cycle: string; _qty: number; _variant: string }
         Returns: Json
@@ -6349,6 +6622,12 @@ export type Database = {
       norm_code: { Args: { _v: string }; Returns: string }
       norm_name: { Args: { _v: string }; Returns: string }
       only_digits: { Args: { _v: string }; Returns: string }
+      order_detail: { Args: { _order: string }; Returns: Json }
+      order_set_status: {
+        Args: { _note?: string; _order: string; _status: string }
+        Returns: Json
+      }
+      orders_list: { Args: { _filtros?: Json }; Returns: Json }
       parse_cents_any: { Args: { _v: string }; Returns: number }
       parse_decimal_any: { Args: { _v: string }; Returns: number }
       partner_doc_reveal: {
@@ -6565,6 +6844,18 @@ export type Database = {
           updated_at: string
         }[]
       }
+      showcase_order_create: {
+        Args: {
+          _cliente: Json
+          _idempotency_key?: string
+          _itens: Json
+          _slug: string
+        }
+        Returns: Json
+      }
+      showcase_public: { Args: { _slug: string }; Returns: Json }
+      showcase_save: { Args: { _payload: Json }; Returns: Json }
+      showcase_slug_reserved: { Args: { _slug: string }; Returns: boolean }
       stock_available: {
         Args: { _location: string; _variant: string }
         Returns: number
@@ -6816,6 +7107,18 @@ export type Database = {
         | "inativo"
         | "desligado"
       request_status: "novo" | "em_atendimento" | "respondido" | "arquivado"
+      sales_delivery_status:
+        | "nao_iniciado"
+        | "combinada"
+        | "entregue"
+        | "devolvida"
+      sales_order_status:
+        | "aguardando_atendimento"
+        | "em_atendimento"
+        | "aguardando_pagamento"
+        | "concluido"
+        | "cancelado"
+      sales_payment_status: "nao_iniciado" | "pendente" | "pago" | "estornado"
       stock_move_kind:
         | "entrada"
         | "saida"
@@ -7093,6 +7396,20 @@ export const Constants = {
         "desligado",
       ],
       request_status: ["novo", "em_atendimento", "respondido", "arquivado"],
+      sales_delivery_status: [
+        "nao_iniciado",
+        "combinada",
+        "entregue",
+        "devolvida",
+      ],
+      sales_order_status: [
+        "aguardando_atendimento",
+        "em_atendimento",
+        "aguardando_pagamento",
+        "concluido",
+        "cancelado",
+      ],
+      sales_payment_status: ["nao_iniciado", "pendente", "pago", "estornado"],
       stock_move_kind: [
         "entrada",
         "saida",

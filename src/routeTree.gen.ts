@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as ALardanRouteImport } from './routes/a-lardan'
 import { Route as AcessoRouteImport } from './routes/acesso'
@@ -23,6 +24,7 @@ import { Route as PulseirasRouteImport } from './routes/pulseiras'
 import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
+import { Route as AuthenticatedConsultoraRouteImport } from './routes/_authenticated/consultora'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
 import { Route as SemijoiasCategoriaRouteImport } from './routes/semijoias.$categoria'
@@ -35,6 +37,7 @@ import { Route as AuthenticatedAdminFinanceiroRouteRouteImport } from './routes/
 import { Route as AuthenticatedAdminImportacaoRouteImport } from './routes/_authenticated/admin/importacao'
 import { Route as AuthenticatedAdminIntegracoesRouteImport } from './routes/_authenticated/admin/integracoes'
 import { Route as AuthenticatedAdminLeadsRouteImport } from './routes/_authenticated/admin/leads'
+import { Route as AuthenticatedAdminMaletasRouteImport } from './routes/_authenticated/admin/maletas'
 import { Route as AuthenticatedAdminPerfilRouteImport } from './routes/_authenticated/admin/perfil'
 import { Route as AuthenticatedAdminRedeRouteImport } from './routes/_authenticated/admin/rede'
 import { Route as AuthenticatedAdminSiteRouteImport } from './routes/_authenticated/admin/site'
@@ -62,6 +65,7 @@ import { Route as AuthenticatedAdminFinanceiroImportacoesRouteImport } from './r
 import { Route as AuthenticatedAdminFinanceiroPagarRouteImport } from './routes/_authenticated/admin/financeiro/pagar'
 import { Route as AuthenticatedAdminFinanceiroPlanoContasRouteImport } from './routes/_authenticated/admin/financeiro/plano-contas'
 import { Route as AuthenticatedAdminFinanceiroReceberRouteImport } from './routes/_authenticated/admin/financeiro/receber'
+import { Route as AuthenticatedAdminMaletasIdRouteImport } from './routes/_authenticated/admin/maletas_.$id'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
 import { Route as AuthenticatedAdminCadastrosPessoasIdRouteImport } from './routes/_authenticated/admin/cadastros/pessoas_.$id'
 import { Route as AuthenticatedAdminCadastrosPessoasNovoRouteImport } from './routes/_authenticated/admin/cadastros/pessoas_.novo'
@@ -71,6 +75,11 @@ import { Route as AuthenticatedAdminCadastrosProdutosNovoRouteImport } from './r
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlugRoute = SlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -135,6 +144,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedConsultoraRoute = AuthenticatedConsultoraRouteImport.update({
+  id: '/consultora',
+  path: '/consultora',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ProdutoSlugRoute = ProdutoSlugRouteImport.update({
@@ -204,6 +218,12 @@ const AuthenticatedAdminLeadsRoute = AuthenticatedAdminLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminMaletasRoute =
+  AuthenticatedAdminMaletasRouteImport.update({
+    id: '/maletas',
+    path: '/maletas',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminPerfilRoute =
   AuthenticatedAdminPerfilRouteImport.update({
     id: '/perfil',
@@ -364,6 +384,12 @@ const AuthenticatedAdminFinanceiroReceberRoute =
     path: '/receber',
     getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
   } as any)
+const AuthenticatedAdminMaletasIdRoute =
+  AuthenticatedAdminMaletasIdRouteImport.update({
+    id: '/maletas_/$id',
+    path: '/maletas/$id',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const ApiPublicMidiaIdRoute = ApiPublicMidiaIdRouteImport.update({
   id: '/api/public/midia/$id',
   path: '/api/public/midia/$id',
@@ -396,6 +422,7 @@ const AuthenticatedAdminCadastrosProdutosNovoRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
   '/aneis': typeof AneisRoute
@@ -408,6 +435,7 @@ export interface FileRoutesByFullPath {
   '/seja-lardan': typeof SejaLardanRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/consultora': typeof AuthenticatedConsultoraRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/semijoias/': typeof SemijoiasIndexRoute
@@ -419,6 +447,7 @@ export interface FileRoutesByFullPath {
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
+  '/admin/maletas': typeof AuthenticatedAdminMaletasRoute
   '/admin/perfil': typeof AuthenticatedAdminPerfilRoute
   '/admin/rede': typeof AuthenticatedAdminRedeRoute
   '/admin/site': typeof AuthenticatedAdminSiteRoute
@@ -445,6 +474,7 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro/pagar': typeof AuthenticatedAdminFinanceiroPagarRoute
   '/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
+  '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
   '/admin/financeiro/': typeof AuthenticatedAdminFinanceiroIndexRoute
@@ -455,6 +485,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRoute
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
   '/aneis': typeof AneisRoute
@@ -466,6 +497,7 @@ export interface FileRoutesByTo {
   '/pulseiras': typeof PulseirasRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/consultora': typeof AuthenticatedConsultoraRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/semijoias': typeof SemijoiasIndexRoute
@@ -476,6 +508,7 @@ export interface FileRoutesByTo {
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
+  '/admin/maletas': typeof AuthenticatedAdminMaletasRoute
   '/admin/perfil': typeof AuthenticatedAdminPerfilRoute
   '/admin/rede': typeof AuthenticatedAdminRedeRoute
   '/admin/site': typeof AuthenticatedAdminSiteRoute
@@ -502,6 +535,7 @@ export interface FileRoutesByTo {
   '/admin/financeiro/pagar': typeof AuthenticatedAdminFinanceiroPagarRoute
   '/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
+  '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/admin/cadastros': typeof AuthenticatedAdminCadastrosIndexRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroIndexRoute
@@ -514,6 +548,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/$slug': typeof SlugRoute
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
   '/aneis': typeof AneisRoute
@@ -526,6 +561,7 @@ export interface FileRoutesById {
   '/seja-lardan': typeof SejaLardanRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/_authenticated/consultora': typeof AuthenticatedConsultoraRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/semijoias/': typeof SemijoiasIndexRoute
@@ -537,6 +573,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/_authenticated/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/_authenticated/admin/leads': typeof AuthenticatedAdminLeadsRoute
+  '/_authenticated/admin/maletas': typeof AuthenticatedAdminMaletasRoute
   '/_authenticated/admin/perfil': typeof AuthenticatedAdminPerfilRoute
   '/_authenticated/admin/rede': typeof AuthenticatedAdminRedeRoute
   '/_authenticated/admin/site': typeof AuthenticatedAdminSiteRoute
@@ -563,6 +600,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/financeiro/pagar': typeof AuthenticatedAdminFinanceiroPagarRoute
   '/_authenticated/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/_authenticated/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
+  '/_authenticated/admin/maletas_/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/_authenticated/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
   '/_authenticated/admin/financeiro/': typeof AuthenticatedAdminFinanceiroIndexRoute
@@ -575,6 +613,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$slug'
     | '/a-lardan'
     | '/acesso'
     | '/aneis'
@@ -587,6 +626,7 @@ export interface FileRouteTypes {
     | '/seja-lardan'
     | '/sitemap.xml'
     | '/admin'
+    | '/consultora'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/semijoias/'
@@ -598,6 +638,7 @@ export interface FileRouteTypes {
     | '/admin/importacao'
     | '/admin/integracoes'
     | '/admin/leads'
+    | '/admin/maletas'
     | '/admin/perfil'
     | '/admin/rede'
     | '/admin/site'
@@ -624,6 +665,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/pagar'
     | '/admin/financeiro/plano-contas'
     | '/admin/financeiro/receber'
+    | '/admin/maletas/$id'
     | '/api/public/midia/$id'
     | '/admin/cadastros/'
     | '/admin/financeiro/'
@@ -634,6 +676,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$slug'
     | '/a-lardan'
     | '/acesso'
     | '/aneis'
@@ -645,6 +688,7 @@ export interface FileRouteTypes {
     | '/pulseiras'
     | '/seja-lardan'
     | '/sitemap.xml'
+    | '/consultora'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/semijoias'
@@ -655,6 +699,7 @@ export interface FileRouteTypes {
     | '/admin/importacao'
     | '/admin/integracoes'
     | '/admin/leads'
+    | '/admin/maletas'
     | '/admin/perfil'
     | '/admin/rede'
     | '/admin/site'
@@ -681,6 +726,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/pagar'
     | '/admin/financeiro/plano-contas'
     | '/admin/financeiro/receber'
+    | '/admin/maletas/$id'
     | '/api/public/midia/$id'
     | '/admin/cadastros'
     | '/admin/financeiro'
@@ -692,6 +738,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/$slug'
     | '/a-lardan'
     | '/acesso'
     | '/aneis'
@@ -704,6 +751,7 @@ export interface FileRouteTypes {
     | '/seja-lardan'
     | '/sitemap.xml'
     | '/_authenticated/admin'
+    | '/_authenticated/consultora'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/semijoias/'
@@ -715,6 +763,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/importacao'
     | '/_authenticated/admin/integracoes'
     | '/_authenticated/admin/leads'
+    | '/_authenticated/admin/maletas'
     | '/_authenticated/admin/perfil'
     | '/_authenticated/admin/rede'
     | '/_authenticated/admin/site'
@@ -741,6 +790,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financeiro/pagar'
     | '/_authenticated/admin/financeiro/plano-contas'
     | '/_authenticated/admin/financeiro/receber'
+    | '/_authenticated/admin/maletas_/$id'
     | '/api/public/midia/$id'
     | '/_authenticated/admin/cadastros/'
     | '/_authenticated/admin/financeiro/'
@@ -753,6 +803,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  SlugRoute: typeof SlugRoute
   ALardanRoute: typeof ALardanRoute
   AcessoRoute: typeof AcessoRoute
   AneisRoute: typeof AneisRoute
@@ -777,6 +828,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$slug': {
+      id: '/$slug'
+      path: '/$slug'
+      fullPath: '/$slug'
+      preLoaderRoute: typeof SlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -870,6 +928,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/consultora': {
+      id: '/_authenticated/consultora'
+      path: '/consultora'
+      fullPath: '/consultora'
+      preLoaderRoute: typeof AuthenticatedConsultoraRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/produto/$slug': {
       id: '/produto/$slug'
       path: '/produto/$slug'
@@ -952,6 +1017,13 @@ declare module '@tanstack/react-router' {
       path: '/leads'
       fullPath: '/admin/leads'
       preLoaderRoute: typeof AuthenticatedAdminLeadsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/maletas': {
+      id: '/_authenticated/admin/maletas'
+      path: '/maletas'
+      fullPath: '/admin/maletas'
+      preLoaderRoute: typeof AuthenticatedAdminMaletasRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/perfil': {
@@ -1143,6 +1215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroReceberRouteImport
       parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
     }
+    '/_authenticated/admin/maletas_/$id': {
+      id: '/_authenticated/admin/maletas_/$id'
+      path: '/maletas/$id'
+      fullPath: '/admin/maletas/$id'
+      preLoaderRoute: typeof AuthenticatedAdminMaletasIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/api/public/midia/$id': {
       id: '/api/public/midia/$id'
       path: '/api/public/midia/$id'
@@ -1240,6 +1319,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminImportacaoRoute: typeof AuthenticatedAdminImportacaoRoute
   AuthenticatedAdminIntegracoesRoute: typeof AuthenticatedAdminIntegracoesRoute
   AuthenticatedAdminLeadsRoute: typeof AuthenticatedAdminLeadsRoute
+  AuthenticatedAdminMaletasRoute: typeof AuthenticatedAdminMaletasRoute
   AuthenticatedAdminPerfilRoute: typeof AuthenticatedAdminPerfilRoute
   AuthenticatedAdminRedeRoute: typeof AuthenticatedAdminRedeRoute
   AuthenticatedAdminSiteRoute: typeof AuthenticatedAdminSiteRoute
@@ -1254,6 +1334,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCadastrosPessoasRoute: typeof AuthenticatedAdminCadastrosPessoasRoute
   AuthenticatedAdminCadastrosProdutosRoute: typeof AuthenticatedAdminCadastrosProdutosRoute
   AuthenticatedAdminCandidaturasIdRoute: typeof AuthenticatedAdminCandidaturasIdRoute
+  AuthenticatedAdminMaletasIdRoute: typeof AuthenticatedAdminMaletasIdRoute
   AuthenticatedAdminCadastrosIndexRoute: typeof AuthenticatedAdminCadastrosIndexRoute
   AuthenticatedAdminCadastrosPessoasIdRoute: typeof AuthenticatedAdminCadastrosPessoasIdRoute
   AuthenticatedAdminCadastrosPessoasNovoRoute: typeof AuthenticatedAdminCadastrosPessoasNovoRoute
@@ -1272,6 +1353,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminImportacaoRoute: AuthenticatedAdminImportacaoRoute,
     AuthenticatedAdminIntegracoesRoute: AuthenticatedAdminIntegracoesRoute,
     AuthenticatedAdminLeadsRoute: AuthenticatedAdminLeadsRoute,
+    AuthenticatedAdminMaletasRoute: AuthenticatedAdminMaletasRoute,
     AuthenticatedAdminPerfilRoute: AuthenticatedAdminPerfilRoute,
     AuthenticatedAdminRedeRoute: AuthenticatedAdminRedeRoute,
     AuthenticatedAdminSiteRoute: AuthenticatedAdminSiteRoute,
@@ -1295,6 +1377,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminCadastrosProdutosRoute,
     AuthenticatedAdminCandidaturasIdRoute:
       AuthenticatedAdminCandidaturasIdRoute,
+    AuthenticatedAdminMaletasIdRoute: AuthenticatedAdminMaletasIdRoute,
     AuthenticatedAdminCadastrosIndexRoute:
       AuthenticatedAdminCadastrosIndexRoute,
     AuthenticatedAdminCadastrosPessoasIdRoute:
@@ -1314,10 +1397,12 @@ const AuthenticatedAdminRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
+  AuthenticatedConsultoraRoute: typeof AuthenticatedConsultoraRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
+  AuthenticatedConsultoraRoute: AuthenticatedConsultoraRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -1326,6 +1411,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  SlugRoute: SlugRoute,
   ALardanRoute: ALardanRoute,
   AcessoRoute: AcessoRoute,
   AneisRoute: AneisRoute,

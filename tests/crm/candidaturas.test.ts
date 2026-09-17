@@ -48,7 +48,7 @@ async function enviar(
   const r = await rpc(null, "submit_candidatura", {
     _payload: {
       full_name: `HOMOLOG Candidata ${sufixo}`,
-      whatsapp: `43 9${marca}${sufixo}`.padEnd(15, "0"),
+      whatsapp: `43 9${marca}${sufixo}`,
       city: "Ibiporã",
       uf: "PR",
       financial_goal: "Aumentar minha renda",

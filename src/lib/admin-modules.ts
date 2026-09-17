@@ -96,6 +96,17 @@ export const ADMIN_MODULES: AdminModule[] = [
     spec: "Central de Cadastros: identidade canônica de pessoas e organizações, papéis acumuláveis, busca inteligente no servidor, detecção de duplicidades e conversão de candidata em consultora. Nunca duplica registros dos módulos especializados.",
   },
   {
+    slug: "crm-candidaturas",
+    path: "/admin/candidaturas",
+    label: "Candidaturas do Site",
+    description:
+      "CRM das candidatas a Consultora Lardan: funil, responsável, follow-ups, origem e histórico.",
+    icon: UserRoundSearch,
+    roles: ["master", "diretoria", "marketing", "suporte"],
+    capability: "candidaturas.view",
+    state: "ativo",
+  },
+  {
     slug: "produtos",
     path: "/admin/cadastros/produtos",
     label: "Produtos",

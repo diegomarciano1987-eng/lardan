@@ -43,6 +43,20 @@ const Entrada = z.object({
       fbclid: texto(200),
       msclkid: texto(200),
       utm: z.record(z.string(), z.string().max(300)).default({}),
+      // Jornada interna de conteúdo: somente caminhos do próprio site e o
+      // identificador do CTA editorial. Nenhum dado pessoal.
+      jornada: z
+        .object({
+          first_content_path: texto(200),
+          first_content_at: texto(40),
+          last_content_path: texto(200),
+          last_content_at: texto(40),
+          content_paths: z.array(z.string().max(200)).max(8).optional(),
+          cta_origin: texto(60),
+          cta_destination: texto(200),
+          cta_at: texto(40),
+        })
+        .optional(),
     })
     .default({ utm: {} }),
 });

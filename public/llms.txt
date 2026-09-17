@@ -70,14 +70,14 @@ Estrutura do ecossistema Lardan para a consultora:
 
 - Disponível hoje: catálogo oficial de peças, garantia de 2 anos, formulário
   de candidatura com análise humana.
-- O ecossistema Lardan está preparado para: CRM com carteira de clientes,
+- A Consultora Lardan conta com: CRM com carteira de clientes,
   preferências, aniversários e histórico; vitrine digital individual;
   acompanhamento de vendas, recebimentos e valores a receber; gestão
   financeira simples da operação; metas, níveis, ranking e campanhas;
   Lardan Academy (vendas, produto, redes sociais, fotografia, atendimento,
   finanças, relacionamento e coleções); geração de link de pagamento.
 
-A gestão financeira prevista é uma organização simples da operação da
+A gestão financeira é uma organização simples da operação da
 consultora. Não é banco, não é conta digital e não é aconselhamento
 financeiro.
 
@@ -86,6 +86,27 @@ financeiro.
 Lardan OS é a infraestrutura digital que conecta a rede Lardan: catálogo,
 estoque, cadastros, vendas e gestão. Regras internas, custos, controles
 financeiros e dados pessoais não são públicos.
+
+## Guias e conteúdos
+
+Guias editoriais publicados pela Lardan, assinados e com fontes visíveis:
+
+- https://lardan.lovable.app/renda-extra-com-vendas — como avaliar tempo,
+  investimento, rede de relacionamento e modelos de venda antes de escolher o
+  que vender para aumentar a renda.
+- https://lardan.lovable.app/como-comecar-a-vender-semijoias — como começar a
+  vender semijoias do zero: produto, clientes, garantia, organização e
+  relacionamento.
+- https://lardan.lovable.app/semijoias-consignadas-para-revenda — como funciona
+  a revenda de semijoias em consignação e o que avaliar antes de entrar.
+- https://lardan.lovable.app/como-vender-semijoias-pelo-whatsapp — atendimento,
+  catálogo, abordagem, objeções e pós-venda no WhatsApp.
+
+## Autoria editorial
+
+Os guias sobre venda consignada, consultoria e desenvolvimento comercial são
+assinados por Daniel de Freitas Maciel, fundador e CEO da Lardan, com 15 anos
+de atuação em redes de venda consignada.
 
 ## URLs principais
 

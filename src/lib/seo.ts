@@ -177,3 +177,37 @@ export function faqLd(perguntas: { pergunta: string; resposta: string }[]): Json
     })),
   };
 }
+
+/** Article de um guia editorial. Autor sempre referencia o mesmo @id do Daniel. */
+export function articleLd(opts: {
+  path: string;
+  headline: string;
+  description: string;
+  datePublished: string;
+  dateModified: string;
+  image?: string | null;
+  section?: string;
+  citations?: string[];
+}): Json {
+  const url = abs(opts.path);
+  const data: Json = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${url}#article`,
+    headline: opts.headline,
+    description: opts.description,
+    url,
+    mainEntityOfPage: { "@id": `${url}#webpage` },
+    datePublished: opts.datePublished,
+    dateModified: opts.dateModified,
+    inLanguage: "pt-BR",
+    author: { "@id": `${SITE_URL}/#daniel` },
+    publisher: { "@id": `${SITE_URL}/#organization` },
+    about: { "@id": `${SITE_URL}/#organization` },
+    image: opts.image && /^https?:\/\//.test(opts.image) ? opts.image : OG_IMAGE,
+  };
+  if (opts.section) data["articleSection"] = opts.section;
+  const externas = (opts.citations ?? []).filter((u) => /^https?:\/\//.test(u));
+  if (externas.length > 0) data["citation"] = externas;
+  return data;
+}

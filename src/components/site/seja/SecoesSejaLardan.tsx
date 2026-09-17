@@ -173,7 +173,7 @@ export function SejaFerramentas() {
           </CinematicTitle>
           <p className="mt-6 text-base leading-relaxed text-muted-foreground">
             Tecnologia por trás. Simplicidade na sua mão. Abaixo, o que o ecossistema Lardan
-            está preparado para colocar na mão da consultora.
+            coloca na mão da consultora.
           </p>
         </div>
 
@@ -199,11 +199,9 @@ export function SejaFerramentas() {
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
-                {f.estado === "preparacao" ? (
-                  <p className="mt-4 text-[0.6875rem] tracking-[0.14em] uppercase text-muted-foreground/80">
-                    Ecossistema Lardan preparado
-                  </p>
-                ) : null}
+                <p className="mt-4 text-[0.6875rem] tracking-[0.14em] uppercase text-muted-foreground/80">
+                  Ecossistema Lardan
+                </p>
               </li>
             ))}
           </ul>

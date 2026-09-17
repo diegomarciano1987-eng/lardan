@@ -1,16 +1,17 @@
 import { Link } from "@tanstack/react-router";
+import fotoCasal from "@/assets/lardan-daniel-larissa.webp.asset.json";
 
 /**
  * Seção institucional "Por trás da Lardan" (Daniel + Larissa).
  *
- * TODO — CONTEÚDO REAL PENDENTE DO CLIENTE. Nada aqui pode ser inventado.
+ * Foto oficial do casal já aplicada.
+ * TODO — CONTEÚDO REAL AINDA PENDENTE DO CLIENTE. Nada pode ser inventado.
  * Substituir quando a marca enviar:
- *   1. foto oficial do casal (src/assets/lardan-daniel-larissa.jpg)
- *   2. história de Daniel
- *   3. história de Larissa
- *   4. como nasceu a Lardan
- *   5. princípios e visão
- *   6. assinatura/frase do casal
+ *   1. história de Daniel
+ *   2. história de Larissa
+ *   3. como nasceu a Lardan
+ *   4. princípios e visão
+ *   5. assinatura/frase do casal
  * O texto abaixo é institucional e intencionalmente sem datas, cidades,
  * formação, números ou qualquer fato biográfico.
  */
@@ -21,11 +22,18 @@ export function Fundadores() {
       className="border-t border-border bg-background"
     >
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 md:grid-cols-2 md:gap-16 md:py-32">
-        {/* Espaço reservado para a fotografia oficial do casal. */}
-        <div
-          aria-hidden
-          className="aspect-[4/5] w-full rounded-sm bg-[linear-gradient(140deg,color-mix(in_oklab,var(--secondary)_90%,transparent),color-mix(in_oklab,var(--muted)_80%,transparent))]"
-        />
+        {/* Fotografia oficial do casal. */}
+        <div className="overflow-hidden rounded-sm bg-muted">
+          <img
+            src={fotoCasal.url}
+            alt="Daniel e Larissa, fundadores da Lardan, com a filha"
+            width={1200}
+            height={1292}
+            loading="lazy"
+            decoding="async"
+            className="aspect-[4/5] w-full object-cover"
+          />
+        </div>
 
         <div>
           <p className="brand-eyebrow mb-4">Por trás da Lardan</p>

@@ -1,5 +1,9 @@
 # Núcleo comercial Lardan Cloud — roadmap
 
+## Site — composição institucional A Lardan
+- [x] Substituir o editorial genérico por logo completa e foto oficial do casal
+- [x] Validar ordem logo primeiro no mobile, composição lado a lado no desktop e acessibilidade
+
 ## Site — Seja Lardan cinematográfico
 - [x] Aplicar a nova foto da família na seção Nossa origem
 - [x] Usar o vídeo enviado como fundo discreto da seção “Não é apenas sobre vender semijoias”

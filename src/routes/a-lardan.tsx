@@ -7,7 +7,8 @@ import {
   danielPortraitInstitucional,
   larissaPortraitSeja,
 } from "@/components/site/retratos";
-import editorialAsset from "@/assets/lardan-editorial-mulher.jpg.asset.json";
+import logoInstitucional from "@/assets/lardan-logo-institucional.webp.asset.json";
+import casalOficial from "@/assets/lardan-casal-oficial.webp.asset.json";
 import {
   DANIEL,
   EMPRESA,
@@ -54,16 +55,33 @@ function ALardanPage() {
         <p>{EMPRESA.fundacao}</p>
       </PageHero>
 
-      <section className="mx-auto max-w-4xl px-6 pb-16">
-        <img
-          src={editorialAsset.url}
-          alt="Editorial Lardan com semijoias em ambiente de vidro e luz marfim"
-          loading="lazy"
-          width={1664}
-          height={928}
-          className="aspect-[16/9] w-full rounded-2xl object-cover"
-          style={{ boxShadow: "var(--shadow-soft)" }}
-        />
+      <section aria-label="Lardan e seus fundadores" className="mx-auto max-w-6xl px-6 pb-20 md:pb-24">
+        <div className="grid items-stretch overflow-hidden rounded-md border border-border bg-card md:grid-cols-[0.92fr_1.08fr]">
+          <div className="relative flex min-h-72 items-center justify-center overflow-hidden px-8 py-16 sm:px-14 md:min-h-[34rem] md:px-16">
+            <div aria-hidden="true" className="absolute inset-0 bg-secondary/45" />
+            <div aria-hidden="true" className="absolute inset-x-10 top-1/2 h-px bg-primary/30" />
+            <img
+              src={logoInstitucional.url}
+              alt="Lardan"
+              width={1190}
+              height={205}
+              className="relative z-10 h-auto w-full max-w-[31rem]"
+            />
+          </div>
+          <figure className="relative min-h-[28rem] overflow-hidden md:min-h-[34rem]">
+            <img
+              src={casalOficial.url}
+              alt="Larissa Persinato Dias Maciel e Daniel de Freitas Maciel, fundadores da Lardan"
+              loading="eager"
+              decoding="async"
+              width={1122}
+              height={1402}
+              className="absolute inset-0 h-full w-full object-cover object-[center_34%]"
+            />
+            <div aria-hidden="true" className="absolute inset-y-0 left-0 hidden w-16 bg-gradient-to-r from-card/35 to-transparent md:block" />
+            <figcaption className="sr-only">Larissa e Daniel, fundadores da Lardan.</figcaption>
+          </figure>
+        </div>
       </section>
 
       {/* Texto institucional oficial da empresa. */}

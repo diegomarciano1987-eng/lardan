@@ -6592,6 +6592,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"][]
       }
       network_cobertura: { Args: { _filtros?: Json }; Returns: Json }
+      network_geo_candidaturas: { Args: { _filtros?: Json }; Returns: Json }
       network_geo_municipios: {
         Args: { _filtros?: Json; _uf: string }
         Returns: {

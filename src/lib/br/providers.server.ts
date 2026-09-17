@@ -216,7 +216,9 @@ export async function lookupAddressByPostalCode(
   if (await excedeuLimite(userId))
     return { ...base, status: "limite", mensagem: "Muitas consultas seguidas. Aguarde um instante." };
 
-  const cacheado = await lerCache<EnderecoConsultado>("viacep", cep);
+  const cacheado =
+    (await lerCache<EnderecoConsultado>("viacep", cep)) ??
+    (await lerCache<EnderecoConsultado>("brasilapi", cep));
   if (cacheado) {
     await auditar({
       provider: "viacep", kind: "cep", referencia: cep, status: "ok",

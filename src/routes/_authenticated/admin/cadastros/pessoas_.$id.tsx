@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, ShieldAlert, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ShieldAlert, Loader2, Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { SmartSelect } from "@/components/premium/SmartSelect";
@@ -31,6 +32,8 @@ import {
 } from "@/lib/registry";
 import { DOC_ESTADO_LABEL, docEstado, formatDoc, maskCepInput, maskDoc, maskDocInput, maskPhoneInput } from "@/lib/docs-br";
 import { UFS } from "@/lib/catalog";
+import { consultarCep, listarMunicipios } from "@/lib/br/lookup.functions";
+import { normalizarEmail, normalizarTelefone, normalizarWhatsapp } from "@/lib/br/canonico";
 
 export const Route = createFileRoute("/_authenticated/admin/cadastros/pessoas_/$id")({
   component: FichaPessoa,
@@ -49,7 +52,7 @@ function Campo({
 }: {
   label: string;
   children: React.ReactNode;
-  help?: string;
+  help?: string | undefined;
 }) {
   return (
     <label className="flex flex-col gap-1.5">
@@ -113,6 +116,9 @@ function FichaPessoa() {
 
   const salvar = useMutation({
     mutationFn: async () => {
+      if (form.doc?.trim() && docEstado(form.doc) === "invalido") {
+        throw new Error("CPF/CNPJ inválido: confira os dígitos antes de salvar.");
+      }
       await saveParty(
         {
           kind: form.kind ?? "pessoa",
@@ -616,7 +622,12 @@ function NovoContato({ onAdd }: { onAdd: (kind: "whatsapp" | "telefone" | "email
         className="admin-btn"
         disabled={valor.trim().length < 5}
         onClick={async () => {
-          await onAdd(kind, valor.trim());
+          const resultado = kind === "email" ? normalizarEmail(valor) : kind === "whatsapp" ? normalizarWhatsapp(valor) : normalizarTelefone(valor);
+          if (resultado.estado !== "valido" || !resultado.canonico) {
+            toast.error(resultado.erro ?? "Contato inválido.");
+            return;
+          }
+          await onAdd(kind, resultado.canonico);
           setValor("");
         }}
       >
@@ -641,11 +652,43 @@ function EnderecoForm({
   useEffect(() => setA((inicial as unknown as Record<string, unknown>) ?? {}), [inicial]);
   const v = (k: string) => (a[k] as string) ?? "";
   const set = (k: string, val: unknown) => setA((s) => ({ ...s, [k]: val }));
+  const consultarCepFn = useServerFn(consultarCep);
+  const listarMunicipiosFn = useServerFn(listarMunicipios);
+  const [consultando, setConsultando] = useState(false);
+  const uf = v("uf");
+  const municipios = useQuery({
+    queryKey: ["ibge-municipios", uf],
+    enabled: Boolean(uf),
+    queryFn: async () => {
+      const r = await listarMunicipiosFn({ data: { uf } });
+      if (r.status !== "ok") throw new Error(r.mensagem ?? "Municípios indisponíveis.");
+      return r.dados ?? [];
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+  });
+
+  async function buscarCep() {
+    setConsultando(true);
+    try {
+      const r = await consultarCepFn({ data: { cep: v("postal_code") } });
+      if (r.status !== "ok" || !r.dados) throw new Error(r.mensagem ?? "CEP não localizado.");
+      const d = r.dados;
+      setA((s) => ({ ...s, postal_code: maskCepInput(d.cep), street: d.logradouro ?? s["street"], complement: d.complemento ?? s["complement"], district: d.bairro ?? s["district"], city: d.cidade ?? s["city"], uf: d.uf ?? s["uf"], ibge_city_code: d.ibge ?? s["ibge_city_code"] }));
+      toast.success(`Endereço preenchido · fonte ${r.provider}${r.cache ? " (cache)" : ""}.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Consulta indisponível. Preencha manualmente.");
+    } finally {
+      setConsultando(false);
+    }
+  }
 
   return (
     <div className="grid gap-4 p-5 md:grid-cols-2">
       <Campo label="CEP">
-        <input className={inputCls} disabled={!podeEditar} value={maskCepInput(v("postal_code"))} onChange={(e) => set("postal_code", maskCepInput(e.target.value))} />
+        <div className="flex gap-2">
+          <input className={inputCls} disabled={!podeEditar} value={maskCepInput(v("postal_code"))} onChange={(e) => set("postal_code", maskCepInput(e.target.value))} onBlur={() => { if (v("postal_code").replace(/\D/g, "").length === 8) void buscarCep(); }} />
+          <button type="button" className="admin-btn h-11 px-3" aria-label="Consultar CEP" title="Consultar CEP" disabled={!podeEditar || consultando} onClick={() => void buscarCep()}>{consultando ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <Search aria-hidden className="size-4" />}</button>
+        </div>
       </Campo>
       <Campo label="Logradouro">
         <input className={inputCls} disabled={!podeEditar} value={v("street")} onChange={(e) => set("street", e.target.value)} />
@@ -663,13 +706,15 @@ function EnderecoForm({
         <input className={inputCls} disabled={!podeEditar} value={v("district")} onChange={(e) => set("district", e.target.value)} />
       </Campo>
       <Campo label="Cidade">
-        <input className={inputCls} disabled={!podeEditar} value={v("city")} onChange={(e) => set("city", e.target.value)} />
+        {uf && (municipios.data?.length ?? 0) > 0 ? (
+          <SmartSelect disabled={!podeEditar} value={v("ibge_city_code")} onChange={(x) => { const m = municipios.data?.find((item) => item.codigo_ibge === x); setA((s) => ({ ...s, ibge_city_code: x, city: m?.nome ?? s["city"] })); }} options={(municipios.data ?? []).map((m) => ({ value: m.codigo_ibge, label: m.nome }))} placeholder={municipios.isLoading ? "Carregando municípios…" : "Selecione o município"} />
+        ) : <input className={inputCls} disabled={!podeEditar} value={v("city")} onChange={(e) => set("city", e.target.value)} />}
       </Campo>
       <Campo label="UF">
         <SmartSelect
           disabled={!podeEditar}
           value={v("uf")}
-          onChange={(x) => set("uf", x)}
+          onChange={(x) => setA((s) => ({ ...s, uf: x, city: "", ibge_city_code: "" }))}
           options={UFS.map((u) => ({ value: u, label: u }))}
           placeholder="UF"
         />

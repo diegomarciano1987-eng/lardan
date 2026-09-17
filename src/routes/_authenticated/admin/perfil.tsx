@@ -15,6 +15,7 @@ import {
   signedAvatarUrl,
   updateMyProfile,
 } from "@/lib/profile";
+import { formatarTelefone, normalizarTelefone } from "@/lib/br/canonico";
 
 export const Route = createFileRoute("/_authenticated/admin/perfil")({
   component: PerfilPage,
@@ -204,13 +205,18 @@ function DadosCard({
   const [erro, setErro] = useState<string | null>(null);
 
   const salvar = useMutation({
-    mutationFn: () =>
-      updateMyProfile({
+    mutationFn: () => {
+      const telefone = normalizarTelefone(form.phone);
+      if (telefone.estado !== "vazio" && telefone.estado !== "valido") {
+        throw new Error(telefone.erro ?? "Telefone inválido.");
+      }
+      return updateMyProfile({
         full_name: form.full_name.trim() || null,
         display_name: form.display_name.trim() || null,
         job_title: form.job_title.trim() || null,
-        phone: form.phone.trim() || null,
-      }),
+        phone: telefone.canonico,
+      });
+    },
     onSuccess: () => {
       setErro(null);
       setOk(true);
@@ -233,7 +239,10 @@ function DadosCard({
         type={type}
         value={form[name]}
         placeholder={placeholder}
-        onChange={(e) => setForm((f) => ({ ...f, [name]: e.target.value }))}
+          onChange={(e) => setForm((f) => ({
+            ...f,
+            [name]: name === "phone" ? formatarTelefone(e.target.value) : e.target.value,
+          }))}
       />
     </div>
   );

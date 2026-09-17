@@ -16,7 +16,13 @@ import {
   type PartnerKind,
   type PartnerRow,
 } from "@/lib/partners";
-import { formatarDocumento, normalizarDocumento } from "@/lib/br/canonico";
+import {
+  formatarDocumento,
+  formatarTelefone,
+  normalizarDocumento,
+  normalizarEmail,
+  normalizarTelefone,
+} from "@/lib/br/canonico";
 import { consultarCnpj } from "@/lib/br/lookup.functions";
 import { UFS } from "@/lib/catalog";
 
@@ -100,12 +106,18 @@ export function PartnersPage({
 
   const salvar = useMutation({
     mutationFn: async (values: RecordValues) => {
+      const email = normalizarEmail(String(values["email"] ?? ""));
+      if (email.estado === "invalido") throw new Error(email.erro ?? "E-mail inválido.");
+      const telefone = normalizarTelefone(String(values["telefone"] ?? ""));
+      if (telefone.estado !== "vazio" && telefone.estado !== "valido") {
+        throw new Error(telefone.erro ?? "Telefone inválido.");
+      }
       const draft: PartnerDraft = {
         nome: String(values["nome"] ?? "").trim(),
         fantasia: (values["fantasia"] as string) || null,
         contato: (values["contato"] as string) || null,
-        email: (values["email"] as string) || null,
-        telefone: (values["telefone"] as string) || null,
+        email: email.canonico,
+        telefone: telefone.canonico,
         inscricao_estadual: (values["inscricao_estadual"] as string) || null,
         cidade: (values["cidade"] as string) || null,
         uf: (values["uf"] as string) || null,
@@ -238,8 +250,8 @@ export function PartnersPage({
     } else {
       lista.push(
         { name: "contato", label: "Pessoa de contato", type: "text" },
-        { name: "email", label: "E-mail", type: "text" },
-        { name: "telefone", label: "Telefone", type: "text" },
+        { name: "email", label: "E-mail", type: "text", placeholder: "nome@empresa.com.br" },
+        { name: "telefone", label: "Telefone", type: "text", placeholder: "(00) 00000-0000" },
       );
     }
     lista.push(
@@ -260,7 +272,7 @@ export function PartnersPage({
       inscricao_estadual: editando.inscricao_estadual ?? "",
       contato: editando.contato ?? "",
       email: editando.email ?? "",
-      telefone: editando.telefone ?? "",
+      telefone: editando.telefone ? formatarTelefone(editando.telefone) : "",
       cidade: editando.cidade ?? "",
       uf: editando.uf ?? "",
       notas: editando.notas ?? "",

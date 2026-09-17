@@ -1,7 +1,14 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRIVACY_VERSION, captureUtm, entryUrl } from "@/lib/privacy";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { consultarCepPublico, listarMunicipiosPublico } from "@/lib/br/lookup.functions";
+import { formatarCep, formatarTelefone, normalizarCep, normalizarWhatsapp } from "@/lib/br/canonico";
 
 type Args = Record<string, unknown>;
 function semVazios<T extends Args>(o: T): T {
@@ -55,6 +62,52 @@ export function SejaLardanForm() {
   const [protocolo, setProtocolo] = useState<string | null>(null);
   const [semNumero, setSemNumero] = useState(false);
   const [uf, setUf] = useState("");
+  const [cep, setCep] = useState("");
+  const [rua, setRua] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [codigoIbge, setCodigoIbge] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [consultandoCep, setConsultandoCep] = useState(false);
+  const [estadoCep, setEstadoCep] = useState<string | null>(null);
+  const consultarCepFn = useServerFn(consultarCepPublico);
+  const listarMunicipiosFn = useServerFn(listarMunicipiosPublico);
+
+  const municipios = useQuery({
+    queryKey: ["ibge-municipios-publico", uf],
+    enabled: Boolean(uf),
+    queryFn: async () => {
+      const r = await listarMunicipiosFn({ data: { uf } });
+      if (r.status !== "ok") throw new Error(r.mensagem ?? "Municípios indisponíveis.");
+      return r.dados ?? [];
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+  });
+
+  async function buscarCep() {
+    const c = normalizarCep(cep);
+    if (c.estado !== "valido") {
+      setEstadoCep(c.erro);
+      return;
+    }
+    setConsultandoCep(true);
+    setEstadoCep(null);
+    try {
+      const r = await consultarCepFn({ data: { cep: c.canonico ?? "" } });
+      if (r.status !== "ok" || !r.dados) throw new Error(r.mensagem ?? "CEP não localizado.");
+      const d = r.dados;
+      setCep(formatarCep(d.cep));
+      if (d.logradouro) setRua(d.logradouro);
+      if (d.cidade) setCidade(d.cidade);
+      if (d.uf) setUf(d.uf);
+      if (d.ibge) setCodigoIbge(d.ibge);
+      setEstadoCep(`Endereço localizado · fonte ${r.provider}${r.cache ? " (cache)" : ""}.`);
+    } catch (e) {
+      setEstadoCep(e instanceof Error ? e.message : "Consulta indisponível. Preencha manualmente.");
+    } finally {
+      setConsultandoCep(false);
+    }
+  }
 
   async function enviar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -65,18 +118,24 @@ export function SejaLardanForm() {
       const v = form.get(k);
       return typeof v === "string" && v.trim() !== "" ? v.trim() : undefined;
     };
+    const whatsappCanonico = normalizarWhatsapp(whatsapp);
+    if (whatsappCanonico.estado !== "valido" || !whatsappCanonico.canonico) {
+      setBusy(false);
+      setErro(whatsappCanonico.erro ?? "WhatsApp inválido.");
+      return;
+    }
 
     const { data, error } = await supabase.rpc(
       "submit_lead",
       semVazios({
         p_full_name: texto("full_name") ?? "",
-        p_whatsapp: texto("whatsapp") ?? "",
+        p_whatsapp: whatsappCanonico.canonico,
         p_city: texto("city") ?? "",
         p_uf: texto("uf") ?? "",
         p_street: texto("street"),
         p_street_number: semNumero ? undefined : texto("street_number"),
         p_no_number: semNumero,
-        p_postal_code: texto("postal_code"),
+        p_postal_code: normalizarCep(cep).canonico ?? undefined,
         p_financial_goal: texto("financial_goal"),
         p_availability: texto("availability"),
         p_experience: texto("experience"),
@@ -86,7 +145,7 @@ export function SejaLardanForm() {
         p_entry_url: entryUrl() ?? undefined,
         p_utm: captureUtm(),
         p_privacy_version: PRIVACY_VERSION,
-        p_marketing_consent: form.get("marketing_consent") === "on",
+        p_marketing_consent: marketingConsent,
       }) as never,
     );
 
@@ -133,6 +192,8 @@ export function SejaLardanForm() {
             required
             inputMode="tel"
             placeholder="(00) 00000-0000"
+            value={whatsapp}
+            onChange={(e) => setWhatsapp(formatarTelefone(e.target.value))}
             className={field}
           />
         </div>
@@ -142,7 +203,7 @@ export function SejaLardanForm() {
         <legend className="brand-eyebrow mb-4">Endereço</legend>
         <div>
           <Label htmlFor="street">Rua</Label>
-          <input id="street" name="street" className={field} />
+          <input id="street" name="street" value={rua} onChange={(e) => setRua(e.target.value)} className={field} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -154,30 +215,28 @@ export function SejaLardanForm() {
               className={`${field} disabled:opacity-50`}
             />
             <label className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-              <input
-                type="checkbox"
-                checked={semNumero}
-                onChange={(e) => setSemNumero(e.target.checked)}
-                className="h-4 w-4 rounded border-input"
-              />
+              <Checkbox checked={semNumero} onCheckedChange={(v) => setSemNumero(v === true)} />
               Sem número
             </label>
           </div>
           <div>
             <Label htmlFor="postal_code">CEP</Label>
-            <input
-              id="postal_code"
-              name="postal_code"
-              inputMode="numeric"
-              placeholder="00000-000"
-              className={field}
-            />
+            <div className="flex gap-2">
+              <input id="postal_code" name="postal_code" inputMode="numeric" placeholder="00000-000" value={cep} onChange={(e) => { setCep(formatarCep(e.target.value)); setEstadoCep(null); }} onBlur={() => { if (normalizarCep(cep).estado === "valido") void buscarCep(); }} className={field} />
+              <Button type="button" variant="outline" size="icon" className="h-11 w-11 shrink-0" aria-label="Consultar CEP" title="Consultar CEP" disabled={consultandoCep} onClick={() => void buscarCep()}>
+                {consultandoCep ? <Loader2 aria-hidden className="animate-spin" /> : <Search aria-hidden />}
+              </Button>
+            </div>
+            {estadoCep ? <p role="status" className="mt-2 text-xs text-muted-foreground">{estadoCep}</p> : null}
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
           <div>
             <Label htmlFor="city">Cidade</Label>
-            <input id="city" name="city" required className={field} />
+            {uf && (municipios.data?.length ?? 0) > 0 ? (
+              <SmartSelect id="city-select" required value={codigoIbge} onChange={(v) => { const m = municipios.data?.find((item) => item.codigo_ibge === v); setCodigoIbge(v); setCidade(m?.nome ?? cidade); }} options={(municipios.data ?? []).map((m) => ({ value: m.codigo_ibge, label: m.nome }))} placeholder={municipios.isLoading ? "Carregando…" : "Selecione a cidade"} searchPlaceholder="Buscar município…" />
+            ) : <input id="city" value={cidade} onChange={(e) => setCidade(e.target.value)} required className={field} />}
+            <input type="hidden" name="city" value={cidade} />
           </div>
           <div>
             <Label htmlFor="uf">UF</Label>
@@ -186,7 +245,7 @@ export function SejaLardanForm() {
               name="uf"
               required
               value={uf}
-              onChange={setUf}
+              onChange={(v) => { setUf(v); setCidade(""); setCodigoIbge(""); }}
               placeholder="UF"
               searchPlaceholder="Buscar estado..."
               searchThreshold={1}
@@ -221,11 +280,7 @@ export function SejaLardanForm() {
       </fieldset>
 
       <label className="flex items-start gap-3 text-xs leading-relaxed text-muted-foreground">
-        <input
-          type="checkbox"
-          name="marketing_consent"
-          className="mt-0.5 h-4 w-4 rounded border-input"
-        />
+        <Checkbox checked={marketingConsent} onCheckedChange={(v) => setMarketingConsent(v === true)} className="mt-0.5" />
         Aceito receber comunicações da Lardan sobre novidades e oportunidades (opcional, pode ser
         cancelado a qualquer momento).
       </label>
@@ -241,13 +296,13 @@ export function SejaLardanForm() {
         </p>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={busy}
-        className="rounded-full bg-primary px-8 py-3 text-[0.75rem] tracking-[0.22em] uppercase text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+        className="h-11 rounded-full px-8 text-[0.75rem] uppercase"
       >
         {busy ? "Enviando…" : "Enviar candidatura"}
-      </button>
+      </Button>
     </form>
   );
 }

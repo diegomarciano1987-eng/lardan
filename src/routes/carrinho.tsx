@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Minus, Plus, ShoppingBag, Sparkles, Truck, X } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { formatPreco, mediaUrl } from "@/lib/storefront";
@@ -11,6 +12,7 @@ import {
   useCarrinho,
 } from "@/lib/carrinho";
 import { ogImageMeta } from "@/lib/seo";
+import { consultarCepPublico } from "@/lib/br/lookup.functions";
 
 export const Route = createFileRoute("/carrinho")({
   component: CarrinhoPage,
@@ -196,6 +198,10 @@ function CarrinhoPage() {
 function SimuladorFrete() {
   const [cep, setCep] = useState("");
   const [simulado, setSimulado] = useState(false);
+  const [consultando, setConsultando] = useState(false);
+  const [destino, setDestino] = useState<string | null>(null);
+  const [erroCep, setErroCep] = useState<string | null>(null);
+  const consultarCepFn = useServerFn(consultarCepPublico);
 
   const digitos = cep.replace(/\D/g, "").slice(0, 8);
   const formatado = digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
@@ -223,15 +229,29 @@ function SimuladorFrete() {
         <button
           type="button"
           disabled={!valido}
-          onClick={() => setSimulado(true)}
+          onClick={async () => {
+            setConsultando(true);
+            setErroCep(null);
+            try {
+              const r = await consultarCepFn({ data: { cep: digitos } });
+              if (r.status !== "ok" || !r.dados) throw new Error(r.mensagem ?? "CEP não localizado.");
+              setDestino([r.dados.cidade, r.dados.uf].filter(Boolean).join(" / "));
+              setSimulado(true);
+            } catch (e) {
+              setSimulado(false);
+              setErroCep(e instanceof Error ? e.message : "Não foi possível consultar o CEP.");
+            } finally {
+              setConsultando(false);
+            }
+          }}
           className="shrink-0 rounded-full border border-foreground/25 px-5 text-[0.625rem] tracking-[0.22em] uppercase text-foreground transition-colors hover:border-foreground/60 disabled:opacity-40"
         >
-          Calcular
+          {consultando ? "Consultando…" : "Calcular"}
         </button>
       </div>
 
       {simulado ? (
-        <ul className="mt-6 space-y-3 text-sm">
+        <><p className="mt-5 text-xs text-muted-foreground">Destino confirmado: {destino}.</p><ul className="mt-3 space-y-3 text-sm">
           {[
             { nome: "Entrega padrão", prazo: "5 a 8 dias úteis" },
             { nome: "Entrega expressa", prazo: "2 a 3 dias úteis" },
@@ -242,7 +262,9 @@ function SimuladorFrete() {
               <span className="text-xs text-muted-foreground">{o.prazo} · valor a confirmar</span>
             </li>
           ))}
-        </ul>
+        </ul></>
+      ) : erroCep ? (
+        <p role="alert" className="mt-5 text-xs leading-relaxed text-destructive">{erroCep}</p>
       ) : (
         <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
           Informe o CEP para ver as opções de entrega. Os valores reais entram quando a entrega for ativada.

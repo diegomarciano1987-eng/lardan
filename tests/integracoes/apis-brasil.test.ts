@@ -13,6 +13,7 @@ import {
   __definirTransporteDeTeste,
   lookupAddressByPostalCode,
   lookupCompanyByTaxId,
+  listMunicipalitiesByState,
 } from "@/lib/br/providers.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
@@ -27,6 +28,7 @@ const CEP_QUEDA = "99990007";
 const CNPJ_OK = "19131243000197"; // válido matematicamente
 const CNPJ_INEXISTENTE = "11444777000161";
 const CNPJ_ALFA = "12ABC34501DE35";
+const UF_IBGE = "TO";
 
 const CEPS = [CEP_OK, CEP_FALLBACK, CEP_INEXISTENTE, CEP_TIMEOUT, CEP_LIMITE, CEP_CACHE, CEP_QUEDA];
 
@@ -279,6 +281,36 @@ describe("CNPJ — provedor simulado", () => {
     const hit = await lookupCompanyByTaxId(CNPJ_OK, null, { comQsa: false });
     expect(chamadas).toBe(1);
     expect(hit.cache).toBe(true);
+  });
+});
+
+describe("IBGE — municípios por UF", () => {
+  it("UF válida devolve somente código e nome oficiais", async () => {
+    instalarTransporte((url) => {
+      expect(url).toContain(`/estados/${UF_IBGE}/municipios`);
+      return json([
+        { id: 1721000, nome: "Palmas", microrregiao: { campo: "descartado" } },
+        { id: 1702109, nome: "Araguaína" },
+      ]);
+    });
+    const r = await listMunicipalitiesByState(UF_IBGE, null);
+    expect(r.status).toBe("ok");
+    expect(r.dados).toEqual([
+      { codigo_ibge: "1721000", nome: "Palmas" },
+      { codigo_ibge: "1702109", nome: "Araguaína" },
+    ]);
+    expect(JSON.stringify(r.dados)).not.toContain("descartado");
+  });
+
+  it("UF inválida não chama o IBGE", async () => {
+    let chamadas = 0;
+    instalarTransporte(() => {
+      chamadas += 1;
+      return json([]);
+    });
+    const r = await listMunicipalitiesByState("XX", null);
+    expect(r.status).toBe("dado_invalido");
+    expect(chamadas).toBe(0);
   });
 });
 

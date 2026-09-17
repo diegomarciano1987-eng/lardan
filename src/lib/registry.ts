@@ -122,6 +122,7 @@ export interface PartyAddress {
   district: string | null;
   city: string | null;
   uf: string | null;
+  ibge_city_code?: string | null;
   reference: string | null;
   is_primary: boolean;
 }
@@ -326,6 +327,7 @@ export async function saveAddress(partyId: string, a: Partial<PartyAddress>) {
     district: a.district ?? null,
     city: a.city ?? null,
     uf: a.uf ?? null,
+    ibge_city_code: a.ibge_city_code ?? null,
     reference: a.reference ?? null,
   };
   const { error } = a.id

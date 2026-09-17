@@ -120,6 +120,19 @@ function RedePage() {
     }));
   }, [uf, geral.data, municipios.data]);
 
+  const candidaturasPorChave = useMemo(() => {
+    const mapa = new Map<string, number>();
+    if (!mostrarCandidaturas) return mapa;
+    if (!uf) {
+      for (const e of candidaturas.data?.estados ?? []) mapa.set(e.uf, e.total);
+    } else {
+      for (const m of candidaturas.data?.municipios ?? []) {
+        if (m.codigo_ibge) mapa.set(m.codigo_ibge, m.total);
+      }
+    }
+    return mapa;
+  }, [uf, candidaturas.data, mostrarCandidaturas]);
+
   if (!podeVer) {
     return (
       <div className="space-y-6">

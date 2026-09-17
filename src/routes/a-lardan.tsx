@@ -117,7 +117,7 @@ function ALardanPage() {
             </article>
 
             <article aria-labelledby="a-lardan-larissa">
-              <RetratoOficial retrato={larissaPortrait} rotulo="Foto oficial de Larissa" />
+              <RetratoOficial retrato={larissaPortraitSeja} rotulo="Foto oficial de Larissa" />
               <h3 id="a-lardan-larissa" className="mt-8 text-2xl text-foreground">
                 {LARISSA.nome}
               </h3>

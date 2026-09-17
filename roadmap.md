@@ -23,6 +23,8 @@
 - [x] 21. Vídeos do Seja Lardan com IntersectionObserver + prefers-reduced-motion
 - [x] 22. theme-color / apple-touch-icon
 - [x] 23. Build, testes (237), provas
+- [x] 24. llms.txt substituído pelo documento oficial aprovado (domínio derivado
+      de SITE_URL, sem URLs manuais)
 
 ## Pendências (dependem do cliente / jurídico)
 

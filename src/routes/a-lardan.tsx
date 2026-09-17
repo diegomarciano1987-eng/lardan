@@ -98,7 +98,10 @@ function ALardanPage() {
 
           <div className="mt-14 grid gap-14 md:grid-cols-2 md:gap-16">
             <article aria-labelledby="a-lardan-daniel">
-              <RetratoOficial retrato={danielPortrait} rotulo="Foto oficial de Daniel" />
+              <RetratoOficial
+                retrato={danielPortraitInstitucional}
+                rotulo="Foto oficial de Daniel"
+              />
               <h3 id="a-lardan-daniel" className="mt-8 text-2xl text-foreground">
                 {DANIEL.nome}
               </h3>

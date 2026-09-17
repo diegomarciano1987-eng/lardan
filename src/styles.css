@@ -245,6 +245,32 @@
   mix-blend-mode: screen;
 }
 
+.seja-perfil-band {
+  min-height: min(46rem, 90vh);
+  background: var(--rose-deep);
+}
+
+.seja-perfil-band > video {
+  filter: brightness(0.86) saturate(0.42) contrast(0.92);
+  transform: scale(1.035);
+}
+
+.seja-perfil-band__veil {
+  background:
+    linear-gradient(100deg, oklch(0.3 0.04 25 / 0.78), oklch(0.58 0.065 27 / 0.68)),
+    linear-gradient(180deg, oklch(0.24 0.03 25 / 0.48), oklch(0.28 0.04 25 / 0.74));
+}
+
+.seja-perfil-band__light {
+  background: linear-gradient(
+    125deg,
+    oklch(0.88 0.04 35 / 0.08),
+    transparent 42%,
+    oklch(0.82 0.06 28 / 0.16)
+  );
+  mix-blend-mode: screen;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cinematic-title-ready .cinematic-title-letter,
   .cinematic-title-ready.cinematic-title-visible .cinematic-title-letter {
@@ -255,6 +281,10 @@
   }
 
   .seja-cinematic-band > video {
+    display: none;
+  }
+
+  .seja-perfil-band > video {
     display: none;
   }
 }

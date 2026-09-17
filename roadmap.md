@@ -5,6 +5,7 @@
 - [x] Usar o vídeo enviado como fundo discreto da seção “Não é apenas sobre vender semijoias”
 - [x] Aplicar entradas cinematográficas aos títulos da página, respeitando redução de movimento
 - [x] Validar desktop, mobile, entrega do vídeo, legibilidade e ausência de estouro horizontal
+- [x] Aplicar o segundo vídeo com overlay rose claro à seção “Ser Lardan não é para qualquer pessoa” e validar contraste
 
 Referência: ANEXO A Lardan Cloud. Regra permanente: não mexer em catálogo,
 produtos, imagens e vitrine institucional já publicados.

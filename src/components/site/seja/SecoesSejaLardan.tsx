@@ -76,7 +76,7 @@ export function SejaEmocional() {
         loop
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
         poster={cinematicPoster.url}
         className="absolute inset-0 -z-30 h-full w-full object-cover"
       >

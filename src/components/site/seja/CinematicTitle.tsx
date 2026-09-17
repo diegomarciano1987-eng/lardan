@@ -42,8 +42,7 @@ export function CinematicTitle({
   let visibleIndex = 0;
 
   return (
-    <Tag ref={ref} id={id} className={`cinematic-title ${className}`}>
-      <span className="sr-only">{children}</span>
+    <Tag ref={ref} id={id} aria-label={children} className={`cinematic-title ${className}`}>
       <span aria-hidden="true" className="cinematic-title-visual">
         {children.split(" ").map((word, wordIndex, words) => (
           <span className="cinematic-title-word" key={`${word}-${wordIndex}`}>

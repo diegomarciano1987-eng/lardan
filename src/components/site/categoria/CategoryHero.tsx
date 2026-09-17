@@ -9,7 +9,7 @@ export function CategoryHero({ categoria }: { categoria: CategoriaDetalhe }) {
 
   return (
     <header className="relative overflow-hidden">
-      <div className="mx-auto grid max-w-[88rem] items-center gap-12 px-6 pb-16 pt-32 md:min-h-[78vh] md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:gap-20 md:pb-24 md:pt-44">
+      <div className="mx-auto grid max-w-[88rem] items-center gap-12 px-6 pb-16 pt-28 md:min-h-[72vh] md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:gap-20 md:pb-24 md:pt-36">
         <div className="max-w-xl">
           <nav aria-label="Trilha de navegação" className="mb-8">
             <ol className="flex items-center gap-2 text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground">

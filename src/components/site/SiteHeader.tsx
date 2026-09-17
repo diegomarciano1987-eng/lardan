@@ -44,7 +44,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
   useEffect(() => {
     const medir = () => {
       // Fundo aparece ao sair da primeira seção (hero) da página.
-      const limiar = Math.max(window.innerHeight * 0.75, 320);
+      const limiar = Math.max(window.innerHeight * 0.55, 240);
       setRolou(window.scrollY > limiar);
     };
     medir();

@@ -65,7 +65,7 @@ function ALardanPage() {
         <div className="grid items-stretch overflow-hidden rounded-md border border-border bg-card md:grid-cols-[0.92fr_1.08fr]">
           <div className="relative flex min-h-72 items-center justify-center overflow-hidden px-8 py-16 sm:px-14 md:min-h-[34rem] md:px-16">
             <div aria-hidden="true" className="absolute inset-0 bg-secondary/45" />
-            <div aria-hidden="true" className="absolute inset-x-10 top-1/2 h-px bg-primary/30" />
+            
             <img
               src={logoInstitucional.url}
               alt="Lardan"

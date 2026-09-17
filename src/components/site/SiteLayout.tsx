@@ -1,15 +1,30 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { VoltarLink } from "./VoltarLink";
 import { useAppleWebKit } from "@/hooks/use-scroll-progress";
+import { registrarPrimeiroContato, registrarVisitaEditorial } from "@/lib/crm/tracking";
+import { CAMINHOS_EDITORIAIS } from "@/lib/editorial/rotas";
+
+/** Rotas públicas sem intenção comercial: não registram origem. */
+const SEM_TRACKING = ["/acesso"];
 
 export function SiteLayout({ children, brandedHeader = false }: { children: ReactNode; brandedHeader?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const comVoltar = pathname !== "/";
   // Marca <html class="is-apple"> em Safari/iOS para os ajustes de desempenho.
   useAppleWebKit();
+
+  // Primeiro contato registrado já na camada pública do site (não só no
+  // formulário), preservando o first touch real de quem chega por um guia.
+  useEffect(() => {
+    if (SEM_TRACKING.some((p) => pathname.startsWith(p))) return;
+    registrarPrimeiroContato();
+    if ((CAMINHOS_EDITORIAIS as readonly string[]).includes(pathname)) {
+      registrarVisitaEditorial(pathname);
+    }
+  }, [pathname]);
 
   return (
     <div className="site-scope min-h-screen bg-background">

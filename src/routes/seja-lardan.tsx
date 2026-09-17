@@ -14,6 +14,7 @@ import {
   SejaVidaReal,
 } from "@/components/site/seja/SecoesSejaLardan";
 import { SejaHistoria } from "@/components/site/seja/SejaHistoria";
+import { SejaGuias } from "@/components/site/seja/SejaGuias";
 import { CinematicTitle } from "@/components/site/seja/CinematicTitle";
 import { FAQ } from "@/lib/seja-lardan-conteudo";
 import {
@@ -60,6 +61,8 @@ function SejaLardanPage() {
       <SejaVidaReal />
       <SejaPerfil />
       <SejaProcesso />
+      <SejaGuias />
+
 
       <section
         id="candidatura"

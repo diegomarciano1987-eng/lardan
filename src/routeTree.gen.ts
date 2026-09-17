@@ -19,9 +19,13 @@ import { Route as BrincosRouteImport } from './routes/brincos'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as ColaresRouteImport } from './routes/colares'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
+import { Route as ComoComecarAVenderSemijoiasRouteImport } from './routes/como-comecar-a-vender-semijoias'
+import { Route as ComoVenderSemijoiasPeloWhatsappRouteImport } from './routes/como-vender-semijoias-pelo-whatsapp'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as PulseirasRouteImport } from './routes/pulseiras'
+import { Route as RendaExtraComVendasRouteImport } from './routes/renda-extra-com-vendas'
 import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
+import { Route as SemijoiasConsignadasParaRevendaRouteImport } from './routes/semijoias-consignadas-para-revenda'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedConsultoraRouteImport } from './routes/_authenticated/consultora'
@@ -121,6 +125,18 @@ const ColecoesRoute = ColecoesRouteImport.update({
   path: '/colecoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComoComecarAVenderSemijoiasRoute =
+  ComoComecarAVenderSemijoiasRouteImport.update({
+    id: '/como-comecar-a-vender-semijoias',
+    path: '/como-comecar-a-vender-semijoias',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ComoVenderSemijoiasPeloWhatsappRoute =
+  ComoVenderSemijoiasPeloWhatsappRouteImport.update({
+    id: '/como-vender-semijoias-pelo-whatsapp',
+    path: '/como-vender-semijoias-pelo-whatsapp',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
@@ -131,11 +147,22 @@ const PulseirasRoute = PulseirasRouteImport.update({
   path: '/pulseiras',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RendaExtraComVendasRoute = RendaExtraComVendasRouteImport.update({
+  id: '/renda-extra-com-vendas',
+  path: '/renda-extra-com-vendas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SejaLardanRoute = SejaLardanRouteImport.update({
   id: '/seja-lardan',
   path: '/seja-lardan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SemijoiasConsignadasParaRevendaRoute =
+  SemijoiasConsignadasParaRevendaRouteImport.update({
+    id: '/semijoias-consignadas-para-revenda',
+    path: '/semijoias-consignadas-para-revenda',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -430,9 +457,13 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof CarrinhoRoute
   '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
+  '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
+  '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
   '/pulseiras': typeof PulseirasRoute
+  '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
   '/seja-lardan': typeof SejaLardanRoute
+  '/semijoias-consignadas-para-revenda': typeof SemijoiasConsignadasParaRevendaRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/consultora': typeof AuthenticatedConsultoraRoute
@@ -493,9 +524,13 @@ export interface FileRoutesByTo {
   '/carrinho': typeof CarrinhoRoute
   '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
+  '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
+  '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
   '/pulseiras': typeof PulseirasRoute
+  '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
   '/seja-lardan': typeof SejaLardanRoute
+  '/semijoias-consignadas-para-revenda': typeof SemijoiasConsignadasParaRevendaRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/consultora': typeof AuthenticatedConsultoraRoute
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -556,9 +591,13 @@ export interface FileRoutesById {
   '/carrinho': typeof CarrinhoRoute
   '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
+  '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
+  '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
   '/pulseiras': typeof PulseirasRoute
+  '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
   '/seja-lardan': typeof SejaLardanRoute
+  '/semijoias-consignadas-para-revenda': typeof SemijoiasConsignadasParaRevendaRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/consultora': typeof AuthenticatedConsultoraRoute
@@ -621,9 +660,13 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/colares'
     | '/colecoes'
+    | '/como-comecar-a-vender-semijoias'
+    | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
     | '/pulseiras'
+    | '/renda-extra-com-vendas'
     | '/seja-lardan'
+    | '/semijoias-consignadas-para-revenda'
     | '/sitemap.xml'
     | '/admin'
     | '/consultora'
@@ -684,9 +727,13 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/colares'
     | '/colecoes'
+    | '/como-comecar-a-vender-semijoias'
+    | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
     | '/pulseiras'
+    | '/renda-extra-com-vendas'
     | '/seja-lardan'
+    | '/semijoias-consignadas-para-revenda'
     | '/sitemap.xml'
     | '/consultora'
     | '/produto/$slug'
@@ -746,9 +793,13 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/colares'
     | '/colecoes'
+    | '/como-comecar-a-vender-semijoias'
+    | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
     | '/pulseiras'
+    | '/renda-extra-com-vendas'
     | '/seja-lardan'
+    | '/semijoias-consignadas-para-revenda'
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/consultora'
@@ -811,9 +862,13 @@ export interface RootRouteChildren {
   CarrinhoRoute: typeof CarrinhoRoute
   ColaresRoute: typeof ColaresRoute
   ColecoesRoute: typeof ColecoesRoute
+  ComoComecarAVenderSemijoiasRoute: typeof ComoComecarAVenderSemijoiasRoute
+  ComoVenderSemijoiasPeloWhatsappRoute: typeof ComoVenderSemijoiasPeloWhatsappRoute
   ContatoRoute: typeof ContatoRoute
   PulseirasRoute: typeof PulseirasRoute
+  RendaExtraComVendasRoute: typeof RendaExtraComVendasRoute
   SejaLardanRoute: typeof SejaLardanRoute
+  SemijoiasConsignadasParaRevendaRoute: typeof SemijoiasConsignadasParaRevendaRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
@@ -893,6 +948,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ColecoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/como-comecar-a-vender-semijoias': {
+      id: '/como-comecar-a-vender-semijoias'
+      path: '/como-comecar-a-vender-semijoias'
+      fullPath: '/como-comecar-a-vender-semijoias'
+      preLoaderRoute: typeof ComoComecarAVenderSemijoiasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-vender-semijoias-pelo-whatsapp': {
+      id: '/como-vender-semijoias-pelo-whatsapp'
+      path: '/como-vender-semijoias-pelo-whatsapp'
+      fullPath: '/como-vender-semijoias-pelo-whatsapp'
+      preLoaderRoute: typeof ComoVenderSemijoiasPeloWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contato': {
       id: '/contato'
       path: '/contato'
@@ -907,11 +976,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PulseirasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/renda-extra-com-vendas': {
+      id: '/renda-extra-com-vendas'
+      path: '/renda-extra-com-vendas'
+      fullPath: '/renda-extra-com-vendas'
+      preLoaderRoute: typeof RendaExtraComVendasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seja-lardan': {
       id: '/seja-lardan'
       path: '/seja-lardan'
       fullPath: '/seja-lardan'
       preLoaderRoute: typeof SejaLardanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/semijoias-consignadas-para-revenda': {
+      id: '/semijoias-consignadas-para-revenda'
+      path: '/semijoias-consignadas-para-revenda'
+      fullPath: '/semijoias-consignadas-para-revenda'
+      preLoaderRoute: typeof SemijoiasConsignadasParaRevendaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -1419,9 +1502,13 @@ const rootRouteChildren: RootRouteChildren = {
   CarrinhoRoute: CarrinhoRoute,
   ColaresRoute: ColaresRoute,
   ColecoesRoute: ColecoesRoute,
+  ComoComecarAVenderSemijoiasRoute: ComoComecarAVenderSemijoiasRoute,
+  ComoVenderSemijoiasPeloWhatsappRoute: ComoVenderSemijoiasPeloWhatsappRoute,
   ContatoRoute: ContatoRoute,
   PulseirasRoute: PulseirasRoute,
+  RendaExtraComVendasRoute: RendaExtraComVendasRoute,
   SejaLardanRoute: SejaLardanRoute,
+  SemijoiasConsignadasParaRevendaRoute: SemijoiasConsignadasParaRevendaRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,

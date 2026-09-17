@@ -9,6 +9,11 @@ const ESTATICAS = [
   { path: "/semijoias", priority: "0.8", changefreq: "weekly" },
   { path: "/colecoes", priority: "0.7", changefreq: "monthly" },
   { path: "/contato", priority: "0.5", changefreq: "yearly" },
+  // Hub editorial (guias assinados). Frequência honesta: atualização editorial.
+  { path: "/renda-extra-com-vendas", priority: "0.8", changefreq: "monthly" },
+  { path: "/como-comecar-a-vender-semijoias", priority: "0.8", changefreq: "monthly" },
+  { path: "/semijoias-consignadas-para-revenda", priority: "0.8", changefreq: "monthly" },
+  { path: "/como-vender-semijoias-pelo-whatsapp", priority: "0.8", changefreq: "monthly" },
 ];
 
 function url(loc: string, priority: string, changefreq: string) {

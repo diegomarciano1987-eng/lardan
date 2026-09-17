@@ -53,6 +53,7 @@ import {
   rotuloTipoFollowup,
 } from "@/lib/crm/api";
 import { cn } from "@/lib/utils";
+import { GUIAS_RESUMO } from "@/lib/editorial";
 
 export const Route = createFileRoute("/_authenticated/admin/candidaturas_/$id")({
   component: CockpitCandidata,
@@ -70,6 +71,35 @@ function Campo({ rotulo, valor }: { rotulo: string; valor: React.ReactNode }) {
       <dt className="ledger-eyebrow">{rotulo}</dt>
       <dd className="mt-1 text-sm break-words text-ledger-text">{valor || "—"}</dd>
     </div>
+  );
+}
+
+/**
+ * Jornada editorial: só aparece quando existe evidência real gravada no
+ * first_touch/last_touch. Nada é deduzido e nenhum campo vazio é exibido.
+ */
+function JornadaEditorialCampos({ origem }: { origem: { first_touch: unknown; last_touch: unknown } }) {
+  const tituloDe = (path?: string) =>
+    path ? (GUIAS_RESUMO.find((g) => g.path === path)?.rotulo ?? path) : undefined;
+  const jornadaDe = (t: unknown) =>
+    ((t as { tracking?: { jornada?: Record<string, string> } } | null)?.tracking?.jornada ?? {}) as
+      Record<string, string>;
+  const primeira = jornadaDe(origem.first_touch);
+  const ultima = jornadaDe(origem.last_touch);
+  const primeiroConteudo = tituloDe(primeira["first_content_path"] ?? ultima["first_content_path"]);
+  const ultimoConteudo = tituloDe(ultima["last_content_path"] ?? primeira["last_content_path"]);
+  const cta = ultima["cta_origin"] ?? primeira["cta_origin"];
+
+  if (!primeiroConteudo && !ultimoConteudo && !cta) return null;
+
+  return (
+    <dl className="mt-5 grid gap-5 border-t border-line pt-5 md:grid-cols-3">
+      {primeiroConteudo ? <Campo rotulo="Primeiro conteúdo lido" valor={primeiroConteudo} /> : null}
+      {ultimoConteudo ? (
+        <Campo rotulo="Último conteúdo antes da candidatura" valor={ultimoConteudo} />
+      ) : null}
+      {cta ? <Campo rotulo="CTA de origem" valor={<span className="num text-xs">{cta}</span>} /> : null}
+    </dl>
   );
 }
 
@@ -551,6 +581,7 @@ function CockpitCandidata() {
                   <Campo rotulo="gclid" valor={d.origem.gclid} />
                   <Campo rotulo="fbclid" valor={d.origem.fbclid} />
                 </dl>
+                <JornadaEditorialCampos origem={d.origem} />
               </Panel>
 
               <Panel title="Dados técnicos do envio">

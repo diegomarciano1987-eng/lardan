@@ -9,7 +9,25 @@
  */
 
 const CHAVE_PRIMEIRO = "lardan.first_touch.v1";
+const CHAVE_JORNADA = "lardan.jornada.v1";
 const LIMITE = 300;
+const MAX_CONTEUDOS = 8;
+
+/**
+ * Jornada interna de conteúdo. Não é UTM: usar utm_source=site destruiria a
+ * atribuição externa. São apenas caminhos internos do próprio site, sem dado
+ * pessoal e sem impressão digital.
+ */
+export interface JornadaEditorial {
+  first_content_path?: string | undefined;
+  first_content_at?: string | undefined;
+  last_content_path?: string | undefined;
+  last_content_at?: string | undefined;
+  content_paths?: string[] | undefined;
+  cta_origin?: string | undefined;
+  cta_destination?: string | undefined;
+  cta_at?: string | undefined;
+}
 
 export interface TrackingCliente {
   landing_page?: string | undefined;
@@ -22,6 +40,7 @@ export interface TrackingCliente {
   fbclid?: string | undefined;
   msclkid?: string | undefined;
   utm: Record<string, string>;
+  jornada?: JornadaEditorial | undefined;
 }
 
 const corta = (v: string | null | undefined) =>
@@ -63,6 +82,55 @@ export function registrarPrimeiroContato(): void {
   }
 }
 
+function lerJornada(): JornadaEditorial {
+  try {
+    const bruto = window.localStorage.getItem(CHAVE_JORNADA);
+    return bruto ? (JSON.parse(bruto) as JornadaEditorial) : {};
+  } catch {
+    return {};
+  }
+}
+
+function gravarJornada(j: JornadaEditorial): void {
+  try {
+    window.localStorage.setItem(CHAVE_JORNADA, JSON.stringify(j));
+  } catch {
+    /* navegador sem armazenamento: a jornada simplesmente não é registrada */
+  }
+}
+
+/**
+ * Registra a visita a um guia editorial. A primeira página de conteúdo nunca é
+ * sobrescrita; a última é sempre a mais recente.
+ */
+export function registrarVisitaEditorial(path: string): void {
+  if (typeof window === "undefined" || !path.startsWith("/")) return;
+  const agora = new Date().toISOString();
+  const j = lerJornada();
+  const caminhos = (j.content_paths ?? []).filter((p) => p !== path);
+  caminhos.push(path);
+  gravarJornada({
+    ...j,
+    first_content_path: j.first_content_path ?? path,
+    first_content_at: j.first_content_at ?? agora,
+    last_content_path: path,
+    last_content_at: agora,
+    content_paths: caminhos.slice(-MAX_CONTEUDOS),
+  });
+}
+
+/** Registra o CTA editorial clicado (somente identificadores internos). */
+export function registrarCliqueCta(ctaId: string, destino: string): void {
+  if (typeof window === "undefined") return;
+  const j = lerJornada();
+  gravarJornada({
+    ...j,
+    cta_origin: ctaId.slice(0, 60),
+    cta_destination: destino.slice(0, 200),
+    cta_at: new Date().toISOString(),
+  });
+}
+
 /** Monta os dados de origem desta visita, somados ao primeiro contato conhecido. */
 export function capturarTracking(): TrackingCliente {
   if (typeof window === "undefined") return { utm: {} };
@@ -83,5 +151,6 @@ export function capturarTracking(): TrackingCliente {
     fbclid: corta(params.get("fbclid")),
     msclkid: corta(params.get("msclkid")),
     utm: Object.keys(utm).length > 0 ? utm : (primeiro.utm ?? {}),
+    jornada: lerJornada(),
   };
 }

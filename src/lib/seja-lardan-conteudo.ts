@@ -1,7 +1,8 @@
 /**
  * Conteúdo textual da página /seja-lardan.
  *
- * Tom oficial: o ecossistema Lardan está preparado e evolui continuamente.
+ * Tom oficial: a estrutura da Consultora Lardan é descrita no presente, porque
+ * está entregue. Nada aqui pode prometer renda.
  * Nada aqui pode prometer renda, garantia de ganho ou resultado — apenas
  * estrutura, tecnologia e acompanhamento da marca.
  */
@@ -23,7 +24,7 @@ export const FERRAMENTAS: Ferramenta[] = [
     eyebrow: "Seu CRM",
     titulo: "Sua cliente. Seu relacionamento. Seu negócio mais organizado.",
     texto:
-      "Relacionamento não precisa depender da memória. O ecossistema Lardan está preparado para reunir suas clientes, preferências e histórico em um só lugar.",
+      "Relacionamento não precisa depender da memória. O CRM da Consultora Lardan reúne suas clientes, preferências e histórico em um só lugar.",
     itens: [
       "Cadastro de clientes",
       "Aniversários",
@@ -31,27 +32,27 @@ export const FERRAMENTAS: Ferramenta[] = [
       "Histórico de compras",
       "Frequência e última compra",
     ],
-    estado: "preparacao",
+    estado: "disponivel",
   },
   {
     chave: "vitrine",
     eyebrow: "Sua vitrine digital",
     titulo: "Uma vitrine para chamar de sua.",
     texto:
-      "O ecossistema Lardan está preparado para dar a cada consultora um espaço digital próprio, ligado ao catálogo oficial da marca, para compartilhar com suas clientes e levar a maleta também para o digital.",
+      "Cada Consultora Lardan tem uma vitrine digital ligada ao ecossistema da marca para apresentar suas peças, compartilhar com as clientes e levar a maleta também para o digital.",
     itens: [
       "Endereço próprio dentro do ecossistema Lardan",
       "Catálogo oficial sempre atualizado",
       "Compartilhamento por WhatsApp e redes",
     ],
-    estado: "preparacao",
+    estado: "disponivel",
   },
   {
     chave: "financeiro",
     eyebrow: "Seu dinheiro",
     titulo: "Venda melhor. Entenda melhor o seu dinheiro.",
     texto:
-      "Gestão financeira simples da sua operação — não é conta digital, banco nem aconselhamento financeiro. É clareza sobre o que entrou, o que falta receber e o que você deve.",
+      "Organize vendas, recebimentos, valores a receber, valores devidos e acompanhe sua operação de forma simples. Não é conta digital, não é banco e não é aconselhamento financeiro.",
     itens: [
       "Entradas e vendas",
       "Recebimentos",
@@ -59,25 +60,25 @@ export const FERRAMENTAS: Ferramenta[] = [
       "Valores devidos",
       "Visão de resultado",
     ],
-    estado: "preparacao",
+    estado: "disponivel",
   },
   {
     chave: "metas",
     eyebrow: "Suas metas",
     titulo: "Você enxerga onde está e quanto falta para chegar ao próximo objetivo.",
     texto:
-      "O acompanhamento de metas do ecossistema Lardan mostra evolução em vez de cobrança.",
+      "Acompanhe suas metas, evolução, campanhas e reconhecimento dentro da rede: evolução em vez de cobrança.",
     itens: ["Meta do período", "Evolução", "Níveis", "Ranking", "Campanhas", "Premiações"],
-    estado: "preparacao",
+    estado: "disponivel",
   },
   {
     chave: "pagamentos",
     eyebrow: "Seus pagamentos",
     titulo: "Receber também precisa ser simples.",
     texto:
-      "A geração de link de pagamento integrada à operação faz parte do ecossistema Lardan, e a consultora também pode seguir combinando o recebimento diretamente com a cliente.",
+      "A consultora registra o recebimento na venda e também pode combinar o pagamento diretamente com a cliente.",
     itens: ["Link de pagamento", "Registro do recebimento na venda"],
-    estado: "preparacao",
+    estado: "disponivel",
   },
 ];
 
@@ -146,17 +147,17 @@ export const FAQ: { pergunta: string; resposta: string }[] = [
   {
     pergunta: "A Consultora Lardan terá ferramentas para organizar suas clientes?",
     resposta:
-      "Sim. O ecossistema Lardan está preparado para oferecer à consultora um CRM com clientes, preferências, histórico, aniversários e frequência de compra, além do acompanhamento de vendas e recebimentos.",
+      "Sim. A Consultora Lardan tem um CRM com clientes, preferências, histórico, aniversários e frequência de compra, além do acompanhamento de vendas e recebimentos.",
   },
   {
     pergunta: "A consultora terá uma vitrine digital?",
     resposta:
-      "A vitrine digital individual, ligada ao catálogo oficial da marca, faz parte do ecossistema Lardan para que a consultora compartilhe suas peças com as clientes pelo celular.",
+      "Sim. Cada consultora tem uma vitrine digital individual, ligada ao catálogo oficial da marca, para compartilhar suas peças com as clientes pelo celular.",
   },
   {
     pergunta: "Existem treinamentos para consultoras?",
     resposta:
-      "Sim. A Lardan Academy prevê formação em vendas, produto, redes sociais, fotografia, atendimento, finanças, relacionamento e lançamentos de coleção.",
+      "Sim. A Lardan Academy reúne formação em vendas, produto, redes sociais, fotografia, atendimento, finanças, relacionamento e lançamentos de coleção.",
   },
   {
     pergunta: "Posso vender Lardan pelo WhatsApp?",
@@ -166,7 +167,7 @@ export const FAQ: { pergunta: string; resposta: string }[] = [
   {
     pergunta: "Como acompanhar minhas vendas e recebimentos?",
     resposta:
-      "O ecossistema Lardan está preparado para mostrar à consultora entradas, vendas, valores a receber, valores devidos e uma visão simples de resultado da própria operação.",
+      "A consultora acompanha entradas, vendas, valores a receber, valores devidos e uma visão simples de resultado da própria operação.",
   },
   {
     pergunta: "Existe meta para Consultora Lardan?",

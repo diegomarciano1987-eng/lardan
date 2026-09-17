@@ -4,7 +4,6 @@ import { Menu, X } from "lucide-react";
 import { HeaderAcoes } from "./HeaderAcoes";
 import { NAV_ITEMS } from "@/lib/brand";
 import { SocialLinks } from "./SocialLinks";
-import logo from "@/assets/lardan-logo-completa.png.asset.json";
 import diamante from "@/assets/lardan-diamante.png.asset.json";
 
 function NavLink({

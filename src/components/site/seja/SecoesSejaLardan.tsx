@@ -36,6 +36,11 @@ export function SejaHero() {
         <p className="seja-promise mt-7 font-display text-[clamp(1.375rem,2.6vw,2rem)] leading-[1.25] tracking-tight">
           Aumente sua renda familiar!
         </p>
+        <p className="seja-proof mt-6 flex max-w-lg flex-wrap items-baseline gap-x-3 gap-y-1 text-base leading-snug text-muted-foreground">
+          <span>Mais de</span>
+          <strong className="seja-proof-number">2.500</strong>
+          <span>consultoras já brilharam com a Lardan.</span>
+        </p>
         <p className="mt-7 max-w-lg text-base leading-relaxed text-muted-foreground">
           Seja Consultora Lardan e tenha produto, tecnologia, treinamento e ferramentas para
           transformar relacionamento em negócio.
@@ -100,6 +105,13 @@ export function SejaEmocional() {
         <CinematicTitle id="nao-e-so-vender" className="text-3xl leading-tight text-ivory md:text-5xl">
           Não é apenas sobre vender semijoias.
         </CinematicTitle>
+        <p className="mt-7 max-w-2xl font-display text-[clamp(1.125rem,2.4vw,1.625rem)] leading-[1.42] tracking-tight text-ivory">
+          Por trás de cada maleta, existe uma história sendo transformada:{" "}
+          <span className="text-ivory/78">
+            consultoras que conquistaram sua moto, sua geladeira, suas viagens — sonhos pagos com o
+            fruto do próprio trabalho
+          </span>
+        </p>
         <div className="rose-rule mt-8 w-20" />
         <div className="mt-8 space-y-5 text-base leading-relaxed text-ivory/72">
           <p>

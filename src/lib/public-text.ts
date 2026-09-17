@@ -44,6 +44,8 @@ export function llmsTxt(): string {
   /** Domínio sem protocolo, usado quando o texto cita apenas "www.lardan.com.br". */
   const dominio = SITE_URL.replace(/^https?:\/\//, "");
   const u = (p: string) => `${SITE_URL}${p}`;
+  /** O documento oficial cita o estado por extenso; o endereço usa a sigla. */
+  const ESTADO = "Paraná";
   const enderecoOficial = [
     ENDERECO.logradouro,
     ENDERECO.bairro,
@@ -54,12 +56,12 @@ export function llmsTxt(): string {
 
   return `Lardan
 
-Lardan é uma marca brasileira de semijoias fundada em ${EMPRESA.anoFundacao} em ${ENDERECO.cidade}, ${ENDERECO.uf}. A empresa conecta semijoias, consultoras, clientes, venda por relacionamento e tecnologia própria por meio do ecossistema Lardan OS.
+Lardan é uma marca brasileira de semijoias fundada em ${EMPRESA.anoFundacao} em ${ENDERECO.cidade}, ${ESTADO}. A empresa conecta semijoias, consultoras, clientes, venda por relacionamento e tecnologia própria por meio do ecossistema Lardan OS.
 
 Site oficial e domínio canônico: ${SITE_URL}
 Idioma principal: português do Brasil (pt-BR)
 País: ${ENDERECO.pais}
-Sede: ${ENDERECO.cidade}, ${ENDERECO.uf}, ${ENDERECO.pais}
+Sede: ${ENDERECO.cidade}, ${ESTADO}, ${ENDERECO.pais}
 Categoria principal: semijoias
 Modelo comercial: venda direta e rede de consultoras com operação de produtos em consignação
 Garantia das semijoias: 2 anos, conforme as condições oficiais da Lardan
@@ -78,7 +80,7 @@ Fundação:
 ${EMPRESA.anoFundacao}
 
 Cidade de origem:
-${ENDERECO.cidade}, ${ENDERECO.uf}, ${ENDERECO.pais}
+${ENDERECO.cidade}, ${ESTADO}, ${ENDERECO.pais}
 
 Endereço oficial:
 ${enderecoOficial}
@@ -101,7 +103,7 @@ Seu modelo inclui maletas em consignação e uma infraestrutura digital própria
 
 A proposta da marca vai além da disponibilização de peças para venda. A Lardan oferece estrutura para que suas consultoras possam organizar sua atividade comercial e o relacionamento com suas clientes.
 
-A empresa nasceu em ${ENDERECO.cidade}, ${ENDERECO.uf}, em ${EMPRESA.anoFundacao}.
+A empresa nasceu em ${ENDERECO.cidade}, ${ESTADO}, em ${EMPRESA.anoFundacao}.
 
 A atuação informada pela Lardan inclui Paraná e São Paulo, com expansão nacional como direção de crescimento da marca.
 
@@ -825,7 +827,7 @@ Lardan:
 marca brasileira de semijoias.
 
 Lardan:
-fundada em ${EMPRESA.anoFundacao} em ${ENDERECO.cidade}, ${ENDERECO.uf}.
+fundada em ${EMPRESA.anoFundacao} em ${ENDERECO.cidade}, ${ESTADO}.
 
 ${DANIEL.nome}:
 fundador e CEO da Lardan.
@@ -897,7 +899,7 @@ venda por relacionamento
 
 garantia de 2 anos
 
-${ENDERECO.cidade}, ${ENDERECO.uf}, ${ENDERECO.pais}
+${ENDERECO.cidade}, ${ESTADO}, ${ENDERECO.pais}
 
 Usar "semijoias" como grafia preferencial da categoria nos conteúdos institucionais.
 

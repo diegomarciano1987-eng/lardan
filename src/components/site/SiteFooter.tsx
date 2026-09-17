@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
+import smalldataAsset from "@/assets/smalldata-logo.png.asset.json";
 import { SocialLinks } from "./SocialLinks";
 import { EMPRESA, ENDERECO_LINHAS, MAPA_URL } from "@/lib/institucional";
 
@@ -38,18 +39,6 @@ const COLUNAS: { titulo: string; links: { label: string; to: string }[] }[] = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-card">
-      {/* Faixa editorial de convite */}
-      <div className="border-b border-border">
-        <div className="mx-auto max-w-4xl px-6 py-20 text-center">
-          <h2 className="text-2xl leading-tight text-foreground md:text-4xl">
-            Talvez sua história com a Lardan esteja apenas começando.
-          </h2>
-          <Link to="/seja-lardan" className="btn-premium mt-10">
-            Quero ser uma consultora
-          </Link>
-        </div>
-      </div>
-
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>

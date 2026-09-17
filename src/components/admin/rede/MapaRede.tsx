@@ -47,6 +47,8 @@ export function MapaRede({
   selecionado,
   onSelecionar,
   pontos = [],
+  candidaturas = [],
+  candidaturasPorChave,
   camada,
   totalRede,
 }: Props) {

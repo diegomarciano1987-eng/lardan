@@ -8,6 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { ErrorState, Panel, Skeleton, formatBRLFromCents } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
@@ -223,6 +233,105 @@ function FluxoCaixa() {
                 </div>
               </Panel>
             ) : null}
+
+            <Panel title="Curva do caixa no período">
+              {d.linhas.length === 0 ? (
+                <p className="py-10 text-center text-sm text-ledger-muted">
+                  Nenhum movimento ou parcela no período selecionado.
+                </p>
+              ) : (
+                <div className="h-[340px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={d.linhas.map((l) => ({
+                        rotulo: rotuloBucket(l.bucket),
+                        entradas: l.entradas_realizadas_cents / 100,
+                        saidas: l.saidas_realizadas_cents / 100,
+                        realizado: l.saldo_realizado_cents / 100,
+                        projetado: l.saldo_projetado_cents / 100,
+                      }))}
+                      margin={{ top: 8, right: 12, bottom: 4, left: 4 }}
+                    >
+                      <defs>
+                        <linearGradient id="fluxoRealizado" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#8a6a3b" stopOpacity={0.55} />
+                          <stop offset="100%" stopColor="#c8a165" stopOpacity={1} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 6" stroke="currentColor" opacity={0.12} />
+                      <XAxis
+                        dataKey="rotulo"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fontSize: 12 }}
+                        minTickGap={16}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        width={84}
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={(v: number) =>
+                          new Intl.NumberFormat("pt-BR", {
+                            notation: "compact",
+                            maximumFractionDigits: 1,
+                          }).format(v)
+                        }
+                      />
+                      <Tooltip
+                        formatter={(v: number | string, nome: string) => [
+                          formatBRLFromCents(Math.round(Number(v) * 100)),
+                          nome,
+                        ]}
+                        contentStyle={{
+                          borderRadius: 12,
+                          border: "1px solid rgba(0,0,0,0.08)",
+                          fontSize: 13,
+                        }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+                      <Line
+                        type="monotone"
+                        dataKey="entradas"
+                        name="Entradas"
+                        stroke="#127f57"
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 4 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="saidas"
+                        name="Saídas"
+                        stroke="#b23a34"
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 4 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="realizado"
+                        name="Saldo realizado"
+                        stroke="url(#fluxoRealizado)"
+                        strokeWidth={3}
+                        dot={false}
+                        activeDot={{ r: 5 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="projetado"
+                        name="Saldo projetado"
+                        stroke="#6b7280"
+                        strokeWidth={2}
+                        strokeDasharray="5 5"
+                        dot={false}
+                        activeDot={{ r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </Panel>
 
             <Panel title="Posição por período" flush>
               <div className="overflow-x-auto">

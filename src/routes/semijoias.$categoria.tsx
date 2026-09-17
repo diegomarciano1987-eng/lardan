@@ -224,7 +224,7 @@ function CategoriaPage() {
       {cat ? (
         <CategoryHero categoria={cat} />
       ) : (
-        <div className="mx-auto max-w-[88rem] px-6 pb-16 pt-40">
+        <div className="mx-auto max-w-[88rem] px-6 pb-16 pt-28 md:pt-32">
           <div className="h-16 w-2/3 animate-pulse rounded bg-muted" />
         </div>
       )}

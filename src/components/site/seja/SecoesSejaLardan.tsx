@@ -1,7 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import heroImg from "@/assets/lardan-consultora-hero.jpg";
-import vidaRealImg from "@/assets/lardan-consultora-vida-real.jpg";
-import ferramentasImg from "@/assets/lardan-consultora-ferramentas.jpg";
+import heroAsset from "@/assets/lardan-consultora-hero.webp.asset.json";
+import vidaRealAsset from "@/assets/lardan-consultora-vida-real.webp.asset.json";
+import ferramentasAsset from "@/assets/lardan-consultora-ferramentas.webp.asset.json";
+
+const heroImg = heroAsset.url;
+const vidaRealImg = vidaRealAsset.url;
+const ferramentasImg = ferramentasAsset.url;
 import cinematicVideo from "@/assets/lardan-seja-cinematico.mp4.asset.json";
 import cinematicVideoWebm from "@/assets/lardan-seja-cinematico.webm.asset.json";
 import cinematicPoster from "@/assets/lardan-seja-cinematico-poster.webp.asset.json";

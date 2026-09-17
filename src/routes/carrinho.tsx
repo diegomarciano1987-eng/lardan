@@ -59,7 +59,7 @@ function CarrinhoPage() {
           }}
         />
 
-        <div className="relative mx-auto max-w-6xl px-6 pb-28 pt-36 md:pt-48">
+        <div className="relative mx-auto max-w-6xl px-6 pb-28 pt-28 md:pt-36">
           <header className="mb-14 max-w-xl">
             <p className="text-[0.625rem] tracking-[0.32em] uppercase text-muted-foreground">
               Curadoria Lardan

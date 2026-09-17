@@ -69,7 +69,7 @@ function SejaLardanPage() {
         aria-labelledby="candidatura-titulo"
         className="scroll-mt-24 border-t border-border"
       >
-        <div className="mx-auto max-w-3xl px-6 pt-24 text-center md:pt-32">
+        <div className="mx-auto max-w-3xl px-6 pt-20 text-center md:pt-24">
           <p className="brand-eyebrow mb-4">Candidatura</p>
           <CinematicTitle id="candidatura-titulo" className="text-3xl leading-tight text-foreground md:text-5xl">
             Conte um pouco sobre você

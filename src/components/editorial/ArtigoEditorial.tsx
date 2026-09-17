@@ -132,7 +132,7 @@ export function ArtigoEditorial({ guia }: { guia: Guia }) {
     <SiteLayout>
       <article className="pb-24">
         {/* Hero editorial */}
-        <header className="mx-auto max-w-6xl px-6 pt-32 md:pt-40">
+        <header className="mx-auto max-w-6xl px-6 pt-28 md:pt-32">
           <nav aria-label="Você está em" className="text-xs text-muted-foreground">
             <ol className="flex flex-wrap items-center gap-2">
               <li>

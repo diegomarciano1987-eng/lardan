@@ -147,7 +147,7 @@
 }
 
 @theme inline {
-  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-display: "Roxborough CF", "Cormorant Garamond", Georgia, serif;
   --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
   --color-rose: var(--rose);
   --color-rose-deep: var(--rose-deep);

@@ -9,7 +9,11 @@ import {
   projetar,
   type Malha,
 } from "@/lib/rede/geo";
-import type { PontoRede } from "@/lib/rede/consultas";
+import type { PontoCandidatura, PontoRede } from "@/lib/rede/consultas";
+
+/** Cores fixas das duas populações do mapa: consultoras e candidatas do site. */
+export const COR_CONSULTORA = "var(--rose)";
+export const COR_CANDIDATA = "var(--color-champagne)";
 
 export interface ValorTerritorio {
   chave: string;

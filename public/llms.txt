@@ -66,12 +66,11 @@ Como funciona a entrada: candidatura pelo site, análise pela equipe, conversa,
 aprovação, onboarding, primeira maleta e ativação. Não há aprovação automática,
 promessa de renda, de prazo ou de resultado.
 
-Estrutura prevista para a consultora (diferenciando o que já existe do que
-ainda está sendo preparado):
+Estrutura do ecossistema Lardan para a consultora:
 
 - Disponível hoje: catálogo oficial de peças, garantia de 2 anos, formulário
   de candidatura com análise humana.
-- Em preparação no ecossistema Lardan: CRM com carteira de clientes,
+- O ecossistema Lardan está preparado para: CRM com carteira de clientes,
   preferências, aniversários e histórico; vitrine digital individual;
   acompanhamento de vendas, recebimentos e valores a receber; gestão
   financeira simples da operação; metas, níveis, ranking e campanhas;

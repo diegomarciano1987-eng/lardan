@@ -36,7 +36,7 @@ export function SiteLayout({ children, brandedHeader = false }: { children: Reac
       </a>
       <SiteHeader branded={brandedHeader} />
       <VoltarLink />
-      <main id="conteudo" className={`min-w-0 ${comVoltar ? "pt-10 md:pt-0" : ""}`}>
+      <main id="conteudo" className={`min-w-0 ${comVoltar ? "pt-4 md:pt-0" : ""}`}>
         {children}
       </main>
       <SiteFooter />

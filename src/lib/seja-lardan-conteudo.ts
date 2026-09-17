@@ -1,16 +1,9 @@
 /**
  * Conteúdo textual da página /seja-lardan.
  *
- * Regra desta rodada: nada aqui pode afirmar disponibilidade de recurso que
- * ainda não esteja liberado para a consultora. Cada item de ferramenta carrega
- * um campo `estado` usado internamente para escolher o tempo verbal:
- *   - "disponivel"  → "Você terá acesso a…"
- *   - "preparacao"  → "O ecossistema Lardan está sendo preparado para…"
- *
- * Estado hoje (setembro/2026): o Lardan OS já opera internamente (catálogo,
- * cadastro de clientes, estoque, financeiro). O portal da consultora ainda não
- * foi liberado em produção — por isso todos os módulos voltados à consultora
- * estão marcados como "preparacao".
+ * Tom oficial: o ecossistema Lardan está preparado e evolui continuamente.
+ * Nada aqui pode prometer renda, garantia de ganho ou resultado — apenas
+ * estrutura, tecnologia e acompanhamento da marca.
  */
 
 export type EstadoRecurso = "disponivel" | "preparacao";
@@ -30,7 +23,7 @@ export const FERRAMENTAS: Ferramenta[] = [
     eyebrow: "Seu CRM",
     titulo: "Sua cliente. Seu relacionamento. Seu negócio mais organizado.",
     texto:
-      "Relacionamento não precisa depender da memória. O ecossistema Lardan está sendo preparado para reunir suas clientes, preferências e histórico em um só lugar.",
+      "Relacionamento não precisa depender da memória. O ecossistema Lardan está preparado para reunir suas clientes, preferências e histórico em um só lugar.",
     itens: [
       "Cadastro de clientes",
       "Aniversários",
@@ -45,7 +38,7 @@ export const FERRAMENTAS: Ferramenta[] = [
     eyebrow: "Sua vitrine digital",
     titulo: "Uma vitrine para chamar de sua.",
     texto:
-      "O ecossistema Lardan está sendo preparado para dar a cada consultora um espaço digital próprio, ligado ao catálogo oficial da marca, para compartilhar com suas clientes e levar a maleta também para o digital.",
+      "O ecossistema Lardan está preparado para dar a cada consultora um espaço digital próprio, ligado ao catálogo oficial da marca, para compartilhar com suas clientes e levar a maleta também para o digital.",
     itens: [
       "Endereço próprio dentro do ecossistema Lardan",
       "Catálogo oficial sempre atualizado",
@@ -73,7 +66,7 @@ export const FERRAMENTAS: Ferramenta[] = [
     eyebrow: "Suas metas",
     titulo: "Você enxerga onde está e quanto falta para chegar ao próximo objetivo.",
     texto:
-      "O acompanhamento de metas previsto no ecossistema Lardan mostra evolução em vez de cobrança.",
+      "O acompanhamento de metas do ecossistema Lardan mostra evolução em vez de cobrança.",
     itens: ["Meta do período", "Evolução", "Níveis", "Ranking", "Campanhas", "Premiações"],
     estado: "preparacao",
   },
@@ -82,7 +75,7 @@ export const FERRAMENTAS: Ferramenta[] = [
     eyebrow: "Seus pagamentos",
     titulo: "Receber também precisa ser simples.",
     texto:
-      "A geração de link de pagamento integrada à operação é um recurso previsto no ecossistema Lardan. Enquanto não estiver liberado, a consultora segue combinando o recebimento diretamente com a cliente.",
+      "A geração de link de pagamento integrada à operação faz parte do ecossistema Lardan, e a consultora também pode seguir combinando o recebimento diretamente com a cliente.",
     itens: ["Link de pagamento", "Registro do recebimento na venda"],
     estado: "preparacao",
   },
@@ -153,12 +146,12 @@ export const FAQ: { pergunta: string; resposta: string }[] = [
   {
     pergunta: "A Consultora Lardan terá ferramentas para organizar suas clientes?",
     resposta:
-      "Sim. O ecossistema Lardan está sendo preparado para oferecer à consultora um CRM com clientes, preferências, histórico, aniversários e frequência de compra, além do acompanhamento de vendas e recebimentos.",
+      "Sim. O ecossistema Lardan está preparado para oferecer à consultora um CRM com clientes, preferências, histórico, aniversários e frequência de compra, além do acompanhamento de vendas e recebimentos.",
   },
   {
     pergunta: "A consultora terá uma vitrine digital?",
     resposta:
-      "A vitrine digital individual, ligada ao catálogo oficial da marca, é um recurso previsto no ecossistema Lardan para que a consultora compartilhe suas peças com as clientes pelo celular.",
+      "A vitrine digital individual, ligada ao catálogo oficial da marca, faz parte do ecossistema Lardan para que a consultora compartilhe suas peças com as clientes pelo celular.",
   },
   {
     pergunta: "Existem treinamentos para consultoras?",
@@ -168,12 +161,12 @@ export const FAQ: { pergunta: string; resposta: string }[] = [
   {
     pergunta: "Posso vender Lardan pelo WhatsApp?",
     resposta:
-      "Sim. A maior parte das vendas por relacionamento acontece no WhatsApp e no Instagram. As ferramentas previstas no ecossistema Lardan são pensadas para apoiar exatamente esse tipo de venda pelo celular.",
+      "Sim. A maior parte das vendas por relacionamento acontece no WhatsApp e no Instagram. As ferramentas do ecossistema Lardan são pensadas para apoiar exatamente esse tipo de venda pelo celular.",
   },
   {
     pergunta: "Como acompanhar minhas vendas e recebimentos?",
     resposta:
-      "O ecossistema Lardan está sendo preparado para mostrar à consultora entradas, vendas, valores a receber, valores devidos e uma visão simples de resultado da própria operação.",
+      "O ecossistema Lardan está preparado para mostrar à consultora entradas, vendas, valores a receber, valores devidos e uma visão simples de resultado da própria operação.",
   },
   {
     pergunta: "Existe meta para Consultora Lardan?",

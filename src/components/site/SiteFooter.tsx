@@ -108,6 +108,26 @@ export function SiteFooter() {
             Acessar Lardan
           </Link>
         </div>
+
+        <div className="mt-8 flex items-center justify-center gap-2 border-t border-border/60 pt-5 text-[11px] tracking-[0.08em] text-muted-foreground/70">
+          <span>desenvolvimento:</span>
+          <a
+            href="https://smalldata.cloud/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center opacity-70 transition-opacity hover:opacity-100"
+            aria-label="Small Data — smalldata.cloud"
+          >
+            <img
+              src={smalldataAsset.url}
+              alt="Small Data"
+              className="h-3.5 w-auto"
+              loading="lazy"
+              width={369}
+              height={64}
+            />
+          </a>
+        </div>
       </div>
     </footer>
   );

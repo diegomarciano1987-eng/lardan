@@ -153,6 +153,38 @@ export function MapaRede({
               </g>
             );
           })}
+
+        {/* Candidaturas do site: cor própria, sempre por agrupamento aproximado */}
+        {candidaturas.map((p, i) => {
+          const [x, y] = projecao.ponto(p.lng, p.lat);
+          const r = 3.5 + (p.total / maiorCandidata) * 10;
+          return (
+            <g key={`c-${i}`}>
+              <circle
+                cx={x}
+                cy={y}
+                r={r}
+                fill={`color-mix(in oklab, ${COR_CANDIDATA} 55%, transparent)`}
+                stroke={COR_CANDIDATA}
+                strokeWidth={0.9}
+                strokeDasharray={p.aproximado ? "2 2" : undefined}
+              >
+                <title>
+                  {p.total} candidatura(s) do site · {p.abertas} em aberto
+                  {p.aproximado ? " · posição aproximada pelo estado" : ""}
+                </title>
+              </circle>
+              <text
+                x={x}
+                y={y + 3}
+                textAnchor="middle"
+                className="pointer-events-none fill-white text-[9px] font-semibold [font-variant-numeric:tabular-nums]"
+              >
+                {p.total}
+              </text>
+            </g>
+          );
+        })}
       </svg>
 
       {/* Leitura textual — o mapa nunca é a única forma de ler o dado */}

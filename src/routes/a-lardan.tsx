@@ -1,20 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { SiteLayout } from "@/components/site/SiteLayout";
-
-import { RetratoOficial } from "@/components/site/RetratoOficial";
-import {
-  danielLarissaPortrait,
-  danielPortraitInstitucional,
-  larissaPortraitSeja,
-} from "@/components/site/retratos";
-import logoInstitucional from "@/assets/lardan-logo-institucional.webp.asset.json";
-import casalOficial from "@/assets/lardan-casal-oficial.webp.asset.json";
+import { createFileRoute } from "@tanstack/react-router";
+...
 import {
   DANIEL,
   EMPRESA,
-  ENDERECO_LINHAS,
   LARISSA,
-  MAPA_URL,
   VALORES,
 } from "@/lib/institucional";
 import {

@@ -315,6 +315,7 @@ export function SejaPerfil() {
         poster={perfilPoster.url}
         className="absolute inset-0 -z-30 h-full w-full object-cover"
       >
+        <source src={perfilVideoWebm.url} type="video/webm" />
         <source src={perfilVideo.url} type="video/mp4" />
       </video>
       <div aria-hidden="true" className="seja-perfil-band__veil absolute inset-0 -z-20" />

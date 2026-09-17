@@ -1,20 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
-
 import { RetratoOficial } from "@/components/site/RetratoOficial";
 import {
-  danielLarissaPortrait,
   danielPortraitInstitucional,
   larissaPortraitSeja,
+  danielLarissaPortrait,
 } from "@/components/site/retratos";
 import logoInstitucional from "@/assets/lardan-logo-institucional.webp.asset.json";
 import casalOficial from "@/assets/lardan-casal-oficial.webp.asset.json";
 import {
   DANIEL,
   EMPRESA,
-  ENDERECO_LINHAS,
   LARISSA,
-  MAPA_URL,
   VALORES,
 } from "@/lib/institucional";
 import {
@@ -198,38 +195,6 @@ function ALardanPage() {
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
             Esta área foi preparada para receber os vídeos e as histórias reais de consultoras
             Lardan. Nada é publicado aqui antes de ser gravado e autorizado por elas.
-          </p>
-        </div>
-      </section>
-
-      {/* Endereço oficial. */}
-      <section aria-labelledby="endereco-titulo" className="border-t border-border">
-        <div className="mx-auto max-w-3xl px-6 py-20 md:py-24">
-          <p className="brand-eyebrow mb-4">Onde estamos</p>
-          <h2 id="endereco-titulo" className="text-2xl text-foreground md:text-3xl">
-            Lardan
-          </h2>
-          <address className="mt-6 text-base not-italic leading-relaxed text-muted-foreground">
-            {ENDERECO_LINHAS.map((linha) => (
-              <span key={linha} className="block">
-                {linha}
-              </span>
-            ))}
-          </address>
-          <a
-            href={MAPA_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-block text-[0.6875rem] tracking-[0.22em] uppercase text-foreground/70 underline-offset-8 transition-colors hover:text-foreground hover:underline"
-          >
-            Ver localização
-          </a>
-          <p className="mt-10 text-sm text-muted-foreground">
-            Quer fazer parte da rede?{" "}
-            <Link to="/seja-lardan" className="underline underline-offset-4 hover:text-foreground">
-              Conheça a oportunidade de ser Consultora Lardan
-            </Link>
-            .
           </p>
         </div>
       </section>

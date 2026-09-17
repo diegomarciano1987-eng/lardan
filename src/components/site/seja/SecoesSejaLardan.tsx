@@ -4,6 +4,8 @@ import vidaRealImg from "@/assets/lardan-consultora-vida-real.jpg";
 import ferramentasImg from "@/assets/lardan-consultora-ferramentas.jpg";
 import cinematicVideo from "@/assets/lardan-seja-cinematico.mp4.asset.json";
 import cinematicPoster from "@/assets/lardan-seja-cinematico-poster.webp.asset.json";
+import perfilVideo from "@/assets/lardan-perfil-cinematico.mp4.asset.json";
+import perfilPoster from "@/assets/lardan-perfil-cinematico-poster.webp.asset.json";
 import { ATRIBUTOS, FAQ, FERRAMENTAS, PROCESSO, TREINAMENTOS } from "@/lib/seja-lardan-conteudo";
 import { CinematicTitle } from "./CinematicTitle";
 
@@ -298,9 +300,23 @@ export function SejaPerfil() {
   return (
     <section
       aria-labelledby="nao-e-para-qualquer-um"
-      className="border-t border-border bg-foreground text-background"
+      className="seja-perfil-band relative isolate overflow-hidden border-t border-border text-ivory"
     >
-      <div className="mx-auto max-w-4xl px-6 py-24 text-center md:py-32">
+      <video
+        aria-hidden="true"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        poster={perfilPoster.url}
+        className="absolute inset-0 -z-30 h-full w-full object-cover"
+      >
+        <source src={perfilVideo.url} type="video/mp4" />
+      </video>
+      <div aria-hidden="true" className="seja-perfil-band__veil absolute inset-0 -z-20" />
+      <div aria-hidden="true" className="seja-perfil-band__light absolute inset-0 -z-10" />
+      <div className="mx-auto max-w-4xl px-6 py-24 text-center md:py-36">
         <CinematicTitle
           id="nao-e-para-qualquer-um"
           className="text-3xl leading-tight md:text-5xl"

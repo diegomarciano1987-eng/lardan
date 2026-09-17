@@ -103,7 +103,7 @@ A proposta da marca vai além da disponibilização de peças para venda. A Lard
 
 A empresa nasceu em ${ENDERECO.cidade}, ${ENDERECO.uf}, em ${EMPRESA.anoFundacao}.
 
-A atuação informada pela Lardan inclui ${ENDERECO.uf === "PR" ? "Paraná" : ENDERECO.uf} e São Paulo, com expansão nacional como direção de crescimento da marca.
+A atuação informada pela Lardan inclui Paraná e São Paulo, com expansão nacional como direção de crescimento da marca.
 
 História da Lardan
 

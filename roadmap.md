@@ -1,10 +1,10 @@
 # Núcleo comercial Lardan Cloud — roadmap
 
 ## Site — Seja Lardan cinematográfico
-- [ ] Aplicar a nova foto da família na seção Nossa origem
-- [ ] Usar o vídeo enviado como fundo discreto da seção “Não é apenas sobre vender semijoias”
-- [ ] Aplicar entradas cinematográficas aos títulos da página, respeitando redução de movimento
-- [ ] Validar desktop, mobile, reprodução do vídeo, legibilidade e ausência de estouro horizontal
+- [x] Aplicar a nova foto da família na seção Nossa origem
+- [x] Usar o vídeo enviado como fundo discreto da seção “Não é apenas sobre vender semijoias”
+- [x] Aplicar entradas cinematográficas aos títulos da página, respeitando redução de movimento
+- [x] Validar desktop, mobile, entrega do vídeo, legibilidade e ausência de estouro horizontal
 
 Referência: ANEXO A Lardan Cloud. Regra permanente: não mexer em catálogo,
 produtos, imagens e vitrine institucional já publicados.

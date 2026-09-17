@@ -155,6 +155,8 @@ function HomePage() {
         />
       ))}
 
+      <Fundadores />
+
       {/* Convite Seja Lardan */}
       <section aria-labelledby="home-seja-lardan" className="border-t border-border bg-secondary/40">
         <div className="mx-auto max-w-3xl px-6 py-24 text-center">
@@ -187,8 +189,6 @@ function HomePage() {
           </p>
         </div>
       </section>
-
-      <Fundadores />
 
     </SiteLayout>
   );

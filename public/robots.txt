@@ -12,3 +12,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /acesso
+Disallow: /carrinho
+Disallow: /api/
+
+Sitemap: https://lardan.lovable.app/sitemap.xml

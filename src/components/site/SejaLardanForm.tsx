@@ -50,6 +50,31 @@ const UFS = [
   "TO",
 ];
 
+const OBJETIVOS = [
+  "Aumentar minha renda",
+  "Construir meu próprio negócio",
+  "Conciliar a atividade com minha rotina",
+  "Trabalhar com vendas",
+  "Desenvolver uma nova carreira",
+  "Outro",
+];
+
+const DISPONIBILIDADES = [
+  "Até 5 horas por semana",
+  "De 5 a 10 horas por semana",
+  "De 10 a 20 horas por semana",
+  "Mais de 20 horas por semana",
+  "Ainda não sei",
+];
+
+const EXPERIENCIAS = [
+  "Nunca trabalhei com vendas",
+  "Já vendi de forma informal",
+  "Já vendi semijoias ou joias",
+  "Já vendi cosméticos, moda ou produtos por relacionamento",
+  "Tenho experiência profissional em vendas",
+];
+
 const field =
   "w-full rounded-md border border-input bg-card px-4 py-3 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
@@ -73,6 +98,9 @@ export function SejaLardanForm() {
   const [codigoIbge, setCodigoIbge] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [objetivo, setObjetivo] = useState("");
+  const [disponibilidade, setDisponibilidade] = useState("");
+  const [experiencia, setExperiencia] = useState("");
   const [consultandoCep, setConsultandoCep] = useState(false);
   const [estadoCep, setEstadoCep] = useState<string | null>(null);
   const consultarCepFn = useServerFn(consultarCepPublico);
@@ -327,24 +355,59 @@ export function SejaLardanForm() {
       <fieldset className="space-y-4">
         <legend className="brand-eyebrow mb-4">Sobre você</legend>
         <div>
-          <Label htmlFor="financial_goal">Objetivo financeiro</Label>
-          <input id="financial_goal" name="financial_goal" className={field} />
+          <Label htmlFor="financial_goal">Qual é seu principal objetivo ao começar?</Label>
+          <SmartSelect
+            id="financial_goal"
+            name="financial_goal"
+            value={objetivo}
+            onChange={setObjetivo}
+            placeholder="Selecione o seu objetivo"
+            searchPlaceholder="Buscar…"
+            options={OBJETIVOS.map((o) => ({ value: o, label: o }))}
+          />
         </div>
         <div>
-          <Label htmlFor="availability">Disponibilidade de tempo</Label>
-          <input id="availability" name="availability" className={field} />
+          <Label htmlFor="availability">
+            Quanto tempo por semana você acredita que consegue dedicar?
+          </Label>
+          <SmartSelect
+            id="availability"
+            name="availability"
+            value={disponibilidade}
+            onChange={setDisponibilidade}
+            placeholder="Selecione a disponibilidade"
+            searchPlaceholder="Buscar…"
+            options={DISPONIBILIDADES.map((o) => ({ value: o, label: o }))}
+          />
         </div>
         <div>
-          <Label htmlFor="experience">Experiência com vendas</Label>
-          <input id="experience" name="experience" className={field} />
+          <Label htmlFor="experience">Você já trabalhou com vendas?</Label>
+          <SmartSelect
+            id="experience"
+            name="experience"
+            value={experiencia}
+            onChange={setExperiencia}
+            placeholder="Selecione uma opção"
+            searchPlaceholder="Buscar…"
+            options={EXPERIENCIAS.map((o) => ({ value: o, label: o }))}
+          />
         </div>
         <div>
-          <Label htmlFor="audience">Pessoas a quem pretende vender</Label>
-          <input id="audience" name="audience" className={field} />
+          <Label htmlFor="audience">
+            Hoje você costuma vender ou se relacionar comercialmente por onde?
+          </Label>
+          <input
+            id="audience"
+            name="audience"
+            placeholder="WhatsApp, Instagram, presencialmente, indicação…"
+            className={field}
+          />
         </div>
         <div>
-          <Label htmlFor="motivation">Motivação</Label>
-          <textarea id="motivation" name="motivation" rows={4} className={field} />
+          <Label htmlFor="motivation">
+            Conte um pouco sobre você e sua motivação para começar agora
+          </Label>
+          <textarea id="motivation" name="motivation" rows={5} className={field} />
         </div>
       </fieldset>
 

@@ -21,6 +21,7 @@ import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as PulseirasRouteImport } from './routes/pulseiras'
 import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
@@ -122,6 +123,11 @@ const PulseirasRoute = PulseirasRouteImport.update({
 const SejaLardanRoute = SejaLardanRouteImport.update({
   id: '/seja-lardan',
   path: '/seja-lardan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
@@ -386,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/pulseiras': typeof PulseirasRoute
   '/seja-lardan': typeof SejaLardanRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
@@ -442,6 +449,7 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/pulseiras': typeof PulseirasRoute
   '/seja-lardan': typeof SejaLardanRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/semijoias': typeof SemijoiasIndexRoute
@@ -498,6 +506,7 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/pulseiras': typeof PulseirasRoute
   '/seja-lardan': typeof SejaLardanRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
@@ -556,6 +565,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/pulseiras'
     | '/seja-lardan'
+    | '/sitemap.xml'
     | '/admin'
     | '/produto/$slug'
     | '/semijoias/$categoria'
@@ -612,6 +622,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/pulseiras'
     | '/seja-lardan'
+    | '/sitemap.xml'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/semijoias'
@@ -667,6 +678,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/pulseiras'
     | '/seja-lardan'
+    | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/produto/$slug'
     | '/semijoias/$categoria'
@@ -725,6 +737,7 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   PulseirasRoute: typeof PulseirasRoute
   SejaLardanRoute: typeof SejaLardanRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
   SemijoiasIndexRoute: typeof SemijoiasIndexRoute
@@ -815,6 +828,13 @@ declare module '@tanstack/react-router' {
       path: '/seja-lardan'
       fullPath: '/seja-lardan'
       preLoaderRoute: typeof SejaLardanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -1271,6 +1291,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   PulseirasRoute: PulseirasRoute,
   SejaLardanRoute: SejaLardanRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,
   SemijoiasIndexRoute: SemijoiasIndexRoute,

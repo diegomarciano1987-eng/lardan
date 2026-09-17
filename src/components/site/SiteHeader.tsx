@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { HeaderAcoes } from "./HeaderAcoes";
 import { NAV_ITEMS } from "@/lib/brand";
+import { SocialLinks } from "./SocialLinks";
 import logo from "@/assets/lardan-logo-completa.png.asset.json";
 
 function NavLink({
@@ -69,10 +70,13 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         ))}
       </nav>
 
-      <HeaderAcoes className="absolute right-5 top-1/2 hidden -translate-y-1/2 md:flex md:right-10" />
+      <div className="absolute right-5 top-1/2 hidden -translate-y-1/2 items-center gap-2 md:right-10 md:flex">
+        <SocialLinks />
+        <HeaderAcoes />
+      </div>
 
       <div className="absolute inset-x-5 bottom-2.5 z-50 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center md:hidden">
-        <span aria-hidden />
+        <SocialLinks tamanho="sm" className="justify-self-start" />
 
         <div className="relative flex flex-col items-center">
           <button

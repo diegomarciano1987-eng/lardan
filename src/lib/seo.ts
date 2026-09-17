@@ -1,5 +1,6 @@
 // Imagem oficial de compartilhamento (1200x630) com a logo LARDAN.
 import ogAsset from "@/assets/lardan-og.jpg.asset.json";
+import { INSTAGRAM_URL } from "@/lib/brand";
 
 /**
  * Configuração central de URL do site.
@@ -67,8 +68,9 @@ export function jsonLdScript(data: Json | Json[]) {
 
 /**
  * Organization com apenas informações confirmadas.
- * TODO (dados reais do cliente): sameAs (redes oficiais), telefone/e-mail de
- * contato, razão social, CNPJ e endereço — não preencher com suposições.
+ * sameAs lista somente a rede oficial da marca.
+ * TODO (dados reais do cliente): telefone/e-mail de contato, razão social,
+ * CNPJ e endereço — não preencher com suposições.
  */
 export function organizationLd(): Json {
   return {
@@ -80,6 +82,7 @@ export function organizationLd(): Json {
     url: SITE_URL,
     logo: OG_IMAGE,
     image: OG_IMAGE,
+    sameAs: [INSTAGRAM_URL],
     description:
       "Marca brasileira de semijoias que conecta produtos, clientes, consultoras e tecnologia em um ecossistema comercial próprio.",
   };

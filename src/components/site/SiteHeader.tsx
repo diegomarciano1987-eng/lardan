@@ -43,8 +43,8 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
 
   useEffect(() => {
     const medir = () => {
-      // Fundo aparece ao sair da primeira seção (hero) da página.
-      const limiar = Math.max(window.innerHeight * 0.55, 240);
+      // Fundo aparece somente ao chegar na terceira seção da página.
+      const limiar = window.innerHeight * 2;
       setRolou(window.scrollY > limiar);
     };
     medir();
@@ -58,13 +58,13 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
 
   return (
     <header
-      className={`fixed inset-x-0 z-50 flex items-center justify-center px-5 transition-[background-color,border-color,box-shadow] duration-500 ${
+      className={`fixed inset-x-0 z-50 flex items-center justify-center px-5 transition-[background-color,border-color,box-shadow,top] duration-500 ${
         branded
           ? "top-0 h-[4.5rem] border-b border-foreground/10 bg-background/82 shadow-[0_16px_42px_-34px_color-mix(in_oklab,var(--foreground)_28%,transparent)] backdrop-blur-xl md:h-24"
-          : `top-6 h-[4.5rem] md:h-16 ${
+          : `h-[4.5rem] md:h-16 ${
               rolou
-                ? "border-b border-foreground/10 bg-background/70 shadow-[0_18px_46px_-38px_color-mix(in_oklab,var(--foreground)_30%,transparent)] backdrop-blur-xl"
-                : "border-b border-transparent"
+                ? "top-0 border-b border-foreground/10 bg-background/35 shadow-[0_18px_46px_-38px_color-mix(in_oklab,var(--foreground)_30%,transparent)] backdrop-blur-xl"
+                : "top-6 border-b border-transparent"
             }`
       }`}
     >

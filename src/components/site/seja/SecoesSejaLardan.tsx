@@ -142,8 +142,8 @@ export function SejaFerramentas() {
             Você não recebe apenas produtos. Recebe uma estrutura para vender.
           </h2>
           <p className="mt-6 text-base leading-relaxed text-muted-foreground">
-            Tecnologia por trás. Simplicidade na sua mão. Abaixo, o que a Lardan já entrega hoje e
-            o que está sendo preparado no ecossistema para a consultora.
+            Tecnologia por trás. Simplicidade na sua mão. Abaixo, o que o ecossistema Lardan
+            está preparado para colocar na mão da consultora.
           </p>
         </div>
 
@@ -171,7 +171,7 @@ export function SejaFerramentas() {
                 </ul>
                 {f.estado === "preparacao" ? (
                   <p className="mt-4 text-[0.6875rem] tracking-[0.14em] uppercase text-muted-foreground/80">
-                    Recurso previsto no ecossistema Lardan
+                    Ecossistema Lardan preparado
                   </p>
                 ) : null}
               </li>

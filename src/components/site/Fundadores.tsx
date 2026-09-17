@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+
 import { DANIEL, LARISSA } from "@/lib/institucional";
 import { RetratoOficial } from "./RetratoOficial";
 import { danielPortrait, larissaPortrait } from "./retratos";
@@ -84,18 +84,6 @@ export function Fundadores() {
             <Citacao texto={LARISSA.citacao} />
           </div>
         </article>
-
-        <div className="mt-20 flex flex-wrap items-center gap-6 border-t border-border pt-10">
-          <Link to="/a-lardan" className="btn-premium">
-            Conheça a Lardan
-          </Link>
-          <Link
-            to="/seja-lardan"
-            className="text-[0.6875rem] tracking-[0.22em] uppercase text-foreground/70 underline-offset-8 transition-colors hover:text-foreground hover:underline"
-          >
-            Quero ser uma consultora
-          </Link>
-        </div>
       </div>
     </section>
   );

@@ -174,6 +174,99 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Seja Lardan — títulos com entrada esfumada, preservando texto semântico.
+   A classe "ready" só é aplicada após hidratação: sem JavaScript, o título
+   permanece integralmente visível.
+   --------------------------------------------------------------------------- */
+.cinematic-title {
+  text-wrap: balance;
+}
+
+.cinematic-title-visual {
+  display: inline;
+}
+
+.cinematic-title-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.cinematic-title-letter {
+  display: inline-block;
+}
+
+.cinematic-title-ready .cinematic-title-letter {
+  opacity: 0;
+  filter: blur(9px);
+  transform: translate3d(0, 0.38em, 0) scale(0.98);
+}
+
+.cinematic-title-ready.cinematic-title-visible .cinematic-title-letter {
+  animation: cinematic-letter-reveal 760ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: min(calc(var(--letter-index) * 24ms), 920ms);
+}
+
+@keyframes cinematic-letter-reveal {
+  55% {
+    opacity: 0.72;
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.seja-cinematic-band {
+  min-height: min(42rem, 82vh);
+  background: var(--rose-deep);
+}
+
+.seja-cinematic-band > video {
+  filter: brightness(0.32) saturate(0.35) contrast(1.08);
+  transform: scale(1.035);
+}
+
+.seja-cinematic-band__veil {
+  background:
+    linear-gradient(100deg, oklch(0.24 0.035 25 / 0.93), oklch(0.47 0.06 25 / 0.74)),
+    linear-gradient(180deg, oklch(0.16 0.02 25 / 0.15), oklch(0.2 0.03 25 / 0.68));
+}
+
+.seja-cinematic-band__light {
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    oklch(0.82 0.065 30 / 0.12) 48%,
+    transparent 72%
+  );
+  mix-blend-mode: screen;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-title-ready .cinematic-title-letter,
+  .cinematic-title-ready.cinematic-title-visible .cinematic-title-letter {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    animation: none;
+  }
+
+  .seja-cinematic-band > video {
+    display: none;
+  }
+}
+
+.is-apple .cinematic-title-ready .cinematic-title-letter {
+  filter: blur(4px);
+}
+
+.is-apple .cinematic-title-ready.cinematic-title-visible .cinematic-title-letter {
+  animation-duration: 620ms;
+}
+
 /* Wordmark e rótulos da marca */
 @utility brand-eyebrow {
   font-size: 0.6875rem;

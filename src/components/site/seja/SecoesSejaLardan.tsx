@@ -3,8 +3,10 @@ import heroImg from "@/assets/lardan-consultora-hero.jpg";
 import vidaRealImg from "@/assets/lardan-consultora-vida-real.jpg";
 import ferramentasImg from "@/assets/lardan-consultora-ferramentas.jpg";
 import cinematicVideo from "@/assets/lardan-seja-cinematico.mp4.asset.json";
+import cinematicVideoWebm from "@/assets/lardan-seja-cinematico.webm.asset.json";
 import cinematicPoster from "@/assets/lardan-seja-cinematico-poster.webp.asset.json";
 import perfilVideo from "@/assets/lardan-perfil-cinematico.mp4.asset.json";
+import perfilVideoWebm from "@/assets/lardan-perfil-cinematico.webm.asset.json";
 import perfilPoster from "@/assets/lardan-perfil-cinematico-poster.webp.asset.json";
 import { ATRIBUTOS, FAQ, FERRAMENTAS, PROCESSO, TREINAMENTOS } from "@/lib/seja-lardan-conteudo";
 import { CinematicTitle } from "./CinematicTitle";
@@ -82,6 +84,7 @@ export function SejaEmocional() {
         poster={cinematicPoster.url}
         className="absolute inset-0 -z-30 h-full w-full object-cover"
       >
+        <source src={cinematicVideoWebm.url} type="video/webm" />
         <source src={cinematicVideo.url} type="video/mp4" />
       </video>
       <div aria-hidden="true" className="seja-cinematic-band__veil absolute inset-0 -z-20" />

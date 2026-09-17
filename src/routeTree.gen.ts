@@ -28,6 +28,7 @@ import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
 import { Route as SemijoiasCategoriaRouteImport } from './routes/semijoias.$categoria'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
+import { Route as AuthenticatedAdminCandidaturasRouteImport } from './routes/_authenticated/admin/candidaturas'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminEstoqueRouteImport } from './routes/_authenticated/admin/estoque'
 import { Route as AuthenticatedAdminFinanceiroRouteRouteImport } from './routes/_authenticated/admin/financeiro/route'
@@ -47,6 +48,7 @@ import { Route as AuthenticatedAdminCadastrosFornecedoresRouteImport } from './r
 import { Route as AuthenticatedAdminCadastrosLocaisRouteImport } from './routes/_authenticated/admin/cadastros/locais'
 import { Route as AuthenticatedAdminCadastrosPessoasRouteImport } from './routes/_authenticated/admin/cadastros/pessoas'
 import { Route as AuthenticatedAdminCadastrosProdutosRouteImport } from './routes/_authenticated/admin/cadastros/produtos'
+import { Route as AuthenticatedAdminCandidaturasIdRouteImport } from './routes/_authenticated/admin/candidaturas_.$id'
 import { Route as AuthenticatedAdminFinanceiroIndexRouteImport } from './routes/_authenticated/admin/financeiro/index'
 import { Route as AuthenticatedAdminFinanceiroAprovacoesRouteImport } from './routes/_authenticated/admin/financeiro/aprovacoes'
 import { Route as AuthenticatedAdminFinanceiroAuditoriaRouteImport } from './routes/_authenticated/admin/financeiro/auditoria'
@@ -161,6 +163,12 @@ const AuthenticatedAdminAuditoriaRoute =
     path: '/auditoria',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminCandidaturasRoute =
+  AuthenticatedAdminCandidaturasRouteImport.update({
+    id: '/candidaturas',
+    path: '/candidaturas',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminConfiguracoesRoute =
   AuthenticatedAdminConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -270,6 +278,12 @@ const AuthenticatedAdminCadastrosProdutosRoute =
   AuthenticatedAdminCadastrosProdutosRouteImport.update({
     id: '/cadastros/produtos',
     path: '/cadastros/produtos',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminCandidaturasIdRoute =
+  AuthenticatedAdminCandidaturasIdRouteImport.update({
+    id: '/candidaturas_/$id',
+    path: '/candidaturas/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminFinanceiroIndexRoute =
@@ -399,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/semijoias/': typeof SemijoiasIndexRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
@@ -417,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
   '/admin/cadastros/pessoas': typeof AuthenticatedAdminCadastrosPessoasRoute
   '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
+  '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
@@ -454,6 +470,7 @@ export interface FileRoutesByTo {
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/semijoias': typeof SemijoiasIndexRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
@@ -472,6 +489,7 @@ export interface FileRoutesByTo {
   '/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
   '/admin/cadastros/pessoas': typeof AuthenticatedAdminCadastrosPessoasRoute
   '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
+  '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
@@ -513,6 +531,7 @@ export interface FileRoutesById {
   '/semijoias/': typeof SemijoiasIndexRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/_authenticated/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/_authenticated/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
@@ -531,6 +550,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cadastros/locais': typeof AuthenticatedAdminCadastrosLocaisRoute
   '/_authenticated/admin/cadastros/pessoas': typeof AuthenticatedAdminCadastrosPessoasRoute
   '/_authenticated/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
+  '/_authenticated/admin/candidaturas_/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/_authenticated/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/_authenticated/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/_authenticated/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
@@ -572,6 +592,7 @@ export interface FileRouteTypes {
     | '/semijoias/'
     | '/admin/financeiro'
     | '/admin/auditoria'
+    | '/admin/candidaturas'
     | '/admin/configuracoes'
     | '/admin/estoque'
     | '/admin/importacao'
@@ -590,6 +611,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/locais'
     | '/admin/cadastros/pessoas'
     | '/admin/cadastros/produtos'
+    | '/admin/candidaturas/$id'
     | '/admin/financeiro/aprovacoes'
     | '/admin/financeiro/auditoria'
     | '/admin/financeiro/centros-custo'
@@ -627,6 +649,7 @@ export interface FileRouteTypes {
     | '/semijoias/$categoria'
     | '/semijoias'
     | '/admin/auditoria'
+    | '/admin/candidaturas'
     | '/admin/configuracoes'
     | '/admin/estoque'
     | '/admin/importacao'
@@ -645,6 +668,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/locais'
     | '/admin/cadastros/pessoas'
     | '/admin/cadastros/produtos'
+    | '/admin/candidaturas/$id'
     | '/admin/financeiro/aprovacoes'
     | '/admin/financeiro/auditoria'
     | '/admin/financeiro/centros-custo'
@@ -685,6 +709,7 @@ export interface FileRouteTypes {
     | '/semijoias/'
     | '/_authenticated/admin/financeiro'
     | '/_authenticated/admin/auditoria'
+    | '/_authenticated/admin/candidaturas'
     | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/estoque'
     | '/_authenticated/admin/importacao'
@@ -703,6 +728,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cadastros/locais'
     | '/_authenticated/admin/cadastros/pessoas'
     | '/_authenticated/admin/cadastros/produtos'
+    | '/_authenticated/admin/candidaturas_/$id'
     | '/_authenticated/admin/financeiro/aprovacoes'
     | '/_authenticated/admin/financeiro/auditoria'
     | '/_authenticated/admin/financeiro/centros-custo'
@@ -879,6 +905,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAuditoriaRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/candidaturas': {
+      id: '/_authenticated/admin/candidaturas'
+      path: '/candidaturas'
+      fullPath: '/admin/candidaturas'
+      preLoaderRoute: typeof AuthenticatedAdminCandidaturasRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/configuracoes': {
       id: '/_authenticated/admin/configuracoes'
       path: '/configuracoes'
@@ -1010,6 +1043,13 @@ declare module '@tanstack/react-router' {
       path: '/cadastros/produtos'
       fullPath: '/admin/cadastros/produtos'
       preLoaderRoute: typeof AuthenticatedAdminCadastrosProdutosRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/candidaturas_/$id': {
+      id: '/_authenticated/admin/candidaturas_/$id'
+      path: '/candidaturas/$id'
+      fullPath: '/admin/candidaturas/$id'
+      preLoaderRoute: typeof AuthenticatedAdminCandidaturasIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/financeiro/': {
@@ -1194,6 +1234,7 @@ const AuthenticatedAdminFinanceiroRouteRouteWithChildren =
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminFinanceiroRouteRoute: typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
+  AuthenticatedAdminCandidaturasRoute: typeof AuthenticatedAdminCandidaturasRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminEstoqueRoute: typeof AuthenticatedAdminEstoqueRoute
   AuthenticatedAdminImportacaoRoute: typeof AuthenticatedAdminImportacaoRoute
@@ -1212,6 +1253,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCadastrosLocaisRoute: typeof AuthenticatedAdminCadastrosLocaisRoute
   AuthenticatedAdminCadastrosPessoasRoute: typeof AuthenticatedAdminCadastrosPessoasRoute
   AuthenticatedAdminCadastrosProdutosRoute: typeof AuthenticatedAdminCadastrosProdutosRoute
+  AuthenticatedAdminCandidaturasIdRoute: typeof AuthenticatedAdminCandidaturasIdRoute
   AuthenticatedAdminCadastrosIndexRoute: typeof AuthenticatedAdminCadastrosIndexRoute
   AuthenticatedAdminCadastrosPessoasIdRoute: typeof AuthenticatedAdminCadastrosPessoasIdRoute
   AuthenticatedAdminCadastrosPessoasNovoRoute: typeof AuthenticatedAdminCadastrosPessoasNovoRoute
@@ -1224,6 +1266,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminFinanceiroRouteRoute:
       AuthenticatedAdminFinanceiroRouteRouteWithChildren,
     AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
+    AuthenticatedAdminCandidaturasRoute: AuthenticatedAdminCandidaturasRoute,
     AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
     AuthenticatedAdminEstoqueRoute: AuthenticatedAdminEstoqueRoute,
     AuthenticatedAdminImportacaoRoute: AuthenticatedAdminImportacaoRoute,
@@ -1250,6 +1293,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminCadastrosPessoasRoute,
     AuthenticatedAdminCadastrosProdutosRoute:
       AuthenticatedAdminCadastrosProdutosRoute,
+    AuthenticatedAdminCandidaturasIdRoute:
+      AuthenticatedAdminCandidaturasIdRoute,
     AuthenticatedAdminCadastrosIndexRoute:
       AuthenticatedAdminCadastrosIndexRoute,
     AuthenticatedAdminCadastrosPessoasIdRoute:

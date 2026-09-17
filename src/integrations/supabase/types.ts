@@ -5600,7 +5600,30 @@ export type Database = {
         }[]
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      kit_aceitar: {
+        Args: { _cycle: string; _idempotency_key?: string; _itens: Json }
+        Returns: Json
+      }
+      kit_conferir: { Args: { _cycle: string; _note?: string }; Returns: Json }
+      kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
+      kit_expedir: { Args: { _cycle: string; _payload?: Json }; Returns: Json }
+      kit_item_upsert: {
+        Args: { _cycle: string; _qty: number; _variant: string }
+        Returns: Json
+      }
+      kit_location_ensure: { Args: { _kit_id: string }; Returns: string }
+      kit_reference_price: { Args: { _variant: string }; Returns: number }
+      kit_require_manage: { Args: never; Returns: string }
+      kit_totals_refresh: { Args: { _cycle: string }; Returns: undefined }
+      kit_transfer_confirm: {
+        Args: { _payload?: Json; _transfer: string }
+        Returns: Json
+      }
+      kit_transfer_forward: {
+        Args: { _cycle: string; _payload?: Json }
+        Returns: Json
+      }
       list_parties: {
         Args: {
           _kind?: string

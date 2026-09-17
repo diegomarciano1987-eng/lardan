@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { HISTORIA_RESUMO } from "@/lib/institucional";
 import { RetratoOficial } from "@/components/site/RetratoOficial";
-import { danielLarissaPortrait } from "@/components/site/retratos";
+import { larissaPortraitSeja } from "@/components/site/retratos";
 
 /**
  * /seja-lardan — resumo emocional da origem da Lardan.

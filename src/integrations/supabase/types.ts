@@ -2610,6 +2610,647 @@ export type Database = {
         }
         Relationships: []
       }
+      kit_acceptance_items: {
+        Row: {
+          acceptance_id: string
+          divergence_reason: string | null
+          id: string
+          photos: Json
+          qty_accepted: number
+          qty_divergent: number
+          qty_expected: number
+          resolution: string | null
+          resolved_at: string | null
+          variant_id: string
+        }
+        Insert: {
+          acceptance_id: string
+          divergence_reason?: string | null
+          id?: string
+          photos?: Json
+          qty_accepted: number
+          qty_divergent?: number
+          qty_expected: number
+          resolution?: string | null
+          resolved_at?: string | null
+          variant_id: string
+        }
+        Update: {
+          acceptance_id?: string
+          divergence_reason?: string | null
+          id?: string
+          photos?: Json
+          qty_accepted?: number
+          qty_divergent?: number
+          qty_expected?: number
+          resolution?: string | null
+          resolved_at?: string | null
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_acceptance_items_acceptance_id_fkey"
+            columns: ["acceptance_id"]
+            isOneToOne: false
+            referencedRelation: "kit_acceptances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_acceptance_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kit_acceptances: {
+        Row: {
+          accepted_at: string
+          actor_user_id: string | null
+          composition_id: string
+          context: Json
+          cycle_id: string
+          id: string
+          idempotency_key: string | null
+          kind: Database["public"]["Enums"]["kit_acceptance_kind"]
+          party_id: string | null
+          terms_version: string
+        }
+        Insert: {
+          accepted_at?: string
+          actor_user_id?: string | null
+          composition_id: string
+          context?: Json
+          cycle_id: string
+          id?: string
+          idempotency_key?: string | null
+          kind: Database["public"]["Enums"]["kit_acceptance_kind"]
+          party_id?: string | null
+          terms_version?: string
+        }
+        Update: {
+          accepted_at?: string
+          actor_user_id?: string | null
+          composition_id?: string
+          context?: Json
+          cycle_id?: string
+          id?: string
+          idempotency_key?: string | null
+          kind?: Database["public"]["Enums"]["kit_acceptance_kind"]
+          party_id?: string | null
+          terms_version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_acceptances_composition_id_fkey"
+            columns: ["composition_id"]
+            isOneToOne: false
+            referencedRelation: "kit_compositions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_acceptances_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_acceptances_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_acceptances_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      kit_balances: {
+        Row: {
+          cycle_id: string
+          id: string
+          qty_accepted: number
+          qty_allocated: number
+          qty_available: number | null
+          qty_divergent: number
+          qty_lost: number
+          qty_reserved: number
+          qty_retained: number
+          qty_return_transit: number
+          qty_returned: number
+          qty_sold: number
+          qty_warranty: number
+          updated_at: string
+          variant_id: string
+        }
+        Insert: {
+          cycle_id: string
+          id?: string
+          qty_accepted?: number
+          qty_allocated?: number
+          qty_available?: number | null
+          qty_divergent?: number
+          qty_lost?: number
+          qty_reserved?: number
+          qty_retained?: number
+          qty_return_transit?: number
+          qty_returned?: number
+          qty_sold?: number
+          qty_warranty?: number
+          updated_at?: string
+          variant_id: string
+        }
+        Update: {
+          cycle_id?: string
+          id?: string
+          qty_accepted?: number
+          qty_allocated?: number
+          qty_available?: number | null
+          qty_divergent?: number
+          qty_lost?: number
+          qty_reserved?: number
+          qty_retained?: number
+          qty_return_transit?: number
+          qty_returned?: number
+          qty_sold?: number
+          qty_warranty?: number
+          updated_at?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_balances_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_balances_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kit_composition_items: {
+        Row: {
+          composition_id: string
+          created_at: string
+          id: string
+          quantity: number
+          reservation_id: string | null
+          unit_reference_cents: number
+          variant_id: string
+        }
+        Insert: {
+          composition_id: string
+          created_at?: string
+          id?: string
+          quantity: number
+          reservation_id?: string | null
+          unit_reference_cents?: number
+          variant_id: string
+        }
+        Update: {
+          composition_id?: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          reservation_id?: string | null
+          unit_reference_cents?: number
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_composition_items_composition_id_fkey"
+            columns: ["composition_id"]
+            isOneToOne: false
+            referencedRelation: "kit_compositions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_composition_items_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "stock_reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_composition_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kit_compositions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          cycle_id: string
+          frozen_at: string | null
+          frozen_by: string | null
+          id: string
+          note: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          cycle_id: string
+          frozen_at?: string | null
+          frozen_by?: string | null
+          id?: string
+          note?: string | null
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          cycle_id?: string
+          frozen_at?: string | null
+          frozen_by?: string | null
+          id?: string
+          note?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_compositions_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kit_cycles: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          closed_at: string | null
+          consultora_location_id: string | null
+          consultora_party_id: string | null
+          created_at: string
+          created_by: string | null
+          current_location_id: string | null
+          custodian_party_id: string | null
+          cycle_no: number
+          due_at: string | null
+          id: string
+          kit_id: string
+          notes: string | null
+          origin_location_id: string | null
+          quantity_total: number
+          received_at: string | null
+          reference_total_cents: number
+          representante_party_id: string | null
+          settlement_started_at: string | null
+          shipped_at: string | null
+          status: Database["public"]["Enums"]["kit_status"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          closed_at?: string | null
+          consultora_location_id?: string | null
+          consultora_party_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_location_id?: string | null
+          custodian_party_id?: string | null
+          cycle_no: number
+          due_at?: string | null
+          id?: string
+          kit_id: string
+          notes?: string | null
+          origin_location_id?: string | null
+          quantity_total?: number
+          received_at?: string | null
+          reference_total_cents?: number
+          representante_party_id?: string | null
+          settlement_started_at?: string | null
+          shipped_at?: string | null
+          status?: Database["public"]["Enums"]["kit_status"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          closed_at?: string | null
+          consultora_location_id?: string | null
+          consultora_party_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_location_id?: string | null
+          custodian_party_id?: string | null
+          cycle_no?: number
+          due_at?: string | null
+          id?: string
+          kit_id?: string
+          notes?: string | null
+          origin_location_id?: string | null
+          quantity_total?: number
+          received_at?: string | null
+          reference_total_cents?: number
+          representante_party_id?: string | null
+          settlement_started_at?: string | null
+          shipped_at?: string | null
+          status?: Database["public"]["Enums"]["kit_status"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_cycles_consultora_location_id_fkey"
+            columns: ["consultora_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_current_location_id_fkey"
+            columns: ["current_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_custodian_party_id_fkey"
+            columns: ["custodian_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_custodian_party_id_fkey"
+            columns: ["custodian_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_origin_location_id_fkey"
+            columns: ["origin_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      kit_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          cycle_id: string
+          from_status: Database["public"]["Enums"]["kit_status"] | null
+          id: string
+          kind: string
+          payload: Json
+          reason: string | null
+          to_status: Database["public"]["Enums"]["kit_status"] | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          cycle_id: string
+          from_status?: Database["public"]["Enums"]["kit_status"] | null
+          id?: string
+          kind: string
+          payload?: Json
+          reason?: string | null
+          to_status?: Database["public"]["Enums"]["kit_status"] | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          cycle_id?: string
+          from_status?: Database["public"]["Enums"]["kit_status"] | null
+          id?: string
+          kind?: string
+          payload?: Json
+          reason?: string | null
+          to_status?: Database["public"]["Enums"]["kit_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_events_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kit_transfers: {
+        Row: {
+          carrier: string | null
+          created_at: string
+          created_by: string | null
+          cycle_id: string
+          delivered_at: string | null
+          evidence: Json
+          from_location_id: string | null
+          from_party_id: string | null
+          id: string
+          note: string | null
+          refusal_reason: string | null
+          refused_at: string | null
+          seq: number
+          shipped_at: string | null
+          shipping_cost_cents: number | null
+          status: Database["public"]["Enums"]["kit_transfer_status"]
+          to_location_id: string | null
+          to_party_id: string | null
+          tracking_code: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          carrier?: string | null
+          created_at?: string
+          created_by?: string | null
+          cycle_id: string
+          delivered_at?: string | null
+          evidence?: Json
+          from_location_id?: string | null
+          from_party_id?: string | null
+          id?: string
+          note?: string | null
+          refusal_reason?: string | null
+          refused_at?: string | null
+          seq: number
+          shipped_at?: string | null
+          shipping_cost_cents?: number | null
+          status?: Database["public"]["Enums"]["kit_transfer_status"]
+          to_location_id?: string | null
+          to_party_id?: string | null
+          tracking_code?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          carrier?: string | null
+          created_at?: string
+          created_by?: string | null
+          cycle_id?: string
+          delivered_at?: string | null
+          evidence?: Json
+          from_location_id?: string | null
+          from_party_id?: string | null
+          id?: string
+          note?: string | null
+          refusal_reason?: string | null
+          refused_at?: string | null
+          seq?: number
+          shipped_at?: string | null
+          shipping_cost_cents?: number | null
+          status?: Database["public"]["Enums"]["kit_transfer_status"]
+          to_location_id?: string | null
+          to_party_id?: string | null
+          tracking_code?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_transfers_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_transfers_from_location_id_fkey"
+            columns: ["from_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_transfers_from_party_id_fkey"
+            columns: ["from_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_transfers_from_party_id_fkey"
+            columns: ["from_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_transfers_to_location_id_fkey"
+            columns: ["to_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_transfers_to_party_id_fkey"
+            columns: ["to_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_transfers_to_party_id_fkey"
+            columns: ["to_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      kits: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          label: string | null
+          notes: string | null
+          qr_token: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          notes?: string | null
+          qr_token?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          notes?: string | null
+          qr_token?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       lead_events: {
         Row: {
           actor_id: string | null
@@ -4570,8 +5211,10 @@ export type Database = {
       barcode_lookup: { Args: { _code: string }; Returns: Json }
       can_manage_catalog: { Args: { _user_id: string }; Returns: boolean }
       can_manage_content: { Args: { _user_id: string }; Returns: boolean }
+      can_manage_kits: { Args: { _user_id: string }; Returns: boolean }
       can_manage_leads: { Args: { _user_id: string }; Returns: boolean }
       can_view_costs: { Args: { _user_id: string }; Returns: boolean }
+      can_view_kits: { Args: { _user_id: string }; Returns: boolean }
       catalog_markup_get: { Args: never; Returns: number }
       catalog_markup_set: { Args: { _percent: number }; Returns: number }
       claim_master_role: { Args: never; Returns: boolean }
@@ -4957,6 +5600,7 @@ export type Database = {
         }[]
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
       list_parties: {
         Args: {
           _kind?: string
@@ -4991,6 +5635,7 @@ export type Database = {
           capability: string
         }[]
       }
+      my_party_id: { Args: never; Returns: string }
       my_roles: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -5439,6 +6084,24 @@ export type Database = {
         | "aprovado"
         | "ativo"
         | "cancelado"
+      kit_acceptance_kind: "integral" | "parcial"
+      kit_status:
+        | "rascunho"
+        | "montagem"
+        | "conferida"
+        | "expedida"
+        | "transito"
+        | "recebida"
+        | "operacao"
+        | "acerto"
+        | "encerrada"
+        | "cancelada"
+      kit_transfer_status:
+        | "pendente"
+        | "transito"
+        | "entregue"
+        | "recusada"
+        | "cancelada"
       lead_status:
         | "novo"
         | "em_analise"
@@ -5692,6 +6355,26 @@ export const Constants = {
         "aprovado",
         "ativo",
         "cancelado",
+      ],
+      kit_acceptance_kind: ["integral", "parcial"],
+      kit_status: [
+        "rascunho",
+        "montagem",
+        "conferida",
+        "expedida",
+        "transito",
+        "recebida",
+        "operacao",
+        "acerto",
+        "encerrada",
+        "cancelada",
+      ],
+      kit_transfer_status: [
+        "pendente",
+        "transito",
+        "entregue",
+        "recusada",
+        "cancelada",
       ],
       lead_status: [
         "novo",

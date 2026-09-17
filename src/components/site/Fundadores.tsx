@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+
 import { DANIEL, LARISSA } from "@/lib/institucional";
 import { RetratoOficial } from "./RetratoOficial";
 import { danielPortrait, larissaPortrait } from "./retratos";

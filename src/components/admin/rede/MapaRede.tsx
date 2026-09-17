@@ -286,6 +286,7 @@ function Legenda({
           </span>
         </li>
       ))}
+      {candidatas}
     </ul>
   );
 }

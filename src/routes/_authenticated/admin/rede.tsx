@@ -247,6 +247,22 @@ function RedePage() {
               onChange={(v) => setCamada(v as Camada)}
             />
           </Campo>
+          <Campo rotulo="Candidaturas do site">
+            <label className="flex h-10 items-center gap-2 text-sm text-ledger-text">
+              <input
+                type="checkbox"
+                className="size-4 accent-[var(--color-champagne)]"
+                checked={mostrarCandidaturas}
+                onChange={(e) => setMostrarCandidaturas(e.target.checked)}
+              />
+              Mostrar no mapa
+              {mostrarCandidaturas && candidaturas.data ? (
+                <span className="text-ledger-muted [font-variant-numeric:tabular-nums]">
+                  ({candidaturas.data.indicadores.total})
+                </span>
+              ) : null}
+            </label>
+          </Campo>
           <div className="flex items-end">
             <button
               type="button"

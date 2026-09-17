@@ -156,6 +156,18 @@ export function SejaLardanForm() {
       const v = form.get(k);
       return typeof v === "string" && v.trim() !== "" ? v.trim() : undefined;
     };
+    // Cidade e estado são validados aqui: o campo oculto do seletor não pode
+    // receber foco, então a validação do navegador travaria o envio em silêncio.
+    if (!uf) {
+      setBusy(false);
+      setErro("Escolha o estado (UF).");
+      return;
+    }
+    if (!cidade.trim()) {
+      setBusy(false);
+      setErro("Escolha ou digite a sua cidade.");
+      return;
+    }
     const whatsappCanonico = normalizarWhatsapp(whatsapp);
     if (whatsappCanonico.estado !== "valido" || !whatsappCanonico.canonico) {
       setBusy(false);
@@ -320,7 +332,6 @@ export function SejaLardanForm() {
             {uf && (municipios.data?.length ?? 0) > 0 ? (
               <SmartSelect
                 id="city-select"
-                required
                 value={codigoIbge}
                 onChange={(v) => {
                   const m = municipios.data?.find((item) => item.codigo_ibge === v);
@@ -350,7 +361,6 @@ export function SejaLardanForm() {
             <SmartSelect
               id="uf"
               name="uf"
-              required
               value={uf}
               onChange={(v) => {
                 setUf(v);

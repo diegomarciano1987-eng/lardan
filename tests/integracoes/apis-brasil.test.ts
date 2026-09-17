@@ -296,8 +296,8 @@ describe("IBGE — municípios por UF", () => {
     const r = await listMunicipalitiesByState(UF_IBGE, null);
     expect(r.status).toBe("ok");
     expect(r.dados).toEqual([
-      { codigo_ibge: "1721000", nome: "Palmas" },
       { codigo_ibge: "1702109", nome: "Araguaína" },
+      { codigo_ibge: "1721000", nome: "Palmas" },
     ]);
     expect(JSON.stringify(r.dados)).not.toContain("descartado");
   });

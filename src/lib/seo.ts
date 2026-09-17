@@ -1,6 +1,7 @@
 // Imagem oficial de compartilhamento (1200x630) com a logo LARDAN.
 import ogAsset from "@/assets/lardan-og.jpg.asset.json";
 import { INSTAGRAM_URL } from "@/lib/brand";
+import { DANIEL, EMPRESA, ENDERECO, LARISSA } from "@/lib/institucional";
 
 /**
  * Configuração central de URL do site.

@@ -85,6 +85,12 @@ function RedePage() {
     enabled: podeVer && camada === "concentracao",
   });
 
+  const candidaturas = useQuery({
+    queryKey: ["rede-candidaturas", filtros, uf],
+    queryFn: () => candidaturasRede(uf ? { ...filtros, uf } : filtros),
+    enabled: podeVer && mostrarCandidaturas,
+  });
+
   const territorio = useQuery({
     queryKey: ["rede-territorio", uf, ibge, filtros],
     queryFn: () => territorioRede(uf, ibge, filtros),

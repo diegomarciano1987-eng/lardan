@@ -30,7 +30,7 @@ export function SejaHero() {
           id="seja-lardan-titulo"
           className="text-4xl leading-[1.05] text-foreground md:text-6xl"
         >
-          Seu próximo capítulo pode começar com você.
+          Todo brilho começa em um lar.
         </CinematicTitle>
         <div className="rose-rule mt-8 w-20" />
         <p className="seja-promise mt-7 font-display text-[clamp(1.375rem,2.6vw,2rem)] leading-[1.25] tracking-tight">

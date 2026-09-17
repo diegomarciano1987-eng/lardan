@@ -139,6 +139,52 @@ export async function pontosRede(filtros: FiltrosRede): Promise<PontoRede[]> {
   }));
 }
 
+/** Candidaturas recebidas pelo site, posicionadas pelo endereço informado. */
+export interface PontoCandidatura {
+  lat: number;
+  lng: number;
+  total: number;
+  abertas: number;
+  aproximado: boolean;
+}
+
+export interface CandidaturasRede {
+  atualizado_em: string;
+  indicadores: {
+    total: number;
+    abertas: number;
+    ganhas: number;
+    perdidas: number;
+    estados: number;
+    municipios: number;
+  };
+  estados: { uf: string; nome: string; total: number; abertas: number }[];
+  municipios: {
+    codigo_ibge: string;
+    municipio: string;
+    uf: string | null;
+    total: number;
+    abertas: number;
+  }[];
+  pontos: PontoCandidatura[];
+}
+
+export async function candidaturasRede(filtros: FiltrosRede): Promise<CandidaturasRede> {
+  const { data, error } = await supabase.rpc("network_geo_candidaturas", {
+    _filtros: limparFiltros(filtros),
+  });
+  if (error) throw error;
+  const bruto = data as unknown as CandidaturasRede;
+  return {
+    ...bruto,
+    pontos: (bruto.pontos ?? []).map((p) => ({
+      ...p,
+      lat: Number(p.lat),
+      lng: Number(p.lng),
+    })),
+  };
+}
+
 export interface Cobertura {
   estados_atendidos: number;
   estados_sem_cobertura: { uf: string; nome: string }[];

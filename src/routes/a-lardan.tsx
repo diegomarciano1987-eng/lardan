@@ -4,8 +4,8 @@ import { PageHero } from "@/components/site/PageHero";
 import { RetratoOficial } from "@/components/site/RetratoOficial";
 import {
   danielLarissaPortrait,
-  danielPortrait,
-  larissaPortrait,
+  danielPortraitInstitucional,
+  larissaPortraitSeja,
 } from "@/components/site/retratos";
 import editorialAsset from "@/assets/lardan-editorial-mulher.jpg.asset.json";
 import {

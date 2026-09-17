@@ -51,9 +51,15 @@ export const Route = createFileRoute("/a-lardan")({
 function ALardanPage() {
   return (
     <SiteLayout>
-      <PageHero eyebrow="A marca" title="A Lardan">
-        <p>{EMPRESA.fundacao}</p>
-      </PageHero>
+      {/* Abertura institucional: sem título de marca, com a fundação em destaque. */}
+      <section className="mx-auto max-w-4xl px-6 pb-12 pt-36 text-center md:pt-44">
+        <p className="brand-eyebrow mb-8">A marca</p>
+        <h1 className="font-display text-[2.1rem] leading-[1.1] tracking-tight text-foreground sm:text-5xl md:text-6xl">
+          {EMPRESA.fundacao}
+        </h1>
+        <div className="rose-rule mx-auto mt-9 w-20" />
+      </section>
+
 
       <section aria-label="Lardan e seus fundadores" className="mx-auto max-w-6xl px-6 pb-20 md:pb-24">
         <div className="grid items-stretch overflow-hidden rounded-md border border-border bg-card md:grid-cols-[0.92fr_1.08fr]">

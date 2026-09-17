@@ -69,8 +69,8 @@ export function jsonLdScript(data: Json | Json[]) {
 /**
  * Organization com apenas informações confirmadas.
  * sameAs lista somente a rede oficial da marca.
- * TODO (dados reais do cliente): telefone/e-mail de contato, razão social,
- * CNPJ e endereço — não preencher com suposições.
+ * TODO (dados reais do cliente): telefone/e-mail de contato, razão social e
+ * CNPJ — não preencher com suposições.
  */
 export function organizationLd(): Json {
   return {
@@ -83,9 +83,45 @@ export function organizationLd(): Json {
     logo: OG_IMAGE,
     image: OG_IMAGE,
     sameAs: [INSTAGRAM_URL],
+    foundingDate: EMPRESA.anoFundacao,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: ENDERECO.logradouro,
+      addressLocality: ENDERECO.cidade,
+      addressRegion: ENDERECO.uf,
+      postalCode: ENDERECO.cep,
+      addressCountry: "BR",
+    },
+    areaServed: [
+      { "@type": "State", name: "Paraná" },
+      { "@type": "State", name: "São Paulo" },
+    ],
+    founder: [{ "@id": `${SITE_URL}/#daniel` }, { "@id": `${SITE_URL}/#larissa` }],
     description:
       "Marca brasileira de semijoias que conecta produtos, clientes, consultoras e tecnologia em um ecossistema comercial próprio.",
   };
+}
+
+/** Fundadores. Somente atributos confirmados oficialmente. */
+export function foundersLd(): Json[] {
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "@id": `${SITE_URL}/#daniel`,
+      name: DANIEL.nome,
+      jobTitle: DANIEL.cargo,
+      worksFor: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "@id": `${SITE_URL}/#larissa`,
+      name: LARISSA.nome,
+      jobTitle: LARISSA.cargo,
+      worksFor: { "@id": `${SITE_URL}/#organization` },
+    },
+  ];
 }
 
 export function webSiteLd(): Json {

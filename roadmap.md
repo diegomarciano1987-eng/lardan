@@ -2,7 +2,7 @@
 
 ## Site — composição institucional A Lardan
 - [x] Substituir o editorial genérico por logo completa e foto oficial do casal
-- [ ] Validar ordem logo primeiro no mobile, composição lado a lado no desktop e acessibilidade
+- [x] Validar ordem logo primeiro no mobile, composição lado a lado no desktop e acessibilidade
 
 ## Site — Seja Lardan cinematográfico
 - [x] Aplicar a nova foto da família na seção Nossa origem

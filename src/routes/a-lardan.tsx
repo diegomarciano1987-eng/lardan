@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { PageHero } from "@/components/site/PageHero";
+
 import { RetratoOficial } from "@/components/site/RetratoOficial";
 import {
   danielLarissaPortrait,

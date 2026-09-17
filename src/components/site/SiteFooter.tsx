@@ -73,26 +73,26 @@ export function SiteFooter() {
               </ul>
             </nav>
           ))}
-        </div>
 
-        <div className="mt-12 border-t border-border pt-10">
-          <h2 className="brand-eyebrow mb-4">Endereço</h2>
-          <address className="text-sm not-italic leading-relaxed text-muted-foreground">
-            <span className="block text-foreground">Lardan</span>
-            {ENDERECO_LINHAS.map((linha) => (
-              <span key={linha} className="block">
-                {linha}
-              </span>
-            ))}
-          </address>
-          <a
-            href={MAPA_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-block text-xs tracking-[0.18em] uppercase text-muted-foreground underline-offset-8 transition-colors hover:text-foreground hover:underline"
-          >
-            Ver localização
-          </a>
+          <div>
+            <h2 className="brand-eyebrow mb-4">Endereço</h2>
+            <address className="text-sm not-italic leading-relaxed text-muted-foreground">
+              <span className="block text-foreground">Lardan</span>
+              {ENDERECO_LINHAS.map((linha) => (
+                <span key={linha} className="block">
+                  {linha}
+                </span>
+              ))}
+            </address>
+            <a
+              href={MAPA_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block text-xs tracking-[0.18em] uppercase text-muted-foreground underline-offset-8 transition-colors hover:text-foreground hover:underline"
+            >
+              Ver localização
+            </a>
+          </div>
         </div>
 
         <p className="mt-10 max-w-3xl text-xs leading-relaxed text-muted-foreground">

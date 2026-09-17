@@ -231,8 +231,8 @@
 
 .seja-cinematic-band__veil {
   background:
-    linear-gradient(100deg, oklch(0.24 0.035 25 / 0.93), oklch(0.47 0.06 25 / 0.74)),
-    linear-gradient(180deg, oklch(0.16 0.02 25 / 0.15), oklch(0.2 0.03 25 / 0.68));
+    linear-gradient(100deg, oklch(0.3 0.09 18 / 0.84), oklch(0.52 0.1 20 / 0.58)),
+    linear-gradient(180deg, oklch(0.2 0.06 18 / 0.1), oklch(0.26 0.08 18 / 0.52));
 }
 
 .seja-cinematic-band__light {
@@ -257,8 +257,8 @@
 
 .seja-perfil-band__veil {
   background:
-    linear-gradient(100deg, oklch(0.3 0.04 25 / 0.78), oklch(0.58 0.065 27 / 0.68)),
-    linear-gradient(180deg, oklch(0.24 0.03 25 / 0.48), oklch(0.28 0.04 25 / 0.74));
+    linear-gradient(100deg, oklch(0.34 0.09 18 / 0.74), oklch(0.58 0.11 20 / 0.62)),
+    linear-gradient(180deg, oklch(0.28 0.07 18 / 0.44), oklch(0.32 0.08 18 / 0.7));
 }
 
 .seja-perfil-band__light {

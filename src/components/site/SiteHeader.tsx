@@ -5,6 +5,7 @@ import { HeaderAcoes } from "./HeaderAcoes";
 import { NAV_ITEMS } from "@/lib/brand";
 import { SocialLinks } from "./SocialLinks";
 import logo from "@/assets/lardan-logo-completa.png.asset.json";
+import diamante from "@/assets/lardan-diamante.png.asset.json";
 
 function NavLink({
   to,
@@ -68,19 +69,21 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
             }`
       }`}
     >
-      {branded ? (
+      {!isHome ? (
         <Link
           to="/"
-          aria-label="Lardan — página inicial"
-          className="absolute left-5 bottom-2.5 flex h-9 items-center px-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring md:bottom-auto md:left-10 md:h-24"
+          aria-label="Voltar para a página inicial"
+          className="absolute left-5 top-1/2 hidden h-10 -translate-y-1/2 items-center gap-2 px-1 text-[0.5625rem] uppercase tracking-[0.2em] text-foreground/65 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring md:left-10 md:flex"
         >
           <img
-            src={logo.url}
-            alt="Lardan"
-            width={200}
-            height={56}
-            className="h-5 w-auto object-contain brightness-[0.32] sepia-[0.18] transition-opacity duration-300 hover:opacity-70 md:h-12"
+            src={diamante.url}
+            alt=""
+            aria-hidden
+            width={624}
+            height={416}
+            className="h-7 w-10 object-contain"
           />
+          <span>Home</span>
         </Link>
       ) : null}
 
@@ -96,7 +99,25 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
       </div>
 
       <div className="absolute inset-x-5 bottom-2.5 z-50 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center md:hidden">
-        <SocialLinks tamanho="sm" className="justify-self-start" />
+        {isHome ? (
+          <SocialLinks tamanho="sm" className="justify-self-start" />
+        ) : (
+          <Link
+            to="/"
+            aria-label="Voltar para a página inicial"
+            className="inline-flex h-9 items-center gap-1.5 justify-self-start pr-2 text-[0.5rem] uppercase tracking-[0.16em] text-foreground/65 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+          >
+            <img
+              src={diamante.url}
+              alt=""
+              aria-hidden
+              width={624}
+              height={416}
+              className="h-6 w-8 object-contain"
+            />
+            <span>Home</span>
+          </Link>
+        )}
 
         <div className="relative flex flex-col items-center">
           <button

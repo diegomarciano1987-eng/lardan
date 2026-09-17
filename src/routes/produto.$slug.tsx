@@ -36,14 +36,14 @@ export const Route = createFileRoute("/produto/$slug")({
   },
   errorComponent: () => (
     <SiteLayout brandedHeader>
-      <div className="mx-auto max-w-3xl px-6 pb-24 pt-28 md:pt-32">
+      <div className="mx-auto max-w-3xl px-6 pb-24 pt-28 md:pt-36">
         <StateNote text="Não conseguimos carregar esta peça agora. Tente novamente em instantes." />
       </div>
     </SiteLayout>
   ),
   notFoundComponent: () => (
     <SiteLayout brandedHeader>
-      <div className="mx-auto max-w-3xl px-6 pb-24 pt-28 md:pt-32">
+      <div className="mx-auto max-w-3xl px-6 pb-24 pt-28 md:pt-36">
         <StateNote text="Esta peça não está disponível no catálogo." />
       </div>
     </SiteLayout>
@@ -57,7 +57,7 @@ function ProdutoPage() {
 
   return (
     <SiteLayout brandedHeader>
-      <div className="mx-auto max-w-6xl px-6 pb-24 pt-28 md:pt-32">
+      <div className="mx-auto max-w-6xl px-6 pb-24 pt-28 md:pt-36">
         <nav className="mb-8 text-xs uppercase tracking-[0.22em] text-muted-foreground">
           <Link to="/semijoias">Semijoias</Link>
           {p.category ? (

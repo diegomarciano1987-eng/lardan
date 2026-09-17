@@ -44,6 +44,7 @@ function RedePage() {
 
   const [filtros, setFiltros] = useState<FiltrosRede>(FILTROS_REDE_VAZIOS);
   const [camada, setCamada] = useState<Camada>("quantidade");
+  const [mostrarCandidaturas, setMostrarCandidaturas] = useState(true);
   const [aba, setAba] = useState<Aba>("mapa");
   const [uf, setUf] = useState<string | null>(null);
   const [ibge, setIbge] = useState<string | null>(null);

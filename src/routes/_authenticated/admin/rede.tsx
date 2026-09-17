@@ -13,6 +13,7 @@ import { OPCOES_UF } from "@/lib/br/ufs";
 import { UF_CODIGO_IBGE, CODIGO_IBGE_UF, type Malha } from "@/lib/rede/geo";
 import {
   FILTROS_REDE_VAZIOS,
+  candidaturasRede,
   contarFiltrosAtivos,
   municipiosDaUf,
   pontosRede,
@@ -43,6 +44,7 @@ function RedePage() {
 
   const [filtros, setFiltros] = useState<FiltrosRede>(FILTROS_REDE_VAZIOS);
   const [camada, setCamada] = useState<Camada>("quantidade");
+  const [mostrarCandidaturas, setMostrarCandidaturas] = useState(true);
   const [aba, setAba] = useState<Aba>("mapa");
   const [uf, setUf] = useState<string | null>(null);
   const [ibge, setIbge] = useState<string | null>(null);
@@ -83,6 +85,12 @@ function RedePage() {
     enabled: podeVer && camada === "concentracao",
   });
 
+  const candidaturas = useQuery({
+    queryKey: ["rede-candidaturas", filtros, uf],
+    queryFn: () => candidaturasRede(uf ? { ...filtros, uf } : filtros),
+    enabled: podeVer && mostrarCandidaturas,
+  });
+
   const territorio = useQuery({
     queryKey: ["rede-territorio", uf, ibge, filtros],
     queryFn: () => territorioRede(uf, ibge, filtros),
@@ -111,6 +119,19 @@ function RedePage() {
       ativas: m.ativas,
     }));
   }, [uf, geral.data, municipios.data]);
+
+  const candidaturasPorChave = useMemo(() => {
+    const mapa = new Map<string, number>();
+    if (!mostrarCandidaturas) return mapa;
+    if (!uf) {
+      for (const e of candidaturas.data?.estados ?? []) mapa.set(e.uf, e.total);
+    } else {
+      for (const m of candidaturas.data?.municipios ?? []) {
+        if (m.codigo_ibge) mapa.set(m.codigo_ibge, m.total);
+      }
+    }
+    return mapa;
+  }, [uf, candidaturas.data, mostrarCandidaturas]);
 
   if (!podeVer) {
     return (
@@ -226,6 +247,22 @@ function RedePage() {
               onChange={(v) => setCamada(v as Camada)}
             />
           </Campo>
+          <Campo rotulo="Candidaturas do site">
+            <label className="flex h-10 items-center gap-2 text-sm text-ledger-text">
+              <input
+                type="checkbox"
+                className="size-4 accent-[var(--color-champagne)]"
+                checked={mostrarCandidaturas}
+                onChange={(e) => setMostrarCandidaturas(e.target.checked)}
+              />
+              Mostrar no mapa
+              {mostrarCandidaturas && candidaturas.data ? (
+                <span className="text-ledger-muted [font-variant-numeric:tabular-nums]">
+                  ({candidaturas.data.indicadores.total})
+                </span>
+              ) : null}
+            </label>
+          </Campo>
           <div className="flex items-end">
             <button
               type="button"
@@ -280,6 +317,8 @@ function RedePage() {
                   else setUf(chave);
                 }}
                 pontos={pontos.data ?? []}
+                candidaturas={mostrarCandidaturas ? (candidaturas.data?.pontos ?? []) : []}
+                candidaturasPorChave={candidaturasPorChave}
                 camada={camada}
                 totalRede={ind?.total ?? 0}
               />

@@ -9,7 +9,11 @@ import {
   projetar,
   type Malha,
 } from "@/lib/rede/geo";
-import type { PontoRede } from "@/lib/rede/consultas";
+import type { PontoCandidatura, PontoRede } from "@/lib/rede/consultas";
+
+/** Cores fixas das duas populações do mapa: consultoras e candidatas do site. */
+export const COR_CONSULTORA = "var(--rose)";
+export const COR_CANDIDATA = "var(--color-champagne)";
 
 export interface ValorTerritorio {
   chave: string;
@@ -26,6 +30,10 @@ interface Props {
   selecionado?: string | null;
   onSelecionar: (chave: string) => void;
   pontos?: PontoRede[];
+  /** Candidaturas do site, posicionadas pelo endereço informado no formulário. */
+  candidaturas?: PontoCandidatura[];
+  /** Quantidade de candidaturas por território, para leitura ao passar o mouse. */
+  candidaturasPorChave?: Map<string, number>;
   camada: "quantidade" | "ativas" | "concentracao";
   totalRede: number;
 }
@@ -39,6 +47,8 @@ export function MapaRede({
   selecionado,
   onSelecionar,
   pontos = [],
+  candidaturas = [],
+  candidaturasPorChave,
   camada,
   totalRede,
 }: Props) {
@@ -53,6 +63,7 @@ export function MapaRede({
   );
 
   const maiorPonto = pontos.reduce((m, p) => Math.max(m, p.total), 0) || 1;
+  const maiorCandidata = candidaturas.reduce((m, p) => Math.max(m, p.total), 0) || 1;
   const destaque = focado ?? selecionado ?? null;
   const info = destaque ? porChave.get(destaque) : null;
 
@@ -142,6 +153,38 @@ export function MapaRede({
               </g>
             );
           })}
+
+        {/* Candidaturas do site: cor própria, sempre por agrupamento aproximado */}
+        {candidaturas.map((p, i) => {
+          const [x, y] = projecao.ponto(p.lng, p.lat);
+          const r = 3.5 + (p.total / maiorCandidata) * 10;
+          return (
+            <g key={`c-${i}`}>
+              <circle
+                cx={x}
+                cy={y}
+                r={r}
+                fill={`color-mix(in oklab, ${COR_CANDIDATA} 55%, transparent)`}
+                stroke={COR_CANDIDATA}
+                strokeWidth={0.9}
+                strokeDasharray={p.aproximado ? "2 2" : undefined}
+              >
+                <title>
+                  {p.total} candidatura(s) do site · {p.abertas} em aberto
+                  {p.aproximado ? " · posição aproximada pelo estado" : ""}
+                </title>
+              </circle>
+              <text
+                x={x}
+                y={y + 3}
+                textAnchor="middle"
+                className="pointer-events-none fill-white text-[9px] font-semibold [font-variant-numeric:tabular-nums]"
+              >
+                {p.total}
+              </text>
+            </g>
+          );
+        })}
       </svg>
 
       {/* Leitura textual — o mapa nunca é a única forma de ler o dado */}
@@ -156,32 +199,74 @@ export function MapaRede({
           <>
             <p className="font-semibold text-ledger-text">{info.nome}</p>
             <p className="text-ledger-muted [font-variant-numeric:tabular-nums]">
-              {info.total} no total · {info.ativas} ativas ·{" "}
+              {info.total} consultoras · {info.ativas} ativas ·{" "}
               {totalRede ? ((info.total / totalRede) * 100).toFixed(1) : "0.0"}% da rede
             </p>
+            {destaque && candidaturasPorChave ? (
+              <p className="[font-variant-numeric:tabular-nums]" style={{ color: COR_CANDIDATA }}>
+                {candidaturasPorChave.get(destaque) ?? 0} candidatura(s) do site
+              </p>
+            ) : null}
           </>
         ) : (
           <span>—</span>
         )}
       </div>
 
-      <Legenda cortes={cortes} camada={camada} />
+      <Legenda cortes={cortes} camada={camada} comCandidaturas={candidaturas.length > 0} />
     </div>
   );
 }
 
-function Legenda({ cortes, camada }: { cortes: number[]; camada: string }) {
+function Legenda({
+  cortes,
+  camada,
+  comCandidaturas,
+}: {
+  cortes: number[];
+  camada: string;
+  comCandidaturas: boolean;
+}) {
+  const candidatas = comCandidaturas ? (
+    <li className="flex items-center gap-1.5">
+      <span
+        className="inline-block size-3 rounded-full"
+        style={{
+          background: `color-mix(in oklab, ${COR_CANDIDATA} 55%, transparent)`,
+          border: `1px solid ${COR_CANDIDATA}`,
+        }}
+      />
+      Candidatas do site
+    </li>
+  ) : null;
+
   if (camada === "concentracao") {
     return (
-      <p className="mt-3 text-xs text-ledger-muted">
-        Cada círculo agrupa consultoras próximas. Contorno tracejado indica localização aproximada
-        pelo estado. Endereço residencial nunca é exibido.
-      </p>
+      <div className="mt-3 space-y-2">
+        <ul className="flex flex-wrap items-center gap-3 text-xs text-ledger-muted">
+          <li className="flex items-center gap-1.5">
+            <span
+              className="inline-block size-3 rounded-full"
+              style={{
+                background: `color-mix(in oklab, ${COR_CONSULTORA} 45%, transparent)`,
+                border: `1px solid ${COR_CONSULTORA}`,
+              }}
+            />
+            Consultoras
+          </li>
+          {candidatas}
+        </ul>
+        <p className="text-xs text-ledger-muted">
+          Cada círculo agrupa pessoas próximas. Contorno tracejado indica localização aproximada
+          pelo estado. Endereço residencial nunca é exibido.
+        </p>
+      </div>
     );
   }
   const faixas = [0, ...cortes];
   return (
     <ul className="mt-3 flex flex-wrap items-center gap-3 text-xs text-ledger-muted">
+      <li className="font-medium text-ledger-text">Consultoras:</li>
       <li className="flex items-center gap-1.5">
         <span
           className="inline-block size-3 rounded-[2px] border border-line-soft"
@@ -201,6 +286,7 @@ function Legenda({ cortes, camada }: { cortes: number[]; camada: string }) {
           </span>
         </li>
       ))}
+      {candidatas}
     </ul>
   );
 }

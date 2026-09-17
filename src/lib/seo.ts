@@ -70,8 +70,8 @@ export function jsonLdScript(data: Json | Json[]) {
 /**
  * Organization com apenas informações confirmadas.
  * sameAs lista somente a rede oficial da marca.
- * TODO (dados reais do cliente): telefone/e-mail de contato, razão social e
- * CNPJ — não preencher com suposições.
+ * TODO (dados reais do cliente): telefone/e-mail de contato — não preencher
+ * com suposições.
  */
 export function organizationLd(): Json {
   return {
@@ -80,6 +80,8 @@ export function organizationLd(): Json {
     "@id": `${SITE_URL}/#organization`,
     name: "Lardan",
     alternateName: "Lardan Semijoias",
+    legalName: EMPRESA.razaoSocial,
+    taxID: EMPRESA.cnpj,
     url: SITE_URL,
     logo: OG_IMAGE,
     image: OG_IMAGE,

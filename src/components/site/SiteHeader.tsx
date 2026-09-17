@@ -44,7 +44,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
   useEffect(() => {
     const medir = () => {
       // Fundo aparece ao sair da primeira seção (hero) da página.
-      const limiar = Math.max(window.innerHeight * 0.75, 320);
+      const limiar = Math.max(window.innerHeight * 0.55, 240);
       setRolou(window.scrollY > limiar);
     };
     medir();
@@ -63,7 +63,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
           ? "top-0 h-[4.5rem] border-b border-foreground/10 bg-background/82 shadow-[0_16px_42px_-34px_color-mix(in_oklab,var(--foreground)_28%,transparent)] backdrop-blur-xl md:h-24"
           : `top-6 h-[4.5rem] md:h-16 ${
               rolou
-                ? "border-b border-foreground/8 bg-background/55 shadow-[0_18px_46px_-38px_color-mix(in_oklab,var(--foreground)_30%,transparent)] backdrop-blur-xl"
+                ? "border-b border-foreground/10 bg-background/70 shadow-[0_18px_46px_-38px_color-mix(in_oklab,var(--foreground)_30%,transparent)] backdrop-blur-xl"
                 : "border-b border-transparent"
             }`
       }`}

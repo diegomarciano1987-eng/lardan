@@ -46,6 +46,8 @@ export const ALT_CASAL =
 
 export const EMPRESA = {
   nome: "LARDAN",
+  razaoSocial: "TSM COMERCIO DE SEMIJOIAS LTDA",
+  cnpj: "43.319.208/0001-80",
   fundacao: "Fundada em 2021, em Ibiporã/PR",
   anoFundacao: "2021",
   paragrafos: [

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
 import { SocialLinks } from "./SocialLinks";
+import { ENDERECO_LINHAS, MAPA_URL } from "@/lib/institucional";
 
 /**
  * Rodapé institucional.
@@ -85,9 +86,29 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <p className="mt-12 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-          Canais oficiais de atendimento e dados empresariais (razão social, CNPJ e cidade) serão
-          publicados aqui assim que confirmados pela marca.
+        <div className="mt-12 border-t border-border pt-10">
+          <h2 className="brand-eyebrow mb-4">Endereço</h2>
+          <address className="text-sm not-italic leading-relaxed text-muted-foreground">
+            <span className="block text-foreground">Lardan</span>
+            {ENDERECO_LINHAS.map((linha) => (
+              <span key={linha} className="block">
+                {linha}
+              </span>
+            ))}
+          </address>
+          <a
+            href={MAPA_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-block text-xs tracking-[0.18em] uppercase text-muted-foreground underline-offset-8 transition-colors hover:text-foreground hover:underline"
+          >
+            Ver localização
+          </a>
+        </div>
+
+        <p className="mt-10 max-w-3xl text-xs leading-relaxed text-muted-foreground">
+          Canais oficiais de atendimento e dados empresariais (razão social e CNPJ) serão publicados
+          aqui assim que confirmados pela marca.
         </p>
 
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center">

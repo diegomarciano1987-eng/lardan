@@ -1,68 +1,100 @@
 import { Link } from "@tanstack/react-router";
-import fotoCasal from "@/assets/lardan-daniel-larissa.webp.asset.json";
+import { DANIEL, LARISSA } from "@/lib/institucional";
+import { RetratoOficial } from "./RetratoOficial";
+import { danielPortrait, larissaPortrait } from "./retratos";
 
 /**
- * Seção institucional "Por trás da Lardan" (Daniel + Larissa).
+ * Seção institucional "Por trás da Lardan" (Home).
  *
- * Foto oficial do casal já aplicada.
- * TODO — CONTEÚDO REAL AINDA PENDENTE DO CLIENTE. Nada pode ser inventado.
- * Substituir quando a marca enviar:
- *   1. história de Daniel
- *   2. história de Larissa
- *   3. como nasceu a Lardan
- *   4. princípios e visão
- *   5. assinatura/frase do casal
- * O texto abaixo é institucional e intencionalmente sem datas, cidades,
- * formação, números ou qualquer fato biográfico.
+ * Texto oficial da marca, sem reescrita. Composição editorial: fotografia
+ * grande + texto e, na sequência, inversão (texto + fotografia).
+ * As fotos individuais entram pelos slots em ./retratos.ts.
  */
+
+function Citacao({ texto }: { texto: string }) {
+  return (
+    <figure className="mt-10 border-l border-primary/50 pl-6">
+      <blockquote className="text-xl leading-snug text-foreground md:text-2xl">
+        “{texto}”
+      </blockquote>
+    </figure>
+  );
+}
+
 export function Fundadores() {
   return (
     <section
       aria-labelledby="por-tras-da-lardan"
       className="border-t border-border bg-background"
     >
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 md:grid-cols-2 md:gap-16 md:py-32">
-        {/* Fotografia oficial do casal. */}
-        <div className="overflow-hidden rounded-sm bg-muted">
-          <img
-            src={fotoCasal.url}
-            alt="Daniel e Larissa, fundadores da Lardan, com a filha"
-            width={1200}
-            height={1292}
-            loading="lazy"
-            decoding="async"
-            className="aspect-[4/5] w-full object-cover"
-          />
-        </div>
-
-        <div>
+      <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
+        <header className="max-w-3xl">
           <p className="brand-eyebrow mb-4">Por trás da Lardan</p>
-          <h2 id="por-tras-da-lardan" className="text-3xl leading-tight text-foreground md:text-5xl">
-            Uma marca construída por pessoas, para pessoas.
+          <h2
+            id="por-tras-da-lardan"
+            className="text-3xl leading-tight text-foreground md:text-5xl"
+          >
+            Uma história que começou pela família e se transformou em propósito.
           </h2>
           <div className="rose-rule mt-8 w-20" />
-          <div className="mt-8 space-y-5 text-base leading-relaxed text-muted-foreground">
-            <p>
-              Por trás de cada peça, de cada consultora e de cada história que encontra a Lardan,
-              existe uma empresa construída com proximidade, cuidado e vontade de crescer junto.
-            </p>
-            <p>
-              Daniel e Larissa conduzem a Lardan acreditando que uma semijoia pode representar muito
-              mais do que beleza. Para quem usa, ela pode marcar um momento. Para quem vende, pode
-              abrir caminhos, criar relacionamentos e fazer parte de novas conquistas.
-            </p>
+        </header>
+
+        {/* ------------------------------ Daniel ------------------------------ */}
+        <article
+          aria-labelledby="fundador-daniel"
+          className="mt-20 grid gap-10 md:mt-28 md:grid-cols-2 md:gap-16"
+        >
+          <div className="md:sticky md:top-28 md:self-start">
+            <RetratoOficial retrato={danielPortrait} rotulo="Foto oficial de Daniel" />
           </div>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Link to="/a-lardan" className="btn-premium">
-              Conheça a Lardan
-            </Link>
-            <Link
-              to="/seja-lardan"
-              className="text-[0.6875rem] tracking-[0.22em] uppercase text-foreground/70 underline-offset-8 transition-colors hover:text-foreground hover:underline"
-            >
-              Quero ser uma consultora
-            </Link>
+
+          <div className="max-w-prose">
+            <h3 id="fundador-daniel" className="text-2xl text-foreground md:text-3xl">
+              {DANIEL.nome}
+            </h3>
+            <p className="brand-eyebrow mt-3 text-muted-foreground">{DANIEL.cargoCurto}</p>
+            <div className="mt-8 space-y-5 text-base leading-relaxed text-muted-foreground">
+              {DANIEL.paragrafos.map((p) => (
+                <p key={p.slice(0, 32)}>{p}</p>
+              ))}
+            </div>
+            <Citacao texto={DANIEL.citacao} />
           </div>
+        </article>
+
+        {/* ----------------------------- Larissa ------------------------------ */}
+        <article
+          aria-labelledby="cofundadora-larissa"
+          className="mt-24 grid gap-10 md:mt-32 md:grid-cols-2 md:gap-16"
+        >
+          <div className="max-w-prose md:order-2 md:sticky md:top-28 md:self-start">
+            <RetratoOficial retrato={larissaPortrait} rotulo="Foto oficial de Larissa" />
+          </div>
+
+          <div className="max-w-prose md:order-1">
+            <h3 id="cofundadora-larissa" className="text-2xl text-foreground md:text-3xl">
+              {LARISSA.nome}
+            </h3>
+            <p className="brand-eyebrow mt-3 text-muted-foreground">{LARISSA.cargoCurto}</p>
+            <div className="mt-8 space-y-5 text-base leading-relaxed text-muted-foreground">
+              {LARISSA.paragrafos.map((p) => (
+                <p key={p.slice(0, 32)}>{p}</p>
+              ))}
+            </div>
+            <Citacao texto={LARISSA.citacao} />
+          </div>
+        </article>
+
+        <div className="mt-20 flex flex-wrap items-center gap-6 border-t border-border pt-10">
+          <Link to="/a-lardan" className="btn-premium">
+            Conheça a Lardan
+          </Link>
+          <Link
+            to="/seja-lardan"
+            className="text-[0.6875rem] tracking-[0.22em] uppercase text-foreground/70 underline-offset-8 transition-colors hover:text-foreground hover:underline"
+          >
+            Quero ser uma consultora
+          </Link>
         </div>
       </div>
     </section>

@@ -13,6 +13,7 @@ import {
   SejaProduto,
   SejaVidaReal,
 } from "@/components/site/seja/SecoesSejaLardan";
+import { SejaHistoria } from "@/components/site/seja/SejaHistoria";
 import { FAQ } from "@/lib/seja-lardan-conteudo";
 import {
   breadcrumbLd,
@@ -50,6 +51,7 @@ function SejaLardanPage() {
     <SiteLayout>
       <SejaHero />
       <SejaEmocional />
+      <SejaHistoria />
       <SejaDefinicao />
       <SejaFerramentas />
       <SejaAcademy />

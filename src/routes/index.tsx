@@ -16,6 +16,7 @@ import brincosMobileAsset from "@/assets/lardan-mobile-brincos.png.asset.json";
 import { Fundadores } from "@/components/site/Fundadores";
 import {
   canonical,
+  foundersLd,
   jsonLdScript,
   organizationLd,
   pageMeta,
@@ -98,6 +99,7 @@ export const Route = createFileRoute("/")({
           description:
             "Semijoias Lardan: anéis, colares, pulseiras e brincos, com 2 anos de garantia e uma rede de consultoras apoiada por tecnologia.",
         }),
+        ...foundersLd(),
       ]),
     ],
   }),

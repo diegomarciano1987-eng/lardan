@@ -297,6 +297,117 @@
   animation-duration: 620ms;
 }
 
+/* Abertura da Home — convite de rolagem leve, sem GIF ou arquivo adicional. */
+.hero-scroll-cue {
+  transition: opacity 180ms linear, transform 180ms ease-out;
+  will-change: opacity, transform;
+}
+
+.hero-scroll-cue__content {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    "gesture label"
+    "track track";
+  align-items: center;
+  gap: 0.5rem 0.7rem;
+  min-width: 9.5rem;
+  padding: 0.55rem 0.8rem 0.5rem;
+  border: 1px solid color-mix(in oklab, var(--rose-deep) 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ivory) 58%, transparent);
+  box-shadow: 0 10px 30px -18px color-mix(in oklab, var(--rose-deep) 45%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.hero-scroll-cue__gesture {
+  grid-area: gesture;
+  position: relative;
+  display: block;
+  width: 1rem;
+  height: 1.55rem;
+  border: 1px solid color-mix(in oklab, var(--rose-deep) 70%, transparent);
+  border-radius: 999px;
+}
+
+.hero-scroll-cue__dot {
+  position: absolute;
+  top: 0.26rem;
+  left: 50%;
+  width: 0.18rem;
+  height: 0.32rem;
+  border-radius: 999px;
+  background: var(--rose-deep);
+  transform: translateX(-50%);
+  animation: hero-scroll-gesture 1.65s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.hero-scroll-cue__label {
+  grid-area: label;
+  color: var(--rose-deep);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hero-scroll-cue__track {
+  grid-area: track;
+  display: block;
+  width: 100%;
+  height: 1px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--rose-deep) 18%, transparent);
+}
+
+.hero-scroll-cue__progress {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  background: var(--gradient-rose);
+}
+
+@keyframes hero-scroll-gesture {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -0.08rem, 0);
+  }
+  28% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-50%, 0.58rem, 0);
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-scroll-cue__content {
+    min-width: 9rem;
+    padding: 0.5rem 0.75rem 0.45rem;
+    backdrop-filter: blur(5px);
+  }
+
+  .hero-scroll-cue__label {
+    font-size: 0.8125rem;
+    letter-spacing: 0.12em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll-cue,
+  .hero-scroll-cue__dot {
+    transition: none;
+    animation: none;
+  }
+}
+
 /* Wordmark e rótulos da marca */
 @utility brand-eyebrow {
   font-size: 0.8125rem;

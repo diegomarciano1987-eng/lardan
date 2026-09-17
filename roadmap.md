@@ -12,6 +12,13 @@
 - [x] Entrada da segunda sessão da direita para a esquerda, sem corte horizontal
 - [x] Alongar transição diamante → LARDAN para ~3 rolagens de tela
 
+## Consultas e validações brasileiras (iniciado 2026-09-17)
+
+- [ ] Inventariar todos os campos de CEP, CPF/CNPJ, telefone, e-mail, PIX, municípios e localização
+- [ ] Ligar os campos às consultas/validações canônicas, com preenchimento automático e retorno visível
+- [ ] Corrigir provedores, fallback, cache, permissões e tratamento de indisponibilidade
+- [ ] Provar CEP, CPF, CNPJ, IBGE e localização com testes reais de servidor e pela interface
+
 ## Financeiro (iniciado 2026-09-15)
 
 - [x] Gate 0/1 — fundação: contas, plano de contas, centros de custo, títulos,

@@ -43,6 +43,10 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
 
   useEffect(() => {
     const medir = () => {
+      if (!isHome) {
+        setRolou(true);
+        return;
+      }
       // Fundo aparece somente ao chegar na terceira seção da página.
       const limiar = window.innerHeight * 2;
       setRolou(window.scrollY > limiar);
@@ -54,7 +58,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
       window.removeEventListener("scroll", medir);
       window.removeEventListener("resize", medir);
     };
-  }, [pathname]);
+  }, [isHome]);
 
   return (
     <header
@@ -62,7 +66,9 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         branded
           ? "top-0 h-[4.5rem] border-b border-foreground/10 bg-background/82 shadow-[0_16px_42px_-34px_color-mix(in_oklab,var(--foreground)_28%,transparent)] backdrop-blur-xl md:h-24"
           : `h-[4.5rem] md:h-16 ${
-              rolou
+              !isHome
+                ? "top-0 border-b border-foreground/10 bg-background/70 shadow-[0_18px_46px_-38px_color-mix(in_oklab,var(--foreground)_30%,transparent)] backdrop-blur-xl"
+                : rolou
                 ? "top-0 border-b border-foreground/10 bg-background/35 shadow-[0_18px_46px_-38px_color-mix(in_oklab,var(--foreground)_30%,transparent)] backdrop-blur-xl"
                 : "top-6 border-b border-transparent"
             }`

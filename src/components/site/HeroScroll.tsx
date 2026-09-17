@@ -41,6 +41,7 @@ export function HeroScroll() {
   const wordmarkIn = easeOut(phase(p, 0.26, 0.5));
   const halo = reduced ? 0 : phase(p, 0.26, 0.36) * (1 - ease(phase(p, 0.42, 0.56)));
   const mostrarReflexo = !reduced && iconOut < 0.65;
+  const scrollCueOut = reduced ? (p > 0.02 ? 1 : 0) : ease(phase(p, 0.018, 0.12));
 
   // O ícone "implode em luz": acende por dentro antes de ceder.
   const brilhoIcone = reduced ? 0 : phase(p, 0.08, 0.22);
@@ -125,6 +126,29 @@ export function HeroScroll() {
             )}
           </div>
           <h1 className="sr-only">Lardan — semijoias</h1>
+        </div>
+
+        {/* Convite inicial: orienta a primeira interação sem competir com a marca. */}
+        <div
+          className="hero-scroll-cue pointer-events-none absolute inset-x-0 bottom-[max(2rem,7vh)] z-10 flex justify-center px-6"
+          style={{
+            opacity: 1 - scrollCueOut,
+            transform: `translate3d(0, ${scrollCueOut * 10}px, 0)`,
+          }}
+          aria-hidden={scrollCueOut > 0.9}
+        >
+          <div className="hero-scroll-cue__content" role="status" aria-label="Role a tela para continuar">
+            <span className="hero-scroll-cue__gesture" aria-hidden>
+              <span className="hero-scroll-cue__dot" />
+            </span>
+            <span className="hero-scroll-cue__label">Role a tela</span>
+            <span className="hero-scroll-cue__track" aria-hidden>
+              <span
+                className="hero-scroll-cue__progress"
+                style={{ transform: `scaleX(${clamp01(p / 0.12)})` }}
+              />
+            </span>
+          </div>
         </div>
 
         {/* Eclipse cinematográfico: a cena escurece nas bordas no instante da troca. */}

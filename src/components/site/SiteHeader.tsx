@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { HeaderAcoes } from "./HeaderAcoes";
 import { NAV_ITEMS } from "@/lib/brand";
@@ -37,15 +37,35 @@ function NavLink({
 
 export function SiteHeader({ branded = false }: { branded?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [rolou, setRolou] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isHome = pathname === "/";
 
+  useEffect(() => {
+    const medir = () => {
+      // Fundo aparece ao sair da primeira seção (hero) da página.
+      const limiar = Math.max(window.innerHeight * 0.75, 320);
+      setRolou(window.scrollY > limiar);
+    };
+    medir();
+    window.addEventListener("scroll", medir, { passive: true });
+    window.addEventListener("resize", medir);
+    return () => {
+      window.removeEventListener("scroll", medir);
+      window.removeEventListener("resize", medir);
+    };
+  }, [pathname]);
+
   return (
     <header
-      className={`fixed inset-x-0 z-50 flex items-center justify-center px-5 ${
+      className={`fixed inset-x-0 z-50 flex items-center justify-center px-5 transition-[background-color,border-color,box-shadow] duration-500 ${
         branded
           ? "top-0 h-[4.5rem] border-b border-foreground/10 bg-background/82 shadow-[0_16px_42px_-34px_color-mix(in_oklab,var(--foreground)_28%,transparent)] backdrop-blur-xl md:h-24"
-          : "top-6 h-[4.5rem] md:h-16"
+          : `top-6 h-[4.5rem] md:h-16 ${
+              rolou
+                ? "border-b border-foreground/8 bg-background/55 shadow-[0_18px_46px_-38px_color-mix(in_oklab,var(--foreground)_30%,transparent)] backdrop-blur-xl"
+                : "border-b border-transparent"
+            }`
       }`}
     >
       {branded ? (

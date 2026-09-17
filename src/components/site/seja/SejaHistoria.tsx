@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { HISTORIA_RESUMO } from "@/lib/institucional";
 import { RetratoOficial } from "@/components/site/RetratoOficial";
-import { danielLarissaPortrait } from "@/components/site/retratos";
+import { larissaPortraitSeja } from "@/components/site/retratos";
 
 /**
  * /seja-lardan — resumo emocional da origem da Lardan.
@@ -19,8 +19,8 @@ export function SejaHistoria() {
     >
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-32">
         <RetratoOficial
-          retrato={danielLarissaPortrait}
-          rotulo="Foto oficial de Daniel e Larissa"
+          retrato={larissaPortraitSeja}
+          rotulo="Foto oficial de Larissa"
         />
 
         <div className="max-w-prose">

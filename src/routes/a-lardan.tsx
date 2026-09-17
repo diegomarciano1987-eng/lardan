@@ -4,8 +4,8 @@ import { PageHero } from "@/components/site/PageHero";
 import { RetratoOficial } from "@/components/site/RetratoOficial";
 import {
   danielLarissaPortrait,
-  danielPortrait,
-  larissaPortrait,
+  danielPortraitInstitucional,
+  larissaPortraitSeja,
 } from "@/components/site/retratos";
 import editorialAsset from "@/assets/lardan-editorial-mulher.jpg.asset.json";
 import {
@@ -98,7 +98,10 @@ function ALardanPage() {
 
           <div className="mt-14 grid gap-14 md:grid-cols-2 md:gap-16">
             <article aria-labelledby="a-lardan-daniel">
-              <RetratoOficial retrato={danielPortrait} rotulo="Foto oficial de Daniel" />
+              <RetratoOficial
+                retrato={danielPortraitInstitucional}
+                rotulo="Foto oficial de Daniel"
+              />
               <h3 id="a-lardan-daniel" className="mt-8 text-2xl text-foreground">
                 {DANIEL.nome}
               </h3>
@@ -114,7 +117,7 @@ function ALardanPage() {
             </article>
 
             <article aria-labelledby="a-lardan-larissa">
-              <RetratoOficial retrato={larissaPortrait} rotulo="Foto oficial de Larissa" />
+              <RetratoOficial retrato={larissaPortraitSeja} rotulo="Foto oficial de Larissa" />
               <h3 id="a-lardan-larissa" className="mt-8 text-2xl text-foreground">
                 {LARISSA.nome}
               </h3>

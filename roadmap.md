@@ -14,10 +14,11 @@
 
 ## Consultas e validações brasileiras (iniciado 2026-09-17)
 
-- [ ] Inventariar todos os campos de CEP, CPF/CNPJ, telefone, e-mail, PIX, municípios e localização
-- [ ] Ligar os campos às consultas/validações canônicas, com preenchimento automático e retorno visível
-- [ ] Corrigir provedores, fallback, cache, permissões e tratamento de indisponibilidade
-- [ ] Provar CEP, CPF, CNPJ, IBGE e localização com testes reais de servidor e pela interface
+- [x] Inventariar todos os campos de CEP, CPF/CNPJ, telefone, e-mail, PIX, municípios e localização
+- [x] Ligar os campos de cadastro aplicáveis às consultas/validações canônicas, com preenchimento automático e retorno visível
+- [x] Corrigir provedores, fallback, cache, permissões e tratamento de indisponibilidade
+- [x] Provar CEP, CPF, CNPJ e IBGE com 60 testes automatizados, consultas reais e interface pública/carrinho
+- [x] Registrar limite legal: CPF possui validação matemática local, sem consulta pública gratuita de titularidade ou situação
 
 ## Financeiro (iniciado 2026-09-15)
 

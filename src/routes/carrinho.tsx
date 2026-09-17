@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Minus, Plus, ShoppingBag, Sparkles, Truck, X } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { formatPreco, mediaUrl } from "@/lib/storefront";
@@ -11,6 +12,7 @@ import {
   useCarrinho,
 } from "@/lib/carrinho";
 import { ogImageMeta } from "@/lib/seo";
+import { consultarCepPublico } from "@/lib/br/lookup.functions";
 
 export const Route = createFileRoute("/carrinho")({
   component: CarrinhoPage,
@@ -19,7 +21,8 @@ export const Route = createFileRoute("/carrinho")({
       { title: "Sua sacola — LARDAN" },
       {
         name: "description",
-        content: "Revise as peças escolhidas, simule o frete e finalize com a sua consultora Lardan.",
+        content:
+          "Revise as peças escolhidas, simule o frete e finalize com a sua consultora Lardan.",
       },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Sua sacola — LARDAN" },
@@ -42,18 +45,28 @@ function CarrinhoPage() {
         <div
           aria-hidden
           className="pointer-events-none absolute -left-40 top-10 h-[32rem] w-[32rem] rounded-full opacity-60 blur-3xl"
-          style={{ background: "radial-gradient(circle, color-mix(in oklab, var(--primary) 22%, transparent), transparent 70%)" }}
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in oklab, var(--primary) 22%, transparent), transparent 70%)",
+          }}
         />
         <div
           aria-hidden
           className="pointer-events-none absolute -right-32 bottom-0 h-[26rem] w-[26rem] rounded-full opacity-50 blur-3xl"
-          style={{ background: "radial-gradient(circle, color-mix(in oklab, var(--foreground) 10%, transparent), transparent 70%)" }}
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in oklab, var(--foreground) 10%, transparent), transparent 70%)",
+          }}
         />
 
         <div className="relative mx-auto max-w-6xl px-6 pb-28 pt-36 md:pt-48">
           <header className="mb-14 max-w-xl">
-            <p className="text-[0.625rem] tracking-[0.32em] uppercase text-muted-foreground">Curadoria Lardan</p>
-            <h1 className="mt-4 font-display text-5xl leading-[1.05] text-foreground md:text-6xl">Sua sacola</h1>
+            <p className="text-[0.625rem] tracking-[0.32em] uppercase text-muted-foreground">
+              Curadoria Lardan
+            </p>
+            <h1 className="mt-4 font-display text-5xl leading-[1.05] text-foreground md:text-6xl">
+              Sua sacola
+            </h1>
             <p className="mt-5 text-base leading-relaxed text-muted-foreground">
               {qtd > 0
                 ? `${qtd} peça${qtd > 1 ? "s" : ""} escolhida${qtd > 1 ? "s" : ""} com cuidado. Revise, simule o frete e siga com a sua consultora.`
@@ -126,23 +139,30 @@ function CarrinhoPage() {
                             <button
                               type="button"
                               aria-label="Diminuir quantidade"
-                              onClick={() => alterarQuantidade(i.slug, i.variante, i.quantidade - 1)}
+                              onClick={() =>
+                                alterarQuantidade(i.slug, i.variante, i.quantidade - 1)
+                              }
                               className="grid h-9 w-9 place-items-center rounded-full text-foreground/70 transition-colors hover:text-foreground"
                             >
                               <Minus className="h-3.5 w-3.5" strokeWidth={1.6} />
                             </button>
-                            <span className="min-w-8 text-center text-sm text-foreground">{i.quantidade}</span>
+                            <span className="min-w-8 text-center text-sm text-foreground">
+                              {i.quantidade}
+                            </span>
                             <button
                               type="button"
                               aria-label="Aumentar quantidade"
-                              onClick={() => alterarQuantidade(i.slug, i.variante, i.quantidade + 1)}
+                              onClick={() =>
+                                alterarQuantidade(i.slug, i.variante, i.quantidade + 1)
+                              }
                               className="grid h-9 w-9 place-items-center rounded-full text-foreground/70 transition-colors hover:text-foreground"
                             >
                               <Plus className="h-3.5 w-3.5" strokeWidth={1.6} />
                             </button>
                           </div>
                           <p className="text-lg text-foreground">
-                            {formatPreco((i.precoCents ?? 0) * i.quantidade) ?? "Consulte sua consultora"}
+                            {formatPreco((i.precoCents ?? 0) * i.quantidade) ??
+                              "Consulte sua consultora"}
                           </p>
                         </div>
                       </div>
@@ -155,7 +175,9 @@ function CarrinhoPage() {
                 <SimuladorFrete />
 
                 <div className="rounded-3xl border border-foreground/10 bg-background/70 p-7 backdrop-blur-xl">
-                  <p className="text-[0.625rem] tracking-[0.28em] uppercase text-muted-foreground">Resumo</p>
+                  <p className="text-[0.625rem] tracking-[0.28em] uppercase text-muted-foreground">
+                    Resumo
+                  </p>
                   <dl className="mt-6 space-y-3 text-sm">
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">Peças</dt>
@@ -172,15 +194,20 @@ function CarrinhoPage() {
                   </dl>
                   <span aria-hidden className="mt-6 block h-px w-full bg-foreground/10" />
                   <div className="mt-6 flex items-end justify-between">
-                    <span className="text-xs tracking-[0.22em] uppercase text-muted-foreground">Total</span>
-                    <span className="font-display text-3xl text-foreground">{formatPreco(subtotal) ?? "—"}</span>
+                    <span className="text-xs tracking-[0.22em] uppercase text-muted-foreground">
+                      Total
+                    </span>
+                    <span className="font-display text-3xl text-foreground">
+                      {formatPreco(subtotal) ?? "—"}
+                    </span>
                   </div>
                   <button type="button" className="btn-premium mt-7 w-full">
                     <Sparkles className="h-4 w-4" strokeWidth={1.5} />
                     Finalizar compra
                   </button>
                   <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                    O pagamento online ainda não está ativo. A sua consultora conclui o pedido com você.
+                    O pagamento online ainda não está ativo. A sua consultora conclui o pedido com
+                    você.
                   </p>
                 </div>
               </aside>
@@ -196,6 +223,10 @@ function CarrinhoPage() {
 function SimuladorFrete() {
   const [cep, setCep] = useState("");
   const [simulado, setSimulado] = useState(false);
+  const [consultando, setConsultando] = useState(false);
+  const [destino, setDestino] = useState<string | null>(null);
+  const [erroCep, setErroCep] = useState<string | null>(null);
+  const consultarCepFn = useServerFn(consultarCepPublico);
 
   const digitos = cep.replace(/\D/g, "").slice(0, 8);
   const formatado = digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
@@ -205,7 +236,9 @@ function SimuladorFrete() {
     <section className="rounded-3xl border border-foreground/10 bg-background/70 p-7 backdrop-blur-xl">
       <div className="flex items-center gap-3">
         <Truck className="h-4 w-4 text-foreground/70" strokeWidth={1.4} />
-        <p className="text-[0.625rem] tracking-[0.28em] uppercase text-muted-foreground">Simular frete</p>
+        <p className="text-[0.625rem] tracking-[0.28em] uppercase text-muted-foreground">
+          Simular frete
+        </p>
       </div>
 
       <div className="mt-5 flex gap-2">
@@ -223,29 +256,55 @@ function SimuladorFrete() {
         <button
           type="button"
           disabled={!valido}
-          onClick={() => setSimulado(true)}
+          onClick={async () => {
+            setConsultando(true);
+            setErroCep(null);
+            try {
+              const r = await consultarCepFn({ data: { cep: digitos } });
+              if (r.status !== "ok" || !r.dados)
+                throw new Error(r.mensagem ?? "CEP não localizado.");
+              setDestino([r.dados.cidade, r.dados.uf].filter(Boolean).join(" / "));
+              setSimulado(true);
+            } catch (e) {
+              setSimulado(false);
+              setErroCep(e instanceof Error ? e.message : "Não foi possível consultar o CEP.");
+            } finally {
+              setConsultando(false);
+            }
+          }}
           className="shrink-0 rounded-full border border-foreground/25 px-5 text-[0.625rem] tracking-[0.22em] uppercase text-foreground transition-colors hover:border-foreground/60 disabled:opacity-40"
         >
-          Calcular
+          {consultando ? "Consultando…" : "Calcular"}
         </button>
       </div>
 
       {simulado ? (
-        <ul className="mt-6 space-y-3 text-sm">
-          {[
-            { nome: "Entrega padrão", prazo: "5 a 8 dias úteis" },
-            { nome: "Entrega expressa", prazo: "2 a 3 dias úteis" },
-            { nome: "Retirar com a consultora", prazo: "a combinar" },
-          ].map((o) => (
-            <li key={o.nome} className="flex items-center justify-between border-b border-foreground/10 pb-3">
-              <span className="text-foreground">{o.nome}</span>
-              <span className="text-xs text-muted-foreground">{o.prazo} · valor a confirmar</span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <p className="mt-5 text-xs text-muted-foreground">Destino confirmado: {destino}.</p>
+          <ul className="mt-3 space-y-3 text-sm">
+            {[
+              { nome: "Entrega padrão", prazo: "5 a 8 dias úteis" },
+              { nome: "Entrega expressa", prazo: "2 a 3 dias úteis" },
+              { nome: "Retirar com a consultora", prazo: "a combinar" },
+            ].map((o) => (
+              <li
+                key={o.nome}
+                className="flex items-center justify-between border-b border-foreground/10 pb-3"
+              >
+                <span className="text-foreground">{o.nome}</span>
+                <span className="text-xs text-muted-foreground">{o.prazo} · valor a confirmar</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : erroCep ? (
+        <p role="alert" className="mt-5 text-xs leading-relaxed text-destructive">
+          {erroCep}
+        </p>
       ) : (
         <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-          Informe o CEP para ver as opções de entrega. Os valores reais entram quando a entrega for ativada.
+          Informe o CEP para ver as opções de entrega. Os valores reais entram quando a entrega for
+          ativada.
         </p>
       )}
     </section>

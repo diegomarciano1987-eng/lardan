@@ -10,11 +10,7 @@
  * dígitos verificadores. Não prova titularidade, existência nem regularidade.
  */
 
-export type EstadoCampo =
-  | "vazio"
-  | "incompleto"
-  | "invalido"
-  | "valido";
+export type EstadoCampo = "vazio" | "incompleto" | "invalido" | "valido";
 
 export interface Canonico {
   /** valor canônico para gravar (ou null quando vazio) */
@@ -26,8 +22,7 @@ export interface Canonico {
   erro: string | null;
 }
 
-export const somenteDigitos = (v: string | null | undefined) =>
-  (v ?? "").replace(/\D/g, "");
+export const somenteDigitos = (v: string | null | undefined) => (v ?? "").replace(/\D/g, "");
 
 const vazio = (formatado = ""): Canonico => ({
   canonico: null,
@@ -67,7 +62,12 @@ export function normalizarCpf(entrada: string): Canonico {
   if (!d) return vazio();
   const formatado = formatarCpf(d);
   if (d.length < 11)
-    return { canonico: null, formatado, estado: "incompleto", erro: "CPF incompleto: faltam dígitos." };
+    return {
+      canonico: null,
+      formatado,
+      estado: "incompleto",
+      erro: "CPF incompleto: faltam dígitos.",
+    };
   if (!cpfValido(d))
     return {
       canonico: null,
@@ -138,7 +138,12 @@ export function normalizarCnpj(entrada: string): Canonico {
   if (!c) return vazio();
   const formatado = formatarCnpj(c);
   if (c.length < 14)
-    return { canonico: null, formatado, estado: "incompleto", erro: "CNPJ incompleto: faltam caracteres." };
+    return {
+      canonico: null,
+      formatado,
+      estado: "incompleto",
+      erro: "CNPJ incompleto: faltam caracteres.",
+    };
   if (!/^[0-9]{2}$/.test(c.slice(12)))
     return {
       canonico: null,
@@ -203,17 +208,21 @@ export function normalizarCep(entrada: string): Canonico {
   if (!d) return vazio();
   const formatado = formatarCep(d);
   if (d.length < 8)
-    return { canonico: null, formatado, estado: "incompleto", erro: "CEP incompleto: são 8 dígitos." };
+    return {
+      canonico: null,
+      formatado,
+      estado: "incompleto",
+      erro: "CEP incompleto: são 8 dígitos.",
+    };
   return { canonico: d, formatado, estado: "valido", erro: null };
 }
 
 /* ------------------------------------------------------------- telefone -- */
 
 export const DDDS_VALIDOS = new Set([
-  11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 24, 27, 28, 31, 32, 33, 34, 35, 37, 38,
-  41, 42, 43, 44, 45, 46, 47, 48, 49, 51, 53, 54, 55, 61, 62, 63, 64, 65, 66, 67, 68,
-  69, 71, 73, 74, 75, 77, 79, 81, 82, 83, 84, 85, 86, 87, 88, 89, 91, 92, 93, 94, 95,
-  96, 97, 98, 99,
+  11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 24, 27, 28, 31, 32, 33, 34, 35, 37, 38, 41, 42, 43,
+  44, 45, 46, 47, 48, 49, 51, 53, 54, 55, 61, 62, 63, 64, 65, 66, 67, 68, 69, 71, 73, 74, 75, 77,
+  79, 81, 82, 83, 84, 85, 86, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99,
 ]);
 
 export const WHATSAPP_MAXLENGTH = 15; // (00) 90000-0000
@@ -246,7 +255,12 @@ export function normalizarWhatsapp(entrada: string): Canonico {
   if (!d) return vazio();
   const formatado = formatarTelefone(d);
   if (d.length < 11)
-    return { canonico: null, formatado, estado: "incompleto", erro: "WhatsApp incompleto: DDD + 9 dígitos." };
+    return {
+      canonico: null,
+      formatado,
+      estado: "incompleto",
+      erro: "WhatsApp incompleto: DDD + 9 dígitos.",
+    };
   if (!DDDS_VALIDOS.has(Number(d.slice(0, 2))))
     return { canonico: null, formatado, estado: "invalido", erro: "DDD inexistente no Brasil." };
   if (d[2] !== "9")
@@ -265,7 +279,12 @@ export function normalizarTelefone(entrada: string): Canonico {
   if (!d) return vazio();
   const formatado = formatarTelefone(d);
   if (d.length < 10)
-    return { canonico: null, formatado, estado: "incompleto", erro: "Telefone incompleto: DDD + número." };
+    return {
+      canonico: null,
+      formatado,
+      estado: "incompleto",
+      erro: "Telefone incompleto: DDD + número.",
+    };
   if (!DDDS_VALIDOS.has(Number(d.slice(0, 2))))
     return { canonico: null, formatado, estado: "invalido", erro: "DDD inexistente no Brasil." };
   if (d.length === 11 && d[2] !== "9")
@@ -295,7 +314,12 @@ export function normalizarEmail(entrada: string): Canonico {
   if (!limpo) return vazio();
   const baixo = limpo.toLowerCase().slice(0, EMAIL_MAXLENGTH);
   if (!EMAIL_RE.test(baixo))
-    return { canonico: null, formatado: limpo, estado: "invalido", erro: "E-mail em formato inválido." };
+    return {
+      canonico: null,
+      formatado: limpo,
+      estado: "invalido",
+      erro: "E-mail em formato inválido.",
+    };
   return { canonico: baixo, formatado: limpo, estado: "valido", erro: null };
 }
 
@@ -365,9 +389,19 @@ export function normalizarCodigoBarras(entrada: string): Canonico {
   const d = somenteDigitos(entrada).slice(0, 14);
   if (!d) return vazio();
   if (![8, 12, 13, 14].includes(d.length))
-    return { canonico: null, formatado: d, estado: "incompleto", erro: "Código de barras deve ter 8, 12, 13 ou 14 dígitos." };
+    return {
+      canonico: null,
+      formatado: d,
+      estado: "incompleto",
+      erro: "Código de barras deve ter 8, 12, 13 ou 14 dígitos.",
+    };
   if (!codigoBarrasValido(d))
-    return { canonico: null, formatado: d, estado: "invalido", erro: "Dígito verificador do código de barras não confere." };
+    return {
+      canonico: null,
+      formatado: d,
+      estado: "invalido",
+      erro: "Dígito verificador do código de barras não confere.",
+    };
   return { canonico: d, formatado: d, estado: "valido", erro: null };
 }
 

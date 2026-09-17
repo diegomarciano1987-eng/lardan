@@ -12,11 +12,7 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { SIGLAS_UF } from "./ufs";
 
-const HOSTS_PERMITIDOS = new Set([
-  "viacep.com.br",
-  "brasilapi.com.br",
-  "servicodados.ibge.gov.br",
-]);
+const HOSTS_PERMITIDOS = new Set(["viacep.com.br", "brasilapi.com.br", "servicodados.ibge.gov.br"]);
 
 export const TIMEOUT_MS = 4000;
 export const TTL_CEP_HORAS = 24 * 30;
@@ -214,21 +210,40 @@ export async function lookupAddressByPostalCode(
     return { ...base, status: "dado_invalido", mensagem: "CEP precisa ter 8 dígitos." };
 
   if (await excedeuLimite(userId))
-    return { ...base, status: "limite", mensagem: "Muitas consultas seguidas. Aguarde um instante." };
+    return {
+      ...base,
+      status: "limite",
+      mensagem: "Muitas consultas seguidas. Aguarde um instante.",
+    };
 
-  const cacheado = await lerCache<EnderecoConsultado>("viacep", cep);
+  const cacheado =
+    (await lerCache<EnderecoConsultado>("viacep", cep)) ??
+    (await lerCache<EnderecoConsultado>("brasilapi", cep));
   if (cacheado) {
     await auditar({
-      provider: "viacep", kind: "cep", referencia: cep, status: "ok",
-      latency_ms: 0, cache_hit: true, user_id: userId,
+      provider: "viacep",
+      kind: "cep",
+      referencia: cep,
+      status: "ok",
+      latency_ms: 0,
+      cache_hit: true,
+      user_id: userId,
     });
     return { ...base, status: "ok", cache: true, dados: cacheado, mensagem: null };
   }
 
   const inicio = Date.now();
-  const tentativas: { provider: string; url: string; mapear: (j: Record<string, unknown>) => EnderecoConsultado | null }[] = [
+  const tentativas: {
+    provider: string;
+    url: string;
+    mapear: (j: Record<string, unknown>) => EnderecoConsultado | null;
+  }[] = [
     { provider: "viacep", url: `https://viacep.com.br/ws/${cep}/json/`, mapear: mapearViaCep },
-    { provider: "brasilapi", url: `https://brasilapi.com.br/api/cep/v1/${cep}`, mapear: mapearBrasilApiCep },
+    {
+      provider: "brasilapi",
+      url: `https://brasilapi.com.br/api/cep/v1/${cep}`,
+      mapear: mapearBrasilApiCep,
+    },
   ];
 
   let ultimoStatus: StatusConsulta = "indisponivel";
@@ -254,12 +269,30 @@ export async function lookupAddressByPostalCode(
         ultimoCodigo = "vazio";
         continue;
       }
-      await gravarCache(t.provider === "viacep" ? "viacep" : "brasilapi", cep, dados, TTL_CEP_HORAS);
+      await gravarCache(
+        t.provider === "viacep" ? "viacep" : "brasilapi",
+        cep,
+        dados,
+        TTL_CEP_HORAS,
+      );
       await auditar({
-        provider: t.provider, kind: "cep", referencia: cep, status: "ok",
-        latency_ms: Date.now() - inicio, cache_hit: false, user_id: userId, http_status: resp.status,
+        provider: t.provider,
+        kind: "cep",
+        referencia: cep,
+        status: "ok",
+        latency_ms: Date.now() - inicio,
+        cache_hit: false,
+        user_id: userId,
+        http_status: resp.status,
       });
-      return { status: "ok", provider: t.provider, consultado_em: agora(), cache: false, dados, mensagem: null };
+      return {
+        status: "ok",
+        provider: t.provider,
+        consultado_em: agora(),
+        cache: false,
+        dados,
+        mensagem: null,
+      };
     } catch (e) {
       ultimoStatus = e instanceof Error && e.name === "AbortError" ? "timeout" : "indisponivel";
       ultimoCodigo = ultimoStatus;
@@ -267,8 +300,14 @@ export async function lookupAddressByPostalCode(
   }
 
   await auditar({
-    provider: "viacep", kind: "cep", referencia: cep, status: ultimoStatus,
-    latency_ms: Date.now() - inicio, cache_hit: false, user_id: userId, error_code: ultimoCodigo,
+    provider: "viacep",
+    kind: "cep",
+    referencia: cep,
+    status: ultimoStatus,
+    latency_ms: Date.now() - inicio,
+    cache_hit: false,
+    user_id: userId,
+    error_code: ultimoCodigo,
   });
   return {
     status: ultimoStatus,
@@ -314,7 +353,9 @@ function texto(v: unknown, max = 200) {
 }
 
 function mapearBrasilApiCnpj(j: Record<string, unknown>): EmpresaConsultada | null {
-  const cnpj = String(j["cnpj"] ?? "").toUpperCase().replace(/[^0-9A-Z]/g, "");
+  const cnpj = String(j["cnpj"] ?? "")
+    .toUpperCase()
+    .replace(/[^0-9A-Z]/g, "");
   if (cnpj.length !== 14) return null;
   const secundarias = Array.isArray(j["cnaes_secundarios"])
     ? (j["cnaes_secundarios"] as Record<string, unknown>[])
@@ -349,7 +390,10 @@ function mapearBrasilApiCnpj(j: Record<string, unknown>): EmpresaConsultada | nu
     numero: texto(j["numero"], 12),
     complemento: texto(j["complemento"], 80),
     bairro: texto(j["bairro"], 80),
-    cep: String(j["cep"] ?? "").replace(/\D/g, "").slice(0, 8) || null,
+    cep:
+      String(j["cep"] ?? "")
+        .replace(/\D/g, "")
+        .slice(0, 8) || null,
     cidade: texto(j["municipio"], 80),
     uf: uf && SIGLAS_UF.includes(uf) ? uf : null,
     telefone: texto(j["ddd_telefone_1"], 20),
@@ -364,15 +408,26 @@ export async function lookupCompanyByTaxId(
   opcoes: { comQsa: boolean },
 ): Promise<Resultado<EmpresaConsultada>> {
   const cnpj = entrada.toUpperCase().replace(/[^0-9A-Z]/g, "");
-  const base = { provider: "brasilapi", consultado_em: agora(), cache: false, dados: null } as const;
+  const base = {
+    provider: "brasilapi",
+    consultado_em: agora(),
+    cache: false,
+    dados: null,
+  } as const;
   if (cnpj.length !== 14)
     return { ...base, status: "dado_invalido", mensagem: "CNPJ precisa ter 14 caracteres." };
 
   if (/[A-Z]/.test(cnpj)) {
     // Provedor público ainda opera sobre a base numérica. Isso NÃO invalida o CNPJ.
     await auditar({
-      provider: "brasilapi", kind: "cnpj", referencia: cnpj, status: "incompativel",
-      latency_ms: 0, cache_hit: false, user_id: userId, error_code: "alfanumerico",
+      provider: "brasilapi",
+      kind: "cnpj",
+      referencia: cnpj,
+      status: "incompativel",
+      latency_ms: 0,
+      cache_hit: false,
+      user_id: userId,
+      error_code: "alfanumerico",
     });
     return {
       ...base,
@@ -383,13 +438,22 @@ export async function lookupCompanyByTaxId(
   }
 
   if (await excedeuLimite(userId))
-    return { ...base, status: "limite", mensagem: "Muitas consultas seguidas. Aguarde um instante." };
+    return {
+      ...base,
+      status: "limite",
+      mensagem: "Muitas consultas seguidas. Aguarde um instante.",
+    };
 
   const cacheado = await lerCache<EmpresaConsultada>("brasilapi_cnpj", cnpj);
   if (cacheado) {
     await auditar({
-      provider: "brasilapi", kind: "cnpj", referencia: cnpj, status: "ok",
-      latency_ms: 0, cache_hit: true, user_id: userId,
+      provider: "brasilapi",
+      kind: "cnpj",
+      referencia: cnpj,
+      status: "ok",
+      latency_ms: 0,
+      cache_hit: true,
+      user_id: userId,
     });
     return {
       ...base,
@@ -405,33 +469,69 @@ export async function lookupCompanyByTaxId(
     const resp = await buscarComRetry(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
     if (resp.status === 404) {
       await auditar({
-        provider: "brasilapi", kind: "cnpj", referencia: cnpj, status: "nao_encontrado",
-        latency_ms: Date.now() - inicio, cache_hit: false, user_id: userId, http_status: 404,
+        provider: "brasilapi",
+        kind: "cnpj",
+        referencia: cnpj,
+        status: "nao_encontrado",
+        latency_ms: Date.now() - inicio,
+        cache_hit: false,
+        user_id: userId,
+        http_status: 404,
       });
-      return { ...base, status: "nao_encontrado", mensagem: "CNPJ não localizado na base pública." };
+      return {
+        ...base,
+        status: "nao_encontrado",
+        mensagem: "CNPJ não localizado na base pública.",
+      };
     }
     if (!resp.ok) {
       const status: StatusConsulta = resp.status === 429 ? "limite" : "indisponivel";
       await auditar({
-        provider: "brasilapi", kind: "cnpj", referencia: cnpj, status,
-        latency_ms: Date.now() - inicio, cache_hit: false, user_id: userId,
-        http_status: resp.status, error_code: String(resp.status),
+        provider: "brasilapi",
+        kind: "cnpj",
+        referencia: cnpj,
+        status,
+        latency_ms: Date.now() - inicio,
+        cache_hit: false,
+        user_id: userId,
+        http_status: resp.status,
+        error_code: String(resp.status),
       });
-      return { ...base, status, mensagem: "Consulta de CNPJ indisponível agora. Preencha manualmente." };
+      return {
+        ...base,
+        status,
+        mensagem: "Consulta de CNPJ indisponível agora. Preencha manualmente.",
+      };
     }
     const json = (await resp.json()) as Record<string, unknown>;
     const dados = mapearBrasilApiCnpj(json);
     if (!dados) {
       await auditar({
-        provider: "brasilapi", kind: "cnpj", referencia: cnpj, status: "incompativel",
-        latency_ms: Date.now() - inicio, cache_hit: false, user_id: userId, error_code: "schema",
+        provider: "brasilapi",
+        kind: "cnpj",
+        referencia: cnpj,
+        status: "incompativel",
+        latency_ms: Date.now() - inicio,
+        cache_hit: false,
+        user_id: userId,
+        error_code: "schema",
       });
-      return { ...base, status: "incompativel", mensagem: "Resposta do provedor não pôde ser interpretada." };
+      return {
+        ...base,
+        status: "incompativel",
+        mensagem: "Resposta do provedor não pôde ser interpretada.",
+      };
     }
     await gravarCache("brasilapi_cnpj", cnpj, dados, TTL_CNPJ_HORAS);
     await auditar({
-      provider: "brasilapi", kind: "cnpj", referencia: cnpj, status: "ok",
-      latency_ms: Date.now() - inicio, cache_hit: false, user_id: userId, http_status: resp.status,
+      provider: "brasilapi",
+      kind: "cnpj",
+      referencia: cnpj,
+      status: "ok",
+      latency_ms: Date.now() - inicio,
+      cache_hit: false,
+      user_id: userId,
+      http_status: resp.status,
     });
     return {
       status: "ok",
@@ -442,12 +542,23 @@ export async function lookupCompanyByTaxId(
       mensagem: null,
     };
   } catch (e) {
-    const status: StatusConsulta = e instanceof Error && e.name === "AbortError" ? "timeout" : "indisponivel";
+    const status: StatusConsulta =
+      e instanceof Error && e.name === "AbortError" ? "timeout" : "indisponivel";
     await auditar({
-      provider: "brasilapi", kind: "cnpj", referencia: cnpj, status,
-      latency_ms: Date.now() - inicio, cache_hit: false, user_id: userId, error_code: status,
+      provider: "brasilapi",
+      kind: "cnpj",
+      referencia: cnpj,
+      status,
+      latency_ms: Date.now() - inicio,
+      cache_hit: false,
+      user_id: userId,
+      error_code: status,
     });
-    return { ...base, status, mensagem: "Consulta de CNPJ indisponível agora. Preencha manualmente." };
+    return {
+      ...base,
+      status,
+      mensagem: "Consulta de CNPJ indisponível agora. Preencha manualmente.",
+    };
   }
 }
 
@@ -468,7 +579,8 @@ export async function listMunicipalitiesByState(
 ): Promise<Resultado<Municipio[]>> {
   const uf = ufEntrada.toUpperCase();
   const base = { provider: "ibge", consultado_em: agora(), cache: false, dados: null } as const;
-  if (!SIGLAS_UF.includes(uf)) return { ...base, status: "dado_invalido", mensagem: "UF inválida." };
+  if (!SIGLAS_UF.includes(uf))
+    return { ...base, status: "dado_invalido", mensagem: "UF inválida." };
 
   const { data: guardados } = await supabaseAdmin
     .from("ibge_municipios")
@@ -500,13 +612,24 @@ export async function listMunicipalitiesByState(
     const json = (await resp.json()) as { id: number; nome: string }[];
     const linhas = json
       .filter((m) => typeof m.id === "number" && typeof m.nome === "string")
-      .map((m) => ({ codigo_ibge: String(m.id), uf, nome: m.nome.slice(0, 80), synced_at: agora() }));
+      .map((m) => ({
+        codigo_ibge: String(m.id),
+        uf,
+        nome: m.nome.slice(0, 80),
+        synced_at: agora(),
+      }));
     if (linhas.length) {
       await supabaseAdmin.from("ibge_municipios").upsert(linhas, { onConflict: "codigo_ibge" });
     }
     await auditar({
-      provider: "ibge", kind: "municipios", referencia: uf, status: "ok",
-      latency_ms: Date.now() - inicio, cache_hit: false, user_id: userId, http_status: resp.status,
+      provider: "ibge",
+      kind: "municipios",
+      referencia: uf,
+      status: "ok",
+      latency_ms: Date.now() - inicio,
+      cache_hit: false,
+      user_id: userId,
+      http_status: resp.status,
     });
     return {
       status: "ok",
@@ -517,10 +640,17 @@ export async function listMunicipalitiesByState(
       mensagem: null,
     };
   } catch (e) {
-    const status: StatusConsulta = e instanceof Error && e.name === "AbortError" ? "timeout" : "indisponivel";
+    const status: StatusConsulta =
+      e instanceof Error && e.name === "AbortError" ? "timeout" : "indisponivel";
     await auditar({
-      provider: "ibge", kind: "municipios", referencia: uf, status,
-      latency_ms: Date.now() - inicio, cache_hit: false, user_id: userId, error_code: status,
+      provider: "ibge",
+      kind: "municipios",
+      referencia: uf,
+      status,
+      latency_ms: Date.now() - inicio,
+      cache_hit: false,
+      user_id: userId,
+      error_code: status,
     });
     // fallback seguro: o que já estiver guardado continua servindo
     if (guardados && guardados.length) {
@@ -532,6 +662,10 @@ export async function listMunicipalitiesByState(
         mensagem: "Lista local (IBGE indisponível agora).",
       };
     }
-    return { ...base, status, mensagem: "Lista de municípios indisponível. Digite a cidade manualmente." };
+    return {
+      ...base,
+      status,
+      mensagem: "Lista de municípios indisponível. Digite a cidade manualmente.",
+    };
   }
 }

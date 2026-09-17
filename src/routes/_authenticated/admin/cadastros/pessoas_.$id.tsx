@@ -1,13 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, ShieldAlert, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ShieldAlert, Loader2, Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { DateField } from "@/components/premium/DateField";
-import { EmptyState, ErrorState, PageHeader, Panel, Skeleton, StatusBadge, formatDateTime } from "@/components/admin/ui";
+import {
+  EmptyState,
+  ErrorState,
+  PageHeader,
+  Panel,
+  Skeleton,
+  StatusBadge,
+  formatDateTime,
+} from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { useCapabilities } from "@/lib/capabilities";
 import {
@@ -29,8 +38,18 @@ import {
   type PartyRoleKind,
   type PartyStatus,
 } from "@/lib/registry";
-import { DOC_ESTADO_LABEL, docEstado, formatDoc, maskCepInput, maskDoc, maskDocInput, maskPhoneInput } from "@/lib/docs-br";
+import {
+  DOC_ESTADO_LABEL,
+  docEstado,
+  formatDoc,
+  maskCepInput,
+  maskDoc,
+  maskDocInput,
+  maskPhoneInput,
+} from "@/lib/docs-br";
 import { UFS } from "@/lib/catalog";
+import { consultarCep, listarMunicipios } from "@/lib/br/lookup.functions";
+import { normalizarEmail, normalizarTelefone, normalizarWhatsapp } from "@/lib/br/canonico";
 
 export const Route = createFileRoute("/_authenticated/admin/cadastros/pessoas_/$id")({
   component: FichaPessoa,
@@ -49,7 +68,7 @@ function Campo({
 }: {
   label: string;
   children: React.ReactNode;
-  help?: string;
+  help?: string | undefined;
 }) {
   return (
     <label className="flex flex-col gap-1.5">
@@ -71,7 +90,6 @@ function dataParaIso(d?: Date): string | null {
   const dia = String(d.getDate()).padStart(2, "0");
   return `${d.getFullYear()}-${mes}-${dia}`;
 }
-
 
 const inputCls =
   "h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm font-medium text-ledger-text shadow-sm outline-none placeholder:font-normal placeholder:text-ledger-muted focus:border-champagne focus:ring-2 focus:ring-champagne/25";
@@ -113,6 +131,9 @@ function FichaPessoa() {
 
   const salvar = useMutation({
     mutationFn: async () => {
+      if (form.doc?.trim() && docEstado(form.doc) === "invalido") {
+        throw new Error("CPF/CNPJ inválido: confira os dígitos antes de salvar.");
+      }
       await saveParty(
         {
           kind: form.kind ?? "pessoa",
@@ -165,7 +186,11 @@ function FichaPessoa() {
 
   const progresso = useMemo(() => {
     if (!query.data) return null;
-    return completude({ party: { ...query.data.party, ...form } as Party, contatos: query.data.contatos, enderecos: query.data.enderecos });
+    return completude({
+      party: { ...query.data.party, ...form } as Party,
+      contatos: query.data.contatos,
+      enderecos: query.data.enderecos,
+    });
   }, [query.data, form]);
 
   if (query.isLoading) {
@@ -177,7 +202,12 @@ function FichaPessoa() {
     );
   }
   if (query.error || !query.data) {
-    return <ErrorState message={query.error instanceof Error ? query.error.message : "Cadastro não encontrado."} onRetry={() => void query.refetch()} />;
+    return (
+      <ErrorState
+        message={query.error instanceof Error ? query.error.message : "Cadastro não encontrado."}
+        onRetry={() => void query.refetch()}
+      />
+    );
   }
 
   const d = query.data;
@@ -185,7 +215,10 @@ function FichaPessoa() {
 
   return (
     <div className="space-y-6">
-      <Link to="/admin/cadastros/pessoas" className="admin-link inline-flex items-center gap-1.5 text-sm">
+      <Link
+        to="/admin/cadastros/pessoas"
+        className="admin-link inline-flex items-center gap-1.5 text-sm"
+      >
         <ArrowLeft aria-hidden className="size-4" /> Pessoas e empresas
       </Link>
 
@@ -197,7 +230,12 @@ function FichaPessoa() {
           <>
             {sujo && <StatusBadge tone="warning">Alterações não salvas</StatusBadge>}
             {podeEditar && (
-              <button type="button" className="admin-btn-primary" disabled={salvar.isPending} onClick={() => salvar.mutate()}>
+              <button
+                type="button"
+                className="admin-btn-primary"
+                disabled={salvar.isPending}
+                onClick={() => salvar.mutate()}
+              >
                 {salvar.isPending && <Loader2 aria-hidden className="size-4 animate-spin" />} Salvar
               </button>
             )}
@@ -211,12 +249,17 @@ function FichaPessoa() {
           <div>
             <p className="text-sm font-semibold text-ledger-text">Possível duplicidade</p>
             <p className="text-sm font-medium text-ledger-muted">
-              Este documento já aparece em {duplicados.data!.length} outro(s) cadastro(s). Nada é unido automaticamente — confira antes de continuar.
+              Este documento já aparece em {duplicados.data!.length} outro(s) cadastro(s). Nada é
+              unido automaticamente — confira antes de continuar.
             </p>
             <ul className="mt-2 space-y-1">
               {duplicados.data!.map((p) => (
                 <li key={p.id}>
-                  <Link to="/admin/cadastros/pessoas/$id" params={{ id: p.id }} className="admin-link text-sm">
+                  <Link
+                    to="/admin/cadastros/pessoas/$id"
+                    params={{ id: p.id }}
+                    className="admin-link text-sm"
+                  >
                     {p.display_name ?? p.legal_name ?? p.code} — {p.code}
                   </Link>
                 </li>
@@ -245,7 +288,10 @@ function FichaPessoa() {
           <Panel title="Completude da ficha" flush>
             <div className="space-y-3 p-5">
               <div className="h-2 w-full overflow-hidden rounded-full bg-surface-muted">
-                <div className="h-full rounded-full bg-bronze" style={{ width: `${progresso?.pct ?? 0}%` }} />
+                <div
+                  className="h-full rounded-full bg-bronze"
+                  style={{ width: `${progresso?.pct ?? 0}%` }}
+                />
               </div>
               <p className="num text-2xl font-semibold text-ledger-text">{progresso?.pct ?? 0}%</p>
               {progresso && progresso.faltando.length > 0 ? (
@@ -261,7 +307,9 @@ function FichaPessoa() {
                   </p>
                 </div>
               ) : (
-                <p className="text-sm font-medium text-ledger-muted">Ficha completa para a etapa atual.</p>
+                <p className="text-sm font-medium text-ledger-muted">
+                  Ficha completa para a etapa atual.
+                </p>
               )}
             </div>
           </Panel>
@@ -269,11 +317,16 @@ function FichaPessoa() {
           <Panel title="Papéis desta pessoa" flush>
             <div className="space-y-3 p-5">
               {d.papeis.length === 0 ? (
-                <p className="text-sm font-medium text-ledger-muted">Nenhum papel atribuído ainda.</p>
+                <p className="text-sm font-medium text-ledger-muted">
+                  Nenhum papel atribuído ainda.
+                </p>
               ) : (
                 <ul className="flex flex-wrap gap-2">
                   {d.papeis.map((p) => (
-                    <li key={p.id} className="inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-2.5 py-1 text-xs font-semibold text-ledger-text shadow-sm">
+                    <li
+                      key={p.id}
+                      className="inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-2.5 py-1 text-xs font-semibold text-ledger-text shadow-sm"
+                    >
                       {PARTY_ROLE_LABEL[p.role]}
                       {podeEditar && (
                         <button
@@ -345,16 +398,29 @@ function FichaPessoa() {
                   disabled={!podeEditar}
                   value={form.status ?? "rascunho"}
                   onChange={(v) => set("status", v as PartyStatus)}
-                  options={Object.entries(PARTY_STATUS_LABEL).map(([value, label]) => ({ value, label }))}
+                  options={Object.entries(PARTY_STATUS_LABEL).map(([value, label]) => ({
+                    value,
+                    label,
+                  }))}
                 />
               </Campo>
               {form.kind === "pessoa" && (
                 <>
                   <Campo label="RG / CNH">
-                    <input className={inputCls} disabled={!podeEditar} value={form.rg ?? ""} onChange={(e) => set("rg", e.target.value)} />
+                    <input
+                      className={inputCls}
+                      disabled={!podeEditar}
+                      value={form.rg ?? ""}
+                      onChange={(e) => set("rg", e.target.value)}
+                    />
                   </Campo>
                   <Campo label="Órgão emissor">
-                    <input className={inputCls} disabled={!podeEditar} value={form.rg_issuer ?? ""} onChange={(e) => set("rg_issuer", e.target.value)} />
+                    <input
+                      className={inputCls}
+                      disabled={!podeEditar}
+                      value={form.rg_issuer ?? ""}
+                      onChange={(e) => set("rg_issuer", e.target.value)}
+                    />
                   </Campo>
                   <Campo label="Nascimento">
                     <DateField
@@ -364,15 +430,29 @@ function FichaPessoa() {
                     />
                   </Campo>
                   <Campo label="Profissão">
-                    <input className={inputCls} disabled={!podeEditar} value={form.profession ?? ""} onChange={(e) => set("profession", e.target.value)} />
+                    <input
+                      className={inputCls}
+                      disabled={!podeEditar}
+                      value={form.profession ?? ""}
+                      onChange={(e) => set("profession", e.target.value)}
+                    />
                   </Campo>
                   <Campo label="Estado civil">
-                    <input className={inputCls} disabled={!podeEditar} value={form.marital_status ?? ""} onChange={(e) => set("marital_status", e.target.value)} />
+                    <input
+                      className={inputCls}
+                      disabled={!podeEditar}
+                      value={form.marital_status ?? ""}
+                      onChange={(e) => set("marital_status", e.target.value)}
+                    />
                   </Campo>
                 </>
               )}
               <Campo label="Cadastro ativo">
-                <Switch checked={form.is_active ?? true} disabled={!podeEditar} onCheckedChange={(v) => set("is_active", v)} />
+                <Switch
+                  checked={form.is_active ?? true}
+                  disabled={!podeEditar}
+                  onCheckedChange={(v) => set("is_active", v)}
+                />
               </Campo>
               <div className="md:col-span-2">
                 <Campo label="Observações">
@@ -397,9 +477,16 @@ function FichaPessoa() {
               )}
               <ul className="space-y-2">
                 {d.contatos.map((c) => (
-                  <li key={c.id} className="flex items-center gap-3 rounded-lg border border-line-soft bg-surface px-3 py-2.5">
-                    <span className="w-24 text-xs font-semibold tracking-[0.08em] text-bronze uppercase">{c.kind}</span>
-                    <span className="num flex-1 text-sm font-medium text-ledger-text">{c.value}</span>
+                  <li
+                    key={c.id}
+                    className="flex items-center gap-3 rounded-lg border border-line-soft bg-surface px-3 py-2.5"
+                  >
+                    <span className="w-24 text-xs font-semibold tracking-[0.08em] text-bronze uppercase">
+                      {c.kind}
+                    </span>
+                    <span className="num flex-1 text-sm font-medium text-ledger-text">
+                      {c.value}
+                    </span>
                     {podeEditar && (
                       <button
                         type="button"
@@ -465,7 +552,10 @@ function FichaPessoa() {
         <TabsContent value="financeiro" className="mt-4">
           {!podeVerFin ? (
             <Panel>
-              <EmptyState title="Acesso restrito" description="Seu perfil não tem permissão para ver dados financeiros deste cadastro." />
+              <EmptyState
+                title="Acesso restrito"
+                description="Seu perfil não tem permissão para ver dados financeiros deste cadastro."
+              />
             </Panel>
           ) : d.papeis.some((p) => p.role === "consultora") ? (
             <ConsultoraForm
@@ -477,7 +567,10 @@ function FichaPessoa() {
             />
           ) : (
             <Panel>
-              <EmptyState title="Sem ficha financeira" description="Os dados de PIX e limite pertencem ao papel de consultora." />
+              <EmptyState
+                title="Sem ficha financeira"
+                description="Os dados de PIX e limite pertencem ao papel de consultora."
+              />
             </Panel>
           )}
         </TabsContent>
@@ -487,19 +580,24 @@ function FichaPessoa() {
           <Panel title="Onde este cadastro é usado" flush>
             <div className="p-5">
               {d.vinculos.length === 0 ? (
-                <p className="text-sm font-medium text-ledger-muted">Nenhum módulo especializado usa este cadastro ainda.</p>
+                <p className="text-sm font-medium text-ledger-muted">
+                  Nenhum módulo especializado usa este cadastro ainda.
+                </p>
               ) : (
                 <ul className="space-y-2 text-sm font-medium text-ledger-text">
                   {d.vinculos.map((v) => (
                     <li key={`${v.entity_type}-${v.entity_id}`} className="flex items-center gap-3">
-                      <span className="w-40 text-xs font-semibold tracking-[0.08em] text-bronze uppercase">{v.entity_type}</span>
+                      <span className="w-40 text-xs font-semibold tracking-[0.08em] text-bronze uppercase">
+                        {v.entity_type}
+                      </span>
                       <span className="num text-xs text-ledger-muted">{v.entity_id}</span>
                     </li>
                   ))}
                 </ul>
               )}
               <p className="mt-4 text-xs font-medium text-ledger-muted">
-                Vendas, comissões, contas a receber e minisite aparecem aqui quando esses módulos entrarem no ar. Em implantação.
+                Vendas, comissões, contas a receber e minisite aparecem aqui quando esses módulos
+                entrarem no ar. Em implantação.
               </p>
             </div>
           </Panel>
@@ -519,7 +617,8 @@ function FichaPessoa() {
             <div className="p-5">
               {d.vinculos.some((v) => v.entity_type === "profile") ? (
                 <p className="text-sm font-medium text-ledger-text">
-                  Esta pessoa tem um usuário de acesso vinculado. Papéis de acesso são administrados em{" "}
+                  Esta pessoa tem um usuário de acesso vinculado. Papéis de acesso são administrados
+                  em{" "}
                   <Link to="/admin/usuarios" className="admin-link">
                     Usuários e papéis
                   </Link>
@@ -538,7 +637,9 @@ function FichaPessoa() {
           <Panel title="Histórico e auditoria" flush>
             <div className="p-5">
               {!caps.includes("audit.view") ? (
-                <p className="text-sm font-medium text-ledger-muted">Seu perfil não consulta a auditoria.</p>
+                <p className="text-sm font-medium text-ledger-muted">
+                  Seu perfil não consulta a auditoria.
+                </p>
               ) : historico.isLoading ? (
                 <Skeleton className="h-24 w-full" />
               ) : (historico.data?.length ?? 0) === 0 ? (
@@ -547,7 +648,9 @@ function FichaPessoa() {
                 <ul className="space-y-2">
                   {historico.data!.map((h) => (
                     <li key={h.id} className="flex items-center gap-3 text-sm">
-                      <span className="num w-40 text-xs text-ledger-muted">{formatDateTime(h.created_at)}</span>
+                      <span className="num w-40 text-xs text-ledger-muted">
+                        {formatDateTime(h.created_at)}
+                      </span>
                       <span className="font-semibold text-ledger-text">{h.action}</span>
                       <span className="text-xs text-ledger-muted">{h.entity}</span>
                     </li>
@@ -562,9 +665,17 @@ function FichaPessoa() {
   );
 }
 
-function AdicionarPapel({ jaTem, onAdd }: { jaTem: PartyRoleKind[]; onAdd: (r: PartyRoleKind) => Promise<void> }) {
+function AdicionarPapel({
+  jaTem,
+  onAdd,
+}: {
+  jaTem: PartyRoleKind[];
+  onAdd: (r: PartyRoleKind) => Promise<void>;
+}) {
   const [role, setRole] = useState<string>("");
-  const disponiveis = (Object.keys(PARTY_ROLE_LABEL) as PartyRoleKind[]).filter((r) => !jaTem.includes(r));
+  const disponiveis = (Object.keys(PARTY_ROLE_LABEL) as PartyRoleKind[]).filter(
+    (r) => !jaTem.includes(r),
+  );
   if (disponiveis.length === 0) return null;
   return (
     <div className="flex items-end gap-2">
@@ -590,7 +701,11 @@ function AdicionarPapel({ jaTem, onAdd }: { jaTem: PartyRoleKind[]; onAdd: (r: P
   );
 }
 
-function NovoContato({ onAdd }: { onAdd: (kind: "whatsapp" | "telefone" | "email", value: string) => Promise<void> }) {
+function NovoContato({
+  onAdd,
+}: {
+  onAdd: (kind: "whatsapp" | "telefone" | "email", value: string) => Promise<void>;
+}) {
   const [kind, setKind] = useState<"whatsapp" | "telefone" | "email">("whatsapp");
   const [valor, setValor] = useState("");
   return (
@@ -608,7 +723,9 @@ function NovoContato({ onAdd }: { onAdd: (kind: "whatsapp" | "telefone" | "email
       <input
         className={`${inputCls} w-64`}
         value={valor}
-        onChange={(e) => setValor(kind === "email" ? e.target.value : maskPhoneInput(e.target.value))}
+        onChange={(e) =>
+          setValor(kind === "email" ? e.target.value : maskPhoneInput(e.target.value))
+        }
         placeholder={kind === "email" ? "nome@email.com" : "(00) 00000-0000"}
       />
       <button
@@ -616,7 +733,17 @@ function NovoContato({ onAdd }: { onAdd: (kind: "whatsapp" | "telefone" | "email
         className="admin-btn"
         disabled={valor.trim().length < 5}
         onClick={async () => {
-          await onAdd(kind, valor.trim());
+          const resultado =
+            kind === "email"
+              ? normalizarEmail(valor)
+              : kind === "whatsapp"
+                ? normalizarWhatsapp(valor)
+                : normalizarTelefone(valor);
+          if (resultado.estado !== "valido" || !resultado.canonico) {
+            toast.error(resultado.erro ?? "Contato inválido.");
+            return;
+          }
+          await onAdd(kind, resultado.canonico);
           setValor("");
         }}
       >
@@ -637,46 +764,157 @@ function EnderecoForm({
   podeEditar: boolean;
   onSaved: () => void | Promise<unknown>;
 }) {
-  const [a, setA] = useState<Record<string, unknown>>((inicial as unknown as Record<string, unknown>) ?? {});
+  const [a, setA] = useState<Record<string, unknown>>(
+    (inicial as unknown as Record<string, unknown>) ?? {},
+  );
   useEffect(() => setA((inicial as unknown as Record<string, unknown>) ?? {}), [inicial]);
   const v = (k: string) => (a[k] as string) ?? "";
   const set = (k: string, val: unknown) => setA((s) => ({ ...s, [k]: val }));
+  const consultarCepFn = useServerFn(consultarCep);
+  const listarMunicipiosFn = useServerFn(listarMunicipios);
+  const [consultando, setConsultando] = useState(false);
+  const uf = v("uf");
+  const municipios = useQuery({
+    queryKey: ["ibge-municipios", uf],
+    enabled: Boolean(uf),
+    queryFn: async () => {
+      const r = await listarMunicipiosFn({ data: { uf } });
+      if (r.status !== "ok") throw new Error(r.mensagem ?? "Municípios indisponíveis.");
+      return r.dados ?? [];
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+  });
+
+  async function buscarCep() {
+    setConsultando(true);
+    try {
+      const r = await consultarCepFn({ data: { cep: v("postal_code") } });
+      if (r.status !== "ok" || !r.dados) throw new Error(r.mensagem ?? "CEP não localizado.");
+      const d = r.dados;
+      setA((s) => ({
+        ...s,
+        postal_code: maskCepInput(d.cep),
+        street: d.logradouro ?? s["street"],
+        complement: d.complemento ?? s["complement"],
+        district: d.bairro ?? s["district"],
+        city: d.cidade ?? s["city"],
+        uf: d.uf ?? s["uf"],
+        ibge_city_code: d.ibge ?? s["ibge_city_code"],
+      }));
+      toast.success(`Endereço preenchido · fonte ${r.provider}${r.cache ? " (cache)" : ""}.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Consulta indisponível. Preencha manualmente.");
+    } finally {
+      setConsultando(false);
+    }
+  }
 
   return (
     <div className="grid gap-4 p-5 md:grid-cols-2">
       <Campo label="CEP">
-        <input className={inputCls} disabled={!podeEditar} value={maskCepInput(v("postal_code"))} onChange={(e) => set("postal_code", maskCepInput(e.target.value))} />
+        <div className="flex gap-2">
+          <input
+            className={inputCls}
+            disabled={!podeEditar}
+            value={maskCepInput(v("postal_code"))}
+            onChange={(e) => set("postal_code", maskCepInput(e.target.value))}
+            onBlur={() => {
+              if (v("postal_code").replace(/\D/g, "").length === 8) void buscarCep();
+            }}
+          />
+          <button
+            type="button"
+            className="admin-btn h-11 px-3"
+            aria-label="Consultar CEP"
+            title="Consultar CEP"
+            disabled={!podeEditar || consultando}
+            onClick={() => void buscarCep()}
+          >
+            {consultando ? (
+              <Loader2 aria-hidden className="size-4 animate-spin" />
+            ) : (
+              <Search aria-hidden className="size-4" />
+            )}
+          </button>
+        </div>
       </Campo>
       <Campo label="Logradouro">
-        <input className={inputCls} disabled={!podeEditar} value={v("street")} onChange={(e) => set("street", e.target.value)} />
+        <input
+          className={inputCls}
+          disabled={!podeEditar}
+          value={v("street")}
+          onChange={(e) => set("street", e.target.value)}
+        />
       </Campo>
       <Campo label="Número">
-        <input className={inputCls} disabled={!podeEditar || Boolean(a["no_number"])} value={v("street_number")} onChange={(e) => set("street_number", e.target.value)} />
+        <input
+          className={inputCls}
+          disabled={!podeEditar || Boolean(a["no_number"])}
+          value={v("street_number")}
+          onChange={(e) => set("street_number", e.target.value)}
+        />
       </Campo>
       <Campo label="Sem número">
-        <Switch checked={Boolean(a["no_number"])} disabled={!podeEditar} onCheckedChange={(x) => set("no_number", x)} />
+        <Switch
+          checked={Boolean(a["no_number"])}
+          disabled={!podeEditar}
+          onCheckedChange={(x) => set("no_number", x)}
+        />
       </Campo>
       <Campo label="Complemento">
-        <input className={inputCls} disabled={!podeEditar} value={v("complement")} onChange={(e) => set("complement", e.target.value)} />
+        <input
+          className={inputCls}
+          disabled={!podeEditar}
+          value={v("complement")}
+          onChange={(e) => set("complement", e.target.value)}
+        />
       </Campo>
       <Campo label="Bairro">
-        <input className={inputCls} disabled={!podeEditar} value={v("district")} onChange={(e) => set("district", e.target.value)} />
+        <input
+          className={inputCls}
+          disabled={!podeEditar}
+          value={v("district")}
+          onChange={(e) => set("district", e.target.value)}
+        />
       </Campo>
       <Campo label="Cidade">
-        <input className={inputCls} disabled={!podeEditar} value={v("city")} onChange={(e) => set("city", e.target.value)} />
+        {uf && (municipios.data?.length ?? 0) > 0 ? (
+          <SmartSelect
+            disabled={!podeEditar}
+            value={v("ibge_city_code")}
+            onChange={(x) => {
+              const m = municipios.data?.find((item) => item.codigo_ibge === x);
+              setA((s) => ({ ...s, ibge_city_code: x, city: m?.nome ?? s["city"] }));
+            }}
+            options={(municipios.data ?? []).map((m) => ({ value: m.codigo_ibge, label: m.nome }))}
+            placeholder={municipios.isLoading ? "Carregando municípios…" : "Selecione o município"}
+          />
+        ) : (
+          <input
+            className={inputCls}
+            disabled={!podeEditar}
+            value={v("city")}
+            onChange={(e) => set("city", e.target.value)}
+          />
+        )}
       </Campo>
       <Campo label="UF">
         <SmartSelect
           disabled={!podeEditar}
           value={v("uf")}
-          onChange={(x) => set("uf", x)}
+          onChange={(x) => setA((s) => ({ ...s, uf: x, city: "", ibge_city_code: "" }))}
           options={UFS.map((u) => ({ value: u, label: u }))}
           placeholder="UF"
         />
       </Campo>
       <div className="md:col-span-2">
         <Campo label="Ponto de referência">
-          <input className={inputCls} disabled={!podeEditar} value={v("reference")} onChange={(e) => set("reference", e.target.value)} />
+          <input
+            className={inputCls}
+            disabled={!podeEditar}
+            value={v("reference")}
+            onChange={(e) => set("reference", e.target.value)}
+          />
         </Campo>
       </div>
       {podeEditar && (
@@ -746,12 +984,21 @@ function ConsultoraForm({
       <div className="grid gap-4 p-5 md:grid-cols-2">
         {secao === "comercial" && (
           <Campo label="Data de entrada">
-            <DateField value={isoParaData(v("joined_at"))} onChange={(x) => set("joined_at", dataParaIso(x))} disabled={!podeEditar} />
+            <DateField
+              value={isoParaData(v("joined_at"))}
+              onChange={(x) => set("joined_at", dataParaIso(x))}
+              disabled={!podeEditar}
+            />
           </Campo>
         )}
         {campos.map(([k, label]) => (
           <Campo key={String(k)} label={label}>
-            <input className={inputCls} disabled={!podeEditar} value={v(k)} onChange={(e) => set(k, e.target.value)} />
+            <input
+              className={inputCls}
+              disabled={!podeEditar}
+              value={v(k)}
+              onChange={(e) => set(k, e.target.value)}
+            />
           </Campo>
         ))}
         {podeEditar && (

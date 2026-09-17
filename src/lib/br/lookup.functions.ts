@@ -14,6 +14,14 @@ export const consultarCep = createServerFn({ method: "POST" })
     return lookupAddressByPostalCode(data.cep, context.userId ?? null);
   });
 
+/** Consulta pública somente de endereço. Não lê cadastros nem recebe dados pessoais. */
+export const consultarCepPublico = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ cep: z.string().max(12) }).parse(data))
+  .handler(async ({ data }) => {
+    const { lookupAddressByPostalCode } = await import("./providers.server");
+    return lookupAddressByPostalCode(data.cep, null);
+  });
+
 export const consultarCnpj = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
@@ -39,4 +47,12 @@ export const listarMunicipios = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { listMunicipalitiesByState } = await import("./providers.server");
     return listMunicipalitiesByState(data.uf, context.userId ?? null);
+  });
+
+/** Lista pública oficial do IBGE, limitada a uma UF válida. */
+export const listarMunicipiosPublico = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ uf: z.string().length(2) }).parse(data))
+  .handler(async ({ data }) => {
+    const { listMunicipalitiesByState } = await import("./providers.server");
+    return listMunicipalitiesByState(data.uf, null);
   });

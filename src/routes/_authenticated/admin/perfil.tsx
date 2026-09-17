@@ -15,6 +15,7 @@ import {
   signedAvatarUrl,
   updateMyProfile,
 } from "@/lib/profile";
+import { formatarTelefone, normalizarTelefone } from "@/lib/br/canonico";
 
 export const Route = createFileRoute("/_authenticated/admin/perfil")({
   component: PerfilPage,
@@ -170,8 +171,8 @@ function FotoCard({
           </div>
         </div>
         <p className="text-xs text-ledger-muted">
-          JPG, PNG, WEBP ou AVIF, até 5 MB. A foto é visível apenas para pessoas com
-          acesso ao sistema.
+          JPG, PNG, WEBP ou AVIF, até 5 MB. A foto é visível apenas para pessoas com acesso ao
+          sistema.
         </p>
         {erro && <p className="text-xs text-danger">{erro}</p>}
         <input
@@ -204,13 +205,18 @@ function DadosCard({
   const [erro, setErro] = useState<string | null>(null);
 
   const salvar = useMutation({
-    mutationFn: () =>
-      updateMyProfile({
+    mutationFn: () => {
+      const telefone = normalizarTelefone(form.phone);
+      if (telefone.estado !== "vazio" && telefone.estado !== "valido") {
+        throw new Error(telefone.erro ?? "Telefone inválido.");
+      }
+      return updateMyProfile({
         full_name: form.full_name.trim() || null,
         display_name: form.display_name.trim() || null,
         job_title: form.job_title.trim() || null,
-        phone: form.phone.trim() || null,
-      }),
+        phone: telefone.canonico,
+      });
+    },
     onSuccess: () => {
       setErro(null);
       setOk(true);
@@ -220,12 +226,7 @@ function DadosCard({
     onError: (e: Error) => setErro(e.message),
   });
 
-  const campo = (
-    name: keyof typeof form,
-    label: string,
-    placeholder: string,
-    type = "text",
-  ) => (
+  const campo = (name: keyof typeof form, label: string, placeholder: string, type = "text") => (
     <div className="space-y-1.5">
       <Label htmlFor={name}>{label}</Label>
       <Input
@@ -233,7 +234,12 @@ function DadosCard({
         type={type}
         value={form[name]}
         placeholder={placeholder}
-        onChange={(e) => setForm((f) => ({ ...f, [name]: e.target.value }))}
+        onChange={(e) =>
+          setForm((f) => ({
+            ...f,
+            [name]: name === "phone" ? formatarTelefone(e.target.value) : e.target.value,
+          }))
+        }
       />
     </div>
   );
@@ -391,10 +397,7 @@ function AcessoCard({
       <div id={id} className="scroll-mt-24 space-y-4 px-5 py-5">
         <Linha rotulo="E-mail" valor={email ?? "—"} />
         <Linha rotulo="Situação" valor={ativo ? "Conta ativa" : "Conta desativada"} />
-        <Linha
-          rotulo="No sistema desde"
-          valor={desde ? formatDateTime(desde) : "—"}
-        />
+        <Linha rotulo="No sistema desde" valor={desde ? formatDateTime(desde) : "—"} />
         <div>
           <p className="ledger-eyebrow">Papéis</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -415,8 +418,7 @@ function AcessoCard({
           </div>
         </div>
         <p className="text-xs text-ledger-muted">
-          Papéis são concedidos apenas pelo Master e toda mudança fica registrada na
-          auditoria.
+          Papéis são concedidos apenas pelo Master e toda mudança fica registrada na auditoria.
         </p>
       </div>
     </Panel>

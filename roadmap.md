@@ -1,5 +1,9 @@
 # Núcleo comercial Lardan Cloud — roadmap
 
+## Site — legibilidade mobile
+- [x] Ampliar textos auxiliares e subtítulos pequenos no celular sem alterar títulos ou desktop
+- [ ] Validar visualmente Home, Seja Lardan, A Lardan e produto em 390 px
+
 ## Site — composição institucional A Lardan
 - [x] Substituir o editorial genérico por logo completa e foto oficial do casal
 - [x] Validar ordem logo primeiro no mobile, composição lado a lado no desktop e acessibilidade

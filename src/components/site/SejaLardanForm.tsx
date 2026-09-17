@@ -8,7 +8,12 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { consultarCepPublico, listarMunicipiosPublico } from "@/lib/br/lookup.functions";
-import { formatarCep, formatarTelefone, normalizarCep, normalizarWhatsapp } from "@/lib/br/canonico";
+import {
+  formatarCep,
+  formatarTelefone,
+  normalizarCep,
+  normalizarWhatsapp,
+} from "@/lib/br/canonico";
 
 type Args = Record<string, unknown>;
 function semVazios<T extends Args>(o: T): T {
@@ -203,7 +208,13 @@ export function SejaLardanForm() {
         <legend className="brand-eyebrow mb-4">Endereço</legend>
         <div>
           <Label htmlFor="street">Rua</Label>
-          <input id="street" name="street" value={rua} onChange={(e) => setRua(e.target.value)} className={field} />
+          <input
+            id="street"
+            name="street"
+            value={rua}
+            onChange={(e) => setRua(e.target.value)}
+            className={field}
+          />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -222,20 +233,74 @@ export function SejaLardanForm() {
           <div>
             <Label htmlFor="postal_code">CEP</Label>
             <div className="flex gap-2">
-              <input id="postal_code" name="postal_code" inputMode="numeric" placeholder="00000-000" value={cep} onChange={(e) => { setCep(formatarCep(e.target.value)); setEstadoCep(null); }} onBlur={() => { if (normalizarCep(cep).estado === "valido") void buscarCep(); }} className={field} />
-              <Button type="button" variant="outline" size="icon" className="h-11 w-11 shrink-0" aria-label="Consultar CEP" title="Consultar CEP" disabled={consultandoCep} onClick={() => void buscarCep()}>
-                {consultandoCep ? <Loader2 aria-hidden className="animate-spin" /> : <Search aria-hidden />}
+              <input
+                id="postal_code"
+                name="postal_code"
+                inputMode="numeric"
+                placeholder="00000-000"
+                value={cep}
+                onChange={(e) => {
+                  setCep(formatarCep(e.target.value));
+                  setEstadoCep(null);
+                }}
+                onBlur={() => {
+                  if (normalizarCep(cep).estado === "valido") void buscarCep();
+                }}
+                className={field}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-11 w-11 shrink-0"
+                aria-label="Consultar CEP"
+                title="Consultar CEP"
+                disabled={consultandoCep}
+                onClick={() => void buscarCep()}
+              >
+                {consultandoCep ? (
+                  <Loader2 aria-hidden className="animate-spin" />
+                ) : (
+                  <Search aria-hidden />
+                )}
               </Button>
             </div>
-            {estadoCep ? <p role="status" className="mt-2 text-xs text-muted-foreground">{estadoCep}</p> : null}
+            {estadoCep ? (
+              <p role="status" className="mt-2 text-xs text-muted-foreground">
+                {estadoCep}
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
           <div>
             <Label htmlFor="city">Cidade</Label>
             {uf && (municipios.data?.length ?? 0) > 0 ? (
-              <SmartSelect id="city-select" required value={codigoIbge} onChange={(v) => { const m = municipios.data?.find((item) => item.codigo_ibge === v); setCodigoIbge(v); setCidade(m?.nome ?? cidade); }} options={(municipios.data ?? []).map((m) => ({ value: m.codigo_ibge, label: m.nome }))} placeholder={municipios.isLoading ? "Carregando…" : "Selecione a cidade"} searchPlaceholder="Buscar município…" />
-            ) : <input id="city" value={cidade} onChange={(e) => setCidade(e.target.value)} required className={field} />}
+              <SmartSelect
+                id="city-select"
+                required
+                value={codigoIbge}
+                onChange={(v) => {
+                  const m = municipios.data?.find((item) => item.codigo_ibge === v);
+                  setCodigoIbge(v);
+                  setCidade(m?.nome ?? cidade);
+                }}
+                options={(municipios.data ?? []).map((m) => ({
+                  value: m.codigo_ibge,
+                  label: m.nome,
+                }))}
+                placeholder={municipios.isLoading ? "Carregando…" : "Selecione a cidade"}
+                searchPlaceholder="Buscar município…"
+              />
+            ) : (
+              <input
+                id="city"
+                value={cidade}
+                onChange={(e) => setCidade(e.target.value)}
+                required
+                className={field}
+              />
+            )}
             <input type="hidden" name="city" value={cidade} />
           </div>
           <div>
@@ -245,7 +310,11 @@ export function SejaLardanForm() {
               name="uf"
               required
               value={uf}
-              onChange={(v) => { setUf(v); setCidade(""); setCodigoIbge(""); }}
+              onChange={(v) => {
+                setUf(v);
+                setCidade("");
+                setCodigoIbge("");
+              }}
               placeholder="UF"
               searchPlaceholder="Buscar estado..."
               searchThreshold={1}
@@ -280,7 +349,11 @@ export function SejaLardanForm() {
       </fieldset>
 
       <label className="flex items-start gap-3 text-xs leading-relaxed text-muted-foreground">
-        <Checkbox checked={marketingConsent} onCheckedChange={(v) => setMarketingConsent(v === true)} className="mt-0.5" />
+        <Checkbox
+          checked={marketingConsent}
+          onCheckedChange={(v) => setMarketingConsent(v === true)}
+          className="mt-0.5"
+        />
         Aceito receber comunicações da Lardan sobre novidades e oportunidades (opcional, pode ser
         cancelado a qualquer momento).
       </label>

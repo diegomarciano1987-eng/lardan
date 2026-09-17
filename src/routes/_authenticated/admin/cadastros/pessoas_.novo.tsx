@@ -32,11 +32,10 @@ interface Busca {
   papel?: PartyRoleKind | undefined;
 }
 
-
 export const Route = createFileRoute("/_authenticated/admin/cadastros/pessoas_/novo")({
   validateSearch: (s: Record<string, unknown>): Busca => ({
-    kind: s['kind'] === "organizacao" ? "organizacao" : "pessoa",
-    papel: typeof s['papel'] === "string" ? (s['papel'] as PartyRoleKind) : undefined,
+    kind: s["kind"] === "organizacao" ? "organizacao" : "pessoa",
+    papel: typeof s["papel"] === "string" ? (s["papel"] as PartyRoleKind) : undefined,
   }),
   component: NovoCadastro,
   head: () => ({
@@ -50,7 +49,15 @@ export const Route = createFileRoute("/_authenticated/admin/cadastros/pessoas_/n
 const inputCls =
   "h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm font-medium text-ledger-text shadow-sm outline-none placeholder:font-normal placeholder:text-ledger-muted focus:border-champagne focus:ring-2 focus:ring-champagne/25";
 
-function Campo({ label, children, help }: { label: string; children: React.ReactNode; help?: string | undefined }) {
+function Campo({
+  label,
+  children,
+  help,
+}: {
+  label: string;
+  children: React.ReactNode;
+  help?: string | undefined;
+}) {
   return (
     <label className="flex flex-col gap-1.5">
       <span className="text-[0.8125rem] font-semibold text-ledger-text">{label}</span>
@@ -120,7 +127,9 @@ function NovoCadastro() {
       return;
     }
     if (pessoa) {
-      toast.success("CPF estruturalmente válido. Isso não comprova titularidade ou situação cadastral.");
+      toast.success(
+        "CPF estruturalmente válido. Isso não comprova titularidade ou situação cadastral.",
+      );
       return;
     }
     setConsultandoDoc(true);
@@ -178,11 +187,14 @@ function NovoCadastro() {
       const nome = form.display_name.trim();
       if (!nome) throw new Error("Informe o nome para criar o cadastro.");
       const doc = normalizarDocumento(form.doc, pessoa ? "cpf" : "cnpj");
-      if (form.doc.trim() && doc.estado !== "valido") throw new Error(doc.erro ?? "Documento inválido.");
+      if (form.doc.trim() && doc.estado !== "valido")
+        throw new Error(doc.erro ?? "Documento inválido.");
       const whatsapp = normalizarWhatsapp(form.whatsapp);
-      if (form.whatsapp.trim() && whatsapp.estado !== "valido") throw new Error(whatsapp.erro ?? "WhatsApp inválido.");
+      if (form.whatsapp.trim() && whatsapp.estado !== "valido")
+        throw new Error(whatsapp.erro ?? "WhatsApp inválido.");
       const email = normalizarEmail(form.email);
-      if (form.email.trim() && email.estado !== "valido") throw new Error(email.erro ?? "E-mail inválido.");
+      if (form.email.trim() && email.estado !== "valido")
+        throw new Error(email.erro ?? "E-mail inválido.");
       const id = await saveParty({
         kind: pessoa ? "pessoa" : "organizacao",
         display_name: nome,
@@ -196,7 +208,8 @@ function NovoCadastro() {
         is_active: true,
       });
       if (papel) await addRole(id, papel);
-      if (whatsapp.canonico) await saveContact(id, { kind: "whatsapp", value: whatsapp.canonico, is_primary: true });
+      if (whatsapp.canonico)
+        await saveContact(id, { kind: "whatsapp", value: whatsapp.canonico, is_primary: true });
       if (email.canonico) await saveContact(id, { kind: "email", value: email.canonico });
       if (form.city.trim() || form.street.trim() || form.postal_code.trim()) {
         await saveAddress(id, {
@@ -225,7 +238,10 @@ function NovoCadastro() {
 
   return (
     <div className="space-y-6">
-      <Link to="/admin/cadastros/pessoas" className="admin-link inline-flex items-center gap-1.5 text-sm">
+      <Link
+        to="/admin/cadastros/pessoas"
+        className="admin-link inline-flex items-center gap-1.5 text-sm"
+      >
         <ArrowLeft aria-hidden className="size-4" /> Pessoas e empresas
       </Link>
 
@@ -235,8 +251,14 @@ function NovoCadastro() {
         description="Preencha e salve. Nada é gravado antes disso — depois de salvar você segue na ficha completa, com todas as abas."
         actions={
           podeEditar ? (
-            <button type="button" className="admin-btn-primary" disabled={criar.isPending} onClick={() => criar.mutate()}>
-              {criar.isPending && <Loader2 aria-hidden className="size-4 animate-spin" />} Criar cadastro
+            <button
+              type="button"
+              className="admin-btn-primary"
+              disabled={criar.isPending}
+              onClick={() => criar.mutate()}
+            >
+              {criar.isPending && <Loader2 aria-hidden className="size-4 animate-spin" />} Criar
+              cadastro
             </button>
           ) : null
         }
@@ -245,22 +267,60 @@ function NovoCadastro() {
       <Panel title="Identificação" flush>
         <div className="grid gap-4 p-5 md:grid-cols-2">
           <Campo label={pessoa ? "Nome completo" : "Razão social"}>
-            <input className={inputCls} value={form.display_name} onChange={(e) => set("display_name", e.target.value)} placeholder={pessoa ? "Como a pessoa se chama" : "Razão social"} />
+            <input
+              className={inputCls}
+              value={form.display_name}
+              onChange={(e) => set("display_name", e.target.value)}
+              placeholder={pessoa ? "Como a pessoa se chama" : "Razão social"}
+            />
           </Campo>
           <Campo label={pessoa ? "Nome social" : "Nome fantasia"}>
-            <input className={inputCls} value={form.social_name} onChange={(e) => set("social_name", e.target.value)} />
+            <input
+              className={inputCls}
+              value={form.social_name}
+              onChange={(e) => set("social_name", e.target.value)}
+            />
           </Campo>
-          <Campo label={pessoa ? "CPF" : "CNPJ"} help={pessoa ? "Validação matemática; não consulta titularidade ou situação na Receita." : "A lupa consulta os dados públicos da empresa."}>
+          <Campo
+            label={pessoa ? "CPF" : "CNPJ"}
+            help={
+              pessoa
+                ? "Validação matemática; não consulta titularidade ou situação na Receita."
+                : "A lupa consulta os dados públicos da empresa."
+            }
+          >
             <div className="flex gap-2">
-              <input className={inputCls} value={form.doc} onChange={(e) => set("doc", normalizarDocumento(e.target.value, pessoa ? "cpf" : "cnpj").formatado)} inputMode={pessoa ? "numeric" : "text"} />
-              <button type="button" className="admin-btn h-11 px-3" aria-label="Conferir documento" title="Conferir documento" disabled={consultandoDoc} onClick={() => void conferirDocumento()}>
-                {consultandoDoc ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <Search aria-hidden className="size-4" />}
+              <input
+                className={inputCls}
+                value={form.doc}
+                onChange={(e) =>
+                  set("doc", normalizarDocumento(e.target.value, pessoa ? "cpf" : "cnpj").formatado)
+                }
+                inputMode={pessoa ? "numeric" : "text"}
+              />
+              <button
+                type="button"
+                className="admin-btn h-11 px-3"
+                aria-label="Conferir documento"
+                title="Conferir documento"
+                disabled={consultandoDoc}
+                onClick={() => void conferirDocumento()}
+              >
+                {consultandoDoc ? (
+                  <Loader2 aria-hidden className="size-4 animate-spin" />
+                ) : (
+                  <Search aria-hidden className="size-4" />
+                )}
               </button>
             </div>
           </Campo>
           {pessoa ? (
             <Campo label="RG">
-              <input className={inputCls} value={form.rg} onChange={(e) => set("rg", e.target.value)} />
+              <input
+                className={inputCls}
+                value={form.rg}
+                onChange={(e) => set("rg", e.target.value)}
+              />
             </Campo>
           ) : (
             <div />
@@ -271,7 +331,11 @@ function NovoCadastro() {
                 <DateField value={nascimento} onChange={setNascimento} />
               </Campo>
               <Campo label="Profissão">
-                <input className={inputCls} value={form.profession} onChange={(e) => set("profession", e.target.value)} />
+                <input
+                  className={inputCls}
+                  value={form.profession}
+                  onChange={(e) => set("profession", e.target.value)}
+                />
               </Campo>
             </>
           )}
@@ -281,10 +345,21 @@ function NovoCadastro() {
       <Panel title="Contato" flush>
         <div className="grid gap-4 p-5 md:grid-cols-2">
           <Campo label="WhatsApp">
-            <input className={inputCls} value={form.whatsapp} onChange={(e) => set("whatsapp", maskPhoneInput(e.target.value))} inputMode="tel" placeholder="(00) 00000-0000" />
+            <input
+              className={inputCls}
+              value={form.whatsapp}
+              onChange={(e) => set("whatsapp", maskPhoneInput(e.target.value))}
+              inputMode="tel"
+              placeholder="(00) 00000-0000"
+            />
           </Campo>
           <Campo label="E-mail">
-            <input className={inputCls} value={form.email} onChange={(e) => set("email", e.target.value)} inputMode="email" />
+            <input
+              className={inputCls}
+              value={form.email}
+              onChange={(e) => set("email", e.target.value)}
+              inputMode="email"
+            />
           </Campo>
         </div>
       </Panel>
@@ -293,25 +368,80 @@ function NovoCadastro() {
         <div className="grid gap-4 p-5 md:grid-cols-2">
           <Campo label="CEP">
             <div className="flex gap-2">
-              <input className={inputCls} value={form.postal_code} onChange={(e) => set("postal_code", maskCepInput(e.target.value))} onBlur={() => { if (form.postal_code.replace(/\D/g, "").length === 8) void conferirCep(); }} inputMode="numeric" />
-              <button type="button" className="admin-btn h-11 px-3" aria-label="Consultar CEP" title="Consultar CEP" disabled={consultandoCep} onClick={() => void conferirCep()}>
-                {consultandoCep ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <Search aria-hidden className="size-4" />}
+              <input
+                className={inputCls}
+                value={form.postal_code}
+                onChange={(e) => set("postal_code", maskCepInput(e.target.value))}
+                onBlur={() => {
+                  if (form.postal_code.replace(/\D/g, "").length === 8) void conferirCep();
+                }}
+                inputMode="numeric"
+              />
+              <button
+                type="button"
+                className="admin-btn h-11 px-3"
+                aria-label="Consultar CEP"
+                title="Consultar CEP"
+                disabled={consultandoCep}
+                onClick={() => void conferirCep()}
+              >
+                {consultandoCep ? (
+                  <Loader2 aria-hidden className="size-4 animate-spin" />
+                ) : (
+                  <Search aria-hidden className="size-4" />
+                )}
               </button>
             </div>
           </Campo>
           <Campo label="Rua">
-            <input className={inputCls} value={form.street} onChange={(e) => set("street", e.target.value)} />
+            <input
+              className={inputCls}
+              value={form.street}
+              onChange={(e) => set("street", e.target.value)}
+            />
           </Campo>
           <Campo label="Número">
-            <input className={inputCls} value={form.street_number} onChange={(e) => set("street_number", e.target.value)} />
+            <input
+              className={inputCls}
+              value={form.street_number}
+              onChange={(e) => set("street_number", e.target.value)}
+            />
           </Campo>
           <Campo label="Bairro">
-            <input className={inputCls} value={form.district} onChange={(e) => set("district", e.target.value)} />
+            <input
+              className={inputCls}
+              value={form.district}
+              onChange={(e) => set("district", e.target.value)}
+            />
           </Campo>
-          <Campo label="Cidade" help={municipios.isError ? "IBGE indisponível; digite a cidade manualmente." : undefined}>
+          <Campo
+            label="Cidade"
+            help={
+              municipios.isError ? "IBGE indisponível; digite a cidade manualmente." : undefined
+            }
+          >
             {form.uf && (municipios.data?.length ?? 0) > 0 ? (
-              <SmartSelect options={(municipios.data ?? []).map((m) => ({ value: m.codigo_ibge, label: m.nome }))} value={form.ibge_city_code} onChange={(v) => { const m = municipios.data?.find((item) => item.codigo_ibge === v); setForm((f) => ({ ...f, ibge_city_code: v, city: m?.nome ?? f.city })); }} placeholder={municipios.isLoading ? "Carregando municípios…" : "Selecione o município"} />
-            ) : <input className={inputCls} value={form.city} onChange={(e) => set("city", e.target.value)} />}
+              <SmartSelect
+                options={(municipios.data ?? []).map((m) => ({
+                  value: m.codigo_ibge,
+                  label: m.nome,
+                }))}
+                value={form.ibge_city_code}
+                onChange={(v) => {
+                  const m = municipios.data?.find((item) => item.codigo_ibge === v);
+                  setForm((f) => ({ ...f, ibge_city_code: v, city: m?.nome ?? f.city }));
+                }}
+                placeholder={
+                  municipios.isLoading ? "Carregando municípios…" : "Selecione o município"
+                }
+              />
+            ) : (
+              <input
+                className={inputCls}
+                value={form.city}
+                onChange={(e) => set("city", e.target.value)}
+              />
+            )}
           </Campo>
           <Campo label="Estado">
             <SmartSelect
@@ -336,8 +466,14 @@ function NovoCadastro() {
 
       <div className="flex justify-end">
         {podeEditar && (
-          <button type="button" className="admin-btn-primary" disabled={criar.isPending} onClick={() => criar.mutate()}>
-            {criar.isPending && <Loader2 aria-hidden className="size-4 animate-spin" />} Criar cadastro
+          <button
+            type="button"
+            className="admin-btn-primary"
+            disabled={criar.isPending}
+            onClick={() => criar.mutate()}
+          >
+            {criar.isPending && <Loader2 aria-hidden className="size-4 animate-spin" />} Criar
+            cadastro
           </button>
         )}
       </div>

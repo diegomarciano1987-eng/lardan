@@ -11,13 +11,7 @@ import { onlyDigits } from "@/lib/docs-br";
 export type PartyKind = "pessoa" | "organizacao";
 
 export type PartyStatus =
-  | "rascunho"
-  | "em_analise"
-  | "aprovado"
-  | "ativo"
-  | "bloqueado"
-  | "inativo"
-  | "desligado";
+  "rascunho" | "em_analise" | "aprovado" | "ativo" | "bloqueado" | "inativo" | "desligado";
 
 export const PARTY_STATUS_LABEL: Record<PartyStatus, string> = {
   rascunho: "Rascunho",
@@ -272,13 +266,19 @@ export async function getParty(id: string): Promise<PartyFull> {
   };
 }
 
-
-export type PartyDraft = Partial<Omit<Party, "id" | "code" | "created_at" | "updated_at" | "doc_digits">>;
+export type PartyDraft = Partial<
+  Omit<Party, "id" | "code" | "created_at" | "updated_at" | "doc_digits">
+>;
 
 /** Cria ou atualiza a identidade canônica. Rascunho salva sem exigir nada. */
 export async function saveParty(draft: PartyDraft, id?: string) {
   if (id) {
-    const { data, error } = await supabase.from("parties").update(draft).eq("id", id).select("id").single();
+    const { data, error } = await supabase
+      .from("parties")
+      .update(draft)
+      .eq("id", id)
+      .select("id")
+      .single();
     if (error) throw error;
     return data.id as string;
   }
@@ -295,7 +295,9 @@ export async function addRole(partyId: string, role: PartyRoleKind) {
   const { error } = await supabase.from("party_roles").insert({ party_id: partyId, role });
   if (error && !error.message.includes("duplicate")) throw error;
   if (role === "consultora") {
-    await supabase.from("consultant_profiles").upsert({ party_id: partyId }, { onConflict: "party_id" });
+    await supabase
+      .from("consultant_profiles")
+      .upsert({ party_id: partyId }, { onConflict: "party_id" });
   }
 }
 
@@ -304,10 +306,18 @@ export async function removeRole(roleId: string) {
   if (error) throw error;
 }
 
-export async function saveContact(partyId: string, c: Partial<ContactPoint> & { kind: ContactPoint["kind"]; value: string }) {
+export async function saveContact(
+  partyId: string,
+  c: Partial<ContactPoint> & { kind: ContactPoint["kind"]; value: string },
+) {
   const { error } = c.id
-    ? await supabase.from("contact_points").update({ kind: c.kind, value: c.value, label: c.label ?? null }).eq("id", c.id)
-    : await supabase.from("contact_points").insert({ party_id: partyId, kind: c.kind, value: c.value, label: c.label ?? null });
+    ? await supabase
+        .from("contact_points")
+        .update({ kind: c.kind, value: c.value, label: c.label ?? null })
+        .eq("id", c.id)
+    : await supabase
+        .from("contact_points")
+        .insert({ party_id: partyId, kind: c.kind, value: c.value, label: c.label ?? null });
   if (error) throw error;
 }
 
@@ -332,7 +342,9 @@ export async function saveAddress(partyId: string, a: Partial<PartyAddress>) {
   };
   const { error } = a.id
     ? await supabase.from("party_addresses").update(payload).eq("id", a.id)
-    : await supabase.from("party_addresses").insert({ party_id: partyId, is_primary: true, ...payload });
+    : await supabase
+        .from("party_addresses")
+        .insert({ party_id: partyId, is_primary: true, ...payload });
   if (error) throw error;
 }
 
@@ -375,7 +387,6 @@ export async function findPossibleDuplicates(input: {
   if (error) throw error;
   return (data ?? []) as unknown as Party[];
 }
-
 
 /** Percentual de completude honesto: só conta o que realmente existe. */
 export function completude(p: {

@@ -171,8 +171,8 @@ function FotoCard({
           </div>
         </div>
         <p className="text-xs text-ledger-muted">
-          JPG, PNG, WEBP ou AVIF, até 5 MB. A foto é visível apenas para pessoas com
-          acesso ao sistema.
+          JPG, PNG, WEBP ou AVIF, até 5 MB. A foto é visível apenas para pessoas com acesso ao
+          sistema.
         </p>
         {erro && <p className="text-xs text-danger">{erro}</p>}
         <input
@@ -226,12 +226,7 @@ function DadosCard({
     onError: (e: Error) => setErro(e.message),
   });
 
-  const campo = (
-    name: keyof typeof form,
-    label: string,
-    placeholder: string,
-    type = "text",
-  ) => (
+  const campo = (name: keyof typeof form, label: string, placeholder: string, type = "text") => (
     <div className="space-y-1.5">
       <Label htmlFor={name}>{label}</Label>
       <Input
@@ -239,10 +234,12 @@ function DadosCard({
         type={type}
         value={form[name]}
         placeholder={placeholder}
-          onChange={(e) => setForm((f) => ({
+        onChange={(e) =>
+          setForm((f) => ({
             ...f,
             [name]: name === "phone" ? formatarTelefone(e.target.value) : e.target.value,
-          }))}
+          }))
+        }
       />
     </div>
   );
@@ -400,10 +397,7 @@ function AcessoCard({
       <div id={id} className="scroll-mt-24 space-y-4 px-5 py-5">
         <Linha rotulo="E-mail" valor={email ?? "—"} />
         <Linha rotulo="Situação" valor={ativo ? "Conta ativa" : "Conta desativada"} />
-        <Linha
-          rotulo="No sistema desde"
-          valor={desde ? formatDateTime(desde) : "—"}
-        />
+        <Linha rotulo="No sistema desde" valor={desde ? formatDateTime(desde) : "—"} />
         <div>
           <p className="ledger-eyebrow">Papéis</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -424,8 +418,7 @@ function AcessoCard({
           </div>
         </div>
         <p className="text-xs text-ledger-muted">
-          Papéis são concedidos apenas pelo Master e toda mudança fica registrada na
-          auditoria.
+          Papéis são concedidos apenas pelo Master e toda mudança fica registrada na auditoria.
         </p>
       </div>
     </Panel>

@@ -80,7 +80,6 @@ export function PartnersPage({
   const podeRevelar = query.data?.pode_revelar ?? false;
   const podeGerir = query.data?.pode_gerir ?? false;
 
-
   const revelar = async (row: PartnerRow) => {
     try {
       const doc = await revealPartnerDoc(kind, row.id);
@@ -256,7 +255,12 @@ export function PartnersPage({
     }
     lista.push(
       { name: "cidade", label: "Cidade", type: "text" },
-      { name: "uf", label: "UF", type: "select", options: UFS.map((u) => ({ value: u, label: u })) },
+      {
+        name: "uf",
+        label: "UF",
+        type: "select",
+        options: UFS.map((u) => ({ value: u, label: u })),
+      },
       { name: "ativo", label: "Ativo", type: "switch" },
       { name: "notas", label: "Observações", type: "textarea" },
     );
@@ -294,7 +298,6 @@ export function PartnersPage({
 
   return (
     <div className="space-y-6">
-
       <PageHeader
         eyebrow={eyebrow}
         title={title}

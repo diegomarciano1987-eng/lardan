@@ -30,7 +30,7 @@ function injectGtag(id: string) {
   if (document.querySelector(`script[data-ga-id="${id}"]`)) return;
   const script = document.createElement("script");
   script.async = true;
-  script.dataset.gaId = id;
+  script.dataset["gaId"] = id;
   script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
   document.head.appendChild(script);
 

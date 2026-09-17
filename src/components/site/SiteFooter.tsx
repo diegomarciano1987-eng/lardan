@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
+import smalldataAsset from "@/assets/smalldata-logo.png.asset.json";
 import { SocialLinks } from "./SocialLinks";
 import { EMPRESA, ENDERECO_LINHAS, MAPA_URL } from "@/lib/institucional";
 
@@ -38,18 +39,6 @@ const COLUNAS: { titulo: string; links: { label: string; to: string }[] }[] = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-card">
-      {/* Faixa editorial de convite */}
-      <div className="border-b border-border">
-        <div className="mx-auto max-w-4xl px-6 py-20 text-center">
-          <h2 className="text-2xl leading-tight text-foreground md:text-4xl">
-            Talvez sua história com a Lardan esteja apenas começando.
-          </h2>
-          <Link to="/seja-lardan" className="btn-premium mt-10">
-            Quero ser uma consultora
-          </Link>
-        </div>
-      </div>
-
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
@@ -118,6 +107,26 @@ export function SiteFooter() {
           >
             Acessar Lardan
           </Link>
+        </div>
+
+        <div className="mt-8 flex items-center justify-center gap-2 border-t border-border/60 pt-5 text-[11px] tracking-[0.08em] text-muted-foreground/70">
+          <span>desenvolvimento:</span>
+          <a
+            href="https://smalldata.cloud/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center opacity-70 transition-opacity hover:opacity-100"
+            aria-label="Small Data — smalldata.cloud"
+          >
+            <img
+              src={smalldataAsset.url}
+              alt="Small Data"
+              className="h-3.5 w-auto"
+              loading="lazy"
+              width={369}
+              height={64}
+            />
+          </a>
         </div>
       </div>
     </footer>

@@ -322,7 +322,7 @@ export const GUIA_RENDA_EXTRA: Guia = {
   ],
   publicadoEm: "2026-09-17",
   atualizadoEm: "2026-09-17",
-  fontes: ["ibge_conta_propria", "ibge_mulheres", "lardan_institucional", "lardan_seja"],
+  fontes: ["ibge_conta_propria", "ibge_mulheres", "datareportal", "lardan_institucional", "lardan_seja"],
   imagem: "vida_real",
   relacionados: [
     {

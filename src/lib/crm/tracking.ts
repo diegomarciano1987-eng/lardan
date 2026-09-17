@@ -68,15 +68,21 @@ export function registrarPrimeiroContato(): void {
     for (const [k, v] of params.entries()) {
       if (k.startsWith("utm_")) utm[k] = v.slice(0, LIMITE);
     }
-    window.localStorage.setItem(
-      CHAVE_PRIMEIRO,
-      JSON.stringify({
-        first_referrer: corta(document.referrer),
-        first_landing_page: corta(window.location.href),
-        first_at: new Date().toISOString(),
-        utm,
-      }),
-    );
+    // Identificadores de campanha também ficam no primeiro contato: o clique do
+    // anúncio pode acontecer vários artigos antes da candidatura.
+    const primeiro: Partial<TrackingCliente> = {
+      first_referrer: corta(document.referrer),
+      first_landing_page: corta(window.location.href),
+      first_at: new Date().toISOString(),
+      utm,
+    };
+    const gclid = corta(params.get("gclid"));
+    if (gclid) primeiro.gclid = gclid;
+    const fbclid = corta(params.get("fbclid"));
+    if (fbclid) primeiro.fbclid = fbclid;
+    const msclkid = corta(params.get("msclkid"));
+    if (msclkid) primeiro.msclkid = msclkid;
+    window.localStorage.setItem(CHAVE_PRIMEIRO, JSON.stringify(primeiro));
   } catch {
     /* navegador sem armazenamento: seguimos apenas com o último contato */
   }
@@ -147,9 +153,10 @@ export function capturarTracking(): TrackingCliente {
     first_landing_page: primeiro.first_landing_page ?? corta(window.location.href),
     first_at: primeiro.first_at,
     language: corta(navigator.language),
-    gclid: corta(params.get("gclid")),
-    fbclid: corta(params.get("fbclid")),
-    msclkid: corta(params.get("msclkid")),
+    // ID atual quando existe; senão, o do primeiro contato (nunca sobrescrito).
+    gclid: corta(params.get("gclid")) ?? primeiro.gclid,
+    fbclid: corta(params.get("fbclid")) ?? primeiro.fbclid,
+    msclkid: corta(params.get("msclkid")) ?? primeiro.msclkid,
     utm: Object.keys(utm).length > 0 ? utm : (primeiro.utm ?? {}),
     jornada: lerJornada(),
   };

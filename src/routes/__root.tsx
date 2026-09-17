@@ -88,6 +88,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "LARDAN" },
       { name: "twitter:card", content: "summary_large_image" },
+      // Cor da barra do navegador em celulares (marfim da identidade).
+      { name: "theme-color", content: "#f7f3ee" },
     ],
     links: [
       {
@@ -106,6 +108,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.cdnfonts.com/css/roxboroughcf",
       },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       // Descrição legível por máquinas (mesma fonte de verdade de domínio).
       { rel: "describedby", href: `${SITE_URL}/llms.txt`, type: "text/plain" },
     ],

@@ -26,7 +26,9 @@ export function headDoGuia(guia: Guia) {
       description: guia.description,
       path: guia.path,
       type: "article",
-      image: imagemAbsoluta,
+      image: imagem
+        ? { url: abs(imagem.url), width: imagem.width, height: imagem.height, alt: imagem.alt }
+        : null,
     }),
     links: canonical(guia.path),
     scripts: [

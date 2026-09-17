@@ -4,28 +4,92 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import { ProductGrid, StateNote } from "@/components/site/ProductGrid";
-import { listPublicCategories, listPublicProducts } from "@/lib/storefront";
-import { ogImageMeta } from "@/lib/seo";
+import {
+  listPublicCategories,
+  listPublicProducts,
+  mediaUrl,
+  type CategoriaPublica,
+  type ProdutoVitrine,
+} from "@/lib/storefront";
+import {
+  breadcrumbLd,
+  canonical,
+  collectionPageLd,
+  itemListLd,
+  jsonLdScript,
+  pageMeta,
+} from "@/lib/seo";
 
 const POR_PAGINA = 12;
+const TITULO = "Semijoias — LARDAN";
+const DESCRICAO =
+  "Catálogo de semijoias Lardan por categoria: anéis, colares, pulseiras e brincos.";
+
+interface Dados {
+  categorias: CategoriaPublica[];
+  produtos: { rows: ProdutoVitrine[]; total: number };
+}
 
 export const Route = createFileRoute("/semijoias/")({
   component: SemijoiasPage,
-  head: () => ({
-    meta: [
-      { title: "Semijoias — LARDAN" },
-      { name: "description", content: "Catálogo de semijoias Lardan por categoria: anéis, colares, pulseiras e brincos." },
-      { property: "og:title", content: "Semijoias — LARDAN" },
-      { property: "og:description", content: "Catálogo de semijoias Lardan por categoria." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      ...ogImageMeta(),
-    ],
-    links: [{ rel: "canonical", href: "/semijoias" }],
-  }),
+  /**
+   * SSR real: categorias e a primeira página de peças publicadas saem no HTML
+   * inicial. Depois da hidratação, busca e paginação continuam no cliente.
+   */
+  loader: async (): Promise<Dados> => {
+    const [categorias, produtos] = await Promise.all([
+      listPublicCategories(),
+      listPublicProducts({ pagina: 0, porPagina: POR_PAGINA }),
+    ]);
+    return { categorias, produtos };
+  },
+  head: ({ loaderData }) => {
+    const itens = (loaderData?.produtos.rows ?? []).map((p) => ({
+      name: p.name,
+      path: `/produto/${p.slug}`,
+      image: mediaUrl(p.cover_media_id),
+    }));
+    const lista = itemListLd({ path: "/semijoias", name: "Semijoias Lardan", itens });
+    return {
+      meta: pageMeta({ title: TITULO, description: DESCRICAO, path: "/semijoias" }),
+      links: canonical("/semijoias"),
+      scripts: [
+        jsonLdScript([
+          collectionPageLd({
+            path: "/semijoias",
+            name: TITULO,
+            description: DESCRICAO,
+            ...(itens.length > 0 ? { itemListId: lista["@id"] as string } : {}),
+          }),
+          breadcrumbLd([
+            { name: "Início", path: "/" },
+            { name: "Semijoias", path: "/semijoias" },
+          ]),
+          ...(itens.length > 0 ? [lista] : []),
+        ]),
+      ],
+    };
+  },
+  errorComponent: () => (
+    <SiteLayout>
+      <PageHero eyebrow="Catálogo" title="Semijoias" />
+      <div className="mx-auto max-w-6xl px-6 pb-24">
+        <StateNote text="Não conseguimos carregar as peças agora. Tente novamente em instantes." />
+      </div>
+    </SiteLayout>
+  ),
+  notFoundComponent: () => (
+    <SiteLayout>
+      <PageHero eyebrow="Catálogo" title="Semijoias" />
+      <div className="mx-auto max-w-6xl px-6 pb-24">
+        <StateNote text="Catálogo indisponível." />
+      </div>
+    </SiteLayout>
+  ),
 });
 
 function SemijoiasPage() {
+  const inicial = Route.useLoaderData();
   const [texto, setTexto] = useState("");
   const [busca, setBusca] = useState("");
   const [pagina, setPagina] = useState(0);
@@ -38,12 +102,18 @@ function SemijoiasPage() {
     return () => clearTimeout(t);
   }, [texto]);
 
-  const categorias = useQuery({ queryKey: ["categorias-publicas"], queryFn: listPublicCategories });
+  const categorias = useQuery({
+    queryKey: ["categorias-publicas"],
+    queryFn: listPublicCategories,
+    initialData: inicial.categorias,
+  });
 
+  const estadoCanonico = busca === "" && pagina === 0;
   const produtos = useQuery({
     queryKey: ["vitrine", "todas", busca, pagina],
     queryFn: () => listPublicProducts({ busca: busca || null, pagina, porPagina: POR_PAGINA }),
     placeholderData: keepPreviousData,
+    ...(estadoCanonico ? { initialData: inicial.produtos } : {}),
   });
 
   const total = produtos.data?.total ?? 0;

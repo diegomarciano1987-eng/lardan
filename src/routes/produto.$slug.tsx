@@ -3,7 +3,15 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { StateNote } from "@/components/site/ProductGrid";
 import { CompraProduto } from "@/components/site/CompraProduto";
 import { formatPreco, getPublicProduct, mediaUrl } from "@/lib/storefront";
-import { ogImageMeta } from "@/lib/seo";
+import {
+  abs,
+  breadcrumbLd,
+  canonical,
+  jsonLdScript,
+  pageMeta,
+  productLd,
+  webPageLd,
+} from "@/lib/seo";
 
 export const Route = createFileRoute("/produto/$slug")({
   component: ProdutoPage,
@@ -15,23 +23,61 @@ export const Route = createFileRoute("/produto/$slug")({
   },
   head: ({ params, loaderData }) => {
     const p = loaderData?.peca ?? null;
+    const path = `/produto/${params.slug}`;
     const titulo = p?.seo_title?.trim() || (p ? `${p.name} — Semijoias LARDAN` : "Peça indisponível — LARDAN");
     const descricao =
       p?.seo_description?.trim() ||
       p?.short_description?.trim() ||
       "Peça de semijoia Lardan publicada no catálogo oficial.";
+
+    // Foto real da peça vira a imagem de compartilhamento (sempre absoluta).
+    const capa = p?.imagens?.[0] ? mediaUrl(p.imagens[0].media_id) : null;
+    const imagem = capa
+      ? { url: abs(capa), alt: p?.imagens?.[0]?.alt || p?.name || "Semijoia Lardan" }
+      : null;
+
+    if (!p) {
+      return {
+        meta: [
+          ...pageMeta({ title: titulo, description: descricao, path, type: "product" }),
+          { name: "robots", content: "noindex, follow" },
+        ],
+        links: canonical(path),
+      };
+    }
+
+    const trilha = [
+      { name: "Início", path: "/" },
+      { name: "Semijoias", path: "/semijoias" },
+      ...(p.category ? [{ name: p.category.name, path: `/semijoias/${p.category.slug}` }] : []),
+      { name: p.name, path },
+    ];
+
     return {
-      meta: [
-        { title: titulo },
-        { name: "description", content: descricao },
-        ...(p ? [] : [{ name: "robots", content: "noindex" }]),
-        { property: "og:title", content: titulo },
-        { property: "og:description", content: descricao },
-        { property: "og:type", content: "product" },
-        { name: "twitter:card", content: "summary_large_image" },
-        ...ogImageMeta(p?.imagens?.[0] ? mediaUrl(p.imagens[0].media_id) : null),
+      meta: pageMeta({
+        title: titulo,
+        description: descricao,
+        path,
+        type: "product",
+        image: imagem,
+      }),
+      links: canonical(path),
+      scripts: [
+        jsonLdScript([
+          webPageLd({ path, name: titulo, description: descricao }),
+          breadcrumbLd(trilha),
+          productLd({
+            path,
+            name: p.name,
+            description: p.description?.trim() || p.short_description,
+            images: p.imagens
+              .map((i) => mediaUrl(i.media_id))
+              .filter((u): u is string => Boolean(u)),
+            material: p.material,
+            priceCents: p.price_cents,
+          }),
+        ]),
       ],
-      links: [{ rel: "canonical", href: `/produto/${params.slug}` }],
     };
   },
   errorComponent: () => (

@@ -107,8 +107,9 @@ export function SiteFooter() {
         </div>
 
         <p className="mt-10 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-          Canais oficiais de atendimento e dados empresariais (razão social e CNPJ) serão publicados
-          aqui assim que confirmados pela marca.
+          {EMPRESA.razaoSocial} · CNPJ {EMPRESA.cnpj}
+          <br />
+          Canais oficiais de atendimento serão publicados aqui assim que confirmados pela marca.
         </p>
 
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center">

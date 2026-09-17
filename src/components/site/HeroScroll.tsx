@@ -41,7 +41,9 @@ export function HeroScroll() {
   const wordmarkIn = easeOut(phase(p, 0.26, 0.5));
   const halo = reduced ? 0 : phase(p, 0.26, 0.36) * (1 - ease(phase(p, 0.42, 0.56)));
   const mostrarReflexo = !reduced && iconOut < 0.65;
-  const scrollCueOut = reduced ? (p > 0.02 ? 1 : 0) : ease(phase(p, 0.018, 0.12));
+  // Permanece como guia durante a primeira marca e só se despede quando o
+  // nome LARDAN começa a surgir (wordmarkIn inicia em 0.26).
+  const scrollCueOut = reduced ? (p > 0.02 ? 1 : 0) : ease(phase(p, 0.24, 0.31));
 
   // O ícone "implode em luz": acende por dentro antes de ceder.
   const brilhoIcone = reduced ? 0 : phase(p, 0.08, 0.22);
@@ -145,7 +147,7 @@ export function HeroScroll() {
             <span className="hero-scroll-cue__track" aria-hidden>
               <span
                 className="hero-scroll-cue__progress"
-                style={{ transform: `scaleX(${clamp01(p / 0.12)})` }}
+                style={{ transform: `scaleX(${clamp01(p / 0.26)})` }}
               />
             </span>
           </div>

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Search } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { PRIVACY_VERSION, captureUtm, entryUrl } from "@/lib/privacy";
+import { PRIVACY_VERSION } from "@/lib/privacy";
+import { capturarTracking, registrarPrimeiroContato } from "@/lib/crm/tracking";
+import { enviarCandidatura } from "@/lib/crm/candidaturas.functions";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -104,6 +105,10 @@ export function SejaLardanForm() {
   const [consultandoCep, setConsultandoCep] = useState(false);
   const [estadoCep, setEstadoCep] = useState<string | null>(null);
   const consultarCepFn = useServerFn(consultarCepPublico);
+  const enviarFn = useServerFn(enviarCandidatura);
+
+  // Guarda o primeiro contato conhecido deste navegador, sem sobrescrever.
+  useEffect(() => registrarPrimeiroContato(), []);
   const listarMunicipiosFn = useServerFn(listarMunicipiosPublico);
 
   const municipios = useQuery({
@@ -151,6 +156,18 @@ export function SejaLardanForm() {
       const v = form.get(k);
       return typeof v === "string" && v.trim() !== "" ? v.trim() : undefined;
     };
+    // Cidade e estado são validados aqui: o campo oculto do seletor não pode
+    // receber foco, então a validação do navegador travaria o envio em silêncio.
+    if (!uf) {
+      setBusy(false);
+      setErro("Escolha o estado (UF).");
+      return;
+    }
+    if (!cidade.trim()) {
+      setBusy(false);
+      setErro("Escolha ou digite a sua cidade.");
+      return;
+    }
     const whatsappCanonico = normalizarWhatsapp(whatsapp);
     if (whatsappCanonico.estado !== "valido" || !whatsappCanonico.canonico) {
       setBusy(false);
@@ -158,38 +175,43 @@ export function SejaLardanForm() {
       return;
     }
 
-    const { data, error } = await supabase.rpc(
-      "submit_lead",
-      semVazios({
-        p_full_name: texto("full_name") ?? "",
-        p_whatsapp: whatsappCanonico.canonico,
-        p_city: texto("city") ?? "",
-        p_uf: texto("uf") ?? "",
-        p_street: texto("street"),
-        p_street_number: semNumero ? undefined : texto("street_number"),
-        p_no_number: semNumero,
-        p_postal_code: normalizarCep(cep).canonico ?? undefined,
-        p_financial_goal: texto("financial_goal"),
-        p_availability: texto("availability"),
-        p_experience: texto("experience"),
-        p_audience: texto("audience"),
-        p_motivation: texto("motivation"),
-        p_source: "site/seja-lardan",
-        p_entry_url: entryUrl() ?? undefined,
-        p_utm: captureUtm(),
-        p_privacy_version: PRIVACY_VERSION,
-        p_marketing_consent: marketingConsent,
-      }) as never,
-    );
+    const resposta = await enviarFn({
+      data: {
+        payload: semVazios({
+          full_name: texto("full_name") ?? "",
+          whatsapp: whatsappCanonico.canonico,
+          email: texto("email"),
+          city: texto("city") ?? "",
+          uf: texto("uf") ?? "",
+          street: texto("street"),
+          street_number: semNumero ? undefined : texto("street_number"),
+          no_number: semNumero,
+          postal_code: normalizarCep(cep).canonico ?? undefined,
+          financial_goal: texto("financial_goal"),
+          availability: texto("availability"),
+          experience: texto("experience"),
+          audience: texto("audience"),
+          motivation: texto("motivation"),
+          source: "site/seja-lardan",
+          privacy_version: PRIVACY_VERSION,
+          marketing_consent: marketingConsent,
+        }) as never,
+        tracking: capturarTracking(),
+      },
+    });
 
     setBusy(false);
-    if (error || !data) {
+    if (resposta.status !== "ok") {
       setErro(
-        "Não foi possível registrar a candidatura. Confira os dados obrigatórios e tente novamente.",
+        resposta.codigo === "limite_envios"
+          ? "Recebemos vários envios seguidos deste acesso. Aguarde alguns minutos e tente novamente."
+          : resposta.codigo === "email_invalido"
+            ? "Confira o e-mail informado."
+            : "Não foi possível registrar a candidatura. Confira os dados obrigatórios e tente novamente.",
       );
       return;
     }
-    setProtocolo(data);
+    setProtocolo(resposta.protocolo);
   }
 
   if (protocolo) {
@@ -229,6 +251,10 @@ export function SejaLardanForm() {
             onChange={(e) => setWhatsapp(formatarTelefone(e.target.value))}
             className={field}
           />
+        </div>
+        <div>
+          <Label htmlFor="email">E-mail (opcional)</Label>
+          <input id="email" name="email" type="email" autoComplete="email" className={field} />
         </div>
       </fieldset>
 
@@ -306,7 +332,6 @@ export function SejaLardanForm() {
             {uf && (municipios.data?.length ?? 0) > 0 ? (
               <SmartSelect
                 id="city-select"
-                required
                 value={codigoIbge}
                 onChange={(v) => {
                   const m = municipios.data?.find((item) => item.codigo_ibge === v);
@@ -336,7 +361,6 @@ export function SejaLardanForm() {
             <SmartSelect
               id="uf"
               name="uf"
-              required
               value={uf}
               onChange={(v) => {
                 setUf(v);

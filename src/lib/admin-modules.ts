@@ -11,6 +11,7 @@ import {
   UserRound,
   UsersRound,
   ContactRound,
+  UserRoundSearch,
   ShoppingBag,
   CloudUpload,
   BellRing,
@@ -266,9 +267,20 @@ export const ADMIN_MODULES: AdminModule[] = [
 /** Módulos internos alcançáveis fora do menu inferior. */
 export const ADMIN_SUBMODULES: AdminModule[] = [
   {
+    slug: "candidaturas-site",
+    path: "/admin/candidaturas",
+    label: "Candidaturas do Site",
+    description:
+      "CRM das candidatas a Consultora Lardan: funil, responsável, follow-ups, origem e histórico.",
+    icon: UserRoundSearch,
+    roles: ["master", "diretoria", "marketing", "suporte"],
+    capability: "candidaturas.view",
+    state: "ativo",
+  },
+  {
     slug: "candidaturas",
     path: "/admin/leads",
-    label: "Candidaturas e contatos",
+    label: "Candidaturas e contatos (legado)",
     description: "Leads do Seja Lardan e mensagens do Contato, com protocolo.",
     icon: ContactRound,
     roles: ["master", "diretoria", "marketing", "suporte"],

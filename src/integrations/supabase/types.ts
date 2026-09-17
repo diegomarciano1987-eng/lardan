@@ -281,6 +281,449 @@ export type Database = {
           },
         ]
       }
+      candidatura_assessments: {
+        Row: {
+          assessment_type: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          lead_id: string
+          metadata: Json
+          result_reference: string | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assessment_type: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lead_id: string
+          metadata?: Json
+          result_reference?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assessment_type?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string
+          metadata?: Json
+          result_reference?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_assessments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidatura_followups: {
+        Row: {
+          assigned_to: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string
+          due_at: string
+          id: string
+          kind: string
+          lead_id: string
+          note: string | null
+          outcome_note: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by: string
+          due_at: string
+          id?: string
+          kind?: string
+          lead_id: string
+          note?: string | null
+          outcome_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string
+          due_at?: string
+          id?: string
+          kind?: string
+          lead_id?: string
+          note?: string | null
+          outcome_note?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_followups_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidatura_lost_reasons: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          key: string
+          label: string
+          requires_note: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          label: string
+          requires_note?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          label?: string
+          requires_note?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      candidatura_note_revisions: {
+        Row: {
+          edited_at: string
+          edited_by: string
+          id: string
+          note_id: string
+          previous_body: string
+        }
+        Insert: {
+          edited_at?: string
+          edited_by: string
+          id?: string
+          note_id: string
+          previous_body: string
+        }
+        Update: {
+          edited_at?: string
+          edited_by?: string
+          id?: string
+          note_id?: string
+          previous_body?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_note_revisions_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "candidatura_notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidatura_notes: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          edits_count: number
+          id: string
+          lead_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          edits_count?: number
+          id?: string
+          lead_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          edits_count?: number
+          id?: string
+          lead_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_notes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidatura_stage_history: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          from_stage_id: string | null
+          id: string
+          lead_id: string
+          note: string | null
+          to_stage_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          from_stage_id?: string | null
+          id?: string
+          lead_id: string
+          note?: string | null
+          to_stage_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          from_stage_id?: string | null
+          id?: string
+          lead_id?: string
+          note?: string | null
+          to_stage_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_stage_history_from_stage_id_fkey"
+            columns: ["from_stage_id"]
+            isOneToOne: false
+            referencedRelation: "candidatura_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatura_stage_history_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatura_stage_history_to_stage_id_fkey"
+            columns: ["to_stage_id"]
+            isOneToOne: false
+            referencedRelation: "candidatura_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidatura_stages: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_initial: boolean
+          key: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_initial?: boolean
+          key: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_initial?: boolean
+          key?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      candidatura_submissions: {
+        Row: {
+          created_at: string
+          id: string
+          ip: unknown
+          is_duplicate: boolean
+          lead_id: string
+          payload: Json
+          protocol: string
+          tracking: Json
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip?: unknown
+          is_duplicate?: boolean
+          lead_id: string
+          payload?: Json
+          protocol: string
+          tracking?: Json
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip?: unknown
+          is_duplicate?: boolean
+          lead_id?: string
+          payload?: Json
+          protocol?: string
+          tracking?: Json
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_submissions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidatura_tag_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          lead_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          lead_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          lead_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_tag_links_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatura_tag_links_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "candidatura_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidatura_tags: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      candidatura_views: {
+        Row: {
+          created_at: string
+          filters: Json
+          id: string
+          is_shared: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          is_shared?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          is_shared?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       catalog_defaults: {
         Row: {
           care_instructions: string | null
@@ -3258,7 +3701,9 @@ export type Database = {
           event_type: string
           id: string
           lead_id: string
+          metadata: Json
           note: string | null
+          title: string | null
         }
         Insert: {
           actor_id?: string | null
@@ -3266,7 +3711,9 @@ export type Database = {
           event_type: string
           id?: string
           lead_id: string
+          metadata?: Json
           note?: string | null
+          title?: string | null
         }
         Update: {
           actor_id?: string | null
@@ -3274,7 +3721,9 @@ export type Database = {
           event_type?: string
           id?: string
           lead_id?: string
+          metadata?: Json
           note?: string | null
+          title?: string | null
         }
         Relationships: [
           {
@@ -3288,87 +3737,199 @@ export type Database = {
       }
       leads: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           assigned_to: string | null
           audience: string | null
           availability: string | null
+          browser: string | null
           city: string
           created_at: string
+          device_type: string | null
+          email: string | null
+          email_norm: string | null
           entry_url: string | null
           experience: string | null
+          fbclid: string | null
           financial_goal: string | null
+          first_referrer: string | null
+          first_response_at: string | null
+          first_touch: Json
           full_name: string
+          gclid: string | null
           id: string
+          ip: unknown
+          landing_page: string | null
+          language: string | null
+          last_contact_at: string | null
+          last_touch: Json
+          lost_at: string | null
+          lost_by: string | null
+          lost_notes: string | null
+          lost_reason_id: string | null
           marketing_consent: boolean
           motivation: string | null
+          msclkid: string | null
+          next_followup_at: string | null
           no_number: boolean
+          os: string | null
+          outcome: string
           party_id: string | null
           postal_code: string | null
+          priority: string
           privacy_version: string
           protocol: string
+          referrer: string | null
           source: string | null
+          source_normalized: string
+          stage_entered_at: string
+          stage_id: string
           status: Database["public"]["Enums"]["lead_status"]
           street: string | null
           street_number: string | null
+          submissions_count: number
           uf: string
           updated_at: string
+          user_agent: string | null
           utm: Json
           whatsapp: string
+          whatsapp_norm: string | null
+          won_at: string | null
+          won_by: string | null
+          won_notes: string | null
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           assigned_to?: string | null
           audience?: string | null
           availability?: string | null
+          browser?: string | null
           city: string
           created_at?: string
+          device_type?: string | null
+          email?: string | null
+          email_norm?: string | null
           entry_url?: string | null
           experience?: string | null
+          fbclid?: string | null
           financial_goal?: string | null
+          first_referrer?: string | null
+          first_response_at?: string | null
+          first_touch?: Json
           full_name: string
+          gclid?: string | null
           id?: string
+          ip?: unknown
+          landing_page?: string | null
+          language?: string | null
+          last_contact_at?: string | null
+          last_touch?: Json
+          lost_at?: string | null
+          lost_by?: string | null
+          lost_notes?: string | null
+          lost_reason_id?: string | null
           marketing_consent?: boolean
           motivation?: string | null
+          msclkid?: string | null
+          next_followup_at?: string | null
           no_number?: boolean
+          os?: string | null
+          outcome?: string
           party_id?: string | null
           postal_code?: string | null
+          priority?: string
           privacy_version: string
           protocol?: string
+          referrer?: string | null
           source?: string | null
+          source_normalized?: string
+          stage_entered_at?: string
+          stage_id: string
           status?: Database["public"]["Enums"]["lead_status"]
           street?: string | null
           street_number?: string | null
+          submissions_count?: number
           uf: string
           updated_at?: string
+          user_agent?: string | null
           utm?: Json
           whatsapp: string
+          whatsapp_norm?: string | null
+          won_at?: string | null
+          won_by?: string | null
+          won_notes?: string | null
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           assigned_to?: string | null
           audience?: string | null
           availability?: string | null
+          browser?: string | null
           city?: string
           created_at?: string
+          device_type?: string | null
+          email?: string | null
+          email_norm?: string | null
           entry_url?: string | null
           experience?: string | null
+          fbclid?: string | null
           financial_goal?: string | null
+          first_referrer?: string | null
+          first_response_at?: string | null
+          first_touch?: Json
           full_name?: string
+          gclid?: string | null
           id?: string
+          ip?: unknown
+          landing_page?: string | null
+          language?: string | null
+          last_contact_at?: string | null
+          last_touch?: Json
+          lost_at?: string | null
+          lost_by?: string | null
+          lost_notes?: string | null
+          lost_reason_id?: string | null
           marketing_consent?: boolean
           motivation?: string | null
+          msclkid?: string | null
+          next_followup_at?: string | null
           no_number?: boolean
+          os?: string | null
+          outcome?: string
           party_id?: string | null
           postal_code?: string | null
+          priority?: string
           privacy_version?: string
           protocol?: string
+          referrer?: string | null
           source?: string | null
+          source_normalized?: string
+          stage_entered_at?: string
+          stage_id?: string
           status?: Database["public"]["Enums"]["lead_status"]
           street?: string | null
           street_number?: string | null
+          submissions_count?: number
           uf?: string
           updated_at?: string
+          user_agent?: string | null
           utm?: Json
           whatsapp?: string
+          whatsapp_norm?: string | null
+          won_at?: string | null
+          won_by?: string | null
+          won_notes?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_lost_reason_id_fkey"
+            columns: ["lost_reason_id"]
+            isOneToOne: false
+            referencedRelation: "candidatura_lost_reasons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_party_id_fkey"
             columns: ["party_id"]
@@ -3382,6 +3943,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "leads_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "candidatura_stages"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -5248,6 +5816,93 @@ export type Database = {
         }
         Returns: Json
       }
+      crm_archive: { Args: { _lead: string; _nota?: string }; Returns: Json }
+      crm_assign: { Args: { _lead: string; _user: string }; Returns: Json }
+      crm_audit: {
+        Args: { _action: string; _lead: string; _payload: Json }
+        Returns: undefined
+      }
+      crm_board: { Args: { _f?: Json }; Returns: Json }
+      crm_card: {
+        Args: { _l: Database["public"]["Tables"]["leads"]["Row"] }
+        Returns: Json
+      }
+      crm_detail: { Args: { _lead: string }; Returns: Json }
+      crm_filtrar: {
+        Args: { _f: Json }
+        Returns: {
+          id: string
+        }[]
+      }
+      crm_followup_cancel: {
+        Args: { _id: string; _motivo?: string }
+        Returns: Json
+      }
+      crm_followup_complete: {
+        Args: { _id: string; _outcome?: string }
+        Returns: Json
+      }
+      crm_followup_create: {
+        Args: {
+          _assigned_to?: string
+          _due_at: string
+          _kind?: string
+          _lead: string
+          _note?: string
+        }
+        Returns: string
+      }
+      crm_followups_list: {
+        Args: { _escopo?: string; _somente_meus?: boolean }
+        Returns: Json
+      }
+      crm_list: {
+        Args: { _f?: Json; _limit?: number; _offset?: number }
+        Returns: Json
+      }
+      crm_log: {
+        Args: {
+          _actor?: string
+          _kind: string
+          _lead: string
+          _meta?: Json
+          _note?: string
+          _title: string
+        }
+        Returns: undefined
+      }
+      crm_mark_lost: {
+        Args: { _lead: string; _nota?: string; _reason: string }
+        Returns: Json
+      }
+      crm_mark_won: { Args: { _lead: string; _nota?: string }; Returns: Json }
+      crm_metrics: { Args: { _ate?: string; _de?: string }; Returns: Json }
+      crm_move_stage: {
+        Args: { _lead: string; _note?: string; _stage: string }
+        Returns: Json
+      }
+      crm_normalize_source: { Args: { _tracking: Json }; Returns: string }
+      crm_note_add: { Args: { _body: string; _lead: string }; Returns: string }
+      crm_note_edit: { Args: { _body: string; _note: string }; Returns: Json }
+      crm_options: { Args: never; Returns: Json }
+      crm_parse_ua: { Args: { _ua: string }; Returns: Json }
+      crm_radar: { Args: never; Returns: Json }
+      crm_refresh_next: { Args: { _lead: string }; Returns: undefined }
+      crm_reopen: { Args: { _lead: string; _nota?: string }; Returns: Json }
+      crm_require: { Args: { _cap: string }; Returns: undefined }
+      crm_set_priority: {
+        Args: { _lead: string; _priority: string }
+        Returns: Json
+      }
+      crm_stage_reorder: { Args: { _ordem: Json }; Returns: Json }
+      crm_stage_save: { Args: { _payload: Json }; Returns: string }
+      crm_tag_save: { Args: { _payload: Json }; Returns: string }
+      crm_tag_set: {
+        Args: { _aplicar: boolean; _lead: string; _tag: string }
+        Returns: Json
+      }
+      crm_touch_contact: { Args: { _lead: string }; Returns: undefined }
+      crm_whatsapp_click: { Args: { _lead: string }; Returns: Json }
       doc_canon: { Args: { v: string }; Returns: string }
       doc_is_valid: { Args: { v: string }; Returns: boolean }
       ensure_profile: {
@@ -5951,6 +6606,10 @@ export type Database = {
           _validade?: string
           _variant?: string
         }
+        Returns: Json
+      }
+      submit_candidatura: {
+        Args: { _payload: Json; _tracking?: Json }
         Returns: Json
       }
       submit_contact_request: {

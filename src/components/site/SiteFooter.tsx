@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
+import { SocialLinks } from "./SocialLinks";
 
 /**
  * Rodapé institucional.
  *
  * Só entram aqui rotas que existem de fato no projeto e informações
- * confirmadas. TODO — pendente de dados reais do cliente:
- *   redes sociais oficiais, WhatsApp, e-mail, horário de atendimento,
- *   razão social, CNPJ e cidade/UF. Nada disso pode ser inventado.
+ * confirmadas. A rede oficial (Instagram) vem de SOCIALS em src/lib/brand.ts.
+ * TODO — pendente de dados reais do cliente: WhatsApp, e-mail, horário de
+ * atendimento, razão social, CNPJ e cidade/UF. Nada disso pode ser inventado.
  */
 
 const COLUNAS: { titulo: string; links: { label: string; to: string }[] }[] = [
@@ -62,6 +63,7 @@ export function SiteFooter() {
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
               Semijoias, relacionamento e tecnologia conectando pessoas a novas histórias.
             </p>
+            <SocialLinks suave className="mt-6" />
           </div>
 
           {COLUNAS.map((coluna) => (
@@ -84,8 +86,8 @@ export function SiteFooter() {
         </div>
 
         <p className="mt-12 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-          Canais oficiais de atendimento, redes sociais e dados empresariais (razão social, CNPJ e
-          cidade) serão publicados aqui assim que confirmados pela marca.
+          Canais oficiais de atendimento e dados empresariais (razão social, CNPJ e cidade) serão
+          publicados aqui assim que confirmados pela marca.
         </p>
 
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center">

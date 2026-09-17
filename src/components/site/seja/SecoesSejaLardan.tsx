@@ -8,6 +8,7 @@ const vidaRealImg = vidaRealAsset.url;
 const ferramentasImg = ferramentasAsset.url;
 import cinematicVideo from "@/assets/lardan-seja-cinematico.mp4.asset.json";
 import cinematicVideoWebm from "@/assets/lardan-seja-cinematico.webm.asset.json";
+import { VideoFundo } from "./VideoFundo";
 import cinematicPoster from "@/assets/lardan-seja-cinematico-poster.webp.asset.json";
 import perfilVideo from "@/assets/lardan-perfil-cinematico.mp4.asset.json";
 import perfilVideoWebm from "@/assets/lardan-perfil-cinematico.webm.asset.json";
@@ -86,19 +87,12 @@ export function SejaEmocional() {
       aria-labelledby="nao-e-so-vender"
       className="seja-cinematic-band relative isolate overflow-hidden border-t border-border"
     >
-      <video
-        aria-hidden="true"
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
+      <VideoFundo
         poster={cinematicPoster.url}
+        webm={cinematicVideoWebm.url}
+        mp4={cinematicVideo.url}
         className="absolute inset-0 -z-30 h-full w-full object-cover"
-      >
-        <source src={cinematicVideoWebm.url} type="video/webm" />
-        <source src={cinematicVideo.url} type="video/mp4" />
-      </video>
+      />
       <div aria-hidden="true" className="seja-cinematic-band__veil absolute inset-0 -z-20" />
       <div aria-hidden="true" className="seja-cinematic-band__light absolute inset-0 -z-10" />
       <div className="mx-auto max-w-3xl px-6 py-24 md:py-36">
@@ -322,19 +316,12 @@ export function SejaPerfil() {
       aria-labelledby="nao-e-para-qualquer-um"
       className="seja-perfil-band relative isolate overflow-hidden border-t border-border text-ivory"
     >
-      <video
-        aria-hidden="true"
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
+      <VideoFundo
         poster={perfilPoster.url}
+        webm={perfilVideoWebm.url}
+        mp4={perfilVideo.url}
         className="absolute inset-0 -z-30 h-full w-full object-cover"
-      >
-        <source src={perfilVideoWebm.url} type="video/webm" />
-        <source src={perfilVideo.url} type="video/mp4" />
-      </video>
+      />
       <div aria-hidden="true" className="seja-perfil-band__veil absolute inset-0 -z-20" />
       <div aria-hidden="true" className="seja-perfil-band__light absolute inset-0 -z-10" />
       <div className="mx-auto max-w-4xl px-6 py-24 text-center md:py-36">

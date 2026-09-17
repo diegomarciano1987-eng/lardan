@@ -22,16 +22,20 @@ import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as ComoComecarAVenderSemijoiasRouteImport } from './routes/como-comecar-a-vender-semijoias'
 import { Route as ComoVenderSemijoiasPeloWhatsappRouteImport } from './routes/como-vender-semijoias-pelo-whatsapp'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as PulseirasRouteImport } from './routes/pulseiras'
 import { Route as RendaExtraComVendasRouteImport } from './routes/renda-extra-com-vendas'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
 import { Route as SemijoiasConsignadasParaRevendaRouteImport } from './routes/semijoias-consignadas-para-revenda'
+import { Route as SitemapPagesDotxmlRouteImport } from './routes/sitemap-pages[.]xml'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedConsultoraRouteImport } from './routes/_authenticated/consultora'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
 import { Route as SemijoiasCategoriaRouteImport } from './routes/semijoias.$categoria'
+import { Route as SitemapProductsPaginaRouteImport } from './routes/sitemap-products.$pagina'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminCandidaturasRouteImport } from './routes/_authenticated/admin/candidaturas'
@@ -142,6 +146,11 @@ const ContatoRoute = ContatoRouteImport.update({
   path: '/contato',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PulseirasRoute = PulseirasRouteImport.update({
   id: '/pulseiras',
   path: '/pulseiras',
@@ -150,6 +159,11 @@ const PulseirasRoute = PulseirasRouteImport.update({
 const RendaExtraComVendasRoute = RendaExtraComVendasRouteImport.update({
   id: '/renda-extra-com-vendas',
   path: '/renda-extra-com-vendas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SejaLardanRoute = SejaLardanRouteImport.update({
@@ -163,6 +177,11 @@ const SemijoiasConsignadasParaRevendaRoute =
     path: '/semijoias-consignadas-para-revenda',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SitemapPagesDotxmlRoute = SitemapPagesDotxmlRouteImport.update({
+  id: '/sitemap-pages.xml',
+  path: '/sitemap-pages.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -191,6 +210,11 @@ const SemijoiasIndexRoute = SemijoiasIndexRouteImport.update({
 const SemijoiasCategoriaRoute = SemijoiasCategoriaRouteImport.update({
   id: '/semijoias/$categoria',
   path: '/semijoias/$categoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapProductsPaginaRoute = SitemapProductsPaginaRouteImport.update({
+  id: '/sitemap-products/$pagina',
+  path: '/sitemap-products/$pagina',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
@@ -460,15 +484,19 @@ export interface FileRoutesByFullPath {
   '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/pulseiras': typeof PulseirasRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoias-consignadas-para-revenda': typeof SemijoiasConsignadasParaRevendaRoute
+  '/sitemap-pages.xml': typeof SitemapPagesDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/consultora': typeof AuthenticatedConsultoraRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
+  '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
   '/semijoias/': typeof SemijoiasIndexRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -527,14 +555,18 @@ export interface FileRoutesByTo {
   '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/pulseiras': typeof PulseirasRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoias-consignadas-para-revenda': typeof SemijoiasConsignadasParaRevendaRoute
+  '/sitemap-pages.xml': typeof SitemapPagesDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/consultora': typeof AuthenticatedConsultoraRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
+  '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
   '/semijoias': typeof SemijoiasIndexRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
@@ -594,15 +626,19 @@ export interface FileRoutesById {
   '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/pulseiras': typeof PulseirasRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoias-consignadas-para-revenda': typeof SemijoiasConsignadasParaRevendaRoute
+  '/sitemap-pages.xml': typeof SitemapPagesDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/consultora': typeof AuthenticatedConsultoraRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
+  '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
   '/semijoias/': typeof SemijoiasIndexRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -663,15 +699,19 @@ export interface FileRouteTypes {
     | '/como-comecar-a-vender-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
+    | '/llms.txt'
     | '/pulseiras'
     | '/renda-extra-com-vendas'
+    | '/robots.txt'
     | '/seja-lardan'
     | '/semijoias-consignadas-para-revenda'
+    | '/sitemap-pages.xml'
     | '/sitemap.xml'
     | '/admin'
     | '/consultora'
     | '/produto/$slug'
     | '/semijoias/$categoria'
+    | '/sitemap-products/$pagina'
     | '/semijoias/'
     | '/admin/financeiro'
     | '/admin/auditoria'
@@ -730,14 +770,18 @@ export interface FileRouteTypes {
     | '/como-comecar-a-vender-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
+    | '/llms.txt'
     | '/pulseiras'
     | '/renda-extra-com-vendas'
+    | '/robots.txt'
     | '/seja-lardan'
     | '/semijoias-consignadas-para-revenda'
+    | '/sitemap-pages.xml'
     | '/sitemap.xml'
     | '/consultora'
     | '/produto/$slug'
     | '/semijoias/$categoria'
+    | '/sitemap-products/$pagina'
     | '/semijoias'
     | '/admin/auditoria'
     | '/admin/candidaturas'
@@ -796,15 +840,19 @@ export interface FileRouteTypes {
     | '/como-comecar-a-vender-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
+    | '/llms.txt'
     | '/pulseiras'
     | '/renda-extra-com-vendas'
+    | '/robots.txt'
     | '/seja-lardan'
     | '/semijoias-consignadas-para-revenda'
+    | '/sitemap-pages.xml'
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/consultora'
     | '/produto/$slug'
     | '/semijoias/$categoria'
+    | '/sitemap-products/$pagina'
     | '/semijoias/'
     | '/_authenticated/admin/financeiro'
     | '/_authenticated/admin/auditoria'
@@ -865,13 +913,17 @@ export interface RootRouteChildren {
   ComoComecarAVenderSemijoiasRoute: typeof ComoComecarAVenderSemijoiasRoute
   ComoVenderSemijoiasPeloWhatsappRoute: typeof ComoVenderSemijoiasPeloWhatsappRoute
   ContatoRoute: typeof ContatoRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   PulseirasRoute: typeof PulseirasRoute
   RendaExtraComVendasRoute: typeof RendaExtraComVendasRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SejaLardanRoute: typeof SejaLardanRoute
   SemijoiasConsignadasParaRevendaRoute: typeof SemijoiasConsignadasParaRevendaRoute
+  SitemapPagesDotxmlRoute: typeof SitemapPagesDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
+  SitemapProductsPaginaRoute: typeof SitemapProductsPaginaRoute
   SemijoiasIndexRoute: typeof SemijoiasIndexRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
 }
@@ -969,6 +1021,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContatoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pulseiras': {
       id: '/pulseiras'
       path: '/pulseiras'
@@ -983,6 +1042,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RendaExtraComVendasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seja-lardan': {
       id: '/seja-lardan'
       path: '/seja-lardan'
@@ -995,6 +1061,13 @@ declare module '@tanstack/react-router' {
       path: '/semijoias-consignadas-para-revenda'
       fullPath: '/semijoias-consignadas-para-revenda'
       preLoaderRoute: typeof SemijoiasConsignadasParaRevendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-pages.xml': {
+      id: '/sitemap-pages.xml'
+      path: '/sitemap-pages.xml'
+      fullPath: '/sitemap-pages.xml'
+      preLoaderRoute: typeof SitemapPagesDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -1037,6 +1110,13 @@ declare module '@tanstack/react-router' {
       path: '/semijoias/$categoria'
       fullPath: '/semijoias/$categoria'
       preLoaderRoute: typeof SemijoiasCategoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-products/$pagina': {
+      id: '/sitemap-products/$pagina'
+      path: '/sitemap-products/$pagina'
+      fullPath: '/sitemap-products/$pagina'
+      preLoaderRoute: typeof SitemapProductsPaginaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/': {
@@ -1505,13 +1585,17 @@ const rootRouteChildren: RootRouteChildren = {
   ComoComecarAVenderSemijoiasRoute: ComoComecarAVenderSemijoiasRoute,
   ComoVenderSemijoiasPeloWhatsappRoute: ComoVenderSemijoiasPeloWhatsappRoute,
   ContatoRoute: ContatoRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   PulseirasRoute: PulseirasRoute,
   RendaExtraComVendasRoute: RendaExtraComVendasRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SejaLardanRoute: SejaLardanRoute,
   SemijoiasConsignadasParaRevendaRoute: SemijoiasConsignadasParaRevendaRoute,
+  SitemapPagesDotxmlRoute: SitemapPagesDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,
+  SitemapProductsPaginaRoute: SitemapProductsPaginaRoute,
   SemijoiasIndexRoute: SemijoiasIndexRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,
 }

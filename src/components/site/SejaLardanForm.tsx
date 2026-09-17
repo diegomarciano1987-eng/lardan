@@ -107,8 +107,7 @@ export function SejaLardanForm() {
   const consultarCepFn = useServerFn(consultarCepPublico);
   const enviarFn = useServerFn(enviarCandidatura);
 
-  // Guarda o primeiro contato conhecido deste navegador, sem sobrescrever.
-  useEffect(() => registrarPrimeiroContato(), []);
+  // O primeiro contato é registrado uma única vez, no SiteLayout.
   const listarMunicipiosFn = useServerFn(listarMunicipiosPublico);
 
   const municipios = useQuery({

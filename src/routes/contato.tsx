@@ -3,20 +3,19 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import { ContatoForm } from "@/components/site/ContatoForm";
 import { ENDERECO_LINHAS, MAPA_URL } from "@/lib/institucional";
-import { ogImageMeta } from "@/lib/seo";
+import { canonical, jsonLdScript, pageMeta, webPageLd } from "@/lib/seo";
+
+const TITULO = "Contato — LARDAN";
+const DESCRICAO = "Fale com a Lardan: atendimento e contato oficial.";
 
 export const Route = createFileRoute("/contato")({
   component: ContatoPage,
   head: () => ({
-    meta: [
-      { title: "Contato — LARDAN" },
-      { name: "description", content: "Fale com a Lardan: atendimento e contato oficial." },
-      { property: "og:title", content: "Contato — LARDAN" },
-      { property: "og:description", content: "Fale com a Lardan." },
-      { property: "og:url", content: "/contato" },
-      ...ogImageMeta(),
+    meta: pageMeta({ title: TITULO, description: DESCRICAO, path: "/contato" }),
+    links: canonical("/contato"),
+    scripts: [
+      jsonLdScript(webPageLd({ path: "/contato", name: TITULO, description: DESCRICAO })),
     ],
-    links: [{ rel: "canonical", href: "/contato" }],
   }),
 });
 

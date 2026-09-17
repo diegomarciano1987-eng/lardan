@@ -27,7 +27,15 @@ import {
   type OrdemVitrine,
   type PecaVitrine,
 } from "@/lib/storefront";
-import { ogImageMeta } from "@/lib/seo";
+import {
+  abs,
+  breadcrumbLd,
+  canonical as canonicalLink,
+  collectionPageLd,
+  itemListLd,
+  jsonLdScript,
+  pageMeta,
+} from "@/lib/seo";
 
 const POR_PAGINA = 12;
 const ORDENS_VALIDAS: OrdemVitrine[] = [
@@ -77,7 +85,16 @@ export const Route = createFileRoute("/semijoias/$categoria")({
   loader: async ({ params }) => {
     // Erro de banco continua sendo erro (500), nunca vira "não existe".
     const categoria = await getPublicCategory(params.categoria);
-    if (categoria) return { categoria };
+    if (categoria) {
+      // SSR real: a primeira página da curadoria (estado canônico, sem filtros)
+      // já sai no HTML inicial, com nomes, links, imagens e preços públicos.
+      const primeira = await browsePublicProducts({
+        categoria: params.categoria,
+        pagina: 0,
+        porPagina: POR_PAGINA,
+      });
+      return { categoria, primeira };
+    }
 
     // Endereço antigo com histórico → redirecionamento permanente.
     const destino = await taxonomyRedirect("categories", params.categoria);
@@ -92,14 +109,14 @@ export const Route = createFileRoute("/semijoias/$categoria")({
   },
   head: ({ params, loaderData }) => {
     const c = loaderData?.categoria ?? null;
-    const canonical = `/semijoias/${params.categoria}`;
+    const path = `/semijoias/${params.categoria}`;
     if (!c) {
       return {
         meta: [
           { title: "Categoria indisponível — LARDAN" },
-          { name: "robots", content: "noindex" },
+          { name: "robots", content: "noindex, follow" },
         ],
-        links: [{ rel: "canonical", href: canonical }],
+        links: canonicalLink(path),
       };
     }
     const titulo = c.seo_title?.trim() || `${c.name} — Semijoias LARDAN`;
@@ -108,20 +125,43 @@ export const Route = createFileRoute("/semijoias/$categoria")({
       c.description?.trim() ||
       `Peças de ${c.name.toLowerCase()} da curadoria Lardan, publicadas no catálogo oficial.`;
     const imagem = mediaUrl(c.hero_media_id) ?? mediaUrl(c.fallback_media_id);
-    const absoluta = imagem && /^https?:\/\//.test(imagem) ? imagem : null;
+
+    const pecas = loaderData?.primeira?.rows ?? [];
+    const itens = pecas.map((p) => ({
+      name: p.name,
+      path: `/produto/${p.slug}`,
+      image: mediaUrl(p.cover_media_id),
+    }));
+    const lista = itemListLd({ path, name: c.name, itens });
 
     return {
       meta: [
-        { title: titulo },
-        { name: "description", content: descricao },
-        { property: "og:title", content: titulo },
-        { property: "og:description", content: descricao },
-        { property: "og:type", content: "website" },
-        { property: "og:url", content: canonical },
-        { name: "twitter:card", content: "summary_large_image" },
-        ...ogImageMeta(absoluta),
+        ...pageMeta({
+          title: titulo,
+          description: descricao,
+          path,
+          image: imagem ? { url: abs(imagem), alt: c.hero_alt ?? c.name } : null,
+        }),
+        // Categoria publicada sem peça alguma não é enviada para indexação.
+        ...(c.total === 0 ? [{ name: "robots", content: "noindex, follow" }] : []),
       ],
-      links: [{ rel: "canonical", href: canonical }],
+      links: canonicalLink(path),
+      scripts: [
+        jsonLdScript([
+          collectionPageLd({
+            path,
+            name: titulo,
+            description: descricao,
+            ...(itens.length > 0 ? { itemListId: lista["@id"] as string } : {}),
+          }),
+          breadcrumbLd([
+            { name: "Início", path: "/" },
+            { name: "Semijoias", path: "/semijoias" },
+            { name: c.name, path },
+          ]),
+          ...(itens.length > 0 ? [lista] : []),
+        ]),
+      ],
     };
   },
   component: CategoriaPage,
@@ -159,6 +199,7 @@ function AvisoEditorial({ titulo, texto: t }: { titulo: string; texto: string })
 
 function CategoriaPage() {
   const { categoria: slug } = Route.useParams();
+  const inicial = Route.useLoaderData();
   const buscaUrl = Route.useSearch();
   const busca: FiltrosCategoria = useMemo(() => ({ ...FILTROS_VAZIOS, ...buscaUrl }), [buscaUrl]);
   const navigate = useNavigate({ from: "/semijoias/$categoria" });
@@ -167,7 +208,11 @@ function CategoriaPage() {
   const detalhe = useQuery({
     queryKey: ["categoria-publica", slug],
     queryFn: () => getPublicCategory(slug),
+    initialData: inicial.categoria,
   });
+
+  // Estado canônico (sem filtros) reaproveita o que já veio do servidor.
+  const semFiltros = Object.keys(buscaUrl).length === 0;
 
   const listagem = useInfiniteQuery({
     queryKey: ["vitrine-categoria", slug, busca],
@@ -190,6 +235,9 @@ function CategoriaPage() {
       }),
     getNextPageParam: (ultima, paginas) =>
       paginas.flatMap((x) => x.rows).length < ultima.total ? paginas.length : undefined,
+    ...(semFiltros && inicial.primeira
+      ? { initialData: { pages: [inicial.primeira], pageParams: [0] } }
+      : {}),
   });
 
   const pecas: PecaVitrine[] = useMemo(
@@ -298,7 +346,6 @@ function CategoriaPage() {
         ) : null}
       </main>
 
-      {cat && pecas.length ? <DadosEstruturados categoria={cat} pecas={pecas} /> : null}
     </SiteLayout>
   );
 }
@@ -426,55 +473,5 @@ function Composicao({
         );
       })}
     </div>
-  );
-}
-
-function DadosEstruturados({
-  categoria,
-  pecas,
-}: {
-  categoria: CategoriaDetalhe;
-  pecas: PecaVitrine[];
-}) {
-  const dados = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "CollectionPage",
-        name: categoria.name,
-        description: categoria.seo_description || categoria.description || undefined,
-        url: `/semijoias/${categoria.slug}`,
-      },
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Lardan", item: "/" },
-          { "@type": "ListItem", position: 2, name: "Semijoias", item: "/semijoias" },
-          {
-            "@type": "ListItem",
-            position: 3,
-            name: categoria.name,
-            item: `/semijoias/${categoria.slug}`,
-          },
-        ],
-      },
-      {
-        "@type": "ItemList",
-        numberOfItems: pecas.length,
-        itemListElement: pecas.map((peca, i) => ({
-          "@type": "ListItem",
-          position: i + 1,
-          name: peca.name,
-          url: `/produto/${peca.slug}`,
-        })),
-      },
-    ],
-  };
-  return (
-    <script
-      type="application/ld+json"
-      // eslint-disable-next-line react/no-danger
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(dados) }}
-    />
   );
 }

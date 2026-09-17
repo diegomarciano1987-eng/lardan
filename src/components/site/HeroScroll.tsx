@@ -48,17 +48,23 @@ export function HeroScroll() {
   return (
     <div ref={trackRef} className="relative h-[760vh]" aria-label={BRAND.name}>
       <div className="sticky top-0 h-screen overflow-hidden bg-background">
-        {/* Único cenário do hero: não recebe escala, blur, filtro ou overlay. */}
-        <img
-          src={heroAsset.url}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 h-full w-full object-cover"
-          fetchPriority="high"
-          decoding="async"
-          width={1664}
-          height={928}
-        />
+        {/* Único cenário do hero: não recebe escala, blur, filtro ou overlay.
+            A arte é a mesma — muda só a entrega (WebP leve, por tamanho de tela). */}
+        <picture>
+          <source media="(max-width: 767px)" srcSet="/img/lardan-mobile-hero.webp" type="image/webp" />
+          <source srcSet="/img/lardan-hero-vidro.webp" type="image/webp" />
+          <img
+            src={heroAsset.url}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 h-full w-full object-cover"
+            fetchPriority="high"
+            decoding="async"
+            width={1664}
+            height={928}
+          />
+        </picture>
+
 
         {/* Estado 1: ícone. */}
         <div

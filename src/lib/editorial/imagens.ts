@@ -4,7 +4,6 @@
  */
 import vidaReal from "@/assets/lardan-consultora-vida-real.webp.asset.json";
 import consultoraHero from "@/assets/lardan-consultora-hero.webp.asset.json";
-import produto from "@/assets/lardan-brincos-fundo-novo.jpg.asset.json";
 import ferramentas from "@/assets/lardan-consultora-ferramentas.webp.asset.json";
 import danielRetrato from "@/assets/lardan-daniel-1.webp.asset.json";
 
@@ -29,10 +28,11 @@ export const IMAGENS_EDITORIAIS: Record<string, ImagemEditorial> = {
     height: 1600,
   },
   produto: {
-    url: produto.url,
+    // Versão otimizada (WebP, ~46 KB) do mesmo enquadramento aprovado.
+    url: "/img/lardan-brincos-fundo-novo.webp",
     alt: "Semijoias Lardan fotografadas em estúdio",
     width: 1600,
-    height: 1067,
+    height: 900,
   },
   ferramentas: {
     url: ferramentas.url,

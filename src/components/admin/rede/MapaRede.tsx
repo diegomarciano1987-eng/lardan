@@ -199,32 +199,74 @@ export function MapaRede({
           <>
             <p className="font-semibold text-ledger-text">{info.nome}</p>
             <p className="text-ledger-muted [font-variant-numeric:tabular-nums]">
-              {info.total} no total · {info.ativas} ativas ·{" "}
+              {info.total} consultoras · {info.ativas} ativas ·{" "}
               {totalRede ? ((info.total / totalRede) * 100).toFixed(1) : "0.0"}% da rede
             </p>
+            {destaque && candidaturasPorChave ? (
+              <p className="[font-variant-numeric:tabular-nums]" style={{ color: COR_CANDIDATA }}>
+                {candidaturasPorChave.get(destaque) ?? 0} candidatura(s) do site
+              </p>
+            ) : null}
           </>
         ) : (
           <span>—</span>
         )}
       </div>
 
-      <Legenda cortes={cortes} camada={camada} />
+      <Legenda cortes={cortes} camada={camada} comCandidaturas={candidaturas.length > 0} />
     </div>
   );
 }
 
-function Legenda({ cortes, camada }: { cortes: number[]; camada: string }) {
+function Legenda({
+  cortes,
+  camada,
+  comCandidaturas,
+}: {
+  cortes: number[];
+  camada: string;
+  comCandidaturas: boolean;
+}) {
+  const candidatas = comCandidaturas ? (
+    <li className="flex items-center gap-1.5">
+      <span
+        className="inline-block size-3 rounded-full"
+        style={{
+          background: `color-mix(in oklab, ${COR_CANDIDATA} 55%, transparent)`,
+          border: `1px solid ${COR_CANDIDATA}`,
+        }}
+      />
+      Candidatas do site
+    </li>
+  ) : null;
+
   if (camada === "concentracao") {
     return (
-      <p className="mt-3 text-xs text-ledger-muted">
-        Cada círculo agrupa consultoras próximas. Contorno tracejado indica localização aproximada
-        pelo estado. Endereço residencial nunca é exibido.
-      </p>
+      <div className="mt-3 space-y-2">
+        <ul className="flex flex-wrap items-center gap-3 text-xs text-ledger-muted">
+          <li className="flex items-center gap-1.5">
+            <span
+              className="inline-block size-3 rounded-full"
+              style={{
+                background: `color-mix(in oklab, ${COR_CONSULTORA} 45%, transparent)`,
+                border: `1px solid ${COR_CONSULTORA}`,
+              }}
+            />
+            Consultoras
+          </li>
+          {candidatas}
+        </ul>
+        <p className="text-xs text-ledger-muted">
+          Cada círculo agrupa pessoas próximas. Contorno tracejado indica localização aproximada
+          pelo estado. Endereço residencial nunca é exibido.
+        </p>
+      </div>
     );
   }
   const faixas = [0, ...cortes];
   return (
     <ul className="mt-3 flex flex-wrap items-center gap-3 text-xs text-ledger-muted">
+      <li className="font-medium text-ledger-text">Consultoras:</li>
       <li className="flex items-center gap-1.5">
         <span
           className="inline-block size-3 rounded-[2px] border border-line-soft"

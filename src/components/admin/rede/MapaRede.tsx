@@ -63,6 +63,7 @@ export function MapaRede({
   );
 
   const maiorPonto = pontos.reduce((m, p) => Math.max(m, p.total), 0) || 1;
+  const maiorCandidata = candidaturas.reduce((m, p) => Math.max(m, p.total), 0) || 1;
   const destaque = focado ?? selecionado ?? null;
   const info = destaque ? porChave.get(destaque) : null;
 

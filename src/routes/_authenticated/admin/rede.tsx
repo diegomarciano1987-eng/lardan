@@ -13,6 +13,7 @@ import { OPCOES_UF } from "@/lib/br/ufs";
 import { UF_CODIGO_IBGE, CODIGO_IBGE_UF, type Malha } from "@/lib/rede/geo";
 import {
   FILTROS_REDE_VAZIOS,
+  candidaturasRede,
   contarFiltrosAtivos,
   municipiosDaUf,
   pontosRede,

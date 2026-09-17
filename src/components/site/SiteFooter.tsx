@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
 import { SocialLinks } from "./SocialLinks";
-import { ENDERECO_LINHAS, MAPA_URL } from "@/lib/institucional";
+import { EMPRESA, ENDERECO_LINHAS, MAPA_URL } from "@/lib/institucional";
 
 /**
  * Rodapé institucional.
  *
  * Só entram aqui rotas que existem de fato no projeto e informações
  * confirmadas. A rede oficial (Instagram) vem de SOCIALS em src/lib/brand.ts.
- * TODO — pendente de dados reais do cliente: WhatsApp, e-mail, horário de
- * atendimento, razão social, CNPJ e cidade/UF. Nada disso pode ser inventado.
+ * TODO — pendente de dados reais do cliente: WhatsApp, e-mail e horário de
+ * atendimento. Nada disso pode ser inventado.
  */
 
 const COLUNAS: { titulo: string; links: { label: string; to: string }[] }[] = [

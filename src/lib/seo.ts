@@ -80,6 +80,8 @@ export function organizationLd(): Json {
     "@id": `${SITE_URL}/#organization`,
     name: "Lardan",
     alternateName: "Lardan Semijoias",
+    legalName: EMPRESA.razaoSocial,
+    taxID: EMPRESA.cnpj,
     url: SITE_URL,
     logo: OG_IMAGE,
     image: OG_IMAGE,

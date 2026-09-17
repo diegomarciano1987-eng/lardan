@@ -90,6 +90,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       // Cor da barra do navegador em celulares (marfim da identidade).
       { name: "theme-color", content: "#f7f3ee" },
+      // Verificação de propriedade do Google Search Console.
+      { name: "google-site-verification", content: "ONkKP7BT1UBu3XgfC1aYlfah0lblV553kdZZnWqg72I" },
     ],
     links: [
       {

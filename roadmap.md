@@ -44,3 +44,8 @@
 - [x] Ecossistema Lardan — card "Sua vitrine digital": título agora é
       "Você terá uma página própria para vender seus produtos." (texto
       aprovado do cliente, 18/09/2026). Os demais cards permanecem como estão.
+- [x] Ecossistema Lardan — duas frentes novas no painel: "Suas finanças
+      pessoais" (controle das finanças pessoais da consultora) e
+      "Universidade corporativa" (formação de vendas da Lardan Academy),
+      além de faixa de fechamento com "Quero me candidatar"
+      (18/09/2026). Painel passou de 4 para 6 blocos.

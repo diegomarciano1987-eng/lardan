@@ -8,7 +8,16 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { CreditCard, Gem, Target, WalletCards, X } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import {
+  CreditCard,
+  Gem,
+  GraduationCap,
+  PiggyBank,
+  Target,
+  WalletCards,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FERRAMENTAS } from "@/lib/seja-lardan-conteudo";
 
@@ -18,12 +27,21 @@ type EcossistemaContextValue = {
 
 const EcossistemaContext = createContext<EcossistemaContextValue | null>(null);
 
-const CHAVES = ["vitrine", "financeiro", "metas", "pagamentos"] as const;
+const CHAVES = [
+  "vitrine",
+  "financeiro",
+  "financas",
+  "pagamentos",
+  "metas",
+  "universidade",
+] as const;
 const ICONES = {
   vitrine: Gem,
   financeiro: WalletCards,
-  metas: Target,
+  financas: PiggyBank,
   pagamentos: CreditCard,
+  metas: Target,
+  universidade: GraduationCap,
 } as const;
 
 const RECURSOS = CHAVES.map((chave) => {
@@ -45,6 +63,7 @@ export function EcossistemaLardanProvider({ children }: { children: ReactNode })
   const tituloId = useId();
   const fecharRef = useRef<HTMLButtonElement>(null);
   const origemRef = useRef<HTMLElement | null>(null);
+  const navigate = useNavigate();
 
   const abrirEcossistema = useCallback(() => {
     origemRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -52,6 +71,11 @@ export function EcossistemaLardanProvider({ children }: { children: ReactNode })
   }, []);
 
   const fechar = useCallback(() => setAberto(false), []);
+
+  const irParaCandidatura = useCallback(() => {
+    fechar();
+    void navigate({ to: "/seja-lardan", hash: "inicio" });
+  }, [fechar, navigate]);
 
   useEffect(() => {
     if (!aberto) return;
@@ -117,6 +141,11 @@ export function EcossistemaLardanProvider({ children }: { children: ReactNode })
                 <h2 id={tituloId} className="text-4xl leading-[1.05] text-background sm:text-5xl md:text-6xl">
                   Uma estrutura inteira ao lado da consultora.
                 </h2>
+                <p className="mt-6 max-w-2xl text-base leading-relaxed text-background/72">
+                  Cada frente resolve uma parte da operação: ter vitrine própria, entender o dinheiro
+                  do negócio e o da própria casa, receber bem, bater metas e continuar aprendendo a
+                  vender.
+                </p>
               </div>
 
               <div className="mt-10 grid gap-px overflow-hidden border border-background/15 bg-background/15 md:grid-cols-2">
@@ -125,14 +154,16 @@ export function EcossistemaLardanProvider({ children }: { children: ReactNode })
                   return (
                     <article
                       key={recurso.chave}
-                      className="ecossistema-card relative bg-foreground/94 p-6 sm:p-8 md:min-h-[22rem] md:p-10"
+                      className="ecossistema-card group relative bg-foreground/94 p-6 transition-colors duration-500 hover:bg-foreground sm:p-8 md:min-h-[22rem] md:p-10"
                       style={{ animationDelay: `${120 + index * 90}ms` }}
                     >
                       <div className="flex items-start justify-between gap-6">
-                        <span className="grid h-11 w-11 place-items-center rounded-full border border-background/20 text-primary">
+                        <span className="grid h-11 w-11 place-items-center rounded-full border border-background/20 text-primary transition-colors duration-500 group-hover:border-background/45">
                           <Icone className="h-5 w-5" strokeWidth={1.25} />
                         </span>
-                        <span className="font-display text-3xl text-background/20">0{index + 1}</span>
+                        <span className="font-display text-3xl text-background/20 transition-colors duration-500 group-hover:text-background/35">
+                          0{index + 1}
+                        </span>
                       </div>
                       <p className="mt-8 text-[0.625rem] uppercase tracking-[0.24em] text-primary">
                         {recurso.eyebrow}
@@ -147,7 +178,7 @@ export function EcossistemaLardanProvider({ children }: { children: ReactNode })
                         {recurso.itens.map((item) => (
                           <li
                             key={item}
-                            className="border border-background/15 px-3 py-2 text-[0.6875rem] leading-snug text-background/78"
+                            className="border border-background/15 px-4 py-2.5 text-[0.6875rem] leading-snug text-background/78 max-md:text-[0.75rem]"
                           >
                             {item}
                           </li>
@@ -159,6 +190,32 @@ export function EcossistemaLardanProvider({ children }: { children: ReactNode })
                     </article>
                   );
                 })}
+              </div>
+
+              <div className="mt-10 border border-background/15 bg-background/[0.06] p-6 sm:p-8 md:p-10">
+                <div className="flex flex-col gap-7 md:flex-row md:items-end md:justify-between md:gap-12">
+                  <div className="max-w-2xl">
+                    <p className="text-[0.625rem] uppercase tracking-[0.24em] text-primary">
+                      Comece com a estrutura pronta
+                    </p>
+                    <h3 className="mt-3 text-2xl leading-tight text-background sm:text-3xl">
+                      A candidatura é o primeiro passo. Depois vem análise, conversa, onboarding e a
+                      primeira maleta.
+                    </h3>
+                    <p className="mt-4 text-sm leading-relaxed text-background/68">
+                      Toda candidatura é analisada pela equipe Lardan. Não há promessa de renda, de
+                      aprovação ou de prazo.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={irParaCandidatura}
+                    className="h-auto shrink-0 rounded-none bg-background px-7 py-4 text-[0.6875rem] font-normal uppercase tracking-[0.22em] text-foreground shadow-none hover:bg-background hover:text-foreground/90"
+                  >
+                    Quero me candidatar
+                  </Button>
+                </div>
               </div>
             </div>
           </section>

@@ -63,6 +63,21 @@ export const FERRAMENTAS: Ferramenta[] = [
     estado: "disponivel",
   },
   {
+    chave: "financas",
+    eyebrow: "Suas finanças pessoais",
+    titulo: "O dinheiro da sua vida também fica organizado.",
+    texto:
+      "Além das vendas, a consultora registra os próprios gastos, contas e reservas para entender para onde o dinheiro vai. É organização: não é conta digital, não é crédito e não é aconselhamento financeiro.",
+    itens: [
+      "Lançamentos do mês",
+      "Gastos por categoria",
+      "Contas e compromissos",
+      "Reserva e objetivos",
+      "Visão do período",
+    ],
+    estado: "preparacao",
+  },
+  {
     chave: "metas",
     eyebrow: "Suas metas",
     titulo: "Você enxerga onde está e quanto falta para chegar ao próximo objetivo.",
@@ -78,6 +93,22 @@ export const FERRAMENTAS: Ferramenta[] = [
     texto:
       "A consultora registra o recebimento na venda e também pode combinar o pagamento diretamente com a cliente.",
     itens: ["Link de pagamento", "Registro do recebimento na venda"],
+    estado: "disponivel",
+  },
+  {
+    chave: "universidade",
+    eyebrow: "Universidade corporativa",
+    titulo: "A escola da marca para quem vende todos os dias.",
+    texto:
+      "A universidade corporativa da Lardan reúne formação prática de vendas e de uso das próprias ferramentas, no ritmo de quem já tem uma operação para tocar.",
+    itens: [
+      "Trilha de vendas",
+      "Apresentação e argumentos de produto",
+      "Atendimento e negociação",
+      "Redes sociais e conteúdo",
+      "Fotografia de peças",
+      "Novas coleções",
+    ],
     estado: "disponivel",
   },
 ];

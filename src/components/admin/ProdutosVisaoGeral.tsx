@@ -141,7 +141,11 @@ function ListaRanking({
   );
 }
 
-export function ProdutosVisaoGeral() {
+export function ProdutosVisaoGeral({
+  onAbrirPendencias,
+}: {
+  onAbrirPendencias?: (tipo: "sem_custo" | "sem_preco" | "sem_ncm" | "sem_referencia") => void;
+}) {
   const navigate = useNavigate();
   const q = useQuery({
     queryKey: ["catalog-overview"],

@@ -1720,6 +1720,99 @@ export type Database = {
           },
         ]
       }
+      financial_import_ap_stage: {
+        Row: {
+          categoria: string | null
+          centro: string | null
+          competencia: string | null
+          conta: string | null
+          created_at: string
+          descricao: string
+          erro: string | null
+          forma: string | null
+          fornecedor: string | null
+          grupo: string
+          id: string
+          installment_id: string | null
+          linha: number
+          lote: string
+          pago_cents: number | null
+          parcela_num: number
+          parcela_total: number
+          processed_at: string | null
+          recorrente: boolean
+          situacao: string | null
+          title_id: string | null
+          valor_cents: number
+          vencimento: string
+        }
+        Insert: {
+          categoria?: string | null
+          centro?: string | null
+          competencia?: string | null
+          conta?: string | null
+          created_at?: string
+          descricao: string
+          erro?: string | null
+          forma?: string | null
+          fornecedor?: string | null
+          grupo: string
+          id?: string
+          installment_id?: string | null
+          linha: number
+          lote: string
+          pago_cents?: number | null
+          parcela_num?: number
+          parcela_total?: number
+          processed_at?: string | null
+          recorrente?: boolean
+          situacao?: string | null
+          title_id?: string | null
+          valor_cents: number
+          vencimento: string
+        }
+        Update: {
+          categoria?: string | null
+          centro?: string | null
+          competencia?: string | null
+          conta?: string | null
+          created_at?: string
+          descricao?: string
+          erro?: string | null
+          forma?: string | null
+          fornecedor?: string | null
+          grupo?: string
+          id?: string
+          installment_id?: string | null
+          linha?: number
+          lote?: string
+          pago_cents?: number | null
+          parcela_num?: number
+          parcela_total?: number
+          processed_at?: string | null
+          recorrente?: boolean
+          situacao?: string | null
+          title_id?: string | null
+          valor_cents?: number
+          vencimento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_import_ap_stage_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_import_ap_stage_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_installments: {
         Row: {
           created_at: string
@@ -2316,6 +2409,7 @@ export type Database = {
           id: string
           id_externo: string | null
           moeda: string
+          numero: string | null
           observacao: string | null
           origem: string
           origem_id: string | null
@@ -2344,6 +2438,7 @@ export type Database = {
           id?: string
           id_externo?: string | null
           moeda?: string
+          numero?: string | null
           observacao?: string | null
           origem?: string
           origem_id?: string | null
@@ -2372,6 +2467,7 @@ export type Database = {
           id?: string
           id_externo?: string | null
           moeda?: string
+          numero?: string | null
           observacao?: string | null
           origem?: string
           origem_id?: string | null

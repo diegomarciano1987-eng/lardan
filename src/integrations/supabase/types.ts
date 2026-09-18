@@ -4666,6 +4666,57 @@ export type Database = {
         }
         Relationships: []
       }
+      product_import_stage: {
+        Row: {
+          barcode: string | null
+          created_at: string
+          custo_cents: number | null
+          erro: string | null
+          linha: number
+          lote: string
+          ncm: string | null
+          nome: string | null
+          product_id: string | null
+          referencia: string | null
+          status: string
+          updated_at: string
+          variant_id: string | null
+          venda_cents: number | null
+        }
+        Insert: {
+          barcode?: string | null
+          created_at?: string
+          custo_cents?: number | null
+          erro?: string | null
+          linha: number
+          lote: string
+          ncm?: string | null
+          nome?: string | null
+          product_id?: string | null
+          referencia?: string | null
+          status?: string
+          updated_at?: string
+          variant_id?: string | null
+          venda_cents?: number | null
+        }
+        Update: {
+          barcode?: string | null
+          created_at?: string
+          custo_cents?: number | null
+          erro?: string | null
+          linha?: number
+          lote?: string
+          ncm?: string | null
+          nome?: string | null
+          product_id?: string | null
+          referencia?: string | null
+          status?: string
+          updated_at?: string
+          variant_id?: string | null
+          venda_cents?: number | null
+        }
+        Relationships: []
+      }
       product_media: {
         Row: {
           created_at: string
@@ -6163,6 +6214,7 @@ export type Database = {
       can_view_kits: { Args: { _user_id: string }; Returns: boolean }
       catalog_markup_get: { Args: never; Returns: number }
       catalog_markup_set: { Args: { _percent: number }; Returns: number }
+      catalog_street_value: { Args: never; Returns: Json }
       claim_master_role: { Args: never; Returns: boolean }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }
       confirm_stock_reservation: {
@@ -6786,6 +6838,11 @@ export type Database = {
       party_doc_reveal: { Args: { _id: string }; Returns: string }
       phone_canon: { Args: { v: string }; Returns: string }
       product_costs_read: { Args: { _product: string }; Returns: Json }
+      product_import_apply: {
+        Args: { _limite?: number; _lote: string }
+        Returns: Json
+      }
+      product_import_slug: { Args: { _t: string }; Returns: string }
       product_next_internal_code: {
         Args: { _category_id: string }
         Returns: string

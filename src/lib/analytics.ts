@@ -33,7 +33,7 @@ function injectGtag(id: string) {
   // `arguments` — o gtag.js ignora arrays comuns, e era por isso que nenhuma
   // visita chegava ao Google Analytics.
   window.dataLayer = window.dataLayer ?? [];
-  function gtag(...._args: unknown[]) {
+  function gtag() {
     // eslint-disable-next-line prefer-rest-params
     window.dataLayer!.push(arguments);
   }

@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { BRAND } from "@/lib/brand";
 import {
   useScrollProgress,
   useDeviceTier,
@@ -10,6 +9,8 @@ import {
 } from "@/hooks/use-scroll-progress";
 import sessao2Asset from "@/assets/lardan-sessao2.png.asset.json";
 import sessao2MobileAsset from "@/assets/lardan-mobile-sessao2.png.asset.json";
+import { Button } from "@/components/ui/button";
+import { useEcossistemaLardan } from "./EcossistemaLardan";
 
 /**
  * Segunda sessão (V/5) — revelação triunfal em lâminas de vidro.
@@ -23,6 +24,7 @@ export function SessaoSemijoias() {
   const tier = useDeviceTier();
   const leve = tier === "leve";
   const apple = useAppleWebKit();
+  const { abrirEcossistema } = useEcossistemaLardan();
   // Safari pinta desfoque de fundo por CPU: usamos menos lâminas e vidro
   // pintado (gradiente), que dá o mesmo aspecto sem travar a rolagem.
   const slats = apple ? 7 : leve ? 10 : 28;
@@ -176,37 +178,62 @@ export function SessaoSemijoias() {
         />
 
         <div className="relative flex h-full max-w-6xl flex-col justify-center px-6 md:px-10 lg:mx-auto">
-          <div className="max-w-xl">
+          <div className="max-w-[35rem]">
             <p
               className="brand-eyebrow mb-4 max-md:!text-background/80"
               style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 18}px)` }}
             >
-              Semijoias
+              Seja Lardan
             </p>
             <h2
               className="text-4xl leading-tight text-foreground max-md:!text-background md:text-6xl"
               style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 24}px)` }}
             >
-              {BRAND.tagline}
+              Todo brilho começa em um lar.
             </h2>
             <div
               className="rose-rule mt-6 w-20 origin-left"
               style={{ transform: `scaleX(${ruleIn})` }}
             />
             <p
-              className="mt-6 max-w-md text-base text-muted-foreground max-md:!text-background/85 md:text-lg"
+              className="seja-promise mt-6 font-display text-[clamp(1.25rem,2vw,1.75rem)] leading-tight max-md:!text-background"
               style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 18}px)` }}
             >
-              {BRAND.subline}
+              Aumente sua renda familiar!
+            </p>
+            <p
+              className="seja-proof mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm leading-snug text-muted-foreground max-md:!text-background/85"
+              style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 18}px)` }}
+            >
+              <span>Mais de</span>
+              <strong className="seja-proof-number text-[2rem]">2.500</strong>
+              <span>consultoras já brilharam com a Lardan.</span>
             </p>
             <Link
-              to="/semijoias"
-              className="btn-premium mt-10"
+              to="/seja-lardan"
+              hash="candidatura"
+              className="btn-premium mt-7"
               style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
               tabIndex={ctaIn > 0.5 ? 0 : -1}
             >
-              Conhecer semijoias
+              Quero me candidatar
             </Link>
+            <p
+              className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground max-md:!text-background/82"
+              style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
+            >
+              A Lardan oferece a melhor estrutura e as melhores tecnologias no suporte de vendas para suas consultoras.
+            </p>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={abrirEcossistema}
+              className="mt-3 h-auto rounded-none border-b border-current px-0 py-2 text-[0.625rem] font-normal uppercase tracking-[0.2em] text-foreground/75 shadow-none hover:bg-transparent hover:text-foreground max-md:!text-background"
+              style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
+              tabIndex={ctaIn > 0.5 ? 0 : -1}
+            >
+              Conheça o Ecossistema Lardan
+            </Button>
           </div>
         </div>
       </section>

@@ -6,6 +6,7 @@ import { VoltarLink } from "./VoltarLink";
 import { useAppleWebKit } from "@/hooks/use-scroll-progress";
 import { registrarPrimeiroContato, registrarVisitaEditorial } from "@/lib/crm/tracking";
 import { CAMINHOS_EDITORIAIS } from "@/lib/editorial/rotas";
+import { EcossistemaLardanProvider } from "./EcossistemaLardan";
 
 /** Rotas públicas sem intenção comercial: não registram origem. */
 const SEM_TRACKING = ["/acesso"];
@@ -27,19 +28,21 @@ export function SiteLayout({ children, brandedHeader = false }: { children: Reac
   }, [pathname]);
 
   return (
-    <div className="site-scope min-h-screen bg-background">
-      <a
-        href="#conteudo"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
-      >
-        Ir para o conteúdo
-      </a>
-      <SiteHeader branded={brandedHeader} />
-      <VoltarLink />
-      <main id="conteudo" className={`min-w-0 ${comVoltar ? "pt-4 md:pt-0" : ""}`}>
-        {children}
-      </main>
-      <SiteFooter />
-    </div>
+    <EcossistemaLardanProvider>
+      <div className="site-scope min-h-screen bg-background">
+        <a
+          href="#conteudo"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+        >
+          Ir para o conteúdo
+        </a>
+        <SiteHeader branded={brandedHeader} />
+        <VoltarLink />
+        <main id="conteudo" className={`min-w-0 ${comVoltar ? "pt-4 md:pt-0" : ""}`}>
+          {children}
+        </main>
+        <SiteFooter />
+      </div>
+    </EcossistemaLardanProvider>
   );
 }

@@ -5,6 +5,8 @@ import { HeaderAcoes } from "./HeaderAcoes";
 import { NAV_ITEMS } from "@/lib/brand";
 import { SocialLinks } from "./SocialLinks";
 import diamante from "@/assets/lardan-diamante.png.asset.json";
+import { Button } from "@/components/ui/button";
+import { useEcossistemaLardan } from "./EcossistemaLardan";
 
 function NavLink({
   to,
@@ -40,6 +42,7 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
   const [rolou, setRolou] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isHome = pathname === "/";
+  const { abrirEcossistema } = useEcossistemaLardan();
 
   useEffect(() => {
     const medir = () => {
@@ -96,6 +99,15 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
         {NAV_ITEMS.map((item) => (
           <NavLink key={item.to} to={item.to} label={item.label} />
         ))}
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={abrirEcossistema}
+          className="group relative h-auto rounded-none px-4 py-2 text-[0.6875rem] font-normal uppercase tracking-[0.22em] text-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
+        >
+          Ecossistema Lardan
+          <span aria-hidden className="absolute inset-x-4 bottom-0 h-px origin-left scale-x-0 bg-foreground/60 transition-transform duration-300 group-hover:scale-x-100" />
+        </Button>
       </nav>
 
       <div className="absolute right-5 top-1/2 hidden -translate-y-1/2 items-center gap-2 md:right-10 md:flex">
@@ -151,6 +163,17 @@ export function SiteHeader({ branded = false }: { branded?: boolean }) {
                   onNavigate={() => setOpen(false)}
                 />
               ))}
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setOpen(false);
+                  abrirEcossistema();
+                }}
+                className="h-auto rounded-none px-4 py-2 text-[0.6875rem] font-normal uppercase tracking-[0.18em] text-foreground/70 shadow-none hover:bg-transparent hover:text-foreground"
+              >
+                Ecossistema Lardan
+              </Button>
             </div>
           )}
         </div>

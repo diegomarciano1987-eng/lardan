@@ -21,6 +21,7 @@ import { CinematicTitle } from "./CinematicTitle";
 export function SejaHero() {
   return (
     <section
+      id="inicio"
       aria-labelledby="seja-lardan-titulo"
       className="mx-auto grid max-w-6xl items-center gap-10 px-6 pt-28 pb-16 md:grid-cols-2 md:pt-36 md:gap-16 md:pb-24"
     >

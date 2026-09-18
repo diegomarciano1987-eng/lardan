@@ -309,7 +309,7 @@ function FluxoCaixa() {
                       <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                       <Line
                         yAxisId="movimento"
-                        type="monotone"
+                        type="linear"
                         dataKey="entradas"
                         name="Entradas realizadas"
                         stroke="#127f57"
@@ -319,7 +319,7 @@ function FluxoCaixa() {
                       />
                       <Line
                         yAxisId="movimento"
-                        type="monotone"
+                        type="linear"
                         dataKey="saidas"
                         name="Saídas realizadas"
                         stroke="#b23a34"
@@ -329,7 +329,7 @@ function FluxoCaixa() {
                       />
                       <Line
                         yAxisId="movimento"
-                        type="monotone"
+                        type="linear"
                         dataKey="aPagar"
                         name="A pagar no dia"
                         stroke="#b23a34"
@@ -340,7 +340,7 @@ function FluxoCaixa() {
                       />
                       <Line
                         yAxisId="movimento"
-                        type="monotone"
+                        type="linear"
                         dataKey="aReceber"
                         name="A receber no dia"
                         stroke="#127f57"
@@ -351,7 +351,7 @@ function FluxoCaixa() {
                       />
                       <Line
                         yAxisId="saldo"
-                        type="monotone"
+                        type="linear"
                         dataKey="realizado"
                         name="Saldo realizado"
                         stroke="url(#fluxoRealizado)"
@@ -361,7 +361,7 @@ function FluxoCaixa() {
                       />
                       <Line
                         yAxisId="saldo"
-                        type="monotone"
+                        type="linear"
                         dataKey="projetado"
                         name="Saldo projetado"
                         stroke="#6b7280"

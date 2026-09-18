@@ -37,9 +37,8 @@ export const FERRAMENTAS: Ferramenta[] = [
   {
     chave: "vitrine",
     eyebrow: "Sua vitrine digital",
-    titulo: "Você terá uma página própria para vender seus produtos.",
-    texto:
-      "Cada Consultora Lardan tem uma vitrine digital ligada ao ecossistema da marca para apresentar suas peças, compartilhar com as clientes e levar a maleta também para o digital.",
+    titulo: "Você terá uma página própria na internet para vender suas semijoias.",
+    texto: "Uma webpage gratuita focada em vendas que vai lhe ajudar a vender.",
     itens: [
       "Endereço próprio dentro do ecossistema Lardan",
       "Catálogo oficial sempre atualizado",

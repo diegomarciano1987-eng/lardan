@@ -33,6 +33,7 @@ export interface FinOverview {
 
 export interface FinTitleRow {
   id: string;
+  numero?: string | null;
   descricao: string;
   documento: string | null;
   status: FinTitleStatus;

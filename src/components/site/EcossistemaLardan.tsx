@@ -178,7 +178,7 @@ export function EcossistemaLardanProvider({ children }: { children: ReactNode })
                         {recurso.itens.map((item) => (
                           <li
                             key={item}
-                            className="border border-background/15 px-3 py-2 text-[0.6875rem] leading-snug text-background/78"
+                            className="border border-background/15 px-3.5 py-2 text-[0.6875rem] leading-snug text-background/78 max-md:text-[0.75rem]"
                           >
                             {item}
                           </li>

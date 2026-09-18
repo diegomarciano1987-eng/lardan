@@ -82,7 +82,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       const { data, error } = await supabase
         .from("products")
         .select(
-          "id, name, slug, internal_code, legacy_code, status, category_id, subcategory_id, collection_id, short_description, description, raw_material, raw_weight_grams, raw_supplier_id, measurements, care_instructions, warranty_text, seo_title, seo_description, price_cents, price_is_public, is_featured, is_legacy, requires_catalog_review, updated_at",
+          "id, name, slug, internal_code, legacy_code, barcode, reference_code, ncm, status, category_id, subcategory_id, collection_id, short_description, description, raw_material, raw_weight_grams, raw_supplier_id, measurements, care_instructions, warranty_text, seo_title, seo_description, price_cents, price_is_public, is_featured, is_legacy, requires_catalog_review, updated_at",
         )
         .eq("id", id!)
         .single();
@@ -157,6 +157,9 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       name: p.name ?? "",
       slug: p.slug ?? "",
       legacy_code: p.legacy_code ?? "",
+      barcode: p.barcode ?? "",
+      reference_code: p.reference_code ?? "",
+      ncm: p.ncm ?? "",
       category_id: p.category_id ?? "",
       subcategory_id: p.subcategory_id ?? "",
       collection_id: p.collection_id ?? "",
@@ -234,6 +237,9 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     name: String(form["name"] ?? "").trim(),
     slug: String(form["slug"] ?? "").trim(),
     legacy_code: String(form["legacy_code"] ?? "").trim(),
+    barcode: String(form["barcode"] ?? "").trim(),
+    reference_code: String(form["reference_code"] ?? "").trim(),
+    ncm: String(form["ncm"] ?? "").replace(/\D/g, ""),
     category_id: String(form["category_id"] ?? ""),
     subcategory_id: String(form["subcategory_id"] ?? ""),
     collection_id: String(form["collection_id"] ?? ""),

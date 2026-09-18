@@ -145,6 +145,7 @@ function ProdutosPage() {
         {([
           ["visao", "Visão geral"],
           ["lista", "Lista de produtos"],
+          ["corrigir", "Cadastros a corrigir"],
         ] as const).map(([valor, rotulo]) => (
           <button
             key={valor}
@@ -162,7 +163,16 @@ function ProdutosPage() {
         ))}
       </div>
 
-      {aba === "visao" && <ProdutosVisaoGeral />}
+      {aba === "visao" && (
+        <ProdutosVisaoGeral
+          onAbrirPendencias={(tipo) => {
+            setPendenciaTipo(tipo);
+            setAba("corrigir");
+          }}
+        />
+      )}
+
+      {aba === "corrigir" && <ProdutosPendencias key={pendenciaTipo} tipoInicial={pendenciaTipo} />}
 
       {aba === "lista" && (
       <DataTable<ProdutoLinha>

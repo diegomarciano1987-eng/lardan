@@ -61,18 +61,40 @@ function ProdutosPage() {
     },
   });
 
+  // Leitor de código de barras: termo único e sem espaços tenta achar a peça exata
+  // (código de barras, referência da etiqueta, SKU ou código interno).
+  const termoCodigo = busca.trim();
+  const podeSerCodigo = termoCodigo.length >= 1 && !/\s/.test(termoCodigo);
+
+  const leitura = useQuery({
+    queryKey: ["product-barcode-lookup", termoCodigo],
+    enabled: podeSerCodigo,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("barcode_lookup", { _code: termoCodigo });
+      if (error) throw error;
+      const r = data as { encontrado: boolean; product_id?: string } | null;
+      return r?.encontrado ? (r.product_id ?? null) : null;
+    },
+  });
+
+  const idExato = podeSerCodigo ? (leitura.data ?? null) : null;
+  const aguardandoLeitura = podeSerCodigo && leitura.isPending;
+
   const query = useQuery({
-    queryKey: ["products", busca, pagina, status, categoria],
+    queryKey: ["products", busca, pagina, status, categoria, idExato],
+    enabled: !aguardandoLeitura,
     queryFn: () =>
       listPaged<ProdutoLinha>({
         table: "products",
         select: "id, slug, name, legacy_code, status, price_cents, price_is_public, category_id, collection_id",
         searchColumns: ["name", "slug", "legacy_code", "material", "short_description"],
-        search: busca,
-        page: pagina,
+        search: idExato ? "" : busca,
+        page: idExato ? 0 : pagina,
         pageSize: PAGE_SIZE,
         orderBy: "created_at",
-        filters: { status, category_id: categoria },
+        filters: idExato
+          ? { id: idExato }
+          : { status, category_id: categoria },
       }),
   });
 

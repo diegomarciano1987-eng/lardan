@@ -355,6 +355,8 @@ function ProdutoDetalhe() {
                       <th className="py-2 pr-4 font-normal">Variante</th>
                       <th className="py-2 pr-4 font-normal">SKU</th>
                       <th className="py-2 pr-4 font-normal">Código de barras</th>
+                      <th className="py-2 pr-4 font-normal">Referência</th>
+                      <th className="py-2 pr-4 font-normal">NCM</th>
                       <th className="py-2 pr-4 text-right font-normal">Preço</th>
                       {podeVerCustos ? (
                         <th className="py-2 pr-4 text-right font-normal">Custo atual</th>
@@ -382,6 +384,8 @@ function ProdutoDetalhe() {
                           </td>
                           <td className="num py-2 pr-4">{v.sku ?? "—"}</td>
                           <td className="num py-2 pr-4">{v.barcode ?? "—"}</td>
+                          <td className="num py-2 pr-4">{v.reference_code ?? "—"}</td>
+                          <td className="num py-2 pr-4">{v.ncm ?? "—"}</td>
                           <td className="num py-2 pr-4 text-right">
                             {v.price_cents == null ? "—" : formatBRLFromCents(v.price_cents)}
                           </td>
@@ -497,6 +501,8 @@ function ProdutoDetalhe() {
                 label: variante.label,
                 sku: variante.sku ?? "",
                 barcode: variante.barcode ?? "",
+                reference_code: variante.reference_code ?? "",
+                ncm: variante.ncm ?? "",
                 legacy_code: variante.legacy_code ?? "",
                 size: variante.size ?? "",
                 color: variante.color ?? "",

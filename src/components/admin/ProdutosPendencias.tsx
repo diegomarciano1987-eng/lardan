@@ -47,7 +47,7 @@ export function ProdutosPendencias({ tipoInicial = "sem_custo" }: { tipoInicial?
     queryFn: async () => {
       const { data, error } = await supabase.rpc("catalog_pendencias", {
         _tipo: tipo,
-        _busca: busca.trim() === "" ? null : busca.trim(),
+        _busca: busca.trim() === "" ? undefined : busca.trim(),
         _limite: PAGE_SIZE,
         _offset: pagina * PAGE_SIZE,
       });

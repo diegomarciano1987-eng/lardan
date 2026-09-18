@@ -247,6 +247,8 @@ function FluxoCaixa() {
                         rotulo: rotuloBucket(l.bucket),
                         entradas: l.entradas_realizadas_cents / 100,
                         saidas: l.saidas_realizadas_cents / 100,
+                        aPagar: l.saidas_previstas_cents / 100,
+                        aReceber: l.entradas_previstas_cents / 100,
                         realizado: l.saldo_realizado_cents / 100,
                         projetado: l.saldo_projetado_cents / 100,
                       }))}

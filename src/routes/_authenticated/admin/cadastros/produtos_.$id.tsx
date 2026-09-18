@@ -559,6 +559,18 @@ function ProdutoDetalhe() {
               },
             },
           },
+          {
+            name: "reference_code",
+            label: "Código de referência (etiqueta)",
+            type: "text",
+            help: "Vazio = usa a referência do produto.",
+          },
+          {
+            name: "ncm",
+            label: "Classificação fiscal (NCM)",
+            type: "text",
+            help: "8 dígitos. Vazio = usa o NCM do produto.",
+          },
           { name: "legacy_code", label: "Código legado", type: "text" },
           { name: "color", label: "Cor comercial", type: "text" },
           { name: "preco", label: "Preço (R$)", type: "text", placeholder: "0,00" },

@@ -261,6 +261,59 @@
     linear-gradient(180deg, oklch(0.28 0.07 18 / 0.44), oklch(0.32 0.08 18 / 0.7));
 }
 
+/* Ecossistema Lardan — abertura editorial em camadas, sem alterar a identidade. */
+.ecossistema-modal {
+  animation: ecossistema-veil-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ecossistema-panel {
+  animation: ecossistema-panel-in 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: center bottom;
+}
+
+.ecossistema-light {
+  background:
+    linear-gradient(115deg, transparent 12%, color-mix(in oklab, var(--primary) 22%, transparent) 46%, transparent 70%),
+    radial-gradient(circle at 86% 8%, color-mix(in oklab, var(--background) 10%, transparent), transparent 28%);
+  animation: ecossistema-light-pass 1.15s 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ecossistema-card {
+  opacity: 0;
+  animation: ecossistema-card-in 720ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes ecossistema-veil-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ecossistema-panel-in {
+  from { opacity: 0; transform: translate3d(0, 3rem, 0) scale(0.975); clip-path: inset(100% 0 0 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); clip-path: inset(0 0 0 0); }
+}
+
+@keyframes ecossistema-card-in {
+  from { opacity: 0; transform: translate3d(0, 1.5rem, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes ecossistema-light-pass {
+  from { opacity: 0; transform: translate3d(-22%, 0, 0); }
+  45% { opacity: 1; }
+  to { opacity: 0.38; transform: translate3d(12%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecossistema-modal,
+  .ecossistema-panel,
+  .ecossistema-card,
+  .ecossistema-light {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 .seja-perfil-band__light {
   background: linear-gradient(
     125deg,

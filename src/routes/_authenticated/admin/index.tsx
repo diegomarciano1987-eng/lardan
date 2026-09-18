@@ -137,6 +137,16 @@ function VisaoGeral() {
     },
   });
 
+  const valorRuas = useQuery({
+    queryKey: ["catalog-street-value"],
+    enabled: podeConteudo,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("catalog_street_value");
+      if (error) throw error;
+      return data as { total_cents: number; pecas: number; custo_cents: number };
+    },
+  });
+
   const trilha = useQuery({
     queryKey: ["admin-audit-recent"],
     enabled: podeAuditoria,
@@ -222,8 +232,17 @@ function VisaoGeral() {
             <LedgerBalance
               icon={BadgeDollarSign}
               label="Valor nas ruas"
-              value={null}
-              scope="Só será exibido com custódia registrada."
+              value={
+                podeConteudo && valorRuas.data
+                  ? formatBRLFromCents(valorRuas.data.total_cents)
+                  : null
+              }
+              pending={podeConteudo && valorRuas.isPending}
+              scope={
+                podeConteudo && valorRuas.data
+                  ? `Preço de venda de ${formatInt(valorRuas.data.pecas)} peças cadastradas. Contagem de estoque ainda não feita.`
+                  : "Sem autorização."
+              }
             />
             <LedgerBalance
               icon={UsersRound}

@@ -46,6 +46,7 @@ function ProdutosPage() {
   const [pagina, setPagina] = useState(0);
   const [status, setStatus] = useState("todos");
   const [categoria, setCategoria] = useState("todos");
+  const [aba, setAba] = useState<"visao" | "lista">("visao");
 
   // Vindo de "Novo cadastro": abre direto a ficha completa do novo produto.
   const buscaUrl = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });

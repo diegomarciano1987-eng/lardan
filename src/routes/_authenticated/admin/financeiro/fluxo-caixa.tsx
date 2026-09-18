@@ -247,6 +247,8 @@ function FluxoCaixa() {
                         rotulo: rotuloBucket(l.bucket),
                         entradas: l.entradas_realizadas_cents / 100,
                         saidas: l.saidas_realizadas_cents / 100,
+                        aPagar: l.saidas_previstas_cents / 100,
+                        aReceber: l.entradas_previstas_cents / 100,
                         realizado: l.saldo_realizado_cents / 100,
                         projetado: l.saldo_projetado_cents / 100,
                       }))}
@@ -267,6 +269,21 @@ function FluxoCaixa() {
                         minTickGap={16}
                       />
                       <YAxis
+                        yAxisId="movimento"
+                        tickLine={false}
+                        axisLine={false}
+                        width={84}
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={(v: number) =>
+                          new Intl.NumberFormat("pt-BR", {
+                            notation: "compact",
+                            maximumFractionDigits: 1,
+                          }).format(v)
+                        }
+                      />
+                      <YAxis
+                        yAxisId="saldo"
+                        orientation="right"
                         tickLine={false}
                         axisLine={false}
                         width={84}
@@ -291,25 +308,50 @@ function FluxoCaixa() {
                       />
                       <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                       <Line
-                        type="monotone"
+                        yAxisId="movimento"
+                        type="linear"
                         dataKey="entradas"
-                        name="Entradas"
+                        name="Entradas realizadas"
                         stroke="#127f57"
                         strokeWidth={2}
                         dot={false}
                         activeDot={{ r: 4 }}
                       />
                       <Line
-                        type="monotone"
+                        yAxisId="movimento"
+                        type="linear"
                         dataKey="saidas"
-                        name="Saídas"
+                        name="Saídas realizadas"
                         stroke="#b23a34"
                         strokeWidth={2}
                         dot={false}
                         activeDot={{ r: 4 }}
                       />
                       <Line
-                        type="monotone"
+                        yAxisId="movimento"
+                        type="linear"
+                        dataKey="aPagar"
+                        name="A pagar no dia"
+                        stroke="#b23a34"
+                        strokeWidth={2}
+                        strokeDasharray="4 4"
+                        dot={{ r: 2 }}
+                        activeDot={{ r: 4 }}
+                      />
+                      <Line
+                        yAxisId="movimento"
+                        type="linear"
+                        dataKey="aReceber"
+                        name="A receber no dia"
+                        stroke="#127f57"
+                        strokeWidth={2}
+                        strokeDasharray="4 4"
+                        dot={{ r: 2 }}
+                        activeDot={{ r: 4 }}
+                      />
+                      <Line
+                        yAxisId="saldo"
+                        type="linear"
                         dataKey="realizado"
                         name="Saldo realizado"
                         stroke="url(#fluxoRealizado)"
@@ -318,7 +360,8 @@ function FluxoCaixa() {
                         activeDot={{ r: 5 }}
                       />
                       <Line
-                        type="monotone"
+                        yAxisId="saldo"
+                        type="linear"
                         dataKey="projetado"
                         name="Saldo projetado"
                         stroke="#6b7280"

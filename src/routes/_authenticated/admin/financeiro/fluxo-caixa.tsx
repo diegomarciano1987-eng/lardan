@@ -269,6 +269,21 @@ function FluxoCaixa() {
                         minTickGap={16}
                       />
                       <YAxis
+                        yAxisId="movimento"
+                        tickLine={false}
+                        axisLine={false}
+                        width={84}
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={(v: number) =>
+                          new Intl.NumberFormat("pt-BR", {
+                            notation: "compact",
+                            maximumFractionDigits: 1,
+                          }).format(v)
+                        }
+                      />
+                      <YAxis
+                        yAxisId="saldo"
+                        orientation="right"
                         tickLine={false}
                         axisLine={false}
                         width={84}

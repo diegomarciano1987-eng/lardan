@@ -41,3 +41,6 @@
       Preferimos omitir a data a inventá-la.
 - [ ] Redirecionamento apex→www responde 302 (controle da plataforma de
       hospedagem, não do código). Canonical absoluto já aponta para www.
+- [x] Ecossistema Lardan — card "Sua vitrine digital": título agora é
+      "Você terá uma página própria para vender seus produtos." (texto
+      aprovado do cliente, 18/09/2026). Os demais cards permanecem como estão.

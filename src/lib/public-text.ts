@@ -158,7 +158,7 @@ ${u("/a-lardan")}
 
 Rede de consultoras
 
-A Lardan informa possuir uma rede de mais de 1.000 consultoras.
+A Lardan informa possuir uma rede de mais de ${REDE.consultoras} consultoras.
 
 Segundo informações institucionais fornecidas pela empresa, essa rede já gerou mais de R$ 2,8 milhões em comissões acumuladas.
 

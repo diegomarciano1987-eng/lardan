@@ -202,7 +202,7 @@ export function SessaoSemijoias() {
               Aumente sua renda familiar!
             </p>
             <p
-              className="seja-proof mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm leading-snug text-muted-foreground max-md:!text-[1rem] max-md:!text-background"
+              className="seja-proof mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm leading-snug text-foreground max-md:!text-[1rem] max-md:!text-background"
               style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 18}px)` }}
             >
               <span>Mais de</span>
@@ -220,7 +220,7 @@ export function SessaoSemijoias() {
               Quero me candidatar
             </Link>
             <p
-              className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground max-md:!text-[1rem] max-md:!text-background"
+              className="mt-5 max-w-lg text-sm leading-relaxed text-foreground max-md:!text-[1rem] max-md:!text-background"
               style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
             >
               A Lardan oferece a melhor estrutura e as melhores tecnologias no suporte de vendas para suas consultoras.
@@ -229,7 +229,7 @@ export function SessaoSemijoias() {
               type="button"
               variant="ghost"
               onClick={abrirEcossistema}
-              className="mt-3 h-auto rounded-none border-b border-current px-0 py-2 text-[0.625rem] font-normal uppercase tracking-[0.2em] text-foreground/75 shadow-none hover:bg-transparent hover:text-foreground max-md:!text-[0.9375rem] max-md:!text-background"
+              className="mt-3 h-auto rounded-none border-b border-current px-0 py-2 text-[0.625rem] font-normal uppercase tracking-[0.2em] text-foreground shadow-none hover:bg-transparent hover:text-foreground max-md:!text-[0.9375rem] max-md:!text-background"
               style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
               tabIndex={ctaIn > 0.5 ? 0 : -1}
             >

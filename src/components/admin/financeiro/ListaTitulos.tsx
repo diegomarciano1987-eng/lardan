@@ -52,7 +52,9 @@ export function ListaTitulos({
   const [novo, setNovo] = React.useState(false);
   const [aberto, setAberto] = React.useState<string | null>(null);
 
-  React.useEffect(() => setPagina(0), [buscaLenta, situacao, classificacao]);
+  const { de, ate } = usePeriodoFinanceiro();
+
+  React.useEffect(() => setPagina(0), [buscaLenta, situacao, classificacao, de, ate]);
   React.useEffect(() => {
     onFiltrosChange?.({ busca: buscaLenta, situacao });
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,6 +1,6 @@
 # LARDAN — Rodada técnica de lançamento (domínio oficial)
 
-- [ ] Atualizar a segunda seção da Home e criar o painel compartilhado Ecossistema Lardan.
+- [x] Atualizar a segunda seção da Home e criar o painel compartilhado Ecossistema Lardan.
 
 - [x] 1. SITE_URL → https://www.lardan.com.br (fonte única)
 - [x] 2. robots.txt e llms.txt gerados por server route a partir de SITE_URL

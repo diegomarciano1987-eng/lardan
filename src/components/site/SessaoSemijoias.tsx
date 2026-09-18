@@ -211,7 +211,6 @@ export function SessaoSemijoias() {
             </p>
             <Link
               to="/seja-lardan"
-              hash="candidatura"
               className="btn-premium mt-7 max-md:!text-[0.9375rem]"
               style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
               tabIndex={ctaIn > 0.5 ? 0 : -1}

@@ -63,7 +63,7 @@ function ProdutoDetalhe() {
       const { data, error } = await supabase
         .from("products")
         .select(
-          "id, name, slug, internal_code, legacy_code, status, category_id, subcategory_id, collection_id, supplier_id, short_description, description, material, plating, measurements, weight_grams, raw_material, raw_weight_grams, raw_supplier_id, price_cents, price_is_public, is_featured, is_new_arrival, stock_visibility, seo_title, seo_description, care_instructions, warranty_text, published_at, scheduled_publish_at, requires_catalog_review, is_legacy, created_at, updated_at",
+          "id, name, slug, internal_code, legacy_code, barcode, reference_code, ncm, status, category_id, subcategory_id, collection_id, supplier_id, short_description, description, material, plating, measurements, weight_grams, raw_material, raw_weight_grams, raw_supplier_id, price_cents, price_is_public, is_featured, is_new_arrival, stock_visibility, seo_title, seo_description, care_instructions, warranty_text, published_at, scheduled_publish_at, requires_catalog_review, is_legacy, created_at, updated_at",
         )
         .eq("id", id)
         .single();
@@ -78,7 +78,7 @@ function ProdutoDetalhe() {
       const { data, error } = await supabase
         .from("product_variants")
         .select(
-          "id, product_id, label, sku, barcode, legacy_code, size, color, plating_type_id, plating_supplier_id, varnish_name, final_weight_grams, price_cents, position, is_default, is_active, created_at, updated_at",
+          "id, product_id, label, sku, barcode, reference_code, ncm, legacy_code, size, color, plating_type_id, plating_supplier_id, varnish_name, final_weight_grams, price_cents, position, is_default, is_active, created_at, updated_at",
         )
         .eq("product_id", id)
         .order("position");
@@ -201,6 +201,8 @@ function ProdutoDetalhe() {
         label: String(v["label"] ?? "").trim(),
         sku: String(v["sku"] ?? "").trim(),
         barcode: String(v["barcode"] ?? "").trim(),
+        reference_code: String(v["reference_code"] ?? "").trim(),
+        ncm: String(v["ncm"] ?? "").replace(/\D/g, ""),
         legacy_code: String(v["legacy_code"] ?? "").trim(),
         size: String(v["size"] ?? "").trim(),
         color: String(v["color"] ?? "").trim(),
@@ -618,6 +620,8 @@ interface VarianteRow {
   label: string;
   sku: string | null;
   barcode: string | null;
+  reference_code: string | null;
+  ncm: string | null;
   legacy_code: string | null;
   size: string | null;
   color: string | null;

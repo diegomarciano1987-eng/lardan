@@ -169,7 +169,9 @@ export function TituloSheet({
         <SheetHeader>
           <SheetTitle>{t ? t.titulo.descricao : "Título"}</SheetTitle>
           <SheetDescription>
-            {t ? `${t.titulo.contraparte} · emissão ${dataBR(t.titulo.emissao)}` : "Carregando…"}
+            {t
+              ? `${t.titulo.numero ? `Nº ${t.titulo.numero} · ` : ""}${t.titulo.contraparte} · emissão ${dataBR(t.titulo.emissao)}`
+              : "Carregando…"}
           </SheetDescription>
         </SheetHeader>
 

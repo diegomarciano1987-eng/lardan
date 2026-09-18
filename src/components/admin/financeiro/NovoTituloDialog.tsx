@@ -69,6 +69,32 @@ export function NovoTituloDialog({
   const [parcelas, setParcelas] = React.useState<ParcelaForm[]>([
     { vencimento: undefined, valor: "" },
   ]);
+  const [recQtd, setRecQtd] = React.useState("");
+  const [recInicio, setRecInicio] = React.useState<Date | undefined>(undefined);
+  const [recValor, setRecValor] = React.useState("");
+
+  const gerarRecorrencia = () => {
+    const n = Number.parseInt(recQtd, 10);
+    if (!Number.isFinite(n) || n < 1 || n > 360) {
+      toast.error("Informe quantas vezes a conta se repete.");
+      return;
+    }
+    if (!recInicio) {
+      toast.error("Informe o primeiro vencimento.");
+      return;
+    }
+    if (!reaisParaCentavos(recValor)) {
+      toast.error("Informe o valor de cada parcela.");
+      return;
+    }
+    setParcelas(
+      Array.from({ length: n }, (_, i) => {
+        const d = new Date(recInicio);
+        d.setMonth(d.getMonth() + i);
+        return { vencimento: d, valor: recValor };
+      }),
+    );
+  };
 
   React.useEffect(() => {
     if (!open) {
@@ -214,6 +240,41 @@ export function NovoTituloDialog({
             valores={classificacao}
             onChange={setClassificacao}
           />
+        </div>
+
+        <div className="mt-2 rounded-[12px] border border-line-soft bg-cream-2 p-4">
+          <p className="ledger-eyebrow">Recorrência</p>
+          <p className="mt-1 mb-3 text-xs font-medium text-ledger-muted">
+            Para contas que se repetem (aluguel, mensalidade), informe quantas vezes, o primeiro
+            vencimento e o valor de cada vez. As parcelas são geradas mês a mês e podem ser
+            ajustadas antes de gravar.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Campo label="Quantas vezes">
+              <input
+                value={recQtd}
+                onChange={(e) => setRecQtd(e.target.value)}
+                inputMode="numeric"
+                placeholder="Ex.: 12"
+                className={inputCls}
+              />
+            </Campo>
+            <Campo label="Primeiro vencimento">
+              <DateField value={recInicio} onChange={setRecInicio} />
+            </Campo>
+            <Campo label="Valor de cada">
+              <input
+                value={recValor}
+                onChange={(e) => setRecValor(e.target.value)}
+                inputMode="decimal"
+                placeholder="0,00"
+                className={inputCls}
+              />
+            </Campo>
+          </div>
+          <button type="button" className="admin-btn mt-3" onClick={gerarRecorrencia}>
+            <Plus aria-hidden className="size-4" /> Gerar parcelas mensais
+          </button>
         </div>
 
         <div className="mt-2 rounded-[12px] border border-line-soft bg-cream-2 p-4">

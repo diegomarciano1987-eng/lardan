@@ -77,6 +77,11 @@ export function ListaTitulos({
       header: "Título",
       render: (r) => (
         <div className="min-w-0">
+          {r.numero ? (
+            <p className="text-[0.7rem] font-semibold tracking-[0.08em] text-bronze tabular-nums">
+              Nº {r.numero}
+            </p>
+          ) : null}
           <p className="truncate font-semibold text-ledger-text">{r.descricao}</p>
           <p className="truncate text-xs text-ledger-muted">
             {r.contraparte}

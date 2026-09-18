@@ -49,3 +49,5 @@
       "Universidade corporativa" (formação de vendas da Lardan Academy),
       além de faixa de fechamento com "Quero me candidatar"
       (18/09/2026). Painel passou de 4 para 6 blocos.
+
+- [x] Ecossistema Lardan — card "Sua vitrine digital" com a cópia oficial: "Você terá uma página própria na internet para vender suas semijoias." + "Uma webpage gratuita focada em vendas que vai lhe ajudar a vender." (fonte única em src/lib/seja-lardan-conteudo.ts; vale no pop-up e na seção #ferramentas)

@@ -308,24 +308,49 @@ function FluxoCaixa() {
                       />
                       <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                       <Line
+                        yAxisId="movimento"
                         type="monotone"
                         dataKey="entradas"
-                        name="Entradas"
+                        name="Entradas realizadas"
                         stroke="#127f57"
                         strokeWidth={2}
                         dot={false}
                         activeDot={{ r: 4 }}
                       />
                       <Line
+                        yAxisId="movimento"
                         type="monotone"
                         dataKey="saidas"
-                        name="Saídas"
+                        name="Saídas realizadas"
                         stroke="#b23a34"
                         strokeWidth={2}
                         dot={false}
                         activeDot={{ r: 4 }}
                       />
                       <Line
+                        yAxisId="movimento"
+                        type="monotone"
+                        dataKey="aPagar"
+                        name="A pagar no dia"
+                        stroke="#b23a34"
+                        strokeWidth={2}
+                        strokeDasharray="4 4"
+                        dot={{ r: 2 }}
+                        activeDot={{ r: 4 }}
+                      />
+                      <Line
+                        yAxisId="movimento"
+                        type="monotone"
+                        dataKey="aReceber"
+                        name="A receber no dia"
+                        stroke="#127f57"
+                        strokeWidth={2}
+                        strokeDasharray="4 4"
+                        dot={{ r: 2 }}
+                        activeDot={{ r: 4 }}
+                      />
+                      <Line
+                        yAxisId="saldo"
                         type="monotone"
                         dataKey="realizado"
                         name="Saldo realizado"
@@ -335,6 +360,7 @@ function FluxoCaixa() {
                         activeDot={{ r: 5 }}
                       />
                       <Line
+                        yAxisId="saldo"
                         type="monotone"
                         dataKey="projetado"
                         name="Saldo projetado"

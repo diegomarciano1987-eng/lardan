@@ -9,6 +9,17 @@
  * Qualquer atualização deste arquivo exige texto oficial da marca.
  */
 
+/* ---------------------------------- Rede ---------------------------------- */
+
+/**
+ * Número oficial da rede de consultoras, atualizado pela marca em 2026-09-18
+ * (antes constava 1.000). É a única fonte desse dado: biografia dos
+ * fundadores, páginas institucionais, llms.txt e schemas derivam daqui.
+ */
+export const REDE = {
+  consultoras: "2.500",
+} as const;
+
 /* ------------------------------- Fundadores ------------------------------- */
 
 export const DANIEL = {

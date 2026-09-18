@@ -11,7 +11,7 @@
  */
 import { SITE_URL } from "@/lib/seo";
 import { INSTAGRAM_URL } from "@/lib/brand";
-import { DANIEL, EMPRESA, ENDERECO, LARISSA } from "@/lib/institucional";
+import { DANIEL, EMPRESA, ENDERECO, LARISSA, REDE } from "@/lib/institucional";
 
 /** Caminhos que nunca devem ser rastreados/indexados. */
 export const CAMINHOS_PRIVADOS = [

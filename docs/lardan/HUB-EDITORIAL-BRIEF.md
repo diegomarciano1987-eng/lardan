@@ -2964,7 +2964,7 @@ Podem ser utilizados apenas quando já oficiais no conteúdo institucional.
 
 Exemplo existente:
 
-mais de 1.000 consultoras.
+mais de 2.500 consultoras.
 
 mais de R$ 2,8 milhões em comissões acumuladas conforme conteúdo institucional fornecido pela marca.
 

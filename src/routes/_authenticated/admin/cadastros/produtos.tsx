@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, StatusBadge } from "@/components/admin/ui";
 import { ProdutosVisaoGeral } from "@/components/admin/ProdutosVisaoGeral";
+import { ProdutosPendencias } from "@/components/admin/ProdutosPendencias";
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import {
@@ -46,7 +47,10 @@ function ProdutosPage() {
   const [pagina, setPagina] = useState(0);
   const [status, setStatus] = useState("todos");
   const [categoria, setCategoria] = useState("todos");
-  const [aba, setAba] = useState<"visao" | "lista">("visao");
+  const [aba, setAba] = useState<"visao" | "lista" | "corrigir">("visao");
+  const [pendenciaTipo, setPendenciaTipo] = useState<
+    "sem_custo" | "sem_preco" | "sem_ncm" | "sem_referencia"
+  >("sem_custo");
 
   // Vindo de "Novo cadastro": abre direto a ficha completa do novo produto.
   const buscaUrl = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });

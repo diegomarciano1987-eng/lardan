@@ -135,6 +135,8 @@ export async function listFinTitles(params: {
   centro?: string;
   entidade?: string;
   semClassificacao?: boolean;
+  de?: string;
+  ate?: string;
 }): Promise<{ rows: FinTitleRow[]; total: number; soma_cents: number }> {
   const args: Record<string, unknown> = {
     _direction: params.direction,
@@ -143,6 +145,8 @@ export async function listFinTitles(params: {
   };
   if (params.search) args["_search"] = params.search;
   if (params.situacao && params.situacao !== "todos") args["_situacao"] = params.situacao;
+  if (params.de) args["_de"] = params.de;
+  if (params.ate) args["_ate"] = params.ate;
   if (params.chart) args["_chart"] = params.chart;
   if (params.centro) args["_cc"] = params.centro;
   if (params.entidade) args["_entidade"] = params.entidade;

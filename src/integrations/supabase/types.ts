@@ -6327,6 +6327,12 @@ export type Database = {
       fin_dre: { Args: { _filtros?: Json }; Returns: Json }
       fin_dre_detalhe: { Args: { _filtros: Json }; Returns: Json }
       fin_fingerprint: { Args: { _intent: Json }; Returns: string }
+      fin_import_ap_apply: {
+        Args: { _limite?: number; _lote: string }
+        Returns: Json
+      }
+      fin_import_ap_refs: { Args: { _lote: string }; Returns: undefined }
+      fin_import_ap_slug: { Args: { _t: string }; Returns: string }
       fin_installment_refresh: {
         Args: { _installment: string }
         Returns: undefined

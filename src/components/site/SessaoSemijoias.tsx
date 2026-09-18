@@ -172,15 +172,15 @@ export function SessaoSemijoias() {
           className="pointer-events-none absolute inset-0 md:hidden"
           style={{
             background:
-              "linear-gradient(90deg, oklch(0.18 0.01 30 / 0.5) 0%, oklch(0.18 0.01 30 / 0.24) 32%, transparent 56%)",
+              "linear-gradient(90deg, oklch(0.13 0.012 30 / 0.78) 0%, oklch(0.13 0.012 30 / 0.62) 48%, oklch(0.13 0.012 30 / 0.28) 78%, oklch(0.13 0.012 30 / 0.12) 100%)",
             opacity: textIn,
           }}
         />
 
         <div className="relative flex h-full max-w-6xl flex-col justify-center px-6 md:px-10 lg:mx-auto">
-          <div className="max-w-[35rem]">
+          <div className="sessao-semijoias-copy max-w-[35rem]">
             <p
-              className="brand-eyebrow mb-4 max-md:!text-background/80"
+              className="brand-eyebrow mb-4 max-md:!text-[0.9375rem] max-md:!text-background"
               style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 18}px)` }}
             >
               Seja Lardan
@@ -202,7 +202,7 @@ export function SessaoSemijoias() {
               Aumente sua renda familiar!
             </p>
             <p
-              className="seja-proof mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm leading-snug text-muted-foreground max-md:!text-background/85"
+              className="seja-proof mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm leading-snug text-muted-foreground max-md:!text-[1rem] max-md:!text-background"
               style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 18}px)` }}
             >
               <span>Mais de</span>
@@ -212,14 +212,14 @@ export function SessaoSemijoias() {
             <Link
               to="/seja-lardan"
               hash="candidatura"
-              className="btn-premium mt-7"
+              className="btn-premium mt-7 max-md:!text-[0.9375rem]"
               style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
               tabIndex={ctaIn > 0.5 ? 0 : -1}
             >
               Quero me candidatar
             </Link>
             <p
-              className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground max-md:!text-background/82"
+              className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground max-md:!text-[1rem] max-md:!text-background"
               style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
             >
               A Lardan oferece a melhor estrutura e as melhores tecnologias no suporte de vendas para suas consultoras.
@@ -228,7 +228,7 @@ export function SessaoSemijoias() {
               type="button"
               variant="ghost"
               onClick={abrirEcossistema}
-              className="mt-3 h-auto rounded-none border-b border-current px-0 py-2 text-[0.625rem] font-normal uppercase tracking-[0.2em] text-foreground/75 shadow-none hover:bg-transparent hover:text-foreground max-md:!text-background"
+              className="mt-3 h-auto rounded-none border-b border-current px-0 py-2 text-[0.625rem] font-normal uppercase tracking-[0.2em] text-foreground/75 shadow-none hover:bg-transparent hover:text-foreground max-md:!text-[0.9375rem] max-md:!text-background"
               style={{ opacity: ctaIn, transform: `translateY(${(1 - ctaIn) * 18}px)` }}
               tabIndex={ctaIn > 0.5 ? 0 : -1}
             >

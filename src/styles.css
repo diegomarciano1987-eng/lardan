@@ -472,6 +472,15 @@
 /* Legibilidade editorial no celular: textos auxiliares nunca ficam menores
    que 13px, sem alterar títulos nem a escala aprovada para desktop. */
 @media (max-width: 767px) {
+  .sessao-semijoias-copy {
+    text-shadow: 0 1px 10px color-mix(in oklab, var(--foreground) 72%, transparent);
+  }
+
+  .sessao-semijoias-copy .seja-proof-number {
+    color: var(--background);
+    text-shadow: 0 1px 12px color-mix(in oklab, var(--foreground) 82%, transparent);
+  }
+
   .site-scope .btn-premium,
   .site-scope .text-xs,
   .site-scope [class*="text-[0.5rem]"],

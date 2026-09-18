@@ -503,6 +503,27 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
               onChange={(v) => set("legacy_code", v)}
               disabled={somente}
             />
+            <Campo
+              label="Código de referência (etiqueta)"
+              valor={form["reference_code"]}
+              onChange={(v) => set("reference_code", v)}
+              disabled={somente}
+              ajuda="É o código impresso na etiqueta. Não pode se repetir em outro produto."
+            />
+            <Campo
+              label="Código de barras"
+              valor={form["barcode"]}
+              onChange={(v) => set("barcode", v)}
+              disabled={somente}
+              ajuda="Digite ou leia com o leitor. Zeros à esquerda são preservados. Com uma única variante, vale também para ela."
+            />
+            <Campo
+              label="Classificação fiscal (NCM)"
+              valor={form["ncm"]}
+              onChange={(v) => set("ncm", v.replace(/\D/g, "").slice(0, 8))}
+              disabled={somente}
+              ajuda="8 dígitos, usado na nota fiscal. Exemplo de bijuteria/semijoia: 71171900."
+            />
           </div>
         </Panel>
 

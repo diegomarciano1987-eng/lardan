@@ -12,6 +12,9 @@ export interface ProdutoBase {
   slug: string;
   internal_code: string | null;
   legacy_code: string | null;
+  barcode: string | null;
+  reference_code: string | null;
+  ncm: string | null;
   category_id: string | null;
   subcategory_id: string | null;
   collection_id: string | null;

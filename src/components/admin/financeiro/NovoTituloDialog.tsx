@@ -217,6 +217,41 @@ export function NovoTituloDialog({
         </div>
 
         <div className="mt-2 rounded-[12px] border border-line-soft bg-cream-2 p-4">
+          <p className="ledger-eyebrow">Recorrência</p>
+          <p className="mt-1 mb-3 text-xs font-medium text-ledger-muted">
+            Para contas que se repetem (aluguel, mensalidade), informe quantas vezes, o primeiro
+            vencimento e o valor de cada vez. As parcelas são geradas mês a mês e podem ser
+            ajustadas antes de gravar.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Campo label="Quantas vezes">
+              <input
+                value={recQtd}
+                onChange={(e) => setRecQtd(e.target.value)}
+                inputMode="numeric"
+                placeholder="Ex.: 12"
+                className={inputCls}
+              />
+            </Campo>
+            <Campo label="Primeiro vencimento">
+              <DateField value={recInicio} onChange={setRecInicio} />
+            </Campo>
+            <Campo label="Valor de cada">
+              <input
+                value={recValor}
+                onChange={(e) => setRecValor(e.target.value)}
+                inputMode="decimal"
+                placeholder="0,00"
+                className={inputCls}
+              />
+            </Campo>
+          </div>
+          <button type="button" className="admin-btn mt-3" onClick={gerarRecorrencia}>
+            <Plus aria-hidden className="size-4" /> Gerar parcelas mensais
+          </button>
+        </div>
+
+        <div className="mt-2 rounded-[12px] border border-line-soft bg-cream-2 p-4">
           <div className="flex items-center justify-between">
             <p className="ledger-eyebrow">Parcelas</p>
             <button

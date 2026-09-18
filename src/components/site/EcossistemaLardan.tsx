@@ -74,7 +74,7 @@ export function EcossistemaLardanProvider({ children }: { children: ReactNode })
 
   const irParaCandidatura = useCallback(() => {
     fechar();
-    void navigate({ to: "/seja-lardan", hash: "#inicio" });
+    void navigate({ to: "/seja-lardan", hash: "inicio" });
   }, [fechar, navigate]);
 
   useEffect(() => {

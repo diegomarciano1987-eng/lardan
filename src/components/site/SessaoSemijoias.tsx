@@ -202,7 +202,7 @@ export function SessaoSemijoias() {
               Aumente sua renda familiar!
             </p>
             <p
-              className="seja-proof mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm leading-snug text-muted-foreground max-md:!text-[1rem] max-md:!text-background"
+              className="seja-proof mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm leading-snug text-foreground max-md:!text-[1rem] max-md:!text-background"
               style={{ opacity: textIn, transform: `translateY(${(1 - textIn) * 18}px)` }}
             >
               <span>Mais de</span>

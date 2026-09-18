@@ -11,7 +11,7 @@
  */
 import { SITE_URL } from "@/lib/seo";
 import { INSTAGRAM_URL } from "@/lib/brand";
-import { DANIEL, EMPRESA, ENDERECO, LARISSA } from "@/lib/institucional";
+import { DANIEL, EMPRESA, ENDERECO, LARISSA, REDE } from "@/lib/institucional";
 
 /** Caminhos que nunca devem ser rastreados/indexados. */
 export const CAMINHOS_PRIVADOS = [
@@ -158,7 +158,7 @@ ${u("/a-lardan")}
 
 Rede de consultoras
 
-A Lardan informa possuir uma rede de mais de 1.000 consultoras.
+A Lardan informa possuir uma rede de mais de ${REDE.consultoras} consultoras.
 
 Segundo informações institucionais fornecidas pela empresa, essa rede já gerou mais de R$ 2,8 milhões em comissões acumuladas.
 

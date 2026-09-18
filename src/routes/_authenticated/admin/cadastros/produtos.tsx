@@ -152,8 +152,8 @@ function ProdutosPage() {
           setBusca(v);
           setPagina(0);
         }}
-        searchPlaceholder="Buscar por nome, código ou material…"
-        isLoading={query.isLoading}
+        searchPlaceholder="Leia o código de barras ou busque por nome, referência ou material…"
+        isLoading={query.isLoading || aguardandoLeitura}
         error={query.error}
         onRetry={() => void query.refetch()}
         onRowClick={(row) => void navigate({ to: "/admin/cadastros/produtos/$id", params: { id: row.id } })}

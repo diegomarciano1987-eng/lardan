@@ -7,6 +7,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { NovoTituloDialog } from "@/components/admin/financeiro/NovoTituloDialog";
 import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
 import { useCapabilities } from "@/lib/capabilities";
+import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import {
   listFinTitles,
   TITLE_STATUS_LABEL,
@@ -61,7 +62,7 @@ export function ListaTitulos({
   }, [buscaLenta, situacao]);
 
   const q = useQuery({
-    queryKey: ["fin-titles", direction, buscaLenta, situacao, classificacao, pagina],
+    queryKey: ["fin-titles", direction, buscaLenta, situacao, classificacao, pagina, de, ate],
     queryFn: () =>
       listFinTitles({
         direction,
@@ -69,6 +70,8 @@ export function ListaTitulos({
         situacao,
         limit: PAGE_SIZE,
         offset: pagina * PAGE_SIZE,
+        de,
+        ate,
         ...(classificacao === "pendentes" ? { semClassificacao: true } : {}),
       }),
   });

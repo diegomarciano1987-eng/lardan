@@ -235,6 +235,7 @@ export function ProdutosVisaoGeral() {
             (t['sem_custo'] ?? 0) + (t['sem_preco'] ?? 0) + (t['sem_ncm'] ?? 0) + (t['sem_referencia'] ?? 0),
           )}
           tone="warning"
+          {...(onAbrirPendencias ? { onClick: () => onAbrirPendencias("sem_custo") } : {})}
           hint={`${formatInt(t['sem_custo'] ?? 0)} sem custo · ${formatInt(t['sem_preco'] ?? 0)} sem preço · ${formatInt(t['sem_ncm'] ?? 0)} sem NCM · ${formatInt(t['sem_referencia'] ?? 0)} sem referência`}
         />
       </div>

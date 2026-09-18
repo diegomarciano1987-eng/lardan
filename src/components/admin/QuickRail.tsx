@@ -2,10 +2,9 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Boxes,
   LayoutDashboard,
-  ShieldCheck,
-  ShoppingBag,
-  Sprout,
-  Users,
+  ListOrdered,
+  TrendingUp,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -14,10 +13,9 @@ type Shortcut = { to: string; label: string; icon: LucideIcon };
 const SHORTCUTS: Shortcut[] = [
   { to: "/admin", label: "Visão geral", icon: LayoutDashboard },
   { to: "/admin/cadastros", label: "Cadastros", icon: Boxes },
-  { to: "/admin/operacao", label: "Operação", icon: ShoppingBag },
-  { to: "/admin/crescimento", label: "Crescimento", icon: Sprout },
-  { to: "/admin/usuarios", label: "Usuários e papéis", icon: Users },
-  { to: "/admin/auditoria", label: "Auditoria", icon: ShieldCheck },
+  { to: "/admin/financeiro/pagar", label: "Contas a pagar", icon: Wallet },
+  { to: "/admin/cadastros/produtos", label: "Lista de produtos", icon: ListOrdered },
+  { to: "/admin/financeiro/fluxo-caixa", label: "Fluxo de caixa", icon: TrendingUp },
 ];
 
 export function QuickRail() {

@@ -7,6 +7,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { NovoTituloDialog } from "@/components/admin/financeiro/NovoTituloDialog";
 import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
 import { useCapabilities } from "@/lib/capabilities";
+import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import {
   listFinTitles,
   TITLE_STATUS_LABEL,
@@ -52,14 +53,16 @@ export function ListaTitulos({
   const [novo, setNovo] = React.useState(false);
   const [aberto, setAberto] = React.useState<string | null>(null);
 
-  React.useEffect(() => setPagina(0), [buscaLenta, situacao, classificacao]);
+  const { de, ate } = usePeriodoFinanceiro();
+
+  React.useEffect(() => setPagina(0), [buscaLenta, situacao, classificacao, de, ate]);
   React.useEffect(() => {
     onFiltrosChange?.({ busca: buscaLenta, situacao });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buscaLenta, situacao]);
 
   const q = useQuery({
-    queryKey: ["fin-titles", direction, buscaLenta, situacao, classificacao, pagina],
+    queryKey: ["fin-titles", direction, buscaLenta, situacao, classificacao, pagina, de, ate],
     queryFn: () =>
       listFinTitles({
         direction,
@@ -67,6 +70,8 @@ export function ListaTitulos({
         situacao,
         limit: PAGE_SIZE,
         offset: pagina * PAGE_SIZE,
+        de,
+        ate,
         ...(classificacao === "pendentes" ? { semClassificacao: true } : {}),
       }),
   });

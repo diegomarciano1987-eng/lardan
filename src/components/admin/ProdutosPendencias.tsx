@@ -45,12 +45,14 @@ export function ProdutosPendencias({ tipoInicial = "sem_custo" }: { tipoInicial?
   const query = useQuery({
     queryKey: ["catalog-pendencias", tipo, busca, pagina],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("catalog_pendencias", {
-        _tipo: tipo,
-        _busca: busca.trim() === "" ? undefined : busca.trim(),
+      const termo = busca.trim();
+      const args = {
+        _tipo: tipo as string,
         _limite: PAGE_SIZE,
         _offset: pagina * PAGE_SIZE,
-      });
+        ...(termo === "" ? {} : { _busca: termo }),
+      };
+      const { data, error } = await supabase.rpc("catalog_pendencias", args);
       if (error) throw error;
       return data as unknown as Resposta;
     },

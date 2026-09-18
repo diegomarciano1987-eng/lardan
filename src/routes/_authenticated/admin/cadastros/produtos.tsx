@@ -141,6 +141,30 @@ function ProdutosPage() {
         }
       />
 
+      <div className="flex w-fit gap-1 rounded-xl border border-line bg-line-soft/40 p-1">
+        {([
+          ["visao", "Visão geral"],
+          ["lista", "Lista de produtos"],
+        ] as const).map(([valor, rotulo]) => (
+          <button
+            key={valor}
+            type="button"
+            onClick={() => setAba(valor)}
+            aria-pressed={aba === valor}
+            className={
+              aba === valor
+                ? "rounded-lg bg-ledger-panel px-4 py-2 text-[0.8125rem] font-semibold text-ledger-text shadow-sm"
+                : "rounded-lg px-4 py-2 text-[0.8125rem] font-medium text-ledger-muted transition hover:text-ledger-text"
+            }
+          >
+            {rotulo}
+          </button>
+        ))}
+      </div>
+
+      {aba === "visao" && <ProdutosVisaoGeral />}
+
+      {aba === "lista" && (
       <DataTable<ProdutoLinha>
         columns={columns}
         rows={query.data?.rows ?? []}

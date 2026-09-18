@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, StatusBadge } from "@/components/admin/ui";
+import { ProdutosVisaoGeral } from "@/components/admin/ProdutosVisaoGeral";
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import {
@@ -45,6 +46,7 @@ function ProdutosPage() {
   const [pagina, setPagina] = useState(0);
   const [status, setStatus] = useState("todos");
   const [categoria, setCategoria] = useState("todos");
+  const [aba, setAba] = useState<"visao" | "lista">("visao");
 
   // Vindo de "Novo cadastro": abre direto a ficha completa do novo produto.
   const buscaUrl = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
@@ -139,6 +141,30 @@ function ProdutosPage() {
         }
       />
 
+      <div className="flex w-fit gap-1 rounded-xl border border-line bg-line-soft/40 p-1">
+        {([
+          ["visao", "Visão geral"],
+          ["lista", "Lista de produtos"],
+        ] as const).map(([valor, rotulo]) => (
+          <button
+            key={valor}
+            type="button"
+            onClick={() => setAba(valor)}
+            aria-pressed={aba === valor}
+            className={
+              aba === valor
+                ? "rounded-lg bg-ledger-panel px-4 py-2 text-[0.8125rem] font-semibold text-ledger-text shadow-sm"
+                : "rounded-lg px-4 py-2 text-[0.8125rem] font-medium text-ledger-muted transition hover:text-ledger-text"
+            }
+          >
+            {rotulo}
+          </button>
+        ))}
+      </div>
+
+      {aba === "visao" && <ProdutosVisaoGeral />}
+
+      {aba === "lista" && (
       <DataTable<ProdutoLinha>
         columns={columns}
         rows={query.data?.rows ?? []}
@@ -185,7 +211,7 @@ function ProdutosPage() {
           </div>
         }
       />
-
+      )}
     </div>
   );
 }

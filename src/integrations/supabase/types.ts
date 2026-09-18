@@ -6214,6 +6214,7 @@ export type Database = {
       can_view_kits: { Args: { _user_id: string }; Returns: boolean }
       catalog_markup_get: { Args: never; Returns: number }
       catalog_markup_set: { Args: { _percent: number }; Returns: number }
+      catalog_overview: { Args: never; Returns: Json }
       catalog_street_value: { Args: never; Returns: Json }
       claim_master_role: { Args: never; Returns: boolean }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }

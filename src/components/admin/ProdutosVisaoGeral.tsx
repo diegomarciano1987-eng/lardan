@@ -60,12 +60,14 @@ function Kpi({
   value,
   hint,
   tone,
+  onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   hint?: string;
   tone?: "success" | "warning" | "danger";
+  onClick?: () => void;
 }) {
   const cor =
     tone === "success"
@@ -75,8 +77,8 @@ function Kpi({
         : tone === "danger"
           ? "text-danger"
           : "text-ledger-text";
-  return (
-    <div className="ledger-panel flex min-w-0 flex-col gap-2 px-5 py-4">
+  const conteudo = (
+    <>
       <div className="flex items-center gap-2 text-ledger-muted">
         <span aria-hidden className="opacity-70">
           {icon}
@@ -85,8 +87,20 @@ function Kpi({
       </div>
       <p className={`num text-[1.6rem] leading-tight font-semibold ${cor}`}>{value}</p>
       {hint && <p className="text-[0.8125rem] font-medium text-ledger-muted">{hint}</p>}
-    </div>
+    </>
   );
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="ledger-panel flex min-w-0 cursor-pointer flex-col gap-2 px-5 py-4 text-left transition hover:border-champagne hover:shadow-sm"
+      >
+        {conteudo}
+      </button>
+    );
+  }
+  return <div className="ledger-panel flex min-w-0 flex-col gap-2 px-5 py-4">{conteudo}</div>;
 }
 
 function ListaRanking({
@@ -127,7 +141,11 @@ function ListaRanking({
   );
 }
 
-export function ProdutosVisaoGeral() {
+export function ProdutosVisaoGeral({
+  onAbrirPendencias,
+}: {
+  onAbrirPendencias?: (tipo: "sem_custo" | "sem_preco" | "sem_ncm" | "sem_referencia") => void;
+}) {
   const navigate = useNavigate();
   const q = useQuery({
     queryKey: ["catalog-overview"],
@@ -221,6 +239,7 @@ export function ProdutosVisaoGeral() {
             (t['sem_custo'] ?? 0) + (t['sem_preco'] ?? 0) + (t['sem_ncm'] ?? 0) + (t['sem_referencia'] ?? 0),
           )}
           tone="warning"
+          {...(onAbrirPendencias ? { onClick: () => onAbrirPendencias("sem_custo") } : {})}
           hint={`${formatInt(t['sem_custo'] ?? 0)} sem custo · ${formatInt(t['sem_preco'] ?? 0)} sem preço · ${formatInt(t['sem_ncm'] ?? 0)} sem NCM · ${formatInt(t['sem_referencia'] ?? 0)} sem referência`}
         />
       </div>

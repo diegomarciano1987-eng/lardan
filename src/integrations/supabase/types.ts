@@ -6215,6 +6215,15 @@ export type Database = {
       catalog_markup_get: { Args: never; Returns: number }
       catalog_markup_set: { Args: { _percent: number }; Returns: number }
       catalog_overview: { Args: never; Returns: Json }
+      catalog_pendencias: {
+        Args: {
+          _busca?: string
+          _limite?: number
+          _offset?: number
+          _tipo: string
+        }
+        Returns: Json
+      }
       catalog_street_value: { Args: never; Returns: Json }
       claim_master_role: { Args: never; Returns: boolean }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }

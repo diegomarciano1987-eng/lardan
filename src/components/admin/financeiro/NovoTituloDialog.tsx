@@ -69,6 +69,32 @@ export function NovoTituloDialog({
   const [parcelas, setParcelas] = React.useState<ParcelaForm[]>([
     { vencimento: undefined, valor: "" },
   ]);
+  const [recQtd, setRecQtd] = React.useState("");
+  const [recInicio, setRecInicio] = React.useState<Date | undefined>(undefined);
+  const [recValor, setRecValor] = React.useState("");
+
+  const gerarRecorrencia = () => {
+    const n = Number.parseInt(recQtd, 10);
+    if (!Number.isFinite(n) || n < 1 || n > 360) {
+      toast.error("Informe quantas vezes a conta se repete.");
+      return;
+    }
+    if (!recInicio) {
+      toast.error("Informe o primeiro vencimento.");
+      return;
+    }
+    if (!reaisParaCentavos(recValor)) {
+      toast.error("Informe o valor de cada parcela.");
+      return;
+    }
+    setParcelas(
+      Array.from({ length: n }, (_, i) => {
+        const d = new Date(recInicio);
+        d.setMonth(d.getMonth() + i);
+        return { vencimento: d, valor: recValor };
+      }),
+    );
+  };
 
   React.useEffect(() => {
     if (!open) {

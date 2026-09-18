@@ -6334,6 +6334,7 @@ export type Database = {
         Args: { _lead: string; _priority: string }
         Returns: Json
       }
+      crm_source_from_referrer: { Args: { _ref: string }; Returns: string }
       crm_stage_reorder: { Args: { _ordem: Json }; Returns: Json }
       crm_stage_save: { Args: { _payload: Json }; Returns: string }
       crm_tag_save: { Args: { _payload: Json }; Returns: string }

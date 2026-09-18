@@ -60,12 +60,14 @@ function Kpi({
   value,
   hint,
   tone,
+  onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   hint?: string;
   tone?: "success" | "warning" | "danger";
+  onClick?: () => void;
 }) {
   const cor =
     tone === "success"
@@ -75,8 +77,8 @@ function Kpi({
         : tone === "danger"
           ? "text-danger"
           : "text-ledger-text";
-  return (
-    <div className="ledger-panel flex min-w-0 flex-col gap-2 px-5 py-4">
+  const conteudo = (
+    <>
       <div className="flex items-center gap-2 text-ledger-muted">
         <span aria-hidden className="opacity-70">
           {icon}
@@ -85,8 +87,20 @@ function Kpi({
       </div>
       <p className={`num text-[1.6rem] leading-tight font-semibold ${cor}`}>{value}</p>
       {hint && <p className="text-[0.8125rem] font-medium text-ledger-muted">{hint}</p>}
-    </div>
+    </>
   );
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="ledger-panel flex min-w-0 cursor-pointer flex-col gap-2 px-5 py-4 text-left transition hover:border-champagne hover:shadow-sm"
+      >
+        {conteudo}
+      </button>
+    );
+  }
+  return <div className="ledger-panel flex min-w-0 flex-col gap-2 px-5 py-4">{conteudo}</div>;
 }
 
 function ListaRanking({

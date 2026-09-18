@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { SejaLardanForm } from "@/components/site/SejaLardanForm";
 import {
@@ -50,10 +50,13 @@ export const Route = createFileRoute("/seja-lardan")({
 });
 
 function SejaLardanPage() {
-  useLayoutEffect(() => {
-    if (window.location.hash === "#inicio") {
-      window.scrollTo(0, 0);
-    }
+  useEffect(() => {
+    if (window.location.hash !== "#inicio") return;
+
+    const frame = window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   return (

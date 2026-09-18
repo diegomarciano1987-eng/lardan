@@ -4752,12 +4752,14 @@ export type Database = {
           is_default: boolean
           label: string
           legacy_code: string | null
+          ncm: string | null
           plating_material_cost_cents: number | null
           plating_supplier_id: string | null
           plating_type_id: string | null
           position: number
           price_cents: number | null
           product_id: string
+          reference_code: string | null
           size: string | null
           sku: string | null
           updated_at: string
@@ -4775,12 +4777,14 @@ export type Database = {
           is_default?: boolean
           label: string
           legacy_code?: string | null
+          ncm?: string | null
           plating_material_cost_cents?: number | null
           plating_supplier_id?: string | null
           plating_type_id?: string | null
           position?: number
           price_cents?: number | null
           product_id: string
+          reference_code?: string | null
           size?: string | null
           sku?: string | null
           updated_at?: string
@@ -4798,12 +4802,14 @@ export type Database = {
           is_default?: boolean
           label?: string
           legacy_code?: string | null
+          ncm?: string | null
           plating_material_cost_cents?: number | null
           plating_supplier_id?: string | null
           plating_type_id?: string | null
           position?: number
           price_cents?: number | null
           product_id?: string
+          reference_code?: string | null
           size?: string | null
           sku?: string | null
           updated_at?: string
@@ -4836,6 +4842,7 @@ export type Database = {
       }
       products: {
         Row: {
+          barcode: string | null
           business_entity_id: string | null
           care_instructions: string | null
           catalog_defaults_version: number | null
@@ -4855,6 +4862,7 @@ export type Database = {
           material: string | null
           measurements: string | null
           name: string
+          ncm: string | null
           plating: string | null
           position: number
           price_cents: number | null
@@ -4864,6 +4872,7 @@ export type Database = {
           raw_piece_cost_cents: number | null
           raw_supplier_id: string | null
           raw_weight_grams: number | null
+          reference_code: string | null
           requires_catalog_review: boolean
           scheduled_publish_at: string | null
           seo_description: string | null
@@ -4880,6 +4889,7 @@ export type Database = {
           weight_grams: number | null
         }
         Insert: {
+          barcode?: string | null
           business_entity_id?: string | null
           care_instructions?: string | null
           catalog_defaults_version?: number | null
@@ -4899,6 +4909,7 @@ export type Database = {
           material?: string | null
           measurements?: string | null
           name: string
+          ncm?: string | null
           plating?: string | null
           position?: number
           price_cents?: number | null
@@ -4908,6 +4919,7 @@ export type Database = {
           raw_piece_cost_cents?: number | null
           raw_supplier_id?: string | null
           raw_weight_grams?: number | null
+          reference_code?: string | null
           requires_catalog_review?: boolean
           scheduled_publish_at?: string | null
           seo_description?: string | null
@@ -4924,6 +4936,7 @@ export type Database = {
           weight_grams?: number | null
         }
         Update: {
+          barcode?: string | null
           business_entity_id?: string | null
           care_instructions?: string | null
           catalog_defaults_version?: number | null
@@ -4943,6 +4956,7 @@ export type Database = {
           material?: string | null
           measurements?: string | null
           name?: string
+          ncm?: string | null
           plating?: string | null
           position?: number
           price_cents?: number | null
@@ -4952,6 +4966,7 @@ export type Database = {
           raw_piece_cost_cents?: number | null
           raw_supplier_id?: string | null
           raw_weight_grams?: number | null
+          reference_code?: string | null
           requires_catalog_review?: boolean
           scheduled_publish_at?: string | null
           seo_description?: string | null

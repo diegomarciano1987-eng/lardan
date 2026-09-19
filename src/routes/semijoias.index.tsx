@@ -48,6 +48,7 @@ export const Route = createFileRoute("/semijoias/")({
       name: p.name,
       path: `/produto/${p.slug}`,
       image: mediaUrl(p.cover_media_id),
+      priceCents: p.price_cents,
     }));
     const lista = itemListLd({ path: "/semijoias", name: "Semijoias Lardan", itens });
     return {

@@ -268,7 +268,7 @@ export function collectionPageLd(opts: {
 export function itemListLd(opts: {
   path: string;
   name: string;
-  itens: { name: string; path: string; image?: string | null }[];
+  itens: { name: string; path: string; image?: string | null; priceCents?: number | null }[];
 }): Json {
   const url = abs(opts.path);
   return {
@@ -285,7 +285,19 @@ export function itemListLd(opts: {
         url: abs(item.path),
       };
       if (item.image) produto["image"] = abs(item.image);
-      return { "@type": "ListItem", position: i + 1, item: produto };
+      // Exigência do Google: todo Product precisa de offers, review ou aggregateRating.
+      // Só emitimos offers com preço real; sem preço o item vira uma URL simples (nunca Product).
+      if (item.priceCents != null && item.priceCents > 0) {
+        produto["offers"] = {
+          "@type": "Offer",
+          price: (item.priceCents / 100).toFixed(2),
+          priceCurrency: "BRL",
+          url: abs(item.path),
+          seller: { "@id": `${SITE_URL}/#organization` },
+        };
+        return { "@type": "ListItem", position: i + 1, item: produto };
+      }
+      return { "@type": "ListItem", position: i + 1, url: abs(item.path), name: item.name };
     }),
   };
 }

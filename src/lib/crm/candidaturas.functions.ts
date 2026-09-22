@@ -117,7 +117,9 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
         ? "limite_envios"
         : error.message.includes("email_invalido")
           ? "email_invalido"
-          : "falha";
+          : error.message.includes("cpf_invalido")
+            ? "cpf_invalido"
+            : "falha";
       return { status: "erro" as const, codigo };
     }
     const r = resultado as { protocol: string; duplicate: boolean };

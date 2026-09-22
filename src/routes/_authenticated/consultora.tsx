@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BriefcaseBusiness, ExternalLink, PackageCheck, ShoppingBag, Store } from "lucide-react";

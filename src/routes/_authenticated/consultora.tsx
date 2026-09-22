@@ -257,6 +257,16 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
           </div>
         </Cartao>
       )}
+
+      <Movimentacoes
+        cycleId={cycleId}
+        nomes={Object.fromEntries([
+          ...d.composicao.map((c) => [c.variant_id, `${c.produto}${c.variante ? ` · ${c.variante}` : ""}`] as const),
+          ...d.saldos.map((b) => [b.variant_id, `${b.produto}${b.variante ? ` · ${b.variante}` : ""}`] as const),
+        ])}
+        podeGerir={false}
+        podeAcrescentar={false}
+      />
     </div>
   );
 }

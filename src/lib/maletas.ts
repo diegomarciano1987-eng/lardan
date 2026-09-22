@@ -261,6 +261,165 @@ export const aceitar = (
 export const publicarPeca = (cycleId: string, variantId: string, publicar: boolean) =>
   rpc<unknown>("kit_item_publish", { _cycle: cycleId, _variant: variantId, _publicar: publicar });
 
+/* ---------------- movimentações do ciclo ---------------- */
+
+export type DestinoRetorno = "retorno" | "garantia" | "perda" | "mantida";
+
+export const DESTINO_RETORNO: Record<DestinoRetorno, string> = {
+  retorno: "Devolvida à Matriz",
+  garantia: "Garantia / defeito",
+  perda: "Perda",
+  mantida: "Mantida com a consultora",
+};
+
+export interface ItemMovimento {
+  id: string;
+  variant_id: string;
+  quantidade: number;
+  destino: DestinoRetorno | null;
+  motivo: string | null;
+  recebida: number | null;
+  aprovada: number | null;
+  divergente: number | null;
+  motivo_conferencia: string | null;
+}
+
+export interface Movimento {
+  id: string;
+  seq: number;
+  tipo:
+    | "remessa_inicial"
+    | "acrescimo"
+    | "transferencia"
+    | "retorno"
+    | "mantida"
+    | "garantia"
+    | "perda"
+    | "venda"
+    | "divergencia";
+  situacao: "pendente" | "confirmado" | "cancelado";
+  quando: string;
+  confirmado_em: string | null;
+  confirmado_por: "consultora" | "representante" | "matriz" | null;
+  de_pessoa: string | null;
+  para_pessoa: string | null;
+  de_local: string | null;
+  para_local: string | null;
+  observacao: string | null;
+  itens: ItemMovimento[];
+}
+
+export const TIPO_MOVIMENTO: Record<string, string> = {
+  remessa_inicial: "Remessa inicial",
+  acrescimo: "Acréscimo",
+  transferencia: "Transferência",
+  retorno: "Retorno declarado",
+  mantida: "Mantida",
+  garantia: "Garantia",
+  perda: "Perda",
+  venda: "Venda",
+  divergencia: "Divergência",
+};
+
+export interface LinhaConciliacao {
+  variant_id: string;
+  enviado: number;
+  acrescido: number;
+  saiu: number;
+  aceito: number;
+  retornado: number;
+  retorno_em_transito: number;
+  garantia: number;
+  divergencia: number;
+  perda: number;
+  mantida: number;
+  vendido: number;
+  a_caminho: number;
+  sob_responsabilidade: number;
+  a_explicar: number;
+}
+
+export interface Conciliacao {
+  linhas: LinhaConciliacao[];
+  totais: Omit<LinhaConciliacao, "variant_id" | "enviado" | "acrescido" | "sob_responsabilidade">;
+  vendas_disponiveis: boolean;
+  aviso: string;
+}
+
+export const historicoMaleta = (cycleId: string) =>
+  rpc<{ movimentos: Movimento[] }>("kit_historico", { _cycle: cycleId });
+
+export const conciliacaoMaleta = (cycleId: string) => rpc<Conciliacao>("kit_conciliacao", { _cycle: cycleId });
+
+/** Acréscimo: baixa na origem e as peças ficam a caminho até a confirmação de quem recebe. */
+export const acrescentarPecas = (
+  cycleId: string,
+  payload: {
+    itens: { variant_id: string; quantity: number; reason?: string }[];
+    origem_location_id?: string | null;
+    carrier?: string;
+    tracking_code?: string;
+    note?: string;
+    idempotency_key: string;
+  },
+) =>
+  rpc<{ movement_id: string; itens: number; quantidade: number; situacao: string; repetida?: boolean }>(
+    "kit_acrescimo",
+    { _cycle: cycleId, _payload: payload },
+  );
+
+export const confirmarAcrescimo = (movementId: string) =>
+  rpc<{ movement_id: string; situacao: string; quantidade?: number; recebido_por?: string; repetida?: boolean }>(
+    "kit_acrescimo_confirmar",
+    { _movement: movementId, _payload: {} },
+  );
+
+/** Declaração de retorno: peça a peça, com destino. Nada baixa no depósito antes da conferência. */
+export const declararRetorno = (
+  cycleId: string,
+  payload: {
+    itens: { variant_id: string; quantity: number; destino: DestinoRetorno; reason?: string }[];
+    note?: string;
+    idempotency_key: string;
+  },
+) =>
+  rpc<{ movement_id: string; itens: number; quantidade: number; situacao: string; repetida?: boolean }>(
+    "kit_retorno",
+    { _cycle: cycleId, _payload: payload },
+  );
+
+/** Conferência da Matriz: declarado × recebido × aprovado × divergente. */
+export const conferirRetorno = (
+  movementId: string,
+  payload: {
+    destino_location_id?: string | null;
+    itens: { item_id: string; qty_recebida: number; qty_aprovada: number; qty_divergente: number; motivo?: string }[];
+  },
+) =>
+  rpc<{
+    movement_id: string;
+    situacao: string;
+    recebidas: number;
+    aprovadas: number;
+    divergentes: number;
+    faltantes: number;
+    perdas: number;
+    aviso: string | null;
+    repetida?: boolean;
+  }>("kit_retorno_confirmar", { _movement: movementId, _payload: payload });
+
+export async function depositosAtivos() {
+  const { data, error } = await supabase
+    .from("locations")
+    .select("id, name, kind, is_blocked, is_active")
+    .eq("kind", "deposito")
+    .eq("is_active", true)
+    .eq("is_blocked", false)
+    .order("name");
+  if (error) throw error;
+  return (data ?? []) as { id: string; name: string }[];
+}
+
 /* ---------------- vitrine ---------------- */
 export const salvarVitrine = (payload: {
   slug: string;

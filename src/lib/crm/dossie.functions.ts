@@ -189,7 +189,7 @@ export const gerarDossieCandidatura = createServerFn({ method: "POST" })
     };
 
     const campo = (rotulo: string, valor: string | null | undefined) => {
-      const v = limpar((valor ?? "").toString().trim() || "—");
+      const v = limpar((valor ?? "").toString().trim() || VAZIO);
       const largura = LARGURA - MARGEM * 2 - 132;
       const linhas = quebrar(v, 10.5, largura);
       espaco(18 + (linhas.length - 1) * 14);

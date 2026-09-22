@@ -59,3 +59,11 @@
 - [ ] Retorno de maleta, acerto Lardan x consultora e conclusão comercial do pedido
 - [ ] Agendador do vencimento de reservas (rotina pronta, sem agendamento)
 
+
+- [x] Etapa 1 — histórico de movimentações da maleta: acréscimo, retorno por destino,
+      confirmação pela Matriz, histórico imutável e conferência por produto
+      (docs/lardan/MALETAS-MOVIMENTACOES.md; 15 testes do cenário 50+5-20, suíte 268/268)
+- [ ] Etapa 1b — telas de acréscimo, retorno, histórico e conferência (rotinas prontas no banco)
+- [ ] Etapa 2 — conferência e preparação de acerto (depende da regra comercial, ainda não definida)
+- [ ] Etapa 3 — importação e sincronização Asaas (sandbox primeiro)
+- [ ] Etapa 4 — camada fiscal preparada e inativa

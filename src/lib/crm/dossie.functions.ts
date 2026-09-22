@@ -360,7 +360,7 @@ export const gerarDossieCandidatura = createServerFn({ method: "POST" })
     }
 
     return {
-      url: assinado.signedUrl,
+      url,
       nome,
       protocolo: String(c["protocolo"] ?? ""),
       cidade: String(c["cidade"] ?? ""),

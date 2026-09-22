@@ -51,3 +51,6 @@
       (18/09/2026). Painel passou de 4 para 6 blocos.
 
 - [x] Ecossistema Lardan — card "Sua vitrine digital" com a cópia oficial: "Você terá uma página própria na internet para vender suas semijoias." + "Uma webpage gratuita focada em vendas que vai lhe ajudar a vender." (fonte única em src/lib/seja-lardan-conteudo.ts; vale no pop-up e na seção #ferramentas)
+
+- [x] Rodada de segurança das maletas: isolamento por pessoa, bloqueio de escrita direta, aceite exato, concorrência e busca no servidor (docs/lardan/MALETAS-SEGURANCA.md)
+- [ ] Retorno de maleta, acerto Lardan x consultora e conclusão comercial do pedido (próxima etapa)

@@ -201,14 +201,19 @@ async function rpc<T>(nome: string, args: Record<string, unknown> = {}) {
 }
 
 /* ---------------- maletas ---------------- */
-export const listarMaletas = (situacao?: string) =>
-  rpc<MaletaCard[]>("kit_board", { _filtros: situacao && situacao !== "todas" ? { situacao } : {} });
+export const listarMaletas = (situacao?: string, pagina = 0, tamanho = 200) =>
+  rpc<MaletaCard[]>("kit_board", {
+    _filtros: situacao && situacao !== "todas" ? { situacao } : {},
+    _limit: tamanho,
+    _offset: pagina * tamanho,
+  });
 
 export const detalheMaleta = (cycleId: string) => rpc<DetalheMaleta>("kit_detail", { _cycle: cycleId });
 
 export const criarCiclo = (payload: {
   consultora_party_id?: string | null;
   representante_party_id?: string | null;
+  origin_location_id?: string | null;
   label?: string | null;
   due_at?: string | null;
   notes?: string | null;
@@ -231,9 +236,21 @@ export const confirmarEntrega = (transferId: string, payload: { recusar?: boolea
 export const encaminhar = (cycleId: string, payload: { carrier?: string; tracking_code?: string; note?: string } = {}) =>
   rpc<{ situacao?: string; repetida?: boolean }>("kit_transfer_forward", { _cycle: cycleId, _payload: payload });
 
+export type TipoDivergencia = "faltante" | "defeito";
+
+/**
+ * A conferência precisa classificar TODAS as peças enviadas:
+ * aceitas + divergentes tem de somar exatamente o que foi expedido.
+ */
 export const aceitar = (
   cycleId: string,
-  itens: { variant_id: string; qty_accepted: number; qty_divergent: number; motivo?: string }[],
+  itens: {
+    variant_id: string;
+    qty_accepted: number;
+    qty_divergent: number;
+    tipo_divergencia?: TipoDivergencia;
+    motivo?: string;
+  }[],
   chave: string,
 ) => rpc<{ acceptance_id: string; repetida?: boolean }>("kit_aceitar", {
   _cycle: cycleId,

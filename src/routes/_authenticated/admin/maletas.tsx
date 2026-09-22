@@ -33,42 +33,65 @@ const SITUACOES = [
   ...Object.entries(SITUACAO_MALETA).map(([value, v]) => ({ value, label: v.rotulo })),
 ];
 
+/** Busca no servidor: a lista nunca é um recorte filtrado no navegador. */
 async function buscarPessoas(papel: "consultora" | "representante", termo: string) {
   const { data, error } = await supabase.rpc("list_parties", {
-    _limit: 30,
+    _limit: 40,
     _offset: 0,
     _role: papel,
+    _status: "ativo",
     ...(termo.trim() ? { _search: termo.trim() } : {}),
   } as never);
   if (error) throw error;
-  return ((data ?? []) as unknown as { id: string; display_name: string }[]).map((p) => ({
-    value: p.id,
-    label: p.display_name,
-  }));
+  const linhas = (data ?? []) as unknown as { id: string; display_name: string; total?: number }[];
+  return {
+    total: Number(linhas[0]?.total ?? linhas.length),
+    opcoes: linhas.map((p) => ({ value: p.id, label: p.display_name })),
+  };
+}
+
+async function buscarDepositos() {
+  const { data, error } = await supabase
+    .from("locations")
+    .select("id, code, name")
+    .eq("kind", "deposito")
+    .eq("is_active", true)
+    .order("code");
+  if (error) throw error;
+  return (data ?? []).map((l) => ({ value: l.id, label: `${l.code} · ${l.name}` }));
 }
 
 function NovaMaleta({ aoCriar }: { aoCriar: (cycleId: string) => void }) {
   const [aberto, setAberto] = React.useState(false);
   const [consultora, setConsultora] = React.useState("");
   const [representante, setRepresentante] = React.useState("");
+  const [deposito, setDeposito] = React.useState("");
   const [etiqueta, setEtiqueta] = React.useState("");
+  const [buscaC, setBuscaC] = React.useState("");
+  const [buscaR, setBuscaR] = React.useState("");
 
   const consultoras = useQuery({
-    queryKey: ["maletas", "pessoas", "consultora"],
-    queryFn: () => buscarPessoas("consultora", ""),
+    queryKey: ["maletas", "pessoas", "consultora", buscaC],
+    queryFn: () => buscarPessoas("consultora", buscaC),
     enabled: aberto,
   });
   const representantes = useQuery({
-    queryKey: ["maletas", "pessoas", "representante"],
-    queryFn: () => buscarPessoas("representante", ""),
+    queryKey: ["maletas", "pessoas", "representante", buscaR],
+    queryFn: () => buscarPessoas("representante", buscaR),
     enabled: aberto,
   });
+  const depositos = useQuery({ queryKey: ["maletas", "depositos"], queryFn: buscarDepositos, enabled: aberto });
+
+  React.useEffect(() => {
+    if (depositos.data?.length === 1 && !deposito) setDeposito(depositos.data[0]!.value);
+  }, [depositos.data, deposito]);
 
   const criar = useMutation({
     mutationFn: () =>
       criarCiclo({
         consultora_party_id: consultora || null,
         representante_party_id: representante || null,
+        origin_location_id: deposito || null,
         label: etiqueta || null,
       }),
     onSuccess: (r) => {
@@ -89,24 +112,47 @@ function NovaMaleta({ aoCriar }: { aoCriar: (cycleId: string) => void }) {
 
   return (
     <Panel title="Nova maleta" className="w-full">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Consultora</span>
           <SmartSelect
             value={consultora}
             onChange={setConsultora}
-            options={consultoras.data ?? []}
+            options={consultoras.data?.opcoes ?? []}
+            onSearch={setBuscaC}
+            loading={consultoras.isFetching}
+            searchPlaceholder="Buscar por nome, código ou documento"
             placeholder="Escolher consultora"
           />
+          <span className="text-xs text-ledger-muted">
+            {consultoras.data
+              ? `${consultoras.data.total} consultora(s) encontradas · mostrando ${consultoras.data.opcoes.length}`
+              : "Digite para buscar em toda a base."}
+          </span>
         </label>
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Representante (opcional)</span>
           <SmartSelect
             value={representante}
             onChange={setRepresentante}
-            options={representantes.data ?? []}
+            options={representantes.data?.opcoes ?? []}
+            onSearch={setBuscaR}
+            loading={representantes.isFetching}
+            searchPlaceholder="Buscar representante"
             placeholder="Entrega direta"
           />
+        </label>
+        <label className="grid gap-1.5 text-sm">
+          <span className="ledger-eyebrow">Depósito de origem</span>
+          <SmartSelect
+            value={deposito}
+            onChange={setDeposito}
+            options={depositos.data ?? []}
+            placeholder="Escolher depósito"
+          />
+          <span className="text-xs text-ledger-muted">
+            As peças saem deste depósito. Com mais de um ativo, a escolha é obrigatória.
+          </span>
         </label>
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Etiqueta</span>

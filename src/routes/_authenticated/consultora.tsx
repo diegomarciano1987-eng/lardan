@@ -19,6 +19,7 @@ import {
   publicarPeca,
   salvarVitrine,
   traduzir,
+  type TipoDivergencia,
 } from "@/lib/maletas";
 
 export const Route = createFileRoute("/_authenticated/consultora")({
@@ -48,6 +49,8 @@ function Cartao({ children, className = "" }: { children: React.ReactNode; class
 function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
   const qc = useQueryClient();
   const [divergencias, setDivergencias] = React.useState<Record<string, number>>({});
+  const [tipos, setTipos] = React.useState<Record<string, TipoDivergencia>>({});
+  const [motivos, setMotivos] = React.useState<Record<string, string>>({});
   const [chave] = React.useState(chaveIdempotencia);
 
   const ficha = useQuery({
@@ -68,12 +71,20 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
   const aceite = useMutation({
     mutationFn: () => {
       const itens = (ficha.data?.composicao ?? []).map((c) => {
-        const div = divergencias[c.variant_id] ?? 0;
+        const div = Math.min(Math.max(divergencias[c.variant_id] ?? 0, 0), c.quantidade);
+        const tipo = tipos[c.variant_id] ?? "faltante";
         return {
           variant_id: c.variant_id,
-          qty_accepted: Math.max(c.quantidade - div, 0),
+          qty_accepted: c.quantidade - div,
           qty_divergent: div,
-          motivo: div > 0 ? "Divergência apontada na conferência" : "",
+          ...(div > 0
+            ? {
+                tipo_divergencia: tipo,
+                motivo:
+                  motivos[c.variant_id]?.trim() ||
+                  (tipo === "faltante" ? "Peça não veio na maleta" : "Peça recebida com defeito"),
+              }
+            : {}),
         };
       });
       return aceitar(cycleId!, itens, chave);
@@ -144,34 +155,66 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         <Cartao>
           <p className="font-semibold">Conferência</p>
           <p className="mt-1 text-sm text-ledger-muted">
-            Informe quantas unidades vieram com problema ou não vieram. O restante é aceito.
+            Toda peça precisa ser classificada: o que você não informar como faltante ou com defeito
+            é registrado como recebido em ordem.
           </p>
-          <div className="mt-4 space-y-3">
-            {d.composicao.map((c) => (
-              <div key={c.variant_id} className="flex items-center gap-3">
-                {imagem(c.media_id) ? (
-                  <img src={imagem(c.media_id)!} alt="" className="size-14 rounded-xl object-cover" />
-                ) : (
-                  <div className="size-14 rounded-xl bg-surface-muted" aria-hidden />
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{c.produto}</p>
-                  <p className="text-xs text-ledger-muted">
-                    {c.variante ?? "—"} · {c.quantidade} un
-                  </p>
+          <div className="mt-4 space-y-4">
+            {d.composicao.map((c) => {
+              const div = Math.min(Math.max(divergencias[c.variant_id] ?? 0, 0), c.quantidade);
+              return (
+                <div key={c.variant_id} className="space-y-2 border-b border-line-soft pb-3 last:border-0">
+                  <div className="flex items-center gap-3">
+                    {imagem(c.media_id) ? (
+                      <img src={imagem(c.media_id)!} alt="" className="size-14 rounded-xl object-cover" />
+                    ) : (
+                      <div className="size-14 rounded-xl bg-surface-muted" aria-hidden />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold">{c.produto}</p>
+                      <p className="text-xs text-ledger-muted">
+                        {c.variante ?? "—"} · enviadas {c.quantidade} · aceitas {c.quantidade - div}
+                      </p>
+                    </div>
+                    <input
+                      type="number"
+                      min={0}
+                      max={c.quantidade}
+                      aria-label={`Unidades com problema de ${c.produto}`}
+                      className="admin-input w-20"
+                      value={divergencias[c.variant_id] ?? 0}
+                      onChange={(e) =>
+                        setDivergencias((v) => ({
+                          ...v,
+                          [c.variant_id]: Math.min(Math.max(0, Number(e.target.value)), c.quantidade),
+                        }))
+                      }
+                    />
+                  </div>
+                  {div > 0 && (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <select
+                        aria-label={`Tipo da divergência de ${c.produto}`}
+                        className="admin-input"
+                        value={tipos[c.variant_id] ?? "faltante"}
+                        onChange={(e) =>
+                          setTipos((v) => ({ ...v, [c.variant_id]: e.target.value as TipoDivergencia }))
+                        }
+                      >
+                        <option value="faltante">Não veio na maleta</option>
+                        <option value="defeito">Veio com defeito</option>
+                      </select>
+                      <input
+                        className="admin-input"
+                        aria-label={`Motivo da divergência de ${c.produto}`}
+                        placeholder="Descreva o que aconteceu"
+                        value={motivos[c.variant_id] ?? ""}
+                        onChange={(e) => setMotivos((v) => ({ ...v, [c.variant_id]: e.target.value }))}
+                      />
+                    </div>
+                  )}
                 </div>
-                <input
-                  type="number"
-                  min={0}
-                  max={c.quantidade}
-                  className="admin-input w-20"
-                  value={divergencias[c.variant_id] ?? 0}
-                  onChange={(e) =>
-                    setDivergencias((v) => ({ ...v, [c.variant_id]: Math.max(0, Number(e.target.value)) }))
-                  }
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
           <button
             type="button"
@@ -450,9 +493,13 @@ function Historico({ cycleId }: { cycleId: string | null }) {
 
 function AreaConsultora() {
   const [aba, setAba] = React.useState<Aba>("maleta");
+  const [escolhida, setEscolhida] = React.useState<string | null>(null);
   const maletas = useQuery({ queryKey: ["consultora", "maletas"], queryFn: () => listarMaletas() });
-  const atual =
-    (maletas.data ?? []).find((m) => !["encerrada", "cancelada"].includes(m.situacao))?.cycle_id ?? null;
+
+  // Só maletas que o próprio banco devolveu para esta pessoa entram na escolha.
+  const abertas = (maletas.data ?? []).filter((m) => !["encerrada", "cancelada"].includes(m.situacao));
+  const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
+  const atual = valida ?? abertas[0]?.cycle_id ?? null;
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6 px-4 py-6">
@@ -476,6 +523,23 @@ function AreaConsultora() {
           </button>
         ))}
       </nav>
+
+      {abertas.length > 1 && (
+        <label className="grid gap-1 text-sm">
+          <span className="text-xs uppercase tracking-widest text-ledger-muted">Maleta em uso</span>
+          <select
+            className="admin-input"
+            value={atual ?? ""}
+            onChange={(e) => setEscolhida(e.target.value || null)}
+          >
+            {abertas.map((m) => (
+              <option key={m.cycle_id} value={m.cycle_id}>
+                {m.codigo} · ciclo {m.ciclo} · {SITUACAO_MALETA[m.situacao]?.rotulo ?? m.situacao}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       {aba === "maleta" && <MinhaMaleta cycleId={atual} />}
       {aba === "vitrine" && <MinhaVitrine />}

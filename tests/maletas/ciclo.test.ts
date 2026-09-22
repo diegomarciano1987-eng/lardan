@@ -247,7 +247,15 @@ describe("Maleta — ciclo operacional", () => {
 
       const aceite = await rpc(tokenConsultora, "kit_aceitar", {
         _cycle: c.cycle_id,
-        _itens: [{ variant_id: varA, qty_accepted: 2, qty_divergent: 1, motivo: "faltou 1 peça" }],
+        _itens: [
+          {
+            variant_id: varA,
+            qty_accepted: 2,
+            qty_divergent: 1,
+            tipo_divergencia: "faltante",
+            motivo: "faltou 1 peça",
+          },
+        ],
         _idempotency_key: `homolog-aceite-${c.cycle_id}`,
       });
       expect(aceite.status).toBe(200);
@@ -264,7 +272,15 @@ describe("Maleta — ciclo operacional", () => {
 
       const repetido = await rpc(tokenConsultora, "kit_aceitar", {
         _cycle: c.cycle_id,
-        _itens: [{ variant_id: varA, qty_accepted: 2, qty_divergent: 1 }],
+        _itens: [
+          {
+            variant_id: varA,
+            qty_accepted: 2,
+            qty_divergent: 1,
+            tipo_divergencia: "faltante",
+            motivo: "faltou 1 peça",
+          },
+        ],
         _idempotency_key: `homolog-aceite-${c.cycle_id}`,
       });
       expect((repetido.body as { repetida?: boolean }).repetida).toBe(true);

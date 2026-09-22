@@ -366,6 +366,6 @@ export const gerarDossieCandidatura = createServerFn({ method: "POST" })
       cidade: String(c["cidade"] ?? ""),
       uf: String(c["uf"] ?? ""),
       whatsapp: telefoneBonito(String(c["whatsapp"] ?? "")),
-      expiraEm: new Date(Date.now() + validade * 1000).toISOString(),
+      expiraEm,
     };
   });

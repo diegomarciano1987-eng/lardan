@@ -83,3 +83,5 @@
       garantia fora do disponível, recebimento por representante × consultora)
 - [ ] Regra do "um terço": pendente de esclarecimento comercial/fiscal; registrada sem efeito
 - [ ] Adaptador Asaas com simulações locais (próxima etapa)
+
+- [x] Validação em ambiente isolado (banco local, dados sintéticos): 41 testes aprovados — integridade das movimentações (28) e inertância fiscal/Asaas com reaproveitamento do financeiro (13). Falha encontrada e corrigida: liberação de peças bloqueadas era recusada a quem tinha a permissão. Evidências em docs/lardan/VALIDACAO-ISOLADA.md; reprodução em tests/isolado/LEIA-ME.md.

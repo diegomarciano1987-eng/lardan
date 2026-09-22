@@ -3257,6 +3257,7 @@ export type Database = {
       kit_acceptance_items: {
         Row: {
           acceptance_id: string
+          divergence_kind: string | null
           divergence_reason: string | null
           id: string
           photos: Json
@@ -3269,6 +3270,7 @@ export type Database = {
         }
         Insert: {
           acceptance_id: string
+          divergence_kind?: string | null
           divergence_reason?: string | null
           id?: string
           photos?: Json
@@ -3281,6 +3283,7 @@ export type Database = {
         }
         Update: {
           acceptance_id?: string
+          divergence_kind?: string | null
           divergence_reason?: string | null
           id?: string
           photos?: Json
@@ -3319,6 +3322,7 @@ export type Database = {
           idempotency_key: string | null
           kind: Database["public"]["Enums"]["kit_acceptance_kind"]
           party_id: string | null
+          payload_hash: string | null
           terms_version: string
         }
         Insert: {
@@ -3331,6 +3335,7 @@ export type Database = {
           idempotency_key?: string | null
           kind: Database["public"]["Enums"]["kit_acceptance_kind"]
           party_id?: string | null
+          payload_hash?: string | null
           terms_version?: string
         }
         Update: {
@@ -3343,6 +3348,7 @@ export type Database = {
           idempotency_key?: string | null
           kind?: Database["public"]["Enums"]["kit_acceptance_kind"]
           party_id?: string | null
+          payload_hash?: string | null
           terms_version?: string
         }
         Relationships: [
@@ -6817,7 +6823,10 @@ export type Database = {
         Args: { _cycle: string; _idempotency_key?: string; _itens: Json }
         Returns: Json
       }
-      kit_board: { Args: { _filtros?: Json }; Returns: Json }
+      kit_board: {
+        Args: { _filtros?: Json; _limit?: number; _offset?: number }
+        Returns: Json
+      }
       kit_conferir: { Args: { _cycle: string; _note?: string }; Returns: Json }
       kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
@@ -6833,7 +6842,9 @@ export type Database = {
       }
       kit_location_ensure: { Args: { _kit_id: string }; Returns: string }
       kit_reference_price: { Args: { _variant: string }; Returns: number }
+      kit_require_cycle: { Args: { _cycle: string }; Returns: string }
       kit_require_manage: { Args: never; Returns: string }
+      kit_scope_all: { Args: never; Returns: boolean }
       kit_totals_refresh: { Args: { _cycle: string }; Returns: undefined }
       kit_transfer_confirm: {
         Args: { _payload?: Json; _transfer: string }

@@ -24,6 +24,13 @@ type Props = {
   className?: string;
   /** Mostra o campo de busca a partir deste número de opções. */
   searchThreshold?: number;
+  /**
+   * Busca no servidor. Quando informada, o termo digitado é enviado ao banco
+   * (com atraso curto) em vez de filtrar apenas as opções já carregadas.
+   */
+  onSearch?: (termo: string) => void;
+  /** Indica busca em andamento no servidor. */
+  loading?: boolean;
 };
 
 function normalizar(v: string) {
@@ -47,6 +54,8 @@ export function SmartSelect({
   required,
   className,
   searchThreshold = 7,
+  onSearch,
+  loading,
 }: Props) {
   const [open, setOpen] = React.useState(false);
   const [term, setTerm] = React.useState("");
@@ -54,9 +63,18 @@ export function SmartSelect({
   const listRef = React.useRef<HTMLDivElement>(null);
 
   const selecionado = options.find((o) => o.value === value);
-  const mostrarBusca = options.length >= searchThreshold;
+  const mostrarBusca = !!onSearch || options.length >= searchThreshold;
+
+  // Busca no servidor: o termo vai ao banco, nunca filtra só o que já veio.
+  React.useEffect(() => {
+    if (!onSearch || !open) return;
+    const t = setTimeout(() => onSearch(term), 250);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [term, open]);
 
   const filtradas = React.useMemo(() => {
+    if (onSearch) return options;
     if (!term.trim()) return options;
     const partes = normalizar(term).split(/\s+/).filter(Boolean);
     return options.filter((o) => {
@@ -156,7 +174,10 @@ export function SmartSelect({
             </div>
           )}
           <div ref={listRef} role="listbox" className="max-h-64 overflow-y-auto p-1">
-            {planas.length === 0 && (
+            {loading && (
+              <p className="px-3 py-6 text-center text-sm text-muted-foreground">Buscando…</p>
+            )}
+            {!loading && planas.length === 0 && (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground">{emptyLabel}</p>
             )}
             {grupos.map(([grupo, itens]) => (

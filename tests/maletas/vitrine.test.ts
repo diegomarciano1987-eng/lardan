@@ -180,7 +180,13 @@ beforeAll(async () => {
   await rpc(tokenConsultora, "kit_aceitar", {
     _cycle: ciclo,
     _itens: [
-      { variant_id: varA, qty_accepted: 2, qty_divergent: 1, motivo: "faltou 1 peça" },
+      {
+        variant_id: varA,
+        qty_accepted: 2,
+        qty_divergent: 1,
+        tipo_divergencia: "faltante",
+        motivo: "faltou 1 peça",
+      },
       { variant_id: varB, qty_accepted: 1, qty_divergent: 0 },
     ],
     _idempotency_key: `homolog-vitrine-aceite-${marca}`,

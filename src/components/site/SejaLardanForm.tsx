@@ -184,7 +184,9 @@ export function SejaLardanForm() {
     const resposta = await enviarFn({
       data: {
         payload: semVazios({
-          full_name: texto("full_name") ?? "",
+          first_name: texto("first_name") ?? "",
+          last_name: texto("last_name") ?? "",
+          cpf: onlyDigits(cpf),
           whatsapp: whatsappCanonico.canonico,
           email: texto("email"),
           city: texto("city") ?? "",

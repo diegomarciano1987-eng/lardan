@@ -14,6 +14,7 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { VariantPicker, type VariantOption } from "@/components/admin/VariantPicker";
+import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   SITUACAO_MALETA,

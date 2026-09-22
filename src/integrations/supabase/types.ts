@@ -3391,6 +3391,7 @@ export type Database = {
           qty_allocated: number
           qty_available: number | null
           qty_divergent: number
+          qty_incoming: number
           qty_lost: number
           qty_reserved: number
           qty_retained: number
@@ -3409,6 +3410,7 @@ export type Database = {
           qty_allocated?: number
           qty_available?: number | null
           qty_divergent?: number
+          qty_incoming?: number
           qty_lost?: number
           qty_reserved?: number
           qty_retained?: number
@@ -3427,6 +3429,7 @@ export type Database = {
           qty_allocated?: number
           qty_available?: number | null
           qty_divergent?: number
+          qty_incoming?: number
           qty_lost?: number
           qty_reserved?: number
           qty_retained?: number
@@ -3739,6 +3742,197 @@ export type Database = {
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kit_movement_items: {
+        Row: {
+          created_at: string
+          destino: string | null
+          id: string
+          movement_id: string
+          quantity: number
+          reason: string | null
+          unit_reference_cents: number | null
+          variant_id: string
+        }
+        Insert: {
+          created_at?: string
+          destino?: string | null
+          id?: string
+          movement_id: string
+          quantity: number
+          reason?: string | null
+          unit_reference_cents?: number | null
+          variant_id: string
+        }
+        Update: {
+          created_at?: string
+          destino?: string | null
+          id?: string
+          movement_id?: string
+          quantity?: number
+          reason?: string | null
+          unit_reference_cents?: number | null
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_movement_items_movement_id_fkey"
+            columns: ["movement_id"]
+            isOneToOne: false
+            referencedRelation: "kit_movements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movement_items_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kit_movements: {
+        Row: {
+          actor_user_id: string | null
+          composition_id: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          cycle_id: string
+          from_location_id: string | null
+          from_party_id: string | null
+          id: string
+          idempotency_key: string | null
+          kind: string
+          kit_id: string
+          note: string | null
+          occurred_at: string
+          payload_hash: string | null
+          seq: number
+          status: string
+          to_location_id: string | null
+          to_party_id: string | null
+          transfer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          composition_id?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          cycle_id: string
+          from_location_id?: string | null
+          from_party_id?: string | null
+          id?: string
+          idempotency_key?: string | null
+          kind: string
+          kit_id: string
+          note?: string | null
+          occurred_at?: string
+          payload_hash?: string | null
+          seq: number
+          status?: string
+          to_location_id?: string | null
+          to_party_id?: string | null
+          transfer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          composition_id?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          cycle_id?: string
+          from_location_id?: string | null
+          from_party_id?: string | null
+          id?: string
+          idempotency_key?: string | null
+          kind?: string
+          kit_id?: string
+          note?: string | null
+          occurred_at?: string
+          payload_hash?: string | null
+          seq?: number
+          status?: string
+          to_location_id?: string | null
+          to_party_id?: string | null
+          transfer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_movements_composition_id_fkey"
+            columns: ["composition_id"]
+            isOneToOne: false
+            referencedRelation: "kit_compositions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movements_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movements_from_location_id_fkey"
+            columns: ["from_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movements_from_party_id_fkey"
+            columns: ["from_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movements_from_party_id_fkey"
+            columns: ["from_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_movements_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movements_to_location_id_fkey"
+            columns: ["to_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movements_to_party_id_fkey"
+            columns: ["to_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movements_to_party_id_fkey"
+            columns: ["to_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_movements_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "kit_transfers"
             referencedColumns: ["id"]
           },
         ]
@@ -6823,15 +7017,22 @@ export type Database = {
         Args: { _cycle: string; _idempotency_key?: string; _itens: Json }
         Returns: Json
       }
+      kit_acrescimo: { Args: { _cycle: string; _payload: Json }; Returns: Json }
+      kit_acrescimo_confirmar: {
+        Args: { _movement: string; _payload?: Json }
+        Returns: Json
+      }
       kit_board: {
         Args: { _filtros?: Json; _limit?: number; _offset?: number }
         Returns: Json
       }
+      kit_conciliacao: { Args: { _cycle: string }; Returns: Json }
       kit_conferir: { Args: { _cycle: string; _note?: string }; Returns: Json }
       kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
       kit_detail: { Args: { _cycle: string }; Returns: Json }
       kit_expedir: { Args: { _cycle: string; _payload?: Json }; Returns: Json }
+      kit_historico: { Args: { _cycle: string }; Returns: Json }
       kit_item_publish: {
         Args: { _cycle: string; _publicar: boolean; _variant: string }
         Returns: Json
@@ -6841,9 +7042,31 @@ export type Database = {
         Returns: Json
       }
       kit_location_ensure: { Args: { _kit_id: string }; Returns: string }
+      kit_movement_open: {
+        Args: {
+          _actor: string
+          _cycle: string
+          _from_loc: string
+          _from_party: string
+          _hash: string
+          _idem: string
+          _kind: string
+          _note: string
+          _status: string
+          _to_loc: string
+          _to_party: string
+          _transfer: string
+        }
+        Returns: string
+      }
       kit_reference_price: { Args: { _variant: string }; Returns: number }
       kit_require_cycle: { Args: { _cycle: string }; Returns: string }
       kit_require_manage: { Args: never; Returns: string }
+      kit_retorno: { Args: { _cycle: string; _payload: Json }; Returns: Json }
+      kit_retorno_confirmar: {
+        Args: { _movement: string; _payload?: Json }
+        Returns: Json
+      }
       kit_scope_all: { Args: never; Returns: boolean }
       kit_totals_refresh: { Args: { _cycle: string }; Returns: undefined }
       kit_transfer_confirm: {

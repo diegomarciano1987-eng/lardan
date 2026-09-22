@@ -32,6 +32,7 @@ import { Route as SitemapPagesDotxmlRouteImport } from './routes/sitemap-pages[.
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedConsultoraRouteImport } from './routes/_authenticated/consultora'
+import { Route as DCodigoRouteImport } from './routes/d.$codigo'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
 import { Route as SemijoiasCategoriaRouteImport } from './routes/semijoias.$categoria'
@@ -198,6 +199,11 @@ const AuthenticatedConsultoraRoute = AuthenticatedConsultoraRouteImport.update({
   id: '/consultora',
   path: '/consultora',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const DCodigoRoute = DCodigoRouteImport.update({
+  id: '/d/$codigo',
+  path: '/d/$codigo',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ProdutoSlugRoute = ProdutoSlugRouteImport.update({
   id: '/produto/$slug',
@@ -507,6 +513,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/consultora': typeof AuthenticatedConsultoraRoute
+  '/d/$codigo': typeof DCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -579,6 +586,7 @@ export interface FileRoutesByTo {
   '/sitemap-pages.xml': typeof SitemapPagesDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/consultora': typeof AuthenticatedConsultoraRoute
+  '/d/$codigo': typeof DCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -653,6 +661,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/consultora': typeof AuthenticatedConsultoraRoute
+  '/d/$codigo': typeof DCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -728,6 +737,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin'
     | '/consultora'
+    | '/d/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -800,6 +810,7 @@ export interface FileRouteTypes {
     | '/sitemap-pages.xml'
     | '/sitemap.xml'
     | '/consultora'
+    | '/d/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -873,6 +884,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/consultora'
+    | '/d/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -946,6 +958,7 @@ export interface RootRouteChildren {
   SemijoiasConsignadasParaRevendaRoute: typeof SemijoiasConsignadasParaRevendaRoute
   SitemapPagesDotxmlRoute: typeof SitemapPagesDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  DCodigoRoute: typeof DCodigoRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
   SitemapProductsPaginaRoute: typeof SitemapProductsPaginaRoute
@@ -1117,6 +1130,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/consultora'
       preLoaderRoute: typeof AuthenticatedConsultoraRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/d/$codigo': {
+      id: '/d/$codigo'
+      path: '/d/$codigo'
+      fullPath: '/d/$codigo'
+      preLoaderRoute: typeof DCodigoRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/produto/$slug': {
       id: '/produto/$slug'
@@ -1634,6 +1654,7 @@ const rootRouteChildren: RootRouteChildren = {
   SemijoiasConsignadasParaRevendaRoute: SemijoiasConsignadasParaRevendaRoute,
   SitemapPagesDotxmlRoute: SitemapPagesDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  DCodigoRoute: DCodigoRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,
   SitemapProductsPaginaRoute: SitemapProductsPaginaRoute,

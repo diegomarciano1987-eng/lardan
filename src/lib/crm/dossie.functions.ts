@@ -316,10 +316,33 @@ export const gerarDossieCandidatura = createServerFn({ method: "POST" })
     if (erroUpload) throw new Error(erroUpload.message);
 
     const validade = 60 * 60 * 24 * 30;
-    const { data: assinado, error: erroLink } = await supabaseAdmin.storage
-      .from("candidaturas")
-      .createSignedUrl(caminho, validade);
-    if (erroLink || !assinado?.signedUrl) throw new Error(erroLink?.message ?? "link indisponível");
+    const expiraEm = new Date(Date.now() + validade * 1000).toISOString();
+
+    // Endereço curto e próprio: o balde continua privado e o caminho interno
+    // nunca sai daqui. 12 caracteres aleatórios = espaço grande demais para
+    // ser adivinhado, e o link morre junto com a validade.
+    const alfabeto = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const sortear = () =>
+      Array.from(crypto.getRandomValues(new Uint32Array(12)), (n) => alfabeto[n % alfabeto.length]).join("");
+
+    let codigo = "";
+    for (let tentativa = 0; tentativa < 5 && !codigo; tentativa += 1) {
+      const candidato = sortear();
+      const { error: erroLink } = await supabaseAdmin.from("dossie_links").insert({
+        code: candidato,
+        lead_id: data.leadId,
+        storage_path: caminho,
+        representante_id: data.representanteId ?? null,
+        created_by: context.userId,
+        expires_at: expiraEm,
+      });
+      if (!erroLink) codigo = candidato;
+      else if (!erroLink.message.includes("duplicate")) throw new Error(erroLink.message);
+    }
+    if (!codigo) throw new Error("Não foi possível gerar o link do dossiê.");
+
+    const { SITE_URL } = await import("@/lib/seo");
+    const url = `${SITE_URL}/d/${codigo}`;
 
     // Registro na linha do tempo: nunca derruba a geração se falhar.
     try {

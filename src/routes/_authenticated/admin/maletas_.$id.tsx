@@ -14,6 +14,7 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { VariantPicker, type VariantOption } from "@/components/admin/VariantPicker";
+import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   SITUACAO_MALETA,
@@ -149,6 +150,9 @@ function MaletaFicha() {
   const s = SITUACAO_MALETA[d.ciclo.status] ?? { rotulo: d.ciclo.status, tom: "neutro" as const };
   const montando = d.ciclo.status === "rascunho" || d.ciclo.status === "montagem";
   const emTransito = d.entregas.filter((t) => t.situacao === "transito");
+  const nomes: Record<string, string> = {};
+  for (const c of d.composicao) nomes[c.variant_id] = `${c.produto}${c.variante ? ` · ${c.variante}` : ""}`;
+  for (const b of d.saldos) nomes[b.variant_id] ??= `${b.produto}${b.variante ? ` · ${b.variante}` : ""}`;
 
   return (
     <div className="space-y-8">
@@ -254,7 +258,14 @@ function MaletaFicha() {
             </Panel>
           )}
 
-          <Panel title="Histórico" flush>
+          <Movimentacoes
+            cycleId={id}
+            nomes={nomes}
+            podeGerir={podeMontar}
+            podeAcrescentar={podeMontar || caps.includes("kit.acrescimo")}
+          />
+
+          <Panel title="Linha do tempo" flush>
             {d.eventos.length === 0 ? (
               <div className="px-6">
                 <EmptyState title="Sem eventos" description="O histórico aparece conforme a maleta avança." />

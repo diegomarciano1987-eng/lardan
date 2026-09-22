@@ -88,6 +88,22 @@ real foi tocado.
   conciliação; a pendência aparece explicitamente no resultado.
 - **Asaas**: próxima etapa (importação e sincronização).
 - **Fiscal**: nada emitido nem simulado; camada apenas prevista.
-- **Telas**: as rotinas estão ativas no banco, mas as telas de acréscimo,
-  retorno, histórico e conferência ainda não foram construídas — é o próximo
-  passo desta etapa. Enquanto isso, nada muda para quem usa o site publicado.
+- **Telas**: construídas na pré-visualização (conferência por peça, histórico,
+  acréscimo, confirmação de recebimento, declaração de retorno e conferência da
+  Matriz), na ficha da maleta e no aplicativo da consultora. **Só passam a
+  valer no site publicado depois da publicação.**
+
+## 5. Rodada de integridade (aplicada no banco)
+
+- `kit_retorno` agora confere autorização **antes** de responder a uma chave
+  repetida, e a chave passou a considerar a operação inteira (tipo, maleta,
+  origem, destino, pessoas e itens). Mesma chave com conteúdo diferente é
+  recusada; repetições simultâneas produzem um único efeito.
+- `kit_retorno_confirmar` faz conferência real: declarado, recebido, aprovado e
+  divergente por peça. Declarar 20 e receber 18 não coloca 20 no depósito; as 2
+  continuam a explicar, sem virar venda nem dívida.
+- Peças em garantia ou com defeito vão para o local **BLOQ-QUALIDADE**, fora do
+  estoque disponível. A liberação exige `stock.unblock` e fica registrada.
+- Acréscimo por representante não usa mais permissão global: exige
+  `kit.acrescimo`, ser o representante daquela maleta e responder pelo depósito
+  de origem. O recebimento distingue consultora, representante e Matriz.

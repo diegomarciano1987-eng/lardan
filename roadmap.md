@@ -67,3 +67,19 @@
 - [ ] Etapa 2 — conferência e preparação de acerto (depende da regra comercial, ainda não definida)
 - [ ] Etapa 3 — importação e sincronização Asaas (sandbox primeiro)
 - [ ] Etapa 4 — camada fiscal preparada e inativa
+
+- [x] Integridade das movimentações: repetição segura (autorização antes da resposta e
+      chave que cobre a operação inteira), conferência real do retorno (declarado ×
+      recebido × aprovado × divergente), garantia/defeito em local bloqueado fora do
+      estoque disponível, acréscimo por representante com autorização específica
+      (seção 5 de docs/lardan/MALETAS-MOVIMENTACOES.md)
+- [x] Etapa 1b — telas de conferência por peça, histórico, acréscimo, confirmação de
+      recebimento, declaração de retorno e conferência da Matriz (na pré-visualização;
+      valem no site publicado só após publicação)
+- [x] Etapa 4 (preparação) — preços versionados, camada fiscal e base do Asaas criadas e
+      desligadas (docs/lardan/FISCAL-E-ASAAS-PREPARACAO.md)
+- [ ] Testes desta rodada: pendentes por falta de base isolada (acesso cruzado por chave,
+      mesma chave em maletas diferentes, concorrência, retorno declarado ≠ recebido,
+      garantia fora do disponível, recebimento por representante × consultora)
+- [ ] Regra do "um terço": pendente de esclarecimento comercial/fiscal; registrada sem efeito
+- [ ] Adaptador Asaas com simulações locais (próxima etapa)

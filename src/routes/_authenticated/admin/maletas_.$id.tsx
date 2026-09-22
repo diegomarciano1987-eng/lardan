@@ -150,6 +150,9 @@ function MaletaFicha() {
   const s = SITUACAO_MALETA[d.ciclo.status] ?? { rotulo: d.ciclo.status, tom: "neutro" as const };
   const montando = d.ciclo.status === "rascunho" || d.ciclo.status === "montagem";
   const emTransito = d.entregas.filter((t) => t.situacao === "transito");
+  const nomes: Record<string, string> = {};
+  for (const c of d.composicao) nomes[c.variant_id] = `${c.produto}${c.variante ? ` · ${c.variante}` : ""}`;
+  for (const b of d.saldos) nomes[b.variant_id] ??= `${b.produto}${b.variante ? ` · ${b.variante}` : ""}`;
 
   return (
     <div className="space-y-8">

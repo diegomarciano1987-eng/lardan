@@ -73,16 +73,18 @@ function Conferencia({
   const t = d.totais;
 
   const colunas: { chave: keyof typeof t; rotulo: string }[] = [
-    { chave: "saiu", rotulo: "Saíram" },
-    { chave: "a_caminho", rotulo: "Em trânsito" },
-    { chave: "aceito", rotulo: "Recebidas" },
-    { chave: "retornado", rotulo: "Devolvidas" },
-    { chave: "retorno_em_transito", rotulo: "Voltando" },
-    { chave: "mantida", rotulo: "Mantidas" },
-    { chave: "garantia", rotulo: "Garantia" },
+    { chave: "enviado", rotulo: "Remessa inicial" },
+    { chave: "a_caminho", rotulo: "Remessa em trânsito" },
+    { chave: "aceito", rotulo: "Recebidas pela consultora" },
+    { chave: "acrescido_transito", rotulo: "Acréscimo em trânsito" },
+    { chave: "acrescido", rotulo: "Acréscimo recebido" },
+    { chave: "retorno_em_transito", rotulo: "Retorno declarado" },
+    { chave: "retornado", rotulo: "Retorno aprovado" },
     { chave: "divergencia", rotulo: "Divergência" },
+    { chave: "garantia", rotulo: "Garantia / defeito" },
+    { chave: "mantida", rotulo: "Mantidas" },
     { chave: "perda", rotulo: "Perdas" },
-    { chave: "vendido", rotulo: "Vendidas" },
+    { chave: "vendido", rotulo: "Vendas comprovadas" },
   ];
 
   return (
@@ -96,11 +98,12 @@ function Conferencia({
         ))}
         <div className="rounded-xl border border-warning/60 bg-surface-muted px-4 py-3">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-warning">
-            Ainda com a consultora
+            Ainda sob responsabilidade
           </p>
           <p className="mt-1 text-xl font-semibold tabular-nums text-ledger-text">{num(t.a_explicar)}</p>
         </div>
       </div>
+
 
       <p className="mt-4 rounded-xl border border-line-soft bg-surface-muted px-4 py-3 text-sm leading-relaxed text-ledger-muted">
         As {num(t.a_explicar)} peças acima continuam sob responsabilidade da consultora. Elas{" "}

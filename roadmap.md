@@ -78,9 +78,12 @@
       valem no site publicado só após publicação)
 - [x] Etapa 4 (preparação) — preços versionados, camada fiscal e base do Asaas criadas e
       desligadas (docs/lardan/FISCAL-E-ASAAS-PREPARACAO.md)
-- [ ] Testes desta rodada: pendentes por falta de base isolada (acesso cruzado por chave,
-      mesma chave em maletas diferentes, concorrência, retorno declarado ≠ recebido,
-      garantia fora do disponível, recebimento por representante × consultora)
+- [x] Testes desta rodada executados no banco local isolado (ver VALIDACAO-ISOLADA.md)
+- [x] Fechamento da interface e preparação de publicação: conceitos separados na conferência,
+      estouro no celular corrigido, chave de repetição estável nos formulários, comparação
+      código × isolado × compartilhado sem diferenças, recusa de chamada manipulada
+      comprovada no navegador (docs/lardan/PUBLICACAO-MALETAS.md) — publicação não feita
+
 - [ ] Regra do "um terço": pendente de esclarecimento comercial/fiscal; registrada sem efeito
 - [ ] Adaptador Asaas com simulações locais (próxima etapa)
 

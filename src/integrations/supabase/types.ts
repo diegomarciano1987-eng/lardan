@@ -6374,6 +6374,7 @@ export type Database = {
       crm_radar: { Args: never; Returns: Json }
       crm_refresh_next: { Args: { _lead: string }; Returns: undefined }
       crm_reopen: { Args: { _lead: string; _nota?: string }; Returns: Json }
+      crm_representantes: { Args: never; Returns: Json }
       crm_require: { Args: { _cap: string }; Returns: undefined }
       crm_set_priority: {
         Args: { _lead: string; _priority: string }

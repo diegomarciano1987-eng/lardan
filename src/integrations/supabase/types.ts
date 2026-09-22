@@ -1306,6 +1306,53 @@ export type Database = {
           },
         ]
       }
+      dossie_links: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          last_opened_at: string | null
+          lead_id: string
+          opened_count: number
+          representante_id: string | null
+          revoked_at: string | null
+          storage_path: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          last_opened_at?: string | null
+          lead_id: string
+          opened_count?: number
+          representante_id?: string | null
+          revoked_at?: string | null
+          storage_path: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          last_opened_at?: string | null
+          lead_id?: string
+          opened_count?: number
+          representante_id?: string | null
+          revoked_at?: string | null
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dossie_links_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_data_applications: {
         Row: {
           applied_at: string

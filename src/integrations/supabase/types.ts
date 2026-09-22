@@ -3395,6 +3395,7 @@ export type Database = {
           qty_lost: number
           qty_reserved: number
           qty_retained: number
+          qty_return_divergent: number
           qty_return_transit: number
           qty_returned: number
           qty_sold: number
@@ -3414,6 +3415,7 @@ export type Database = {
           qty_lost?: number
           qty_reserved?: number
           qty_retained?: number
+          qty_return_divergent?: number
           qty_return_transit?: number
           qty_returned?: number
           qty_sold?: number
@@ -3433,6 +3435,7 @@ export type Database = {
           qty_lost?: number
           qty_reserved?: number
           qty_retained?: number
+          qty_return_divergent?: number
           qty_return_transit?: number
           qty_returned?: number
           qty_sold?: number
@@ -3748,30 +3751,42 @@ export type Database = {
       }
       kit_movement_items: {
         Row: {
+          conference_reason: string | null
           created_at: string
           destino: string | null
           id: string
           movement_id: string
+          qty_approved: number | null
+          qty_conf_divergent: number | null
+          qty_received: number | null
           quantity: number
           reason: string | null
           unit_reference_cents: number | null
           variant_id: string
         }
         Insert: {
+          conference_reason?: string | null
           created_at?: string
           destino?: string | null
           id?: string
           movement_id: string
+          qty_approved?: number | null
+          qty_conf_divergent?: number | null
+          qty_received?: number | null
           quantity: number
           reason?: string | null
           unit_reference_cents?: number | null
           variant_id: string
         }
         Update: {
+          conference_reason?: string | null
           created_at?: string
           destino?: string | null
           id?: string
           movement_id?: string
+          qty_approved?: number | null
+          qty_conf_divergent?: number | null
+          qty_received?: number | null
           quantity?: number
           reason?: string | null
           unit_reference_cents?: number | null
@@ -3798,8 +3813,10 @@ export type Database = {
         Row: {
           actor_user_id: string | null
           composition_id: string | null
+          confirmed_as: string | null
           confirmed_at: string | null
           confirmed_by: string | null
+          confirmed_party_id: string | null
           created_at: string
           cycle_id: string
           from_location_id: string | null
@@ -3821,8 +3838,10 @@ export type Database = {
         Insert: {
           actor_user_id?: string | null
           composition_id?: string | null
+          confirmed_as?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
+          confirmed_party_id?: string | null
           created_at?: string
           cycle_id: string
           from_location_id?: string | null
@@ -3844,8 +3863,10 @@ export type Database = {
         Update: {
           actor_user_id?: string | null
           composition_id?: string | null
+          confirmed_as?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
+          confirmed_party_id?: string | null
           created_at?: string
           cycle_id?: string
           from_location_id?: string | null
@@ -4379,6 +4400,7 @@ export type Database = {
           created_by: string | null
           id: string
           is_active: boolean
+          is_blocked: boolean
           kind: Database["public"]["Enums"]["location_type"]
           name: string
           notes: string | null
@@ -4395,6 +4417,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_active?: boolean
+          is_blocked?: boolean
           kind?: Database["public"]["Enums"]["location_type"]
           name: string
           notes?: string | null
@@ -4411,6 +4434,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_active?: boolean
+          is_blocked?: boolean
           kind?: Database["public"]["Enums"]["location_type"]
           name?: string
           notes?: string | null
@@ -7022,6 +7046,7 @@ export type Database = {
         Args: { _movement: string; _payload?: Json }
         Returns: Json
       }
+      kit_blocked_location: { Args: never; Returns: string }
       kit_board: {
         Args: { _filtros?: Json; _limit?: number; _offset?: number }
         Returns: Json
@@ -7033,6 +7058,18 @@ export type Database = {
       kit_detail: { Args: { _cycle: string }; Returns: Json }
       kit_expedir: { Args: { _cycle: string; _payload?: Json }; Returns: Json }
       kit_historico: { Args: { _cycle: string }; Returns: Json }
+      kit_idem_hash: {
+        Args: {
+          _cycle: string
+          _from_loc: string
+          _from_party: string
+          _itens: Json
+          _kind: string
+          _to_loc: string
+          _to_party: string
+        }
+        Returns: string
+      }
       kit_item_publish: {
         Args: { _cycle: string; _publicar: boolean; _variant: string }
         Returns: Json
@@ -7402,6 +7439,15 @@ export type Database = {
         Returns: Json
       }
       stock_item_detail: { Args: { _variant: string }; Returns: Json }
+      stock_liberar_bloqueio: {
+        Args: {
+          _motivo: string
+          _quantity: number
+          _to_location_id: string
+          _variant_id: string
+        }
+        Returns: string
+      }
       stock_movements_list: {
         Args: {
           _kind?: string

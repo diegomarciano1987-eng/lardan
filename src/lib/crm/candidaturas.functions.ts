@@ -129,7 +129,7 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
       const { avisarNovaCandidatura } = await import("./avisos.server");
       await avisarNovaCandidatura({
         protocolo: r.protocol,
-        nome: data.payload.full_name,
+        nome: `${data.payload.first_name} ${data.payload.last_name}`.trim(),
         cidade: data.payload.city,
         uf: data.payload.uf,
         whatsapp: data.payload.whatsapp,

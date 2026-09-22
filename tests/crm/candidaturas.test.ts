@@ -20,6 +20,8 @@ let master: Conta;
 let consultora: Conta;
 let suporte: Conta;
 const criados: string[] = [];
+/** Candidaturas auxiliares, fora da numeração usada pelos cenários por índice. */
+const extras: string[] = [];
 
 async function admin(path: string, init: RequestInit = {}) {
   const res = await fetch(`${URL}${path}`, {
@@ -39,6 +41,25 @@ async function admin(path: string, init: RequestInit = {}) {
   }
 }
 
+/**
+ * CPF sintético válido e estável por sufixo: mesma candidata = mesmo CPF
+ * (o reenvio precisa cair na regra de duplicidade), candidatas diferentes
+ * nunca colidem. Nenhum CPF real é usado.
+ */
+function cpfSintetico(sufixo: string): string {
+  const base = `${marca}${sufixo}`.replace(/\D/g, "").padStart(9, "7").slice(-9);
+  const digitos = base.split("").map(Number);
+  const dv = (parcial: number[]) => {
+    const peso = parcial.length + 1;
+    const soma = parcial.reduce((acc, n, i) => acc + n * (peso - i), 0);
+    const r = (soma * 10) % 11;
+    return r === 10 ? 0 : r;
+  };
+  const d1 = dv(digitos);
+  const d2 = dv([...digitos, d1]);
+  return `${digitos.join("")}${d1}${d2}`;
+}
+
 /** Envia como o site envia: anônimo, pela rotina oficial. */
 async function enviar(
   sufixo: string,
@@ -47,7 +68,9 @@ async function enviar(
 ) {
   const r = await rpc(null, "submit_candidatura", {
     _payload: {
-      full_name: `HOMOLOG Candidata ${sufixo}`,
+      first_name: "HOMOLOG",
+      last_name: `Candidata ${sufixo}`,
+      cpf: cpfSintetico(sufixo),
       whatsapp: `43 9${marca}${sufixo}`,
       city: "Ibiporã",
       uf: "PR",
@@ -63,6 +86,7 @@ async function enviar(
   });
   return r;
 }
+
 
 async function acharPorProtocolo(protocolo: string) {
   const r = await admin(`/rest/v1/leads?protocol=eq.${protocolo}&select=*`);
@@ -91,9 +115,10 @@ beforeAll(async () => {
 }, T);
 
 afterAll(async () => {
-  for (const id of criados) {
+  for (const id of [...criados, ...extras]) {
     await admin(`/rest/v1/leads?id=eq.${id}`, { method: "DELETE" });
   }
+
   await limpar();
 }, T);
 
@@ -122,15 +147,28 @@ describe("CRM de Candidaturas", () => {
   );
 
   it(
-    "2 · UTM do Google é classificada como Google",
+    "2 · UTM do Google distingue busca orgânica, anúncio e origem genérica",
     async () => {
       const r = await enviar("02", { utm: { utm_source: "google", utm_medium: "organic" } });
       const linha = await acharPorProtocolo((r.body as { protocol: string }).protocol);
       criados.push(linha!["id"] as string);
-      expect(linha!["source_normalized"]).toBe("google");
+      expect(linha!["source_normalized"]).toBe("google_organico");
+
+      // candidatas distintas (sufixos próprios) para não cair na regra de duplicidade
+      const pago = await enviar("42", { utm: { utm_source: "google", utm_medium: "cpc" } });
+      const lPago = await acharPorProtocolo((pago.body as { protocol: string }).protocol);
+      extras.push(lPago!["id"] as string);
+      expect(lPago!["source_normalized"]).toBe("google_ads");
+
+      const generico = await enviar("43", { utm: { utm_source: "google" } });
+      const lGen = await acharPorProtocolo((generico.body as { protocol: string }).protocol);
+      extras.push(lGen!["id"] as string);
+      expect(lGen!["source_normalized"]).toBe("google");
     },
     T,
   );
+
+
 
   it(
     "3 · UTM do ChatGPT é classificada como ChatGPT",
@@ -510,10 +548,38 @@ describe("CRM de Candidaturas", () => {
     "extra · payload inválido é recusado pela rotina oficial",
     async () => {
       const semNome = await rpc(null, "submit_candidatura", {
-        _payload: { full_name: "a", whatsapp: "4399", city: "x", uf: "ZZ", privacy_version: "" },
+        _payload: { first_name: "a", whatsapp: "4399", city: "x", uf: "ZZ", privacy_version: "" },
       });
       expect(semNome.status).toBeGreaterThanOrEqual(400);
+
+      // CPF inválido é recusado mesmo com o resto do formulário correto
+      const cpfRuim = await rpc(null, "submit_candidatura", {
+        _payload: {
+          first_name: "HOMOLOG",
+          last_name: "Candidata CPF",
+          cpf: "111.111.111-11",
+          whatsapp: `43 9${marca}99`,
+          city: "Ibiporã",
+          uf: "PR",
+          privacy_version: "2026-09-05.v1",
+        },
+      });
+      expect(cpfRuim.status).toBeGreaterThanOrEqual(400);
+
+      // sobrenome ausente também é recusado
+      const semSobrenome = await rpc(null, "submit_candidatura", {
+        _payload: {
+          first_name: "HOMOLOG",
+          cpf: cpfSintetico("98"),
+          whatsapp: `43 9${marca}98`,
+          city: "Ibiporã",
+          uf: "PR",
+          privacy_version: "2026-09-05.v1",
+        },
+      });
+      expect(semSobrenome.status).toBeGreaterThanOrEqual(400);
     },
     T,
   );
 });
+

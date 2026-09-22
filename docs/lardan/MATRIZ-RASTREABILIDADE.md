@@ -74,7 +74,7 @@ Padrão: recurso desativado no servidor **e** na UI; "Ver especificação" funci
 | EST-10 | RESERVA-CRIAR | /admin/estoque | stock.reservation.create (Master, Diretoria, Estoque) | Disponível calculado na transação; recusa acima do disponível; validade obrigatória; idempotente e auditado | ATIVO |
 | EST-11 | RESERVA-CONFIRMAR | /admin/estoque | stock.reservation.confirm | Gera uma única saída física vinculada; repetição não duplica | ATIVO |
 | EST-12 | RESERVA-LIBERAR/CANCELAR | /admin/estoque | stock.reservation.cancel | Devolve disponível sem mexer no físico; cancelamento exige motivo | ATIVO |
-| EST-13 | RESERVA-EXPIRAR | função `expire_stock_reservations` | stock.reservation.expire (Master, Diretoria) | Vencida deixa de comprometer; repetição sem efeito; agendador pendente | PARCIAL |
+| EST-13 | RESERVA-EXPIRAR | função `expire_stock_reservations` | exclusiva do serviço interno (nenhum perfil de usuário executa) | Vencida deixa de comprometer; repetição sem efeito; recusa a visitante e a Master testada; agendador pendente | PARCIAL |
 | EST-14 | RESERVA-CONSULTAR | /admin/estoque | stock.reservation.view (inclui Financeiro) | Busca, filtros e paginação no servidor; nunca devolve custo | ATIVO |
 | FIN-20 | EXTRATO-IMPORTAR | /admin/financeiro (Conciliação) | finance.statement.import | Hash no servidor; arquivo repetido não duplica; linha inválida com motivo; zeros à esquerda preservados | ATIVO |
 | FIN-21 | EXTRATO-CONSULTAR | /admin/financeiro (Conciliação) | finance.statement.view | Busca, filtros, totais e paginação no servidor | ATIVO |

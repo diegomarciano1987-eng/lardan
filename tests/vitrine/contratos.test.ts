@@ -193,10 +193,13 @@ describe("categoria e coleção: porta canônica", () => {
 
 describe("produto publicado: invariantes permanentes", () => {
   it("completa a ficha exigida e publica pela porta canônica", async () => {
+    // nome único por execução: o cadastro de fornecedor tem nome exclusivo e
+    // um resíduo de bateria anterior derrubava toda a ficha do produto
     const fornecedor = await criar("suppliers", {
-      name: "HOMOLOG Fornecedor",
-      trade_name: "HOMOLOG",
+      name: `HOMOLOG Fornecedor ${marca}`,
+      trade_name: `HOMOLOG ${marca}`,
     });
+
     fornecedorId = fornecedor.id;
 
     const banhos = await comoUsuario(

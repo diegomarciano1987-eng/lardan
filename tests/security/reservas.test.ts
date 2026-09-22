@@ -36,6 +36,21 @@ async function admin(path: string, init: RequestInit) {
   return res.status;
 }
 
+/** Caminho autorizado da rotina de vencimento: só o serviço pode executar. */
+async function rpcServico(fn: string, body: Record<string, unknown> = {}) {
+  const res = await fetch(`${URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: {
+      apikey: SERVICE,
+      Authorization: `Bearer ${SERVICE}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  return { status: res.status, body: await res.json().catch(() => null) };
+}
+
+
 async function saldo(): Promise<{ fisico: number; reservado: number }> {
   const r = await comoUsuario(
     master(),
@@ -247,7 +262,24 @@ describe("motor de reservas", () => {
   );
 
   it(
-    "reserva vencida deixa de comprometer o disponível",
+    "rotina de vencimento é recusada a perfis de usuário, inclusive master",
+    async () => {
+      const semLogin = await rpc(null, "expire_stock_reservations");
+      expect(semLogin.status).toBeGreaterThanOrEqual(400);
+      const comMaster = await rpc(master(), "expire_stock_reservations");
+      expect(comMaster.status).toBeGreaterThanOrEqual(400);
+      registrar(
+        "visitante e master",
+        "expirar reservas por credencial de usuário",
+        "recusado (rotina exclusiva do serviço)",
+        `visitante HTTP ${semLogin.status}, master HTTP ${comMaster.status}`,
+      );
+    },
+    T,
+  );
+
+  it(
+    "reserva vencida deixa de comprometer o disponível (caminho de serviço)",
     async () => {
       const antes = await saldo();
       const r = await reservar(master(), 2);
@@ -255,21 +287,22 @@ describe("motor de reservas", () => {
         method: "PATCH",
         body: JSON.stringify({ expires_at: new Date(Date.now() - 3600_000).toISOString() }),
       });
-      const e1 = await rpc(master(), "expire_stock_reservations");
+      const e1 = await rpcServico("expire_stock_reservations");
       expect(e1.status).toBe(200);
       const depois = await saldo();
       expect(depois).toEqual(antes);
-      const e2 = await rpc(master(), "expire_stock_reservations");
+      const e2 = await rpcServico("expire_stock_reservations");
       expect(e2.status).toBe(200);
       expect(await saldo()).toEqual(antes);
       registrar(
-        "master",
+        "serviço",
         "expirar reservas",
         "vencida libera disponível e repetição não tem efeito",
         "ok",
       );
     },
     T,
+
   );
 
   it(

@@ -115,5 +115,22 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
       return { status: "erro" as const, codigo };
     }
     const r = resultado as { protocol: string; duplicate: boolean };
+
+    // Avisos internos: nunca derrubam o envio da candidata se falharem.
+    try {
+      const { avisarNovaCandidatura } = await import("./avisos.server");
+      await avisarNovaCandidatura({
+        protocolo: r.protocol,
+        nome: data.payload.full_name,
+        cidade: data.payload.city,
+        uf: data.payload.uf,
+        whatsapp: data.payload.whatsapp,
+        email: data.payload.email ?? null,
+        reenvio: r.duplicate,
+      });
+    } catch (falha) {
+      console.error("[candidatura] aviso interno falhou:", falha);
+    }
+
     return { status: "ok" as const, protocolo: r.protocol, reenvio: r.duplicate };
   });

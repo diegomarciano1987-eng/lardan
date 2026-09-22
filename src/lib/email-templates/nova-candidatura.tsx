@@ -93,7 +93,7 @@ const Email = ({
   )
 }
 
-const Linha = ({ rotulo, valor }: { rotulo: string; valor?: string | null }) => (
+const Linha = ({ rotulo, valor }: { rotulo: string; valor: string | null | undefined }) => (
   <Text style={linha}>
     <span style={rotuloStyle}>{rotulo}</span>
     <span style={valorStyle}>{valor && valor !== '' ? valor : '—'}</span>

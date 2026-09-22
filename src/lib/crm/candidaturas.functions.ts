@@ -13,7 +13,13 @@ const texto = (max: number) => z.string().trim().max(max).optional();
 
 const Entrada = z.object({
   payload: z.object({
-    full_name: z.string().trim().min(2).max(160),
+    first_name: z.string().trim().min(2).max(80),
+    last_name: z.string().trim().min(2).max(120),
+    cpf: z
+      .string()
+      .trim()
+      .transform((v) => v.replace(/\D/g, ""))
+      .refine((v) => v.length === 11, "cpf_invalido"),
     whatsapp: z.string().trim().min(10).max(32),
     email: z.string().trim().max(200).optional(),
     city: z.string().trim().min(2).max(120),

@@ -33,7 +33,7 @@ const MARGEM = 48;
 const LARGURA = 595.28;
 const ALTURA = 841.89;
 
-const VAZIO = "Nao informado";
+const VAZIO = "Não informado";
 
 /** Helvetica usa WinAnsi: acentos passam, símbolos exóticos não. */
 function limpar(valor: string): string {
@@ -61,7 +61,7 @@ function cepBonito(valor: string | null | undefined): string {
 function rotuloOrigem(valor: string | null | undefined): string {
   const v = (valor ?? "").trim();
   if (!v) return "";
-  const texto = v.replace(/[_-]+/g, " ").trim();
+  const texto = v.replace(/[_-]+/g, " ").trim().replace(/^nao /i, "Não ");
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
@@ -169,7 +169,7 @@ export const gerarDossieCandidatura = createServerFn({ method: "POST" })
     };
 
     const titulo = (texto: string) => {
-      espaco(64);
+      espaco(140);
       y -= 18; // respiro antes de cada bloco
       pagina.drawText(limpar(texto.toUpperCase()), {
         x: MARGEM,

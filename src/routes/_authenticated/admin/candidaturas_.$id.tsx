@@ -19,6 +19,7 @@ import { EmptyState, ErrorState, Panel, Skeleton, BackButton } from "@/component
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { useCapabilities } from "@/lib/capabilities";
 import { FollowupDialog } from "@/components/admin/candidaturas/FollowupDialog";
+import { EnvioRepresentante } from "@/components/admin/candidaturas/EnvioRepresentante";
 import {
   Dialog,
   DialogContent,
@@ -707,6 +708,9 @@ function CockpitCandidata() {
               )}
             </div>
           </Panel>
+
+          <EnvioRepresentante leadId={id} />
+
 
           {pode("candidaturas.tags") && (
             <Panel title="Etiquetas">

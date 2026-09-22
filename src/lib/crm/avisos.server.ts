@@ -34,7 +34,27 @@ export async function avisarNovaCandidatura(c: NovaCandidatura) {
   };
 }
 
-/** Envio do e-mail interno (ligado assim que o domínio de e-mail estiver pronto). */
-async function enviarEmailInterno(_c: NovaCandidatura) {
-  return { sent: false, reason: "email_nao_configurado" as const };
+/**
+ * E-mail para a caixa oficial. O destinatário é fixo no próprio modelo, então
+ * nunca é possível enviar esse aviso para um endereço vindo do navegador.
+ */
+async function enviarEmailInterno(c: NovaCandidatura) {
+  const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+  return sendTemplateEmail("nova-candidatura", EMAIL_INTERNO, {
+    idempotencyKey: `nova-candidatura-${c.protocolo}${c.reenvio ? "-reenvio" : ""}`,
+    templateData: {
+      protocolo: c.protocolo,
+      nome: c.nome,
+      cidade: c.cidade,
+      uf: c.uf,
+      whatsapp: c.whatsapp,
+      email: c.email,
+      reenvio: c.reenvio,
+      quando: new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short",
+        timeZone: "America/Sao_Paulo",
+      }).format(new Date()),
+    },
+  });
 }

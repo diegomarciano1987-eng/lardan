@@ -246,8 +246,13 @@ export const gerarDossieCandidatura = createServerFn({ method: "POST" })
     }
 
     titulo("Identificação");
-    campo("Nome", c["nome_proprio"] as string);
-    campo("Sobrenome", c["sobrenome"] as string);
+    if (c["nome_proprio"] || c["sobrenome"]) {
+      campo("Nome", c["nome_proprio"] as string);
+      campo("Sobrenome", c["sobrenome"] as string);
+    } else {
+      // Candidaturas anteriores ao campo separado guardam só o nome completo.
+      campo("Nome completo", c["nome"] as string);
+    }
     campo(c["cpf_visivel"] ? "CPF" : "CPF (mascarado)", c["cpf"] as string);
     campo("WhatsApp", telefoneBonito(String(c["whatsapp"] ?? "")));
     campo("E-mail", c["email"] as string);
@@ -256,7 +261,7 @@ export const gerarDossieCandidatura = createServerFn({ method: "POST" })
     const rua = [c["rua"], c["sem_numero"] ? "s/n" : c["numero"]].filter(Boolean).join(", ");
     campo("Logradouro", rua);
     campo("Cidade / UF", `${c["cidade"] ?? ""}/${c["uf"] ?? ""}`);
-    campo("CEP", c["cep"] as string);
+    campo("CEP", cepBonito(c["cep"] as string));
 
     titulo("Perfil da candidata");
     campo("Objetivo", c["objetivo"] as string);

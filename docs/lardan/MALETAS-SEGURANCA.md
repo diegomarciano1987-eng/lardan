@@ -21,7 +21,7 @@ Identidade da maleta e histórico preservados: `kits` continua permanente, cada 
 
 Ligado e comprovado:
 
-1. Saldo em depósito (`stock_balances`) e contagem/entrada por `stock_movement_create`.
+1. Saldo em depósito (`stock_balances`) e contagem/entrada por `register_stock_movement`.
 2. Montagem (`kit_item_upsert`) validando disponível no depósito de origem escolhido.
 3. Conferência (`kit_conferir`): reserva o estoque e congela a composição.
 4. Expedição (`kit_expedir`) direta ou via representante, movendo o físico para a localização da maleta.
@@ -39,11 +39,12 @@ Ligado e comprovado:
 
 Consequência direta: se saírem 50 peças e voltarem 30, o sistema **não** classifica as 20 restantes. Não há cobrança automática nem presunção de venda.
 
-## 3. Ponto de integração fiscal (preparado, não integrado)
+## 3. Fundação para integração fiscal futura
 
-Nenhum fornecedor foi escolhido e nenhuma autorização é simulada. O que já existe e sustenta a integração futura: identificador estável do ciclo, composição congelada na conferência, expedição datada com rota e custódia, eventos imutáveis.
+Não há integração fiscal. Nenhum fornecedor foi escolhido, nenhuma autorização é simulada e o romaneio de expedição **não** é nota fiscal. O que existe hoje é apenas a fundação sobre a qual uma integração futura poderá ser construída: identificador estável do ciclo, composição congelada na conferência, expedição datada com rota e custódia, eventos imutáveis.
 
-Estados previstos para o documento de remessa: `pendente`, `autorizado`, `rejeitado`, `cancelado`. Remessa e venda são operações distintas e não devem compartilhar o mesmo documento.
+Os estados de documento de remessa (`pendente`, `autorizado`, `rejeitado`, `cancelado`) são uma **intenção de projeto**, não estrutura existente: não há tabela, coluna, função ou tela que os represente. Remessa e venda são operações distintas e não devem compartilhar o mesmo documento.
+
 
 ## 4. Testes executados
 

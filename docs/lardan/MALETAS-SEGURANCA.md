@@ -58,7 +58,7 @@ Cobertura: consultora A × maleta de B (lista, detalhe e tabela); representante 
 
 Limitações honestas: carga testada é funcional e de concorrência pontual (2 operações simultâneas na mesma peça), **não** é teste de carga com milhares de operações simultâneas. Nada disso autoriza afirmar desempenho sob uso massivo.
 
-Dívida de teste **pré-existente**, fora do escopo desta rodada e sem relação com as mudanças de maletas: `tests/crm/candidaturas.test.ts` (o envio não manda nome, sobrenome e CPF, obrigatórios desde a rodada do CPF), `tests/vitrine/contratos.test.ts` (preparo envia categoria vazia), `tests/security/reservas.test.ts` e `tests/security/estoque.test.ts` (esperam que `expire_stock_reservations` seja chamável por usuário logado; hoje é só do serviço).
+Dívida de teste **pré-existente** (herdada de rodadas anteriores, sem relação com as mudanças de maletas) — **regularizada na rodada de fechamento**, ver seção 7.
 
 ## 5. Respostas objetivas
 

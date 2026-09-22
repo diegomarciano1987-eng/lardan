@@ -355,11 +355,11 @@ export const conciliacaoMaleta = (cycleId: string) => rpc<Conciliacao>("kit_conc
 export const acrescentarPecas = (
   cycleId: string,
   payload: {
-    itens: { variant_id: string; quantity: number; reason?: string }[];
+    itens: { variant_id: string; quantity: number; reason?: string | undefined }[];
     origem_location_id?: string | null;
-    carrier?: string;
-    tracking_code?: string;
-    note?: string;
+    carrier?: string | undefined;
+    tracking_code?: string | undefined;
+    note?: string | undefined;
     idempotency_key: string;
   },
 ) =>
@@ -378,8 +378,8 @@ export const confirmarAcrescimo = (movementId: string) =>
 export const declararRetorno = (
   cycleId: string,
   payload: {
-    itens: { variant_id: string; quantity: number; destino: DestinoRetorno; reason?: string }[];
-    note?: string;
+    itens: { variant_id: string; quantity: number; destino: DestinoRetorno; reason?: string | undefined }[];
+    note?: string | undefined;
     idempotency_key: string;
   },
 ) =>
@@ -393,7 +393,7 @@ export const conferirRetorno = (
   movementId: string,
   payload: {
     destino_location_id?: string | null;
-    itens: { item_id: string; qty_recebida: number; qty_aprovada: number; qty_divergente: number; motivo?: string }[];
+    itens: { item_id: string; qty_recebida: number; qty_aprovada: number; qty_divergente: number; motivo?: string | undefined }[];
   },
 ) =>
   rpc<{

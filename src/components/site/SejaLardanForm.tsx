@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Search } from "lucide-react";
 import { PRIVACY_VERSION } from "@/lib/privacy";
+import { isValidCpf, maskDocInput, onlyDigits } from "@/lib/docs-br";
 import { capturarTracking, registrarPrimeiroContato } from "@/lib/crm/tracking";
 import { enviarCandidatura } from "@/lib/crm/candidaturas.functions";
 import { SmartSelect } from "@/components/premium/SmartSelect";
@@ -98,6 +99,7 @@ export function SejaLardanForm() {
   const [cidade, setCidade] = useState("");
   const [codigoIbge, setCodigoIbge] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [cpf, setCpf] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [objetivo, setObjetivo] = useState("");
   const [disponibilidade, setDisponibilidade] = useState("");

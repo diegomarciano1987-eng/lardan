@@ -84,6 +84,10 @@ async function acharUsuario(email: string): Promise<string | null> {
   return users.find((u) => u.email?.toLowerCase() === email.toLowerCase())?.id ?? null;
 }
 
+/** Ids criados por ESTA execução — a limpeza só toca neles. */
+const partiesCriadas = new Set<string>();
+const contasCriadas = new Set<string>();
+
 /** Cria uma pessoa sintética (prefixo HOMOLOG) e devolve o id. */
 export async function criarPartySintetica(rotulo: string): Promise<string | null> {
   const r = await adm(`/rest/v1/parties`, {
@@ -97,8 +101,11 @@ export async function criarPartySintetica(rotulo: string): Promise<string | null
     }),
   });
   const linhas = Array.isArray(r.body) ? (r.body as { id: string }[]) : [];
-  return linhas[0]?.id ?? null;
+  const id = linhas[0]?.id ?? null;
+  if (id) partiesCriadas.add(id);
+  return id;
 }
+
 
 export async function criarConta(opts: {
   nome: string;
@@ -128,8 +135,10 @@ export async function criarConta(opts: {
     });
   }
 
+  contasCriadas.add(userId);
   const ativo = opts.ativo ?? true;
   const partyId = opts.comParty ? await criarPartySintetica(opts.nome) : null;
+
 
   await adm(`/rest/v1/profiles?on_conflict=id`, {
     method: "POST",
@@ -176,22 +185,29 @@ export async function criarConta(opts: {
  * perde os papéis, é desativada no perfil e fica bloqueada no login — sem
  * acesso a nada e sem apagar histórico.
  */
+/**
+ * Limpeza restrita: só toca nos ids que ESTA execução criou/provisionou.
+ * Nada de varredura ampla por prefixo de nome ou por domínio de e-mail —
+ * a base é compartilhada e registros reais não podem ser alcançados.
+ */
 export async function limpar() {
-  const r = await adm(`/auth/v1/admin/users?page=1&per_page=200`);
-  const users = (r.body as { users?: { id: string; email: string }[] }).users ?? [];
-  const alvos = users.filter((u) => u.email?.endsWith(TEST_DOMAIN));
   await Promise.all(
-    alvos.map(async (u) => {
-      await adm(`/rest/v1/user_roles?user_id=eq.${u.id}`, { method: "DELETE" });
-      await adm(`/rest/v1/profiles?id=eq.${u.id}`, {
+    [...contasCriadas].map(async (id) => {
+      await adm(`/rest/v1/user_roles?user_id=eq.${id}`, { method: "DELETE" });
+      await adm(`/rest/v1/profiles?id=eq.${id}`, {
         method: "PATCH",
         body: JSON.stringify({ is_active: false, party_id: null }),
       });
-      await adm(`/auth/v1/admin/users/${u.id}`, {
+      await adm(`/auth/v1/admin/users/${id}`, {
         method: "PUT",
         body: JSON.stringify({ ban_duration: "876000h" }),
       });
     }),
   );
-  await adm(`/rest/v1/parties?display_name=like.${TEST_PREFIX}%25`, { method: "DELETE" });
+  for (const id of partiesCriadas) {
+    await adm(`/rest/v1/parties?id=eq.${id}`, { method: "DELETE" });
+  }
+  contasCriadas.clear();
+  partiesCriadas.clear();
 }
+

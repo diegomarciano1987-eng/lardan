@@ -258,6 +258,12 @@ describe("Cenário obrigatório 50 + 5 − 20", () => {
     expect(l.vendido).toBe(0);
     expect(c.dados.vendas_disponiveis).toBe(false);
 
+    // a tela precisa separar remessa inicial, acréscimo em trânsito e acréscimo recebido
+    expect(c.dados.totais.enviado).toBe(50);
+    expect(c.dados.totais.acrescido).toBe(5);
+    expect(c.dados.totais.acrescido_transito).toBe(0);
+    expect(c.dados.totais.vendido).toBe(0);
+
     // cada peça em uma única categoria
     const categorias =
       l.retornado + l.retorno_em_transito + l.garantia + l.divergencia + l.perda + l.mantida + l.vendido;

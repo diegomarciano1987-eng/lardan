@@ -171,7 +171,8 @@ function MaletaFicha() {
       />
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
+
           {podeMontar && montando && (
             <Panel title="Montagem">
               <div className="flex flex-wrap items-end gap-3">
@@ -285,7 +286,7 @@ function MaletaFicha() {
           </Panel>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Panel title="Identificação">
             <div className="flex flex-col items-center gap-3">
               <QrMaleta token={d.maleta.qr_token} />

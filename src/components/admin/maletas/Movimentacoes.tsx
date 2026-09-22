@@ -73,16 +73,18 @@ function Conferencia({
   const t = d.totais;
 
   const colunas: { chave: keyof typeof t; rotulo: string }[] = [
-    { chave: "saiu", rotulo: "Saíram" },
-    { chave: "a_caminho", rotulo: "Em trânsito" },
-    { chave: "aceito", rotulo: "Recebidas" },
-    { chave: "retornado", rotulo: "Devolvidas" },
-    { chave: "retorno_em_transito", rotulo: "Voltando" },
-    { chave: "mantida", rotulo: "Mantidas" },
-    { chave: "garantia", rotulo: "Garantia" },
+    { chave: "enviado", rotulo: "Remessa inicial" },
+    { chave: "a_caminho", rotulo: "Remessa em trânsito" },
+    { chave: "aceito", rotulo: "Recebidas pela consultora" },
+    { chave: "acrescido_transito", rotulo: "Acréscimo em trânsito" },
+    { chave: "acrescido", rotulo: "Acréscimo recebido" },
+    { chave: "retorno_em_transito", rotulo: "Retorno declarado" },
+    { chave: "retornado", rotulo: "Retorno aprovado" },
     { chave: "divergencia", rotulo: "Divergência" },
+    { chave: "garantia", rotulo: "Garantia / defeito" },
+    { chave: "mantida", rotulo: "Mantidas" },
     { chave: "perda", rotulo: "Perdas" },
-    { chave: "vendido", rotulo: "Vendidas" },
+    { chave: "vendido", rotulo: "Vendas comprovadas" },
   ];
 
   return (
@@ -96,18 +98,27 @@ function Conferencia({
         ))}
         <div className="rounded-xl border border-warning/60 bg-surface-muted px-4 py-3">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-warning">
-            Ainda com a consultora
+            Ainda sob responsabilidade
           </p>
           <p className="mt-1 text-xl font-semibold tabular-nums text-ledger-text">{num(t.a_explicar)}</p>
         </div>
       </div>
 
       <p className="mt-4 rounded-xl border border-line-soft bg-surface-muted px-4 py-3 text-sm leading-relaxed text-ledger-muted">
-        As {num(t.a_explicar)} peças acima continuam sob responsabilidade da consultora. Elas{" "}
-        <strong className="text-ledger-text">não comprovam venda</strong> e não geram cobrança.
-        {d.vendas_disponiveis
-          ? ""
-          : " As vendas da consultora ainda não alimentam esta conferência, então o destino delas precisa ser informado manualmente."}
+        {d.linhas.length === 0 ? (
+          <>
+            Este ciclo ainda não tem saldos por peça registrados: os números acima ficam zerados até a maleta ser
+            recebida e movimentada. Isso <strong className="text-ledger-text">não significa divergência</strong>.
+          </>
+        ) : (
+          <>
+            As {num(t.a_explicar)} peças acima continuam sob responsabilidade de quem está com a maleta. Elas{" "}
+            <strong className="text-ledger-text">não comprovam venda</strong> e não geram cobrança.
+            {d.vendas_disponiveis
+              ? ""
+              : " As vendas da consultora ainda não alimentam esta conferência, então o destino delas precisa ser informado manualmente."}
+          </>
+        )}
       </p>
 
       {d.linhas.length > 0 && (
@@ -155,13 +166,18 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
 
   const depositos = useQuery({ queryKey: ["maletas", "depositos"], queryFn: depositosAtivos });
 
+  // A chave vive enquanto o formulário não for concluído: duplo clique, reenvio
+  // ou nova tentativa depois de um erro de rede usam a MESMA chave e o banco
+  // devolve o movimento já registrado em vez de criar outro.
+  const chaveRef = React.useRef(chaveIdempotencia());
+
   const enviar = useMutation({
     mutationFn: () =>
       acrescentarPecas(cycleId, {
         itens: linhas.map((l) => ({ variant_id: l.peca.id, quantity: l.qtd })),
         origem_location_id: origem || null,
         note: nota || undefined,
-        idempotency_key: chaveIdempotencia(),
+        idempotency_key: chaveRef.current,
       }),
     onSuccess: (r) => {
       toast.success(
@@ -169,6 +185,7 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
           ? "Este acréscimo já estava registrado."
           : `${r.quantidade} peças a caminho. Falta a confirmação de quem recebe.`,
       );
+      chaveRef.current = chaveIdempotencia();
       setLinhas([]);
       setNota("");
       onFeito();
@@ -277,6 +294,9 @@ function AcoesRetorno({
 
   const disponiveis = (conc.data?.linhas ?? []).filter((l) => num(l.sob_responsabilidade) > 0);
 
+  // Mesma chave enquanto a declaração não for concluída: reenviar não duplica.
+  const chaveRef = React.useRef(chaveIdempotencia());
+
   const enviar = useMutation({
     mutationFn: () =>
       declararRetorno(cycleId, {
@@ -288,12 +308,13 @@ function AcoesRetorno({
             destino: v.destino,
             reason: v.motivo || undefined,
           })),
-        idempotency_key: chaveIdempotencia(),
+        idempotency_key: chaveRef.current,
       }),
     onSuccess: (r) => {
       toast.success(
         r.repetida ? "Este retorno já estava registrado." : `${r.quantidade} peças declaradas. Aguardando a Matriz.`,
       );
+      chaveRef.current = chaveIdempotencia();
       setLinhas({});
       setAberto(false);
       onFeito();

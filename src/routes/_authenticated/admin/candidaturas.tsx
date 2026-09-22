@@ -20,6 +20,7 @@ import { EmptyState, ErrorState, PageHeader, Panel, Skeleton } from "@/component
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { useCapabilities } from "@/lib/capabilities";
 import { Kanban, CardCandidatura } from "@/components/admin/candidaturas/Kanban";
+import { AvisosPush } from "@/components/admin/candidaturas/AvisosPush";
 import { FollowupDialog } from "@/components/admin/candidaturas/FollowupDialog";
 import {
   carregarAgenda,
@@ -251,6 +252,8 @@ function CandidaturasPage() {
         title="Candidaturas do Site"
         description="Todas as pessoas que se candidataram a Consultora Lardan pelo formulário Seja Lardan, com etapa, responsável, origem e próxima ação."
         actions={
+          <div className="flex flex-wrap items-center gap-2">
+          <AvisosPush />
           <div className="flex items-center gap-1 rounded-xl border border-line bg-surface p-1">
             {(
               [
@@ -274,6 +277,7 @@ function CandidaturasPage() {
                 {rotulo}
               </button>
             ))}
+          </div>
           </div>
         }
       />

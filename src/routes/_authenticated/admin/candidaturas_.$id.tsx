@@ -311,6 +311,10 @@ function CockpitCandidata() {
               <Panel title="Resumo">
                 <dl className="grid grid-cols-2 gap-5 md:grid-cols-3">
                   <Campo rotulo="Telefone" valor={<span className="num">{c.whatsapp}</span>} />
+                  <Campo
+                    rotulo={c.cpf_visivel ? "CPF" : "CPF (mascarado)"}
+                    valor={c.cpf ? <span className="num">{c.cpf}</span> : "Não informado"}
+                  />
                   <Campo rotulo="E-mail" valor={c.email} />
                   <Campo rotulo="Cidade / Estado" valor={`${c.cidade}/${c.uf}`} />
                   <Campo rotulo="Data da candidatura" valor={dataHora(c.criada_em)} />

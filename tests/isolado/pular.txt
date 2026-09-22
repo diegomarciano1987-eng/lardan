@@ -1,0 +1,11 @@
+# Migrações ignoradas no ambiente isolado.
+#
+# São exclusivamente migrações de CONTEÚDO (semeadura ou correção de linhas
+# reais do catálogo/site) que apontam para identificadores existentes só na
+# base compartilhada. Nenhuma delas cria ou altera estrutura, permissão,
+# política de acesso ou rotina — por isso a ausência delas não afeta nada do
+# que está sendo validado (maletas, estoque, fiscal, Asaas, financeiro).
+#
+# Qualquer migração com estrutura NUNCA entra nesta lista.
+
+20260907164454_dfe40288-1827-412d-8d4d-4ca40b40eb41.sql

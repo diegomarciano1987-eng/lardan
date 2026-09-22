@@ -254,7 +254,14 @@ function MaletaFicha() {
             </Panel>
           )}
 
-          <Panel title="Histórico" flush>
+          <Movimentacoes
+            cycleId={id}
+            nomes={nomes}
+            podeGerir={podeMontar}
+            podeAcrescentar={podeMontar || caps.includes("kit.acrescimo")}
+          />
+
+          <Panel title="Linha do tempo" flush>
             {d.eventos.length === 0 ? (
               <div className="px-6">
                 <EmptyState title="Sem eventos" description="O histórico aparece conforme a maleta avança." />

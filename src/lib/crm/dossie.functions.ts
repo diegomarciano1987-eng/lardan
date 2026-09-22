@@ -33,12 +33,15 @@ const MARGEM = 48;
 const LARGURA = 595.28;
 const ALTURA = 841.89;
 
+const VAZIO = "Nao informado";
+
 /** Helvetica usa WinAnsi: acentos passam, símbolos exóticos não. */
 function limpar(valor: string): string {
   return valor
     .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
-    .replace(/\u2022/g, "-")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/[\u2022\u00b7]/g, "-")
     .replace(/[^\u0020-\u00FF\n]/g, "");
 }
 
@@ -49,10 +52,23 @@ function telefoneBonito(digitos: string): string {
   return digitos;
 }
 
+function cepBonito(valor: string | null | undefined): string {
+  const d = (valor ?? "").replace(/\D/g, "");
+  return d.length === 8 ? `${d.slice(0, 5)}-${d.slice(5)}` : (valor ?? "");
+}
+
+/** "nao_identificado" vira "Nao identificado"; canais conhecidos ficam legíveis. */
+function rotuloOrigem(valor: string | null | undefined): string {
+  const v = (valor ?? "").trim();
+  if (!v) return "";
+  const texto = v.replace(/[_-]+/g, " ").trim();
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
 function dataBonita(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return VAZIO;
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return VAZIO;
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",

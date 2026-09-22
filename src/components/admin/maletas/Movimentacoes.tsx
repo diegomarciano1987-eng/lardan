@@ -166,13 +166,18 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
 
   const depositos = useQuery({ queryKey: ["maletas", "depositos"], queryFn: depositosAtivos });
 
+  // A chave vive enquanto o formulário não for concluído: duplo clique, reenvio
+  // ou nova tentativa depois de um erro de rede usam a MESMA chave e o banco
+  // devolve o movimento já registrado em vez de criar outro.
+  const chaveRef = React.useRef(chaveIdempotencia());
+
   const enviar = useMutation({
     mutationFn: () =>
       acrescentarPecas(cycleId, {
         itens: linhas.map((l) => ({ variant_id: l.peca.id, quantity: l.qtd })),
         origem_location_id: origem || null,
         note: nota || undefined,
-        idempotency_key: chaveIdempotencia(),
+        idempotency_key: chaveRef.current,
       }),
     onSuccess: (r) => {
       toast.success(
@@ -180,6 +185,7 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
           ? "Este acréscimo já estava registrado."
           : `${r.quantidade} peças a caminho. Falta a confirmação de quem recebe.`,
       );
+      chaveRef.current = chaveIdempotencia();
       setLinhas([]);
       setNota("");
       onFeito();

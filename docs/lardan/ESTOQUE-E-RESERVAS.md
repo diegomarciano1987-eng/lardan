@@ -41,7 +41,7 @@ DELETE, e o histórico permanece para consulta em qualquer situação.
 | `create_stock_reservation` | `stock.reservation.create` | Trava variante+local (`FOR UPDATE`), expira vencidas, calcula o disponível dentro da transação, recusa acima do disponível, exige validade futura, gera protocolo `RSV-AAMMDD-#####`, chave de repetição, auditoria |
 | `confirm_stock_reservation` | `stock.reservation.confirm` | Só reserva ativa; gera **uma** saída física vinculada (`stock_movements.reservation_id`); repetição devolve a mesma reserva e o mesmo movimento (`repetida: true`), sem novo efeito |
 | `release_stock_reservation` | `stock.reservation.cancel` | Libera ou cancela; cancelamento exige motivo; devolve o disponível sem mexer no físico; repetição não tem efeito |
-| `expire_stock_reservations` | `stock.reservation.expire` | Marca vencidas e devolve o reservado; repetição é segura |
+| `expire_stock_reservations` | **exclusiva do serviço interno** (nenhum perfil de usuário, nem Master, executa) | Marca vencidas e devolve o reservado; repetição é segura |
 | `stock_reservations_list` / `stock_reservation_detail` | `stock.reservation.view` | Busca, filtros e paginação no servidor; nunca devolvem custo |
 
 ## 4. Como a expiração é executada
@@ -51,8 +51,9 @@ A expiração **não depende do navegador aberto**. Ela roda em três momentos:
 1. Dentro de `register_stock_movement`, antes de calcular qualquer delta.
 2. Dentro de `create_stock_reservation` e `confirm_stock_reservation`, antes de
    decidir o disponível.
-3. Sob demanda, por `expire_stock_reservations()`, que pode ser chamada por um
-   agendador.
+3. Sob demanda, por `expire_stock_reservations()`, chamável apenas pelo serviço
+   interno (um agendador futuro usaria esse caminho; hoje não há agendamento).
+
 
 Efeito prático: nenhuma decisão de estoque usa reserva vencida, mesmo que
 ninguém tenha rodado a varredura. **Pendência conhecida:** ainda não existe

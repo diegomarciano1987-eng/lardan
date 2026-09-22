@@ -132,6 +132,11 @@ export interface Envio {
 
 export interface Detalhe {
   candidatura: CandidaturaCard & {
+    nome_proprio: string | null;
+    sobrenome: string | null;
+    /** Mascarado quando a pessoa não tem permissão de ver dados pessoais. */
+    cpf: string | null;
+    cpf_visivel: boolean;
     rua: string | null;
     numero: string | null;
     sem_numero: boolean;
@@ -247,6 +252,8 @@ export function traduzirErro(mensagem: string): string {
     usuario_invalido: "Usuário inválido ou inativo.",
     prioridade_invalida: "Prioridade inválida.",
     nome_invalido: "Informe um nome válido.",
+    sobrenome_invalido: "Informe o sobrenome.",
+    cpf_invalido: "Informe um CPF válido.",
     limite_envios: "Muitos envios seguidos. Tente novamente em alguns minutos.",
   };
   for (const [chave, frase] of Object.entries(mapa)) {

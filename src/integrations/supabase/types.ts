@@ -3901,6 +3901,8 @@ export type Database = {
           availability: string | null
           browser: string | null
           city: string
+          cpf: string | null
+          cpf_digits: string | null
           created_at: string
           device_type: string | null
           email: string | null
@@ -3909,6 +3911,7 @@ export type Database = {
           experience: string | null
           fbclid: string | null
           financial_goal: string | null
+          first_name: string | null
           first_referrer: string | null
           first_response_at: string | null
           first_touch: Json
@@ -3919,6 +3922,7 @@ export type Database = {
           landing_page: string | null
           language: string | null
           last_contact_at: string | null
+          last_name: string | null
           last_touch: Json
           lost_at: string | null
           lost_by: string | null
@@ -3963,6 +3967,8 @@ export type Database = {
           availability?: string | null
           browser?: string | null
           city: string
+          cpf?: string | null
+          cpf_digits?: string | null
           created_at?: string
           device_type?: string | null
           email?: string | null
@@ -3971,6 +3977,7 @@ export type Database = {
           experience?: string | null
           fbclid?: string | null
           financial_goal?: string | null
+          first_name?: string | null
           first_referrer?: string | null
           first_response_at?: string | null
           first_touch?: Json
@@ -3981,6 +3988,7 @@ export type Database = {
           landing_page?: string | null
           language?: string | null
           last_contact_at?: string | null
+          last_name?: string | null
           last_touch?: Json
           lost_at?: string | null
           lost_by?: string | null
@@ -4025,6 +4033,8 @@ export type Database = {
           availability?: string | null
           browser?: string | null
           city?: string
+          cpf?: string | null
+          cpf_digits?: string | null
           created_at?: string
           device_type?: string | null
           email?: string | null
@@ -4033,6 +4043,7 @@ export type Database = {
           experience?: string | null
           fbclid?: string | null
           financial_goal?: string | null
+          first_name?: string | null
           first_referrer?: string | null
           first_response_at?: string | null
           first_touch?: Json
@@ -4043,6 +4054,7 @@ export type Database = {
           landing_page?: string | null
           language?: string | null
           last_contact_at?: string | null
+          last_name?: string | null
           last_touch?: Json
           lost_at?: string | null
           lost_by?: string | null

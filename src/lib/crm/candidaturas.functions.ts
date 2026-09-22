@@ -13,7 +13,13 @@ const texto = (max: number) => z.string().trim().max(max).optional();
 
 const Entrada = z.object({
   payload: z.object({
-    full_name: z.string().trim().min(2).max(160),
+    first_name: z.string().trim().min(2).max(80),
+    last_name: z.string().trim().min(2).max(120),
+    cpf: z
+      .string()
+      .trim()
+      .transform((v) => v.replace(/\D/g, ""))
+      .refine((v) => v.length === 11, "cpf_invalido"),
     whatsapp: z.string().trim().min(10).max(32),
     email: z.string().trim().max(200).optional(),
     city: z.string().trim().min(2).max(120),
@@ -111,7 +117,9 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
         ? "limite_envios"
         : error.message.includes("email_invalido")
           ? "email_invalido"
-          : "falha";
+          : error.message.includes("cpf_invalido")
+            ? "cpf_invalido"
+            : "falha";
       return { status: "erro" as const, codigo };
     }
     const r = resultado as { protocol: string; duplicate: boolean };
@@ -121,7 +129,7 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
       const { avisarNovaCandidatura } = await import("./avisos.server");
       await avisarNovaCandidatura({
         protocolo: r.protocol,
-        nome: data.payload.full_name,
+        nome: `${data.payload.first_name} ${data.payload.last_name}`.trim(),
         cidade: data.payload.city,
         uf: data.payload.uf,
         whatsapp: data.payload.whatsapp,

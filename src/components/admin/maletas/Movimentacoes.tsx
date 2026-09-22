@@ -104,13 +104,21 @@ function Conferencia({
         </div>
       </div>
 
-
       <p className="mt-4 rounded-xl border border-line-soft bg-surface-muted px-4 py-3 text-sm leading-relaxed text-ledger-muted">
-        As {num(t.a_explicar)} peças acima continuam sob responsabilidade da consultora. Elas{" "}
-        <strong className="text-ledger-text">não comprovam venda</strong> e não geram cobrança.
-        {d.vendas_disponiveis
-          ? ""
-          : " As vendas da consultora ainda não alimentam esta conferência, então o destino delas precisa ser informado manualmente."}
+        {d.linhas.length === 0 ? (
+          <>
+            Este ciclo ainda não tem saldos por peça registrados: os números acima ficam zerados até a maleta ser
+            recebida e movimentada. Isso <strong className="text-ledger-text">não significa divergência</strong>.
+          </>
+        ) : (
+          <>
+            As {num(t.a_explicar)} peças acima continuam sob responsabilidade de quem está com a maleta. Elas{" "}
+            <strong className="text-ledger-text">não comprovam venda</strong> e não geram cobrança.
+            {d.vendas_disponiveis
+              ? ""
+              : " As vendas da consultora ainda não alimentam esta conferência, então o destino delas precisa ser informado manualmente."}
+          </>
+        )}
       </p>
 
       {d.linhas.length > 0 && (

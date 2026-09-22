@@ -234,9 +234,45 @@ export function SejaLardanForm() {
     <form onSubmit={enviar} className="mx-auto max-w-2xl space-y-8" noValidate={false}>
       <fieldset className="space-y-4">
         <legend className="brand-eyebrow mb-4">Dados de contato</legend>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="first_name">Nome</Label>
+            <input
+              id="first_name"
+              name="first_name"
+              required
+              minLength={2}
+              autoComplete="given-name"
+              className={field}
+            />
+          </div>
+          <div>
+            <Label htmlFor="last_name">Sobrenome</Label>
+            <input
+              id="last_name"
+              name="last_name"
+              required
+              minLength={2}
+              autoComplete="family-name"
+              className={field}
+            />
+          </div>
+        </div>
         <div>
-          <Label htmlFor="full_name">Nome completo</Label>
-          <input id="full_name" name="full_name" required minLength={2} className={field} />
+          <Label htmlFor="cpf">CPF</Label>
+          <input
+            id="cpf"
+            name="cpf"
+            required
+            inputMode="numeric"
+            placeholder="000.000.000-00"
+            value={cpf}
+            onChange={(e) => setCpf(maskDocInput(e.target.value).slice(0, 14))}
+            className={field}
+          />
+          <p className="mt-2 text-xs text-muted-foreground">
+            O CPF é usado apenas para identificar a candidata no cadastro da Lardan.
+          </p>
         </div>
         <div>
           <Label htmlFor="whatsapp">WhatsApp com DDD</Label>

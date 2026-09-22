@@ -278,8 +278,8 @@ export const gerarDossieCandidatura = createServerFn({ method: "POST" })
     titulo("Candidatura");
     campo("Protocolo", c["protocolo"] as string);
     campo("Recebida em", dataBonita(c["criada_em"] as string));
-    campo("Origem", (d.origem?.["normalizada"] as string) ?? (c["origem"] as string));
-    campo("Prioridade", c["prioridade"] as string);
+    campo("Origem", rotuloOrigem((d.origem?.["normalizada"] as string) ?? (c["origem"] as string)));
+    campo("Prioridade", rotuloOrigem(c["prioridade"] as string));
     campo("Responsável", c["responsavel"] as string);
     campo("Último contato", dataBonita(c["ultimo_contato"] as string));
     campo("Reenvios", String(c["reenvios"] ?? 0));

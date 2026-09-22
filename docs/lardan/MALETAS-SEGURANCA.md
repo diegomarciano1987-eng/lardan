@@ -77,6 +77,21 @@ Validar: abrir Maletas com um perfil interno (vê tudo) e com uma consultora (v�
 
 ## 7. Fechamento técnico da rodada
 
+### 7.0 Migrações e arquivos desta rodada
+
+Migrações aplicadas (nesta ordem):
+
+- `20260922172759_0a174405-4b15-4c2c-89d1-abc93e7d9db0.sql` — autorização de `order_set_status` e `showcase_save`; revogação de execução aberta
+- `20260922173141_8b931ea0-7544-49ee-bd5b-f3bf7ac892a5.sql` — `expire_stock_reservations` alcançável pelo serviço, recusada a usuários
+- `20260922173937_9b8d4de2-b39a-46eb-bb56-3164b341fb51.sql` — `order_set_status` restaurada ao comportamento original (só a autorização mudou)
+- `20260922174011_211e109e-fa19-4217-b880-8d80d57ae196.sql` — `showcase_save` restaurada ao padrão original (vitrine nova nasce fora do ar)
+- `20260922174455_be5d059d-0e42-4c83-aa95-51af2f464901.sql` — idempotência de `register_stock_movement` sob chamadas simultâneas
+
+Arquivos alterados: `tests/crm/candidaturas.test.ts`, `tests/vitrine/contratos.test.ts`, `tests/security/reservas.test.ts`, `tests/security/harness.ts`, `docs/lardan/MALETAS-SEGURANCA.md`, `docs/lardan/ESTOQUE-E-RESERVAS.md`, `docs/lardan/MATRIZ-RASTREABILIDADE.md`, `roadmap.md`.
+
+Ambiente: base do projeto (mesma do preview e do publicado), Node/Bun local, `bunx vitest run` e `bunx tsgo --noEmit`.
+
+
 ### 7.1 Correções adicionais aplicadas no banco
 
 | Achado | Onde | Correção |

@@ -169,7 +169,8 @@ export const gerarDossieCandidatura = createServerFn({ method: "POST" })
     };
 
     const titulo = (texto: string) => {
-      espaco(46);
+      espaco(64);
+      y -= 18; // respiro antes de cada bloco
       pagina.drawText(limpar(texto.toUpperCase()), {
         x: MARGEM,
         y,

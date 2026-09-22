@@ -11,6 +11,8 @@ export default defineConfig({
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
   test: {
+    // tests/isolado roda no ambiente local com `bun test` (ver tests/isolado/LEIA-ME.md)
+    exclude: ["node_modules/**", "dist/**", "tests/isolado/**"],
     fileParallelism: false,
     sequence: { concurrent: false },
     testTimeout: 180_000,

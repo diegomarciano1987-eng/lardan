@@ -294,6 +294,9 @@ function AcoesRetorno({
 
   const disponiveis = (conc.data?.linhas ?? []).filter((l) => num(l.sob_responsabilidade) > 0);
 
+  // Mesma chave enquanto a declaração não for concluída: reenviar não duplica.
+  const chaveRef = React.useRef(chaveIdempotencia());
+
   const enviar = useMutation({
     mutationFn: () =>
       declararRetorno(cycleId, {
@@ -305,12 +308,13 @@ function AcoesRetorno({
             destino: v.destino,
             reason: v.motivo || undefined,
           })),
-        idempotency_key: chaveIdempotencia(),
+        idempotency_key: chaveRef.current,
       }),
     onSuccess: (r) => {
       toast.success(
         r.repetida ? "Este retorno já estava registrado." : `${r.quantidade} peças declaradas. Aguardando a Matriz.`,
       );
+      chaveRef.current = chaveIdempotencia();
       setLinhas({});
       setAberto(false);
       onFeito();

@@ -169,6 +169,11 @@ export function SejaLardanForm() {
       setErro("Escolha ou digite a sua cidade.");
       return;
     }
+    if (!isValidCpf(cpf)) {
+      setBusy(false);
+      setErro("Confira o CPF informado.");
+      return;
+    }
     const whatsappCanonico = normalizarWhatsapp(whatsapp);
     if (whatsappCanonico.estado !== "valido" || !whatsappCanonico.canonico) {
       setBusy(false);

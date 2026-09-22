@@ -325,6 +325,7 @@ export interface LinhaConciliacao {
   variant_id: string;
   enviado: number;
   acrescido: number;
+  acrescido_transito: number;
   saiu: number;
   aceito: number;
   retornado: number;
@@ -341,7 +342,7 @@ export interface LinhaConciliacao {
 
 export interface Conciliacao {
   linhas: LinhaConciliacao[];
-  totais: Omit<LinhaConciliacao, "variant_id" | "enviado" | "acrescido" | "sob_responsabilidade">;
+  totais: Omit<LinhaConciliacao, "variant_id" | "sob_responsabilidade">;
   vendas_disponiveis: boolean;
   aviso: string;
 }

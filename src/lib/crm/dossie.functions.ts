@@ -307,7 +307,7 @@ export const gerarDossieCandidatura = createServerFn({ method: "POST" })
         _title: data.representanteNome
           ? `Dossiê enviado para ${data.representanteNome}`
           : "Dossiê em PDF gerado",
-        _note: undefined,
+        _note: `arquivo ${caminho}`,
         _meta: { representante_id: data.representanteId ?? null, arquivo: caminho },
       });
     } catch {

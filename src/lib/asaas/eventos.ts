@@ -18,7 +18,8 @@ const TAMANHO_MAXIMO = 256 * 1024;
 
 export interface EventoRegistrado {
   id: string;
-  repetido: boolean;
+  novo?: boolean;
+  repetido?: boolean;
   processado?: boolean;
   efeito?: string;
   revisao_manual?: boolean;
@@ -48,7 +49,7 @@ export async function registrarEvento(banco: BancoAsaas, accountId: string, e: E
     _payload: {
       account_id: accountId,
       external_id: e.id,
-      event_type: e.event,
+      event: e.event,
       charge_external_id: e.chargeExternalId,
       event_at: e.eventAt,
       payload: e.payload,
@@ -57,7 +58,7 @@ export async function registrarEvento(banco: BancoAsaas, accountId: string, e: E
 }
 
 export const processarEvento = (banco: BancoAsaas, eventId: string) =>
-  banco.rpc<EventoRegistrado>(ROTINAS.eventoProcessar, { _event: eventId });
+  banco.rpc<EventoRegistrado>(ROTINAS.eventoProcessar, { _evento: eventId });
 
 /** Recebe, registra e processa a fila. Repetido não repete efeito. */
 export async function drenarEventos(banco: BancoAsaas, transporte: TransporteAsaas, accountId: string) {
@@ -65,7 +66,7 @@ export async function drenarEventos(banco: BancoAsaas, transporte: TransporteAsa
   const saida: EventoRegistrado[] = [];
   for (const e of fila) {
     const reg = await registrarEvento(banco, accountId, e);
-    saida.push(reg.repetido ? reg : await processarEvento(banco, reg.id));
+    saida.push(reg.novo === false ? reg : await processarEvento(banco, reg.id));
   }
   return saida;
 }

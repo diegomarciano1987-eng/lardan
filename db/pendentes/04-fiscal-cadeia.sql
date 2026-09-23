@@ -321,8 +321,8 @@ BEGIN
 
   IF emissor IS NULL THEN pend := pend || 'emissor não definido'::text; END IF;
   IF destinatario IS NULL THEN pend := pend || 'destinatário fiscal não definido'::text; END IF;
-  pend := pend || 'natureza da operação pendente'::text || 'CFOP pendente'::text || 'regime tributário pendente'::text::text
-               || 'valor fiscal pendente (proporção de "um terço" sem efeito)'::text;
+  pend := pend || ARRAY['natureza da operação pendente', 'CFOP pendente', 'regime tributário pendente',
+                        'valor fiscal pendente (proporção de "um terço" sem efeito)']::text[];
 
   PERFORM set_config('lardann.fiscal','on', true);
   INSERT INTO public.fiscal_documents

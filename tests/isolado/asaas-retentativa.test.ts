@@ -89,6 +89,8 @@ beforeAll(async () => {
   representante = await criarConta({ nome: "rep-rt", papeis: ["representante"], comParty: true });
   inativo = await criarConta({ nome: "inat-rt", papeis: ["financeiro"], ativo: false, comParty: true });
   semPessoa = await criarConta({ nome: "semp-rt", papeis: ["financeiro"], comParty: false });
+  // o cadastro cria pessoa automaticamente; aqui ela é removida de propósito
+  await adm.unsafe(`update public.profiles set party_id=null where id=$1`, [semPessoa.uid]);
 });
 
 /* ======================================================================= */

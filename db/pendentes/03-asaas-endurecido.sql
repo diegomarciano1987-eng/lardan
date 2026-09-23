@@ -209,11 +209,18 @@ BEGIN
     RAISE EXCEPTION 'O identificador externo da cobrança não muda.';
   END IF;
 
+  -- quando os três valores são conhecidos, líquido + tarifa tem de fechar com o recebido
+  IF coalesce(NEW.received_cents,0) > 0
+     AND NEW.net_value_cents IS NOT NULL AND NEW.fee_cents IS NOT NULL
+     AND NEW.net_value_cents + NEW.fee_cents <> NEW.received_cents THEN
+    RAISE EXCEPTION 'Recebido, líquido e tarifa incoerentes.';
+  END IF;
   IF coalesce(NEW.received_cents,0) > 0
      AND coalesce(NEW.net_value_cents, NEW.received_cents) + coalesce(NEW.fee_cents,0)
          < coalesce(NEW.received_cents,0) THEN
     RAISE EXCEPTION 'Recebido, líquido e tarifa incoerentes.';
   END IF;
+
 
   IF NEW.title_id IS NOT NULL THEN
     SELECT * INTO t FROM public.financial_titles WHERE id = NEW.title_id;

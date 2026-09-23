@@ -133,3 +133,43 @@ Documentação e testes (não vão ao ar): `docs/lardan/*`, `tests/isolado/*`,
    número dobrado.
 9. Abrir a mesma ficha no celular: sem rolagem lateral.
 10. Confirmar que nenhuma tela oferece emissão fiscal ou cobrança.
+
+## 9. Publicação controlada — 23/09/2026
+
+- Endereço: https://www.lardan.com.br
+- Commit publicado: `1c3e45a` (anterior em produção: `ce45013`, última interface
+  antiga sem as movimentações).
+- Árvore de trabalho limpa no momento da publicação; o diff em relação à
+  interface anterior contém apenas: `src/components/admin/maletas/Movimentacoes.tsx`,
+  `src/lib/maletas.ts`, `src/lib/capabilities.ts`,
+  `src/routes/_authenticated/admin/maletas_.$id.tsx`,
+  `src/routes/_authenticated/consultora.tsx` — mais documentação, `roadmap.md` e
+  testes, que não vão ao ar.
+- Nenhuma migração nova, nenhuma regra financeira alterada, nenhuma integração
+  ligada. Busca por credencial, endereço de provedor fiscal ou chave Asaas nos
+  arquivos publicados: nenhuma ocorrência.
+- Toda operação continua passando por `supabase.rpc`; botão escondido não
+  autoriza nada — a autorização é do banco.
+
+### Verificações de leitura após a publicação (perfil Matriz)
+
+| Verificação | Resultado |
+| --- | --- |
+| Lista de maletas abre | ok |
+| Ficha da maleta abre | ok (MAL-00262, MAL-00263) |
+| Histórico do ciclo carrega | ok ("Movimentações do ciclo" + "Linha do tempo") |
+| 13 conceitos separados | ok (remessa inicial · remessa em trânsito · recebidas · acréscimo em trânsito · acréscimo recebido · retorno declarado · retorno aprovado · divergência · garantia/defeito · mantidas · perdas · vendas comprovadas · ainda sob responsabilidade) |
+| Ciclo sem saldos → aviso explicativo | ok |
+| Computador (1280 px) | sem rolagem lateral |
+| Celular (390 px) | 392 px, sem estouro |
+| Erros de aplicação | nenhum; os únicos 500 são do CDN externo de fontes |
+| Fiscal e Asaas | nenhuma tela de emissão ou cobrança disponível |
+
+Nenhuma escrita foi feita na base compartilhada: apenas leitura. Nenhum dado
+sintético criado. Acerto, Asaas e fiscal seguem pendentes/desligados.
+
+### Acompanhamento da primeira operação legítima
+
+Fica pendente: registrar usuário/perfil, maleta, horário, operação esperada,
+movimento criado, saldo antes/depois, resultado na tela e eventual erro — apenas
+identificadores técnicos, sem dados pessoais.

@@ -37,8 +37,9 @@ beforeAll(async () => {
   ).id;
   contaSandbox = (
     await um<{ id: string }>(
-      `insert into public.asaas_accounts (label, environment, secret_ref) values ($1,'sandbox','ASAAS_SANDBOX_TOKEN') returning id`,
-      [`${marca} sandbox`],
+      `insert into public.asaas_accounts (label, environment, secret_ref, owner_entity_id)
+       values ($1,'sandbox','ASAAS_SANDBOX_TOKEN',$2) returning id`,
+      [`${marca} sandbox`, entidade],
     )
   ).id;
   contaProducao = (
@@ -211,7 +212,12 @@ describe("Cobranças e eventos", () => {
       ),
     ).toBe(true);
 
-    await adm.unsafe(`insert into public.asaas_import_runs (account_id, mode) values ($1,'previa')`, [contaSandbox]);
+    // nem sequer um lote de prévia nasce fora da rotina oficial
+    expect(
+      await recusa(() =>
+        adm.unsafe(`insert into public.asaas_import_runs (account_id, mode) values ($1,'previa')`, [contaSandbox]),
+      ),
+    ).toBe(true);
   });
 });
 

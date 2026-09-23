@@ -64,6 +64,7 @@ import { Route as AuthenticatedAdminCadastrosProdutosRouteImport } from './route
 import { Route as AuthenticatedAdminCandidaturasIdRouteImport } from './routes/_authenticated/admin/candidaturas_.$id'
 import { Route as AuthenticatedAdminFinanceiroIndexRouteImport } from './routes/_authenticated/admin/financeiro/index'
 import { Route as AuthenticatedAdminFinanceiroAprovacoesRouteImport } from './routes/_authenticated/admin/financeiro/aprovacoes'
+import { Route as AuthenticatedAdminFinanceiroAsaasRouteImport } from './routes/_authenticated/admin/financeiro/asaas'
 import { Route as AuthenticatedAdminFinanceiroAuditoriaRouteImport } from './routes/_authenticated/admin/financeiro/auditoria'
 import { Route as AuthenticatedAdminFinanceiroCentrosCustoRouteImport } from './routes/_authenticated/admin/financeiro/centros-custo'
 import { Route as AuthenticatedAdminFinanceiroConciliacaoRouteImport } from './routes/_authenticated/admin/financeiro/conciliacao'
@@ -76,6 +77,7 @@ import { Route as AuthenticatedAdminFinanceiroPagarRouteImport } from './routes/
 import { Route as AuthenticatedAdminFinanceiroPlanoContasRouteImport } from './routes/_authenticated/admin/financeiro/plano-contas'
 import { Route as AuthenticatedAdminFinanceiroReceberRouteImport } from './routes/_authenticated/admin/financeiro/receber'
 import { Route as AuthenticatedAdminMaletasIdRouteImport } from './routes/_authenticated/admin/maletas_.$id'
+import { Route as AuthenticatedFinanceiroSimulacaoIdRouteImport } from './routes/_authenticated/financeiro/simulacao.$id'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as AuthenticatedAdminCadastrosPessoasIdRouteImport } from './routes/_authenticated/admin/cadastros/pessoas_.$id'
@@ -382,6 +384,12 @@ const AuthenticatedAdminFinanceiroAprovacoesRoute =
     path: '/aprovacoes',
     getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
   } as any)
+const AuthenticatedAdminFinanceiroAsaasRoute =
+  AuthenticatedAdminFinanceiroAsaasRouteImport.update({
+    id: '/asaas',
+    path: '/asaas',
+    getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
+  } as any)
 const AuthenticatedAdminFinanceiroAuditoriaRoute =
   AuthenticatedAdminFinanceiroAuditoriaRouteImport.update({
     id: '/auditoria',
@@ -453,6 +461,12 @@ const AuthenticatedAdminMaletasIdRoute =
     id: '/maletas_/$id',
     path: '/maletas/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedFinanceiroSimulacaoIdRoute =
+  AuthenticatedFinanceiroSimulacaoIdRouteImport.update({
+    id: '/financeiro/simulacao/$id',
+    path: '/financeiro/simulacao/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const ApiPublicMidiaIdRoute = ApiPublicMidiaIdRouteImport.update({
   id: '/api/public/midia/$id',
@@ -543,6 +557,7 @@ export interface FileRoutesByFullPath {
   '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
+  '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
   '/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
@@ -555,6 +570,7 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
+  '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
@@ -615,6 +631,7 @@ export interface FileRoutesByTo {
   '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
+  '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
   '/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
@@ -627,6 +644,7 @@ export interface FileRoutesByTo {
   '/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
+  '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/admin/cadastros': typeof AuthenticatedAdminCadastrosIndexRoute
@@ -691,6 +709,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/_authenticated/admin/candidaturas_/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/_authenticated/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
+  '/_authenticated/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/_authenticated/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/_authenticated/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
   '/_authenticated/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
@@ -703,6 +722,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/_authenticated/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/_authenticated/admin/maletas_/$id': typeof AuthenticatedAdminMaletasIdRoute
+  '/_authenticated/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/_authenticated/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
@@ -767,6 +787,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos'
     | '/admin/candidaturas/$id'
     | '/admin/financeiro/aprovacoes'
+    | '/admin/financeiro/asaas'
     | '/admin/financeiro/auditoria'
     | '/admin/financeiro/centros-custo'
     | '/admin/financeiro/conciliacao'
@@ -779,6 +800,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/plano-contas'
     | '/admin/financeiro/receber'
     | '/admin/maletas/$id'
+    | '/financeiro/simulacao/$id'
     | '/api/public/midia/$id'
     | '/lovable/email/transactional/preview'
     | '/admin/cadastros/'
@@ -839,6 +861,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos'
     | '/admin/candidaturas/$id'
     | '/admin/financeiro/aprovacoes'
+    | '/admin/financeiro/asaas'
     | '/admin/financeiro/auditoria'
     | '/admin/financeiro/centros-custo'
     | '/admin/financeiro/conciliacao'
@@ -851,6 +874,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/plano-contas'
     | '/admin/financeiro/receber'
     | '/admin/maletas/$id'
+    | '/financeiro/simulacao/$id'
     | '/api/public/midia/$id'
     | '/lovable/email/transactional/preview'
     | '/admin/cadastros'
@@ -914,6 +938,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cadastros/produtos'
     | '/_authenticated/admin/candidaturas_/$id'
     | '/_authenticated/admin/financeiro/aprovacoes'
+    | '/_authenticated/admin/financeiro/asaas'
     | '/_authenticated/admin/financeiro/auditoria'
     | '/_authenticated/admin/financeiro/centros-custo'
     | '/_authenticated/admin/financeiro/conciliacao'
@@ -926,6 +951,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financeiro/plano-contas'
     | '/_authenticated/admin/financeiro/receber'
     | '/_authenticated/admin/maletas_/$id'
+    | '/_authenticated/financeiro/simulacao/$id'
     | '/api/public/midia/$id'
     | '/lovable/email/transactional/preview'
     | '/_authenticated/admin/cadastros/'
@@ -1355,6 +1381,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroAprovacoesRouteImport
       parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
     }
+    '/_authenticated/admin/financeiro/asaas': {
+      id: '/_authenticated/admin/financeiro/asaas'
+      path: '/asaas'
+      fullPath: '/admin/financeiro/asaas'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceiroAsaasRouteImport
+      parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
+    }
     '/_authenticated/admin/financeiro/auditoria': {
       id: '/_authenticated/admin/financeiro/auditoria'
       path: '/auditoria'
@@ -1439,6 +1472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMaletasIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/financeiro/simulacao/$id': {
+      id: '/_authenticated/financeiro/simulacao/$id'
+      path: '/financeiro/simulacao/$id'
+      fullPath: '/financeiro/simulacao/$id'
+      preLoaderRoute: typeof AuthenticatedFinanceiroSimulacaoIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/midia/$id': {
       id: '/api/public/midia/$id'
       path: '/api/public/midia/$id'
@@ -1486,6 +1526,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminFinanceiroRouteRouteChildren {
   AuthenticatedAdminFinanceiroAprovacoesRoute: typeof AuthenticatedAdminFinanceiroAprovacoesRoute
+  AuthenticatedAdminFinanceiroAsaasRoute: typeof AuthenticatedAdminFinanceiroAsaasRoute
   AuthenticatedAdminFinanceiroAuditoriaRoute: typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   AuthenticatedAdminFinanceiroCentrosCustoRoute: typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
   AuthenticatedAdminFinanceiroConciliacaoRoute: typeof AuthenticatedAdminFinanceiroConciliacaoRoute
@@ -1504,6 +1545,8 @@ const AuthenticatedAdminFinanceiroRouteRouteChildren: AuthenticatedAdminFinancei
   {
     AuthenticatedAdminFinanceiroAprovacoesRoute:
       AuthenticatedAdminFinanceiroAprovacoesRoute,
+    AuthenticatedAdminFinanceiroAsaasRoute:
+      AuthenticatedAdminFinanceiroAsaasRoute,
     AuthenticatedAdminFinanceiroAuditoriaRoute:
       AuthenticatedAdminFinanceiroAuditoriaRoute,
     AuthenticatedAdminFinanceiroCentrosCustoRoute:
@@ -1622,11 +1665,14 @@ const AuthenticatedAdminRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedConsultoraRoute: typeof AuthenticatedConsultoraRoute
+  AuthenticatedFinanceiroSimulacaoIdRoute: typeof AuthenticatedFinanceiroSimulacaoIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedConsultoraRoute: AuthenticatedConsultoraRoute,
+  AuthenticatedFinanceiroSimulacaoIdRoute:
+    AuthenticatedFinanceiroSimulacaoIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

@@ -16,6 +16,7 @@
  * idempotência no provedor: a correlação e a repetição são controladas por nós.
  */
 import {
+  proximoOffsetOficial,
   type ClienteExterno,
   type CobrancaExterna,
   ConsultaIndisponivel,
@@ -61,6 +62,8 @@ export interface OpcoesHttp {
   chave: string;
   fetch?: Fetch;
   userAgent?: string;
+  /** tempo máximo por requisição (padrão 30 s); sempre menor que a posse */
+  timeoutSegundos?: number;
 }
 
 /* ------------------------------------------------------------ dinheiro */
@@ -139,6 +142,7 @@ export function classificar(metodo: string, status: number, corpo: unknown, retr
 export class TransporteHttpAsaas implements TransporteAsaas {
   readonly simulado = false;
   readonly modo = "conectado" as const;
+  readonly timeoutRequisicaoSegundos: number;
   readonly ambiente: AmbienteProvedor;
   private readonly chave: string;
   private readonly fetch: Fetch;
@@ -149,6 +153,7 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     this.chave = o.chave;
     this.fetch = o.fetch ?? fetchBloqueado;
     this.userAgent = o.userAgent ?? "Lardan/1.0 (recebiveis)";
+    this.timeoutRequisicaoSegundos = o.timeoutSegundos ?? 30;
   }
 
   /** Monta a requisição sem enviá-la (usado também pelos testes). */
@@ -173,7 +178,7 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     const { url, init } = this.montar(metodo, caminho, o);
     let r: Response;
     try {
-      r = await this.fetch(url, init);
+      r = await this.fetch(url, { ...init, signal: AbortSignal.timeout(this.timeoutRequisicaoSegundos * 1000) });
     } catch (e) {
       if (e instanceof FalhaAntesDoEnvio) throw e;
       throw metodo === "GET"
@@ -203,7 +208,7 @@ export class TransporteHttpAsaas implements TransporteAsaas {
       limit: f.limit,
       hasMore: Boolean(corpo?.["hasMore"]),
       total: typeof corpo?.["totalCount"] === "number" ? (corpo!["totalCount"] as number) : null,
-      proximoOffset: f.offset + data.length,
+      proximoOffset: proximoOffsetOficial(f.offset, f.limit, data.length, Boolean(corpo?.["hasMore"])),
     };
   }
 

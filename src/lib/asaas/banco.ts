@@ -23,7 +23,6 @@ export const ROTINAS = {
   parcelas: "asaas_receber_parcelas",
   fila: "asaas_receber_fila",
   ocorrencias: "asaas_receber_ocorrencias",
-  contas: "asaas_receber_contas",
 } as const;
 
 /** Somente executor interno (service_role). */
@@ -43,4 +42,9 @@ export const ROTINAS_EXECUTOR = {
   clienteEstado: "asaas_exec_cliente_estado",
   adiar: "asaas_exec_adiar",
   revisao: "asaas_exec_revisao",
+  renovar: "asaas_exec_renovar",
+  clienteRenovar: "asaas_exec_cliente_renovar",
+  preflightParcela: "asaas_exec_preflight_parcela",
+  preflightConta: "asaas_exec_preflight_conta",
+  contas: "asaas_exec_contas",
 } as const;

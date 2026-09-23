@@ -7,6 +7,7 @@
  * ser gravado num armazenamento para sobreviver a reinício do servidor.
  */
 import {
+  proximoOffsetOficial,
   type ClienteExterno,
   type CobrancaExterna,
   type EventoExterno,
@@ -60,6 +61,7 @@ export class SimuladorAsaas implements TransporteAsaas {
   readonly ambiente = "simulacao" as const;
   readonly simulado = true;
   readonly modo = "simulado" as const;
+  readonly timeoutRequisicaoSegundos = 0;
   readonly conta: string | null;
 
   private clientes = new Map<string, ClienteExterno>();
@@ -181,7 +183,8 @@ export class SimuladorAsaas implements TransporteAsaas {
   async listarClientes(f: { limit: number; offset: number }): Promise<Pagina<ClienteExterno>> {
     const todos = [...this.clientes.values()].sort((a, b) => a.id.localeCompare(b.id));
     const itens = todos.slice(f.offset, f.offset + f.limit);
-    return { itens, quantidadeBruta: itens.length, offset: f.offset, limit: f.limit, hasMore: f.offset + itens.length < todos.length, total: todos.length, proximoOffset: f.offset + itens.length };
+    const hasMore = f.offset + f.limit < todos.length;
+    return { itens, quantidadeBruta: itens.length, offset: f.offset, limit: f.limit, hasMore, total: todos.length, proximoOffset: proximoOffsetOficial(f.offset, f.limit, itens.length, hasMore) };
   }
 
   async consultarCliente(id: string) {
@@ -222,7 +225,8 @@ export class SimuladorAsaas implements TransporteAsaas {
       return Boolean(f.incluirEmAbertoAnteriores) && !depoisDoInicio && emAberto(c);
     });
     const itens = todas.slice(f.offset, f.offset + f.limit).map((c) => this.publica(c));
-    return { itens, quantidadeBruta: itens.length, offset: f.offset, limit: f.limit, hasMore: f.offset + itens.length < todas.length, total: todas.length, proximoOffset: f.offset + itens.length };
+    const hasMore = f.offset + f.limit < todas.length;
+    return { itens, quantidadeBruta: itens.length, offset: f.offset, limit: f.limit, hasMore, total: todas.length, proximoOffset: proximoOffsetOficial(f.offset, f.limit, itens.length, hasMore) };
   }
 
   async consultarCobranca(id: string) {

@@ -38,6 +38,10 @@ export interface OpcoesExecutor {
   actor: string | null;
   worker?: string;
   leaseSegundos?: number;
+  /** relógio controlado (somente testes/rotina interna); padrão: agora do banco */
+  agora?: string;
+  /** conta que o preflight do servidor resolveu; a intenção precisa bater */
+  contaEsperada?: string;
 }
 
 export interface Intencao {
@@ -56,6 +60,7 @@ export interface Intencao {
   charge_id?: string | null;
   simulado?: boolean;
   aviso?: string;
+  account_id?: string;
 }
 
 export const prepararIntencao = (banco: BancoAsaas, p: PedidoCobranca) =>
@@ -80,6 +85,9 @@ export interface ResultadoCobranca {
   fase?: string | null;
   erro?: string | null;
   aviso?: string;
+  failure_class?: string | null;
+  next_attempt_at?: string | null;
+  pendencia_operacional?: boolean;
 }
 
 interface Reserva {
@@ -105,6 +113,9 @@ interface Reserva {
 
 interface ReservaCliente {
   reservada: boolean;
+  ocupada?: boolean;
+  token?: string;
+  estado?: string;
   existente?: boolean;
   external_id?: string;
   revisao?: boolean;
@@ -128,6 +139,25 @@ async function obterLinkSeguro(t: TransporteAsaas, id: string, dado?: string | n
  * fala com o adaptador, grava. Qualquer falha na gravação deixa a posse
  * vencer; a retomada consulta o provedor antes de qualquer reenvio.
  */
+/** Mantém a posse viva durante uma chamada lenta ao provedor. */
+async function comRenovacao<T>(fn: () => Promise<T>, renovar: () => Promise<unknown>, leaseSegundos: number): Promise<T> {
+  const h = setInterval(() => void renovar().catch(() => undefined), Math.max(250, (leaseSegundos * 1000) / 3));
+  try {
+    return await fn();
+  } finally {
+    clearInterval(h);
+  }
+}
+
+const opc = (o: OpcoesExecutor) => (o.agora ? { _agora: o.agora } : {});
+
+/**
+ * Executa (ou retoma) uma intenção. Transações curtas: reserva, sai do banco,
+ * fala com o adaptador, grava. Qualquer falha na gravação deixa a posse
+ * vencer; a retomada consulta o provedor antes de qualquer reenvio.
+ * 401/403, 429 e consulta indisponível mantêm a MESMA intenção em
+ * 'aguardando_retentativa' até next_attempt_at.
+ */
 export async function executarIntencao(
   servico: BancoAsaas,
   transporte: TransporteAsaas,
@@ -135,59 +165,76 @@ export async function executarIntencao(
   o: OpcoesExecutor,
 ): Promise<ResultadoCobranca> {
   const worker = o.worker ?? `srv-${Math.random().toString(36).slice(2, 10)}`;
-  const r = await servico.rpc<Reserva>(ROTINAS_EXECUTOR.reservar, {
+  const lease = o.leaseSegundos ?? 120;
+  const r = await servico.rpc<Reserva & { failure_class?: string | null; next_attempt_at?: string | null }>(ROTINAS_EXECUTOR.reservar, {
     _intent: intencaoId,
     _worker: worker,
     _actor: o.actor,
-    _lease_segundos: o.leaseSegundos ?? 120,
+    _lease_segundos: lease,
+    _timeout_req: transporte.timeoutRequisicaoSegundos,
+    ...opc(o),
   });
   if (!r.reservada) {
-    // duplo clique, outra aba ou outro trabalhador: um único efeito
-    return { id: intencaoId, state: r.state, invoice_url: r.invoice_url ?? null, external_id: r.external_id ?? null, charge_id: r.charge_id ?? null, reaproveitada: true };
+    // duplo clique, outra aba, outro trabalhador ou prazo de retentativa ainda aberto
+    return {
+      id: intencaoId, state: r.state, invoice_url: r.invoice_url ?? null, external_id: r.external_id ?? null,
+      charge_id: r.charge_id ?? null, reaproveitada: true,
+      failure_class: r.failure_class ?? null, next_attempt_at: r.next_attempt_at ?? null,
+      ...(r.state === "aguardando_retentativa" ? { aviso: "Nova tentativa só depois do prazo registrado." } : {}),
+    };
   }
+  const base = { _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor };
   const gravar = (payload: Record<string, unknown>) =>
-    servico.rpc<ResultadoCobranca>(ROTINAS_EXECUTOR.resultado, {
-      _intent: intencaoId,
-      _worker: worker,
-      _tentativa: r.tentativa,
-      _actor: o.actor,
-      _payload: payload,
-    });
+    servico.rpc<ResultadoCobranca>(ROTINAS_EXECUTOR.resultado, { ...base, _payload: payload });
   const adiar = (classe: string, e: Error, repetirEm?: number | null, codigos: string[] = []) =>
     servico.rpc<ResultadoCobranca>(ROTINAS_EXECUTOR.adiar, {
-      _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor,
-      _classe: classe, _codigos: codigos, _repetir_em: repetirEm ?? 300, _erro: msg(e),
+      ...base, _classe: classe, _codigos: codigos, _repetir_em: repetirEm ?? null, _erro: msg(e), ...opc(o),
     });
-  const revisar = (e: Error) => servico.rpc<ResultadoCobranca>(ROTINAS_EXECUTOR.revisao, {
-    _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor, _motivo: msg(e),
-  });
+  const revisar = (e: Error) => servico.rpc<ResultadoCobranca>(ROTINAS_EXECUTOR.revisao, { ...base, _motivo: msg(e) });
+  const renovarIntencao = () =>
+    servico.rpc(ROTINAS_EXECUTOR.renovar, { _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _segundos: lease });
+  const recuperavel = (e: unknown) => {
+    if (e instanceof CredencialRecusada) return adiar("credencial", e, null, e.codigos);
+    if (e instanceof LimiteDeRequisicoes) return adiar("limite", e, e.repetirEmSegundos, e.codigos);
+    if (e instanceof ConsultaIndisponivel) return adiar("consulta_indisponivel", e);
+    return null;
+  };
 
   if (transporte.modo !== r.modo_execucao) {
     const erro = `Servidor em modo ${transporte.modo}, conta em modo ${r.modo_execucao}: nada foi enviado.`;
     return r.modo === "criar" ? gravar({ resultado: "rejeitada", fase: "antes_do_provedor", erro }) : gravar({ resultado: "desconhecida", erro });
   }
 
+  /** Posse do cliente (conta+pessoa) com token próprio. */
+  const reservarCliente = () =>
+    servico.rpc<ReservaCliente>(ROTINAS_EXECUTOR.clienteReservar, {
+      ...base, _lease: lease, _timeout_req: transporte.timeoutRequisicaoSegundos,
+    });
+  const persistirCliente = async (token: string, c: { id: string; name: string }) => {
+    await servico.rpc(ROTINAS_EXECUTOR.cliente, { ...base, _token: token, _external_id: c.id, _nome: c.name });
+  };
+
   if (r.modo === "consultar") {
-    // Se a resposta perdida ocorreu ao criar o cliente, primeiro recupere o
-    // cliente pela referência estável. Não consulte nem recrie a cobrança.
+    // Resposta perdida ao criar o cliente: recupere-o pela referência estável.
     if (!r.customer_external_id) {
       try {
-        const c = await transporte.localizarClientePorReferencia(refCliente(r.party_id));
-        if (!c) return adiar("consulta_indisponivel", new ConsultaIndisponivel("Cliente externo ainda não foi localizado pela referência."));
-        await servico.rpc(ROTINAS_EXECUTOR.cliente, {
-          _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor,
-          _external_id: c.id, _nome: c.name,
-        });
-        await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, {
-          _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor,
-          _state: "concluida", _erro: null,
-        });
-        // O cliente foi recuperado; criar a cobrança ainda é seguro porque a
-        // primeira operação externa parou antes desse POST.
-        return executarIntencaoAposCliente(servico, transporte, r, c.id, worker, o, gravar, adiar);
+        const rc = await reservarCliente();
+        if (rc.revisao) return revisar(new Error(rc.motivo ?? "Cliente externo ambíguo."));
+        let clienteId = rc.external_id ?? null;
+        if (!clienteId) {
+          if (!rc.reservada || !rc.token) {
+            return { id: intencaoId, state: r.state, reaproveitada: true, aviso: "Outra execução está preparando o cliente desta pessoa." };
+          }
+          const c = await transporte.localizarClientePorReferencia(refCliente(r.party_id));
+          if (!c) return adiar("consulta_indisponivel", new ConsultaIndisponivel("Cliente externo ainda não foi localizado pela referência."));
+          await persistirCliente(rc.token, c);
+          clienteId = c.id;
+        }
+        // A primeira operação externa parou antes do POST da cobrança.
+        return executarIntencaoAposCliente(transporte, r, clienteId, gravar, recuperavel, renovarIntencao, lease);
       } catch (e) {
         if (e instanceof ReferenciaAmbigua) return revisar(e);
-        return adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
+        return (await recuperavel(e)) ?? adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
       }
     }
     let achada;
@@ -195,7 +242,7 @@ export async function executarIntencao(
       achada = await transporte.consultarCobrancaPorReferencia(r.internal_reference);
     } catch (e) {
       if (e instanceof ReferenciaAmbigua) return revisar(e);
-      return adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
+      return (await recuperavel(e)) ?? adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
     }
     if (!achada) {
       return gravar({ resultado: "rejeitada", fase: "sem_registro_apos_consulta", erro: "Provedor consultado: nenhuma cobrança com esta referência. Nova solicitação é permitida." });
@@ -204,51 +251,40 @@ export async function executarIntencao(
     return gravar({ resultado: "criada", external_id: achada.id, invoice_url: link, status: achada.status });
   }
 
-  // ---- cliente: localizar pela referência, criar se preciso, persistir já
+  // ---- cliente: reservar conta+pessoa → consultar referência → criar se ausente → persistir com token
   let cliente = r.customer_external_id;
+  let token: string | null = null;
   if (!cliente) {
-    const reservaCliente = await servico.rpc<ReservaCliente>(ROTINAS_EXECUTOR.clienteReservar, {
-      _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor,
-      _lease: o.leaseSegundos ?? 120,
-    });
-    if (reservaCliente.revisao) return revisar(new Error(reservaCliente.motivo ?? "Cliente externo ambíguo."));
-    if (reservaCliente.external_id) cliente = reservaCliente.external_id;
-    if (!cliente && !reservaCliente.reservada) {
+    const rc = await reservarCliente();
+    if (rc.revisao) return revisar(new Error(rc.motivo ?? "Cliente externo ambíguo."));
+    if (rc.external_id) cliente = rc.external_id;
+    else if (!rc.reservada || !rc.token) {
       return { id: intencaoId, state: "processando", reaproveitada: true, aviso: "Outra execução está preparando o cliente desta pessoa." };
-    }
+    } else token = rc.token;
   }
-  if (!cliente) {
+  if (!cliente && token) {
+    const tk = token;
+    const renovarCliente = () =>
+      servico.rpc(ROTINAS_EXECUTOR.clienteRenovar, { ...base, _token: tk, _lease: lease });
     try {
       const ref = refCliente(r.party_id);
       let c = await transporte.localizarClientePorReferencia(ref);
       if (!c) {
-        await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, {
-          _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor, _state: "criar", _erro: null,
-        });
-        c = await transporte.prepararCliente({ name: r.devedor.nome ?? "Cliente", cpfCnpj: r.devedor.doc, ref });
+        await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, { ...base, _token: tk, _state: "criar", _erro: null });
+        c = await comRenovacao(
+          () => transporte.prepararCliente({ name: r.devedor.nome ?? "Cliente", cpfCnpj: r.devedor.doc, ref }),
+          () => Promise.all([renovarCliente(), renovarIntencao()]),
+          lease,
+        );
       }
-      await servico.rpc(ROTINAS_EXECUTOR.cliente, {
-        _intent: intencaoId,
-        _worker: worker,
-        _tentativa: r.tentativa,
-        _actor: o.actor,
-        _external_id: c.id,
-        _nome: c.name,
-      });
-      await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, {
-        _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor, _state: "concluida", _erro: null,
-      });
+      await persistirCliente(tk, c);
       cliente = c.id;
     } catch (e) {
       if (e instanceof ReferenciaAmbigua) return revisar(e);
-      if (e instanceof CredencialRecusada) return adiar("credencial", e, 3600, e.codigos);
-      if (e instanceof LimiteDeRequisicoes) return adiar("limite", e, e.repetirEmSegundos, e.codigos);
-      if (e instanceof ConsultaIndisponivel) return adiar("consulta_indisponivel", e);
+      const adiada = recuperavel(e);
+      if (adiada) return adiada;
       if (!(e instanceof FalhaAntesDoEnvio) && !(e instanceof RecusadoPeloProvedor)) {
-        await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, {
-          _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor,
-          _state: "desconhecida", _erro: msg(e),
-        }).catch(() => undefined);
+        await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, { ...base, _token: tk, _state: "desconhecida", _erro: msg(e) }).catch(() => undefined);
         return gravar({ resultado: "desconhecida", erro: `Cliente externo: ${msg(e)}` });
       }
       return gravar({ resultado: "rejeitada", fase: "cliente", erro: `Cliente externo: ${msg(e)}` });
@@ -256,33 +292,35 @@ export async function executarIntencao(
   }
 
   // ---- cobrança
-  return executarIntencaoAposCliente(servico, transporte, r, cliente, worker, o, gravar, adiar);
+  return executarIntencaoAposCliente(transporte, r, cliente!, gravar, recuperavel, renovarIntencao, lease);
 }
 
 async function executarIntencaoAposCliente(
-  servico: BancoAsaas,
   transporte: TransporteAsaas,
   r: Reserva,
   cliente: string,
-  worker: string,
-  o: OpcoesExecutor,
   gravar: (payload: Record<string, unknown>) => Promise<ResultadoCobranca>,
-  adiar: (classe: string, e: Error, repetirEm?: number | null, codigos?: string[]) => Promise<ResultadoCobranca>,
+  recuperavel: (e: unknown) => Promise<ResultadoCobranca> | null,
+  renovar: () => Promise<unknown>,
+  lease: number,
 ): Promise<ResultadoCobranca> {
   let criada;
   try {
-    criada = await transporte.criarCobranca({
-      customer: cliente,
-      valueCents: r.valor_cents,
-      dueDate: r.due_date,
-      billingType: r.billing_type,
-      externalReference: r.internal_reference,
-      idempotencyKey: r.internal_reference,
-    });
+    criada = await comRenovacao(
+      () => transporte.criarCobranca({
+        customer: cliente,
+        valueCents: r.valor_cents,
+        dueDate: r.due_date,
+        billingType: r.billing_type,
+        externalReference: r.internal_reference,
+        idempotencyKey: r.internal_reference,
+      }),
+      renovar,
+      lease,
+    );
   } catch (e) {
     if (e instanceof FalhaAntesDoEnvio) return gravar({ resultado: "rejeitada", fase: "antes_do_provedor", erro: msg(e) });
-    if (e instanceof CredencialRecusada) return adiar("credencial", e, 3600, e.codigos);
-    if (e instanceof LimiteDeRequisicoes) return adiar("limite", e, e.repetirEmSegundos, e.codigos);
+    if (e instanceof CredencialRecusada || e instanceof LimiteDeRequisicoes) return recuperavel(e)!;
     if (e instanceof RecusadoPeloProvedor) return gravar({ resultado: "rejeitada", fase: "provedor_recusou", erro: msg(e) });
     // qualquer outra coisa depois do envio: pode ter criado. Nunca reenviar sem consultar.
     return gravar({ resultado: "desconhecida", erro: msg(e) });
@@ -315,6 +353,7 @@ export async function retomarPendentes(
     _account: o.accountId ?? null,
     _preparada_seg: o.preparadaSegundos ?? 60,
     _limite: 50,
+    ...opc(o),
   });
   const saida: ResultadoCobranca[] = [];
   for (const p of lista) {
@@ -342,7 +381,10 @@ export async function gerarLinkDeCobranca(
     return { state: "criada", invoice_url: url, external_id: it.external_id ?? null, charge_id: it.charge_id ?? null, reaproveitada: true, aviso: it.aviso ?? "" };
   }
   if (!it.id) throw new Error("Intenção não registrada.");
-  if (it.state && !["preparada", "desconhecida"].includes(it.state)) {
+  if (o.contaEsperada && it.account_id && it.account_id !== o.contaEsperada) {
+    throw new Error("A conta da intenção não corresponde à conta validada pelo servidor.");
+  }
+  if (it.state && !["preparada", "desconhecida", "aguardando_retentativa"].includes(it.state)) {
     return { id: it.id, state: it.state, invoice_url: it.invoice_url ?? null, external_id: it.external_id ?? null, reaproveitada: true };
   }
   return executarIntencao(servico, transporte, it.id, o);

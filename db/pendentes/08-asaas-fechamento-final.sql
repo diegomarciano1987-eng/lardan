@@ -1,4 +1,3 @@
-BEGIN;
 
 -- Fechamento final da preparação Asaas. Pendente: somente ambiente isolado.
 ALTER TABLE public.asaas_accounts
@@ -382,4 +381,3 @@ END $fn$;
 REVOKE ALL ON FUNCTION public.asaas_receber_contas() FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.asaas_receber_contas() TO authenticated;
 
-COMMIT;

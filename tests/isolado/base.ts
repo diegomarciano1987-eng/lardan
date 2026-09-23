@@ -84,7 +84,9 @@ export async function rpc<T = unknown>(
     .map((a) => {
       const v = args[a.nome];
       const json = v !== null && typeof v === "object";
-      valores.push(json ? JSON.stringify(v) : v);
+      // arrays de texto viram literal de array do Postgres (o driver real faz isso)
+      const arrPg = Array.isArray(v) && a.tipo.endsWith("[]");
+      valores.push(arrPg ? `{${(v as unknown[]).map((x) => `"${String(x).replace(/["\\]/g, "\\$&")}"`).join(",")}}` : json ? JSON.stringify(v) : v);
       // texto → jsonb evita que o driver reenvie o JSON como texto puro
       return `${a.nome} => $${valores.length}::text::${a.tipo}`;
     })
@@ -230,7 +232,9 @@ export async function rpcServico<T = unknown>(fn: string, args: Record<string, u
     .map((a) => {
       const v = args[a.nome];
       const json = v !== null && typeof v === "object";
-      valores.push(json ? JSON.stringify(v) : v);
+      // arrays de texto viram literal de array do Postgres (o driver real faz isso)
+      const arrPg = Array.isArray(v) && a.tipo.endsWith("[]");
+      valores.push(arrPg ? `{${(v as unknown[]).map((x) => `"${String(x).replace(/["\\]/g, "\\$&")}"`).join(",")}}` : json ? JSON.stringify(v) : v);
       return `${a.nome} => $${valores.length}::text::${a.tipo}`;
     })
     .join(", ");

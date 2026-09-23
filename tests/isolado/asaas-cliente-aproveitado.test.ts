@@ -118,15 +118,17 @@ describe("ZIP 19: cliente vinculado por outra execução + resposta perdida", ()
     const t2 = await titulo(c.empresa, c.party);
     const sim = new SimuladorAsaas({ conta: c.conta, semente: marca() });
 
+    // as duas intenções são preparadas ANTES de existir cliente vinculado
+    const i1 = await prepararIntencao(banco(fin), { installmentId: t1.installmentId, billingType: "PIX" });
+    const i2 = await prepararIntencao(banco(fin), { installmentId: t2.installmentId, billingType: "PIX" });
+    expect((await intencao(t2.installmentId))[0]!["customer_external_id"]).toBeNull();
     // execução A cria e vincula o cliente da pessoa
     const a = espiao(sim, new Set());
-    const i1 = await prepararIntencao(banco(fin), { installmentId: t1.installmentId, billingType: "PIX" });
     const r1 = await executarIntencao(servico, a.t, i1.id!, { actor: fin.uid, worker: "wA" });
     expect(r1.state).toBe("criada");
     const [cli] = (await adm.unsafe(`select external_id from public.asaas_customers where account_id=$1 and party_id=$2`, [c.conta, c.party])) as { external_id: string }[];
 
     // execução B aproveita o cliente; o provedor cria a cobrança e a resposta se perde
-    const i2 = await prepararIntencao(banco(fin), { installmentId: t2.installmentId, billingType: "PIX" });
     const [antes] = await intencao(t2.installmentId);
     const ref2 = antes!["internal_reference"] as string;
     const b = espiao(sim, new Set([ref2]));

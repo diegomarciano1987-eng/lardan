@@ -513,3 +513,14 @@ END $fn$;
 DROP TRIGGER IF EXISTS asaas_import_run_guard ON public.asaas_import_runs;
 CREATE TRIGGER asaas_import_run_guard BEFORE INSERT OR UPDATE ON public.asaas_import_runs
   FOR EACH ROW EXECUTE FUNCTION public.asaas_import_run_guard();
+
+-- ---------------- escrita direta: revogada ----------------
+-- O navegador nunca grava nessas tabelas. Tudo passa por rotina com autorização.
+REVOKE INSERT, UPDATE, DELETE ON public.asaas_accounts      FROM authenticated, anon;
+REVOKE INSERT, UPDATE, DELETE ON public.asaas_customers     FROM authenticated, anon;
+REVOKE INSERT, UPDATE, DELETE ON public.asaas_charges       FROM authenticated, anon;
+REVOKE INSERT, UPDATE, DELETE ON public.asaas_events        FROM authenticated, anon;
+REVOKE INSERT, UPDATE, DELETE ON public.asaas_import_runs   FROM authenticated, anon;
+REVOKE INSERT, UPDATE, DELETE ON public.asaas_import_findings FROM authenticated, anon;
+REVOKE INSERT, UPDATE, DELETE ON public.asaas_charge_changes  FROM authenticated, anon;
+REVOKE INSERT, UPDATE, DELETE ON public.asaas_event_types     FROM authenticated, anon;

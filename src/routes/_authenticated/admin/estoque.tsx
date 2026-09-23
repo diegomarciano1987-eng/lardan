@@ -1,7 +1,8 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownLeft, ArrowUpRight, BookmarkPlus, FileUp, PackagePlus } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, BookmarkPlus, FileUp, MapPin, PackagePlus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import {
   EmptyState,
   PageHeader,
@@ -489,6 +490,10 @@ function EstoquePage() {
             actions={
               podeOperar ? (
                 <div className="flex flex-wrap gap-3">
+                  <Link to="/admin/cadastros/locais" className="admin-btn">
+                    <MapPin aria-hidden className="mr-2 inline size-4" />
+                    Locais
+                  </Link>
                   <button type="button" onClick={() => setImportacao(true)} className="admin-btn-primary">
                     <FileUp aria-hidden className="mr-2 inline size-4" />
                     Importar planilha

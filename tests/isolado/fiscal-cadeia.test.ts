@@ -8,7 +8,7 @@
  *   bash tests/isolado/subir.sh && bun test tests/isolado
  */
 import { beforeAll, describe, expect, it } from "bun:test";
-import { adm, Conta, criarConta, criarVariante, rpc } from "./base";
+import { adm, Conta, criarConta, criarVariante, escritaDireta, rpc } from "./base";
 
 const um = async <T,>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const recusa = async (fn: () => Promise<unknown>) => {
@@ -157,6 +157,8 @@ describe("Preparação e travas", () => {
       _doc: doc,
       _access_key: "0".repeat(44),
       _protocol: "simulado",
+      _xml_path: null,
+      _xml_hash: null,
     });
     expect(a.ok).toBe(false);
     expect(String(a.erro)).toContain("simulada");
@@ -167,12 +169,13 @@ describe("Preparação e travas", () => {
   });
 
   it("9. escrita direta em documento e em histórico é recusada", async () => {
-    expect(
-      await recusa(() => adm.unsafe(`insert into public.fiscal_documents (kind) values ('venda')`)),
-    ).toBe(true);
-    expect(
-      await recusa(() => adm.unsafe(`delete from public.fiscal_document_events where document_id = $1`, [doc])),
-    ).toBe(true);
+    const insercao = await escritaDireta(fiscal, `insert into public.fiscal_documents (kind) values ('venda')`);
+    expect(insercao.ok).toBe(false);
+
+    const exclusao = await escritaDireta(fiscal, `delete from public.fiscal_document_events where document_id = $1`, [
+      doc,
+    ]);
+    expect(exclusao.ok).toBe(false);
   });
 
   it("10. a cadeia fiscal não gera título, parcela, liquidação nem cobrança", async () => {

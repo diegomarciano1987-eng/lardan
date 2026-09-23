@@ -334,8 +334,10 @@ BEGIN
   it := public.asaas_exec_posse(_intent,_worker,_tentativa);
   IF _state NOT IN('criar','desconhecida','concluida','revisao') THEN RAISE EXCEPTION 'Estado de cliente inválido.'; END IF;
   PERFORM public.asaas_cliente_posse(it.account_id,it.party_id,_worker,_token);
+  -- 'desconhecida' é gravada depois que a chamada TERMINOU (com erro): a posse é
+  -- liberada, mas quem assumir herda 'desconhecida' e consulta antes de criar.
   UPDATE public.asaas_customer_leases SET state=_state,last_error=left(_erro,500),
-    lease_until=CASE WHEN _state IN('concluida','revisao') THEN now() ELSE lease_until END,updated_at=now()
+    lease_until=CASE WHEN _state IN('concluida','revisao','desconhecida') THEN now() ELSE lease_until END,updated_at=now()
    WHERE account_id=it.account_id AND party_id=it.party_id AND lease_token=_token;
 END $fn$;
 REVOKE ALL ON FUNCTION public.asaas_exec_cliente_estado(uuid,text,integer,uuid,uuid,text,text) FROM PUBLIC,anon,authenticated;

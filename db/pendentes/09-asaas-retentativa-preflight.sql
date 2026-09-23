@@ -383,6 +383,36 @@ END $fn$;
 REVOKE ALL ON FUNCTION public.asaas_exec_cliente(uuid,text,integer,uuid,uuid,text,text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.asaas_exec_cliente(uuid,text,integer,uuid,uuid,text,text) TO service_role;
 
+/** Aproveitamento de cliente já vinculado por outra execução: grava na intenção
+    atual (dono da posse da intenção), só se o cliente pertence à mesma conta e
+    pessoa e está vinculado. Não cria cliente, não exige posse de cliente. */
+CREATE OR REPLACE FUNCTION public.asaas_exec_cliente_vincular(
+  _intent uuid, _worker text, _tentativa integer, _actor uuid, _external_id text)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='public' AS $fn$
+DECLARE it public.asaas_charge_intents; cu record;
+BEGIN
+  PERFORM public.asaas_exec_exigir(_actor, 'finance.receivable.manage');
+  it := public.asaas_exec_posse(_intent, _worker, _tentativa);
+  IF coalesce(btrim(_external_id),'') = '' THEN RAISE EXCEPTION 'Cliente externo sem identificador.'; END IF;
+  SELECT * INTO cu FROM public.asaas_customers
+   WHERE account_id = it.account_id AND external_id = _external_id AND party_id = it.party_id AND match_status = 'vinculado';
+  IF cu.id IS NULL THEN RAISE EXCEPTION 'Cliente externo não está vinculado a esta pessoa nesta conta.'; END IF;
+  IF it.customer_external_id IS NOT NULL THEN
+    IF it.customer_external_id <> _external_id THEN
+      RAISE EXCEPTION 'A intenção já possui outro cliente externo: revisão humana obrigatória.';
+    END IF;
+    RETURN jsonb_build_object('customer_id', cu.id, 'external_id', _external_id, 'ja_vinculado', true);
+  END IF;
+  PERFORM set_config('lardann.asaas_intent','on', true);
+  UPDATE public.asaas_charge_intents SET customer_external_id = _external_id WHERE id = _intent;
+  PERFORM set_config('lardann.asaas_intent','off', true);
+  INSERT INTO public.asaas_charge_intent_events (intent_id, de, para, detalhe, actor_id)
+  VALUES (_intent, it.state, it.state, jsonb_build_object('cliente_externo', _external_id, 'origem', 'aproveitado'), _actor);
+  RETURN jsonb_build_object('customer_id', cu.id, 'external_id', _external_id);
+END $fn$;
+REVOKE ALL ON FUNCTION public.asaas_exec_cliente_vincular(uuid,text,integer,uuid,text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.asaas_exec_cliente_vincular(uuid,text,integer,uuid,text) TO service_role;
+
 -- ---------- 6. preflight: conta derivada do registro, sem efeito ----------
 /** Ator do executor: ativo, com papel e com pessoa vinculada. */
 CREATE OR REPLACE FUNCTION public.asaas_ator_pode(_actor uuid, _cap text)

@@ -39,6 +39,7 @@ export const ROTINAS_EXECUTOR = {
   configCobranca: "asaas_exec_config_cobranca",
   configLote: "asaas_exec_config_lote",
   clienteReservar: "asaas_exec_cliente_reservar",
+  clienteVincular: "asaas_exec_cliente_vincular",
   clienteEstado: "asaas_exec_cliente_estado",
   adiar: "asaas_exec_adiar",
   revisao: "asaas_exec_revisao",

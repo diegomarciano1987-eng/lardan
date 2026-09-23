@@ -214,29 +214,14 @@ export async function executarIntencao(
     await servico.rpc(ROTINAS_EXECUTOR.cliente, { ...base, _token: token, _external_id: c.id, _nome: c.name });
   };
 
+  /** Cliente já vinculado por outra execução: grava na intenção atual antes da cobrança. */
+  const vincularCliente = (externalId: string) =>
+    servico.rpc(ROTINAS_EXECUTOR.clienteVincular, { ...base, _external_id: externalId });
+
   if (r.modo === "consultar") {
-    // Resposta perdida ao criar o cliente: recupere-o pela referência estável.
-    if (!r.customer_external_id) {
-      try {
-        const rc = await reservarCliente();
-        if (rc.revisao) return revisar(new Error(rc.motivo ?? "Cliente externo ambíguo."));
-        let clienteId = rc.external_id ?? null;
-        if (!clienteId) {
-          if (!rc.reservada || !rc.token) {
-            return { id: intencaoId, state: r.state, reaproveitada: true, aviso: "Outra execução está preparando o cliente desta pessoa." };
-          }
-          const c = await transporte.localizarClientePorReferencia(refCliente(r.party_id));
-          if (!c) return adiar("consulta_indisponivel", new ConsultaIndisponivel("Cliente externo ainda não foi localizado pela referência."));
-          await persistirCliente(rc.token, c);
-          clienteId = c.id;
-        }
-        // A primeira operação externa parou antes do POST da cobrança.
-        return executarIntencaoAposCliente(transporte, r, clienteId, gravar, recuperavel, renovarIntencao, lease);
-      } catch (e) {
-        if (e instanceof ReferenciaAmbigua) return revisar(e);
-        return (await recuperavel(e)) ?? adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
-      }
-    }
+    // Resultado desconhecido: SEMPRE consultar a cobrança pela referência antes
+    // de qualquer novo envio. Ausência de cliente na intenção não prova que a
+    // cobrança nunca foi enviada (o cliente pode ter sido aproveitado).
     let achada;
     try {
       achada = await transporte.consultarCobrancaPorReferencia(r.internal_reference);
@@ -244,11 +229,37 @@ export async function executarIntencao(
       if (e instanceof ReferenciaAmbigua) return revisar(e);
       return (await recuperavel(e)) ?? adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
     }
-    if (!achada) {
+    if (achada) {
+      if (!r.customer_external_id && achada.customer) {
+        try { await vincularCliente(achada.customer); } catch { /* vínculo divergente fica para revisão; a cobrança é registrada */ }
+      }
+      const link = await obterLinkSeguro(transporte, achada.id, achada.invoiceUrl);
+      return gravar({ resultado: "criada", external_id: achada.id, invoice_url: link, status: achada.status });
+    }
+    if (r.customer_external_id) {
       return gravar({ resultado: "rejeitada", fase: "sem_registro_apos_consulta", erro: "Provedor consultado: nenhuma cobrança com esta referência. Nova solicitação é permitida." });
     }
-    const link = await obterLinkSeguro(transporte, achada.id, achada.invoiceUrl);
-    return gravar({ resultado: "criada", external_id: achada.id, invoice_url: link, status: achada.status });
+    // Consultado agora: nenhuma cobrança existe. Recuperar o cliente e só então enviar.
+    try {
+      const rc = await reservarCliente();
+      if (rc.revisao) return revisar(new Error(rc.motivo ?? "Cliente externo ambíguo."));
+      let clienteId = rc.external_id ?? null;
+      if (clienteId) {
+        await vincularCliente(clienteId);
+      } else {
+        if (!rc.reservada || !rc.token) {
+          return { id: intencaoId, state: r.state, reaproveitada: true, aviso: "Outra execução está preparando o cliente desta pessoa." };
+        }
+        const c = await transporte.localizarClientePorReferencia(refCliente(r.party_id));
+        if (!c) return adiar("consulta_indisponivel", new ConsultaIndisponivel("Cliente externo ainda não foi localizado pela referência."));
+        await persistirCliente(rc.token, c);
+        clienteId = c.id;
+      }
+      return executarIntencaoAposCliente(transporte, r, clienteId, gravar, recuperavel, renovarIntencao, lease);
+    } catch (e) {
+      if (e instanceof ReferenciaAmbigua) return revisar(e);
+      return (await recuperavel(e)) ?? adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
+    }
   }
 
   // ---- cliente: reservar conta+pessoa → consultar referência → criar se ausente → persistir com token
@@ -257,8 +268,11 @@ export async function executarIntencao(
   if (!cliente) {
     const rc = await reservarCliente();
     if (rc.revisao) return revisar(new Error(rc.motivo ?? "Cliente externo ambíguo."));
-    if (rc.external_id) cliente = rc.external_id;
-    else if (!rc.reservada || !rc.token) {
+    if (rc.external_id) {
+      // aproveitado de outra execução: persistir na intenção ANTES de criar a cobrança
+      await vincularCliente(rc.external_id);
+      cliente = rc.external_id;
+    } else if (!rc.reservada || !rc.token) {
       return { id: intencaoId, state: "processando", reaproveitada: true, aviso: "Outra execução está preparando o cliente desta pessoa." };
     } else token = rc.token;
   }

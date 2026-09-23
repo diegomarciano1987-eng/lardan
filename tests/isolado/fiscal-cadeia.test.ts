@@ -150,7 +150,6 @@ describe("Preparação e travas", () => {
       _status: "erro",
       _payload: { motivo: "simulação local" },
     });
-    if (!t.ok) console.log("ERRO8:", t.erro);
     expect(t.ok).toBe(true);
     expect(t.dados.simulado).toBe(true);
 

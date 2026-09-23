@@ -79,7 +79,7 @@ export async function executarIntencao(
     internalReference: string;
     idempotencyKey: string;
     descricao?: string | null;
-    devedor?: { nome: string; doc?: string | null; email?: string | null };
+    devedor?: { nome: string; doc?: string | null; email?: string | null } | undefined;
   },
   worker = "web",
 ): Promise<ResultadoCobranca> {

@@ -226,7 +226,7 @@ DROP POLICY IF EXISTS "fiscal_document_items_write" ON public.fiscal_document_it
 CREATE OR REPLACE FUNCTION public.zz_block_direct_fiscal()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public' AS $fn$
 BEGIN
-  IF current_user IN ('authenticated','anon') AND current_setting('lardann.fiscal', true) <> 'on' THEN
+  IF current_user IN ('authenticated','anon') AND coalesce(current_setting('lardann.fiscal', true), 'off') <> 'on' THEN
     RAISE EXCEPTION 'Documentos fiscais só são gravados pelas rotinas oficiais.' USING errcode = '42501';
   END IF;
   RETURN coalesce(NEW, OLD);
@@ -285,7 +285,7 @@ BEGIN
     END IF;
   END IF;
   IF TG_OP = 'UPDATE' AND OLD.status <> 'autorizado' AND NEW.status = 'autorizado'
-     AND current_setting('lardann.fiscal_autorizar', true) <> 'on' THEN
+     AND coalesce(current_setting('lardann.fiscal_autorizar', true), 'off') <> 'on' THEN
     RAISE EXCEPTION 'Autorização só pela rotina oficial, com retorno do provedor registrado.';
   END IF;
   RETURN NEW;

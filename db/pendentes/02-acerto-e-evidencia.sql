@@ -65,7 +65,7 @@ CREATE POLICY sales_evidence_events_read ON public.sales_evidence_events FOR SEL
 CREATE OR REPLACE FUNCTION public.zz_block_direct_evidence()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public' AS $fn$
 BEGIN
-  IF current_setting('lardann.evidence', true) <> 'on' THEN
+  IF coalesce(current_setting('lardann.evidence', true), 'off') <> 'on' THEN
     RAISE EXCEPTION 'Evidência de venda só é gravada pelas rotinas oficiais.';
   END IF;
   RETURN NEW;
@@ -262,7 +262,7 @@ CREATE POLICY kit_acerto_events_read ON public.kit_acerto_events FOR SELECT TO a
 CREATE OR REPLACE FUNCTION public.zz_block_direct_acerto()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public' AS $fn$
 BEGIN
-  IF current_setting('lardann.acerto', true) <> 'on' THEN
+  IF coalesce(current_setting('lardann.acerto', true), 'off') <> 'on' THEN
     RAISE EXCEPTION 'O acerto só é gravado pelas rotinas oficiais.';
   END IF;
   IF TG_TABLE_NAME = 'kit_acertos' THEN

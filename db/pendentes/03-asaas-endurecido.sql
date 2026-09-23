@@ -248,7 +248,7 @@ BEGIN
   END IF;
 
   IF NEW.reconcile_status = 'vinculado'
-     AND current_setting('lardann.asaas_link', true) <> 'on' THEN
+     AND coalesce(current_setting('lardann.asaas_link', true), 'off') <> 'on' THEN
     RAISE EXCEPTION 'Vínculo de cobrança só pela rotina oficial.';
   END IF;
 

@@ -592,7 +592,7 @@ BEGIN
   SELECT * INTO t FROM public.financial_titles WHERE id = i.title_id;
   IF t.direction <> 'receivable' THEN RAISE EXCEPTION 'Só há cobrança para título a receber.'; END IF;
   IF t.status <> 'ativo' THEN RAISE EXCEPTION 'Título não está ativo.'; END IF;
-  IF t.approval_status = 'na_fila' THEN RAISE EXCEPTION 'Título pendente de aprovação.'; END IF;
+  IF t.approval_status = 'pendente' THEN RAISE EXCEPTION 'Título pendente de aprovação.'; END IF;
 
   v_saldo := public.fin_installment_saldo(i.id);
   IF coalesce(v_saldo,0) <= 0 THEN RAISE EXCEPTION 'Parcela sem saldo devido.'; END IF;

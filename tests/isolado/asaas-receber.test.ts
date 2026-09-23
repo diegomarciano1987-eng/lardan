@@ -738,10 +738,13 @@ describe("links de cobranças importadas", () => {
     expect(await v(cx!.id, "pay_abc123", "/financeiro/simulacao/pay_abc123")).toBe(false);
     expect(await v(conta, "sim_pay_x", "https://sandbox.asaas.com/i/abc123def")).toBe(false);
     expect(await v(conta, "sim_pay_x", "/financeiro/simulacao/sim_pay_y")).toBe(false);
-    const inval = await adm.unsafe(
-      `update public.asaas_accounts set ambiente_provedor = null where id=$1`, [cx!.id],
-    ).then(() => true, () => false);
-    expect(inval).toBe(false);
+    let aceitou = true;
+    try {
+      await adm.unsafe(`update public.asaas_accounts set ambiente_provedor = null where id=$1`, [cx!.id]);
+    } catch {
+      aceitou = false;
+    }
+    expect(aceitou).toBe(false);
   });
 });
 

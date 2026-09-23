@@ -635,7 +635,12 @@ BEGIN
   IF v_venc < current_date THEN v_venc := current_date; END IF;
   v_forma := coalesce(nullif(_payload->>'billing_type',''),'UNDEFINED');
   v_ref := 'lardan:installment:' || i.id::text;
-  v_key := coalesce(nullif(_payload->>'idempotency_key',''), v_ref || ':' || v_saldo::text || ':' || v_venc::text);
+  -- tentativas encerradas (rejeitada/cancelada) não prendem a parcela: a chave
+  -- padrão inclui quantas já houve, para que uma nova solicitação seja nova
+  v_key := coalesce(nullif(_payload->>'idempotency_key',''),
+    v_ref || ':' || v_saldo::text || ':' || v_venc::text || ':' ||
+    (SELECT count(*) FROM public.asaas_charge_intents x
+      WHERE x.installment_id = i.id AND x.state IN ('rejeitada','cancelada'))::text);
   v_hash := public.fin_fingerprint(jsonb_build_object(
     'account', conta.id, 'installment', i.id, 'party', v_party,
     'valor_cents', v_saldo, 'due_date', v_venc, 'billing_type', v_forma));

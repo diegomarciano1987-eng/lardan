@@ -166,3 +166,72 @@ describe("classificação de erros", () => {
     expect(await t.consultarCobranca("p").catch((x) => x)).toBeInstanceOf(ChamadaExternaBloqueada);
   });
 });
+
+describe("fábrica de transporte (resolução única por conta)", () => {
+  const { resolverConta, transporteDaResolucao, IntegracaoIndisponivel } = require("../../src/lib/asaas/configuracao.server") as typeof import("../../src/lib/asaas/configuracao.server");
+  const conta = "11111111-1111-4111-8111-111111111111";
+  const sb = { ok: true, situacao: "sandbox_configurado", account_id: conta, modo: "conectado" as const, ambiente: "sandbox" as const, secret_ref: "ASAAS_SANDBOX_LARDAN" };
+  const env = { ASAAS_SANDBOX_LARDAN: "$aact_hmlg_valor_sintetico", ASAAS_CONNECTED_ACCOUNT_ID: conta };
+
+  function espiarFetch(resp: () => Response) {
+    const original = globalThis.fetch;
+    const chamadas: { url: string; init: RequestInit }[] = [];
+    globalThis.fetch = (async (url: string, init: RequestInit) => { chamadas.push({ url, init }); return resp(); }) as unknown as typeof fetch;
+    return { chamadas, restaurar: () => { globalThis.fetch = original; } };
+  }
+
+  test("gate desligado: recusa antes de construir o cliente HTTP; nenhuma requisição", async () => {
+    const e = espiarFetch(() => json(200, pagamento));
+    try {
+      for (const gate of [undefined, "0", "true", "yes"]) {
+        const r = resolverConta(sb, { ...env, ...(gate ? { ASAAS_EGRESS_ENABLED: gate } : {}) });
+        expect(r.executavel).toBe(false);
+        await expect(transporteDaResolucao(r)).rejects.toBeInstanceOf(IntegracaoIndisponivel);
+      }
+      expect(e.chamadas.length).toBe(0);
+    } finally { e.restaurar(); }
+  });
+
+  test("tudo válido e gate ligado: o fetch do servidor é injetado com cabeçalhos corretos (sem rede: fetch espionado)", async () => {
+    const e = espiarFetch(() => json(200, pagamento));
+    try {
+      const r = resolverConta(sb, { ...env, ASAAS_EGRESS_ENABLED: "1" });
+      expect(r.executavel).toBe(true);
+      const t = await transporteDaResolucao(r);
+      await t.criarCobranca({ customer: "cus_1", valueCents: 12990, dueDate: "2026-10-10", billingType: "PIX", externalReference: "r", idempotencyKey: "k" });
+      expect(e.chamadas.length).toBe(1);
+      const h = e.chamadas[0]!.init.headers as Record<string, string>;
+      expect(e.chamadas[0]!.url).toBe("https://api-sandbox.asaas.com/v3/payments");
+      expect(h["access_token"]).toBe("$aact_hmlg_valor_sintetico");
+      expect(h["content-type"]).toBe("application/json");
+      expect(h["user-agent"]).toContain("Lardan");
+      expect(e.chamadas[0]!.init.signal).toBeDefined();
+    } finally { e.restaurar(); }
+  });
+
+  test("sandbox só aceita $aact_hmlg_; produção estruturalmente bloqueada", () => {
+    expect(resolverConta(sb, { ...env, ASAAS_SANDBOX_LARDAN: "$aact_prod_x", ASAAS_EGRESS_ENABLED: "1" }).situacao).toBe("credencial_ausente");
+    expect(resolverConta({ ...sb, ambiente: "producao", secret_ref: "ASAAS_PRODUCAO_LARDAN" }, { ASAAS_PRODUCAO_LARDAN: "$aact_prod_x", ASAAS_CONNECTED_ACCOUNT_ID: conta, ASAAS_EGRESS_ENABLED: "1" }).executavel).toBe(false);
+  });
+
+  test("resposta pública não contém chave nem nome de segredo", () => {
+    const { publico } = require("../../src/lib/asaas/configuracao.server") as typeof import("../../src/lib/asaas/configuracao.server");
+    for (const e2 of [{}, env, { ...env, ASAAS_EGRESS_ENABLED: "1" }]) {
+      const t = JSON.stringify(publico(resolverConta(sb, e2), conta, "Conta"));
+      expect(t).not.toContain("$aact");
+      expect(t).not.toContain("ASAAS_");
+    }
+  });
+});
+
+describe("paginação oficial no simulador", () => {
+  test("hasMore → offset + limit; última página → offset + bruta", async () => {
+    const { SimuladorAsaas } = await import("../../src/lib/asaas/simulador");
+    const s = new SimuladorAsaas({ conta: "c", semente: "p" });
+    for (let i = 0; i < 25; i++) s.semearCobranca({ customer: "x", valueCents: 1, dueDate: "2026-10-10", billingType: "PIX", status: "PENDING" });
+    const a = await s.listarCobrancas({ limit: 10, offset: 0 });
+    expect([a.hasMore, a.proximoOffset]).toEqual([true, 10]);
+    const b = await s.listarCobrancas({ limit: 10, offset: 20 });
+    expect([b.hasMore, b.quantidadeBruta, b.proximoOffset]).toEqual([false, 5, 25]);
+  });
+});

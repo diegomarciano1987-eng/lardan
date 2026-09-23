@@ -61,6 +61,7 @@ export function LeitorEntrada() {
   const [local, setLocal] = React.useState("");
   const [categoria, setCategoria] = React.useState("");
   const [codigo, setCodigo] = React.useState("");
+  const [referencia, setReferencia] = React.useState("");
   const [contador, setContador] = React.useState(0);
   const [recusados, setRecusados] = React.useState(0);
   const [leituras, setLeituras] = React.useState<Leitura[]>([]);
@@ -76,7 +77,7 @@ export function LeitorEntrada() {
     }
   }, [locais.data, local]);
 
-  const pronto = Boolean(local && categoria);
+  const pronto = Boolean(local && categoria && referencia.trim());
   React.useEffect(() => {
     if (pronto) campo.current?.focus();
   }, [pronto]);
@@ -120,6 +121,7 @@ export function LeitorEntrada() {
         quantity: 1,
         toLocationId: local,
         reasonCode: "compra",
+        reference: referencia.trim(),
         note: `Entrada por leitor (${nomeCategoria})`,
       });
       apito(true);
@@ -162,10 +164,20 @@ export function LeitorEntrada() {
   return (
     <div className="space-y-5">
       <Panel title="Entrada rápida por leitor">
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           <div>
             <p className="ledger-eyebrow mb-2">1. Local de entrada</p>
             <SmartSelect options={opcoesLocal} value={local} onChange={setLocal} placeholder="Escolha o local" />
+          </div>
+          <div>
+            <p className="ledger-eyebrow mb-2">Nota, pedido ou protocolo</p>
+            <input
+              value={referencia}
+              onChange={(e) => setReferencia(e.target.value)}
+              aria-label="Referência do recebimento"
+              placeholder="Ex.: NF 1234 ou Contagem 24/09"
+              className="h-11 w-full rounded-[10px] border border-line bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+            />
           </div>
           <div>
             <p className="ledger-eyebrow mb-2">2. Categoria desta entrada</p>
@@ -203,7 +215,7 @@ export function LeitorEntrada() {
                 autoComplete="off"
                 inputMode="none"
                 aria-label="Código de barras"
-                placeholder={pronto ? "Aguardando leitura…" : "Escolha local e categoria acima"}
+                placeholder={pronto ? "Aguardando leitura…" : "Preencha local, referência e categoria"}
                 className="w-full bg-transparent font-display text-4xl font-bold tracking-wide text-ledger-text outline-none placeholder:text-ledger-muted/60"
               />
             </label>

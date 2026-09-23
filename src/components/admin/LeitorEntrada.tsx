@@ -71,8 +71,8 @@ export function LeitorEntrada() {
 
   React.useEffect(() => {
     if (!local && locais.data?.length) {
-      const dep = (locais.data as { id: string; code?: string }[]).find((l) => l.code === "DEP-01");
-      setLocal((dep ?? locais.data[0]).id);
+      const dep = locais.data.find((l) => l.code === "DEP-01") ?? locais.data[0];
+      if (dep) setLocal(dep.id);
     }
   }, [locais.data, local]);
 

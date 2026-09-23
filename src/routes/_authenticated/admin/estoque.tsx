@@ -480,51 +480,55 @@ function EstoquePage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader
-        eyebrow="OPERAÇÃO · ESTOQUE"
-        title="Estoque"
-        description="Saldos por local e razão permanente de movimentações. Nenhum saldo é editado à mão."
-        actions={
-          podeOperar ? (
-            <div className="flex flex-wrap gap-3">
-              <button type="button" onClick={() => setImportacao(true)} className="admin-btn-primary">
-                <FileUp aria-hidden className="mr-2 inline size-4" />
-                Importar planilha
-              </button>
-              <button type="button" onClick={() => setDialogo(true)} className="admin-btn-primary">
-                <PackagePlus aria-hidden className="mr-2 inline size-4" />
-                Nova movimentação
-              </button>
-              {podeCriarReserva && (
-                <button
-                  type="button"
-                  onClick={() => setDialogoReserva(true)}
-                  className="admin-btn-primary"
-                >
-                  <BookmarkPlus aria-hidden className="mr-2 inline size-4" />
-                  Nova reserva
-                </button>
-              )}
-            </div>
-          ) : undefined
-        }
-      />
-
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <Indicador rotulo="Locais ativos" valor={resumo.data?.locais} />
-        <Indicador rotulo="Peças com saldo" valor={resumo.data?.pecas_com_saldo} />
-        <Indicador rotulo="Unidades em estoque" valor={resumo.data?.unidades} />
-        <Indicador rotulo="Saldos negativos" valor={resumo.data?.negativos} />
-        <Indicador rotulo="Movimentos (7 dias)" valor={resumo.data?.movimentos_7d} />
-      </div>
-
-      {semLocais && (
-        <Panel title="Antes de começar">
-          <EmptyState
-            title="Nenhum local ativo cadastrado"
-            description="O estoque trabalha por local: depósito, loja, maleta ou trânsito. Cadastre pelo menos um local em Cadastros › Locais para poder registrar entradas e saídas."
+      {aba !== "leitor" && (
+        <>
+          <PageHeader
+            eyebrow="OPERAÇÃO · ESTOQUE"
+            title="Estoque"
+            description="Saldos por local e razão permanente de movimentações. Nenhum saldo é editado à mão."
+            actions={
+              podeOperar ? (
+                <div className="flex flex-wrap gap-3">
+                  <button type="button" onClick={() => setImportacao(true)} className="admin-btn-primary">
+                    <FileUp aria-hidden className="mr-2 inline size-4" />
+                    Importar planilha
+                  </button>
+                  <button type="button" onClick={() => setDialogo(true)} className="admin-btn-primary">
+                    <PackagePlus aria-hidden className="mr-2 inline size-4" />
+                    Nova movimentação
+                  </button>
+                  {podeCriarReserva && (
+                    <button
+                      type="button"
+                      onClick={() => setDialogoReserva(true)}
+                      className="admin-btn-primary"
+                    >
+                      <BookmarkPlus aria-hidden className="mr-2 inline size-4" />
+                      Nova reserva
+                    </button>
+                  )}
+                </div>
+              ) : undefined
+            }
           />
-        </Panel>
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <Indicador rotulo="Locais ativos" valor={resumo.data?.locais} />
+            <Indicador rotulo="Peças com saldo" valor={resumo.data?.pecas_com_saldo} />
+            <Indicador rotulo="Unidades em estoque" valor={resumo.data?.unidades} />
+            <Indicador rotulo="Saldos negativos" valor={resumo.data?.negativos} />
+            <Indicador rotulo="Movimentos (7 dias)" valor={resumo.data?.movimentos_7d} />
+          </div>
+
+          {semLocais && (
+            <Panel title="Antes de começar">
+              <EmptyState
+                title="Nenhum local ativo cadastrado"
+                description="O estoque trabalha por local: depósito, loja, maleta ou trânsito. Cadastre pelo menos um local em Cadastros › Locais para poder registrar entradas e saídas."
+              />
+            </Panel>
+          )}
+        </>
       )}
 
       <div className="flex gap-2">

@@ -7856,6 +7856,7 @@ export type Database = {
         Args: { _cycle: string; _payload?: Json }
         Returns: Json
       }
+      limpeza_homolog_total: { Args: { _executar?: boolean }; Returns: Json }
       list_parties: {
         Args: {
           _kind?: string

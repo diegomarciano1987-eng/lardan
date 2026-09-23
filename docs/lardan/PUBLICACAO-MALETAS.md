@@ -1,8 +1,12 @@
-# Maletas — fechamento da interface e preparação de publicação
+# Maletas — fechamento da interface, preparação e publicação controlada
 
-Data: 22/09/2026. **Nada foi publicado nesta rodada.** Fiscal e Asaas seguem
-desligados: nenhum documento sai de "preparação" e nenhuma cobrança vira
-lançamento.
+- **22/09/2026 — preparação, sem publicação.** As seções 1 a 8 descrevem essa
+  rodada: nada foi ao ar nela.
+- **23/09/2026 — publicação controlada, concluída.** Commit publicado:
+  **`1c3e45a`**. O registro está na seção 9.
+
+Em ambas as rodadas, fiscal e Asaas seguem desligados: nenhum documento sai de
+"preparação" e nenhuma cobrança vira lançamento.
 
 ## 1. Persistência da correção da Qualidade
 

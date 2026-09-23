@@ -201,23 +201,23 @@ export function AsaasReceber() {
   const contas = useQuery({ queryKey: ["asaas", "contas"], queryFn: carregarContas, retry: false });
   const integracao = useQuery({ queryKey: ["asaas", "integracao"], queryFn: () => estado() });
   const parcelas = useInfiniteQuery({
-    queryKey: ["asaas", "parcelas", termo, situacao],
-    queryFn: ({ pageParam }) => carregarParcelas({ busca: termo, situacao, cursor: pageParam }),
+    queryKey: ["asaas", "parcelas", contaSelecionada, termo, situacao],
+    queryFn: ({ pageParam }) => carregarParcelas({ accountId: contaSelecionada, busca: termo, situacao, cursor: pageParam }),
     initialPageParam: null as Cursor,
     getNextPageParam: (p) => p.proximo ?? undefined,
     retry: false,
   });
   const fila = useInfiniteQuery({
-    queryKey: ["asaas", "fila"],
-    queryFn: ({ pageParam }) => carregarFila(pageParam),
+    queryKey: ["asaas", "fila", contaSelecionada],
+    queryFn: ({ pageParam }) => carregarFila(contaSelecionada, pageParam),
     initialPageParam: null as Cursor,
     getNextPageParam: (p) => p.proximo ?? undefined,
     enabled: aba === "erros",
     retry: false,
   });
   const ocorr = useInfiniteQuery({
-    queryKey: ["asaas", "ocorrencias"],
-    queryFn: ({ pageParam }) => carregarOcorrencias(pageParam),
+    queryKey: ["asaas", "ocorrencias", contaSelecionada],
+    queryFn: ({ pageParam }) => carregarOcorrencias(contaSelecionada, pageParam),
     initialPageParam: null as Cursor,
     getNextPageParam: (p) => p.proximo ?? undefined,
     enabled: aba === "ocorrencias",

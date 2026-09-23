@@ -1,9 +1,11 @@
 /**
- * Porta de acesso ao banco usada pelos serviços do Asaas.
+ * Portas de acesso ao banco usadas pelos serviços do Asaas.
  *
- * Existe para que o MESMO serviço rode contra o banco da aplicação e contra o
- * banco isolado dos testes. Os testes não reescrevem a importação: eles trocam
- * apenas esta porta e o transporte.
+ * Duas portas distintas:
+ *  - banco do USUÁRIO (sessão do navegador; RLS e capacidades valem): prepara
+ *    intenção, importa, aprova, lê painéis;
+ *  - banco do EXECUTOR interno (papel de serviço do servidor): grava o que o
+ *    provedor devolveu, eventos e links. O navegador nunca chega nele.
  */
 export interface BancoAsaas {
   rpc<T = unknown>(fn: string, args: Record<string, unknown>): Promise<T>;
@@ -17,9 +19,20 @@ export const ROTINAS = {
   importarAprovar: "asaas_import_aprovar",
   importarEfetivar: "asaas_import_efetivar",
   cobrancaPreparar: "asaas_cobranca_preparar",
-  cobrancaProcessando: "asaas_cobranca_processando",
-  cobrancaResultado: "asaas_cobranca_resultado",
-  eventoRegistrar: "asaas_evento_registrar",
   eventoProcessar: "asaas_evento_processar",
-  painel: "asaas_receber_painel",
+  parcelas: "asaas_receber_parcelas",
+  fila: "asaas_receber_fila",
+  ocorrencias: "asaas_receber_ocorrencias",
+  contas: "asaas_receber_contas",
+} as const;
+
+/** Somente executor interno (service_role). */
+export const ROTINAS_EXECUTOR = {
+  reservar: "asaas_exec_reservar",
+  cliente: "asaas_exec_cliente",
+  resultado: "asaas_exec_resultado",
+  link: "asaas_exec_link",
+  cobranca: "asaas_exec_cobranca",
+  pendentes: "asaas_exec_pendentes",
+  eventoRegistrar: "asaas_evento_registrar",
 } as const;

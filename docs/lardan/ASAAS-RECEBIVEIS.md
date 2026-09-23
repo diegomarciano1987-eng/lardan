@@ -162,3 +162,67 @@ cria cliente e cobrança pelo próprio link): esta preparação usa apenas a fat
 - Regra contábil do recebimento: tarifa, disponibilidade de fundos, recebimento fora do Asaas, estorno e
   chargeback ficam pendentes de decisão em vez de virar baixa inventada.
 - Regra comercial do acerto de maleta, incluindo o "um terço".
+
+---
+
+## Rodada de correção — auditoria do pacote 15 (23/09/2026)
+
+Nada foi aplicado ao banco compartilhado, publicado ou conectado. Nenhuma
+credencial, webhook, sandbox ou produção foi usada. Toda prova abaixo rodou no
+banco isolado (`127.0.0.1:55432/lardan_iso`) e na segunda instância (porta 8090).
+
+### Problemas confirmados no código e correção
+
+| # | Problema confirmado | Correção (arquivo) |
+|---|---|---|
+| 1 | `asaas_evento_registrar` era SECURITY DEFINER executável por `authenticated`, sem sessão nem capacidade | Revogada e substituída por `asaas_evento_registrar(_payload,_origem,_actor)` só para o papel interno do servidor. `provedor` exige conta conectada; `simulacao` exige conta simulada e ator com `finance.reconcile` (`07`) |
+| 2 | `asaas_cobranca_resultado` aceitava do navegador ID externo, endereço e situação | Removida junto com `asaas_cobranca_processando`. Só o executor interno grava, via `asaas_exec_reservar` / `asaas_exec_cliente` / `asaas_exec_resultado` / `asaas_exec_link`, conferindo conta, intenção, trabalhador, tentativa, transição, formato do ID e do endereço (`07`) |
+| 3 | `conciliacao` não bloqueava nova intenção | Índice de intenção viva e `asaas_cobranca_preparar` incluem `conciliacao`; ID externo e vínculo ficam preservados (`05`, `07`) |
+| 4 | Rejeição e resultado desconhecido se confundiam | `rejeitada` exige fase: `antes_do_provedor`, `cliente`, `provedor_recusou` ou `sem_registro_apos_consulta` (esta só depois de consultar). Qualquer falha depois do envio vira `desconhecida` (`07`, `cobranca.ts`) |
+| 5 | Cliente criado fora do `try`; falhas inesperadas deixavam `processando` | Execução em fases (cliente → cobrança → link → gravação); cliente persistido na hora; posse temporária com expiração; posse vencida vira `desconhecida` auditada e só é retomada por CONSULTA; preparadas nunca iniciadas são retomadas (`asaas_exec_pendentes`, `retomarPendentes`) |
+| 6 | Link das importadas não era guardado | `asaas_charges.invoice_url` com guarda: aproveita o payload quando válido, consulta pelo ID quando ausente (sem criar), valida por modo e ambiente no servidor (`07`, `obterLinkCobranca`) |
+| 7 | Painel com limite fixo 50/200 | `asaas_receber_parcelas` (cursor estável vencimento+id, busca por pessoa/número/descrição, filtro de situação), `asaas_receber_fila`, `asaas_receber_ocorrencias` paginadas; tela com busca, seletor e "Carregar mais" |
+| 8 | Simulação misturada com ambiente; simulador global | `modo_execucao` (simulado/conectado) separado de `ambiente_provedor` (sandbox/produção), com restrição no banco; configuração do servidor (`ASAAS_MODO`, `ASAAS_AMBIENTE`, `ASAAS_API_KEY`) ausente/ambígua/incoerente = indisponível; um simulador por conta, com estado gravável para sobreviver a reinício |
+| 9 | HTTP só lançava bloqueio | `TransporteHttpAsaas` monta requisições reais (base por ambiente, cabeçalho `access_token`, `User-Agent`, corpo em reais, offset/limit ≤ 100, `hasMore`/`totalCount`), traduz respostas para centavos e classifica erros (400 recusa, 401/403 credencial, 429 limite, 5xx/queda em POST = desconhecido, em GET = consulta indisponível, 404 em consulta = ausente). `fetch` injetável; o padrão bloqueia antes da rede. Não presume unicidade de `externalReference` nem idempotência do provedor |
+
+Defeitos adicionais encontrados pelos novos testes e corrigidos:
+- a restrição de modo aceitava conta "conectada" sem ambiente (CHECK com resultado NULL passa); agora exige `IS NOT NULL`;
+- depois de uma rejeição, a nova solicitação colidia com a chave padrão; a chave passa a incluir o número de tentativas encerradas;
+- na tela, o detalhe fechava quando a parcela saía do filtro após obter o link.
+
+Documentação oficial consultada (23/09/2026): docs.asaas.com — criar cobrança,
+listar cobranças, listar/criar clientes, autenticação e códigos HTTP. O host do
+endereço de fatura do sandbox (`sandbox.asaas.com/i/…`) não aparece textualmente
+na documentação consultada: fica como **a confirmar na homologação**.
+
+### Testes executados
+
+- `bash tests/isolado/subir.sh && bun test ./tests/isolado` → **126 aprovados, 0 falhas, 623 verificações** em 6 arquivos (164 migrações + 6 pendentes; `06` proposta ignorada).
+- `bun test ./tests/asaas/transporte-http.test.ts` → **12 aprovados, 0 falhas, 45 verificações**, sem rede.
+- Regressões novas: segurança do executor (navegador recusado em todas as rotinas internas; posse/tentativa; formato de ID; endereço estranho descartado; ator sem permissão ou inativo), conciliação bloqueando, falha no cliente sem duplicar, link que falha e é recuperado pelo ID, falha ao gravar resultado com retomada sem reenvio, erro inesperado = desconhecida, desconhecida sem registro só encerra após consulta, preparada retomada, reinício, modo incompatível, links importados, validação por ambiente, 205 parcelas em 4 páginas sem repetir, fila/ocorrências por cursor, isolamento entre contas, configuração inválida, entrada de eventos.
+
+### Navegador (instância isolada 8090)
+
+Roteiro `/tmp/browser/asaas2/fluxo.py` (incluído no pacote). Observado:
+prévia 121 cobranças em 3 páginas (116 novas, 3 históricas, 1 cliente sem
+vínculo, 1 possível duplicidade); Financeiro recusado ao aprovar; Diretoria
+resolveu e aprovou, recusada ao efetivar; Financeiro efetivou (117 títulos
+criados, 118 vínculos, 3 só espelho) e a repetição não fez nada; paginação
+25 → 50 de 120; filtro "Cobrança sem link" no servidor; link de importada obtido
+pelo identificador sem criar cobrança; duplo clique = uma cobrança; reaproveitamento;
+página local de simulação; evento e evento repetido sem baixa; resposta perdida
+bloqueando nova solicitação e recuperada por consulta; celular; consultora sem
+acesso. Hosts contatados: somente locais e as fontes/analytics já usados pelo
+layout — nenhum domínio do Asaas.
+
+### Contagens finais explicadas (banco isolado)
+
+- **121 cobranças consultadas** no simulador = 116 em aberto do cliente vinculado + 3 históricas recebidas + 1 de cliente sem vínculo + 1 com mesmo valor/vencimento de um título lançado à mão.
+- **117 títulos criados** = 116 novas + 1 do cliente sem vínculo, depois de a Diretoria escolher a pessoa. A possível duplicidade foi ligada ao título manual existente (não criou outro); as 3 históricas ficaram só como espelho informativo.
+- **3 títulos manuais** semeados (duplicidade, link, resposta perdida) → 120 títulos a receber.
+- **123 cobranças finais** = 121 importadas + 2 geradas pela tela (link e resposta perdida recuperada). 112 têm link guardado (123 − 12 importadas sem link + 1 obtida pelo identificador).
+- **0 liquidações**: nenhum evento, link ou importação criou baixa.
+
+### Continua pendente
+
+Regra contábil do recebimento (baixa, tarifa, juros/multa, estorno, chargeback), homologação em sandbox com credencial, endpoint de webhook com validação do token do provedor, confirmação do host do link no sandbox, aplicação dos pendentes ao banco compartilhado e publicação — nada disso foi feito nesta rodada.

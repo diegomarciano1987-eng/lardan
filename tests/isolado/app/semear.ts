@@ -32,8 +32,9 @@ async function main() {
   )) as { id: string }[];
   await adm.unsafe(
     `insert into public.asaas_customers (account_id, external_id, name, party_id, match_status)
-     values ($1,'cus_demo_vinculado','ISO Cliente Vinculado',$2,'vinculado')`,
-    [a!.id, p!.id],
+     values ($1,$3,'ISO Cliente Vinculado',$2,'vinculado')`,
+    // mesmo identificador que o simulador da conta usa (demo.functions.ts)
+    [a!.id, p!.id, `sim_cus_${a!.id.slice(0, 8)}_vinc`],
   );
   const master = await criarConta({ nome: "semeador", papeis: ["master"], comParty: true });
   const titulo = async (valor: number, venc: string, desc: string) => {

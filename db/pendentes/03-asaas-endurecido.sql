@@ -321,7 +321,7 @@ BEGIN
   END IF;
   SELECT * INTO c FROM public.asaas_customers WHERE id = _customer;
   IF c.id IS NULL THEN RAISE EXCEPTION 'Cliente inexistente.'; END IF;
-  INSERT INTO public.audit_logs (actor_user_id, action, entity, entity_id, payload)
+  INSERT INTO public.audit_logs (actor_id, action, entity, entity_id, payload)
   VALUES (auth.uid(), 'asaas.customer.sensivel', 'asaas_customers', c.id, '{}'::jsonb);
   RETURN jsonb_build_object('doc', c.doc, 'email', c.email);
 END $fn$;

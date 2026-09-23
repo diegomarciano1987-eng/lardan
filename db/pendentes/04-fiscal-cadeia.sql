@@ -319,10 +319,10 @@ BEGIN
   SELECT to_jsonb(p) INTO destinatario FROM public.parties p
    WHERE p.id = (_payload->>'recipient_party_id')::uuid;
 
-  IF emissor IS NULL THEN pend := pend || 'emissor não definido'; END IF;
-  IF destinatario IS NULL THEN pend := pend || 'destinatário fiscal não definido'; END IF;
-  pend := pend || 'natureza da operação pendente' || 'CFOP pendente' || 'regime tributário pendente'
-               || 'valor fiscal pendente (proporção de "um terço" sem efeito)';
+  IF emissor IS NULL THEN pend := pend || 'emissor não definido'::text; END IF;
+  IF destinatario IS NULL THEN pend := pend || 'destinatário fiscal não definido'::text; END IF;
+  pend := pend || 'natureza da operação pendente'::text || 'CFOP pendente'::text || 'regime tributário pendente'::text::text
+               || 'valor fiscal pendente (proporção de "um terço" sem efeito)'::text;
 
   PERFORM set_config('lardann.fiscal','on', true);
   INSERT INTO public.fiscal_documents
@@ -356,15 +356,15 @@ BEGIN
   SELECT count(*), coalesce(sum(coalesce(total_cents, quantity * coalesce(unit_value_cents,0))),0)
     INTO itens, soma FROM public.fiscal_document_items WHERE document_id = _doc;
 
-  IF itens = 0 THEN pend := pend || 'documento sem itens'; END IF;
-  IF d.emitter_entity_id IS NULL THEN pend := pend || 'emissor'; END IF;
-  IF d.recipient_party_id IS NULL THEN pend := pend || 'destinatário'; END IF;
+  IF itens = 0 THEN pend := pend || 'documento sem itens'::text; END IF;
+  IF d.emitter_entity_id IS NULL THEN pend := pend || 'emissor'::text; END IF;
+  IF d.recipient_party_id IS NULL THEN pend := pend || 'destinatário'::text; END IF;
   IF EXISTS (SELECT 1 FROM public.fiscal_document_items WHERE document_id = _doc
               AND (cfop IS NULL OR ncm IS NULL OR (cst IS NULL AND csosn IS NULL))) THEN
-    pend := pend || 'CFOP, NCM e CST/CSOSN não definidos (dependem do contador)';
+    pend := pend || 'CFOP, NCM e CST/CSOSN não definidos (dependem do contador)'::text;
   END IF;
-  IF d.total_cents <> soma THEN pend := pend || 'total do documento diferente da soma dos itens'; END IF;
-  IF d.environment = 'producao' THEN pend := pend || 'ambiente de produção indisponível nesta preparação'; END IF;
+  IF d.total_cents <> soma THEN pend := pend || 'total do documento diferente da soma dos itens'::text; END IF;
+  IF d.environment = 'producao' THEN pend := pend || 'ambiente de produção indisponível nesta preparação'::text; END IF;
 
   PERFORM set_config('lardann.fiscal','on', true);
   UPDATE public.fiscal_documents

@@ -599,3 +599,21 @@ BEGIN
  PERFORM set_config('lardann.asaas_intent','off',true);
  RETURN jsonb_build_object('id',v_id,'account_id',conta.id,'state','preparada','internal_reference',v_ref||':'||left(md5(v_key),8));
 END $fn$;
+
+-- ---------- 9. usuário sem pessoa vinculada também é recusado nas rotinas do navegador ----------
+-- Todas as rotinas asaas_* chamadas pelo navegador passam a exigir o mesmo
+-- critério do executor (ativo + papel + pessoa vinculada). A troca é feita
+-- sobre a definição vigente de cada rotina, dentro desta mesma transação.
+DO $$
+DECLARE f record; def text; novo text;
+BEGIN
+  FOR f IN SELECT p.oid FROM pg_proc p JOIN pg_namespace ns ON ns.oid=p.pronamespace
+            WHERE ns.nspname='public' AND p.proname LIKE 'asaas\_%' AND p.proname NOT LIKE 'asaas\_exec\_%'
+  LOOP
+    def := pg_get_functiondef(f.oid);
+    IF position('public.has_capability(auth.uid()' IN def) > 0 THEN
+      novo := replace(def, 'public.has_capability(auth.uid()', 'public.asaas_ator_pode(auth.uid()');
+      EXECUTE novo;
+    END IF;
+  END LOOP;
+END $$;

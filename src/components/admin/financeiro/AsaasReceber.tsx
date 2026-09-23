@@ -33,6 +33,7 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
   const evento = useServerFn(demoEvento);
   const [forma, setForma] = React.useState<"PIX" | "BOLETO">("PIX");
   const [ultimo, setUltimo] = React.useState<string | null>(null);
+  const [urlObtida, setUrlObtida] = React.useState<string | null>(null);
   const atualizar = () => void qc.invalidateQueries({ queryKey: ["asaas"] });
   const falhou = (e: Error) => toast.error(e.message);
   const descrever = (r: Resultado) =>
@@ -53,7 +54,7 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
   });
   const linkM = useMutation({
     mutationFn: () => obterLink({ data: { chargeId: linha.cobranca!.id, accountId: conta.id } }),
-    onSuccess: (r) => { setUltimo(r.consultado ? "Link consultado no provedor pelo identificador; nenhuma cobrança criada." : "Link já estava guardado."); atualizar(); },
+    onSuccess: (r) => { setUrlObtida(r.invoice_url); setUltimo(r.consultado ? "Link consultado no provedor pelo identificador; nenhuma cobrança criada." : "Link já estava guardado."); atualizar(); },
     onError: falhou,
   });
   const eventoM = useMutation({
@@ -69,7 +70,7 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
   });
   const ocupado = solicitar.isPending || recuperarM.isPending || eventoM.isPending || linkM.isPending;
   const estado = linha.intencao?.state;
-  const url = linha.cobranca?.invoice_url ?? null;
+  const url = linha.cobranca?.invoice_url ?? urlObtida;
   const simulado = conta.modo === "simulado";
 
   return (

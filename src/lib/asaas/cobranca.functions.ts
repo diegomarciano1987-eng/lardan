@@ -10,20 +10,20 @@ type Ctx = { supabase: never; userId: string };
 
 export const gerarLinkCobranca = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { accountId: string; installmentId: string; billingType: "PIX" | "BOLETO" | "UNDEFINED" }) => {
-    if (!d?.accountId || !d?.installmentId) throw new Error("Conta e parcela são obrigatórias.");
+  .inputValidator((d: { installmentId: string; billingType: "PIX" | "BOLETO" | "UNDEFINED" }) => {
+    if (!d?.installmentId) throw new Error("Parcela obrigatória.");
     if (!["PIX", "BOLETO", "UNDEFINED"].includes(d.billingType)) throw new Error("Forma de pagamento inválida.");
     return d;
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    const { criarTransporte } = await import("./index");
-    const { gerarLinkDeCobranca } = await import("./cobranca");
-    const { bancoDe, bancoExecutor } = await import("./servidor.server");
-    const transporte = await criarTransporte(data.accountId);
-    return gerarLinkDeCobranca(bancoDe(c.supabase), await bancoExecutor(), transporte,
-      { accountId: data.accountId, installmentId: data.installmentId, billingType: data.billingType },
-      { actor: c.userId });
+    const { prepararIntencao, executarIntencao } = await import("./cobranca");
+    const { bancoDe, transporteDaIntencao } = await import("./servidor.server");
+    const it = await prepararIntencao(bancoDe(c.supabase), data);
+    if (it.reaproveitada) return { ...it, state: "criada" };
+    if (!it.id) throw new Error("Intenção não registrada.");
+    const resolvida = await transporteDaIntencao(it.id, c.userId);
+    return executarIntencao(resolvida.executor, resolvida.transporte, it.id, { actor: c.userId });
   });
 
 export const recuperarIntencao = createServerFn({ method: "POST" })
@@ -33,33 +33,32 @@ export const recuperarIntencao = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data, context }) => {
-    const c = context as unknown as { userId: string; supabase: { from: (t: string) => { select: (s: string) => { eq: (k: string, v: string) => { maybeSingle: () => PromiseLike<{ data: { account_id: string } | null }> } } } } };
-    const { data: it } = await c.supabase.from("asaas_charge_intents").select("account_id").eq("id", data.intentId).maybeSingle();
-    if (!it) throw new Error("Intenção não encontrada ou sem acesso.");
-    const { criarTransporte } = await import("./index");
+    const c = context as unknown as Ctx;
     const { executarIntencao } = await import("./cobranca");
-    const { bancoExecutor } = await import("./servidor.server");
-    return executarIntencao(await bancoExecutor(), await criarTransporte(it.account_id), data.intentId, { actor: c.userId });
+    const { transporteDaIntencao } = await import("./servidor.server");
+    const resolvida = await transporteDaIntencao(data.intentId, c.userId);
+    return executarIntencao(resolvida.executor, resolvida.transporte, data.intentId, { actor: c.userId });
   });
 
 export const obterLinkDaCobranca = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { chargeId: string; accountId: string }) => {
-    if (!d?.chargeId || !d?.accountId) throw new Error("Cobrança obrigatória.");
+  .inputValidator((d: { chargeId: string }) => {
+    if (!d?.chargeId) throw new Error("Cobrança obrigatória.");
     return d;
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    const { criarTransporte } = await import("./index");
     const { obterLinkCobranca } = await import("./cobranca");
-    const { bancoExecutor } = await import("./servidor.server");
-    return obterLinkCobranca(await bancoExecutor(), await criarTransporte(data.accountId), data.chargeId, c.userId);
+    const { transporteDaCobranca } = await import("./servidor.server");
+    const resolvida = await transporteDaCobranca(data.chargeId, c.userId);
+    return obterLinkCobranca(resolvida.executor, resolvida.transporte, data.chargeId, c.userId);
   });
 
 export const estadoIntegracao = createServerFn({ method: "GET" }).handler(async () => {
   const { configuracaoDoServidor } = await import("./index");
   const cfg = configuracaoDoServidor();
   return cfg.disponivel
-    ? { disponivel: true as const, modo: cfg.modo, ambiente: cfg.ambiente, demo: cfg.demoIsolado }
+    ? { disponivel: true as const, modo: cfg.modo, ambiente: cfg.ambiente, demo: cfg.demoIsolado,
+        redeHabilitada: cfg.modo === "conectado" ? cfg.redeHabilitada : false }
     : { disponivel: false as const, motivo: cfg.motivo };
 });

@@ -47,6 +47,8 @@ export interface CobrancaExterna {
 
 export interface Pagina<T> {
   itens: T[];
+  /** quantidade recebida antes de qualquer filtro local */
+  quantidadeBruta: number;
   offset: number;
   limit: number;
   hasMore: boolean;

@@ -189,6 +189,42 @@ describe("importação de recebíveis", () => {
     expect(linhas[0]!.c).toBe(75);
   });
 
+  test("página bruta totalmente filtrada avança e a retomada não omite a próxima cobrança", async () => {
+    const sim = new SimuladorAsaas({ conta, semente: `filtro-${marca()}` });
+    const valida = cobrancaSimulada(sim, 1, cliente);
+    let chamadas = 0;
+    const listarOriginal = sim.listarCobrancas.bind(sim);
+    sim.listarCobrancas = async (f) => {
+      chamadas++;
+      if (f.offset === 0) return { itens: [], quantidadeBruta: 100, offset: 0, limit: 100, hasMore: true, total: 101, proximoOffset: 100 };
+      const p = await listarOriginal({ ...f, offset: 0, limit: 1 });
+      return { ...p, itens: [valida], quantidadeBruta: 1, offset: 100, limit: 100, hasMore: false, total: 101, proximoOffset: 101 };
+    };
+    const b = banco(financeiro);
+    const pedido = { accountId: conta, kind: "historica" as const, de: `2025-${String(n % 12 + 1).padStart(2,"0")}-01`, pageSize: 100 };
+    const lote = await abrirLote(b, pedido);
+    const primeira = await buscarPaginas(b, sim, lote, { ...pedido, maxPaginas: 1 });
+    expect(primeira.offset).toBe(100);
+    expect(primeira.trazidos).toBe(0);
+    const retomado = await abrirLote(b, pedido);
+    const final = await buscarPaginas(b, sim, retomado, pedido);
+    expect(final.offset).toBe(101);
+    expect(final.trazidos).toBe(1);
+    expect(chamadas).toBe(2);
+  });
+
+  test("mais de 1.000 cobranças percorrem o cursor bruto sem repetição nem ciclo", async () => {
+    const sim = new SimuladorAsaas({ conta, semente: `mil-${marca()}` });
+    for (let i = 0; i < 1005; i++) cobrancaSimulada(sim, i, cliente);
+    const pedido = { accountId: conta, kind: "historica" as const, de: `2024-${String(n % 12 + 1).padStart(2,"0")}-01`, pageSize: 100 };
+    const lote = await abrirLote(banco(financeiro), pedido);
+    const r = await buscarPaginas(banco(financeiro), sim, lote, pedido);
+    expect(r.paginas).toBe(11);
+    expect(r.trazidos).toBe(1005);
+    expect(r.offset).toBe(1005);
+    expect(await contar(`select count(*)::int c from public.asaas_import_stage where run_id=$1 and tipo='cobranca'`, [lote.run_id])).toBe(1005);
+  }, 120_000);
+
   test("importar três vezes o mesmo recorte não duplica linhas", async () => {
     const sim = new SimuladorAsaas({ semente: `rep-${marca()}` });
     for (let i = 0; i < 10; i++) cobrancaSimulada(sim, i, cliente);
@@ -394,6 +430,30 @@ const intencaoDe = async (installment: string) =>
 const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 describe("link de cobrança", () => {
+  test("a conta enviada pelo chamador é ignorada; o título usa a conta canônica da empresa", async () => {
+    const t = await criarTitulo(4550, "2026-09-19");
+    const it = await prepararIntencao(banco(financeiro), { accountId: contaB, installmentId: t.installmentId, billingType: "PIX" });
+    expect(it.account_id).toBe(conta);
+    expect(it.account_id).not.toBe(contaB);
+  });
+
+  test("duas parcelas simultâneas da mesma pessoa usam um cliente externo e duas cobranças", async () => {
+    const p = await criarPessoa("Concorrente");
+    const a = await criarTitulo(4100, "2026-09-17", p);
+    const b2 = await criarTitulo(4200, "2026-09-18", p);
+    const sim = simConta(`conc-${marca()}`);
+    const [ra, rb] = await Promise.all([
+      gerarLinkServico(banco(financeiro), servico, sim, { accountId: contaB, installmentId: a.installmentId, billingType: "PIX" }, { actor: financeiro.uid, worker: "instancia-a", leaseSegundos: 1 }),
+      gerarLinkServico(banco(financeiro), servico, sim, { accountId: contaB, installmentId: b2.installmentId, billingType: "BOLETO" }, { actor: financeiro.uid, worker: "instancia-b", leaseSegundos: 1 }),
+    ]);
+    if (ra.state !== "criada" || rb.state !== "criada") {
+      await esperar(1100);
+      await retomarPendentes(servico, async () => sim, { actor: financeiro.uid, preparadaSegundos: 0, leaseSegundos: 1 });
+    }
+    expect(sim.chamadasCriarCliente).toBe(1);
+    expect(await contar(`select count(*)::int c from public.asaas_customers where account_id=$1 and party_id=$2 and match_status='vinculado'`, [conta,p])).toBe(1);
+    expect(await contar(`select count(*)::int c from public.asaas_charges where installment_id in($1,$2)`, [a.installmentId,b2.installmentId])).toBe(2);
+  }, 10_000);
   test("gera link vinculado à parcela, guardado no espelho e identificado como simulação", async () => {
     const t = await criarTitulo(9900, "2026-09-20");
     const sim = simConta("link");
@@ -591,14 +651,14 @@ describe("segurança do executor", () => {
 });
 
 describe("falhas e retomada", () => {
-  test("falha ao preparar cliente: rejeição sem cobrança; a próxima localiza o cliente e não duplica", async () => {
+  test("resposta perdida ao criar cliente fica desconhecida; a retomada localiza sem duplicar", async () => {
     const p2 = await criarPessoa("SemCliente");
     const t = await criarTitulo(3100, "2026-10-03", p2);
     const sim = simConta("cli");
     sim.definirFalhaCliente(`lardan:party:${p2}`, "perder_resposta");
     const a = await gerarLinkDeCobranca(banco(financeiro), sim, { accountId: conta, installmentId: t.installmentId, billingType: "PIX" });
-    expect(a.state).toBe("rejeitada");
-    expect(a.fase).toBe("cliente");
+    expect(a.state).toBe("desconhecida");
+    expect(a.fase).toBeNull();
     expect(sim.chamadasCriar).toBe(0);
     const b2 = await gerarLinkDeCobranca(banco(financeiro), sim, { accountId: conta, installmentId: t.installmentId, billingType: "PIX" });
     expect(b2.state).toBe("criada");
@@ -728,8 +788,8 @@ describe("links de cobranças importadas", () => {
 
   test("validação de endereço por modo e ambiente", async () => {
     const [cx] = (await adm.unsafe(
-      `insert into public.asaas_accounts (label, environment, state, owner_entity_id, modo_execucao, ambiente_provedor)
-       values ($1,'sandbox','sandbox_conectada',$2,'conectado','sandbox') returning id`, [`ISO conectada ${marca()}`, empresa],
+       `insert into public.asaas_accounts (label, environment, state, owner_entity_id, modo_execucao, ambiente_provedor,secret_ref,invoice_host_confirmed)
+        values ($1,'sandbox','sandbox_conectada',$2,'conectado','sandbox','ASAAS_SANDBOX_TESTE',true) returning id`, [`ISO conectada ${marca()}`, empresa],
     )) as { id: string }[];
     const v = async (acc: string, ext: string, url: string) =>
       ((await adm.unsafe(`select public.asaas_fatura_url_valida($1,$2,$3) v`, [acc, ext, url])) as { v: boolean }[])[0]!.v;
@@ -818,7 +878,9 @@ describe("isolamento entre contas e configuração", () => {
     expect(lerConfiguracao({ ASAAS_MODO: "conectado", ASAAS_AMBIENTE: "sandbox" }).disponivel).toBe(false);
     expect(lerConfiguracao({ ASAAS_MODO: "conectado", ASAAS_AMBIENTE: "sandbox", ASAAS_API_KEY: "$aact_prod_x" }).disponivel).toBe(false);
     expect(lerConfiguracao({ ASAAS_MODO: "conectado", ASAAS_AMBIENTE: "producao", ASAAS_API_KEY: "$aact_prod_x", LARDAN_DEMO_ISOLADO: "1" }).disponivel).toBe(false);
-    expect(lerConfiguracao({ ASAAS_MODO: "conectado", ASAAS_AMBIENTE: "sandbox", ASAAS_API_KEY: "$aact_hmlg_x" }).disponivel).toBe(true);
+    const preparada = lerConfiguracao({ ASAAS_MODO: "conectado", ASAAS_AMBIENTE: "sandbox", ASAAS_API_KEY: "$aact_hmlg_x", ASAAS_CONNECTED_ACCOUNT_ID: conta });
+    expect(preparada.disponivel).toBe(true);
+    if (preparada.disponivel && preparada.modo === "conectado") expect(preparada.redeHabilitada).toBe(false);
     expect(lerConfiguracao({ ASAAS_MODO: "simulacao" }).disponivel).toBe(false);
     await expect(criarTransporte(conta, lerConfiguracao({}))).rejects.toBeInstanceOf(IntegracaoIndisponivel);
   });
@@ -881,9 +943,9 @@ describe("nenhuma chamada externa", () => {
     await expect(http.criarCobranca({ customer: "x", valueCents: 1, dueDate: "2026-01-01", billingType: "PIX", externalReference: "r", idempotencyKey: "k" })).rejects.toBeInstanceOf(ChamadaExternaBloqueada);
   });
 
-  test("a conta preparada está em modo simulado, sem ambiente de provedor", async () => {
+  test("a conta sintética está explicitamente ativa em simulação, sem ambiente de provedor", async () => {
     const [l] = (await adm.unsafe(`select is_active, modo_execucao, ambiente_provedor from public.asaas_accounts where id=$1`, [conta])) as { is_active: boolean; modo_execucao: string; ambiente_provedor: string | null }[];
-    expect(l!.is_active).toBe(false);
+    expect(l!.is_active).toBe(true);
     expect(l!.modo_execucao).toBe("simulado");
     expect(l!.ambiente_provedor).toBeNull();
   });

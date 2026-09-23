@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { EmptyState, Panel, StatusBadge } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { supabase } from "@/integrations/supabase/client";
-import { demoImportar } from "@/lib/asaas/demo.functions";
+import { importarRecebiveis } from "@/lib/asaas/importacao.functions";
 
 const ROTULO: Record<string, string> = {
   novo: "Novo recebimento",
@@ -63,7 +63,7 @@ function EscolherPessoa({ onEscolher }: { onEscolher: (id: string) => void }) {
 }
 
 export function AsaasImportacao({ contaId }: { contaId: string | undefined }) {
-  const importar = useServerFn(demoImportar);
+  const importar = useServerFn(importarRecebiveis);
   const qc = useQueryClient();
   const [runId, setRunId] = React.useState<string | null>(null);
   const [resumo, setResumo] = React.useState<{ total: number; resumo: Record<string, number>; paginas: number; trazidos: number } | null>(null);
@@ -72,15 +72,17 @@ export function AsaasImportacao({ contaId }: { contaId: string | undefined }) {
 
   // Lote em andamento: quem aprova é outra pessoa, em outra sessão.
   const ultimo = useQuery({
-    queryKey: ["asaas", "lote-aberto"],
+    queryKey: ["asaas", "lote-aberto", contaId],
+    enabled: !!contaId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("asaas_import_runs" as never)
-        .select("id, status, approved_at")
+        .select("id, account_id, status, approved_at")
+        .eq("account_id", contaId!)
         .order("created_at", { ascending: false })
         .limit(1);
       if (error) throw error;
-      return ((data ?? []) as unknown as { id: string; status: string; approved_at: string | null }[])[0] ?? null;
+      return ((data ?? []) as unknown as { id: string; account_id: string; status: string; approved_at: string | null }[])[0] ?? null;
     },
   });
   React.useEffect(() => {
@@ -143,7 +145,7 @@ export function AsaasImportacao({ contaId }: { contaId: string | undefined }) {
     <div className="space-y-6">
       <Panel title="Prévia de importação">
         <p className="text-sm text-ledger-muted">
-          A consulta usa o provedor simulado do servidor. A prévia classifica cada cobrança e não cria título, parcela nem baixa.
+          O servidor resolve o modo e o ambiente da conta. A prévia classifica cada cobrança e não cria título, parcela nem baixa.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <button type="button" disabled={!contaId || consultar.isPending} onClick={() => consultar.mutate()}

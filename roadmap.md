@@ -88,3 +88,13 @@
 - [ ] Adaptador Asaas com simulações locais (próxima etapa)
 
 - [x] Validação em ambiente isolado (banco local, dados sintéticos): 41 testes aprovados — integridade das movimentações (28) e inertância fiscal/Asaas com reaproveitamento do financeiro (13). Falha encontrada e corrigida: liberação de peças bloqueadas era recusada a quem tinha a permissão. Evidências em docs/lardan/VALIDACAO-ISOLADA.md; reprodução em tests/isolado/LEIA-ME.md.
+
+## Fechamento final da preparação Asaas — 23/09/2026
+- [ ] Tornar migrações pendentes atômicas e remover qualquer janela com rotinas inseguras.
+- [ ] Unificar estado da conta e resolver conta, ambiente e segredo exclusivamente no servidor.
+- [ ] Corrigir importação comum, lote por conta e cursor bruto do provedor.
+- [ ] Coordenar criação de cliente por conta+pessoa entre processos.
+- [ ] Completar classificação de falhas, retomadas e links por conta correta.
+- [ ] Preparar manipulador de webhook inativo e testável.
+- [ ] Validar banco isolado, tipos e navegador em todos os perfis exigidos.
+- [ ] Atualizar documentação e gerar pacote final com manifesto e evidências reais.

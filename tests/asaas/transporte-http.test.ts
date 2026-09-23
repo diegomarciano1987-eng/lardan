@@ -90,6 +90,25 @@ describe("montagem da requisição", () => {
     expect(new URL(chamadas[0]!.url).searchParams.get("dueDate[ge]")).toBeNull();
     expect(p.itens.map((i) => i.id)).toEqual(["pay_velha", "pay_080225913252"]);
     expect(p.proximoOffset).toBe(3);
+    expect(p.quantidadeBruta).toBe(3);
+  });
+
+  test("100 registros filtrados localmente preservam avanço bruto e hasMore", async () => {
+    const antigosPagos = Array.from({ length: 100 }, (_, i) => ({ ...pagamento, id: `pay_filtrado_${i}`, dueDate: "2025-01-01", status: "RECEIVED" }));
+    const { f } = falso(() => json(200, { hasMore: true, totalCount: 101, limit: 100, offset: 0, data: antigosPagos }));
+    const p = await http(f).listarCobrancas({ limit: 100, offset: 0, dueDateGE: "2026-01-01", incluirEmAbertoAnteriores: true });
+    expect(p.itens).toHaveLength(0);
+    expect(p.quantidadeBruta).toBe(100);
+    expect(p.proximoOffset).toBe(100);
+    expect(p.hasMore).toBe(true);
+  });
+
+  test("página curta com hasMore avança exatamente a quantidade bruta", async () => {
+    const { f } = falso(() => json(200, { hasMore: true, totalCount: 12, limit: 100, offset: 7, data: [pagamento] }));
+    const p = await http(f).listarCobrancas({ limit: 100, offset: 7 });
+    expect(p.quantidadeBruta).toBe(1);
+    expect(p.proximoOffset).toBe(8);
+    expect(p.hasMore).toBe(true);
   });
 
   test("externalReference não é presumida única", async () => {

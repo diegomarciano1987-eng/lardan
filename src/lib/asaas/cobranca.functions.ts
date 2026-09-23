@@ -17,15 +17,11 @@ export const gerarLinkCobranca = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    const { gerarLinkDeCobranca } = await import("./cobranca");
-    const { bancoDe, bancoExecutor, resolverPorParcela } = await import("./servidor.server");
-    const { transporteDaResolucao } = await import("./configuracao.server");
+    const { solicitarCobranca } = await import("./operacoes");
+    const { bancoDe, bancoExecutor } = await import("./servidor.server");
+    const { envDoServidor } = await import("./configuracao.server");
     // Preflight ANTES de qualquer efeito: sem intenção, tentativa ou alteração.
-    const r = await resolverPorParcela(data.installmentId, c.userId);
-    if (!r.executavel) return { state: "indisponivel", situacao: r.situacao, aviso: r.motivo, reaproveitada: false };
-    const transporte = await transporteDaResolucao(r);
-    return gerarLinkDeCobranca(bancoDe(c.supabase), await bancoExecutor(), transporte, data,
-      { actor: c.userId, contaEsperada: r.accountId });
+    return solicitarCobranca(bancoDe(c.supabase), await bancoExecutor(), c.userId, data, { env: envDoServidor() });
   });
 
 export const recuperarIntencao = createServerFn({ method: "POST" })

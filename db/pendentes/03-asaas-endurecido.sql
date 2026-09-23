@@ -200,26 +200,55 @@ DROP POLICY IF EXISTS asaas_charge_changes_read ON public.asaas_charge_changes;
 CREATE POLICY asaas_charge_changes_read ON public.asaas_charge_changes FOR SELECT TO authenticated
   USING (public.has_capability(auth.uid(),'finance.audit.view'));
 
+-- Semântica dos valores (documentada em docs/lardan/ASAAS-ADAPTADOR.md):
+--   value_cents      = valor cobrado no documento
+--   received_cents   = valor efetivamente pago pelo cliente no evento de recebimento
+--   fee_cents        = tarifa do provedor sobre AQUELE recebimento
+--   net_value_cents  = líquido creditado na conta do provedor por AQUELE recebimento
+-- Só reconciliamos componentes do MESMO evento e só quando os três são conhecidos.
+-- Desconhecido continua NULL: nunca vira zero.
 CREATE OR REPLACE FUNCTION public.asaas_charge_integridade()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public' AS $fn$
-DECLARE t record; p record; conta record;
+DECLARE t record; conta record; ent uuid;
+        oficial boolean := coalesce(current_setting('lardann.asaas_link', true), 'off') = 'on';
 BEGIN
   IF TG_OP = 'UPDATE' AND NEW.external_id IS DISTINCT FROM OLD.external_id THEN
     RAISE EXCEPTION 'O identificador externo da cobrança não muda.';
   END IF;
 
-  -- quando os três valores são conhecidos, líquido + tarifa tem de fechar com o recebido
+  -- campos controlados: vínculo, estado externo e resultado externo só pelas rotinas
+  IF TG_OP = 'UPDATE' AND NOT oficial THEN
+    IF NEW.title_id IS DISTINCT FROM OLD.title_id
+       OR NEW.installment_id IS DISTINCT FROM OLD.installment_id THEN
+      RAISE EXCEPTION 'Vínculo de cobrança só muda pela rotina oficial.';
+    END IF;
+    IF NEW.reconcile_status IS DISTINCT FROM OLD.reconcile_status THEN
+      RAISE EXCEPTION 'Situação de conciliação só muda pela rotina oficial.';
+    END IF;
+    IF NEW.external_status IS DISTINCT FROM OLD.external_status
+       OR NEW.received_cents IS DISTINCT FROM OLD.received_cents
+       OR NEW.net_value_cents IS DISTINCT FROM OLD.net_value_cents
+       OR NEW.fee_cents IS DISTINCT FROM OLD.fee_cents
+       OR NEW.refunded_cents IS DISTINCT FROM OLD.refunded_cents
+       OR NEW.payment_date IS DISTINCT FROM OLD.payment_date
+       OR NEW.credit_date IS DISTINCT FROM OLD.credit_date THEN
+      RAISE EXCEPTION 'Resultado externo da cobrança só entra pelas rotinas de importação e evento.';
+    END IF;
+    IF NEW.linked_by IS DISTINCT FROM OLD.linked_by OR NEW.linked_at IS DISTINCT FROM OLD.linked_at THEN
+      RAISE EXCEPTION 'Autor e horário do vínculo são definidos pelo servidor.';
+    END IF;
+  END IF;
+  IF TG_OP = 'INSERT' AND NOT oficial
+     AND (NEW.title_id IS NOT NULL OR NEW.installment_id IS NOT NULL
+          OR NEW.reconcile_status = 'vinculado' OR NEW.linked_by IS NOT NULL) THEN
+    RAISE EXCEPTION 'Cobrança nasce sem vínculo; vincular é rotina oficial.';
+  END IF;
+
   IF coalesce(NEW.received_cents,0) > 0
      AND NEW.net_value_cents IS NOT NULL AND NEW.fee_cents IS NOT NULL
      AND NEW.net_value_cents + NEW.fee_cents <> NEW.received_cents THEN
-    RAISE EXCEPTION 'Recebido, líquido e tarifa incoerentes.';
+    RAISE EXCEPTION 'Componentes do mesmo recebimento não fecham (recebido = líquido + tarifa).';
   END IF;
-  IF coalesce(NEW.received_cents,0) > 0
-     AND coalesce(NEW.net_value_cents, NEW.received_cents) + coalesce(NEW.fee_cents,0)
-         < coalesce(NEW.received_cents,0) THEN
-    RAISE EXCEPTION 'Recebido, líquido e tarifa incoerentes.';
-  END IF;
-
 
   IF NEW.title_id IS NOT NULL THEN
     SELECT * INTO t FROM public.financial_titles WHERE id = NEW.title_id;
@@ -232,8 +261,11 @@ BEGIN
        WHERE i.id = NEW.installment_id AND i.title_id = NEW.title_id) THEN
       RAISE EXCEPTION 'A parcela informada pertence a outro título.';
     END IF;
-    IF NEW.party_id IS NOT NULL AND t.party_id IS NOT NULL AND NEW.party_id <> t.party_id THEN
-      RAISE EXCEPTION 'A pessoa da cobrança não é a contraparte do título.';
+    IF NEW.party_id IS NULL THEN
+      RAISE EXCEPTION 'Cobrança vinculada exige pessoa identificada; pendência cadastral não passa em branco.';
+    END IF;
+    IF t.party_id IS NOT NULL AND NEW.party_id <> coalesce(t.pagador_party_id, t.party_id) THEN
+      RAISE EXCEPTION 'A pessoa da cobrança não é o devedor do título.';
     END IF;
   ELSIF NEW.installment_id IS NOT NULL THEN
     RAISE EXCEPTION 'Parcela informada sem título.';
@@ -246,8 +278,29 @@ BEGIN
     END IF;
   END IF;
 
-  IF NEW.reconcile_status = 'vinculado'
-     AND coalesce(current_setting('lardann.asaas_link', true), 'off') <> 'on' THEN
+  -- empresa proprietária da conta x empresa do título
+  IF NEW.title_id IS NOT NULL THEN
+    ent := conta.owner_entity_id;
+    IF ent IS NULL THEN
+      RAISE EXCEPTION 'Conta Asaas sem empresa proprietária: vínculo bloqueado.';
+    END IF;
+    IF t.business_entity_id IS NULL THEN
+      RAISE EXCEPTION 'Título sem empresa: pendência cadastral, vínculo bloqueado.';
+    END IF;
+    IF t.business_entity_id <> ent THEN
+      RAISE EXCEPTION 'A conta Asaas pertence a outra empresa que não a do título.';
+    END IF;
+  END IF;
+
+  -- cliente externo coerente com a pessoa
+  IF NEW.party_id IS NOT NULL AND NEW.customer_external_id IS NOT NULL AND EXISTS (
+    SELECT 1 FROM public.asaas_customers cu
+     WHERE cu.account_id = NEW.account_id AND cu.external_id = NEW.customer_external_id
+       AND cu.party_id IS NOT NULL AND cu.party_id <> NEW.party_id) THEN
+    RAISE EXCEPTION 'O cliente externo desta cobrança está vinculado a outra pessoa.';
+  END IF;
+
+  IF NEW.reconcile_status = 'vinculado' AND NOT oficial THEN
     RAISE EXCEPTION 'Vínculo de cobrança só pela rotina oficial.';
   END IF;
 
@@ -268,20 +321,46 @@ DROP TRIGGER IF EXISTS asaas_charge_integridade ON public.asaas_charges;
 CREATE TRIGGER asaas_charge_integridade BEFORE INSERT OR UPDATE ON public.asaas_charges
   FOR EACH ROW EXECUTE FUNCTION public.asaas_charge_integridade();
 
-/** Vínculo oficial cobrança → título/parcela. Não cria título e não dá baixa. */
+/**
+ * Vínculo oficial cobrança → título/parcela. Não cria título e não dá baixa.
+ * Repetição só é repetição quando o vínculo COMPLETO é igual (título e parcela).
+ * Mesmo título com parcela diferente é conflito: exige alteração explícita.
+ */
 CREATE OR REPLACE FUNCTION public.asaas_charge_vincular(
-  _charge uuid, _title uuid, _installment uuid DEFAULT NULL, _motivo text DEFAULT NULL
+  _charge uuid, _title uuid, _installment uuid DEFAULT NULL, _motivo text DEFAULT NULL,
+  _alterar boolean DEFAULT false
 ) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $fn$
-DECLARE c record;
+DECLARE c record; processado boolean;
 BEGIN
   IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Sessão obrigatória.'; END IF;
   IF NOT public.has_capability(auth.uid(),'finance.import.approve') THEN
     RAISE EXCEPTION 'Sem permissão para vincular cobranças.';
   END IF;
+  IF _title IS NULL THEN RAISE EXCEPTION 'Informe o título.'; END IF;
   SELECT * INTO c FROM public.asaas_charges WHERE id = _charge FOR UPDATE;
   IF c.id IS NULL THEN RAISE EXCEPTION 'Cobrança inexistente.'; END IF;
-  IF c.reconcile_status = 'vinculado' AND c.title_id = _title THEN
-    RETURN jsonb_build_object('id', c.id, 'repetida', true, 'title_id', c.title_id);
+
+  IF c.title_id IS NOT NULL THEN
+    IF c.title_id = _title AND c.installment_id IS NOT DISTINCT FROM _installment THEN
+      RETURN jsonb_build_object('id', c.id, 'repetida', true,
+        'title_id', c.title_id, 'installment_id', c.installment_id);
+    END IF;
+    -- já houve processamento financeiro? então nem alteração explícita desvincula
+    SELECT EXISTS (
+      SELECT 1 FROM public.financial_allocations a
+        JOIN public.financial_installments i ON i.id = a.installment_id
+       WHERE i.title_id = c.title_id
+         AND (c.installment_id IS NULL OR a.installment_id = c.installment_id)
+    ) INTO processado;
+    IF processado THEN
+      RAISE EXCEPTION 'Já houve processamento financeiro neste vínculo: trate por conciliação, não por troca.';
+    END IF;
+    IF NOT _alterar THEN
+      RAISE EXCEPTION 'Conflito de vínculo: esta cobrança já aponta para outro título ou parcela.';
+    END IF;
+    IF coalesce(btrim(_motivo),'') = '' THEN
+      RAISE EXCEPTION 'Alterar vínculo exige motivo.';
+    END IF;
   END IF;
 
   PERFORM set_config('lardann.asaas_link','on', true);
@@ -292,12 +371,23 @@ BEGIN
   PERFORM set_config('lardann.asaas_link','off', true);
 
   INSERT INTO public.asaas_charge_changes (charge_id, campo, de, para, origem, actor_user_id)
-  VALUES (_charge, 'title_id', c.title_id::text, _title::text, 'vinculo_manual', auth.uid());
+  VALUES (_charge, 'title_id', c.title_id::text, _title::text,
+          CASE WHEN c.title_id IS NULL THEN 'vinculo_manual' ELSE 'vinculo_alterado' END, auth.uid()),
+         (_charge, 'installment_id', c.installment_id::text, _installment::text,
+          CASE WHEN c.title_id IS NULL THEN 'vinculo_manual' ELSE 'vinculo_alterado' END, auth.uid());
+
+  INSERT INTO public.audit_logs (actor_id, action, entity, entity_id, payload)
+  VALUES (auth.uid(), 'asaas.charge.vincular', 'asaas_charges', _charge,
+          jsonb_build_object('title_id', _title, 'installment_id', _installment,
+                             'alterado', c.title_id IS NOT NULL, 'motivo', _motivo));
 
   RETURN jsonb_build_object('id', _charge, 'repetida', false, 'title_id', _title,
+    'installment_id', _installment, 'alterado', c.title_id IS NOT NULL,
     'aviso', 'Vínculo registrado. Nenhuma baixa financeira foi criada.');
 END $fn$;
-REVOKE ALL ON FUNCTION public.asaas_charge_vincular(uuid,uuid,uuid,text) FROM PUBLIC, anon;
+DROP FUNCTION IF EXISTS public.asaas_charge_vincular(uuid,uuid,uuid,text);
+REVOKE ALL ON FUNCTION public.asaas_charge_vincular(uuid,uuid,uuid,text,boolean) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.asaas_charge_vincular(uuid,uuid,uuid,text,boolean) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.asaas_charge_vincular(uuid,uuid,uuid,text) TO authenticated;
 
 -- ---------------- dados pessoais: acesso mínimo ----------------

@@ -112,9 +112,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.cdnfonts.com/css/roxboroughcf",
       },
-      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
-      { rel: "icon", type: "image/png", sizes: "48x48", href: "/favicon-48.png" },
-      { rel: "icon", type: "image/png", sizes: "96x96", href: "/favicon.png" },
+      { rel: "shortcut icon", type: "image/x-icon", href: "/favicon.ico?v=2" },
+      { rel: "icon", type: "image/png", sizes: "48x48", href: "/favicon-lardan-48-v2.png" },
+      { rel: "icon", type: "image/png", sizes: "96x96", href: "/favicon-lardan-v2.png" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/site.webmanifest" },
       // Descrição legível por máquinas (mesma fonte de verdade de domínio).

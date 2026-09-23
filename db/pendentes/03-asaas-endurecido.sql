@@ -96,11 +96,10 @@ BEGIN
   IF EXISTS (SELECT 1 FROM public.asaas_events WHERE account_id IS NULL) THEN
     RAISE EXCEPTION 'Existem eventos sem conta; trate-os antes de endurecer a regra.';
   END IF;
-  BEGIN
-    ALTER TABLE public.asaas_events ALTER COLUMN account_id SET NOT NULL;
-  EXCEPTION WHEN others THEN NULL;
-  END;
 END $$;
+
+-- restrição obrigatória: se falhar, a preparação falha (sem silenciar)
+ALTER TABLE public.asaas_events ALTER COLUMN account_id SET NOT NULL;
 
 ALTER TABLE public.asaas_events DROP CONSTRAINT IF EXISTS asaas_events_external_id_key;
 DROP INDEX IF EXISTS public.asaas_events_external_id_key;

@@ -208,6 +208,9 @@ function Mais({ tem, carregando, onClick }: { tem: boolean; carregando: boolean;
   );
 }
 
+const naoAplicada = (e: unknown) =>
+  e instanceof PreparacaoNaoAplicada || (e instanceof Error && /does not exist|could not find|schema cache/i.test(e.message));
+
 export function AsaasReceber() {
   const [aba, setAba] = React.useState<Aba>("recebiveis");
   const [escolhida, setEscolhida] = React.useState<LinhaReceber | null>(null);
@@ -242,7 +245,17 @@ export function AsaasReceber() {
     retry: false,
   });
 
-  if (contas.error instanceof PreparacaoNaoAplicada || parcelas.error instanceof PreparacaoNaoAplicada) {
+  React.useEffect(() => {
+    if (!contaSelecionada && contas.data?.[0]) setContaSelecionada(contas.data[0].id);
+  }, [contaSelecionada, contas.data]);
+  const conta = contas.data?.find((c) => c.id === contaSelecionada) ?? contas.data?.[0];
+  const linhas = parcelas.data?.pages.flatMap((p) => p.itens) ?? [];
+  const total = parcelas.data?.pages[0]?.total ?? 0;
+  const demo = conta?.situacao === "simulada";
+  // a linha pode sair do filtro depois de uma ação (ex.: ganhou link); o detalhe continua aberto
+  const parcela = escolhida ? (linhas.find((l) => l.installment_id === escolhida.installment_id) ?? escolhida) : null;
+
+  if (naoAplicada(contas.error) || naoAplicada(parcelas.error)) {
     return (
       <div className="space-y-6">
         <Panel title="Recebíveis Asaas">
@@ -254,16 +267,6 @@ export function AsaasReceber() {
       </div>
     );
   }
-
-  React.useEffect(() => {
-    if (!contaSelecionada && contas.data?.[0]) setContaSelecionada(contas.data[0].id);
-  }, [contaSelecionada, contas.data]);
-  const conta = contas.data?.find((c) => c.id === contaSelecionada) ?? contas.data?.[0];
-  const linhas = parcelas.data?.pages.flatMap((p) => p.itens) ?? [];
-  const total = parcelas.data?.pages[0]?.total ?? 0;
-  const demo = conta?.situacao === "simulada";
-  // a linha pode sair do filtro depois de uma ação (ex.: ganhou link); o detalhe continua aberto
-  const parcela = escolhida ? (linhas.find((l) => l.installment_id === escolhida.installment_id) ?? escolhida) : null;
 
   return (
     <div className="space-y-6">

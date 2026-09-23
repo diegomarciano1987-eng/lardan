@@ -186,6 +186,7 @@ function Avisos({ conta }: { conta: ContaAsaas | undefined }) {
     <div className="space-y-1" data-testid="estado-conta">
       <StatusBadge tone={TOM_SITUACAO[conta.situacao]}>{conta.rotulo}</StatusBadge>
       {!conta.operacoes.cobrar && <p className="text-sm text-ledger-muted">{conta.motivo}</p>}
+      <AvisosPermanentes />
     </div>
   );
 }

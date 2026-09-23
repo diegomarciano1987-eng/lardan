@@ -14,3 +14,5 @@ com autorização explícita, sem editar o conteúdo já validado.
 | `02-acerto-e-evidencia.sql` | domínio do acerto comercial e evidência de venda da consultora |
 | `03-asaas-endurecido.sql` | contas, cobranças, clientes, eventos e importação do Asaas |
 | `04-fiscal-cadeia.sql` | cadeia fiscal auditável, imutabilidade e rotinas oficiais |
+
+- `07-asaas-executor-interno.sql` — executor interno (service_role) para resultado, cliente, link e eventos; posse temporária e retomada; conciliação bloqueando; link no espelho validado por modo/ambiente; modo de execução separado do ambiente; painel paginado por cursor. Pendente, validado só no banco isolado.

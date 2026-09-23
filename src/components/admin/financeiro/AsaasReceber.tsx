@@ -188,7 +188,7 @@ function Mais({ tem, carregando, onClick }: { tem: boolean; carregando: boolean;
 
 export function AsaasReceber() {
   const [aba, setAba] = React.useState<Aba>("recebiveis");
-  const [parcelaId, setParcelaId] = React.useState<string | null>(null);
+  const [escolhida, setEscolhida] = React.useState<LinhaReceber | null>(null);
   const [busca, setBusca] = React.useState("");
   const [situacao, setSituacao] = React.useState<SituacaoFiltro>("");
   const termo = useDebounced(busca);
@@ -238,7 +238,8 @@ export function AsaasReceber() {
   const linhas = parcelas.data?.pages.flatMap((p) => p.itens) ?? [];
   const total = parcelas.data?.pages[0]?.total ?? 0;
   const demo = Boolean(integracao.data && integracao.data.disponivel && integracao.data.demo);
-  const parcela = linhas.find((l) => l.installment_id === parcelaId) ?? null;
+  // a linha pode sair do filtro depois de uma ação (ex.: ganhou link); o detalhe continua aberto
+  const parcela = escolhida ? (linhas.find((l) => l.installment_id === escolhida.installment_id) ?? escolhida) : null;
 
   return (
     <div className="space-y-6">
@@ -306,7 +307,7 @@ export function AsaasReceber() {
                         <td className="px-4 py-3 text-right tabular-nums">{formatBRLFromCents(l.saldo_cents)}</td>
                         <td className="px-4 py-3"><StatusBadge tone={s.tom}>{s.rotulo}</StatusBadge></td>
                         <td className="px-6 py-3 text-right">
-                          <button type="button" className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold hover:border-bronze hover:text-bronze" onClick={() => setParcelaId(l.installment_id)}>
+                          <button type="button" className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold hover:border-bronze hover:text-bronze" onClick={() => setEscolhida(l)}>
                             Detalhe
                           </button>
                         </td>
@@ -366,7 +367,7 @@ export function AsaasReceber() {
         </Panel>
       )}
 
-      {parcela && conta && <DetalheParcela conta={conta} linha={parcela} demo={demo} onFechar={() => setParcelaId(null)} />}
+      {parcela && conta && <DetalheParcela conta={conta} linha={parcela} demo={demo} onFechar={() => setEscolhida(null)} />}
     </div>
   );
 }

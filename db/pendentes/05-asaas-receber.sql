@@ -476,7 +476,12 @@ DECLARE r record; s record; conta record; sistema text;
         v_title uuid; v_inst uuid; v_charge uuid;
         criados integer := 0; vinculados integer := 0; espelhos integer := 0; ignorados integer := 0;
 BEGIN
-  IF NOT public.has_capability(auth.uid(),'finance.import.approve') THEN
+  -- Segregação (ajuste após o navegador isolado): a Diretoria aprova; quem
+  -- efetiva é quem opera o contas a receber, porque a efetivação cria títulos
+  -- pelas rotinas canônicas, que exigem finance.receivable.manage.
+  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Sessão obrigatória.'; END IF;
+  IF NOT public.has_capability(auth.uid(),'finance.import.run')
+     OR NOT public.has_capability(auth.uid(),'finance.receivable.manage') THEN
     RAISE EXCEPTION 'Sem permissão para efetivar importação.';
   END IF;
   SELECT * INTO r FROM public.asaas_import_runs WHERE id = _run FOR UPDATE;

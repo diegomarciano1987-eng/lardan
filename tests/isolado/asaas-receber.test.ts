@@ -11,7 +11,7 @@ import { adm, criarConta, escritaDireta, ler, rpc, rpcServico, type Conta } from
 import type { BancoAsaas } from "../../src/lib/asaas/banco";
 import { SimuladorAsaas, type EstadoSimulador } from "../../src/lib/asaas/simulador";
 import { TransporteHttpAsaas, ChamadaExternaBloqueada } from "../../src/lib/asaas/transporte-http.server";
-import { lerConfiguracao, criarTransporte, IntegracaoIndisponivel } from "../../src/lib/asaas/index";
+import { resolverConta, transporteDaResolucao, IntegracaoIndisponivel } from "../../src/lib/asaas/configuracao.server";
 import {
   abrirLote,
   aprovarLote,
@@ -870,19 +870,26 @@ describe("isolamento entre contas e configuração", () => {
   });
 
   test("configuração ausente, ambígua ou inválida deixa a integração indisponível", async () => {
-    expect(lerConfiguracao({}).disponivel).toBe(false);
-    expect(lerConfiguracao({ ASAAS_MODO: "simulado" }).disponivel).toBe(true);
-    expect(lerConfiguracao({ ASAAS_MODO: "simulado", ASAAS_AMBIENTE: "sandbox" }).disponivel).toBe(false);
-    expect(lerConfiguracao({ ASAAS_MODO: "simulado", ASAAS_API_KEY: "$aact_hmlg_x" }).disponivel).toBe(false);
-    expect(lerConfiguracao({ ASAAS_MODO: "conectado" }).disponivel).toBe(false);
-    expect(lerConfiguracao({ ASAAS_MODO: "conectado", ASAAS_AMBIENTE: "sandbox" }).disponivel).toBe(false);
-    expect(lerConfiguracao({ ASAAS_MODO: "conectado", ASAAS_AMBIENTE: "sandbox", ASAAS_API_KEY: "$aact_prod_x" }).disponivel).toBe(false);
-    expect(lerConfiguracao({ ASAAS_MODO: "conectado", ASAAS_AMBIENTE: "producao", ASAAS_API_KEY: "$aact_prod_x", LARDAN_DEMO_ISOLADO: "1" }).disponivel).toBe(false);
-    const preparada = lerConfiguracao({ ASAAS_MODO: "conectado", ASAAS_AMBIENTE: "sandbox", ASAAS_API_KEY: "$aact_hmlg_x", ASAAS_CONNECTED_ACCOUNT_ID: conta });
-    expect(preparada.disponivel).toBe(true);
-    if (preparada.disponivel && preparada.modo === "conectado") expect(preparada.redeHabilitada).toBe(false);
-    expect(lerConfiguracao({ ASAAS_MODO: "simulacao" }).disponivel).toBe(false);
-    await expect(criarTransporte(conta, lerConfiguracao({}))).rejects.toBeInstanceOf(IntegracaoIndisponivel);
+    const sb = { ok: true, situacao: "sandbox_configurado", account_id: conta, modo: "conectado" as const, ambiente: "sandbox" as const, secret_ref: "ASAAS_SANDBOX_LARDAN" };
+    const ok = { ASAAS_SANDBOX_LARDAN: "$aact_hmlg_sintetica", ASAAS_CONNECTED_ACCOUNT_ID: conta, ASAAS_EGRESS_ENABLED: "1" };
+    expect(resolverConta({ ok: false, situacao: "preparada", motivo: "x" }, ok).situacao).toBe("preparada");
+    expect(resolverConta({ ok: false, situacao: "conta_suspensa" }, ok).situacao).toBe("conta_suspensa");
+    expect(resolverConta({ ok: false, situacao: "qualquer" }, ok).situacao).toBe("indisponivel");
+    expect(resolverConta({ ...sb, modo: "simulado", ambiente: null }, {}).executavel).toBe(false); // sem ambiente isolado
+    expect(resolverConta({ ...sb, modo: "simulado", ambiente: null }, { LARDAN_DEMO_ISOLADO: "1" }).situacao).toBe("simulada");
+    expect(resolverConta({ ...sb, modo: "simulado", ambiente: "sandbox" }, { LARDAN_DEMO_ISOLADO: "1" }).executavel).toBe(false);
+    expect(resolverConta({ ...sb, ambiente: "producao", secret_ref: "ASAAS_PRODUCAO_X" }, { ...ok, ASAAS_PRODUCAO_X: "$aact_prod_x" }).executavel).toBe(false);
+    expect(resolverConta({ ...sb, secret_ref: null }, ok).situacao).toBe("credencial_ausente");
+    expect(resolverConta({ ...sb, secret_ref: "OUTRO_NOME" }, { ...ok, OUTRO_NOME: "$aact_hmlg_x" }).situacao).toBe("credencial_ausente");
+    expect(resolverConta(sb, { ...ok, ASAAS_SANDBOX_LARDAN: "$aact_prod_x" }).situacao).toBe("credencial_ausente");
+    expect(resolverConta(sb, { ...ok, ASAAS_SANDBOX_LARDAN: undefined }).situacao).toBe("credencial_ausente");
+    expect(resolverConta(sb, { ...ok, ASAAS_CONNECTED_ACCOUNT_ID: contaB }).executavel).toBe(false);
+    expect(resolverConta(sb, { ...ok, ASAAS_EGRESS_ENABLED: undefined }).situacao).toBe("saida_desligada");
+    expect(resolverConta(sb, { ...ok, ASAAS_EGRESS_ENABLED: "true" }).situacao).toBe("saida_desligada");
+    expect(resolverConta(sb, ok).situacao).toBe("sandbox_configurado");
+    // nenhuma variável global antiga decide nada
+    expect(resolverConta(sb, { ASAAS_MODO: "conectado", ASAAS_AMBIENTE: "sandbox", ASAAS_API_KEY: "$aact_hmlg_x" }).executavel).toBe(false);
+    await expect(transporteDaResolucao(resolverConta(sb, { ...ok, ASAAS_EGRESS_ENABLED: "0" }))).rejects.toBeInstanceOf(IntegracaoIndisponivel);
   });
 });
 

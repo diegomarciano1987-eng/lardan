@@ -79,7 +79,7 @@ describe("montagem da requisição", () => {
     expect(u.searchParams.get("dueDate[le]")).toBe("2026-12-31");
     expect(p.hasMore).toBe(true);
     expect(p.total).toBe(250);
-    expect(p.proximoOffset).toBe(102);
+    expect(p.proximoOffset).toBe(200); // offset + limit (documentação oficial)
   });
 
   test("em aberto anterior ao recorte: sem dueDate[ge] e filtro local, offset do provedor preservado", async () => {
@@ -103,11 +103,11 @@ describe("montagem da requisição", () => {
     expect(p.hasMore).toBe(true);
   });
 
-  test("página curta com hasMore avança exatamente a quantidade bruta", async () => {
+  test("página curta com hasMore avança offset + limit solicitado", async () => {
     const { f } = falso(() => json(200, { hasMore: true, totalCount: 12, limit: 100, offset: 7, data: [pagamento] }));
     const p = await http(f).listarCobrancas({ limit: 100, offset: 7 });
     expect(p.quantidadeBruta).toBe(1);
-    expect(p.proximoOffset).toBe(8);
+    expect(p.proximoOffset).toBe(107); // offset + limit, não offset + data.length
     expect(p.hasMore).toBe(true);
   });
 

@@ -647,7 +647,10 @@ BEGIN
     END IF;
     RETURN jsonb_build_object('id', existente.id, 'repetida', true, 'state', existente.state,
       'valor_cents', existente.value_cents, 'invoice_url', existente.invoice_url,
-      'external_id', existente.external_id, 'simulado', existente.simulado);
+      'external_id', existente.external_id, 'simulado', existente.simulado,
+      'due_date', existente.due_date, 'billing_type', existente.billing_type,
+      'customer_external_id', existente.customer_external_id,
+      'internal_reference', existente.internal_reference);
   END IF;
 
   SELECT * INTO viva FROM public.asaas_charge_intents
@@ -656,6 +659,9 @@ BEGIN
     RETURN jsonb_build_object('id', viva.id, 'repetida', true, 'state', viva.state,
       'valor_cents', viva.value_cents, 'invoice_url', viva.invoice_url,
       'external_id', viva.external_id, 'simulado', viva.simulado,
+      'due_date', viva.due_date, 'billing_type', viva.billing_type,
+      'customer_external_id', viva.customer_external_id,
+      'internal_reference', viva.internal_reference,
       'aviso','Já havia uma intenção viva para esta parcela.');
   END IF;
 

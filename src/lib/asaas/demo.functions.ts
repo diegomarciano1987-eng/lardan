@@ -81,6 +81,8 @@ export const demoGerarLink = createServerFn({ method: "POST" })
     const it = await prepararIntencao(banco, { accountId: data.accountId, installmentId: data.installmentId, billingType: data.billingType });
     if (it.reaproveitada) return { state: "criada", invoice_url: it.invoice_url ?? null, external_id: it.external_id ?? null, reaproveitada: true };
     if (!it.id) throw new Error("Intenção não registrada.");
+    // Repetição (duplo clique, outra aba): só quem registrou a intenção a executa.
+    if (it.repetida) return { id: it.id, state: it.state ?? "preparada", invoice_url: it.invoice_url ?? null, external_id: it.external_id ?? null, reaproveitada: true };
     if (it.state && it.state !== "preparada") return { id: it.id, state: it.state, invoice_url: it.invoice_url ?? null, reaproveitada: true };
     if (data.perderResposta && it.internal_reference) sim.definirFalha(it.internal_reference, "perder_resposta");
     const r = await executarIntencao(banco, sim, it.id, {

@@ -77,7 +77,6 @@ export function AsaasImportacao({ contaId }: { contaId: string | undefined }) {
       const { data, error } = await supabase
         .from("asaas_import_runs" as never)
         .select("id, status, approved_at")
-        .eq("kind" as never, "cobrancas" as never)
         .order("created_at", { ascending: false })
         .limit(1);
       if (error) throw error;

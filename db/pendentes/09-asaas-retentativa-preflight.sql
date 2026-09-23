@@ -384,6 +384,27 @@ REVOKE ALL ON FUNCTION public.asaas_exec_cliente(uuid,text,integer,uuid,uuid,tex
 GRANT EXECUTE ON FUNCTION public.asaas_exec_cliente(uuid,text,integer,uuid,uuid,text,text) TO service_role;
 
 -- ---------- 6. preflight: conta derivada do registro, sem efeito ----------
+/** Ator do executor: ativo, com papel e com pessoa vinculada. */
+CREATE OR REPLACE FUNCTION public.asaas_ator_pode(_actor uuid, _cap text)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public' AS $fn$
+  SELECT _actor IS NOT NULL AND EXISTS (
+    SELECT 1 FROM public.user_roles ur
+      JOIN public.role_capabilities rc ON rc.role = ur.role
+      JOIN public.profiles p ON p.id = ur.user_id
+     WHERE ur.user_id = _actor AND rc.capability = _cap AND p.is_active AND p.party_id IS NOT NULL)
+$fn$;
+REVOKE ALL ON FUNCTION public.asaas_ator_pode(uuid,text) FROM PUBLIC,anon,authenticated;
+
+/** Leituras e preflight pedidos por usuário nunca aceitam ator nulo. */
+CREATE OR REPLACE FUNCTION public.asaas_exec_exigir_usuario(_actor uuid,_cap text)
+RETURNS void LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='public' AS $fn$
+BEGIN
+  IF _actor IS NULL OR NOT public.asaas_ator_pode(_actor,_cap) THEN
+    RAISE EXCEPTION 'Sem permissão para esta operação de cobrança.';
+  END IF;
+END $fn$;
+REVOKE ALL ON FUNCTION public.asaas_exec_exigir_usuario(uuid,text) FROM PUBLIC,anon,authenticated,service_role;
+
 /** Situação sanitizada de uma conta, do ponto de vista do banco. */
 CREATE OR REPLACE FUNCTION public.asaas_conta_situacao(_account uuid)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='public' AS $fn$
@@ -410,7 +431,7 @@ CREATE OR REPLACE FUNCTION public.asaas_exec_preflight_parcela(_installment uuid
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='public' AS $fn$
 DECLARE i record; t record; n integer; a uuid;
 BEGIN
-  PERFORM public.asaas_exec_exigir(_actor,'finance.receivable.manage');
+  PERFORM public.asaas_exec_exigir_usuario(_actor,'finance.receivable.manage');
   SELECT * INTO i FROM public.financial_installments WHERE id=_installment;
   IF i.id IS NULL THEN RETURN jsonb_build_object('ok',false,'situacao','indisponivel','motivo','Parcela inexistente.'); END IF;
   SELECT * INTO t FROM public.financial_titles WHERE id=i.title_id;
@@ -428,7 +449,7 @@ BEGIN
   IF _cap NOT IN ('finance.import.run','finance.receivable.manage','finance.receivable.view') THEN
     RAISE EXCEPTION 'Capacidade inválida.';
   END IF;
-  PERFORM public.asaas_exec_exigir(_actor,_cap);
+  PERFORM public.asaas_exec_exigir_usuario(_actor,_cap);
   RETURN public.asaas_conta_situacao(_account);
 END $fn$;
 REVOKE ALL ON FUNCTION public.asaas_exec_preflight_conta(uuid,uuid,text) FROM PUBLIC,anon,authenticated;
@@ -438,7 +459,7 @@ GRANT EXECUTE ON FUNCTION public.asaas_exec_preflight_conta(uuid,uuid,text) TO s
 CREATE OR REPLACE FUNCTION public.asaas_exec_contas(_actor uuid)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='public' AS $fn$
 BEGIN
-  PERFORM public.asaas_exec_exigir(_actor,'finance.receivable.view');
+  PERFORM public.asaas_exec_exigir_usuario(_actor,'finance.receivable.view');
   RETURN coalesce((SELECT jsonb_agg(public.asaas_conta_situacao(id) || jsonb_build_object('account_id',id,'nome',label)
     ORDER BY label,id) FROM public.asaas_accounts),'[]'::jsonb);
 END $fn$;

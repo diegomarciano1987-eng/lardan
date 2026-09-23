@@ -95,9 +95,9 @@ beforeAll(async () => {
 describe("máquina de estados das retentativas (relógio controlado)", () => {
   async function comFalha(erro: () => Error) {
     const c = await cenario();
-    await vincular(c.conta, c.party);
     const t = await titulo(c.empresa, c.party);
     const sim = new SimuladorAsaas({ conta: c.conta, semente: marca() });
+    sim.semearCliente({ id: await vincular(c.conta, c.party), name: "ISO" });
     const original = sim.criarCobranca.bind(sim);
     let falhar = true;
     sim.criarCobranca = async (x) => { if (falhar) throw erro(); return original(x); };
@@ -161,9 +161,9 @@ describe("máquina de estados das retentativas (relógio controlado)", () => {
 
   test("consulta indisponível: espera em modo CONSULTAR; depois do prazo consulta, nunca reenvia", async () => {
     const c = await cenario();
-    await vincular(c.conta, c.party);
     const t = await titulo(c.empresa, c.party);
     const sim = new SimuladorAsaas({ conta: c.conta, semente: marca() });
+    sim.semearCliente({ id: await vincular(c.conta, c.party), name: "ISO" });
     const it = await prepararIntencao(banco(fin), { installmentId: t.installmentId, billingType: "PIX" });
     sim.definirFalha(it.internal_reference!, "perder_resposta");
     const a = await executarIntencao(servico, sim, it.id!, { actor: fin.uid });
@@ -200,7 +200,9 @@ describe("máquina de estados das retentativas (relógio controlado)", () => {
     const { c, t, it, sim } = await comFalha(() => new LimiteDeRequisicoes(60));
     const estado = JSON.parse(JSON.stringify((sim as unknown as { estado(): unknown }).estado?.() ?? null));
     // "reinício": novo processo, novo simulador, novo trabalhador
-    const reiniciado = new SimuladorAsaas({ conta: c.conta, semente: `re-${marca()}`, ...(estado ? {} : {}) });
+    const reiniciado = new SimuladorAsaas({ conta: c.conta, semente: `re-${marca()}` });
+    reiniciado.semearCliente({ id: String((await intencao(t.installmentId))[0]!["customer_external_id"]), name: "ISO" });
+    void estado;
     const antes = await retomarPendentes(servico, async () => reiniciado, { actor: fin.uid, accountId: c.conta, preparadaSegundos: 0 });
     expect(antes.some((s) => s.id === it.id)).toBe(false);
     const depois = await retomarPendentes(servico, async () => reiniciado, { actor: fin.uid, accountId: c.conta, preparadaSegundos: 0, agora: futuro(120) });
@@ -465,7 +467,9 @@ describe("privilégios das rotinas internas", () => {
                   else has_function_privilege(r.rolname, p.oid, 'EXECUTE') end`)) as { proname: string; rolname: string }[];
     expect(linhas).toEqual([]);
     const servicoPode = (await adm.unsafe(`select count(*)::int c from pg_proc p join pg_namespace ns on ns.oid=p.pronamespace
-       where ns.nspname='public' and p.proname like 'asaas_exec_%' and not has_function_privilege('service_role', p.oid, 'EXECUTE')`)) as { c: number }[];
+       where ns.nspname='public' and p.proname like 'asaas_exec_%'
+         and p.proname not in ('asaas_exec_posse','asaas_exec_exigir_usuario') -- auxiliares internos das rotinas
+         and not has_function_privilege('service_role', p.oid, 'EXECUTE')`)) as { c: number }[];
     expect(servicoPode[0]!.c).toBe(0);
   });
 

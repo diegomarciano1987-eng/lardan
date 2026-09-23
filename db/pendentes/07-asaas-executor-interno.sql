@@ -37,7 +37,9 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'asaas_accounts_modo_ck') THEN
     ALTER TABLE public.asaas_accounts ADD CONSTRAINT asaas_accounts_modo_ck CHECK (
       (modo_execucao = 'simulado' AND ambiente_provedor IS NULL)
-      OR (modo_execucao = 'conectado' AND ambiente_provedor IN ('sandbox','producao')));
+      -- IS NOT NULL explícito: CHECK com resultado NULL passaria
+      OR (modo_execucao = 'conectado' AND ambiente_provedor IS NOT NULL
+          AND ambiente_provedor IN ('sandbox','producao')));
   END IF;
 END $$;
 

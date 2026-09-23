@@ -228,6 +228,7 @@ export function LeitorEntrada() {
                 ref={campo}
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
+                onBlur={manterFoco}
                 disabled={!pronto}
                 autoComplete="off"
                 inputMode="none"

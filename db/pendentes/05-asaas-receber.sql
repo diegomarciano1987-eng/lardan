@@ -959,7 +959,7 @@ BEGIN
       WHERE ci.state IN ('desconhecida','rejeitada','conciliacao')), '[]'::jsonb),
     'ocorrencias', coalesce((SELECT jsonb_agg(jsonb_build_object(
         'id', ev.id, 'event', ev.event, 'status', ev.status, 'classificacao', ev.classification,
-        'cobranca', ev.charge_external_id, 'quando', ev.event_at, 'nota', ev.last_error)
+        'cobranca', ev.charge_external_id, 'quando', ev.event_at, 'nota', ev.last_error))
        FROM public.asaas_events ev WHERE ev.status = 'pendente'
       ORDER BY ev.event_at DESC LIMIT 50), '[]'::jsonb),
     'contas', coalesce((SELECT jsonb_agg(jsonb_build_object('id', a.id, 'nome', a.label,

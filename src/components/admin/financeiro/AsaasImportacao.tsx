@@ -149,7 +149,7 @@ export function AsaasImportacao({ contaId, podeImportar, motivo }: { contaId: st
           O servidor resolve o modo e o ambiente da conta. A prévia classifica cada cobrança e não cria título, parcela nem baixa.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
-          <button type="button" disabled={!contaId || consultar.isPending} onClick={() => consultar.mutate()}
+          <button type="button" disabled={!contaId || !podeImportar || consultar.isPending} onClick={() => consultar.mutate()}
             className="rounded-lg border border-bronze px-4 py-2 text-sm font-semibold text-bronze disabled:opacity-50">
             {consultar.isPending ? "Consultando…" : "Consultar pelo adaptador"}
           </button>
@@ -162,6 +162,7 @@ export function AsaasImportacao({ contaId, podeImportar, motivo }: { contaId: st
             Efetivar localmente
           </button>
         </div>
+        {!podeImportar && contaId && <p className="mt-3 text-sm text-warning" data-testid="motivo-importacao">Importação indisponível: {motivo}</p>}
         {resumo && (
           <div className="mt-5" data-testid="previa-resumo">
             <p className="text-sm font-semibold">{resumo.total} cobranças em {resumo.paginas} páginas</p>

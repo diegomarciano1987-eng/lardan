@@ -18,6 +18,7 @@ async function main() {
     await adm.unsafe(`update auth.users set email = $2 where id = $1`, [c.uid, `demo.${nome}@lardan.test`]);
     await adm.unsafe(`update public.profiles set email = $2, full_name = $3 where id = $1`, [c.uid, `demo.${nome}@lardan.test`, `Demo ${nome}`]);
   }
+  await adm.unsafe(`select set_config('request.jwt.claims','{"role":"service_role"}',false)`);
   await adm.unsafe(`update public.profiles set is_active=false where id=$1`, [contas.desativado.uid]);
   const [e] = (await adm.unsafe(
     `insert into public.business_entities (legal_name, trade_name) values ('ISO Empresa Demonstração','ISO Demo') returning id`,

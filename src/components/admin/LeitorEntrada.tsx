@@ -82,6 +82,23 @@ export function LeitorEntrada() {
     if (pronto) campo.current?.focus();
   }, [pronto]);
 
+  // Mantém o cursor sempre no campo de leitura: qualquer perda de foco
+  // (clique fora, Tab, após bipe) devolve o foco em seguida.
+  React.useEffect(() => {
+    if (!pronto) return;
+    const forcar = () => campo.current?.focus();
+    forcar();
+    const id = window.setInterval(() => {
+      if (document.activeElement !== campo.current) forcar();
+    }, 400);
+    return () => window.clearInterval(id);
+  }, [pronto]);
+
+  function manterFoco() {
+    if (!pronto) return;
+    window.setTimeout(() => campo.current?.focus(), 30);
+  }
+
   const nomeCategoria = mapa.get(categoria)?.name ?? "";
 
   function registrar(l: Omit<Leitura, "id" | "hora">) {

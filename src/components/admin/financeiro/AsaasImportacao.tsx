@@ -62,7 +62,7 @@ function EscolherPessoa({ onEscolher }: { onEscolher: (id: string) => void }) {
   );
 }
 
-export function AsaasImportacao({ contaId }: { contaId: string | undefined }) {
+export function AsaasImportacao({ contaId, podeImportar, motivo }: { contaId: string | undefined; podeImportar: boolean; motivo: string }) {
   const importar = useServerFn(importarRecebiveis);
   const qc = useQueryClient();
   const [runId, setRunId] = React.useState<string | null>(null);
@@ -108,6 +108,7 @@ export function AsaasImportacao({ contaId }: { contaId: string | undefined }) {
   const consultar = useMutation({
     mutationFn: () => importar({ data: { accountId: contaId! } }),
     onSuccess: (r) => {
+      if (r.indisponivel) { toast.error(r.motivo); return; }
       setRunId(r.lote.run_id);
       setRelatorio(null);
       setResumo(r.previa ? { total: r.previa.total, resumo: r.previa.resumo, paginas: r.busca.paginas, trazidos: r.busca.trazidos } : null);

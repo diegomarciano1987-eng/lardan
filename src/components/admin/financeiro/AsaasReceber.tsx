@@ -386,13 +386,14 @@ export function AsaasReceber() {
               {fila.data!.pages.flatMap((p) => p.itens).map((f) => (
                 <li key={f.id} className="rounded-lg border border-line px-4 py-3">
                   <div className="flex items-center justify-between gap-2">
-                    <StatusBadge tone="danger">{f.state}</StatusBadge>
+                    <StatusBadge tone={f.state === "aguardando_retentativa" ? "warning" : "danger"}>{f.pendencia_operacional ? "Pendência operacional: credencial" : f.state}</StatusBadge>
                     <span className="text-xs text-ledger-muted">{f.attempts} tentativa(s)</span>
                   </div>
                   <p className="mt-2 text-ledger-muted">
                     {f.fase ? `${FASES[f.fase] ?? f.fase}. ` : ""}
                     {f.erro ?? "Resultado desconhecido: consultar o provedor antes de reenviar."}
                   </p>
+                  {f.next_attempt_at && <p className="mt-1 text-xs text-ledger-muted">Nova tentativa, na mesma intenção, a partir de {new Date(f.next_attempt_at).toLocaleString("pt-BR")}.</p>}
                 </li>
               ))}
             </ul>

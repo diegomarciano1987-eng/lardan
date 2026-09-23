@@ -64,6 +64,7 @@ import { Route as AuthenticatedAdminCadastrosProdutosRouteImport } from './route
 import { Route as AuthenticatedAdminCandidaturasIdRouteImport } from './routes/_authenticated/admin/candidaturas_.$id'
 import { Route as AuthenticatedAdminFinanceiroIndexRouteImport } from './routes/_authenticated/admin/financeiro/index'
 import { Route as AuthenticatedAdminFinanceiroAprovacoesRouteImport } from './routes/_authenticated/admin/financeiro/aprovacoes'
+import { Route as AuthenticatedAdminFinanceiroAsaasRouteImport } from './routes/_authenticated/admin/financeiro/asaas'
 import { Route as AuthenticatedAdminFinanceiroAuditoriaRouteImport } from './routes/_authenticated/admin/financeiro/auditoria'
 import { Route as AuthenticatedAdminFinanceiroCentrosCustoRouteImport } from './routes/_authenticated/admin/financeiro/centros-custo'
 import { Route as AuthenticatedAdminFinanceiroConciliacaoRouteImport } from './routes/_authenticated/admin/financeiro/conciliacao'
@@ -382,6 +383,12 @@ const AuthenticatedAdminFinanceiroAprovacoesRoute =
     path: '/aprovacoes',
     getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
   } as any)
+const AuthenticatedAdminFinanceiroAsaasRoute =
+  AuthenticatedAdminFinanceiroAsaasRouteImport.update({
+    id: '/asaas',
+    path: '/asaas',
+    getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
+  } as any)
 const AuthenticatedAdminFinanceiroAuditoriaRoute =
   AuthenticatedAdminFinanceiroAuditoriaRouteImport.update({
     id: '/auditoria',
@@ -543,6 +550,7 @@ export interface FileRoutesByFullPath {
   '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
+  '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
   '/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
@@ -615,6 +623,7 @@ export interface FileRoutesByTo {
   '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
+  '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
   '/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
@@ -691,6 +700,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/_authenticated/admin/candidaturas_/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/_authenticated/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
+  '/_authenticated/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/_authenticated/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/_authenticated/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
   '/_authenticated/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
@@ -767,6 +777,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos'
     | '/admin/candidaturas/$id'
     | '/admin/financeiro/aprovacoes'
+    | '/admin/financeiro/asaas'
     | '/admin/financeiro/auditoria'
     | '/admin/financeiro/centros-custo'
     | '/admin/financeiro/conciliacao'
@@ -839,6 +850,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos'
     | '/admin/candidaturas/$id'
     | '/admin/financeiro/aprovacoes'
+    | '/admin/financeiro/asaas'
     | '/admin/financeiro/auditoria'
     | '/admin/financeiro/centros-custo'
     | '/admin/financeiro/conciliacao'
@@ -914,6 +926,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cadastros/produtos'
     | '/_authenticated/admin/candidaturas_/$id'
     | '/_authenticated/admin/financeiro/aprovacoes'
+    | '/_authenticated/admin/financeiro/asaas'
     | '/_authenticated/admin/financeiro/auditoria'
     | '/_authenticated/admin/financeiro/centros-custo'
     | '/_authenticated/admin/financeiro/conciliacao'
@@ -1355,6 +1368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroAprovacoesRouteImport
       parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
     }
+    '/_authenticated/admin/financeiro/asaas': {
+      id: '/_authenticated/admin/financeiro/asaas'
+      path: '/asaas'
+      fullPath: '/admin/financeiro/asaas'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceiroAsaasRouteImport
+      parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
+    }
     '/_authenticated/admin/financeiro/auditoria': {
       id: '/_authenticated/admin/financeiro/auditoria'
       path: '/auditoria'
@@ -1486,6 +1506,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminFinanceiroRouteRouteChildren {
   AuthenticatedAdminFinanceiroAprovacoesRoute: typeof AuthenticatedAdminFinanceiroAprovacoesRoute
+  AuthenticatedAdminFinanceiroAsaasRoute: typeof AuthenticatedAdminFinanceiroAsaasRoute
   AuthenticatedAdminFinanceiroAuditoriaRoute: typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   AuthenticatedAdminFinanceiroCentrosCustoRoute: typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
   AuthenticatedAdminFinanceiroConciliacaoRoute: typeof AuthenticatedAdminFinanceiroConciliacaoRoute
@@ -1504,6 +1525,8 @@ const AuthenticatedAdminFinanceiroRouteRouteChildren: AuthenticatedAdminFinancei
   {
     AuthenticatedAdminFinanceiroAprovacoesRoute:
       AuthenticatedAdminFinanceiroAprovacoesRoute,
+    AuthenticatedAdminFinanceiroAsaasRoute:
+      AuthenticatedAdminFinanceiroAsaasRoute,
     AuthenticatedAdminFinanceiroAuditoriaRoute:
       AuthenticatedAdminFinanceiroAuditoriaRoute,
     AuthenticatedAdminFinanceiroCentrosCustoRoute:

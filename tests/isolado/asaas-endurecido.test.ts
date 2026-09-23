@@ -136,12 +136,21 @@ describe("Cobranças e eventos", () => {
       [contaSandbox, `${marca}-vinc`, pessoa.partyId],
     );
 
-    const direta = await escritaDireta(
+    // fora da rotina oficial, a tentativa direta não pode deixar a cobrança vinculada:
+    // ou o banco recusa, ou a linha sequer é alcançada pela sessão do usuário
+    await escritaDireta(
       financeiro,
       `update public.asaas_charges set title_id = $2, reconcile_status = 'vinculado' where id = $1`,
       [c.id, titulo],
     );
-    expect(direta.ok).toBe(false);
+    const apos = await um<{ reconcile_status: string; title_id: string | null }>(
+      `select reconcile_status, title_id from public.asaas_charges where id = $1`,
+      [c.id],
+    );
+    expect(apos.reconcile_status).toBe("pendente");
+    expect(apos.title_id).toBeNull();
+
+
 
 
     const negado = await rpc(semPermissao, "asaas_charge_vincular", { _charge: c.id, _title: titulo });

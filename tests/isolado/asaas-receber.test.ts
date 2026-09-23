@@ -138,7 +138,7 @@ beforeAll(async () => {
 
 describe("importação de recebíveis", () => {
   test("percorre mais de 100 cobranças com paginação real", async () => {
-    const sim = new SimuladorAsaas({ semente: "pag" });
+    const sim = new SimuladorAsaas({ semente: `pag-${marca()}` });
     for (let i = 0; i < 120; i++) cobrancaSimulada(sim, i, cliente);
     const b = banco(financeiro);
     const lote = await abrirLote(b, { accountId: conta, pageSize: 50 });
@@ -150,7 +150,7 @@ describe("importação de recebíveis", () => {
   });
 
   test("interrompe e retoma sem perder nem duplicar", async () => {
-    const sim = new SimuladorAsaas({ semente: "ret" });
+    const sim = new SimuladorAsaas({ semente: `ret-${marca()}` });
     for (let i = 0; i < 75; i++) cobrancaSimulada(sim, i, cliente);
     const b = banco(financeiro);
     const pedido = { accountId: conta, kind: "sincronizacao" as const, pageSize: 25 };
@@ -174,7 +174,7 @@ describe("importação de recebíveis", () => {
   });
 
   test("importar três vezes o mesmo recorte não duplica linhas", async () => {
-    const sim = new SimuladorAsaas({ semente: "rep" });
+    const sim = new SimuladorAsaas({ semente: `rep-${marca()}` });
     for (let i = 0; i < 10; i++) cobrancaSimulada(sim, i, cliente);
     const b = banco(financeiro);
     const pedido = { accountId: conta, kind: "historica" as const, de: "2026-01-01", ate: "2026-12-31", pageSize: 5 };
@@ -193,7 +193,7 @@ describe("importação de recebíveis", () => {
   });
 
   test("dívida antiga em aberto entra mesmo fora do recorte", async () => {
-    const sim = new SimuladorAsaas({ semente: "velha" });
+    const sim = new SimuladorAsaas({ semente: `velha-${marca()}` });
     sim.semearCobranca({ customer: cliente, valueCents: 1000, dueDate: "2019-03-01", billingType: "BOLETO", status: "OVERDUE", externalReference: null });
     sim.semearCobranca({ customer: cliente, valueCents: 1000, dueDate: "2019-04-01", billingType: "BOLETO", status: "RECEIVED", externalReference: null });
     const pagina = await sim.listarCobrancas({ limit: 50, offset: 0, dueDateGE: "2026-01-01", incluirEmAbertoAnteriores: true });
@@ -202,7 +202,7 @@ describe("importação de recebíveis", () => {
   });
 
   test("prévia classifica sem criar título, parcela ou baixa", async () => {
-    const sim = new SimuladorAsaas({ semente: "prev" });
+    const sim = new SimuladorAsaas({ semente: `prev-${marca()}` });
     cobrancaSimulada(sim, 1, cliente, 7700);
     const b = banco(financeiro);
     const lote = await abrirLote(b, { accountId: conta, kind: "sincronizacao", de: "2026-02-01", ate: "2026-02-28", pageSize: 10 });
@@ -216,7 +216,7 @@ describe("importação de recebíveis", () => {
   });
 
   test("cliente sem vínculo externo fica em revisão e nunca é ligado por nome", async () => {
-    const sim = new SimuladorAsaas({ semente: "amb" });
+    const sim = new SimuladorAsaas({ semente: `amb-${marca()}` });
     sim.semearCobranca({ customer: "cus_desconhecido", customerName: "ISO Cliente", valueCents: 3000, dueDate: "2026-03-10", billingType: "PIX", status: "PENDING", externalReference: null });
     const b = banco(financeiro);
     const lote = await abrirLote(b, { accountId: conta, kind: "sincronizacao", de: "2026-03-01", ate: "2026-03-31", pageSize: 10 });
@@ -230,7 +230,7 @@ describe("importação de recebíveis", () => {
 
   test("título manual equivalente vira duplicidade suspeita e não gera outro título", async () => {
     const t = await criarTitulo(4321, "2026-04-15");
-    const sim = new SimuladorAsaas({ semente: "dup" });
+    const sim = new SimuladorAsaas({ semente: `dup-${marca()}` });
     sim.semearCobranca({ customer: cliente, valueCents: 4321, dueDate: "2026-04-15", billingType: "BOLETO", status: "PENDING", externalReference: null });
     const b = banco(financeiro);
     const lote = await abrirLote(b, { accountId: conta, kind: "sincronizacao", de: "2026-04-01", ate: "2026-04-30", pageSize: 10 });
@@ -263,7 +263,7 @@ describe("importação de recebíveis", () => {
   });
 
   test("pagamento histórico é espelho: não cria caixa", async () => {
-    const sim = new SimuladorAsaas({ semente: "hist" });
+    const sim = new SimuladorAsaas({ semente: `hist-${marca()}` });
     sim.semearCobranca({ customer: cliente, valueCents: 2500, valuePaidCents: 2500, dueDate: "2026-05-10", paymentDate: "2026-05-09", billingType: "BOLETO", status: "RECEIVED", externalReference: null });
     const b = banco(financeiro);
     const lote = await abrirLote(b, { accountId: conta, kind: "historica", de: "2026-05-01", ate: "2026-05-31", pageSize: 10 });
@@ -288,7 +288,7 @@ describe("importação de recebíveis", () => {
       [conta, cliente],
       [contaB, clienteB],
     ] as const) {
-      const sim = new SimuladorAsaas({ semente: "multi" });
+      const sim = new SimuladorAsaas({ semente: `multi-${marca()}` });
       sim.semearCobranca({ id: externo, customer: cus, valueCents: 1500, dueDate: "2026-06-10", billingType: "PIX", status: "PENDING", externalReference: null });
       const lote = await abrirLote(b, { accountId: c, kind: "sincronizacao", de: "2026-06-01", ate: "2026-06-30", pageSize: 10 });
       await buscarPaginas(b, sim, lote, { accountId: c, pageSize: 10 });
@@ -307,7 +307,7 @@ describe("importação de recebíveis", () => {
 
 describe("autorização", () => {
   test("preencher aprovador pelo navegador não aprova", async () => {
-    const sim = new SimuladorAsaas({ semente: "falsa" });
+    const sim = new SimuladorAsaas({ semente: `falsa-${marca()}` });
     cobrancaSimulada(sim, 2, cliente);
     const b = banco(financeiro);
     const lote = await abrirLote(b, { accountId: conta, kind: "sincronizacao", de: "2026-07-01", ate: "2026-07-31", pageSize: 5 });
@@ -325,7 +325,7 @@ describe("autorização", () => {
   });
 
   test("quem só executa a importação não aprova", async () => {
-    const sim = new SimuladorAsaas({ semente: "semaprov" });
+    const sim = new SimuladorAsaas({ semente: `semaprov-${marca()}` });
     cobrancaSimulada(sim, 3, cliente);
     const b = banco(financeiro);
     const lote = await abrirLote(b, { accountId: conta, kind: "sincronizacao", de: "2026-08-01", ate: "2026-08-31", pageSize: 5 });
@@ -357,7 +357,7 @@ describe("autorização", () => {
 describe("link de cobrança", () => {
   test("gera link vinculado à parcela certa e identificado como simulação", async () => {
     const t = await criarTitulo(9900, "2026-09-20");
-    const sim = new SimuladorAsaas({ semente: "link" });
+    const sim = new SimuladorAsaas({ semente: `link-${marca()}` });
     const r = await gerarLinkDeCobranca(banco(financeiro), sim, {
       accountId: conta,
       installmentId: t.installmentId,
@@ -377,7 +377,7 @@ describe("link de cobrança", () => {
 
   test("segunda solicitação reaproveita o link e não cria outra cobrança", async () => {
     const t = await criarTitulo(5000, "2026-09-21");
-    const sim = new SimuladorAsaas({ semente: "reuso" });
+    const sim = new SimuladorAsaas({ semente: `reuso-${marca()}` });
     const p = { accountId: conta, installmentId: t.installmentId, billingType: "BOLETO" as const };
     const a = await gerarLinkDeCobranca(banco(financeiro), sim, p);
     const b2 = await gerarLinkDeCobranca(banco(financeiro), sim, p);
@@ -388,7 +388,7 @@ describe("link de cobrança", () => {
 
   test("duplo clique e dois trabalhadores produzem um único efeito", async () => {
     const t = await criarTitulo(4000, "2026-09-22");
-    const sim = new SimuladorAsaas({ semente: "duplo" });
+    const sim = new SimuladorAsaas({ semente: `duplo-${marca()}` });
     const p = { accountId: conta, installmentId: t.installmentId, billingType: "BOLETO" as const };
     const [x, y] = await Promise.all([
       gerarLinkDeCobranca(banco(financeiro), sim, { ...p, worker: "aba-1" }),
@@ -449,7 +449,7 @@ describe("link de cobrança", () => {
 
   test("resposta perdida vira resultado desconhecido e a consulta recupera sem duplicar", async () => {
     const t = await criarTitulo(6000, "2026-09-26");
-    const sim = new SimuladorAsaas({ semente: "perdida" });
+    const sim = new SimuladorAsaas({ semente: `perdida-${marca()}` });
     const intencao = await prepararIntencao(banco(financeiro), {
       accountId: conta,
       installmentId: t.installmentId,
@@ -483,7 +483,7 @@ describe("link de cobrança", () => {
 
   test("rejeição do provedor fica registrada sem cobrança criada", async () => {
     const t = await criarTitulo(7000, "2026-09-27");
-    const sim = new SimuladorAsaas({ semente: "rejeita" });
+    const sim = new SimuladorAsaas({ semente: `rejeita-${marca()}` });
     const intencao = await prepararIntencao(banco(financeiro), {
       accountId: conta,
       installmentId: t.installmentId,
@@ -509,7 +509,7 @@ describe("link de cobrança", () => {
 
   test("saldo que muda durante o processamento vai para conciliação", async () => {
     const t = await criarTitulo(10000, "2026-09-28");
-    const sim = new SimuladorAsaas({ semente: "saldo" });
+    const sim = new SimuladorAsaas({ semente: `saldo-${marca()}` });
     const intencao = await prepararIntencao(banco(financeiro), {
       accountId: conta,
       installmentId: t.installmentId,
@@ -549,7 +549,7 @@ describe("link de cobrança", () => {
 
   test("gerar link não liquida a parcela nem cria obrigação nova", async () => {
     const t = await criarTitulo(5500, "2026-09-29");
-    const sim = new SimuladorAsaas({ semente: "naoliquida" });
+    const sim = new SimuladorAsaas({ semente: `naoliquida-${marca()}` });
     await gerarLinkDeCobranca(banco(financeiro), sim, {
       accountId: conta,
       installmentId: t.installmentId,
@@ -569,7 +569,7 @@ describe("link de cobrança", () => {
 describe("eventos e conciliação", () => {
   test("recebimento é espelhado sem inventar baixa", async () => {
     const t = await criarTitulo(8800, "2026-10-05");
-    const sim = new SimuladorAsaas({ semente: "evt" });
+    const sim = new SimuladorAsaas({ semente: `evt-${marca()}` });
     const link = await gerarLinkDeCobranca(banco(financeiro), sim, {
       accountId: conta,
       installmentId: t.installmentId,
@@ -595,7 +595,7 @@ describe("eventos e conciliação", () => {
 
   test("evento repetido não repete efeito", async () => {
     const t = await criarTitulo(3300, "2026-10-07");
-    const sim = new SimuladorAsaas({ semente: "rep-evt" });
+    const sim = new SimuladorAsaas({ semente: `rep-evt-${marca()}` });
     const link = await gerarLinkDeCobranca(banco(financeiro), sim, {
       accountId: conta,
       installmentId: t.installmentId,
@@ -631,7 +631,7 @@ describe("eventos e conciliação", () => {
 
   test("valor desconhecido continua desconhecido", async () => {
     const t = await criarTitulo(2200, "2026-10-09");
-    const sim = new SimuladorAsaas({ semente: "desconhecido" });
+    const sim = new SimuladorAsaas({ semente: `desconhecido-${marca()}` });
     const link = await gerarLinkDeCobranca(banco(financeiro), sim, {
       accountId: conta,
       installmentId: t.installmentId,

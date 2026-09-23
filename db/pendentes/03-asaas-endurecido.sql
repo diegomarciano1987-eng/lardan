@@ -483,11 +483,28 @@ DROP POLICY IF EXISTS asaas_import_findings_read ON public.asaas_import_findings
 CREATE POLICY asaas_import_findings_read ON public.asaas_import_findings FOR SELECT TO authenticated
   USING (public.has_capability(auth.uid(),'finance.receivable.view'));
 
--- efetivar exige aprovação explícita
+-- Efetivar exige aprovação de verdade: preencher approved_by NÃO aprova.
+-- Autor, aprovador, horário e estado são definidos pelo servidor.
 CREATE OR REPLACE FUNCTION public.asaas_import_run_guard()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public' AS $fn$
+DECLARE oficial boolean := coalesce(current_setting('lardann.asaas_import', true), 'off') = 'on';
 BEGIN
-  IF NEW.mode = 'efetivar' AND NEW.approved_by IS NULL THEN
+  IF NOT oficial THEN
+    IF TG_OP = 'INSERT' THEN
+      RAISE EXCEPTION 'Lote de importação só nasce pela rotina oficial.';
+    END IF;
+    IF NEW.approved_by IS DISTINCT FROM OLD.approved_by
+       OR NEW.approved_at IS DISTINCT FROM OLD.approved_at
+       OR NEW.mode IS DISTINCT FROM OLD.mode
+       OR NEW.status IS DISTINCT FROM OLD.status
+       OR NEW.simulado IS DISTINCT FROM OLD.simulado
+       OR NEW.kind IS DISTINCT FROM OLD.kind
+       OR NEW.offset_atual IS DISTINCT FROM OLD.offset_atual
+       OR NEW.has_more IS DISTINCT FROM OLD.has_more THEN
+      RAISE EXCEPTION 'Aprovação e estado do lote só mudam pelas rotinas oficiais.';
+    END IF;
+  END IF;
+  IF NEW.mode = 'efetivar' AND (NEW.approved_by IS NULL OR NEW.approved_at IS NULL) THEN
     RAISE EXCEPTION 'Efetivar importação exige aprovação registrada.';
   END IF;
   NEW.updated_at := now();

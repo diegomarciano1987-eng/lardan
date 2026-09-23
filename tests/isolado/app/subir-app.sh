@@ -37,7 +37,7 @@ EOF
 cd "$RAIZ"
 SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_PUBLISHABLE_KEY=$ANON \
 VITE_SUPABASE_URL=http://127.0.0.1:54321 VITE_SUPABASE_PUBLISHABLE_KEY=$ANON \
-ASAAS_MODO=simulado LARDAN_DEMO_ISOLADO=1 LARDAN_SIM_DIR="$BASE/sim" SUPABASE_SERVICE_ROLE_KEY=$SERVICO LARDAN_ISO_ENVDIR="$BASE/env" \
+LARDAN_DEMO_ISOLADO=1 LARDAN_SIM_DIR="$BASE/sim" SUPABASE_SERVICE_ROLE_KEY=$SERVICO LARDAN_ISO_ENVDIR="$BASE/env" \
   nohup bunx vite dev --config tests/isolado/app/vite.isolado.config.ts --port 8090 >"$BASE/vite.log" 2>&1 & echo $! >"$BASE/vite.pid"
 
 for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8090/ && break; sleep 1; done

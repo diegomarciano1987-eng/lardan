@@ -62,7 +62,7 @@ Versão do código testado: commit base `64188fc` + alterações não publicadas
 | Postgres isolado (164 migrações + 5 pendentes) | 55432 | recriado do zero pelo código |
 | PostgREST 14.1 | 54330 | papéis `anon`/`authenticated` reais, RLS ativa |
 | Gateway local de autenticação (JWT HS256 sintético) | 54321 | usuários `demo.*@lardan.test` |
-| Aplicação (Vite, `ASAAS_AMBIENTE=simulacao`, `LARDAN_DEMO_ISOLADO=1`) | 8090 | pré-visualização 8080 intocada |
+| Aplicação (Vite, `LARDAN_DEMO_ISOLADO=1`, conta registrada como simulada) | 8090 | pré-visualização 8080 intocada |
 
 Ações de demonstração (`src/lib/asaas/demo.functions.ts`) só respondem com as duas variáveis do servidor;
 na pré-visualização e no site publicado recusam.
@@ -148,7 +148,7 @@ Essas pendências **não** impedem preparar cobrança de título manual já apro
 
 ## O que falta para o sandbox (roteiro futuro)
 
-1. Cadastrar credencial do sandbox como segredo do servidor (`ASAAS_API_KEY`) e `ASAAS_AMBIENTE=sandbox`.
+1. Seguir o roteiro de ativação da seção "Fechamento técnico" (modelo único por conta).
 2. Liberar o transporte HTTP (hoje bloqueado antes da rede) após homologação do contrato de campos.
 3. Criar a rota pública do webhook com token de autenticação e cadastrá-la no painel do Asaas.
 4. Repetir esta mesma bateria contra o sandbox, sem dados reais.
@@ -182,7 +182,7 @@ banco isolado (`127.0.0.1:55432/lardan_iso`) e na segunda instância (porta 8090
 | 5 | Cliente criado fora do `try`; falhas inesperadas deixavam `processando` | Execução em fases (cliente → cobrança → link → gravação); cliente persistido na hora; posse temporária com expiração; posse vencida vira `desconhecida` auditada e só é retomada por CONSULTA; preparadas nunca iniciadas são retomadas (`asaas_exec_pendentes`, `retomarPendentes`) |
 | 6 | Link das importadas não era guardado | `asaas_charges.invoice_url` com guarda: aproveita o payload quando válido, consulta pelo ID quando ausente (sem criar), valida por modo e ambiente no servidor (`07`, `obterLinkCobranca`) |
 | 7 | Painel com limite fixo 50/200 | `asaas_receber_parcelas` (cursor estável vencimento+id, busca por pessoa/número/descrição, filtro de situação), `asaas_receber_fila`, `asaas_receber_ocorrencias` paginadas; tela com busca, seletor e "Carregar mais" |
-| 8 | Simulação misturada com ambiente; simulador global | `modo_execucao` (simulado/conectado) separado de `ambiente_provedor` (sandbox/produção), com restrição no banco; configuração do servidor (`ASAAS_MODO`, `ASAAS_AMBIENTE`, `ASAAS_API_KEY`) ausente/ambígua/incoerente = indisponível; um simulador por conta, com estado gravável para sobreviver a reinício |
+| 8 | Simulação misturada com ambiente; simulador global | `modo_execucao` (simulado/conectado) separado de `ambiente_provedor` (sandbox/produção), com restrição no banco; configuração incoerente = indisponível (modelo antigo por variáveis globais removido no fechamento técnico); um simulador por conta, com estado gravável para sobreviver a reinício |
 | 9 | HTTP só lançava bloqueio | `TransporteHttpAsaas` monta requisições reais (base por ambiente, cabeçalho `access_token`, `User-Agent`, corpo em reais, offset/limit ≤ 100, `hasMore`/`totalCount`), traduz respostas para centavos e classifica erros (400 recusa, 401/403 credencial, 429 limite, 5xx/queda em POST = desconhecido, em GET = consulta indisponível, 404 em consulta = ausente). `fetch` injetável; o padrão bloqueia antes da rede. Não presume unicidade de `externalReference` nem idempotência do provedor |
 
 Defeitos adicionais encontrados pelos novos testes e corrigidos:
@@ -255,3 +255,37 @@ Correções finais: conta derivada de intenção, cobrança ou lote; configuraç
 Nenhum evento gera liquidação, alocação ou razão. Link não cria obrigação, venda ou documento fiscal. Recebível manual aprovado independe de maleta; recebível futuro de acerto continua bloqueado até aprovação formal. Retorno, perda, garantia, defeito e quantidade a explicar não viram venda. O “aproximadamente um terço” permanece apenas informação operacional, sem percentual fiscal executável.
 
 Para receber uma credencial de sandbox ainda faltam decisão/autorização operacional, cadastro do segredo no servidor, UUID da única conta conectada, confirmação do host de fatura, homologação com dados sintéticos e liberação deliberada do gate de saída. Webhook exige segredo próprio, endpoint público e homologação; o manipulador permanece bloqueado. Banco compartilhado, site publicado, fiscal, acerto, liquidações e razão não foram alterados.
+
+## Fechamento técnico — pronto para receber segredo de sandbox (23/09/2026)
+
+Estado: **preparado, não aplicado**. Nada foi aplicado ao banco compartilhado, o site publicado não foi alterado, nenhum endereço do Asaas foi acessado e a saída externa permanece desligada.
+
+### Modelo único de configuração
+A única fonte de verdade é a conta Asaas vinculada à empresa do título:
+
+| Peça | Onde vive | Observação |
+|---|---|---|
+| Conta, estado (`simulada`, `preparada`, `sandbox_conectada`, `suspensa`) e ambiente | banco (`asaas_accounts`) | produção estruturalmente bloqueada |
+| `secret_ref` | banco | só o NOME do segredo, ex. `ASAAS_SANDBOX_LARDAN` |
+| Valor do segredo | segredo do servidor | lido só no servidor; precisa começar com `$aact_hmlg_` |
+| `ASAAS_CONNECTED_ACCOUNT_ID` | segredo do servidor | UUID da única conta autorizada neste servidor |
+| `ASAAS_EGRESS_ENABLED` | segredo do servidor | só `1` libera a saída; qualquer outro valor bloqueia antes de criar o cliente HTTP |
+| `ASAAS_WEBHOOK_LARDAN` | nome reservado | recebimento de eventos ainda não ativado |
+
+O navegador recebe apenas situação sanitizada: conta simulada, preparada, sandbox configurado, saída externa desligada, credencial ausente ou incompatível, conta suspensa ou indisponível. Nenhuma chave, token ou nome de segredo é devolvido. As variáveis `ASAAS_MODO`, `ASAAS_AMBIENTE`, `ASAAS_API_KEY` não têm mais efeito.
+
+### Garantias
+- **Retentativas:** estado `aguardando_retentativa` com `retomar_modo` (`criar` ou `consultar`). 401/403 (pendência operacional de credencial), 429 (respeita Retry-After de 1 a 86.400 s; senão 60 s) e consulta indisponível (300 s) mantêm a MESMA intenção. Nada reserva antes de `next_attempt_at`; depois do prazo, um único trabalhador assume. Resultado desconhecido sempre consulta o provedor antes de reenviar. Erro terminal continua terminal. Toda transição é auditada. A atualização converte intenções travadas pelo comportamento antigo.
+- **Preflight no servidor:** a conta é derivada de parcela → título → empresa. Com conta indisponível não há intenção, lote, tentativa nem alteração de título, parcela ou cobrança.
+- **Paginação oficial:** com `hasMore=true`, próximo offset = offset + limit pedido; no fim, offset + quantidade bruta. Filtros locais não mexem no cursor. O banco recusa cursor calculado pela quantidade recebida.
+- **Cliente concorrente:** posse com token próprio, renovação durante chamada lenta, folga pelo tempo máximo da requisição; trabalhador antigo não grava; quem assume depois de expiração consulta antes de criar. Consultas de clientes na importação limitadas a 4 simultâneas.
+- **Permissões:** rotinas internas só por service_role; usuário desativado ou sem pessoa vinculada é recusado em todas as rotinas do módulo; consultora, representante e visitante não acessam.
+- **Migrações:** pendentes sem transação própria; `tests/isolado/subir.sh` aplica tudo em transação única e `tests/isolado/atualizar.sh` atualiza uma base do pacote anterior em transação única (interrupção simulada = nada aplicado).
+
+### Roteiro futuro de ativação da homologação (depende de autorização)
+1. Lardan cria a conta de sandbox e fornece a chave (`$aact_hmlg_...`) pelo formulário seguro de segredos.
+2. Aplicar os pendentes ao banco, com autorização.
+3. Registrar a conta como `sandbox_conectada` com `secret_ref = ASAAS_SANDBOX_LARDAN`.
+4. Definir `ASAAS_CONNECTED_ACCOUNT_ID` com o UUID dessa conta.
+5. Autorizar explicitamente e só então definir `ASAAS_EGRESS_ENABLED=1`.
+6. Homologar: cliente, cobrança, link, consulta, importação e erros.

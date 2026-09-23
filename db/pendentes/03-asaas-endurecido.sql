@@ -388,7 +388,6 @@ END $fn$;
 DROP FUNCTION IF EXISTS public.asaas_charge_vincular(uuid,uuid,uuid,text);
 REVOKE ALL ON FUNCTION public.asaas_charge_vincular(uuid,uuid,uuid,text,boolean) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.asaas_charge_vincular(uuid,uuid,uuid,text,boolean) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.asaas_charge_vincular(uuid,uuid,uuid,text) TO authenticated;
 
 -- ---------------- dados pessoais: acesso mínimo ----------------
 -- quem apenas vê recebíveis não enxerga documento, e-mail nem payload bruto

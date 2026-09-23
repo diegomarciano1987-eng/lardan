@@ -301,7 +301,8 @@ BEGIN
   DELETE FROM public.asaas_import_findings WHERE run_id = _run AND resolvido = false;
 
   FOR s IN SELECT * FROM public.asaas_import_stage
-            WHERE run_id = _run AND tipo = 'cobranca' AND classificacao <> 'efetivado' LOOP
+            WHERE run_id = _run AND tipo = 'cobranca'
+              AND classificacao NOT IN ('efetivado','vinculo_sugerido') LOOP
     v_party := NULL; v_title := NULL; v_charge := NULL; v_motivo := NULL; v_dup := NULL;
     v_class := 'novo'; v_acao := 'criar_titulo';
 

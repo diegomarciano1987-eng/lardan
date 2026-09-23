@@ -165,7 +165,7 @@ export async function gerarLinkDeCobranca(
 ): Promise<ResultadoCobranca> {
   const intencao = await prepararIntencao(banco, p);
   if (intencao.reaproveitada) {
-    return { state: "criada", invoice_url: intencao.invoice_url ?? null, external_id: intencao.external_id ?? null, charge_id: intencao.charge_id ?? null, reaproveitada: true, aviso: intencao.aviso };
+    return { state: "criada", invoice_url: intencao.invoice_url ?? null, external_id: intencao.external_id ?? null, charge_id: intencao.charge_id ?? null, reaproveitada: true, aviso: intencao.aviso ?? "" };
   }
   if (!intencao.id) throw new Error("Intenção não registrada.");
   if (intencao.state && intencao.state !== "preparada") {

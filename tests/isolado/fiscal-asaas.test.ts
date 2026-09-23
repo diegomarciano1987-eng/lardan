@@ -155,28 +155,24 @@ describe("Fiscal inerte", () => {
     expect(await conta(`select count(*)::int as n from public.financial_settlements`)).toBe(l);
   });
 
-  it("5. documento autorizado não volta atrás — o caminho é o cancelamento", async () => {
-    // simulação declarada: a emissão é ligada só dentro deste teste e desligada ao fim
+  it("5. nem com a emissão ligada alguém marca 'autorizado' na mão", async () => {
+    // contrato endurecido: autorização só existe com retorno do provedor registrado
+    // pela rotina oficial. A simulação abaixo liga a emissão apenas dentro do teste.
     await adm.unsafe(`update public.fiscal_settings set emission_active = true`);
     try {
       const d = await um<{ id: string }>(
         `insert into public.fiscal_documents (kind, recipient_party_id) values ('remessa', $1) returning id`,
         [pessoa.partyId],
       );
-      await adm.unsafe(`update public.fiscal_documents set status = 'autorizado' where id = $1`, [d.id]);
-
-      for (const alvo of ["preparacao", "enviado", "rejeitado"]) {
-        let recusado = false;
-        try {
-          await adm.unsafe(`update public.fiscal_documents set status = $2 where id = $1`, [d.id, alvo]);
-        } catch {
-          recusado = true;
-        }
-        expect(recusado).toBe(true);
+      let recusado = false;
+      try {
+        await adm.unsafe(`update public.fiscal_documents set status = 'autorizado' where id = $1`, [d.id]);
+      } catch {
+        recusado = true;
       }
-      await adm.unsafe(`update public.fiscal_documents set status = 'cancelado' where id = $1`, [d.id]);
+      expect(recusado).toBe(true);
       expect((await um<{ status: string }>(`select status from public.fiscal_documents where id = $1`, [d.id])).status)
-        .toBe("cancelado");
+        .toBe("preparacao");
     } finally {
       await adm.unsafe(`update public.fiscal_settings set emission_active = false`);
     }

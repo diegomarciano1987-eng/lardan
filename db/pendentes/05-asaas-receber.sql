@@ -817,7 +817,7 @@ BEGIN
     (account_id, external_id, event, charge_external_id, event_at, received_at, status,
      classification, payload)
   VALUES (conta, _payload->>'external_id', _payload->>'event', _payload->>'charge_external_id',
-          coalesce(nullif(_payload->>'event_at','')::timestamptz, now()), now(), 'pendente',
+          coalesce(nullif(_payload->>'event_at','')::timestamptz, now()), now(), 'na_fila',
           CASE WHEN tipo.event IS NULL THEN 'desconhecido' ELSE 'conhecido' END,
           coalesce(_payload->'payload','{}'::jsonb))
   ON CONFLICT (account_id, external_id) DO NOTHING
@@ -859,13 +859,13 @@ BEGIN
   IF tipo.event IS NULL THEN
     UPDATE public.asaas_events SET status='na_fila', classification='desconhecido',
       last_error='Tipo de evento não catalogado.', attempts = attempts + 1 WHERE id=e.id;
-    RETURN jsonb_build_object('id', e.id, 'status','pendente','motivo','tipo_desconhecido');
+    RETURN jsonb_build_object('id', e.id, 'status','na_fila','motivo','tipo_desconhecido');
   END IF;
 
   IF c.id IS NULL THEN
     UPDATE public.asaas_events SET status='na_fila', classification='revisao',
       last_error='Evento sem cobrança espelhada.', attempts = attempts + 1 WHERE id=e.id;
-    RETURN jsonb_build_object('id', e.id, 'status','pendente','motivo','sem_cobranca');
+    RETURN jsonb_build_object('id', e.id, 'status','na_fila','motivo','sem_cobranca');
   END IF;
 
   -- evento atrasado não sobrescreve situação mais recente
@@ -902,7 +902,7 @@ BEGIN
 
     UPDATE public.asaas_events SET
       status = CASE WHEN tipo.revisao_manual OR tipo.efeito_recebivel <> 'espelha'
-                    THEN 'pendente' ELSE 'processado' END,
+                    THEN 'na_fila' ELSE 'processado' END,
       classification = CASE WHEN tipo.revisao_manual THEN 'revisao' ELSE 'conhecido' END,
       processed_at = now(),
       last_error = CASE WHEN tipo.efeito_recebivel = 'recebimento_registrado'

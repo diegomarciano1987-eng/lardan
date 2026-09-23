@@ -1,6 +1,5 @@
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { EmptyState, Panel, StatusBadge, formatBRLFromCents } from "@/components/admin/ui";
 import {
@@ -210,9 +209,9 @@ export function AsaasReceber() {
           {parcela.intencao?.invoice_url ? (
             <div className="mt-5 rounded-lg border border-warning px-4 py-3">
               <p className="text-sm font-semibold text-warning">{AVISO_SIMULACAO}</p>
-              <Link to={parcela.intencao.invoice_url} className="mt-2 inline-block text-sm font-semibold text-bronze underline">
+              <a href={parcela.intencao.invoice_url} className="mt-2 inline-block text-sm font-semibold text-bronze underline">
                 Abrir demonstração local
-              </Link>
+              </a>
               <button type="button" disabled className="ml-4 cursor-not-allowed text-sm text-ledger-muted" title="Disponível somente quando o Asaas estiver conectado">
                 Copiar link real (indisponível)
               </button>

@@ -13,8 +13,11 @@ export const importarRecebiveis = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
     const { abrirLote, buscarPaginas, gerarPrevia } = await import("./importacao");
-    const { bancoDe, bancoExecutor, transporteDaConfiguracao } = await import("./servidor.server");
+    const { bancoDe, bancoExecutor, transporteDaConfiguracao, resolverPorConta } = await import("./servidor.server");
     const { ROTINAS_EXECUTOR } = await import("./banco");
+    // Preflight ANTES de abrir lote: conta, segredo, ambiente e gate.
+    const r = await resolverPorConta(data.accountId, c.userId, "finance.import.run");
+    if (!r.executavel) return { indisponivel: true as const, situacao: r.situacao, motivo: r.motivo };
     const usuario = bancoDe(c.supabase);
     const pedido = { accountId: data.accountId, pageSize: 50, incluirEmAbertoAnteriores: true,
       ...(data.maxPaginas ? { maxPaginas: data.maxPaginas } : {}) };
@@ -23,5 +26,5 @@ export const importarRecebiveis = createServerFn({ method: "POST" })
     const config = await executor.rpc<Parameters<typeof transporteDaConfiguracao>[0]>(ROTINAS_EXECUTOR.configLote,
       { _run: lote.run_id, _actor: c.userId });
     const busca = await buscarPaginas(usuario, await transporteDaConfiguracao(config), lote, pedido);
-    return { lote, busca, previa: busca.hasMore ? null : await gerarPrevia(usuario, lote.run_id) };
+    return { indisponivel: false as const, lote, busca, previa: busca.hasMore ? null : await gerarPrevia(usuario, lote.run_id) };
   });

@@ -9,7 +9,7 @@
  */
 import type { BancoAsaas } from "./banco";
 import { ROTINAS } from "./banco";
-import type { CobrancaExterna, TransporteAsaas } from "./contrato";
+import { proximoOffsetOficial, type CobrancaExterna, type TransporteAsaas } from "./contrato";
 
 export interface PedidoImportacao {
   accountId: string;
@@ -77,7 +77,12 @@ export async function buscarPaginas(
     });
 
     const clientes = await coletarClientes(transporte, pagina.itens);
-    const proximoOffset = pagina.proximoOffset ?? offset + pagina.quantidadeBruta;
+    if (pagina.offset !== offset || pagina.limit < 1 || pagina.quantidadeBruta > pagina.limit) {
+      throw new Error("Página do provedor incompatível com o pedido.");
+    }
+    // Regra oficial: com hasMore, offset + limit; independe do filtro local.
+    const proximoOffset = proximoOffsetOficial(offset, pagina.limit, pagina.quantidadeBruta, pagina.hasMore);
+    if (pagina.proximoOffset !== proximoOffset) throw new Error("Transporte calculou cursor fora da regra oficial.");
     const r = await banco.rpc<{ novos: number; repetidos: number; offset: number; has_more: boolean }>(
       ROTINAS.importarPagina,
       {
@@ -98,17 +103,25 @@ export async function buscarPaginas(
     offset = proximoOffset;
     hasMore = pagina.hasMore;
     paginas += 1;
-    if (pagina.quantidadeBruta === 0 && pagina.hasMore) {
-      throw new Error("O provedor indicou continuação sem avançar o cursor.");
-    }
   }
 
   return { runId: lote.run_id, paginas, trazidos, novos, repetidos, hasMore, offset };
 }
 
+export const CONSULTAS_SIMULTANEAS = 4;
+
 async function coletarClientes(transporte: TransporteAsaas, itens: CobrancaExterna[]) {
   const ids = [...new Set(itens.map((i) => i.customer).filter(Boolean))];
-  const achados = await Promise.all(ids.map((id) => transporte.consultarCliente(id)));
+  // concorrência limitada: nunca dezenas de consultas simultâneas
+  const achados: unknown[] = [];
+  let proximo = 0;
+  const trabalhador = async () => {
+    while (proximo < ids.length) {
+      const id = ids[proximo++]!;
+      achados.push(await transporte.consultarCliente(id));
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(CONSULTAS_SIMULTANEAS, ids.length) }, trabalhador));
   return achados.filter(Boolean);
 }
 

@@ -12,12 +12,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 type Ctx = { supabase: never; userId: string };
 
 async function simuladorDemo(accountId: string, ctx: Ctx, capacidade: string) {
-  const { configuracaoDoServidor, simuladorDaConta } = await import("./index");
-  const cfg = configuracaoDoServidor();
-  if (!cfg.disponivel || cfg.modo !== "simulado" || !cfg.demoIsolado) {
+  const { simuladorDaConta } = await import("./index");
+  const { bancoDe, resolverPorConta } = await import("./servidor.server");
+  const r = await resolverPorConta(accountId, ctx.userId, "finance.receivable.view");
+  if (!r.executavel || r.situacao !== "simulada") {
     throw new Error("Demonstração do adaptador disponível somente no ambiente isolado de simulação.");
   }
-  const { bancoDe } = await import("./servidor.server");
   const pode = await bancoDe(ctx.supabase).rpc<boolean>("has_capability", { _user_id: ctx.userId, _cap: capacidade });
   if (!pode) throw new Error("Sem permissão para esta ação de demonstração.");
   const sim = await simuladorDaConta(accountId);

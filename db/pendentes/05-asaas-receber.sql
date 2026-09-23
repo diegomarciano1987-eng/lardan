@@ -592,7 +592,7 @@ BEGIN
   SELECT * INTO t FROM public.financial_titles WHERE id = i.title_id;
   IF t.direction <> 'receivable' THEN RAISE EXCEPTION 'Só há cobrança para título a receber.'; END IF;
   IF t.status <> 'ativo' THEN RAISE EXCEPTION 'Título não está ativo.'; END IF;
-  IF t.approval_status = 'pendente' THEN RAISE EXCEPTION 'Título pendente de aprovação.'; END IF;
+  IF t.approval_status = 'na_fila' THEN RAISE EXCEPTION 'Título pendente de aprovação.'; END IF;
 
   v_saldo := public.fin_installment_saldo(i.id);
   IF coalesce(v_saldo,0) <= 0 THEN RAISE EXCEPTION 'Parcela sem saldo devido.'; END IF;
@@ -857,13 +857,13 @@ BEGIN
     WHERE account_id = e.account_id AND external_id = e.charge_external_id FOR UPDATE;
 
   IF tipo.event IS NULL THEN
-    UPDATE public.asaas_events SET status='pendente', classification='desconhecido',
+    UPDATE public.asaas_events SET status='na_fila', classification='desconhecido',
       last_error='Tipo de evento não catalogado.', attempts = attempts + 1 WHERE id=e.id;
     RETURN jsonb_build_object('id', e.id, 'status','pendente','motivo','tipo_desconhecido');
   END IF;
 
   IF c.id IS NULL THEN
-    UPDATE public.asaas_events SET status='pendente', classification='revisao',
+    UPDATE public.asaas_events SET status='na_fila', classification='revisao',
       last_error='Evento sem cobrança espelhada.', attempts = attempts + 1 WHERE id=e.id;
     RETURN jsonb_build_object('id', e.id, 'status','pendente','motivo','sem_cobranca');
   END IF;
@@ -878,7 +878,7 @@ BEGIN
 
   PERFORM set_config('lardann.asaas_link','on', true);
   IF atrasado THEN
-    UPDATE public.asaas_events SET status='pendente', classification='revisao',
+    UPDATE public.asaas_events SET status='na_fila', classification='revisao',
       last_error='Evento anterior a uma situação mais recente: exige conciliação.',
       processed_at=now() WHERE id=e.id;
   ELSE
@@ -961,7 +961,7 @@ BEGIN
     'ocorrencias', coalesce((SELECT jsonb_agg(jsonb_build_object(
         'id', ev.id, 'event', ev.event, 'status', ev.status, 'classificacao', ev.classification,
         'cobranca', ev.charge_external_id, 'quando', ev.event_at, 'nota', ev.last_error))
-       FROM public.asaas_events ev WHERE ev.status = 'pendente'
+       FROM public.asaas_events ev WHERE ev.status = 'na_fila'
       ORDER BY ev.event_at DESC LIMIT 50), '[]'::jsonb),
     'contas', coalesce((SELECT jsonb_agg(jsonb_build_object('id', a.id, 'nome', a.label,
         'ambiente', a.environment, 'estado', a.state, 'conectada', a.is_active,

@@ -476,7 +476,12 @@ DECLARE r record; s record; conta record; sistema text;
         v_title uuid; v_inst uuid; v_charge uuid;
         criados integer := 0; vinculados integer := 0; espelhos integer := 0; ignorados integer := 0;
 BEGIN
-  IF NOT public.has_capability(auth.uid(),'finance.import.approve') THEN
+  -- Segregação (ajuste após o navegador isolado): a Diretoria aprova; quem
+  -- efetiva é quem opera o contas a receber, porque a efetivação cria títulos
+  -- pelas rotinas canônicas, que exigem finance.receivable.manage.
+  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Sessão obrigatória.'; END IF;
+  IF NOT public.has_capability(auth.uid(),'finance.import.run')
+     OR NOT public.has_capability(auth.uid(),'finance.receivable.manage') THEN
     RAISE EXCEPTION 'Sem permissão para efetivar importação.';
   END IF;
   SELECT * INTO r FROM public.asaas_import_runs WHERE id = _run FOR UPDATE;
@@ -642,7 +647,10 @@ BEGIN
     END IF;
     RETURN jsonb_build_object('id', existente.id, 'repetida', true, 'state', existente.state,
       'valor_cents', existente.value_cents, 'invoice_url', existente.invoice_url,
-      'external_id', existente.external_id, 'simulado', existente.simulado);
+      'external_id', existente.external_id, 'simulado', existente.simulado,
+      'due_date', existente.due_date, 'billing_type', existente.billing_type,
+      'customer_external_id', existente.customer_external_id,
+      'internal_reference', existente.internal_reference);
   END IF;
 
   SELECT * INTO viva FROM public.asaas_charge_intents
@@ -651,6 +659,9 @@ BEGIN
     RETURN jsonb_build_object('id', viva.id, 'repetida', true, 'state', viva.state,
       'valor_cents', viva.value_cents, 'invoice_url', viva.invoice_url,
       'external_id', viva.external_id, 'simulado', viva.simulado,
+      'due_date', viva.due_date, 'billing_type', viva.billing_type,
+      'customer_external_id', viva.customer_external_id,
+      'internal_reference', viva.internal_reference,
       'aviso','Já havia uma intenção viva para esta parcela.');
   END IF;
 
@@ -958,11 +969,14 @@ BEGIN
         'installment_id', ci.installment_id))
        FROM public.asaas_charge_intents ci
       WHERE ci.state IN ('desconhecida','rejeitada','conciliacao')), '[]'::jsonb),
-    'ocorrencias', coalesce((SELECT jsonb_agg(jsonb_build_object(
+    -- corrigido após a validação no navegador isolado: ORDER BY/LIMIT fora do
+    -- agregado era recusado pelo Postgres assim que existia uma ocorrência.
+    'ocorrencias', coalesce((SELECT jsonb_agg(o ORDER BY o->>'quando' DESC) FROM (
+       SELECT jsonb_build_object(
         'id', ev.id, 'event', ev.event, 'status', ev.status, 'classificacao', ev.classification,
-        'cobranca', ev.charge_external_id, 'quando', ev.event_at, 'nota', ev.last_error))
+        'cobranca', ev.charge_external_id, 'quando', ev.event_at, 'nota', ev.last_error) AS o
        FROM public.asaas_events ev WHERE ev.status = 'na_fila'
-      ORDER BY ev.event_at DESC LIMIT 50), '[]'::jsonb),
+      ORDER BY ev.event_at DESC LIMIT 50) q), '[]'::jsonb),
     'contas', coalesce((SELECT jsonb_agg(jsonb_build_object('id', a.id, 'nome', a.label,
         'ambiente', a.environment, 'estado', a.state, 'conectada', a.is_active,
         'empresa', a.owner_entity_id))

@@ -94,7 +94,13 @@ export async function executarIntencao(
 
   let cliente = dados.customerExternalId ?? null;
   if (!cliente) {
-    if (!dados.devedor) throw new Error("Sem cliente externo e sem dados para prepará-lo.");
+    if (!dados.devedor) {
+      // Já reservada: nunca deixar a intenção presa em "processando".
+      return banco.rpc<ResultadoCobranca>(ROTINAS.cobrancaResultado, {
+        _intent: intencaoId,
+        _payload: { resultado: "rejeitada", erro: "Sem cliente externo e sem dados para prepará-lo." },
+      });
+    }
     const criado = await transporte.prepararCliente({
       name: dados.devedor.nome,
       cpfCnpj: dados.devedor.doc ?? null,

@@ -1,15 +1,112 @@
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { EmptyState, Panel, StatusBadge, formatBRLFromCents } from "@/components/admin/ui";
 import {
   AVISO_SIMULACAO,
   PreparacaoNaoAplicada,
   carregarPainel,
-  prepararCobranca,
   situacaoCobranca,
   type LinhaReceber,
 } from "@/lib/asaas-painel";
+import { demoEvento, demoGerarLink, demoRecuperar } from "@/lib/asaas/demo.functions";
+import { AsaasImportacao } from "./AsaasImportacao";
+
+function DetalheParcela({ conta, linha, onFechar }: { conta: string; linha: LinhaReceber; onFechar: () => void }) {
+  const qc = useQueryClient();
+  const gerar = useServerFn(demoGerarLink);
+  const recuperar = useServerFn(demoRecuperar);
+  const evento = useServerFn(demoEvento);
+  const [forma, setForma] = React.useState<"PIX" | "BOLETO">("PIX");
+  const [ultimo, setUltimo] = React.useState<string | null>(null);
+  const atualizar = () => void qc.invalidateQueries({ queryKey: ["asaas", "painel"] });
+  const falhou = (e: Error) => toast.error(e.message);
+
+  const solicitar = useMutation({
+    mutationFn: (perderResposta: boolean) => gerar({ data: { accountId: conta, installmentId: linha.installment_id, billingType: forma, perderResposta } }),
+    onSuccess: (r) => { setUltimo(`Situação: ${r.state}${r.reaproveitada ? " (cobrança existente reaproveitada)" : ""}`); atualizar(); },
+    onError: falhou,
+  });
+  const recuperarM = useMutation({
+    mutationFn: () => recuperar({ data: { intentId: linha.intencao!.id } }),
+    onSuccess: (r) => { setUltimo(`Consulta ao provedor: ${r.state}. Chamadas de criação no provedor: ${r.chamadas_criar}.`); atualizar(); },
+    onError: falhou,
+  });
+  const eventoM = useMutation({
+    mutationFn: (repetir: boolean) => evento({ data: { accountId: conta, chargeExternalId: linha.cobranca!.external_id!, pagoCents: linha.saldo_cents, tarifaCents: 199, repetir } }),
+    onSuccess: (r) => {
+      const partes = r.map((e) => (e.repetido ? "repetido (sem novo efeito)" : `${e.efeito ?? "registrado"}${e.revisao_manual ? " · revisão manual" : ""}`));
+      setUltimo(`Evento: ${partes.join(" / ")}. Nenhuma baixa foi criada.`);
+      atualizar();
+    },
+    onError: falhou,
+  });
+  const ocupado = solicitar.isPending || recuperarM.isPending || eventoM.isPending;
+  const estado = linha.intencao?.state;
+
+  return (
+    <Panel title="Detalhe da parcela e vínculo Asaas">
+      <dl className="grid gap-3 text-sm sm:grid-cols-2">
+        <div><dt className="text-ledger-muted">Devedor</dt><dd className="font-medium">{linha.pessoa ?? "—"}</dd></div>
+        <div><dt className="text-ledger-muted">Saldo no servidor</dt><dd className="font-medium tabular-nums" data-testid="saldo-parcela">{formatBRLFromCents(linha.saldo_cents)}</dd></div>
+        <div><dt className="text-ledger-muted">Cobrança vinculada</dt><dd className="font-medium break-all" data-testid="cobranca-vinculada">{linha.cobranca?.external_id ?? "nenhuma"}</dd></div>
+        <div><dt className="text-ledger-muted">Situação</dt><dd className="font-medium" data-testid="situacao">{situacaoCobranca(linha).rotulo}</dd></div>
+      </dl>
+
+      {linha.intencao?.invoice_url && (
+        <div className="mt-5 rounded-lg border border-warning px-4 py-3">
+          <p className="text-sm font-semibold text-warning">{AVISO_SIMULACAO}</p>
+          <a href={linha.intencao.invoice_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-bronze underline">
+            Abrir demonstração local
+          </a>
+          <button type="button" disabled className="ml-4 cursor-not-allowed text-sm text-ledger-muted" title="Disponível somente quando o Asaas estiver conectado">
+            Copiar link real (indisponível)
+          </button>
+        </div>
+      )}
+
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className="flex gap-1" role="group" aria-label="Forma de pagamento">
+          {(["PIX", "BOLETO"] as const).map((f) => (
+            <button key={f} type="button" onClick={() => setForma(f)} aria-pressed={forma === f}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${forma === f ? "border-bronze text-bronze" : "border-line text-ledger-muted"}`}>
+              {f === "PIX" ? "Pix" : "Boleto"}
+            </button>
+          ))}
+        </div>
+        <button type="button" disabled={linha.saldo_cents <= 0 || ocupado} onClick={() => solicitar.mutate(false)}
+          className="rounded-lg border border-bronze px-4 py-2 text-sm font-semibold text-bronze disabled:opacity-50">
+          {linha.intencao?.invoice_url ? "Solicitar de novo (reaproveita)" : "Solicitar cobrança simulada"}
+        </button>
+        {!linha.intencao && (
+          <button type="button" disabled={ocupado} onClick={() => solicitar.mutate(true)}
+            className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-ledger-muted">
+            Simular resposta perdida
+          </button>
+        )}
+        {estado === "desconhecida" && (
+          <button type="button" disabled={ocupado} onClick={() => recuperarM.mutate()}
+            className="rounded-lg border border-danger px-4 py-2 text-sm font-semibold text-danger">
+            Consultar provedor e recuperar
+          </button>
+        )}
+        {linha.cobranca?.external_id && (
+          <>
+            <button type="button" disabled={ocupado} onClick={() => eventoM.mutate(false)}
+              className="rounded-lg border border-line px-3 py-2 text-xs font-semibold">Simular recebimento (evento)</button>
+            <button type="button" disabled={ocupado} onClick={() => eventoM.mutate(true)}
+              className="rounded-lg border border-line px-3 py-2 text-xs font-semibold">Evento repetido</button>
+          </>
+        )}
+      </div>
+      <p className="mt-3 text-xs text-ledger-muted">Gerar link não liquida a parcela, não comprova venda e não emite nota fiscal.</p>
+      {ultimo && <p className="mt-3 text-sm font-medium" data-testid="ultimo-resultado">{ultimo}</p>}
+
+      <button type="button" className="mt-5 text-sm text-ledger-muted underline" onClick={onFechar}>Fechar detalhe</button>
+    </Panel>
+  );
+}
 
 const ABAS = [
   { id: "recebiveis", label: "Contas a receber" },
@@ -31,27 +128,14 @@ function Avisos() {
 export function AsaasReceber() {
   const [aba, setAba] = React.useState<Aba>("recebiveis");
   const [parcela, setParcela] = React.useState<LinhaReceber | null>(null);
-  const qc = useQueryClient();
 
   const painel = useQuery({
     queryKey: ["asaas", "painel"],
-    queryFn: () => carregarPainel(50, 0),
+    queryFn: () => carregarPainel(200, 0),
     retry: false,
   });
 
-  const preparar = useMutation({
-    mutationFn: (dados: { conta: string; linha: LinhaReceber; forma: string }) =>
-      prepararCobranca({
-        account_id: dados.conta,
-        installment_id: dados.linha.installment_id,
-        billing_type: dados.forma,
-      }),
-    onSuccess: (r) => {
-      toast.success(r.aviso ?? "Cobrança preparada. Nenhuma baixa foi criada.");
-      void qc.invalidateQueries({ queryKey: ["asaas", "painel"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+
 
   if (painel.error instanceof PreparacaoNaoAplicada) {
     return (
@@ -141,23 +225,7 @@ export function AsaasReceber() {
         </Panel>
       )}
 
-      {aba === "importacao" && (
-        <Panel title="Prévia de importação">
-          <p className="text-sm text-ledger-muted">
-            Selecionar conta, período e consultar pelo adaptador. A prévia classifica cada recebível
-            (histórico informativo, saldo devedor, pagamento já refletido na abertura, novo recebimento) e
-            não cria título, parcela nem baixa. A efetivação depende de aprovação registrada pelo servidor.
-          </p>
-          <p className="mt-3 text-sm text-ledger-muted">
-            Conta disponível: <strong>{conta ? `${conta.nome} (${conta.ambiente})` : "nenhuma conta preparada"}</strong>.
-            Enquanto o Asaas não estiver conectado, a consulta usa o provedor simulado.
-          </p>
-          <p className="mt-3 text-sm font-semibold text-warning">
-            Revisão de clientes e duplicidades: correspondências por documento ambíguo ficam pendentes de decisão
-            humana. Pessoas nunca são vinculadas por nome.
-          </p>
-        </Panel>
-      )}
+      {aba === "importacao" && <AsaasImportacao contaId={conta?.id} />}
 
       {aba === "ocorrencias" && dados && (
         <Panel title="Ocorrências recebidas do provedor">
@@ -197,45 +265,12 @@ export function AsaasReceber() {
         </Panel>
       )}
 
-      {parcela && (
-        <Panel title="Detalhe da parcela e vínculo Asaas">
-          <dl className="grid gap-3 text-sm sm:grid-cols-2">
-            <div><dt className="text-ledger-muted">Devedor</dt><dd className="font-medium">{parcela.pessoa ?? "—"}</dd></div>
-            <div><dt className="text-ledger-muted">Saldo no servidor</dt><dd className="font-medium tabular-nums">{formatBRLFromCents(parcela.saldo_cents)}</dd></div>
-            <div><dt className="text-ledger-muted">Cobrança vinculada</dt><dd className="font-medium">{parcela.cobranca?.external_id ?? "nenhuma"}</dd></div>
-            <div><dt className="text-ledger-muted">Situação</dt><dd className="font-medium">{situacaoCobranca(parcela).rotulo}</dd></div>
-          </dl>
-
-          {parcela.intencao?.invoice_url ? (
-            <div className="mt-5 rounded-lg border border-warning px-4 py-3">
-              <p className="text-sm font-semibold text-warning">{AVISO_SIMULACAO}</p>
-              <a href={parcela.intencao.invoice_url} className="mt-2 inline-block text-sm font-semibold text-bronze underline">
-                Abrir demonstração local
-              </a>
-              <button type="button" disabled className="ml-4 cursor-not-allowed text-sm text-ledger-muted" title="Disponível somente quando o Asaas estiver conectado">
-                Copiar link real (indisponível)
-              </button>
-            </div>
-          ) : (
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                disabled={!conta || parcela.saldo_cents <= 0 || preparar.isPending}
-                onClick={() => conta && preparar.mutate({ conta: conta.id, linha: parcela, forma: "PIX" })}
-                className="rounded-lg border border-bronze px-4 py-2 text-sm font-semibold text-bronze disabled:opacity-50"
-              >
-                Solicitar cobrança simulada (PIX)
-              </button>
-              <span className="text-xs text-ledger-muted">
-                Gerar link não liquida a parcela, não comprova venda e não emite nota fiscal.
-              </span>
-            </div>
-          )}
-
-          <button type="button" className="mt-5 text-sm text-ledger-muted underline" onClick={() => setParcela(null)}>
-            Fechar detalhe
-          </button>
-        </Panel>
+      {parcela && conta && (
+        <DetalheParcela
+          conta={conta.id}
+          linha={dados?.itens.find((i) => i.installment_id === parcela.installment_id) ?? parcela}
+          onFechar={() => setParcela(null)}
+        />
       )}
     </div>
   );

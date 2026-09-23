@@ -64,6 +64,7 @@ done
 # Mudanças preparadas e ainda NÃO aplicadas ao banco compartilhado.
 pendentes=0
 for f in "$RAIZ"/db/pendentes/*.sql; do
+  case "$f" in *proposta*) echo "ignorado (proposta, não aplicar): $(basename "$f")"; continue;; esac
   [ -e "$f" ] || continue
   if ! psql "$ISO" -v ON_ERROR_STOP=1 -q -f "$f" >"$BASE/ultima.log" 2>&1; then
     echo "FALHOU (pendente): $(basename "$f")"

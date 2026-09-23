@@ -226,3 +226,32 @@ layout — nenhum domínio do Asaas.
 ### Continua pendente
 
 Regra contábil do recebimento (baixa, tarifa, juros/multa, estorno, chargeback), homologação em sandbox com credencial, endpoint de webhook com validação do token do provedor, confirmação do host do link no sandbox, aplicação dos pendentes ao banco compartilhado e publicação — nada disso foi feito nesta rodada.
+
+
+---
+
+## Fechamento final da preparação (23/09/2026)
+
+### Problemas reproduzidos e correções
+
+Foram reproduzidos: conta aceita da tela em cobrança/link; configuração global ambígua; fluxo comum de importação desligado da tela; cursor calculado após filtro local; ausência de coordenação distribuída do cliente; classificação terminal incorreta para credencial/limite/resultado incerto; painel e cache sem conta; rotinas legadas existentes entre pendentes; webhook incompleto.
+
+Correções finais: conta derivada de intenção, cobrança ou lote; configuração por conta com segredo apenas por referência `ASAAS_SANDBOX_*`, UUID único do servidor e gate adicional `ASAAS_EGRESS_ENABLED=1`; estados canônicos e alteração controlada; importação comum server-side; cursor bruto persistido em `asaas_import_pages`; lease por conta+pessoa; recuperação por referência antes de recriar cliente; retries persistidos; link resolvido pelo identificador interno; painel/cache filtrados por conta; webhook permanece inativo; pendentes aplicados numa transação única pelo roteiro isolado. Produção permanece impossível de ativar.
+
+### Provas finais efetivamente executadas
+
+- Reconstrução do zero: 164 migrações e 7 pendentes dentro de um pacote transacional; a proposta fiscal `06` continuou ignorada.
+- `bun test ./tests/isolado`: **130 testes, 638 verificações, 0 falhas**, seis arquivos.
+- `bun test ./tests/asaas/transporte-http.test.ts`: **14 testes, 53 verificações, 0 falhas**, somente `fetch` falso ou bloqueado.
+- `bunx tsgo --noEmit`: sem erro.
+- Paginação: página bruta de 100 itens, zero mantidos após filtro e `hasMore=true` avançou para offset 100; retomada consumiu o item 101 sem repetir; 1.005 cobranças percorreram 11 páginas, sem omissão ou ciclo.
+- Concorrência: duas instâncias cobrando duas parcelas da mesma pessoa produziram **um cliente externo e duas cobranças**, sem seleção arbitrária. Resposta perdida na criação do cliente foi retomada por consulta à referência, sem segunda criação.
+- Segurança: `asaas_exec_*` está executável somente por `service_role` (e, para a auxiliar privada, apenas pelo proprietário); visitante/autenticado não recebeu execução; as três assinaturas legadas inseguras não existem. Interrupção simulada depois de criar/conceder uma rotina terminou em `ROLLBACK`; a rotina não permaneceu (`count=0`).
+- Navegador isolado em 1280 px e 390 px: Financeiro e Diretoria abriram o painel; consultora e usuário desativado viram acesso recusado. Usuário sem pessoa abriu apenas a leitura financeira permitida pelo papel; nenhuma ação de importação/cobrança foi executada nesse perfil. Capturas e roteiro estão no pacote.
+- Hosts observados pelo navegador: `127.0.0.1`, fontes Google/CDN e analytics já presentes no layout. **Zero requisições** para `api-sandbox.asaas.com`, `api.asaas.com`, `sandbox.asaas.com` ou `www.asaas.com`. O transporte padrão também falhou antes do acesso.
+
+### Limites preservados e pendências reais
+
+Nenhum evento gera liquidação, alocação ou razão. Link não cria obrigação, venda ou documento fiscal. Recebível manual aprovado independe de maleta; recebível futuro de acerto continua bloqueado até aprovação formal. Retorno, perda, garantia, defeito e quantidade a explicar não viram venda. O “aproximadamente um terço” permanece apenas informação operacional, sem percentual fiscal executável.
+
+Para receber uma credencial de sandbox ainda faltam decisão/autorização operacional, cadastro do segredo no servidor, UUID da única conta conectada, confirmação do host de fatura, homologação com dados sintéticos e liberação deliberada do gate de saída. Webhook exige segredo próprio, endpoint público e homologação; o manipulador permanece bloqueado. Banco compartilhado, site publicado, fiscal, acerto, liquidações e razão não foram alterados.

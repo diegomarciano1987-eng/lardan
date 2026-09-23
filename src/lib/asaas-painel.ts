@@ -104,16 +104,16 @@ async function chamar<T>(fn: string, args: Record<string, unknown> = {}): Promis
   return data as T;
 }
 
-export const carregarParcelas = (f: { busca?: string; situacao?: SituacaoFiltro; cursor?: Cursor; limite?: number }) =>
+export const carregarParcelas = (f: { accountId?: string; busca?: string; situacao?: SituacaoFiltro; cursor?: Cursor; limite?: number }) =>
   chamar<PaginaDe<LinhaReceber>>("asaas_receber_parcelas", {
-    _filtros: { busca: f.busca || null, situacao: f.situacao || null, cursor: f.cursor ?? null, limite: f.limite ?? 25 },
+    _filtros: { account_id: f.accountId || null, busca: f.busca || null, situacao: f.situacao || null, cursor: f.cursor ?? null, limite: f.limite ?? 25 },
   });
 
-export const carregarFila = (cursor: Cursor = null) =>
-  chamar<PaginaDe<FilaErro>>("asaas_receber_fila", { _filtros: { cursor, limite: 25 } });
+export const carregarFila = (accountId?: string, cursor: Cursor = null) =>
+  chamar<PaginaDe<FilaErro>>("asaas_receber_fila", { _filtros: { account_id: accountId || null, cursor, limite: 25 } });
 
-export const carregarOcorrencias = (cursor: Cursor = null) =>
-  chamar<PaginaDe<Ocorrencia>>("asaas_receber_ocorrencias", { _filtros: { cursor, limite: 25 } });
+export const carregarOcorrencias = (accountId?: string, cursor: Cursor = null) =>
+  chamar<PaginaDe<Ocorrencia>>("asaas_receber_ocorrencias", { _filtros: { account_id: accountId || null, cursor, limite: 25 } });
 
 export const carregarContas = () => chamar<ContaAsaas[]>("asaas_receber_contas");
 

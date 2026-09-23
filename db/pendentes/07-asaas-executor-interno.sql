@@ -629,6 +629,7 @@ RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO 'publi
 DECLARE lim integer := least(greatest(coalesce((_filtros->>'limite')::int,25),1),100);
         busca text := nullif(btrim(coalesce(_filtros->>'busca','')),'');
         sit text := nullif(_filtros->>'situacao','');
+        aid uuid := nullif(_filtros->>'account_id','')::uuid;
         cv date := nullif(_filtros#>>'{cursor,v}','')::date;
         cid uuid := nullif(_filtros#>>'{cursor,id}','')::uuid;
         itens jsonb; prox jsonb; total bigint;
@@ -657,6 +658,10 @@ BEGIN
       LEFT JOIN LATERAL (SELECT * FROM public.asaas_charge_intents x WHERE x.installment_id = i.id
                           ORDER BY x.created_at DESC, x.id LIMIT 1) ci ON true
      WHERE t.direction = 'receivable' AND t.status <> 'cancelado'
+       AND (aid IS NULL OR ch.account_id = aid OR ci.account_id = aid OR
+            (ch.id IS NULL AND ci.id IS NULL AND EXISTS (
+              SELECT 1 FROM public.asaas_accounts aa
+               WHERE aa.id=aid AND aa.owner_entity_id=t.business_entity_id AND aa.billing_default)))
        AND (busca IS NULL OR pa.display_name ILIKE '%' || busca || '%'
             OR t.numero::text ILIKE '%' || busca || '%' OR t.descricao ILIKE '%' || busca || '%')
        AND (sit IS NULL
@@ -701,6 +706,7 @@ GRANT EXECUTE ON FUNCTION public.asaas_receber_parcelas(jsonb) TO authenticated;
 CREATE OR REPLACE FUNCTION public.asaas_receber_fila(_filtros jsonb DEFAULT '{}'::jsonb)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO 'public' AS $fn$
 DECLARE lim integer := least(greatest(coalesce((_filtros->>'limite')::int,25),1),100);
+        aid uuid := nullif(_filtros->>'account_id','')::uuid;
         ct timestamptz := nullif(_filtros#>>'{cursor,t}','')::timestamptz;
         cid uuid := nullif(_filtros#>>'{cursor,id}','')::uuid;
         itens jsonb; prox jsonb;
@@ -711,6 +717,7 @@ BEGIN
   WITH pagina AS (
     SELECT ci.* FROM public.asaas_charge_intents ci
      WHERE ci.state IN ('desconhecida','rejeitada','conciliacao','processando')
+       AND (aid IS NULL OR ci.account_id=aid)
        AND (ct IS NULL OR (ci.created_at, ci.id) < (ct, cid))
      ORDER BY ci.created_at DESC, ci.id DESC LIMIT lim + 1)
   SELECT coalesce((SELECT jsonb_agg(jsonb_build_object('id', p.id, 'state', p.state, 'erro', p.last_error,
@@ -731,6 +738,7 @@ GRANT EXECUTE ON FUNCTION public.asaas_receber_fila(jsonb) TO authenticated;
 CREATE OR REPLACE FUNCTION public.asaas_receber_ocorrencias(_filtros jsonb DEFAULT '{}'::jsonb)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO 'public' AS $fn$
 DECLARE lim integer := least(greatest(coalesce((_filtros->>'limite')::int,25),1),100);
+        aid uuid := nullif(_filtros->>'account_id','')::uuid;
         ct timestamptz := nullif(_filtros#>>'{cursor,t}','')::timestamptz;
         cid uuid := nullif(_filtros#>>'{cursor,id}','')::uuid;
         itens jsonb; prox jsonb;
@@ -740,7 +748,8 @@ BEGIN
   END IF;
   WITH pagina AS (
     SELECT ev.* FROM public.asaas_events ev
-     WHERE ev.status = 'na_fila' AND (ct IS NULL OR (ev.event_at, ev.id) < (ct, cid))
+     WHERE ev.status = 'na_fila' AND (aid IS NULL OR ev.account_id=aid)
+       AND (ct IS NULL OR (ev.event_at, ev.id) < (ct, cid))
      ORDER BY ev.event_at DESC, ev.id DESC LIMIT lim + 1)
   SELECT coalesce((SELECT jsonb_agg(jsonb_build_object('id', p.id, 'event', p.event, 'status', p.status,
             'classificacao', p.classification, 'cobranca', p.charge_external_id,

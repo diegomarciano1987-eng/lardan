@@ -3,6 +3,7 @@
  * A configuração é resolvida SOMENTE por conta em `configuracao.server.ts`;
  * não existe configuração global concorrente.
  */
+type Env = Record<string, string | undefined>;
 import { type Armazenamento, type EstadoSimulador, SimuladorAsaas } from "./simulador";
 
 export * from "./contrato";

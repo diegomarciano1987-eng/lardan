@@ -14,13 +14,18 @@ import type { BancoAsaas } from "./banco";
 import { ROTINAS, ROTINAS_EXECUTOR } from "./banco";
 import {
   FalhaAntesDoEnvio,
+  CredencialRecusada,
+  LimiteDeRequisicoes,
+  ConsultaIndisponivel,
+  ReferenciaAmbigua,
   RecusadoPeloProvedor,
   type FormaPagamento,
   type TransporteAsaas,
 } from "./contrato";
 
 export interface PedidoCobranca {
-  accountId: string;
+  /** legado aceito em chamadas internas/testes, mas deliberadamente ignorado */
+  accountId?: string;
   installmentId: string;
   billingType: FormaPagamento;
   dueDate?: string | null;
@@ -56,7 +61,6 @@ export interface Intencao {
 export const prepararIntencao = (banco: BancoAsaas, p: PedidoCobranca) =>
   banco.rpc<Intencao>(ROTINAS.cobrancaPreparar, {
     _payload: {
-      account_id: p.accountId,
       installment_id: p.installmentId,
       billing_type: p.billingType,
       due_date: p.dueDate ?? null,
@@ -97,6 +101,14 @@ interface Reserva {
   external_id: string | null;
   invoice_url?: string | null;
   charge_id?: string | null;
+}
+
+interface ReservaCliente {
+  reservada: boolean;
+  existente?: boolean;
+  external_id?: string;
+  revisao?: boolean;
+  motivo?: string;
 }
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e)).slice(0, 400);
@@ -141,6 +153,14 @@ export async function executarIntencao(
       _actor: o.actor,
       _payload: payload,
     });
+  const adiar = (classe: string, e: Error, repetirEm?: number | null, codigos: string[] = []) =>
+    servico.rpc<ResultadoCobranca>(ROTINAS_EXECUTOR.adiar, {
+      _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor,
+      _classe: classe, _codigos: codigos, _repetir_em: repetirEm ?? 300, _erro: msg(e),
+    });
+  const revisar = (e: Error) => servico.rpc<ResultadoCobranca>(ROTINAS_EXECUTOR.revisao, {
+    _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor, _motivo: msg(e),
+  });
 
   if (transporte.modo !== r.modo_execucao) {
     const erro = `Servidor em modo ${transporte.modo}, conta em modo ${r.modo_execucao}: nada foi enviado.`;
@@ -148,11 +168,34 @@ export async function executarIntencao(
   }
 
   if (r.modo === "consultar") {
+    // Se a resposta perdida ocorreu ao criar o cliente, primeiro recupere o
+    // cliente pela referência estável. Não consulte nem recrie a cobrança.
+    if (!r.customer_external_id) {
+      try {
+        const c = await transporte.localizarClientePorReferencia(refCliente(r.party_id));
+        if (!c) return adiar("consulta_indisponivel", new ConsultaIndisponivel("Cliente externo ainda não foi localizado pela referência."));
+        await servico.rpc(ROTINAS_EXECUTOR.cliente, {
+          _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor,
+          _external_id: c.id, _nome: c.name,
+        });
+        await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, {
+          _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor,
+          _state: "concluida", _erro: null,
+        });
+        // O cliente foi recuperado; criar a cobrança ainda é seguro porque a
+        // primeira operação externa parou antes desse POST.
+        return executarIntencaoAposCliente(servico, transporte, r, c.id, worker, o, gravar, adiar);
+      } catch (e) {
+        if (e instanceof ReferenciaAmbigua) return revisar(e);
+        return adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
+      }
+    }
     let achada;
     try {
       achada = await transporte.consultarCobrancaPorReferencia(r.internal_reference);
     } catch (e) {
-      return gravar({ resultado: "desconhecida", erro: `Consulta ao provedor falhou: ${msg(e)}` });
+      if (e instanceof ReferenciaAmbigua) return revisar(e);
+      return adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
     }
     if (!achada) {
       return gravar({ resultado: "rejeitada", fase: "sem_registro_apos_consulta", erro: "Provedor consultado: nenhuma cobrança com esta referência. Nova solicitação é permitida." });
@@ -164,11 +207,26 @@ export async function executarIntencao(
   // ---- cliente: localizar pela referência, criar se preciso, persistir já
   let cliente = r.customer_external_id;
   if (!cliente) {
+    const reservaCliente = await servico.rpc<ReservaCliente>(ROTINAS_EXECUTOR.clienteReservar, {
+      _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor,
+      _lease: o.leaseSegundos ?? 120,
+    });
+    if (reservaCliente.revisao) return revisar(new Error(reservaCliente.motivo ?? "Cliente externo ambíguo."));
+    if (reservaCliente.external_id) cliente = reservaCliente.external_id;
+    if (!cliente && !reservaCliente.reservada) {
+      return { id: intencaoId, state: "processando", reaproveitada: true, aviso: "Outra execução está preparando o cliente desta pessoa." };
+    }
+  }
+  if (!cliente) {
     try {
       const ref = refCliente(r.party_id);
-      const c =
-        (await transporte.localizarClientePorReferencia(ref)) ??
-        (await transporte.prepararCliente({ name: r.devedor.nome ?? "Cliente", cpfCnpj: r.devedor.doc, ref }));
+      let c = await transporte.localizarClientePorReferencia(ref);
+      if (!c) {
+        await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, {
+          _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor, _state: "criar", _erro: null,
+        });
+        c = await transporte.prepararCliente({ name: r.devedor.nome ?? "Cliente", cpfCnpj: r.devedor.doc, ref });
+      }
       await servico.rpc(ROTINAS_EXECUTOR.cliente, {
         _intent: intencaoId,
         _worker: worker,
@@ -177,15 +235,40 @@ export async function executarIntencao(
         _external_id: c.id,
         _nome: c.name,
       });
+      await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, {
+        _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor, _state: "concluida", _erro: null,
+      });
       cliente = c.id;
     } catch (e) {
-      // nenhuma cobrança foi enviada: rejeição segura; a próxima tentativa
-      // localiza o cliente pela referência e não duplica
+      if (e instanceof ReferenciaAmbigua) return revisar(e);
+      if (e instanceof CredencialRecusada) return adiar("credencial", e, 3600, e.codigos);
+      if (e instanceof LimiteDeRequisicoes) return adiar("limite", e, e.repetirEmSegundos, e.codigos);
+      if (e instanceof ConsultaIndisponivel) return adiar("consulta_indisponivel", e);
+      if (!(e instanceof FalhaAntesDoEnvio) && !(e instanceof RecusadoPeloProvedor)) {
+        await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, {
+          _intent: intencaoId, _worker: worker, _tentativa: r.tentativa, _actor: o.actor,
+          _state: "desconhecida", _erro: msg(e),
+        }).catch(() => undefined);
+        return gravar({ resultado: "desconhecida", erro: `Cliente externo: ${msg(e)}` });
+      }
       return gravar({ resultado: "rejeitada", fase: "cliente", erro: `Cliente externo: ${msg(e)}` });
     }
   }
 
   // ---- cobrança
+  return executarIntencaoAposCliente(servico, transporte, r, cliente, worker, o, gravar, adiar);
+}
+
+async function executarIntencaoAposCliente(
+  servico: BancoAsaas,
+  transporte: TransporteAsaas,
+  r: Reserva,
+  cliente: string,
+  worker: string,
+  o: OpcoesExecutor,
+  gravar: (payload: Record<string, unknown>) => Promise<ResultadoCobranca>,
+  adiar: (classe: string, e: Error, repetirEm?: number | null, codigos?: string[]) => Promise<ResultadoCobranca>,
+): Promise<ResultadoCobranca> {
   let criada;
   try {
     criada = await transporte.criarCobranca({
@@ -198,6 +281,8 @@ export async function executarIntencao(
     });
   } catch (e) {
     if (e instanceof FalhaAntesDoEnvio) return gravar({ resultado: "rejeitada", fase: "antes_do_provedor", erro: msg(e) });
+    if (e instanceof CredencialRecusada) return adiar("credencial", e, 3600, e.codigos);
+    if (e instanceof LimiteDeRequisicoes) return adiar("limite", e, e.repetirEmSegundos, e.codigos);
     if (e instanceof RecusadoPeloProvedor) return gravar({ resultado: "rejeitada", fase: "provedor_recusou", erro: msg(e) });
     // qualquer outra coisa depois do envio: pode ter criado. Nunca reenviar sem consultar.
     return gravar({ resultado: "desconhecida", erro: msg(e) });
@@ -257,7 +342,7 @@ export async function gerarLinkDeCobranca(
     return { state: "criada", invoice_url: url, external_id: it.external_id ?? null, charge_id: it.charge_id ?? null, reaproveitada: true, aviso: it.aviso ?? "" };
   }
   if (!it.id) throw new Error("Intenção não registrada.");
-  if (it.state && it.state !== "preparada") {
+  if (it.state && !["preparada", "desconhecida"].includes(it.state)) {
     return { id: it.id, state: it.state, invoice_url: it.invoice_url ?? null, external_id: it.external_id ?? null, reaproveitada: true };
   }
   return executarIntencao(servico, transporte, it.id, o);

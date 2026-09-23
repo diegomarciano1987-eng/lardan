@@ -41,8 +41,10 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
 
   const solicitar = useMutation({
     mutationFn: async (perderResposta: boolean): Promise<Resultado> => {
-      const d = { accountId: conta.id, installmentId: linha.installment_id, billingType: forma };
-      return perderResposta ? perder({ data: d }) : gerar({ data: d });
+      const d = { installmentId: linha.installment_id, billingType: forma };
+      return perderResposta
+        ? perder({ data: { ...d, accountId: conta.id } })
+        : gerar({ data: d });
     },
     onSuccess: (r) => { setUltimo(descrever(r)); atualizar(); },
     onError: falhou,
@@ -53,7 +55,7 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
     onError: falhou,
   });
   const linkM = useMutation({
-    mutationFn: () => obterLink({ data: { chargeId: linha.cobranca!.id, accountId: conta.id } }),
+    mutationFn: () => obterLink({ data: { chargeId: linha.cobranca!.id } }),
     onSuccess: (r) => { setUrlObtida(r.invoice_url); setUltimo(r.consultado ? "Link consultado no provedor pelo identificador; nenhuma cobrança criada." : "Link já estava guardado."); atualizar(); },
     onError: falhou,
   });
@@ -163,8 +165,8 @@ const SITUACOES: { value: SituacaoFiltro; label: string }[] = [
 function Avisos({ conta, integracao }: { conta: ContaAsaas | undefined; integracao: { disponivel: boolean; motivo?: string } | undefined }) {
   return (
     <div className="flex flex-wrap gap-2">
-      <StatusBadge tone="danger">Asaas não conectado</StatusBadge>
-      {conta && <StatusBadge tone="warning">{conta.modo === "simulado" ? "Modo de simulação" : `Conectado · ${conta.ambiente}`}</StatusBadge>}
+      <StatusBadge tone="danger">Saída externa desligada</StatusBadge>
+      {conta && <StatusBadge tone="warning">{({ simulacao_isolada: "Simulação isolada", preparado_rede_bloqueada: "Preparado, rede bloqueada", sandbox_configurado: "Sandbox configurado", producao_configurada: "Produção configurada, inativa", configuracao_incoerente: "Configuração incoerente", conta_suspensa: "Conta suspensa" } as Record<string,string>)[conta.situacao] ?? conta.estado}</StatusBadge>}
       {integracao && !integracao.disponivel && <StatusBadge tone="danger">Integração indisponível: {integracao.motivo}</StatusBadge>}
     </div>
   );
@@ -192,6 +194,7 @@ export function AsaasReceber() {
   const [escolhida, setEscolhida] = React.useState<LinhaReceber | null>(null);
   const [busca, setBusca] = React.useState("");
   const [situacao, setSituacao] = React.useState<SituacaoFiltro>("");
+  const [contaSelecionada, setContaSelecionada] = React.useState<string>("");
   const termo = useDebounced(busca);
   const estado = useServerFn(estadoIntegracao);
 
@@ -235,7 +238,10 @@ export function AsaasReceber() {
     );
   }
 
-  const conta = contas.data?.[0];
+  React.useEffect(() => {
+    if (!contaSelecionada && contas.data?.[0]) setContaSelecionada(contas.data[0].id);
+  }, [contaSelecionada, contas.data]);
+  const conta = contas.data?.find((c) => c.id === contaSelecionada) ?? contas.data?.[0];
   const linhas = parcelas.data?.pages.flatMap((p) => p.itens) ?? [];
   const total = parcelas.data?.pages[0]?.total ?? 0;
   const demo = Boolean(integracao.data && integracao.data.disponivel && integracao.data.demo);
@@ -245,6 +251,14 @@ export function AsaasReceber() {
   return (
     <div className="space-y-6">
       <Avisos conta={conta} integracao={integracao.data} />
+      {(contas.data?.length ?? 0) > 1 && (
+        <label className="block max-w-md text-sm font-medium">Conta Asaas
+          <select value={conta?.id ?? ""} onChange={(e) => { setContaSelecionada(e.target.value); setEscolhida(null); }}
+            className="mt-1 w-full rounded-lg border border-line bg-transparent px-3 py-2">
+            {contas.data!.map((c) => <option key={c.id} value={c.id}>{c.nome} — {c.situacao}</option>)}
+          </select>
+        </label>
+      )}
 
       <nav className="flex flex-wrap gap-2" aria-label="Seções de recebíveis Asaas">
         {ABAS.map((a) => (
@@ -368,7 +382,10 @@ export function AsaasReceber() {
         </Panel>
       )}
 
-      {parcela && conta && <DetalheParcela conta={conta} linha={parcela} demo={demo} onFechar={() => setEscolhida(null)} />}
+      {parcela && (() => {
+        const real = contas.data?.find((c) => c.id === parcela.account_id) ?? conta;
+        return real ? <DetalheParcela conta={real} linha={parcela} demo={real.modo === "simulado" && demo} onFechar={() => setEscolhida(null)} /> : null;
+      })()}
     </div>
   );
 }

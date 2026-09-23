@@ -198,6 +198,7 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     const data = Array.isArray(corpo?.["data"]) ? (corpo!["data"] as Json[]) : [];
     return {
       itens: data.map(tr),
+      quantidadeBruta: data.length,
       offset: f.offset,
       limit: f.limit,
       hasMore: Boolean(corpo?.["hasMore"]),

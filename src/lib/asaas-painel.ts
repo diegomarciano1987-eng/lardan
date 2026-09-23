@@ -24,6 +24,7 @@ export interface IntencaoResumo {
 
 export interface LinhaReceber {
   installment_id: string;
+  account_id: string | null;
   title_id: string;
   numero: string | null;
   descricao: string | null;
@@ -42,6 +43,8 @@ export interface ContaAsaas {
   modo: "simulado" | "conectado";
   ambiente: "sandbox" | "producao" | null;
   estado: string;
+  situacao: string;
+  executavel: boolean;
   conectada: boolean;
   empresa: string | null;
 }

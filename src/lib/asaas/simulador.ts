@@ -181,7 +181,7 @@ export class SimuladorAsaas implements TransporteAsaas {
   async listarClientes(f: { limit: number; offset: number }): Promise<Pagina<ClienteExterno>> {
     const todos = [...this.clientes.values()].sort((a, b) => a.id.localeCompare(b.id));
     const itens = todos.slice(f.offset, f.offset + f.limit);
-    return { itens, offset: f.offset, limit: f.limit, hasMore: f.offset + itens.length < todos.length, total: todos.length };
+    return { itens, quantidadeBruta: itens.length, offset: f.offset, limit: f.limit, hasMore: f.offset + itens.length < todos.length, total: todos.length, proximoOffset: f.offset + itens.length };
   }
 
   async consultarCliente(id: string) {
@@ -222,7 +222,7 @@ export class SimuladorAsaas implements TransporteAsaas {
       return Boolean(f.incluirEmAbertoAnteriores) && !depoisDoInicio && emAberto(c);
     });
     const itens = todas.slice(f.offset, f.offset + f.limit).map((c) => this.publica(c));
-    return { itens, offset: f.offset, limit: f.limit, hasMore: f.offset + itens.length < todas.length, total: todas.length };
+    return { itens, quantidadeBruta: itens.length, offset: f.offset, limit: f.limit, hasMore: f.offset + itens.length < todas.length, total: todas.length, proximoOffset: f.offset + itens.length };
   }
 
   async consultarCobranca(id: string) {

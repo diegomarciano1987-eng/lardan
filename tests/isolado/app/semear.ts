@@ -11,11 +11,14 @@ async function main() {
     diretoria: await criarConta({ nome: "diretoria", papeis: ["diretoria"], comParty: true }),
     financeiro: await criarConta({ nome: "financeiro", papeis: ["financeiro"], comParty: true }),
     consultora: await criarConta({ nome: "consultora", papeis: ["consultora"], comParty: true }),
+    desativado: await criarConta({ nome: "desativado", papeis: ["financeiro"], comParty: true }),
+    sempessoa: await criarConta({ nome: "sempessoa", papeis: ["financeiro"], comParty: false }),
   };
   for (const [nome, c] of Object.entries(contas)) {
     await adm.unsafe(`update auth.users set email = $2 where id = $1`, [c.uid, `demo.${nome}@lardan.test`]);
     await adm.unsafe(`update public.profiles set email = $2, full_name = $3 where id = $1`, [c.uid, `demo.${nome}@lardan.test`, `Demo ${nome}`]);
   }
+  await adm.unsafe(`update public.profiles set active=false where id=$1`, [contas.desativado.uid]);
   const [e] = (await adm.unsafe(
     `insert into public.business_entities (legal_name, trade_name) values ('ISO Empresa Demonstração','ISO Demo') returning id`,
   )) as { id: string }[];

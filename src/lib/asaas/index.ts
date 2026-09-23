@@ -15,7 +15,7 @@ export type { BancoAsaas } from "./banco";
 
 export type ConfigAsaas =
   | { disponivel: true; modo: "simulado"; ambiente: null; demoIsolado: boolean }
-  | { disponivel: true; modo: "conectado"; ambiente: AmbienteProvedor; demoIsolado: false }
+  | { disponivel: true; modo: "conectado"; ambiente: AmbienteProvedor; demoIsolado: false; redeHabilitada: boolean; accountId: string }
   | { disponivel: false; motivo: string };
 
 type Env = Record<string, string | undefined>;
@@ -37,7 +37,10 @@ export function lerConfiguracao(env: Env): ConfigAsaas {
     if (!chave) return { disponivel: false, motivo: "Credencial do servidor ausente." };
     const prefixo = amb === "sandbox" ? "$aact_hmlg_" : "$aact_prod_";
     if (!chave.startsWith(prefixo)) return { disponivel: false, motivo: "Credencial não pertence ao ambiente configurado." };
-    return { disponivel: true, modo: "conectado", ambiente: amb, demoIsolado: false };
+    const accountId = env["ASAAS_CONNECTED_ACCOUNT_ID"];
+    if (!accountId) return { disponivel: false, motivo: "UUID da única conta conectada não foi configurado." };
+    return { disponivel: true, modo: "conectado", ambiente: amb, demoIsolado: false,
+      redeHabilitada: env["ASAAS_EGRESS_ENABLED"] === "1", accountId };
   }
   return { disponivel: false, motivo: "Modo de execução do Asaas inválido." };
 }
@@ -83,6 +86,8 @@ export async function simuladorDaConta(accountId: string): Promise<SimuladorAsaa
 export async function criarTransporte(accountId: string, config: ConfigAsaas = configuracaoDoServidor()): Promise<TransporteAsaas> {
   if (!config.disponivel) throw new IntegracaoIndisponivel(config.motivo);
   if (config.modo === "simulado") return simuladorDaConta(accountId);
+  if (config.accountId !== accountId) throw new IntegracaoIndisponivel("A conta conectada deste servidor não corresponde ao registro solicitado.");
+  if (!config.redeHabilitada) throw new IntegracaoIndisponivel("Conta preparada, mas a saída externa permanece bloqueada.");
   const { TransporteHttpAsaas } = await import("./transporte-http.server");
   const chave = (globalThis as { process?: { env?: Env } }).process?.env?.["ASAAS_API_KEY"] ?? "";
   // rede bloqueada nesta rodada: fetch padrão recusa antes de sair

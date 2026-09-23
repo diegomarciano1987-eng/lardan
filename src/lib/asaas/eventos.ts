@@ -13,6 +13,7 @@
 import type { BancoAsaas } from "./banco";
 import { ROTINAS, ROTINAS_EXECUTOR } from "./banco";
 import type { EventoExterno, TransporteAsaas } from "./contrato";
+import { timingSafeEqual } from "node:crypto";
 
 const TAMANHO_MAXIMO = 256 * 1024;
 
@@ -34,13 +35,20 @@ export function validarEnvelope(e: {
   corpo: unknown;
 }) {
   if (!e.accountId) throw new Error("Evento sem conta.");
-  if (!e.tokenEsperado || e.token !== e.tokenEsperado) throw new Error("Evento não autenticado.");
+  const recebido = Buffer.from(e.token ?? "", "utf8");
+  const esperado = Buffer.from(e.tokenEsperado ?? "", "utf8");
+  if (!e.tokenEsperado || recebido.length !== esperado.length || !timingSafeEqual(recebido, esperado)) throw new Error("Evento não autenticado.");
   const texto = JSON.stringify(e.corpo ?? null);
   if (texto.length > TAMANHO_MAXIMO) throw new Error("Mensagem acima do tamanho aceito.");
   const c = e.corpo as Record<string, unknown> | null;
   if (!c || typeof c !== "object") throw new Error("Mensagem sem estrutura.");
   if (!c["id"] || !c["event"]) throw new Error("Mensagem sem identificador ou tipo.");
   return true;
+}
+
+/** Contrato inativo. Nenhuma rota pública chama este manipulador nesta preparação. */
+export async function manipularWebhookInativo(): Promise<never> {
+  throw new Error("Webhook Asaas não habilitado nesta preparação.");
 }
 
 export type OrigemEvento = "provedor" | "simulacao";

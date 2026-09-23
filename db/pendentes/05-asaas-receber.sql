@@ -1,3 +1,10 @@
+BEGIN;
+
+-- A reconstrução nunca deixa as entradas legadas acessíveis entre arquivos.
+DROP FUNCTION IF EXISTS public.asaas_cobranca_resultado(uuid,jsonb);
+DROP FUNCTION IF EXISTS public.asaas_cobranca_processando(uuid,text);
+DROP FUNCTION IF EXISTS public.asaas_evento_registrar(jsonb);
+
 -- ============================================================
 -- Contas a receber do Asaas: espelho importado, intenção de cobrança,
 -- link de fatura e recebimento de eventos.
@@ -678,7 +685,7 @@ BEGIN
      simulado, created_by)
   VALUES (conta.id, t.id, i.id, v_party, cliente.external_id, cliente.id IS NULL,
           v_saldo, v_venc, v_forma, v_ref || ':' || left(md5(v_key),8), v_key, v_hash,
-          coalesce(conta.modo_execucao,'simulado') = 'simulado', auth.uid())
+          conta.modo_execucao = 'simulado', auth.uid())
   RETURNING id INTO v_id;
   INSERT INTO public.asaas_charge_intent_events (intent_id, de, para, detalhe, actor_id)
   VALUES (v_id, NULL, 'preparada', jsonb_build_object('valor_cents', v_saldo), auth.uid());
@@ -688,168 +695,22 @@ BEGIN
     'valor_cents', v_saldo, 'due_date', v_venc, 'billing_type', v_forma,
     'customer_external_id', cliente.external_id, 'criar_cliente', cliente.id IS NULL,
     'internal_reference', v_ref || ':' || left(md5(v_key),8),
-    'simulado', coalesce(conta.modo_execucao,'simulado') = 'simulado',
+    'simulado', conta.modo_execucao = 'simulado',
     'aviso','Intenção registrada. Gerar link não liquida parcela nem emite documento fiscal.');
 END $fn$;
 REVOKE ALL ON FUNCTION public.asaas_cobranca_preparar(jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.asaas_cobranca_preparar(jsonb) TO authenticated;
 
-/** Reserva a intenção para UM trabalhador. Transação curta: nada fica travado na rede. */
-CREATE OR REPLACE FUNCTION public.asaas_cobranca_processando(_intent uuid, _worker text)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $fn$
-DECLARE n integer; it record;
-BEGIN
-  IF NOT public.has_capability(auth.uid(),'finance.receivable.manage') THEN
-    RAISE EXCEPTION 'Sem permissão.';
-  END IF;
-  PERFORM set_config('lardann.asaas_intent','on', true);
-  UPDATE public.asaas_charge_intents
-     SET state='processando', worker=_worker, processing_at=now(), attempts = attempts + 1
-   WHERE id=_intent AND state='preparada';
-  GET DIAGNOSTICS n = ROW_COUNT;
-  PERFORM set_config('lardann.asaas_intent','off', true);
-  SELECT * INTO it FROM public.asaas_charge_intents WHERE id=_intent;
-  IF it.id IS NULL THEN RAISE EXCEPTION 'Intenção inexistente.'; END IF;
-  IF n = 1 THEN
-    INSERT INTO public.asaas_charge_intent_events (intent_id, de, para, detalhe, actor_id)
-    VALUES (_intent, 'preparada','processando', jsonb_build_object('worker',_worker), auth.uid());
-  END IF;
-  RETURN jsonb_build_object('id',_intent,'reservada', n = 1, 'state', it.state,
-    'attempts', it.attempts, 'invoice_url', it.invoice_url, 'external_id', it.external_id);
-END $fn$;
-REVOKE ALL ON FUNCTION public.asaas_cobranca_processando(uuid,text) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.asaas_cobranca_processando(uuid,text) TO authenticated;
-
-/**
- * Registra o resultado do adaptador. Estados distintos:
- * criada | rejeitada | desconhecida (resposta perdida) | conciliacao (saldo mudou).
- * O endereço da fatura vem do provedor; nunca é montado por concatenação.
- */
-CREATE OR REPLACE FUNCTION public.asaas_cobranca_resultado(_intent uuid, _payload jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $fn$
-DECLARE it record; res text; v_charge uuid; v_saldo bigint; v_url text;
-BEGIN
-  IF NOT public.has_capability(auth.uid(),'finance.receivable.manage') THEN
-    RAISE EXCEPTION 'Sem permissão.';
-  END IF;
-  SELECT * INTO it FROM public.asaas_charge_intents WHERE id=_intent FOR UPDATE;
-  IF it.id IS NULL THEN RAISE EXCEPTION 'Intenção inexistente.'; END IF;
-  res := _payload->>'resultado';
-  IF res NOT IN ('criada','rejeitada','desconhecida') THEN RAISE EXCEPTION 'Resultado inválido.'; END IF;
-  IF it.state IN ('criada','rejeitada','cancelada') THEN
-    RETURN jsonb_build_object('id', it.id, 'repetida', true, 'state', it.state,
-      'invoice_url', it.invoice_url, 'external_id', it.external_id);
-  END IF;
-
-  PERFORM set_config('lardann.asaas_intent','on', true);
-
-  IF res = 'rejeitada' THEN
-    UPDATE public.asaas_charge_intents
-       SET state='rejeitada', last_error=left(coalesce(_payload->>'erro','Rejeitada pelo provedor'),500),
-           resolved_at=now()
-     WHERE id=_intent;
-  ELSIF res = 'desconhecida' THEN
-    UPDATE public.asaas_charge_intents
-       SET state='desconhecida', last_error=left(coalesce(_payload->>'erro','Resposta não recebida'),500)
-     WHERE id=_intent;
-  ELSE
-    IF coalesce(_payload->>'external_id','') = '' OR coalesce(_payload->>'invoice_url','') = '' THEN
-      RAISE EXCEPTION 'Cobrança criada sem identificador ou sem endereço devolvido pelo provedor.';
-    END IF;
-    v_url := _payload->>'invoice_url';
-    IF it.simulado AND v_url NOT LIKE '/financeiro/simulacao/%' THEN
-      RAISE EXCEPTION 'Em simulação o endereço tem de ser local e identificado como demonstração.';
-    END IF;
-    IF NOT it.simulado AND v_url NOT LIKE 'https://%' THEN
-      RAISE EXCEPTION 'Endereço de fatura inválido.';
-    END IF;
-
-    v_saldo := public.fin_installment_saldo(it.installment_id);
-    IF v_saldo IS DISTINCT FROM it.value_cents THEN
-      -- o provedor criou, mas o saldo mudou no meio: nunca uma segunda cobrança silenciosa
-      UPDATE public.asaas_charge_intents
-         SET state='conciliacao', external_id=_payload->>'external_id', invoice_url=v_url,
-             last_error='Saldo da parcela mudou durante o processamento.'
-       WHERE id=_intent;
-      PERFORM set_config('lardann.asaas_intent','off', true);
-      INSERT INTO public.asaas_charge_intent_events (intent_id, de, para, detalhe, actor_id)
-      VALUES (_intent, it.state, 'conciliacao',
-              jsonb_build_object('saldo_atual', v_saldo, 'valor_intencao', it.value_cents), auth.uid());
-      RETURN jsonb_build_object('id',_intent,'state','conciliacao','invoice_url', v_url,
-        'aviso','Cobrança existe no provedor, mas o saldo mudou. Encaminhado para conciliação.');
-    END IF;
-
-    SELECT id INTO v_charge FROM public.asaas_charges
-      WHERE account_id = it.account_id AND external_id = _payload->>'external_id';
-    IF v_charge IS NULL THEN
-      PERFORM set_config('lardann.asaas_link','on', true);
-      INSERT INTO public.asaas_charges
-        (account_id, external_id, customer_external_id, value_cents, due_date, billing_type,
-         external_status, party_id, reconcile_status, raw)
-      VALUES (it.account_id, _payload->>'external_id', it.customer_external_id, it.value_cents,
-              it.due_date, it.billing_type, coalesce(_payload->>'status','PENDING'), it.party_id,
-              'pendente', coalesce(_payload->'raw','{}'::jsonb))
-      RETURNING id INTO v_charge;
-      PERFORM set_config('lardann.asaas_link','off', true);
-    END IF;
-    PERFORM public.asaas_charge_vincular(v_charge, it.title_id, it.installment_id,
-      'Cobrança preparada pela Lardan', false);
-
-    UPDATE public.asaas_charge_intents
-       SET state='criada', external_id=_payload->>'external_id', invoice_url=v_url,
-           charge_id=v_charge, resolved_at=now(), last_error=NULL
-     WHERE id=_intent;
-  END IF;
-
-  PERFORM set_config('lardann.asaas_intent','off', true);
-  SELECT * INTO it FROM public.asaas_charge_intents WHERE id=_intent;
-  INSERT INTO public.asaas_charge_intent_events (intent_id, de, para, detalhe, actor_id)
-  VALUES (_intent, 'processando', it.state, jsonb_build_object('external_id', it.external_id), auth.uid());
-
-  RETURN jsonb_build_object('id',_intent,'state',it.state,'invoice_url',it.invoice_url,
-    'external_id', it.external_id, 'charge_id', it.charge_id, 'simulado', it.simulado,
-    'aviso','Gerar link não liquida a parcela, não comprova venda e não emite nota fiscal.');
-END $fn$;
-REVOKE ALL ON FUNCTION public.asaas_cobranca_resultado(uuid,jsonb) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.asaas_cobranca_resultado(uuid,jsonb) TO authenticated;
+-- As rotinas antigas de processamento e resultado foram removidas deste arquivo.
+-- O executor interno seguro é criado atomicamente em 07-asaas-executor-interno.sql;
+-- em nenhum ponto da reconstrução o navegador recebe escrita de resultado externo.
 
 -- ============================================================
 -- EVENTOS
 -- ============================================================
 
-/** Persiste o evento antes de qualquer efeito. Deduplica por conta + ID externo. */
-CREATE OR REPLACE FUNCTION public.asaas_evento_registrar(_payload jsonb)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $fn$
-DECLARE conta uuid; v_id uuid; novo boolean := true; tipo record;
-BEGIN
-  conta := (_payload->>'account_id')::uuid;
-  IF conta IS NULL THEN RAISE EXCEPTION 'Evento sem conta.'; END IF;
-  IF coalesce(_payload->>'external_id','') = '' THEN RAISE EXCEPTION 'Evento sem identificador.'; END IF;
-  IF coalesce(_payload->>'event','') = '' THEN RAISE EXCEPTION 'Evento sem tipo.'; END IF;
-  IF length(_payload::text) > 200000 THEN RAISE EXCEPTION 'Mensagem grande demais.'; END IF;
-
-  SELECT * INTO tipo FROM public.asaas_event_types WHERE event = _payload->>'event';
-
-  INSERT INTO public.asaas_events
-    (account_id, external_id, event, charge_external_id, event_at, received_at, status,
-     classification, payload)
-  VALUES (conta, _payload->>'external_id', _payload->>'event', _payload->>'charge_external_id',
-          coalesce(nullif(_payload->>'event_at','')::timestamptz, now()), now(), 'na_fila',
-          CASE WHEN tipo.event IS NULL THEN 'desconhecido' ELSE 'conhecido' END,
-          coalesce(_payload->'payload','{}'::jsonb))
-  ON CONFLICT (account_id, external_id) DO NOTHING
-  RETURNING id INTO v_id;
-
-  IF v_id IS NULL THEN
-    novo := false;
-    SELECT id INTO v_id FROM public.asaas_events
-      WHERE account_id = conta AND external_id = _payload->>'external_id';
-  END IF;
-  RETURN jsonb_build_object('id', v_id, 'novo', novo,
-    'conhecido', tipo.event IS NOT NULL);
-END $fn$;
-REVOKE ALL ON FUNCTION public.asaas_evento_registrar(jsonb) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.asaas_evento_registrar(jsonb) TO authenticated;
+-- A entrada antiga de eventos foi removida. A única entrada é criada em
+-- 07-asaas-executor-interno.sql e permanece exclusiva do serviço interno.
 
 /**
  * Aplica a matriz ao espelho da cobrança. NÃO cria baixa: a regra contábil do
@@ -990,3 +851,5 @@ BEGIN
 END $fn$;
 REVOKE ALL ON FUNCTION public.asaas_receber_painel(jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.asaas_receber_painel(jsonb) TO authenticated;
+
+COMMIT;

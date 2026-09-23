@@ -63,16 +63,21 @@ done
 
 # Mudanças preparadas e ainda NÃO aplicadas ao banco compartilhado.
 pendentes=0
+PACOTE_PENDENTE="$BASE/pendentes-atomicos.sql"
+printf '%s\n' 'BEGIN;' >"$PACOTE_PENDENTE"
 for f in "$RAIZ"/db/pendentes/*.sql; do
   case "$f" in *proposta*) echo "ignorado (proposta, não aplicar): $(basename "$f")"; continue;; esac
   [ -e "$f" ] || continue
-  if ! psql "$ISO" -v ON_ERROR_STOP=1 -q -f "$f" >"$BASE/ultima.log" 2>&1; then
-    echo "FALHOU (pendente): $(basename "$f")"
-    tail -30 "$BASE/ultima.log"
-    exit 1
-  fi
+  printf '\n-- arquivo: %s\n' "$(basename "$f")" >>"$PACOTE_PENDENTE"
+  cat "$f" >>"$PACOTE_PENDENTE"
   pendentes=$((pendentes + 1))
 done
+printf '%s\n' 'COMMIT;' >>"$PACOTE_PENDENTE"
+if ! psql "$ISO" -v ON_ERROR_STOP=1 -q -f "$PACOTE_PENDENTE" >"$BASE/ultima.log" 2>&1; then
+  echo "FALHOU: pacote pendente atômico foi integralmente revertido"
+  tail -30 "$BASE/ultima.log"
+  exit 1
+fi
 
 echo "migrações aplicadas: $total (ignoradas por serem só conteúdo: $puladas)"
 echo "arquivos pendentes aplicados: $pendentes"

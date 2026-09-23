@@ -77,11 +77,15 @@ export async function buscarPaginas(
     });
 
     const clientes = await coletarClientes(transporte, pagina.itens);
+    const proximoOffset = pagina.proximoOffset ?? offset + pagina.quantidadeBruta;
     const r = await banco.rpc<{ novos: number; repetidos: number; offset: number; has_more: boolean }>(
       ROTINAS.importarPagina,
       {
         _run: lote.run_id,
         _offset: offset,
+        _limit: pagina.limit,
+        _raw_count: pagina.quantidadeBruta,
+        _next_offset: proximoOffset,
         _itens: pagina.itens,
         _has_more: pagina.hasMore,
         _clientes: clientes,
@@ -91,10 +95,12 @@ export async function buscarPaginas(
     trazidos += pagina.itens.length;
     novos += r.novos;
     repetidos += r.repetidos;
-    offset = pagina.proximoOffset ?? offset + pagina.itens.length;
+    offset = proximoOffset;
     hasMore = pagina.hasMore;
     paginas += 1;
-    if (pagina.itens.length === 0) break;
+    if (pagina.quantidadeBruta === 0 && pagina.hasMore) {
+      throw new Error("O provedor indicou continuação sem avançar o cursor.");
+    }
   }
 
   return { runId: lote.run_id, paginas, trazidos, novos, repetidos, hasMore, offset };

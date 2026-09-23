@@ -238,6 +238,28 @@ DROP TRIGGER IF EXISTS zz_block_direct_fiscal_item ON public.fiscal_document_ite
 CREATE TRIGGER zz_block_direct_fiscal_item BEFORE INSERT OR UPDATE OR DELETE ON public.fiscal_document_items
   FOR EACH ROW EXECUTE FUNCTION public.zz_block_direct_fiscal();
 
+-- A trava anterior só conhecia a situação 'preparacao'. A cadeia preparada tem
+-- mais situações ANTES do envio (rascunho, bloqueado_pendencia, validado): elas
+-- continuam sendo preparação. Sair da preparação segue proibido com a emissão
+-- desligada.
+CREATE OR REPLACE FUNCTION public.fiscal_document_guard()
+RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public' AS $fn$
+DECLARE ativo boolean;
+BEGIN
+  SELECT emission_active INTO ativo FROM public.fiscal_settings WHERE id;
+  IF NEW.status NOT IN ('preparacao','rascunho','bloqueado_pendencia','validado')
+     AND coalesce(ativo,false) IS NOT TRUE THEN
+    RAISE EXCEPTION 'A emissão fiscal não está ativa. Nenhum documento pode sair da preparação.';
+  END IF;
+  IF NEW.kind = 'devolucao_simbolica' THEN NEW.moves_physical_stock := false; END IF;
+  IF TG_OP = 'UPDATE' AND OLD.status = 'autorizado'
+     AND NEW.status NOT IN ('autorizado','cancelamento_solicitado','cancelado') THEN
+    RAISE EXCEPTION 'Documento autorizado não volta atrás; o caminho é o cancelamento.';
+  END IF;
+  NEW.updated_at := now();
+  RETURN NEW;
+END $fn$;
+
 -- imutabilidade após autorização + cancelamento é evento
 CREATE OR REPLACE FUNCTION public.fiscal_document_imutavel()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO 'public' AS $fn$

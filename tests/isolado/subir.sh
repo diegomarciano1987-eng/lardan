@@ -61,6 +61,19 @@ for f in "$RAIZ"/supabase/migrations/*.sql; do
   total=$((total + 1))
 done
 
+# Mudanças preparadas e ainda NÃO aplicadas ao banco compartilhado.
+pendentes=0
+for f in "$RAIZ"/db/pendentes/*.sql; do
+  [ -e "$f" ] || continue
+  if ! psql "$ISO" -v ON_ERROR_STOP=1 -q -f "$f" >"$BASE/ultima.log" 2>&1; then
+    echo "FALHOU (pendente): $(basename "$f")"
+    tail -30 "$BASE/ultima.log"
+    exit 1
+  fi
+  pendentes=$((pendentes + 1))
+done
+
 echo "migrações aplicadas: $total (ignoradas por serem só conteúdo: $puladas)"
+echo "arquivos pendentes aplicados: $pendentes"
 [ -f "$BASE/puladas.txt" ] && cat "$BASE/puladas.txt"
 echo "$ISO"

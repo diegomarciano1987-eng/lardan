@@ -22,6 +22,7 @@ let entidade = "";
 let contaFin = "";
 let contaAsaas = "";
 let variante = "";
+let origemItem = "";
 const marca = `ISO-FA-${Date.now().toString(36)}`;
 
 beforeAll(async () => {
@@ -48,6 +49,26 @@ beforeAll(async () => {
     await um<{ id: string }>(
       `insert into public.asaas_accounts (label, environment) values ($1, 'sandbox') returning id`,
       [`${marca} asaas`],
+    )
+  ).id;
+
+  // origem sintética para os itens fiscais: maleta, ciclo e composição
+  const kit = await um<{ id: string }>(`insert into public.kits (label) values ($1) returning id`, [
+    `${marca} maleta`,
+  ]);
+  const ciclo = await um<{ id: string }>(
+    `insert into public.kit_cycles (kit_id, cycle_no, consultora_party_id) values ($1, 1, $2) returning id`,
+    [kit.id, pessoa.partyId],
+  );
+  const comp = await um<{ id: string }>(
+    `insert into public.kit_compositions (cycle_id, version) values ($1, 1) returning id`,
+    [ciclo.id],
+  );
+  origemItem = (
+    await um<{ id: string }>(
+      `insert into public.kit_composition_items (composition_id, variant_id, quantity)
+       values ($1, $2, 50) returning id`,
+      [comp.id, variante],
     )
   ).id;
 });
@@ -103,8 +124,9 @@ describe("Fiscal inerte", () => {
     expect(d.moves_physical_stock).toBe(false);
 
     await adm.unsafe(
-      `insert into public.fiscal_document_items (document_id, variant_id, quantity) values ($1, $2, 7)`,
-      [d.id, variante],
+      `insert into public.fiscal_document_items (document_id, variant_id, quantity, composition_item_id)
+       values ($1, $2, 7, $3)`,
+      [d.id, variante, origemItem],
     );
     expect(await conta(`select count(*)::int as n from public.stock_movements`)).toBe(antes);
     expect(await conta(`select count(*)::int as n from public.stock_balances where variant_id = $1`, [variante])).toBe(
@@ -123,9 +145,9 @@ describe("Fiscal inerte", () => {
       [pessoa.partyId],
     );
     await adm.unsafe(
-      `insert into public.fiscal_document_items (document_id, variant_id, quantity, unit_value_cents)
-       values ($1, $2, 2, 61728)`,
-      [d.id, variante],
+      `insert into public.fiscal_document_items (document_id, variant_id, quantity, unit_value_cents, composition_item_id)
+       values ($1, $2, 2, 61728, $3)`,
+      [d.id, variante, origemItem],
     );
 
     expect(await conta(`select count(*)::int as n from public.financial_titles`)).toBe(t);
@@ -310,7 +332,7 @@ describe("Asaas inerte e financeiro reaproveitado", () => {
       await adm.unsafe(
         `insert into public.asaas_events (account_id, external_id, event, charge_external_id, payload)
          values ($1, $2, 'PAYMENT_RECEIVED', $3, '{}'::jsonb)
-         on conflict (external_id) do nothing`,
+         on conflict (account_id, external_id) do nothing`,
         [contaAsaas, ev, `${marca}-pay-1`],
       );
     }

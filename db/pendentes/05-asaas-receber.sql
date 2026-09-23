@@ -1,4 +1,3 @@
-BEGIN;
 
 -- A reconstrução nunca deixa as entradas legadas acessíveis entre arquivos.
 DROP FUNCTION IF EXISTS public.asaas_cobranca_resultado(uuid,jsonb);
@@ -852,4 +851,3 @@ END $fn$;
 REVOKE ALL ON FUNCTION public.asaas_receber_painel(jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.asaas_receber_painel(jsonb) TO authenticated;
 
-COMMIT;

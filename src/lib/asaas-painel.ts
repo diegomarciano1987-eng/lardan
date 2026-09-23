@@ -37,16 +37,14 @@ export interface LinhaReceber {
   intencao: IntencaoResumo | null;
 }
 
+/** Estado sanitizado da conta, resolvido no servidor (nunca contém segredo). */
 export interface ContaAsaas {
   id: string;
   nome: string;
-  modo: "simulado" | "conectado";
-  ambiente: "sandbox" | "producao" | null;
-  estado: string;
-  situacao: string;
-  executavel: boolean;
-  conectada: boolean;
-  empresa: string | null;
+  situacao: "simulada" | "preparada" | "sandbox_configurado" | "saida_desligada" | "credencial_ausente" | "conta_suspensa" | "indisponivel";
+  rotulo: string;
+  motivo: string;
+  operacoes: { importar: boolean; cobrar: boolean; link: boolean; recuperar: boolean };
 }
 
 export interface FilaErro {
@@ -57,6 +55,9 @@ export interface FilaErro {
   attempts: number;
   installment_id: string;
   external_id: string | null;
+  failure_class?: string | null;
+  next_attempt_at?: string | null;
+  pendencia_operacional?: boolean;
 }
 
 export interface Ocorrencia {
@@ -115,13 +116,13 @@ export const carregarFila = (accountId?: string, cursor: Cursor = null) =>
 export const carregarOcorrencias = (accountId?: string, cursor: Cursor = null) =>
   chamar<PaginaDe<Ocorrencia>>("asaas_receber_ocorrencias", { _filtros: { account_id: accountId || null, cursor, limite: 25 } });
 
-export const carregarContas = () => chamar<ContaAsaas[]>("asaas_receber_contas");
 
 export const AVISO_SIMULACAO = "SIMULAÇÃO — NÃO É UMA COBRANÇA PAGÁVEL";
 
 export function situacaoCobranca(l: LinhaReceber): { rotulo: string; tom: "success" | "warning" | "danger" | "info" | "neutral" } {
   if (l.intencao?.state === "desconhecida") return { rotulo: "Resultado desconhecido", tom: "danger" };
   if (l.intencao?.state === "conciliacao") return { rotulo: "Em conciliação", tom: "danger" };
+  if (l.intencao?.state === "aguardando_retentativa") return { rotulo: "Aguardando nova tentativa", tom: "warning" };
   if (l.intencao?.state === "processando") return { rotulo: "Processando", tom: "warning" };
   if (l.cobranca?.invoice_url) return { rotulo: `Link disponível · ${l.cobranca.status ?? ""}`, tom: "info" };
   if (l.cobranca) return { rotulo: "Cobrança sem link — obter", tom: "warning" };

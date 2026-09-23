@@ -53,8 +53,12 @@ export interface Pagina<T> {
   limit: number;
   hasMore: boolean;
   total?: number | null;
-  /** próximo offset no provedor quando a página foi filtrada localmente */
-  proximoOffset?: number;
+  /**
+   * Próximo offset no PROVEDOR. Regra oficial: com hasMore=true é offset +
+   * limit solicitado; sem continuação, offset + quantidade bruta. Nunca é
+   * calculado pela quantidade mantida depois de filtro local.
+   */
+  proximoOffset: number;
 }
 
 export interface FiltroCobrancas {
@@ -152,6 +156,8 @@ export interface TransporteAsaas {
   readonly ambiente: Ambiente;
   readonly simulado: boolean;
   readonly modo: ModoExecucao;
+  /** tempo máximo de uma requisição; a posse sempre dura mais que isso */
+  readonly timeoutRequisicaoSegundos: number;
 
   listarClientes(f: { limit: number; offset: number }): Promise<Pagina<ClienteExterno>>;
   consultarCliente(id: string): Promise<ClienteExterno | null>;
@@ -169,4 +175,9 @@ export interface TransporteAsaas {
 
   /** fila local de eventos (no futuro, entregues pelo webhook) */
   receberEventos(): Promise<EventoExterno[]>;
+}
+
+/** Próximo offset conforme a documentação do provedor. */
+export function proximoOffsetOficial(offset: number, limitSolicitado: number, quantidadeBruta: number, hasMore: boolean) {
+  return hasMore ? offset + limitSolicitado : offset + quantidadeBruta;
 }

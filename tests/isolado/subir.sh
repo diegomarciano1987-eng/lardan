@@ -68,6 +68,10 @@ printf '%s\n' 'BEGIN;' >"$PACOTE_PENDENTE"
 for f in "$RAIZ"/db/pendentes/*.sql; do
   case "$f" in *proposta*) echo "ignorado (proposta, não aplicar): $(basename "$f")"; continue;; esac
   [ -e "$f" ] || continue
+  # LARDAN_PENDENTES_ATE=08 reproduz a base no estado do pacote anterior
+  if [ -n "${LARDAN_PENDENTES_ATE:-}" ] && [[ "$(basename "$f")" > "${LARDAN_PENDENTES_ATE}~" ]]; then
+    echo "adiado (atualização posterior): $(basename "$f")"; continue
+  fi
   printf '\n-- arquivo: %s\n' "$(basename "$f")" >>"$PACOTE_PENDENTE"
   cat "$f" >>"$PACOTE_PENDENTE"
   pendentes=$((pendentes + 1))

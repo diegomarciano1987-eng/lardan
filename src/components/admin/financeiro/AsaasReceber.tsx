@@ -8,7 +8,6 @@ import {
   AVISO_SIMULACAO,
   FASES,
   PreparacaoNaoAplicada,
-  carregarContas,
   carregarFila,
   carregarOcorrencias,
   carregarParcelas,
@@ -18,11 +17,11 @@ import {
   type LinhaReceber,
   type SituacaoFiltro,
 } from "@/lib/asaas-painel";
-import { estadoIntegracao, gerarLinkCobranca, obterLinkDaCobranca, recuperarIntencao } from "@/lib/asaas/cobranca.functions";
+import { estadoContasAsaas, gerarLinkCobranca, obterLinkDaCobranca, recuperarIntencao } from "@/lib/asaas/cobranca.functions";
 import { demoEvento, demoPerderResposta } from "@/lib/asaas/demo.functions";
 import { AsaasImportacao } from "./AsaasImportacao";
 
-type Resultado = { state?: string; reaproveitada?: boolean; fase?: string | null; erro?: string | null; chamadas_criar?: number };
+type Resultado = { state?: string; reaproveitada?: boolean; fase?: string | null; erro?: string | null; chamadas_criar?: number; aviso?: string; next_attempt_at?: string | null };
 
 function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; linha: LinhaReceber; demo: boolean; onFechar: () => void }) {
   const qc = useQueryClient();
@@ -37,7 +36,7 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
   const atualizar = () => void qc.invalidateQueries({ queryKey: ["asaas"] });
   const falhou = (e: Error) => toast.error(e.message);
   const descrever = (r: Resultado) =>
-    `Situação: ${r.state}${r.reaproveitada ? " (existente reaproveitada)" : ""}${r.fase ? ` — ${FASES[r.fase] ?? r.fase}` : ""}`;
+    `Situação: ${r.state}${r.reaproveitada ? " (existente reaproveitada)" : ""}${r.fase ? ` — ${FASES[r.fase] ?? r.fase}` : ""}${r.aviso ? ` — ${r.aviso}` : ""}${r.next_attempt_at ? ` (próxima tentativa: ${new Date(r.next_attempt_at).toLocaleString("pt-BR")})` : ""}`;
 
   const solicitar = useMutation({
     mutationFn: async (perderResposta: boolean): Promise<Resultado> => {
@@ -73,7 +72,8 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
   const ocupado = solicitar.isPending || recuperarM.isPending || eventoM.isPending || linkM.isPending;
   const estado = linha.intencao?.state;
   const url = linha.cobranca?.invoice_url ?? urlObtida;
-  const simulado = conta.modo === "simulado";
+  const simulado = conta.situacao === "simulada";
+  const op = conta.operacoes;
 
   return (
     <Panel title="Detalhe da parcela e vínculo Asaas">
@@ -103,7 +103,7 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
             </button>
           ))}
         </div>
-        <button type="button" disabled={linha.saldo_cents <= 0 || ocupado || estado === "conciliacao" || estado === "desconhecida"} onClick={() => solicitar.mutate(false)}
+        <button type="button" disabled={!op.cobrar || linha.saldo_cents <= 0 || ocupado || estado === "conciliacao" || estado === "desconhecida" || estado === "aguardando_retentativa"} onClick={() => solicitar.mutate(false)}
           className="rounded-lg border border-bronze px-4 py-2 text-sm font-semibold text-bronze disabled:opacity-50">
           {linha.cobranca ? "Solicitar de novo (reaproveita)" : simulado ? "Solicitar cobrança simulada" : "Solicitar cobrança"}
         </button>
@@ -113,14 +113,14 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
             Simular resposta perdida
           </button>
         )}
-        {(estado === "desconhecida" || estado === "processando" || estado === "preparada") && (
-          <button type="button" disabled={ocupado} onClick={() => recuperarM.mutate()}
+        {(estado === "desconhecida" || estado === "processando" || estado === "preparada" || estado === "aguardando_retentativa") && (
+          <button type="button" disabled={!op.recuperar || ocupado} onClick={() => recuperarM.mutate()}
             className="rounded-lg border border-danger px-4 py-2 text-sm font-semibold text-danger">
             Consultar provedor e recuperar
           </button>
         )}
         {linha.cobranca && !url && (
-          <button type="button" disabled={ocupado} onClick={() => linkM.mutate()}
+          <button type="button" disabled={!op.link || ocupado} onClick={() => linkM.mutate()}
             className="rounded-lg border border-bronze px-3 py-2 text-xs font-semibold text-bronze">
             Obter link pelo identificador
           </button>
@@ -134,8 +134,9 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
           </>
         )}
       </div>
+      {!op.cobrar && <p className="mt-3 text-sm text-warning" data-testid="motivo-indisponivel">Operações desta conta indisponíveis: {conta.motivo}</p>}
       {estado === "conciliacao" && <p className="mt-3 text-sm text-danger">Em conciliação: nenhuma nova cobrança pode ser gerada para esta parcela até a revisão.</p>}
-      <p className="mt-3 text-xs text-ledger-muted">Gerar link não liquida a parcela, não comprova venda e não emite nota fiscal.</p>
+      <AvisosPermanentes />
       {ultimo && <p className="mt-3 text-sm font-medium" data-testid="ultimo-resultado">{ultimo}</p>}
 
       <button type="button" className="mt-5 text-sm text-ledger-muted underline" onClick={onFechar}>Fechar detalhe</button>
@@ -162,12 +163,30 @@ const SITUACOES: { value: SituacaoFiltro; label: string }[] = [
   { value: "rejeitada", label: "Rejeitada" },
 ];
 
-function Avisos({ conta, integracao }: { conta: ContaAsaas | undefined; integracao: { disponivel: boolean; motivo?: string } | undefined }) {
+function AvisosPermanentes() {
   return (
-    <div className="flex flex-wrap gap-2">
-      <StatusBadge tone="danger">Saída externa desligada</StatusBadge>
-      {conta && <StatusBadge tone="warning">{({ simulacao_isolada: "Simulação isolada", preparado_rede_bloqueada: "Preparado, rede bloqueada", sandbox_configurado: "Sandbox configurado", producao_configurada: "Produção configurada, inativa", configuracao_incoerente: "Configuração incoerente", conta_suspensa: "Conta suspensa" } as Record<string,string>)[conta.situacao] ?? conta.estado}</StatusBadge>}
-      {integracao && !integracao.disponivel && <StatusBadge tone="danger">Integração indisponível: {integracao.motivo}</StatusBadge>}
+    <ul className="mt-3 list-disc space-y-0.5 pl-5 text-xs text-ledger-muted">
+      <li>Gerar cobrança não liquida a parcela.</li>
+      <li>Link de cobrança não comprova pagamento.</li>
+      <li>Cobrança não comprova venda e não emite nota fiscal.</li>
+      <li>Eventos recebidos continuam aguardando conciliação.</li>
+      <li>Simulação não é cobrança pagável.</li>
+    </ul>
+  );
+}
+
+const TOM_SITUACAO: Record<ContaAsaas["situacao"], "success" | "warning" | "danger" | "info" | "neutral"> = {
+  simulada: "info", sandbox_configurado: "success", preparada: "warning", saida_desligada: "warning",
+  credencial_ausente: "danger", conta_suspensa: "danger", indisponivel: "danger",
+};
+
+function Avisos({ conta }: { conta: ContaAsaas | undefined }) {
+  if (!conta) return null;
+  return (
+    <div className="space-y-1" data-testid="estado-conta">
+      <StatusBadge tone={TOM_SITUACAO[conta.situacao]}>{conta.rotulo}</StatusBadge>
+      {!conta.operacoes.cobrar && <p className="text-sm text-ledger-muted">{conta.motivo}</p>}
+      <AvisosPermanentes />
     </div>
   );
 }
@@ -196,10 +215,9 @@ export function AsaasReceber() {
   const [situacao, setSituacao] = React.useState<SituacaoFiltro>("");
   const [contaSelecionada, setContaSelecionada] = React.useState<string>("");
   const termo = useDebounced(busca);
-  const estado = useServerFn(estadoIntegracao);
+  const estado = useServerFn(estadoContasAsaas);
 
-  const contas = useQuery({ queryKey: ["asaas", "contas"], queryFn: carregarContas, retry: false });
-  const integracao = useQuery({ queryKey: ["asaas", "integracao"], queryFn: () => estado() });
+  const contas = useQuery({ queryKey: ["asaas", "contas"], queryFn: () => estado() as Promise<ContaAsaas[]>, retry: false });
   const parcelas = useInfiniteQuery({
     queryKey: ["asaas", "parcelas", contaSelecionada, termo, situacao],
     queryFn: ({ pageParam }) => carregarParcelas({ accountId: contaSelecionada, busca: termo, situacao, cursor: pageParam }),
@@ -227,7 +245,6 @@ export function AsaasReceber() {
   if (contas.error instanceof PreparacaoNaoAplicada || parcelas.error instanceof PreparacaoNaoAplicada) {
     return (
       <div className="space-y-6">
-        <Avisos conta={undefined} integracao={undefined} />
         <Panel title="Recebíveis Asaas">
           <EmptyState
             title="Preparação ainda não aplicada a este ambiente"
@@ -244,21 +261,24 @@ export function AsaasReceber() {
   const conta = contas.data?.find((c) => c.id === contaSelecionada) ?? contas.data?.[0];
   const linhas = parcelas.data?.pages.flatMap((p) => p.itens) ?? [];
   const total = parcelas.data?.pages[0]?.total ?? 0;
-  const demo = Boolean(integracao.data && integracao.data.disponivel && integracao.data.demo);
+  const demo = conta?.situacao === "simulada";
   // a linha pode sair do filtro depois de uma ação (ex.: ganhou link); o detalhe continua aberto
   const parcela = escolhida ? (linhas.find((l) => l.installment_id === escolhida.installment_id) ?? escolhida) : null;
 
   return (
     <div className="space-y-6">
-      <Avisos conta={conta} integracao={integracao.data} />
       {(contas.data?.length ?? 0) > 1 && (
-        <label className="block max-w-md text-sm font-medium">Conta Asaas
-          <select value={conta?.id ?? ""} onChange={(e) => { setContaSelecionada(e.target.value); setEscolhida(null); }}
-            className="mt-1 w-full rounded-lg border border-line bg-transparent px-3 py-2">
-            {contas.data!.map((c) => <option key={c.id} value={c.id}>{c.nome} — {c.situacao}</option>)}
-          </select>
-        </label>
+        <div className="max-w-md text-sm font-medium">
+          <span className="mb-1 block">Conta Asaas</span>
+          <SmartSelect
+            options={contas.data!.map((c) => ({ value: c.id, label: `${c.nome} — ${c.rotulo}` }))}
+            value={conta?.id ?? ""}
+            onChange={(v) => { setContaSelecionada(v); setEscolhida(null); }}
+            placeholder="Conta Asaas"
+          />
+        </div>
       )}
+      <Avisos conta={conta} />
 
       <nav className="flex flex-wrap gap-2" aria-label="Seções de recebíveis Asaas">
         {ABAS.map((a) => (
@@ -337,7 +357,7 @@ export function AsaasReceber() {
         </Panel>
       )}
 
-      {aba === "importacao" && <AsaasImportacao contaId={conta?.id} />}
+      {aba === "importacao" && <AsaasImportacao contaId={conta?.id} podeImportar={conta?.operacoes.importar ?? false} motivo={conta?.motivo ?? ""} />}
 
       {aba === "ocorrencias" && (
         <Panel title="Ocorrências recebidas do provedor">
@@ -367,13 +387,14 @@ export function AsaasReceber() {
               {fila.data!.pages.flatMap((p) => p.itens).map((f) => (
                 <li key={f.id} className="rounded-lg border border-line px-4 py-3">
                   <div className="flex items-center justify-between gap-2">
-                    <StatusBadge tone="danger">{f.state}</StatusBadge>
+                    <StatusBadge tone={f.state === "aguardando_retentativa" ? "warning" : "danger"}>{f.pendencia_operacional ? "Pendência operacional: credencial" : f.state}</StatusBadge>
                     <span className="text-xs text-ledger-muted">{f.attempts} tentativa(s)</span>
                   </div>
                   <p className="mt-2 text-ledger-muted">
                     {f.fase ? `${FASES[f.fase] ?? f.fase}. ` : ""}
                     {f.erro ?? "Resultado desconhecido: consultar o provedor antes de reenviar."}
                   </p>
+                  {f.next_attempt_at && <p className="mt-1 text-xs text-ledger-muted">Nova tentativa, na mesma intenção, a partir de {new Date(f.next_attempt_at).toLocaleString("pt-BR")}.</p>}
                 </li>
               ))}
             </ul>
@@ -384,7 +405,7 @@ export function AsaasReceber() {
 
       {parcela && (() => {
         const real = contas.data?.find((c) => c.id === parcela.account_id) ?? conta;
-        return real ? <DetalheParcela conta={real} linha={parcela} demo={real.modo === "simulado" && demo} onFechar={() => setEscolhida(null)} /> : null;
+        return real ? <DetalheParcela conta={real} linha={parcela} demo={real.situacao === "simulada"} onFechar={() => setEscolhida(null)} /> : null;
       })()}
     </div>
   );

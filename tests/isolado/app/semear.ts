@@ -28,6 +28,18 @@ async function main() {
      values ('ISO Asaas simulado','sandbox','simulada',$1,'ignorar_anteriores','acc_demo') returning id`,
     [e!.id],
   )) as { id: string }[];
+  // Segunda empresa com conta de sandbox registrada: apenas o NOME do segredo
+  // (placeholder). Nenhum valor existe no ambiente isolado; o gate está desligado.
+  const [e2] = (await adm.unsafe(
+    `insert into public.business_entities (legal_name, trade_name) values ('ISO Empresa Sandbox','ISO Sandbox') returning id`,
+  )) as { id: string }[];
+  await adm.unsafe(
+    `insert into public.asaas_accounts (label, environment, state, owner_entity_id, opening_balance_strategy, external_account_id,
+       is_active, modo_execucao, ambiente_provedor, secret_ref, config_status)
+     values ('ISO Asaas sandbox (sem segredo)','sandbox','sandbox_conectada',$1,'ignorar_anteriores','acc_sbx',
+       true,'conectado','sandbox','ASAAS_SANDBOX_LARDAN','sandbox_configurado')`,
+    [e2!.id],
+  );
   const [p] = (await adm.unsafe(
     `insert into public.parties (kind, display_name, legal_name, status) values ('pessoa','ISO Cliente Vinculado','ISO Cliente Vinculado','ativo') returning id`,
   )) as { id: string }[];

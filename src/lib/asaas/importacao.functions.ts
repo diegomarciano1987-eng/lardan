@@ -12,16 +12,10 @@ export const importarRecebiveis = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    const { abrirLote, buscarPaginas, gerarPrevia } = await import("./importacao");
-    const { bancoDe, bancoExecutor, transporteDaConfiguracao } = await import("./servidor.server");
-    const { ROTINAS_EXECUTOR } = await import("./banco");
-    const usuario = bancoDe(c.supabase);
-    const pedido = { accountId: data.accountId, pageSize: 50, incluirEmAbertoAnteriores: true,
-      ...(data.maxPaginas ? { maxPaginas: data.maxPaginas } : {}) };
-    const lote = await abrirLote(usuario, pedido);
-    const executor = await bancoExecutor();
-    const config = await executor.rpc<Parameters<typeof transporteDaConfiguracao>[0]>(ROTINAS_EXECUTOR.configLote,
-      { _run: lote.run_id, _actor: c.userId });
-    const busca = await buscarPaginas(usuario, await transporteDaConfiguracao(config), lote, pedido);
-    return { lote, busca, previa: busca.hasMore ? null : await gerarPrevia(usuario, lote.run_id) };
+    const { importarComPreflight } = await import("./operacoes");
+    const { bancoDe, bancoExecutor } = await import("./servidor.server");
+    const { envDoServidor } = await import("./configuracao.server");
+    // Preflight ANTES de abrir lote: conta, segredo, ambiente e gate.
+    return importarComPreflight(bancoDe(c.supabase), await bancoExecutor(), c.userId,
+      { accountId: data.accountId, ...(data.maxPaginas ? { maxPaginas: data.maxPaginas } : {}) }, { env: envDoServidor() });
   });

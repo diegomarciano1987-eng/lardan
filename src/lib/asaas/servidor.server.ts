@@ -24,6 +24,16 @@ export async function bancoExecutor(): Promise<BancoAsaas> {
   return bancoDe(supabaseAdmin as unknown as RpcCliente);
 }
 
+import {
+  envDoServidor,
+  IntegracaoIndisponivel,
+  resolverConta,
+  transporteDaResolucao,
+  type Resolucao,
+  type SituacaoBanco,
+} from "./configuracao.server";
+
+/** Configuração interna vinda do banco (asaas_exec_config*): só referência de segredo. */
 export interface ConfigInterna {
   account_id: string;
   state: string;
@@ -34,28 +44,40 @@ export interface ConfigInterna {
   invoice_host_confirmed: boolean;
 }
 
-export async function transporteDaConfiguracao(config: ConfigInterna): Promise<TransporteAsaas> {
-  if (config.modo === "simulado") {
-    if (process.env['LARDAN_DEMO_ISOLADO'] !== "1") throw new Error("Simulação disponível somente no ambiente isolado.");
-    const { simuladorDaConta } = await import("./index");
-    return simuladorDaConta(config.account_id);
-  }
-  if (config.ambiente !== "sandbox") throw new Error("Produção permanece bloqueada nesta preparação.");
-  if (process.env['ASAAS_EGRESS_ENABLED'] !== "1") throw new Error("Conta preparada, mas a saída externa permanece bloqueada.");
-  const ref = config.secret_ref;
-  if (!ref || !/^ASAAS_SANDBOX_[A-Z0-9_]{1,48}$/.test(ref)) throw new Error("Referência de credencial sandbox inválida.");
-  const chave = process.env[ref];
-  if (!chave || !chave.startsWith("$aact_hmlg_")) throw new Error("Credencial sandbox ausente ou incompatível.");
-  const contaUnica = process.env['ASAAS_CONNECTED_ACCOUNT_ID'];
-  if (!contaUnica || contaUnica !== config.account_id) throw new Error("A conta conectada deste servidor não corresponde ao registro solicitado.");
-  const { TransporteHttpAsaas } = await import("./transporte-http.server");
-  return new TransporteHttpAsaas({ ambiente: "sandbox", chave });
+const deConfig = (c: ConfigInterna): SituacaoBanco => ({
+  ok: true, situacao: c.state === "simulada" ? "simulada" : "sandbox_configurado",
+  account_id: c.account_id, state: c.state, modo: c.modo, ambiente: c.ambiente, secret_ref: c.secret_ref,
+  invoice_host_confirmed: c.invoice_host_confirmed,
+});
+
+async function exigir(r: Resolucao) {
+  if (!r.executavel) throw new IntegracaoIndisponivel(r.motivo, r.situacao);
+  return transporteDaResolucao(r);
 }
 
-export async function transporteDaConta(accountId: string, operacao: string): Promise<TransporteAsaas> {
+export async function transporteDaConfiguracao(config: ConfigInterna): Promise<TransporteAsaas> {
+  return exigir(resolverConta(deConfig(config), envDoServidor()));
+}
+
+/** Preflight da parcela: conta derivada de parcela → título → empresa. Sem efeito. */
+export async function resolverPorParcela(installmentId: string, actor: string): Promise<Resolucao> {
   const executor = await bancoExecutor();
-  const config = await executor.rpc<ConfigInterna>(ROTINAS_EXECUTOR.config, { _account: accountId, _operacao: operacao });
-  return transporteDaConfiguracao(config);
+  const sit = await executor.rpc<SituacaoBanco>(ROTINAS_EXECUTOR.preflightParcela, { _installment: installmentId, _actor: actor });
+  return resolverConta(sit, envDoServidor());
+}
+
+/** Preflight de conta (importação / leitura). Sem efeito. */
+export async function resolverPorConta(accountId: string, actor: string, cap: "finance.import.run" | "finance.receivable.manage" | "finance.receivable.view"): Promise<Resolucao> {
+  const executor = await bancoExecutor();
+  const sit = await executor.rpc<SituacaoBanco>(ROTINAS_EXECUTOR.preflightConta, { _account: accountId, _actor: actor, _cap: cap });
+  return resolverConta(sit, envDoServidor());
+}
+
+export async function contasResolvidas(actor: string) {
+  const executor = await bancoExecutor();
+  const lista = await executor.rpc<(SituacaoBanco & { nome: string; account_id: string })[]>(ROTINAS_EXECUTOR.contas, { _actor: actor });
+  const env = envDoServidor();
+  return lista.map((b) => ({ id: b.account_id, nome: b.nome, r: resolverConta(b, env) }));
 }
 
 export async function transporteDaIntencao(intentId: string, actor: string | null) {

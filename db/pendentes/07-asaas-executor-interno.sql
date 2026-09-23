@@ -1,4 +1,3 @@
-BEGIN;
 
 -- ============================================================
 -- 07 — Asaas: executor interno, posse temporária, links e paginação
@@ -779,4 +778,3 @@ END $fn$;
 REVOKE ALL ON FUNCTION public.asaas_receber_contas() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.asaas_receber_contas() TO authenticated;
 
-COMMIT;

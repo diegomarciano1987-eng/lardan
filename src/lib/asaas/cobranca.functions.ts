@@ -17,13 +17,11 @@ export const gerarLinkCobranca = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    const { prepararIntencao, executarIntencao } = await import("./cobranca");
-    const { bancoDe, transporteDaIntencao } = await import("./servidor.server");
-    const it = await prepararIntencao(bancoDe(c.supabase), data);
-    if (it.reaproveitada) return { ...it, state: "criada" };
-    if (!it.id) throw new Error("Intenção não registrada.");
-    const resolvida = await transporteDaIntencao(it.id, c.userId);
-    return executarIntencao(resolvida.executor, resolvida.transporte, it.id, { actor: c.userId });
+    const { solicitarCobranca } = await import("./operacoes");
+    const { bancoDe, bancoExecutor } = await import("./servidor.server");
+    const { envDoServidor } = await import("./configuracao.server");
+    // Preflight ANTES de qualquer efeito: sem intenção, tentativa ou alteração.
+    return solicitarCobranca(bancoDe(c.supabase), await bancoExecutor(), c.userId, data, { env: envDoServidor() });
   });
 
 export const recuperarIntencao = createServerFn({ method: "POST" })
@@ -54,11 +52,14 @@ export const obterLinkDaCobranca = createServerFn({ method: "POST" })
     return obterLinkCobranca(resolvida.executor, resolvida.transporte, data.chargeId, c.userId);
   });
 
-export const estadoIntegracao = createServerFn({ method: "GET" }).handler(async () => {
-  const { configuracaoDoServidor } = await import("./index");
-  const cfg = configuracaoDoServidor();
-  return cfg.disponivel
-    ? { disponivel: true as const, modo: cfg.modo, ambiente: cfg.ambiente, demo: cfg.demoIsolado,
-        redeHabilitada: cfg.modo === "conectado" ? cfg.redeHabilitada : false }
-    : { disponivel: false as const, motivo: cfg.motivo };
-});
+/** Estado sanitizado por conta — mesma resolução usada pelas operações. */
+export const estadoContasAsaas = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const c = context as unknown as Ctx;
+    const { bancoDe, contasResolvidas } = await import("./servidor.server");
+    const { publico } = await import("./configuracao.server");
+    const pode = await bancoDe(c.supabase).rpc<boolean>("has_capability", { _user_id: c.userId, _cap: "finance.receivable.view" });
+    if (!pode) throw new Error("Sem permissão.");
+    return (await contasResolvidas(c.userId)).map((x) => publico(x.r, x.id, x.nome));
+  });

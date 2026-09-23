@@ -333,7 +333,8 @@ CREATE OR REPLACE FUNCTION public.asaas_charge_vincular(
 DECLARE c record; processado boolean;
 BEGIN
   IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Sessão obrigatória.'; END IF;
-  IF NOT public.has_capability(auth.uid(),'finance.import.approve') THEN
+  IF NOT public.has_capability(auth.uid(),'finance.import.approve')
+     AND NOT public.has_capability(auth.uid(),'finance.receivable.manage') THEN
     RAISE EXCEPTION 'Sem permissão para vincular cobranças.';
   END IF;
   IF _title IS NULL THEN RAISE EXCEPTION 'Informe o título.'; END IF;

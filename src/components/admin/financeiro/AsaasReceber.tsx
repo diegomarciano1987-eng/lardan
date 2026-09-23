@@ -170,7 +170,7 @@ function AvisosPermanentes() {
       <li>Link de cobrança não comprova pagamento.</li>
       <li>Cobrança não comprova venda e não emite nota fiscal.</li>
       <li>Eventos recebidos continuam aguardando conciliação.</li>
-      <li>{AVISO_SIMULACAO.charAt(0) + AVISO_SIMULACAO.slice(1).toLowerCase()}: simulação não é cobrança pagável.</li>
+      <li>Simulação não é cobrança pagável.</li>
     </ul>
   );
 }

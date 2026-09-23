@@ -70,6 +70,24 @@ export function AsaasImportacao({ contaId }: { contaId: string | undefined }) {
   const [relatorio, setRelatorio] = React.useState<Record<string, unknown> | null>(null);
   const [pessoa, setPessoa] = React.useState<Record<string, string>>({});
 
+  // Lote em andamento: quem aprova é outra pessoa, em outra sessão.
+  const ultimo = useQuery({
+    queryKey: ["asaas", "lote-aberto"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("asaas_import_runs" as never)
+        .select("id, status, approved_at")
+        .eq("kind" as never, "cobrancas" as never)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (error) throw error;
+      return ((data ?? []) as unknown as { id: string; status: string; approved_at: string | null }[])[0] ?? null;
+    },
+  });
+  React.useEffect(() => {
+    if (!runId && ultimo.data) setRunId(ultimo.data.id);
+  }, [runId, ultimo.data]);
+
   const linhas = useQuery({
     queryKey: ["asaas", "stage", runId],
     enabled: !!runId,

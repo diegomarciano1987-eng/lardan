@@ -215,3 +215,35 @@ export async function localBloqueado() {
   const r = (await adm.unsafe(`select public.kit_blocked_location() as id`)) as { id: string }[];
   return r[0]!.id;
 }
+
+/**
+ * Chama uma rotina no papel do EXECUTOR interno do servidor (service_role),
+ * sem sessão de usuário — como o servidor faz com o cliente de serviço.
+ */
+export async function rpcServico<T = unknown>(fn: string, args: Record<string, unknown> = {}): Promise<Resposta<T>> {
+  const mapa = await carregarAssinaturas();
+  const assinatura = mapa.get(fn);
+  if (!assinatura) throw new Error(`rotina inexistente: ${fn}`);
+  const valores: unknown[] = [];
+  const chamada = assinatura
+    .filter((a) => a.nome in args)
+    .map((a) => {
+      const v = args[a.nome];
+      const json = v !== null && typeof v === "object";
+      valores.push(json ? JSON.stringify(v) : v);
+      return `${a.nome} => $${valores.length}::text::${a.tipo}`;
+    })
+    .join(", ");
+  const conexao = await adm.reserve();
+  try {
+    await conexao.unsafe(`set role service_role`);
+    await conexao.unsafe(`select set_config('lardan.test_uid', '', false)`);
+    const r = (await conexao.unsafe(`select public.${fn}(${chamada}) as r`, valores)) as { r: T }[];
+    return { ok: true, dados: r[0]!.r, erro: null };
+  } catch (e) {
+    return { ok: false, dados: null as T, erro: (e as Error).message };
+  } finally {
+    try { await conexao.unsafe(`reset role`); } catch { /* */ }
+    conexao.release();
+  }
+}

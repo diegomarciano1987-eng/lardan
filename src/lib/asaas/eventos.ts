@@ -11,7 +11,7 @@
  * desconhecido — não vira zero.
  */
 import type { BancoAsaas } from "./banco";
-import { ROTINAS } from "./banco";
+import { ROTINAS, ROTINAS_EXECUTOR } from "./banco";
 import type { EventoExterno, TransporteAsaas } from "./contrato";
 
 const TAMANHO_MAXIMO = 256 * 1024;
@@ -43,9 +43,21 @@ export function validarEnvelope(e: {
   return true;
 }
 
-/** Persiste antes de confirmar. Deduplica por conta + identificador externo. */
-export async function registrarEvento(banco: BancoAsaas, accountId: string, e: EventoExterno): Promise<EventoRegistrado> {
-  return banco.rpc<EventoRegistrado>(ROTINAS.eventoRegistrar, {
+export type OrigemEvento = "provedor" | "simulacao";
+
+/**
+ * Persiste antes de confirmar. Deduplica por conta + identificador externo.
+ * Só o executor interno (banco de serviço) chama: 'provedor' depois de
+ * validarEnvelope; 'simulacao' somente na demonstração isolada, com ator.
+ */
+export async function registrarEvento(
+  servico: BancoAsaas,
+  accountId: string,
+  e: EventoExterno,
+  origem: OrigemEvento,
+  actor: string | null = null,
+): Promise<EventoRegistrado> {
+  return servico.rpc<EventoRegistrado>(ROTINAS_EXECUTOR.eventoRegistrar, {
     _payload: {
       account_id: accountId,
       external_id: e.id,
@@ -54,19 +66,28 @@ export async function registrarEvento(banco: BancoAsaas, accountId: string, e: E
       event_at: e.eventAt,
       payload: e.payload,
     },
+    _origem: origem,
+    _actor: actor,
   });
 }
 
 export const processarEvento = (banco: BancoAsaas, eventId: string) =>
   banco.rpc<EventoRegistrado>(ROTINAS.eventoProcessar, { _evento: eventId });
 
-/** Recebe, registra e processa a fila. Repetido não repete efeito. */
-export async function drenarEventos(banco: BancoAsaas, transporte: TransporteAsaas, accountId: string) {
+/** Recebe, registra (executor) e processa (conciliador). Repetido não repete efeito. */
+export async function drenarEventos(
+  servico: BancoAsaas,
+  conciliador: BancoAsaas,
+  transporte: TransporteAsaas,
+  accountId: string,
+  origem: OrigemEvento,
+  actor: string | null = null,
+) {
   const fila = await transporte.receberEventos();
   const saida: EventoRegistrado[] = [];
   for (const e of fila) {
-    const reg = await registrarEvento(banco, accountId, e);
-    saida.push(reg.novo === false ? reg : await processarEvento(banco, reg.id));
+    const reg = await registrarEvento(servico, accountId, e, origem, actor);
+    saida.push(reg.novo === false ? { ...reg, repetido: true } : await processarEvento(conciliador, reg.id));
   }
   return saida;
 }

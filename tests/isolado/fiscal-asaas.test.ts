@@ -201,7 +201,7 @@ describe("Fiscal inerte", () => {
       `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
         where n.nspname = 'public' and p.prosrc ilike '%https://%'`,
     )) as { proname: string }[];
-    expect(mencoes.map((r) => r.proname).sort()).toEqual(["asaas_cobranca_resultado"]);
+    expect(mencoes.map((r) => r.proname).sort()).toEqual(["asaas_fatura_url_valida"]);
   });
 });
 

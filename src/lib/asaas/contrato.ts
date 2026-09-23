@@ -6,7 +6,13 @@
  * escolhe transporte, ambiente nem endereço.
  */
 
+/** @deprecated use ModoExecucao + AmbienteProvedor */
 export type Ambiente = "simulacao" | "sandbox" | "producao";
+
+/** Como o servidor executa: simulador local ou provedor de verdade. */
+export type ModoExecucao = "simulado" | "conectado";
+/** Qual ambiente do provedor, só quando conectado. */
+export type AmbienteProvedor = "sandbox" | "producao";
 
 export type FormaPagamento = "BOLETO" | "PIX" | "CREDIT_CARD" | "UNDEFINED";
 
@@ -45,6 +51,8 @@ export interface Pagina<T> {
   limit: number;
   hasMore: boolean;
   total?: number | null;
+  /** próximo offset no provedor quando a página foi filtrada localmente */
+  proximoOffset?: number;
 }
 
 export interface FiltroCobrancas {
@@ -88,15 +96,60 @@ export class RespostaPerdida extends Error {
 
 /** Falha explícita do provedor: a cobrança não existe lá. */
 export class RecusadoPeloProvedor extends Error {
-  constructor(msg: string) {
+  constructor(
+    msg: string,
+    readonly status: number | null = null,
+    readonly codigos: string[] = [],
+  ) {
     super(msg);
     this.name = "RecusadoPeloProvedor";
+  }
+}
+
+/** 429: o provedor não processou; pode tentar depois. */
+export class LimiteDeRequisicoes extends RecusadoPeloProvedor {
+  constructor(readonly repetirEmSegundos: number | null = null) {
+    super("Limite de requisições do provedor atingido.", 429, ["rate_limit"]);
+    this.name = "LimiteDeRequisicoes";
+  }
+}
+
+/** 401/403: credencial ausente, inválida ou de outro ambiente. Nada foi criado. */
+export class CredencialRecusada extends RecusadoPeloProvedor {
+  constructor(status: number, codigos: string[]) {
+    super("Credencial recusada pelo provedor (ausente, inválida ou de outro ambiente).", status, codigos);
+    this.name = "CredencialRecusada";
+  }
+}
+
+/** Nada saiu do servidor: seguro afirmar que o provedor não criou nada. */
+export class FalhaAntesDoEnvio extends Error {
+  constructor(msg: string) {
+    super(msg);
+    this.name = "FalhaAntesDoEnvio";
+  }
+}
+
+/** Consulta (GET) falhou de forma transitória; não diz nada sobre existência. */
+export class ConsultaIndisponivel extends Error {
+  constructor(msg: string) {
+    super(msg);
+    this.name = "ConsultaIndisponivel";
+  }
+}
+
+/** Mais de um registro para uma referência que deveria ser única do nosso lado. */
+export class ReferenciaAmbigua extends Error {
+  constructor(ref: string, n: number) {
+    super(`A referência ${ref} corresponde a ${n} registros no provedor: exige conciliação humana.`);
+    this.name = "ReferenciaAmbigua";
   }
 }
 
 export interface TransporteAsaas {
   readonly ambiente: Ambiente;
   readonly simulado: boolean;
+  readonly modo: ModoExecucao;
 
   listarClientes(f: { limit: number; offset: number }): Promise<Pagina<ClienteExterno>>;
   consultarCliente(id: string): Promise<ClienteExterno | null>;

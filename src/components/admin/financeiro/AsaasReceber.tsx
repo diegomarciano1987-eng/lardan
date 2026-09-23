@@ -1,49 +1,76 @@
 import * as React from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { EmptyState, Panel, StatusBadge, formatBRLFromCents } from "@/components/admin/ui";
+import { SmartSelect } from "@/components/premium/SmartSelect";
 import {
   AVISO_SIMULACAO,
+  FASES,
   PreparacaoNaoAplicada,
-  carregarPainel,
+  carregarContas,
+  carregarFila,
+  carregarOcorrencias,
+  carregarParcelas,
   situacaoCobranca,
+  type ContaAsaas,
+  type Cursor,
   type LinhaReceber,
+  type SituacaoFiltro,
 } from "@/lib/asaas-painel";
-import { demoEvento, demoGerarLink, demoRecuperar } from "@/lib/asaas/demo.functions";
+import { estadoIntegracao, gerarLinkCobranca, obterLinkDaCobranca, recuperarIntencao } from "@/lib/asaas/cobranca.functions";
+import { demoEvento, demoPerderResposta } from "@/lib/asaas/demo.functions";
 import { AsaasImportacao } from "./AsaasImportacao";
 
-function DetalheParcela({ conta, linha, onFechar }: { conta: string; linha: LinhaReceber; onFechar: () => void }) {
+type Resultado = { state?: string; reaproveitada?: boolean; fase?: string | null; erro?: string | null; chamadas_criar?: number };
+
+function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; linha: LinhaReceber; demo: boolean; onFechar: () => void }) {
   const qc = useQueryClient();
-  const gerar = useServerFn(demoGerarLink);
-  const recuperar = useServerFn(demoRecuperar);
+  const gerar = useServerFn(gerarLinkCobranca);
+  const perder = useServerFn(demoPerderResposta);
+  const recuperar = useServerFn(recuperarIntencao);
+  const obterLink = useServerFn(obterLinkDaCobranca);
   const evento = useServerFn(demoEvento);
   const [forma, setForma] = React.useState<"PIX" | "BOLETO">("PIX");
   const [ultimo, setUltimo] = React.useState<string | null>(null);
-  const atualizar = () => void qc.invalidateQueries({ queryKey: ["asaas", "painel"] });
+  const atualizar = () => void qc.invalidateQueries({ queryKey: ["asaas"] });
   const falhou = (e: Error) => toast.error(e.message);
+  const descrever = (r: Resultado) =>
+    `Situação: ${r.state}${r.reaproveitada ? " (existente reaproveitada)" : ""}${r.fase ? ` — ${FASES[r.fase] ?? r.fase}` : ""}`;
 
   const solicitar = useMutation({
-    mutationFn: (perderResposta: boolean) => gerar({ data: { accountId: conta, installmentId: linha.installment_id, billingType: forma, perderResposta } }),
-    onSuccess: (r) => { setUltimo(`Situação: ${r.state}${r.reaproveitada ? " (cobrança existente reaproveitada)" : ""}`); atualizar(); },
+    mutationFn: async (perderResposta: boolean): Promise<Resultado> => {
+      const d = { accountId: conta.id, installmentId: linha.installment_id, billingType: forma };
+      return perderResposta ? perder({ data: d }) : gerar({ data: d });
+    },
+    onSuccess: (r) => { setUltimo(descrever(r)); atualizar(); },
     onError: falhou,
   });
   const recuperarM = useMutation({
-    mutationFn: () => recuperar({ data: { intentId: linha.intencao!.id } }),
-    onSuccess: (r) => { setUltimo(`Consulta ao provedor: ${r.state}. Chamadas de criação no provedor: ${r.chamadas_criar}.`); atualizar(); },
+    mutationFn: (): Promise<Resultado> => recuperar({ data: { intentId: linha.intencao!.id } }),
+    onSuccess: (r) => { setUltimo(`Consulta ao provedor antes de qualquer reenvio. ${descrever(r)}`); atualizar(); },
+    onError: falhou,
+  });
+  const linkM = useMutation({
+    mutationFn: () => obterLink({ data: { chargeId: linha.cobranca!.id, accountId: conta.id } }),
+    onSuccess: (r) => { setUltimo(r.consultado ? "Link consultado no provedor pelo identificador; nenhuma cobrança criada." : "Link já estava guardado."); atualizar(); },
     onError: falhou,
   });
   const eventoM = useMutation({
-    mutationFn: (repetir: boolean) => evento({ data: { accountId: conta, chargeExternalId: linha.cobranca!.external_id!, pagoCents: linha.saldo_cents, tarifaCents: 199, repetir } }),
+    mutationFn: (repetir: boolean) => evento({ data: { accountId: conta.id, chargeExternalId: linha.cobranca!.external_id!, pagoCents: linha.saldo_cents, tarifaCents: 199, repetir } }),
     onSuccess: (r) => {
-      const partes = r.map((e) => (e.repetido ? "repetido (sem novo efeito)" : `${e.efeito ?? "registrado"}${e.revisao_manual ? " · revisão manual" : ""}`));
+      const partes = (r as { repetido?: boolean; efeito?: string; revisao_manual?: boolean }[]).map((e) =>
+        e.repetido ? "repetido (sem novo efeito)" : `${e.efeito ?? "registrado"}${e.revisao_manual ? " · revisão manual" : ""}`,
+      );
       setUltimo(`Evento: ${partes.join(" / ")}. Nenhuma baixa foi criada.`);
       atualizar();
     },
     onError: falhou,
   });
-  const ocupado = solicitar.isPending || recuperarM.isPending || eventoM.isPending;
+  const ocupado = solicitar.isPending || recuperarM.isPending || eventoM.isPending || linkM.isPending;
   const estado = linha.intencao?.state;
+  const url = linha.cobranca?.invoice_url ?? null;
+  const simulado = conta.modo === "simulado";
 
   return (
     <Panel title="Detalhe da parcela e vínculo Asaas">
@@ -53,16 +80,14 @@ function DetalheParcela({ conta, linha, onFechar }: { conta: string; linha: Linh
         <div><dt className="text-ledger-muted">Cobrança vinculada</dt><dd className="font-medium break-all" data-testid="cobranca-vinculada">{linha.cobranca?.external_id ?? "nenhuma"}</dd></div>
         <div><dt className="text-ledger-muted">Situação</dt><dd className="font-medium" data-testid="situacao">{situacaoCobranca(linha).rotulo}</dd></div>
       </dl>
+      {linha.intencao?.erro && <p className="mt-3 text-sm text-ledger-muted">{linha.intencao.erro}</p>}
 
-      {linha.intencao?.invoice_url && (
+      {url && (
         <div className="mt-5 rounded-lg border border-warning px-4 py-3">
-          <p className="text-sm font-semibold text-warning">{AVISO_SIMULACAO}</p>
-          <a href={linha.intencao.invoice_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-bronze underline">
-            Abrir demonstração local
+          {simulado && <p className="text-sm font-semibold text-warning">{AVISO_SIMULACAO}</p>}
+          <a href={url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-bronze underline" data-testid="link-fatura">
+            {simulado ? "Abrir demonstração local" : "Abrir fatura"}
           </a>
-          <button type="button" disabled className="ml-4 cursor-not-allowed text-sm text-ledger-muted" title="Disponível somente quando o Asaas estiver conectado">
-            Copiar link real (indisponível)
-          </button>
         </div>
       )}
 
@@ -75,23 +100,29 @@ function DetalheParcela({ conta, linha, onFechar }: { conta: string; linha: Linh
             </button>
           ))}
         </div>
-        <button type="button" disabled={linha.saldo_cents <= 0 || ocupado} onClick={() => solicitar.mutate(false)}
+        <button type="button" disabled={linha.saldo_cents <= 0 || ocupado || estado === "conciliacao" || estado === "desconhecida"} onClick={() => solicitar.mutate(false)}
           className="rounded-lg border border-bronze px-4 py-2 text-sm font-semibold text-bronze disabled:opacity-50">
-          {linha.intencao?.invoice_url ? "Solicitar de novo (reaproveita)" : "Solicitar cobrança simulada"}
+          {linha.cobranca ? "Solicitar de novo (reaproveita)" : simulado ? "Solicitar cobrança simulada" : "Solicitar cobrança"}
         </button>
-        {!linha.intencao && (
+        {demo && !linha.cobranca && !linha.intencao && (
           <button type="button" disabled={ocupado} onClick={() => solicitar.mutate(true)}
             className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-ledger-muted">
             Simular resposta perdida
           </button>
         )}
-        {estado === "desconhecida" && (
+        {(estado === "desconhecida" || estado === "processando" || estado === "preparada") && (
           <button type="button" disabled={ocupado} onClick={() => recuperarM.mutate()}
             className="rounded-lg border border-danger px-4 py-2 text-sm font-semibold text-danger">
             Consultar provedor e recuperar
           </button>
         )}
-        {linha.cobranca?.external_id && (
+        {linha.cobranca && !url && (
+          <button type="button" disabled={ocupado} onClick={() => linkM.mutate()}
+            className="rounded-lg border border-bronze px-3 py-2 text-xs font-semibold text-bronze">
+            Obter link pelo identificador
+          </button>
+        )}
+        {demo && linha.cobranca?.external_id && (
           <>
             <button type="button" disabled={ocupado} onClick={() => eventoM.mutate(false)}
               className="rounded-lg border border-line px-3 py-2 text-xs font-semibold">Simular recebimento (evento)</button>
@@ -100,6 +131,7 @@ function DetalheParcela({ conta, linha, onFechar }: { conta: string; linha: Linh
           </>
         )}
       </div>
+      {estado === "conciliacao" && <p className="mt-3 text-sm text-danger">Em conciliação: nenhuma nova cobrança pode ser gerada para esta parcela até a revisão.</p>}
       <p className="mt-3 text-xs text-ledger-muted">Gerar link não liquida a parcela, não comprova venda e não emite nota fiscal.</p>
       {ultimo && <p className="mt-3 text-sm font-medium" data-testid="ultimo-resultado">{ultimo}</p>}
 
@@ -116,31 +148,82 @@ const ABAS = [
 ] as const;
 type Aba = (typeof ABAS)[number]["id"];
 
-function Avisos() {
+const SITUACOES: { value: SituacaoFiltro; label: string }[] = [
+  { value: "", label: "Todas as situações" },
+  { value: "sem_cobranca", label: "Sem cobrança" },
+  { value: "com_link", label: "Com link" },
+  { value: "pendente_link", label: "Cobrança sem link" },
+  { value: "em_processamento", label: "Em processamento" },
+  { value: "conciliacao", label: "Em conciliação" },
+  { value: "desconhecida", label: "Resultado desconhecido" },
+  { value: "rejeitada", label: "Rejeitada" },
+];
+
+function Avisos({ conta, integracao }: { conta: ContaAsaas | undefined; integracao: { disponivel: boolean; motivo?: string } | undefined }) {
   return (
     <div className="flex flex-wrap gap-2">
       <StatusBadge tone="danger">Asaas não conectado</StatusBadge>
-      <StatusBadge tone="warning">Modo de simulação</StatusBadge>
+      {conta && <StatusBadge tone="warning">{conta.modo === "simulado" ? "Modo de simulação" : `Conectado · ${conta.ambiente}`}</StatusBadge>}
+      {integracao && !integracao.disponivel && <StatusBadge tone="danger">Integração indisponível: {integracao.motivo}</StatusBadge>}
+    </div>
+  );
+}
+
+function useDebounced<T>(v: T, ms = 300) {
+  const [d, setD] = React.useState(v);
+  React.useEffect(() => { const t = setTimeout(() => setD(v), ms); return () => clearTimeout(t); }, [v, ms]);
+  return d;
+}
+
+function Mais({ tem, carregando, onClick }: { tem: boolean; carregando: boolean; onClick: () => void }) {
+  if (!tem) return null;
+  return (
+    <div className="px-6 py-4">
+      <button type="button" onClick={onClick} disabled={carregando} className="rounded-lg border border-line px-4 py-2 text-sm font-semibold hover:border-bronze disabled:opacity-50">
+        {carregando ? "Carregando…" : "Carregar mais"}
+      </button>
     </div>
   );
 }
 
 export function AsaasReceber() {
   const [aba, setAba] = React.useState<Aba>("recebiveis");
-  const [parcela, setParcela] = React.useState<LinhaReceber | null>(null);
+  const [parcelaId, setParcelaId] = React.useState<string | null>(null);
+  const [busca, setBusca] = React.useState("");
+  const [situacao, setSituacao] = React.useState<SituacaoFiltro>("");
+  const termo = useDebounced(busca);
+  const estado = useServerFn(estadoIntegracao);
 
-  const painel = useQuery({
-    queryKey: ["asaas", "painel"],
-    queryFn: () => carregarPainel(200, 0),
+  const contas = useQuery({ queryKey: ["asaas", "contas"], queryFn: carregarContas, retry: false });
+  const integracao = useQuery({ queryKey: ["asaas", "integracao"], queryFn: () => estado() });
+  const parcelas = useInfiniteQuery({
+    queryKey: ["asaas", "parcelas", termo, situacao],
+    queryFn: ({ pageParam }) => carregarParcelas({ busca: termo, situacao, cursor: pageParam }),
+    initialPageParam: null as Cursor,
+    getNextPageParam: (p) => p.proximo ?? undefined,
+    retry: false,
+  });
+  const fila = useInfiniteQuery({
+    queryKey: ["asaas", "fila"],
+    queryFn: ({ pageParam }) => carregarFila(pageParam),
+    initialPageParam: null as Cursor,
+    getNextPageParam: (p) => p.proximo ?? undefined,
+    enabled: aba === "erros",
+    retry: false,
+  });
+  const ocorr = useInfiniteQuery({
+    queryKey: ["asaas", "ocorrencias"],
+    queryFn: ({ pageParam }) => carregarOcorrencias(pageParam),
+    initialPageParam: null as Cursor,
+    getNextPageParam: (p) => p.proximo ?? undefined,
+    enabled: aba === "ocorrencias",
     retry: false,
   });
 
-
-
-  if (painel.error instanceof PreparacaoNaoAplicada) {
+  if (contas.error instanceof PreparacaoNaoAplicada || parcelas.error instanceof PreparacaoNaoAplicada) {
     return (
       <div className="space-y-6">
-        <Avisos />
+        <Avisos conta={undefined} integracao={undefined} />
         <Panel title="Recebíveis Asaas">
           <EmptyState
             title="Preparação ainda não aplicada a este ambiente"
@@ -151,39 +234,55 @@ export function AsaasReceber() {
     );
   }
 
-  const dados = painel.data;
-  const conta = dados?.contas[0];
+  const conta = contas.data?.[0];
+  const linhas = parcelas.data?.pages.flatMap((p) => p.itens) ?? [];
+  const total = parcelas.data?.pages[0]?.total ?? 0;
+  const demo = Boolean(integracao.data && integracao.data.disponivel && integracao.data.demo);
+  const parcela = linhas.find((l) => l.installment_id === parcelaId) ?? null;
 
   return (
     <div className="space-y-6">
-      <Avisos />
+      <Avisos conta={conta} integracao={integracao.data} />
 
       <nav className="flex flex-wrap gap-2" aria-label="Seções de recebíveis Asaas">
         {ABAS.map((a) => (
-          <button
-            key={a.id}
-            type="button"
-            onClick={() => setAba(a.id)}
-            aria-current={aba === a.id ? "page" : undefined}
-            className={`rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-              aba === a.id ? "border-bronze text-bronze" : "border-line text-ledger-muted hover:border-bronze"
-            }`}
-          >
+          <button key={a.id} type="button" onClick={() => setAba(a.id)} aria-current={aba === a.id ? "page" : undefined}
+            className={`rounded-lg border px-3 py-2 text-sm font-semibold transition ${aba === a.id ? "border-bronze text-bronze" : "border-line text-ledger-muted hover:border-bronze"}`}>
             {a.label}
           </button>
         ))}
       </nav>
 
-      {painel.isLoading && <Panel><p className="text-sm text-ledger-muted">Carregando…</p></Panel>}
-
-      {aba === "recebiveis" && dados && (
+      {aba === "recebiveis" && (
         <Panel title="Parcelas a receber e situação da cobrança" flush>
-          {dados.itens.length === 0 ? (
+          <div className="flex flex-wrap items-center gap-3 px-6 pt-5">
+            <input
+              type="search"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar por pessoa, número ou descrição do título"
+              aria-label="Buscar parcelas"
+              className="min-w-[16rem] flex-1 rounded-lg border border-line bg-transparent px-3 py-2 text-sm"
+            />
+            <SmartSelect
+              options={SITUACOES}
+              value={situacao}
+              onChange={(v) => setSituacao(v as SituacaoFiltro)}
+              placeholder="Situação"
+              className="min-w-[14rem]"
+            />
+            <span className="text-xs text-ledger-muted" data-testid="contagem-parcelas">
+              {parcelas.isFetching ? "Buscando…" : `${linhas.length} de ${total} parcela(s)`}
+            </span>
+          </div>
+          {parcelas.isLoading ? (
+            <p className="px-6 py-5 text-sm text-ledger-muted">Carregando…</p>
+          ) : linhas.length === 0 ? (
             <div className="px-6 py-5">
-              <EmptyState title="Sem parcelas" description="Nenhuma parcela a receber neste recorte." />
+              <EmptyState title="Sem parcelas" description={termo || situacao ? "Nenhuma parcela para esta busca." : "Nenhuma parcela a receber."} />
             </div>
           ) : (
-            <div className="min-w-0 overflow-x-auto">
+            <div className="mt-4 min-w-0 overflow-x-auto">
               <table className="w-full min-w-[54rem] text-sm">
                 <thead className="text-left text-ledger-muted">
                   <tr className="border-b border-line-soft">
@@ -195,7 +294,7 @@ export function AsaasReceber() {
                   </tr>
                 </thead>
                 <tbody>
-                  {dados.itens.map((l) => {
+                  {linhas.map((l) => {
                     const s = situacaoCobranca(l);
                     return (
                       <tr key={l.installment_id} className="border-b border-line-soft last:border-0">
@@ -207,11 +306,7 @@ export function AsaasReceber() {
                         <td className="px-4 py-3 text-right tabular-nums">{formatBRLFromCents(l.saldo_cents)}</td>
                         <td className="px-4 py-3"><StatusBadge tone={s.tom}>{s.rotulo}</StatusBadge></td>
                         <td className="px-6 py-3 text-right">
-                          <button
-                            type="button"
-                            className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold hover:border-bronze hover:text-bronze"
-                            onClick={() => setParcela(l)}
-                          >
+                          <button type="button" className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold hover:border-bronze hover:text-bronze" onClick={() => setParcelaId(l.installment_id)}>
                             Detalhe
                           </button>
                         </td>
@@ -222,18 +317,19 @@ export function AsaasReceber() {
               </table>
             </div>
           )}
+          <Mais tem={Boolean(parcelas.hasNextPage)} carregando={parcelas.isFetchingNextPage} onClick={() => void parcelas.fetchNextPage()} />
         </Panel>
       )}
 
       {aba === "importacao" && <AsaasImportacao contaId={conta?.id} />}
 
-      {aba === "ocorrencias" && dados && (
+      {aba === "ocorrencias" && (
         <Panel title="Ocorrências recebidas do provedor">
-          {dados.ocorrencias.length === 0 ? (
+          {(ocorr.data?.pages.flatMap((p) => p.itens) ?? []).length === 0 ? (
             <EmptyState title="Sem ocorrências na fila" description="Nenhum evento aguardando conciliação." />
           ) : (
             <ul className="space-y-2 text-sm">
-              {dados.ocorrencias.map((o) => (
+              {ocorr.data!.pages.flatMap((p) => p.itens).map((o) => (
                 <li key={o.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line px-4 py-3">
                   <span className="font-medium">{o.event}</span>
                   <span className="text-ledger-muted">{o.cobranca ?? "—"}</span>
@@ -242,36 +338,35 @@ export function AsaasReceber() {
               ))}
             </ul>
           )}
+          <Mais tem={Boolean(ocorr.hasNextPage)} carregando={ocorr.isFetchingNextPage} onClick={() => void ocorr.fetchNextPage()} />
         </Panel>
       )}
 
-      {aba === "erros" && dados && (
+      {aba === "erros" && (
         <Panel title="Fila de erros e resultados desconhecidos">
-          {dados.fila_erros.length === 0 ? (
+          {(fila.data?.pages.flatMap((p) => p.itens) ?? []).length === 0 ? (
             <EmptyState title="Fila vazia" description="Nenhuma tentativa rejeitada ou inconclusiva." />
           ) : (
             <ul className="space-y-2 text-sm">
-              {dados.fila_erros.map((f) => (
+              {fila.data!.pages.flatMap((p) => p.itens).map((f) => (
                 <li key={f.id} className="rounded-lg border border-line px-4 py-3">
                   <div className="flex items-center justify-between gap-2">
                     <StatusBadge tone="danger">{f.state}</StatusBadge>
                     <span className="text-xs text-ledger-muted">{f.attempts} tentativa(s)</span>
                   </div>
-                  <p className="mt-2 text-ledger-muted">{f.erro ?? "Resultado desconhecido: consultar o provedor antes de reenviar."}</p>
+                  <p className="mt-2 text-ledger-muted">
+                    {f.fase ? `${FASES[f.fase] ?? f.fase}. ` : ""}
+                    {f.erro ?? "Resultado desconhecido: consultar o provedor antes de reenviar."}
+                  </p>
                 </li>
               ))}
             </ul>
           )}
+          <Mais tem={Boolean(fila.hasNextPage)} carregando={fila.isFetchingNextPage} onClick={() => void fila.fetchNextPage()} />
         </Panel>
       )}
 
-      {parcela && conta && (
-        <DetalheParcela
-          conta={conta.id}
-          linha={dados?.itens.find((i) => i.installment_id === parcela.installment_id) ?? parcela}
-          onFechar={() => setParcela(null)}
-        />
-      )}
+      {parcela && conta && <DetalheParcela conta={conta} linha={parcela} demo={demo} onFechar={() => setParcelaId(null)} />}
     </div>
   );
 }

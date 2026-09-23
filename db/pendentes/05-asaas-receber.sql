@@ -126,7 +126,7 @@ CREATE INDEX IF NOT EXISTS asaas_charge_intents_parcela_idx
 -- uma intenção viva por parcela
 CREATE UNIQUE INDEX IF NOT EXISTS asaas_charge_intents_viva_uidx
   ON public.asaas_charge_intents (installment_id)
-  WHERE state IN ('preparada','processando','criada','desconhecida');
+  WHERE state IN ('preparada','processando','criada','desconhecida','conciliacao');
 
 GRANT SELECT ON public.asaas_charge_intents TO authenticated;
 GRANT ALL ON public.asaas_charge_intents TO service_role;
@@ -625,8 +625,9 @@ BEGIN
   IF existente.id IS NOT NULL THEN
     RETURN jsonb_build_object('reaproveitada', true, 'charge_id', existente.id,
       'external_id', existente.external_id,
-      'invoice_url', (SELECT invoice_url FROM public.asaas_charge_intents
-                       WHERE charge_id = existente.id ORDER BY created_at DESC LIMIT 1),
+      'invoice_url', coalesce(existente.invoice_url,
+                       (SELECT invoice_url FROM public.asaas_charge_intents
+                         WHERE charge_id = existente.id ORDER BY created_at DESC LIMIT 1)),
       'aviso','Já existe cobrança ativa para esta parcela. Nenhuma nova foi criada.');
   END IF;
 
@@ -654,7 +655,7 @@ BEGIN
   END IF;
 
   SELECT * INTO viva FROM public.asaas_charge_intents
-   WHERE installment_id = i.id AND state IN ('preparada','processando','criada','desconhecida') LIMIT 1;
+   WHERE installment_id = i.id AND state IN ('preparada','processando','criada','desconhecida','conciliacao') LIMIT 1;
   IF viva.id IS NOT NULL THEN
     RETURN jsonb_build_object('id', viva.id, 'repetida', true, 'state', viva.state,
       'valor_cents', viva.value_cents, 'invoice_url', viva.invoice_url,
@@ -672,7 +673,7 @@ BEGIN
      simulado, created_by)
   VALUES (conta.id, t.id, i.id, v_party, cliente.external_id, cliente.id IS NULL,
           v_saldo, v_venc, v_forma, v_ref || ':' || left(md5(v_key),8), v_key, v_hash,
-          conta.environment <> 'producao', auth.uid())
+          coalesce(conta.modo_execucao,'simulado') = 'simulado', auth.uid())
   RETURNING id INTO v_id;
   INSERT INTO public.asaas_charge_intent_events (intent_id, de, para, detalhe, actor_id)
   VALUES (v_id, NULL, 'preparada', jsonb_build_object('valor_cents', v_saldo), auth.uid());
@@ -682,7 +683,7 @@ BEGIN
     'valor_cents', v_saldo, 'due_date', v_venc, 'billing_type', v_forma,
     'customer_external_id', cliente.external_id, 'criar_cliente', cliente.id IS NULL,
     'internal_reference', v_ref || ':' || left(md5(v_key),8),
-    'simulado', conta.environment <> 'producao',
+    'simulado', coalesce(conta.modo_execucao,'simulado') = 'simulado',
     'aviso','Intenção registrada. Gerar link não liquida parcela nem emite documento fiscal.');
 END $fn$;
 REVOKE ALL ON FUNCTION public.asaas_cobranca_preparar(jsonb) FROM PUBLIC, anon;

@@ -91,7 +91,7 @@ export async function buscarPaginas(
     trazidos += pagina.itens.length;
     novos += r.novos;
     repetidos += r.repetidos;
-    offset += pagina.itens.length;
+    offset = pagina.proximoOffset ?? offset + pagina.itens.length;
     hasMore = pagina.hasMore;
     paginas += 1;
     if (pagina.itens.length === 0) break;

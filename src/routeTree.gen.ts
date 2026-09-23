@@ -77,6 +77,7 @@ import { Route as AuthenticatedAdminFinanceiroPagarRouteImport } from './routes/
 import { Route as AuthenticatedAdminFinanceiroPlanoContasRouteImport } from './routes/_authenticated/admin/financeiro/plano-contas'
 import { Route as AuthenticatedAdminFinanceiroReceberRouteImport } from './routes/_authenticated/admin/financeiro/receber'
 import { Route as AuthenticatedAdminMaletasIdRouteImport } from './routes/_authenticated/admin/maletas_.$id'
+import { Route as AuthenticatedFinanceiroSimulacaoIdRouteImport } from './routes/_authenticated/financeiro/simulacao.$id'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as AuthenticatedAdminCadastrosPessoasIdRouteImport } from './routes/_authenticated/admin/cadastros/pessoas_.$id'
@@ -461,6 +462,12 @@ const AuthenticatedAdminMaletasIdRoute =
     path: '/maletas/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedFinanceiroSimulacaoIdRoute =
+  AuthenticatedFinanceiroSimulacaoIdRouteImport.update({
+    id: '/financeiro/simulacao/$id',
+    path: '/financeiro/simulacao/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicMidiaIdRoute = ApiPublicMidiaIdRouteImport.update({
   id: '/api/public/midia/$id',
   path: '/api/public/midia/$id',
@@ -563,6 +570,7 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
+  '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
@@ -636,6 +644,7 @@ export interface FileRoutesByTo {
   '/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
+  '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/admin/cadastros': typeof AuthenticatedAdminCadastrosIndexRoute
@@ -713,6 +722,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/_authenticated/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/_authenticated/admin/maletas_/$id': typeof AuthenticatedAdminMaletasIdRoute
+  '/_authenticated/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/_authenticated/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
@@ -790,6 +800,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/plano-contas'
     | '/admin/financeiro/receber'
     | '/admin/maletas/$id'
+    | '/financeiro/simulacao/$id'
     | '/api/public/midia/$id'
     | '/lovable/email/transactional/preview'
     | '/admin/cadastros/'
@@ -863,6 +874,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/plano-contas'
     | '/admin/financeiro/receber'
     | '/admin/maletas/$id'
+    | '/financeiro/simulacao/$id'
     | '/api/public/midia/$id'
     | '/lovable/email/transactional/preview'
     | '/admin/cadastros'
@@ -939,6 +951,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financeiro/plano-contas'
     | '/_authenticated/admin/financeiro/receber'
     | '/_authenticated/admin/maletas_/$id'
+    | '/_authenticated/financeiro/simulacao/$id'
     | '/api/public/midia/$id'
     | '/lovable/email/transactional/preview'
     | '/_authenticated/admin/cadastros/'
@@ -1459,6 +1472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMaletasIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/financeiro/simulacao/$id': {
+      id: '/_authenticated/financeiro/simulacao/$id'
+      path: '/financeiro/simulacao/$id'
+      fullPath: '/financeiro/simulacao/$id'
+      preLoaderRoute: typeof AuthenticatedFinanceiroSimulacaoIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/midia/$id': {
       id: '/api/public/midia/$id'
       path: '/api/public/midia/$id'
@@ -1645,11 +1665,14 @@ const AuthenticatedAdminRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedConsultoraRoute: typeof AuthenticatedConsultoraRoute
+  AuthenticatedFinanceiroSimulacaoIdRoute: typeof AuthenticatedFinanceiroSimulacaoIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedConsultoraRoute: AuthenticatedConsultoraRoute,
+  AuthenticatedFinanceiroSimulacaoIdRoute:
+    AuthenticatedFinanceiroSimulacaoIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

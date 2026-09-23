@@ -958,11 +958,14 @@ BEGIN
         'installment_id', ci.installment_id))
        FROM public.asaas_charge_intents ci
       WHERE ci.state IN ('desconhecida','rejeitada','conciliacao')), '[]'::jsonb),
-    'ocorrencias', coalesce((SELECT jsonb_agg(jsonb_build_object(
+    -- corrigido após a validação no navegador isolado: ORDER BY/LIMIT fora do
+    -- agregado era recusado pelo Postgres assim que existia uma ocorrência.
+    'ocorrencias', coalesce((SELECT jsonb_agg(o ORDER BY o->>'quando' DESC) FROM (
+       SELECT jsonb_build_object(
         'id', ev.id, 'event', ev.event, 'status', ev.status, 'classificacao', ev.classification,
-        'cobranca', ev.charge_external_id, 'quando', ev.event_at, 'nota', ev.last_error))
+        'cobranca', ev.charge_external_id, 'quando', ev.event_at, 'nota', ev.last_error) AS o
        FROM public.asaas_events ev WHERE ev.status = 'na_fila'
-      ORDER BY ev.event_at DESC LIMIT 50), '[]'::jsonb),
+      ORDER BY ev.event_at DESC LIMIT 50) q), '[]'::jsonb),
     'contas', coalesce((SELECT jsonb_agg(jsonb_build_object('id', a.id, 'nome', a.label,
         'ambiente', a.environment, 'estado', a.state, 'conectada', a.is_active,
         'empresa', a.owner_entity_id))

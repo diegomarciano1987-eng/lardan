@@ -7,7 +7,7 @@
  *   bash tests/isolado/subir.sh && bun test tests/isolado
  */
 import { beforeAll, describe, expect, it } from "bun:test";
-import { adm, Conta, criarConta, rpc } from "./base";
+import { adm, Conta, criarConta, escritaDireta, rpc } from "./base";
 
 const um = async <T,>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const recusa = async (fn: () => Promise<unknown>) => {
@@ -136,14 +136,13 @@ describe("Cobranças e eventos", () => {
       [contaSandbox, `${marca}-vinc`, pessoa.partyId],
     );
 
-    expect(
-      await recusa(() =>
-        adm.unsafe(`update public.asaas_charges set title_id = $2, reconcile_status = 'vinculado' where id = $1`, [
-          c.id,
-          titulo,
-        ]),
-      ),
-    ).toBe(true);
+    const direta = await escritaDireta(
+      financeiro,
+      `update public.asaas_charges set title_id = $2, reconcile_status = 'vinculado' where id = $1`,
+      [c.id, titulo],
+    );
+    expect(direta.ok).toBe(false);
+
 
     const negado = await rpc(semPermissao, "asaas_charge_vincular", { _charge: c.id, _title: titulo });
     expect(negado.ok).toBe(false);

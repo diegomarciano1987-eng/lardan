@@ -17,6 +17,7 @@ import { StockMovementDialog } from "@/components/admin/StockMovementDialog";
 import { StockItemPanel } from "@/components/admin/StockItemPanel";
 import { StockThumb } from "@/components/admin/StockThumb";
 import { ImportProductsDialog } from "@/components/admin/ImportProductsDialog";
+import { LeitorEntrada } from "@/components/admin/LeitorEntrada";
 import { ReservationDialog } from "@/components/admin/ReservationDialog";
 import {
   ReservationActionDialog,
@@ -79,7 +80,7 @@ function EstoquePage() {
   const podeConfirmarReserva = caps.includes("stock.reservation.confirm");
   const podeCancelarReserva = caps.includes("stock.reservation.cancel");
 
-  const [aba, setAba] = React.useState<"saldos" | "movimentos" | "reservas">("saldos");
+  const [aba, setAba] = React.useState<"saldos" | "movimentos" | "reservas" | "leitor">("saldos");
   const [dialogo, setDialogo] = React.useState(false);
   const [importacao, setImportacao] = React.useState(false);
   const [itemAberto, setItemAberto] = React.useState<string | null>(null);
@@ -528,7 +529,7 @@ function EstoquePage() {
 
       <div className="flex gap-2">
         {(
-          ["saldos", "movimentos", ...(podeVerReserva ? (["reservas"] as const) : [])] as const
+          ["saldos", "movimentos", ...(podeVerReserva ? (["reservas"] as const) : []), ...(podeOperar ? (["leitor"] as const) : [])] as const
         ).map((v) => (
           <button
             key={v}
@@ -540,12 +541,14 @@ function EstoquePage() {
                 : "rounded-[10px] border border-line px-4 py-2 text-sm font-semibold text-ledger-muted hover:bg-surface-muted"
             }
           >
-            {v === "saldos" ? "Saldos" : v === "movimentos" ? "Movimentações" : "Reservas"}
+            {v === "saldos" ? "Saldos" : v === "movimentos" ? "Movimentações" : v === "leitor" ? "Leitor de entrada" : "Reservas"}
           </button>
         ))}
       </div>
 
-      {aba === "saldos" ? (
+      {aba === "leitor" ? (
+        <LeitorEntrada />
+      ) : aba === "saldos" ? (
         <>
           <DataTable
             columns={colunasSaldo}

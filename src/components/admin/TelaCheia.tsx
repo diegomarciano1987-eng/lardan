@@ -53,7 +53,7 @@ export function TelaCheia({ children }: { children: React.ReactNode }) {
   return (
     <div
       data-tela-cheia={ativa ? "sim" : "nao"}
-      className={ativa ? "fixed inset-0 z-40 overflow-y-auto bg-background p-6 md:p-10" : ""}
+      className={ativa ? "fixed inset-0 z-[60] overflow-y-auto bg-background p-6 md:p-10" : ""}
     >
       <div className="mb-4 flex justify-end">{botao}</div>
       {children}

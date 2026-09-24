@@ -132,7 +132,7 @@ export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
             aria-label="Avaliações de clientes no Google"
           >
             <div key={ativa} className="avaliacao-unica">
-              <ReviewCard avaliacao={AVALIACOES[ativa] ?? AVALIACOES[0]} destaque />
+              <ReviewCard avaliacao={AVALIACOES[ativa] ?? AVALIACAO_MARIA} destaque />
             </div>
             <div className="mt-6 flex justify-center gap-2" role="tablist" aria-label="Escolher avaliação">
               {AVALIACOES.map((avaliacao, index) => (

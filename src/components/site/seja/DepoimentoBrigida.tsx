@@ -1,3 +1,4 @@
+import * as React from "react";
 import { MapPin, Play } from "lucide-react";
 import depoimentoAsset from "@/assets/brigida-carla-giroudo-depoimento.mp4.asset.json";
 import depoimentoWebmAsset from "@/assets/brigida-carla-giroudo-depoimento.webm.asset.json";
@@ -5,6 +6,8 @@ import posterAsset from "@/assets/brigida-carla-giroudo-poster.webp.asset.json";
 import { CinematicTitle } from "./CinematicTitle";
 
 export function DepoimentoBrigida() {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [tocando, setTocando] = React.useState(false);
   return (
     <section
       aria-labelledby="depoimento-brigida-titulo"
@@ -14,7 +17,9 @@ export function DepoimentoBrigida() {
         <div className="relative mx-auto w-full max-w-[24rem]">
           <div aria-hidden="true" className="absolute -inset-3 border border-rose/25" />
           <video
-            controls
+            ref={videoRef}
+            controls={tocando}
+            onPlay={() => setTocando(true)}
             playsInline
             preload="metadata"
             poster={posterAsset.url}
@@ -25,6 +30,18 @@ export function DepoimentoBrigida() {
             <source src={depoimentoAsset.url} type="video/mp4" />
             Seu navegador não consegue reproduzir este vídeo.
           </video>
+          {!tocando ? (
+            <button
+              type="button"
+              onClick={() => void videoRef.current?.play()}
+              aria-label="Assistir ao depoimento da Brígida"
+              className="group absolute inset-0 flex items-center justify-center"
+            >
+              <span className="flex size-24 items-center justify-center rounded-full bg-background/90 text-rose-deep shadow-[var(--shadow-soft)] ring-8 ring-background/30 transition duration-300 group-hover:scale-110 group-focus-visible:scale-110 md:size-28">
+                <Play aria-hidden="true" className="ml-1.5 size-10 fill-current md:size-12" />
+              </span>
+            </button>
+          ) : null}
         </div>
 
         <div className="md:py-8">

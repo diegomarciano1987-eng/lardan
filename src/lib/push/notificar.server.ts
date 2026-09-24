@@ -50,50 +50,52 @@ export async function enviarAvisoPush(
   const resultado: ResultadoEnvio = { enviados: 0, removidos: 0, falhas: [] };
   const expirados: string[] = [];
 
-  for (const linha of inscricoes) {
-    const assinatura: PushSubscription = {
-      endpoint: linha.endpoint,
-      expirationTime: null,
-      keys: { p256dh: linha.p256dh, auth: linha.auth },
-    };
-
-    try {
-      const payload = await buildPushPayload(
-        {
-          data: {
-            titulo: aviso.titulo,
-            corpo: aviso.corpo,
-            url: aviso.url ?? "/admin/candidaturas",
-            tag: aviso.tag ?? "lardan-candidatura",
-          },
-        },
-        assinatura,
-        vapid,
-      );
-      const resposta = await fetch(linha.endpoint, {
-        method: payload.method,
-        headers: payload.headers,
-        body: payload.body as BodyInit,
-      });
-
-      if (resposta.ok) {
-        resultado.enviados += 1;
-        continue;
-      }
-      const corpo = (await resposta.text()).slice(0, 300);
-      if (resposta.status === 404 || resposta.status === 410) {
-        expirados.push(linha.id);
-      } else {
-        resultado.falhas.push({ endpoint: linha.endpoint, status: resposta.status, corpo });
-      }
-    } catch (erro) {
-      resultado.falhas.push({
+  await Promise.all(
+    inscricoes.map(async (linha) => {
+      const assinatura: PushSubscription = {
         endpoint: linha.endpoint,
-        status: 0,
-        corpo: erro instanceof Error ? erro.message : String(erro),
-      });
-    }
-  }
+        expirationTime: null,
+        keys: { p256dh: linha.p256dh, auth: linha.auth },
+      };
+      try {
+        const payload = await buildPushPayload(
+          {
+            data: {
+              titulo: aviso.titulo,
+              corpo: aviso.corpo,
+              url: aviso.url ?? "/admin/candidaturas",
+              tag: aviso.tag ?? "lardan-candidatura",
+            },
+            options: { ttl: 86400, urgency: "high" },
+          } as never,
+          assinatura,
+          vapid,
+        );
+        const headers = new Headers(payload.headers as HeadersInit);
+        headers.set("Urgency", "high");
+        if (!headers.has("TTL")) headers.set("TTL", "86400");
+        const resposta = await fetch(linha.endpoint, {
+          method: payload.method,
+          headers,
+          body: payload.body as BodyInit,
+          signal: AbortSignal.timeout(6000),
+        });
+        if (resposta.ok) {
+          resultado.enviados += 1;
+          return;
+        }
+        const corpo = (await resposta.text()).slice(0, 300);
+        if (resposta.status === 404 || resposta.status === 410) expirados.push(linha.id);
+        else resultado.falhas.push({ endpoint: linha.endpoint, status: resposta.status, corpo });
+      } catch (erro) {
+        resultado.falhas.push({
+          endpoint: linha.endpoint,
+          status: 0,
+          corpo: erro instanceof Error ? erro.message : String(erro),
+        });
+      }
+    }),
+  );
 
   if (expirados.length > 0) {
     await supabaseAdmin.from("push_subscriptions").delete().in("id", expirados);

@@ -76,6 +76,7 @@ function SejaLardanPage() {
       <SejaPerfil />
       <SejaProcesso />
       <SejaGuias />
+      <AvaliacoesGoogle />
 
 
       <section

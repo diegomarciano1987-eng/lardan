@@ -2178,6 +2178,80 @@ export type Database = {
           },
         ]
       }
+      financial_import_ar_stage: {
+        Row: {
+          categoria: string | null
+          centro: string | null
+          chave: string
+          competencia: string | null
+          conta: string | null
+          contraparte: string | null
+          created_at: string
+          descricao: string
+          forma: string | null
+          id: string
+          linha: number
+          lote: string
+          pago_em: string | null
+          processed_at: string | null
+          recebido_cents: number | null
+          situacao: string | null
+          title_id: string | null
+          valor_cents: number
+          vencimento: string
+        }
+        Insert: {
+          categoria?: string | null
+          centro?: string | null
+          chave: string
+          competencia?: string | null
+          conta?: string | null
+          contraparte?: string | null
+          created_at?: string
+          descricao: string
+          forma?: string | null
+          id?: string
+          linha: number
+          lote: string
+          pago_em?: string | null
+          processed_at?: string | null
+          recebido_cents?: number | null
+          situacao?: string | null
+          title_id?: string | null
+          valor_cents: number
+          vencimento: string
+        }
+        Update: {
+          categoria?: string | null
+          centro?: string | null
+          chave?: string
+          competencia?: string | null
+          conta?: string | null
+          contraparte?: string | null
+          created_at?: string
+          descricao?: string
+          forma?: string | null
+          id?: string
+          linha?: number
+          lote?: string
+          pago_em?: string | null
+          processed_at?: string | null
+          recebido_cents?: number | null
+          situacao?: string | null
+          title_id?: string | null
+          valor_cents?: number
+          vencimento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_import_ar_stage_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_installments: {
         Row: {
           created_at: string
@@ -7629,6 +7703,11 @@ export type Database = {
       }
       fin_import_ap_refs: { Args: { _lote: string }; Returns: undefined }
       fin_import_ap_slug: { Args: { _t: string }; Returns: string }
+      fin_import_ar_apply: {
+        Args: { _limite?: number; _lote: string }
+        Returns: Json
+      }
+      fin_import_ar_refs: { Args: { _lote: string }; Returns: undefined }
       fin_installment_refresh: {
         Args: { _installment: string }
         Returns: undefined

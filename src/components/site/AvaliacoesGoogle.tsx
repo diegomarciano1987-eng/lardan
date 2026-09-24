@@ -11,13 +11,17 @@ import dudaAsset from "@/assets/avaliacao-duda-goes.png.asset.json";
 const GOOGLE_REVIEWS_URL =
   "https://www.google.com/search?q=lardan#lrd=0x94eb4765591303db:0x6e4139909e180f1d,1";
 
-const AVALIACOES = [
-  {
-    nome: "Maria Fatima",
-    foto: mariaAsset.url,
-    texto:
-      "Excelente peças e com muita qualidade e charme. A Lardan Semi jóias chegou para ficar e deixar qualquer mulher valorizadas com suas peças. Só comprem que não vão se arrepender. A gerência é muito atenciosa para com os vendedores. Estou satisfeita com todas as jóias que tenho e que vendo.",
-  },
+type Avaliacao = { nome: string; foto: string; texto: string };
+
+const AVALIACAO_MARIA: Avaliacao = {
+  nome: "Maria Fatima",
+  foto: mariaAsset.url,
+  texto:
+    "Excelente peças e com muita qualidade e charme. A Lardan Semi jóias chegou para ficar e deixar qualquer mulher valorizadas com suas peças. Só comprem que não vão se arrepender. A gerência é muito atenciosa para com os vendedores. Estou satisfeita com todas as jóias que tenho e que vendo.",
+};
+
+const AVALIACOES: readonly Avaliacao[] = [
+  AVALIACAO_MARIA,
   {
     nome: "Natália Pedroso",
     foto: nataliaAsset.url,
@@ -47,7 +51,7 @@ function ReviewCard({
   avaliacao,
   destaque,
 }: {
-  avaliacao: (typeof AVALIACOES)[number];
+  avaliacao: Avaliacao;
   destaque: boolean;
 }) {
   return (
@@ -125,6 +129,9 @@ export function AvaliacoesGoogle() {
 
   const anterior = (ativa - 1 + AVALIACOES.length) % AVALIACOES.length;
   const proxima = (ativa + 1) % AVALIACOES.length;
+  const avaliacaoAnterior = AVALIACOES[anterior] ?? AVALIACAO_MARIA;
+  const avaliacaoAtiva = AVALIACOES[ativa] ?? AVALIACAO_MARIA;
+  const avaliacaoProxima = AVALIACOES[proxima] ?? AVALIACAO_MARIA;
 
   return (
     <section
@@ -173,9 +180,9 @@ export function AvaliacoesGoogle() {
             )}
             aria-live="polite"
           >
-            <ReviewCard avaliacao={AVALIACOES[anterior]} destaque={false} />
-            <ReviewCard avaliacao={AVALIACOES[ativa]} destaque />
-            <ReviewCard avaliacao={AVALIACOES[proxima]} destaque={false} />
+            <ReviewCard avaliacao={avaliacaoAnterior} destaque={false} />
+            <ReviewCard avaliacao={avaliacaoAtiva} destaque />
+            <ReviewCard avaliacao={avaliacaoProxima} destaque={false} />
           </div>
         </div>
 

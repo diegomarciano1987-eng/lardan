@@ -95,19 +95,37 @@ function ReviewCard({
 }
 
 const INTERVALO_UNICA_MS = 1500;
+const INTERVALO_DESKTOP_MS = 3500;
+const ESPACO_DESKTOP_PX = 20; // gap-5 entre os cards
 
 export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
   const [ativa, setAtiva] = React.useState(0);
   const [pausado, setPausado] = React.useState(false);
   const toqueInicial = React.useRef<{ x: number; y: number } | null>(null);
 
+  // Desktop: palco com 1 card grande no centro e os vizinhos menores nas laterais.
+  const palcoRef = React.useRef<HTMLDivElement | null>(null);
+  const [larguraItem, setLarguraItem] = React.useState(0);
+
   React.useEffect(() => {
-    if (!unica) return;
+    if (unica) return;
+    const palco = palcoRef.current;
+    if (!palco) return;
+    const medir = () => {
+      setLarguraItem((palco.clientWidth - 2 * ESPACO_DESKTOP_PX) / 3);
+    };
+    medir();
+    const observer = new ResizeObserver(medir);
+    observer.observe(palco);
+    return () => observer.disconnect();
+  }, [unica]);
+
+  React.useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (pausado) return;
     const timer = window.setInterval(() => {
       setAtiva((atual) => (atual + 1) % AVALIACOES.length);
-    }, INTERVALO_UNICA_MS);
+    }, unica ? INTERVALO_UNICA_MS : INTERVALO_DESKTOP_MS);
     return () => window.clearInterval(timer);
   }, [unica, pausado]);
 
@@ -187,19 +205,58 @@ export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
             </div>
           </div>
         ) : (
-          <div className="avaliacoes-janela mt-12 select-none overflow-hidden md:mt-16">
-            <div className="avaliacoes-trilho flex gap-5" aria-label="Avaliações de clientes no Google">
-              {[...AVALIACOES, ...AVALIACOES].map((avaliacao, index) => (
-                <div
-                  key={`${avaliacao.nome}-${index}`}
-                  className="avaliacoes-item shrink-0"
-                  aria-hidden={index >= AVALIACOES.length ? "true" : undefined}
-                >
-                  <ReviewCard avaliacao={avaliacao} destaque />
-                </div>
-              ))}
+          <>
+            {/* Celular: esteira contínua, um card por vez. */}
+            <div className="avaliacoes-janela mt-12 select-none overflow-hidden md:hidden">
+              <div className="avaliacoes-trilho flex gap-5" aria-label="Avaliações de clientes no Google">
+                {[...AVALIACOES, ...AVALIACOES].map((avaliacao, index) => (
+                  <div
+                    key={`${avaliacao.nome}-${index}`}
+                    className="avaliacoes-item shrink-0"
+                    aria-hidden={index >= AVALIACOES.length ? "true" : undefined}
+                  >
+                    <ReviewCard avaliacao={avaliacao} destaque />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+
+            {/* Desktop: card central grande, vizinhos menores nas laterais, giro suave e lento. */}
+            <div
+              ref={palcoRef}
+              className="avaliacoes-palco relative mx-auto mt-16 hidden h-[39rem] select-none overflow-hidden md:block"
+              aria-label="Avaliações de clientes no Google"
+              onMouseEnter={() => setPausado(true)}
+              onMouseLeave={() => setPausado(false)}
+            >
+              {AVALIACOES.map((avaliacao, index) => {
+                // Distância circular do card para o centro: -2..2.
+                let deslocamento = index - ativa;
+                if (deslocamento > AVALIACOES.length / 2) deslocamento -= AVALIACOES.length;
+                if (deslocamento < -AVALIACOES.length / 2) deslocamento += AVALIACOES.length;
+                const visivel = Math.abs(deslocamento) <= 1;
+                const centro = larguraItem + ESPACO_DESKTOP_PX;
+                return (
+                  <div
+                    key={avaliacao.nome}
+                    aria-hidden={deslocamento !== 0}
+                    className="avaliacoes-palco-item absolute left-1/2 top-0"
+                    style={{
+                      width: larguraItem > 0 ? larguraItem : undefined,
+                      transform: `translate3d(calc(-50% + ${deslocamento * centro}px), 0, 0) scale(${
+                        deslocamento === 0 ? 1 : 0.8
+                      })`,
+                      opacity: visivel ? (deslocamento === 0 ? 1 : 0.55) : 0,
+                      zIndex: deslocamento === 0 ? 2 : 1,
+                      pointerEvents: visivel ? "auto" : "none",
+                    }}
+                  >
+                    <ReviewCard avaliacao={avaliacao} destaque={deslocamento === 0} />
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
 
         <div className="mt-10 flex justify-center">

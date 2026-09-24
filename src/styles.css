@@ -1139,12 +1139,19 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
 }
 
 .avaliacoes-trilho {
-  animation: avaliacoes-deslizar 42s linear infinite;
   will-change: transform;
 }
 
 .avaliacoes-item {
-  width: calc((100% - 2.5rem) / 3);
+  width: 100%;
+}
+
+/* Desktop: palco com card central grande e vizinhos menores, transição suave. */
+.avaliacoes-palco-item {
+  transition:
+    transform 900ms cubic-bezier(0.22, 0.61, 0.21, 1),
+    opacity 900ms cubic-bezier(0.22, 0.61, 0.21, 1);
+  will-change: transform, opacity;
 }
 
 .avaliacao-card {

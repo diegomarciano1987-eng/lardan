@@ -22,7 +22,8 @@ self.addEventListener("push", (evento) => {
     badge: "/favicon-48.png",
     tag: dados.tag || "lardan-candidatura",
     renotify: true,
-    requireInteraction: false,
+    requireInteraction: true,
+    vibrate: [200, 100, 200],
     data: { url: dados.url || "/admin/candidaturas" },
   };
 

@@ -129,7 +129,7 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
     // Avisos internos: nunca derrubam o envio da candidata se falharem.
     try {
       const { avisarNovaCandidatura } = await import("./avisos.server");
-      await avisarNovaCandidatura({
+      const avisos = avisarNovaCandidatura({
         protocolo: r.protocol,
         nome: `${data.payload.first_name} ${data.payload.last_name}`.trim(),
         cidade: data.payload.city,
@@ -137,7 +137,9 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
         whatsapp: data.payload.whatsapp,
         email: data.payload.email ?? null,
         reenvio: r.duplicate,
-      });
+      }).catch((falha) => console.error("[candidatura] aviso interno falhou:", falha));
+      // A candidata não espera os avisos além de 2,5 s.
+      await Promise.race([avisos, new Promise((ok) => setTimeout(ok, 2500))]);
     } catch (falha) {
       console.error("[candidatura] aviso interno falhou:", falha);
     }

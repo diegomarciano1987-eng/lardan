@@ -108,9 +108,31 @@ export function LeitorEntrada() {
   }
 
   async function processar(cod: string) {
-    const { data, error } = await supabase.rpc("barcode_lookup", { _code: cod });
-    const r = data as { encontrado: boolean; product_id?: string; variant_id?: string; produto?: string; variante?: string } | null;
-    if (error || !r?.encontrado || !r.variant_id) {
+    type Res = {
+      encontrado: boolean;
+      precisa_criar?: boolean;
+      product_id?: string;
+      variant_id?: string;
+      produto?: string;
+      variante?: string;
+      tamanho?: string | null;
+      unidade?: boolean;
+      forma?: string;
+      variante_criada?: boolean;
+      categoria_nome?: string | null;
+    };
+    const resolver = async (criar: boolean) => {
+      const { data, error } = await supabase.rpc("barcode_resolver" as never, { _code: cod, _criar: criar } as never);
+      if (error) throw error;
+      return data as unknown as Res;
+    };
+    let r: Res | null = null;
+    try {
+      r = await resolver(false);
+    } catch {
+      r = null;
+    }
+    if (!r?.encontrado || (!r.variant_id && !r.precisa_criar)) {
       apito(false);
       setRecusados((n) => n + 1);
       registrar({ codigo: cod, ok: false, texto: "Código não cadastrado", detalhe: "Cadastre a peça antes de dar entrada." });
@@ -121,30 +143,48 @@ export function LeitorEntrada() {
       .select("category_id, subcategory_id")
       .eq("id", r.product_id!)
       .single();
-    const ok =
-      pertence(p?.category_id ?? null, categoria, mapa) || pertence(p?.subcategory_id ?? null, categoria, mapa);
-    const nome = [r.produto, r.variante].filter(Boolean).join(" · ");
+    const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const temCategoria = Boolean(p?.category_id || p?.subcategory_id);
+    const ok = temCategoria
+      ? pertence(p?.category_id ?? null, categoria, mapa) || pertence(p?.subcategory_id ?? null, categoria, mapa)
+      : Boolean(r.categoria_nome) && semAcento(nomeCategoria) === r.categoria_nome;
     if (!ok) {
       apito(false);
       setRecusados((n) => n + 1);
-      const real = mapa.get(p?.category_id ?? "")?.name ?? "sem categoria";
-      registrar({ codigo: cod, ok: false, texto: `Não é ${nomeCategoria}`, detalhe: `${nome} — categoria: ${real}. Não entrou.` });
+      const real = temCategoria ? (mapa.get(p?.category_id ?? "")?.name ?? "outra") : (r.categoria_nome ?? "não identificada");
+      registrar({ codigo: cod, ok: false, texto: `Não é ${nomeCategoria}`, detalhe: `${r.produto} — categoria: ${real}. Não entrou.` });
       return;
     }
+    if (!r.variant_id) {
+      try {
+        r = await resolver(true);
+      } catch (e) {
+        apito(false);
+        setRecusados((n) => n + 1);
+        registrar({ codigo: cod, ok: false, texto: "Não gravou", detalhe: (e as Error).message });
+        return;
+      }
+    }
+    const nome = [r.produto, r.variante].filter(Boolean).join(" · ");
+    const extra = [
+      r.unidade ? "unidade" : null,
+      r.forma === "anel_tamanho" && r.tamanho ? `aro ${r.tamanho}` : null,
+      r.variante_criada ? "variação de tamanho criada" : null,
+    ].filter(Boolean).join(" · ");
     try {
       await registerMovement({
         kind: "entrada",
-        variantId: r.variant_id,
+        variantId: r.variant_id!,
         quantity: 1,
         toLocationId: local,
         reasonCode: "compra",
         reference: referencia.trim(),
-        note: `Entrada por leitor (${nomeCategoria})`,
+        note: `Entrada por leitor (${nomeCategoria}) · lido ${cod}`,
       });
       apito(true);
       setContador((n) => n + 1);
       setPorPeca((m) => ({ ...m, [r.variant_id!]: { nome, qtd: (m[r.variant_id!]?.qtd ?? 0) + 1 } }));
-      registrar({ codigo: cod, ok: true, texto: nome });
+      registrar({ codigo: cod, ok: true, texto: nome, ...(extra ? { detalhe: extra } : {}) });
     } catch (e) {
       apito(false);
       setRecusados((n) => n + 1);

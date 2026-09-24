@@ -257,44 +257,6 @@ export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
           })}
         </div>
 
-            {/* Desktop: card central grande, vizinhos menores nas laterais, giro suave e lento. */}
-            <div
-              ref={palcoRef}
-              className="avaliacoes-palco relative mx-auto mt-16 hidden h-[39rem] select-none overflow-hidden md:block"
-              aria-label="Avaliações de clientes no Google"
-              onMouseEnter={() => setPausado(true)}
-              onMouseLeave={() => setPausado(false)}
-            >
-              {AVALIACOES.map((avaliacao, index) => {
-                // Distância circular do card para o centro: -2..2.
-                let deslocamento = index - ativa;
-                if (deslocamento > AVALIACOES.length / 2) deslocamento -= AVALIACOES.length;
-                if (deslocamento < -AVALIACOES.length / 2) deslocamento += AVALIACOES.length;
-                const visivel = Math.abs(deslocamento) <= 1;
-                const centro = larguraItem + ESPACO_DESKTOP_PX;
-                return (
-                  <div
-                    key={avaliacao.nome}
-                    aria-hidden={deslocamento !== 0}
-                    className="avaliacoes-palco-item absolute left-1/2 top-0"
-                    style={{
-                      width: larguraItem > 0 ? larguraItem : undefined,
-                      transform: `translate3d(calc(-50% + ${deslocamento * centro}px), 0, 0) scale(${
-                        deslocamento === 0 ? 1 : 0.8
-                      })`,
-                      opacity: visivel ? (deslocamento === 0 ? 1 : 0.55) : 0,
-                      zIndex: deslocamento === 0 ? 2 : 1,
-                      pointerEvents: visivel ? "auto" : "none",
-                    }}
-                  >
-                    <ReviewCard avaliacao={avaliacao} destaque={deslocamento === 0} />
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-
         <div className="mt-10 flex justify-center">
           <a
             href={GOOGLE_REVIEWS_URL}

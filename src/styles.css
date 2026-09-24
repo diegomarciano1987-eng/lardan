@@ -1132,24 +1132,23 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
   display: none !important;
 }
 
-/* Avaliações Google — troca cinematográfica sem empilhar cards no celular. */
-.avaliacoes-palco {
-  transition:
-    opacity 420ms cubic-bezier(0.4, 0, 0.2, 1),
-    filter 420ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 420ms cubic-bezier(0.4, 0, 0.2, 1);
+/* Avaliações Google — somente o card central troca, sem apagar os laterais. */
+@keyframes avaliacao-central-saindo {
+  from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0); }
+  to { opacity: 0; filter: blur(11px); transform: translate3d(-0.75rem, 0, 0) scale(0.985); }
 }
 
-.avaliacoes-palco--visivel {
-  opacity: 1;
-  filter: blur(0);
-  transform: translate3d(0, 0, 0);
+@keyframes avaliacao-central-entrando {
+  from { opacity: 0; filter: blur(11px); transform: translate3d(0.75rem, 0, 0) scale(0.985); }
+  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0); }
 }
 
-.avaliacoes-palco--saindo {
-  opacity: 0;
-  filter: blur(13px);
-  transform: translate3d(0, 0.35rem, 0) scale(0.985);
+.avaliacao-card--saindo {
+  animation: avaliacao-central-saindo 560ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.avaliacao-card--entrando {
+  animation: avaliacao-central-entrando 560ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .avaliacao-card {
@@ -1163,7 +1162,6 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
 
 .avaliacao-card--lateral {
   opacity: 0.68;
-  transform: scale(0.95);
 }
 
 @media (max-width: 767px) {
@@ -1177,7 +1175,8 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .avaliacoes-palco {
-    transition: none;
+  .avaliacao-card--saindo,
+  .avaliacao-card--entrando {
+    animation-duration: 1ms;
   }
 }

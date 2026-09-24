@@ -57,7 +57,7 @@ function ReviewCard({
   return (
     <article
       className={cn(
-        "avaliacao-card flex min-h-[25rem] min-w-0 flex-col border border-border bg-card p-7 md:min-h-[27rem] md:p-8",
+        "avaliacao-card flex h-[36rem] min-w-0 flex-col border border-border bg-card p-7 md:h-[34rem] md:p-8",
         destaque ? "avaliacao-card--destaque" : "avaliacao-card--lateral",
       )}
     >
@@ -97,32 +97,38 @@ function ReviewCard({
 
 export function AvaliacoesGoogle() {
   const [ativa, setAtiva] = React.useState(0);
-  const [visivel, setVisivel] = React.useState(true);
+  const [destino, setDestino] = React.useState<number | null>(null);
   const [interagindo, setInteragindo] = React.useState(false);
   const gestoInicio = React.useRef<number | null>(null);
   const trocaPendente = React.useRef<number | null>(null);
+  const trocando = React.useRef(false);
 
   const selecionar = React.useCallback((proxima: number) => {
-    if (trocaPendente.current !== null) window.clearTimeout(trocaPendente.current);
-    setVisivel(false);
+    if (trocando.current) return;
+    const indice = (proxima + AVALIACOES.length) % AVALIACOES.length;
+    if (indice === ativa) return;
+    trocando.current = true;
+    setDestino(indice);
     trocaPendente.current = window.setTimeout(() => {
-      setAtiva((proxima + AVALIACOES.length) % AVALIACOES.length);
-      setVisivel(true);
+      setAtiva(indice);
+      setDestino(null);
+      trocando.current = false;
       trocaPendente.current = null;
-    }, 420);
-  }, []);
+    }, 560);
+  }, [ativa]);
 
   React.useEffect(() => {
-    if (interagindo || !visivel || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (interagindo || destino !== null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
     const timer = window.setTimeout(() => selecionar(ativa + 1), 3000);
     return () => window.clearTimeout(timer);
-  }, [ativa, interagindo, selecionar, visivel]);
+  }, [ativa, destino, interagindo, selecionar]);
 
   React.useEffect(
     () => () => {
       if (trocaPendente.current !== null) window.clearTimeout(trocaPendente.current);
+      trocando.current = false;
     },
     [],
   );
@@ -132,6 +138,7 @@ export function AvaliacoesGoogle() {
   const avaliacaoAnterior = AVALIACOES[anterior] ?? AVALIACAO_MARIA;
   const avaliacaoAtiva = AVALIACOES[ativa] ?? AVALIACAO_MARIA;
   const avaliacaoProxima = AVALIACOES[proxima] ?? AVALIACAO_MARIA;
+  const avaliacaoDestino = destino === null ? null : (AVALIACOES[destino] ?? AVALIACAO_MARIA);
 
   return (
     <section
@@ -174,14 +181,20 @@ export function AvaliacoesGoogle() {
           }}
         >
           <div
-            className={cn(
-              "avaliacoes-palco grid min-w-0 gap-5 md:grid-cols-[0.82fr_1fr_0.82fr] md:items-center",
-              visivel ? "avaliacoes-palco--visivel" : "avaliacoes-palco--saindo",
-            )}
+            className="avaliacoes-palco grid min-w-0 gap-5 md:grid-cols-3 md:items-stretch"
             aria-live="polite"
           >
             <ReviewCard avaliacao={avaliacaoAnterior} destaque={false} />
-            <ReviewCard avaliacao={avaliacaoAtiva} destaque />
+            <div className="avaliacao-card-stack relative h-[36rem] min-w-0 md:h-[34rem]">
+              <div className={cn("absolute inset-0", avaliacaoDestino && "avaliacao-card--saindo")}>
+                <ReviewCard avaliacao={avaliacaoAtiva} destaque />
+              </div>
+              {avaliacaoDestino ? (
+                <div className="avaliacao-card--entrando absolute inset-0">
+                  <ReviewCard avaliacao={avaliacaoDestino} destaque />
+                </div>
+              ) : null}
+            </div>
             <ReviewCard avaliacao={avaliacaoProxima} destaque={false} />
           </div>
         </div>

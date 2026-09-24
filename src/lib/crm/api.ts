@@ -45,6 +45,7 @@ export interface CandidaturaCard {
   origem: string;
   campanha: string | null;
   criada_em: string;
+  ultimo_envio: string;
   ultimo_contato: string | null;
   primeiro_atendimento: string | null;
   proximo_followup: string | null;

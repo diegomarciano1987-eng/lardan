@@ -67,6 +67,7 @@ export function CardCandidatura({
   const [movendo, setMovendo] = useState(false);
   const p = prazo(c.proximo_followup);
   const novo = !c.primeiro_atendimento && c.desfecho === "aberta";
+  const reenviadoAgora = c.reenvios > 1 && Date.now() - new Date(c.ultimo_envio).getTime() < 86_400_000;
 
   function abrirWhatsapp() {
     void registrarCliqueWhatsapp(c.id).catch(() => undefined);
@@ -126,6 +127,7 @@ export function CardCandidatura({
 
       <div className="mt-2.5 flex flex-wrap gap-1">
         {novo && <Selo tom="novo">Novo</Selo>}
+        {reenviadoAgora && <Selo tom="hoje">Reenviado agora</Selo>}
         {p.tom === "atrasado" && <Selo tom="atrasado">Atrasado</Selo>}
         {p.tom === "hoje" && <Selo tom="hoje">Hoje</Selo>}
         {p.tom === "nenhum" && c.desfecho === "aberta" && <Selo tom="aviso">Sem próxima ação</Selo>}
@@ -133,7 +135,7 @@ export function CardCandidatura({
         {c.prioridade !== "normal" && (
           <Selo tom="prioridade">{c.prioridade === "urgente" ? "Urgente" : "Alta"}</Selo>
         )}
-        {c.reenvios > 1 && <Selo tom="neutro">{c.reenvios} envios</Selo>}
+        {c.reenvios > 1 && <Selo tom="neutro">{c.reenvios} envios · último {desde(c.ultimo_envio)}</Selo>}
       </div>
 
       <dl className="mt-2.5 space-y-0.5 text-[0.6875rem] text-ledger-muted">

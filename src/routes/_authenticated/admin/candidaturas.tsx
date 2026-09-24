@@ -203,7 +203,7 @@ function CandidaturasPage() {
     enabled: podeVer && busca.vista === "followups",
   });
 
-  // Chegou candidatura nova: o quadro se atualiza sozinho, sem recarregar a página.
+  // Chegou uma candidatura nova ou um reenvio: o quadro se atualiza sozinho.
   useEffect(() => {
     if (!podeVer) return;
     const canal = supabase
@@ -211,6 +211,10 @@ function CandidaturasPage() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "leads" }, () => {
         void qc.invalidateQueries({ queryKey: ["crm"] });
         toast.info("Nova candidatura recebida pelo site.");
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "leads" }, () => {
+        void qc.invalidateQueries({ queryKey: ["crm"] });
+        toast.info("Candidatura reenviada pelo site.");
       })
       .subscribe();
     return () => {
@@ -542,7 +546,7 @@ function CandidaturasPage() {
                         "Origem",
                         "Etapa",
                         "Responsável",
-                        "Criada em",
+                        "Último envio",
                         "Último contato",
                         "Próximo follow-up",
                         "Situação",
@@ -581,7 +585,7 @@ function CandidaturasPage() {
                             {c.responsavel ?? "Sem responsável"}
                           </td>
                           <td className="px-4 py-3 text-xs text-ledger-muted">
-                            {dataHora(c.criada_em)}
+                            {dataHora(c.ultimo_envio)}
                           </td>
                           <td className="px-4 py-3 text-xs text-ledger-muted">
                             {c.ultimo_contato ? desde(c.ultimo_contato) : "nenhum"}

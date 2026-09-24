@@ -144,6 +144,7 @@ export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
             onMouseLeave={() => setPausado(false)}
             onTouchStart={(e) => {
               const toque = e.touches[0];
+              if (!toque) return;
               toqueInicial.current = { x: toque.clientX, y: toque.clientY };
               setPausado(true);
             }}
@@ -153,6 +154,7 @@ export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
               setPausado(false);
               if (!inicio) return;
               const toque = e.changedTouches[0];
+              if (!toque) return;
               const dx = toque.clientX - inicio.x;
               const dy = toque.clientY - inicio.y;
               // Arraste horizontal claro: passa para o depoimento ao lado.

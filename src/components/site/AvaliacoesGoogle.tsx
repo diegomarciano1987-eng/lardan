@@ -155,7 +155,7 @@ export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
 
         {unica ? (
           <div
-            className="mx-auto mt-12 max-w-2xl touch-pan-y select-none md:mt-16"
+            className="mx-auto mt-12 max-w-2xl touch-pan-y select-none md:hidden"
             aria-live="polite"
             aria-label="Avaliações de clientes no Google"
             onMouseEnter={() => setPausado(true)}

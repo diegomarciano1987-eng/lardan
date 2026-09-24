@@ -140,7 +140,7 @@ export function AvisosPush() {
         <div
           role="dialog"
           aria-label="Como ligar os avisos no iPhone"
-          className="absolute right-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-line bg-surface p-4 text-left text-[0.8125rem] leading-relaxed text-ledger-text shadow-xl"
+          className="absolute left-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-line bg-surface p-4 text-left text-[0.8125rem] leading-relaxed text-ledger-text shadow-xl"
         >
           <p className="font-semibold">No iPhone, o aviso só funciona pelo ícone do painel</p>
           <ol className="mt-2 list-decimal space-y-1 pl-4 text-ledger-muted">

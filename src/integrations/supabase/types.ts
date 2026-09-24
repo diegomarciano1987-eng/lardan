@@ -7405,6 +7405,7 @@ export type Database = {
       crm_whatsapp_click: { Args: { _lead: string }; Returns: Json }
       doc_canon: { Args: { v: string }; Returns: string }
       doc_is_valid: { Args: { v: string }; Returns: boolean }
+      ean13_check_digit: { Args: { _body12: string }; Returns: string }
       ensure_profile: {
         Args: never
         Returns: {
@@ -8300,6 +8301,7 @@ export type Database = {
         Args: { _payload: Json; _variant_id: string }
         Returns: Json
       }
+      variant_ean_next: { Args: never; Returns: string }
       variant_save: { Args: { _id: string; _payload: Json }; Returns: Json }
     }
     Enums: {

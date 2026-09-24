@@ -94,7 +94,18 @@ function ReviewCard({
   );
 }
 
-export function AvaliacoesGoogle() {
+export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
+  const [ativa, setAtiva] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!unica) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => {
+      setAtiva((atual) => (atual + 1) % AVALIACOES.length);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [unica]);
+
   return (
     <section
       aria-labelledby="avaliacoes-google-titulo"
@@ -114,19 +125,47 @@ export function AvaliacoesGoogle() {
           </p>
         </div>
 
-        <div className="avaliacoes-janela mt-12 select-none overflow-hidden md:mt-16">
-          <div className="avaliacoes-trilho flex gap-5" aria-label="Avaliações de clientes no Google">
-            {[...AVALIACOES, ...AVALIACOES].map((avaliacao, index) => (
-              <div
-                key={`${avaliacao.nome}-${index}`}
-                className="avaliacoes-item shrink-0"
-                aria-hidden={index >= AVALIACOES.length ? "true" : undefined}
-              >
-                <ReviewCard avaliacao={avaliacao} destaque />
-              </div>
-            ))}
+        {unica ? (
+          <div
+            className="mx-auto mt-12 max-w-2xl select-none md:mt-16"
+            aria-live="polite"
+            aria-label="Avaliações de clientes no Google"
+          >
+            <div key={ativa} className="avaliacao-unica">
+              <ReviewCard avaliacao={AVALIACOES[ativa]} destaque />
+            </div>
+            <div className="mt-6 flex justify-center gap-2" role="tablist" aria-label="Escolher avaliação">
+              {AVALIACOES.map((avaliacao, index) => (
+                <button
+                  key={avaliacao.nome}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === ativa}
+                  aria-label={`Ver avaliação de ${avaliacao.nome}`}
+                  onClick={() => setAtiva(index)}
+                  className={cn(
+                    "size-2 rounded-full transition-all duration-300",
+                    index === ativa ? "w-6 bg-rose" : "bg-rose/30 hover:bg-rose/55",
+                  )}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="avaliacoes-janela mt-12 select-none overflow-hidden md:mt-16">
+            <div className="avaliacoes-trilho flex gap-5" aria-label="Avaliações de clientes no Google">
+              {[...AVALIACOES, ...AVALIACOES].map((avaliacao, index) => (
+                <div
+                  key={`${avaliacao.nome}-${index}`}
+                  className="avaliacoes-item shrink-0"
+                  aria-hidden={index >= AVALIACOES.length ? "true" : undefined}
+                >
+                  <ReviewCard avaliacao={avaliacao} destaque />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-10 flex justify-center">
           <a

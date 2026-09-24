@@ -6,6 +6,7 @@
  * pré-visualização — os dois casos têm aviso próprio na tela.
  */
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useServerFn } from "@tanstack/react-start";
 import { Bell, BellOff, BellRing, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -136,7 +137,7 @@ export function AvisosPush() {
         </button>
       ) : null}
 
-      {ajudaIOS && (
+      {ajudaIOS && createPortal(
         <div
           role="dialog"
           aria-label="Como ligar os avisos no iPhone"
@@ -153,7 +154,8 @@ export function AvisosPush() {
           <button type="button" className="mt-3 text-xs font-semibold underline" onClick={() => setAjudaIOS(false)}>
             Entendi
           </button>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

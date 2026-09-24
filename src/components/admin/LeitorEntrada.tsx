@@ -4,6 +4,7 @@ import { ScanBarcode, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { Panel, formatInt } from "@/components/admin/ui";
+import { TelaCheia } from "@/components/admin/TelaCheia";
 import { listStockLocations, registerMovement } from "@/lib/stock";
 
 type Categoria = { id: string; name: string; parent_id: string | null };
@@ -219,6 +220,7 @@ export function LeitorEntrada() {
   const ultima = leituras[0];
 
   return (
+    <TelaCheia>
     <div className="space-y-5">
       <Panel title="Entrada rápida por leitor">
         <div className="grid gap-4 md:grid-cols-3">
@@ -336,5 +338,6 @@ export function LeitorEntrada() {
         </aside>
       </div>
     </div>
+    </TelaCheia>
   );
 }

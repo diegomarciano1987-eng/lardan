@@ -142,6 +142,8 @@ export interface Detalhe {
     sem_numero: boolean;
     cep: string | null;
     objetivo: string | null;
+    sonho: string | null;
+    sonho_valor_cents: number | null;
     disponibilidade: string | null;
     experiencia: string | null;
     canais: string | null;

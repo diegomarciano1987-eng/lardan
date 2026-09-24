@@ -104,6 +104,7 @@ export function SejaLardanForm() {
   const [objetivo, setObjetivo] = useState("");
   const [disponibilidade, setDisponibilidade] = useState("");
   const [experiencia, setExperiencia] = useState("");
+  const [sonhoValor, setSonhoValor] = useState("");
   const [consultandoCep, setConsultandoCep] = useState(false);
   const [estadoCep, setEstadoCep] = useState<string | null>(null);
   const consultarCepFn = useServerFn(consultarCepPublico);
@@ -200,6 +201,8 @@ export function SejaLardanForm() {
           experience: texto("experience"),
           audience: texto("audience"),
           motivation: texto("motivation"),
+          dream: texto("dream"),
+          dream_value_cents: centavosDoValor(sonhoValor),
           source: "site/seja-lardan",
           privacy_version: PRIVACY_VERSION,
           marketing_consent: marketingConsent,
@@ -479,6 +482,31 @@ export function SejaLardanForm() {
         </div>
       </fieldset>
 
+      <fieldset className="space-y-4 rounded-xl border border-primary/30 bg-primary/5 p-6">
+        <legend className="brand-eyebrow px-2">Seu sonho</legend>
+        <div>
+          <Label htmlFor="dream">Qual o sonho que a Lardan pode te ajudar a realizar?</Label>
+          <input
+            id="dream"
+            name="dream"
+            maxLength={300}
+            placeholder="Uma moto, um carro, uma geladeira nova, uma viagem…"
+            className={field}
+          />
+        </div>
+        <div>
+          <Label htmlFor="dream_value">Quanto custa esse sonho?</Label>
+          <input
+            id="dream_value"
+            inputMode="numeric"
+            value={sonhoValor}
+            onChange={(e) => setSonhoValor(mascaraReais(e.target.value))}
+            placeholder="R$ 0"
+            className={field}
+          />
+        </div>
+      </fieldset>
+
       <label className="flex items-start gap-3 text-xs leading-relaxed text-muted-foreground">
         <Checkbox
           checked={marketingConsent}
@@ -509,4 +537,16 @@ export function SejaLardanForm() {
       </Button>
     </form>
   );
+}
+
+/** Máscara de reais inteiros: "15000" → "R$ 15.000". */
+function mascaraReais(v: string): string {
+  const d = v.replace(/\D/g, "").replace(/^0+/, "").slice(0, 10);
+  if (!d) return "";
+  return "R$ " + Number(d).toLocaleString("pt-BR");
+}
+
+function centavosDoValor(v: string): string | undefined {
+  const d = v.replace(/\D/g, "");
+  return d ? String(Number(d) * 100) : undefined;
 }

@@ -4948,6 +4948,8 @@ export type Database = {
           cpf_digits: string | null
           created_at: string
           device_type: string | null
+          dream: string | null
+          dream_value_cents: number | null
           email: string | null
           email_norm: string | null
           entry_url: string | null
@@ -5014,6 +5016,8 @@ export type Database = {
           cpf_digits?: string | null
           created_at?: string
           device_type?: string | null
+          dream?: string | null
+          dream_value_cents?: number | null
           email?: string | null
           email_norm?: string | null
           entry_url?: string | null
@@ -5080,6 +5084,8 @@ export type Database = {
           cpf_digits?: string | null
           created_at?: string
           device_type?: string | null
+          dream?: string | null
+          dream_value_cents?: number | null
           email?: string | null
           email_norm?: string | null
           entry_url?: string | null

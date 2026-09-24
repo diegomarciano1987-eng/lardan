@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CalendarPlus, MessageCircle, UserRound, Clock3, ArrowRightLeft } from "lucide-react";
+import { CalendarPlus, ChevronLeft, ChevronRight, MessageCircle, UserRound, Clock3, ArrowRightLeft } from "lucide-react";
 import {
   desde,
   iniciais,

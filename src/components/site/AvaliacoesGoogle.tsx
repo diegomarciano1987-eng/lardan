@@ -94,17 +94,27 @@ function ReviewCard({
   );
 }
 
+const INTERVALO_UNICA_MS = 1500;
+
 export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
   const [ativa, setAtiva] = React.useState(0);
+  const [pausado, setPausado] = React.useState(false);
+  const toqueInicial = React.useRef<{ x: number; y: number } | null>(null);
 
   React.useEffect(() => {
     if (!unica) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (pausado) return;
     const timer = window.setInterval(() => {
       setAtiva((atual) => (atual + 1) % AVALIACOES.length);
-    }, 3000);
+    }, INTERVALO_UNICA_MS);
     return () => window.clearInterval(timer);
-  }, [unica]);
+  }, [unica, pausado]);
+
+  const avancar = React.useCallback((delta: number) => {
+    setAtiva((atual) => (atual + delta + AVALIACOES.length) % AVALIACOES.length);
+  }, []);
+
 
   return (
     <section
@@ -127,11 +137,36 @@ export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
 
         {unica ? (
           <div
-            className="mx-auto mt-12 max-w-2xl select-none md:mt-16"
+            className="mx-auto mt-12 max-w-2xl touch-pan-y select-none md:mt-16"
             aria-live="polite"
             aria-label="Avaliações de clientes no Google"
+            onMouseEnter={() => setPausado(true)}
+            onMouseLeave={() => setPausado(false)}
+            onTouchStart={(e) => {
+              const toque = e.touches[0];
+              if (!toque) return;
+              toqueInicial.current = { x: toque.clientX, y: toque.clientY };
+              setPausado(true);
+            }}
+            onTouchEnd={(e) => {
+              const inicio = toqueInicial.current;
+              toqueInicial.current = null;
+              setPausado(false);
+              if (!inicio) return;
+              const toque = e.changedTouches[0];
+              if (!toque) return;
+              const dx = toque.clientX - inicio.x;
+              const dy = toque.clientY - inicio.y;
+              // Arraste horizontal claro: passa para o depoimento ao lado.
+              if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                avancar(dx < 0 ? 1 : -1);
+              }
+            }}
           >
-            <div key={ativa} className="avaliacao-unica">
+            <div
+              key={ativa}
+              className="avaliacao-unica cursor-grab active:cursor-grabbing"
+            >
               <ReviewCard avaliacao={AVALIACOES[ativa] ?? AVALIACAO_MARIA} destaque />
             </div>
             <div className="mt-6 flex justify-center gap-2" role="tablist" aria-label="Escolher avaliação">

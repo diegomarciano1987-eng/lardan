@@ -101,3 +101,5 @@
 - [x] Sonho da candidata no formulário Seja LARDAN + ficha (teste)
 - [x] Botão tela cheia no Leitor de entrada e na Entrada de maleta
 - [x] Busca de consultoras na Entrada de maleta alcançar as 5 mil
+
+- [ ] Avaliações do Google premium na Home e em Seja Lardan, com carrossel mobile automático e fotos reais

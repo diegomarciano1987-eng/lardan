@@ -1132,23 +1132,19 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
   display: none !important;
 }
 
-/* Avaliações Google — somente o card central troca, sem apagar os laterais. */
-@keyframes avaliacao-central-saindo {
-  from { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0); }
-  to { opacity: 0; filter: blur(11px); transform: translate3d(-0.75rem, 0, 0) scale(0.985); }
+/* Avaliações Google — esteira contínua, sem pausas nem cortes entre os cards. */
+@keyframes avaliacoes-deslizar {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(calc(-166.666667% - 2.083333rem), 0, 0); }
 }
 
-@keyframes avaliacao-central-entrando {
-  from { opacity: 0; filter: blur(11px); transform: translate3d(0.75rem, 0, 0) scale(0.985); }
-  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0); }
+.avaliacoes-trilho {
+  animation: avaliacoes-deslizar 42s linear infinite;
+  will-change: transform;
 }
 
-.avaliacao-card--saindo {
-  animation: avaliacao-central-saindo 560ms cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-.avaliacao-card--entrando {
-  animation: avaliacao-central-entrando 560ms cubic-bezier(0.4, 0, 0.2, 1) both;
+.avaliacoes-item {
+  width: calc((100% - 2.5rem) / 3);
 }
 
 .avaliacao-card {
@@ -1160,23 +1156,24 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
   z-index: 1;
 }
 
-.avaliacao-card--lateral {
-  opacity: 0.68;
-}
-
 @media (max-width: 767px) {
-  .avaliacao-card--lateral {
-    display: none;
+  @keyframes avaliacoes-deslizar-mobile {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(calc(-500% - 6.25rem), 0, 0); }
   }
 
-  .avaliacoes-palco {
-    grid-template-columns: minmax(0, 1fr);
+  .avaliacoes-trilho {
+    animation-name: avaliacoes-deslizar-mobile;
+    animation-duration: 48s;
+  }
+
+  .avaliacoes-item {
+    width: 100%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .avaliacao-card--saindo,
-  .avaliacao-card--entrando {
-    animation-duration: 1ms;
+  .avaliacoes-trilho {
+    animation-play-state: paused;
   }
 }

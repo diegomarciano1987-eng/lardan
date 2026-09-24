@@ -1092,3 +1092,6 @@
 body:has([data-tela-cheia="sim"]) [data-radix-popper-content-wrapper] {
   z-index: 70 !important;
 }
+body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
+  display: none !important;
+}

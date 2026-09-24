@@ -108,7 +108,6 @@ export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
   const [larguraItem, setLarguraItem] = React.useState(0);
 
   React.useEffect(() => {
-    if (unica) return;
     const palco = palcoRef.current;
     if (!palco) return;
     const medir = () => {
@@ -118,7 +117,7 @@ export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
     const observer = new ResizeObserver(medir);
     observer.observe(palco);
     return () => observer.disconnect();
-  }, [unica]);
+  }, []);
 
   React.useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;

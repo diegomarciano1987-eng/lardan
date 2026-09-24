@@ -1,6 +1,5 @@
 import * as React from "react";
-import { ChevronLeft, ChevronRight, ExternalLink, Quote, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ExternalLink, Quote, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import mariaAsset from "@/assets/avaliacao-maria-fatima.png.asset.json";
 import nataliaAsset from "@/assets/avaliacao-natalia-pedroso.png.asset.json";
@@ -96,50 +95,6 @@ function ReviewCard({
 }
 
 export function AvaliacoesGoogle() {
-  const [ativa, setAtiva] = React.useState(0);
-  const [destino, setDestino] = React.useState<number | null>(null);
-  const [interagindo, setInteragindo] = React.useState(false);
-  const gestoInicio = React.useRef<number | null>(null);
-  const trocaPendente = React.useRef<number | null>(null);
-  const trocando = React.useRef(false);
-
-  const selecionar = React.useCallback((proxima: number) => {
-    if (trocando.current) return;
-    const indice = (proxima + AVALIACOES.length) % AVALIACOES.length;
-    if (indice === ativa) return;
-    trocando.current = true;
-    setDestino(indice);
-    trocaPendente.current = window.setTimeout(() => {
-      setAtiva(indice);
-      setDestino(null);
-      trocando.current = false;
-      trocaPendente.current = null;
-    }, 560);
-  }, [ativa]);
-
-  React.useEffect(() => {
-    if (interagindo || destino !== null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
-    const timer = window.setTimeout(() => selecionar(ativa + 1), 3000);
-    return () => window.clearTimeout(timer);
-  }, [ativa, destino, interagindo, selecionar]);
-
-  React.useEffect(
-    () => () => {
-      if (trocaPendente.current !== null) window.clearTimeout(trocaPendente.current);
-      trocando.current = false;
-    },
-    [],
-  );
-
-  const anterior = (ativa - 1 + AVALIACOES.length) % AVALIACOES.length;
-  const proxima = (ativa + 1) % AVALIACOES.length;
-  const avaliacaoAnterior = AVALIACOES[anterior] ?? AVALIACAO_MARIA;
-  const avaliacaoAtiva = AVALIACOES[ativa] ?? AVALIACAO_MARIA;
-  const avaliacaoProxima = AVALIACOES[proxima] ?? AVALIACAO_MARIA;
-  const avaliacaoDestino = destino === null ? null : (AVALIACOES[destino] ?? AVALIACAO_MARIA);
-
   return (
     <section
       aria-labelledby="avaliacoes-google-titulo"
@@ -159,91 +114,18 @@ export function AvaliacoesGoogle() {
           </p>
         </div>
 
-        <div
-          className="mt-12 touch-pan-y select-none md:mt-16"
-          onPointerDown={(event) => {
-            if (event.pointerType === "mouse") return;
-            gestoInicio.current = event.clientX;
-            setInteragindo(true);
-          }}
-          onPointerUp={(event) => {
-            const inicio = gestoInicio.current;
-            gestoInicio.current = null;
-            setInteragindo(false);
-            if (inicio === null || event.pointerType === "mouse") return;
-            const distancia = event.clientX - inicio;
-            if (Math.abs(distancia) < 45) return;
-            selecionar(distancia < 0 ? ativa + 1 : ativa - 1);
-          }}
-          onPointerCancel={() => {
-            gestoInicio.current = null;
-            setInteragindo(false);
-          }}
-        >
-          <div
-            className="avaliacoes-palco grid min-w-0 gap-5 md:grid-cols-3 md:items-stretch"
-            aria-live="polite"
-          >
-            <ReviewCard avaliacao={avaliacaoAnterior} destaque={false} />
-            <div className="avaliacao-card-stack relative h-[36rem] min-w-0 md:h-[39rem]">
-              <div className={cn("absolute inset-0", avaliacaoDestino && "avaliacao-card--saindo")}>
-                <ReviewCard avaliacao={avaliacaoAtiva} destaque />
-              </div>
-              {avaliacaoDestino ? (
-                <div className="avaliacao-card--entrando absolute inset-0">
-                  <ReviewCard avaliacao={avaliacaoDestino} destaque />
-                </div>
-              ) : null}
-            </div>
-            <ReviewCard avaliacao={avaliacaoProxima} destaque={false} />
-          </div>
-        </div>
-
-        <div className="mt-8 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => selecionar(ativa - 1)}
-            aria-label="Ver avaliação anterior"
-            className="size-11 rounded-full"
-          >
-            <ChevronLeft aria-hidden="true" />
-          </Button>
-
-          <div className="flex min-w-0 justify-center gap-2" aria-label="Escolher avaliação">
-            {AVALIACOES.map((avaliacao, index) => (
-              <Button
-                key={avaliacao.nome}
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => selecionar(index)}
-                aria-label={`Ver avaliação de ${avaliacao.nome}`}
-                aria-current={index === ativa ? "true" : undefined}
-                className="size-8 rounded-full p-0"
+        <div className="avaliacoes-janela mt-12 select-none overflow-hidden md:mt-16">
+          <div className="avaliacoes-trilho flex gap-5" aria-label="Avaliações de clientes no Google">
+            {[...AVALIACOES, ...AVALIACOES].map((avaliacao, index) => (
+              <div
+                key={`${avaliacao.nome}-${index}`}
+                className="avaliacoes-item shrink-0"
+                aria-hidden={index >= AVALIACOES.length ? "true" : undefined}
               >
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "block h-1.5 rounded-full transition-all duration-500",
-                    index === ativa ? "w-7 bg-rose-deep" : "w-1.5 bg-border",
-                  )}
-                />
-              </Button>
+                <ReviewCard avaliacao={avaliacao} destaque />
+              </div>
             ))}
           </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => selecionar(ativa + 1)}
-            aria-label="Ver próxima avaliação"
-            className="size-11 rounded-full"
-          >
-            <ChevronRight aria-hidden="true" />
-          </Button>
         </div>
 
         <div className="mt-10 flex justify-center">

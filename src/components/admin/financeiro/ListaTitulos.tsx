@@ -53,7 +53,10 @@ export function ListaTitulos({
   const [novo, setNovo] = React.useState(false);
   const [aberto, setAberto] = React.useState<string | null>(null);
 
-  const { de, ate } = usePeriodoFinanceiro();
+  const periodo = usePeriodoFinanceiro();
+  const [todoPeriodo, setTodoPeriodo] = React.useState(false);
+  const de = todoPeriodo ? undefined : periodo.de;
+  const ate = todoPeriodo ? undefined : periodo.ate;
 
   React.useEffect(() => setPagina(0), [buscaLenta, situacao, classificacao, de, ate]);
   React.useEffect(() => {
@@ -70,8 +73,8 @@ export function ListaTitulos({
         situacao,
         limit: PAGE_SIZE,
         offset: pagina * PAGE_SIZE,
-        de,
-        ate,
+        ...(de ? { de } : {}),
+        ...(ate ? { ate } : {}),
         ...(classificacao === "pendentes" ? { semClassificacao: true } : {}),
       }),
   });
@@ -176,7 +179,9 @@ export function ListaTitulos({
     >
       <span className={`size-2.5 rounded-full ${tom}`} aria-hidden />
       <span>
-        <span className="block text-xs font-semibold text-ledger-muted">{rotulo} no período</span>
+        <span className="block text-xs font-semibold text-ledger-muted">
+          {rotulo} {todoPeriodo ? "(todo o período)" : "no período"}
+        </span>
         <span className="block text-sm font-semibold tabular-nums text-ledger-text">
           {qtd ?? "—"} · {cents === undefined ? "—" : formatBRLFromCents(cents)}
         </span>
@@ -222,6 +227,15 @@ export function ListaTitulos({
         }
         filters={
           <>
+            <SmartSelect
+              options={[
+                { value: "periodo", label: "Período selecionado" },
+                { value: "tudo", label: "Todo o período" },
+              ]}
+              value={todoPeriodo ? "tudo" : "periodo"}
+              onChange={(v) => setTodoPeriodo(v === "tudo")}
+              className="w-52"
+            />
             <SmartSelect
               options={[
                 { value: "todos", label: "Todas as situações" },

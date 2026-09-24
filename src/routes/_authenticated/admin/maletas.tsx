@@ -243,14 +243,21 @@ function MaletasPage() {
         title="Maletas"
         description="Montagem, conferência, expedição, cadeia de custódia e aceite. Todas as ações usam as regras transacionais do banco."
         actions={
-          podeMontar ? (
-            <NovaMaleta
-              aoCriar={(id) => {
-                qc.invalidateQueries({ queryKey: ["maletas"] });
-                navigate({ to: "/admin/maletas/$id", params: { id } });
-              }}
-            />
-          ) : undefined
+          <div className="flex flex-wrap gap-2">
+            {caps.includes("stock.operate") && (
+              <Link to="/admin/maletas/entrada" className="admin-btn">
+                <ScanLine aria-hidden className="size-4" /> Entrada de maleta
+              </Link>
+            )}
+            {podeMontar && (
+              <NovaMaleta
+                aoCriar={(id) => {
+                  qc.invalidateQueries({ queryKey: ["maletas"] });
+                  navigate({ to: "/admin/maletas/$id", params: { id } });
+                }}
+              />
+            )}
+          </div>
         }
       />
 

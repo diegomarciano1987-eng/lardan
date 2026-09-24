@@ -98,3 +98,6 @@
 - [ ] Preparar manipulador de webhook inativo e testável.
 - [ ] Validar banco isolado, tipos e navegador em todos os perfis exigidos.
 - [ ] Atualizar documentação e gerar pacote final com manifesto e evidências reais.
+- [ ] Sonho da candidata no formulário Seja LARDAN + ficha (teste)
+- [ ] Botão tela cheia no Leitor de entrada e na Entrada de maleta
+- [ ] Busca de consultoras na Entrada de maleta alcançar as 5 mil

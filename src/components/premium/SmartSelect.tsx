@@ -31,6 +31,8 @@ type Props = {
   onSearch?: (termo: string) => void;
   /** Indica busca em andamento no servidor. */
   loading?: boolean;
+  /** Rodapé da lista (ex.: "Mostrando 60 de 5.200"). */
+  footer?: React.ReactNode;
 };
 
 function normalizar(v: string) {
@@ -56,6 +58,7 @@ export function SmartSelect({
   searchThreshold = 7,
   onSearch,
   loading,
+  footer,
 }: Props) {
   const [open, setOpen] = React.useState(false);
   const [term, setTerm] = React.useState("");
@@ -218,6 +221,9 @@ export function SmartSelect({
               </div>
             ))}
           </div>
+          {footer && (
+            <div className="border-t border-border/70 px-3 py-2 text-xs text-muted-foreground">{footer}</div>
+          )}
         </PopoverContent>
       </Popover>
     </>

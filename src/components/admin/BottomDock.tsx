@@ -179,7 +179,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
 
       <nav
         aria-label="Módulos do sistema"
-        className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(18px,env(safe-area-inset-bottom))]"
+        data-bottom-dock className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(18px,env(safe-area-inset-bottom))]"
       >
         <div className="flex w-full max-w-[94vw] items-center gap-2 rounded-[24px] border border-white/8 bg-ink px-3 py-2 shadow-[0_18px_40px_-16px_rgba(24,24,23,0.65)]">
           <Link to="/admin" className="hidden shrink-0 px-2 lg:block" aria-label="Lardan — visão geral">

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { EmptyState, ErrorState, PageHeader, Panel, Skeleton, StatusBadge } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { TelaCheia } from "@/components/admin/TelaCheia";
 import { useCapabilities } from "@/lib/capabilities";
 import { listStockLocations } from "@/lib/stock";
 import { chaveIdempotencia, traduzir } from "@/lib/maletas";
@@ -67,16 +68,18 @@ const SITUACAO = {
 
 function NovaEntrada({ aoAbrir }: { aoAbrir: (id: string) => void }) {
   const [busca, setBusca] = React.useState("");
+  const [limite, setLimite] = React.useState(60);
+  const [rotuloEscolhida, setRotuloEscolhida] = React.useState<{ id: string; display_name: string; situacao: string } | null>(null);
   const [consultora, setConsultora] = React.useState("");
   const [local, setLocal] = React.useState("");
   const [referencia, setReferencia] = React.useState("");
 
   const consultoras = useQuery({
-    queryKey: ["entrada-maleta", "consultoras", busca],
+    queryKey: ["entrada-maleta", "consultoras", busca, limite],
     queryFn: () =>
       rpc<{ total: number; itens: { id: string; display_name: string; code: string | null; situacao: string }[] }>(
         "kit_entrada_consultoras",
-        { _busca: busca || null, _limit: 40 },
+        { _busca: busca || null, _limit: limite },
       ),
   });
   const locais = useQuery({ queryKey: ["entrada-maleta", "locais"], queryFn: listStockLocations });
@@ -91,7 +94,15 @@ function NovaEntrada({ aoAbrir }: { aoAbrir: (id: string) => void }) {
     }
   }, [locais.data, local]);
 
-  const escolhida = consultoras.data?.itens.find((c) => c.id === consultora);
+  const escolhida = consultoras.data?.itens.find((c) => c.id === consultora) ?? (rotuloEscolhida?.id === consultora ? rotuloEscolhida : undefined);
+  const opcoesConsultora = (consultoras.data?.itens ?? []).map((c) => ({
+    value: c.id,
+    label: c.display_name,
+    hint: c.situacao === "ativo" ? "Ativa" : "Inativa — será ativada",
+  }));
+  if (escolhida && !opcoesConsultora.some((o) => o.value === escolhida.id)) {
+    opcoesConsultora.unshift({ value: escolhida.id, label: escolhida.display_name, hint: escolhida.situacao === "ativo" ? "Ativa" : "Inativa — será ativada" });
+  }
 
   const abrir = useMutation({
     mutationFn: () =>
@@ -117,14 +128,33 @@ function NovaEntrada({ aoAbrir }: { aoAbrir: (id: string) => void }) {
           <span className="ledger-eyebrow">1. Consultora (obrigatória)</span>
           <SmartSelect
             value={consultora}
-            onChange={setConsultora}
-            onSearch={setBusca}
-            loading={consultoras.isFetching}
-            options={(consultoras.data?.itens ?? []).map((c) => ({
-              value: c.id,
-              label: c.display_name,
-              hint: c.situacao === "ativo" ? "Ativa" : "Inativa — será ativada",
-            }))}
+            onChange={(v) => {
+              setConsultora(v);
+              const c = consultoras.data?.itens.find((x) => x.id === v);
+              if (c) setRotuloEscolhida(c);
+            }}
+            onSearch={(t) => {
+              setBusca(t);
+              setLimite(60);
+            }}
+            loading={consultoras.isLoading}
+            options={opcoesConsultora}
+            footer={
+              consultoras.data ? (
+                <div className="flex items-center justify-between gap-2">
+                  <span>
+                    Mostrando {Math.min(consultoras.data.itens.length, consultoras.data.total).toLocaleString("pt-BR")} de{" "}
+                    {consultoras.data.total.toLocaleString("pt-BR")}
+                    {!busca && " · digite nome, código ou CPF"}
+                  </span>
+                  {consultoras.data.total > consultoras.data.itens.length && limite < 300 && (
+                    <button type="button" className="underline" onClick={() => setLimite((l) => Math.min(l + 60, 300))}>
+                      {consultoras.isFetching ? "Carregando…" : "Mostrar mais"}
+                    </button>
+                  )}
+                </div>
+              ) : null
+            }
             searchPlaceholder="Buscar por nome, código ou CPF"
             placeholder="Escolher consultora"
           />
@@ -247,6 +277,7 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
   const s = SITUACAO[d.status];
 
   return (
+    <TelaCheia>
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button type="button" className="admin-btn" onClick={aoFechar}>
@@ -351,6 +382,7 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
         </div>
       </div>
     </div>
+    </TelaCheia>
   );
 }
 

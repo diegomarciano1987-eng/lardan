@@ -287,7 +287,34 @@ export function Kanban({
   const etapaDe = (c: CandidaturaCard) => otimista[c.id] ?? c.etapa_id;
 
   return (
-    <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-4">
+    <div>
+      <div className="mb-2.5 flex items-center justify-end gap-1.5">
+        <span className="mr-1 text-[0.6875rem] text-ledger-muted">
+          {board.etapas.length} etapas
+        </span>
+        <button
+          type="button"
+          onClick={() => rolar(-1)}
+          disabled={!rolagem.podeEsq}
+          aria-label="Ver etapas anteriores"
+          title="Etapas anteriores"
+          className="grid size-8 place-items-center rounded-lg border border-line bg-surface text-ledger-text transition hover:border-bronze hover:text-bronze disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-line disabled:hover:text-ledger-text"
+        >
+          <ChevronLeft aria-hidden className="size-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => rolar(1)}
+          disabled={!rolagem.podeDir}
+          aria-label="Ver próximas etapas"
+          title="Próximas etapas"
+          className="grid size-8 place-items-center rounded-lg border border-line bg-surface text-ledger-text transition hover:border-bronze hover:text-bronze disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-line disabled:hover:text-ledger-text"
+        >
+          <ChevronRight aria-hidden className="size-4" />
+        </button>
+      </div>
+      <div ref={trilho} className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-4">
+
       {board.etapas.map((etapa) => {
         const cards = board.cards.filter((c) => etapaDe(c) === etapa.id);
         return (

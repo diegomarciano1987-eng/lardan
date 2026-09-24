@@ -92,6 +92,7 @@ export function SejaLardanForm() {
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);
+  const [foiReenvio, setFoiReenvio] = useState(false);
   const [semNumero, setSemNumero] = useState(false);
   const [uf, setUf] = useState("");
   const [cep, setCep] = useState("");
@@ -182,47 +183,53 @@ export function SejaLardanForm() {
       return;
     }
 
-    const resposta = await enviarFn({
-      data: {
-        payload: semVazios({
-          first_name: texto("first_name") ?? "",
-          last_name: texto("last_name") ?? "",
-          cpf: onlyDigits(cpf),
-          whatsapp: whatsappCanonico.canonico,
-          email: texto("email"),
-          city: texto("city") ?? "",
-          uf: texto("uf") ?? "",
-          street: texto("street"),
-          street_number: semNumero ? undefined : texto("street_number"),
-          no_number: semNumero,
-          postal_code: normalizarCep(cep).canonico ?? undefined,
-          financial_goal: texto("financial_goal"),
-          availability: texto("availability"),
-          experience: texto("experience"),
-          audience: texto("audience"),
-          motivation: texto("motivation"),
-          dream: texto("dream"),
-          dream_value_cents: centavosDoValor(sonhoValor),
-          source: "site/seja-lardan",
-          privacy_version: PRIVACY_VERSION,
-          marketing_consent: marketingConsent,
-        }) as never,
-        tracking: capturarTracking(),
-      },
-    });
+    try {
+      const resposta = await enviarFn({
+        data: {
+          payload: semVazios({
+            first_name: texto("first_name") ?? "",
+            last_name: texto("last_name") ?? "",
+            cpf: onlyDigits(cpf),
+            whatsapp: whatsappCanonico.canonico,
+            email: texto("email"),
+            city: texto("city") ?? "",
+            uf: texto("uf") ?? "",
+            street: texto("street"),
+            street_number: semNumero ? undefined : texto("street_number"),
+            no_number: semNumero,
+            postal_code: normalizarCep(cep).canonico ?? undefined,
+            financial_goal: texto("financial_goal"),
+            availability: texto("availability"),
+            experience: texto("experience"),
+            audience: texto("audience"),
+            motivation: texto("motivation"),
+            dream: texto("dream"),
+            dream_value_cents: centavosDoValor(sonhoValor),
+            source: "site/seja-lardan",
+            privacy_version: PRIVACY_VERSION,
+            marketing_consent: marketingConsent,
+          }) as never,
+          tracking: capturarTracking(),
+        },
+      });
 
-    setBusy(false);
-    if (resposta.status !== "ok") {
-      setErro(
-        resposta.codigo === "limite_envios"
-          ? "Recebemos vários envios seguidos deste acesso. Aguarde alguns minutos e tente novamente."
-          : resposta.codigo === "email_invalido"
-            ? "Confira o e-mail informado."
-            : "Não foi possível registrar a candidatura. Confira os dados obrigatórios e tente novamente.",
-      );
-      return;
+      if (resposta.status !== "ok") {
+        setErro(
+          resposta.codigo === "limite_envios"
+            ? "Recebemos vários envios seguidos deste acesso. Aguarde alguns minutos e tente novamente."
+            : resposta.codigo === "email_invalido"
+              ? "Confira o e-mail informado."
+              : "Não foi possível registrar a candidatura. Confira os dados obrigatórios e tente novamente.",
+        );
+        return;
+      }
+      setFoiReenvio(resposta.reenvio);
+      setProtocolo(resposta.protocolo);
+    } catch {
+      setErro("Não foi possível confirmar o registro. Seus dados continuam preenchidos; tente enviar novamente.");
+    } finally {
+      setBusy(false);
     }
-    setProtocolo(resposta.protocolo);
   }
 
   if (protocolo) {
@@ -231,7 +238,7 @@ export function SejaLardanForm() {
         role="status"
         className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 text-center"
       >
-        <p className="brand-eyebrow mb-3">Candidatura registrada</p>
+        <p className="brand-eyebrow mb-3">{foiReenvio ? "Candidatura atualizada" : "Candidatura registrada"}</p>
         <h2 className="text-3xl text-foreground">Recebemos os seus dados</h2>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
           O seu protocolo é <strong className="text-foreground">{protocolo}</strong>. Guarde este

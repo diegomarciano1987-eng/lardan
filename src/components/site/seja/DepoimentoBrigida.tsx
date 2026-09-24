@@ -1,5 +1,6 @@
 import { MapPin, Play } from "lucide-react";
 import depoimentoAsset from "@/assets/brigida-carla-giroudo-depoimento.mp4.asset.json";
+import depoimentoWebmAsset from "@/assets/brigida-carla-giroudo-depoimento.webm.asset.json";
 import posterAsset from "@/assets/brigida-carla-giroudo-poster.webp.asset.json";
 import { CinematicTitle } from "./CinematicTitle";
 
@@ -20,6 +21,7 @@ export function DepoimentoBrigida() {
             aria-label="Depoimento de Brígida Carla Giroudo, Consultora Diamante Lardan"
             className="relative aspect-[9/16] w-full bg-foreground object-cover shadow-[var(--shadow-soft)]"
           >
+            <source src={depoimentoWebmAsset.url} type="video/webm" />
             <source src={depoimentoAsset.url} type="video/mp4" />
             Seu navegador não consegue reproduzir este vídeo.
           </video>

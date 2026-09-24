@@ -374,6 +374,7 @@ export function Kanban({
       {opcoes && board.etapas.length === 0 && (
         <p className="text-sm text-ledger-muted">Nenhuma etapa ativa configurada.</p>
       )}
+      </div>
     </div>
   );
 }

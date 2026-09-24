@@ -1156,6 +1156,30 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
   z-index: 1;
 }
 
+/* Avaliação única — entra esfumaçada, de forma suave, a cada troca. */
+@keyframes avaliacao-unica-entrando {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translate3d(0.75rem, 0, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.avaliacao-unica {
+  animation: avaliacao-unica-entrando 700ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avaliacao-unica {
+    animation-duration: 1ms;
+  }
+}
+
 @media (max-width: 767px) {
   @keyframes avaliacoes-deslizar-mobile {
     from { transform: translate3d(0, 0, 0); }

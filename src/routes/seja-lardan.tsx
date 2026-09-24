@@ -69,7 +69,7 @@ function SejaLardanPage() {
       <SejaHistoria />
       <SejaDefinicao />
       <SejaFerramentas />
-      <AvaliacoesGoogle />
+      <AvaliacoesGoogle unica />
       <SejaAcademy />
       <SejaProduto />
       <SejaVidaReal />

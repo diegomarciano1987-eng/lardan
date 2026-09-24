@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { AvaliacoesGoogle } from "@/components/site/AvaliacoesGoogle";
 import { RetratoOficial } from "@/components/site/RetratoOficial";
 import {
   danielPortraitInstitucional,
@@ -185,19 +186,8 @@ function ALardanPage() {
         </div>
       </section>
 
-      {/* Histórias reais: estrutura preparada, sem depoimento inventado. */}
-      <section aria-labelledby="historias-titulo" className="border-t border-border">
-        <div className="mx-auto max-w-3xl px-6 py-20 text-center md:py-28">
-          <p className="brand-eyebrow mb-4">Em breve</p>
-          <h2 id="historias-titulo" className="text-3xl leading-tight text-foreground md:text-4xl">
-            Histórias reais de quem é Lardan
-          </h2>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
-            Esta área foi preparada para receber os vídeos e as histórias reais de consultoras
-            Lardan. Nada é publicado aqui antes de ser gravado e autorizado por elas.
-          </p>
-        </div>
-      </section>
+      {/* Avaliações reais no Google, no lugar do bloco "Em breve". */}
+      <AvaliacoesGoogle unica />
     </SiteLayout>
   );
 }

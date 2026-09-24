@@ -545,7 +545,7 @@ function ProdutoDetalhe() {
             name: "barcode",
             label: "Código de barras",
             type: "text",
-            help: "Etiqueta existente: digite ou leia com o leitor. Zeros à esquerda são preservados.",
+            help: "Vazio = o sistema gera um EAN-13 novo. Já tem etiqueta? Digite ou leia com o leitor — zeros à esquerda preservados.",
             action: {
               label: "Consultar código de barras",
               run: async (valor) => {

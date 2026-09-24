@@ -57,7 +57,7 @@ function ReviewCard({
   return (
     <article
       className={cn(
-        "avaliacao-card flex h-[36rem] min-w-0 flex-col border border-border bg-card p-7 md:h-[34rem] md:p-8",
+        "avaliacao-card flex h-[36rem] min-w-0 flex-col border border-border bg-card p-7 md:h-[39rem] md:p-8",
         destaque ? "avaliacao-card--destaque" : "avaliacao-card--lateral",
       )}
     >
@@ -185,7 +185,7 @@ export function AvaliacoesGoogle() {
             aria-live="polite"
           >
             <ReviewCard avaliacao={avaliacaoAnterior} destaque={false} />
-            <div className="avaliacao-card-stack relative h-[36rem] min-w-0 md:h-[34rem]">
+            <div className="avaliacao-card-stack relative h-[36rem] min-w-0 md:h-[39rem]">
               <div className={cn("absolute inset-0", avaliacaoDestino && "avaliacao-card--saindo")}>
                 <ReviewCard avaliacao={avaliacaoAtiva} destaque />
               </div>

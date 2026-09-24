@@ -84,7 +84,12 @@ export function PeriodoGlobal() {
     return i.de === de && i.ate === ate;
   });
 
-  const intervalo = { from: daIso(de), to: daIso(ate) };
+  const [rascunho, setRascunho] = React.useState<{ from?: Date; to?: Date } | undefined>();
+  React.useEffect(() => {
+    if (aberto) setRascunho({ from: daIso(de), to: daIso(ate) });
+  }, [aberto, de, ate]);
+  const intervalo = rascunho ?? { from: daIso(de), to: daIso(ate) };
+  const podeAplicar = !!rascunho?.from;
 
   return (
     <Popover open={aberto} onOpenChange={setAberto}>
@@ -136,23 +141,38 @@ export function PeriodoGlobal() {
           formatters={{
             formatMonthDropdown: (d: Date) => d.toLocaleString("pt-BR", { month: "long" }),
           }}
-          selected={intervalo}
+          selected={intervalo as never}
           month={mesVisivel}
           onMonthChange={setMesVisivel}
           captionLayout="dropdown"
           startMonth={new Date(2020, 0)}
           endMonth={new Date(new Date().getFullYear() + 5, 11)}
-          onSelect={(faixa) => {
-            if (!faixa?.from) return;
-            const fim = faixa.to ?? faixa.from;
-            aplicar({ de: iso(faixa.from), ate: iso(fim) });
-            if (faixa.to) setAberto(false);
-          }}
+          onSelect={(faixa) => setRascunho(faixa ?? undefined)}
           className="pointer-events-auto p-3"
         />
-        <p className="border-t border-line-soft px-3 py-2 text-xs font-medium text-ledger-muted">
-          {exibir(de)} até {exibir(ate)} — fica na barra de endereço.
-        </p>
+        <div className="flex items-center justify-between gap-3 border-t border-line-soft px-3 py-2.5">
+          <p className="text-xs font-medium tabular-nums text-ledger-muted">
+            {rascunho?.from ? rascunho.from.toLocaleDateString("pt-BR") : "—"} até{" "}
+            {rascunho?.to ? rascunho.to.toLocaleDateString("pt-BR") : rascunho?.from ? rascunho.from.toLocaleDateString("pt-BR") : "—"}
+          </p>
+          <div className="flex gap-2">
+            <button type="button" className="admin-btn" onClick={() => setAberto(false)}>
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className="admin-btn-primary"
+              disabled={!podeAplicar}
+              onClick={() => {
+                if (!rascunho?.from) return;
+                aplicar({ de: iso(rascunho.from), ate: iso(rascunho.to ?? rascunho.from) });
+                setAberto(false);
+              }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );

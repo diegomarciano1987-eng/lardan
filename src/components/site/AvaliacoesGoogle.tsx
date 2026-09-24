@@ -95,19 +95,37 @@ function ReviewCard({
 }
 
 const INTERVALO_UNICA_MS = 1500;
+const INTERVALO_DESKTOP_MS = 3500;
+const ESPACO_DESKTOP_PX = 20; // gap-5 entre os cards
 
 export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
   const [ativa, setAtiva] = React.useState(0);
   const [pausado, setPausado] = React.useState(false);
   const toqueInicial = React.useRef<{ x: number; y: number } | null>(null);
 
+  // Desktop: palco com 1 card grande no centro e os vizinhos menores nas laterais.
+  const palcoRef = React.useRef<HTMLDivElement | null>(null);
+  const [larguraItem, setLarguraItem] = React.useState(0);
+
   React.useEffect(() => {
-    if (!unica) return;
+    if (unica) return;
+    const palco = palcoRef.current;
+    if (!palco) return;
+    const medir = () => {
+      setLarguraItem((palco.clientWidth - 2 * ESPACO_DESKTOP_PX) / 3);
+    };
+    medir();
+    const observer = new ResizeObserver(medir);
+    observer.observe(palco);
+    return () => observer.disconnect();
+  }, [unica]);
+
+  React.useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (pausado) return;
     const timer = window.setInterval(() => {
       setAtiva((atual) => (atual + 1) % AVALIACOES.length);
-    }, INTERVALO_UNICA_MS);
+    }, unica ? INTERVALO_UNICA_MS : INTERVALO_DESKTOP_MS);
     return () => window.clearInterval(timer);
   }, [unica, pausado]);
 

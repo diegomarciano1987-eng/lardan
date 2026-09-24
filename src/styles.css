@@ -1188,7 +1188,7 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
 
   .avaliacoes-trilho {
     animation-name: avaliacoes-deslizar-mobile;
-    animation-duration: 48s;
+    animation-duration: 96s;
   }
 
   .avaliacoes-item {

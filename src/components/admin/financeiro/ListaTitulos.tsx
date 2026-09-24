@@ -76,6 +76,9 @@ export function ListaTitulos({
       }),
   });
 
+  const hojeIso = new Date().toLocaleDateString("sv-SE");
+  const resumo = q.data?.resumo;
+
   const colunas: Column<FinTitleRow>[] = [
     {
       key: "descricao",
@@ -97,8 +100,16 @@ export function ListaTitulos({
     },
     {
       key: "vencimento",
-      header: "Próximo vencimento",
-      render: (r) => <span className="tabular-nums">{dataBR(r.proximo_vencimento)}</span>,
+      header: "Vencimento",
+      render: (r) => {
+        const venc = r.vencimento_ref ?? r.proximo_vencimento;
+        const atrasado = !r.quitado && r.status !== "cancelado" && !!r.proximo_vencimento && r.proximo_vencimento < hojeIso;
+        return (
+          <span className={atrasado ? "tabular-nums font-semibold text-danger" : "tabular-nums"}>
+            {dataBR(venc ?? null)}
+          </span>
+        );
+      },
     },
     {
       key: "parcelas",
@@ -128,28 +139,57 @@ export function ListaTitulos({
         ),
     },
     {
+      key: "quitado",
+      header: "Quitado",
+      render: (r) =>
+        r.status === "cancelado" ? (
+          <StatusBadge tone="danger">Cancelado</StatusBadge>
+        ) : r.quitado ? (
+          <div className="text-xs">
+            <StatusBadge tone="success">Quitado</StatusBadge>
+            {r.ultimo_pagamento ? (
+              <p className="mt-1 tabular-nums text-ledger-muted">em {dataBR(r.ultimo_pagamento)}</p>
+            ) : null}
+          </div>
+        ) : r.proximo_vencimento && r.proximo_vencimento < hojeIso ? (
+          <StatusBadge tone="danger">Vencido</StatusBadge>
+        ) : (
+          <StatusBadge tone="warning">Em aberto</StatusBadge>
+        ),
+    },
+    {
       key: "status",
-      header: "Situação",
+      header: "Aprovação",
       render: (r) => (
-        <StatusBadge
-          tone={
-            r.status === "cancelado"
-              ? "danger"
-              : r.status === "submetido"
-                ? "warning"
-                : r.status === "rascunho"
-                  ? "neutral"
-                  : "success"
-          }
-        >
-          {TITLE_STATUS_LABEL[r.status]}
-        </StatusBadge>
+        <span className="text-xs text-ledger-muted">{TITLE_STATUS_LABEL[r.status]}</span>
       ),
     },
   ];
 
+  const chip = (valor: string, rotulo: string, qtd: number | undefined, cents: number | undefined, tom: string) => (
+    <button
+      type="button"
+      onClick={() => setSituacao(situacao === valor ? "todos" : valor)}
+      className={`flex min-h-12 items-center gap-3 rounded-[10px] border px-4 py-2 text-left transition ${
+        situacao === valor ? "border-bronze bg-cream-2" : "border-line-soft bg-surface hover:border-bronze"
+      }`}
+    >
+      <span className={`size-2.5 rounded-full ${tom}`} aria-hidden />
+      <span>
+        <span className="block text-xs font-semibold text-ledger-muted">{rotulo} no período</span>
+        <span className="block text-sm font-semibold tabular-nums text-ledger-text">
+          {qtd ?? "—"} · {cents === undefined ? "—" : formatBRLFromCents(cents)}
+        </span>
+      </span>
+    </button>
+  );
+
   return (
     <>
+      <div className="mb-4 flex flex-wrap gap-2">
+        {chip("liquidado", "Quitadas", resumo?.quitados, resumo?.quitado_cents, "bg-success")}
+        {chip("aberto", direction === "payable" ? "Em aberto (a pagar)" : "Em aberto (a receber)", resumo?.abertos, resumo?.aberto_cents, "bg-warning")}
+      </div>
       <DataTable
         columns={colunas}
         rows={q.data?.rows ?? []}
@@ -165,6 +205,15 @@ export function ListaTitulos({
         error={q.error}
         onRetry={() => void q.refetch()}
         onRowClick={(r) => setAberto(r.id)}
+        rowClassName={(r) =>
+          r.status === "cancelado"
+            ? "opacity-60"
+            : r.quitado
+              ? "bg-success/[0.06] hover:bg-success/[0.1]"
+              : r.proximo_vencimento && r.proximo_vencimento < hojeIso
+                ? "bg-danger/[0.05] hover:bg-danger/[0.09]"
+                : undefined
+        }
         emptyTitle="Nenhum título registrado"
         emptyDescription={
           direction === "payable"
@@ -178,7 +227,7 @@ export function ListaTitulos({
                 { value: "todos", label: "Todas as situações" },
                 { value: "aberto", label: "Em aberto" },
                 { value: "vencido", label: "Vencidas" },
-                { value: "liquidado", label: "Liquidadas" },
+                { value: "liquidado", label: "Quitadas" },
               ]}
               value={situacao}
               onChange={setSituacao}

@@ -226,6 +226,39 @@ export function Kanban({
   /** Movimento otimista: se o banco recusar, o card volta sozinho. */
   const [otimista, setOtimista] = useState<Record<string, string>>({});
 
+  /* Navegação por setas no topo do quadro. */
+  const trilho = useRef<HTMLDivElement>(null);
+  const [rolagem, setRolagem] = useState({ podeEsq: false, podeDir: false });
+
+  const medirRolagem = useCallback(() => {
+    const el = trilho.current;
+    if (!el) return;
+    setRolagem({
+      podeEsq: el.scrollLeft > 4,
+      podeDir: el.scrollLeft < el.scrollWidth - el.clientWidth - 4,
+    });
+  }, []);
+
+  useEffect(() => {
+    medirRolagem();
+    const el = trilho.current;
+    if (!el) return;
+    el.addEventListener("scroll", medirRolagem, { passive: true });
+    window.addEventListener("resize", medirRolagem);
+    return () => {
+      el.removeEventListener("scroll", medirRolagem);
+      window.removeEventListener("resize", medirRolagem);
+    };
+  }, [medirRolagem, board.etapas.length]);
+
+  function rolar(direcao: -1 | 1) {
+    const el = trilho.current;
+    if (!el) return;
+    // Duas colunas por clique (~604px), suave.
+    el.scrollBy({ left: direcao * 604, behavior: "smooth" });
+  }
+
+
   const mover = useMutation({
     mutationFn: ({ lead, etapa }: { lead: string; etapa: string }) => moverEtapa(lead, etapa),
     onSuccess: async (_d, v) => {

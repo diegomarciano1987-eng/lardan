@@ -7411,6 +7411,10 @@ export type Database = {
         Returns: number
       }
       barcode_lookup: { Args: { _code: string }; Returns: Json }
+      barcode_resolver: {
+        Args: { _code: string; _criar?: boolean }
+        Returns: Json
+      }
       can_manage_catalog: { Args: { _user_id: string }; Returns: boolean }
       can_manage_content: { Args: { _user_id: string }; Returns: boolean }
       can_manage_kits: { Args: { _user_id: string }; Returns: boolean }
@@ -7430,6 +7434,7 @@ export type Database = {
         Returns: Json
       }
       catalog_street_value: { Args: never; Returns: Json }
+      categoria_por_nome: { Args: { _nome: string }; Returns: string }
       claim_master_role: { Args: never; Returns: boolean }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }
       confirm_stock_reservation: {

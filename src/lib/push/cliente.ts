@@ -12,7 +12,8 @@ export type EstadoAviso =
   | "inativo"
   | "negado"
   | "sem_suporte"
-  | "abrir_em_nova_aba";
+  | "abrir_em_nova_aba"
+  | "ios_instalar";
 
 export interface InscricaoPush {
   endpoint: string;
@@ -38,6 +39,24 @@ function bytesParaBase64Url(buffer: ArrayBuffer | null): string {
   return btoa(texto).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+/** iPhone/iPad (inclui iPad que se apresenta como Mac). */
+export function ehIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return (
+    /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+/** Aberto pelo ícone da Tela de Início (modo app). */
+export function emModoApp(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(display-mode: standalone)").matches === true ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
 export function suportaAviso(): boolean {
   return (
     typeof window !== "undefined" &&
@@ -53,17 +72,29 @@ export function dentroDeIframe(): boolean {
 }
 
 export async function estadoAtual(): Promise<EstadoAviso> {
-  if (!suportaAviso()) return "sem_suporte";
+  // No iPhone o aviso só existe no painel aberto pelo ícone da Tela de Início.
+  if (ehIOS() && !emModoApp()) return "ios_instalar";
+  if (!suportaAviso()) return ehIOS() ? "ios_instalar" : "sem_suporte";
   if (Notification.permission === "denied") return "negado";
-  const registro = await navigator.serviceWorker.getRegistration("/lardan-push-sw.js");
-  const inscricao = await registro?.pushManager.getSubscription();
-  return inscricao ? "ativo" : "inativo";
+  try {
+    // Nunca deixa o botão travado esperando o navegador responder.
+    const inscricao = await Promise.race([
+      navigator.serviceWorker
+        .getRegistration("/lardan-push-sw.js")
+        .then((r) => r?.pushManager.getSubscription() ?? null),
+      new Promise<null>((ok) => setTimeout(() => ok(null), 3000)),
+    ]);
+    return inscricao ? "ativo" : "inativo";
+  } catch {
+    return "inativo";
+  }
 }
 
 /** Pede a permissão e devolve a inscrição para guardar no servidor. */
 export async function ativarAviso(): Promise<
   { ok: true; inscricao: InscricaoPush } | { ok: false; estado: EstadoAviso }
 > {
+  if (ehIOS() && !emModoApp()) return { ok: false, estado: "ios_instalar" };
   if (!suportaAviso()) return { ok: false, estado: "sem_suporte" };
   if (dentroDeIframe()) return { ok: false, estado: "abrir_em_nova_aba" };
 

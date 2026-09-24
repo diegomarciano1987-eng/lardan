@@ -335,6 +335,19 @@ function CockpitCandidata() {
 
               <Panel title="Respostas do formulário Seja Lardan">
                 <dl className="grid gap-5 md:grid-cols-2">
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 md:col-span-2">
+                    <dl className="grid gap-4 md:grid-cols-2">
+                      <Campo rotulo="Sonho que a Lardan pode ajudar" valor={c.sonho} />
+                      <Campo
+                        rotulo="Valor do sonho"
+                        valor={
+                          c.sonho_valor_cents != null
+                            ? (c.sonho_valor_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 })
+                            : null
+                        }
+                      />
+                    </dl>
+                  </div>
                   <Campo rotulo="Objetivo" valor={c.objetivo} />
                   <Campo rotulo="Disponibilidade" valor={c.disponibilidade} />
                   <Campo rotulo="Experiência com vendas" valor={c.experiencia} />

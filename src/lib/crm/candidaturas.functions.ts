@@ -33,6 +33,8 @@ const Entrada = z.object({
     experience: texto(400),
     audience: texto(400),
     motivation: texto(2000),
+    dream: texto(300),
+    dream_value_cents: z.string().regex(/^\d{1,12}$/).optional(),
     source: texto(120),
     privacy_version: z.string().trim().min(1).max(60),
     marketing_consent: z.boolean().optional(),

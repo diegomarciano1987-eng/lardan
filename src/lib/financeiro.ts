@@ -42,6 +42,10 @@ export interface FinTitleRow {
   valor_cents: number;
   contraparte: string;
   proximo_vencimento: string | null;
+  ultimo_vencimento?: string | null;
+  vencimento_ref?: string | null;
+  ultimo_pagamento?: string | null;
+  quitado?: boolean;
   pago_cents: number;
   parcelas: number;
   chart_account_id?: string | null;
@@ -125,6 +129,13 @@ export async function fetchFinAccounts(): Promise<FinAccount[]> {
   return (data as unknown as FinAccount[]) ?? [];
 }
 
+export interface FinTitleList {
+  rows: FinTitleRow[];
+  total: number;
+  soma_cents: number;
+  resumo?: { quitados: number; abertos: number; quitado_cents: number; aberto_cents: number };
+}
+
 export async function listFinTitles(params: {
   direction: FinDirection;
   search?: string;
@@ -137,7 +148,7 @@ export async function listFinTitles(params: {
   semClassificacao?: boolean;
   de?: string;
   ate?: string;
-}): Promise<{ rows: FinTitleRow[]; total: number; soma_cents: number }> {
+}): Promise<FinTitleList> {
   const args: Record<string, unknown> = {
     _direction: params.direction,
     _limit: params.limit,
@@ -153,7 +164,7 @@ export async function listFinTitles(params: {
   if (params.semClassificacao) args["_sem_classificacao"] = true;
   const { data, error } = await supabase.rpc("fin_titles_list", args as never);
   if (error) throw error;
-  return data as unknown as { rows: FinTitleRow[]; total: number; soma_cents: number };
+  return data as unknown as FinTitleList;
 }
 
 export async function fetchFinTitle(id: string): Promise<FinTitleDetail> {

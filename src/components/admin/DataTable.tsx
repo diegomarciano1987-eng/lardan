@@ -27,6 +27,7 @@ interface Props<T> {
   error?: unknown;
   onRetry?: () => void;
   onRowClick?: (row: T) => void;
+  rowClassName?: (row: T) => string | undefined;
   emptyTitle?: string;
   emptyDescription?: string;
 }
@@ -49,6 +50,7 @@ export function DataTable<T>({
   error,
   onRetry,
   onRowClick,
+  rowClassName,
   emptyTitle = "Sem dados",
   emptyDescription = "Nenhum registro encontrado com os filtros atuais.",
 }: Props<T>) {
@@ -111,6 +113,7 @@ export function DataTable<T>({
                   className={cn(
                     "border-b border-line-soft last:border-0 transition-colors",
                     onRowClick && "cursor-pointer hover:bg-surface-muted",
+                    rowClassName?.(row),
                   )}
                 >
                   {columns.map((c) => (

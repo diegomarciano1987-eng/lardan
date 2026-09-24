@@ -4333,6 +4333,153 @@ export type Database = {
           },
         ]
       }
+      kit_entrada_itens: {
+        Row: {
+          chave: string
+          codigo_lido: string
+          created_at: string
+          created_by: string
+          entrada_id: string
+          estornado_em: string | null
+          estornado_por: string | null
+          estorno_movement_id: string | null
+          id: string
+          stock_movement_id: string
+          variant_id: string
+        }
+        Insert: {
+          chave: string
+          codigo_lido: string
+          created_at?: string
+          created_by: string
+          entrada_id: string
+          estornado_em?: string | null
+          estornado_por?: string | null
+          estorno_movement_id?: string | null
+          id?: string
+          stock_movement_id: string
+          variant_id: string
+        }
+        Update: {
+          chave?: string
+          codigo_lido?: string
+          created_at?: string
+          created_by?: string
+          entrada_id?: string
+          estornado_em?: string | null
+          estornado_por?: string | null
+          estorno_movement_id?: string | null
+          id?: string
+          stock_movement_id?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_entrada_itens_entrada_id_fkey"
+            columns: ["entrada_id"]
+            isOneToOne: false
+            referencedRelation: "kit_entradas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_entrada_itens_estorno_movement_id_fkey"
+            columns: ["estorno_movement_id"]
+            isOneToOne: true
+            referencedRelation: "stock_movements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_entrada_itens_stock_movement_id_fkey"
+            columns: ["stock_movement_id"]
+            isOneToOne: true
+            referencedRelation: "stock_movements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_entrada_itens_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kit_entradas: {
+        Row: {
+          code: string
+          concluded_at: string | null
+          concluded_by: string | null
+          consultora_ativada: boolean
+          consultora_party_id: string
+          consultora_status_anterior: string | null
+          created_at: string
+          created_by: string
+          id: string
+          location_id: string
+          nota: string | null
+          referencia: string
+          status: string
+          total_pecas: number
+          updated_at: string
+        }
+        Insert: {
+          code?: string
+          concluded_at?: string | null
+          concluded_by?: string | null
+          consultora_ativada?: boolean
+          consultora_party_id: string
+          consultora_status_anterior?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          location_id: string
+          nota?: string | null
+          referencia: string
+          status?: string
+          total_pecas?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          concluded_at?: string | null
+          concluded_by?: string | null
+          consultora_ativada?: boolean
+          consultora_party_id?: string
+          consultora_status_anterior?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          location_id?: string
+          nota?: string | null
+          referencia?: string
+          status?: string
+          total_pecas?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_entradas_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_entradas_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_entradas_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kit_events: {
         Row: {
           actor_user_id: string | null
@@ -7799,6 +7946,28 @@ export type Database = {
       kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
       kit_detail: { Args: { _cycle: string }; Returns: Json }
+      kit_entrada_abrir: {
+        Args: {
+          _consultora: string
+          _location: string
+          _nota?: string
+          _referencia: string
+        }
+        Returns: Json
+      }
+      kit_entrada_bipar: {
+        Args: { _chave: string; _codigo: string; _entrada: string }
+        Returns: Json
+      }
+      kit_entrada_concluir: { Args: { _entrada: string }; Returns: Json }
+      kit_entrada_consultoras: {
+        Args: { _busca?: string; _limit?: number }
+        Returns: Json
+      }
+      kit_entrada_desfazer: { Args: { _item: string }; Returns: Json }
+      kit_entrada_detalhe: { Args: { _entrada: string }; Returns: Json }
+      kit_entrada_exigir: { Args: never; Returns: string }
+      kit_entradas_listar: { Args: { _limit?: number }; Returns: Json }
       kit_expedir: { Args: { _cycle: string; _payload?: Json }; Returns: Json }
       kit_historico: { Args: { _cycle: string }; Returns: Json }
       kit_idem_hash: {

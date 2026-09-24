@@ -17,6 +17,7 @@ import {
 import { SejaHistoria } from "@/components/site/seja/SejaHistoria";
 import { SejaGuias } from "@/components/site/seja/SejaGuias";
 import { CinematicTitle } from "@/components/site/seja/CinematicTitle";
+import { DepoimentoBrigida } from "@/components/site/seja/DepoimentoBrigida";
 import { FAQ } from "@/lib/seja-lardan-conteudo";
 import {
   breadcrumbLd,
@@ -62,6 +63,7 @@ function SejaLardanPage() {
   return (
     <SiteLayout>
       <SejaHero />
+      <DepoimentoBrigida />
       <SejaEmocional />
       <SejaHistoria />
       <SejaDefinicao />

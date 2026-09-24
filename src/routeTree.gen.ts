@@ -52,7 +52,6 @@ import { Route as AuthenticatedAdminRedeRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminSiteRouteImport } from './routes/_authenticated/admin/site'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as ApiPublicGaConfigRouteImport } from './routes/api/public/ga-config'
-import { Route as ApiPublicTmpArLoadRouteImport } from './routes/api/public/tmp-ar-load'
 import { Route as AuthenticatedAdminCadastrosIndexRouteImport } from './routes/_authenticated/admin/cadastros/index'
 import { Route as AuthenticatedAdminCadastrosCategoriasRouteImport } from './routes/_authenticated/admin/cadastros/categorias'
 import { Route as AuthenticatedAdminCadastrosColecoesRouteImport } from './routes/_authenticated/admin/cadastros/colecoes'
@@ -314,11 +313,6 @@ const ApiPublicGaConfigRoute = ApiPublicGaConfigRouteImport.update({
   path: '/api/public/ga-config',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicTmpArLoadRoute = ApiPublicTmpArLoadRouteImport.update({
-  id: '/api/public/tmp-ar-load',
-  path: '/api/public/tmp-ar-load',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedAdminCadastrosIndexRoute =
   AuthenticatedAdminCadastrosIndexRouteImport.update({
     id: '/cadastros/',
@@ -559,7 +553,6 @@ export interface FileRoutesByFullPath {
   '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
-  '/api/public/tmp-ar-load': typeof ApiPublicTmpArLoadRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/cadastros/categorias': typeof AuthenticatedAdminCadastrosCategoriasRoute
   '/admin/cadastros/colecoes': typeof AuthenticatedAdminCadastrosColecoesRoute
@@ -635,7 +628,6 @@ export interface FileRoutesByTo {
   '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
-  '/api/public/tmp-ar-load': typeof ApiPublicTmpArLoadRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/cadastros/categorias': typeof AuthenticatedAdminCadastrosCategoriasRoute
   '/admin/cadastros/colecoes': typeof AuthenticatedAdminCadastrosColecoesRoute
@@ -715,7 +707,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/site': typeof AuthenticatedAdminSiteRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
-  '/api/public/tmp-ar-load': typeof ApiPublicTmpArLoadRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/cadastros/categorias': typeof AuthenticatedAdminCadastrosCategoriasRoute
   '/_authenticated/admin/cadastros/colecoes': typeof AuthenticatedAdminCadastrosColecoesRoute
@@ -795,7 +786,6 @@ export interface FileRouteTypes {
     | '/admin/site'
     | '/admin/usuarios'
     | '/api/public/ga-config'
-    | '/api/public/tmp-ar-load'
     | '/admin/'
     | '/admin/cadastros/categorias'
     | '/admin/cadastros/colecoes'
@@ -871,7 +861,6 @@ export interface FileRouteTypes {
     | '/admin/site'
     | '/admin/usuarios'
     | '/api/public/ga-config'
-    | '/api/public/tmp-ar-load'
     | '/admin'
     | '/admin/cadastros/categorias'
     | '/admin/cadastros/colecoes'
@@ -950,7 +939,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/site'
     | '/_authenticated/admin/usuarios'
     | '/api/public/ga-config'
-    | '/api/public/tmp-ar-load'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/cadastros/categorias'
     | '/_authenticated/admin/cadastros/colecoes'
@@ -1015,7 +1003,6 @@ export interface RootRouteChildren {
   SitemapProductsPaginaRoute: typeof SitemapProductsPaginaRoute
   SemijoiasIndexRoute: typeof SemijoiasIndexRoute
   ApiPublicGaConfigRoute: typeof ApiPublicGaConfigRoute
-  ApiPublicTmpArLoadRoute: typeof ApiPublicTmpArLoadRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
@@ -1321,13 +1308,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/ga-config'
       fullPath: '/api/public/ga-config'
       preLoaderRoute: typeof ApiPublicGaConfigRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/tmp-ar-load': {
-      id: '/api/public/tmp-ar-load'
-      path: '/api/public/tmp-ar-load'
-      fullPath: '/api/public/tmp-ar-load'
-      preLoaderRoute: typeof ApiPublicTmpArLoadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/cadastros/': {
@@ -1749,7 +1729,6 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapProductsPaginaRoute: SitemapProductsPaginaRoute,
   SemijoiasIndexRoute: SemijoiasIndexRoute,
   ApiPublicGaConfigRoute: ApiPublicGaConfigRoute,
-  ApiPublicTmpArLoadRoute: ApiPublicTmpArLoadRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }

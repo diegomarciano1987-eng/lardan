@@ -94,17 +94,27 @@ function ReviewCard({
   );
 }
 
+const INTERVALO_UNICA_MS = 1500;
+
 export function AvaliacoesGoogle({ unica = false }: { unica?: boolean }) {
   const [ativa, setAtiva] = React.useState(0);
+  const [pausado, setPausado] = React.useState(false);
+  const toqueInicial = React.useRef<{ x: number; y: number } | null>(null);
 
   React.useEffect(() => {
     if (!unica) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (pausado) return;
     const timer = window.setInterval(() => {
       setAtiva((atual) => (atual + 1) % AVALIACOES.length);
-    }, 3000);
+    }, INTERVALO_UNICA_MS);
     return () => window.clearInterval(timer);
-  }, [unica]);
+  }, [unica, pausado]);
+
+  const avancar = React.useCallback((delta: number) => {
+    setAtiva((atual) => (atual + delta + AVALIACOES.length) % AVALIACOES.length);
+  }, []);
+
 
   return (
     <section

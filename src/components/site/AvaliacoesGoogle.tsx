@@ -160,13 +160,9 @@ export function AvaliacoesGoogle() {
         </div>
 
         <div
-          className="mt-12 touch-pan-y md:mt-16"
-          onPointerEnter={() => setInteragindo(true)}
-          onPointerLeave={() => {
-            gestoInicio.current = null;
-            setInteragindo(false);
-          }}
+          className="mt-12 touch-pan-y select-none md:mt-16"
           onPointerDown={(event) => {
+            if (event.pointerType === "mouse") return;
             gestoInicio.current = event.clientX;
             setInteragindo(true);
           }}
@@ -174,10 +170,14 @@ export function AvaliacoesGoogle() {
             const inicio = gestoInicio.current;
             gestoInicio.current = null;
             setInteragindo(false);
-            if (inicio === null) return;
+            if (inicio === null || event.pointerType === "mouse") return;
             const distancia = event.clientX - inicio;
             if (Math.abs(distancia) < 45) return;
             selecionar(distancia < 0 ? ativa + 1 : ativa - 1);
+          }}
+          onPointerCancel={() => {
+            gestoInicio.current = null;
+            setInteragindo(false);
           }}
         >
           <div

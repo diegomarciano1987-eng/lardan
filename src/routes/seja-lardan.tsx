@@ -66,18 +66,16 @@ function SejaLardanPage() {
       <SejaHero />
       <DepoimentoBrigida />
       <SejaEmocional />
-      <AvaliacoesGoogle />
       <SejaHistoria />
       <SejaDefinicao />
       <SejaFerramentas />
+      <AvaliacoesGoogle />
       <SejaAcademy />
       <SejaProduto />
       <SejaVidaReal />
       <SejaPerfil />
       <SejaProcesso />
       <SejaGuias />
-      <AvaliacoesGoogle />
-
 
       <section
         id="candidatura"

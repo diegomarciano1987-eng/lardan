@@ -6,7 +6,6 @@
  * pré-visualização — os dois casos têm aviso próprio na tela.
  */
 import { useCallback, useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { useServerFn } from "@tanstack/react-start";
 import { Bell, BellOff, BellRing, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -137,11 +136,11 @@ export function AvisosPush() {
         </button>
       ) : null}
 
-      {ajudaIOS && createPortal(
+      {ajudaIOS && (
         <div
           role="dialog"
           aria-label="Como ligar os avisos no iPhone"
-          className="fixed inset-x-4 top-24 z-50 mx-auto max-w-sm rounded-xl border border-line bg-surface p-4 text-left text-[0.8125rem] leading-relaxed text-ledger-text shadow-xl"
+          className="absolute left-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-3rem))] rounded-xl border border-line bg-surface p-4 text-left text-[0.8125rem] leading-relaxed text-ledger-text shadow-xl"
         >
           <p className="font-semibold">No iPhone, o aviso só funciona pelo ícone do painel</p>
           <ol className="mt-2 list-decimal space-y-1 pl-4 text-ledger-muted">
@@ -154,8 +153,7 @@ export function AvisosPush() {
           <button type="button" className="mt-3 text-xs font-semibold underline" onClick={() => setAjudaIOS(false)}>
             Entendi
           </button>
-        </div>,
-        document.body,
+        </div>
       )}
     </div>
   );

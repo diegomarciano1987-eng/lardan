@@ -84,7 +84,7 @@ export function PeriodoGlobal() {
     return i.de === de && i.ate === ate;
   });
 
-  const [rascunho, setRascunho] = React.useState<{ from?: Date; to?: Date } | undefined>();
+  const [rascunho, setRascunho] = React.useState<{ from?: Date | undefined; to?: Date | undefined } | undefined>();
   React.useEffect(() => {
     if (aberto) setRascunho({ from: daIso(de), to: daIso(ate) });
   }, [aberto, de, ate]);

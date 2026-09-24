@@ -38,6 +38,10 @@ export function SejaHero() {
         <p className="seja-promise mt-7 font-display text-[clamp(1.375rem,2.6vw,2rem)] leading-[1.25] tracking-tight">
           Aumente sua renda familiar!
         </p>
+        <p className="seja-garantia mt-5 inline-flex items-center gap-2.5">
+          <span aria-hidden className="seja-garantia-dot" />
+          Semijoias com dois anos de garantia
+        </p>
         <p className="seja-proof mt-6 flex max-w-lg flex-wrap items-baseline gap-x-3 gap-y-1 text-base leading-snug text-muted-foreground">
           <span>Mais de</span>
           <strong className="seja-proof-number">2.500</strong>

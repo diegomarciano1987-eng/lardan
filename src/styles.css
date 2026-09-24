@@ -530,6 +530,40 @@
   }
 }
 
+/* Selo de garantia do Seja Lardan: pílula discreta abaixo da promessa,
+   na cor da marca, com ponto luminoso e entrada suave entre a promessa
+   e a prova social. */
+.seja-garantia {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--rose-deep);
+  background: color-mix(in oklab, var(--rose) 10%, transparent);
+  border: 1px solid color-mix(in oklab, var(--rose) 26%, transparent);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  width: fit-content;
+  opacity: 0;
+  transform: translateY(0.5rem);
+  animation: seja-promise-rise 820ms cubic-bezier(0.16, 1, 0.3, 1) 590ms forwards;
+}
+
+.seja-garantia-dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 999px;
+  background: var(--gradient-rose);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--rose) 60%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seja-garantia {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .seja-promise {
     animation: none;
@@ -537,6 +571,8 @@
     transform: none;
   }
 }
+
+
 
 /* Prova social do Seja Lardan: número em destaque na cor da marca, alinhado
    pela base com o texto ao redor. Entrada logo depois da promessa. */

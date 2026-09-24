@@ -1131,3 +1131,53 @@ body:has([data-tela-cheia="sim"]) [data-radix-popper-content-wrapper] {
 body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
   display: none !important;
 }
+
+/* Avaliações Google — troca cinematográfica sem empilhar cards no celular. */
+.avaliacoes-palco {
+  transition:
+    opacity 420ms cubic-bezier(0.4, 0, 0.2, 1),
+    filter 420ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 420ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.avaliacoes-palco--visivel {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0);
+}
+
+.avaliacoes-palco--saindo {
+  opacity: 0;
+  filter: blur(13px);
+  transform: translate3d(0, 0.35rem, 0) scale(0.985);
+}
+
+.avaliacao-card {
+  box-shadow: var(--shadow-soft);
+}
+
+.avaliacao-card--destaque {
+  position: relative;
+  z-index: 1;
+}
+
+.avaliacao-card--lateral {
+  opacity: 0.68;
+  transform: scale(0.95);
+}
+
+@media (max-width: 767px) {
+  .avaliacao-card--lateral {
+    display: none;
+  }
+
+  .avaliacoes-palco {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avaliacoes-palco {
+    transition: none;
+  }
+}

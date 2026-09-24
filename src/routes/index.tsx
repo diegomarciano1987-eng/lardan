@@ -14,6 +14,7 @@ import colaresMobileAsset from "@/assets/sessao_colares_mobile.png.asset.json";
 import pulseirasMobileAsset from "@/assets/lardan-mobile-pulseiras.png.asset.json";
 import brincosMobileAsset from "@/assets/lardan-mobile-brincos.png.asset.json";
 import { Fundadores } from "@/components/site/Fundadores";
+import { AvaliacoesGoogle } from "@/components/site/AvaliacoesGoogle";
 import {
   canonical,
   foundersLd,
@@ -156,6 +157,8 @@ function HomePage() {
       ))}
 
       <Fundadores />
+
+      <AvaliacoesGoogle />
 
       {/* Convite Seja Lardan */}
       <section aria-labelledby="home-seja-lardan" className="border-t border-border bg-secondary/40">

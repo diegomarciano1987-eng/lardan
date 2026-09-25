@@ -733,14 +733,17 @@ export function Conciliacao({
 
   return (
     <div className="space-y-6">
-      <Panel title="Extrato bancário">
+      <Panel title={titulo}>
+        {acoesTopo ? <div className="mb-4">{acoesTopo}</div> : null}
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <SmartSelect
-            options={opcoesConta}
-            value={conta}
-            onChange={setConta}
-            placeholder="Conta bancária ou caixa"
-          />
+          {contaFixa ? null : (
+            <SmartSelect
+              options={opcoesConta}
+              value={conta}
+              onChange={setConta}
+              placeholder="Conta bancária ou caixa"
+            />
+          )}
           <input
             type="date"
             value={de}

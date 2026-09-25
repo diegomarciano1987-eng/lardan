@@ -119,7 +119,7 @@ export const sincronizarExtratoAsaas = createServerFn({ method: "POST" })
     if (reg.error) throw new Error(reg.error.message);
     const r = reg.data as { import_id: string; repetido: boolean };
     if (r.repetido) return { total: itens.length, novas: 0 };
-    const st = await context.supabase.rpc("fin_statement_lines_stage", { _import: r.import_id, _lines: linhas });
+    const st = await context.supabase.rpc("fin_statement_lines_stage", { _import: r.import_id, _lines: linhas as never });
     if (st.error) throw new Error(st.error.message);
     return { total: itens.length, novas: linhas.length };
   });

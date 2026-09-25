@@ -139,7 +139,7 @@ export const saudeAsaas = createServerFn({ method: "POST" })
       sb.from("asaas_events").select("received_at").order("received_at", { ascending: false }).limit(1).maybeSingle(),
       sb.from("asaas_events").select("id", { count: "exact", head: true }).not("last_error", "is", null),
       sb.from("asaas_import_runs").select("created_at,status").order("created_at", { ascending: false }).limit(1).maybeSingle(),
-      sb.from("financial_statement_imports").select("created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      sb.from("financial_statement_files").select("created_at").ilike("original_name", "Extrato Asaas%").order("created_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
     const base = {
       verificadoEm: agora,

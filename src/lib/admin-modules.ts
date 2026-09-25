@@ -302,11 +302,10 @@ export const ADMIN_SUBMODULES: AdminModule[] = [
   {
     slug: "usuarios",
     path: "/admin/usuarios",
-    label: "Usuários e papéis",
-    description: "Contas da equipe, papéis de acesso e ativação.",
+    label: "Usuários e convites",
+    description: "Convites individuais, contas da equipe, papéis e segundo fator.",
     icon: UsersRound,
-    roles: ["master"],
-    capability: "users.manage",
+    roles: ["master", "diretoria", "marketing", "suporte", "financeiro", "cobranca", "estoque", "montagem", "qualidade"],
     state: "ativo",
   },
   {

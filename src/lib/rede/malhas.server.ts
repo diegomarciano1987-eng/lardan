@@ -9,18 +9,19 @@ const HOST = "servicodados.ibge.gov.br";
 const TIMEOUT_MS = 8000;
 const TTL_DIAS = 60;
 
-export type NivelMalha = "brasil" | "estado";
+export type NivelMalha = "brasil" | "estado" | "municipio";
 
 function urlDaMalha(nivel: NivelMalha, codigoUf?: string) {
   const base = "https://servicodados.ibge.gov.br/api/v3/malhas";
   const formato = "formato=application/vnd.geo+json&qualidade=minima";
+  if (nivel === "municipio") return `${base}/municipios/${codigoUf}?formato=application/vnd.geo+json&qualidade=intermediaria`;
   return nivel === "brasil"
     ? `${base}/paises/BR?${formato}&intrarregiao=UF`
     : `${base}/estados/${codigoUf}?${formato}&intrarregiao=municipio`;
 }
 
 export async function carregarMalha(nivel: NivelMalha, codigoUf?: string) {
-  const chave = nivel === "brasil" ? "malha:brasil-uf" : `malha:uf-${codigoUf}`;
+  const chave = nivel === "brasil" ? "malha:brasil-uf" : nivel === "municipio" ? `malha:mun-${codigoUf}` : `malha:uf-${codigoUf}`;
   const db = supabaseAdmin;
 
   const { data: cache } = await db

@@ -9214,6 +9214,19 @@ export type Database = {
       }
       network_cobertura: { Args: { _filtros?: Json }; Returns: Json }
       network_geo_candidaturas: { Args: { _filtros?: Json }; Returns: Json }
+      network_geo_municipio_consultoras: {
+        Args: { _filtros?: Json; _ibge: string }
+        Returns: {
+          bairro: string
+          codigo: string
+          lat: number
+          lng: number
+          nome: string
+          party_id: string
+          precisao: string
+          status: string
+        }[]
+      }
       network_geo_municipios: {
         Args: { _filtros?: Json; _uf: string }
         Returns: {
@@ -9250,6 +9263,7 @@ export type Database = {
         Returns: Json
       }
       orders_list: { Args: { _filtros?: Json }; Returns: Json }
+      painel_visao_geral: { Args: never; Returns: Json }
       parse_cents_any: { Args: { _v: string }; Returns: number }
       parse_decimal_any: { Args: { _v: string }; Returns: number }
       partner_doc_reveal: {

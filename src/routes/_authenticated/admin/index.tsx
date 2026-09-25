@@ -22,6 +22,7 @@ import { moduleAllowed, ADMIN_MODULES } from "@/lib/admin-modules";
 import { useCapabilities } from "@/lib/capabilities";
 import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
 
+import { VisaoGeralPainel } from "@/components/admin/VisaoGeralPainel";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import {
   PageHeader,
@@ -167,6 +168,13 @@ function VisaoGeral() {
     await queryClient.invalidateQueries();
   }
 
+  const finHome = useQuery({
+    queryKey: ["fin-overview", "admin-home"],
+    queryFn: () => fetchFinOverviewPeriodo(),
+    enabled: caps.includes("finance.view"),
+    staleTime: 60_000,
+  });
+
   const atualizadoEm = counts.dataUpdatedAt || trilha.dataUpdatedAt;
 
   return (
@@ -213,135 +221,54 @@ function VisaoGeral() {
         </Panel>
       )}
 
-      <div className="grid gap-3 xl:grid-cols-[22%_minmax(0,56%)_22%]">
-        {/* Coluna esquerda */}
-        <div className="flex flex-col gap-3">
-          <Panel title="Principais saldos">
-            <LedgerBalance
-              icon={Boxes}
-              label="Estoque central"
-              value={null}
-              scope="Motor de estoque em construção — nenhum saldo apurado."
-            />
-            <LedgerBalance
-              icon={BriefcaseBusiness}
-              label="Peças em maletas"
-              value={null}
-              scope="Depende do módulo Maletas."
-            />
-            <LedgerBalance
-              icon={BadgeDollarSign}
-              label="Valor nas ruas"
-              value={
-                podeConteudo && valorRuas.data
-                  ? formatBRLFromCents(valorRuas.data.total_cents)
-                  : null
-              }
-              pending={podeConteudo && valorRuas.isPending}
-              scope={
-                podeConteudo && valorRuas.data
-                  ? `Preço de venda de ${formatInt(valorRuas.data.pecas)} peças cadastradas. Contagem de estoque ainda não feita.`
-                  : "Sem autorização."
-              }
-            />
-            <LedgerBalance
-              icon={UsersRound}
-              label="Candidaturas recebidas"
-              value={podeLeads && counts.data?.leads != null ? formatInt(counts.data.leads) : null}
-              pending={podeLeads && counts.isPending}
-              scope={podeLeads ? "Seja Lardan — total no banco." : "Sem autorização."}
-            />
-          </Panel>
-
-          {caps.includes("finance.view") && <IndicadoresFinanceiros />}
-        </div>
-
-        {/* Coluna central */}
-        <div className="flex min-w-0 flex-col gap-3">
-          <Panel
-            title="Movimentações de estoque"
-            action={<ModuleAvailabilityBadge state="em_construcao" />}
-          >
-            <EmptyState
-              title="A razão de estoque ainda não recebeu movimentos"
-              description="Entradas, saídas, transferências, reservas, maletas, vendas, devoluções e ajustes serão registrados aqui de forma imutável, com paginação no servidor. Nenhuma linha de demonstração é exibida."
-              action={
-                <Link to="/admin/estoque" className="admin-link mt-2">
-                  Ver o módulo Estoque
-                </Link>
-              }
-            />
-          </Panel>
+      {caps.includes("finance.view") ? (
+        <VisaoGeralPainel
+          saldoContas={finHome.data?.saldo_contas_cents}
+          vencidoReceber={finHome.data?.vencido_receber_cents}
+          vencidoPagar={finHome.data?.vencido_pagar_cents}
+        />
+      ) : null}
 
           <Panel title="Atalhos operacionais" flush>
-            <ul className="grid gap-2 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3">
-              {SHORTCUTS.map((s) => {
-                const mod = ADMIN_MODULES.find((m) => m.slug === s.module);
-                if (!mod || !moduleAllowed(mod, caps, roles)) return null;
-                const Icon = s.icon;
-                const disponivel = mod.state === "ativo";
-                const conteudo = (
-                  <span className="flex items-center gap-2.5">
-                    <Icon aria-hidden className="size-4 text-bronze" />
-                    <span className="min-w-0 flex-1 truncate">{s.label}</span>
+        <ul className="grid gap-2 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3">
+          {SHORTCUTS.map((s) => {
+            const mod = ADMIN_MODULES.find((m) => m.slug === s.module);
+            if (!mod || !moduleAllowed(mod, caps, roles)) return null;
+            const Icon = s.icon;
+            const disponivel = mod.state === "ativo";
+            const conteudo = (
+              <span className="flex items-center gap-2.5">
+                <Icon aria-hidden className="size-4 text-bronze" />
+                <span className="min-w-0 flex-1 truncate">{s.label}</span>
+              </span>
+            );
+            return (
+              <li key={s.label}>
+                {disponivel && mod.path ? (
+                  <Link
+                    to={s.to ?? mod.path}
+                    className="block rounded-[10px] border border-line bg-surface px-3.5 py-3 text-sm font-semibold text-ledger-text shadow-sm transition-all hover:-translate-y-px hover:bg-surface-muted hover:shadow"
+                  >
+                    {conteudo}
+                  </Link>
+                ) : (
+                  <span
+                    aria-disabled="true"
+                    title={`${s.label} — ${mod.state === "em_construcao" ? "em construção" : "em breve"}`}
+                    className="block cursor-not-allowed rounded-[10px] border border-dashed border-line px-3.5 py-3 text-sm font-medium text-ledger-muted"
+                  >
+                    {conteudo}
+                    <span className="mt-1 block text-[0.625rem] font-semibold uppercase tracking-[0.1em]">
+                      {mod.state === "em_construcao" ? "Em construção" : "Em breve"}
+                    </span>
                   </span>
-                );
-                return (
-                  <li key={s.label}>
-                    {disponivel && mod.path ? (
-                      <Link
-                        to={s.to ?? mod.path}
-                        className="block rounded-[10px] border border-line bg-surface px-3.5 py-3 text-sm font-semibold text-ledger-text shadow-sm transition-all hover:-translate-y-px hover:bg-surface-muted hover:shadow"
-                      >
-                        {conteudo}
-                      </Link>
-                    ) : (
-                      <span
-                        aria-disabled="true"
-                        title={`${s.label} — ${mod.state === "em_construcao" ? "em construção" : "em breve"}`}
-                        className="block cursor-not-allowed rounded-[10px] border border-dashed border-line px-3.5 py-3 text-sm font-medium text-ledger-muted"
-                      >
-                        {conteudo}
-                        <span className="mt-1 block text-[0.625rem] font-semibold uppercase tracking-[0.1em]">
-                          {mod.state === "em_construcao" ? "Em construção" : "Em breve"}
-                        </span>
-                      </span>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </Panel>
-        </div>
-
-        {/* Coluna direita */}
-        <div className="flex flex-col gap-3">
-          <Panel title="Conciliação e status" flush>
-            <div className="px-5 py-5">
-              <p className="text-sm text-ledger-text">Ainda não conciliado</p>
-              <p className="mt-2 text-xs leading-relaxed text-ledger-muted">
-                Não há inventário nem contagem registrada, portanto nenhum percentual de conciliação
-                pode ser apurado.
-              </p>
-            </div>
-          </Panel>
-
-          <Panel title="Atenção operacional">
-            <EmptyState
-              title="Nenhum alerta apurável"
-              description="Mínimos de SKU, ciclos de maleta, divergências de importação e títulos vencidos passam a alimentar este painel quando os módulos correspondentes entrarem em operação."
-            />
-          </Panel>
-
-          <Panel title="Aprovações pendentes">
-            <EmptyState
-              title="Nenhuma aprovação na fila"
-              description="Cargas iniciais, ajustes de estoque, divergências de inventário, estornos e mudanças sensíveis de permissão aparecerão aqui com protocolo e solicitante."
-            />
-          </Panel>
-        </div>
-      </div>
-
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </Panel>
+        
       {/* Faixa secundária: o que já é real hoje */}
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Panel title="Catálogo e site">

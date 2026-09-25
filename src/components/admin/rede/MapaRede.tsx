@@ -159,7 +159,7 @@ export function MapaRede({
           const [x, y] = projecao.ponto(p.lng, p.lat);
           const r = 3.5 + (p.total / maiorCandidata) * 10;
           return (
-            <g key={`c-${i}`}>
+            <g key={`c-${i}`} className="pointer-events-none">
               <circle
                 cx={x}
                 cy={y}

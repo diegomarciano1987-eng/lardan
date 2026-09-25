@@ -9,6 +9,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { MapaRede, type ValorTerritorio } from "@/components/admin/rede/MapaRede";
 import { PainelTerritorio } from "@/components/admin/rede/PainelTerritorio";
 import { CoberturaRede } from "@/components/admin/rede/CoberturaRede";
+import { CidadeConsultoras } from "@/components/admin/rede/CidadeConsultoras";
 import { OPCOES_UF } from "@/lib/br/ufs";
 import { UF_CODIGO_IBGE, CODIGO_IBGE_UF, type Malha } from "@/lib/rede/geo";
 import {
@@ -296,7 +297,9 @@ function RedePage() {
         ))}
       </nav>
 
-      {aba === "mapa" ? (
+      {aba === "mapa" && uf && ibge ? (
+        <CidadeConsultoras key={ibge} ibge={ibge} uf={uf} nome={titulo} onVoltar={() => setIbge(null)} />
+      ) : aba === "mapa" ? (
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <Panel title={uf ? `Mapa — ${titulo}` : "Mapa do Brasil"}>
             {malha.error ? (
@@ -313,7 +316,7 @@ function RedePage() {
                 chaveDaFeicao={(cod) => (uf ? cod : (CODIGO_IBGE_UF[cod] ?? cod))}
                 selecionado={ibge ?? uf}
                 onSelecionar={(chave) => {
-                  if (uf) setIbge((atual) => (atual === chave ? null : chave));
+                  if (uf) setIbge(chave);
                   else setUf(chave);
                 }}
                 pontos={pontos.data ?? []}

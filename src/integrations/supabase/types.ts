@@ -17,12 +17,15 @@ export type Database = {
       asaas_accounts: {
         Row: {
           ambiente_provedor: string | null
+          billing_default: boolean
+          config_status: string
           config_version: number
           created_at: string
           cutover_date: string | null
           environment: string
           external_account_id: string | null
           id: string
+          invoice_host_confirmed: boolean
           is_active: boolean
           label: string
           last_error: string | null
@@ -42,12 +45,15 @@ export type Database = {
         }
         Insert: {
           ambiente_provedor?: string | null
+          billing_default?: boolean
+          config_status?: string
           config_version?: number
           created_at?: string
           cutover_date?: string | null
           environment: string
           external_account_id?: string | null
           id?: string
+          invoice_host_confirmed?: boolean
           is_active?: boolean
           label: string
           last_error?: string | null
@@ -67,12 +73,15 @@ export type Database = {
         }
         Update: {
           ambiente_provedor?: string | null
+          billing_default?: boolean
+          config_status?: string
           config_version?: number
           created_at?: string
           cutover_date?: string | null
           environment?: string
           external_account_id?: string | null
           id?: string
+          invoice_host_confirmed?: boolean
           is_active?: boolean
           label?: string
           last_error?: string | null
@@ -192,6 +201,8 @@ export type Database = {
           customer_external_id: string | null
           due_date: string
           external_id: string | null
+          failure_class: string | null
+          failure_codes: string[] | null
           id: string
           idempotency_key: string
           installment_id: string
@@ -199,6 +210,7 @@ export type Database = {
           invoice_url: string | null
           last_error: string | null
           lease_until: string | null
+          next_attempt_at: string | null
           party_id: string
           processing_at: string | null
           recuperacoes: number
@@ -223,6 +235,8 @@ export type Database = {
           customer_external_id?: string | null
           due_date: string
           external_id?: string | null
+          failure_class?: string | null
+          failure_codes?: string[] | null
           id?: string
           idempotency_key: string
           installment_id: string
@@ -230,6 +244,7 @@ export type Database = {
           invoice_url?: string | null
           last_error?: string | null
           lease_until?: string | null
+          next_attempt_at?: string | null
           party_id: string
           processing_at?: string | null
           recuperacoes?: number
@@ -254,6 +269,8 @@ export type Database = {
           customer_external_id?: string | null
           due_date?: string
           external_id?: string | null
+          failure_class?: string | null
+          failure_codes?: string[] | null
           id?: string
           idempotency_key?: string
           installment_id?: string
@@ -261,6 +278,7 @@ export type Database = {
           invoice_url?: string | null
           last_error?: string | null
           lease_until?: string | null
+          next_attempt_at?: string | null
           party_id?: string
           processing_at?: string | null
           recuperacoes?: number
@@ -456,6 +474,61 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "financial_titles"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      asaas_customer_leases: {
+        Row: {
+          account_id: string
+          attempt: number
+          last_error: string | null
+          lease_until: string
+          party_id: string
+          state: string
+          updated_at: string
+          worker: string
+        }
+        Insert: {
+          account_id: string
+          attempt?: number
+          last_error?: string | null
+          lease_until: string
+          party_id: string
+          state?: string
+          updated_at?: string
+          worker: string
+        }
+        Update: {
+          account_id?: string
+          attempt?: number
+          last_error?: string | null
+          lease_until?: string
+          party_id?: string
+          state?: string
+          updated_at?: string
+          worker?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_customer_leases_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_customer_leases_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_customer_leases_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -677,6 +750,50 @@ export type Database = {
           },
         ]
       }
+      asaas_import_pages: {
+        Row: {
+          created_at: string
+          has_more: boolean
+          kept_count: number
+          next_offset: number
+          page_hash: string
+          raw_count: number
+          requested_limit: number
+          requested_offset: number
+          run_id: string
+        }
+        Insert: {
+          created_at?: string
+          has_more: boolean
+          kept_count: number
+          next_offset: number
+          page_hash: string
+          raw_count: number
+          requested_limit: number
+          requested_offset: number
+          run_id: string
+        }
+        Update: {
+          created_at?: string
+          has_more?: boolean
+          kept_count?: number
+          next_offset?: number
+          page_hash?: string
+          raw_count?: number
+          requested_limit?: number
+          requested_offset?: number
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_import_pages_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_import_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_import_runs: {
         Row: {
           account_id: string
@@ -692,6 +809,10 @@ export type Database = {
           id: string
           imported: number
           kind: string
+          last_page_hash: string | null
+          last_page_next_offset: number | null
+          last_page_offset: number | null
+          last_page_raw_count: number | null
           mode: string
           offset_atual: number
           page: number
@@ -718,6 +839,10 @@ export type Database = {
           id?: string
           imported?: number
           kind?: string
+          last_page_hash?: string | null
+          last_page_next_offset?: number | null
+          last_page_offset?: number | null
+          last_page_raw_count?: number | null
           mode?: string
           offset_atual?: number
           page?: number
@@ -744,6 +869,10 @@ export type Database = {
           id?: string
           imported?: number
           kind?: string
+          last_page_hash?: string | null
+          last_page_next_offset?: number | null
+          last_page_offset?: number | null
+          last_page_raw_count?: number | null
           mode?: string
           offset_atual?: number
           page?: number
@@ -8031,6 +8160,17 @@ export type Database = {
         Args: { _delta: number; _location: string; _variant: string }
         Returns: number
       }
+      asaas_account_configurar: {
+        Args: {
+          _account: string
+          _external_account_id?: string
+          _invoice_host_confirmed?: boolean
+          _secret_ref?: string
+          _state: string
+          _webhook_secret_ref?: string
+        }
+        Returns: Json
+      }
       asaas_ator_pode: {
         Args: { _actor: string; _cap: string }
         Returns: boolean
@@ -8052,6 +8192,19 @@ export type Database = {
         Args: { _actor?: string; _origem: string; _payload: Json }
         Returns: Json
       }
+      asaas_exec_adiar: {
+        Args: {
+          _actor: string
+          _classe: string
+          _codigos: string[]
+          _erro: string
+          _intent: string
+          _repetir_em: number
+          _tentativa: number
+          _worker: string
+        }
+        Returns: Json
+      }
       asaas_exec_cliente: {
         Args: {
           _actor: string
@@ -8063,8 +8216,45 @@ export type Database = {
         }
         Returns: Json
       }
+      asaas_exec_cliente_estado: {
+        Args: {
+          _actor: string
+          _erro?: string
+          _intent: string
+          _state: string
+          _tentativa: number
+          _worker: string
+        }
+        Returns: undefined
+      }
+      asaas_exec_cliente_reservar: {
+        Args: {
+          _actor: string
+          _intent: string
+          _lease?: number
+          _tentativa: number
+          _worker: string
+        }
+        Returns: Json
+      }
       asaas_exec_cobranca: {
         Args: { _actor: string; _charge: string }
+        Returns: Json
+      }
+      asaas_exec_config: {
+        Args: { _account: string; _operacao: string }
+        Returns: Json
+      }
+      asaas_exec_config_cobranca: {
+        Args: { _actor: string; _charge: string }
+        Returns: Json
+      }
+      asaas_exec_config_intencao: {
+        Args: { _actor: string; _intent: string }
+        Returns: Json
+      }
+      asaas_exec_config_lote: {
+        Args: { _actor: string; _run: string }
         Returns: Json
       }
       asaas_exec_exigir: {
@@ -8093,6 +8283,8 @@ export type Database = {
           customer_external_id: string | null
           due_date: string
           external_id: string | null
+          failure_class: string | null
+          failure_codes: string[] | null
           id: string
           idempotency_key: string
           installment_id: string
@@ -8100,6 +8292,7 @@ export type Database = {
           invoice_url: string | null
           last_error: string | null
           lease_until: string | null
+          next_attempt_at: string | null
           party_id: string
           processing_at: string | null
           recuperacoes: number
@@ -8138,6 +8331,16 @@ export type Database = {
         }
         Returns: Json
       }
+      asaas_exec_revisao: {
+        Args: {
+          _actor: string
+          _intent: string
+          _motivo: string
+          _tentativa: number
+          _worker: string
+        }
+        Returns: Json
+      }
       asaas_external_id_valido: {
         Args: { _account: string; _external_id: string }
         Returns: boolean
@@ -8169,7 +8372,10 @@ export type Database = {
           _clientes?: Json
           _has_more: boolean
           _itens: Json
+          _limit: number
+          _next_offset: number
           _offset: number
+          _raw_count: number
           _run: string
         }
         Returns: Json

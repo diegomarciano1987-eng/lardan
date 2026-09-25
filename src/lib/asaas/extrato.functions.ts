@@ -15,6 +15,9 @@ const ROTULO_TIPO: Record<string, string> = {
   PAYMENT_REVERSAL: "Estorno",
   REFUND_REQUEST_CANCELLED: "Estorno cancelado",
   CHARGEBACK: "Chargeback",
+  INSTANT_TEXT_MESSAGE_FEE: "Tarifa de aviso por WhatsApp",
+  PHONE_CALL_NOTIFICATION_FEE: "Tarifa de aviso por robô de voz",
+  PAYMENT_MESSAGING_NOTIFICATION_FEE: "Tarifa de mensageria",
 };
 
 /** Conta financeira que representa o saldo Asaas no razão (já cadastrada). */

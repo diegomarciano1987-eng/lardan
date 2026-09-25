@@ -212,6 +212,12 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     };
   }
 
+  /** Saúde: consulta de saldo, somente leitura. */
+  async consultarSaldo() {
+    const c = await this.enviar<Json>("GET", "/finance/balance");
+    return paraCentavos(c?.["balance"]);
+  }
+
   /** Extrato da conta Asaas (entradas e saídas: recebimentos, Pix, transferências, tarifas). Somente leitura. */
   async listarExtrato(f: { de: string; ate: string; limit: number; offset: number }) {
     const lim = Math.min(Math.max(f.limit, 1), 100);

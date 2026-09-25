@@ -215,7 +215,9 @@ export type Database = {
           processing_at: string | null
           recuperacoes: number
           rejeicao_fase: string | null
+          request_timeout_s: number
           resolved_at: string | null
+          retomar_modo: string | null
           simulado: boolean
           state: string
           title_id: string
@@ -249,7 +251,9 @@ export type Database = {
           processing_at?: string | null
           recuperacoes?: number
           rejeicao_fase?: string | null
+          request_timeout_s?: number
           resolved_at?: string | null
+          retomar_modo?: string | null
           simulado?: boolean
           state?: string
           title_id: string
@@ -283,7 +287,9 @@ export type Database = {
           processing_at?: string | null
           recuperacoes?: number
           rejeicao_fase?: string | null
+          request_timeout_s?: number
           resolved_at?: string | null
+          retomar_modo?: string | null
           simulado?: boolean
           state?: string
           title_id?: string
@@ -482,8 +488,10 @@ export type Database = {
           account_id: string
           attempt: number
           last_error: string | null
+          lease_token: string
           lease_until: string
           party_id: string
+          request_timeout_s: number
           state: string
           updated_at: string
           worker: string
@@ -492,8 +500,10 @@ export type Database = {
           account_id: string
           attempt?: number
           last_error?: string | null
+          lease_token?: string
           lease_until: string
           party_id: string
+          request_timeout_s?: number
           state?: string
           updated_at?: string
           worker: string
@@ -502,8 +512,10 @@ export type Database = {
           account_id?: string
           attempt?: number
           last_error?: string | null
+          lease_token?: string
           lease_until?: string
           party_id?: string
+          request_timeout_s?: number
           state?: string
           updated_at?: string
           worker?: string
@@ -8185,7 +8197,34 @@ export type Database = {
         }
         Returns: Json
       }
+      asaas_cliente_posse: {
+        Args: {
+          _account: string
+          _party: string
+          _token: string
+          _worker: string
+        }
+        Returns: {
+          account_id: string
+          attempt: number
+          last_error: string | null
+          lease_token: string
+          lease_until: string
+          party_id: string
+          request_timeout_s: number
+          state: string
+          updated_at: string
+          worker: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "asaas_customer_leases"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       asaas_cobranca_preparar: { Args: { _payload: Json }; Returns: Json }
+      asaas_conta_situacao: { Args: { _account: string }; Returns: Json }
       asaas_customer_sensivel: { Args: { _customer: string }; Returns: Json }
       asaas_evento_processar: { Args: { _evento: string }; Returns: Json }
       asaas_evento_registrar: {
@@ -8195,6 +8234,7 @@ export type Database = {
       asaas_exec_adiar: {
         Args: {
           _actor: string
+          _agora?: string
           _classe: string
           _codigos: string[]
           _erro: string
@@ -8212,6 +8252,7 @@ export type Database = {
           _intent: string
           _nome: string
           _tentativa: number
+          _token: string
           _worker: string
         }
         Returns: Json
@@ -8223,15 +8264,38 @@ export type Database = {
           _intent: string
           _state: string
           _tentativa: number
+          _token: string
           _worker: string
         }
         Returns: undefined
+      }
+      asaas_exec_cliente_renovar: {
+        Args: {
+          _actor: string
+          _intent: string
+          _lease?: number
+          _tentativa: number
+          _token: string
+          _worker: string
+        }
+        Returns: boolean
       }
       asaas_exec_cliente_reservar: {
         Args: {
           _actor: string
           _intent: string
           _lease?: number
+          _tentativa: number
+          _timeout_req?: number
+          _worker: string
+        }
+        Returns: Json
+      }
+      asaas_exec_cliente_vincular: {
+        Args: {
+          _actor: string
+          _external_id: string
+          _intent: string
           _tentativa: number
           _worker: string
         }
@@ -8257,7 +8321,12 @@ export type Database = {
         Args: { _actor: string; _run: string }
         Returns: Json
       }
+      asaas_exec_contas: { Args: { _actor: string }; Returns: Json }
       asaas_exec_exigir: {
+        Args: { _actor: string; _cap: string }
+        Returns: undefined
+      }
+      asaas_exec_exigir_usuario: {
         Args: { _actor: string; _cap: string }
         Returns: undefined
       }
@@ -8266,7 +8335,12 @@ export type Database = {
         Returns: Json
       }
       asaas_exec_pendentes: {
-        Args: { _account?: string; _limite?: number; _preparada_seg?: number }
+        Args: {
+          _account?: string
+          _agora?: string
+          _limite?: number
+          _preparada_seg?: number
+        }
         Returns: Json
       }
       asaas_exec_posse: {
@@ -8297,7 +8371,9 @@ export type Database = {
           processing_at: string | null
           recuperacoes: number
           rejeicao_fase: string | null
+          request_timeout_s: number
           resolved_at: string | null
+          retomar_modo: string | null
           simulado: boolean
           state: string
           title_id: string
@@ -8312,11 +8388,30 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      asaas_exec_preflight_conta: {
+        Args: { _account: string; _actor: string; _cap: string }
+        Returns: Json
+      }
+      asaas_exec_preflight_parcela: {
+        Args: { _actor: string; _installment: string }
+        Returns: Json
+      }
+      asaas_exec_renovar: {
+        Args: {
+          _intent: string
+          _segundos?: number
+          _tentativa: number
+          _worker: string
+        }
+        Returns: boolean
+      }
       asaas_exec_reservar: {
         Args: {
           _actor: string
+          _agora?: string
           _intent: string
           _lease_segundos?: number
+          _timeout_req?: number
           _worker: string
         }
         Returns: Json

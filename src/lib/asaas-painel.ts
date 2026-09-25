@@ -80,6 +80,8 @@ export interface PaginaDe<T> {
 
 export type SituacaoFiltro =
   | ""
+  | "aberta"
+  | "quitada"
   | "sem_cobranca"
   | "com_link"
   | "pendente_link"
@@ -105,9 +107,9 @@ async function chamar<T>(fn: string, args: Record<string, unknown> = {}): Promis
   return data as T;
 }
 
-export const carregarParcelas = (f: { accountId?: string; busca?: string; situacao?: SituacaoFiltro; cursor?: Cursor; limite?: number }) =>
+export const carregarParcelas = (f: { accountId?: string; busca?: string; situacao?: SituacaoFiltro; cursor?: Cursor; limite?: number; de?: string; ate?: string }) =>
   chamar<PaginaDe<LinhaReceber>>("asaas_receber_parcelas", {
-    _filtros: { account_id: f.accountId || null, busca: f.busca || null, situacao: f.situacao || null, cursor: f.cursor ?? null, limite: f.limite ?? 25 },
+    _filtros: { de: f.de || null, ate: f.ate || null, account_id: f.accountId || null, busca: f.busca || null, situacao: f.situacao || null, cursor: f.cursor ?? null, limite: f.limite ?? 25 },
   });
 
 export const carregarFila = (accountId?: string, cursor: Cursor = null) =>

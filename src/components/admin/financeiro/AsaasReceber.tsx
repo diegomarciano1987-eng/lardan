@@ -4,6 +4,20 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { EmptyState, Panel, StatusBadge, formatBRLFromCents } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { DateRangeField } from "@/components/premium/DateRangeField";
+import type { DateRange } from "react-day-picker";
+
+const isoDia = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const mesAtual = (): DateRange => {
+  const h = new Date();
+  return { from: new Date(h.getFullYear(), h.getMonth(), 1), to: new Date(h.getFullYear(), h.getMonth() + 1, 0) };
+};
+const estaSemana = (): DateRange => {
+  const h = new Date();
+  const ini = new Date(h.getFullYear(), h.getMonth(), h.getDate() - ((h.getDay() + 6) % 7));
+  return { from: ini, to: new Date(ini.getFullYear(), ini.getMonth(), ini.getDate() + 6) };
+};
 import {
   AVISO_SIMULACAO,
   FASES,
@@ -154,6 +168,8 @@ type Aba = (typeof ABAS)[number]["id"];
 
 const SITUACOES: { value: SituacaoFiltro; label: string }[] = [
   { value: "", label: "Todas as situações" },
+  { value: "aberta", label: "Em aberto" },
+  { value: "quitada", label: "Quitadas" },
   { value: "sem_cobranca", label: "Sem cobrança" },
   { value: "com_link", label: "Com link" },
   { value: "pendente_link", label: "Cobrança sem link" },
@@ -216,14 +232,17 @@ export function AsaasReceber() {
   const [escolhida, setEscolhida] = React.useState<LinhaReceber | null>(null);
   const [busca, setBusca] = React.useState("");
   const [situacao, setSituacao] = React.useState<SituacaoFiltro>("");
+  const [periodo, setPeriodo] = React.useState<DateRange | undefined>(mesAtual);
+  const de = periodo?.from ? isoDia(periodo.from) : "";
+  const ate = periodo?.to ? isoDia(periodo.to) : de;
   const [contaSelecionada, setContaSelecionada] = React.useState<string>("");
   const termo = useDebounced(busca);
   const estado = useServerFn(estadoContasAsaas);
 
   const contas = useQuery({ queryKey: ["asaas", "contas"], queryFn: () => estado() as Promise<ContaAsaas[]>, retry: false });
   const parcelas = useInfiniteQuery({
-    queryKey: ["asaas", "parcelas", contaSelecionada, termo, situacao],
-    queryFn: ({ pageParam }) => carregarParcelas({ accountId: contaSelecionada, busca: termo, situacao, cursor: pageParam }),
+    queryKey: ["asaas", "parcelas", contaSelecionada, termo, situacao, de, ate],
+    queryFn: ({ pageParam }) => carregarParcelas({ accountId: contaSelecionada, busca: termo, situacao, cursor: pageParam, de, ate }),
     initialPageParam: null as Cursor,
     getNextPageParam: (p) => p.proximo ?? undefined,
     retry: false,
@@ -310,6 +329,14 @@ export function AsaasReceber() {
               placeholder="Situação"
               className="min-w-[14rem]"
             />
+            <div className="w-full sm:w-72">
+              <DateRangeField value={periodo} onChange={(r) => setPeriodo(r?.from ? r : undefined)} placeholder="Todo o período" />
+            </div>
+            <span className="flex gap-1.5">
+              <button type="button" className="admin-btn" onClick={() => setPeriodo(estaSemana())}>Semana</button>
+              <button type="button" className="admin-btn" onClick={() => setPeriodo(mesAtual())}>Mês</button>
+              <button type="button" className="admin-btn" onClick={() => setPeriodo(undefined)}>Tudo</button>
+            </span>
             <span className="text-xs text-ledger-muted" data-testid="contagem-parcelas">
               {parcelas.isFetching ? "Buscando…" : `${linhas.length} de ${total} parcela(s)`}
             </span>
@@ -318,7 +345,7 @@ export function AsaasReceber() {
             <p className="px-6 py-5 text-sm text-ledger-muted">Carregando…</p>
           ) : linhas.length === 0 ? (
             <div className="px-6 py-5">
-              <EmptyState title="Sem parcelas" description={termo || situacao ? "Nenhuma parcela para esta busca." : "Nenhuma parcela a receber."} />
+              <EmptyState title="Sem parcelas" description={situacao === "com_link" || situacao === "pendente_link" ? "Nenhuma cobrança foi gerada no Asaas para parcelas deste período ainda — por isso não há links." : termo || situacao ? "Nenhuma parcela para esta busca neste período." : "Nenhuma parcela a receber neste período."} />
             </div>
           ) : (
             <div className="mt-4 min-w-0 overflow-x-auto">

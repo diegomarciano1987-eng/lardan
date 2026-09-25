@@ -12,6 +12,8 @@ export interface AreaFinanceira {
   descricao: string;
   capacidade: Capability;
   emImplantacao?: boolean;
+  /** alimentado pela API do Asaas: botão azul */
+  asaas?: boolean;
 }
 
 /** Segunda camada de navegação do departamento financeiro. */
@@ -51,6 +53,7 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     label: "Extrato Asaas",
     descricao: "Entradas e saídas da conta Asaas",
     capacidade: "finance.statement.view",
+    asaas: true,
   },
   {
     to: "/admin/financeiro/asaas",
@@ -58,6 +61,7 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     descricao: "Importação, cobrança e conciliação (simulação)",
     capacidade: "finance.receivable.view",
     emImplantacao: true,
+    asaas: true,
   },
   {
     to: "/admin/financeiro/conciliacao",
@@ -170,16 +174,17 @@ function NavegacaoFinanceira() {
                 ...(typeof prev["ate"] === "string" ? { ate: prev["ate"] } : {}),
               })}
               activeOptions={{ exact: a.to === "/admin/financeiro" }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-line-soft bg-cream-2 px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-ledger-muted transition-colors hover:text-ledger-text focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none"
+              className={a.asaas ? "inline-flex items-center gap-1.5 rounded-full border border-asaas bg-asaas px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-asaas-foreground opacity-85 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-asaas focus-visible:outline-none" : "inline-flex items-center gap-1.5 rounded-full border border-line-soft bg-cream-2 px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-ledger-muted transition-colors hover:text-ledger-text focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none"}
               activeProps={{
-                className:
-                  "inline-flex items-center gap-1.5 rounded-full border border-champagne bg-surface px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-ledger-text shadow-sm focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none",
+                className: a.asaas
+                  ? "inline-flex items-center gap-1.5 rounded-full border border-asaas bg-asaas px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-asaas-foreground shadow-md ring-2 ring-asaas/30 focus-visible:outline-none"
+                  : "inline-flex items-center gap-1.5 rounded-full border border-champagne bg-surface px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-ledger-text shadow-sm focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none",
                 "aria-current": "page",
               }}
             >
               {a.label}
               {a.emImplantacao ? (
-                <span className="rounded-full bg-line-soft px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-ledger-muted uppercase">
+                <span className={a.asaas ? "rounded-full bg-asaas-foreground/20 px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-asaas-foreground uppercase" : "rounded-full bg-line-soft px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-ledger-muted uppercase"}>
                   em implantação
                 </span>
               ) : null}

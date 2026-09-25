@@ -100,6 +100,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
                         )}
                       >
                         <span className="truncate">{a.label}</span>
+                        {a.asaas && <span aria-label="Asaas" className="size-2 shrink-0 rounded-full bg-asaas" />}
                         {a.emImplantacao && (
                           <span className="ml-auto shrink-0 text-[0.625rem] uppercase tracking-[0.08em] text-warning">
                             Em implantação

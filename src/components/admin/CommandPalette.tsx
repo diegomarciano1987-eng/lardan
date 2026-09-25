@@ -265,7 +265,7 @@ export function CommandPalette({
   }, [debounced, caps, roles]);
 
   const hits = useMemo(
-    () => [...(query.data ?? []), ...destinos].slice(0, 24),
+    () => [...(query.data ?? []), ...destinos].slice(0, 60),
     [query.data, destinos],
   );
 
@@ -276,7 +276,7 @@ export function CommandPalette({
   const go = (hit: SearchHit | undefined) => {
     if (!hit) return;
     onClose();
-    void navigate({ to: hit.to });
+    void navigate({ to: hit.to, ...(hit.search ? { search: hit.search } : {}) } as never);
   };
 
   const groups = hits.reduce<Record<string, SearchHit[]>>((acc, h) => {

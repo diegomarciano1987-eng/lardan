@@ -1,0 +1,1 @@
+ALTER FUNCTION public.asaas_import_pagina SET search_path = public, extensions;

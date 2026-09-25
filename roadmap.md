@@ -16,3 +16,5 @@
 - [ ] Endurecer OFX/CSV (encoding, BANKID/ACCTID, saldos, FITID)
 - [ ] Testes obrigatórios da seção 11
 - [ ] Fase B: primeira cobrança controlada (consultora escolhida pela Diretoria)
+
+- [ ] Contas e caixas: ficha por conta (dados bancários, agência, endereço), movimentações, auditoria, transferência entre contas

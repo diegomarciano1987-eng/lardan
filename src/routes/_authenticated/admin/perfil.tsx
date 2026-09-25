@@ -16,6 +16,7 @@ import {
   updateMyProfile,
 } from "@/lib/profile";
 import { formatarTelefone, normalizarTelefone } from "@/lib/br/canonico";
+import { MeuAutenticador } from "@/components/admin/acessos/Autenticador";
 
 export const Route = createFileRoute("/_authenticated/admin/perfil")({
   component: PerfilPage,

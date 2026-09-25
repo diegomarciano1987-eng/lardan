@@ -124,3 +124,37 @@ export function PainelSegundoFator() {
     </section>
   );
 }
+
+/** Pede o código do aplicativo quando a conta tem autenticador e a sessão ainda não passou por ele. */
+export function PortaoSegundoFator({ children }: { children: React.ReactNode }) {
+  const [estado, setEstado] = React.useState<"conferindo" | "codigo" | "ok">("conferindo");
+  const [codigo, setCodigo] = React.useState("");
+  const [erro, setErro] = React.useState("");
+  React.useEffect(() => {
+    supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data }) => {
+      setEstado(data?.nextLevel === "aal2" && data.currentLevel !== "aal2" ? "codigo" : "ok");
+    }).catch(() => setEstado("ok"));
+  }, []);
+  async function verificar(e: React.FormEvent) {
+    e.preventDefault();
+    const { data } = await supabase.auth.mfa.listFactors();
+    const f = data?.totp.find((x) => x.status === "verified");
+    if (!f) return setEstado("ok");
+    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: f.id, code: codigo.trim() });
+    if (error) return setErro("Código incorreto.");
+    setEstado("ok");
+  }
+  if (estado === "ok") return <>{children}</>;
+  if (estado === "conferindo") return null;
+  return (
+    <form onSubmit={verificar} className="mx-auto mt-24 max-w-sm space-y-3 rounded-2xl border border-border bg-card p-6">
+      <h1 className="text-xl text-foreground">Código do autenticador</h1>
+      <p className="text-sm text-muted-foreground">Digite o código de 6 dígitos do seu aplicativo.</p>
+      <input autoFocus inputMode="numeric" maxLength={6} value={codigo} onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))}
+        className="w-full rounded-xl border border-input bg-background px-4 py-3 text-center text-lg tracking-[0.4em]" />
+      {erro && <p className="text-sm text-destructive">{erro}</p>}
+      <button disabled={codigo.length !== 6} className="w-full rounded-full bg-primary px-5 py-3 text-sm text-primary-foreground disabled:opacity-50">Entrar</button>
+      <button type="button" onClick={() => void supabase.auth.signOut()} className="w-full text-sm text-muted-foreground underline">Sair</button>
+    </form>
+  );
+}

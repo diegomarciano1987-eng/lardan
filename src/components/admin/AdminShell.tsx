@@ -1,3 +1,4 @@
+import { PortaoSegundoFator } from "@/components/admin/acessos/Autenticador";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -108,7 +109,7 @@ export function AdminShell({
 
         </header>
 
-        <main className="mx-auto min-w-0 max-w-[1600px] px-5 pb-40 pt-8 md:pl-[96px] md:pr-8">{children}</main>
+        <main className="mx-auto min-w-0 max-w-[1600px] px-5 pb-40 pt-8 md:pl-[96px] md:pr-8"><PortaoSegundoFator>{children}</PortaoSegundoFator></main>
 
         <QuickRail />
         <BottomDock roles={roles} />

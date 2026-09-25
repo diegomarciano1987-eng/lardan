@@ -55,7 +55,7 @@ function ConvitePage() {
         setErro(r.erro ?? "Não foi possível aceitar.");
         return;
       }
-      const destino = r.papeis?.length === 1 && r.papeis[0] === "consultora" ? "/consultora" : "/admin";
+      const destino = "/admin";
       void navigate({ to: destino, replace: true });
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Não foi possível aceitar.");

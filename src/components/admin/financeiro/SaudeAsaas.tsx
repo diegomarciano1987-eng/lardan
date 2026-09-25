@@ -34,7 +34,7 @@ export function SaudeAsaas() {
           <StatusBadge tone="danger">Falha na conexão</StatusBadge>
         )}
         {d?.conta ? <span className="text-sm font-medium text-ledger-text">{d.conta}</span> : null}
-        <button type="button" className="admin-btn-secondary" onClick={() => void q.refetch()} disabled={q.isFetching}>
+        <button type="button" className="inline-flex h-9 items-center gap-2 rounded-[10px] border border-line bg-surface px-3 text-sm font-medium text-ledger-text hover:border-champagne" onClick={() => void q.refetch()} disabled={q.isFetching}>
           <RefreshCw aria-hidden className={`size-4 ${q.isFetching ? "animate-spin" : ""}`} />
           Verificar agora
         </button>

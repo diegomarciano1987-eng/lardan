@@ -18,3 +18,12 @@
 - [ ] Fase B: primeira cobrança controlada (consultora escolhida pela Diretoria)
 
 - [x] Contas e caixas: ficha por conta (dados bancários, agência, endereço), movimentações, auditoria, transferência entre contas
+
+## Fase A — continuação (spec 25/09)
+- [x] Conferência dos 10.800 títulos, 919 clientes, 1.446 cobranças, 5.025 movimentações, diferença R$ 400 Santander (só leitura)
+- [ ] Aplicar vínculo em lote dos 918 clientes com CPF exato de consultora (aguarda autorização)
+- [ ] Central Asaas em 7 abas
+- [ ] Baixa assistida "Revisar e conciliar" + testes isolados
+- [ ] Transferências como composição no cockpit + testes de contas
+- [ ] Testes OFX/CSV + validação BANKID/ACCTID/CURDEF
+- [ ] Seleção da primeira cobrança real (botão travado até autorização)

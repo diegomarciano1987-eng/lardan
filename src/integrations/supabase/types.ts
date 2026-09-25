@@ -8195,6 +8195,10 @@ export type Database = {
         }
         Returns: string
       }
+      admin_vincular_usuario_pessoa: {
+        Args: { _motivo: string; _party: string; _user: string }
+        Returns: Json
+      }
       apply_stock_delta: {
         Args: { _delta: number; _location: string; _variant: string }
         Returns: number

@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { lazy, Suspense, useMemo, useState } from "react";
+import { ClientOnly, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Minus, Plus, Search } from "lucide-react";
+import { ArrowLeft, ExternalLink, MapPin, Search, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { caminho, projetar, type Malha } from "@/lib/rede/geo";
+import type { Malha } from "@/lib/rede/geo";
+import type { GrupoCep } from "./MapaCidadeLeaflet";
 import { obterMalha } from "@/lib/rede/rede.functions";
 import { formatInt } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
@@ -18,25 +19,47 @@ interface Consultora {
   lng: number | null;
   precisao: string | null;
   bairro: string | null;
+  cep: string | null;
+  geo_fonte: string | null;
 }
 
 type Filtro = "todas" | "ativas" | "inativas";
 
-const LARGURA = 720;
+const MapaCidadeLeaflet = lazy(() => import("./MapaCidadeLeaflet"));
 
-/** Espalha levemente pessoas no mesmo CEP para que cada uma seja clicável. */
-function espalhar(lista: Consultora[]) {
-  const vistos = new Map<string, number>();
-  return lista.map((c) => {
-    if (c.lat == null || c.lng == null) return { c, lat: null, lng: null };
-    const chave = `${c.lat.toFixed(4)}:${c.lng.toFixed(4)}`;
-    const n = vistos.get(chave) ?? 0;
-    vistos.set(chave, n + 1);
-    if (n === 0) return { c, lat: c.lat, lng: c.lng };
-    const ang = n * 2.399; // ângulo áureo
-    const raio = 0.0009 * Math.sqrt(n);
-    return { c, lat: c.lat + Math.sin(ang) * raio, lng: c.lng + Math.cos(ang) * raio };
-  });
+const fmtCep = (c: string | null) => {
+  const d = (c ?? "").replace(/\D/g, "");
+  return d.length === 8 ? `${d.slice(0, 5)}-${d.slice(5)}` : null;
+};
+
+/** Um ponto por CEP. Coordenada compartilhada por vários CEPs = centro da cidade/bairro → aproximado. */
+function agrupar(lista: Consultora[]): { grupos: GrupoCep[]; porChave: Map<string, Consultora[]> } {
+  const porChave = new Map<string, Consultora[]>();
+  const cepsPorCoord = new Map<string, Set<string>>();
+  for (const c of lista) {
+    if (c.lat == null || c.lng == null) continue;
+    const cep = fmtCep(c.cep);
+    const coord = `${c.lat.toFixed(5)}:${c.lng.toFixed(5)}`;
+    const chave = cep ?? `xy:${coord}`;
+    (porChave.get(chave) ?? porChave.set(chave, []).get(chave)!).push(c);
+    (cepsPorCoord.get(coord) ?? cepsPorCoord.set(coord, new Set()).get(coord)!).add(chave);
+  }
+  const grupos: GrupoCep[] = [];
+  for (const [chave, ps] of porChave) {
+    const p = ps[0]!;
+    const coord = `${p.lat!.toFixed(5)}:${p.lng!.toFixed(5)}`;
+    const aproximado = (cepsPorCoord.get(coord)?.size ?? 0) > 2 || /bairro/i.test(p.geo_fonte ?? "");
+    grupos.push({
+      chave,
+      lat: p.lat!,
+      lng: p.lng!,
+      cep: fmtCep(p.cep),
+      total: ps.length,
+      ativas: ps.filter((x) => x.status === "ativo").length,
+      aproximado,
+    });
+  }
+  return { grupos, porChave };
 }
 
 export function CidadeConsultoras({
@@ -53,7 +76,7 @@ export function CidadeConsultoras({
   const buscarMalha = useServerFn(obterMalha);
   const [filtro, setFiltro] = useState<Filtro>("todas");
   const [busca, setBusca] = useState("");
-  const [zoom, setZoom] = useState(1);
+  const [cepSel, setCepSel] = useState<string | null>(null);
   const [foco, setFoco] = useState<string | null>(null);
   const [bairro, setBairro] = useState<string | null>(null);
 
@@ -104,42 +127,15 @@ export function CidadeConsultoras({
     return [...m.entries()].sort((a, b) => b[1].total - a[1].total).slice(0, 12);
   }, [todas]);
 
-  const projecao = useMemo(() => (malha.data ? projetar(malha.data, LARGURA) : null), [malha.data]);
-  const pontos = useMemo(() => espalhar(visiveis), [visiveis]);
+  const { grupos, porChave } = useMemo(() => agrupar(visiveis), [visiveis]);
   const semPosicao = visiveis.filter((c) => c.lat == null).length;
-  const focada = foco ? todas.find((c) => c.party_id === foco) : null;
-
-  /** Enquadra onde as consultoras estão (a área rural do município fica de fora). */
-  const caixa = useMemo(() => {
-    if (!projecao) return null;
-    const xs: number[] = [];
-    const ys: number[] = [];
-    for (const c of todas) {
-      if (c.lat == null || c.lng == null) continue;
-      const [x, y] = projecao.ponto(c.lng, c.lat);
-      if (x < 0 || y < 0 || x > projecao.largura || y > projecao.altura) continue;
-      xs.push(x);
-      ys.push(y);
-    }
-    if (xs.length < 3) return { x: 0, y: 0, w: projecao.largura, h: projecao.altura };
-    xs.sort((m, n) => m - n);
-    ys.sort((m, n) => m - n);
-    const q = (arr: number[], p: number) => arr[Math.min(arr.length - 1, Math.floor(arr.length * p))]!;
-    const x0 = q(xs, 0.02), x1 = q(xs, 0.98), y0 = q(ys, 0.02), y1 = q(ys, 0.98);
-    const lado = Math.max(x1 - x0, y1 - y0, 40) * 1.2;
-    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-    const w = lado, h = lado;
-    return { x: cx - w / 2, y: cy - h / 2, w, h };
-  }, [projecao, todas]);
-
-  const vb = caixa
-    ? (() => {
-        const w = caixa.w / zoom;
-        const h = caixa.h / zoom;
-        return `${caixa.x + (caixa.w - w) / 2} ${caixa.y + (caixa.h - h) / 2} ${w} ${h}`;
-      })()
-    : "0 0 1 1";
-  const escala = caixa && projecao ? (caixa.w / projecao.largura) / zoom : 1;
+  const aproximadas = grupos.filter((g) => g.aproximado).reduce((n, g) => n + g.total, 0);
+  const noCep = cepSel ? porChave.get(cepSel) ?? [] : [];
+  const grupoSel = grupos.find((g) => g.chave === cepSel);
+  const chaveDe = (c: Consultora) => {
+    if (c.lat == null || c.lng == null) return null;
+    return fmtCep(c.cep) ?? `xy:${c.lat.toFixed(5)}:${c.lng.toFixed(5)}`;
+  };
 
   return (
     <div className="space-y-4">
@@ -158,65 +154,21 @@ export function CidadeConsultoras({
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div className="ledger-panel relative overflow-hidden p-3">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="font-display text-lg font-semibold text-ledger-text">{nome}</p>
-            <div className="flex gap-1">
-              <button type="button" aria-label="Aproximar" className="admin-btn px-2" onClick={() => setZoom((z) => Math.min(8, z * 1.5))}>
-                <Plus className="size-4" />
-              </button>
-              <button type="button" aria-label="Afastar" className="admin-btn px-2" onClick={() => setZoom((z) => Math.max(1, z / 1.5))}>
-                <Minus className="size-4" />
-              </button>
-            </div>
-          </div>
-          {!projecao || pessoas.isLoading ? (
-            <p className="py-24 text-center text-sm text-ledger-muted">Desenhando a cidade…</p>
+          <p className="mb-2 font-display text-lg font-semibold text-ledger-text">{nome}</p>
+          {pessoas.isLoading ? (
+            <p className="py-24 text-center text-sm text-ledger-muted">Carregando consultoras…</p>
           ) : (
-            <svg viewBox={vb} className="aspect-square max-h-[680px] w-full" role="group" aria-label={`Consultoras em ${nome}`}>
-              {malha.data!.features.map((f) => (
-                <path
-                  key={f.properties.codarea}
-                  d={caminho(f.geometry, projecao)}
-                  fill="color-mix(in oklab, var(--muted) 30%, white)"
-                  stroke="color-mix(in oklab, var(--foreground) 30%, transparent)"
-                  strokeWidth={1.2 * escala}
+            <ClientOnly fallback={<div className="h-[640px] rounded-[12px] bg-surface-muted" />}>
+              <Suspense fallback={<div className="h-[640px] rounded-[12px] bg-surface-muted" />}>
+                <MapaCidadeLeaflet
+                  grupos={grupos}
+                  contorno={(malha.data as unknown as GeoJSON.GeoJsonObject) ?? null}
+                  selecionado={cepSel}
+                  onSelecionar={setCepSel}
                 />
-              ))}
-              {pontos.map(({ c, lat, lng }) => {
-                if (lat == null || lng == null) return null;
-                const [x, y] = projecao.ponto(lng, lat);
-                const ativa = c.status === "ativo";
-                const r = (foco === c.party_id ? 7 : 4) * escala;
-                return (
-                  <circle
-                    key={c.party_id}
-                    cx={x}
-                    cy={y}
-                    r={r}
-                    fill={ativa ? "var(--rose)" : "color-mix(in oklab, var(--foreground) 45%, transparent)"}
-                    stroke="white"
-                    strokeWidth={0.8 * escala}
-                    className="cursor-pointer"
-                    onMouseEnter={() => setFoco(c.party_id)}
-                    onClick={() => setFoco(c.party_id)}
-                  >
-                    <title>{`${c.nome}${c.codigo ? ` · ${c.codigo}` : ""} · ${ativa ? "ativa" : "inativa"}${c.bairro ? ` · ${c.bairro}` : ""}`}</title>
-                  </circle>
-                );
-              })}
-            </svg>
+              </Suspense>
+            </ClientOnly>
           )}
-          {focada ? (
-            <div className="absolute bottom-3 left-3 max-w-xs rounded-md border border-line-soft bg-surface px-3 py-2 text-xs shadow-sm">
-              <p className="font-semibold text-ledger-text">{focada.nome}</p>
-              <p className="text-ledger-muted">
-                {[focada.codigo, focada.status === "ativo" ? "Ativa" : "Inativa", focada.bairro].filter(Boolean).join(" · ")}
-              </p>
-              <Link to="/admin/cadastros/pessoas/$id" params={{ id: focada.party_id }} className="admin-link mt-1 inline-block">
-                Abrir ficha
-              </Link>
-            </div>
-          ) : null}
           <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-ledger-muted">
             <span className="flex items-center gap-1.5">
               <span className="inline-block size-2.5 rounded-full" style={{ background: "var(--rose)" }} /> Ativa
@@ -224,12 +176,48 @@ export function CidadeConsultoras({
             <span className="flex items-center gap-1.5">
               <span className="inline-block size-2.5 rounded-full bg-ledger-muted" /> Inativa
             </span>
-            <span>Posição pelo CEP, não pelo número da casa.</span>
+            <span>Um ponto por CEP; o número indica quantas moram nele.</span>
+            {aproximadas > 0 ? <span>Borda tracejada: {formatInt(aproximadas)} com CEP localizado só pelo bairro/centro.</span> : null}
             {semPosicao > 0 ? <span>{formatInt(semPosicao)} sem CEP localizado (aparecem só na lista).</span> : null}
           </div>
         </div>
 
         <div className="space-y-3">
+          {cepSel ? (
+            <div className="ledger-panel space-y-2 border-bronze/50 p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="flex items-center gap-1.5 font-display text-base font-semibold text-ledger-text">
+                    <MapPin aria-hidden className="size-4 text-bronze" /> {grupoSel?.cep ? `CEP ${grupoSel.cep}` : "Local no mapa"}
+                  </p>
+                  <p className="text-xs text-ledger-muted">
+                    {formatInt(noCep.length)} consultora(s){noCep[0]?.bairro ? ` · ${noCep[0].bairro}` : ""}
+                    {grupoSel?.aproximado ? " · posição aproximada" : ""}
+                  </p>
+                </div>
+                <button type="button" aria-label="Fechar" className="admin-btn px-2" onClick={() => setCepSel(null)}>
+                  <X className="size-4" />
+                </button>
+              </div>
+              <ul className="max-h-[300px] divide-y divide-line-soft overflow-y-auto">
+                {noCep.map((c) => (
+                  <li key={c.party_id} className="flex items-center gap-2 py-2">
+                    <span
+                      className={cn("inline-block size-2 shrink-0 rounded-full", c.status !== "ativo" && "bg-ledger-muted")}
+                      style={c.status === "ativo" ? { background: "var(--rose)" } : undefined}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-ledger-text">{c.nome}</p>
+                      <p className="text-xs text-ledger-muted">{[c.codigo, c.status === "ativo" ? "Ativa" : "Inativa"].filter(Boolean).join(" · ")}</p>
+                    </div>
+                    <Link to="/admin/cadastros/pessoas/$id" params={{ id: c.party_id }} className="admin-btn shrink-0 text-xs">
+                      Cadastro <ExternalLink aria-hidden className="size-3.5" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <div className="ledger-panel space-y-3 p-4">
             <div className="flex gap-1">
               {(["todas", "ativas", "inativas"] as Filtro[]).map((f) => (
@@ -266,7 +254,11 @@ export function CidadeConsultoras({
                   <button
                     type="button"
                     onMouseEnter={() => setFoco(c.party_id)}
-                    onClick={() => setFoco(c.party_id)}
+                    onClick={() => {
+                      setFoco(c.party_id);
+                      const k = chaveDe(c);
+                      if (k) setCepSel(k);
+                    }}
                     className={cn(
                       "flex w-full items-center gap-2 px-1 py-2 text-left text-sm hover:bg-surface-muted",
                       foco === c.party_id && "bg-surface-muted",

@@ -11,31 +11,16 @@
  * segue pela rotina humana existente na tela de recebíveis.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { createHash, timingSafeEqual } from "node:crypto";
-import { registrarEvento } from "@/lib/asaas/eventos";
-import { bancoExecutor } from "@/lib/asaas/servidor.server";
-import { ROTINAS } from "@/lib/asaas/banco";
-import { paraCentavos } from "@/lib/asaas/transporte-http.server";
 
 const TAMANHO_MAXIMO = 256 * 1024;
 
 function mesmoToken(recebido: string, esperado: string | undefined): boolean {
   if (!esperado || esperado.length === 0) return false;
+  const { timingSafeEqual } = require("node:crypto") as typeof import("node:crypto");
   const a = Buffer.from(recebido, "utf8");
   const b = Buffer.from(esperado, "utf8");
   return a.length === b.length && timingSafeEqual(a, b);
 }
-
-/** Dinheiro do provedor vem em reais; payload interno é em centavos. */
-const cent = (v: unknown): number | undefined => {
-  try {
-    return paraCentavos(v) ?? undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-const txt = (v: unknown): string => (typeof v === "string" && v !== "" ? v : "");
 
 export const Route = createFileRoute("/api/public/asaas/webhook")({
   server: {
@@ -43,6 +28,23 @@ export const Route = createFileRoute("/api/public/asaas/webhook")({
       OPTIONS: async () => new Response(null, { status: 204 }),
 
       POST: async ({ request }) => {
+        const { createHash, timingSafeEqual } = await import("node:crypto");
+        const { registrarEvento } = await import("@/lib/asaas/eventos");
+        const { bancoExecutor } = await import("@/lib/asaas/servidor.server");
+        const { ROTINAS } = await import("@/lib/asaas/banco");
+        const { paraCentavos } = await import("@/lib/asaas/transporte-http.server");
+
+        /** Dinheiro do provedor vem em reais; payload interno é em centavos. */
+        const cent = (v: unknown): number | undefined => {
+          try {
+            return paraCentavos(v) ?? undefined;
+          } catch {
+            return undefined;
+          }
+        };
+        const txt = (v: unknown): string => (typeof v === "string" && v !== "" ? v : "");
+        void timingSafeEqual;
+
         const bruto = await request.text();
         if (bruto.length > TAMANHO_MAXIMO) return new Response("Payload grande demais.", { status: 413 });
 

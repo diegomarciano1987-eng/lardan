@@ -79,6 +79,7 @@ import { Route as AuthenticatedAdminFinanceiroReceberRouteImport } from './route
 import { Route as AuthenticatedAdminMaletasIdRouteImport } from './routes/_authenticated/admin/maletas_.$id'
 import { Route as AuthenticatedAdminMaletasEntradaRouteImport } from './routes/_authenticated/admin/maletas_.entrada'
 import { Route as AuthenticatedFinanceiroSimulacaoIdRouteImport } from './routes/_authenticated/financeiro/simulacao.$id'
+import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as AuthenticatedAdminCadastrosPessoasIdRouteImport } from './routes/_authenticated/admin/cadastros/pessoas_.$id'
@@ -475,6 +476,11 @@ const AuthenticatedFinanceiroSimulacaoIdRoute =
     path: '/financeiro/simulacao/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicAsaasWebhookRoute = ApiPublicAsaasWebhookRouteImport.update({
+  id: '/api/public/asaas/webhook',
+  path: '/api/public/asaas/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMidiaIdRoute = ApiPublicMidiaIdRouteImport.update({
   id: '/api/public/midia/$id',
   path: '/api/public/midia/$id',
@@ -579,6 +585,7 @@ export interface FileRoutesByFullPath {
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/admin/maletas/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
+  '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
@@ -654,6 +661,7 @@ export interface FileRoutesByTo {
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/admin/maletas/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
+  '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/admin/cadastros': typeof AuthenticatedAdminCadastrosIndexRoute
@@ -733,6 +741,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/maletas_/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/_authenticated/admin/maletas_/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/_authenticated/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
+  '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/_authenticated/admin/cadastros/': typeof AuthenticatedAdminCadastrosIndexRoute
@@ -812,6 +821,7 @@ export interface FileRouteTypes {
     | '/admin/maletas/$id'
     | '/admin/maletas/entrada'
     | '/financeiro/simulacao/$id'
+    | '/api/public/asaas/webhook'
     | '/api/public/midia/$id'
     | '/lovable/email/transactional/preview'
     | '/admin/cadastros/'
@@ -887,6 +897,7 @@ export interface FileRouteTypes {
     | '/admin/maletas/$id'
     | '/admin/maletas/entrada'
     | '/financeiro/simulacao/$id'
+    | '/api/public/asaas/webhook'
     | '/api/public/midia/$id'
     | '/lovable/email/transactional/preview'
     | '/admin/cadastros'
@@ -965,6 +976,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/maletas_/$id'
     | '/_authenticated/admin/maletas_/entrada'
     | '/_authenticated/financeiro/simulacao/$id'
+    | '/api/public/asaas/webhook'
     | '/api/public/midia/$id'
     | '/lovable/email/transactional/preview'
     | '/_authenticated/admin/cadastros/'
@@ -1003,6 +1015,7 @@ export interface RootRouteChildren {
   SitemapProductsPaginaRoute: typeof SitemapProductsPaginaRoute
   SemijoiasIndexRoute: typeof SemijoiasIndexRoute
   ApiPublicGaConfigRoute: typeof ApiPublicGaConfigRoute
+  ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
@@ -1499,6 +1512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceiroSimulacaoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/asaas/webhook': {
+      id: '/api/public/asaas/webhook'
+      path: '/api/public/asaas/webhook'
+      fullPath: '/api/public/asaas/webhook'
+      preLoaderRoute: typeof ApiPublicAsaasWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/midia/$id': {
       id: '/api/public/midia/$id'
       path: '/api/public/midia/$id'
@@ -1729,6 +1749,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapProductsPaginaRoute: SitemapProductsPaginaRoute,
   SemijoiasIndexRoute: SemijoiasIndexRoute,
   ApiPublicGaConfigRoute: ApiPublicGaConfigRoute,
+  ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }

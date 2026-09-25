@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
+import { SaudeAsaas } from "@/components/admin/financeiro/SaudeAsaas";
 import { AsaasReceber } from "@/components/admin/financeiro/AsaasReceber";
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/asaas")({
@@ -7,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/admin/financeiro/asaas")({
   head: () => ({
     meta: [
       { title: "Recebíveis Asaas — Financeiro LARDAN" },
-      { name: "description", content: "Importação de recebíveis, cobranças e conciliação em modo de simulação." },
+      { name: "description", content: "Importação de recebíveis, cobranças e conciliação em produção." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -16,7 +17,10 @@ export const Route = createFileRoute("/_authenticated/admin/financeiro/asaas")({
 function Pagina() {
   return (
     <AreaFinanceiraGuard capacidade="finance.receivable.view">
-      <AsaasReceber />
+      <div className="space-y-6">
+        <SaudeAsaas />
+        <AsaasReceber />
+      </div>
     </AreaFinanceiraGuard>
   );
 }

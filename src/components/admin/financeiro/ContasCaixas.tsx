@@ -1,7 +1,8 @@
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import {
   EmptyState,
   ErrorState,
@@ -94,7 +95,7 @@ export function ContasCaixas() {
   return (
     <div className="space-y-6">
       <Panel
-        title="Contas e caixas"
+        title="Contas e caixas — clique numa conta para abrir o painel dela"
         action={
           podeGerir ? (
             <button type="button" className="admin-btn-primary" onClick={() => setNova(true)}>
@@ -114,7 +115,12 @@ export function ContasCaixas() {
         {contas.data && contas.data.length > 0 && (
           <ul className="divide-y divide-line-soft">
             {contas.data.map((c) => (
-              <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+              <li key={c.id}>
+                <Link
+                  to="/admin/financeiro/contas/$id"
+                  params={{ id: c.id }}
+                  className="-mx-2 flex flex-wrap items-center justify-between gap-3 rounded-[10px] px-2 py-3 transition-colors hover:bg-cream-2"
+                >
                 <div className="min-w-0">
                   <p className="font-semibold text-ledger-text">{c.nome}</p>
                   <p className="text-xs text-ledger-muted">
@@ -131,7 +137,9 @@ export function ContasCaixas() {
                   <span className="text-sm font-semibold tabular-nums text-ledger-text">
                     {formatBRLFromCents(c.saldo_cents)}
                   </span>
+                  <ChevronRight aria-hidden className="size-4 text-ledger-muted" />
                 </span>
+                </Link>
               </li>
             ))}
           </ul>

@@ -126,3 +126,41 @@ export const sincronizarExtratoAsaas = createServerFn({ method: "POST" })
     if (st.error) throw new Error(st.error.message);
     return { total: itens.length, novas: linhas.length };
   });
+
+/** Verificação de saúde somente leitura: nunca cria nada no Asaas. */
+export const saudeAsaas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const agora = new Date().toISOString();
+    const { contasResolvidas } = await import("./servidor.server");
+    const { transporteDaResolucao } = await import("./configuracao.server");
+    const sb = context.supabase;
+    const [ev, falhas, imp, ext] = await Promise.all([
+      sb.from("asaas_events").select("received_at").order("received_at", { ascending: false }).limit(1).maybeSingle(),
+      sb.from("asaas_events").select("id", { count: "exact", head: true }).not("last_error", "is", null),
+      sb.from("asaas_import_runs").select("created_at,status").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      sb.from("financial_statement_imports").select("created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    ]);
+    const base = {
+      verificadoEm: agora,
+      ultimoWebhook: (ev.data?.received_at as string | undefined) ?? null,
+      falhasWebhook: falhas.count ?? 0,
+      ultimaImportacao: (imp.data?.created_at as string | undefined) ?? null,
+      situacaoImportacao: (imp.data?.status as string | undefined) ?? null,
+      ultimoExtrato: (ext.data?.created_at as string | undefined) ?? null,
+    };
+    try {
+      const contas = await contasResolvidas(context.userId);
+      const alvo = contas.find((c) => c.r.executavel && c.r.transporte.tipo === "http");
+      if (!alvo) {
+        const motivo = contas.find((c) => c.r.situacao !== "conta_suspensa")?.r.motivo ?? "Nenhuma conta conectada.";
+        return { ...base, ok: false, conta: null, ambiente: null, saldoCents: null, erro: motivo };
+      }
+      const t = (await transporteDaResolucao(alvo.r)) as unknown as { ambiente: string; consultarSaldo: () => Promise<number | null> };
+      const saldo = await t.consultarSaldo();
+      return { ...base, ok: true, conta: alvo.nome, ambiente: t.ambiente, saldoCents: saldo, erro: null };
+    } catch (e) {
+      const msg = (e as Error).message.replace(/\$aact_[A-Za-z0-9_]+/g, "[oculto]").slice(0, 200);
+      return { ...base, ok: false, conta: null, ambiente: null, saldoCents: null, erro: msg };
+    }
+  });

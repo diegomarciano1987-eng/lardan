@@ -200,8 +200,23 @@ function NavegacaoFinanceira() {
  * as páginas financeiras. Fica sempre abaixo do cabeçalho da página e
  * nunca compete com o menu global inferior.
  */
+/** Área ativa do Financeiro conforme o endereço da tela. */
+function useAreaFinanceiraAtiva(): AreaFinanceira | undefined {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  if (pathname.startsWith("/admin/financeiro/contas/")) {
+    return AREAS_FINANCEIRAS.find((a) => a.to === "/admin/financeiro/contas");
+  }
+  const exatas = AREAS_FINANCEIRAS.filter((a) => a.to === pathname);
+  if (exatas.length > 0) return exatas[0];
+  return AREAS_FINANCEIRAS.filter((a) => a.to !== "/admin/financeiro").find((a) =>
+    pathname.startsWith(`${a.to}/`),
+  );
+}
+
 export function FinanceiroShell({ children }: { children: React.ReactNode }) {
   const caps = useCapabilities();
+  const area = useAreaFinanceiraAtiva();
+  const titulo = area && area.to !== "/admin/financeiro" ? area.label : "Visão geral";
 
   if (!caps.includes("finance.view") && !caps.includes("finance.dashboard.view")) {
     return (
@@ -219,7 +234,7 @@ export function FinanceiroShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="space-y-4 pb-4">
-      <PageHeader eyebrow="Lardan Cloud" title="Financeiro" actions={<PeriodoGlobal />} />
+      <PageHeader eyebrow="Financeiro" title={titulo} actions={<PeriodoGlobal />} />
 
       <NavegacaoFinanceira />
 

@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const rpc = supabase.rpc as unknown as (
+const rpc = supabase.rpc.bind(supabase) as unknown as (
   f: string,
   a: Record<string, unknown>,
 ) => Promise<{ data: unknown; error: { message: string } | null }>;

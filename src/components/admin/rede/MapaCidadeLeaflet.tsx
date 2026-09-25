@@ -53,10 +53,9 @@ export default function MapaCidadeLeaflet({
   useEffect(() => {
     if (!divRef.current || mapaRef.current) return;
     const mapa = L.map(divRef.current, { scrollWheelZoom: true, zoomControl: true }).setView([-23.31, -51.16], 12);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      maxZoom: 20,
-      subdomains: "abcd",
-      attribution: "© OpenStreetMap · © CARTO",
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "© OpenStreetMap",
     }).addTo(mapa);
     camadaRef.current = L.layerGroup().addTo(mapa);
     mapaRef.current = mapa;

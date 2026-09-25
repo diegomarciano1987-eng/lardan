@@ -59,17 +59,18 @@ export function textoParaCentavos(bruto: string): number | null {
 export function textoParaData(bruto: string): string | null {
   const t = (bruto ?? "").trim();
   if (!t) return null;
+  const valida = (a: number, mes: number, d: number): string | null => {
+    if (mes < 1 || mes > 12 || d < 1) return null;
+    const ultimo = new Date(Date.UTC(a, mes, 0)).getUTCDate();
+    if (d > ultimo) return null; // 31/02, 31/04 etc.
+    return `${String(a).padStart(4, "0")}-${String(mes).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  };
   let m = /^(\d{4})-(\d{2})-(\d{2})/.exec(t);
-  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  if (m) return valida(Number(m[1]), Number(m[2]), Number(m[3]));
   m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/.exec(t);
-  if (m) {
-    const d = Number(m[1]);
-    const mes = Number(m[2]);
-    if (d < 1 || d > 31 || mes < 1 || mes > 12) return null;
-    return `${m[3]}-${String(mes).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-  }
+  if (m) return valida(Number(m[3]), Number(m[2]), Number(m[1]));
   m = /^(\d{8})$/.exec(t);
-  if (m) return `${t.slice(0, 4)}-${t.slice(4, 6)}-${t.slice(6, 8)}`;
+  if (m) return valida(Number(t.slice(0, 4)), Number(t.slice(4, 6)), Number(t.slice(6, 8)));
   return null;
 }
 
@@ -237,8 +238,9 @@ export const processarExtrato = createServerFn({ method: "POST" })
       },
     });
     if (reg.error) throw new Error(reg.error.message);
-    const registro = reg.data as { file_id: string; import_id: string; repetido: boolean };
-    if (registro.repetido) {
+    const registro = reg.data as { file_id: string; import_id: string; repetido: boolean; concluido?: boolean };
+    // arquivo registrado não é arquivo concluído: só encerra se as linhas já entraram
+    if (registro.repetido && registro.concluido !== false) {
       return { ...registro, sha256: hash, total: 0, validas: 0, invalidas: 0, repetidas: 0 };
     }
 

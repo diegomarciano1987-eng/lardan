@@ -14,6 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_grantable_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      access_invite_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          evento: string
+          id: string
+          invite_id: string
+          payload: Json
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          evento: string
+          id?: string
+          invite_id: string
+          payload?: Json
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          evento?: string
+          id?: string
+          invite_id?: string
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_invite_events_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "access_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      access_invites: {
+        Row: {
+          aceito_at: string | null
+          aceito_por: string | null
+          created_at: string
+          created_by: string
+          email: string
+          envios: number
+          expires_at: string
+          id: string
+          party_id: string
+          revogado_at: string | null
+          revogado_por: string | null
+          roles: Database["public"]["Enums"]["app_role"][]
+          status: string
+          tentativas: number
+          token_hash: string
+          ultimo_envio_at: string | null
+          ultimo_erro: string | null
+          updated_at: string
+        }
+        Insert: {
+          aceito_at?: string | null
+          aceito_por?: string | null
+          created_at?: string
+          created_by: string
+          email: string
+          envios?: number
+          expires_at?: string
+          id?: string
+          party_id: string
+          revogado_at?: string | null
+          revogado_por?: string | null
+          roles: Database["public"]["Enums"]["app_role"][]
+          status?: string
+          tentativas?: number
+          token_hash: string
+          ultimo_envio_at?: string | null
+          ultimo_erro?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aceito_at?: string | null
+          aceito_por?: string | null
+          created_at?: string
+          created_by?: string
+          email?: string
+          envios?: number
+          expires_at?: string
+          id?: string
+          party_id?: string
+          revogado_at?: string | null
+          revogado_por?: string | null
+          roles?: Database["public"]["Enums"]["app_role"][]
+          status?: string
+          tentativas?: number
+          token_hash?: string
+          ultimo_envio_at?: string | null
+          ultimo_erro?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_invites_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_invites_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       asaas_accounts: {
         Row: {
           ambiente_provedor: string | null
@@ -8194,6 +8325,31 @@ export type Database = {
       }
     }
     Functions: {
+      access_invite_accept: { Args: { _token_hash: string }; Returns: Json }
+      access_invite_create: {
+        Args: {
+          _email: string
+          _party: string
+          _roles: Database["public"]["Enums"]["app_role"][]
+          _token_hash: string
+        }
+        Returns: Json
+      }
+      access_invite_envio: {
+        Args: { _erro: string; _id: string; _ok: boolean }
+        Returns: undefined
+      }
+      access_invite_preview: { Args: { _token_hash: string }; Returns: Json }
+      access_invite_resend: {
+        Args: { _id: string; _token_hash: string }
+        Returns: Json
+      }
+      access_invite_revoke: { Args: { _id: string }; Returns: undefined }
+      access_pode_conceder: {
+        Args: { _role: Database["public"]["Enums"]["app_role"]; _uid: string }
+        Returns: boolean
+      }
+      access_pode_ver_convites: { Args: { _uid: string }; Returns: boolean }
       address_geo_fingerprint: {
         Args: {
           _city: string

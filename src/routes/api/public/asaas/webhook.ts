@@ -14,14 +14,6 @@ import { createFileRoute } from "@tanstack/react-router";
 
 const TAMANHO_MAXIMO = 256 * 1024;
 
-function mesmoToken(recebido: string, esperado: string | undefined): boolean {
-  if (!esperado || esperado.length === 0) return false;
-  const { timingSafeEqual } = require("node:crypto") as typeof import("node:crypto");
-  const a = Buffer.from(recebido, "utf8");
-  const b = Buffer.from(esperado, "utf8");
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
 export const Route = createFileRoute("/api/public/asaas/webhook")({
   server: {
     handlers: {
@@ -43,7 +35,12 @@ export const Route = createFileRoute("/api/public/asaas/webhook")({
           }
         };
         const txt = (v: unknown): string => (typeof v === "string" && v !== "" ? v : "");
-        void timingSafeEqual;
+        const mesmoToken = (recebido: string, esperado: string | undefined): boolean => {
+          if (!esperado || esperado.length === 0) return false;
+          const a = Buffer.from(recebido, "utf8");
+          const b = Buffer.from(esperado, "utf8");
+          return a.length === b.length && timingSafeEqual(a, b);
+        };
 
         const bruto = await request.text();
         if (bruto.length > TAMANHO_MAXIMO) return new Response("Payload grande demais.", { status: 413 });

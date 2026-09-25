@@ -137,6 +137,33 @@ async function executarSync(
     const contas = await contasResolvidas(context.userId);
     const alvo = contas.find((c) => c.r.executavel && c.r.transporte.tipo === "http");
     if (!alvo) throw new Error("Nenhuma conta Asaas conectada e autorizada neste servidor.");
+    // destino vem da ligação explícita conta Asaas → conta financeira, nunca do navegador
+    {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: cfg, error } = await supabaseAdmin
+        .from("asaas_accounts")
+        .select("financial_account_id, owner_entity_id")
+        .eq("id", alvo.id)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      const destino = (cfg as { financial_account_id: string | null } | null)?.financial_account_id;
+      if (!destino) throw new Error("A conta Asaas ainda não está ligada a uma conta financeira.");
+      if (data.financial_account_id && data.financial_account_id !== destino) {
+        throw new Error("Conta de destino diferente da ligada à conta Asaas.");
+      }
+      const { data: fin } = await supabaseAdmin
+        .from("financial_accounts")
+        .select("business_entity_id, is_active")
+        .eq("id", destino)
+        .maybeSingle();
+      const f = fin as { business_entity_id: string | null; is_active: boolean } | null;
+      const dono = (cfg as { owner_entity_id: string | null }).owner_entity_id;
+      if (!f || f.is_active === false) throw new Error("Conta financeira ligada ao Asaas está inativa.");
+      if (f.business_entity_id && dono && f.business_entity_id !== dono) {
+        throw new Error("Conta financeira ligada pertence a outra empresa.");
+      }
+      data = { ...data, financial_account_id: destino };
+    }
     const transporte = (await transporteDaResolucao(alvo.r)) as unknown as {
       listarExtrato: (f: { de: string; ate: string; limit: number; offset: number }) => Promise<{
         itens: Json[];

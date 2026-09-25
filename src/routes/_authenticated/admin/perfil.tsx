@@ -68,6 +68,7 @@ function PerfilPage() {
         title="Meu perfil"
         description="Seus dados, sua foto, sua senha e os acessos liberados para você no sistema."
       />
+      <MeuAutenticador />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
         <div className="space-y-6">

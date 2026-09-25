@@ -60,7 +60,6 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     label: "Recebíveis Asaas",
     descricao: "Importação, cobrança e conciliação (simulação)",
     capacidade: "finance.receivable.view",
-    emImplantacao: true,
     asaas: true,
   },
   {

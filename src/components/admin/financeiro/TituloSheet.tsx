@@ -70,6 +70,9 @@ export function TituloSheet({
   const [conta, setConta] = React.useState("");
   const [valor, setValor] = React.useState("");
   const [referencia, setReferencia] = React.useState("");
+  const [tarifa, setTarifa] = React.useState("");
+  const [juros, setJuros] = React.useState("");
+  const [desconto, setDesconto] = React.useState("");
   const [chave] = React.useState(() => crypto.randomUUID());
   const [estornando, setEstornando] = React.useState<string | null>(null);
   const [cancelando, setCancelando] = React.useState(false);
@@ -85,18 +88,28 @@ export function TituloSheet({
       if (!conta) throw new Error("Escolha a conta.");
       const cents = reaisParaCentavos(valor);
       if (!cents || cents <= 0) throw new Error("Informe um valor maior que zero.");
+      const tc = reaisParaCentavos(tarifa) ?? 0;
+      const jc = reaisParaCentavos(juros) ?? 0;
+      const dc = reaisParaCentavos(desconto) ?? 0;
+      if (tc < 0 || jc < 0 || dc < 0) throw new Error("Tarifa, juros e desconto não podem ser negativos.");
       return registrarBaixa({
+        tarifa_cents: tc,
+        juros_cents: jc,
+        desconto_cents: dc,
         direction: t.titulo.direction,
         financial_account_id: conta,
         valor_cents: cents,
         ...(referencia.trim() ? { referencia: referencia.trim() } : {}),
-        idempotency_key: `${chave}-${parcela}-${cents}`,
+        idempotency_key: `${chave}-${parcela}-${cents}-${tc}-${jc}-${dc}`,
         alocacoes: [{ installment_id: parcela, valor_cents: cents }],
       });
     },
     onSuccess: (r) => {
       toast.success(r.repetido ? "Esta baixa já havia sido registrada." : "Baixa registrada.");
       setValor("");
+      setTarifa("");
+      setJuros("");
+      setDesconto("");
       void qc.invalidateQueries({ queryKey: ["fin-title", id] });
       void qc.invalidateQueries({ queryKey: ["fin-titles"] });
       void qc.invalidateQueries({ queryKey: ["fin-overview"] });
@@ -303,6 +316,32 @@ export function TituloSheet({
                     value={referencia}
                     onChange={(e) => setReferencia(e.target.value)}
                     placeholder="Referência (opcional)"
+                    className={inputCls}
+                  />
+                </div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  <input
+                    value={tarifa}
+                    onChange={(e) => setTarifa(e.target.value)}
+                    inputMode="decimal"
+                    placeholder="Tarifa R$"
+                    aria-label="Tarifa"
+                    className={inputCls}
+                  />
+                  <input
+                    value={juros}
+                    onChange={(e) => setJuros(e.target.value)}
+                    inputMode="decimal"
+                    placeholder="Juros R$"
+                    aria-label="Juros"
+                    className={inputCls}
+                  />
+                  <input
+                    value={desconto}
+                    onChange={(e) => setDesconto(e.target.value)}
+                    inputMode="decimal"
+                    placeholder="Desconto R$"
+                    aria-label="Desconto"
                     className={inputCls}
                   />
                 </div>

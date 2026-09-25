@@ -29,6 +29,22 @@ import {
   type LinhaExtratoRow,
   type StatusLinha,
 } from "@/lib/conciliacao";
+import type { DateRange } from "react-day-picker";
+import { DateRangeField } from "@/components/premium/DateRangeField";
+
+const isoLocal = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/** Remove códigos técnicos e números internos do histórico bancário. */
+export function historicoAmigavel(h: string | null | undefined): string {
+  if (!h) return "";
+  return h
+    .replace(/^[A-Z0-9_]{3,}\s+—\s+/, "")
+    .replace(/\s+(?:d[aoe]s?\s+)?(?:cobran[çc]a|fatura|transfer[êe]ncia|pagamento)\s+(?:n[ºo°]?\s*)?[\w-]*\d[\w-]*/gi, " —")
+    .replace(/\s+—\s*$/, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
 
 const PAGE_SIZE = 25;
 
@@ -513,7 +529,14 @@ export function Conciliacao({
   contaFixa,
   acoesTopo,
   titulo = "Extrato bancário",
-}: { contaFixa?: string; acoesTopo?: React.ReactNode; titulo?: string } = {}) {
+  mesAtualObrigatorio = false,
+}: {
+  contaFixa?: string;
+  acoesTopo?: React.ReactNode | ((periodo: { de: string; ate: string }) => React.ReactNode);
+  titulo?: string;
+  /** período nunca fica vazio: sem escolha, volta para o mês atual */
+  mesAtualObrigatorio?: boolean;
+} = {}) {
   const qc = useQueryClient();
   const caps = useCapabilities();
   const podeVer = caps.includes("finance.statement.view");
@@ -523,8 +546,27 @@ export function Conciliacao({
 
   const [conta, setConta] = React.useState(contaFixa ?? "");
   const [status, setStatus] = React.useState("todos");
-  const [de, setDe] = React.useState("");
-  const [ate, setAte] = React.useState("");
+  const mesAtual = React.useMemo(() => {
+    const h = new Date();
+    return {
+      de: isoLocal(new Date(h.getFullYear(), h.getMonth(), 1)),
+      ate: isoLocal(new Date(h.getFullYear(), h.getMonth() + 1, 0)),
+    };
+  }, []);
+  const [de, setDe] = React.useState(mesAtualObrigatorio ? mesAtual.de : "");
+  const [ate, setAte] = React.useState(mesAtualObrigatorio ? mesAtual.ate : "");
+  const periodo: DateRange | undefined = de
+    ? { from: new Date(`${de}T12:00:00`), to: ate ? new Date(`${ate}T12:00:00`) : undefined }
+    : undefined;
+  const mudarPeriodo = (r?: DateRange) => {
+    if (!r?.from) {
+      setDe(mesAtualObrigatorio ? mesAtual.de : "");
+      setAte(mesAtualObrigatorio ? mesAtual.ate : "");
+      return;
+    }
+    setDe(isoLocal(r.from));
+    setAte(isoLocal(r.to ?? r.from));
+  };
   const [busca, setBusca] = React.useState("");
   const buscaLenta = useDebounce(busca);
   const [pagina, setPagina] = React.useState(0);
@@ -685,13 +727,15 @@ export function Conciliacao({
       render: (r) => (
         <div className="min-w-0">
           <p className="truncate font-semibold text-ledger-text">
-            {r.historico || "Sem histórico"}
+            {historicoAmigavel(r.historico) || "Sem histórico"}
           </p>
-          <p className="truncate text-xs text-ledger-muted">
-            linha {r.line_no}
-            {r.bank_id ? ` · id ${r.bank_id}` : ""}
-            {r.documento ? ` · doc. ${r.documento}` : ""}
-          </p>
+          {!contaFixa && (
+            <p className="truncate text-xs text-ledger-muted">
+              linha {r.line_no}
+              {r.bank_id ? ` · id ${r.bank_id}` : ""}
+              {r.documento ? ` · doc. ${r.documento}` : ""}
+            </p>
+          )}
         </div>
       ),
     },
@@ -734,7 +778,11 @@ export function Conciliacao({
   return (
     <div className="space-y-6">
       <Panel title={titulo}>
-        {acoesTopo ? <div className="mb-4">{acoesTopo}</div> : null}
+        {acoesTopo ? (
+          <div className="mb-4">
+            {typeof acoesTopo === "function" ? acoesTopo({ de, ate }) : acoesTopo}
+          </div>
+        ) : null}
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {contaFixa ? null : (
             <SmartSelect
@@ -744,20 +792,13 @@ export function Conciliacao({
               placeholder="Conta bancária ou caixa"
             />
           )}
-          <input
-            type="date"
-            value={de}
-            onChange={(e) => setDe(e.target.value)}
-            aria-label="De"
-            className={inputCls}
-          />
-          <input
-            type="date"
-            value={ate}
-            onChange={(e) => setAte(e.target.value)}
-            aria-label="Até"
-            className={inputCls}
-          />
+          <div className="sm:col-span-2">
+            <DateRangeField
+              value={periodo}
+              onChange={mudarPeriodo}
+              placeholder={mesAtualObrigatorio ? "Mês atual" : "Período (dia/mês/ano)"}
+            />
+          </div>
           <SmartSelect
             options={[
               { value: "todos", label: "Todas as situações" },

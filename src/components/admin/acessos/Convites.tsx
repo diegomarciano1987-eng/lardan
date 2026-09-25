@@ -97,7 +97,7 @@ export function ConvitesPanel({ podeConceder }: { podeConceder: AppRole[] }) {
           {["todos", "pendente", "aceito", "expirado", "revogado", "falha_envio"].map((f) => (
             <button key={f} onClick={() => { setFiltro(f); setPagina(0); }}
               className={`rounded-full px-3 py-1.5 text-xs ${filtro === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-              {f === "todos" ? "Todos" : SITUACAO[f].rotulo}
+              {f === "todos" ? "Todos" : SITUACAO[f]?.rotulo}
             </button>
           ))}
         </div>
@@ -156,10 +156,11 @@ function NovoConvite({ podeConceder, onFeito, criar }: {
     enabled: termo.trim().length >= 3 && !pessoa,
     queryFn: async () => {
       const t = termo.trim();
-      const { data, error } = await supabase.from("parties").select("id, display_name, email")
-        .or(`display_name.ilike.%${t.replace(/[,()]/g, " ")}%,email.ilike.%${t.replace(/[,()]/g, " ")}%`).limit(10);
+      const { data, error } = await supabase.from("parties").select("id, display_name, contact_points(kind, value)")
+        .ilike("display_name", `%${t}%`).limit(10);
       if (error) throw error;
-      return data as { id: string; display_name: string; email: string | null }[];
+      return ((data ?? []) as unknown as { id: string; display_name: string; contact_points: { kind: string; value: string }[] | null }[])
+        .map((p) => ({ id: p.id, display_name: p.display_name, email: p.contact_points?.find((c) => c.kind === "email")?.value ?? null }));
     },
   });
 
@@ -179,7 +180,7 @@ function NovoConvite({ podeConceder, onFeito, criar }: {
     <div className="mt-4 space-y-3 rounded-xl bg-muted/50 p-4">
       {!pessoa ? (
         <>
-          <input value={termo} onChange={(e) => setTermo(e.target.value)} placeholder="Buscar cadastro por nome ou e-mail (mín. 3 letras)"
+          <input value={termo} onChange={(e) => setTermo(e.target.value)} placeholder="Buscar cadastro pelo nome (mín. 3 letras)"
             className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm" />
           <p className="text-xs text-muted-foreground">Pessoa nova? Cadastre primeiro em Cadastros e depois convide.</p>
           <div className="divide-y divide-border rounded-xl bg-background">

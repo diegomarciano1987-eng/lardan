@@ -105,7 +105,7 @@ function ConvitePage() {
         {!info || loading ? (
           <p className="mt-6 text-sm text-muted-foreground">Conferindo o convite…</p>
         ) : !valido ? (
-          <p className="mt-6 rounded-xl bg-muted p-4 text-sm text-foreground">{MSG[info.situacao] ?? MSG.invalido}</p>
+          <p className="mt-6 rounded-xl bg-muted p-4 text-sm text-foreground">{MSG[info.situacao] ?? MSG["invalido"]}</p>
         ) : (
           <>
             <p className="mt-4 text-sm text-muted-foreground">

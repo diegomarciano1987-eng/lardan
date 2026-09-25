@@ -8737,6 +8737,7 @@ export type Database = {
       }
       fin_settings_overview: { Args: never; Returns: Json }
       fin_settlement_create: { Args: { _payload: Json }; Returns: Json }
+      fin_settlement_create_ajustes: { Args: { _payload: Json }; Returns: Json }
       fin_settlement_reverse: {
         Args: { _motivo: string; _settlement: string }
         Returns: string

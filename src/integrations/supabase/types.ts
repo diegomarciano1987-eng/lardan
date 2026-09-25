@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       asaas_accounts: {
         Row: {
+          ambiente_provedor: string | null
           config_version: number
           created_at: string
           cutover_date: string | null
@@ -29,6 +30,7 @@ export type Database = {
           last_success_at: string | null
           last_sync_at: string | null
           last_sync_cursor: string | null
+          modo_execucao: string
           note: string | null
           opening_balance_handled: boolean
           opening_balance_strategy: string
@@ -39,6 +41,7 @@ export type Database = {
           webhook_secret_ref: string | null
         }
         Insert: {
+          ambiente_provedor?: string | null
           config_version?: number
           created_at?: string
           cutover_date?: string | null
@@ -52,6 +55,7 @@ export type Database = {
           last_success_at?: string | null
           last_sync_at?: string | null
           last_sync_cursor?: string | null
+          modo_execucao?: string
           note?: string | null
           opening_balance_handled?: boolean
           opening_balance_strategy?: string
@@ -62,6 +66,7 @@ export type Database = {
           webhook_secret_ref?: string | null
         }
         Update: {
+          ambiente_provedor?: string | null
           config_version?: number
           created_at?: string
           cutover_date?: string | null
@@ -75,6 +80,7 @@ export type Database = {
           last_success_at?: string | null
           last_sync_at?: string | null
           last_sync_cursor?: string | null
+          modo_execucao?: string
           note?: string | null
           opening_balance_handled?: boolean
           opening_balance_strategy?: string
@@ -192,8 +198,11 @@ export type Database = {
           internal_reference: string
           invoice_url: string | null
           last_error: string | null
+          lease_until: string | null
           party_id: string
           processing_at: string | null
+          recuperacoes: number
+          rejeicao_fase: string | null
           resolved_at: string | null
           simulado: boolean
           state: string
@@ -220,8 +229,11 @@ export type Database = {
           internal_reference: string
           invoice_url?: string | null
           last_error?: string | null
+          lease_until?: string | null
           party_id: string
           processing_at?: string | null
+          recuperacoes?: number
+          rejeicao_fase?: string | null
           resolved_at?: string | null
           simulado?: boolean
           state?: string
@@ -248,8 +260,11 @@ export type Database = {
           internal_reference?: string
           invoice_url?: string | null
           last_error?: string | null
+          lease_until?: string | null
           party_id?: string
           processing_at?: string | null
+          recuperacoes?: number
+          rejeicao_fase?: string | null
           resolved_at?: string | null
           simulado?: boolean
           state?: string
@@ -323,6 +338,7 @@ export type Database = {
           installment_id: string | null
           installment_number: number | null
           interest_cents: number | null
+          invoice_url: string | null
           linked_at: string | null
           linked_by: string | null
           net_value_cents: number | null
@@ -356,6 +372,7 @@ export type Database = {
           installment_id?: string | null
           installment_number?: number | null
           interest_cents?: number | null
+          invoice_url?: string | null
           linked_at?: string | null
           linked_by?: string | null
           net_value_cents?: number | null
@@ -389,6 +406,7 @@ export type Database = {
           installment_id?: string | null
           installment_number?: number | null
           interest_cents?: number | null
+          invoice_url?: string | null
           linked_at?: string | null
           linked_by?: string | null
           net_value_cents?: number | null
@@ -8013,6 +8031,10 @@ export type Database = {
         Args: { _delta: number; _location: string; _variant: string }
         Returns: number
       }
+      asaas_ator_pode: {
+        Args: { _actor: string; _cap: string }
+        Returns: boolean
+      }
       asaas_charge_vincular: {
         Args: {
           _alterar?: boolean
@@ -8026,6 +8048,104 @@ export type Database = {
       asaas_cobranca_preparar: { Args: { _payload: Json }; Returns: Json }
       asaas_customer_sensivel: { Args: { _customer: string }; Returns: Json }
       asaas_evento_processar: { Args: { _evento: string }; Returns: Json }
+      asaas_evento_registrar: {
+        Args: { _actor?: string; _origem: string; _payload: Json }
+        Returns: Json
+      }
+      asaas_exec_cliente: {
+        Args: {
+          _actor: string
+          _external_id: string
+          _intent: string
+          _nome: string
+          _tentativa: number
+          _worker: string
+        }
+        Returns: Json
+      }
+      asaas_exec_cobranca: {
+        Args: { _actor: string; _charge: string }
+        Returns: Json
+      }
+      asaas_exec_exigir: {
+        Args: { _actor: string; _cap: string }
+        Returns: undefined
+      }
+      asaas_exec_link: {
+        Args: { _actor: string; _charge: string; _url: string }
+        Returns: Json
+      }
+      asaas_exec_pendentes: {
+        Args: { _account?: string; _limite?: number; _preparada_seg?: number }
+        Returns: Json
+      }
+      asaas_exec_posse: {
+        Args: { _intent: string; _tentativa: number; _worker: string }
+        Returns: {
+          account_id: string
+          attempts: number
+          billing_type: string
+          charge_id: string | null
+          content_hash: string
+          created_at: string
+          created_by: string | null
+          criar_cliente: boolean
+          customer_external_id: string | null
+          due_date: string
+          external_id: string | null
+          id: string
+          idempotency_key: string
+          installment_id: string
+          internal_reference: string
+          invoice_url: string | null
+          last_error: string | null
+          lease_until: string | null
+          party_id: string
+          processing_at: string | null
+          recuperacoes: number
+          rejeicao_fase: string | null
+          resolved_at: string | null
+          simulado: boolean
+          state: string
+          title_id: string
+          updated_at: string
+          value_cents: number
+          worker: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "asaas_charge_intents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      asaas_exec_reservar: {
+        Args: {
+          _actor: string
+          _intent: string
+          _lease_segundos?: number
+          _worker: string
+        }
+        Returns: Json
+      }
+      asaas_exec_resultado: {
+        Args: {
+          _actor: string
+          _intent: string
+          _payload: Json
+          _tentativa: number
+          _worker: string
+        }
+        Returns: Json
+      }
+      asaas_external_id_valido: {
+        Args: { _account: string; _external_id: string }
+        Returns: boolean
+      }
+      asaas_fatura_url_valida: {
+        Args: { _account: string; _external_id: string; _url: string }
+        Returns: boolean
+      }
       asaas_import_abrir: {
         Args: {
           _account: string
@@ -8066,7 +8186,20 @@ export type Database = {
         Returns: Json
       }
       asaas_origin_key: { Args: { _account: string }; Returns: string }
-      asaas_receber_painel: { Args: { _filtros?: Json }; Returns: Json }
+      asaas_receber_contas: { Args: never; Returns: Json }
+      asaas_receber_fila: { Args: { _filtros?: Json }; Returns: Json }
+      asaas_receber_ocorrencias: { Args: { _filtros?: Json }; Returns: Json }
+      asaas_receber_parcelas: { Args: { _filtros?: Json }; Returns: Json }
+      asaas_vincular_interno: {
+        Args: {
+          _actor: string
+          _charge: string
+          _installment: string
+          _motivo: string
+          _title: string
+        }
+        Returns: undefined
+      }
       barcode_lookup: { Args: { _code: string }; Returns: Json }
       barcode_resolver: {
         Args: { _code: string; _criar?: boolean }

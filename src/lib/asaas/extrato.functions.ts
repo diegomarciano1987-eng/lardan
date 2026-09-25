@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 type Json = Record<string, unknown>;
 
@@ -59,11 +61,7 @@ async function ultimaSync() {
 export const statusSyncExtratoAsaas = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: pode } = await context.supabase.rpc("has_capability" as never, {
-      _user_id: context.userId,
-      _cap: "finance.statement.view",
-    } as never);
-    void pode;
+    void context;
     const u = await ultimaSync();
     if (!u) return null;
     let quem: string | null = null;
@@ -132,7 +130,7 @@ export const sincronizarExtratoAsaas = createServerFn({ method: "POST" })
 
 async function executarSync(
   data: { de: string; ate?: string; financial_account_id: string },
-  context: { userId: string; supabase: Awaited<ReturnType<typeof import("@/integrations/supabase/auth-middleware")["requireSupabaseAuth"]["options"]["server"]>> extends never ? never : any },
+  context: { userId: string; supabase: SupabaseClient<Database> },
 ): Promise<{ total: number; novas: number }> {
     const { contasResolvidas } = await import("./servidor.server");
     const { transporteDaResolucao } = await import("./configuracao.server");

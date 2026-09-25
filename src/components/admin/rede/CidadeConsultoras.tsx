@@ -69,7 +69,12 @@ export function CidadeConsultoras({
     queryFn: async () => {
       const { data, error } = await supabase.rpc("network_geo_municipio_consultoras" as never, { _ibge: ibge } as never);
       if (error) throw error;
-      return (data ?? []) as unknown as Consultora[];
+      return ((data ?? []) as unknown as Consultora[]).map((c) => {
+        const lat = c.lat == null ? null : Number(c.lat);
+        const lng = c.lng == null ? null : Number(c.lng);
+        const ok = lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng);
+        return { ...c, lat: ok ? lat : null, lng: ok ? lng : null };
+      });
     },
   });
 

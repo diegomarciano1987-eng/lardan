@@ -27,6 +27,7 @@ export const Route = createFileRoute("/_authenticated/admin/maletas")({
 });
 
 const TOM = { neutro: "neutral", aviso: "warning", ok: "success", erro: "danger" } as const;
+const TAMANHO = 100;
 
 const SITUACOES = [
   { value: "todas", label: "Todas as situações" },
@@ -213,27 +214,37 @@ function MaletasPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [situacao, setSituacao] = React.useState("todas");
+  const [pagina, setPagina] = React.useState(0);
   const [qr, setQr] = React.useState("");
+  React.useEffect(() => setPagina(0), [situacao]);
 
   const lista = useQuery({
-    queryKey: ["maletas", "board", situacao],
-    queryFn: () => listarMaletas(situacao),
+    queryKey: ["maletas", "board", situacao, pagina],
+    queryFn: () => listarMaletas(situacao, pagina, TAMANHO),
   });
 
   async function abrirPorQr() {
-    const token = qr.trim().split("/").pop() ?? "";
+    const bruto = qr.trim();
+    const token = (/[?&]qr=([^&#\s]+)/.exec(bruto)?.[1] ?? bruto.split("/").pop() ?? "").trim();
     if (!token) return;
+    // busca direta no servidor, com as permissões de quem está logado
     const { data, error } = await supabase.from("kits").select("id").eq("qr_token", token).maybeSingle();
     if (error || !data) {
       toast.error("Maleta não encontrada para este código.");
       return;
     }
-    const alvo = (lista.data ?? []).find((m) => m.kit_id === data.id);
-    if (!alvo) {
+    const { data: ciclo } = await supabase
+      .from("kit_cycles")
+      .select("id")
+      .eq("kit_id", data.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!ciclo) {
       toast.error("Nenhum ciclo desta maleta está visível para você.");
       return;
     }
-    navigate({ to: "/admin/maletas/$id", params: { id: alvo.cycle_id } });
+    navigate({ to: "/admin/maletas/$id", params: { id: ciclo.id } });
   }
 
   return (
@@ -297,6 +308,15 @@ function MaletasPage() {
           </div>
         )}
         {lista.data?.map((m) => <Linha key={m.cycle_id} m={m} />)}
+        {(pagina > 0 || (lista.data?.length ?? 0) === TAMANHO) && (
+          <div className="flex items-center justify-between px-6 pb-4 pt-2 text-sm">
+            <button type="button" className="rounded-lg border border-ledger-line px-3 py-1.5 disabled:opacity-40"
+              disabled={pagina === 0} onClick={() => setPagina((p) => Math.max(0, p - 1))}>Anteriores</button>
+            <span className="text-ledger-muted">Página {pagina + 1}</span>
+            <button type="button" className="rounded-lg border border-ledger-line px-3 py-1.5 disabled:opacity-40"
+              disabled={(lista.data?.length ?? 0) < TAMANHO} onClick={() => setPagina((p) => p + 1)}>Próximas</button>
+          </div>
+        )}
       </Panel>
 
       <p className="flex items-center gap-2 text-xs text-ledger-muted">

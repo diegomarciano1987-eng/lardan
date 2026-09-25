@@ -211,8 +211,11 @@ export async function registrarBaixa(input: {
   referencia?: string;
   idempotency_key: string;
   alocacoes: { installment_id: string; valor_cents: number }[];
+  tarifa_cents?: number;
+  juros_cents?: number;
+  desconto_cents?: number;
 }): Promise<{ id: string; repetido: boolean; nao_alocado_cents: number }> {
-  const { data, error } = await supabase.rpc("fin_settlement_create", {
+  const { data, error } = await supabase.rpc("fin_settlement_create_ajustes" as never, {
     _payload: input as unknown as never,
   });
   if (error) throw error;

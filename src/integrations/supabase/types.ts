@@ -2467,14 +2467,20 @@ export type Database = {
       }
       financial_accounts: {
         Row: {
+          agencia_cidade: string | null
+          agencia_endereco: string | null
           agencia_masked: string | null
           apelido: string | null
           banco: string | null
+          banco_codigo: string | null
           business_entity_id: string | null
+          conta_digito: string | null
           conta_masked: string | null
           created_at: string
           created_by: string | null
           data_corte: string | null
+          gerente: string | null
+          gerente_contato: string | null
           id: string
           is_active: boolean
           is_homologacao: boolean
@@ -2482,18 +2488,27 @@ export type Database = {
           moeda: string
           nome: string
           notes: string | null
+          pix_chave: string | null
           saldo_inicial_cents: number
+          titular: string | null
+          titular_documento: string | null
           updated_at: string
         }
         Insert: {
+          agencia_cidade?: string | null
+          agencia_endereco?: string | null
           agencia_masked?: string | null
           apelido?: string | null
           banco?: string | null
+          banco_codigo?: string | null
           business_entity_id?: string | null
+          conta_digito?: string | null
           conta_masked?: string | null
           created_at?: string
           created_by?: string | null
           data_corte?: string | null
+          gerente?: string | null
+          gerente_contato?: string | null
           id?: string
           is_active?: boolean
           is_homologacao?: boolean
@@ -2501,18 +2516,27 @@ export type Database = {
           moeda?: string
           nome: string
           notes?: string | null
+          pix_chave?: string | null
           saldo_inicial_cents?: number
+          titular?: string | null
+          titular_documento?: string | null
           updated_at?: string
         }
         Update: {
+          agencia_cidade?: string | null
+          agencia_endereco?: string | null
           agencia_masked?: string | null
           apelido?: string | null
           banco?: string | null
+          banco_codigo?: string | null
           business_entity_id?: string | null
+          conta_digito?: string | null
           conta_masked?: string | null
           created_at?: string
           created_by?: string | null
           data_corte?: string | null
+          gerente?: string | null
+          gerente_contato?: string | null
           id?: string
           is_active?: boolean
           is_homologacao?: boolean
@@ -2520,7 +2544,10 @@ export type Database = {
           moeda?: string
           nome?: string
           notes?: string | null
+          pix_chave?: string | null
           saldo_inicial_cents?: number
+          titular?: string | null
+          titular_documento?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -8676,8 +8703,24 @@ export type Database = {
         Returns: number
       }
       expire_stock_reservations: { Args: never; Returns: number }
+      fin_account_auditoria: { Args: { _account: string }; Returns: Json }
+      fin_account_cockpit: {
+        Args: {
+          _account: string
+          _ate: string
+          _de: string
+          _limit?: number
+          _offset?: number
+          _q?: string
+        }
+        Returns: Json
+      }
       fin_account_create: { Args: { _payload: Json }; Returns: string }
       fin_account_detail: { Args: { _account: string }; Returns: Json }
+      fin_account_update: {
+        Args: { _account: string; _payload: Json }
+        Returns: undefined
+      }
       fin_accounts_overview: { Args: never; Returns: Json }
       fin_acknowledge: {
         Args: {

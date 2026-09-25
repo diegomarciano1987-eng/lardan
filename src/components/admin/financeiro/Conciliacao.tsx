@@ -509,15 +509,19 @@ function PainelLote({
 }
 
 /** Conciliação bancária: envio do extrato, correspondências e baixa pelo razão. */
-export function Conciliacao() {
+export function Conciliacao({
+  contaFixa,
+  acoesTopo,
+  titulo = "Extrato bancário",
+}: { contaFixa?: string; acoesTopo?: React.ReactNode; titulo?: string } = {}) {
   const qc = useQueryClient();
   const caps = useCapabilities();
   const podeVer = caps.includes("finance.statement.view");
-  const podeImportar = caps.includes("finance.statement.import");
+  const podeImportar = caps.includes("finance.statement.import") && !contaFixa;
   const podeDesfazer = caps.includes("finance.reconcile.undo");
   const processar = useServerFn(processarExtrato);
 
-  const [conta, setConta] = React.useState("");
+  const [conta, setConta] = React.useState(contaFixa ?? "");
   const [status, setStatus] = React.useState("todos");
   const [de, setDe] = React.useState("");
   const [ate, setAte] = React.useState("");
@@ -535,8 +539,12 @@ export function Conciliacao() {
   });
 
   React.useEffect(() => {
+    if (contaFixa) {
+      if (conta !== contaFixa) setConta(contaFixa);
+      return;
+    }
     if (!conta && contas.data && contas.data.length > 0) setConta(contas.data[0]!.id);
-  }, [contas.data, conta]);
+  }, [contas.data, conta, contaFixa]);
   React.useEffect(() => setPagina(0), [conta, status, de, ate, buscaLenta]);
 
   const filtros = React.useMemo(

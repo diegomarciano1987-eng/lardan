@@ -47,6 +47,12 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     capacidade: "finance.bank.view",
   },
   {
+    to: "/admin/financeiro/asaas-extrato",
+    label: "Extrato Asaas",
+    descricao: "Entradas e saídas da conta Asaas",
+    capacidade: "finance.statement.view",
+  },
+  {
     to: "/admin/financeiro/asaas",
     label: "Recebíveis Asaas",
     descricao: "Importação, cobrança e conciliação (simulação)",

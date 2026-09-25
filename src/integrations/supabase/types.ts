@@ -16,62 +16,155 @@ export type Database = {
     Tables: {
       asaas_accounts: {
         Row: {
+          config_version: number
           created_at: string
           cutover_date: string | null
           environment: string
+          external_account_id: string | null
           id: string
           is_active: boolean
           label: string
+          last_error: string | null
+          last_error_at: string | null
+          last_success_at: string | null
+          last_sync_at: string | null
+          last_sync_cursor: string | null
           note: string | null
           opening_balance_handled: boolean
+          opening_balance_strategy: string
+          owner_entity_id: string | null
+          secret_ref: string | null
+          state: string
           updated_at: string
+          webhook_secret_ref: string | null
         }
         Insert: {
+          config_version?: number
           created_at?: string
           cutover_date?: string | null
           environment: string
+          external_account_id?: string | null
           id?: string
           is_active?: boolean
           label: string
+          last_error?: string | null
+          last_error_at?: string | null
+          last_success_at?: string | null
+          last_sync_at?: string | null
+          last_sync_cursor?: string | null
           note?: string | null
           opening_balance_handled?: boolean
+          opening_balance_strategy?: string
+          owner_entity_id?: string | null
+          secret_ref?: string | null
+          state?: string
           updated_at?: string
+          webhook_secret_ref?: string | null
         }
         Update: {
+          config_version?: number
           created_at?: string
           cutover_date?: string | null
           environment?: string
+          external_account_id?: string | null
           id?: string
           is_active?: boolean
           label?: string
+          last_error?: string | null
+          last_error_at?: string | null
+          last_success_at?: string | null
+          last_sync_at?: string | null
+          last_sync_cursor?: string | null
           note?: string | null
           opening_balance_handled?: boolean
+          opening_balance_strategy?: string
+          owner_entity_id?: string | null
+          secret_ref?: string | null
+          state?: string
           updated_at?: string
+          webhook_secret_ref?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "asaas_accounts_owner_entity_id_fkey"
+            columns: ["owner_entity_id"]
+            isOneToOne: false
+            referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asaas_charge_changes: {
+        Row: {
+          actor_user_id: string | null
+          campo: string
+          charge_id: string
+          created_at: string
+          de: string | null
+          id: string
+          origem: string
+          para: string | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          campo: string
+          charge_id: string
+          created_at?: string
+          de?: string | null
+          id?: string
+          origem?: string
+          para?: string | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          campo?: string
+          charge_id?: string
+          created_at?: string
+          de?: string | null
+          id?: string
+          origem?: string
+          para?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_charge_changes_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_charges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       asaas_charges: {
         Row: {
           account_id: string
           billing_type: string | null
+          confirmed_date: string | null
           credit_date: string | null
           customer_external_id: string | null
+          discount_cents: number | null
           due_date: string | null
           external_id: string
           external_status: string | null
           fee_cents: number | null
+          fine_cents: number | null
           id: string
           imported_at: string
           installment_count: number | null
           installment_external_id: string | null
           installment_id: string | null
           installment_number: number | null
+          interest_cents: number | null
+          linked_at: string | null
+          linked_by: string | null
           net_value_cents: number | null
+          party_id: string | null
           payment_date: string | null
           raw: Json
           received_cents: number | null
           reconcile_note: string | null
           reconcile_status: string
+          refunded_cents: number | null
           title_id: string | null
           updated_at: string
           value_cents: number
@@ -79,24 +172,32 @@ export type Database = {
         Insert: {
           account_id: string
           billing_type?: string | null
+          confirmed_date?: string | null
           credit_date?: string | null
           customer_external_id?: string | null
+          discount_cents?: number | null
           due_date?: string | null
           external_id: string
           external_status?: string | null
           fee_cents?: number | null
+          fine_cents?: number | null
           id?: string
           imported_at?: string
           installment_count?: number | null
           installment_external_id?: string | null
           installment_id?: string | null
           installment_number?: number | null
+          interest_cents?: number | null
+          linked_at?: string | null
+          linked_by?: string | null
           net_value_cents?: number | null
+          party_id?: string | null
           payment_date?: string | null
           raw?: Json
           received_cents?: number | null
           reconcile_note?: string | null
           reconcile_status?: string
+          refunded_cents?: number | null
           title_id?: string | null
           updated_at?: string
           value_cents?: number
@@ -104,24 +205,32 @@ export type Database = {
         Update: {
           account_id?: string
           billing_type?: string | null
+          confirmed_date?: string | null
           credit_date?: string | null
           customer_external_id?: string | null
+          discount_cents?: number | null
           due_date?: string | null
           external_id?: string
           external_status?: string | null
           fee_cents?: number | null
+          fine_cents?: number | null
           id?: string
           imported_at?: string
           installment_count?: number | null
           installment_external_id?: string | null
           installment_id?: string | null
           installment_number?: number | null
+          interest_cents?: number | null
+          linked_at?: string | null
+          linked_by?: string | null
           net_value_cents?: number | null
+          party_id?: string | null
           payment_date?: string | null
           raw?: Json
           received_cents?: number | null
           reconcile_note?: string | null
           reconcile_status?: string
+          refunded_cents?: number | null
           title_id?: string | null
           updated_at?: string
           value_cents?: number
@@ -140,6 +249,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "financial_installments"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_charges_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_charges_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
           {
             foreignKeyName: "asaas_charges_title_id_fkey"
@@ -217,47 +340,86 @@ export type Database = {
           },
         ]
       }
+      asaas_event_types: {
+        Row: {
+          cria_baixa: boolean
+          efeito_preparatorio: string
+          event: string
+          familia: string
+          nota: string | null
+        }
+        Insert: {
+          cria_baixa?: boolean
+          efeito_preparatorio: string
+          event: string
+          familia: string
+          nota?: string | null
+        }
+        Update: {
+          cria_baixa?: boolean
+          efeito_preparatorio?: string
+          event?: string
+          familia?: string
+          nota?: string | null
+        }
+        Relationships: []
+      }
       asaas_events: {
         Row: {
-          account_id: string | null
+          account_id: string
           attempts: number
           charge_external_id: string | null
+          classification: string
           event: string
           event_at: string | null
           external_id: string
           id: string
           last_error: string | null
+          locked_at: string | null
+          locked_by: string | null
+          next_attempt_at: string | null
           payload: Json
           processed_at: string | null
           received_at: string
+          sequence_hint: string | null
           status: string
         }
         Insert: {
-          account_id?: string | null
+          account_id: string
           attempts?: number
           charge_external_id?: string | null
+          classification?: string
           event: string
           event_at?: string | null
           external_id: string
           id?: string
           last_error?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+          next_attempt_at?: string | null
           payload?: Json
           processed_at?: string | null
           received_at?: string
+          sequence_hint?: string | null
           status?: string
         }
         Update: {
-          account_id?: string | null
+          account_id?: string
           attempts?: number
           charge_external_id?: string | null
+          classification?: string
           event?: string
           event_at?: string | null
           external_id?: string
           id?: string
           last_error?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+          next_attempt_at?: string | null
           payload?: Json
           processed_at?: string | null
           received_at?: string
+          sequence_hint?: string | null
           status?: string
         }
         Relationships: [
@@ -270,57 +432,125 @@ export type Database = {
           },
         ]
       }
+      asaas_import_findings: {
+        Row: {
+          charge_external_id: string | null
+          created_at: string
+          customer_external_id: string | null
+          detalhe: Json
+          id: string
+          resolvido: boolean
+          run_id: string
+          tipo: string
+        }
+        Insert: {
+          charge_external_id?: string | null
+          created_at?: string
+          customer_external_id?: string | null
+          detalhe?: Json
+          id?: string
+          resolvido?: boolean
+          run_id: string
+          tipo: string
+        }
+        Update: {
+          charge_external_id?: string | null
+          created_at?: string
+          customer_external_id?: string | null
+          detalhe?: Json
+          id?: string
+          resolvido?: boolean
+          run_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_import_findings_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_import_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_import_runs: {
         Row: {
           account_id: string
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           created_by: string | null
           cursor: string | null
           duplicated: number
           failed: number
           finished_at: string | null
+          has_more: boolean
           id: string
           imported: number
+          kind: string
           mode: string
+          offset_atual: number
           page: number
+          page_size: number
           report: Json
+          simulado: boolean
           started_at: string | null
           status: string
           updated_at: string
+          window_end: string | null
+          window_start: string | null
         }
         Insert: {
           account_id: string
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           created_by?: string | null
           cursor?: string | null
           duplicated?: number
           failed?: number
           finished_at?: string | null
+          has_more?: boolean
           id?: string
           imported?: number
+          kind?: string
           mode?: string
+          offset_atual?: number
           page?: number
+          page_size?: number
           report?: Json
+          simulado?: boolean
           started_at?: string | null
           status?: string
           updated_at?: string
+          window_end?: string | null
+          window_start?: string | null
         }
         Update: {
           account_id?: string
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           created_by?: string | null
           cursor?: string | null
           duplicated?: number
           failed?: number
           finished_at?: string | null
+          has_more?: boolean
           id?: string
           imported?: number
+          kind?: string
           mode?: string
+          offset_atual?: number
           page?: number
+          page_size?: number
           report?: Json
+          simulado?: boolean
           started_at?: string | null
           status?: string
           updated_at?: string
+          window_end?: string | null
+          window_start?: string | null
         }
         Relationships: [
           {
@@ -7490,6 +7720,18 @@ export type Database = {
         Args: { _delta: number; _location: string; _variant: string }
         Returns: number
       }
+      asaas_charge_vincular: {
+        Args: {
+          _alterar?: boolean
+          _charge: string
+          _installment?: string
+          _motivo?: string
+          _title: string
+        }
+        Returns: Json
+      }
+      asaas_customer_sensivel: { Args: { _customer: string }; Returns: Json }
+      asaas_origin_key: { Args: { _account: string }; Returns: string }
       barcode_lookup: { Args: { _code: string }; Returns: Json }
       barcode_resolver: {
         Args: { _code: string; _criar?: boolean }

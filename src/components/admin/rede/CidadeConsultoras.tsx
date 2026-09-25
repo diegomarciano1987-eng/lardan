@@ -117,6 +117,7 @@ export function CidadeConsultoras({
     for (const c of todas) {
       if (c.lat == null || c.lng == null) continue;
       const [x, y] = projecao.ponto(c.lng, c.lat);
+      if (x < 0 || y < 0 || x > projecao.largura || y > projecao.altura) continue;
       xs.push(x);
       ys.push(y);
     }
@@ -124,11 +125,10 @@ export function CidadeConsultoras({
     xs.sort((m, n) => m - n);
     ys.sort((m, n) => m - n);
     const q = (arr: number[], p: number) => arr[Math.min(arr.length - 1, Math.floor(arr.length * p))]!;
-    const x0 = q(xs, 0.03), x1 = q(xs, 0.97), y0 = q(ys, 0.03), y1 = q(ys, 0.97);
-    const lado = Math.max(x1 - x0, y1 - y0, 40) * 1.25;
+    const x0 = q(xs, 0.02), x1 = q(xs, 0.98), y0 = q(ys, 0.02), y1 = q(ys, 0.98);
+    const lado = Math.max(x1 - x0, y1 - y0, 40) * 1.2;
     const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-    const w = Math.min(projecao.largura, lado * (projecao.largura / projecao.altura));
-    const h = Math.min(projecao.altura, lado);
+    const w = lado, h = lado;
     return { x: cx - w / 2, y: cy - h / 2, w, h };
   }, [projecao, todas]);
 
@@ -172,7 +172,7 @@ export function CidadeConsultoras({
           {!projecao || pessoas.isLoading ? (
             <p className="py-24 text-center text-sm text-ledger-muted">Desenhando a cidade…</p>
           ) : (
-            <svg viewBox={vb} className="w-full transition-all" role="group" aria-label={`Consultoras em ${nome}`}>
+            <svg viewBox={vb} className="aspect-square max-h-[680px] w-full" role="group" aria-label={`Consultoras em ${nome}`}>
               {malha.data!.features.map((f) => (
                 <path
                   key={f.properties.codarea}

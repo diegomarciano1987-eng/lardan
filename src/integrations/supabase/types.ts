@@ -145,6 +145,27 @@ export type Database = {
           },
         ]
       }
+      access_security_settings: {
+        Row: {
+          id: boolean
+          mfa_obrigatorio: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: boolean
+          mfa_obrigatorio?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: boolean
+          mfa_obrigatorio?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       asaas_accounts: {
         Row: {
           ambiente_provedor: string | null
@@ -8345,6 +8366,16 @@ export type Database = {
         Returns: Json
       }
       access_invite_revoke: { Args: { _id: string }; Returns: undefined }
+      access_mfa_exigir: { Args: { _ligar: boolean }; Returns: Json }
+      access_mfa_ok: { Args: never; Returns: boolean }
+      access_mfa_situacao: {
+        Args: never
+        Returns: {
+          email: string
+          tem_autenticador: boolean
+          user_id: string
+        }[]
+      }
       access_pode_conceder: {
         Args: { _role: Database["public"]["Enums"]["app_role"]; _uid: string }
         Returns: boolean

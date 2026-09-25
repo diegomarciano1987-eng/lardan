@@ -24,6 +24,7 @@ import { Route as ComoVenderSemijoiasPeloWhatsappRouteImport } from './routes/co
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as PulseirasRouteImport } from './routes/pulseiras'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as RendaExtraComVendasRouteImport } from './routes/renda-extra-com-vendas'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
@@ -32,6 +33,7 @@ import { Route as SitemapPagesDotxmlRouteImport } from './routes/sitemap-pages[.
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedConsultoraRouteImport } from './routes/_authenticated/consultora'
+import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as DCodigoRouteImport } from './routes/d.$codigo'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
@@ -165,6 +167,11 @@ const PulseirasRoute = PulseirasRouteImport.update({
   path: '/pulseiras',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RendaExtraComVendasRoute = RendaExtraComVendasRouteImport.update({
   id: '/renda-extra-com-vendas',
   path: '/renda-extra-com-vendas',
@@ -205,6 +212,11 @@ const AuthenticatedConsultoraRoute = AuthenticatedConsultoraRouteImport.update({
   id: '/consultora',
   path: '/consultora',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ConviteTokenRoute = ConviteTokenRouteImport.update({
+  id: '/convite/$token',
+  path: '/convite/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DCodigoRoute = DCodigoRouteImport.update({
   id: '/d/$codigo',
@@ -546,6 +558,7 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/pulseiras': typeof PulseirasRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/seja-lardan': typeof SejaLardanRoute
@@ -554,6 +567,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/consultora': typeof AuthenticatedConsultoraRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
@@ -626,6 +640,7 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/pulseiras': typeof PulseirasRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/seja-lardan': typeof SejaLardanRoute
@@ -633,6 +648,7 @@ export interface FileRoutesByTo {
   '/sitemap-pages.xml': typeof SitemapPagesDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/consultora': typeof AuthenticatedConsultoraRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
@@ -706,6 +722,7 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/pulseiras': typeof PulseirasRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/seja-lardan': typeof SejaLardanRoute
@@ -714,6 +731,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/consultora': typeof AuthenticatedConsultoraRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
@@ -788,6 +806,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/llms.txt'
     | '/pulseiras'
+    | '/redefinir-senha'
     | '/renda-extra-com-vendas'
     | '/robots.txt'
     | '/seja-lardan'
@@ -796,6 +815,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin'
     | '/consultora'
+    | '/convite/$token'
     | '/d/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
@@ -868,6 +888,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/llms.txt'
     | '/pulseiras'
+    | '/redefinir-senha'
     | '/renda-extra-com-vendas'
     | '/robots.txt'
     | '/seja-lardan'
@@ -875,6 +896,7 @@ export interface FileRouteTypes {
     | '/sitemap-pages.xml'
     | '/sitemap.xml'
     | '/consultora'
+    | '/convite/$token'
     | '/d/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
@@ -947,6 +969,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/llms.txt'
     | '/pulseiras'
+    | '/redefinir-senha'
     | '/renda-extra-com-vendas'
     | '/robots.txt'
     | '/seja-lardan'
@@ -955,6 +978,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/consultora'
+    | '/convite/$token'
     | '/d/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
@@ -1029,12 +1053,14 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   PulseirasRoute: typeof PulseirasRoute
+  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   RendaExtraComVendasRoute: typeof RendaExtraComVendasRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SejaLardanRoute: typeof SejaLardanRoute
   SemijoiasConsignadasParaRevendaRoute: typeof SemijoiasConsignadasParaRevendaRoute
   SitemapPagesDotxmlRoute: typeof SitemapPagesDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ConviteTokenRoute: typeof ConviteTokenRoute
   DCodigoRoute: typeof DCodigoRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
@@ -1153,6 +1179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PulseirasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/renda-extra-com-vendas': {
       id: '/renda-extra-com-vendas'
       path: '/renda-extra-com-vendas'
@@ -1208,6 +1241,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/consultora'
       preLoaderRoute: typeof AuthenticatedConsultoraRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/convite/$token': {
+      id: '/convite/$token'
+      path: '/convite/$token'
+      fullPath: '/convite/$token'
+      preLoaderRoute: typeof ConviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/d/$codigo': {
       id: '/d/$codigo'
@@ -1783,12 +1823,14 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   PulseirasRoute: PulseirasRoute,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
   RendaExtraComVendasRoute: RendaExtraComVendasRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SejaLardanRoute: SejaLardanRoute,
   SemijoiasConsignadasParaRevendaRoute: SemijoiasConsignadasParaRevendaRoute,
   SitemapPagesDotxmlRoute: SitemapPagesDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ConviteTokenRoute: ConviteTokenRoute,
   DCodigoRoute: DCodigoRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,

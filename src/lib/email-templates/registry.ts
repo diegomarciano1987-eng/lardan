@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import { template as novaCandidatura } from './nova-candidatura'
+import { template as conviteAcesso } from './convite-acesso'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -20,4 +21,5 @@ export interface TemplateEntry {
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'nova-candidatura': novaCandidatura,
+  'convite-acesso': conviteAcesso,
 }

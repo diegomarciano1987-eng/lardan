@@ -106,6 +106,10 @@ function AcessoPage() {
             />
           </div>
 
+          <a href="/redefinir-senha" className="-mt-2 block text-right text-xs text-muted-foreground underline">
+            Esqueci minha senha
+          </a>
+
           {erro && (
             <p role="alert" className="text-sm text-destructive">
               {erro}

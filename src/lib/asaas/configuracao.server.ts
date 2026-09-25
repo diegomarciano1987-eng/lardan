@@ -20,6 +20,7 @@ export type SituacaoPublica =
   | "simulada"
   | "preparada"
   | "sandbox_configurado"
+  | "producao_configurado"
   | "saida_desligada"
   | "credencial_ausente"
   | "conta_suspensa"
@@ -29,6 +30,7 @@ export const ROTULO_SITUACAO: Record<SituacaoPublica, string> = {
   simulada: "Conta simulada",
   preparada: "Preparada",
   sandbox_configurado: "Sandbox configurado",
+  producao_configurado: "Produção configurada",
   saida_desligada: "Saída externa desligada",
   credencial_ausente: "Credencial ausente ou incompatível",
   conta_suspensa: "Conta suspensa",
@@ -52,17 +54,40 @@ export type Resolucao =
   | {
       executavel: true;
       accountId: string;
-      situacao: "simulada" | "sandbox_configurado";
+      situacao: "simulada" | "sandbox_configurado" | "producao_configurado";
       motivo: string;
-      transporte: { tipo: "simulador" } | { tipo: "http"; ambiente: "sandbox"; chave: string };
+      transporte: { tipo: "simulador" } | { tipo: "http"; ambiente: "sandbox" | "producao"; chave: string };
     }
   | { executavel: false; accountId: string | null; situacao: SituacaoPublica; motivo: string };
 
 const NOME_SEGREDO_SANDBOX = /^ASAAS_SANDBOX_[A-Z0-9_]{1,48}$/;
 const PREFIXO_SANDBOX = "$aact_hmlg_";
+const NOME_SEGREDO_PRODUCAO = /^ASAAS_PRODUCAO_[A-Z0-9_]{1,48}$/;
+const PREFIXO_PRODUCAO = "$aact_prod_";
 
 const conhecida = (s: string): SituacaoPublica =>
   (Object.keys(ROTULO_SITUACAO) as SituacaoPublica[]).includes(s as SituacaoPublica) ? (s as SituacaoPublica) : "indisponivel";
+
+/** Exigências comuns aos dois ambientes conectados: chave válida, conta autorizada, egress ligado. */
+function exigirConectado(
+  conta: string | null,
+  ref: string,
+  chave: string | undefined,
+  env: Env,
+  nomeValido: (r: string) => boolean,
+  prefixo: string,
+  situacao: "sandbox_configurado" | "producao_configurado",
+  motivoOk: string,
+  ambiente: "sandbox" | "producao",
+): Resolucao {
+  const nao = (s: SituacaoPublica, m: string): Resolucao => ({ executavel: false, accountId: conta, situacao: s, motivo: m });
+  if (!nomeValido(ref)) return nao("credencial_ausente", "Credencial do servidor ausente ou incompatível com o ambiente.");
+  if (!chave || !chave.startsWith(prefixo)) return nao("credencial_ausente", "Credencial do servidor ausente ou incompatível com o ambiente.");
+  const autorizada = env["ASAAS_CONNECTED_ACCOUNT_ID"];
+  if (!autorizada || autorizada !== conta) return nao("indisponivel", "Esta conta não é a conta autorizada neste servidor.");
+  if (env["ASAAS_EGRESS_ENABLED"] !== "1") return nao("saida_desligada", `${ambiente === "producao" ? "Produção" : "Sandbox"} preparado, mas a saída externa está desligada neste servidor.`);
+  return { executavel: true, accountId: conta!, situacao, motivo: motivoOk, transporte: { tipo: "http", ambiente, chave } };
+}
 
 export function resolverConta(b: SituacaoBanco, env: Env): Resolucao {
   const conta = b.account_id ?? null;
@@ -75,16 +100,14 @@ export function resolverConta(b: SituacaoBanco, env: Env): Resolucao {
     return { executavel: true, accountId: conta, situacao: "simulada", motivo: "Simulação isolada — não é cobrança pagável.", transporte: { tipo: "simulador" } };
   }
   if (b.modo !== "conectado") return nao("indisponivel", "Configuração da conta incoerente.");
-  // produção permanece estruturalmente bloqueada
-  if (b.ambiente !== "sandbox") return nao("indisponivel", "Produção bloqueada nesta preparação.");
-  const ref = b.secret_ref ?? "";
-  if (!NOME_SEGREDO_SANDBOX.test(ref)) return nao("credencial_ausente", "Credencial do servidor ausente ou incompatível com o ambiente.");
-  const chave = env[ref];
-  if (!chave || !chave.startsWith(PREFIXO_SANDBOX)) return nao("credencial_ausente", "Credencial do servidor ausente ou incompatível com o ambiente.");
-  const autorizada = env["ASAAS_CONNECTED_ACCOUNT_ID"];
-  if (!autorizada || autorizada !== conta) return nao("indisponivel", "Esta conta não é a conta autorizada neste servidor.");
-  if (env["ASAAS_EGRESS_ENABLED"] !== "1") return nao("saida_desligada", "Sandbox preparado, mas a saída externa está desligada neste servidor.");
-  return { executavel: true, accountId: conta, situacao: "sandbox_configurado", motivo: "Sandbox configurado.", transporte: { tipo: "http", ambiente: "sandbox", chave } };
+  if (b.ambiente === "producao") {
+    if (b.state !== "producao_conectada") return nao("indisponivel", "Configuração da conta incoerente.");
+    return exigirConectado(conta, b.secret_ref ?? "", b.secret_ref ? env[b.secret_ref] : undefined, env,
+      (r) => NOME_SEGREDO_PRODUCAO.test(r), PREFIXO_PRODUCAO, "producao_configurado", "Produção configurada.", "producao");
+  }
+  if (b.ambiente !== "sandbox") return nao("indisponivel", "Configuração da conta incoerente.");
+  return exigirConectado(conta, b.secret_ref ?? "", b.secret_ref ? env[b.secret_ref] : undefined, env,
+    (r) => NOME_SEGREDO_SANDBOX.test(r), PREFIXO_SANDBOX, "sandbox_configurado", "Sandbox configurado.", "sandbox");
 }
 
 export interface ContaPublica {
@@ -130,7 +153,7 @@ export async function transporteDaResolucao(r: Resolucao, deps: { fetch?: Fetch 
   }
   const { TransporteHttpAsaas } = await import("./transporte-http.server");
   const fetchReal: Fetch = deps.fetch ?? ((url, init) => globalThis.fetch(url, init));
-  return new TransporteHttpAsaas({ ambiente: "sandbox", chave: r.transporte.chave, fetch: fetchReal });
+  return new TransporteHttpAsaas({ ambiente: r.transporte.ambiente, chave: r.transporte.chave, fetch: fetchReal });
 }
 
 export const envDoServidor = (): Env => (globalThis as { process?: { env?: Env } }).process?.env ?? {};

@@ -41,7 +41,7 @@ export interface LinhaReceber {
 export interface ContaAsaas {
   id: string;
   nome: string;
-  situacao: "simulada" | "preparada" | "sandbox_configurado" | "saida_desligada" | "credencial_ausente" | "conta_suspensa" | "indisponivel";
+  situacao: "simulada" | "preparada" | "sandbox_configurado" | "producao_configurado" | "saida_desligada" | "credencial_ausente" | "conta_suspensa" | "indisponivel";
   rotulo: string;
   motivo: string;
   operacoes: { importar: boolean; cobrar: boolean; link: boolean; recuperar: boolean };

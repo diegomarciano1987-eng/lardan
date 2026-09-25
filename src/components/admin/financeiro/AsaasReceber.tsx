@@ -176,7 +176,7 @@ function AvisosPermanentes() {
 }
 
 const TOM_SITUACAO: Record<ContaAsaas["situacao"], "success" | "warning" | "danger" | "info" | "neutral"> = {
-  simulada: "info", sandbox_configurado: "success", preparada: "warning", saida_desligada: "warning",
+  simulada: "info", sandbox_configurado: "success", producao_configurado: "success", preparada: "warning", saida_desligada: "warning",
   credencial_ausente: "danger", conta_suspensa: "danger", indisponivel: "danger",
 };
 

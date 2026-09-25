@@ -9218,7 +9218,9 @@ export type Database = {
         Args: { _filtros?: Json; _ibge: string }
         Returns: {
           bairro: string
+          cep: string
           codigo: string
+          geo_fonte: string
           lat: number
           lng: number
           nome: string

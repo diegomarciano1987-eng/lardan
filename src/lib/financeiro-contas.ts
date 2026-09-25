@@ -1,9 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const rpc = supabase.rpc.bind(supabase) as unknown as (
-  f: string,
-  a: Record<string, unknown>,
-) => Promise<{ data: unknown; error: { message: string } | null }>;
+async function rpc(f: string, a: Record<string, unknown>) {
+  return (await supabase.rpc(f as never, a as never)) as unknown as {
+    data: unknown;
+    error: { message: string } | null;
+  };
+}
 
 export interface MovimentoConta {
   id: string;

@@ -21,13 +21,13 @@ export function MeuAutenticador() {
 
   async function iniciar() {
     const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: `Lardan ${Date.now()}` });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setQr({ id: data.id, svg: data.totp.qr_code, segredo: data.totp.secret });
   }
   async function confirmar() {
     if (!qr) return;
     const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: qr.id, code: codigo.trim() });
-    if (error) return toast.error("Código incorreto. Confira a hora do celular e tente de novo.");
+    if (error) { toast.error("Código incorreto. Confira a hora do celular e tente de novo."); return; }
     toast.success("Autenticador cadastrado.");
     setQr(null);
     setCodigo("");
@@ -83,9 +83,9 @@ export function PainelSegundoFator() {
   async function alternar() {
     const ligar = !dados.data?.ligado;
     const { data, error } = await supabase.rpc("access_mfa_exigir" as never, { _ligar: ligar } as never);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     const r = data as unknown as { ok: boolean; faltam?: string[] };
-    if (!r.ok) return toast.error(`Ainda sem autenticador: ${r.faltam?.join(", ")}`);
+    if (!r.ok) { toast.error(`Ainda sem autenticador: ${r.faltam?.join(", ")}`); return; }
     toast.success(ligar ? "Exigência ligada." : "Exigência desligada.");
     void qc.invalidateQueries({ queryKey: ["mfa-situacao"] });
   }

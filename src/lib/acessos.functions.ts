@@ -97,3 +97,29 @@ export const aceitarConvite = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return r as unknown as { ok: boolean; erro?: string; papeis?: string[]; repetido?: boolean };
   });
+
+/** Recuperação auditada: só Master (com segundo fator), com motivo. */
+export const removerAutenticador = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { user_id: string; motivo: string }) => {
+    if (!/^[0-9a-f-]{36}$/.test(i.user_id) || (i.motivo ?? "").trim().length < 5) throw new Error("Dados inválidos.");
+    return i;
+  })
+  .handler(async ({ data, context }) => {
+    const { data: ok } = await context.supabase.rpc("has_role" as never, { _user_id: context.userId, _role: "master" } as never);
+    if (!ok) throw new Error("Somente o Master.");
+    const aal = (context.claims as { aal?: string }).aal;
+    if (aal !== "aal2" && data.user_id !== context.userId) throw new Error("Entre com seu autenticador antes de recuperar o de outra pessoa.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: f, error } = await supabaseAdmin.auth.admin.mfa.listFactors({ userId: data.user_id });
+    if (error) throw new Error(error.message);
+    for (const fator of f.factors) {
+      const { error: e2 } = await supabaseAdmin.auth.admin.mfa.deleteFactor({ userId: data.user_id, id: fator.id });
+      if (e2) throw new Error(e2.message);
+    }
+    await supabaseAdmin.from("audit_logs").insert({
+      actor_id: context.userId, action: "access.mfa.recuperar", entity: "auth.mfa_factors", entity_id: data.user_id,
+      payload: { motivo: data.motivo, fatores: f.factors.length },
+    } as never);
+    return { removidos: f.factors.length };
+  });

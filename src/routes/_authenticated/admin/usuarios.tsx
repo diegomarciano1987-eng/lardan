@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ConvitesPanel } from "@/components/admin/acessos/Convites";
+import { PainelSegundoFator } from "@/components/admin/acessos/Autenticador";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   component: UsuariosPage,
@@ -116,26 +117,42 @@ function UsuariosPage() {
     onError: (e) => toast.error(e.message),
   });
 
+  const concedeveis = useQuery({
+    queryKey: ["papeis-concedeveis"],
+    enabled: !souMaster,
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      const r = await Promise.all(ALL_ROLES.map(async (role) => {
+        const { data } = await supabase.rpc("access_pode_conceder" as never, { _uid: u.user?.id, _role: role } as never);
+        return data ? role : null;
+      }));
+      return r.filter(Boolean) as AppRole[];
+    },
+  });
+
   if (!souMaster) {
     return (
-      <div className="max-w-xl">
-        <div className="flex items-center gap-4"><BackButton /><h1 className="text-3xl text-foreground">Usuários e papéis</h1></div>
-        <p className="mt-4 text-sm text-muted-foreground">
-          Este módulo é exclusivo do perfil Master.
-        </p>
+      <div className="max-w-5xl">
+        <div className="flex items-center gap-4"><BackButton /><h1 className="text-3xl text-foreground">Usuários e convites</h1></div>
+        {concedeveis.isLoading ? null : (concedeveis.data?.length ?? 0) === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">Você não tem autorização do Master para convidar.</p>
+        ) : (
+          <ConvitesPanel podeConceder={concedeveis.data ?? []} />
+        )}
       </div>
     );
   }
 
   return (
     <div className="max-w-5xl">
-      <div className="flex items-center gap-4"><BackButton /><h1 className="text-3xl text-foreground">Usuários e papéis</h1></div>
+      <div className="flex items-center gap-4"><BackButton /><h1 className="text-3xl text-foreground">Usuários e convites</h1></div>
       <p className="mt-2 text-sm text-muted-foreground">
         Papéis vivem em tabela separada e toda alteração passa por operação
         autorizada com auditoria. O último Master ativo não pode ser removido.
       </p>
 
       <ConvitesPanel podeConceder={ALL_ROLES} />
+      <PainelSegundoFator />
       <h2 className="mt-10 text-xl text-foreground">Usuários com acesso</h2>
       {usersQuery.isLoading ? (
         <p className="mt-8 text-sm text-muted-foreground">Carregando…</p>

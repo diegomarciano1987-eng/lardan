@@ -11,8 +11,8 @@ export const obterMalha = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z
       .object({
-        nivel: z.enum(["brasil", "estado"]),
-        codigoUf: z.string().regex(/^\d{2}$/).optional(),
+        nivel: z.enum(["brasil", "estado", "municipio"]),
+        codigoUf: z.string().regex(/^\d{2}(\d{5})?$/).optional(),
       })
       .parse(data),
   )

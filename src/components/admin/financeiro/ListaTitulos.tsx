@@ -54,7 +54,8 @@ export function ListaTitulos({
   const [aberto, setAberto] = React.useState<string | null>(null);
 
   const periodo = usePeriodoFinanceiro();
-  const [todoPeriodo, setTodoPeriodo] = React.useState(false);
+  // Chegando com uma busca (ex.: pela busca global), procura em todo o período.
+  const [todoPeriodo, setTodoPeriodo] = React.useState(Boolean(buscaInicial));
   const de = todoPeriodo ? undefined : periodo.de;
   const ate = todoPeriodo ? undefined : periodo.ate;
 

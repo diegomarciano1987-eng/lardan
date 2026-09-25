@@ -15,6 +15,7 @@ export interface SearchHit {
   title: string;
   context: string;
   to: string;
+  search?: Record<string, string>;
 }
 
 const LIMIT = 5;
@@ -112,6 +113,99 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
     }
   }
 
+  // Pessoas: todas (ativas e inativas), por nome, razão social, código ou CPF/CNPJ.
+  const digitos = term.replace(/\D/g, "");
+  const safe = term.replace(/[,()]/g, " ");
+  const likeSafe = `%${safe}%`;
+  const podeFinPagar = caps.includes("finance.payable.view") || caps.includes("finance.view");
+  const podeFinReceber = caps.includes("finance.receivable.view") || caps.includes("finance.view");
+
+  const pessoaFiltro = [
+    `display_name.ilike.${likeSafe}`,
+    `legal_name.ilike.${likeSafe}`,
+    `code.ilike.${likeSafe}`,
+    ...(digitos.length >= 3 ? [`doc_digits.ilike.%${digitos}%`] : []),
+  ].join(",");
+  const tituloFiltro = [
+    `descricao.ilike.${likeSafe}`,
+    `documento.ilike.${likeSafe}`,
+    `id_externo.ilike.${likeSafe}`,
+    ...(/^\d+$/.test(term) ? [`numero.eq.${term}`] : []),
+  ].join(",");
+
+  const [pessoas, pagar, receber, maletas, contas, fornecedores] = await Promise.all([
+    supabase
+      .from("parties")
+      .select("id,display_name,legal_name,code,status,doc_masked")
+      .or(pessoaFiltro)
+      .order("display_name")
+      .limit(8),
+    podeFinPagar
+      ? supabase
+          .from("financial_titles")
+          .select("id,descricao,valor_cents,status,numero")
+          .eq("direction", "payable")
+          .or(tituloFiltro)
+          .order("created_at", { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [] as never[] }),
+    podeFinReceber
+      ? supabase
+          .from("financial_titles")
+          .select("id,descricao,valor_cents,status,numero")
+          .eq("direction", "receivable")
+          .or(tituloFiltro)
+          .order("created_at", { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [] as never[] }),
+    supabase.from("kits").select("id,code,label").or(`code.ilike.${likeSafe},label.ilike.${likeSafe}`).limit(LIMIT),
+    supabase.from("financial_accounts").select("id,nome,kind").ilike("nome", likeSafe).limit(LIMIT),
+    supabase
+      .from("suppliers")
+      .select("id,name,trade_name")
+      .or(`name.ilike.${likeSafe},trade_name.ilike.${likeSafe}`)
+      .limit(LIMIT),
+  ]);
+
+  const reais = (c: number | null) =>
+    ((c ?? 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  for (const p of pessoas.data ?? []) {
+    hits.push({
+      id: `pes-${p.id}`,
+      group: "Pessoas e consultoras",
+      icon: ContactRound,
+      title: p.display_name ?? p.legal_name ?? "Pessoa",
+      context: [p.code, p.doc_masked, p.status].filter(Boolean).join(" · "),
+      to: `/admin/cadastros/pessoas/${p.id}`,
+    });
+  }
+  for (const [lista, grupo, rota] of [
+    [pagar.data ?? [], "Contas a pagar", "/admin/financeiro/pagar"],
+    [receber.data ?? [], "Contas a receber", "/admin/financeiro/receber"],
+  ] as const) {
+    for (const t of lista as { id: string; descricao: string | null; valor_cents: number | null; status: string; numero: number | null }[]) {
+      hits.push({
+        id: `tit-${t.id}`,
+        group: grupo,
+        icon: FileText,
+        title: t.descricao ?? "Título",
+        context: `${t.numero ? `Nº ${t.numero} · ` : ""}${reais(t.valor_cents)} · ${t.status}`,
+        to: rota,
+        search: { busca: t.descricao ?? term },
+      });
+    }
+  }
+  for (const k of maletas.data ?? []) {
+    hits.push({ id: `kit-${k.id}`, group: "Maletas", icon: Boxes, title: k.code, context: k.label ?? "", to: "/admin/maletas" });
+  }
+  for (const c of contas.data ?? []) {
+    hits.push({ id: `cta-${c.id}`, group: "Contas e caixas", icon: FileText, title: c.nome, context: String(c.kind), to: `/admin/financeiro/contas/${c.id}` });
+  }
+  for (const f of fornecedores.data ?? []) {
+    hits.push({ id: `for-${f.id}`, group: "Fornecedores", icon: ContactRound, title: f.name, context: f.trade_name ?? "", to: "/admin/cadastros" });
+  }
+
   return hits;
 }
 
@@ -171,7 +265,7 @@ export function CommandPalette({
   }, [debounced, caps, roles]);
 
   const hits = useMemo(
-    () => [...(query.data ?? []), ...destinos].slice(0, 24),
+    () => [...(query.data ?? []), ...destinos].slice(0, 60),
     [query.data, destinos],
   );
 
@@ -182,7 +276,7 @@ export function CommandPalette({
   const go = (hit: SearchHit | undefined) => {
     if (!hit) return;
     onClose();
-    void navigate({ to: hit.to });
+    void navigate({ to: hit.to, ...(hit.search ? { search: hit.search } : {}) } as never);
   };
 
   const groups = hits.reduce<Record<string, SearchHit[]>>((acc, h) => {

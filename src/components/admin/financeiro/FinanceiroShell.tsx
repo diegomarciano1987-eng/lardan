@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { EmptyState, PageHeader, Panel, formatBRLFromCents } from "@/components/admin/ui";
 import { useCapabilities, type Capability } from "@/lib/capabilities";
 import { fetchFinOverviewPeriodo } from "@/lib/financeiro";

@@ -14,7 +14,6 @@ export const Route = createFileRoute("/_authenticated/admin/financeiro/asaas-ext
   head: () => ({ meta: [{ title: "Extrato Asaas — Financeiro Lardan" }] }),
 });
 
-const INICIO = "2026-01-01";
 
 function Pagina() {
   return (
@@ -31,7 +30,8 @@ function ExtratoAsaas() {
   const conta = useQuery({ queryKey: ["asaas-extrato-conta"], queryFn: () => buscarConta() });
 
   const sync = useMutation({
-    mutationFn: () => sincronizar({ data: { de: INICIO, financial_account_id: conta.data!.id } }),
+    mutationFn: (p: { de: string; ate: string }) =>
+      sincronizar({ data: { de: p.de, ate: p.ate, financial_account_id: conta.data!.id } }),
     onSuccess: (r) => {
       toast.success(
         r.novas > 0
@@ -59,23 +59,24 @@ function ExtratoAsaas() {
     <Conciliacao
       contaFixa={conta.data.id}
       titulo={`Extrato Asaas — ${conta.data.nome}`}
-      acoesTopo={
+      mesAtualObrigatorio
+      acoesTopo={({ de, ate }) => (
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             className="admin-btn-primary"
             disabled={sync.isPending}
-            onClick={() => sync.mutate()}
+            onClick={() => sync.mutate({ de, ate })}
           >
             <RefreshCw aria-hidden className={`size-4 ${sync.isPending ? "animate-spin" : ""}`} />
             {sync.isPending ? "Buscando no Asaas…" : "Buscar movimentações do Asaas"}
           </button>
           <span className="text-xs font-medium text-ledger-muted">
-            Entradas e saídas desde 01/01/2026. Clique numa linha para vincular a uma conta a
-            receber ou a pagar — o vínculo já quita o título.
+            Busca só o período escolhido abaixo (mês atual por padrão). Clique numa linha para
+            vincular a uma conta a receber ou a pagar — o vínculo já quita o título.
           </span>
         </div>
-      }
+      )}
     />
   );
 }

@@ -42,8 +42,9 @@ export const contaExtratoAsaas = createServerFn({ method: "GET" })
  */
 export const sincronizarExtratoAsaas = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { de: string; financial_account_id: string }) => {
+  .inputValidator((input: { de: string; ate?: string; financial_account_id: string }) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(input.de)) throw new Error("Data inicial inválida.");
+    if (input.ate && !/^\d{4}-\d{2}-\d{2}$/.test(input.ate)) throw new Error("Data final inválida.");
     if (!/^[0-9a-f-]{36}$/.test(input.financial_account_id)) throw new Error("Conta inválida.");
     return input;
   })
@@ -60,7 +61,8 @@ export const sincronizarExtratoAsaas = createServerFn({ method: "POST" })
         proximoOffset: number | null;
       }>;
     };
-    const ate = new Date().toISOString().slice(0, 10);
+    const hoje = new Date().toISOString().slice(0, 10);
+    const ate = data.ate && data.ate < hoje ? data.ate : hoje;
 
     const itens: Json[] = [];
     let offset = 0;
@@ -96,7 +98,7 @@ export const sincronizarExtratoAsaas = createServerFn({ method: "POST" })
         data: String(t["date"] ?? "").slice(0, 10),
         valor_cents: Math.abs(valor),
         kind: valor < 0 ? "saida" : valor > 0 ? "entrada" : "",
-        historico: [ROTULO_TIPO[tipo] ?? tipo, desc].filter(Boolean).join(" — ").slice(0, 500),
+        historico: (desc || ROTULO_TIPO[tipo] || "Movimentação Asaas").slice(0, 500),
         documento: String(t["paymentId"] ?? t["transferId"] ?? ""),
         bank_id: String(t["id"]),
         raw: t,

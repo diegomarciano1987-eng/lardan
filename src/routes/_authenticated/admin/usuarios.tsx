@@ -21,12 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { ConvitesPanel } from "@/components/admin/acessos/Convites";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   component: UsuariosPage,
   head: () => ({
     meta: [
-      { title: "Usuários e papéis — Administração LARDAN" },
+      { title: "Usuários e convites — Administração LARDAN" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -134,6 +135,8 @@ function UsuariosPage() {
         autorizada com auditoria. O último Master ativo não pode ser removido.
       </p>
 
+      <ConvitesPanel podeConceder={ALL_ROLES} />
+      <h2 className="mt-10 text-xl text-foreground">Usuários com acesso</h2>
       {usersQuery.isLoading ? (
         <p className="mt-8 text-sm text-muted-foreground">Carregando…</p>
       ) : (usersQuery.data?.length ?? 0) === 0 ? (

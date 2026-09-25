@@ -212,6 +212,15 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     };
   }
 
+  /** Extrato da conta Asaas (entradas e saídas: recebimentos, Pix, transferências, tarifas). Somente leitura. */
+  async listarExtrato(f: { de: string; ate: string; limit: number; offset: number }) {
+    const lim = Math.min(Math.max(f.limit, 1), 100);
+    const c = await this.enviar<Json>("GET", "/financialTransactions", {
+      query: { startDate: f.de, finishDate: f.ate, offset: f.offset, limit: lim },
+    });
+    return this.pagina(c, { limit: lim, offset: f.offset }, (j) => j);
+  }
+
   async listarClientes(f: { limit: number; offset: number }) {
     const lim = Math.min(Math.max(f.limit, 1), 100);
     const c = await this.enviar<Json>("GET", "/customers", { query: { offset: f.offset, limit: lim } });

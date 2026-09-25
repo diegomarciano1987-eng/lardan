@@ -3,6 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { EmptyState, Panel, StatusBadge, formatBRLFromCents } from "@/components/admin/ui";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { DateRangeField } from "@/components/premium/DateRangeField";
 import type { DateRange } from "react-day-picker";
@@ -354,7 +355,7 @@ export function AsaasReceber() {
                   <tr className="border-b border-line-soft">
                     <th className="px-6 py-3 font-semibold">Devedor</th>
                     <th className="px-4 py-3 font-semibold">Vencimento</th>
-                    <th className="px-4 py-3 text-right font-semibold">Saldo</th>
+                    <th className="px-4 py-3 text-right font-semibold">Valor</th>
                     <th className="px-4 py-3 font-semibold">Cobrança</th>
                     <th className="px-6 py-3" />
                   </tr>
@@ -365,11 +366,16 @@ export function AsaasReceber() {
                     return (
                       <tr key={l.installment_id} className="border-b border-line-soft last:border-0">
                         <td className="px-6 py-3">
-                          <span className="font-medium text-ledger-text">{l.pessoa ?? "Sem pessoa vinculada"}</span>
+                          <span className="font-medium text-ledger-text">{l.pessoa ?? "Devedor não identificado"}</span>
                           <span className="block text-xs text-ledger-muted">{l.descricao ?? l.numero ?? "—"}</span>
                         </td>
                         <td className="px-4 py-3">{new Date(`${l.vencimento}T12:00:00`).toLocaleDateString("pt-BR")}</td>
-                        <td className="px-4 py-3 text-right tabular-nums">{formatBRLFromCents(l.saldo_cents)}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          <span className="block">{formatBRLFromCents(l.valor_cents)}</span>
+                          <span className="block text-xs text-ledger-muted">
+                            {l.saldo_cents <= 0 ? "Quitada" : `Saldo ${formatBRLFromCents(l.saldo_cents)}`}
+                          </span>
+                        </td>
                         <td className="px-4 py-3"><StatusBadge tone={s.tom}>{s.rotulo}</StatusBadge></td>
                         <td className="px-6 py-3 text-right">
                           <button type="button" className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold hover:border-bronze hover:text-bronze" onClick={() => setEscolhida(l)}>
@@ -433,10 +439,22 @@ export function AsaasReceber() {
         </Panel>
       )}
 
-      {parcela && (() => {
-        const real = contas.data?.find((c) => c.id === parcela.account_id) ?? conta;
-        return real ? <DetalheParcela conta={real} linha={parcela} demo={real.situacao === "simulada"} onFechar={() => setEscolhida(null)} /> : null;
-      })()}
+      <Sheet open={!!parcela} onOpenChange={(v) => { if (!v) setEscolhida(null); }}>
+        <SheetContent className="admin-scope w-full overflow-y-auto sm:max-w-2xl">
+          <SheetHeader>
+            <SheetTitle>{parcela?.pessoa ?? "Devedor não identificado"}</SheetTitle>
+            <SheetDescription>{parcela?.descricao ?? parcela?.numero ?? ""}</SheetDescription>
+          </SheetHeader>
+          <div className="mt-4">
+            {parcela && (() => {
+              const real = contas.data?.find((c) => c.id === parcela.account_id) ?? conta;
+              return real
+                ? <DetalheParcela conta={real} linha={parcela} demo={real.situacao === "simulada"} onFechar={() => setEscolhida(null)} />
+                : <EmptyState title="Sem conta Asaas" description="Nenhuma conta Asaas disponível para esta parcela." />;
+            })()}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

@@ -76,7 +76,7 @@ export default function MapaCidadeLeaflet({
     if (!mapa || !contorno) return;
     contornoRef.current?.remove();
     contornoRef.current = L.geoJSON(contorno, {
-      style: { color: "#8a6a4a", weight: 2, fill: false, dashArray: "6 4", interactive: false },
+      style: { className: "contorno-cidade", weight: 2, fill: false, dashArray: "6 4", interactive: false },
     }).addTo(mapa);
   }, [contorno]);
 

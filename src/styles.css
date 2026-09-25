@@ -1210,3 +1210,5 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
     animation-play-state: paused;
   }
 }
+
+.contorno-cidade { stroke: var(--bronze); }

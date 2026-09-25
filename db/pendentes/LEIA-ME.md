@@ -16,3 +16,7 @@ com autorização explícita, sem editar o conteúdo já validado.
 | `04-fiscal-cadeia.sql` | cadeia fiscal auditável, imutabilidade e rotinas oficiais |
 
 - `07-asaas-executor-interno.sql` — executor interno (service_role) para resultado, cliente, link e eventos; posse temporária e retomada; conciliação bloqueando; link no espelho validado por modo/ambiente; modo de execução separado do ambiente; painel paginado por cursor. Pendente, validado só no banco isolado.
+
+## Já aplicados
+
+Os pacotes 03, 05, 07, 08, 09 e 10 já estão incorporados às migrações do projeto e foram movidos para `db/aplicados/` (histórico). O roteiro isolado não os reaplica.

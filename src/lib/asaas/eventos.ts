@@ -95,7 +95,8 @@ export async function drenarEventos(
   const saida: EventoRegistrado[] = [];
   for (const e of fila) {
     const reg = await registrarEvento(servico, accountId, e, origem, actor);
-    saida.push(reg.novo === false ? { ...reg, repetido: true } : await processarEvento(conciliador, reg.id));
+    const pendente = (reg as { pendente?: boolean }).pendente === true;
+    saida.push(reg.novo === false && !pendente ? { ...reg, repetido: true } : await processarEvento(conciliador, reg.id));
   }
   return saida;
 }

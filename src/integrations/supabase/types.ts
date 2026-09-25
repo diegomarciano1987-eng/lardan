@@ -24,6 +24,7 @@ export type Database = {
           cutover_date: string | null
           environment: string
           external_account_id: string | null
+          financial_account_id: string | null
           id: string
           invoice_host_confirmed: boolean
           is_active: boolean
@@ -52,6 +53,7 @@ export type Database = {
           cutover_date?: string | null
           environment: string
           external_account_id?: string | null
+          financial_account_id?: string | null
           id?: string
           invoice_host_confirmed?: boolean
           is_active?: boolean
@@ -80,6 +82,7 @@ export type Database = {
           cutover_date?: string | null
           environment?: string
           external_account_id?: string | null
+          financial_account_id?: string | null
           id?: string
           invoice_host_confirmed?: boolean
           is_active?: boolean
@@ -100,6 +103,13 @@ export type Database = {
           webhook_secret_ref?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "asaas_accounts_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "asaas_accounts_owner_entity_id_fkey"
             columns: ["owner_entity_id"]
@@ -8782,6 +8792,7 @@ export type Database = {
         Args: { _motivo: string; _reconciliation: string }
         Returns: string
       }
+      fin_safe_date: { Args: { _t: string }; Returns: string }
       fin_settings_overview: { Args: never; Returns: Json }
       fin_settlement_create: { Args: { _payload: Json }; Returns: Json }
       fin_settlement_create_ajustes: { Args: { _payload: Json }; Returns: Json }

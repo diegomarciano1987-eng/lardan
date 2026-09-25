@@ -89,11 +89,14 @@ export const Route = createFileRoute("/api/public/asaas/webhook")({
           creditDate: txt(pagamento["creditDate"]),
           original: corpo,
         };
-        const externalId = `wh:${evento}:${txt(pagamento["id"])}:${createHash("sha256").update(bruto).digest("hex").slice(0, 16)}`;
+        // identidade = ID oficial do evento no Asaas (por conta); hash só como evidência
+        const hash = createHash("sha256").update(bruto).digest("hex");
+        const idOficial = txt(corpo["id"]);
+        const externalId = idOficial || `wh:${evento}:${txt(pagamento["id"])}:${hash.slice(0, 16)}`;
 
         try {
           const executor = await bancoExecutor();
-          const reg = await registrarEvento(
+          const reg = (await registrarEvento(
             executor,
             conta.id,
             {
@@ -101,12 +104,13 @@ export const Route = createFileRoute("/api/public/asaas/webhook")({
               event: evento,
               chargeExternalId: txt(pagamento["id"]),
               eventAt: txt(corpo["dateCreated"]) || new Date().toISOString(),
-              payload,
+              payload: { ...payload, sha256: hash },
             },
             "provedor",
-          );
+          )) as { id: string; novo?: boolean; pendente?: boolean };
           let processado: unknown = null;
-          if (reg.novo !== false) {
+          // novo OU salvo e ainda pendente: termina o trabalho; concluído não repete efeito
+          if (reg.novo !== false || reg.pendente === true) {
             processado = await executor.rpc(ROTINAS.eventoProcessar, { _evento: reg.id });
           }
           return Response.json({ received: true, novo: reg.novo !== false, resultado: processado });

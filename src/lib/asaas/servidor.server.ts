@@ -45,7 +45,8 @@ export interface ConfigInterna {
 }
 
 const deConfig = (c: ConfigInterna): SituacaoBanco => ({
-  ok: true, situacao: c.state === "simulada" ? "simulada" : "sandbox_configurado",
+  ok: true,
+  situacao: c.state === "simulada" ? "simulada" : c.state === "producao_conectada" ? "producao_configurado" : "sandbox_configurado",
   account_id: c.account_id, state: c.state, modo: c.modo, ambiente: c.ambiente, secret_ref: c.secret_ref,
   invoice_host_confirmed: c.invoice_host_confirmed,
 });

@@ -86,6 +86,18 @@ export const LardanLayout = ({ preview, selo, titulo, children, botao, rodape }:
           <Text style={rodapeLinks}>
             <Link href={SITE} style={rodapeLink}>lardan.com.br</Link>
           </Text>
+
+          {/* Selos de segurança */}
+          <Section style={selosBox}>
+            <Text style={selosTitulo}>Segurança em primeiro lugar</Text>
+            <Text style={selosLinha}>
+              <span style={seloItem}>🔒 Dados 100% criptografados</span>
+              <span style={seloItem}>🛡️ Compra segura</span>
+              <span style={seloItem}>✔ Infraestrutura certificada SOC 2 · ISO 27001</span>
+              <span style={seloItem}>📄 Privacidade LGPD</span>
+            </Text>
+          </Section>
+
           <Text style={legal}>Esta é uma mensagem automática. Por favor, não responda.</Text>
         </Section>
       </Container>
@@ -148,3 +160,7 @@ const nota = { fontSize: '12px', lineHeight: '1.7', color: '#8a7a73', margin: '0
 const rodapeLinks = { margin: '0 0 8px', fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase' as const }
 const rodapeLink = { color: tinta, textDecoration: 'none' }
 const legal = { fontSize: '10px', color: '#aa9a93', margin: 0, fontFamily: sans }
+const selosBox = { margin: '18px 16px 16px', padding: '14px 10px 12px', borderTop: `1px solid ${roseClaro}` }
+const selosTitulo = { fontSize: '9px', letterSpacing: '3px', textTransform: 'uppercase' as const, color: rose, margin: '0 0 10px', textAlign: 'center' as const, fontFamily: sans }
+const selosLinha = { margin: 0, textAlign: 'center' as const, lineHeight: '2.1' }
+const seloItem = { display: 'inline-block', fontSize: '10px', color: '#8a7a73', fontFamily: sans, border: `1px solid ${roseClaro}`, borderRadius: '20px', padding: '3px 12px', margin: '2px 4px', backgroundColor: papel }

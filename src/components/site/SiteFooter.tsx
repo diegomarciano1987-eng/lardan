@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import diamanteAsset from "@/assets/lardan-diamante.png.asset.json";
 import smalldataAsset from "@/assets/smalldata-logo.png.asset.json";
 import { SocialLinks } from "./SocialLinks";
+import { SelosSeguranca } from "./SelosSeguranca";
 import { EMPRESA, ENDERECO_LINHAS, MAPA_URL } from "@/lib/institucional";
 
 /**
@@ -117,6 +118,8 @@ export function SiteFooter() {
             Acessar Lardan
           </Link>
         </div>
+
+        <SelosSeguranca />
 
         <div className="mt-8 flex items-center justify-center gap-2 border-t border-border/60 pt-5 text-[11px] tracking-[0.08em] text-muted-foreground/70">
           <span>desenvolvimento:</span>

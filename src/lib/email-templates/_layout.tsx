@@ -2,7 +2,6 @@ import * as React from 'react'
 import { Body, Button, Column, Container, Font, Head, Heading, Html, Img, Link, Preview, Row, Section, Text } from '@react-email/components'
 
 export const SITE = 'https://www.lardan.com.br'
-export const ARTE = `${SITE}/email/lardan-convite.jpg`
 export const LOGO = `${SITE}/email/lardan-logo.png`
 
 interface LayoutProps {
@@ -52,7 +51,6 @@ export const LardanLayout = ({ preview, selo, titulo, children, botao, rodape }:
         {/* Cartão principal com moldura dupla */}
         <Section style={moldura}>
           <Section style={card}>
-            <Img src={ARTE} width="558" alt="Joias Lardan" style={arte} />
             <Section style={inner}>
               <Row>
                 <Column style={linhaCol}><div style={linha} /></Column>
@@ -120,7 +118,6 @@ const logoBox = { padding: '38px 20px 30px', textAlign: 'center' as const }
 const logoImg = { display: 'block', margin: '0 auto', border: 0, outline: 'none' }
 const moldura = { margin: '0 auto', width: '580px', maxWidth: '100%', padding: '6px', border: `1px solid ${roseClaro}`, borderRadius: '4px', backgroundColor: papel }
 const card = { backgroundColor: papel, border: `1px solid ${roseClaro}`, borderRadius: '2px', overflow: 'hidden' }
-const arte = { display: 'block', width: '100%', height: 'auto', border: 0 }
 const inner = { padding: '40px 44px 44px' }
 const linhaCol = { width: '32%', verticalAlign: 'middle' as const }
 const linha = { borderTop: `1px solid ${roseClaro}`, height: '1px', lineHeight: '1px', fontSize: '1px' }

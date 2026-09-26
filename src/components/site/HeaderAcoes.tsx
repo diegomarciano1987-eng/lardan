@@ -12,7 +12,7 @@ export function HeaderAcoes({ className = "" }: { className?: string }) {
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <Link to="/acesso" aria-label="Minha conta" className={base}>
+      <Link to="/minha-conta" aria-label="Minha conta" className={base}>
         <UserRound className="h-[1.05rem] w-[1.05rem]" strokeWidth={1.4} />
       </Link>
       <Link to="/carrinho" aria-label={`Sacola${qtd ? ` com ${qtd} peça(s)` : " vazia"}`} className={base}>

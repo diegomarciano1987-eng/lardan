@@ -32,6 +32,31 @@ async function enviar(email: string, nome: string, link: string, chave: string) 
 
 type Papel = "master" | "diretoria" | "marketing" | "suporte" | "financeiro" | "cobranca" | "estoque" | "montagem" | "qualidade" | "representante" | "consultora";
 
+/** Salva o conjunto completo de acessos de um colaborador em uma única operação auditada. */
+export const substituirPapeis = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { user_id: string; roles: Papel[] }) => {
+    if (!/^[0-9a-f-]{36}$/.test(i.user_id)) throw new Error("Colaborador inválido.");
+    if (!Array.isArray(i.roles) || i.roles.length > 11) throw new Error("Acessos inválidos.");
+    return { user_id: i.user_id, roles: [...new Set(i.roles)] };
+  })
+  .handler(async ({ data, context }) => {
+    const { data: master } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "master",
+    });
+    if (!master) throw new Error("Somente o Master pode editar acessos.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: roles, error } = await supabaseAdmin.rpc("access_roles_replace_admin" as never, {
+      _user_id: data.user_id,
+      _roles: data.roles,
+      _actor_id: context.userId,
+    } as never);
+    if (error) throw new Error(error.message);
+    return (roles ?? []) as Papel[];
+  });
+
 export const criarConvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { party_id: string; email: string; roles: Papel[]; origem: string }) => {

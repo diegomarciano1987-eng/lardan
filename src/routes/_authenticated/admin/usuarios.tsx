@@ -1,10 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import * as React from "react";
+import { Pencil, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { BackButton } from "@/components/admin/ui";
 import { ROLE_LABEL, useAdminRoles } from "@/components/admin/AdminShell";
 import type { AppRole } from "@/lib/session";
+import type { Capability } from "@/lib/capabilities";
+import { ADMIN_MODULES, moduleAllowed } from "@/lib/admin-modules";
+import { substituirPapeis } from "@/lib/acessos.functions";
 import {
   Table,
   TableBody,
@@ -13,13 +18,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { ConvitesPanel } from "@/components/admin/acessos/Convites";
 import { PainelSegundoFator } from "@/components/admin/acessos/Autenticador";
@@ -48,12 +56,17 @@ function UsuariosPage() {
   const queryClient = useQueryClient();
   const myRoles = useAdminRoles();
   const souMaster = myRoles.includes("master");
+  const salvarPapeis = useServerFn(substituirPapeis);
+  const [editando, setEditando] = React.useState<UserRow | null>(null);
 
   const usersQuery = useQuery({
     queryKey: ["admin-users"],
     enabled: souMaster,
     queryFn: async (): Promise<UserRow[]> => {
-      const [{ data: profiles, error: e1 }, { data: rolesRows, error: e2 }] =
+      const [
+        { data: profiles, error: e1 },
+        { data: rolesRows, error: e2 },
+      ] =
         await Promise.all([
           supabase.from("profiles").select("id, full_name, email, is_active"),
           supabase.from("user_roles").select("user_id, role"),
@@ -67,8 +80,24 @@ function UsuariosPage() {
         byUser.set(r.user_id, list);
       }
       return (profiles ?? [])
+        .filter((p) => !p.email?.toLowerCase().endsWith("@lardan.test") && !p.full_name?.toUpperCase().startsWith("HOMOLOG"))
         .map((p) => ({ ...p, roles: byUser.get(p.id) ?? [] }))
         .sort((a, b) => (a.email ?? "").localeCompare(b.email ?? ""));
+    },
+  });
+
+  const roleCapabilities = useQuery({
+    queryKey: ["role-capabilities-admin"],
+    enabled: souMaster,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("role_capabilities").select("role, capability");
+      if (error) throw error;
+      const map = new Map<AppRole, Capability[]>();
+      for (const row of data ?? []) {
+        const role = row.role as AppRole;
+        map.set(role, [...(map.get(role) ?? []), row.capability as Capability]);
+      }
+      return map;
     },
   });
 
@@ -78,25 +107,12 @@ function UsuariosPage() {
       queryClient.invalidateQueries({ queryKey: ["my-roles"] }),
     ]);
 
-  const grant = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
-      const { error } = await supabase.rpc("grant_role", { _user_id: userId, _role: role });
-      if (error) throw error;
-    },
+  const saveRoles = useMutation({
+    mutationFn: async ({ userId, roles }: { userId: string; roles: AppRole[] }) =>
+      salvarPapeis({ data: { user_id: userId, roles } }),
     onSuccess: async () => {
-      toast.success("Papel concedido.");
-      await invalidate();
-    },
-    onError: (e) => toast.error(e.message),
-  });
-
-  const revoke = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
-      const { error } = await supabase.rpc("revoke_role", { _user_id: userId, _role: role });
-      if (error) throw error;
-    },
-    onSuccess: async () => {
-      toast.success("Papel revogado.");
+      toast.success("Acessos atualizados.");
+      setEditando(null);
       await invalidate();
     },
     onError: (e) => toast.error(e.message),
@@ -130,6 +146,11 @@ function UsuariosPage() {
     },
   });
 
+  function areasDe(roles: AppRole[]) {
+    const caps = [...new Set(roles.flatMap((role) => roleCapabilities.data?.get(role) ?? []))];
+    return ADMIN_MODULES.filter((mod) => mod.path && moduleAllowed(mod, caps, roles)).map((mod) => mod.label);
+  }
+
   if (!souMaster) {
     return (
       <div className="max-w-5xl">
@@ -146,10 +167,7 @@ function UsuariosPage() {
   return (
     <div className="max-w-5xl">
       <div className="flex items-center gap-4"><BackButton /><h1 className="text-3xl text-foreground">Usuários e convites</h1></div>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Papéis vivem em tabela separada e toda alteração passa por operação
-        autorizada com auditoria. O último Master ativo não pode ser removido.
-      </p>
+      <p className="mt-2 text-sm text-muted-foreground">Edite uma pessoa para escolher uma ou várias áreas. Toda mudança fica registrada.</p>
 
       <ConvitesPanel podeConceder={ALL_ROLES} />
       <PainelSegundoFator />
@@ -159,68 +177,48 @@ function UsuariosPage() {
       ) : (usersQuery.data?.length ?? 0) === 0 ? (
         <p className="mt-8 text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>
       ) : (
-        <div className="mt-8 overflow-x-auto rounded-xl border border-border">
+        <div className="mt-8 overflow-x-auto rounded-xl border border-border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Usuário</TableHead>
-                <TableHead>Papéis</TableHead>
-                <TableHead>Adicionar papel</TableHead>
-                <TableHead className="text-right">Ativa</TableHead>
+                <TableHead>Áreas liberadas</TableHead>
+                <TableHead>Situação</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {usersQuery.data!.map((u) => (
+              {usersQuery.data?.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell>
                     <p className="text-sm text-foreground">{u.full_name || "—"}</p>
                     <p className="text-xs text-muted-foreground">{u.email}</p>
                   </TableCell>
                   <TableCell>
+                    <div className="max-w-xl">
                     <ul className="flex flex-wrap gap-1.5">
                       {u.roles.length === 0 && (
-                        <li className="text-xs text-muted-foreground">sem papel</li>
+                        <li className="text-xs text-muted-foreground">Nenhuma área liberada</li>
                       )}
-                      {u.roles.map((r) => (
-                        <li key={r}>
-                          <button
-                            type="button"
-                            title={`Revogar ${ROLE_LABEL[r]}`}
-                            onClick={() => revoke.mutate({ userId: u.id, role: r })}
-                            className="rounded-full border border-border px-2.5 py-0.5 text-[0.625rem] text-foreground transition-colors hover:border-destructive hover:text-destructive"
-                          >
-                            {ROLE_LABEL[r]} ×
-                          </button>
+                      {areasDe(u.roles).map((area) => (
+                        <li key={area} className="rounded-md border border-border bg-muted/40 px-2 py-1 text-xs text-foreground">
+                          {area}
                         </li>
                       ))}
                     </ul>
+                    {u.roles.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Perfis: {u.roles.map((r) => ROLE_LABEL[r]).join(", ")}</p>}
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <Select
-                      onValueChange={(v) =>
-                        grant.mutate({ userId: u.id, role: v as AppRole })
-                      }
-                    >
-                      <SelectTrigger className="h-8 w-40 text-xs">
-                        <SelectValue placeholder="Conceder…" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ALL_ROLES.filter((r) => !u.roles.includes(r)).map((r) => (
-                          <SelectItem key={r} value={r} className="text-xs">
-                            {ROLE_LABEL[r]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                      <Switch checked={u.is_active} onCheckedChange={(active) => toggleActive.mutate({ userId: u.id, active })} aria-label={`Conta de ${u.full_name || u.email} ativa`} />
+                      <span className="text-xs text-muted-foreground">{u.is_active ? "Ativa" : "Inativa"}</span>
+                    </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Switch
-                      checked={u.is_active}
-                      onCheckedChange={(active) =>
-                        toggleActive.mutate({ userId: u.id, active })
-                      }
-                      aria-label="Conta ativa"
-                    />
+                    <Button type="button" size="sm" variant="outline" disabled={!u.is_active} onClick={() => setEditando(u)}>
+                      <Pencil aria-hidden /> Editar acessos
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -228,6 +226,74 @@ function UsuariosPage() {
           </Table>
         </div>
       )}
+      <EditarAcessos
+        usuario={editando}
+        onOpenChange={(open) => { if (!open) setEditando(null); }}
+        onSalvar={(roles) => {
+          if (editando) saveRoles.mutate({ userId: editando.id, roles });
+        }}
+        salvando={saveRoles.isPending}
+        areasDe={areasDe}
+      />
     </div>
+  );
+}
+
+function EditarAcessos({ usuario, onOpenChange, onSalvar, salvando, areasDe }: {
+  usuario: UserRow | null;
+  onOpenChange: (open: boolean) => void;
+  onSalvar: (roles: AppRole[]) => void;
+  salvando: boolean;
+  areasDe: (roles: AppRole[]) => string[];
+}) {
+  const [selecionados, setSelecionados] = React.useState<AppRole[]>([]);
+
+  React.useEffect(() => {
+    setSelecionados(usuario?.roles ?? []);
+  }, [usuario]);
+
+  const alternar = (role: AppRole) => setSelecionados((atuais) =>
+    atuais.includes(role) ? atuais.filter((item) => item !== role) : [...atuais, role],
+  );
+  const areas = areasDe(selecionados);
+
+  return (
+    <Dialog open={Boolean(usuario)} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Editar acessos</DialogTitle>
+          <DialogDescription>{usuario?.full_name || usuario?.email}</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {ALL_ROLES.map((role) => {
+            const marcado = selecionados.includes(role);
+            const areasDoPapel = areasDe([role]);
+            return (
+              <label key={role} className="flex cursor-pointer gap-3 rounded-md border border-border bg-card p-4 hover:bg-muted/40">
+                <Checkbox checked={marcado} onCheckedChange={() => alternar(role)} aria-label={ROLE_LABEL[role]} />
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-foreground">{ROLE_LABEL[role]}</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                    {areasDoPapel.length ? areasDoPapel.join(" · ") : "Acesso específico fora da operação"}
+                  </span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+        <div className="rounded-md border border-primary/25 bg-primary/5 p-4">
+          <p className="flex items-center gap-2 text-sm font-semibold text-foreground"><ShieldCheck aria-hidden className="size-4 text-primary" />Resultado do acesso</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {areas.length ? areas.join(" · ") : "Esta pessoa ficará sem acesso às áreas do sistema."}
+          </p>
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button type="button" disabled={salvando} onClick={() => onSalvar(selecionados)}>
+            {salvando ? "Salvando…" : "Salvar acessos"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

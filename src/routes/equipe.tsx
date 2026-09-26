@@ -6,11 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchMyRoles } from "@/lib/session";
 import { DESTINO, PORTAS, portaLiberada, type Porta } from "@/lib/portas";
 
-type Busca = { area?: Porta };
+type Busca = { area?: Porta | undefined };
 
 export const Route = createFileRoute("/equipe")({
   validateSearch: (s: Record<string, unknown>): Busca => ({
-    area: PORTAS.includes(s.area as Porta) ? (s.area as Porta) : undefined,
+    area: PORTAS.includes(s["area"] as Porta) ? (s["area"] as Porta) : undefined,
   }),
   head: () => ({
     meta: [

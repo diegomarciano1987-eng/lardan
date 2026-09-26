@@ -72,7 +72,7 @@ function MinhaConta() {
   }
 
   const usuario = session?.user;
-  const nomeExibido = (usuario?.user_metadata?.full_name as string | undefined) ?? usuario?.email;
+  const nomeExibido = (usuario?.user_metadata?.["full_name"] as string | undefined) ?? usuario?.email;
 
   return (
     <SiteLayout>

@@ -22,7 +22,9 @@ import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as ComoComecarAVenderSemijoiasRouteImport } from './routes/como-comecar-a-vender-semijoias'
 import { Route as ComoVenderSemijoiasPeloWhatsappRouteImport } from './routes/como-vender-semijoias-pelo-whatsapp'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as EquipeRouteImport } from './routes/equipe'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as MinhaContaRouteImport } from './routes/minha-conta'
 import { Route as PulseirasRouteImport } from './routes/pulseiras'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as RendaExtraComVendasRouteImport } from './routes/renda-extra-com-vendas'
@@ -33,6 +35,7 @@ import { Route as SitemapPagesDotxmlRouteImport } from './routes/sitemap-pages[.
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedConsultoraRouteImport } from './routes/_authenticated/consultora'
+import { Route as AuthenticatedRepresentanteRouteImport } from './routes/_authenticated/representante'
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as DCodigoRouteImport } from './routes/d.$codigo'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
@@ -159,9 +162,19 @@ const ContatoRoute = ContatoRouteImport.update({
   path: '/contato',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EquipeRoute = EquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
   id: '/llms.txt',
   path: '/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MinhaContaRoute = MinhaContaRouteImport.update({
+  id: '/minha-conta',
+  path: '/minha-conta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PulseirasRoute = PulseirasRouteImport.update({
@@ -215,6 +228,12 @@ const AuthenticatedConsultoraRoute = AuthenticatedConsultoraRouteImport.update({
   path: '/consultora',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRepresentanteRoute =
+  AuthenticatedRepresentanteRouteImport.update({
+    id: '/representante',
+    path: '/representante',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ConviteTokenRoute = ConviteTokenRouteImport.update({
   id: '/convite/$token',
   path: '/convite/$token',
@@ -568,7 +587,9 @@ export interface FileRoutesByFullPath {
   '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
+  '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/minha-conta': typeof MinhaContaRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
@@ -579,6 +600,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/consultora': typeof AuthenticatedConsultoraRoute
+  '/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -652,7 +674,9 @@ export interface FileRoutesByTo {
   '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
+  '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/minha-conta': typeof MinhaContaRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
@@ -662,6 +686,7 @@ export interface FileRoutesByTo {
   '/sitemap-pages.xml': typeof SitemapPagesDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/consultora': typeof AuthenticatedConsultoraRoute
+  '/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -736,7 +761,9 @@ export interface FileRoutesById {
   '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
+  '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/minha-conta': typeof MinhaContaRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
@@ -747,6 +774,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/consultora': typeof AuthenticatedConsultoraRoute
+  '/_authenticated/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -822,7 +850,9 @@ export interface FileRouteTypes {
     | '/como-comecar-a-vender-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
+    | '/equipe'
     | '/llms.txt'
+    | '/minha-conta'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-vendas'
@@ -833,6 +863,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin'
     | '/consultora'
+    | '/representante'
     | '/convite/$token'
     | '/d/$codigo'
     | '/produto/$slug'
@@ -906,7 +937,9 @@ export interface FileRouteTypes {
     | '/como-comecar-a-vender-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
+    | '/equipe'
     | '/llms.txt'
+    | '/minha-conta'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-vendas'
@@ -916,6 +949,7 @@ export interface FileRouteTypes {
     | '/sitemap-pages.xml'
     | '/sitemap.xml'
     | '/consultora'
+    | '/representante'
     | '/convite/$token'
     | '/d/$codigo'
     | '/produto/$slug'
@@ -989,7 +1023,9 @@ export interface FileRouteTypes {
     | '/como-comecar-a-vender-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
+    | '/equipe'
     | '/llms.txt'
+    | '/minha-conta'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-vendas'
@@ -1000,6 +1036,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/consultora'
+    | '/_authenticated/representante'
     | '/convite/$token'
     | '/d/$codigo'
     | '/produto/$slug'
@@ -1075,7 +1112,9 @@ export interface RootRouteChildren {
   ComoComecarAVenderSemijoiasRoute: typeof ComoComecarAVenderSemijoiasRoute
   ComoVenderSemijoiasPeloWhatsappRoute: typeof ComoVenderSemijoiasPeloWhatsappRoute
   ContatoRoute: typeof ContatoRoute
+  EquipeRoute: typeof EquipeRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
+  MinhaContaRoute: typeof MinhaContaRoute
   PulseirasRoute: typeof PulseirasRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   RendaExtraComVendasRoute: typeof RendaExtraComVendasRoute
@@ -1191,11 +1230,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContatoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/equipe': {
+      id: '/equipe'
+      path: '/equipe'
+      fullPath: '/equipe'
+      preLoaderRoute: typeof EquipeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/llms.txt': {
       id: '/llms.txt'
       path: '/llms.txt'
       fullPath: '/llms.txt'
       preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/minha-conta': {
+      id: '/minha-conta'
+      path: '/minha-conta'
+      fullPath: '/minha-conta'
+      preLoaderRoute: typeof MinhaContaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pulseiras': {
@@ -1266,6 +1319,13 @@ declare module '@tanstack/react-router' {
       path: '/consultora'
       fullPath: '/consultora'
       preLoaderRoute: typeof AuthenticatedConsultoraRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/representante': {
+      id: '/_authenticated/representante'
+      path: '/representante'
+      fullPath: '/representante'
+      preLoaderRoute: typeof AuthenticatedRepresentanteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/convite/$token': {
@@ -1834,12 +1894,14 @@ const AuthenticatedAdminRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedConsultoraRoute: typeof AuthenticatedConsultoraRoute
+  AuthenticatedRepresentanteRoute: typeof AuthenticatedRepresentanteRoute
   AuthenticatedFinanceiroSimulacaoIdRoute: typeof AuthenticatedFinanceiroSimulacaoIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedConsultoraRoute: AuthenticatedConsultoraRoute,
+  AuthenticatedRepresentanteRoute: AuthenticatedRepresentanteRoute,
   AuthenticatedFinanceiroSimulacaoIdRoute:
     AuthenticatedFinanceiroSimulacaoIdRoute,
 }
@@ -1861,7 +1923,9 @@ const rootRouteChildren: RootRouteChildren = {
   ComoComecarAVenderSemijoiasRoute: ComoComecarAVenderSemijoiasRoute,
   ComoVenderSemijoiasPeloWhatsappRoute: ComoVenderSemijoiasPeloWhatsappRoute,
   ContatoRoute: ContatoRoute,
+  EquipeRoute: EquipeRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
+  MinhaContaRoute: MinhaContaRoute,
   PulseirasRoute: PulseirasRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   RendaExtraComVendasRoute: RendaExtraComVendasRoute,

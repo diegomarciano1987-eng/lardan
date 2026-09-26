@@ -9,7 +9,7 @@ import { CAMINHOS_EDITORIAIS } from "@/lib/editorial/rotas";
 import { EcossistemaLardanProvider } from "./EcossistemaLardan";
 
 /** Rotas públicas sem intenção comercial: não registram origem. */
-const SEM_TRACKING = ["/acesso"];
+const SEM_TRACKING = ["/acesso", "/equipe", "/minha-conta"];
 
 export function SiteLayout({ children, brandedHeader = false }: { children: ReactNode; brandedHeader?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

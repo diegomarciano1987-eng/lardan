@@ -111,7 +111,7 @@ export function SiteFooter() {
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center">
           <span>© {new Date().getFullYear()} Lardan. Todos os direitos reservados.</span>
           <Link
-            to="/acesso"
+            to="/equipe"
             className="tracking-[0.18em] uppercase transition-colors hover:text-foreground"
           >
             Acessar Lardan

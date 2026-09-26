@@ -17,6 +17,9 @@ import { DANIEL, EMPRESA, ENDERECO, LARISSA, REDE } from "@/lib/institucional";
 export const CAMINHOS_PRIVADOS = [
   "/admin",
   "/acesso",
+  "/equipe",
+  "/minha-conta",
+  "/representante",
   "/consultora",
   "/carrinho",
   "/api/",

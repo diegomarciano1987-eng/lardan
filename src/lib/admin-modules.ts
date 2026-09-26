@@ -320,26 +320,6 @@ export const ADMIN_SUBMODULES: AdminModule[] = [
     capability: "leads.view",
     state: "ativo",
   },
-  {
-    slug: "usuarios",
-    path: "/admin/usuarios",
-    label: "Usuários e convites",
-    description: "Convites individuais, contas da equipe, papéis e segundo fator.",
-    icon: UsersRound,
-    roles: ["master", "diretoria", "marketing", "suporte", "financeiro", "cobranca", "estoque", "montagem", "qualidade"],
-    state: "ativo",
-  },
-  {
-    slug: "integracoes",
-    path: "/admin/integracoes",
-    label: "Integrações",
-    description: "Asaas e demais conectores, preparados e desligados.",
-    icon: SlidersHorizontal,
-    roles: ["master", "diretoria"],
-    capability: "audit.view",
-    state: "em_construcao",
-    spec: "Integração Asaas preparada com sinalizador desligado: contratos internos, fila de saída e caixa de entrada de webhooks com verificação de assinatura. Nenhuma cobrança é emitida nesta etapa.",
-  },
 ];
 
 export const ALL_MODULES = [...ADMIN_MODULES, ...ADMIN_SUBMODULES];

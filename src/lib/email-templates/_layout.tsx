@@ -39,7 +39,7 @@ export const LardanLayout = ({ preview, selo, titulo, children, botao, rodape }:
       <Container style={outer}>
         {/* Faixa superior */}
         <Section style={topo}>
-          <Text style={topoTexto}>SEMIJOIAS FOLHEADAS A OURO 18K · DESDE A FAMÍLIA</Text>
+          <Text style={topoTexto}>JOIAS · SEMIJOIAS</Text>
         </Section>
 
         {/* Logo */}

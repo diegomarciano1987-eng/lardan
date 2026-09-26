@@ -21,6 +21,7 @@ import {
   FileClock,
   SlidersHorizontal,
   Store,
+  Plug,
   type LucideIcon,
 } from "lucide-react";
 
@@ -265,6 +266,26 @@ export const ADMIN_MODULES: AdminModule[] = [
     roles: ["master", "diretoria"],
     capability: "audit.view",
     state: "ativo",
+  },
+  {
+    slug: "usuarios",
+    path: "/admin/usuarios",
+    label: "Usuários e Convites",
+    description: "Convites individuais, contas da equipe, papéis e segundo fator.",
+    icon: UsersRound,
+    roles: ALL_STAFF,
+    state: "ativo",
+  },
+  {
+    slug: "integracoes",
+    path: "/admin/integracoes",
+    label: "Integrações",
+    description: "Asaas e demais conectores, preparados e desligados.",
+    icon: Plug,
+    roles: ["master", "diretoria"],
+    capability: "audit.view",
+    state: "em_construcao",
+    spec: "Integração Asaas preparada com sinalizador desligado: contratos internos, fila de saída e caixa de entrada de webhooks com verificação de assinatura. Nenhuma cobrança é emitida nesta etapa.",
   },
   {
     slug: "pdv",

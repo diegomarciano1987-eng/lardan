@@ -9,8 +9,8 @@ interface LayoutProps {
   selo: string
   titulo: string
   children: React.ReactNode
-  botao?: { texto: string; link: string }
-  rodape?: string
+  botao?: { texto: string; link: string } | undefined
+  rodape?: string | undefined
 }
 
 export const LardanLayout = ({ preview, selo, titulo, children, botao, rodape }: LayoutProps) => (

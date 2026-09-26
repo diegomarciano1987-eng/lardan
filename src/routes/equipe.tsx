@@ -147,7 +147,7 @@ function EquipePage() {
       )}
 
       <p className="relative mt-14 max-w-sm text-center text-xs leading-relaxed text-muted-foreground">
-        Área restrita à equipe Lardan, com acesso somente por convite. Os acessos são registrados.
+        Área restrita à equipe Lardan, com acesso somente por convite.
       </p>
     </main>
   );

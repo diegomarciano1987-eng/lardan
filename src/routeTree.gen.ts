@@ -24,6 +24,7 @@ import { Route as ComoVenderSemijoiasPeloWhatsappRouteImport } from './routes/co
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as EquipeRouteImport } from './routes/equipe'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as MinhaContaRouteImport } from './routes/minha-conta'
 import { Route as PulseirasRouteImport } from './routes/pulseiras'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as RendaExtraComVendasRouteImport } from './routes/renda-extra-com-vendas'
@@ -169,6 +170,11 @@ const EquipeRoute = EquipeRouteImport.update({
 const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
   id: '/llms.txt',
   path: '/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MinhaContaRoute = MinhaContaRouteImport.update({
+  id: '/minha-conta',
+  path: '/minha-conta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PulseirasRoute = PulseirasRouteImport.update({
@@ -583,6 +589,7 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/minha-conta': typeof MinhaContaRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
@@ -669,6 +676,7 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/minha-conta': typeof MinhaContaRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
@@ -755,6 +763,7 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/minha-conta': typeof MinhaContaRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
@@ -843,6 +852,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/equipe'
     | '/llms.txt'
+    | '/minha-conta'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-vendas'
@@ -929,6 +939,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/equipe'
     | '/llms.txt'
+    | '/minha-conta'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-vendas'
@@ -1014,6 +1025,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/equipe'
     | '/llms.txt'
+    | '/minha-conta'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-vendas'
@@ -1102,6 +1114,7 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   EquipeRoute: typeof EquipeRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
+  MinhaContaRoute: typeof MinhaContaRoute
   PulseirasRoute: typeof PulseirasRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   RendaExtraComVendasRoute: typeof RendaExtraComVendasRoute
@@ -1229,6 +1242,13 @@ declare module '@tanstack/react-router' {
       path: '/llms.txt'
       fullPath: '/llms.txt'
       preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/minha-conta': {
+      id: '/minha-conta'
+      path: '/minha-conta'
+      fullPath: '/minha-conta'
+      preLoaderRoute: typeof MinhaContaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pulseiras': {
@@ -1905,6 +1925,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   EquipeRoute: EquipeRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
+  MinhaContaRoute: MinhaContaRoute,
   PulseirasRoute: PulseirasRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   RendaExtraComVendasRoute: RendaExtraComVendasRoute,

@@ -4,6 +4,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BriefcaseBusiness, ExternalLink, PackageCheck, ShoppingBag, Store } from "lucide-react";
 import { toast } from "sonner";
+import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
+import { fetchMyRoles } from "@/lib/session";
+import { portaLiberada } from "@/lib/portas";
 import {
   SITUACAO_MALETA,
   SITUACAO_PEDIDO,
@@ -503,6 +506,13 @@ function Historico({ cycleId }: { cycleId: string | null }) {
 }
 
 function AreaConsultora() {
+  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles });
+  if (isLoading) return null;
+  if (!portaLiberada("consultora", roles ?? [])) return <AcessoNaoLiberado />;
+  return <AreaConsultoraLiberada />;
+}
+
+function AreaConsultoraLiberada() {
   const [aba, setAba] = React.useState<Aba>("maleta");
   const [escolhida, setEscolhida] = React.useState<string | null>(null);
   const maletas = useQuery({ queryKey: ["consultora", "maletas"], queryFn: () => listarMaletas() });

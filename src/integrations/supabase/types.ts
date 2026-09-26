@@ -8388,6 +8388,14 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      access_roles_replace_admin: {
+        Args: {
+          _actor_id: string
+          _roles: Database["public"]["Enums"]["app_role"][]
+          _user_id: string
+        }
+        Returns: Database["public"]["Enums"]["app_role"][]
+      }
       address_geo_fingerprint: {
         Args: {
           _city: string

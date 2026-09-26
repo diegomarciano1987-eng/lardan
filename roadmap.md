@@ -27,3 +27,9 @@
 - [ ] Transferências como composição no cockpit + testes de contas
 - [ ] Testes OFX/CSV + validação BANKID/ACCTID/CURDEF
 - [ ] Seleção da primeira cobrança real (botão travado até autorização)
+
+## Usuários e acessos
+- [x] Auditar papéis, áreas e bloqueio de inativos
+- [ ] Remover contas HOMOLOG da base real
+- [x] Criar edição conjunta de múltiplos acessos
+- [ ] Validar visualmente e testar persistência, bloqueio e auditoria

@@ -37,6 +37,11 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   head: () => ({
     meta: [
       { title: "Usuários e convites — Administração LARDAN" },
+      { name: "description", content: "Gestão protegida de colaboradores, convites e áreas de acesso do Sistema Lardan." },
+      { property: "og:title", content: "Usuários e convites — Administração LARDAN" },
+      { property: "og:description", content: "Gestão protegida de colaboradores, convites e áreas de acesso do Sistema Lardan." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

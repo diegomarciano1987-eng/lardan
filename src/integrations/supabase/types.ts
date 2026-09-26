@@ -8381,13 +8381,6 @@ export type Database = {
         Returns: boolean
       }
       access_pode_ver_convites: { Args: { _uid: string }; Returns: boolean }
-      access_roles_replace: {
-        Args: {
-          _roles: Database["public"]["Enums"]["app_role"][]
-          _user_id: string
-        }
-        Returns: Database["public"]["Enums"]["app_role"][]
-      }
       access_roles_replace_admin: {
         Args: {
           _actor_id: string

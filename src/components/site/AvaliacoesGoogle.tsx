@@ -5,7 +5,7 @@ import mariaAsset from "@/assets/avaliacao-maria-fatima.png.asset.json";
 import nataliaAsset from "@/assets/avaliacao-natalia-pedroso.png.asset.json";
 import larissaAsset from "@/assets/avaliacao-larissa-persinato.png.asset.json";
 import saraAsset from "@/assets/avaliacao-sara-danielly.png.asset.json";
-import dudaAsset from "@/assets/avaliacao-duda-goes.png.asset.json";
+import cristinaAsset from "@/assets/avaliacao-cristina-santos.png.asset.json";
 
 const GOOGLE_REVIEWS_URL =
   "https://www.google.com/search?q=lardan#lrd=0x94eb4765591303db:0x6e4139909e180f1d,1";
@@ -40,9 +40,10 @@ const AVALIACOES: readonly Avaliacao[] = [
       "Experiência muito boa, todos são muito atenciosos, e a qualidade das joias são muito boas.",
   },
   {
-    nome: "Duda Goes",
-    foto: dudaAsset.url,
-    texto: "Amei, perfeito!",
+    nome: "Cristina Santos",
+    foto: cristinaAsset.url,
+    texto:
+      "Está sendo maravilhoso, as joias são lindas delicadas. As pessoas são muito simpáticas e sempre tiram dúvidas que tenho. Só tenho que agradecer porque está me ajudando muito.",
   },
 ] as const;
 

@@ -33,3 +33,6 @@
 - [ ] Remover contas HOMOLOG da base real
 - [x] Criar edição conjunta de múltiplos acessos
 - [ ] Validar visualmente e testar persistência, bloqueio e auditoria
+
+## Avaliações do Google
+- [x] Substituir Duda Goes por Cristina Santos em todas as exibições

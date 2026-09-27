@@ -89,13 +89,44 @@ export const LardanLayout = ({ preview, selo, titulo, children, botao, rodape }:
 
           {/* Selos de segurança */}
           <Section style={selosBox}>
-            <Text style={selosTitulo}>Segurança em primeiro lugar</Text>
-            <Text style={selosLinha}>
-              <span style={seloItem}>🔒 Dados 100% criptografados</span>
-              <span style={seloItem}>🛡️ Compra segura</span>
-              <span style={seloItem}>✔ Infraestrutura certificada SOC 2 · ISO 27001</span>
-              <span style={seloItem}>📄 Privacidade LGPD</span>
-            </Text>
+            <Text style={selosTitulo}>SEGURANÇA EM PRIMEIRO LUGAR</Text>
+            <Section style={selosGrade}>
+              <Row style={seloLinha}>
+                <Column style={seloMarca}>01</Column>
+                <Column>
+                  <Text style={seloNome}>Dados 100% criptografados</Text>
+                  <Text style={seloDescricao}>Conexão segura SSL/TLS</Text>
+                </Column>
+              </Row>
+              <Row style={seloLinha}>
+                <Column style={seloMarca}>02</Column>
+                <Column>
+                  <Text style={seloNome}>Compra segura</Text>
+                  <Text style={seloDescricao}>Pagamentos protegidos</Text>
+                </Column>
+              </Row>
+              <Row style={seloLinha}>
+                <Column style={seloMarca}>03</Column>
+                <Column>
+                  <Text style={seloNome}>Infraestrutura certificada</Text>
+                  <Text style={seloDescricao}>SOC 2 Tipo II · ISO 27001</Text>
+                </Column>
+              </Row>
+              <Row style={seloLinha}>
+                <Column style={seloMarca}>04</Column>
+                <Column>
+                  <Text style={seloNome}>Privacidade LGPD</Text>
+                  <Text style={seloDescricao}>Seus dados, suas regras</Text>
+                </Column>
+              </Row>
+              <Row style={{ ...seloLinha, borderBottom: '0' }}>
+                <Column style={seloMarca}>05</Column>
+                <Column>
+                  <Text style={seloNome}>Ambiente verificado</Text>
+                  <Text style={seloDescricao}>Monitoramento contínuo</Text>
+                </Column>
+              </Row>
+            </Section>
           </Section>
 
           <Text style={legal}>Esta é uma mensagem automática. Por favor, não responda.</Text>
@@ -160,7 +191,10 @@ const nota = { fontSize: '12px', lineHeight: '1.7', color: '#8a7a73', margin: '0
 const rodapeLinks = { margin: '0 0 8px', fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase' as const }
 const rodapeLink = { color: tinta, textDecoration: 'none' }
 const legal = { fontSize: '10px', color: '#aa9a93', margin: 0, fontFamily: sans }
-const selosBox = { margin: '18px 16px 16px', padding: '14px 10px 12px', borderTop: `1px solid ${roseClaro}` }
-const selosTitulo = { fontSize: '9px', letterSpacing: '3px', textTransform: 'uppercase' as const, color: rose, margin: '0 0 10px', textAlign: 'center' as const, fontFamily: sans }
-const selosLinha = { margin: 0, textAlign: 'center' as const, lineHeight: '2.1' }
-const seloItem = { display: 'inline-block', fontSize: '10px', color: '#8a7a73', fontFamily: sans, border: `1px solid ${roseClaro}`, borderRadius: '20px', padding: '3px 12px', margin: '2px 4px', backgroundColor: papel }
+const selosBox = { margin: '24px 0 18px', padding: '28px 24px 24px', backgroundColor: tinta, borderTop: `3px solid ${rose}` }
+const selosTitulo = { fontSize: '10px', letterSpacing: '3px', color: roseClaro, margin: '0 0 20px', textAlign: 'center' as const, fontFamily: sans, fontWeight: 600 }
+const selosGrade = { border: '1px solid #72564e' }
+const seloLinha = { borderBottom: '1px solid #72564e' }
+const seloMarca = { width: '54px', padding: '15px', color: roseClaro, fontSize: '11px', fontFamily: sans, textAlign: 'center' as const, verticalAlign: 'middle' as const, borderRight: '1px solid #72564e' }
+const seloNome = { margin: '0', padding: '12px 15px 1px', color: papel, fontSize: '12px', lineHeight: '1.35', fontFamily: sans, fontWeight: 600 }
+const seloDescricao = { margin: '0', padding: '0 15px 12px', color: '#d0bbb3', fontSize: '10px', lineHeight: '1.4', fontFamily: sans }

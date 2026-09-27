@@ -100,6 +100,12 @@
   --rose: oklch(0.72 0.075 26);
   --rose-deep: oklch(0.47 0.06 25);
   --ivory: oklch(0.985 0.006 80);
+  --trust-background: oklch(0.235 0.018 35);
+  --trust-surface: oklch(0.285 0.021 35);
+  --trust-foreground: oklch(0.985 0.006 80);
+  --trust-muted: oklch(0.77 0.023 39);
+  --trust-accent: oklch(0.66 0.07 28);
+  --trust-border: oklch(0.72 0.075 26 / 0.28);
   --gradient-rose: linear-gradient(
     100deg,
     oklch(0.47 0.06 25),
@@ -149,9 +155,17 @@
 @theme inline {
   --font-display: "Roxborough CF", "Cormorant Garamond", Georgia, serif;
   --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  --font-trust-title: "Outfit", "Jost", ui-sans-serif, system-ui, sans-serif;
+  --font-trust-body: "Figtree", "Jost", ui-sans-serif, system-ui, sans-serif;
   --color-rose: var(--rose);
   --color-rose-deep: var(--rose-deep);
   --color-ivory: var(--ivory);
+  --color-trust-background: var(--trust-background);
+  --color-trust-surface: var(--trust-surface);
+  --color-trust-foreground: var(--trust-foreground);
+  --color-trust-muted: var(--trust-muted);
+  --color-trust-accent: var(--trust-accent);
+  --color-trust-border: var(--trust-border);
 }
 
 @layer base {

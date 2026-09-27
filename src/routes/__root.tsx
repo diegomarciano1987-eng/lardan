@@ -83,13 +83,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "LARDAN — Semijoias" },
-      { name: "description", content: "Semijoias Lardan para acompanhar os seus momentos." },
-      { property: "og:title", content: "LARDAN — Semijoias" },
-      { property: "og:description", content: "Semijoias Lardan para acompanhar os seus momentos." },
-      { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "LARDAN" },
-      { name: "twitter:card", content: "summary_large_image" },
       // Cor da barra do navegador em celulares (marfim da identidade).
       { name: "theme-color", content: "#f7f3ee" },
       // Verificação de propriedade do Google Search Console.

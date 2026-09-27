@@ -90,43 +90,13 @@ export const LardanLayout = ({ preview, selo, titulo, children, botao, rodape }:
           {/* Selos de segurança */}
           <Section style={selosBox}>
             <Text style={selosTitulo}>SEGURANÇA EM PRIMEIRO LUGAR</Text>
-            <Section style={selosGrade}>
-              <Row style={seloLinha}>
-                <Column style={seloMarca}>01</Column>
-                <Column>
-                  <Text style={seloNome}>Dados 100% criptografados</Text>
-                  <Text style={seloDescricao}>Conexão segura SSL/TLS</Text>
-                </Column>
-              </Row>
-              <Row style={seloLinha}>
-                <Column style={seloMarca}>02</Column>
-                <Column>
-                  <Text style={seloNome}>Compra segura</Text>
-                  <Text style={seloDescricao}>Pagamentos protegidos</Text>
-                </Column>
-              </Row>
-              <Row style={seloLinha}>
-                <Column style={seloMarca}>03</Column>
-                <Column>
-                  <Text style={seloNome}>Infraestrutura certificada</Text>
-                  <Text style={seloDescricao}>SOC 2 Tipo II · ISO 27001</Text>
-                </Column>
-              </Row>
-              <Row style={seloLinha}>
-                <Column style={seloMarca}>04</Column>
-                <Column>
-                  <Text style={seloNome}>Privacidade LGPD</Text>
-                  <Text style={seloDescricao}>Seus dados, suas regras</Text>
-                </Column>
-              </Row>
-              <Row style={{ ...seloLinha, borderBottom: '0' }}>
-                <Column style={seloMarca}>05</Column>
-                <Column>
-                  <Text style={seloNome}>Ambiente verificado</Text>
-                  <Text style={seloDescricao}>Monitoramento contínuo</Text>
-                </Column>
-              </Row>
-            </Section>
+            <Row>
+              <Column style={seloEmail}><Text style={medalha}>⌾</Text><Text style={seloNome}>Dados criptografados</Text><Text style={seloDescricao}>SSL/TLS</Text></Column>
+              <Column style={seloEmail}><Text style={medalha}>◇</Text><Text style={seloNome}>Compra segura</Text><Text style={seloDescricao}>Pagamento protegido</Text></Column>
+              <Column style={seloEmail}><Text style={medalha}>▣</Text><Text style={seloNome}>Certificada</Text><Text style={seloDescricao}>SOC 2 · ISO 27001</Text></Column>
+              <Column style={seloEmail}><Text style={medalha}>✓</Text><Text style={seloNome}>Privacidade</Text><Text style={seloDescricao}>LGPD</Text></Column>
+              <Column style={seloEmail}><Text style={medalha}>✦</Text><Text style={seloNome}>Verificado</Text><Text style={seloDescricao}>Monitoramento</Text></Column>
+            </Row>
           </Section>
 
           <Text style={legal}>Esta é uma mensagem automática. Por favor, não responda.</Text>
@@ -191,10 +161,9 @@ const nota = { fontSize: '12px', lineHeight: '1.7', color: '#8a7a73', margin: '0
 const rodapeLinks = { margin: '0 0 8px', fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase' as const }
 const rodapeLink = { color: tinta, textDecoration: 'none' }
 const legal = { fontSize: '10px', color: '#aa9a93', margin: 0, fontFamily: sans }
-const selosBox = { margin: '24px 0 18px', padding: '28px 24px 24px', backgroundColor: tinta, borderTop: `3px solid ${rose}` }
-const selosTitulo = { fontSize: '10px', letterSpacing: '3px', color: roseClaro, margin: '0 0 20px', textAlign: 'center' as const, fontFamily: sans, fontWeight: 600 }
-const selosGrade = { border: '1px solid #72564e' }
-const seloLinha = { borderBottom: '1px solid #72564e' }
-const seloMarca = { width: '54px', padding: '15px', color: roseClaro, fontSize: '11px', fontFamily: sans, textAlign: 'center' as const, verticalAlign: 'middle' as const, borderRight: '1px solid #72564e' }
-const seloNome = { margin: '0', padding: '12px 15px 1px', color: papel, fontSize: '12px', lineHeight: '1.35', fontFamily: sans, fontWeight: 600 }
-const seloDescricao = { margin: '0', padding: '0 15px 12px', color: '#d0bbb3', fontSize: '10px', lineHeight: '1.4', fontFamily: sans }
+const selosBox = { margin: '24px 0 18px', padding: '24px 12px 22px', backgroundColor: tinta, borderTop: `2px solid ${rose}` }
+const selosTitulo = { fontSize: '9px', letterSpacing: '3px', color: roseClaro, margin: '0 0 18px', textAlign: 'center' as const, fontFamily: sans, fontWeight: 600 }
+const seloEmail = { width: '20%', padding: '0 3px', textAlign: 'center' as const, verticalAlign: 'top' as const }
+const medalha = { width: '34px', height: '34px', lineHeight: '34px', margin: '0 auto 8px', border: `1px double ${rose}`, borderRadius: '50%', color: roseClaro, backgroundColor: '#5b443d', fontSize: '17px', textAlign: 'center' as const, fontFamily: 'Georgia, serif', boxShadow: 'inset 0 1px 0 #8e6b60, 0 3px 6px #241815' }
+const seloNome = { margin: '0', color: papel, fontSize: '9px', lineHeight: '1.3', fontFamily: sans, fontWeight: 600, textAlign: 'center' as const }
+const seloDescricao = { margin: '3px 0 0', color: '#d0bbb3', fontSize: '8px', lineHeight: '1.3', fontFamily: sans, textAlign: 'center' as const }

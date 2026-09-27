@@ -119,9 +119,12 @@ export function SiteFooter() {
           </Link>
         </div>
 
-        <SelosSeguranca />
+      </div>
 
-        <div className="mt-8 flex items-center justify-center gap-2 border-t border-border/60 pt-5 text-[11px] tracking-[0.08em] text-muted-foreground/70">
+      <SelosSeguranca />
+
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="flex items-center justify-center gap-2 py-6 text-[11px] tracking-[0.08em] text-muted-foreground/70">
           <span>desenvolvimento:</span>
           <a
             href="https://smalldata.cloud/"

@@ -36,3 +36,6 @@
 
 ## Avaliações do Google
 - [x] Substituir Duda Goes por Cristina Santos em todas as exibições
+
+## Selos de segurança
+- [x] Redesenhar os selos de todos os rodapés com faixa institucional escura e versão compatível para e-mails

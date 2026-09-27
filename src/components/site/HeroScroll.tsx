@@ -127,7 +127,6 @@ export function HeroScroll() {
               </>
             )}
           </div>
-          <h1 className="sr-only">Lardan — semijoias</h1>
         </div>
 
         {/* Convite inicial: orienta a primeira interação sem competir com a marca. */}
@@ -203,6 +202,14 @@ export function HeroScroll() {
             }}
           />
         )}
+
+        {/* Título principal da página: visível desde o primeiro quadro, sob a
+            marca — mesma voz tipográfica dos textos de apoio do site. */}
+        <div className="pointer-events-none absolute inset-x-0 top-[calc(50%+clamp(80px,13vw,170px))] z-[5] flex justify-center px-6">
+          <h1 className="text-center text-[0.8125rem] uppercase tracking-[var(--tracking-brand)] text-foreground">
+            Lardan — semijoias
+          </h1>
+        </div>
 
         {/* Estado 2: nome LARDAN emerge do clarão, no mesmo cenário intacto. */}
         <div

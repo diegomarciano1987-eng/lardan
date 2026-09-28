@@ -203,10 +203,10 @@ export function HeroScroll() {
           />
         )}
 
-        {/* Título principal da página: visível desde o primeiro quadro, sob a
-            marca — mesma voz tipográfica dos textos de apoio do site. */}
-        <div className="pointer-events-none absolute inset-x-0 top-[calc(50%+clamp(80px,13vw,170px))] z-[5] flex justify-center px-6">
-          <h1 className="text-center text-[0.8125rem] uppercase tracking-[var(--tracking-brand)] text-foreground">
+        {/* Título principal da página: visível desde o primeiro quadro, logo
+            acima do convite de rolagem — serifada da identidade, voz editorial. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(max(2rem,7vh)+4.75rem)] z-[5] flex justify-center px-6">
+          <h1 className="text-center font-display text-[0.9375rem] font-light uppercase tracking-[var(--tracking-brand)] text-foreground">
             Lardan — semijoias
           </h1>
         </div>

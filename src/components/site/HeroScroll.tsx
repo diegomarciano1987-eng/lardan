@@ -204,9 +204,9 @@ export function HeroScroll() {
         )}
 
         {/* Título principal da página: visível desde o primeiro quadro, logo
-            acima do convite de rolagem — serifada da identidade, voz editorial. */}
+            acima do convite de rolagem — mesma voz tipográfica do menu. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-[calc(max(2rem,7vh)+4.75rem)] z-[5] flex justify-center px-6">
-          <h1 className="text-center font-display text-[0.9375rem] font-light uppercase tracking-[var(--tracking-brand)] text-foreground">
+          <h1 className="text-center font-sans text-[0.6875rem] font-normal uppercase tracking-[0.22em] text-foreground">
             Lardan — semijoias
           </h1>
         </div>

@@ -94,3 +94,12 @@
 - [ ] Etapa 3: "Importar OFX" em cada conta, prévia novas/conhecidas/conflitantes, FITID ausente
 - [ ] Etapa 4: conciliação assistida (parcial, dividir, tarifa, transferência) e sugestões com evidência; IA sem poder de escrita
 - [ ] Etapa 5: celular 360/390, zoom 200%, publicação
+
+## Financeiro unificado (01/10)
+- [x] Etapa 1 + Asaas somando no total (1.532 cobranças espelhadas)
+- [x] Fonte formal em todos os valores
+- [x] Ficha do título (cockpit) ao clicar na linha + botão Baixa + histórico/auditoria
+- [x] Etapa 2a: vínculo cobrança Asaas → parcela (automático só se certo; resto revisão)
+- [x] Etapa 2b: sincronização automática diária do Asaas (1ª abertura após 6h)
+- [x] Etapa 2c: Extrato Asaas / Conciliação / Recebíveis seguem o período global
+- [ ] Etapas 3-5 (OFX, conciliação assistida, celular + publicação)

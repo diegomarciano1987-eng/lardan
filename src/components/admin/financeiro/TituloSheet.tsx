@@ -18,6 +18,7 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { useCapabilities } from "@/lib/capabilities";
+import { supabase } from "@/integrations/supabase/client";
 import { ClassificarTituloDialog } from "@/components/admin/financeiro/ClassificacaoCampos";
 import { PedirDadosDialog } from "@/components/admin/financeiro/PedirDadosDialog";
 import {
@@ -38,6 +39,17 @@ const inputCls =
 
 const dataBR = (d: string) => new Intl.DateTimeFormat("pt-BR").format(new Date(`${d}T12:00:00`));
 
+const ACOES: Record<string, string> = {
+  INSERT: "Criado",
+  UPDATE: "Alterado",
+  DELETE: "Removido",
+};
+function rotuloAcao(a: string) {
+  if (ACOES[a]) return ACOES[a];
+  const m = a.split(".").pop() ?? a;
+  return (m.charAt(0).toUpperCase() + m.slice(1)).replace(/_/g, " ");
+}
+
 function saldoParcela(p: FinInstallment) {
   return p.valor_cents + p.ajustes_cents - p.pago_cents;
 }
@@ -46,9 +58,15 @@ function saldoParcela(p: FinInstallment) {
 export function TituloSheet({
   id,
   onOpenChange,
+  parcelaInicial,
+  focoBaixa = false,
 }: {
   id: string | null;
   onOpenChange: (v: boolean) => void;
+  /** parcela já escolhida para a baixa (quando aberto a partir da lista) */
+  parcelaInicial?: string | null;
+  /** rola direto para o formulário de baixa */
+  focoBaixa?: boolean;
 }) {
   const qc = useQueryClient();
   const caps = useCapabilities();
@@ -80,6 +98,36 @@ export function TituloSheet({
   const [classificando, setClassificando] = React.useState(false);
 
   const t = detalhe.data;
+  const baixaRef = React.useRef<HTMLElement>(null);
+
+  // abre já com a parcela escolhida e o saldo dela preenchido
+  React.useEffect(() => {
+    if (!t) return;
+    const alvo = t.parcelas.find((p) => p.id === parcelaInicial) ?? t.parcelas.find((p) => saldoParcela(p) > 0);
+    if (alvo) {
+      setParcela(alvo.id);
+      const sd = saldoParcela(alvo);
+      if (sd > 0) setValor((sd / 100).toFixed(2).replace(".", ","));
+    }
+    if (focoBaixa) setTimeout(() => baixaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t?.titulo.id, parcelaInicial, focoBaixa]);
+
+  const auditoria = useQuery({
+    queryKey: ["fin-title-audit", id],
+    enabled: !!id && !!t,
+    queryFn: async () => {
+      const ids = [id as string, ...(t?.parcelas ?? []).map((p) => p.id)];
+      const { data, error } = await supabase
+        .from("audit_logs")
+        .select("id, action, created_at, actor_id, payload")
+        .in("entity_id", ids)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   const baixar = useMutation({
     mutationFn: async () => {
@@ -281,7 +329,7 @@ export function TituloSheet({
             </section>
 
             {podeBaixar && t.titulo.status !== "cancelado" && (
-              <section className="rounded-[12px] border border-line-soft bg-cream-2 p-4">
+              <section ref={baixaRef} className="scroll-mt-4 rounded-[12px] border border-champagne/50 bg-cream-2 p-4">
                 <p className="ledger-eyebrow">
                   {t.titulo.direction === "payable"
                     ? "Registrar pagamento"
@@ -413,15 +461,38 @@ export function TituloSheet({
             )}
 
             <section>
-              <p className="ledger-eyebrow">Histórico</p>
-              <ul className="mt-2 space-y-1.5">
-                {t.eventos.map((ev) => (
-                  <li key={ev.id} className="text-sm text-ledger-muted">
-                    {formatDateTime(ev.created_at)} — {ev.evento}
-                    {ev.motivo ? ` (${ev.motivo})` : ""}
-                  </li>
-                ))}
-              </ul>
+              <p className="ledger-eyebrow">Histórico do título</p>
+              {t.eventos.length === 0 ? (
+                <p className="mt-2 text-sm text-ledger-muted">Sem eventos registrados.</p>
+              ) : (
+                <ul className="mt-2 space-y-1.5">
+                  {t.eventos.map((ev) => (
+                    <li key={ev.id} className="text-sm text-ledger-muted">
+                      {formatDateTime(ev.created_at)} — {ev.evento}
+                      {ev.motivo ? ` (${ev.motivo})` : ""}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section>
+              <p className="ledger-eyebrow">Auditoria</p>
+              {auditoria.isLoading ? <Skeleton className="mt-2 h-16 w-full" /> : null}
+              {auditoria.error ? (
+                <p className="mt-2 text-sm text-ledger-muted">Sua permissão não inclui a trilha de auditoria.</p>
+              ) : auditoria.data && auditoria.data.length === 0 ? (
+                <p className="mt-2 text-sm text-ledger-muted">Sem registros de auditoria para este título.</p>
+              ) : (
+                <ul className="mt-2 divide-y divide-line-soft border-y border-line-soft">
+                  {(auditoria.data ?? []).map((a) => (
+                    <li key={a.id} className="py-2 text-sm">
+                      <span className="font-medium text-ledger-text">{rotuloAcao(a.action)}</span>
+                      <span className="block text-xs text-ledger-muted">{formatDateTime(a.created_at)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
 
             {t.titulo.status !== "cancelado" && (

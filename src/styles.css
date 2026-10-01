@@ -160,6 +160,7 @@
 @theme inline {
   --font-display: "Roxborough CF", "Cormorant Garamond", Georgia, serif;
   --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  --font-numeric: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   --font-trust-title: "Outfit", "Jost", ui-sans-serif, system-ui, sans-serif;
   --font-trust-body: "Figtree", "Jost", ui-sans-serif, system-ui, sans-serif;
   --color-rose: var(--rose);
@@ -1333,3 +1334,11 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
 @keyframes abertura-halo { 0% { opacity: 0; transform: scale(.4); } 100% { opacity: 1; transform: scale(1); } }
 @keyframes abertura-nome { from { opacity: 0; letter-spacing: .2em; } to { opacity: 1; letter-spacing: .5em; } }
 @media (prefers-reduced-motion: reduce) { .abertura-halo, .abertura-diamante, .abertura-nome { animation: none; } }
+
+/* Valores em reais e números: fonte formal, algarismos alinhados (mesma largura). */
+.tabular-nums,
+.valor-num {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
+}

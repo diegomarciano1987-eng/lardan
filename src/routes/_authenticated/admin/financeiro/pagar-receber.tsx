@@ -8,6 +8,8 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
 import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import { ListaTitulos } from "@/components/admin/financeiro/ListaTitulos";
+import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
+import { CobrancaAsaasSheet, ConferenciaAsaas, useSincronizacaoDiariaAsaas } from "@/components/admin/financeiro/AsaasConferencia";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   fetchLiquidacoes,
@@ -177,7 +179,12 @@ function PagarReceber() {
           <ListaLiquidacoes direction={natureza === "pagar" ? "payable" : "receivable"} de={de} ate={ate} pagina={pagina} onPagina={(p) => ir({ pagina: p }, false)} />
         ) : (
           <>
-            {s.origem === "asaas" && podeRec ? <PainelAsaas de={de} ate={ate} /> : null}
+            {s.origem === "asaas" && podeRec ? (
+              <>
+                <PainelAsaas de={de} ate={ate} />
+                <ConferenciaAsaas />
+              </>
+            ) : null}
             <ListaUnificada
               filtros={{ natureza, de, ate, situacao: s.situacao ?? "todos", origem: s.origem ?? "todas", busca: s.busca ?? "", limit: POR, offset: (pagina - 1) * POR }}
               busca={busca}
@@ -213,9 +220,29 @@ function ListaUnificada({
   const d = q.data;
   const t = d?.totais;
   const paginas = t ? Math.max(1, Math.ceil(t.linhas / POR)) : 1;
+  const caps = useCapabilities();
+  const podeBaixar = caps.includes("finance.settlement.create");
+  const [aberto, setAberto] = React.useState<{ titulo: string; parcela: string | null; baixa: boolean } | null>(null);
+  const [cobranca, setCobranca] = React.useState<LinhaPR | null>(null);
+  const abrir = (r: LinhaPR, baixa = false) => {
+    if (r.tipo === "cobranca_asaas") setCobranca(r);
+    else if (r.title_id) setAberto({ titulo: r.title_id, parcela: r.id, baixa });
+  };
 
   return (
     <Panel flush>
+      <TituloSheet
+        id={aberto?.titulo ?? null}
+        parcelaInicial={aberto?.parcela ?? null}
+        focoBaixa={aberto?.baixa ?? false}
+        onOpenChange={(v) => {
+          if (!v) {
+            setAberto(null);
+            void q.refetch();
+          }
+        }}
+      />
+      <CobrancaAsaasSheet linha={cobranca} onOpenChange={(v) => !v && setCobranca(null)} />
       <div className="flex flex-wrap items-center gap-3 px-5 pt-4">
         <input
           value={busca}
@@ -296,7 +323,7 @@ function ListaUnificada({
           {/* celular: cartões */}
           <ul className="mt-3 space-y-2 px-3 md:hidden">
             {d.rows.map((r) => (
-              <LinhaCartao key={`${r.tipo}-${r.id}`} r={r} />
+              <LinhaCartao key={`${r.tipo}-${r.id}`} r={r} onAbrir={abrir} podeBaixar={podeBaixar} />
             ))}
           </ul>
 
@@ -313,12 +340,17 @@ function ListaUnificada({
                   <th className="px-3 py-2 text-right">Ajustes</th>
                   <th className="px-3 py-2 text-right">Recebido/pago</th>
                   <th className="px-3 py-2 text-right">Saldo</th>
-                  <th className="px-5 py-2">Situação</th>
+                  <th className="px-3 py-2">Situação</th>
+                  <th className="px-5 py-2 text-right">Ação</th>
                 </tr>
               </thead>
               <tbody>
                 {d.rows.map((r) => (
-                  <tr key={`${r.tipo}-${r.id}`} className="border-b border-line-soft/60 align-top">
+                  <tr
+                    key={`${r.tipo}-${r.id}`}
+                    className="cursor-pointer border-b border-line-soft/60 align-top transition hover:bg-cream-2/70"
+                    onClick={() => abrir(r)}
+                  >
                     <td className="px-5 py-2 tabular-nums">{dataBR(r.vencimento)}</td>
                     <td className="px-3 py-2">
                       <div className="flex flex-wrap items-center gap-1.5">
@@ -340,14 +372,17 @@ function ListaUnificada({
                     <td className="px-3 py-2 text-right tabular-nums">{r.ajustes_cents ? formatBRLFromCents(r.ajustes_cents) : "—"}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatBRLFromCents(r.liquidado_cents)}</td>
                     <td className="px-3 py-2 text-right font-semibold tabular-nums">{formatBRLFromCents(r.saldo_cents)}</td>
-                    <td className="px-5 py-2">
+                    <td className="px-3 py-2">
                       {ROTULO_SIT[r.situacao]}
                       {r.status_externo ? <span className="block text-xs text-ledger-muted">Asaas: {r.status_externo === "PENDING" ? "pendente" : r.status_externo === "RECEIVED" ? "recebida" : r.status_externo === "CONFIRMED" ? "confirmada" : r.status_externo === "OVERDUE" ? "vencida" : r.status_externo === "RECEIVED_IN_CASH" ? "recebida em dinheiro" : r.status_externo}</span> : null}
                       {r.invoice_url ? (
-                        <a href={r.invoice_url} target="_blank" rel="noopener noreferrer" className="block text-xs text-asaas underline">
+                        <a href={r.invoice_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="block text-xs text-asaas underline">
                           Ver fatura
                         </a>
                       ) : null}
+                    </td>
+                    <td className="px-5 py-2 text-right">
+                      <AcaoLinha r={r} podeBaixar={podeBaixar} onAbrir={abrir} />
                     </td>
                   </tr>
                 ))}
@@ -375,7 +410,36 @@ function ListaUnificada({
   );
 }
 
-function LinhaCartao({ r }: { r: LinhaPR }) {
+function AcaoLinha({ r, podeBaixar, onAbrir }: { r: LinhaPR; podeBaixar: boolean; onAbrir: (r: LinhaPR, baixa?: boolean) => void }) {
+  if (r.tipo === "parcela" && r.saldo_cents > 0 && podeBaixar) {
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onAbrir(r, true);
+        }}
+        className="inline-flex min-h-10 items-center rounded-[10px] bg-ledger-text px-3 text-xs font-semibold whitespace-nowrap text-surface"
+      >
+        {r.direction === "payable" ? "Dar baixa (pago)" : "Dar baixa (recebido)"}
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onAbrir(r);
+      }}
+      className="admin-btn min-h-10 text-xs whitespace-nowrap"
+    >
+      Abrir ficha
+    </button>
+  );
+}
+
+function LinhaCartao({ r, onAbrir, podeBaixar }: { r: LinhaPR; onAbrir: (r: LinhaPR, baixa?: boolean) => void; podeBaixar: boolean }) {
   return (
     <li className="rounded-[12px] border border-line-soft bg-surface p-3">
       <details>
@@ -409,6 +473,14 @@ function LinhaCartao({ r }: { r: LinhaPR }) {
             </>
           ) : null}
         </dl>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <AcaoLinha r={r} podeBaixar={podeBaixar} onAbrir={onAbrir} />
+          {r.tipo === "parcela" && r.saldo_cents > 0 && podeBaixar ? (
+            <button type="button" className="admin-btn min-h-10 text-xs" onClick={() => onAbrir(r)}>
+              Abrir ficha
+            </button>
+          ) : null}
+        </div>
       </details>
     </li>
   );
@@ -503,6 +575,7 @@ function ListaLiquidacoes({
 
 function PainelAsaas({ de, ate }: { de: string; ate: string }) {
   const qc = useQueryClient();
+  useSincronizacaoDiariaAsaas(de, ate);
   const sync = useServerFn(sincronizarCobrancasAsaas);
   const ultima = useQuery({ queryKey: ["asaas-sync-ultima"], queryFn: fetchUltimaSyncAsaas });
   const m = useMutation({

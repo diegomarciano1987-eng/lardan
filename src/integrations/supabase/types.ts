@@ -4340,6 +4340,54 @@ export type Database = {
         }
         Relationships: []
       }
+      help_articles: {
+        Row: {
+          categoria: string
+          corpo: string
+          created_at: string
+          id: string
+          ordem: number
+          publico: string
+          resumo: string
+          revisado_em: string
+          slug: string
+          status: string
+          tela: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          categoria: string
+          corpo?: string
+          created_at?: string
+          id?: string
+          ordem?: number
+          publico?: string
+          resumo?: string
+          revisado_em?: string
+          slug: string
+          status?: string
+          tela?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          categoria?: string
+          corpo?: string
+          created_at?: string
+          id?: string
+          ordem?: number
+          publico?: string
+          resumo?: string
+          revisado_em?: string
+          slug?: string
+          status?: string
+          tela?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       homolog_purge_runs: {
         Row: {
           antes: Json

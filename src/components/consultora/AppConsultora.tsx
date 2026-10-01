@@ -72,6 +72,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
           })}
         </nav>
         <div className="mt-auto flex flex-col gap-2">
+          <BotaoNovidades />
           <BotaoAjuda tela={ajuda} className="w-full justify-start" />
           <button type="button" onClick={sair} className="admin-btn min-h-12 w-full text-base"><LogOut className="size-5" aria-hidden /> Sair</button>
         </div>

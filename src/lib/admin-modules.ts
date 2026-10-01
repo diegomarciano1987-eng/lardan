@@ -23,6 +23,7 @@ import {
   Store,
   Plug,
   LifeBuoy,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 
@@ -92,6 +93,15 @@ export const ADMIN_MODULES: AdminModule[] = [
     label: "Central de Ajuda",
     description: "Artigos de ajuda das consultoras e do público: rascunho, publicação e revisão.",
     icon: LifeBuoy,
+    roles: CONTENT,
+    state: "ativo",
+  },
+  {
+    slug: "avisos",
+    path: "/admin/avisos",
+    label: "Central de Avisos",
+    description: "Novidades, avisos e promoções para as consultoras, com aviso crítico e lista de quem confirmou ciência.",
+    icon: Megaphone,
     roles: CONTENT,
     state: "ativo",
   },

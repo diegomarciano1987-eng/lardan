@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DateField } from "@/components/premium/DateField";
 import { BotaoAjuda } from "@/components/ajuda/Ajuda";
+import diamanteLardan from "@/assets/lardan-diamante.png.asset.json";
+import nomeLardan from "@/assets/lardan-wordmark.png.asset.json";
 import { brl, chaveIdempotencia, imagem, traduzir } from "@/lib/maletas";
 import {
   CANAL, carregarInicio, criarPedido, dataBR, formatarTelefone, hojeISO, linkWhats, listarAtendimentos, listarClientes,
@@ -43,8 +45,8 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
     <div className="area-consultora min-h-dvh bg-background text-foreground lg:flex">
       {/* Menu lateral no computador */}
       <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-8 lg:flex">
-        <p className="font-display text-3xl">Lardan</p>
-        <p className="mb-8 text-base text-muted-foreground">Minha área de consultora</p>
+        <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Minha área</p>
+        <p className="mb-8 mt-1 text-xl font-semibold">Consultora</p>
         <button type="button" onClick={() => ir({ aba: "novo" })} className="btn-app-principal mb-6 w-full">
           <Plus className="size-5" aria-hidden /> Novo pedido
         </button>
@@ -60,12 +62,18 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
           })}
         </nav>
         <div className="mt-auto flex flex-col gap-2">
+          <img src={nomeLardan.url} alt="LARDAN" className="mb-3 h-auto w-28 object-contain object-left" />
           <BotaoAjuda tela={ajuda} className="w-full justify-start" />
           <button type="button" onClick={sair} className="admin-btn min-h-12 w-full text-base"><LogOut className="size-5" aria-hidden /> Sair</button>
         </div>
       </aside>
 
       <div className="min-w-0 flex-1">
+        <div className="grid h-16 grid-cols-[minmax(0,1fr)_auto] items-center border-b border-border bg-card px-4 sm:px-6 lg:h-20 lg:border-0 lg:bg-transparent lg:px-10">
+          <img src={nomeLardan.url} alt="LARDAN" className="h-auto w-28 object-contain object-left lg:hidden" />
+          <span className="hidden lg:block" aria-hidden />
+          <img src={diamanteLardan.url} alt="" aria-hidden className="h-auto w-11 object-contain lg:w-14" />
+        </div>
         <main className="mx-auto w-full max-w-5xl px-4 pt-5 pb-[calc(6.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-10 lg:pb-12">
           {children}
         </main>

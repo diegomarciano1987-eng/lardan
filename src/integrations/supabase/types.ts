@@ -8153,6 +8153,55 @@ export type Database = {
           },
         ]
       }
+      showcase_illustrations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          party_id: string
+          prompt: string | null
+          storage_path: string
+          variant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          party_id: string
+          prompt?: string | null
+          storage_path: string
+          variant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          party_id?: string
+          prompt?: string | null
+          storage_path?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "showcase_illustrations_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "showcase_illustrations_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "showcase_illustrations_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       showcase_views: {
         Row: {
           created_at: string

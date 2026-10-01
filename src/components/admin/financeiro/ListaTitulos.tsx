@@ -89,11 +89,24 @@ export function ListaTitulos({
       header: "Título",
       render: (r) => (
         <div className="min-w-0">
-          {r.numero ? (
-            <p className="text-[0.7rem] font-semibold tracking-[0.08em] text-bronze tabular-nums">
-              Nº {r.numero}
-            </p>
-          ) : null}
+          <div className="flex items-center gap-2">
+            {r.numero ? (
+              <p className="text-[0.7rem] font-semibold tracking-[0.08em] text-bronze tabular-nums">
+                Nº {r.numero}
+              </p>
+            ) : null}
+            <span
+              className={
+                r.origem === "asaas"
+                  ? "rounded-full bg-asaas px-2 py-0.5 text-[0.65rem] font-semibold text-asaas-foreground"
+                  : r.origem === "importacao"
+                    ? "rounded-full border border-line-soft bg-cream-2 px-2 py-0.5 text-[0.65rem] font-semibold text-ledger-muted"
+                    : "rounded-full border border-champagne bg-surface px-2 py-0.5 text-[0.65rem] font-semibold text-ledger-text"
+              }
+            >
+              {r.origem === "asaas" ? "Asaas" : r.origem === "importacao" ? "Importação" : "Manual"}
+            </span>
+          </div>
           <p className="truncate font-semibold text-ledger-text">{r.descricao}</p>
           <p className="truncate text-xs text-ledger-muted">
             {r.contraparte}

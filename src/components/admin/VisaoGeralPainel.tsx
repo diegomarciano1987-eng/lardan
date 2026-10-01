@@ -18,6 +18,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Panel, Skeleton, ErrorState, formatBRLFromCents, formatInt } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
+import { PulsoCards } from "@/components/admin/PulsoCards";
 
 interface Painel {
   fluxo: { mes: string; entradas: number; saidas: number }[];
@@ -146,12 +147,7 @@ export function VisaoGeralPainel({ saldoContas, vencidoReceber, vencidoPagar }: 
         </div>
       ) : aba === "pulso" ? (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Kpi rotulo="Saldo em contas" valor={saldoContas != null ? formatBRLFromCents(saldoContas) : "—"} detalhe="Todas as contas e caixas" />
-            <Kpi rotulo={`Recebido em ${mesAtual ? rotuloMes(mesAtual.mes) : "—"}`} valor={formatBRLFromCents(mesAtual?.entradas ?? 0)} detalhe={`Pago no mês: ${formatBRLFromCents(mesAtual?.saidas ?? 0)}`} />
-            <Kpi rotulo="Resultado de caixa · 12 meses" valor={formatBRLFromCents(entradas12 - saidas12)} detalhe={`${compacto(entradas12)} entraram · ${compacto(saidas12)} saíram`} tom={entradas12 - saidas12 < 0 ? "alerta" : undefined} />
-            <Kpi rotulo="Vencido a receber" valor={formatBRLFromCents(vencidoReceber ?? 0)} detalhe={`Vencido a pagar: ${formatBRLFromCents(vencidoPagar ?? 0)}`} tom={(vencidoReceber ?? 0) > 0 ? "alerta" : undefined} />
-          </div>
+          <PulsoCards />
 
           <div className="grid gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
             <Panel title="Fluxo de caixa realizado · últimos 12 meses">

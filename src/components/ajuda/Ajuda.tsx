@@ -59,7 +59,7 @@ export function CorpoArtigo({ texto }: { texto: string }) {
 }
 
 /** Lista pesquisável + leitura do artigo. Não navega: quem chamou continua com o formulário intacto. */
-export function CentralAjuda({ tela, inicial }: { tela?: string; inicial?: string | null }) {
+export function CentralAjuda({ tela, inicial }: { tela?: string | undefined; inicial?: string | null }) {
   const q = useQuery({ queryKey: ["ajuda"], queryFn: listarAjuda, staleTime: 5 * 60_000 });
   const [busca, setBusca] = React.useState("");
   const [aberto, setAberto] = React.useState<string | null>(inicial ?? null);
@@ -126,7 +126,7 @@ function Grupo({ titulo, itens, abrir, destaque }: { titulo: string; itens: Arti
 }
 
 /** Botão “Ajuda” que abre a central por cima da tela, sem perder o que está preenchido. */
-export function BotaoAjuda({ tela, className = "" }: { tela?: string; className?: string }) {
+export function BotaoAjuda({ tela, className = "" }: { tela?: string | undefined; className?: string }) {
   const [aberta, setAberta] = React.useState(false);
   return (
     <>

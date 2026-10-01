@@ -124,7 +124,7 @@ function MinhaConta() {
               </div>
               <div>
                 <label htmlFor="senha" className="brand-eyebrow mb-2 block">Senha</label>
-                <input id="senha" type="password" required minLength={8}
+                <PasswordInput id="senha" required minLength={8}
                   autoComplete={modo === "entrar" ? "current-password" : "new-password"} value={senha}
                   onChange={(e) => setSenha(e.target.value)} className={inputClass} />
               </div>

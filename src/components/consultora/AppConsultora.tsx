@@ -248,12 +248,12 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
       )}
       {q.data && q.data.length > 0 && lista.length === 0 && <Estado tipo="vazio" texto={`Nenhuma cliente encontrada para “${busca}”.`} />}
 
-      <ul className="grid gap-3 lg:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {lista.map((c) => {
           const atrasado = c.proximo_retorno && c.proximo_retorno < hoje;
           const ehHoje = c.proximo_retorno === hoje;
           return (
-            <li key={c.id}>
+            <li key={c.id} className="min-w-0">
               <button type="button" onClick={() => ir({ aba: "clientes", id: c.id, q: nav.q })}
                 className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 text-left active:bg-muted">
                 <span className="grid size-12 shrink-0 place-items-center rounded-full bg-primary/12 text-lg font-semibold text-primary" aria-hidden>
@@ -498,9 +498,9 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
           <h2 className="text-xl font-semibold">Para quem é o pedido?</h2>
           {clientes.isLoading && <Estado tipo="carregando" texto="Carregando clientes…" />}
           {clientes.data?.length === 0 && <Estado tipo="vazio" texto="Cadastre a cliente primeiro." />}
-          <ul className="grid gap-2 lg:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 lg:grid-cols-2">
             {clientes.data?.map((c) => (
-              <li key={c.id}>
+              <li key={c.id} className="min-w-0">
                 <button type="button" onClick={() => { setCliente(c.id); setPasso(2); }}
                   className={`flex min-h-16 w-full items-center justify-between gap-3 rounded-2xl border p-4 text-left ${cliente === c.id ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
                   <span className="min-w-0"><span className="block truncate text-[1.1rem] font-semibold">{c.nome}</span>
@@ -546,12 +546,12 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
               );
             })}
           </ul>
-          <div className="fixed inset-x-0 bottom-[calc(4.6rem+env(safe-area-inset-bottom))] z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur lg:static lg:rounded-2xl lg:border">
+          {(pecas.data?.length ?? 0) > 0 && <div className="fixed inset-x-0 bottom-[calc(4.6rem+env(safe-area-inset-bottom))] z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur lg:static lg:rounded-2xl lg:border">
             <div className="mx-auto flex max-w-5xl items-center gap-3">
               <p className="min-w-0 flex-1 text-[1.02rem]"><strong>{unidades}</strong> peça{unidades === 1 ? "" : "s"} · <strong>{brl(total)}</strong></p>
               <button type="button" className="btn-app-principal" disabled={unidades === 0} onClick={() => setPasso(3)}>Revisar pedido</button>
             </div>
-          </div>
+          </div>}
         </div>
       )}
 

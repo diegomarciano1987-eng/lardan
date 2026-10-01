@@ -181,9 +181,26 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
             ))}
           </nav>
         )}
-        {catalogo.length ? <Grade lista={catalogo} /> : (
+        {!catalogo.length ? (
           <p className="py-10 text-center text-sm text-[var(--v-muted)]">Nenhuma peça disponível nesta vitrine agora. Fale comigo pelo WhatsApp que eu te aviso quando chegar novidade.</p>
-        )}
+        ) : categoria === "todas" && categorias.length > 1 ? (
+          <div className="space-y-12">
+            {[...categorias, ...(visiveis.some((i) => !i.categoria) ? [""] : [])].map((c) => {
+              const lista = visiveis.filter((i) => (i.categoria || "") === c);
+              if (!lista.length) return null;
+              return (
+                <div key={c || "outras"}>
+                  <div className={`mb-5 flex items-center gap-4 ${a.tema === "minimalista" ? "justify-center" : ""}`}>
+                    <h3 className="text-sm uppercase tracking-[0.3em]">{c || "Outras peças"}</h3>
+                    <span className="h-px flex-1 bg-[var(--v-line)]" />
+                    <span className="text-xs text-[var(--v-muted)]">{lista.length} {lista.length === 1 ? "peça" : "peças"}</span>
+                  </div>
+                  <Grade lista={lista} />
+                </div>
+              );
+            })}
+          </div>
+        ) : <Grade lista={catalogo} />}
       </section>
     );
   });

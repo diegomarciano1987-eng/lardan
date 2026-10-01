@@ -53,3 +53,6 @@
 ## Estúdio da Minha Vitrine
 - [x] Rascunho/publicação/histórico, perfil, contato, foto e capa, temas, organização, compartilhamento, página pública
 - [ ] Testes de regressão isolados (imagens extremas, duas abas, conexão interrompida) — ambiente isolado
+- [x] Rodada celular da consultora (parte 1): navegação inferior, toque 48px, conferência sem campos minúsculos, Central de Ajuda + passeio + editor
+- [ ] Rodada celular parte 2: cadastro de clientes, pedido/venda/pagamento e financeiro da consultora (telas ainda não existem; dependem das decisões da Etapa 5)
+- [ ] Teste em aparelhos Android/iPhone reais e leitor de tela

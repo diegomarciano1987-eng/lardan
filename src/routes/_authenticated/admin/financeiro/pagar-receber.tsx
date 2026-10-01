@@ -521,7 +521,7 @@ function PainelAsaas({ de, ate }: { de: string; ate: string }) {
           {ultima.error
             ? "Não foi possível ler a última sincronização."
             : u
-              ? `Última sincronização: ${new Date(u.iniciado_em).toLocaleString("pt-BR")} · ${u.status === "concluida" ? `${u.recebidas} lidas (${dataBR(u.de)} a ${dataBR(u.ate)})` : u.status === "falhou" ? `falhou: ${u.erro ?? ""}` : "em andamento"}`
+              ? `Última sincronização: ${new Date(u.iniciado_em).toLocaleString("pt-BR")} · ${u.status === "concluida" ? `${u.recebidas} cobranças lidas (todas as datas)` : u.status === "falhou" ? `falhou: ${u.erro ?? ""}` : "em andamento"}`
               : "Nenhuma sincronização ainda."}
         </p>
         <p className="text-xs text-ledger-muted">Somente leitura: não cria cobrança, não avisa cliente e não dá baixa.</p>
@@ -532,7 +532,7 @@ function PainelAsaas({ de, ate }: { de: string; ate: string }) {
         onClick={() => m.mutate()}
         className="inline-flex min-h-11 items-center rounded-[10px] bg-asaas px-4 text-sm font-semibold text-asaas-foreground disabled:opacity-60"
       >
-        {m.isPending ? "Sincronizando…" : "Sincronizar período com o Asaas"}
+        {m.isPending ? "Sincronizando…" : "Sincronizar todas as cobranças do Asaas"}
       </button>
     </div>
   );

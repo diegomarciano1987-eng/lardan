@@ -27,6 +27,37 @@ export function SiteLayout({ children, brandedHeader = false }: { children: Reac
     }
   }, [pathname]);
 
+  // Atalho na página inicial: segurar G e apertar S ("go system") abre o login da equipe.
+  useEffect(() => {
+    if (pathname !== "/") return;
+    let gPressionado = false;
+    const digitando = (el: EventTarget | null) =>
+      el instanceof HTMLElement &&
+      (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName));
+    function down(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey || digitando(e.target)) return;
+      const k = e.key.toLowerCase();
+      if (k === "g") gPressionado = true;
+      else if (k === "s" && gPressionado) {
+        e.preventDefault();
+        gPressionado = false;
+        window.location.assign("/equipe");
+      }
+    }
+    function up(e: KeyboardEvent) {
+      if (e.key.toLowerCase() === "g") gPressionado = false;
+    }
+    const reset = () => (gPressionado = false);
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    window.addEventListener("blur", reset);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", reset);
+    };
+  }, [pathname]);
+
   return (
     <EcossistemaLardanProvider>
       <div className="site-scope min-h-screen bg-background">

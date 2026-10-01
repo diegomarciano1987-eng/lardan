@@ -58,7 +58,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Minha área</p>
         <p className="mb-6 mt-1 text-xl font-semibold">Consultora</p>
         <button type="button" onClick={() => ir({ aba: "novo" })} className="btn-app-principal mb-5 w-full">
-          <Plus className="size-5" aria-hidden /> Novo pedido
+          <Plus className="size-5" aria-hidden /> Nova venda
         </button>
         <nav aria-label="Menu" className="flex flex-col gap-1">
           {[...PRINCIPAIS, ...EXTRAS].map((i) => {
@@ -100,7 +100,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
             <SheetDescription className="text-base">Consultora</SheetDescription>
           </SheetHeader>
           <button type="button" onClick={() => abrir("novo")} className="btn-app-principal mb-5 w-full">
-            <Plus className="size-5" aria-hidden /> Novo pedido
+            <Plus className="size-5" aria-hidden /> Nova venda
           </button>
           <nav aria-label="Todas as opções" className="flex flex-col gap-1">
             {[...PRINCIPAIS, ...EXTRAS].map((i) => {
@@ -202,7 +202,7 @@ export function Inicio({ ir }: { ir: Ir }) {
           className="flex min-h-24 items-center gap-4 rounded-3xl bg-acao px-6 py-5 text-left text-acao-foreground shadow-[var(--shadow-app)] active:scale-[0.99]">
           <span className="grid size-14 shrink-0 place-items-center rounded-full bg-acao-foreground/15"><Plus className="size-7" aria-hidden /></span>
           <span>
-            <span className="block text-xl font-semibold">Novo pedido</span>
+            <span className="block text-xl font-semibold">Nova venda</span>
             <span className="block text-[0.98rem] opacity-90">Escolha a cliente e as peças da sua maleta</span>
           </span>
         </button>
@@ -503,7 +503,7 @@ export function FichaCliente({ id, nav, ir }: { id: string; nav: Nav; ir: Ir }) 
           </section>
           <EtapaPessoa cl={cl} />
           <button type="button" className="btn-app-principal w-full" onClick={() => ir({ aba: "novo", id: cl.id })}>
-            <Plus className="size-5" aria-hidden /> Novo pedido para {cl.nome.split(" ")[0]}
+            <Plus className="size-5" aria-hidden /> Nova venda para {cl.nome.split(" ")[0]}
           </button>
           <section className="rounded-2xl border border-border bg-card p-5">
             <h2 className="text-lg font-semibold">Próximo retorno</h2>
@@ -621,7 +621,7 @@ function EtapaPessoa({ cl }: { cl: Cliente }) {
   );
 }
 
-/* ------------------------------------------------------------------ novo pedido */
+/* ------------------------------------------------------------------ nova venda */
 
 export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | undefined; ir: Ir }) {
   const qc = useQueryClient();
@@ -650,7 +650,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
 
   return (
     <div>
-      <Topo titulo={passo === 4 ? "Pedido criado" : "Novo pedido"} ajuda="pedidos" voltar={passo === 4 ? undefined : voltar} />
+      <Topo titulo={passo === 4 ? "Pedido criado" : "Nova venda"} ajuda="pedidos" voltar={passo === 4 ? undefined : voltar} />
       {passo < 4 && (
         <ol className="mb-6 grid grid-cols-3 gap-2" aria-label="Etapas">
           {ETAPAS.map((e, i) => {

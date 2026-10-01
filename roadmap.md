@@ -73,3 +73,12 @@
 - [ ] Extratos bancários não importados (só Asaas) — comparação por banco bloqueada
 - [ ] P0.3–P0.8 despesas fixas, despesas fixas, teto 1.000, transferências, futuros, Asaas, parcelas
 - [ ] P1 (9–18), P2 (19–23), P3 (24–27) — item 9 depende da política comercial do acerto
+
+## P0 financeiro — rodada itens 8/3/5 (01/10)
+- [x] Item 8: lista por parcela (vencimento, saldo, competência próprios; total do contrato como referência)
+- [x] Item 3: competência por parcela; aluguel casa comercial distribuído (12 eventos auditados)
+- [ ] Item 3: demais contratos de despesa — aguardando decisão individual do Daniel
+- [x] Item 5: transferência uma vez; implantação separada; lista por operação com as duas movimentações
+- [~] Item 7: Asaas medido (250 eventos na fila, 0 cobranças espelhadas); R$ 3.388,77 sem origem — precisa do saldo Asaas em 30/09
+- [ ] Item 9: simulação do acerto (sem recebíveis)
+- [ ] Item 1: extratos OFX por conta em 30/09 (bloqueado: arquivos)

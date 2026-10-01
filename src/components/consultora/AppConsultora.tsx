@@ -201,7 +201,7 @@ export function Inicio({ ir }: { ir: Ir }) {
         </button>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { r: "Cadastrar cliente", i: UserPlus, n: { aba: "clientes", modo: "nova" } as Nav },
+            { r: "Nova interessada", i: UserPlus, n: { aba: "clientes", modo: "nova" } as Nav },
             { r: "Meus pedidos", i: ShoppingBag, n: { aba: "pedidos" } as Nav },
             { r: "Minha vitrine", i: Store, n: { aba: "vitrine" } as Nav },
           ].map((a) => (

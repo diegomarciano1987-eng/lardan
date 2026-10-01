@@ -2107,6 +2107,112 @@ export type Database = {
           },
         ]
       }
+      consultant_client_contacts: {
+        Row: {
+          canal: string
+          client_id: string
+          consultora_party_id: string
+          created_at: string
+          id: string
+          nota: string
+        }
+        Insert: {
+          canal: string
+          client_id: string
+          consultora_party_id: string
+          created_at?: string
+          id?: string
+          nota?: string
+        }
+        Update: {
+          canal?: string
+          client_id?: string
+          consultora_party_id?: string
+          created_at?: string
+          id?: string
+          nota?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_client_contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "consultant_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_client_contacts_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_client_contacts_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      consultant_clients: {
+        Row: {
+          aniversario: string | null
+          consultora_party_id: string
+          created_at: string
+          email: string | null
+          id: string
+          nome: string
+          observacoes: string
+          preferencias: string
+          proximo_retorno: string | null
+          telefone: string
+          updated_at: string
+        }
+        Insert: {
+          aniversario?: string | null
+          consultora_party_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome: string
+          observacoes?: string
+          preferencias?: string
+          proximo_retorno?: string | null
+          telefone?: string
+          updated_at?: string
+        }
+        Update: {
+          aniversario?: string | null
+          consultora_party_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string
+          observacoes?: string
+          preferencias?: string
+          proximo_retorno?: string | null
+          telefone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_clients_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_clients_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       consultant_profiles: {
         Row: {
           audience: string | null
@@ -7568,6 +7674,7 @@ export type Database = {
           cancel_reason: string | null
           cancelled_at: string | null
           channel: string
+          client_id: string | null
           closed_at: string | null
           code: string
           consultora_party_id: string
@@ -7592,6 +7699,7 @@ export type Database = {
           cancel_reason?: string | null
           cancelled_at?: string | null
           channel?: string
+          client_id?: string | null
           closed_at?: string | null
           code?: string
           consultora_party_id: string
@@ -7616,6 +7724,7 @@ export type Database = {
           cancel_reason?: string | null
           cancelled_at?: string | null
           channel?: string
+          client_id?: string | null
           closed_at?: string | null
           code?: string
           consultora_party_id?: string
@@ -7637,6 +7746,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sales_orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "consultant_clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sales_orders_consultora_party_id_fkey"
             columns: ["consultora_party_id"]
@@ -8875,6 +8991,24 @@ export type Database = {
           _reservation_id: string
         }
         Returns: Json
+      }
+      consultant_home: { Args: never; Returns: Json }
+      consultant_order_create: {
+        Args: { _client: string; _idempotency_key: string; _itens: Json }
+        Returns: Json
+      }
+      consultant_pieces: {
+        Args: never
+        Returns: {
+          cycle_id: string
+          disponivel: number
+          maleta: string
+          media_id: string
+          preco_cents: number
+          produto: string
+          variant_id: string
+          variante: string
+        }[]
       }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }

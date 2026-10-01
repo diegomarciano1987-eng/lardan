@@ -470,7 +470,7 @@ function AreaConsultoraLiberada() {
       {aba === "clientes" && (nav.modo ? <FormCliente id={nav.modo === "editar" ? nav.id : undefined} ir={ir} />
         : nav.id ? <FichaCliente id={nav.id} nav={nav} ir={ir} /> : <Clientes nav={nav} ir={ir} />)}
       {aba === "novo" && <NovoPedido clienteInicial={nav.id} ir={ir} />}
-      {aba === "pedidos" && (<><Topo titulo="Pedidos" ajuda="pedidos"><button type="button" className="btn-app-principal hidden sm:inline-flex" onClick={() => ir({ aba: "novo" })}>Novo pedido</button></Topo><div className="max-w-3xl"><Pedidos /></div></>)}
+      {aba === "pedidos" && (<><Topo titulo="Pedidos" ajuda="pedidos"><button type="button" className="btn-app-principal hidden sm:inline-flex" onClick={() => ir({ aba: "novo" })}>Nova venda</button></Topo><div className="max-w-3xl"><Pedidos /></div></>)}
       {aba === "maleta" && (<><Topo titulo="Minha maleta" ajuda="maleta" />{seletorMaleta}<div className="max-w-3xl"><MinhaMaleta cycleId={atual} /></div></>)}
       {aba === "historico" && (<><Topo titulo="Entregas da maleta" ajuda="maleta" voltar={() => ir({ aba: "mais" })} />{seletorMaleta}<div className="max-w-3xl"><Historico cycleId={atual} /></div></>)}
       {aba === "vitrine" && (<><Topo titulo="Minha vitrine" ajuda="vitrine" voltar={() => ir({ aba: "mais" })} /><Estudio /></>)}
@@ -482,7 +482,7 @@ function AreaConsultoraLiberada() {
 const PASSOS = [
   { t: "Bem-vinda à sua área", d: "Aqui você cuida das suas clientes, dos seus pedidos, da sua maleta e da sua vitrine, tudo pelo celular." },
   { t: "Menu embaixo da tela", d: "Início, Clientes, Pedidos, Maleta e Mais. Em “Mais” ficam a sua vitrine e as entregas." },
-  { t: "Novo pedido", d: "No Início, toque em “Novo pedido”: escolha a cliente, as peças e confira antes de confirmar." },
+  { t: "Nova venda", d: "No Início, toque em “Nova venda”: escolha a cliente, as peças e confira antes de confirmar." },
   { t: "Dúvidas?", d: "Toque em “Ajuda” no alto da tela. Ao fechar, você volta para onde estava. Este passeio pode ser revisto na Central de Ajuda." },
 ];
 

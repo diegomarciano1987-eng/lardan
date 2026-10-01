@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BriefcaseBusiness, PackageCheck, ShoppingBag, Store } from "lucide-react";
 import { toast } from "sonner";
 import { Estudio } from "@/components/vitrine/Estudio";
+import { BotaoAjuda } from "@/components/ajuda/Ajuda";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { fetchMyRoles } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
@@ -25,7 +27,12 @@ import {
   type TipoDivergencia,
 } from "@/lib/maletas";
 
+const ABAS_VALIDAS = ["maleta", "vitrine", "pedidos", "historico"] as const;
+
 export const Route = createFileRoute("/_authenticated/consultora")({
+  validateSearch: (s: Record<string, unknown>): { aba?: Aba | undefined } => ({
+    aba: ABAS_VALIDAS.includes(s["aba"] as Aba) ? (s["aba"] as Aba) : undefined,
+  }),
   component: AreaConsultora,
   head: () => ({
     meta: [
@@ -173,46 +180,48 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
                       <div className="size-14 rounded-xl bg-surface-muted" aria-hidden />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">{c.produto}</p>
-                      <p className="text-xs text-ledger-muted">
-                        {c.variante ?? "—"} · enviadas {c.quantidade} · aceitas {c.quantidade - div}
+                      <p className="text-base font-semibold leading-snug">{c.produto}</p>
+                      <p className="text-[0.95rem] text-ledger-muted">
+                        {c.variante ?? "Sem variação"} · enviadas {c.quantidade} · aceitas {c.quantidade - div}
                       </p>
                     </div>
-                    <input
-                      type="number"
-                      min={0}
-                      max={c.quantidade}
-                      aria-label={`Unidades com problema de ${c.produto}`}
-                      className="admin-input w-20"
-                      value={divergencias[c.variant_id] ?? 0}
-                      onChange={(e) =>
-                        setDivergencias((v) => ({
-                          ...v,
-                          [c.variant_id]: Math.min(Math.max(0, Number(e.target.value)), c.quantidade),
-                        }))
-                      }
-                    />
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <span className="text-[0.95rem]">Unidades com problema</span>
+                    <div className="flex items-center gap-2" role="group" aria-label={`Unidades com problema de ${c.produto}`}>
+                      <button type="button" className="admin-btn size-12 justify-center p-0 text-xl" aria-label="Diminuir"
+                        disabled={div <= 0}
+                        onClick={() => setDivergencias((v) => ({ ...v, [c.variant_id]: Math.max(0, div - 1) }))}>−</button>
+                      <span className="w-10 text-center text-xl font-semibold num" aria-live="polite">{div}</span>
+                      <button type="button" className="admin-btn size-12 justify-center p-0 text-xl" aria-label="Aumentar"
+                        disabled={div >= c.quantidade}
+                        onClick={() => setDivergencias((v) => ({ ...v, [c.variant_id]: Math.min(c.quantidade, div + 1) }))}>+</button>
+                    </div>
                   </div>
                   {div > 0 && (
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <select
-                        aria-label={`Tipo da divergência de ${c.produto}`}
-                        className="admin-input"
-                        value={tipos[c.variant_id] ?? "faltante"}
-                        onChange={(e) =>
-                          setTipos((v) => ({ ...v, [c.variant_id]: e.target.value as TipoDivergencia }))
-                        }
-                      >
-                        <option value="faltante">Não veio na maleta</option>
-                        <option value="defeito">Veio com defeito</option>
-                      </select>
-                      <input
-                        className="admin-input"
-                        aria-label={`Motivo da divergência de ${c.produto}`}
-                        placeholder="Descreva o que aconteceu"
-                        value={motivos[c.variant_id] ?? ""}
-                        onChange={(e) => setMotivos((v) => ({ ...v, [c.variant_id]: e.target.value }))}
-                      />
+                    <div className="grid gap-2">
+                      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={`Tipo da divergência de ${c.produto}`}>
+                        {([["faltante", "Não veio na maleta"], ["defeito", "Veio com defeito"]] as const).map(([v, r]) => {
+                          const sel = (tipos[c.variant_id] ?? "faltante") === v;
+                          return (
+                            <button key={v} type="button" role="radio" aria-checked={sel}
+                              onClick={() => setTipos((t) => ({ ...t, [c.variant_id]: v as TipoDivergencia }))}
+                              className={`min-h-12 rounded-xl border px-3 text-[0.95rem] font-medium ${sel ? "border-ink bg-ink text-warm-ivory" : "border-line bg-surface"}`}>
+                              {sel ? "✓ " : ""}{r}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <label className="grid gap-1">
+                        <span className="text-[0.95rem] font-medium">O que aconteceu?</span>
+                        <input
+                          className="admin-input"
+                          autoComplete="off"
+                          placeholder="Ex.: veio sem o fecho"
+                          value={motivos[c.variant_id] ?? ""}
+                          onChange={(e) => setMotivos((v) => ({ ...v, [c.variant_id]: e.target.value }))}
+                        />
+                      </label>
                     </div>
                   )}
                 </div>
@@ -409,7 +418,14 @@ function AreaConsultora() {
 }
 
 function AreaConsultoraLiberada() {
-  const [aba, setAba] = React.useState<Aba>("maleta");
+  const busca = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const aba: Aba = busca.aba ?? "maleta";
+  // A aba fica no endereço: ao voltar de outra tela, a consultora reencontra o mesmo ponto.
+  const setAba = (a: Aba) => {
+    navigate({ search: { aba: a }, replace: true });
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  };
   const [escolhida, setEscolhida] = React.useState<string | null>(null);
   const maletas = useQuery({ queryKey: ["consultora", "maletas"], queryFn: () => listarMaletas() });
 
@@ -417,45 +433,53 @@ function AreaConsultoraLiberada() {
   const abertas = (maletas.data ?? []).filter((m) => !["encerrada", "cancelada"].includes(m.situacao));
   const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
+  const telaAjuda = aba === "historico" ? "maleta" : aba;
 
   return (
-    <div className={`mx-auto w-full space-y-6 px-4 py-6 ${aba === "vitrine" ? "max-w-7xl" : "max-w-2xl"}`}>
-      <header>
-        <p className="text-xs uppercase tracking-[0.25em] text-ledger-muted">Lardan</p>
-        <h1 className="font-display text-3xl">Minha área</h1>
+    <div className={`area-consultora mx-auto w-full space-y-6 px-4 pt-6 pb-[calc(6.5rem+env(safe-area-inset-bottom))] sm:pb-10 ${aba === "vitrine" ? "max-w-7xl" : "max-w-2xl"}`}>
+      <header className="flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm uppercase tracking-[0.25em] text-ledger-muted">Lardan</p>
+          <h1 className="font-display text-3xl">Minha área</h1>
+        </div>
+        <div className="flex shrink-0 gap-2">
+          <Passeio />
+          <BotaoAjuda tela={telaAjuda} />
+        </div>
       </header>
 
-      <nav className="grid grid-cols-4 gap-2">
+      <nav aria-label="Seções da minha área"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 gap-1 border-t border-line-soft bg-surface/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur sm:static sm:gap-2 sm:rounded-2xl sm:border sm:p-1">
         {ABAS.map((a) => (
           <button
             key={a.id}
             type="button"
+            aria-current={aba === a.id ? "page" : undefined}
             onClick={() => setAba(a.id)}
-            className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-[0.7rem] ${
-              aba === a.id ? "border-bronze text-ledger-text" : "border-line-soft text-ledger-muted"
+            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[0.8rem] font-medium leading-tight sm:flex-row sm:text-[0.95rem] ${
+              aba === a.id ? "bg-ink text-warm-ivory" : "text-ledger-text"
             }`}
           >
-            <a.icone aria-hidden className="size-5" />
+            <a.icone aria-hidden className="size-6 sm:size-5" />
             {a.rotulo}
           </button>
         ))}
       </nav>
 
       {abertas.length > 1 && (
-        <label className="grid gap-1 text-sm">
-          <span className="text-xs uppercase tracking-widest text-ledger-muted">Maleta em uso</span>
-          <select
-            className="admin-input"
-            value={atual ?? ""}
-            onChange={(e) => setEscolhida(e.target.value || null)}
-          >
-            {abertas.map((m) => (
-              <option key={m.cycle_id} value={m.cycle_id}>
-                {m.codigo} · ciclo {m.ciclo} · {SITUACAO_MALETA[m.situacao]?.rotulo ?? m.situacao}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div role="radiogroup" aria-label="Maleta em uso" className="grid gap-2">
+          <span className="text-sm font-medium uppercase tracking-widest text-ledger-muted">Maleta em uso</span>
+          {abertas.map((m) => {
+            const sel = m.cycle_id === atual;
+            return (
+              <button key={m.cycle_id} type="button" role="radio" aria-checked={sel} onClick={() => setEscolhida(m.cycle_id)}
+                className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-base ${sel ? "border-ink bg-ink text-warm-ivory" : "border-line bg-surface"}`}>
+                <span>{m.codigo} · ciclo {m.ciclo}</span>
+                <span className="text-[0.9rem]">{sel ? "✓ Em uso" : (SITUACAO_MALETA[m.situacao]?.rotulo ?? m.situacao)}</span>
+              </button>
+            );
+          })}
+        </div>
       )}
 
       {aba === "maleta" && <MinhaMaleta cycleId={atual} />}
@@ -463,5 +487,50 @@ function AreaConsultoraLiberada() {
       {aba === "pedidos" && <Pedidos />}
       {aba === "historico" && <Historico cycleId={atual} />}
     </div>
+  );
+}
+
+const PASSOS = [
+  { t: "Bem-vinda à sua área", d: "Aqui você cuida da sua maleta, da sua vitrine e dos seus pedidos, tudo pelo celular." },
+  { t: "Menu embaixo da tela", d: "Use os quatro botões na parte de baixo: Minha maleta, Minha vitrine, Pedidos e Entregas." },
+  { t: "Minha maleta", d: "Quando a maleta chegar, confirme o recebimento e confira as peças antes de aceitar." },
+  { t: "Minha vitrine", d: "Monte sua página com foto, capa e peças. As clientes só veem depois de você tocar em “Publicar alterações”." },
+  { t: "Dúvidas?", d: "Toque em “Ajuda” no alto de qualquer tela. Ao fechar, você volta para onde estava. Este passeio pode ser revisto no botão “Passeio”." },
+];
+
+/** Passeio curto e opcional: abre sozinho só na primeira visita e pode ser reaberto. */
+function Passeio() {
+  const [aberto, setAberto] = React.useState(false);
+  const [i, setI] = React.useState(0);
+  React.useEffect(() => {
+    try { if (!localStorage.getItem("lardan-passeio-consultora")) setAberto(true); } catch { /* sem armazenamento */ }
+  }, []);
+  const fechar = () => {
+    setAberto(false); setI(0);
+    try { localStorage.setItem("lardan-passeio-consultora", "1"); } catch { /* ok */ }
+  };
+  const p = PASSOS[i]!;
+  return (
+    <>
+      <button type="button" className="admin-btn min-h-12 text-base max-[380px]:hidden" onClick={() => setAberto(true)}>Passeio</button>
+      <Dialog open={aberto} onOpenChange={(o) => (o ? setAberto(true) : fechar())}>
+        <DialogContent className="max-w-md">
+          <DialogHeader className="text-left">
+            <p className="text-sm text-ledger-muted">Passo {i + 1} de {PASSOS.length}</p>
+            <DialogTitle className="font-display text-2xl">{p.t}</DialogTitle>
+            <DialogDescription className="text-base leading-relaxed text-ledger-text">{p.d}</DialogDescription>
+          </DialogHeader>
+          <div className="mt-2 flex gap-2">
+            {i > 0 && <button type="button" className="admin-btn min-h-12 flex-1 justify-center text-base" onClick={() => setI(i - 1)}>Voltar</button>}
+            {i < PASSOS.length - 1 ? (
+              <button type="button" className="admin-btn-primary min-h-13 flex-1 text-sm" onClick={() => setI(i + 1)}>Próximo</button>
+            ) : (
+              <button type="button" className="admin-btn-primary min-h-13 flex-1 text-sm" onClick={fechar}>Começar</button>
+            )}
+          </div>
+          <button type="button" className="min-h-12 text-base text-ledger-muted underline" onClick={fechar}>Pular passeio</button>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

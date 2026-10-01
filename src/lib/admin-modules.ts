@@ -22,6 +22,7 @@ import {
   SlidersHorizontal,
   Store,
   Plug,
+  LifeBuoy,
   type LucideIcon,
 } from "lucide-react";
 
@@ -83,6 +84,15 @@ export const ADMIN_MODULES: AdminModule[] = [
     icon: Globe2,
     roles: CONTENT,
     capability: "site.manage",
+    state: "ativo",
+  },
+  {
+    slug: "ajuda",
+    path: "/admin/ajuda",
+    label: "Central de Ajuda",
+    description: "Artigos de ajuda das consultoras e do público: rascunho, publicação e revisão.",
+    icon: LifeBuoy,
+    roles: CONTENT,
     state: "ativo",
   },
   {

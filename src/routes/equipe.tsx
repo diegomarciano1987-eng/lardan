@@ -34,7 +34,7 @@ const CARTOES: { id: Porta; titulo: string; texto: string; icone: typeof Gem }[]
 ];
 
 const inputClass =
-  "w-full rounded-md border border-input bg-card px-4 py-3 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "w-full rounded-md border border-input bg-card px-4 py-3 min-h-12 text-base text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
 function EquipePage() {
   const { area } = Route.useSearch();
@@ -100,7 +100,7 @@ function EquipePage() {
                 key={id}
                 to="/equipe"
                 search={{ area: id }}
-                className="group flex flex-col items-center rounded-2xl border border-primary/25 bg-card px-8 py-12 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+                className="group flex flex-col items-center rounded-2xl border border-primary/25 bg-card px-6 py-8 md:px-8 md:py-12 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
               >
                 <span className="grid h-16 w-16 place-items-center rounded-full border border-primary/30 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                   <Icone className="h-7 w-7" strokeWidth={1.3} />
@@ -115,7 +115,7 @@ function EquipePage() {
         <div className="relative w-full max-w-sm">
           <Link
             to="/equipe"
-            className="mb-8 inline-flex items-center gap-2 text-xs tracking-[0.18em] uppercase text-muted-foreground hover:text-foreground"
+            className="mb-6 inline-flex min-h-12 items-center gap-2 text-sm tracking-[0.18em] uppercase text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" /> Trocar porta
           </Link>
@@ -123,23 +123,23 @@ function EquipePage() {
           <h1 className="mb-8 font-display text-3xl text-foreground">{escolhido.titulo}</h1>
           <form className="space-y-4" onSubmit={entrar}>
             <div>
-              <label htmlFor="email" className="brand-eyebrow mb-2 block">E-mail</label>
+              <label htmlFor="email" className="mb-2 block text-base font-medium text-foreground">E-mail</label>
               <input id="email" type="email" required autoComplete="email" value={email}
                 onChange={(e) => setEmail(e.target.value)} className={inputClass} />
             </div>
             <div>
-              <label htmlFor="senha" className="brand-eyebrow mb-2 block">Senha</label>
+              <label htmlFor="senha" className="mb-2 block text-base font-medium text-foreground">Senha</label>
               <PasswordInput id="senha" required autoComplete="current-password" value={senha}
                 onChange={(e) => setSenha(e.target.value)} className={inputClass} />
             </div>
-            <Link to="/redefinir-senha" className="-mt-2 block text-right text-xs text-muted-foreground underline">
+            <Link to="/redefinir-senha" className="-mt-1 flex min-h-12 items-center justify-end text-base text-foreground underline">
               Esqueci minha senha
             </Link>
-            {erro && <p role="alert" className="text-sm text-destructive">{erro}</p>}
+            {erro && <p role="alert" className="rounded-md border border-destructive/40 p-3 text-base text-destructive">⚠ {erro}</p>}
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-full bg-primary px-8 py-3 text-[0.75rem] tracking-[0.22em] uppercase text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="min-h-14 w-full rounded-full bg-primary px-8 py-3 text-[0.9rem] tracking-[0.22em] uppercase text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {busy ? "Entrando…" : "Entrar"}
             </button>
@@ -150,6 +150,9 @@ function EquipePage() {
       <p className="relative mt-14 max-w-sm text-center text-xs leading-relaxed text-muted-foreground">
         Área restrita à equipe Lardan, com acesso somente por convite.
       </p>
+      <Link to="/ajuda" className="relative mt-3 inline-flex min-h-12 items-center text-base text-foreground underline">
+        Precisa de ajuda para entrar?
+      </Link>
     </main>
   );
 }

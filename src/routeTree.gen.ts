@@ -14,6 +14,7 @@ import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as ALardanRouteImport } from './routes/a-lardan'
 import { Route as AcessoRouteImport } from './routes/acesso'
+import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as AneisRouteImport } from './routes/aneis'
 import { Route as BrincosRouteImport } from './routes/brincos'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
@@ -43,6 +44,7 @@ import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
 import { Route as SemijoiasCategoriaRouteImport } from './routes/semijoias.$categoria'
 import { Route as SitemapProductsPaginaRouteImport } from './routes/sitemap-products.$pagina'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminAjudaRouteImport } from './routes/_authenticated/admin/ajuda'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminCandidaturasRouteImport } from './routes/_authenticated/admin/candidaturas'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
@@ -119,6 +121,11 @@ const ALardanRoute = ALardanRouteImport.update({
 const AcessoRoute = AcessoRouteImport.update({
   id: '/acesso',
   path: '/acesso',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AjudaRoute = AjudaRouteImport.update({
+  id: '/ajuda',
+  path: '/ajuda',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AneisRoute = AneisRouteImport.update({
@@ -268,6 +275,11 @@ const SitemapProductsPaginaRoute = SitemapProductsPaginaRouteImport.update({
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
+const AuthenticatedAdminAjudaRoute = AuthenticatedAdminAjudaRouteImport.update({
+  id: '/ajuda',
+  path: '/ajuda',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
 const AuthenticatedAdminAuditoriaRoute =
@@ -586,6 +598,7 @@ export interface FileRoutesByFullPath {
   '/$slug': typeof SlugRoute
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
+  '/ajuda': typeof AjudaRoute
   '/aneis': typeof AneisRoute
   '/brincos': typeof BrincosRoute
   '/carrinho': typeof CarrinhoRoute
@@ -615,6 +628,7 @@ export interface FileRoutesByFullPath {
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
   '/semijoias/': typeof SemijoiasIndexRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
+  '/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -674,6 +688,7 @@ export interface FileRoutesByTo {
   '/$slug': typeof SlugRoute
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
+  '/ajuda': typeof AjudaRoute
   '/aneis': typeof AneisRoute
   '/brincos': typeof BrincosRoute
   '/carrinho': typeof CarrinhoRoute
@@ -701,6 +716,7 @@ export interface FileRoutesByTo {
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
   '/semijoias': typeof SemijoiasIndexRoute
+  '/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -762,6 +778,7 @@ export interface FileRoutesById {
   '/$slug': typeof SlugRoute
   '/a-lardan': typeof ALardanRoute
   '/acesso': typeof AcessoRoute
+  '/ajuda': typeof AjudaRoute
   '/aneis': typeof AneisRoute
   '/brincos': typeof BrincosRoute
   '/carrinho': typeof CarrinhoRoute
@@ -791,6 +808,7 @@ export interface FileRoutesById {
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
   '/semijoias/': typeof SemijoiasIndexRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
+  '/_authenticated/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -852,6 +870,7 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/a-lardan'
     | '/acesso'
+    | '/ajuda'
     | '/aneis'
     | '/brincos'
     | '/carrinho'
@@ -881,6 +900,7 @@ export interface FileRouteTypes {
     | '/sitemap-products/$pagina'
     | '/semijoias/'
     | '/admin/financeiro'
+    | '/admin/ajuda'
     | '/admin/auditoria'
     | '/admin/candidaturas'
     | '/admin/configuracoes'
@@ -940,6 +960,7 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/a-lardan'
     | '/acesso'
+    | '/ajuda'
     | '/aneis'
     | '/brincos'
     | '/carrinho'
@@ -967,6 +988,7 @@ export interface FileRouteTypes {
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
     | '/semijoias'
+    | '/admin/ajuda'
     | '/admin/auditoria'
     | '/admin/candidaturas'
     | '/admin/configuracoes'
@@ -1027,6 +1049,7 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/a-lardan'
     | '/acesso'
+    | '/ajuda'
     | '/aneis'
     | '/brincos'
     | '/carrinho'
@@ -1056,6 +1079,7 @@ export interface FileRouteTypes {
     | '/sitemap-products/$pagina'
     | '/semijoias/'
     | '/_authenticated/admin/financeiro'
+    | '/_authenticated/admin/ajuda'
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/candidaturas'
     | '/_authenticated/admin/configuracoes'
@@ -1117,6 +1141,7 @@ export interface RootRouteChildren {
   SlugRoute: typeof SlugRoute
   ALardanRoute: typeof ALardanRoute
   AcessoRoute: typeof AcessoRoute
+  AjudaRoute: typeof AjudaRoute
   AneisRoute: typeof AneisRoute
   BrincosRoute: typeof BrincosRoute
   CarrinhoRoute: typeof CarrinhoRoute
@@ -1186,6 +1211,13 @@ declare module '@tanstack/react-router' {
       path: '/acesso'
       fullPath: '/acesso'
       preLoaderRoute: typeof AcessoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ajuda': {
+      id: '/ajuda'
+      path: '/ajuda'
+      fullPath: '/ajuda'
+      preLoaderRoute: typeof AjudaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/aneis': {
@@ -1389,6 +1421,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/ajuda': {
+      id: '/_authenticated/admin/ajuda'
+      path: '/ajuda'
+      fullPath: '/admin/ajuda'
+      preLoaderRoute: typeof AuthenticatedAdminAjudaRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/auditoria': {
@@ -1826,6 +1865,7 @@ const AuthenticatedAdminFinanceiroRouteRouteWithChildren =
 
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminFinanceiroRouteRoute: typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
+  AuthenticatedAdminAjudaRoute: typeof AuthenticatedAdminAjudaRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminCandidaturasRoute: typeof AuthenticatedAdminCandidaturasRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
@@ -1861,6 +1901,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
   {
     AuthenticatedAdminFinanceiroRouteRoute:
       AuthenticatedAdminFinanceiroRouteRouteWithChildren,
+    AuthenticatedAdminAjudaRoute: AuthenticatedAdminAjudaRoute,
     AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
     AuthenticatedAdminCandidaturasRoute: AuthenticatedAdminCandidaturasRoute,
     AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
@@ -1936,6 +1977,7 @@ const rootRouteChildren: RootRouteChildren = {
   SlugRoute: SlugRoute,
   ALardanRoute: ALardanRoute,
   AcessoRoute: AcessoRoute,
+  AjudaRoute: AjudaRoute,
   AneisRoute: AneisRoute,
   BrincosRoute: BrincosRoute,
   CarrinhoRoute: CarrinhoRoute,

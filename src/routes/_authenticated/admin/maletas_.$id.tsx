@@ -1,7 +1,8 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Printer, Send, Truck } from "lucide-react";
+import { CheckCircle2, Printer, ScanBarcode, Send, Truck } from "lucide-react";
+import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import {
@@ -70,6 +71,7 @@ function MaletaFicha() {
   const [rastreio, setRastreio] = React.useState("");
   const [divergencias, setDivergencias] = React.useState<Record<string, number>>({});
   const [chave] = React.useState(chaveIdempotencia);
+  const [leitor, setLeitor] = React.useState(false);
 
   const add = useMutation({
     mutationFn: () => definirItem(id, peca!.id, qtd),
@@ -173,8 +175,19 @@ function MaletaFicha() {
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="min-w-0 space-y-6">
 
+          {leitor && (
+            <MontagemLeitor
+              cycleId={id}
+              titulo={`Maleta ${d.maleta.codigo} · ${d.consultora ?? "sem consultora"}`}
+              composicao={d.composicao}
+              aoFechar={() => setLeitor(false)}
+            />
+          )}
           {podeMontar && montando && (
             <Panel title="Montagem">
+              <button type="button" className="admin-btn admin-btn-primary mb-4 w-full justify-center py-4 text-base" onClick={() => setLeitor(true)}>
+                <ScanBarcode aria-hidden className="size-5" /> Montar com leitor de código
+              </button>
               <div className="flex flex-wrap items-end gap-3">
                 <div className="min-w-72 flex-1">
                   <VariantPicker value={peca} onChange={setPeca} />

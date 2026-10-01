@@ -209,7 +209,8 @@ function MaletaFicha() {
                 </button>
               </div>
               <p className="mt-3 text-xs text-ledger-muted">
-                Só entra o que existe no depósito. A quantidade é conferida contra o saldo disponível.
+                A montagem é livre mesmo com estoque zerado (peças na rua, contagem pendente). O
+                disponível no depósito aparece só como aviso, e a contagem regulariza depois.
               </p>
             </Panel>
           )}

@@ -93,6 +93,7 @@ export const arquivoPublico = (path?: string | null) => (path ? `/api/public/vit
 export interface EstudioDados {
   party_id: string;
   nome_cadastro: string;
+  cadastro?: { nome: string; whatsapp: string; cidade: string; uf: string };
   slug: string | null;
   no_ar: boolean;
   rascunho: Partial<DesignVitrine>;

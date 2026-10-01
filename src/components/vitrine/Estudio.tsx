@@ -276,7 +276,7 @@ function PainelContato({ d, muda }: { d: DesignVitrine; muda: Muda }) {
       {!msg && <Exemplo texto="Olá! Vi sua vitrine Lardan e gostei destas peças:" onUsar={() => muda((x) => { x.perfil.mensagem = "Olá! Vi sua vitrine Lardan e gostei destas peças:"; return x; })} />}
       <p className="pt-2 text-xs uppercase tracking-widest text-ledger-muted">Redes sociais (só o nome de usuário)</p>
       {(["instagram", "facebook", "tiktok"] as const).map((k) => (
-        <Campo key={k} rotulo={k === "tiktok" ? "TikTok" : k[0].toUpperCase() + k.slice(1)}>
+        <Campo key={k} rotulo={k === "tiktok" ? "TikTok" : k === "instagram" ? "Instagram" : "Facebook"}>
           <input className="admin-input" value={c[k]} placeholder="seuusuario" onChange={(e) => set(k, e.target.value.replace(/^@/, "").replace(/.*\.com\//, ""))} />
         </Campo>
       ))}
@@ -534,14 +534,14 @@ function PainelOrganizacao({ d, muda, itens }: { d: DesignVitrine; muda: Muda; i
           {o.selecoes.map((sel, si) => (
             <div key={si} className="rounded-xl border border-line-soft p-3">
               <div className="flex gap-2">
-                <input className="admin-input flex-1" value={sel.titulo} maxLength={40} onChange={(e) => muda((x) => { x.organizacao.selecoes[si].titulo = e.target.value; return x; })} />
+                <input className="admin-input flex-1" value={sel.titulo} maxLength={40} onChange={(e) => muda((x) => { x.organizacao.selecoes[si]!.titulo = e.target.value; return x; })} />
                 <button type="button" className="admin-btn px-2" aria-label="Apagar seleção" onClick={() => muda((x) => { x.organizacao.selecoes.splice(si, 1); return x; })}><Trash2 className="size-3.5" /></button>
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {itens.map((i) => {
                   const dentro = sel.itens.includes(i.variant_id);
                   return (
-                    <button key={i.variant_id} type="button" aria-pressed={dentro} onClick={() => muda((x) => { const s = x.organizacao.selecoes[si]; s.itens = dentro ? s.itens.filter((v) => v !== i.variant_id) : [...s.itens, i.variant_id]; return x; })}
+                    <button key={i.variant_id} type="button" aria-pressed={dentro} onClick={() => muda((x) => { const s = x.organizacao.selecoes[si]!; s.itens = dentro ? s.itens.filter((v) => v !== i.variant_id) : [...s.itens, i.variant_id]; return x; })}
                       className={`rounded-full border px-2.5 py-1 text-[0.7rem] ${dentro ? "border-primary bg-primary/10" : "border-line-soft text-ledger-muted"}`}>
                       {i.produto}
                     </button>

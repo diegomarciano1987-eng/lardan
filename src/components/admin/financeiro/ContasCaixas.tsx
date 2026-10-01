@@ -134,8 +134,15 @@ export function ContasCaixas() {
                   <StatusBadge tone={c.is_active ? "success" : "neutral"}>
                     {c.is_active ? "Ativa" : "Inativa"}
                   </StatusBadge>
-                  <span className="text-sm font-semibold tabular-nums text-ledger-text">
-                    {formatBRLFromCents(c.saldo_cents)}
+                  <span className="flex flex-col items-end">
+                    <span className="text-sm font-semibold tabular-nums text-ledger-text">
+                      {formatBRLFromCents(c.saldo_cents)}
+                    </span>
+                    {(c.previsto_futuro_cents ?? 0) !== 0 && (
+                      <span className="text-xs tabular-nums text-ledger-muted" data-previsto>
+                        Previsto (data futura): {formatBRLFromCents(c.previsto_futuro_cents ?? 0)}
+                      </span>
+                    )}
                   </span>
                   <ChevronRight aria-hidden className="size-4 text-ledger-muted" />
                 </span>

@@ -70,6 +70,9 @@ export interface FinAccount {
   is_active: boolean;
   saldo_cents: number;
   ultimo_movimento: string | null;
+  /** Lançamentos com data posterior à data de corte: não entram no saldo realizado. */
+  previsto_futuro_cents?: number;
+  data_corte?: string;
 }
 
 export interface FinInstallment {
@@ -671,6 +674,10 @@ export interface FinDre {
     resultado_cents: number;
   };
   pendentes_classificacao: { quantidade: number; valor_cents: number };
+  indicadores?: Record<
+    "sem_conta_contabil" | "sem_centro_custo" | "fora_da_dre" | "parcelas_em_aberto" | "nao_conciliados",
+    { quantidade: number; valor_cents: number; criterio: string }
+  >;
 }
 
 export interface FiltrosDre {

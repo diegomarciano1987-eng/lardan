@@ -9777,7 +9777,12 @@ export type Database = {
         }
         Returns: Json
       }
+      showcase_path_ok: {
+        Args: { _p: string; _party: string }
+        Returns: boolean
+      }
       showcase_public: { Args: { _slug: string }; Returns: Json }
+      showcase_public_file_ok: { Args: { _path: string }; Returns: boolean }
       showcase_save: { Args: { _payload: Json }; Returns: Json }
       showcase_set_online: { Args: { _no_ar: boolean }; Returns: Json }
       showcase_slug_reserved: { Args: { _slug: string }; Returns: boolean }

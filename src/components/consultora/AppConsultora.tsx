@@ -77,7 +77,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
           const on = ativo === i.aba;
           return (
             <button key={i.aba} type="button" aria-current={on ? "page" : undefined} onClick={() => ir({ aba: i.aba })}
-              className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl text-[0.8rem] leading-tight ${on ? "font-semibold text-primary" : "text-foreground"}`}>
+              className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl text-[0.8rem] leading-tight ${on ? "font-semibold text-acao" : "text-foreground"}`}>
               <span className={`grid h-8 w-12 place-items-center rounded-full ${on ? "bg-primary/12" : ""}`}><i.icone className="size-6" aria-hidden /></span>
               {i.rotulo}
             </button>
@@ -143,8 +143,8 @@ export function Inicio({ ir }: { ir: Ir }) {
 
       <section className="grid gap-3 lg:grid-cols-[1.2fr_1fr]">
         <button type="button" onClick={() => ir({ aba: "novo" })}
-          className="flex min-h-24 items-center gap-4 rounded-3xl bg-primary px-6 py-5 text-left text-primary-foreground shadow-[var(--shadow-app)] active:scale-[0.99]">
-          <span className="grid size-14 shrink-0 place-items-center rounded-full bg-primary-foreground/15"><Plus className="size-7" aria-hidden /></span>
+          className="flex min-h-24 items-center gap-4 rounded-3xl bg-acao px-6 py-5 text-left text-acao-foreground shadow-[var(--shadow-app)] active:scale-[0.99]">
+          <span className="grid size-14 shrink-0 place-items-center rounded-full bg-acao-foreground/15"><Plus className="size-7" aria-hidden /></span>
           <span>
             <span className="block text-xl font-semibold">Novo pedido</span>
             <span className="block text-[0.98rem] opacity-90">Escolha a cliente e as peças da sua maleta</span>
@@ -412,7 +412,7 @@ export function FichaCliente({ id, nav, ir }: { id: string; nav: Nav; ir: Ir }) 
               <div role="radiogroup" aria-label="Como foi o contato" className="grid grid-cols-2 gap-2">
                 {(Object.keys(CANAL) as Atendimento["canal"][]).map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={canal === k} onClick={() => setCanal(k)}
-                    className={`min-h-12 rounded-xl border text-base ${canal === k ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background"}`}>
+                    className={`min-h-12 rounded-xl border text-base ${canal === k ? "border-acao bg-acao text-acao-foreground" : "border-border bg-background"}`}>
                     {canal === k ? "✓ " : ""}{CANAL[k]}
                   </button>
                 ))}
@@ -585,7 +585,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
       {passo === 4 && resultado && (
         <div className="max-w-xl space-y-4">
           <div className="rounded-3xl border border-primary/40 bg-card p-6 text-center">
-            <span className="mx-auto mb-3 grid size-16 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="size-8" aria-hidden /></span>
+            <span className="mx-auto mb-3 grid size-16 place-items-center rounded-full bg-acao text-acao-foreground"><Check className="size-8" aria-hidden /></span>
             <p className="text-xl font-semibold">Pedido {resultado.codigo} criado</p>
             <p className="mt-1 text-[1.05rem]">{cl?.nome} · {brl(resultado.total_cents)}</p>
             <p className="mt-2 text-[0.98rem] text-muted-foreground">Situação: em atendimento. As peças não foram reservadas.</p>

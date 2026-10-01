@@ -110,7 +110,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "48x48", href: "/favicon-lardan-48-v2.png" },
       { rel: "icon", type: "image/png", sizes: "96x96", href: "/favicon-lardan-v2.png" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
-      { rel: "manifest", href: "/site.webmanifest" },
       // Descrição legível por máquinas (mesma fonte de verdade de domínio).
       { rel: "describedby", href: `${SITE_URL}/llms.txt`, type: "text/plain" },
     ],

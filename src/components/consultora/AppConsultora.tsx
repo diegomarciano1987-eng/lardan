@@ -345,8 +345,8 @@ function Campo({ rotulo, dica, erro, obrigatorio, children }: { rotulo: string; 
   const id = React.useId();
   return (
     <div className="grid gap-1.5" aria-describedby={erro ? `${id}-e` : undefined}>
-      <label className="text-[1.05rem] font-semibold">{rotulo}{obrigatorio && <span className="font-normal text-muted-foreground"> (obrigatório)</span>}</label>
-      {children}
+      <label htmlFor={`${id}-c`} className="text-[1.05rem] font-semibold">{rotulo}{obrigatorio && <span className="font-normal text-muted-foreground"> (obrigatório)</span>}</label>
+      {React.isValidElement(children) ? React.cloneElement(children as React.ReactElement<{ id?: string; "aria-invalid"?: boolean }>, { id: `${id}-c`, ...(erro ? { "aria-invalid": true } : {}) }) : children}
       {dica && !erro && <p className="text-[0.95rem] text-muted-foreground">{dica}</p>}
       {erro && <p id={`${id}-e`} role="alert" className="text-[0.98rem] font-medium text-destructive">⚠ {erro}</p>}
     </div>

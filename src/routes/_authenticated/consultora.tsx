@@ -1,3 +1,4 @@
+import { FotoPeca } from "@/components/FotoPeca";
 import * as React from "react";
 import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
 import { createFileRoute } from "@tanstack/react-router";
@@ -188,11 +189,7 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
               return (
                 <div key={c.variant_id} className="space-y-2 border-b border-line-soft pb-3 last:border-0">
                   <div className="flex items-center gap-3">
-                    {imagem(c.media_id) ? (
-                      <img src={imagem(c.media_id)!} alt="" className="size-14 rounded-xl object-cover" />
-                    ) : (
-                      <div className="size-14 rounded-xl bg-surface-muted" aria-hidden />
-                    )}
+                    <FotoPeca mediaId={c.media_id} variantId={c.variant_id} className="size-14 rounded-xl" />
                     <div className="min-w-0 flex-1">
                       <p className="text-base font-semibold leading-snug">{c.produto}</p>
                       <p className="text-[0.95rem] text-ledger-muted">
@@ -259,11 +256,7 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
           <div className="mt-4 space-y-3">
             {d.saldos.map((b) => (
               <div key={b.variant_id} className="flex items-center gap-3">
-                {imagem(b.media_id) ? (
-                  <img src={imagem(b.media_id)!} alt="" className="size-14 rounded-xl object-cover" />
-                ) : (
-                  <div className="size-14 rounded-xl bg-surface-muted" aria-hidden />
-                )}
+                <FotoPeca mediaId={b.media_id} variantId={b.variant_id} className="size-14 rounded-xl" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">{b.produto}</p>
                   <p className="text-xs text-ledger-muted">

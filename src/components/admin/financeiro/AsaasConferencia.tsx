@@ -173,6 +173,8 @@ export function ConferenciaAsaas() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+  const [recusando, setRecusando] = React.useState<string | null>(null);
+  const [motivo, setMotivo] = React.useState("");
   const d = q.data;
   const resumo = d?.resumo ?? {};
   const paginas = d ? Math.max(1, Math.ceil(d.total / POR)) : 1;
@@ -246,8 +248,8 @@ export function ConferenciaAsaas() {
                   className="admin-btn min-h-10"
                   disabled={decidir.isPending}
                   onClick={() => {
-                    const m = window.prompt("Motivo da recusa:");
-                    if (m && m.trim()) decidir.mutate({ id: r.id, aceitar: false, motivo: m.trim() });
+                    setRecusando(r.id);
+                    setMotivo("");
                   }}
                 >
                   Recusar
@@ -256,6 +258,31 @@ export function ConferenciaAsaas() {
             ) : (
               <span />
             )}
+            {recusando === r.id ? (
+              <div className="flex flex-wrap gap-2 md:col-span-3">
+                <input
+                  autoFocus
+                  value={motivo}
+                  onChange={(e) => setMotivo(e.target.value)}
+                  placeholder="Motivo da recusa (obrigatório)"
+                  className="h-11 min-w-0 flex-1 rounded-[10px] border border-line bg-surface px-3 text-base sm:text-sm"
+                />
+                <button
+                  type="button"
+                  className="admin-btn-primary min-h-11"
+                  disabled={!motivo.trim() || decidir.isPending}
+                  onClick={() => {
+                    decidir.mutate({ id: r.id, aceitar: false, motivo: motivo.trim() });
+                    setRecusando(null);
+                  }}
+                >
+                  Confirmar recusa
+                </button>
+                <button type="button" className="admin-btn min-h-11" onClick={() => setRecusando(null)}>
+                  Voltar
+                </button>
+              </div>
+            ) : null}
           </li>
         ))}
       </ul>

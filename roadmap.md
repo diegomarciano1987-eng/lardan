@@ -82,3 +82,15 @@
 - [~] Item 7: Asaas medido (250 eventos na fila, 0 cobranças espelhadas); R$ 3.388,77 sem origem — precisa do saldo Asaas em 30/09
 - [ ] Item 9: simulação do acerto (sem recebíveis)
 - [ ] Item 1: extratos OFX por conta em 30/09 (bloqueado: arquivos)
+
+## Financeiro unificado (prompt 01/10)
+- [x] Etapa 1: um único cálculo para cartões e listas, com saldo na data de corte (período respeitado, posição histórica)
+- [x] Etapa 1: área "Pagar e receber" (Todos/A receber/A pagar, origem, situação, paginação no servidor); links antigos redirecionam
+- [x] Etapa 1: cartões da Visão geral abrem a composição exata; cartões repetidos tirados do topo; menu com 5 destinos + "Mais"
+- [x] Etapa 1: período com mês anterior/próximo, datas visíveis e validação
+- [x] Etapa 1: espelho das cobranças Asaas (só leitura, idempotente) + confronto de outubro
+- [ ] Etapa 2: vincular cobrança Asaas → parcela (regras determinísticas + revisão), rotina automática de sincronização
+- [ ] Etapa 2: Extrato Asaas/Conciliação/Recebíveis Asaas obedecendo ao período global (ainda usam período próprio)
+- [ ] Etapa 3: "Importar OFX" em cada conta, prévia novas/conhecidas/conflitantes, FITID ausente
+- [ ] Etapa 4: conciliação assistida (parcial, dividir, tarifa, transferência) e sugestões com evidência; IA sem poder de escrita
+- [ ] Etapa 5: celular 360/390, zoom 200%, publicação

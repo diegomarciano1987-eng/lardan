@@ -9725,6 +9725,10 @@ export type Database = {
         Args: { _d: Json; _party: string }
         Returns: Json
       }
+      showcase_design_clean_v2: {
+        Args: { _d: Json; _party: string }
+        Returns: Json
+      }
       showcase_design_discard: { Args: never; Returns: Json }
       showcase_design_get: { Args: never; Returns: Json }
       showcase_design_publish: { Args: { _revision: number }; Returns: Json }

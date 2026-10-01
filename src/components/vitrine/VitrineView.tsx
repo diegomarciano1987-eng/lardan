@@ -2,6 +2,7 @@ import * as React from "react";
 import { Clock, Facebook, Instagram, MapPin, MessageCircle, Music2, Share2, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { brl, imagem, type VitrineItem } from "@/lib/maletas";
+import logoLardan from "@/assets/lardan-logo-institucional.webp.asset.json";
 import { CAPAS, designPadrao, whatsappLink, type DesignVitrine } from "@/lib/vitrine-design";
 
 type Item = VitrineItem & { midias?: string[] };
@@ -189,10 +190,13 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
 
   return (
     <div className={`vitrine-raiz @container vp-${a.paleta} vf-${a.fonte} ${previa ? "min-h-full" : "min-h-screen"}`}>
+      <div className="flex justify-center bg-[var(--v-bg)] py-3">
+        <img src={logoLardan.url} alt="Lardan" className="h-6 w-auto @3xl:h-7" />
+      </div>
       {a.tema === "classica" && (
         <header>
           <Capa alto="h-44 @3xl:h-72" />
-          <div className="mx-auto -mt-14 max-w-4xl px-5 @3xl:-mt-20">
+          <div className="relative z-10 mx-auto -mt-14 max-w-4xl px-5 @3xl:-mt-20">
             <div className="flex justify-center"><Retrato tam="size-28 @3xl:size-36" /></div>
             <div className="mt-4"><Info alinhar="centro" /></div>
           </div>

@@ -2909,6 +2909,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_homologacao: boolean
+          is_implantacao: boolean
           kind: Database["public"]["Enums"]["fin_account_kind"]
           moeda: string
           nome: string
@@ -2937,6 +2938,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_homologacao?: boolean
+          is_implantacao?: boolean
           kind: Database["public"]["Enums"]["fin_account_kind"]
           moeda?: string
           nome: string
@@ -2965,6 +2967,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_homologacao?: boolean
+          is_implantacao?: boolean
           kind?: Database["public"]["Enums"]["fin_account_kind"]
           moeda?: string
           nome?: string
@@ -3388,6 +3391,7 @@ export type Database = {
       }
       financial_installments: {
         Row: {
+          competencia: string | null
           created_at: string
           id: string
           numero: number
@@ -3400,6 +3404,7 @@ export type Database = {
           vencimento: string
         }
         Insert: {
+          competencia?: string | null
           created_at?: string
           id?: string
           numero: number
@@ -3412,6 +3417,7 @@ export type Database = {
           vencimento: string
         }
         Update: {
+          competencia?: string | null
           created_at?: string
           id?: string
           numero?: number
@@ -9367,11 +9373,27 @@ export type Database = {
         Returns: Json
       }
       fin_import_ar_refs: { Args: { _lote: string }; Returns: undefined }
+      fin_installment_competencia_set: {
+        Args: { _competencia: string; _installment: string; _motivo: string }
+        Returns: Json
+      }
       fin_installment_refresh: {
         Args: { _installment: string }
         Returns: undefined
       }
       fin_installment_saldo: { Args: { _installment: string }; Returns: number }
+      fin_installments_list: {
+        Args: {
+          _ate?: string
+          _de?: string
+          _direction: string
+          _limit?: number
+          _offset?: number
+          _search?: string
+          _situacao?: string
+        }
+        Returns: Json
+      }
       fin_overview: { Args: { _ate?: string; _de?: string }; Returns: Json }
       fin_payment_method_save: { Args: { _payload: Json }; Returns: string }
       fin_payment_method_toggle: {
@@ -9469,6 +9491,7 @@ export type Database = {
         Args: { _motivo: string; _transfer: string }
         Returns: string
       }
+      fin_transfers_list: { Args: { _ate: string; _de: string }; Returns: Json }
       fin_unaccent_lower: { Args: { _t: string }; Returns: string }
       fin_validar_classificacao: {
         Args: {

@@ -10,7 +10,39 @@ export type Cliente = {
   observacoes: string;
   proximo_retorno: string | null;
   created_at: string;
+  etapa: Etapa;
+  instagram: string | null;
+  origem: string;
+  encerrada: boolean;
+  encerrada_motivo: string | null;
+  ultima_interacao: string | null;
 };
+
+export type Etapa = "nova" | "conversa" | "escolhendo" | "combinado" | "cliente";
+export const ETAPAS: { id: Etapa; rotulo: string; dica: string }[] = [
+  { id: "nova", rotulo: "Nova interessada", dica: "Cadastrada, ainda sem conversa registrada" },
+  { id: "conversa", rotulo: "Em conversa", dica: "Contato iniciado" },
+  { id: "escolhendo", rotulo: "Escolhendo peças", dica: "Já sabe do que ela gosta" },
+  { id: "combinado", rotulo: "Pedido combinado", dica: "Pedido em atendimento, ainda não é venda" },
+  { id: "cliente", rotulo: "Cliente", dica: "Já tem venda registrada" },
+];
+export const rotuloEtapa = (e: string) => ETAPAS.find((x) => x.id === e)?.rotulo ?? (e === "pausada" ? "Pausada" : e === "reativada" ? "Reativada" : e);
+export type EventoEtapa = { id: string; de: string | null; para: string; motivo: string | null; created_at: string };
+
+export async function moverEtapa(id: string, etapa: Etapa) {
+  const r = await t("consultant_clients").update({ etapa } as never).eq("id", id);
+  if (r.error) throw r.error;
+}
+export async function pausarPessoa(id: string, motivo: string | null) {
+  const r = await t("consultant_clients").update({ encerrada: motivo !== null, encerrada_motivo: motivo } as never).eq("id", id);
+  if (r.error) throw r.error;
+}
+export async function historicoEtapas(id: string): Promise<EventoEtapa[]> {
+  const { data, error } = await t("consultant_client_stage_events").select("id,de,para,motivo,created_at").eq("client_id", id).order("created_at", { ascending: false }).limit(50);
+  if (error) throw error;
+  return (data ?? []) as unknown as EventoEtapa[];
+}
+export const linkInstagram = (u: string | null) => (u && /^[a-z0-9._]{1,30}$/.test(u) ? `https://instagram.com/${u}` : null);
 
 export type Atendimento = { id: string; canal: "whatsapp" | "ligacao" | "presencial" | "outro"; nota: string; created_at: string };
 
@@ -76,6 +108,8 @@ export async function salvarCliente(c: Partial<Cliente> & { nome: string }, part
     preferencias: c.preferencias ?? "",
     observacoes: c.observacoes ?? "",
     proximo_retorno: c.proximo_retorno || null,
+    instagram: c.instagram?.trim() || null,
+    origem: (c.origem ?? "").trim().slice(0, 80),
   };
   const r = c.id
     ? await t("consultant_clients").update(linha as never).eq("id", c.id).select("id").single()

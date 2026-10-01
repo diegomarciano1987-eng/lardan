@@ -15,3 +15,6 @@
 - Showcase images sit in the private vitrine-originais bucket and reach the public only through /api/public/vitrine-img for paths in a live published design; why: public buckets are blocked and drafts must stay private.
 - Help content lives in help_articles (audience publico|consultora, rascunho|publicado, RLS by audience, edited only by can_manage_content); screens open it in a side sheet via BotaoAjuda so in-progress forms are never lost.
 - Consultant area uses the .area-consultora scope (48px touch, 16px inputs) and keeps the active tab in the URL (?aba=) so back/refresh return to the same place.
+- Account balance = sum of financial_account_movements up to the cutoff date (America/Sao_Paulo); saldo_inicial is itself a movement, never add financial_accounts.saldo_inicial_cents again. Why: avoids double counting across Visão geral/Contas/Fluxo.
+- Movements dated after today are forecast only (previsto), never realized, in every financial RPC. Why: realized reports cannot include future dates.
+- fin_dre reports unclassified titles, missing cost center, out-of-DRE natures, open installments and unreconciled lines as separate indicators. Why: "unpaid" is not "unclassified".

@@ -67,5 +67,9 @@
 
 ## Financeiro (substituir Conta Azul) — itens 1–27
 - [x] P0.1 Saldo: dupla contagem do saldo inicial corrigida (diferença R$ 28.500,86 explicada)
-- [ ] P0.2–P0.8 DRE/pendências, despesas fixas, teto 1.000, transferências, futuros, Asaas, parcelas
+- [x] P0.6 parcial: futuros só no previsto (Visão geral, Contas, Fluxo)
+- [~] P0.2 DRE: caixa sem dupla contagem e estorno com sinal; 5 indicadores separados — falta ponte com números do PDF
+- [ ] Natureza de AJUSTE DE IMPLANTAÇÃO e RETIDO REPRESENTANTE no caixa disponível — decisão do Daniel
+- [ ] Extratos bancários não importados (só Asaas) — comparação por banco bloqueada
+- [ ] P0.3–P0.8 despesas fixas, despesas fixas, teto 1.000, transferências, futuros, Asaas, parcelas
 - [ ] P1 (9–18), P2 (19–23), P3 (24–27) — item 9 depende da política comercial do acerto

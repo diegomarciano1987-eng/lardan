@@ -2,7 +2,7 @@ import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Minus, ScanBarcode, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { definirItem, traduzir, type ItemComposicao } from "@/lib/maletas";
+import { brl, definirItem, traduzir, type ItemComposicao } from "@/lib/maletas";
 
 type Leitura = { id: string; codigo: string; ok: boolean; texto: string; detalhe?: string; hora: string };
 type Res = {
@@ -15,6 +15,7 @@ type Res = {
   unidade?: boolean;
   forma?: string;
   variante_criada?: boolean;
+  preco_cents?: number | null;
 };
 
 let audioCtx: AudioContext | null = null;
@@ -54,7 +55,7 @@ export function MontagemLeitor({
 }) {
   const qc = useQueryClient();
   const qtd = React.useRef<Record<string, number>>({});
-  const [itens, setItens] = React.useState<Record<string, { nome: string; qtd: number }>>({});
+  const [itens, setItens] = React.useState<Record<string, { nome: string; qtd: number; preco: number }>>({});
   const [codigo, setCodigo] = React.useState("");
   const [leituras, setLeituras] = React.useState<Leitura[]>([]);
   const [pendentes, setPendentes] = React.useState(0);
@@ -63,10 +64,10 @@ export function MontagemLeitor({
   const campo = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    const m: Record<string, { nome: string; qtd: number }> = {};
+    const m: Record<string, { nome: string; qtd: number; preco: number }> = {};
     for (const c of composicao) {
       qtd.current[c.variant_id] = c.quantidade;
-      m[c.variant_id] = { nome: [c.produto, c.variante].filter(Boolean).join(" · "), qtd: c.quantidade };
+      m[c.variant_id] = { nome: [c.produto, c.variante].filter(Boolean).join(" · "), qtd: c.quantidade, preco: c.valor_unitario };
     }
     setItens(m);
     // só na abertura
@@ -91,14 +92,14 @@ export function MontagemLeitor({
     setLeituras((a) => [{ ...l, id: crypto.randomUUID(), hora: new Date().toLocaleTimeString("pt-BR") }, ...a].slice(0, 40));
   }
 
-  async function ajustar(variantId: string, nome: string, delta: number) {
+  async function ajustar(variantId: string, nome: string, delta: number, preco = 0) {
     const nova = Math.max(0, (qtd.current[variantId] ?? 0) + delta);
     await definirItem(cycleId, variantId, nova);
     qtd.current[variantId] = nova;
     setItens((m) => {
       const n = { ...m };
       if (nova === 0) delete n[variantId];
-      else n[variantId] = { nome, qtd: nova };
+      else n[variantId] = { nome, qtd: nova, preco: preco || n[variantId]?.preco || 0 };
       return n;
     });
   }
@@ -120,7 +121,7 @@ export function MontagemLeitor({
     }
     const nome = [r.produto, r.variante].filter(Boolean).join(" · ");
     try {
-      await ajustar(r.variant_id, nome, 1);
+      await ajustar(r.variant_id, nome, 1, r.preco_cents ?? 0);
       apito(true);
       setNesta((n) => n + 1);
       const extra = [
@@ -166,6 +167,7 @@ export function MontagemLeitor({
 
   const lista = Object.entries(itens).sort((a, b) => a[1].nome.localeCompare(b[1].nome));
   const total = lista.reduce((s, [, v]) => s + v.qtd, 0);
+  const valorTotal = lista.reduce((s, [, v]) => s + v.qtd * v.preco, 0);
   const ultima = leituras[0];
 
   return (
@@ -222,6 +224,11 @@ export function MontagemLeitor({
               <p className="font-display text-8xl font-bold tabular-nums text-ledger-text">{total}</p>
               <p className="text-sm text-ledger-muted">{nesta} bipada(s) agora</p>
             </div>
+            <div className="ledger-panel p-6 text-center">
+              <p className="ledger-eyebrow">Valor total da maleta</p>
+              <p className="font-display text-5xl font-bold tabular-nums text-ledger-text">{brl(valorTotal)}</p>
+              <p className="text-sm text-ledger-muted">soma do preço de venda das peças</p>
+            </div>
             <div className="ledger-panel p-5">
               <p className="ledger-eyebrow mb-2">Composição</p>
               {lista.length === 0 ? (
@@ -232,6 +239,7 @@ export function MontagemLeitor({
                     <li key={id} className="flex items-center justify-between gap-2">
                       <span className="truncate">{p.nome}</span>
                       <span className="flex items-center gap-2">
+                        <span className="tabular-nums text-ledger-muted">{brl(p.preco * p.qtd)}</span>
                         <strong className="tabular-nums">{p.qtd}</strong>
                         <button type="button" aria-label={`Retirar 1 de ${p.nome}`} className="rounded-md border border-line p-1 hover:bg-surface-muted" onClick={() => tirarUma(id, p.nome)}>
                           <Minus className="size-3" />

@@ -1,3 +1,4 @@
+import { FotoPeca } from "@/components/FotoPeca";
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -227,11 +228,7 @@ function MaletaFicha() {
                   key={c.variant_id}
                   className="flex items-center gap-4 border-b border-line-soft px-6 py-3 last:border-0"
                 >
-                  {imagem(c.media_id) ? (
-                    <img src={imagem(c.media_id)!} alt="" className="size-12 rounded-lg object-cover" />
-                  ) : (
-                    <div className="size-12 rounded-lg bg-surface-muted" aria-hidden />
-                  )}
+                  <FotoPeca mediaId={c.media_id} variantId={c.variant_id} className="size-12 shrink-0 rounded-lg" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-ledger-text">{c.produto}</p>
                     <p className="text-xs text-ledger-muted">

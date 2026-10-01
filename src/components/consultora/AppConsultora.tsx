@@ -705,9 +705,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
               const set = (v: number) => setQtd((q) => ({ ...q, [k(p)]: Math.max(0, Math.min(p.disponivel, v)) }));
               return (
                 <li key={k(p)} className={`flex gap-3 rounded-2xl border bg-card p-3 ${n > 0 ? "border-primary" : "border-border"}`}>
-                  {imagem(p.media_id)
-                    ? <img src={imagem(p.media_id)!} alt="" loading="lazy" className="size-24 shrink-0 rounded-xl object-cover" />
-                    : <div className="grid size-24 shrink-0 place-items-center rounded-xl bg-muted text-center text-sm text-muted-foreground">Sem foto</div>}
+                  <FotoPeca mediaId={p.media_id} variantId={p.variant_id} className="size-24 shrink-0 rounded-xl" vazio={<div className="grid size-24 shrink-0 place-items-center rounded-xl bg-muted text-center text-sm text-muted-foreground">Sem foto</div>} />
                   <div className="flex min-w-0 flex-1 flex-col">
                     <p className="text-[1.05rem] font-semibold leading-snug">{p.produto}</p>
                     <p className="text-[0.95rem] text-muted-foreground">{p.variante ?? "Tamanho único"} · {p.disponivel} disponível{p.disponivel > 1 ? "is" : ""}</p>
@@ -737,7 +735,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
           <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
             {escolhidas.map((p) => (
               <li key={k(p)} className="flex items-center gap-3 p-4">
-                {imagem(p.media_id) ? <img src={imagem(p.media_id)!} alt="" className="size-14 rounded-lg object-cover" /> : <div className="size-14 rounded-lg bg-muted" aria-hidden />}
+                <FotoPeca mediaId={p.media_id} variantId={p.variant_id} className="size-14 rounded-lg" />
                 <div className="min-w-0 flex-1">
                   <p className="text-[1.02rem] font-semibold">{p.produto}</p>
                   <p className="text-[0.95rem] text-muted-foreground">{p.variante ?? "Tamanho único"} · {qtd[k(p)]} × {brl(p.preco_cents)}</p>

@@ -90,7 +90,7 @@ export function PulsoCards() {
           <button type="button" aria-label="Próximo período" onClick={() => setAncora(mover(escala, ancora, 1))} className="admin-btn px-2"><ChevronRight className="size-4" /></button>
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold capitalize text-ledger-text">{per.rotulo}</p>
+          <p className="text-sm font-semibold text-ledger-text first-letter:uppercase">{per.rotulo}</p>
           <p className="valor-num text-xs text-ledger-muted">{br(per.de)} a {br(per.ate)}</p>
         </div>
         <button type="button" onClick={() => setAncora(new Date())} className="ml-auto text-xs font-semibold text-bronze hover:underline">Voltar para hoje</button>

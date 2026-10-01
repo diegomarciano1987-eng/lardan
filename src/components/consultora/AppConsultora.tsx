@@ -14,7 +14,7 @@ import { AberturaApp, InstalarApp } from "@/components/consultora/InstalarApp";
 import { brl, chaveIdempotencia, imagem, traduzir } from "@/lib/maletas";
 import {
   CANAL, carregarInicio, criarPedido, dataBR, formatarTelefone, hojeISO, linkWhats, listarAtendimentos, listarClientes,
-  meuParty, obterCliente, pecasDisponiveis, registrarAtendimento, salvarCliente, type Atendimento, type Cliente, type Peca,
+  meuParty, obterCliente, ETAPAS, historicoEtapas, linkInstagram, moverEtapa, pausarPessoa, rotuloEtapa, type Etapa, pecasDisponiveis, registrarAtendimento, salvarCliente, type Atendimento, type Cliente, type Peca,
 } from "@/lib/consultora";
 
 export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "mais" | "novo";
@@ -28,7 +28,7 @@ const deIso = (s: string | null) => (s ? new Date(s + "T12:00:00") : undefined);
 
 const PRINCIPAIS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
   { aba: "inicio", rotulo: "Início", icone: Home },
-  { aba: "clientes", rotulo: "Clientes", icone: Users },
+  { aba: "clientes", rotulo: "Jornada", icone: Users },
   { aba: "pedidos", rotulo: "Pedidos", icone: ShoppingBag },
   { aba: "maleta", rotulo: "Maleta", icone: BriefcaseBusiness },
 ];
@@ -267,63 +267,109 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
   const busca = nav.q ?? "";
   const partes = semAcento(busca).split(/\s+/).filter(Boolean);
   const lista = (q.data ?? []).filter((c) => {
-    const t = semAcento(`${c.nome} ${c.telefone} ${formatarTelefone(c.telefone)} ${c.email ?? ""} ${c.preferencias}`);
+    const t = semAcento(`${c.nome} ${c.telefone} ${formatarTelefone(c.telefone)} ${c.email ?? ""} ${c.instagram ?? ""} ${c.preferencias}`);
     return partes.every((p) => t.includes(p));
   });
-  const hoje = hojeISO();
+  const ativas = lista.filter((c) => !c.encerrada);
+  const pausadas = lista.filter((c) => c.encerrada);
+  const [aberta, setAberta] = React.useState<string>(() => (typeof window !== "undefined" && sessionStorage.getItem("jornada-aberta")) || "nova");
+  const abrir = (id: string) => { const v = aberta === id ? "" : id; setAberta(v); sessionStorage.setItem("jornada-aberta", v); };
+  const grupos = [...ETAPAS.map((e) => ({ id: e.id as string, rotulo: e.rotulo, dica: e.dica, itens: ativas.filter((c) => c.etapa === e.id) })),
+    { id: "pausadas", rotulo: "Pausadas / Encerradas", dica: "Arquivadas com motivo. Dá para reativar.", itens: pausadas }];
 
   return (
     <div>
-      <Topo titulo="Clientes" ajuda="clientes" />
+      <Topo titulo="Jornada" ajuda="clientes" />
       <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_auto]">
         <label className="block">
-          <span className="sr-only">Buscar cliente</span>
+          <span className="sr-only">Buscar pessoa</span>
           <span className="relative block">
             <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
-            <input type="search" value={busca} placeholder="Buscar por nome ou telefone" enterKeyHint="search"
+            <input type="search" value={busca} placeholder="Buscar por nome, telefone ou Instagram" enterKeyHint="search"
               onChange={(e) => ir({ aba: "clientes", q: e.target.value || undefined })}
               className="admin-input min-h-14 rounded-2xl pl-12 text-[1.05rem]" />
           </span>
         </label>
         <button type="button" className="btn-app-principal" onClick={() => ir({ aba: "clientes", modo: "nova" })}>
-          <UserPlus className="size-5" aria-hidden /> Cadastrar cliente
+          <UserPlus className="size-5" aria-hidden /> Nova interessada
         </button>
       </div>
 
-      {q.isLoading && <Estado tipo="carregando" texto="Carregando suas clientes…" />}
-      {q.isError && <Estado tipo="erro" texto="Não foi possível carregar suas clientes." acao={<button className="admin-btn" onClick={() => q.refetch()}>Tentar de novo</button>} />}
+      {q.isLoading && <Estado tipo="carregando" texto="Carregando sua jornada…" />}
+      {q.isError && <Estado tipo="erro" texto="Não foi possível carregar sua jornada." acao={<button className="admin-btn" onClick={() => q.refetch()}>Tentar de novo</button>} />}
       {q.data && q.data.length === 0 && (
-        <Estado tipo="vazio" texto="Você ainda não cadastrou clientes. Comece pela primeira: só o nome é obrigatório." />
+        <Estado tipo="vazio" texto="Ninguém na sua jornada ainda. Cadastre a primeira interessada: só o nome é obrigatório, não precisa ter comprado." />
       )}
-      {q.data && q.data.length > 0 && lista.length === 0 && <Estado tipo="vazio" texto={`Nenhuma cliente encontrada para “${busca}”.`} />}
+      {q.data && q.data.length > 0 && lista.length === 0 && <Estado tipo="vazio" texto={`Ninguém encontrado para “${busca}”.`} />}
 
-      <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        {lista.map((c) => {
-          const atrasado = c.proximo_retorno && c.proximo_retorno < hoje;
-          const ehHoje = c.proximo_retorno === hoje;
-          return (
-            <li key={c.id} className="min-w-0">
-              <button type="button" onClick={() => ir({ aba: "clientes", id: c.id, q: nav.q })}
-                className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 text-left active:bg-muted">
-                <span className="grid size-12 shrink-0 place-items-center rounded-full bg-primary/12 text-lg font-semibold text-primary" aria-hidden>
-                  {c.nome.trim().slice(0, 1).toUpperCase()}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[1.1rem] font-semibold">{c.nome}</span>
-                  <span className="block text-[0.98rem] text-muted-foreground">{c.telefone ? formatarTelefone(c.telefone) : "Sem telefone"}</span>
-                  {c.proximo_retorno && (
-                    <span className={`mt-1 inline-block text-[0.95rem] font-medium ${atrasado ? "text-destructive" : "text-foreground"}`}>
-                      {atrasado ? "⚠ Retorno atrasado: " : ehHoje ? "Retorno hoje" : "Retorno: "}{ehHoje ? "" : dataBR(c.proximo_retorno)}
-                    </span>
+      {q.data && q.data.length > 0 && (
+        <>
+          {/* Celular e tablet: seções recolhíveis, sem colunas lado a lado */}
+          <div className="space-y-3 xl:hidden">
+            {grupos.map((g) => {
+              const on = aberta === g.id || (busca !== "" && g.itens.length > 0);
+              return (
+                <section key={g.id} className="rounded-2xl border border-border bg-card">
+                  <h2>
+                    <button type="button" aria-expanded={on} onClick={() => abrir(g.id)}
+                      className="flex min-h-16 w-full items-center gap-3 px-5 text-left">
+                      <span className="min-w-0 flex-1"><span className="block text-[1.1rem] font-semibold">{g.rotulo}</span><span className="block text-[0.95rem] text-muted-foreground">{g.dica}</span></span>
+                      <span className="grid min-w-9 place-items-center rounded-full bg-primary/12 px-2.5 py-1 text-base font-semibold text-primary">{g.itens.length}</span>
+                      <ChevronRight className={`size-6 shrink-0 text-muted-foreground transition-transform ${on ? "rotate-90" : ""}`} aria-hidden />
+                    </button>
+                  </h2>
+                  {on && (
+                    <ul className="space-y-2 px-3 pb-3">
+                      {g.itens.length === 0 && <li className="px-2 py-3 text-[1rem] text-muted-foreground">Ninguém nesta etapa.</li>}
+                      {g.itens.map((c) => <li key={c.id} className="min-w-0"><CartaoPessoa c={c} onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}
+                    </ul>
                   )}
-                </span>
-                <ChevronRight className="size-6 shrink-0 text-muted-foreground" aria-hidden />
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+                </section>
+              );
+            })}
+          </div>
+          {/* Computador largo: quadro por colunas */}
+          <div className="hidden gap-3 xl:grid xl:grid-cols-5">
+            {grupos.slice(0, 5).map((g) => (
+              <section key={g.id} aria-label={g.rotulo} className="min-w-0 rounded-2xl bg-muted/50 p-3">
+                <h2 className="mb-3 flex items-center justify-between gap-2 px-1 text-[1.05rem] font-semibold">
+                  <span className="truncate">{g.rotulo}</span><span className="rounded-full bg-card px-2.5 text-base text-primary">{g.itens.length}</span>
+                </h2>
+                <ul className="space-y-2">
+                  {g.itens.map((c) => <li key={c.id}><CartaoPessoa c={c} compacto onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}
+                  {g.itens.length === 0 && <li className="px-1 text-[0.98rem] text-muted-foreground">Ninguém aqui.</li>}
+                </ul>
+              </section>
+            ))}
+            {pausadas.length > 0 && (
+              <section className="col-span-5 rounded-2xl border border-border bg-card p-4">
+                <h2 className="mb-3 text-[1.05rem] font-semibold">Pausadas / Encerradas ({pausadas.length})</h2>
+                <ul className="grid grid-cols-3 gap-2">{pausadas.map((c) => <li key={c.id}><CartaoPessoa c={c} compacto onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}</ul>
+              </section>
+            )}
+          </div>
+        </>
+      )}
     </div>
+  );
+}
+
+function CartaoPessoa({ c, onAbrir, compacto }: { c: Cliente; onAbrir: () => void; compacto?: boolean }) {
+  const hoje = hojeISO();
+  const atrasado = c.proximo_retorno && c.proximo_retorno < hoje;
+  const ehHoje = c.proximo_retorno === hoje;
+  return (
+    <button type="button" onClick={onAbrir} className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-4 text-left active:bg-muted">
+      {!compacto && <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/12 text-lg font-semibold text-primary" aria-hidden>{c.nome.trim().slice(0, 1).toUpperCase()}</span>}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[1.05rem] font-semibold">{c.nome}</span>
+        <span className={`block text-[0.95rem] ${atrasado ? "font-medium text-destructive" : "text-muted-foreground"}`}>
+          {c.proximo_retorno ? (atrasado ? `⚠ Retorno atrasado: ${dataBR(c.proximo_retorno)}` : ehHoje ? "Retorno hoje" : `Retorno: ${dataBR(c.proximo_retorno)}`) : "Sem retorno agendado"}
+        </span>
+        <span className="block text-[0.92rem] text-muted-foreground">{c.encerrada ? `Motivo: ${c.encerrada_motivo ?? ""}` : c.ultima_interacao ? `Último contato: ${dataBR(c.ultima_interacao)}` : "Nenhum contato registrado"}</span>
+      </span>
+      <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+    </button>
   );
 }
 
@@ -337,7 +383,7 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
     mutationFn: async () => salvarCliente({ ...f, nome: f.nome ?? "" } as Cliente, await meuParty()),
     onSuccess: (novo) => {
       qc.invalidateQueries({ queryKey: ["consultora"] });
-      toast.success(id ? "Cliente atualizada." : "Cliente cadastrada.");
+      toast.success(id ? "Dados atualizados." : "Pessoa incluída na Jornada.");
       if (depois) depois(novo); else ir({ aba: "clientes", id: novo });
     },
     onError: (e) => toast.error("Não salvou. Seus dados continuam aqui. " + traduzir(e)),
@@ -345,9 +391,11 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
   const enviar = (e: React.FormEvent) => {
     e.preventDefault();
     const er: Record<string, string> = {};
-    if (!f.nome || f.nome.trim().length < 2) er["nome"] = "Escreva o nome da cliente (pelo menos 2 letras).";
+    if (!f.nome || f.nome.trim().length < 2) er["nome"] = "Escreva o nome da pessoa (pelo menos 2 letras).";
     const tel = (f.telefone ?? "").replace(/\D/g, "");
     if (tel && (tel.length < 10 || tel.length > 13)) er["telefone"] = "Confira o telefone: use DDD + número, por exemplo (11) 98765-4321.";
+    const ig = (f.instagram ?? "").trim().toLowerCase().replace(/^(https?:\/\/)?(www\.|m\.)?instagram\.com\//, "").replace(/^@/, "").replace(/[/?#].*$/, "");
+    if (ig && !/^[a-z0-9._]{1,30}$/.test(ig)) er["instagram"] = "Confira o Instagram: use @usuario ou o link do perfil.";
     if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) er["email"] = "Confira o e-mail, por exemplo maria@gmail.com.";
     setErros(er);
     if (Object.keys(er).length === 0 && !salvar.isPending) salvar.mutate();
@@ -356,14 +404,20 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
 
   return (
     <div>
-      <Topo titulo={id ? "Editar cliente" : "Cadastrar cliente"} ajuda="clientes" voltar={() => ir(id ? { aba: "clientes", id } : { aba: "clientes" })} />
+      <Topo titulo={id ? "Editar dados" : "Nova interessada"} ajuda="clientes" voltar={() => ir(id ? { aba: "clientes", id } : { aba: "clientes" })} />
       <form onSubmit={enviar} noValidate className="max-w-2xl space-y-5">
-        <Campo rotulo="Nome da cliente" obrigatorio erro={erros["nome"]}>
+        <Campo rotulo="Nome" obrigatorio erro={erros["nome"]}>
           <input className="admin-input min-h-14 text-[1.05rem]" autoComplete="off" autoCapitalize="words" {...campo("nome")} />
         </Campo>
         <Campo rotulo="Telefone / WhatsApp" dica="Com DDD. Pode colar o número como estiver." erro={erros["telefone"]}>
           <input className="admin-input min-h-14 text-[1.05rem]" type="tel" inputMode="tel" autoComplete="off"
             value={formatarTelefone(f.telefone ?? "")} onChange={(e) => setF({ ...f, telefone: e.target.value.replace(/\D/g, "").slice(0, 13) })} />
+        </Campo>
+        <Campo rotulo="Instagram da cliente" dica="Opcional. Pode ser @usuario ou o link do perfil. Fica só com você, nunca vai para a vitrine." erro={erros["instagram"]}>
+          <input className="admin-input min-h-14 text-[1.05rem]" autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="@usuario" {...campo("instagram")} />
+        </Campo>
+        <Campo rotulo="Como vocês se conheceram" dica="Opcional. Ex.: indicação da Ana, Instagram, feira.">
+          <input className="admin-input min-h-14 text-[1.05rem]" maxLength={80} {...campo("origem")} />
         </Campo>
         <Campo rotulo="E-mail" dica="Opcional." erro={erros["email"]}>
           <input className="admin-input min-h-14 text-[1.05rem]" type="email" inputMode="email" autoComplete="off" {...campo("email")} />
@@ -382,7 +436,7 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
         </Campo>
         <div className="sticky bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 bg-background/95 px-4 py-3 lg:bottom-0">
           <button type="submit" className="btn-app-principal w-full" disabled={salvar.isPending} aria-busy={salvar.isPending}>
-            {salvar.isPending ? "Salvando…" : id ? "Salvar alterações" : "Salvar cliente"}
+            {salvar.isPending ? "Salvando…" : id ? "Salvar alterações" : "Salvar na Jornada"}
           </button>
         </div>
       </form>
@@ -430,6 +484,8 @@ export function FichaCliente({ id, nav, ir }: { id: string; nav: Nav; ir: Ir }) 
           <section className="rounded-2xl border border-border bg-card p-5">
             <p className="text-[1.1rem]">{cl.telefone ? formatarTelefone(cl.telefone) : "Sem telefone cadastrado"}</p>
             {cl.email && <p className="text-[1.02rem] text-muted-foreground break-all">{cl.email}</p>}
+            {cl.instagram && <a href={linkInstagram(cl.instagram) ?? undefined} target="_blank" rel="noopener noreferrer" className="block text-[1.02rem] text-acao underline-offset-4 hover:underline">@{cl.instagram}</a>}
+            {cl.origem && <p className="text-[1.02rem] text-muted-foreground">Origem: {cl.origem}</p>}
             {cl.aniversario && <p className="mt-1 text-[1.02rem]">Aniversário: {dataBR(cl.aniversario).slice(0, 5)}</p>}
             <div className="mt-4 grid grid-cols-2 gap-2">
               {whats ? <a href={whats} target="_blank" rel="noreferrer" className="admin-btn min-h-13 justify-center text-base"><MessageCircle className="size-5" aria-hidden /> WhatsApp</a>
@@ -438,6 +494,7 @@ export function FichaCliente({ id, nav, ir }: { id: string; nav: Nav; ir: Ir }) 
                 : <span className="admin-btn min-h-13 justify-center text-base opacity-60" aria-disabled>Ligar</span>}
             </div>
           </section>
+          <EtapaPessoa cl={cl} />
           <button type="button" className="btn-app-principal w-full" onClick={() => ir({ aba: "novo", id: cl.id })}>
             <Plus className="size-5" aria-hidden /> Novo pedido para {cl.nome.split(" ")[0]}
           </button>
@@ -491,6 +548,69 @@ export function FichaCliente({ id, nav, ir }: { id: string; nav: Nav; ir: Ir }) 
         </section>
       </div>
     </div>
+  );
+}
+
+function EtapaPessoa({ cl }: { cl: Cliente }) {
+  const qc = useQueryClient();
+  const h = useQuery({ queryKey: ["consultora", "etapas", cl.id], queryFn: () => historicoEtapas(cl.id) });
+  const [motivo, setMotivo] = React.useState("");
+  const [pausando, setPausando] = React.useState(false);
+  const ok = () => { qc.invalidateQueries({ queryKey: ["consultora"] }); };
+  const mover = useMutation({ mutationFn: (e: Etapa) => moverEtapa(cl.id, e), onSuccess: () => { ok(); toast.success("Etapa atualizada."); }, onError: (e) => toast.error(traduzir(e)) });
+  const pausar = useMutation({ mutationFn: (m: string | null) => pausarPessoa(cl.id, m), onSuccess: (_d, m) => { ok(); setPausando(false); setMotivo(""); toast.success(m ? "Pausada. Fica guardada em Pausadas/Encerradas." : "Reativada na Jornada."); }, onError: (e) => toast.error(traduzir(e)) });
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5">
+      <h2 className="text-lg font-semibold">Etapa na Jornada</h2>
+      {cl.encerrada ? (
+        <>
+          <p className="mt-1 text-[1.05rem]">Pausada. Motivo: {cl.encerrada_motivo}</p>
+          <button type="button" className="btn-app-principal mt-3 w-full" disabled={pausar.isPending} onClick={() => pausar.mutate(null)}>Reativar</button>
+        </>
+      ) : (
+        <>
+          <div role="radiogroup" aria-label="Etapa" className="mt-3 grid gap-2">
+            {ETAPAS.map((e) => {
+              const atual = cl.etapa === e.id;
+              const bloqueada = e.id === "cliente" || cl.etapa === "cliente";
+              return (
+                <button key={e.id} type="button" role="radio" aria-checked={atual} disabled={atual || bloqueada || mover.isPending}
+                  onClick={() => mover.mutate(e.id)}
+                  className={`min-h-13 rounded-xl border px-4 text-left text-base ${atual ? "border-acao bg-acao text-acao-foreground" : "border-border bg-background disabled:opacity-60"}`}>
+                  {atual ? "✓ " : ""}{e.rotulo}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[0.95rem] text-muted-foreground">“Cliente” aparece sozinho quando uma venda é registrada.</p>
+          {!pausando ? (
+            <button type="button" className="admin-btn mt-3 min-h-12 w-full justify-center text-base" onClick={() => setPausando(true)}>Pausar ou encerrar</button>
+          ) : (
+            <form className="mt-3 space-y-3" onSubmit={(e) => { e.preventDefault(); if (motivo.trim()) pausar.mutate(motivo.trim()); }}>
+              <Campo rotulo="Motivo" dica="Ex.: pediu para falar depois das férias.">
+                <input className="admin-input min-h-13 text-[1.05rem]" value={motivo} maxLength={200} onChange={(e) => setMotivo(e.target.value)} />
+              </Campo>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" className="admin-btn min-h-13 justify-center text-base" onClick={() => setPausando(false)}>Cancelar</button>
+                <button type="submit" className="btn-app-principal" disabled={!motivo.trim() || pausar.isPending}>Pausar</button>
+              </div>
+            </form>
+          )}
+        </>
+      )}
+      {h.data && h.data.length > 0 && (
+        <details className="mt-4">
+          <summary className="min-h-12 cursor-pointer py-2 text-base font-semibold">Histórico da Jornada ({h.data.length})</summary>
+          <ol className="mt-2 space-y-1.5">
+            {h.data.map((ev) => (
+              <li key={ev.id} className="text-[0.98rem]">
+                <span className="text-muted-foreground">{new Date(ev.created_at).toLocaleDateString("pt-BR")}</span> · {ev.de ? `${rotuloEtapa(ev.de)} → ` : "Entrou como "}{rotuloEtapa(ev.para)}{ev.motivo ? ` (${ev.motivo})` : ""}
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+    </section>
   );
 }
 

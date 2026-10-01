@@ -241,7 +241,7 @@ export function Inicio({ ir }: { ir: Ir }) {
           <h2 id="mes" className="mb-3 text-xl font-semibold">Seu resumo</h2>
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              ["Clientes cadastradas", d.clientes],
+              ["Pessoas na Jornada", d.clientes],
               ["Pedidos em aberto", d.pedidos_abertos],
               ["Pedidos neste mês", d.pedidos_mes],
               ["Peças disponíveis na maleta", d.pecas_disponiveis],

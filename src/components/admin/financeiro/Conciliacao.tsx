@@ -1,3 +1,5 @@
+import { useNavigate } from "@tanstack/react-router";
+import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -553,19 +555,19 @@ export function Conciliacao({
       ate: isoLocal(new Date(h.getFullYear(), h.getMonth() + 1, 0)),
     };
   }, []);
-  const [de, setDe] = React.useState(mesAtualObrigatorio ? mesAtual.de : "");
-  const [ate, setAte] = React.useState(mesAtualObrigatorio ? mesAtual.ate : "");
-  const periodo: DateRange | undefined = de
-    ? { from: new Date(`${de}T12:00:00`), to: ate ? new Date(`${ate}T12:00:00`) : undefined }
-    : undefined;
+  // segue o período global do Financeiro (topo da tela), igual às demais áreas
+  void mesAtualObrigatorio;
+  void mesAtual;
+  const periodoGlobal = usePeriodoFinanceiro();
+  const navegar = useNavigate();
+  const de = periodoGlobal.de;
+  const ate = periodoGlobal.ate;
+  const periodo: DateRange | undefined = { from: new Date(`${de}T12:00:00`), to: new Date(`${ate}T12:00:00`) };
   const mudarPeriodo = (r?: DateRange) => {
-    if (!r?.from) {
-      setDe(mesAtualObrigatorio ? mesAtual.de : "");
-      setAte(mesAtualObrigatorio ? mesAtual.ate : "");
-      return;
-    }
-    setDe(isoLocal(r.from));
-    setAte(isoLocal(r.to ?? r.from));
+    if (!r?.from) return;
+    const nde = isoLocal(r.from);
+    const nate = isoLocal(r.to ?? r.from);
+    void navegar({ to: ".", search: ((prev: Record<string, unknown>) => ({ ...prev, de: nde, ate: nate })) as never, replace: true });
   };
   const [busca, setBusca] = React.useState("");
   const buscaLenta = useDebounce(busca);

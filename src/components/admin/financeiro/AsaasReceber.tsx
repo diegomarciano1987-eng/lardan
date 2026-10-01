@@ -1,3 +1,5 @@
+import { useNavigate } from "@tanstack/react-router";
+import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import * as React from "react";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -233,9 +235,18 @@ export function AsaasReceber() {
   const [escolhida, setEscolhida] = React.useState<LinhaReceber | null>(null);
   const [busca, setBusca] = React.useState("");
   const [situacao, setSituacao] = React.useState<SituacaoFiltro>("");
-  const [periodo, setPeriodo] = React.useState<DateRange | undefined>(mesAtual);
-  const de = periodo?.from ? isoDia(periodo.from) : "";
-  const ate = periodo?.to ? isoDia(periodo.to) : de;
+  // segue o período global do Financeiro (topo da tela)
+  const periodoGlobal = usePeriodoFinanceiro();
+  const navegar = useNavigate();
+  const de = periodoGlobal.de;
+  const ate = periodoGlobal.ate;
+  const periodo: DateRange | undefined = { from: new Date(`${de}T12:00:00`), to: new Date(`${ate}T12:00:00`) };
+  const setPeriodo = (r?: DateRange) => {
+    if (!r?.from) return;
+    const nde = isoDia(r.from);
+    const nate = isoDia(r.to ?? r.from);
+    void navegar({ to: ".", search: ((prev: Record<string, unknown>) => ({ ...prev, de: nde, ate: nate })) as never, replace: true });
+  };
   const [contaSelecionada, setContaSelecionada] = React.useState<string>("");
   const termo = useDebounced(busca);
   const estado = useServerFn(estadoContasAsaas);

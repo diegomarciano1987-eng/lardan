@@ -42,6 +42,16 @@ export const Route = createFileRoute("/_authenticated/consultora")({
     meta: [
       { title: "Minha área — Consultora LARDAN" },
       { name: "robots", content: "noindex, nofollow" },
+      { name: "theme-color", content: "#1c1614" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "LARDAN" },
+    ],
+    // Atalho instalável existe só na área da consultora.
+    links: [
+      { rel: "manifest", href: "/consultora.webmanifest" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/consultora-apple-180.png" },
     ],
   }),
 });

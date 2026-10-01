@@ -39,3 +39,13 @@
 
 ## Selos de segurança
 - [x] Redesenhar os selos de todos os rodapés com faixa institucional escura e versão compatível para e-mails
+
+## Área comercial das consultoras (plano aprovado 01/10)
+- [x] Etapa 1a: aceite só após recebimento; confirmação tardia não reabre; repasse exige custódia; "concluído" bloqueado; pedido anônimo da vitrine revogado
+- [x] Vitrine: sacola vira lista de interesse via WhatsApp (sem reserva), número sem 55 duplicado
+- [ ] Conta de teste da consultora (aguarda Diego confirmar e-mail projetos.diegosilva@hotmail.com)
+- [ ] Etapa 1b: regra única de elegibilidade/preço; testes isolados de regressão
+- [ ] Etapa 2: convite e primeiro acesso
+- [ ] Etapa 3: vitrine em perfil completo (capa, retrato, filtros, busca)
+- [ ] Etapa 4: CRM de clientes, pedidos e vendas
+- [ ] Etapa 5: pagamentos, devolução e garantia (aguarda decisões: prazo de reserva, limite de desconto, recebedor, texto de garantia)

@@ -31,7 +31,7 @@ const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitr
 const str = (v: unknown) => (typeof v === "string" && v.length > 0 && v.length < 200 ? v : undefined);
 
 export const Route = createFileRoute("/_authenticated/consultora")({
-  validateSearch: (s: Record<string, unknown>): Partial<Nav> => ({
+  validateSearch: (s: Record<string, unknown>): { aba?: AbaApp | undefined; id?: string | undefined; modo?: "nova" | "editar" | undefined; q?: string | undefined } => ({
     aba: ABAS_VALIDAS.includes(s["aba"] as AbaApp) ? (s["aba"] as AbaApp) : undefined,
     id: str(s["id"]),
     modo: s["modo"] === "nova" || s["modo"] === "editar" ? s["modo"] : undefined,

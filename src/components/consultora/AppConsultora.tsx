@@ -88,7 +88,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
   );
 }
 
-export function Topo({ titulo, voltar, ajuda, children }: { titulo: string; voltar?: () => void; ajuda: string; children?: React.ReactNode }) {
+export function Topo({ titulo, voltar, ajuda, children }: { titulo: string; voltar?: (() => void) | undefined; ajuda: string; children?: React.ReactNode }) {
   return (
     <header className="mb-6 flex items-center gap-3">
       {voltar && (

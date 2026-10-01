@@ -5,7 +5,7 @@ import { brl, imagem, type VitrineItem } from "@/lib/maletas";
 import logoLardan from "@/assets/lardan-logo-institucional.webp.asset.json";
 import { CAPAS, designPadrao, whatsappLink, type DesignVitrine } from "@/lib/vitrine-design";
 
-type Item = VitrineItem & { midias?: string[] };
+type Item = VitrineItem & { midias?: string[]; ilustracao?: string | null };
 
 export interface VitrineViewProps {
   design: Partial<DesignVitrine> | null | undefined;
@@ -131,11 +131,17 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
     <ul className={grade}>
       {lista.map((i) => {
         const q = sacola[i.variant_id] ?? 0;
-        const src = foto(i);
+        const real = foto(i);
+        const src = real ?? i.ilustracao ?? null;
         return (
           <li key={i.variant_id} className={`${cartao} ${a.grade === "lista" ? "flex gap-3" : "flex flex-col"}`}>
-            <div className={`overflow-hidden bg-[var(--v-line)] ${a.cartao === "suave" ? "rounded-xl" : ""} ${a.grade === "lista" ? "size-24 shrink-0" : a.tema === "editorial" ? "aspect-[3/4]" : "aspect-square"}`}>
-              {src && <img src={src} alt={i.produto} loading="lazy" className="size-full object-cover" />}
+            <div className={`relative overflow-hidden bg-[var(--v-line)] ${a.cartao === "suave" ? "rounded-xl" : ""} ${a.grade === "lista" ? "size-24 shrink-0" : a.tema === "editorial" ? "aspect-[3/4]" : "aspect-square"}`}>
+              {src && <img src={src} alt={i.produto} loading="lazy" width={800} height={800} className="size-full object-cover" />}
+              {!real && i.ilustracao && (
+                <span className="absolute bottom-1.5 left-1.5 rounded-full bg-[var(--v-bg)]/85 px-2 py-0.5 text-[0.6rem] font-medium tracking-wide text-[var(--v-muted)]">
+                  Imagem ilustrativa
+                </span>
+              )}
             </div>
             <div className={a.grade === "lista" ? "flex-1 py-1" : "px-1 pb-1 pt-3"}>
               <p className="text-sm font-medium leading-snug">{i.produto}</p>

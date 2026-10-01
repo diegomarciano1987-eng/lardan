@@ -22,6 +22,7 @@ import { ErrorState, Panel, Skeleton, formatBRLFromCents } from "@/components/ad
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
 import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
+import { listarTransferencias } from "@/lib/financeiro-parcelas";
 import {
   fetchClassificacoes,
   fetchFinAccounts,
@@ -516,5 +517,40 @@ function Resumo({
     >
       {conteudo}
     </button>
+  );
+}
+
+function TransferenciasOperacoes({ de, ate }: { de: string; ate: string }) {
+  const q = useQuery({ queryKey: ["fin-transferencias", de, ate], queryFn: () => listarTransferencias(de, ate) });
+  const d = q.data;
+  if (!d || d.rows.length === 0) return null;
+  return (
+    <Panel title="Transferências do período — uma linha por operação" flush>
+      <p className="px-5 pt-4 text-xs text-ledger-muted">
+        {d.criterio} Operacionais: {formatBRLFromCents(d.operacional_cents)} · Ajustes de implantação:{" "}
+        {formatBRLFromCents(d.implantacao_cents)}.
+      </p>
+      <ul className="mt-3 divide-y divide-line-soft/60 text-sm">
+        {d.rows.map((t) => (
+          <li key={t.id} className="px-5 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="font-medium text-ledger-text">
+                {new Date(`${t.data}T12:00:00`).toLocaleDateString("pt-BR")} · {t.de} → {t.para}
+                {t.implantacao ? (
+                  <span className="ml-2 rounded-full border border-line px-2 py-0.5 text-xs text-ledger-muted">
+                    Ajuste de implantação
+                  </span>
+                ) : null}
+              </span>
+              <span className="font-semibold tabular-nums">{formatBRLFromCents(t.valor_cents)}</span>
+            </div>
+            <p className="mt-1 text-xs text-ledger-muted">
+              Movimentações para conciliação:{" "}
+              {(t.movimentos ?? []).map((m) => `${m.conta} ${formatBRLFromCents(m.valor_cents)}`).join(" · ")}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </Panel>
   );
 }

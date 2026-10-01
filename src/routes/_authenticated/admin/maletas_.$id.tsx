@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Printer, ScanBarcode, Send, Truck } from "lucide-react";
+import { CheckCircle2, FileText, Printer, ScanBarcode, Send, Truck } from "lucide-react";
 import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
 import { toast } from "sonner";
 import QRCode from "qrcode";
@@ -72,6 +72,7 @@ function MaletaFicha() {
   const [divergencias, setDivergencias] = React.useState<Record<string, number>>({});
   const [chave] = React.useState(chaveIdempotencia);
   const [leitor, setLeitor] = React.useState(false);
+  const [confirmando, setConfirmando] = React.useState(false);
 
   const add = useMutation({
     mutationFn: () => definirItem(id, peca!.id, qtd),
@@ -352,13 +353,46 @@ function MaletaFicha() {
                     value={rastreio}
                     onChange={(e) => setRastreio(e.target.value)}
                   />
+                  {!confirmando ? (
+                    <button
+                      type="button"
+                      className="admin-btn w-full"
+                      disabled={d.ciclo.status !== "conferida" || expedirM.isPending}
+                      onClick={() => setConfirmando(true)}
+                    >
+                      <Send aria-hidden className="size-4" /> Expedir
+                    </button>
+                  ) : (
+                    <div className="space-y-2 rounded-lg border border-line p-3">
+                      <p className="text-sm font-semibold text-ledger-text">
+                        Confirmar expedição para {rota === "direta" ? d.consultora ?? "a consultora" : "o representante"}?
+                      </p>
+                      <p className="text-xs text-ledger-muted">
+                        {d.ciclo.quantity_total} peças · {brl(Number(d.ciclo.reference_total_cents ?? 0))}
+                      </p>
+                      <div className="flex gap-2">
+                        <button type="button" className="admin-btn flex-1" onClick={() => setConfirmando(false)}>
+                          Voltar
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-primary flex-1"
+                          disabled={expedirM.isPending}
+                          onClick={() => expedirM.mutate(undefined, { onSettled: () => setConfirmando(false) })}
+                        >
+                          <CheckCircle2 aria-hidden className="size-4" /> Confirmar expedição
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   <button
                     type="button"
                     className="admin-btn w-full"
-                    disabled={d.ciclo.status !== "conferida" || expedirM.isPending}
-                    onClick={() => expedirM.mutate()}
+                    disabled
+                    title="A emissão da nota fiscal será liberada em breve."
                   >
-                    <Send aria-hidden className="size-4" /> Expedir
+                    <FileText aria-hidden className="size-4" /> Gerar nota fiscal
+                    <span className="text-[0.65rem] uppercase tracking-wider text-ledger-muted">em breve</span>
                   </button>
                 </div>
               </div>

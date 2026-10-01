@@ -388,6 +388,7 @@ export interface FinCashflow {
     entradas_realizadas_cents: number;
     saidas_realizadas_cents: number;
     transferencias_cents: number;
+    transferencias_implantacao_cents?: number;
     nao_classificado_entradas_cents: number;
     nao_classificado_saidas_cents: number;
     entradas_previstas_cents: number;

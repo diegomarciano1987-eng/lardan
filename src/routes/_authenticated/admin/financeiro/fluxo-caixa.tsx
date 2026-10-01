@@ -198,8 +198,13 @@ function FluxoCaixa() {
               <Resumo
                 rotulo="Transferências entre contas"
                 valor={d.totais.transferencias_cents}
-                nota="Não entram no consolidado"
+                nota="Uma vez por operação · fora do consolidado"
                 onClick={() => setDetalhe("transferencia")}
+              />
+              <Resumo
+                rotulo="Ajustes de implantação"
+                valor={d.totais.transferencias_implantacao_cents ?? 0}
+                nota="Equalização com o Conta Azul · fora do consolidado"
               />
               <Resumo
                 rotulo="Saldo projetado"
@@ -207,6 +212,7 @@ function FluxoCaixa() {
                 nota="Realizado + previsto"
               />
             </div>
+            {!d.filtros.conta_id ? <TransferenciasOperacoes de={periodo.de} ate={periodo.ate} /> : null}
 
             {d.filtros.classificacao_aplicada &&
             (d.totais.nao_classificado_entradas_cents > 0 ||

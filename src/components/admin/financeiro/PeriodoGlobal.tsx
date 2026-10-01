@@ -12,7 +12,8 @@ const daIso = (v?: string) => {
   if (!v || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return undefined;
   const [a, m, d] = v.split("-").map(Number);
   const data = new Date(a!, m! - 1, d!);
-  return Number.isNaN(data.getTime()) ? undefined : data;
+  if (Number.isNaN(data.getTime()) || data.getMonth() !== m! - 1 || data.getDate() !== d!) return undefined;
+  return data;
 };
 
 const exibir = (v?: string) => {
@@ -49,9 +50,11 @@ export function intervaloDoPreset(preset: Exclude<PresetPeriodo, "personalizado"
 export function usePeriodoFinanceiro() {
   const busca = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   const padrao = intervaloDoPreset("mes");
-  const de = typeof busca["de"] === "string" ? (busca["de"] as string) : padrao.de;
-  const ate = typeof busca["ate"] === "string" ? (busca["ate"] as string) : padrao.ate;
-  return { de, ate };
+  const de0 = typeof busca["de"] === "string" && daIso(busca["de"] as string) ? (busca["de"] as string) : undefined;
+  const ate0 = typeof busca["ate"] === "string" && daIso(busca["ate"] as string) ? (busca["ate"] as string) : undefined;
+  // datas inexistentes (ex.: 31/02) ou início depois do fim voltam ao mês atual
+  if (!de0 || !ate0 || de0 > ate0) return padrao;
+  return { de: de0, ate: ate0 };
 }
 
 const PRESETS: { chave: Exclude<PresetPeriodo, "personalizado">; rotulo: string }[] = [
@@ -79,6 +82,21 @@ export function PeriodoGlobal() {
     });
   };
 
+  const deslocarMes = (delta: number) => {
+    const base = daIso(de) ?? new Date();
+    const ini = new Date(base.getFullYear(), base.getMonth() + delta, 1);
+    aplicar({ de: iso(ini), ate: iso(new Date(ini.getFullYear(), ini.getMonth() + 1, 0)) });
+  };
+  const mesInteiro = (() => {
+    const a = daIso(de);
+    const b = daIso(ate);
+    if (!a || !b || a.getDate() !== 1) return null;
+    const fim = new Date(a.getFullYear(), a.getMonth() + 1, 0);
+    if (iso(fim) !== ate) return null;
+    const nome = a.toLocaleDateString("pt-BR", { month: "long" });
+    return `${nome.charAt(0).toUpperCase()}${nome.slice(1)}/${a.getFullYear()}`;
+  })();
+
   const ativo = PRESETS.find((p) => {
     const i = intervaloDoPreset(p.chave);
     return i.de === de && i.ate === ate;
@@ -92,15 +110,18 @@ export function PeriodoGlobal() {
   const podeAplicar = !!rascunho?.from;
 
   return (
+    <div className="flex items-center gap-1">
+    <button type="button" aria-label="Mês anterior" onClick={() => deslocarMes(-1)} className="inline-flex size-11 items-center justify-center rounded-[10px] border border-line bg-surface text-lg font-semibold text-ledger-text hover:border-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-champagne">‹</button>
     <Popover open={aberto} onOpenChange={setAberto}>
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="inline-flex min-h-10 items-center gap-2 rounded-[10px] border border-line bg-surface px-3.5 text-sm font-semibold text-ledger-text transition hover:border-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-champagne"
+          className="inline-flex min-h-11 items-center gap-2 rounded-[10px] border border-line bg-surface px-3.5 text-sm font-semibold text-ledger-text transition hover:border-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-champagne"
         >
           <span className="ledger-eyebrow text-[0.625rem]">Período</span>
-          <span className="tabular-nums">
-            {ativo ? ativo.rotulo : `${exibir(de)} – ${exibir(ate)}`}
+          <span className="flex flex-col items-start leading-tight">
+            <span className="tabular-nums">{mesInteiro ?? ativo?.rotulo ?? "Personalizado"}</span>
+            <span className="text-xs font-medium tabular-nums text-ledger-muted">{exibir(de)} a {exibir(ate)}</span>
           </span>
         </button>
       </PopoverTrigger>
@@ -175,5 +196,7 @@ export function PeriodoGlobal() {
         </div>
       </PopoverContent>
     </Popover>
+    <button type="button" aria-label="Próximo mês" onClick={() => deslocarMes(1)} className="inline-flex size-11 items-center justify-center rounded-[10px] border border-line bg-surface text-lg font-semibold text-ledger-text hover:border-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-champagne">›</button>
+    </div>
   );
 }

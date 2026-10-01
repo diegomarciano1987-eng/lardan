@@ -83,6 +83,7 @@ import { Route as AuthenticatedAdminFinanceiroDreRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminFinanceiroFluxoCaixaRouteImport } from './routes/_authenticated/admin/financeiro/fluxo-caixa'
 import { Route as AuthenticatedAdminFinanceiroImportacoesRouteImport } from './routes/_authenticated/admin/financeiro/importacoes'
 import { Route as AuthenticatedAdminFinanceiroPagarRouteImport } from './routes/_authenticated/admin/financeiro/pagar'
+import { Route as AuthenticatedAdminFinanceiroPagarReceberRouteImport } from './routes/_authenticated/admin/financeiro/pagar-receber'
 import { Route as AuthenticatedAdminFinanceiroPlanoContasRouteImport } from './routes/_authenticated/admin/financeiro/plano-contas'
 import { Route as AuthenticatedAdminFinanceiroReceberRouteImport } from './routes/_authenticated/admin/financeiro/receber'
 import { Route as AuthenticatedAdminMaletasIdRouteImport } from './routes/_authenticated/admin/maletas_.$id'
@@ -507,6 +508,12 @@ const AuthenticatedAdminFinanceiroPagarRoute =
     path: '/pagar',
     getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
   } as any)
+const AuthenticatedAdminFinanceiroPagarReceberRoute =
+  AuthenticatedAdminFinanceiroPagarReceberRouteImport.update({
+    id: '/pagar-receber',
+    path: '/pagar-receber',
+    getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
+  } as any)
 const AuthenticatedAdminFinanceiroPlanoContasRoute =
   AuthenticatedAdminFinanceiroPlanoContasRouteImport.update({
     id: '/plano-contas',
@@ -672,6 +679,7 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro/fluxo-caixa': typeof AuthenticatedAdminFinanceiroFluxoCaixaRoute
   '/admin/financeiro/importacoes': typeof AuthenticatedAdminFinanceiroImportacoesRoute
   '/admin/financeiro/pagar': typeof AuthenticatedAdminFinanceiroPagarRoute
+  '/admin/financeiro/pagar-receber': typeof AuthenticatedAdminFinanceiroPagarReceberRoute
   '/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
@@ -761,6 +769,7 @@ export interface FileRoutesByTo {
   '/admin/financeiro/fluxo-caixa': typeof AuthenticatedAdminFinanceiroFluxoCaixaRoute
   '/admin/financeiro/importacoes': typeof AuthenticatedAdminFinanceiroImportacoesRoute
   '/admin/financeiro/pagar': typeof AuthenticatedAdminFinanceiroPagarRoute
+  '/admin/financeiro/pagar-receber': typeof AuthenticatedAdminFinanceiroPagarReceberRoute
   '/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
@@ -854,6 +863,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/financeiro/fluxo-caixa': typeof AuthenticatedAdminFinanceiroFluxoCaixaRoute
   '/_authenticated/admin/financeiro/importacoes': typeof AuthenticatedAdminFinanceiroImportacoesRoute
   '/_authenticated/admin/financeiro/pagar': typeof AuthenticatedAdminFinanceiroPagarRoute
+  '/_authenticated/admin/financeiro/pagar-receber': typeof AuthenticatedAdminFinanceiroPagarReceberRoute
   '/_authenticated/admin/financeiro/plano-contas': typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   '/_authenticated/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/_authenticated/admin/maletas_/$id': typeof AuthenticatedAdminMaletasIdRoute
@@ -947,6 +957,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/fluxo-caixa'
     | '/admin/financeiro/importacoes'
     | '/admin/financeiro/pagar'
+    | '/admin/financeiro/pagar-receber'
     | '/admin/financeiro/plano-contas'
     | '/admin/financeiro/receber'
     | '/admin/maletas/$id'
@@ -1036,6 +1047,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/fluxo-caixa'
     | '/admin/financeiro/importacoes'
     | '/admin/financeiro/pagar'
+    | '/admin/financeiro/pagar-receber'
     | '/admin/financeiro/plano-contas'
     | '/admin/financeiro/receber'
     | '/admin/maletas/$id'
@@ -1128,6 +1140,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financeiro/fluxo-caixa'
     | '/_authenticated/admin/financeiro/importacoes'
     | '/_authenticated/admin/financeiro/pagar'
+    | '/_authenticated/admin/financeiro/pagar-receber'
     | '/_authenticated/admin/financeiro/plano-contas'
     | '/_authenticated/admin/financeiro/receber'
     | '/_authenticated/admin/maletas_/$id'
@@ -1709,6 +1722,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroPagarRouteImport
       parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
     }
+    '/_authenticated/admin/financeiro/pagar-receber': {
+      id: '/_authenticated/admin/financeiro/pagar-receber'
+      path: '/pagar-receber'
+      fullPath: '/admin/financeiro/pagar-receber'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceiroPagarReceberRouteImport
+      parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
+    }
     '/_authenticated/admin/financeiro/plano-contas': {
       id: '/_authenticated/admin/financeiro/plano-contas'
       path: '/plano-contas'
@@ -1837,6 +1857,7 @@ interface AuthenticatedAdminFinanceiroRouteRouteChildren {
   AuthenticatedAdminFinanceiroFluxoCaixaRoute: typeof AuthenticatedAdminFinanceiroFluxoCaixaRoute
   AuthenticatedAdminFinanceiroImportacoesRoute: typeof AuthenticatedAdminFinanceiroImportacoesRoute
   AuthenticatedAdminFinanceiroPagarRoute: typeof AuthenticatedAdminFinanceiroPagarRoute
+  AuthenticatedAdminFinanceiroPagarReceberRoute: typeof AuthenticatedAdminFinanceiroPagarReceberRoute
   AuthenticatedAdminFinanceiroPlanoContasRoute: typeof AuthenticatedAdminFinanceiroPlanoContasRoute
   AuthenticatedAdminFinanceiroReceberRoute: typeof AuthenticatedAdminFinanceiroReceberRoute
   AuthenticatedAdminFinanceiroIndexRoute: typeof AuthenticatedAdminFinanceiroIndexRoute
@@ -1868,6 +1889,8 @@ const AuthenticatedAdminFinanceiroRouteRouteChildren: AuthenticatedAdminFinancei
       AuthenticatedAdminFinanceiroImportacoesRoute,
     AuthenticatedAdminFinanceiroPagarRoute:
       AuthenticatedAdminFinanceiroPagarRoute,
+    AuthenticatedAdminFinanceiroPagarReceberRoute:
+      AuthenticatedAdminFinanceiroPagarReceberRoute,
     AuthenticatedAdminFinanceiroPlanoContasRoute:
       AuthenticatedAdminFinanceiroPlanoContasRoute,
     AuthenticatedAdminFinanceiroReceberRoute:

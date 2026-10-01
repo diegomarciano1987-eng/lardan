@@ -504,6 +504,65 @@ export type Database = {
           },
         ]
       }
+      asaas_charge_sync_runs: {
+        Row: {
+          account_id: string
+          ate: string
+          atualizadas: number
+          concluido_em: string | null
+          de: string
+          erro: string | null
+          filtro: string
+          id: string
+          iniciado_em: string
+          iniciado_por: string | null
+          inseridas: number
+          paginas: number
+          recebidas: number
+          status: string
+        }
+        Insert: {
+          account_id: string
+          ate: string
+          atualizadas?: number
+          concluido_em?: string | null
+          de: string
+          erro?: string | null
+          filtro: string
+          id?: string
+          iniciado_em?: string
+          iniciado_por?: string | null
+          inseridas?: number
+          paginas?: number
+          recebidas?: number
+          status?: string
+        }
+        Update: {
+          account_id?: string
+          ate?: string
+          atualizadas?: number
+          concluido_em?: string | null
+          de?: string
+          erro?: string | null
+          filtro?: string
+          id?: string
+          iniciado_em?: string
+          iniciado_por?: string | null
+          inseridas?: number
+          paginas?: number
+          recebidas?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_charge_sync_runs_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_charges: {
         Row: {
           account_id: string
@@ -8831,6 +8890,10 @@ export type Database = {
       asaas_cobranca_preparar: { Args: { _payload: Json }; Returns: Json }
       asaas_conta_situacao: { Args: { _account: string }; Returns: Json }
       asaas_customer_sensivel: { Args: { _customer: string }; Returns: Json }
+      asaas_espelho_upsert: {
+        Args: { _account_id: string; _rows: Json }
+        Returns: Json
+      }
       asaas_evento_processar: { Args: { _evento: string }; Returns: Json }
       asaas_evento_registrar: {
         Args: { _actor?: string; _origem: string; _payload: Json }
@@ -9394,7 +9457,44 @@ export type Database = {
         }
         Returns: Json
       }
+      fin_liquidacoes_list: {
+        Args: {
+          _ate: string
+          _de: string
+          _direction: string
+          _limit?: number
+          _offset?: number
+        }
+        Returns: Json
+      }
       fin_overview: { Args: { _ate?: string; _de?: string }; Returns: Json }
+      fin_pagar_receber: {
+        Args: {
+          _ate?: string
+          _de?: string
+          _limit?: number
+          _natureza?: string
+          _offset?: number
+          _origem?: string
+          _search?: string
+          _situacao?: string
+        }
+        Returns: Json
+      }
+      fin_parcela_posicao: {
+        Args: { _corte: string }
+        Returns: {
+          ajustes_cents: number
+          competencia: string
+          direction: Database["public"]["Enums"]["fin_direction"]
+          installment_id: string
+          liquidado_cents: number
+          saldo_cents: number
+          title_id: string
+          valor_cents: number
+          vencimento: string
+        }[]
+      }
       fin_payment_method_save: { Args: { _payload: Json }; Returns: string }
       fin_payment_method_toggle: {
         Args: { _ativo: boolean; _id: string }

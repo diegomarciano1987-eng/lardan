@@ -15,10 +15,18 @@ export const TITLE_STATUS_LABEL: Record<FinTitleStatus, string> = {
 
 export interface FinOverview {
   periodo: { de: string; ate: string };
+  data_corte_saldo: string;
+  data_referencia_vencidos: string;
   a_receber_cents: number;
+  a_receber_qtd: number;
   a_pagar_cents: number;
+  a_pagar_qtd: number;
   vencido_receber_cents: number;
+  vencido_receber_qtd: number;
   vencido_pagar_cents: number;
+  vencido_pagar_qtd: number;
+  atraso_anterior_receber_cents: number;
+  atraso_anterior_pagar_cents: number;
   proj30_receber_cents: number;
   proj30_pagar_cents: number;
   proj60_receber_cents: number;
@@ -26,9 +34,13 @@ export interface FinOverview {
   proj90_receber_cents: number;
   proj90_pagar_cents: number;
   recebido_periodo_cents: number;
+  recebido_qtd: number;
   pago_periodo_cents: number;
+  pago_qtd: number;
   saldo_contas_cents: number;
   titulos_pendentes_aprovacao: number;
+  asaas_a_vincular_qtd: number;
+  asaas_a_vincular_cents: number;
 }
 
 export interface FinTitleRow {

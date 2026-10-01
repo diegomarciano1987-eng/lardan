@@ -1,64 +1,21 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
-import { ListaTitulos } from "@/components/admin/financeiro/ListaTitulos";
-import { AlternarVisao, ListaParcelas } from "@/components/admin/financeiro/ListaParcelas";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-interface Busca {
-  de?: string;
-  ate?: string;
-  busca?: string;
-  situacao?: string;
-  visao?: string;
-}
-
+/** Endereço antigo: abre "Pagar e receber" já em A pagar, preservando período e busca. */
 export const Route = createFileRoute("/_authenticated/admin/financeiro/pagar")({
-  component: Pagar,
-  validateSearch: (s: Record<string, unknown>): Busca => ({
-    ...(typeof s["de"] === "string" ? { de: s["de"] } : {}),
-    ...(typeof s["ate"] === "string" ? { ate: s["ate"] } : {}),
-    ...(typeof s["busca"] === "string" ? { busca: s["busca"] } : {}),
-    ...(typeof s["situacao"] === "string" ? { situacao: s["situacao"] } : {}),
-    ...(s["visao"] === "parcela" ? { visao: "parcela" } : {}),
-  }),
+  validateSearch: (s: Record<string, unknown>) => s,
+  beforeLoad: ({ search }) => {
+    const s = search as Record<string, unknown>;
+    const str = (k: string) => (typeof s[k] === "string" && s[k] ? (s[k] as string) : undefined);
+    throw redirect({
+      to: "/admin/financeiro/pagar-receber",
+      search: {
+        natureza: "pagar",
+        ...(str("de") ? { de: str("de") } : {}),
+        ...(str("ate") ? { ate: str("ate") } : {}),
+        ...(str("busca") ? { busca: str("busca") } : {}),
+        ...(s["visao"] === "parcela" ? {} : str("busca") ? { visao: "titulo" as const } : {}),
+      } as never,
+      replace: true,
+    });
+  },
 });
-
-function Pagar() {
-  const navigate = useNavigate();
-  const s = Route.useSearch();
-  return (
-    <AreaFinanceiraGuard capacidade="finance.payable.view">
-      <AlternarVisao
-        visao={s.visao === "parcela" ? "parcela" : "titulo"}
-        onChange={(v) =>
-          void navigate({
-            to: "/admin/financeiro/pagar",
-            search: (prev: Busca): Busca => {
-              const { visao: _v, ...resto } = prev;
-              return v === "parcela" ? { ...resto, visao: "parcela" } : resto;
-            },
-            replace: true,
-          })
-        }
-      />
-      {s.visao === "parcela" ? <ListaParcelas direction="payable" /> : <ListaTitulos
-        direction="payable"
-        buscaInicial={s.busca ?? ""}
-        situacaoInicial={s.situacao ?? "todos"}
-        onFiltrosChange={(f) =>
-          void navigate({
-            to: "/admin/financeiro/pagar",
-            search: (prev: Busca): Busca => {
-              const { busca: _anterior, ...resto } = prev;
-              return {
-                ...resto,
-                ...(f.busca ? { busca: f.busca } : {}),
-                situacao: f.situacao,
-              };
-            },
-            replace: true,
-          })
-        }
-      />}
-    </AreaFinanceiraGuard>
-  );
-}

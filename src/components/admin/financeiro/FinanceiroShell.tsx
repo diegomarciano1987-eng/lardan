@@ -1,10 +1,8 @@
 import * as React from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { EmptyState, PageHeader, Panel, formatBRLFromCents } from "@/components/admin/ui";
+import { EmptyState, PageHeader, Panel } from "@/components/admin/ui";
 import { useCapabilities, type Capability } from "@/lib/capabilities";
-import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
-import { PeriodoGlobal, usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
+import { PeriodoGlobal } from "@/components/admin/financeiro/PeriodoGlobal";
 
 export interface AreaFinanceira {
   to: string;
@@ -25,16 +23,28 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     capacidade: "finance.dashboard.view",
   },
   {
-    to: "/admin/financeiro/pagar",
-    label: "Contas a pagar",
-    descricao: "Títulos a pagar",
-    capacidade: "finance.payable.view",
+    to: "/admin/financeiro/pagar-receber",
+    label: "Pagar e receber",
+    descricao: "Tudo a receber e a pagar, por parcela",
+    capacidade: "finance.view",
   },
   {
-    to: "/admin/financeiro/receber",
-    label: "Contas a receber",
-    descricao: "Títulos a receber",
-    capacidade: "finance.receivable.view",
+    to: "/admin/financeiro/contas",
+    label: "Contas e extratos",
+    descricao: "Saldos pelo razão e extratos",
+    capacidade: "finance.bank.view",
+  },
+  {
+    to: "/admin/financeiro/conciliacao",
+    label: "Conciliação",
+    descricao: "Extratos bancários",
+    capacidade: "finance.statement.view",
+  },
+  {
+    to: "/admin/financeiro/dre",
+    label: "Relatórios",
+    descricao: "DRE e apuração gerencial",
+    capacidade: "finance.dre.view",
   },
   {
     to: "/admin/financeiro/fluxo-caixa",
@@ -43,16 +53,16 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     capacidade: "finance.dashboard.view",
   },
   {
-    to: "/admin/financeiro/contas",
-    label: "Contas e caixas",
-    descricao: "Saldos pelo razão",
-    capacidade: "finance.bank.view",
+    to: "/admin/financeiro/aprovacoes",
+    label: "Aprovações",
+    descricao: "Fila de decisão",
+    capacidade: "finance.dashboard.view",
   },
   {
-    to: "/admin/financeiro/conciliacao",
-    label: "Conciliação",
-    descricao: "Extratos bancários",
-    capacidade: "finance.statement.view",
+    to: "/admin/financeiro/importacoes",
+    label: "Importações",
+    descricao: "Títulos a pagar e a receber",
+    capacidade: "finance.view",
   },
   {
     to: "/admin/financeiro/plano-contas",
@@ -67,28 +77,10 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     capacidade: "finance.view",
   },
   {
-    to: "/admin/financeiro/aprovacoes",
-    label: "Aprovações",
-    descricao: "Fila de decisão",
-    capacidade: "finance.dashboard.view",
-  },
-  {
     to: "/admin/financeiro/auditoria",
     label: "Auditoria",
     descricao: "Histórico imutável",
     capacidade: "finance.audit.view",
-  },
-  {
-    to: "/admin/financeiro/importacoes",
-    label: "Importações",
-    descricao: "Títulos a pagar e a receber",
-    capacidade: "finance.view",
-  },
-  {
-    to: "/admin/financeiro/dre",
-    label: "DRE e relatórios",
-    descricao: "Apuração gerencial",
-    capacidade: "finance.dre.view",
   },
   {
     to: "/admin/financeiro/configuracoes",
@@ -105,92 +97,88 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
   },
   {
     to: "/admin/financeiro/asaas",
-    label: "Recebíveis Asaas",
-    descricao: "Importação, cobrança e conciliação (simulação)",
+    label: "Pendências da integração Asaas",
+    descricao: "Importação pausada e fila técnica",
     capacidade: "finance.receivable.view",
     asaas: true,
   },
 ];
 
-function Indicador({ rotulo, valor, nota }: { rotulo: string; valor: string; nota?: string }) {
-  return (
-    <div className="rounded-[12px] border border-line-soft bg-cream-2 px-4 py-3">
-      <p className="ledger-eyebrow">{rotulo}</p>
-      <p className="mt-1 font-display text-lg font-bold tabular-nums text-ledger-text">{valor}</p>
-      {nota ? <p className="mt-0.5 text-xs font-medium text-ledger-muted">{nota}</p> : null}
-    </div>
-  );
-}
+/** Destinos principais da faixa; o restante fica no grupo "Mais". */
+const PRINCIPAIS = new Set([
+  "/admin/financeiro",
+  "/admin/financeiro/pagar-receber",
+  "/admin/financeiro/contas",
+  "/admin/financeiro/conciliacao",
+  "/admin/financeiro/dre",
+]);
 
-function ResumoFinanceiro() {
-  const { de, ate } = usePeriodoFinanceiro();
-  const q = useQuery({
-    queryKey: ["fin-overview", "shell", de, ate],
-    queryFn: () => fetchFinOverviewPeriodo(de, ate),
-    staleTime: 60_000,
-  });
-  const d = q.data;
-  return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <Indicador
-        rotulo="Saldo em contas"
-        valor={d ? formatBRLFromCents(d.saldo_contas_cents) : "—"}
-        nota="Calculado pelo razão"
-      />
-      <Indicador
-        rotulo="A receber em aberto"
-        valor={d ? formatBRLFromCents(d.a_receber_cents) : "—"}
-        nota="Entradas previstas"
-      />
-      <Indicador
-        rotulo="A pagar em aberto"
-        valor={d ? formatBRLFromCents(d.a_pagar_cents) : "—"}
-        nota="Saídas previstas"
-      />
-      <Indicador
-        rotulo="Aguardando aprovação"
-        valor={d ? String(d.titulos_pendentes_aprovacao) : "—"}
-        nota="Títulos submetidos"
-      />
-    </div>
-  );
-}
+const manterPeriodo = (prev: Record<string, unknown>) => ({
+  ...(typeof prev["de"] === "string" ? { de: prev["de"] } : {}),
+  ...(typeof prev["ate"] === "string" ? { ate: prev["ate"] } : {}),
+});
+
+const PILULA =
+  "inline-flex min-h-10 items-center gap-1.5 rounded-full border border-line-soft bg-cream-2 px-4 text-sm font-semibold whitespace-nowrap text-ledger-muted transition-colors hover:text-ledger-text focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none";
+const PILULA_ATIVA =
+  "inline-flex min-h-10 items-center gap-1.5 rounded-full border border-champagne bg-surface px-4 text-sm font-semibold whitespace-nowrap text-ledger-text shadow-sm focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none";
 
 /** Navegação contextual das áreas do Financeiro, filtrada por capacidade. */
 function NavegacaoFinanceira() {
   const caps = useCapabilities();
+  const ativa = useAreaFinanceiraAtiva();
   const areas = AREAS_FINANCEIRAS.filter((a) => caps.includes(a.capacidade));
+  const [aberto, setAberto] = React.useState(false);
   if (areas.length <= 1) return null;
+  const principais = areas.filter((a) => PRINCIPAIS.has(a.to));
+  const mais = areas.filter((a) => !PRINCIPAIS.has(a.to));
+  const maisAtivo = ativa && !PRINCIPAIS.has(ativa.to);
   return (
-    <nav aria-label="Áreas do Financeiro" className="-mx-1 overflow-x-auto pb-1">
-      <ul className="flex min-w-max items-center gap-1.5 px-1">
-        {areas.map((a) => (
+    <nav aria-label="Áreas do Financeiro" className="space-y-2">
+      <ul className="flex flex-wrap items-center gap-1.5">
+        {principais.map((a) => (
           <li key={a.to}>
             <Link
               to={a.to}
-              search={(prev: Record<string, unknown>) => ({
-                ...(typeof prev["de"] === "string" ? { de: prev["de"] } : {}),
-                ...(typeof prev["ate"] === "string" ? { ate: prev["ate"] } : {}),
-              })}
+              search={manterPeriodo as never}
               activeOptions={{ exact: a.to === "/admin/financeiro" }}
-              className={a.asaas ? "inline-flex items-center gap-1.5 rounded-full border border-asaas bg-asaas px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-asaas-foreground opacity-85 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-asaas focus-visible:outline-none" : "inline-flex items-center gap-1.5 rounded-full border border-line-soft bg-cream-2 px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-ledger-muted transition-colors hover:text-ledger-text focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none"}
-              activeProps={{
-                className: a.asaas
-                  ? "inline-flex items-center gap-1.5 rounded-full border border-asaas bg-asaas px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-asaas-foreground shadow-md ring-2 ring-asaas/30 focus-visible:outline-none"
-                  : "inline-flex items-center gap-1.5 rounded-full border border-champagne bg-surface px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap text-ledger-text shadow-sm focus-visible:ring-2 focus-visible:ring-champagne focus-visible:outline-none",
-                "aria-current": "page",
-              }}
+              className={PILULA}
+              activeProps={{ className: PILULA_ATIVA, "aria-current": "page" }}
             >
               {a.label}
-              {a.emImplantacao ? (
-                <span className={a.asaas ? "rounded-full bg-asaas-foreground/20 px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-asaas-foreground uppercase" : "rounded-full bg-line-soft px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide text-ledger-muted uppercase"}>
-                  em implantação
-                </span>
-              ) : null}
             </Link>
           </li>
         ))}
+        {mais.length ? (
+          <li>
+            <button
+              type="button"
+              aria-expanded={aberto}
+              onClick={() => setAberto((v) => !v)}
+              className={maisAtivo ? PILULA_ATIVA : PILULA}
+            >
+              {maisAtivo ? `Mais · ${ativa?.label}` : "Mais"} {aberto ? "▴" : "▾"}
+            </button>
+          </li>
+        ) : null}
       </ul>
+      {aberto ? (
+        <ul className="grid gap-1.5 rounded-[14px] border border-line-soft bg-surface p-2 sm:grid-cols-2 lg:grid-cols-4">
+          {mais.map((a) => (
+            <li key={a.to}>
+              <Link
+                to={a.to}
+                search={manterPeriodo as never}
+                onClick={() => setAberto(false)}
+                className={`flex min-h-12 flex-col justify-center rounded-[10px] px-3 py-2 hover:bg-cream-2 focus-visible:ring-2 focus-visible:outline-none ${a.asaas ? "focus-visible:ring-asaas" : "focus-visible:ring-champagne"}`}
+              >
+                <span className={`text-sm font-semibold ${a.asaas ? "text-asaas" : "text-ledger-text"}`}>{a.label}</span>
+                <span className="text-xs text-ledger-muted">{a.descricao}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </nav>
   );
 }
@@ -237,8 +225,6 @@ export function FinanceiroShell({ children }: { children: React.ReactNode }) {
       <PageHeader eyebrow="Financeiro" title={titulo} actions={<PeriodoGlobal />} />
 
       <NavegacaoFinanceira />
-
-      <ResumoFinanceiro />
 
       {children}
     </div>

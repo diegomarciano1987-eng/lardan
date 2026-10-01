@@ -49,20 +49,6 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     capacidade: "finance.bank.view",
   },
   {
-    to: "/admin/financeiro/asaas-extrato",
-    label: "Extrato Asaas",
-    descricao: "Entradas e saídas da conta Asaas",
-    capacidade: "finance.statement.view",
-    asaas: true,
-  },
-  {
-    to: "/admin/financeiro/asaas",
-    label: "Recebíveis Asaas",
-    descricao: "Importação, cobrança e conciliação (simulação)",
-    capacidade: "finance.receivable.view",
-    asaas: true,
-  },
-  {
     to: "/admin/financeiro/conciliacao",
     label: "Conciliação",
     descricao: "Extratos bancários",
@@ -109,6 +95,20 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     label: "Configurações",
     descricao: "Parâmetros e integrações",
     capacidade: "finance.view",
+  },
+  {
+    to: "/admin/financeiro/asaas-extrato",
+    label: "Extrato Asaas",
+    descricao: "Entradas e saídas da conta Asaas",
+    capacidade: "finance.statement.view",
+    asaas: true,
+  },
+  {
+    to: "/admin/financeiro/asaas",
+    label: "Recebíveis Asaas",
+    descricao: "Importação, cobrança e conciliação (simulação)",
+    capacidade: "finance.receivable.view",
+    asaas: true,
   },
 ];
 

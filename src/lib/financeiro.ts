@@ -34,6 +34,8 @@ export interface FinOverview {
 export interface FinTitleRow {
   id: string;
   numero?: string | null;
+  /** importacao | manual | asaas */
+  origem?: string | null;
   descricao: string;
   documento: string | null;
   status: FinTitleStatus;

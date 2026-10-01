@@ -10,6 +10,7 @@ import { DateField } from "@/components/premium/DateField";
 import { BotaoAjuda } from "@/components/ajuda/Ajuda";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import nomeLardan from "@/assets/lardan-wordmark.png.asset.json";
+import { AberturaApp, InstalarApp } from "@/components/consultora/InstalarApp";
 import { brl, chaveIdempotencia, imagem, traduzir } from "@/lib/maletas";
 import {
   CANAL, carregarInicio, criarPedido, dataBR, formatarTelefone, hojeISO, linkWhats, listarAtendimentos, listarClientes,
@@ -47,7 +48,8 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
     ir({ aba });
   };
   return (
-    <div className="area-consultora min-h-dvh bg-background text-foreground lg:flex">
+    <div className="area-consultora min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex">
+      <AberturaApp />
       {/* Menu lateral no computador */}
       <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex">
         <img src={nomeLardan.url} alt="LARDAN" className="mb-7 h-auto w-32 object-contain object-left" />
@@ -663,6 +665,7 @@ export function Mais({ ir }: { ir: Ir }) {
     <div>
       <Topo titulo="Mais" ajuda="inicio" />
       <ul className="space-y-3">
+        <li><InstalarApp /></li>
         {itens.map((x) => (
           <li key={x.r}>
             <button type="button" onClick={() => ir(x.n)} className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-5 text-left active:bg-muted">

@@ -33,7 +33,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   const categorias = Array.from(new Set(visiveis.map((i) => i.categoria).filter(Boolean))) as string[];
   const catalogo = categoria === "todas" ? visiveis : visiveis.filter((i) => i.categoria === categoria);
 
-  const foto = (i: Item) => imagem(o.fotos[i.variant_id] && i.midias?.includes(o.fotos[i.variant_id]) ? o.fotos[i.variant_id] : i.media_id);
+  const foto = (i: Item) => { const f = o.fotos[i.variant_id]; return imagem(f && i.midias?.includes(f) ? f : i.media_id); };
   const pecas = Object.values(sacola).reduce((x, y) => x + y, 0);
   const total = visiveis.reduce((s, i) => s + (sacola[i.variant_id] ?? 0) * i.preco_cents, 0);
 

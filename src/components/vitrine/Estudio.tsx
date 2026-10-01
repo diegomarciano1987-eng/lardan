@@ -563,7 +563,7 @@ function PainelOrganizacao({ d, muda, itens }: { d: DesignVitrine; muda: Muda; i
           <ul className="space-y-1.5">
             {lista.map((i, idx) => {
               const destaque = o.destaques.includes(i.variant_id); const oculta = o.ocultas.includes(i.variant_id);
-              const fotoId = o.fotos[i.variant_id] && i.midias.includes(o.fotos[i.variant_id]) ? o.fotos[i.variant_id] : i.media_id;
+              const fEsc = o.fotos[i.variant_id]; const fotoId = fEsc && i.midias.includes(fEsc) ? fEsc : i.media_id;
               return (
                 <li key={i.variant_id} draggable onDragStart={() => setArrastando(i.variant_id)} onDragOver={(e) => e.preventDefault()}
                   onDrop={() => { if (arrastando && arrastando !== i.variant_id) mover(arrastando, idx); setArrastando(null); }}

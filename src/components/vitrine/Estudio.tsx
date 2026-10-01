@@ -109,11 +109,11 @@ export function Estudio() {
 
   const Controles = (
     <div className="space-y-5">
-      <nav className="flex gap-1 overflow-x-auto rounded-xl border border-line-soft bg-surface p-1">
+      <nav aria-label="Partes do estúdio" className="grid grid-cols-2 gap-1 rounded-xl border border-line-soft bg-surface p-1 min-[480px]:grid-cols-3">
         {PAINEIS.map((p) => (
-          <button key={p.id} type="button" onClick={() => setPainel(p.id)}
-            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs ${painel === p.id ? "bg-primary text-primary-foreground" : "text-ledger-muted hover:bg-muted"}`}>
-            <p.icone className="size-3.5" /> {p.nome}
+          <button key={p.id} type="button" onClick={() => setPainel(p.id)} aria-current={painel === p.id ? "true" : undefined}
+            className={`flex min-h-12 items-center justify-center gap-2 rounded-lg px-2 py-2 text-[0.95rem] font-medium ${painel === p.id ? "bg-primary text-primary-foreground" : "text-ledger-text hover:bg-muted"}`}>
+            <p.icone className="size-5 shrink-0" aria-hidden /> {p.nome}
           </button>
         ))}
       </nav>

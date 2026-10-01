@@ -762,6 +762,61 @@
   }
 }
 
+@utility admin-input {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-surface);
+  padding: 0.625rem 0.875rem;
+  font-size: 1rem;
+  color: var(--color-ledger-text);
+
+  &:focus-visible {
+    outline: 2px solid var(--color-champagne);
+    outline-offset: 2px;
+  }
+}
+
+/* Área da consultora: pensada para celular e leitura confortável.
+   Toque mínimo 48px, ação principal 52px+, texto nunca abaixo de ~15px. */
+.area-consultora {
+  font-size: 1rem;
+}
+.area-consultora .admin-btn,
+.area-consultora button.admin-btn {
+  min-height: 3rem;
+  font-size: 0.95rem;
+}
+.area-consultora .admin-btn-primary {
+  min-height: 3.375rem;
+  font-size: 0.85rem;
+}
+.area-consultora .text-xs,
+.area-consultora .text-\[0\.7rem\],
+.area-consultora .text-\[11px\],
+.area-consultora .text-\[10px\] {
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+.area-consultora .text-sm {
+  font-size: 0.95rem;
+}
+.area-consultora input,
+.area-consultora textarea,
+.area-consultora select {
+  font-size: max(1rem, 16px);
+}
+.area-consultora input[type="checkbox"],
+.area-consultora input[type="radio"] {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.area-consultora .text-ledger-muted {
+  color: color-mix(in oklab, var(--color-ledger-text) 72%, transparent);
+}
+
 @utility admin-link {
   display: inline-flex;
   align-items: center;

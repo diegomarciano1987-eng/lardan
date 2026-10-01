@@ -87,6 +87,7 @@ import { Route as AuthenticatedAdminMaletasEntradaRouteImport } from './routes/_
 import { Route as AuthenticatedFinanceiroSimulacaoIdRouteImport } from './routes/_authenticated/financeiro/simulacao.$id'
 import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
+import { Route as ApiPublicVitrineImgSplatRouteImport } from './routes/api/public/vitrine-img.$'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -527,6 +528,12 @@ const ApiPublicMidiaIdRoute = ApiPublicMidiaIdRouteImport.update({
   path: '/api/public/midia/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicVitrineImgSplatRoute =
+  ApiPublicVitrineImgSplatRouteImport.update({
+    id: '/api/public/vitrine-img/$',
+    path: '/api/public/vitrine-img/$',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -650,6 +657,7 @@ export interface FileRoutesByFullPath {
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
+  '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -735,6 +743,7 @@ export interface FileRoutesByTo {
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
+  '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -824,6 +833,7 @@ export interface FileRoutesById {
   '/_authenticated/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
+  '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -913,6 +923,7 @@ export interface FileRouteTypes {
     | '/financeiro/simulacao/$id'
     | '/api/public/asaas/webhook'
     | '/api/public/midia/$id'
+    | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -998,6 +1009,7 @@ export interface FileRouteTypes {
     | '/financeiro/simulacao/$id'
     | '/api/public/asaas/webhook'
     | '/api/public/midia/$id'
+    | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -1086,6 +1098,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financeiro/simulacao/$id'
     | '/api/public/asaas/webhook'
     | '/api/public/midia/$id'
+    | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -1132,6 +1145,7 @@ export interface RootRouteChildren {
   ApiPublicGaConfigRoute: typeof ApiPublicGaConfigRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
+  ApiPublicVitrineImgSplatRoute: typeof ApiPublicVitrineImgSplatRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -1685,6 +1699,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMidiaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/vitrine-img/$': {
+      id: '/api/public/vitrine-img/$'
+      path: '/api/public/vitrine-img/$'
+      fullPath: '/api/public/vitrine-img/$'
+      preLoaderRoute: typeof ApiPublicVitrineImgSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -1943,6 +1964,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicGaConfigRoute: ApiPublicGaConfigRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,
+  ApiPublicVitrineImgSplatRoute: ApiPublicVitrineImgSplatRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,

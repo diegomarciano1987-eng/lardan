@@ -504,6 +504,73 @@ export type Database = {
           },
         ]
       }
+      asaas_charge_matches: {
+        Row: {
+          charge_id: string
+          created_at: string
+          decidido_em: string | null
+          decidido_por: string | null
+          evidencia: Json
+          id: string
+          installment_id: string
+          motivo: string | null
+          regra: string
+          status: string
+          title_id: string
+          updated_at: string
+        }
+        Insert: {
+          charge_id: string
+          created_at?: string
+          decidido_em?: string | null
+          decidido_por?: string | null
+          evidencia?: Json
+          id?: string
+          installment_id: string
+          motivo?: string | null
+          regra: string
+          status: string
+          title_id: string
+          updated_at?: string
+        }
+        Update: {
+          charge_id?: string
+          created_at?: string
+          decidido_em?: string | null
+          decidido_por?: string | null
+          evidencia?: Json
+          id?: string
+          installment_id?: string
+          motivo?: string | null
+          regra?: string
+          status?: string
+          title_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_charge_matches_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_charge_matches_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_charge_matches_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_charge_sync_runs: {
         Row: {
           account_id: string
@@ -8888,6 +8955,15 @@ export type Database = {
         }
       }
       asaas_cobranca_preparar: { Args: { _payload: Json }; Returns: Json }
+      asaas_conferencia_decidir: {
+        Args: { _aceitar: boolean; _match: string; _motivo?: string }
+        Returns: undefined
+      }
+      asaas_conferencia_gerar: { Args: never; Returns: Json }
+      asaas_conferencia_lista: {
+        Args: { _limit?: number; _offset?: number; _status?: string }
+        Returns: Json
+      }
       asaas_conta_situacao: { Args: { _account: string }; Returns: Json }
       asaas_customer_sensivel: { Args: { _customer: string }; Returns: Json }
       asaas_espelho_upsert: {

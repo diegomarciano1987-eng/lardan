@@ -762,6 +762,26 @@
   }
 }
 
+@utility btn-app-principal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3.5rem;
+  border-radius: 9999px;
+  background: var(--color-acao);
+  padding: 0.75rem 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-acao-foreground);
+  box-shadow: var(--shadow-app);
+  transition: transform 120ms ease, filter 160ms ease;
+  &:active { transform: scale(0.98); }
+  &:hover { filter: brightness(1.06); }
+  &:focus-visible { outline: 3px solid var(--color-ring); outline-offset: 3px; }
+  &:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+}
+
 @utility admin-input {
   display: block;
   width: 100%;

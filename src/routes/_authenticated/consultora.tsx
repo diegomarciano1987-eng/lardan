@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BriefcaseBusiness, PackageCheck, ShoppingBag, Store } from "lucide-react";
 import { toast } from "sonner";
 import { Estudio } from "@/components/vitrine/Estudio";
-import { BotaoAjuda } from "@/components/ajuda/Ajuda";
+import { CascaConsultora, Clientes, FichaCliente, FormCliente, Inicio, Mais, NovoPedido, Topo, type AbaApp, type Ir, type Nav } from "@/components/consultora/AppConsultora";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { fetchMyRoles } from "@/lib/session";
@@ -27,11 +27,15 @@ import {
   type TipoDivergencia,
 } from "@/lib/maletas";
 
-const ABAS_VALIDAS = ["maleta", "vitrine", "pedidos", "historico"] as const;
+const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "mais", "novo"];
+const str = (v: unknown) => (typeof v === "string" && v.length > 0 && v.length < 200 ? v : undefined);
 
 export const Route = createFileRoute("/_authenticated/consultora")({
-  validateSearch: (s: Record<string, unknown>): { aba?: Aba | undefined } => ({
-    aba: ABAS_VALIDAS.includes(s["aba"] as Aba) ? (s["aba"] as Aba) : undefined,
+  validateSearch: (s: Record<string, unknown>): Partial<Nav> => ({
+    aba: ABAS_VALIDAS.includes(s["aba"] as AbaApp) ? (s["aba"] as AbaApp) : undefined,
+    id: str(s["id"]),
+    modo: s["modo"] === "nova" || s["modo"] === "editar" ? s["modo"] : undefined,
+    q: str(s["q"]),
   }),
   component: AreaConsultora,
   head: () => ({
@@ -418,119 +422,91 @@ function AreaConsultora() {
 }
 
 function AreaConsultoraLiberada() {
-  const busca = Route.useSearch();
+  const nav = Route.useSearch() as Nav;
   const navigate = Route.useNavigate();
-  const aba: Aba = busca.aba ?? "maleta";
-  // A aba fica no endereço: ao voltar de outra tela, a consultora reencontra o mesmo ponto.
-  const setAba = (a: Aba) => {
-    navigate({ search: { aba: a }, replace: true });
-    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  const ir: Ir = (n) => {
+    const busca = n.q !== undefined || n.aba === nav.aba;
+    navigate({ search: { aba: n.aba, id: n.id, modo: n.modo, q: n.q }, replace: busca && n.aba === nav.aba && !n.id && !nav.id && !n.modo });
+    if (!(n.aba === nav.aba && n.q !== nav.q)) window.scrollTo({ top: 0 });
   };
   const [escolhida, setEscolhida] = React.useState<string | null>(null);
   const maletas = useQuery({ queryKey: ["consultora", "maletas"], queryFn: () => listarMaletas() });
-
-  // Só maletas que o próprio banco devolveu para esta pessoa entram na escolha.
   const abertas = (maletas.data ?? []).filter((m) => !["encerrada", "cancelada"].includes(m.situacao));
   const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
-  const telaAjuda = aba === "historico" ? "maleta" : aba;
+  const aba = nav.aba ?? "inicio";
+  const ajuda = aba === "historico" ? "maleta" : aba === "novo" ? "pedidos" : aba;
+
+  const seletorMaleta = abertas.length > 1 && (
+    <div role="radiogroup" aria-label="Maleta em uso" className="mb-5 grid gap-2">
+      <span className="text-[1.05rem] font-semibold">Maleta em uso</span>
+      {abertas.map((m) => {
+        const sel = m.cycle_id === atual;
+        return (
+          <button key={m.cycle_id} type="button" role="radio" aria-checked={sel} onClick={() => setEscolhida(m.cycle_id)}
+            className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-base ${sel ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
+            <span>{m.codigo} · ciclo {m.ciclo}</span>
+            <span className="text-[0.95rem]">{sel ? "✓ Em uso" : (SITUACAO_MALETA[m.situacao]?.rotulo ?? m.situacao)}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 
   return (
-    <div className={`area-consultora mx-auto w-full space-y-6 px-4 pt-6 pb-[calc(6.5rem+env(safe-area-inset-bottom))] sm:pb-10 ${aba === "vitrine" ? "max-w-7xl" : "max-w-2xl"}`}>
-      <header className="flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm uppercase tracking-[0.25em] text-ledger-muted">Lardan</p>
-          <h1 className="font-display text-3xl">Minha área</h1>
-        </div>
-        <div className="flex shrink-0 gap-2">
-          <Passeio />
-          <BotaoAjuda tela={telaAjuda} />
-        </div>
-      </header>
-
-      <nav aria-label="Seções da minha área"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 gap-1 border-t border-line-soft bg-surface/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur sm:static sm:gap-2 sm:rounded-2xl sm:border sm:p-1">
-        {ABAS.map((a) => (
-          <button
-            key={a.id}
-            type="button"
-            aria-current={aba === a.id ? "page" : undefined}
-            onClick={() => setAba(a.id)}
-            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[0.8rem] font-medium leading-tight sm:flex-row sm:text-[0.95rem] ${
-              aba === a.id ? "bg-ink text-warm-ivory" : "text-ledger-text"
-            }`}
-          >
-            <a.icone aria-hidden className="size-6 sm:size-5" />
-            {a.rotulo}
-          </button>
-        ))}
-      </nav>
-
-      {abertas.length > 1 && (
-        <div role="radiogroup" aria-label="Maleta em uso" className="grid gap-2">
-          <span className="text-sm font-medium uppercase tracking-widest text-ledger-muted">Maleta em uso</span>
-          {abertas.map((m) => {
-            const sel = m.cycle_id === atual;
-            return (
-              <button key={m.cycle_id} type="button" role="radio" aria-checked={sel} onClick={() => setEscolhida(m.cycle_id)}
-                className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-base ${sel ? "border-ink bg-ink text-warm-ivory" : "border-line bg-surface"}`}>
-                <span>{m.codigo} · ciclo {m.ciclo}</span>
-                <span className="text-[0.9rem]">{sel ? "✓ Em uso" : (SITUACAO_MALETA[m.situacao]?.rotulo ?? m.situacao)}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {aba === "maleta" && <MinhaMaleta cycleId={atual} />}
-      {aba === "vitrine" && <Estudio />}
-      {aba === "pedidos" && <Pedidos />}
-      {aba === "historico" && <Historico cycleId={atual} />}
-    </div>
+    <CascaConsultora nav={{ ...nav, aba }} ir={ir} ajuda={ajuda}>
+      <Passeio />
+      {aba === "inicio" && <Inicio ir={ir} />}
+      {aba === "clientes" && (nav.modo ? <FormCliente id={nav.modo === "editar" ? nav.id : undefined} ir={ir} />
+        : nav.id ? <FichaCliente id={nav.id} nav={nav} ir={ir} /> : <Clientes nav={nav} ir={ir} />)}
+      {aba === "novo" && <NovoPedido clienteInicial={nav.id} ir={ir} />}
+      {aba === "pedidos" && (<><Topo titulo="Pedidos" ajuda="pedidos"><button type="button" className="btn-app-principal hidden sm:inline-flex" onClick={() => ir({ aba: "novo" })}>Novo pedido</button></Topo><div className="max-w-3xl"><Pedidos /></div></>)}
+      {aba === "maleta" && (<><Topo titulo="Minha maleta" ajuda="maleta" />{seletorMaleta}<div className="max-w-3xl"><MinhaMaleta cycleId={atual} /></div></>)}
+      {aba === "historico" && (<><Topo titulo="Entregas da maleta" ajuda="maleta" voltar={() => ir({ aba: "mais" })} />{seletorMaleta}<div className="max-w-3xl"><Historico cycleId={atual} /></div></>)}
+      {aba === "vitrine" && (<><Topo titulo="Minha vitrine" ajuda="vitrine" voltar={() => ir({ aba: "mais" })} /><Estudio /></>)}
+      {aba === "mais" && <Mais ir={ir} />}
+    </CascaConsultora>
   );
 }
 
 const PASSOS = [
-  { t: "Bem-vinda à sua área", d: "Aqui você cuida da sua maleta, da sua vitrine e dos seus pedidos, tudo pelo celular." },
-  { t: "Menu embaixo da tela", d: "Use os quatro botões na parte de baixo: Minha maleta, Minha vitrine, Pedidos e Entregas." },
-  { t: "Minha maleta", d: "Quando a maleta chegar, confirme o recebimento e confira as peças antes de aceitar." },
-  { t: "Minha vitrine", d: "Monte sua página com foto, capa e peças. As clientes só veem depois de você tocar em “Publicar alterações”." },
-  { t: "Dúvidas?", d: "Toque em “Ajuda” no alto de qualquer tela. Ao fechar, você volta para onde estava. Este passeio pode ser revisto no botão “Passeio”." },
+  { t: "Bem-vinda à sua área", d: "Aqui você cuida das suas clientes, dos seus pedidos, da sua maleta e da sua vitrine, tudo pelo celular." },
+  { t: "Menu embaixo da tela", d: "Início, Clientes, Pedidos, Maleta e Mais. Em “Mais” ficam a sua vitrine e as entregas." },
+  { t: "Novo pedido", d: "No Início, toque em “Novo pedido”: escolha a cliente, as peças e confira antes de confirmar." },
+  { t: "Dúvidas?", d: "Toque em “Ajuda” no alto da tela. Ao fechar, você volta para onde estava. Este passeio pode ser revisto na Central de Ajuda." },
 ];
 
-/** Passeio curto e opcional: abre sozinho só na primeira visita e pode ser reaberto. */
+/** Passeio curto e opcional: abre sozinho só na primeira visita. */
 function Passeio() {
   const [aberto, setAberto] = React.useState(false);
   const [i, setI] = React.useState(0);
   React.useEffect(() => {
-    try { if (!localStorage.getItem("lardan-passeio-consultora")) setAberto(true); } catch { /* sem armazenamento */ }
+    try { if (!localStorage.getItem("lardan-passeio-consultora-v2")) setAberto(true); } catch { /* sem armazenamento */ }
+    const reabrir = () => { setI(0); setAberto(true); };
+    window.addEventListener("lardan:passeio", reabrir);
+    return () => window.removeEventListener("lardan:passeio", reabrir);
   }, []);
   const fechar = () => {
     setAberto(false); setI(0);
-    try { localStorage.setItem("lardan-passeio-consultora", "1"); } catch { /* ok */ }
+    try { localStorage.setItem("lardan-passeio-consultora-v2", "1"); } catch { /* ok */ }
   };
   const p = PASSOS[i]!;
   return (
-    <>
-      <button type="button" className="admin-btn min-h-12 text-base max-[380px]:hidden" onClick={() => setAberto(true)}>Passeio</button>
-      <Dialog open={aberto} onOpenChange={(o) => (o ? setAberto(true) : fechar())}>
-        <DialogContent className="max-w-md">
-          <DialogHeader className="text-left">
-            <p className="text-sm text-ledger-muted">Passo {i + 1} de {PASSOS.length}</p>
-            <DialogTitle className="font-display text-2xl">{p.t}</DialogTitle>
-            <DialogDescription className="text-base leading-relaxed text-ledger-text">{p.d}</DialogDescription>
-          </DialogHeader>
-          <div className="mt-2 flex gap-2">
-            {i > 0 && <button type="button" className="admin-btn min-h-12 flex-1 justify-center text-base" onClick={() => setI(i - 1)}>Voltar</button>}
-            {i < PASSOS.length - 1 ? (
-              <button type="button" className="admin-btn-primary min-h-13 flex-1 text-sm" onClick={() => setI(i + 1)}>Próximo</button>
-            ) : (
-              <button type="button" className="admin-btn-primary min-h-13 flex-1 text-sm" onClick={fechar}>Começar</button>
-            )}
-          </div>
-          <button type="button" className="min-h-12 text-base text-ledger-muted underline" onClick={fechar}>Pular passeio</button>
-        </DialogContent>
-      </Dialog>
-    </>
+    <Dialog open={aberto} onOpenChange={(o) => (o ? setAberto(true) : fechar())}>
+      <DialogContent className="max-w-md">
+        <DialogHeader className="text-left">
+          <p className="text-base text-muted-foreground">Passo {i + 1} de {PASSOS.length}</p>
+          <DialogTitle className="font-display text-3xl">{p.t}</DialogTitle>
+          <DialogDescription className="text-[1.08rem] leading-relaxed text-foreground">{p.d}</DialogDescription>
+        </DialogHeader>
+        <div className="mt-2 flex gap-2">
+          {i > 0 && <button type="button" className="admin-btn min-h-13 flex-1 justify-center text-base" onClick={() => setI(i - 1)}>Voltar</button>}
+          <button type="button" className="btn-app-principal flex-1" onClick={() => (i < PASSOS.length - 1 ? setI(i + 1) : fechar())}>
+            {i < PASSOS.length - 1 ? "Próximo" : "Começar"}
+          </button>
+        </div>
+        <button type="button" className="min-h-12 text-base underline" onClick={fechar}>Pular passeio</button>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -18,3 +18,5 @@
 - Account balance = sum of financial_account_movements up to the cutoff date (America/Sao_Paulo); saldo_inicial is itself a movement, never add financial_accounts.saldo_inicial_cents again. Why: avoids double counting across Visão geral/Contas/Fluxo.
 - Movements dated after today are forecast only (previsto), never realized, in every financial RPC. Why: realized reports cannot include future dates.
 - fin_dre reports unclassified titles, missing cost center, out-of-DRE natures, open installments and unreconciled lines as separate indicators. Why: "unpaid" is not "unclassified".
+- Installment competência lives on financial_installments.competencia (null = title's), changed only via fin_installment_competencia_set with reason + title event; DRE competência sums per installment. Why: recurring contracts must not land in one month.
+- Transfers count once per operation (outgoing side); transfers touching an is_implantacao account are reported separately; both movements stay visible. Why: avoid doubling and keep conciliation.

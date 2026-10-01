@@ -1,0 +1,19 @@
+{
+  "id": "/consultora",
+  "name": "LARDAN Consultora",
+  "short_name": "LARDAN",
+  "description": "Área da consultora LARDAN: maleta, vitrine, clientes e pedidos.",
+  "start_url": "/consultora?origem=app",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "portrait",
+  "background_color": "#1c1614",
+  "theme_color": "#1c1614",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/consultora-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/consultora-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/consultora-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

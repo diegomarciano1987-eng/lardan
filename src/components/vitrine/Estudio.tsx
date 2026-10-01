@@ -79,8 +79,8 @@ export function Estudio() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chave]);
 
-  if (q.isLoading || !d || !q.data) return <div className="rounded-2xl border border-line-soft bg-surface p-5">Abrindo seu estúdio…</div>;
   if (q.isError) return <div className="rounded-2xl border border-line-soft bg-surface p-5">{traduzir(q.error)}</div>;
+  if (q.isLoading || !d || !q.data) return <div className="rounded-2xl border border-line-soft bg-surface p-5">Abrindo seu estúdio…</div>;
 
   const dados = q.data;
   const muda = (f: (x: DesignVitrine) => DesignVitrine) => { pendente.current = true; setD((x) => (x ? f(structuredClone(x)) : x)); };

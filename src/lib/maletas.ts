@@ -422,14 +422,6 @@ export async function depositosAtivos() {
 }
 
 /* ---------------- vitrine ---------------- */
-export const salvarVitrine = (payload: {
-  slug: string;
-  headline?: string;
-  bio?: string;
-  whatsapp?: string;
-  is_public: boolean;
-}) => rpc<{ slug: string }>("showcase_save", { _payload: payload });
-
 export async function minhaVitrine() {
   const { data, error } = await supabase
     .from("consultant_showcases")
@@ -440,18 +432,6 @@ export async function minhaVitrine() {
 }
 
 export const vitrinePublica = (slug: string) => rpc<VitrinePublica | null>("showcase_public", { _slug: slug });
-
-export const enviarPedido = (
-  slug: string,
-  cliente: { nome: string; telefone?: string; email?: string; observacao?: string; canal?: string },
-  itens: { cycle_id: string; variant_id: string; quantidade: number }[],
-  chave: string,
-) => rpc<{ order_id: string; codigo: string; total_cents: number; repetido?: boolean }>("showcase_order_create", {
-  _slug: slug,
-  _cliente: cliente,
-  _itens: itens,
-  _idempotency_key: chave,
-});
 
 /* ---------------- pedidos ---------------- */
 export const listarPedidos = (status?: string) =>

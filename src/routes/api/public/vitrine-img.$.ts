@@ -25,7 +25,8 @@ export const Route = createFileRoute("/api/public/vitrine-img/$")({
           headers: {
             "content-type": ext === "webp" ? "image/webp" : ext === "png" ? "image/png" : "image/jpeg",
             etag,
-            "cache-control": "public, max-age=300, s-maxage=86400, stale-while-revalidate=86400",
+            // Retirada do ar precisa valer em minutos: cache curto, sem servir versão velha.
+            "cache-control": "public, max-age=60, s-maxage=60, must-revalidate",
             "x-content-type-options": "nosniff",
           },
         });

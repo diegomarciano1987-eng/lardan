@@ -108,7 +108,7 @@ function VisaoGeral() {
               <CardComposicao
                 rotulo="A receber em aberto no período"
                 valor={formatBRLFromCents(d.a_receber_cents)}
-                nota={`${formatInt(d.a_receber_qtd)} parcela(s) com vencimento no período`}
+                nota={`${formatInt(d.a_receber_lardan_qtd)} parcela(s) Lardan ${formatBRLFromCents(d.a_receber_lardan_cents)} + ${formatInt(d.a_receber_asaas_qtd)} cobrança(s) Asaas ${formatBRLFromCents(d.a_receber_asaas_cents)}`}
                 tom="entrada"
                 to="/admin/financeiro/pagar-receber"
                 search={{ ...per, natureza: "receber", situacao: "aberto" }}
@@ -144,14 +144,14 @@ function VisaoGeral() {
                 to="/admin/financeiro/pagar-receber"
                 search={{ ...per, natureza: "pagar", visao: "liquidacoes" }}
               />
-              {d.asaas_a_vincular_qtd > 0 ? (
+              {d.asaas_recebido_conferir_qtd > 0 ? (
                 <CardComposicao
-                  rotulo="Cobranças Asaas a vincular"
-                  valor={formatBRLFromCents(d.asaas_a_vincular_cents)}
-                  nota={`${formatInt(d.asaas_a_vincular_qtd)} cobrança(s) do período, fora dos totais até conciliar`}
+                  rotulo="Recebido no Asaas a conferir"
+                  valor={formatBRLFromCents(d.asaas_recebido_conferir_cents)}
+                  nota={`${formatInt(d.asaas_recebido_conferir_qtd)} cobrança(s) já pagas no Asaas e ainda sem vínculo; fora do "Recebido" para não contar duas vezes`}
                   tom="asaas"
                   to="/admin/financeiro/pagar-receber"
-                  search={{ ...per, natureza: "receber", origem: "asaas", situacao: "a_vincular" }}
+                  search={{ ...per, natureza: "receber", origem: "asaas", situacao: "quitado" }}
                 />
               ) : null}
             </section>
@@ -160,7 +160,7 @@ function VisaoGeral() {
               <CardComposicao
                 rotulo="Vencido a receber no período"
                 valor={formatBRLFromCents(d.vencido_receber_cents)}
-                nota={`${formatInt(d.vencido_receber_qtd)} parcela(s) vencidas antes de ${dataBR(d.data_referencia_vencidos)} · atrasos anteriores ao período: ${formatBRLFromCents(d.atraso_anterior_receber_cents)}`}
+                nota={`${formatInt(d.vencido_receber_qtd)} vencidas antes de ${dataBR(d.data_referencia_vencidos)} (Asaas: ${formatInt(d.vencido_receber_asaas_qtd)}) · atrasos anteriores ao período: ${formatBRLFromCents(d.atraso_anterior_receber_cents)}, sendo Asaas ${formatBRLFromCents(d.atraso_anterior_receber_asaas_cents)}`}
                 tom="entrada"
                 to="/admin/financeiro/pagar-receber"
                 search={{ ...per, natureza: "receber", situacao: "vencido" }}

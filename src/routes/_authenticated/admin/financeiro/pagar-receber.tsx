@@ -68,6 +68,7 @@ const ROTULO_SIT: Record<string, string> = {
   vencido: "Vencida",
   quitado: "Quitada",
   a_vincular: "A vincular",
+  recebido_asaas: "Recebido no Asaas",
 };
 
 function EtiquetaOrigem({ origem }: { origem: string }) {
@@ -229,7 +230,7 @@ function ListaUnificada({
             { value: "aberto", label: "Em aberto (inclui vencidas)" },
             { value: "vencido", label: "Vencidas" },
             { value: "quitado", label: "Quitadas" },
-            { value: "a_vincular", label: "Asaas a vincular" },
+            { value: "a_vincular", label: "Cobranças Asaas sem vínculo" },
           ]}
           value={filtros.situacao}
           onChange={(v) => onFiltro({ situacao: v })}
@@ -270,19 +271,21 @@ function ListaUnificada({
             {t.asaas_a_vincular.qtd > 0 ? (
               <button
                 type="button"
-                onClick={() => onFiltro({ origem: "asaas", situacao: "a_vincular", natureza: "receber" })}
+                onClick={() => onFiltro({ origem: "asaas", natureza: "receber" })}
                 className="rounded-[12px] border border-asaas/40 bg-asaas/10 px-4 py-3 text-left focus-visible:ring-2 focus-visible:ring-asaas focus-visible:outline-none"
               >
-                <p className="ledger-eyebrow">Asaas a vincular</p>
+                <p className="ledger-eyebrow">Asaas no período</p>
                 <p className="mt-1 font-display text-xl font-bold tabular-nums text-ledger-text">
-                  {formatBRLFromCents(t.asaas_a_vincular.valor_cents)}
+                  {formatBRLFromCents(t.asaas_a_vincular.aberto_cents)} em aberto
                 </p>
                 <p className="text-xs font-medium text-ledger-muted">
-                  {formatInt(t.asaas_a_vincular.qtd)} cobrança(s) · {formatInt(t.asaas_a_vincular.clientes)} cliente(s) · fora dos totais até conciliar
+                  {formatInt(t.asaas_a_vincular.aberto_qtd)} cobrança(s) · {formatInt(t.asaas_a_vincular.clientes_aberto)} cliente(s) · já somadas em "A receber"
                 </p>
-                <p className="text-xs font-medium text-ledger-text tabular-nums">
-                  Em aberto {formatBRLFromCents(t.asaas_a_vincular.aberto_cents)} ({formatInt(t.asaas_a_vincular.aberto_qtd)} · {formatInt(t.asaas_a_vincular.clientes_aberto)} clientes) · recebidas {formatBRLFromCents(t.asaas_a_vincular.recebido_cents)} ({formatInt(t.asaas_a_vincular.recebido_qtd)})
-                </p>
+                {t.asaas_a_vincular.recebido_qtd > 0 ? (
+                  <p className="text-xs font-medium text-ledger-text tabular-nums">
+                    Recebido no Asaas {formatBRLFromCents(t.asaas_a_vincular.recebido_cents)} ({formatInt(t.asaas_a_vincular.recebido_qtd)}) · fora do total até conferir
+                  </p>
+                ) : null}
               </button>
             ) : null}
           </div>

@@ -38,7 +38,7 @@ function mover(escala: Escala, ancora: Date, passo: number) {
   return d;
 }
 
-function Kpi({ rotulo, valor, detalhe, tom, onClick, carregando }: { rotulo: string; valor: string; detalhe: string; tom?: "alerta"; onClick: () => void; carregando: boolean }) {
+function Kpi({ rotulo, valor, detalhe, tom, onClick, carregando }: { rotulo: string; valor: string; detalhe: string; tom?: "alerta" | undefined; onClick: () => void; carregando: boolean }) {
   return (
     <button
       type="button"

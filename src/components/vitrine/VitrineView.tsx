@@ -188,7 +188,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   });
 
   return (
-    <div className={`vitrine-raiz @container vp-${a.paleta} vf-${a.fonte} min-h-full`}>
+    <div className={`vitrine-raiz @container vp-${a.paleta} vf-${a.fonte} ${previa ? "min-h-full" : "min-h-screen"}`}>
       {a.tema === "classica" && (
         <header>
           <Capa alto="h-44 @3xl:h-72" />

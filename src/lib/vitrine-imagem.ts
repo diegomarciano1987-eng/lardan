@@ -93,7 +93,9 @@ export async function gerarImagemCompartilhar(opts: {
     try {
       const i = await carregar(opts.capa);
       const e = Math.max(720 / i.width, 630 / i.height);
+      ctx.save(); ctx.beginPath(); ctx.rect(480, 0, 720, 630); ctx.clip();
       ctx.drawImage(i, 480 + (720 - i.width * e) / 2, (630 - i.height * e) / 2, i.width * e, i.height * e);
+      ctx.restore();
       const g = ctx.createLinearGradient(480, 0, 700, 0);
       g.addColorStop(0, cor("--vitrine-og-fundo", "#1c1714"));
       g.addColorStop(1, "transparent");

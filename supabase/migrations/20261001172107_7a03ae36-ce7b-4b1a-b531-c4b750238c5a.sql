@@ -1,0 +1,1 @@
+alter function public.fin_dre(jsonb) volatile;

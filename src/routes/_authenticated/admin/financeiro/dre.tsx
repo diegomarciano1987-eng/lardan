@@ -220,6 +220,32 @@ function Dre() {
                 </button>
               ) : null}
             </Panel>
+
+            {d.indicadores ? (
+              <Panel title="Pendências separadas — não são a mesma coisa">
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {(
+                    [
+                      ["sem_conta_contabil", "Sem conta do plano de contas"],
+                      ["sem_centro_custo", "Sem centro de custo"],
+                      ["fora_da_dre", "Fora da DRE (ativo/passivo)"],
+                      ["parcelas_em_aberto", "Parcelas em aberto no período"],
+                      ["nao_conciliados", "Extrato não conciliado no período"],
+                    ] as const
+                  ).map(([k, rot]) => (
+                    <li key={k} className="rounded-[10px] border border-line-soft p-3">
+                      <p className="text-sm font-semibold text-ledger-text">{rot}</p>
+                      <p className="tabular-nums text-ledger-text">
+                        {d.indicadores![k].quantidade} ·{" "}
+                        {formatBRLFromCents(d.indicadores![k].valor_cents)}
+                      </p>
+                      <p className="mt-1 text-xs text-ledger-muted">{d.indicadores![k].criterio}</p>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-xs text-ledger-muted">{d.fonte}</p>
+              </Panel>
+            ) : null}
           </>
         ) : null}
 

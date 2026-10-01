@@ -8992,9 +8992,23 @@ export type Database = {
         }
         Returns: Json
       }
+      consultant_home: { Args: never; Returns: Json }
       consultant_order_create: {
         Args: { _client: string; _idempotency_key: string; _itens: Json }
         Returns: Json
+      }
+      consultant_pieces: {
+        Args: never
+        Returns: {
+          cycle_id: string
+          disponivel: number
+          maleta: string
+          media_id: string
+          preco_cents: number
+          produto: string
+          variant_id: string
+          variante: string
+        }[]
       }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }

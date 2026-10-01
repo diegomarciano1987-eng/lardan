@@ -9284,6 +9284,10 @@ export type Database = {
         Returns: string
       }
       fin_safe_date: { Args: { _t: string }; Returns: string }
+      fin_saldo_conta: {
+        Args: { _ate: string; _conta: string }
+        Returns: number
+      }
       fin_settings_overview: { Args: never; Returns: Json }
       fin_settlement_create: { Args: { _payload: Json }; Returns: Json }
       fin_settlement_create_ajustes: { Args: { _payload: Json }; Returns: Json }

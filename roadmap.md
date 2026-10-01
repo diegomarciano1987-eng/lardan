@@ -49,3 +49,7 @@
 - [ ] Etapa 3: vitrine em perfil completo (capa, retrato, filtros, busca)
 - [ ] Etapa 4: CRM de clientes, pedidos e vendas
 - [ ] Etapa 5: pagamentos, devolução e garantia (aguarda decisões: prazo de reserva, limite de desconto, recebedor, texto de garantia)
+
+## Estúdio da Minha Vitrine
+- [x] Rascunho/publicação/histórico, perfil, contato, foto e capa, temas, organização, compartilhamento, página pública
+- [ ] Testes de regressão isolados (imagens extremas, duas abas, conexão interrompida) — ambiente isolado

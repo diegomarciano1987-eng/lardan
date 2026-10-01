@@ -37,9 +37,11 @@ export const sincronizarCobrancasAsaas = createServerFn({ method: "POST" })
       throw new Error("Uma sincronização acabou de ser feita. Aguarde um minuto.");
     }
 
+    // Sempre espelha TODAS as cobranças da conta (todos os vencimentos e situações),
+    // para que atrasos antigos e parcelas futuras também apareçam na lista única.
     const { data: run } = await supabaseAdmin
       .from("asaas_charge_sync_runs" as never)
-      .insert({ account_id: CONTA_PRODUCAO, filtro: "vencimento", de: data.de, ate: data.ate, iniciado_por: context.userId } as never)
+      .insert({ account_id: CONTA_PRODUCAO, filtro: "todas", de: data.de, ate: data.ate, iniciado_por: context.userId } as never)
       .select("id")
       .single();
     const runId = (run as { id: string } | null)?.id;
@@ -47,7 +49,7 @@ export const sincronizarCobrancasAsaas = createServerFn({ method: "POST" })
     try {
       let offset = 0;
       for (;;) {
-        const qs = new URLSearchParams({ "dueDate[ge]": data.de, "dueDate[le]": data.ate, limit: "100", offset: String(offset) });
+        const qs = new URLSearchParams({ limit: "100", offset: String(offset) });
         const resp = await fetch(`https://api.asaas.com/v3/payments?${qs}`, {
           headers: { access_token: chave, "User-Agent": "lardan-espelho" },
         });

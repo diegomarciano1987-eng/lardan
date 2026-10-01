@@ -39,6 +39,15 @@ export interface FinOverview {
   pago_qtd: number;
   saldo_contas_cents: number;
   titulos_pendentes_aprovacao: number;
+  a_receber_lardan_cents: number;
+  a_receber_lardan_qtd: number;
+  a_receber_asaas_cents: number;
+  a_receber_asaas_qtd: number;
+  vencido_receber_asaas_cents: number;
+  vencido_receber_asaas_qtd: number;
+  atraso_anterior_receber_asaas_cents: number;
+  asaas_recebido_conferir_qtd: number;
+  asaas_recebido_conferir_cents: number;
   asaas_a_vincular_qtd: number;
   asaas_a_vincular_cents: number;
 }

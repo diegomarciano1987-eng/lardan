@@ -18,7 +18,7 @@ export interface LinhaPR {
   ajustes_cents: number;
   liquidado_cents: number;
   saldo_cents: number;
-  situacao: "aberto" | "vencido" | "quitado" | "a_vincular";
+  situacao: "aberto" | "vencido" | "quitado" | "recebido_asaas" | "a_vincular";
   conta_prevista: string | null;
   conta_liquidacao: string | null;
   title_id: string | null;

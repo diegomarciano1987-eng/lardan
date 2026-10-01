@@ -1,0 +1,1 @@
+ALTER FUNCTION public.showcase_path_ok(text, uuid) SET search_path TO 'public';

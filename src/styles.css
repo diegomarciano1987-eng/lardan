@@ -1226,3 +1226,19 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
 }
 
 .contorno-cidade { stroke: var(--bronze); }
+
+/* ---------- Vitrine da consultora: paletas e fontes aprovadas ---------- */
+:root {
+  --vitrine-og-fundo: oklch(0.2 0.012 50);
+  --vitrine-og-ouro: oklch(0.74 0.07 65);
+  --vitrine-og-texto: oklch(0.96 0.01 70);
+}
+.vp-perola { --v-bg: oklch(0.985 0.004 80); --v-surface: oklch(1 0 0); --v-ink: oklch(0.22 0.01 50); --v-muted: oklch(0.5 0.012 60); --v-accent: oklch(0.6 0.06 55); --v-accent-ink: oklch(0.99 0 0); --v-line: oklch(0.9 0.008 70); }
+.vp-rose { --v-bg: oklch(0.965 0.016 20); --v-surface: oklch(0.99 0.006 20); --v-ink: oklch(0.28 0.03 15); --v-muted: oklch(0.52 0.03 15); --v-accent: oklch(0.62 0.08 15); --v-accent-ink: oklch(0.99 0 0); --v-line: oklch(0.88 0.025 20); }
+.vp-champanhe { --v-bg: oklch(0.955 0.02 80); --v-surface: oklch(0.985 0.01 85); --v-ink: oklch(0.27 0.025 60); --v-muted: oklch(0.5 0.03 65); --v-accent: oklch(0.66 0.09 75); --v-accent-ink: oklch(0.2 0.02 60); --v-line: oklch(0.86 0.03 80); }
+.vp-noite { --v-bg: oklch(0.19 0.01 50); --v-surface: oklch(0.24 0.012 50); --v-ink: oklch(0.95 0.01 70); --v-muted: oklch(0.72 0.015 70); --v-accent: oklch(0.76 0.075 70); --v-accent-ink: oklch(0.18 0.01 50); --v-line: oklch(0.34 0.012 50); }
+.vf-marca { --v-titulo: var(--font-display); --v-corpo: var(--font-sans); }
+.vf-moderna { --v-titulo: "Outfit", var(--font-sans); --v-corpo: "Figtree", var(--font-sans); }
+.vf-delicada { --v-titulo: "Cormorant Garamond", var(--font-display); --v-corpo: var(--font-sans); }
+.vitrine-raiz { background: var(--v-bg); color: var(--v-ink); font-family: var(--v-corpo); }
+.vitrine-raiz .v-titulo { font-family: var(--v-titulo); }

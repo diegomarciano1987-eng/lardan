@@ -2239,6 +2239,10 @@ export type Database = {
           avatar_media_id: string | null
           bio: string | null
           created_at: string
+          design_draft: Json
+          design_published: Json | null
+          design_published_at: string | null
+          design_revision: number
           headline: string | null
           is_public: boolean
           party_id: string
@@ -2250,6 +2254,10 @@ export type Database = {
           avatar_media_id?: string | null
           bio?: string | null
           created_at?: string
+          design_draft?: Json
+          design_published?: Json | null
+          design_published_at?: string | null
+          design_revision?: number
           headline?: string | null
           is_public?: boolean
           party_id: string
@@ -2261,6 +2269,10 @@ export type Database = {
           avatar_media_id?: string | null
           bio?: string | null
           created_at?: string
+          design_draft?: Json
+          design_published?: Json | null
+          design_published_at?: string | null
+          design_revision?: number
           headline?: string | null
           is_public?: boolean
           party_id?: string
@@ -7649,6 +7661,48 @@ export type Database = {
         }
         Relationships: []
       }
+      showcase_design_versions: {
+        Row: {
+          created_at: string
+          design: Json
+          id: string
+          party_id: string
+          published_by: string | null
+          version_no: number
+        }
+        Insert: {
+          created_at?: string
+          design: Json
+          id?: string
+          party_id: string
+          published_by?: string | null
+          version_no: number
+        }
+        Update: {
+          created_at?: string
+          design?: Json
+          id?: string
+          party_id?: string
+          published_by?: string | null
+          version_no?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "showcase_design_versions_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "showcase_design_versions_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       showcase_views: {
         Row: {
           created_at: string
@@ -9667,7 +9721,27 @@ export type Database = {
         Returns: Json
       }
       showcase_counts: { Args: never; Returns: Json }
+      showcase_design_clean: {
+        Args: { _d: Json; _party: string }
+        Returns: Json
+      }
+      showcase_design_clean_v2: {
+        Args: { _d: Json; _party: string }
+        Returns: Json
+      }
+      showcase_design_discard: { Args: never; Returns: Json }
+      showcase_design_get: { Args: never; Returns: Json }
+      showcase_design_publish: { Args: { _revision: number }; Returns: Json }
+      showcase_design_restore: { Args: { _version: string }; Returns: Json }
+      showcase_design_save: {
+        Args: { _draft: Json; _revision: number }
+        Returns: Json
+      }
       showcase_ids: { Args: { _f?: Json; _max?: number }; Returns: string[] }
+      showcase_items_for: {
+        Args: { _design: Json; _party: string }
+        Returns: Json
+      }
       showcase_list: {
         Args: { _f?: Json; _limit?: number; _offset?: number; _sort?: string }
         Returns: {
@@ -9707,8 +9781,14 @@ export type Database = {
         }
         Returns: Json
       }
+      showcase_path_ok: {
+        Args: { _p: string; _party: string }
+        Returns: boolean
+      }
       showcase_public: { Args: { _slug: string }; Returns: Json }
+      showcase_public_file_ok: { Args: { _path: string }; Returns: boolean }
       showcase_save: { Args: { _payload: Json }; Returns: Json }
+      showcase_set_online: { Args: { _no_ar: boolean }; Returns: Json }
       showcase_slug_reserved: { Args: { _slug: string }; Returns: boolean }
       stock_available: {
         Args: { _location: string; _variant: string }

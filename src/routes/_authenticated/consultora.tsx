@@ -2,8 +2,9 @@ import * as React from "react";
 import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BriefcaseBusiness, ExternalLink, PackageCheck, ShoppingBag, Store } from "lucide-react";
+import { BriefcaseBusiness, PackageCheck, ShoppingBag, Store } from "lucide-react";
 import { toast } from "sonner";
+import { Estudio } from "@/components/vitrine/Estudio";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { fetchMyRoles } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
@@ -18,10 +19,8 @@ import {
   imagem,
   listarMaletas,
   listarPedidos,
-  minhaVitrine,
   mudarSituacaoPedido,
   publicarPeca,
-  salvarVitrine,
   traduzir,
   type TipoDivergencia,
 } from "@/lib/maletas";
@@ -275,109 +274,6 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
   );
 }
 
-/* ---------------- vitrine ---------------- */
-function MinhaVitrine() {
-  const qc = useQueryClient();
-  const atual = useQuery({ queryKey: ["consultora", "vitrine"], queryFn: minhaVitrine });
-  const [form, setForm] = React.useState({ slug: "", headline: "", bio: "", whatsapp: "", is_public: false });
-  const [carregou, setCarregou] = React.useState(false);
-
-  React.useEffect(() => {
-    if (atual.data && !carregou) {
-      setForm({
-        slug: atual.data.slug ?? "",
-        headline: atual.data.headline ?? "",
-        bio: atual.data.bio ?? "",
-        whatsapp: atual.data.whatsapp ?? "",
-        is_public: atual.data.is_public ?? false,
-      });
-      setCarregou(true);
-    }
-  }, [atual.data, carregou]);
-
-  const salvar = useMutation({
-    mutationFn: () => salvarVitrine(form),
-    onSuccess: () => {
-      toast.success("Vitrine salva.");
-      void qc.invalidateQueries({ queryKey: ["consultora", "vitrine"] });
-    },
-    onError: (e) => toast.error(traduzir(e)),
-  });
-
-  const origem = typeof window === "undefined" ? "" : window.location.origin;
-
-  return (
-    <Cartao>
-      <p className="font-semibold">Minha vitrine</p>
-      <p className="mt-1 text-sm text-ledger-muted">
-        Suas peças aceitas e disponíveis aparecem sozinhas. Nada de custo, documento ou endereço é publicado.
-      </p>
-      <div className="mt-4 space-y-3">
-        <label className="grid gap-1 text-sm">
-          <span className="text-xs uppercase tracking-widest text-ledger-muted">Endereço</span>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-ledger-muted">{origem}/</span>
-            <input
-              className="admin-input flex-1"
-              value={form.slug}
-              onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value.toLowerCase() }))}
-              placeholder="seunome"
-            />
-          </div>
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span className="text-xs uppercase tracking-widest text-ledger-muted">Frase de apresentação</span>
-          <input
-            className="admin-input"
-            value={form.headline}
-            onChange={(e) => setForm((f) => ({ ...f, headline: e.target.value }))}
-          />
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span className="text-xs uppercase tracking-widest text-ledger-muted">Sobre você</span>
-          <textarea
-            className="admin-input min-h-24"
-            value={form.bio}
-            onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
-          />
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span className="text-xs uppercase tracking-widest text-ledger-muted">WhatsApp</span>
-          <input
-            className="admin-input"
-            value={form.whatsapp}
-            onChange={(e) => setForm((f) => ({ ...f, whatsapp: e.target.value }))}
-            placeholder="43999999999"
-          />
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={form.is_public}
-            onChange={(e) => setForm((f) => ({ ...f, is_public: e.target.checked }))}
-          />
-          Deixar minha vitrine no ar
-        </label>
-      </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="admin-btn admin-btn-primary"
-          disabled={salvar.isPending}
-          onClick={() => salvar.mutate()}
-        >
-          Salvar
-        </button>
-        {atual.data?.slug && atual.data.is_public && (
-          <a className="admin-btn" href={`/${atual.data.slug}`} target="_blank" rel="noreferrer">
-            <ExternalLink aria-hidden className="size-4" /> Ver minha vitrine
-          </a>
-        )}
-      </div>
-    </Cartao>
-  );
-}
-
 /* ---------------- pedidos ---------------- */
 function Pedidos() {
   const qc = useQueryClient();
@@ -523,7 +419,7 @@ function AreaConsultoraLiberada() {
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-6 px-4 py-6">
+    <div className={`mx-auto w-full space-y-6 px-4 py-6 ${aba === "vitrine" ? "max-w-7xl" : "max-w-2xl"}`}>
       <header>
         <p className="text-xs uppercase tracking-[0.25em] text-ledger-muted">Lardan</p>
         <h1 className="font-display text-3xl">Minha área</h1>
@@ -563,7 +459,7 @@ function AreaConsultoraLiberada() {
       )}
 
       {aba === "maleta" && <MinhaMaleta cycleId={atual} />}
-      {aba === "vitrine" && <MinhaVitrine />}
+      {aba === "vitrine" && <Estudio />}
       {aba === "pedidos" && <Pedidos />}
       {aba === "historico" && <Historico cycleId={atual} />}
     </div>

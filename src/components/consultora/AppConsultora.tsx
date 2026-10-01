@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, BriefcaseBusiness, CalendarClock, Check, ChevronRight, CircleHelp, Home, LogOut, Menu, MessageCircle,

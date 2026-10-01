@@ -9406,6 +9406,15 @@ export type Database = {
         Returns: string
       }
       fin_approval_rule: { Args: never; Returns: Json }
+      fin_asaas_abertas: {
+        Args: { _corte: string }
+        Returns: {
+          due_date: string
+          id: string
+          pessoa_chave: string
+          value_cents: number
+        }[]
+      }
       fin_audit_list: { Args: { _filtros?: Json }; Returns: Json }
       fin_cashflow: { Args: { _filtros?: Json }; Returns: Json }
       fin_cashflow_detail: { Args: { _filtros: Json }; Returns: Json }

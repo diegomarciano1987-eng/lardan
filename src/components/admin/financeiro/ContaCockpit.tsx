@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { DateRange } from "react-day-picker";
@@ -345,18 +346,76 @@ function Dados({ id, dados, podeGerir }: { id: string; dados: Record<string, str
             ))}
           </dl>
           {podeGerir && (
-            <button
-              type="button"
-              className="admin-btn mt-5"
-              disabled={salvar.isPending}
-              onClick={() => salvar.mutate({ is_active: !dados["is_active"] })}
-            >
-              {dados["is_active"] ? "Desativar conta" : "Reativar conta"}
-            </button>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="admin-btn"
+                disabled={salvar.isPending}
+                onClick={() => salvar.mutate({ is_active: !dados["is_active"] })}
+              >
+                {dados["is_active"] ? "Desativar conta" : "Reativar conta"}
+              </button>
+              <ExcluirConta id={id} />
+            </div>
           )}
         </>
       )}
     </Panel>
+  );
+}
+
+function ExcluirConta({ id }: { id: string }) {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const [aberto, setAberto] = React.useState(false);
+  const [motivo, setMotivo] = React.useState("");
+  const excluir = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("fin_account_excluir" as never, { _id: id, _motivo: motivo } as never);
+      if (error) throw new Error(error.message);
+      return data as unknown as { modo: string; vinculos: number };
+    },
+    onSuccess: (r) => {
+      toast.success(
+        r.modo === "apagada"
+          ? "Conta excluída."
+          : `Conta excluída da lista. ${r.vinculos} lançamento(s) ligados a ela foram mantidos.`,
+      );
+      void qc.invalidateQueries({ queryKey: ["fin-accounts"] });
+      void qc.invalidateQueries({ queryKey: ["fin-overview"] });
+      void navigate({ to: "/admin/financeiro/contas" });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  if (!aberto)
+    return (
+      <button type="button" className="admin-btn text-destructive" onClick={() => setAberto(true)}>
+        Excluir conta
+      </button>
+    );
+  return (
+    <div className="w-full space-y-2 rounded-[10px] border border-destructive/30 bg-destructive/5 p-4">
+      <p className="text-sm text-ledger-text">
+        Só é possível excluir conta sem saldo. Títulos, baixas e movimentos ligados a ela não serão apagados.
+      </p>
+      <input
+        value={motivo}
+        onChange={(e) => setMotivo(e.target.value)}
+        placeholder="Motivo da exclusão (obrigatório)"
+        className={inputCls}
+      />
+      <div className="flex gap-2">
+        <button
+          type="button"
+          className="admin-btn-primary"
+          disabled={excluir.isPending || motivo.trim().length < 3}
+          onClick={() => excluir.mutate()}
+        >
+          {excluir.isPending ? "Excluindo…" : "Confirmar exclusão"}
+        </button>
+        <button type="button" className="admin-btn" onClick={() => setAberto(false)}>Cancelar</button>
+      </div>
+    </div>
   );
 }
 

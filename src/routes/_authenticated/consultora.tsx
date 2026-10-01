@@ -173,39 +173,38 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
                       <div className="size-14 rounded-xl bg-surface-muted" aria-hidden />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">{c.produto}</p>
-                      <p className="text-xs text-ledger-muted">
-                        {c.variante ?? "—"} · enviadas {c.quantidade} · aceitas {c.quantidade - div}
+                      <p className="text-base font-semibold leading-snug">{c.produto}</p>
+                      <p className="text-[0.95rem] text-ledger-muted">
+                        {c.variante ?? "Sem variação"} · enviadas {c.quantidade} · aceitas {c.quantidade - div}
                       </p>
                     </div>
-                    <input
-                      type="number"
-                      min={0}
-                      max={c.quantidade}
-                      aria-label={`Unidades com problema de ${c.produto}`}
-                      className="admin-input w-20"
-                      value={divergencias[c.variant_id] ?? 0}
-                      onChange={(e) =>
-                        setDivergencias((v) => ({
-                          ...v,
-                          [c.variant_id]: Math.min(Math.max(0, Number(e.target.value)), c.quantidade),
-                        }))
-                      }
-                    />
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <span className="text-[0.95rem]">Unidades com problema</span>
+                    <div className="flex items-center gap-2" role="group" aria-label={`Unidades com problema de ${c.produto}`}>
+                      <button type="button" className="admin-btn size-12 justify-center p-0 text-xl" aria-label="Diminuir"
+                        disabled={div <= 0}
+                        onClick={() => setDivergencias((v) => ({ ...v, [c.variant_id]: Math.max(0, div - 1) }))}>−</button>
+                      <span className="w-10 text-center text-xl font-semibold num" aria-live="polite">{div}</span>
+                      <button type="button" className="admin-btn size-12 justify-center p-0 text-xl" aria-label="Aumentar"
+                        disabled={div >= c.quantidade}
+                        onClick={() => setDivergencias((v) => ({ ...v, [c.variant_id]: Math.min(c.quantidade, div + 1) }))}>+</button>
+                    </div>
                   </div>
                   {div > 0 && (
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <select
-                        aria-label={`Tipo da divergência de ${c.produto}`}
-                        className="admin-input"
-                        value={tipos[c.variant_id] ?? "faltante"}
-                        onChange={(e) =>
-                          setTipos((v) => ({ ...v, [c.variant_id]: e.target.value as TipoDivergencia }))
-                        }
-                      >
-                        <option value="faltante">Não veio na maleta</option>
-                        <option value="defeito">Veio com defeito</option>
-                      </select>
+                    <div className="grid gap-2">
+                      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={`Tipo da divergência de ${c.produto}`}>
+                        {([["faltante", "Não veio na maleta"], ["defeito", "Veio com defeito"]] as const).map(([v, r]) => {
+                          const sel = (tipos[c.variant_id] ?? "faltante") === v;
+                          return (
+                            <button key={v} type="button" role="radio" aria-checked={sel}
+                              onClick={() => setTipos((t) => ({ ...t, [c.variant_id]: v as TipoDivergencia }))}
+                              className={`min-h-12 rounded-xl border px-3 text-[0.95rem] font-medium ${sel ? "border-ink bg-ink text-warm-ivory" : "border-line bg-surface"}`}>
+                              {sel ? "✓ " : ""}{r}
+                            </button>
+                          );
+                        })}
+                      </div>
                       <input
                         className="admin-input"
                         aria-label={`Motivo da divergência de ${c.produto}`}

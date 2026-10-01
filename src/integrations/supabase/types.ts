@@ -3030,6 +3030,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           data_corte: string | null
+          excluida_em: string | null
+          excluida_motivo: string | null
+          excluida_por: string | null
           gerente: string | null
           gerente_contato: string | null
           id: string
@@ -3059,6 +3062,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_corte?: string | null
+          excluida_em?: string | null
+          excluida_motivo?: string | null
+          excluida_por?: string | null
           gerente?: string | null
           gerente_contato?: string | null
           id?: string
@@ -3088,6 +3094,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_corte?: string | null
+          excluida_em?: string | null
+          excluida_motivo?: string | null
+          excluida_por?: string | null
           gerente?: string | null
           gerente_contato?: string | null
           id?: string
@@ -9467,6 +9476,10 @@ export type Database = {
       }
       fin_account_create: { Args: { _payload: Json }; Returns: string }
       fin_account_detail: { Args: { _account: string }; Returns: Json }
+      fin_account_excluir: {
+        Args: { _id: string; _motivo: string }
+        Returns: Json
+      }
       fin_account_update: {
         Args: { _account: string; _payload: Json }
         Returns: undefined

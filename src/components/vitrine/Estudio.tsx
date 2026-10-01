@@ -45,7 +45,15 @@ export function Estudio() {
 
   React.useEffect(() => {
     if (q.data && d === null) {
-      setD(designPadrao(q.data.rascunho));
+      // Regra: o que já existe no cadastro vem preenchido (só onde está vazio).
+      const base = designPadrao(q.data.rascunho);
+      const c = q.data.cadastro;
+      if (c) {
+        if (!base.perfil.nome) base.perfil.nome = c.nome;
+        if (!base.perfil.cidade && c.cidade) base.perfil.cidade = c.uf ? `${c.cidade} - ${c.uf}` : c.cidade;
+        if (!base.contato.whatsapp) base.contato.whatsapp = c.whatsapp;
+      }
+      setD(base);
       setRev(q.data.revisao);
       revRef.current = q.data.revisao;
     }

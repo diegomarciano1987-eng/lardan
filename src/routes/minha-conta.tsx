@@ -5,6 +5,7 @@ import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useSession } from "@/lib/session";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export const Route = createFileRoute("/minha-conta")({
   head: () => ({

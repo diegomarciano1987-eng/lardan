@@ -5,6 +5,7 @@ import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMyRoles } from "@/lib/session";
 import { DESTINO, PORTAS, portaLiberada, type Porta } from "@/lib/portas";
+import { PasswordInput } from "@/components/ui/password-input";
 
 type Busca = { area?: Porta | undefined };
 

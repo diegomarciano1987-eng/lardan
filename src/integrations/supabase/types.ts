@@ -2156,18 +2156,65 @@ export type Database = {
           },
         ]
       }
+      consultant_client_stage_events: {
+        Row: {
+          autor: string | null
+          client_id: string
+          consultora_party_id: string
+          created_at: string
+          de: string | null
+          id: string
+          motivo: string | null
+          para: string
+        }
+        Insert: {
+          autor?: string | null
+          client_id: string
+          consultora_party_id: string
+          created_at?: string
+          de?: string | null
+          id?: string
+          motivo?: string | null
+          para: string
+        }
+        Update: {
+          autor?: string | null
+          client_id?: string
+          consultora_party_id?: string
+          created_at?: string
+          de?: string | null
+          id?: string
+          motivo?: string | null
+          para?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_client_stage_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "consultant_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultant_clients: {
         Row: {
           aniversario: string | null
           consultora_party_id: string
           created_at: string
           email: string | null
+          encerrada: boolean
+          encerrada_motivo: string | null
+          etapa: string
           id: string
+          instagram: string | null
           nome: string
           observacoes: string
+          origem: string
           preferencias: string
           proximo_retorno: string | null
           telefone: string
+          ultima_interacao: string | null
           updated_at: string
         }
         Insert: {
@@ -2175,12 +2222,18 @@ export type Database = {
           consultora_party_id: string
           created_at?: string
           email?: string | null
+          encerrada?: boolean
+          encerrada_motivo?: string | null
+          etapa?: string
           id?: string
+          instagram?: string | null
           nome: string
           observacoes?: string
+          origem?: string
           preferencias?: string
           proximo_retorno?: string | null
           telefone?: string
+          ultima_interacao?: string | null
           updated_at?: string
         }
         Update: {
@@ -2188,12 +2241,18 @@ export type Database = {
           consultora_party_id?: string
           created_at?: string
           email?: string | null
+          encerrada?: boolean
+          encerrada_motivo?: string | null
+          etapa?: string
           id?: string
+          instagram?: string | null
           nome?: string
           observacoes?: string
+          origem?: string
           preferencias?: string
           proximo_retorno?: string | null
           telefone?: string
+          ultima_interacao?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -354,7 +354,7 @@ function PainelAparencia({ d, muda }: { d: DesignVitrine; muda: Muda }) {
 
 /* ---------- foto e capa ---------- */
 function PainelFoto({ d, muda, party, img, onLinks }: { d: DesignVitrine; muda: Muda; party: string; img: (p?: string | null) => string | null; onLinks: (m: Record<string, string>) => void }) {
-  const [editando, setEditando] = React.useState<{ tipo: "avatar" | "capa"; bmp: ImageBitmap; original?: string | null; crop?: Recorte | null } | null>(null);
+  const [editando, setEditando] = React.useState<{ tipo: "avatar" | "capa"; bmp: ImageBitmap; original?: string | null | undefined; crop?: Recorte | null | undefined } | null>(null);
   const [preparando, setPreparando] = React.useState(false);
   const galeria = React.useRef<HTMLInputElement>(null);
   const camera = React.useRef<HTMLInputElement>(null);
@@ -369,7 +369,8 @@ function PainelFoto({ d, muda, party, img, onLinks }: { d: DesignVitrine; muda: 
     const o = d.imagens.avatar?.original; if (!o) return;
     try {
       const m = await linksPrevia([o]);
-      const blob = await (await fetch(m[o])).blob();
+      const u = m[o]; if (!u) throw new Error("x");
+      const blob = await (await fetch(u)).blob();
       setEditando({ tipo: "avatar", bmp: await createImageBitmap(blob), original: o, crop: d.imagens.avatar?.crop });
     } catch { toast.error("Não foi possível abrir a foto original."); }
   };
@@ -378,13 +379,13 @@ function PainelFoto({ d, muda, party, img, onLinks }: { d: DesignVitrine; muda: 
     setPreparando(true);
     try {
       if (editando.tipo === "avatar") {
-        const [p1, p2] = await gerarTamanhos(editando.bmp, r, [{ w: 400, h: 400 }, { w: 800, h: 800 }]);
+        const [p1, p2] = (await gerarTamanhos(editando.bmp, r, [{ w: 400, h: 400 }, { w: 800, h: 800 }])) as [Blob, Blob];
         const original = editando.original ?? await enviarArquivo(party, "orig", await originalLimpo(editando.bmp));
         const [a1, a2] = await Promise.all([enviarArquivo(party, "pub", p1, "-400"), enviarArquivo(party, "pub", p2, "-800")]);
         const m = await linksPrevia([a1, a2]); onLinks(m);
         muda((x) => { x.imagens.avatar = { path: a1, path2x: a2, original, crop: r }; return x; });
       } else {
-        const [desk, mob] = await gerarTamanhos(editando.bmp, r, [{ w: 1920, h: 720 }, { w: 1080, h: 810 }]);
+        const [desk, mob] = (await gerarTamanhos(editando.bmp, r, [{ w: 1920, h: 720 }, { w: 1080, h: 810 }])) as [Blob, Blob];
         const original = await enviarArquivo(party, "orig", await originalLimpo(editando.bmp));
         const [c1, c2] = await Promise.all([enviarArquivo(party, "pub", desk, "-1920"), enviarArquivo(party, "pub", mob, "-1080")]);
         const m = await linksPrevia([c1, c2]); onLinks(m);
@@ -470,7 +471,7 @@ function PainelFoto({ d, muda, party, img, onLinks }: { d: DesignVitrine; muda: 
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>{editando?.tipo === "avatar" ? "Ajuste sua foto" : "Ajuste sua capa"}</DialogTitle></DialogHeader>
           {editando && (
-            <RecorteFoto img={editando.bmp} inicial={editando.crop} proporcao={editando.tipo === "avatar" ? 1 : 1920 / 720} redondo={editando.tipo === "avatar"}
+            <RecorteFoto img={editando.bmp} inicial={editando.crop ?? null} proporcao={editando.tipo === "avatar" ? 1 : 1920 / 720} redondo={editando.tipo === "avatar"}
               minimo={editando.tipo === "avatar" ? 400 : 1000} confirmando={preparando} onCancelar={() => setEditando(null)} onConfirmar={(r) => void confirmar(r)} />
           )}
         </DialogContent>
@@ -508,8 +509,8 @@ function PainelOrganizacao({ d, muda, itens }: { d: DesignVitrine; muda: Muda; i
             return (
               <li key={s} className="flex items-center gap-2 rounded-lg border border-line-soft px-3 py-2 text-sm">
                 <span className="flex-1">{SECOES_NOME[s]}</span>
-                {ativa && <><button type="button" aria-label="Subir" className="admin-btn px-2" disabled={i === 0} onClick={() => muda((x) => { const a = x.organizacao.secoes; [a[i - 1], a[i]] = [a[i], a[i - 1]]; return x; })}><ArrowUp className="size-3.5" /></button>
-                  <button type="button" aria-label="Descer" className="admin-btn px-2" disabled={i === o.secoes.length - 1} onClick={() => muda((x) => { const a = x.organizacao.secoes; [a[i + 1], a[i]] = [a[i], a[i + 1]]; return x; })}><ArrowDown className="size-3.5" /></button></>}
+                {ativa && <><button type="button" aria-label="Subir" className="admin-btn px-2" disabled={i === 0} onClick={() => muda((x) => { const a = x.organizacao.secoes; const t = a[i]!; a[i] = a[i - 1]!; a[i - 1] = t; return x; })}><ArrowUp className="size-3.5" /></button>
+                  <button type="button" aria-label="Descer" className="admin-btn px-2" disabled={i === o.secoes.length - 1} onClick={() => muda((x) => { const a = x.organizacao.secoes; const t = a[i]!; a[i] = a[i + 1]!; a[i + 1] = t; return x; })}><ArrowDown className="size-3.5" /></button></>}
                 <button type="button" className="admin-btn px-2" aria-label={ativa ? "Esconder parte" : "Mostrar parte"} onClick={() => muda((x) => { x.organizacao.secoes = ativa ? x.organizacao.secoes.filter((v) => v !== s) : [...x.organizacao.secoes, s]; return x; })}>
                   {ativa ? <Eye className="size-3.5" /> : <EyeOff className="size-3.5" />}
                 </button>

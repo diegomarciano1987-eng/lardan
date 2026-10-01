@@ -5,6 +5,7 @@ import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMyRoles } from "@/lib/session";
 import { DESTINO, PORTAS, portaLiberada, type Porta } from "@/lib/portas";
+import { PasswordInput } from "@/components/ui/password-input";
 
 type Busca = { area?: Porta | undefined };
 
@@ -128,7 +129,7 @@ function EquipePage() {
             </div>
             <div>
               <label htmlFor="senha" className="brand-eyebrow mb-2 block">Senha</label>
-              <input id="senha" type="password" required autoComplete="current-password" value={senha}
+              <PasswordInput id="senha" required autoComplete="current-password" value={senha}
                 onChange={(e) => setSenha(e.target.value)} className={inputClass} />
             </div>
             <Link to="/redefinir-senha" className="-mt-2 block text-right text-xs text-muted-foreground underline">

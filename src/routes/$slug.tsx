@@ -1,14 +1,11 @@
 import * as React from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Share2, ShoppingBag } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { MessageCircle, Share2, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import {
   brl,
-  chaveIdempotencia,
-  enviarPedido,
   imagem,
-  traduzir,
   vitrinePublica,
   type VitrineItem,
 } from "@/lib/maletas";
@@ -24,7 +21,7 @@ export const Route = createFileRoute("/$slug")({
     const nome = loaderData?.nome ?? "Vitrine";
     const titulo = `${nome} · Semijoias LARDAN`;
     const descricao =
-      loaderData?.headline ?? `Peças LARDAN disponíveis com ${nome}. Escolha e envie seu pedido direto.`;
+      loaderData?.headline ?? `Peças LARDAN disponíveis com ${nome}. Escolha suas peças e fale direto com a consultora.`;
     return {
       meta: [
         { title: titulo },
@@ -42,9 +39,6 @@ function VitrineConsultora() {
   const dados = Route.useLoaderData();
   const { slug } = Route.useParams();
   const [sacola, setSacola] = React.useState<Record<string, number>>({});
-  const [cliente, setCliente] = React.useState({ nome: "", telefone: "", observacao: "" });
-  const [chave, setChave] = React.useState(chaveIdempotencia);
-  const [enviado, setEnviado] = React.useState<{ codigo: string } | null>(null);
   const [categoria, setCategoria] = React.useState("todas");
 
   const vitrine = useQuery({
@@ -62,21 +56,22 @@ function VitrineConsultora() {
   const total = itens.reduce((acc, i) => acc + (sacola[chaveItem(i)] ?? 0) * i.preco_cents, 0);
   const pecas = Object.values(sacola).reduce((a, b) => a + b, 0);
 
-  const enviar = useMutation({
-    mutationFn: () => {
-      const lista = itens
-        .filter((i) => (sacola[chaveItem(i)] ?? 0) > 0)
-        .map((i) => ({ cycle_id: i.cycle_id, variant_id: i.variant_id, quantidade: sacola[chaveItem(i)]! }));
-      return enviarPedido(slug, { ...cliente, canal: "vitrine" }, lista, chave);
-    },
-    onSuccess: (r) => {
-      setEnviado({ codigo: r.codigo });
-      setSacola({});
-      setChave(chaveIdempotencia());
-      void vitrine.refetch();
-    },
-    onError: (e) => toast.error(traduzir(e)),
-  });
+  const zap = whatsappLink(vitrine.data?.whatsapp);
+  const primeiroNome = (vitrine.data?.nome ?? "").split(" ")[0] || "a consultora";
+  const mensagem = (lista: VitrineItem[]) => {
+    const linhas = lista.map((i) => {
+      const q = sacola[chaveItem(i)] ?? 1;
+      const det = [i.variante, i.tamanho, i.cor].filter(Boolean).join(" · ");
+      return `• ${q}x ${i.produto}${det ? ` (${det})` : ""} — ${brl(i.preco_cents)}`;
+    });
+    const url = typeof window === "undefined" ? "" : window.location.href;
+    return `Olá, ${primeiroNome}! Vi sua vitrine Lardan e tenho interesse:\n${linhas.join("\n")}\n\nAinda está disponível?\n${url}`;
+  };
+  const abrirZap = (lista: VitrineItem[]) => {
+    if (!zap) return;
+    window.open(`${zap}?text=${encodeURIComponent(mensagem(lista))}`, "_blank", "noopener,noreferrer");
+  };
+  const selecionados = itens.filter((i) => (sacola[chaveItem(i)] ?? 0) > 0);
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 pb-32 pt-10">
@@ -86,14 +81,14 @@ function VitrineConsultora() {
         {vitrine.data?.headline && <p className="mt-2 text-muted-foreground">{vitrine.data.headline}</p>}
         {vitrine.data?.bio && <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed">{vitrine.data.bio}</p>}
         <div className="mt-5 flex flex-wrap justify-center gap-2">
-          {vitrine.data?.whatsapp && (
+          {zap && (
             <a
               className="rounded-full border border-foreground/15 px-4 py-2 text-sm"
-              href={`https://wa.me/55${vitrine.data.whatsapp}`}
+              href={zap ?? undefined}
               target="_blank"
               rel="noreferrer"
             >
-              Falar no WhatsApp
+              Falar com {primeiroNome}
             </a>
           )}
           <button
@@ -177,16 +172,6 @@ function VitrineConsultora() {
         </ul>
       )}
 
-      {enviado && (
-        <section className="mt-10 rounded-2xl border border-foreground/15 p-6 text-center">
-          <p className="font-display text-2xl">Pedido enviado</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Protocolo {enviado.codigo}. As peças ficaram guardadas para você e a consultora vai confirmar o
-            atendimento e a forma de pagamento.
-          </p>
-        </section>
-      )}
-
       {pecas > 0 && (
         <section className="fixed inset-x-0 bottom-0 border-t border-foreground/10 bg-background/95 p-4 backdrop-blur">
           <div className="mx-auto w-full max-w-3xl space-y-3">
@@ -194,34 +179,28 @@ function VitrineConsultora() {
               <ShoppingBag aria-hidden className="mr-1 inline size-4" />
               {pecas} peça(s) · <strong>{brl(total)}</strong>
             </p>
-            <div className="grid gap-2 md:grid-cols-3">
-              <input
-                className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 text-sm"
-                placeholder="Seu nome"
-                value={cliente.nome}
-                onChange={(e) => setCliente((c) => ({ ...c, nome: e.target.value }))}
-              />
-              <input
-                className="rounded-lg border border-foreground/15 bg-transparent px-3 py-2 text-sm"
-                placeholder="Seu WhatsApp"
-                value={cliente.telefone}
-                onChange={(e) => setCliente((c) => ({ ...c, telefone: e.target.value }))}
-              />
-              <button
-                type="button"
-                className="rounded-lg bg-foreground px-4 py-2 text-sm text-background disabled:opacity-50"
-                disabled={enviar.isPending || cliente.nome.trim().length < 2}
-                onClick={() => enviar.mutate()}
-              >
-                {enviar.isPending ? "Enviando…" : "Enviar pedido"}
-              </button>
-            </div>
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-3 text-sm text-background disabled:opacity-50"
+              disabled={!zap}
+              onClick={() => abrirZap(selecionados)}
+            >
+              <MessageCircle aria-hidden className="size-4" /> Enviar interesse para {primeiroNome}
+            </button>
             <p className="text-[0.7rem] text-muted-foreground">
-              O envio reserva as peças por 48 horas. O pagamento é combinado direto com a consultora.
+              Sua seleção fica só neste aparelho e não reserva peças. A disponibilidade é confirmada no atendimento.
             </p>
           </div>
         </section>
       )}
     </main>
   );
+}
+
+/** Monta o endereço do WhatsApp sem duplicar o 55 quando o número já vem com DDI. */
+function whatsappLink(numero?: string | null) {
+  let d = (numero ?? "").replace(/\D/g, "").replace(/^0+/, "");
+  if (d.length < 10) return null;
+  if (!(d.startsWith("55") && d.length >= 12)) d = `55${d}`;
+  return `https://wa.me/${d}`;
 }

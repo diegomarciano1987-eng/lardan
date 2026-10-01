@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Salvar múltiplos papéis de um colaborador por uma única função protegida e auditada, evitando estado parcial entre concessões.
+- Public showcase never reserves stock: anonymous order RPC is revoked; interest goes through the consultant's WhatsApp. Why: no stock locked without human service.

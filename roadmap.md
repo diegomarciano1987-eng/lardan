@@ -56,3 +56,10 @@
 - [x] Rodada celular da consultora (parte 1): navegação inferior, toque 48px, conferência sem campos minúsculos, Central de Ajuda + passeio + editor
 - [ ] Rodada celular parte 2: cadastro de clientes, pedido/venda/pagamento e financeiro da consultora (telas ainda não existem; dependem das decisões da Etapa 5)
 - [ ] Teste em aparelhos Android/iPhone reais e leitor de tela
+
+## Segurança + Jornada + A receber (parecer 01/10)
+- [x] Bloco 1: vitrine só pelas ações oficiais; funções antigas fechadas; página pública sem caminhos de originais; cache de imagens 60s; clientes fora do alcance de estoque/montagem (permissão crm.view)
+- [ ] Bloco 1: verificar no site oficial após publicar (cache CDN, 404 de vitrine fora do ar)
+- [ ] Bloco 2: Jornada (etapas, Instagram da cliente, Pausadas/Encerradas, quadro desktop / seções no celular)
+- [ ] Bloco 3: A receber de clientes + notificações internas (botão de venda a prazo travado até decisão da política)
+- [ ] Ajuda: artigos de Jornada e A receber

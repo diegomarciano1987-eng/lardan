@@ -1,0 +1,1 @@
+revoke execute on function public.fin_saldo_conta(uuid,date) from authenticated;

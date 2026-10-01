@@ -64,3 +64,8 @@
 - [ ] Jornada: nomes das etapas editáveis pela equipe Lardan
 - [ ] Bloco 3: A receber de clientes + notificações internas (botão de venda a prazo travado até decisão da política)
 - [ ] Ajuda: artigos de Jornada e A receber
+
+## Financeiro (substituir Conta Azul) — itens 1–27
+- [x] P0.1 Saldo: dupla contagem do saldo inicial corrigida (diferença R$ 28.500,86 explicada)
+- [ ] P0.2–P0.8 DRE/pendências, despesas fixas, teto 1.000, transferências, futuros, Asaas, parcelas
+- [ ] P1 (9–18), P2 (19–23), P3 (24–27) — item 9 depende da política comercial do acerto

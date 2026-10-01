@@ -46,6 +46,7 @@ import { Route as SitemapProductsPaginaRouteImport } from './routes/sitemap-prod
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAjudaRouteImport } from './routes/_authenticated/admin/ajuda'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
+import { Route as AuthenticatedAdminAvisosRouteImport } from './routes/_authenticated/admin/avisos'
 import { Route as AuthenticatedAdminCandidaturasRouteImport } from './routes/_authenticated/admin/candidaturas'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminEstoqueRouteImport } from './routes/_authenticated/admin/estoque'
@@ -286,6 +287,12 @@ const AuthenticatedAdminAuditoriaRoute =
   AuthenticatedAdminAuditoriaRouteImport.update({
     id: '/auditoria',
     path: '/auditoria',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminAvisosRoute =
+  AuthenticatedAdminAvisosRouteImport.update({
+    id: '/avisos',
+    path: '/avisos',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminCandidaturasRoute =
@@ -630,6 +637,7 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
   '/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/admin/avisos': typeof AuthenticatedAdminAvisosRoute
   '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
@@ -718,6 +726,7 @@ export interface FileRoutesByTo {
   '/semijoias': typeof SemijoiasIndexRoute
   '/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/admin/avisos': typeof AuthenticatedAdminAvisosRoute
   '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
@@ -810,6 +819,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
   '/_authenticated/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/_authenticated/admin/avisos': typeof AuthenticatedAdminAvisosRoute
   '/_authenticated/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
@@ -902,6 +912,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro'
     | '/admin/ajuda'
     | '/admin/auditoria'
+    | '/admin/avisos'
     | '/admin/candidaturas'
     | '/admin/configuracoes'
     | '/admin/estoque'
@@ -990,6 +1001,7 @@ export interface FileRouteTypes {
     | '/semijoias'
     | '/admin/ajuda'
     | '/admin/auditoria'
+    | '/admin/avisos'
     | '/admin/candidaturas'
     | '/admin/configuracoes'
     | '/admin/estoque'
@@ -1081,6 +1093,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financeiro'
     | '/_authenticated/admin/ajuda'
     | '/_authenticated/admin/auditoria'
+    | '/_authenticated/admin/avisos'
     | '/_authenticated/admin/candidaturas'
     | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/estoque'
@@ -1435,6 +1448,13 @@ declare module '@tanstack/react-router' {
       path: '/auditoria'
       fullPath: '/admin/auditoria'
       preLoaderRoute: typeof AuthenticatedAdminAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/avisos': {
+      id: '/_authenticated/admin/avisos'
+      path: '/avisos'
+      fullPath: '/admin/avisos'
+      preLoaderRoute: typeof AuthenticatedAdminAvisosRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/candidaturas': {
@@ -1867,6 +1887,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminFinanceiroRouteRoute: typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
   AuthenticatedAdminAjudaRoute: typeof AuthenticatedAdminAjudaRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
+  AuthenticatedAdminAvisosRoute: typeof AuthenticatedAdminAvisosRoute
   AuthenticatedAdminCandidaturasRoute: typeof AuthenticatedAdminCandidaturasRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminEstoqueRoute: typeof AuthenticatedAdminEstoqueRoute
@@ -1903,6 +1924,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminFinanceiroRouteRouteWithChildren,
     AuthenticatedAdminAjudaRoute: AuthenticatedAdminAjudaRoute,
     AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
+    AuthenticatedAdminAvisosRoute: AuthenticatedAdminAvisosRoute,
     AuthenticatedAdminCandidaturasRoute: AuthenticatedAdminCandidaturasRoute,
     AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
     AuthenticatedAdminEstoqueRoute: AuthenticatedAdminEstoqueRoute,

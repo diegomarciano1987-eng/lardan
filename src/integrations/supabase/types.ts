@@ -2107,6 +2107,92 @@ export type Database = {
           },
         ]
       }
+      consultant_announcement_reads: {
+        Row: {
+          announcement_id: string
+          ciente_em: string | null
+          dispositivo: string | null
+          id: string
+          lido_em: string
+          user_id: string
+        }
+        Insert: {
+          announcement_id: string
+          ciente_em?: string | null
+          dispositivo?: string | null
+          id?: string
+          lido_em?: string
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string
+          ciente_em?: string | null
+          dispositivo?: string | null
+          id?: string
+          lido_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_announcement_reads_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "consultant_announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultant_announcements: {
+        Row: {
+          corpo: string
+          created_at: string
+          created_by: string | null
+          critico: boolean
+          fim_em: string | null
+          id: string
+          imagem_path: string | null
+          inicio_em: string
+          link_rotulo: string | null
+          link_url: string | null
+          status: string
+          tipo: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          corpo?: string
+          created_at?: string
+          created_by?: string | null
+          critico?: boolean
+          fim_em?: string | null
+          id?: string
+          imagem_path?: string | null
+          inicio_em?: string
+          link_rotulo?: string | null
+          link_url?: string | null
+          status?: string
+          tipo?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          corpo?: string
+          created_at?: string
+          created_by?: string | null
+          critico?: boolean
+          fim_em?: string | null
+          id?: string
+          imagem_path?: string | null
+          inicio_em?: string
+          link_rotulo?: string | null
+          link_url?: string | null
+          status?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       consultant_client_contacts: {
         Row: {
           canal: string
@@ -9013,6 +9099,20 @@ export type Database = {
           _title: string
         }
         Returns: undefined
+      }
+      aviso_registrar: {
+        Args: { _ciente?: boolean; _dispositivo?: string; _id: string }
+        Returns: string
+      }
+      aviso_relatorio: {
+        Args: { _id: string }
+        Returns: {
+          ciente_em: string
+          email: string
+          lido_em: string
+          nome: string
+          user_id: string
+        }[]
       }
       barcode_lookup: { Args: { _code: string }; Returns: Json }
       barcode_resolver: {

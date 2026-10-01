@@ -11,6 +11,7 @@ import { BotaoAjuda } from "@/components/ajuda/Ajuda";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import nomeLardan from "@/assets/lardan-wordmark.png.asset.json";
 import { AberturaApp, InstalarApp } from "@/components/consultora/InstalarApp";
+import { BotaoNovidades, CartaoNovidades, CentralAvisosProvider } from "@/components/consultora/Avisos";
 import { brl, chaveIdempotencia, imagem, traduzir } from "@/lib/maletas";
 import {
   CANAL, carregarInicio, criarPedido, dataBR, formatarTelefone, hojeISO, linkWhats, listarAtendimentos, listarClientes,
@@ -48,6 +49,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
     ir({ aba });
   };
   return (
+    <CentralAvisosProvider>
     <div className="area-consultora min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex">
       <AberturaApp />
       {/* Menu lateral no computador */}
@@ -70,14 +72,16 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
           })}
         </nav>
         <div className="mt-auto flex flex-col gap-2">
+          <BotaoNovidades />
           <BotaoAjuda tela={ajuda} className="w-full justify-start" />
           <button type="button" onClick={sair} className="admin-btn min-h-12 w-full text-base"><LogOut className="size-5" aria-hidden /> Sair</button>
         </div>
       </aside>
 
       <div className="min-w-0 flex-1">
-        <header className="grid h-16 grid-cols-[minmax(0,1fr)_auto] items-center border-b border-border bg-card px-4 sm:px-6 lg:hidden">
-          <img src={nomeLardan.url} alt="LARDAN" className="h-auto w-28 object-contain object-left" />
+        <header className="grid h-16 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 border-b border-border bg-card px-4 sm:px-6 lg:hidden">
+          <img src={nomeLardan.url} alt="LARDAN" className="h-auto w-24 min-w-0 object-contain object-left sm:w-28" />
+          <BotaoNovidades />
           <button type="button" onClick={() => setMenuAberto(true)} aria-label="Abrir menu" aria-expanded={menuAberto}
             className="grid size-12 shrink-0 place-items-center rounded-xl border border-border bg-background text-acao transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
             <Menu className="size-6" aria-hidden />
@@ -134,6 +138,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
         })}
       </nav>
     </div>
+    </CentralAvisosProvider>
   );
 }
 
@@ -189,6 +194,8 @@ export function Inicio({ ir }: { ir: Ir }) {
         </div>
         <span className="lg:hidden"><BotaoAjuda tela="inicio" /></span>
       </header>
+
+      <CartaoNovidades />
 
       <section className="grid gap-3 lg:grid-cols-[1.2fr_1fr]">
         <button type="button" onClick={() => ir({ aba: "novo" })}

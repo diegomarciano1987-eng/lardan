@@ -828,7 +828,8 @@ function Bancada({
             );
           })}
         </div>
-      </section>
+        </section>
+      )}
     </>
   );
 }

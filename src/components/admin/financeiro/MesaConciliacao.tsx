@@ -3,8 +3,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowDownLeft, ArrowUpRight, Brain, Check, ChevronRight, FilePlus2, Link2, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { classificarTitulo, criarTitulo, fetchClassificacoes, fetchFinTitle } from "@/lib/financeiro";
-import { centrosMesa, contrapartesMesa, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
+import { classificarTitulo, fetchClassificacoes } from "@/lib/financeiro";
+import { centrosMesa, contrapartesMesa, faltaConciliar, novoLancamentoConciliar, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
+import { DateField } from "@/components/premium/DateField";
 import { formatBRLFromCents, Skeleton } from "@/components/admin/ui";
 import { reaisParaCentavos } from "@/lib/financeiro";
 import { listarParcelas, type ParcelaLinha } from "@/lib/financeiro-parcelas";
@@ -237,6 +238,7 @@ function Bancada({
   const [descricao, setDescricao] = React.useState(linha.historico ?? "");
   const [documento, setDocumento] = React.useState(linha.documento ?? "");
   const [observacao, setObservacao] = React.useState("");
+  const [competencia, setCompetencia] = React.useState(linha.data ?? "");
   const [palpiteAplicado, setPalpiteAplicado] = React.useState(false);
 
   React.useEffect(() => {
@@ -293,8 +295,9 @@ function Bancada({
   const partySel = (contrapartes.data ?? []).find((c) => c.id === party);
 
   const somaAloc = bandeja.reduce((t, b) => t + (reaisParaCentavos(b.texto) ?? 0), 0);
-  const ajustes = (reaisParaCentavos(tarifa) ?? 0) + (reaisParaCentavos(juros) ?? 0) - (reaisParaCentavos(desconto) ?? 0);
-  const falta = valorLinha - somaAloc - ajustes;
+  const tarifaCents = reaisParaCentavos(tarifa) ?? 0;
+  // mesma regra do banco: recebimento = alocado − tarifa; pagamento = alocado + tarifa
+  const falta = faltaConciliar(valorLinha, somaAloc, tarifaCents, saida);
   const bateExistente = bandeja.length > 0 && falta === 0;
   const prontoNovo = !!party && descricao.trim().length > 0;
   const pronto = modo === "novo" ? prontoNovo : bateExistente;
@@ -304,7 +307,7 @@ function Bancada({
       setBandeja((p) => p.filter((b) => b.c.installment_id !== c.installment_id));
       return;
     }
-    const restante = Math.max(0, valorLinha - somaAloc - ajustes);
+    const restante = Math.max(0, faltaConciliar(valorLinha, somaAloc, tarifaCents, saida));
     const valor = Math.min(restante || c.aberto_cents, c.aberto_cents);
     setBandeja((p) => [...p, { c, texto: centsParaTexto(valor) }]);
   };
@@ -316,29 +319,18 @@ function Bancada({
         .join(" · ");
       if (modo === "novo") {
         if (!party) throw new Error("Escolha quem recebeu ou pagou.");
-        const tituloId = await criarTitulo({
-          direction,
+        // uma só transação: cria o título já ativo e concilia; repetir devolve o mesmo resultado
+        return novoLancamentoConciliar({
+          line_id: linha.id,
           party_id: party,
           descricao: descricao.trim(),
+          ...(competencia ? { competencia } : {}),
           ...(documento.trim() ? { documento: documento.trim() } : {}),
-          ...(linha.data ? { emissao: linha.data, competencia: linha.data } : {}),
-          ...(observacao.trim() ? { observacao: observacao.trim() } : {}),
+          ...(obs ? { observacao: obs } : {}),
           ...(centro ? { cost_center_id: centro } : {}),
           ...(plano ? { chart_account_id: plano } : {}),
           ...(forma ? { payment_method_id: forma } : {}),
-          financial_account_id: conta,
-          valor_cents: valorLinha,
-          parcelas: [{ vencimento: linha.data ?? new Date().toISOString().slice(0, 10), valor_cents: valorLinha }],
-          ...({ origem: "conciliacao", id_externo: `extrato:${linha.id}` } as object),
-        });
-        const det = await fetchFinTitle(tituloId);
-        const inst = det.parcelas[0]?.id;
-        if (!inst) throw new Error("Lançamento criado, mas a parcela não foi encontrada.");
-        return conciliar({
-          line_ids: [linha.id],
-          alocacoes: [{ installment_id: inst, valor_cents: valorLinha }],
-          ...(obs ? { observacao: obs } : {}),
-          idempotency_key: `novo:${linha.id}`,
+          ...(tarifaCents ? { tarifa_cents: tarifaCents } : {}),
         });
       }
       const alocacoes = bandeja
@@ -547,6 +539,11 @@ function Bancada({
                   />
                 ))}
               </div>
+              <p className="mt-2 text-xs text-ledger-muted">
+                {saida
+                  ? "Pagamento: valor do extrato = valor pago na conta + tarifa. A tarifa sai da conta como despesa separada."
+                  : "Recebimento: valor do extrato = valor recebido na conta − tarifa. A parcela é quitada pelo valor cheio e a tarifa vira despesa separada."}
+              </p>
             </details>
           </div>
         )}
@@ -621,6 +618,15 @@ function Bancada({
                   <Rotulo>Descrição do lançamento</Rotulo>
                   <input value={descricao} onChange={(e) => setDescricao(e.target.value)} className={campoCls} />
                 </label>
+              )}
+              {modo === "novo" && (
+                <div>
+                  <Rotulo>Competência</Rotulo>
+                  <DateField
+                    value={competencia ? new Date(`${competencia}T12:00:00`) : undefined}
+                    onChange={(d) => setCompetencia(d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "")}
+                  />
+                </div>
               )}
               <label>
                 <Rotulo>Documento / nota</Rotulo>

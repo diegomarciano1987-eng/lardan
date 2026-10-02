@@ -23,3 +23,4 @@
 - Mesa de conciliação: 'novo lançamento' cria o título via fin_title_create (origem conciliacao, id_externo extrato:<linha>) e concilia na sequência; palpites de classificação vêm de fin_mesa_palpite (conciliações anteriores com o mesmo início de histórico). Why: aprender sem regra fixa e sem baixa automática.
 - Every database change is also saved as a file in supabase/migrations (the isolated test bench applies only that folder); why: one source of truth for migrations.
 - Bank fees in reconciliation are a separate ledger movement, never an installment adjustment (receipt: line = allocated − fee; payment: line = allocated + fee); why: fees must not raise the amount owed.
+- DRE gerencial reads only from fin_dre_base and its lucro líquido must equal fin_dre for the same filters; why: one calculation rule, two views.

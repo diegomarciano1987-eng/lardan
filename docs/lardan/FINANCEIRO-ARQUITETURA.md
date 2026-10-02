@@ -198,3 +198,11 @@ Testes versionados: `tests/financeiro/departamento.test.ts` (`bun run test:finan
 - Avisos do linter de segurança (176) são o padrão preexistente do projeto:
   funções SECURITY DEFINER expostas, 6 tabelas com RLS sem política e uma extensão no
   schema público. Continuam registrados para tratamento próprio.
+
+## DRE gerencial moderna (02/10/2026)
+- Estrutura versionada `fin_dre_estrutura` e mapa `fin_dre_mapa` (proposta inicial por código, para revisão do Daniel); conta sem mapa cai em "Contas fora da estrutura" e continua no lucro líquido.
+- `fin_dre_gerencial(_filtros)`: matriz linhas × meses (até 24), análise vertical, comparativo mês anterior / ano anterior / orçado, alertas por regra (>25% contra média de 3 meses e >R$ 1.000) e indicadores Lardan. Usa `fin_dre_base`, a mesma fonte da `fin_dre`.
+- Fechamento `fin_periodos` com gatilhos que bloqueiam título, parcela e baixa em mês fechado; `fin_periodo_fechar` (finance.period.close) e `fin_periodo_reabrir` (finance.period.reopen, motivo obrigatório), ambos auditados.
+- Orçamento `fin_orcamento` via `fin_orcamento_salvar` (finance.budget.manage), valores positivos com sinal da linha; importação por planilha com prévia.
+- Tela nova em `/admin/financeiro/dre`; a anterior segue em `/admin/financeiro/dre-simples`.
+- Provas: `tests/isolado/dre-gerencial.test.ts` (12 meses × 2 regimes iguais à fin_dre; 24 meses/50 mil títulos em 198 ms) e conferência real jan–set/2026: diferença zero em todos os meses.

@@ -161,12 +161,16 @@ export async function criarConta(opts: {
     partyId = p!.id;
   }
 
-  await adm.unsafe(
+  // vínculo usuário↔pessoa só muda pela rotina administrativa: a bancada a simula
+  await adm.begin(async (tx) => {
+    await tx.unsafe(`select set_config('lardan.profile_link','on',true)`);
+    await tx.unsafe(
     `insert into public.profiles (id, full_name, email, is_active, party_id)
      values ($1, $2, $3, $4, $5)
      on conflict (id) do update set is_active = excluded.is_active, party_id = excluded.party_id`,
-    [uid, `ISO ${opts.nome}`, email, opts.ativo ?? true, partyId],
+      [uid, `ISO ${opts.nome}`, email, opts.ativo ?? true, partyId],
   );
+  });
   for (const papel of opts.papeis) {
     await adm.unsafe(`insert into public.user_roles (user_id, role) values ($1, $2::app_role)`, [uid, papel]);
   }

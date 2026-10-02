@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { LayoutPanelLeft, Upload, X } from "lucide-react";
+import { faltaConciliar } from "@/lib/mesa-conciliacao";
 import { MesaConciliacao } from "@/components/admin/financeiro/MesaConciliacao";
 import {
   EmptyState,
@@ -261,6 +262,7 @@ function PainelLinha({
           </label>
           <ResumoConciliacao
             somaLinhas={emAberto}
+            saida={linha.kind === "saida"}
             alocacoes={Object.values(selecionadas)}
             tarifa={tarifa}
             juros={juros}
@@ -312,23 +314,26 @@ function PainelLinha({
 /** Resumo aritmético mostrado antes de confirmar a conciliação. */
 function ResumoConciliacao({
   somaLinhas,
+  saida,
   alocacoes,
   tarifa,
   juros,
   desconto,
 }: {
   somaLinhas: number;
+  saida: boolean;
   alocacoes: string[];
   tarifa: string;
   juros: string;
   desconto: string;
 }) {
   const somaAloc = alocacoes.reduce((t, v) => t + (reaisParaCentavos(v) ?? 0), 0);
-  const ajustes =
-    (reaisParaCentavos(tarifa) ?? 0) +
-    (reaisParaCentavos(juros) ?? 0) -
-    (reaisParaCentavos(desconto) ?? 0);
-  const diferenca = somaLinhas - somaAloc - ajustes;
+  // mesma regra do banco: recebimento = alocado − tarifa; pagamento = alocado + tarifa.
+  // Juros e desconto mudam o saldo da parcela, não o valor da linha.
+  const tarifaCents = reaisParaCentavos(tarifa) ?? 0;
+  const diferenca = faltaConciliar(somaLinhas, somaAloc, tarifaCents, saida);
+  void juros;
+  void desconto;
   return (
     <div className="rounded-[10px] border border-line-soft bg-cream-2 p-3 text-sm">
       <p className="ledger-eyebrow">Resumo antes de confirmar</p>
@@ -342,8 +347,8 @@ function ResumoConciliacao({
           <span className="tabular-nums">{formatBRLFromCents(somaAloc)}</span>
         </li>
         <li className="flex justify-between gap-3">
-          <span>Tarifa, juros e desconto</span>
-          <span className="tabular-nums">{formatBRLFromCents(ajustes)}</span>
+          <span>{saida ? "Tarifa (soma ao pago)" : "Tarifa (desconta do recebido)"}</span>
+          <span className="tabular-nums">{formatBRLFromCents(tarifaCents)}</span>
         </li>
         <li className="flex justify-between gap-3 font-semibold">
           <span>Diferença restante</span>
@@ -508,6 +513,7 @@ function PainelLote({
 
         <ResumoConciliacao
           somaLinhas={soma}
+          saida={linhas[0]?.kind === "saida"}
           alocacoes={Object.values(selecionadas)}
           tarifa={tarifa}
           juros={juros}

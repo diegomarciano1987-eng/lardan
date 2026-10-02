@@ -71,7 +71,13 @@ export function paraCentavos(v: unknown): number | null {
   if (v === null || v === undefined || v === "") return null;
   const n = typeof v === "number" ? v : Number(v);
   if (!Number.isFinite(n)) throw new Error(`Valor monetário inválido: ${String(v)}`);
-  return Math.round(n * 100);
+  // por dígitos: sem multiplicar ponto flutuante (98.01 * 100 = 9800.999…)
+  const m = /^(-?)(\d+)(?:\.(\d+))?$/.exec(String(v).trim());
+  if (!m) return Math.round(n * 100); // notação científica: caso extremo
+  const dec = (m[3] ?? "").padEnd(3, "0");
+  let c = Number(m[2]) * 100 + Number(dec.slice(0, 2));
+  if (Number(dec[2]) >= 5) c += 1;
+  return m[1] === "-" ? -c : c;
 }
 
 export function paraReais(c: number): number {

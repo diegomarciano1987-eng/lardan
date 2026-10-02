@@ -90,7 +90,10 @@ beforeAll(async () => {
   inativo = await criarConta({ nome: "inat-rt", papeis: ["financeiro"], ativo: false, comParty: true });
   semPessoa = await criarConta({ nome: "semp-rt", papeis: ["financeiro"], comParty: false });
   // o cadastro cria pessoa automaticamente; aqui ela é removida de propósito
-  await adm.unsafe(`update public.profiles set party_id=null where id=$1`, [semPessoa.uid]);
+  await adm.begin(async (tx) => {
+    await tx.unsafe(`select set_config('lardan.profile_link','on',true)`);
+    await tx.unsafe(`update public.profiles set party_id=null where id=$1`, [semPessoa.uid]);
+  });
 });
 
 /* ======================================================================= */

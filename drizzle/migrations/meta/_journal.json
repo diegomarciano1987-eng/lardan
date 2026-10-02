@@ -15,6 +15,13 @@
       "when": 1790966237632,
       "tag": "0001_mesa_titulo_da_parcela",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790969121340,
+      "tag": "0002_correcao_financeiro_tarifa_dre",
+      "breakpoints": true
     }
   ]
 }

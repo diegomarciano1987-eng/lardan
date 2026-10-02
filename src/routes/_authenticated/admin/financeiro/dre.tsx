@@ -58,6 +58,7 @@ function Dre() {
   const [aberto, setAberto] = React.useState<{
     chart_id?: string;
     sem_classificacao?: boolean;
+    encargos_sem_conta?: boolean;
     rotulo: string;
   } | null>(null);
 
@@ -82,6 +83,7 @@ function Dre() {
         ...filtros,
         ...(aberto?.chart_id ? { chart_id: aberto.chart_id } : {}),
         ...(aberto?.sem_classificacao ? { sem_classificacao: true } : {}),
+        ...(aberto?.encargos_sem_conta ? { encargos_sem_conta: true } : {}),
       }),
     enabled: aberto !== null,
   });
@@ -229,6 +231,7 @@ function Dre() {
                       ["sem_conta_contabil", "Sem conta do plano de contas"],
                       ["sem_centro_custo", "Sem centro de custo"],
                       ["fora_da_dre", "Fora da DRE (ativo/passivo)"],
+                      ["encargos_sem_conta", "Encargos sem conta (tarifas, juros, descontos)"],
                       ["parcelas_em_aberto", "Parcelas em aberto no período"],
                       ["nao_conciliados", "Extrato não conciliado no período"],
                     ] as const
@@ -236,10 +239,19 @@ function Dre() {
                     <li key={k} className="rounded-[10px] border border-line-soft p-3">
                       <p className="text-sm font-semibold text-ledger-text">{rot}</p>
                       <p className="tabular-nums text-ledger-text">
-                        {d.indicadores![k].quantidade} ·{" "}
-                        {formatBRLFromCents(d.indicadores![k].valor_cents)}
+                        {d.indicadores![k]?.quantidade ?? 0} ·{" "}
+                        {formatBRLFromCents(d.indicadores![k]?.valor_cents ?? 0)}
                       </p>
-                      <p className="mt-1 text-xs text-ledger-muted">{d.indicadores![k].criterio}</p>
+                      <p className="mt-1 text-xs text-ledger-muted">{d.indicadores![k]?.criterio}</p>
+                      {k === "encargos_sem_conta" && (d.indicadores![k]?.quantidade ?? 0) > 0 ? (
+                        <button
+                          type="button"
+                          className="admin-btn mt-2"
+                          onClick={() => setAberto({ encargos_sem_conta: true, rotulo: "Encargos sem conta padrão" })}
+                        >
+                          Ver origem
+                        </button>
+                      ) : null}
                     </li>
                   ))}
                 </ul>

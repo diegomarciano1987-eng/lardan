@@ -138,3 +138,7 @@ end $$;
 -- precisa continuar declarando suas próprias permissões.
 alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
 alter default privileges in schema public grant usage, select on sequences to anon, authenticated, service_role;
+
+-- ------------------------------------------------- storage.extension
+-- A nuvem traz esta função; políticas de armazenamento a usam.
+create or replace function storage.extension(name text) returns text language sql immutable as $$ select lower(substring(name from '\.([^./]+)$')) $$;

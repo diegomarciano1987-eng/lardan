@@ -171,7 +171,7 @@ async function executarSync(
         proximoOffset: number | null;
       }>;
     };
-    const hoje = new Date().toISOString().slice(0, 10);
+    const hoje = diaSP();
     const ate = data.ate && data.ate < hoje ? data.ate : hoje;
 
     const itens: Json[] = [];
@@ -199,8 +199,9 @@ async function executarSync(
     const novas = itens.filter((i) => i["id"] && !existentes.has(String(i["id"])));
     if (novas.length === 0) return { total: itens.length, novas: 0 };
 
+    const { paraCentavos } = await import("@/lib/asaas/transporte-http.server");
     const linhas = novas.map((t, n) => {
-      const valor = Math.round(Number(t["value"] ?? 0) * 100);
+      const valor = paraCentavos(t["value"] ?? 0) ?? 0;
       const tipo = String(t["type"] ?? "");
       const desc = String(t["description"] ?? "").trim();
       return {

@@ -23,7 +23,7 @@ async function linha(acc: string, data: string, valor: number, tipo: string, his
     `insert into public.financial_statement_imports (file_id, financial_account_id) values ($1,$2) returning id`, [f.id, acc]);
   return (await um<{ id: string }>(
     `insert into public.financial_statement_lines (import_id, file_id, financial_account_id, line_no, data, valor_cents, kind, historico, hash, status, raw)
-     values ($1,$2,$3,$4,$5,$6,'saida',$7,$8,'pendente',$9::jsonb) returning id`,
+     values ($1,$2,$3,$4,$5,$6,'saida',$7,$8,'pendente',$9::text::jsonb) returning id`,
     [i.id, f.id, acc, ++n, data, valor, hist, marca(), JSON.stringify({ type: tipo, value: -valor / 100 })])).id;
 }
 

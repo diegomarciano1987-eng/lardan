@@ -86,3 +86,16 @@ export const novoLancamentoConciliar = (payload: {
  */
 export const faltaConciliar = (valorLinha: number, somaAloc: number, tarifa: number, saida: boolean) =>
   saida ? valorLinha - somaAloc - tarifa : valorLinha - somaAloc + tarifa;
+
+/** Microtarifas de notificação do Asaas (WhatsApp R$ 0,45 e robô de voz R$ 0,55). */
+export type MicrotarifaMes = {
+  mes: string; qtd: number; qtd_whatsapp: number; qtd_voz: number; total_cents: number; de: string; ate: string;
+};
+export const microtarifasPrevia = (conta: string, ate?: string) =>
+  rpc<MicrotarifaMes[]>("fin_microtarifas_previa", { _conta: conta, _ate: ate ?? null });
+export const microtarifasConciliar = (conta: string, ate?: string) =>
+  rpc<{ meses: { mes: string; title_id: string; linhas: number; total_cents: number }[] }>(
+    "fin_microtarifas_conciliar", { _conta: conta, _ate: ate ?? null });
+/** Reconhece a linha pelo histórico do Asaas (a lista não traz o tipo bruto). */
+export const ehMicrotarifa = (historico: string | null | undefined) =>
+  /^Taxa de notificação por (WhatsApp|robô de voz)/i.test(historico ?? "");

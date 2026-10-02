@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { ArrowDownLeft, ArrowUpRight, Brain, Check, ChevronRight, FilePlus2, Link2, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { classificarTitulo, fetchClassificacoes } from "@/lib/financeiro";
-import { centrosMesa, contrapartesMesa, faltaConciliar, novoLancamentoConciliar, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
+import { centrosMesa, contrapartesMesa, ehMicrotarifa, microtarifasConciliar, microtarifasPrevia, faltaConciliar, novoLancamentoConciliar, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
 import { DateField } from "@/components/premium/DateField";
 import { formatBRLFromCents, Skeleton } from "@/components/admin/ui";
 import { reaisParaCentavos } from "@/lib/financeiro";
@@ -75,10 +75,13 @@ export function MesaConciliacao({
   const [puladas, setPuladas] = React.useState<string[]>([]);
   const [atualId, setAtualId] = React.useState<string | null>(null);
 
-  const linhasFila = (fila.data ?? []).filter((l) => !resolvidas.includes(l.id));
+  const [ocultarMicro, setOcultarMicro] = React.useState(true);
+  const linhasFila = (fila.data ?? []).filter(
+    (l) => !resolvidas.includes(l.id) && !(ocultarMicro && ehMicrotarifa(l.historico)),
+  );
   const ordenada = [...linhasFila.filter((l) => !puladas.includes(l.id)), ...linhasFila.filter((l) => puladas.includes(l.id))];
   const atual = ordenada.find((l) => l.id === atualId) ?? ordenada[0] ?? null;
-  const totalInicial = (fila.data ?? []).length;
+  const totalInicial = (fila.data ?? []).filter((l) => !(ocultarMicro && ehMicrotarifa(l.historico))).length;
 
   React.useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -123,6 +126,18 @@ export function MesaConciliacao({
           <X aria-hidden className="mr-1 inline size-4" /> Fechar mesa
         </button>
       </header>
+
+      <Microtarifas
+        conta={conta}
+        ate={ate}
+        podeConciliar={podeConciliar}
+        ocultar={ocultarMicro}
+        onOcultar={setOcultarMicro}
+        onFeito={() => {
+          onMudou();
+          void fila.refetch();
+        }}
+      />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)_minmax(0,1.1fr)]">
         {/* Fila */}
@@ -193,6 +208,102 @@ export function MesaConciliacao({
   );
 }
 
+const mesBR = (m: string) => {
+  const [a, mm] = m.split("-");
+  return new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date(Number(a), Number(mm) - 1, 15));
+};
+
+/** Faixa das microtarifas de notificação do Asaas: prévia por mês e conciliação em lote. */
+function Microtarifas({
+  conta,
+  ate,
+  podeConciliar,
+  ocultar,
+  onOcultar,
+  onFeito,
+}: {
+  conta: string;
+  ate: string;
+  podeConciliar: boolean;
+  ocultar: boolean;
+  onOcultar: (v: boolean) => void;
+  onFeito: () => void;
+}) {
+  const previa = useQuery({ queryKey: ["mesa-microtarifas", conta, ate], queryFn: () => microtarifasPrevia(conta, ate) });
+  const [aberto, setAberto] = React.useState(false);
+  const meses = previa.data ?? [];
+  const qtd = meses.reduce((s, m) => s + m.qtd, 0);
+  const total = meses.reduce((s, m) => s + m.total_cents, 0);
+  const lote = useMutation({
+    mutationFn: () => microtarifasConciliar(conta, ate),
+    onSuccess: (r) => {
+      const linhas = r.meses.reduce((s, m) => s + m.linhas, 0);
+      toast.success(`${linhas} microtarifas conciliadas em ${r.meses.length} lançamento(s) mensal(is).`);
+      setAberto(false);
+      void previa.refetch();
+      onFeito();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  if (!qtd) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-4 border-b border-line bg-cream-2/60 px-6 py-3">
+      <Sparkles aria-hidden className="size-5 text-bronze" />
+      <p className="text-sm text-ledger-text">
+        <strong className="tabular-nums">{qtd.toLocaleString("pt-BR")}</strong> tarifas de notificação do Asaas
+        (WhatsApp e robô de voz) somando <strong className="tabular-nums">{formatBRLFromCents(total)}</strong>.
+        São custos cobrados pelo Asaas, não pagamentos às clientes citadas.
+      </p>
+      <label className="ml-auto flex items-center gap-2 text-sm text-ledger-muted">
+        <input type="checkbox" checked={ocultar} onChange={(e) => onOcultar(e.target.checked)} />
+        Esconder da fila
+      </label>
+      {podeConciliar && (
+        <button type="button" className="admin-btn-primary" onClick={() => setAberto(true)}>
+          Conciliar em lote
+        </button>
+      )}
+      {aberto && (
+        <div role="dialog" aria-modal="true" aria-label="Conciliar microtarifas" className="fixed inset-0 z-[80] flex items-center justify-center bg-foreground/40 p-6">
+          <div className="w-full max-w-2xl rounded-[16px] border border-line bg-surface p-6 shadow-xl">
+            <p className="ledger-eyebrow">Conferência antes de conciliar</p>
+            <p className="font-display text-2xl font-bold text-ledger-text">Microtarifas de notificação Asaas</p>
+            <p className="mt-2 text-sm text-ledger-muted">
+              Será criado um lançamento a pagar por mês para ASAAS - SISTEMA PAGAMENTO, classificado em
+              Tarifas Bancárias (5.1.1) / Administrativo, já conciliado com todas as linhas abaixo.
+            </p>
+            <table className="mt-4 w-full text-sm">
+              <thead className="text-left text-ledger-muted">
+                <tr><th className="py-2">Mês</th><th>WhatsApp</th><th>Robô de voz</th><th className="text-right">Total</th></tr>
+              </thead>
+              <tbody>
+                {meses.map((m) => (
+                  <tr key={m.mes} className="border-t border-line">
+                    <td className="py-2">{mesBR(m.mes).replace(/^./, (c) => c.toUpperCase())}</td>
+                    <td className="tabular-nums">{m.qtd_whatsapp}</td>
+                    <td className="tabular-nums">{m.qtd_voz}</td>
+                    <td className="text-right tabular-nums">{formatBRLFromCents(m.total_cents)}</td>
+                  </tr>
+                ))}
+                <tr className="border-t border-line font-semibold">
+                  <td className="py-2">Total</td>
+                  <td colSpan={2} className="tabular-nums">{qtd.toLocaleString("pt-BR")} linhas</td>
+                  <td className="text-right tabular-nums">{formatBRLFromCents(total)}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" className="admin-btn" onClick={() => setAberto(false)} disabled={lote.isPending}>Cancelar</button>
+              <button type="button" className="admin-btn-primary" onClick={() => lote.mutate()} disabled={lote.isPending}>
+                {lote.isPending ? "Conciliando…" : `Confirmar ${formatBRLFromCents(total)}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const campoCls =
   "h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm text-ledger-text outline-none focus:border-champagne";

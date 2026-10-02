@@ -4,7 +4,8 @@ import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Upload, X } from "lucide-react";
+import { LayoutPanelLeft, Upload, X } from "lucide-react";
+import { MesaConciliacao } from "@/components/admin/financeiro/MesaConciliacao";
 import {
   EmptyState,
   ErrorState,
@@ -662,6 +663,7 @@ export function Conciliacao({
 
   const [desfazendo, setDesfazendo] = React.useState<LinhaExtratoRow | null>(null);
   const [marcadas, setMarcadas] = React.useState<string[]>([]);
+  const [mesa, setMesa] = React.useState(false);
 
   const desfazer = useMutation({
     mutationFn: async ({ linha, motivo }: { linha: LinhaExtratoRow; motivo: string }) => {
@@ -841,6 +843,20 @@ export function Conciliacao({
             </span>
           </div>
         )}
+        {conta && caps.includes("finance.reconcile") && (
+          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-[14px] border border-champagne bg-cream-2 p-4">
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-lg font-bold text-ledger-text">Mesa de conciliação</p>
+              <p className="text-sm text-ledger-muted">
+                Um lançamento por vez, em tela cheia: veja o que entrou ou saiu e clique na conta que corresponde.
+                {resumo.data ? ` ${resumo.data.pendentes + resumo.data.divergentes} aguardando.` : ""}
+              </p>
+            </div>
+            <button type="button" className="admin-btn-primary h-12 px-6 text-base" onClick={() => setMesa(true)}>
+              <LayoutPanelLeft aria-hidden className="size-5" /> Abrir mesa
+            </button>
+          </div>
+        )}
         {diagnostico && (
           <p className="mt-3 rounded-[10px] border border-line-soft bg-cream-2 p-3 text-sm font-medium text-ledger-text">
             {diagnostico}
@@ -911,6 +927,16 @@ export function Conciliacao({
         </div>
       )}
 
+      {mesa && conta && (
+        <MesaConciliacao
+          conta={conta}
+          contaNome={opcoesConta.find((o) => o.value === conta)?.label ?? "Conta"}
+          de={de}
+          ate={ate}
+          onFechar={() => setMesa(false)}
+          onMudou={atualizar}
+        />
+      )}
       <PedirDadosDialog
         open={!!desfazendo}
         titulo="Desfazer conciliação"

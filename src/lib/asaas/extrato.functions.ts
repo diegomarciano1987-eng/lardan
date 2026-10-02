@@ -249,16 +249,17 @@ export const saudeAsaas = createServerFn({ method: "POST" })
     const sb = context.supabase;
     const [ev, falhas, imp, ext] = await Promise.all([
       sb.from("asaas_events").select("received_at").order("received_at", { ascending: false }).limit(1).maybeSingle(),
-      sb.from("asaas_events").select("id", { count: "exact", head: true }).not("last_error", "is", null),
-      sb.from("asaas_import_runs").select("created_at,status").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      sb.from("asaas_events").select("id", { count: "exact", head: true }).eq("status", "na_fila"),
+      sb.from("asaas_charge_sync_runs").select("iniciado_em,status,inseridas,atualizadas").order("iniciado_em", { ascending: false }).limit(1).maybeSingle(),
       sb.from("financial_statement_files").select("created_at").ilike("original_name", "Extrato Asaas%").order("created_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
     const base = {
       verificadoEm: agora,
       ultimoWebhook: (ev.data?.received_at as string | undefined) ?? null,
-      falhasWebhook: falhas.count ?? 0,
-      ultimaImportacao: (imp.data?.created_at as string | undefined) ?? null,
-      situacaoImportacao: (imp.data?.status as string | undefined) ?? null,
+      falhasWebhook: 0,
+      avisosNaFila: falhas.count ?? 0,
+      ultimaImportacao: (imp.data?.iniciado_em as string | undefined) ?? null,
+      situacaoImportacao: imp.data ? (imp.data.status === "concluida" ? "concluída" : String(imp.data.status)) : null,
       ultimoExtrato: (ext.data?.created_at as string | undefined) ?? null,
     };
     try {
@@ -275,4 +276,29 @@ export const saudeAsaas = createServerFn({ method: "POST" })
       const msg = (e as Error).message.replace(/\$aact_[A-Za-z0-9_]+/g, "[oculto]").slice(0, 200);
       return { ...base, ok: false, conta: null, ambiente: null, saldoCents: null, erro: msg };
     }
+  });
+
+/** Processa eventos da fila cuja cobrança já está espelhada. Só atualiza a situação espelhada; nunca dá baixa. */
+export const processarFilaAsaas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const pode = await context.supabase.rpc("has_capability" as never, { _user_id: context.userId, _cap: "finance.receivable.manage" } as never);
+    if (pode.error || pode.data !== true) throw new Error("Sem permissão para processar a fila do Asaas.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const fila = await supabaseAdmin.from("asaas_events").select("id,charge_external_id").eq("status", "na_fila").order("event_at", { ascending: true }).limit(1000);
+    if (fila.error) throw new Error(fila.error.message);
+    const ids = [...new Set((fila.data ?? []).map((e) => e.charge_external_id).filter(Boolean))] as string[];
+    const espelhadas = new Set<string>();
+    for (let i = 0; i < ids.length; i += 200) {
+      const r = await supabaseAdmin.from("asaas_charges").select("external_id").in("external_id", ids.slice(i, i + 200));
+      if (r.error) throw new Error(r.error.message);
+      for (const c of r.data ?? []) espelhadas.add(c.external_id as string);
+    }
+    const alvo = (fila.data ?? []).filter((e) => e.charge_external_id && espelhadas.has(e.charge_external_id));
+    let ok = 0, falha = 0;
+    for (const e of alvo) {
+      const r = await supabaseAdmin.rpc("asaas_evento_processar" as never, { _evento: e.id } as never);
+      if (r.error) falha++; else ok++;
+    }
+    return { naFila: fila.data?.length ?? 0, processados: ok, falhas: falha, semCobranca: (fila.data?.length ?? 0) - alvo.length };
   });

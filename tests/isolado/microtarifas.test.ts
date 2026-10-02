@@ -69,8 +69,8 @@ describe("microtarifas Asaas", () => {
     expect(r.dados.meses.map((m) => [m.mes, m.linhas, m.total_cents])).toEqual([["2026-09", 3, 145], ["2026-10", 1, 55]]);
 
     const st = (await adm.unsafe(
-      `select id, status::text s from public.financial_statement_lines where id = any($1::uuid[])`,
-      [[...set, out, outra, futura]])) as { id: string; s: string }[];
+      `select id, status::text s from public.financial_statement_lines where id::text = any(string_to_array($1, ','))`,
+      [[...set, out, outra, futura].join(",")])) as { id: string; s: string }[];
     const por = Object.fromEntries(st.map((x) => [x.id, x.s]));
     for (const id of [...set, out]) expect(por[id]).toBe("conciliada");
     expect(por[outra]).toBe("pendente");

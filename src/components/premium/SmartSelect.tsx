@@ -161,7 +161,7 @@ export function SmartSelect({
         <PopoverContent
           align="start"
           sideOffset={6}
-          className="pointer-events-auto w-[var(--radix-popover-trigger-width)] min-w-[13rem] overflow-hidden rounded-[12px] border border-border/80 p-0 shadow-xl"
+          className="pointer-events-auto z-[70] w-[var(--radix-popover-trigger-width)] min-w-[13rem] overflow-hidden rounded-[12px] border border-border/80 p-0 shadow-xl"
           onKeyDown={teclado}
         >
           {mostrarBusca && (

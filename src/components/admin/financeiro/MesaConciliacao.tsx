@@ -1,7 +1,10 @@
 import * as React from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowDownLeft, ArrowUpRight, Check, ChevronRight, Search, SkipForward, Sparkles, X } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Brain, Check, ChevronRight, FilePlus2, Link2, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
+import { SmartSelect } from "@/components/premium/SmartSelect";
+import { classificarTitulo, criarTitulo, fetchClassificacoes, fetchFinTitle } from "@/lib/financeiro";
+import { centrosMesa, contrapartesMesa, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
 import { formatBRLFromCents, Skeleton } from "@/components/admin/ui";
 import { reaisParaCentavos } from "@/lib/financeiro";
 import { listarParcelas, type ParcelaLinha } from "@/lib/financeiro-parcelas";
@@ -155,6 +158,7 @@ export function MesaConciliacao({
           <Bancada
             key={atual.id}
             linha={atual}
+            conta={conta}
             podeConciliar={podeConciliar}
             podeMarcar={podeMarcar}
             onFeito={() => {
@@ -188,21 +192,33 @@ export function MesaConciliacao({
   );
 }
 
+
+const campoCls =
+  "h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm text-ledger-text outline-none focus:border-champagne";
+
+function Rotulo({ children }: { children: React.ReactNode }) {
+  return <span className="mb-1 block text-[0.7rem] font-semibold tracking-[0.12em] text-bronze uppercase">{children}</span>;
+}
+
 function Bancada({
   linha,
+  conta,
   podeConciliar,
   podeMarcar,
   onFeito,
   onPular,
 }: {
   linha: LinhaExtratoRow;
+  conta: string;
   podeConciliar: boolean;
   podeMarcar: boolean;
   onFeito: () => void;
   onPular: () => void;
 }) {
   const saida = linha.kind === "saida";
+  const direction = saida ? "payable" : "receivable";
   const valorLinha = (linha.valor_cents ?? 0) - linha.conciliado_cents;
+  const [modo, setModo] = React.useState<"existente" | "novo" | null>(null);
   const [aba, setAba] = React.useState<"sugestoes" | "buscar">("sugestoes");
   const [busca, setBusca] = React.useState("");
   const [buscaLenta, setBuscaLenta] = React.useState("");
@@ -212,27 +228,76 @@ function Bancada({
   const [desconto, setDesconto] = React.useState("");
   const [motivo, setMotivo] = React.useState("");
   const [marcando, setMarcando] = React.useState(false);
+  // Classificação (DRE) e dados complementares
+  const [party, setParty] = React.useState("");
+  const [partyBusca, setPartyBusca] = React.useState("");
+  const [centro, setCentro] = React.useState("");
+  const [plano, setPlano] = React.useState("");
+  const [forma, setForma] = React.useState("");
+  const [descricao, setDescricao] = React.useState(linha.historico ?? "");
+  const [documento, setDocumento] = React.useState(linha.documento ?? "");
+  const [observacao, setObservacao] = React.useState("");
+  const [palpiteAplicado, setPalpiteAplicado] = React.useState(false);
 
   React.useEffect(() => {
     const t = setTimeout(() => setBuscaLenta(busca.trim()), 350);
     return () => clearTimeout(t);
   }, [busca]);
 
-  const sugestoes = useQuery({
-    queryKey: ["fin-sugestoes", linha.id],
-    queryFn: () => sugerirCorrespondencias(linha.id),
+  const sugestoes = useQuery({ queryKey: ["fin-sugestoes", linha.id], queryFn: () => sugerirCorrespondencias(linha.id) });
+  const palpite = useQuery({ queryKey: ["mesa-palpite", linha.id], queryFn: () => palpiteDaLinha(linha.id) });
+  const centros = useQuery({ queryKey: ["mesa-centros"], queryFn: centrosMesa, staleTime: 60_000 });
+  const classes = useQuery({
+    queryKey: ["fin-classificacoes", direction, "", ""],
+    queryFn: () => fetchClassificacoes({ direction }),
+    staleTime: 60_000,
+  });
+  const contrapartes = useQuery({
+    queryKey: ["mesa-contrapartes", partyBusca],
+    queryFn: () => contrapartesMesa(partyBusca),
+    enabled: modo === "novo",
   });
   const procura = useQuery({
     queryKey: ["mesa-busca", saida, buscaLenta],
     queryFn: () =>
-      listarParcelas({ direction: saida ? "payable" : "receivable", busca: buscaLenta, situacao: "aberto", limit: 30, offset: 0 }),
-    enabled: aba === "buscar",
+      listarParcelas({ direction, busca: buscaLenta, situacao: "aberto", limit: 30, offset: 0 }),
+    enabled: modo === "existente" && aba === "buscar",
   });
+
+  // Escolha inicial do caminho: com sugestão → "já existe"; sem sugestão → "novo lançamento".
+  React.useEffect(() => {
+    if (modo !== null || !sugestoes.data) return;
+    setModo(sugestoes.data.length > 0 ? "existente" : "novo");
+  }, [sugestoes.data, modo]);
+
+  // Aprendizado: preenche com o que foi usado nas vezes anteriores, sem sobrescrever escolha.
+  React.useEffect(() => {
+    const p = palpite.data;
+    if (!p || palpiteAplicado || !p.vezes) return;
+    setPalpiteAplicado(true);
+    if (p.cost_center_id) setCentro((v) => v || p.cost_center_id!);
+    if (p.chart_account_id) setPlano((v) => v || p.chart_account_id!);
+    if (p.payment_method_id) setForma((v) => v || p.payment_method_id!);
+    if (p.party_id) setParty((v) => v || p.party_id!);
+  }, [palpite.data, palpiteAplicado]);
+
+  const centroSel = (centros.data ?? []).find((c) => c.id === centro);
+  const partyOpcoes = React.useMemo(() => {
+    const lista = (contrapartes.data ?? []).map((c) => ({ value: c.id, label: c.nome, hint: papeisTexto(c.papeis) || c.code }));
+    const p = palpite.data;
+    if (party && !lista.some((o) => o.value === party) && p?.party_id === party) {
+      lista.unshift({ value: party, label: p.party_nome ?? "Contraparte sugerida", hint: "sugerida" });
+    }
+    return lista;
+  }, [contrapartes.data, party, palpite.data]);
+  const partySel = (contrapartes.data ?? []).find((c) => c.id === party);
 
   const somaAloc = bandeja.reduce((t, b) => t + (reaisParaCentavos(b.texto) ?? 0), 0);
   const ajustes = (reaisParaCentavos(tarifa) ?? 0) + (reaisParaCentavos(juros) ?? 0) - (reaisParaCentavos(desconto) ?? 0);
   const falta = valorLinha - somaAloc - ajustes;
-  const bate = bandeja.length > 0 && falta === 0;
+  const bateExistente = bandeja.length > 0 && falta === 0;
+  const prontoNovo = !!party && descricao.trim().length > 0;
+  const pronto = modo === "novo" ? prontoNovo : bateExistente;
 
   const adicionar = (c: Candidata) => {
     if (bandeja.some((b) => b.c.installment_id === c.installment_id)) {
@@ -246,21 +311,75 @@ function Bancada({
 
   const aplicar = useMutation({
     mutationFn: async () => {
+      const obs = [observacao.trim(), documento.trim() && documento !== linha.documento ? `Doc.: ${documento.trim()}` : ""]
+        .filter(Boolean)
+        .join(" · ");
+      if (modo === "novo") {
+        if (!party) throw new Error("Escolha quem recebeu ou pagou.");
+        const tituloId = await criarTitulo({
+          direction,
+          party_id: party,
+          descricao: descricao.trim(),
+          ...(documento.trim() ? { documento: documento.trim() } : {}),
+          ...(linha.data ? { emissao: linha.data, competencia: linha.data } : {}),
+          ...(observacao.trim() ? { observacao: observacao.trim() } : {}),
+          ...(centro ? { cost_center_id: centro } : {}),
+          ...(plano ? { chart_account_id: plano } : {}),
+          ...(forma ? { payment_method_id: forma } : {}),
+          financial_account_id: conta,
+          valor_cents: valorLinha,
+          parcelas: [{ vencimento: linha.data ?? new Date().toISOString().slice(0, 10), valor_cents: valorLinha }],
+          ...({ origem: "conciliacao", id_externo: `extrato:${linha.id}` } as object),
+        });
+        const det = await fetchFinTitle(tituloId);
+        const inst = det.parcelas[0]?.id;
+        if (!inst) throw new Error("Lançamento criado, mas a parcela não foi encontrada.");
+        return conciliar({
+          line_ids: [linha.id],
+          alocacoes: [{ installment_id: inst, valor_cents: valorLinha }],
+          ...(obs ? { observacao: obs } : {}),
+          idempotency_key: `novo:${linha.id}`,
+        });
+      }
       const alocacoes = bandeja
         .map((b) => ({ installment_id: b.c.installment_id, valor_cents: reaisParaCentavos(b.texto) ?? 0 }))
         .filter((a) => a.valor_cents > 0);
       if (!alocacoes.length) throw new Error("Escolha ao menos uma conta para vincular.");
+      // Classificação para o DRE: só grava o que mudou, sempre com motivo no histórico do título.
+      if (centro || plano || forma) {
+        const vistos = new Set<string>();
+        for (const a of alocacoes) {
+          const t = await tituloDaParcela(a.installment_id);
+          if (!t || vistos.has(t.title_id)) continue;
+          vistos.add(t.title_id);
+          const novoCentro = centro || t.cost_center_id;
+          const novoPlano = plano || t.chart_account_id;
+          const novaForma = forma || t.payment_method_id;
+          if (novoCentro === t.cost_center_id && novoPlano === t.chart_account_id && novaForma === t.payment_method_id) continue;
+          await classificarTitulo({
+            title_id: t.title_id,
+            motivo: "Classificado na mesa de conciliação bancária",
+            esperado_updated_at: t.updated_at,
+            business_entity_id: t.business_entity_id,
+            financial_account_id: t.financial_account_id,
+            cost_center_id: novoCentro,
+            chart_account_id: novoPlano,
+            payment_method_id: novaForma,
+          });
+        }
+      }
       return conciliar({
         line_ids: [linha.id],
         alocacoes,
         tarifa_cents: reaisParaCentavos(tarifa) ?? 0,
         juros_cents: reaisParaCentavos(juros) ?? 0,
         desconto_cents: reaisParaCentavos(desconto) ?? 0,
+        ...(obs ? { observacao: obs } : {}),
         idempotency_key: `${linha.id}:${JSON.stringify(alocacoes)}`,
       });
     },
     onSuccess: () => {
-      toast.success("Conciliado! Próximo lançamento.");
+      toast.success(modo === "novo" ? "Lançamento criado e conciliado!" : "Conciliado! Próximo lançamento.");
       onFeito();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -278,13 +397,15 @@ function Bancada({
   React.useEffect(() => {
     const h = (e: KeyboardEvent) => {
       const alvo = e.target as HTMLElement;
-      if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && bate && !aplicar.isPending) aplicar.mutate();
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && pronto && !aplicar.isPending) aplicar.mutate();
       if (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA") return;
       if (e.key.toLowerCase() === "p") onPular();
+      if (e.key === "1") setModo("existente");
+      if (e.key === "2") setModo("novo");
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [bate, aplicar, onPular]);
+  }, [pronto, aplicar, onPular]);
 
   const candidatas: Candidata[] =
     aba === "sugestoes"
@@ -303,20 +424,25 @@ function Bancada({
           ].filter(Boolean) as string[],
         }))
       : (procura.data?.rows ?? []).map(deParcela);
-
   const carregando = aba === "sugestoes" ? sugestoes.isLoading : procura.isLoading;
+
+  const pal = palpite.data;
+  const opcoesCentro = [
+    { value: "", label: "Pendente de classificação" },
+    ...(centros.data ?? []).map((c) => ({
+      value: c.id,
+      label: `${c.codigo} · ${c.nome}`,
+      ...(c.responsavel_nome ? { hint: `${c.responsavel_nome}${c.papeis.length ? ` (${papeisTexto(c.papeis)})` : ""}` } : {}),
+    })),
+  ];
 
   return (
     <>
-      {/* Centro: lançamento + bandeja */}
+      {/* Centro: lançamento + escolha do caminho + classificação */}
       <section className="min-h-0 overflow-y-auto border-r border-line p-6">
         <div className="ledger-panel p-6">
           <div className="flex items-center gap-2">
-            {saida ? (
-              <ArrowUpRight aria-hidden className="size-5 text-destructive" />
-            ) : (
-              <ArrowDownLeft aria-hidden className="size-5 text-bronze" />
-            )}
+            {saida ? <ArrowUpRight aria-hidden className="size-5 text-destructive" /> : <ArrowDownLeft aria-hidden className="size-5 text-bronze" />}
             <p className="ledger-eyebrow">{saida ? "Saiu da conta" : "Entrou na conta"} · {dataBR(linha.data)}</p>
           </div>
           <p className={`mt-3 font-display text-5xl font-bold tabular-nums ${saida ? "text-destructive" : "text-ledger-text"}`}>
@@ -328,169 +454,328 @@ function Bancada({
             {linha.documento ? ` · documento ${linha.documento}` : ""}
             {linha.conciliado_cents > 0 ? ` · já conciliado ${formatBRLFromCents(linha.conciliado_cents)}` : ""}
           </p>
-          <p className="mt-4 text-sm font-medium text-ledger-muted">
-            Qual {saida ? "conta a pagar" : "conta a receber"} é este {saida ? "pagamento" : "recebimento"}? Escolha ao lado.
-          </p>
         </div>
 
-        <div className="mt-6">
-          <p className="ledger-eyebrow mb-2">Vínculo</p>
-          {bandeja.length === 0 ? (
-            <div className="rounded-[14px] border-2 border-dashed border-line p-8 text-center text-sm font-medium text-ledger-muted">
-              Clique numa conta ao lado para vincular
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {bandeja.map((b) => (
-                <li key={b.c.installment_id} className="flex items-center gap-3 rounded-[12px] border border-line bg-surface p-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-ledger-text">{b.c.titulo}</p>
-                    <p className="truncate text-xs text-ledger-muted">
-                      {b.c.contraparte ?? "Sem nome"} · em aberto {formatBRLFromCents(b.c.aberto_cents)}
-                    </p>
-                  </div>
-                  <input
-                    value={b.texto}
-                    inputMode="decimal"
-                    aria-label="Valor a vincular"
-                    onChange={(e) =>
-                      setBandeja((p) => p.map((x) => (x.c.installment_id === b.c.installment_id ? { ...x, texto: e.target.value } : x)))
-                    }
-                    className="h-11 w-32 rounded-[10px] border border-line bg-surface px-3 text-right text-base font-semibold tabular-nums text-ledger-text outline-none focus:border-champagne"
-                  />
-                  <button type="button" className="admin-btn" aria-label="Tirar do vínculo" onClick={() => adicionar(b.c)}>
-                    <X aria-hidden className="size-4" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <details className="mt-3">
-            <summary className="cursor-pointer text-sm font-semibold text-ledger-text">Tarifa, juros ou desconto</summary>
-            <div className="mt-2 grid gap-2 sm:grid-cols-3">
-              {[
-                ["Tarifa R$", tarifa, setTarifa],
-                ["Juros R$", juros, setJuros],
-                ["Desconto R$", desconto, setDesconto],
-              ].map(([rot, v, set]) => (
-                <input
-                  key={rot as string}
-                  value={v as string}
-                  placeholder={rot as string}
-                  inputMode="decimal"
-                  onChange={(e) => (set as (s: string) => void)(e.target.value)}
-                  className="h-11 rounded-[10px] border border-line bg-surface px-3 text-sm tabular-nums outline-none focus:border-champagne"
-                />
-              ))}
-            </div>
-          </details>
-
-          <div
-            className={`mt-4 flex items-center justify-between rounded-[14px] p-4 transition ${
-              bate ? "bg-primary text-primary-foreground" : "bg-cream-2 text-ledger-text"
-            }`}
-          >
-            <span className="text-sm font-semibold">
-              {bandeja.length === 0 ? "Falta vincular" : bate ? "Bate certinho" : falta > 0 ? "Ainda falta" : "Passou do valor em"}
-            </span>
-            <span className="flex items-center gap-2 text-2xl font-bold tabular-nums">
-              {bate ? <Check aria-hidden className="size-6" /> : formatBRLFromCents(Math.abs(falta))}
-            </span>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {podeConciliar && (
-              <button
-                type="button"
-                className="admin-btn-primary h-12 flex-1 text-base"
-                disabled={!bate || aplicar.isPending}
-                onClick={() => aplicar.mutate()}
-              >
-                <Check aria-hidden className="mr-1 inline size-5" />
-                {aplicar.isPending ? "Conciliando…" : "Conciliar"}
-              </button>
-            )}
-            <button type="button" className="admin-btn h-12" onClick={onPular}>
-              <SkipForward aria-hidden className="mr-1 inline size-4" /> Deixar para depois
-            </button>
-          </div>
-          <p className="mt-2 text-xs text-ledger-muted">Atalhos: Ctrl+Enter concilia · P deixa para depois · Esc fecha a mesa</p>
-
-          {podeMarcar && (
-            <div className="mt-6 border-t border-line pt-4">
-              {!marcando ? (
-                <button type="button" className="text-sm font-semibold text-bronze underline-offset-4 hover:underline" onClick={() => setMarcando(true)}>
-                  Não tem conta correspondente? Ignorar ou marcar divergência
-                </button>
-              ) : (
-                <div className="space-y-2">
-                  <input
-                    value={motivo}
-                    onChange={(e) => setMotivo(e.target.value)}
-                    placeholder="Motivo (obrigatório)"
-                    className="h-11 w-full rounded-[10px] border border-line bg-surface px-3 text-sm outline-none focus:border-champagne"
-                  />
-                  <div className="flex gap-2">
-                    <button type="button" className="admin-btn" disabled={!motivo.trim()} onClick={() => marcar.mutate("ignorada")}>
-                      Ignorar lançamento
-                    </button>
-                    <button type="button" className="admin-btn" disabled={!motivo.trim()} onClick={() => marcar.mutate("divergente")}>
-                      Marcar divergência
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Direita: candidatas */}
-      <section className="flex min-h-0 flex-col p-6">
-        <div className="flex gap-2">
-          {(["sugestoes", "buscar"] as const).map((a) => (
+        {/* Pergunta principal */}
+        <p className="mt-6 mb-2 text-sm font-semibold text-ledger-text">
+          Este {saida ? "pagamento" : "recebimento"} já está lançado no sistema?
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Caminho da conciliação">
+          {(
+            [
+              ["existente", Link2, "Sim, já existe", `Vincular a uma ${saida ? "conta a pagar" : "conta a receber"}`],
+              ["novo", FilePlus2, "Não, é novo", "Criar o lançamento agora e conciliar"],
+            ] as const
+          ).map(([m, Icone, t, d], i) => (
             <button
-              key={a}
+              key={m}
               type="button"
-              onClick={() => setAba(a)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                aba === a ? "bg-primary text-primary-foreground" : "bg-cream-2 text-ledger-text hover:bg-cream-2/70"
+              role="radio"
+              aria-checked={modo === m}
+              onClick={() => setModo(m)}
+              className={`flex items-start gap-3 rounded-[14px] border-2 p-4 text-left transition ${
+                modo === m ? "border-bronze bg-surface shadow-md" : "border-line bg-surface hover:border-champagne"
               }`}
             >
-              {a === "sugestoes" ? `Sugestões${sugestoes.data ? ` (${sugestoes.data.length})` : ""}` : "Procurar outra conta"}
+              <Icone aria-hidden className={`mt-0.5 size-5 shrink-0 ${modo === m ? "text-bronze" : "text-ledger-muted"}`} />
+              <span>
+                <span className="block font-semibold text-ledger-text">{t} <span className="text-xs text-ledger-muted">({i + 1})</span></span>
+                <span className="block text-xs text-ledger-muted">{d}</span>
+              </span>
             </button>
           ))}
         </div>
-        {aba === "buscar" && (
-          <div className="relative mt-3">
-            <Search aria-hidden className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
-            <input
-              autoFocus
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              placeholder={`Nome, descrição ou número — ${saida ? "contas a pagar" : "contas a receber"} em aberto`}
-              className="h-12 w-full rounded-[12px] border border-line bg-surface pl-10 pr-3 text-base outline-none focus:border-champagne"
-            />
+
+        {pal && pal.vezes > 0 && (
+          <div className="mt-4 flex items-start gap-3 rounded-[14px] border border-champagne/60 bg-cream-2 p-3 text-sm">
+            <Brain aria-hidden className="mt-0.5 size-5 shrink-0 text-bronze" />
+            <p className="text-ledger-text">
+              <strong>Sugestão aprendida:</strong> lançamentos com “{pal.chave}” foram classificados assim em{" "}
+              {pal.vezes} conciliação(ões) anterior(es){pal.party_nome ? `, com ${pal.party_nome}` : ""}. Confira antes de gravar.
+            </p>
           </div>
         )}
 
-        <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
-          {carregando && <Skeleton className="h-24 w-full" />}
-          {!carregando && candidatas.length === 0 && (
-            <div className="rounded-[14px] bg-cream-2 p-6 text-center text-sm text-ledger-muted">
-              {aba === "sugestoes" ? (
-                <>
-                  Nenhuma sugestão automática.{" "}
-                  <button type="button" className="font-semibold text-bronze underline" onClick={() => setAba("buscar")}>
-                    Procurar outra conta
-                  </button>
-                </>
-              ) : (
-                "Nenhuma conta em aberto encontrada."
+        {modo === "existente" && (
+          <div className="mt-6">
+            <p className="ledger-eyebrow mb-2">Vínculo</p>
+            {bandeja.length === 0 ? (
+              <div className="rounded-[14px] border-2 border-dashed border-line p-6 text-center text-sm font-medium text-ledger-muted">
+                Clique numa conta ao lado para vincular
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {bandeja.map((b) => (
+                  <li key={b.c.installment_id} className="flex items-center gap-3 rounded-[12px] border border-line bg-surface p-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-ledger-text">{b.c.titulo}</p>
+                      <p className="truncate text-xs text-ledger-muted">
+                        {b.c.contraparte ?? "Sem nome"} · em aberto {formatBRLFromCents(b.c.aberto_cents)}
+                      </p>
+                    </div>
+                    <input
+                      value={b.texto}
+                      inputMode="decimal"
+                      aria-label="Valor a vincular"
+                      onChange={(e) =>
+                        setBandeja((p) => p.map((x) => (x.c.installment_id === b.c.installment_id ? { ...x, texto: e.target.value } : x)))
+                      }
+                      className="h-11 w-32 rounded-[10px] border border-line bg-surface px-3 text-right text-base font-semibold tabular-nums text-ledger-text outline-none focus:border-champagne"
+                    />
+                    <button type="button" className="admin-btn" aria-label="Tirar do vínculo" onClick={() => adicionar(b.c)}>
+                      <X aria-hidden className="size-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <details className="mt-3">
+              <summary className="cursor-pointer text-sm font-semibold text-ledger-text">Tarifa, juros ou desconto</summary>
+              <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                {[
+                  ["Tarifa R$", tarifa, setTarifa],
+                  ["Juros R$", juros, setJuros],
+                  ["Desconto R$", desconto, setDesconto],
+                ].map(([rot, v, set]) => (
+                  <input
+                    key={rot as string}
+                    value={v as string}
+                    placeholder={rot as string}
+                    inputMode="decimal"
+                    onChange={(e) => (set as (s: string) => void)(e.target.value)}
+                    className={`${campoCls} tabular-nums`}
+                  />
+                ))}
+              </div>
+            </details>
+          </div>
+        )}
+
+        {modo !== null && (
+          <div className="mt-6 rounded-[14px] border border-line bg-surface p-4">
+            <p className="ledger-eyebrow">Classificação para o DRE</p>
+            <p className="mt-1 mb-3 text-xs text-ledger-muted">
+              {modo === "existente"
+                ? "Opcional: o que for escolhido aqui atualiza o título vinculado, com registro no histórico."
+                : "O lançamento nasce já classificado. O que ficar em branco aparece como pendente de classificação."}
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {modo === "novo" && (
+                <div className="sm:col-span-2">
+                  <Rotulo>{saida ? "Pago para" : "Recebido de"} (obrigatório)</Rotulo>
+                  <SmartSelect
+                    options={partyOpcoes}
+                    value={party}
+                    onChange={setParty}
+                    onSearch={setPartyBusca}
+                    loading={contrapartes.isFetching}
+                    placeholder="Buscar consultora, fornecedor, cliente…"
+                    searchPlaceholder="Nome ou código"
+                  />
+                  {partySel && partySel.papeis.length > 0 && (
+                    <p className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-bronze">
+                      <UserRound aria-hidden className="size-3.5" /> {papeisTexto(partySel.papeis)}
+                    </p>
+                  )}
+                </div>
               )}
+              <div className="sm:col-span-2">
+                <Rotulo>Centro de custo</Rotulo>
+                <SmartSelect options={opcoesCentro} value={centro} onChange={setCentro} placeholder="Pendente de classificação" />
+                {centroSel && (
+                  <p className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-ledger-text">
+                    <UserRound aria-hidden className="size-3.5 text-bronze" />
+                    {centroSel.responsavel_nome
+                      ? `Ligado a ${centroSel.responsavel_nome}${centroSel.papeis.length ? ` — ${papeisTexto(centroSel.papeis)}` : ""}`
+                      : "Sem consultora ou fornecedor ligado a este centro"}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Rotulo>Conta contábil</Rotulo>
+                <SmartSelect
+                  options={[
+                    { value: "", label: "Pendente de classificação" },
+                    ...(classes.data?.planos ?? []).map((p) => ({ value: p.id, label: `${p.codigo} · ${p.nome}`, hint: p.natureza })),
+                  ]}
+                  value={plano}
+                  onChange={setPlano}
+                  placeholder="Pendente de classificação"
+                />
+              </div>
+              <div>
+                <Rotulo>Forma de {saida ? "pagamento" : "recebimento"}</Rotulo>
+                <SmartSelect
+                  options={[{ value: "", label: "Não informada" }, ...(classes.data?.formas ?? []).map((f) => ({ value: f.id, label: f.nome }))]}
+                  value={forma}
+                  onChange={setForma}
+                  placeholder="Não informada"
+                />
+              </div>
+            </div>
+
+            <p className="ledger-eyebrow mt-5">Informações complementares</p>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2">
+              {modo === "novo" && (
+                <label className="sm:col-span-2">
+                  <Rotulo>Descrição do lançamento</Rotulo>
+                  <input value={descricao} onChange={(e) => setDescricao(e.target.value)} className={campoCls} />
+                </label>
+              )}
+              <label>
+                <Rotulo>Documento / nota</Rotulo>
+                <input value={documento} onChange={(e) => setDocumento(e.target.value)} placeholder="Nº da nota, contrato…" className={campoCls} />
+              </label>
+              <label>
+                <Rotulo>Observação</Rotulo>
+                <input value={observacao} onChange={(e) => setObservacao(e.target.value)} placeholder="Ex.: referente a setembro" className={campoCls} />
+              </label>
+            </div>
+          </div>
+        )}
+
+        <div
+          className={`mt-4 flex items-center justify-between rounded-[14px] p-4 transition ${
+            pronto ? "bg-primary text-primary-foreground" : "bg-cream-2 text-ledger-text"
+          }`}
+        >
+          <span className="text-sm font-semibold">
+            {modo === "novo"
+              ? pronto
+                ? "Pronto para criar e conciliar"
+                : "Escolha quem recebeu ou pagou"
+              : bandeja.length === 0
+                ? "Falta vincular"
+                : bateExistente
+                  ? "Bate certinho"
+                  : falta > 0
+                    ? "Ainda falta"
+                    : "Passou do valor em"}
+          </span>
+          <span className="flex items-center gap-2 text-2xl font-bold tabular-nums">
+            {pronto ? <Check aria-hidden className="size-6" /> : modo === "novo" ? formatBRLFromCents(valorLinha) : formatBRLFromCents(Math.abs(falta))}
+          </span>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {podeConciliar && (
+            <button type="button" className="admin-btn-primary h-12 flex-1 text-base" disabled={!pronto || aplicar.isPending} onClick={() => aplicar.mutate()}>
+              <Check aria-hidden className="mr-1 inline size-5" />
+              {aplicar.isPending ? "Gravando…" : modo === "novo" ? "Criar lançamento e conciliar" : "Conciliar"}
+            </button>
+          )}
+          <button type="button" className="admin-btn h-12" onClick={onPular}>
+            <SkipForward aria-hidden className="mr-1 inline size-4" /> Deixar para depois
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-ledger-muted">Atalhos: 1 já existe · 2 é novo · Ctrl+Enter grava · P deixa para depois · Esc fecha</p>
+
+        {podeMarcar && (
+          <div className="mt-6 border-t border-line pt-4">
+            {!marcando ? (
+              <button type="button" className="text-sm font-semibold text-bronze underline-offset-4 hover:underline" onClick={() => setMarcando(true)}>
+                Ignorar ou marcar divergência
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Motivo (obrigatório)" className={campoCls} />
+                <div className="flex gap-2">
+                  <button type="button" className="admin-btn" disabled={!motivo.trim()} onClick={() => marcar.mutate("ignorada")}>
+                    Ignorar lançamento
+                  </button>
+                  <button type="button" className="admin-btn" disabled={!motivo.trim()} onClick={() => marcar.mutate("divergente")}>
+                    Marcar divergência
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* Direita */}
+      {modo === "novo" ? (
+        <section className="flex min-h-0 flex-col gap-4 overflow-y-auto p-6">
+          <div className="ledger-panel p-6">
+            <p className="ledger-eyebrow">Resumo do novo lançamento</p>
+            <dl className="mt-4 space-y-3 text-sm">
+              {(
+                [
+                  ["Tipo", saida ? "Conta a pagar (já paga)" : "Conta a receber (já recebida)"],
+                  [saida ? "Pago para" : "Recebido de", partyOpcoes.find((o) => o.value === party)?.label ?? "—"],
+                  ["Valor", formatBRLFromCents(valorLinha)],
+                  ["Data e competência", dataBR(linha.data)],
+                  ["Centro de custo", centroSel ? `${centroSel.codigo} · ${centroSel.nome}` : "Pendente"],
+                  ["Conta contábil", classes.data?.planos.find((p) => p.id === plano)?.nome ?? "Pendente"],
+                  ["Forma", classes.data?.formas.find((f) => f.id === forma)?.nome ?? "Não informada"],
+                ] as const
+              ).map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4 border-b border-line-soft pb-2">
+                  <dt className="text-ledger-muted">{k}</dt>
+                  <dd className="text-right font-semibold tabular-nums text-ledger-text">{v}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-4 text-xs text-ledger-muted">
+              Ao gravar, o sistema cria o título com uma parcela, dá a baixa nesta conta bancária e liga ao extrato. Tudo fica na
+              auditoria e pode ser desfeito com motivo.
+            </p>
+          </div>
+          {sugestoes.data && sugestoes.data.length > 0 && (
+            <button type="button" className="admin-btn" onClick={() => setModo("existente")}>
+              Há {sugestoes.data.length} conta(s) parecida(s) já lançada(s) — ver
+            </button>
+          )}
+        </section>
+      ) : (
+        <section className="flex min-h-0 flex-col p-6">
+          <div className="flex gap-2">
+            {(["sugestoes", "buscar"] as const).map((a) => (
+              <button
+                key={a}
+                type="button"
+                onClick={() => setAba(a)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  aba === a ? "bg-primary text-primary-foreground" : "bg-cream-2 text-ledger-text hover:bg-cream-2/70"
+                }`}
+              >
+                {a === "sugestoes" ? `Sugestões${sugestoes.data ? ` (${sugestoes.data.length})` : ""}` : "Procurar outra conta"}
+              </button>
+            ))}
+          </div>
+          {aba === "buscar" && (
+            <div className="relative mt-3">
+              <Search aria-hidden className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
+              <input
+                autoFocus
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder={`Nome, descrição ou número — ${saida ? "contas a pagar" : "contas a receber"} em aberto`}
+                className="h-12 w-full rounded-[12px] border border-line bg-surface pl-10 pr-3 text-base outline-none focus:border-champagne"
+              />
             </div>
           )}
+
+          <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+            {carregando && <Skeleton className="h-24 w-full" />}
+            {!carregando && candidatas.length === 0 && (
+              <div className="rounded-[14px] bg-cream-2 p-6 text-center text-sm text-ledger-muted">
+                {aba === "sugestoes" ? (
+                  <>
+                    Nenhuma sugestão automática.{" "}
+                    <button type="button" className="font-semibold text-bronze underline" onClick={() => setAba("buscar")}>
+                      Procurar outra conta
+                    </button>{" "}
+                    ou{" "}
+                    <button type="button" className="font-semibold text-bronze underline" onClick={() => setModo("novo")}>
+                      lançar como novo
+                    </button>
+                  </>
+                ) : (
+                  "Nenhuma conta em aberto encontrada."
+                )}
+              </div>
+            )}
           {candidatas.map((c) => {
             const escolhida = bandeja.some((b) => b.c.installment_id === c.installment_id);
             const exato = c.aberto_cents === valorLinha;
@@ -543,7 +828,8 @@ function Bancada({
             );
           })}
         </div>
-      </section>
+        </section>
+      )}
     </>
   );
 }

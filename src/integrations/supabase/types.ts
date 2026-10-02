@@ -9572,6 +9572,7 @@ export type Database = {
       fin_dre: { Args: { _filtros?: Json }; Returns: Json }
       fin_dre_detalhe: { Args: { _filtros: Json }; Returns: Json }
       fin_fingerprint: { Args: { _intent: Json }; Returns: string }
+      fin_historico_chave: { Args: { _h: string }; Returns: string }
       fin_import_ap_apply: {
         Args: { _limite?: number; _lote: string }
         Returns: Json
@@ -9614,6 +9615,10 @@ export type Database = {
         }
         Returns: Json
       }
+      fin_mesa_centros: { Args: never; Returns: Json }
+      fin_mesa_contrapartes: { Args: { _busca?: string }; Returns: Json }
+      fin_mesa_palpite: { Args: { _line: string }; Returns: Json }
+      fin_mesa_titulo_da_parcela: { Args: { _inst: string }; Returns: Json }
       fin_overview: { Args: { _ate?: string; _de?: string }; Returns: Json }
       fin_pagar_receber: {
         Args: {

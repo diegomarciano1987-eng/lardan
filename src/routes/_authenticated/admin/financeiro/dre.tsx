@@ -240,7 +240,7 @@ function DreGerencialTela() {
             <Panel
               title="Resultado mês a mês"
               flush
-              actions={
+              action={
                 <div className="flex gap-1">
                   {[
                     ["valor", "Valores"],
@@ -251,7 +251,7 @@ function DreGerencialTela() {
                       key={k}
                       type="button"
                       className={`admin-btn ${modo === k ? "admin-btn-primary" : ""}`}
-                      onClick={() => trocar({ modo: k })}
+                      onClick={() => trocar({ modo: k! })}
                     >
                       {r}
                     </button>
@@ -288,7 +288,7 @@ function DreGerencialTela() {
 
             <Panel
               title={`Pendências (${contarPendencias(pend.data, d)})`}
-              actions={
+              action={
                 <button type="button" className="admin-btn" onClick={() => setPendAberto((v) => !v)}>
                   {pendAberto ? "Recolher" : "Ver pendências"}
                 </button>
@@ -822,7 +822,7 @@ function Orcamento({ d, pode, onSalvo }: { d: DreGerencial; pode: boolean; onSal
 
   const salvarUm = async () => {
     const v = centavos(valor);
-    if (!Number.isFinite(v)) return toast.error("Valor inválido.");
+    if (!Number.isFinite(v)) { toast.error("Valor inválido."); return; }
     try {
       await salvarOrcamento([{ mes: `${mes}-01`, linha: linhaSel, valor_cents: v }], "tela");
       toast.success("Orçamento salvo.");
@@ -1064,7 +1064,7 @@ footer{margin-top:18px;font-size:10px;color:#777}</style></head><body>
 <footer>Gerado em ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}. Apuração gerencial interna; não é demonstração contábil nem fiscal oficial.</footer>
 <script>window.onload=()=>setTimeout(()=>window.print(),300)</script></body></html>`;
   const w = window.open("", "_blank");
-  if (!w) return toast.error("Libere a abertura de janelas para gerar o PDF.");
+  if (!w) { toast.error("Libere a abertura de janelas para gerar o PDF."); return; }
   w.document.write(html);
   w.document.close();
 }

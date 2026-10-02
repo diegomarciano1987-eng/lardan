@@ -103,3 +103,8 @@
 - [x] Etapa 2b: sincronização automática diária do Asaas (1ª abertura após 6h)
 - [x] Etapa 2c: Extrato Asaas / Conciliação / Recebíveis seguem o período global
 - [ ] Etapas 3-5 (OFX, conciliação assistida, celular + publicação)
+
+## DRE gerencial moderna
+- [x] Fases A, B e C (estrutura, matriz, tela, fechamento, orçamento, exportação, testes)
+- [ ] Daniel revisar o mapa proposto de contas → linhas da DRE
+- [ ] Publicar após aprovação do Diego

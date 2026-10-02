@@ -29,6 +29,20 @@
       "when": 1790969911908,
       "tag": "0003_microtarifas_asaas_lote",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790972447404,
+      "tag": "0004_dre_gerencial",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790972630816,
+      "tag": "0005_dre_gerencial_desempenho",
+      "breakpoints": true
     }
   ]
 }

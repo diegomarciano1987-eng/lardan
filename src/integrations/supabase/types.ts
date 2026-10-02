@@ -2955,6 +2955,175 @@ export type Database = {
           },
         ]
       }
+      fin_dre_estrutura: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          created_at: string
+          formula: string | null
+          id: string
+          ordem: number
+          rotulo: string
+          sinal: number
+          tipo: string
+          versao: number
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          created_at?: string
+          formula?: string | null
+          id?: string
+          ordem: number
+          rotulo: string
+          sinal?: number
+          tipo: string
+          versao?: number
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          created_at?: string
+          formula?: string | null
+          id?: string
+          ordem?: number
+          rotulo?: string
+          sinal?: number
+          tipo?: string
+          versao?: number
+        }
+        Relationships: []
+      }
+      fin_dre_mapa: {
+        Row: {
+          chart_id: string
+          estrutura_codigo: string
+          id: string
+          proposta: boolean
+          updated_at: string
+          updated_by: string | null
+          versao: number
+        }
+        Insert: {
+          chart_id: string
+          estrutura_codigo: string
+          id?: string
+          proposta?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          versao?: number
+        }
+        Update: {
+          chart_id?: string
+          estrutura_codigo?: string
+          id?: string
+          proposta?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_dre_mapa_chart_id_fkey"
+            columns: ["chart_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fin_orcamento: {
+        Row: {
+          chart_id: string | null
+          cost_center_id: string | null
+          estrutura_codigo: string
+          id: string
+          mes: string
+          origem: string
+          updated_at: string
+          updated_by: string | null
+          valor_cents: number
+        }
+        Insert: {
+          chart_id?: string | null
+          cost_center_id?: string | null
+          estrutura_codigo: string
+          id?: string
+          mes: string
+          origem?: string
+          updated_at?: string
+          updated_by?: string | null
+          valor_cents: number
+        }
+        Update: {
+          chart_id?: string | null
+          cost_center_id?: string | null
+          estrutura_codigo?: string
+          id?: string
+          mes?: string
+          origem?: string
+          updated_at?: string
+          updated_by?: string | null
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_orcamento_chart_id_fkey"
+            columns: ["chart_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_orcamento_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fin_periodos: {
+        Row: {
+          business_entity_id: string | null
+          fechado_em: string | null
+          fechado_por: string | null
+          id: string
+          mes: string
+          motivo: string | null
+          situacao: string
+          updated_at: string
+        }
+        Insert: {
+          business_entity_id?: string | null
+          fechado_em?: string | null
+          fechado_por?: string | null
+          id?: string
+          mes: string
+          motivo?: string | null
+          situacao?: string
+          updated_at?: string
+        }
+        Update: {
+          business_entity_id?: string | null
+          fechado_em?: string | null
+          fechado_por?: string | null
+          id?: string
+          mes?: string
+          motivo?: string | null
+          situacao?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_periodos_business_entity_id_fkey"
+            columns: ["business_entity_id"]
+            isOneToOne: false
+            referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_account_movements: {
         Row: {
           created_at: string
@@ -9597,6 +9766,11 @@ export type Database = {
         }[]
       }
       fin_dre_detalhe: { Args: { _filtros: Json }; Returns: Json }
+      fin_dre_gerencial: { Args: { _filtros: Json }; Returns: Json }
+      fin_dre_mapa_set: {
+        Args: { _chart: string; _linha: string }
+        Returns: undefined
+      }
       fin_encargos_contas: { Args: never; Returns: Json }
       fin_encargos_contas_set: { Args: { _payload: Json }; Returns: Json }
       fin_fingerprint: { Args: { _intent: Json }; Returns: string }
@@ -9657,6 +9831,10 @@ export type Database = {
         Returns: Json
       }
       fin_microtarifas_tipos: { Args: never; Returns: string[] }
+      fin_orcamento_salvar: {
+        Args: { _linhas: Json; _origem?: string }
+        Returns: Json
+      }
       fin_overview: { Args: { _ate?: string; _de?: string }; Returns: Json }
       fin_pagar_receber: {
         Args: {
@@ -9689,6 +9867,18 @@ export type Database = {
       fin_payment_method_toggle: {
         Args: { _ativo: boolean; _id: string }
         Returns: undefined
+      }
+      fin_periodo_fechado: {
+        Args: { _data: string; _ent: string }
+        Returns: boolean
+      }
+      fin_periodo_fechar: {
+        Args: { _ent: string; _mes: string; _motivo: string }
+        Returns: Json
+      }
+      fin_periodo_reabrir: {
+        Args: { _ent: string; _mes: string; _motivo: string }
+        Returns: Json
       }
       fin_reconcile: { Args: { _payload: Json }; Returns: Json }
       fin_reconcile_undo: {

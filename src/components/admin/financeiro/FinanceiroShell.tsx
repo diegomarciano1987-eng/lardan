@@ -42,8 +42,8 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
   },
   {
     to: "/admin/financeiro/dre",
-    label: "Relatórios",
-    descricao: "DRE e apuração gerencial",
+    label: "DRE",
+    descricao: "Resultado gerencial do período",
     capacidade: "finance.dre.view",
   },
   {

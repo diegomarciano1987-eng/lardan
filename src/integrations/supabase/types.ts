@@ -9648,6 +9648,15 @@ export type Database = {
       fin_mesa_novo_conciliar: { Args: { _payload: Json }; Returns: Json }
       fin_mesa_palpite: { Args: { _line: string }; Returns: Json }
       fin_mesa_titulo_da_parcela: { Args: { _inst: string }; Returns: Json }
+      fin_microtarifas_conciliar: {
+        Args: { _ate?: string; _conta: string }
+        Returns: Json
+      }
+      fin_microtarifas_previa: {
+        Args: { _ate?: string; _conta: string }
+        Returns: Json
+      }
+      fin_microtarifas_tipos: { Args: never; Returns: string[] }
       fin_overview: { Args: { _ate?: string; _de?: string }; Returns: Json }
       fin_pagar_receber: {
         Args: {

@@ -25,8 +25,8 @@ async function linha(acc: string, valor: number, kind: "entrada" | "saida", hist
     `insert into public.financial_statement_imports (file_id, financial_account_id) values ($1,$2) returning id`, [f.id, acc]);
   return (await um<{ id: string }>(
     `insert into public.financial_statement_lines (import_id, file_id, financial_account_id, line_no, data, valor_cents, kind, historico, hash, status)
-     values ($1,$2,$3,1,$4,$5,$6,$7,$8,'pendente') returning id`,
-    [i.id, f.id, acc, DIA, valor, kind, hist, marca()])).id;
+     values ($1,$2,$3,$9,$4,$5,$6,$7,$8,'pendente') returning id`,
+    [i.id, f.id, acc, DIA, valor, kind, hist, marca(), ++n])).id;
 }
 async function titulo(direction: "receivable" | "payable", valor: number, plano: string) {
   const p = await um<{ id: string }>(

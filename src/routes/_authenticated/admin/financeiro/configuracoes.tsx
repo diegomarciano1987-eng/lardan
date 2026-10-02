@@ -4,7 +4,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ErrorState, Panel, Skeleton, StatusBadge } from "@/components/admin/ui";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
-import { alternarFormaPagamento, fetchFinSettings, salvarFormaPagamento } from "@/lib/financeiro";
+import {
+  alternarFormaPagamento,
+  fetchContasEncargos,
+  fetchFinSettings,
+  listChartAccounts,
+  salvarContasEncargos,
+  salvarFormaPagamento,
+  type ContasEncargos,
+} from "@/lib/financeiro";
+import { SmartSelect } from "@/components/premium/SmartSelect";
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/configuracoes")({
   component: ConfiguracoesFinanceiras,
@@ -119,6 +128,8 @@ function ConfiguracoesFinanceiras() {
               ) : null}
             </Panel>
 
+            <ContasEncargosPanel pode={pode} />
+
             <Panel title="Regra de aprovação">
               <p className="text-sm font-medium text-ledger-text">{q.data.aprovacao.regra}</p>
               <p className="mt-1 text-xs font-medium text-ledger-muted">
@@ -151,5 +162,70 @@ function ConfiguracoesFinanceiras() {
         ) : null}
       </div>
     </AreaFinanceiraGuard>
+  );
+}
+
+const ENCARGOS: { chave: keyof ContasEncargos; rotulo: string; ajuda: string }[] = [
+  { chave: "tarifas", rotulo: "Tarifas bancárias e de cobrança", ajuda: "Tarifa descontada no extrato ao receber ou pagar." },
+  { chave: "juros_recebidos", rotulo: "Juros e multas recebidos", ajuda: "Encargos cobrados de clientes em atraso." },
+  { chave: "juros_pagos", rotulo: "Juros e multas pagos", ajuda: "Encargos pagos a fornecedores por atraso." },
+  { chave: "descontos_concedidos", rotulo: "Descontos concedidos", ajuda: "Descontos e abatimentos dados a clientes." },
+];
+
+/** Contas do plano usadas pela DRE para tarifas, juros, multas e descontos. */
+function ContasEncargosPanel({ pode }: { pode: boolean }) {
+  const qc = useQueryClient();
+  const atual = useQuery({ queryKey: ["fin-encargos-contas"], queryFn: fetchContasEncargos });
+  const plano = useQuery({
+    queryKey: ["fin-chart", "encargos"],
+    queryFn: () => listChartAccounts({ situacao: "ativos", limit: 500, offset: 0 }),
+    staleTime: 60_000,
+  });
+  const [form, setForm] = React.useState<ContasEncargos>({});
+  React.useEffect(() => {
+    if (atual.data) setForm(atual.data);
+  }, [atual.data]);
+  const salvar = useMutation({
+    mutationFn: () => salvarContasEncargos(form),
+    onSuccess: () => {
+      toast.success("Contas dos encargos salvas.");
+      void qc.invalidateQueries({ queryKey: ["fin-encargos-contas"] });
+      void qc.invalidateQueries({ queryKey: ["fin-dre"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const opcoes = [
+    { value: "", label: "Não definida" },
+    ...(plano.data?.rows ?? [])
+      .filter((c) => c.aceita_lancamento && c.is_active)
+      .map((c) => ({ value: c.id, label: `${c.codigo} — ${c.nome}`, hint: c.natureza })),
+  ];
+  return (
+    <Panel title="Contas padrão dos encargos (DRE)">
+      <p className="text-sm font-medium text-ledger-muted">
+        Tarifas, juros, multas e descontos entram na DRE nestas contas. Enquanto uma conta não estiver
+        definida, o valor aparece no indicador "Encargos sem conta" — nunca some.
+      </p>
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        {ENCARGOS.map((e) => (
+          <div key={e.chave}>
+            <p className="text-sm font-semibold text-ledger-text">{e.rotulo}</p>
+            <p className="mb-1 text-xs text-ledger-muted">{e.ajuda}</p>
+            <SmartSelect
+              options={opcoes}
+              value={form[e.chave] ?? ""}
+              onChange={(v) => setForm((f) => ({ ...f, [e.chave]: v || null }))}
+              placeholder="Não definida"
+              disabled={!pode}
+            />
+          </div>
+        ))}
+      </div>
+      {pode ? (
+        <button type="button" className="admin-btn-primary mt-4" disabled={salvar.isPending} onClick={() => salvar.mutate()}>
+          {salvar.isPending ? "Salvando…" : "Salvar contas dos encargos"}
+        </button>
+      ) : null}
+    </Panel>
   );
 }

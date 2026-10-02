@@ -65,3 +65,24 @@ export const contrapartesMesa = (busca: string) =>
 export const centrosMesa = () => rpc<CentroMesa[]>("fin_mesa_centros");
 export const tituloDaParcela = (inst: string) =>
   rpc<TituloDaParcela>("fin_mesa_titulo_da_parcela", { _inst: inst });
+
+/** Novo lançamento + conciliação numa só transação no banco (sem título órfão, repetível). */
+export const novoLancamentoConciliar = (payload: {
+  line_id: string;
+  party_id: string;
+  descricao: string;
+  competencia?: string;
+  documento?: string;
+  observacao?: string;
+  cost_center_id?: string;
+  chart_account_id?: string;
+  payment_method_id?: string;
+  tarifa_cents?: number;
+}) => rpc<{ id: string; title_id: string; repetido: boolean }>("fin_mesa_novo_conciliar", { _payload: payload });
+
+/**
+ * Mesma conta do banco: recebimento → linha = alocado − tarifa;
+ * pagamento → linha = alocado + tarifa. Juros e desconto mudam o saldo da parcela, não a linha.
+ */
+export const faltaConciliar = (valorLinha: number, somaAloc: number, tarifa: number, saida: boolean) =>
+  saida ? valorLinha - somaAloc - tarifa : valorLinha - somaAloc + tarifa;

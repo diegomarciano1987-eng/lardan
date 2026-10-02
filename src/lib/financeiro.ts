@@ -699,7 +699,7 @@ export interface FinDre {
   };
   pendentes_classificacao: { quantidade: number; valor_cents: number };
   indicadores?: Record<
-    "sem_conta_contabil" | "sem_centro_custo" | "fora_da_dre" | "parcelas_em_aberto" | "nao_conciliados",
+    "sem_conta_contabil" | "sem_centro_custo" | "fora_da_dre" | "encargos_sem_conta" | "parcelas_em_aberto" | "nao_conciliados",
     { quantidade: number; valor_cents: number; criterio: string }
   >;
 }
@@ -722,7 +722,7 @@ export async function fetchFinDre(filtros: FiltrosDre): Promise<FinDre> {
 }
 
 export async function fetchFinDreDetalhe(
-  filtros: FiltrosDre & { chart_id?: string; sem_classificacao?: boolean },
+  filtros: FiltrosDre & { chart_id?: string; sem_classificacao?: boolean; encargos_sem_conta?: boolean },
 ): Promise<{
   soma_cents: number;
   rows: {
@@ -749,4 +749,21 @@ export async function fetchFinDreDetalhe(
       valor_cents: number;
     }[];
   };
+}
+
+/* ===================== Contas padrão dos encargos (DRE) ===================== */
+export type ContasEncargos = Partial<
+  Record<"tarifas" | "juros_recebidos" | "juros_pagos" | "descontos_concedidos", string | null>
+>;
+
+export async function fetchContasEncargos(): Promise<ContasEncargos> {
+  const { data, error } = await supabase.rpc("fin_encargos_contas" as never);
+  if (error) throw error;
+  return (data as unknown as ContasEncargos) ?? {};
+}
+
+export async function salvarContasEncargos(payload: ContasEncargos): Promise<ContasEncargos> {
+  const { data, error } = await supabase.rpc("fin_encargos_contas_set" as never, { _payload: payload } as never);
+  if (error) throw error;
+  return data as unknown as ContasEncargos;
 }

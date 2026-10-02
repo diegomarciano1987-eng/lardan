@@ -331,7 +331,6 @@ function ResumoConciliacao({
   // mesma regra do banco: recebimento = alocado − tarifa; pagamento = alocado + tarifa.
   // Juros e desconto mudam o saldo da parcela, não o valor da linha.
   const tarifaCents = reaisParaCentavos(tarifa) ?? 0;
-  const ajustes = saida ? tarifaCents : -tarifaCents;
   const diferenca = faltaConciliar(somaLinhas, somaAloc, tarifaCents, saida);
   void juros;
   void desconto;
@@ -349,7 +348,7 @@ function ResumoConciliacao({
         </li>
         <li className="flex justify-between gap-3">
           <span>{saida ? "Tarifa (soma ao pago)" : "Tarifa (desconta do recebido)"}</span>
-          <span className="tabular-nums">{formatBRLFromCents(ajustes)}</span>
+          <span className="tabular-nums">{formatBRLFromCents(tarifaCents)}</span>
         </li>
         <li className="flex justify-between gap-3 font-semibold">
           <span>Diferença restante</span>

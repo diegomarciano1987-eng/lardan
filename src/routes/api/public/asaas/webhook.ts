@@ -80,9 +80,14 @@ export const Route = createFileRoute("/api/public/asaas/webhook")({
           return Response.json({ received: true, ignored: "sem_evento_ou_cobranca" });
         }
 
+        // tarifa = valor − líquido quando os dois existem (mesma regra do espelho)
+        const valorCents = cent(pagamento["value"]);
+        const liquidoCents = cent(pagamento["netValue"]);
+        const feeCents =
+          valorCents !== undefined && liquidoCents !== undefined ? valorCents - liquidoCents : cent(pagamento["fee"]);
         const payload = {
           valuePaidCents: cent(pagamento["valuePaid"] ?? pagamento["value"]),
-          feeCents: cent(pagamento["fee"]),
+          feeCents,
           netValueCents: cent(pagamento["netValue"]),
           refundedCents: cent(pagamento["refundedValue"] ?? pagamento["refundAmount"]),
           paymentDate: txt(pagamento["paymentDate"]) || txt(pagamento["clientPaymentDate"]),

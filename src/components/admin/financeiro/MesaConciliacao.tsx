@@ -279,7 +279,7 @@ function Microtarifas({
               <tbody>
                 {meses.map((m) => (
                   <tr key={m.mes} className="border-t border-line">
-                    <td className="py-2 capitalize">{mesBR(m.mes)}</td>
+                    <td className="py-2">{mesBR(m.mes).replace(/^./, (c) => c.toUpperCase())}</td>
                     <td className="tabular-nums">{m.qtd_whatsapp}</td>
                     <td className="tabular-nums">{m.qtd_voz}</td>
                     <td className="text-right tabular-nums">{formatBRLFromCents(m.total_cents)}</td>

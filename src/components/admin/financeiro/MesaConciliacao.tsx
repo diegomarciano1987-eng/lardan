@@ -432,7 +432,7 @@ function Bancada({
     ...(centros.data ?? []).map((c) => ({
       value: c.id,
       label: `${c.codigo} · ${c.nome}`,
-      hint: c.responsavel_nome ? `${c.responsavel_nome}${c.papeis.length ? ` (${papeisTexto(c.papeis)})` : ""}` : undefined,
+      ...(c.responsavel_nome ? { hint: `${c.responsavel_nome}${c.papeis.length ? ` (${papeisTexto(c.papeis)})` : ""}` } : {}),
     })),
   ];
 

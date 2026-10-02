@@ -9554,6 +9554,8 @@ export type Database = {
         }[]
       }
       fin_audit_list: { Args: { _filtros?: Json }; Returns: Json }
+      fin_auditoria_asaas_duplicidade: { Args: never; Returns: Json }
+      fin_auditoria_tarifa_conciliacao: { Args: never; Returns: Json }
       fin_cashflow: { Args: { _filtros?: Json }; Returns: Json }
       fin_cashflow_detail: { Args: { _filtros: Json }; Returns: Json }
       fin_chart_list: { Args: { _filtros?: Json }; Returns: Json }
@@ -9570,7 +9572,33 @@ export type Database = {
         Returns: undefined
       }
       fin_dre: { Args: { _filtros?: Json }; Returns: Json }
+      fin_dre_base: {
+        Args: {
+          _ate: string
+          _cc: string
+          _de: string
+          _ent: string
+          _regime: string
+        }
+        Returns: {
+          cc: string
+          chart_id: string
+          codigo: string
+          contraparte: string
+          data: string
+          descricao: string
+          direction: string
+          natureza: string
+          nome: string
+          origem: string
+          ref_id: string
+          title_id: string
+          valor_cents: number
+        }[]
+      }
       fin_dre_detalhe: { Args: { _filtros: Json }; Returns: Json }
+      fin_encargos_contas: { Args: never; Returns: Json }
+      fin_encargos_contas_set: { Args: { _payload: Json }; Returns: Json }
       fin_fingerprint: { Args: { _intent: Json }; Returns: string }
       fin_historico_chave: { Args: { _h: string }; Returns: string }
       fin_import_ap_apply: {
@@ -9617,6 +9645,7 @@ export type Database = {
       }
       fin_mesa_centros: { Args: never; Returns: Json }
       fin_mesa_contrapartes: { Args: { _busca?: string }; Returns: Json }
+      fin_mesa_novo_conciliar: { Args: { _payload: Json }; Returns: Json }
       fin_mesa_palpite: { Args: { _line: string }; Returns: Json }
       fin_mesa_titulo_da_parcela: { Args: { _inst: string }; Returns: Json }
       fin_overview: { Args: { _ate?: string; _de?: string }; Returns: Json }

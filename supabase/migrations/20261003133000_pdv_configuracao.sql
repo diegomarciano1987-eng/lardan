@@ -132,4 +132,4 @@ BEGIN
 END $$;
 GRANT EXECUTE ON FUNCTION public.pdv_estoque_resumo(uuid) TO authenticated;
 
-INSERT INTO public.pdv_unidades(nome, location_id) VALUES ('LOJA ETINERANTE', '0d3c8090-b9ec-4e51-b36c-3cc9609e1693') ON CONFLICT DO NOTHING;
+INSERT INTO public.pdv_unidades(nome, location_id) SELECT 'LOJA ETINERANTE', id FROM public.locations WHERE id='0d3c8090-b9ec-4e51-b36c-3cc9609e1693' ON CONFLICT DO NOTHING;

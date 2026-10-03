@@ -25,7 +25,9 @@ import { Route as ComoVenderSemijoiasPeloWhatsappRouteImport } from './routes/co
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as EquipeRouteImport } from './routes/equipe'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as LojaRouteImport } from './routes/loja'
 import { Route as MinhaContaRouteImport } from './routes/minha-conta'
+import { Route as PdvRouteImport } from './routes/pdv'
 import { Route as PulseirasRouteImport } from './routes/pulseiras'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as RendaExtraComVendasRouteImport } from './routes/renda-extra-com-vendas'
@@ -190,9 +192,19 @@ const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
   path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LojaRoute = LojaRouteImport.update({
+  id: '/loja',
+  path: '/loja',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MinhaContaRoute = MinhaContaRouteImport.update({
   id: '/minha-conta',
   path: '/minha-conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PdvRoute = PdvRouteImport.update({
+  id: '/pdv',
+  path: '/pdv',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PulseirasRoute = PulseirasRouteImport.update({
@@ -677,7 +689,9 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/loja': typeof LojaRoute
   '/minha-conta': typeof MinhaContaRoute
+  '/pdv': typeof PdvRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
@@ -777,7 +791,9 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/loja': typeof LojaRoute
   '/minha-conta': typeof MinhaContaRoute
+  '/pdv': typeof PdvRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
@@ -877,7 +893,9 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/loja': typeof LojaRoute
   '/minha-conta': typeof MinhaContaRoute
+  '/pdv': typeof PdvRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
@@ -979,7 +997,9 @@ export interface FileRouteTypes {
     | '/contato'
     | '/equipe'
     | '/llms.txt'
+    | '/loja'
     | '/minha-conta'
+    | '/pdv'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-vendas'
@@ -1079,7 +1099,9 @@ export interface FileRouteTypes {
     | '/contato'
     | '/equipe'
     | '/llms.txt'
+    | '/loja'
     | '/minha-conta'
+    | '/pdv'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-vendas'
@@ -1178,7 +1200,9 @@ export interface FileRouteTypes {
     | '/contato'
     | '/equipe'
     | '/llms.txt'
+    | '/loja'
     | '/minha-conta'
+    | '/pdv'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-vendas'
@@ -1280,7 +1304,9 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   EquipeRoute: typeof EquipeRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
+  LojaRoute: typeof LojaRoute
   MinhaContaRoute: typeof MinhaContaRoute
+  PdvRoute: typeof PdvRoute
   PulseirasRoute: typeof PulseirasRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   RendaExtraComVendasRoute: typeof RendaExtraComVendasRoute
@@ -1421,11 +1447,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/loja': {
+      id: '/loja'
+      path: '/loja'
+      fullPath: '/loja'
+      preLoaderRoute: typeof LojaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/minha-conta': {
       id: '/minha-conta'
       path: '/minha-conta'
       fullPath: '/minha-conta'
       preLoaderRoute: typeof MinhaContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pdv': {
+      id: '/pdv'
+      path: '/pdv'
+      fullPath: '/pdv'
+      preLoaderRoute: typeof PdvRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pulseiras': {
@@ -2206,7 +2246,9 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   EquipeRoute: EquipeRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
+  LojaRoute: LojaRoute,
   MinhaContaRoute: MinhaContaRoute,
+  PdvRoute: PdvRoute,
   PulseirasRoute: PulseirasRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   RendaExtraComVendasRoute: RendaExtraComVendasRoute,

@@ -99,6 +99,27 @@
       "when": 1791034029577,
       "tag": "0013_pdv_configuracao",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791034599865,
+      "tag": "0014_pdv_frente_de_venda",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1791034638976,
+      "tag": "0015_pdv_asaas_preparar_simples",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791034665425,
+      "tag": "0016_pdv_audit_sem_segredos",
+      "breakpoints": true
     }
   ]
 }

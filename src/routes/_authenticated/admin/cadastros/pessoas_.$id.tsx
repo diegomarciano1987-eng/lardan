@@ -631,6 +631,15 @@ function FichaPessoa() {
               )}
             </div>
           </Panel>
+          <Panel title="Ativar consultora e convidar para o Portal da Consultora" flush className="mt-4">
+            <div className="max-w-xl space-y-3 p-5">
+              <p className="text-sm text-ledger-muted">
+                Ao gerar o convite, esta pessoa passa a ser consultora ativa (sem criar outro cadastro) e
+                recebe o link para criar a senha do Portal da Consultora — não do sistema Lardan.
+              </p>
+              <ConviteConsultora partyId={id} />
+            </div>
+          </Panel>
         </TabsContent>
 
         <TabsContent value="historico" className="mt-4">

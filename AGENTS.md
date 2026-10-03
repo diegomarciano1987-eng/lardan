@@ -26,3 +26,6 @@
 - DRE gerencial reads only from fin_dre_base and its lucro líquido must equal fin_dre for the same filters; why: one calculation rule, two views.
 - Referral (indicação) commissions are computed only by a DB trigger when a kit cycle closes, stored once per cycle in referral_commissions with an item snapshot; why: transparent, idempotent, never recalculated retroactively when tiers change.
 - Showcase addresses are checked by showcase_slug_reserved (site routes, categories, pages, and old addresses kept forever in showcase_slug_history); why: one consultant's link can never be taken by another.
+
+- Asaas PAYMENT_RECEIVED on a charge linked to an installment settles it automatically via asaas_baixa_automatica (official settlement engine, gross on installment, fee as separate movement, idempotency key asaas:baixa:<account>:<charge>); cash receipts, refunds and disputes stay manual. Why: paid in Asaas must be paid in Lardan without double counting.
+- The isolated bench also applies drizzle/migrations files that have no copy in supabase/migrations. Why: the migration tool now writes only to drizzle/migrations.

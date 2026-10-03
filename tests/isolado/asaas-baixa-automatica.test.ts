@@ -30,8 +30,8 @@ async function cenario(valor = 10000, ligar: "direto" | "match" | "nenhum" = "di
   const inst = (await um<{ id: string }>(`select id from public.financial_installments where title_id=$1`, [r.dados])).id;
   const ext = `pay_${marca()}`;
   const ch = (await oficial<{ id: string }>(
-    `insert into public.asaas_charges (account_id, external_id, value_cents, due_date, billing_type, external_status, installment_id)
-     values ($1,$2,$3,$4,'PIX','PENDING',$5) returning id`, [acc, ext, valor, DIA, ligar === "direto" ? inst : null])).id;
+    `insert into public.asaas_charges (account_id, external_id, value_cents, due_date, billing_type, external_status, installment_id, title_id)
+     values ($1,$2,$3,$4,'PIX','PENDING',$5,$6) returning id`, [acc, ext, valor, DIA, ligar === "direto" ? inst : null, ligar === "direto" ? r.dados : null])).id;
   if (ligar === "match") await adm.unsafe(
     `insert into public.asaas_charge_matches (charge_id, installment_id, title_id, regra, status) values ($1,$2,$3,'numero_fatura','confirmado')`, [ch, inst, r.dados]);
   return { fin, acc, inst, ext, ch };

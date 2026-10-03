@@ -89,7 +89,7 @@ function Label({ htmlFor, children }: { htmlFor: string; children: React.ReactNo
   );
 }
 
-export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: string; modo?: "site" | "indicacao" } = {}) {
+export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: string | undefined; modo?: "site" | "indicacao" } = {}) {
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);

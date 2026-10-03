@@ -157,7 +157,7 @@ export const removerAutenticador = createServerFn({ method: "POST" })
  */
 export const convidarConsultora = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { lead_id?: string; party_id?: string; email: string; origem: string }) => {
+  .inputValidator((i: { lead_id?: string | undefined; party_id?: string | undefined; email: string; origem: string }) => {
     const uuid = /^[0-9a-f-]{36}$/;
     if (!(i.lead_id && uuid.test(i.lead_id)) && !(i.party_id && uuid.test(i.party_id))) throw new Error("Cadastro inválido.");
     const email = (i.email ?? "").trim().toLowerCase();

@@ -49,9 +49,9 @@ function Cobranca() {
   const termo = s.q.trim().toLowerCase();
   const lista = todos.filter((d) =>
     (!termo || [d.nome, d.documento, d.cidade, d.uf, d.responsavel_nome].some((x) => x?.toLowerCase().includes(termo))) &&
-    (!s.f || !filtroKpi[s.f] || filtroKpi[s.f](d)) &&
+    (!s.f || (filtroKpi[s.f]?.(d) ?? true)) &&
     (!s.etapa || d.etapa === s.etapa) &&
-    (!s.faixa || (d.maior_atraso >= FAIXAS[s.faixa][0] && d.maior_atraso <= FAIXAS[s.faixa][1])),
+    (!s.faixa || !FAIXAS[s.faixa] || (d.maior_atraso >= FAIXAS[s.faixa]![0] && d.maior_atraso <= FAIXAS[s.faixa]![1])),
   ).sort((a, b) => Number(b.vencido_cents) - Number(a.vencido_cents));
 
   const mover = async (d: Devedor, e: Etapa) => {
@@ -119,7 +119,7 @@ function Chips({ valor, opcoes, onChange }: { valor: string; opcoes: string[][];
   return (
     <div className="flex flex-wrap gap-1">
       {opcoes.map(([k, r]) => (
-        <button key={k} onClick={() => onChange(valor === k ? "" : k)}
+        <button key={k} onClick={() => onChange(valor === k ? "" : k ?? "")}
           className={`h-10 rounded-full border px-3 text-xs ${valor === k ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}>{r}</button>
       ))}
     </div>

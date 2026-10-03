@@ -31,6 +31,7 @@ function Cockpit() {
   if (q.isLoading) return <p className="p-6 text-sm text-muted-foreground">Carregando…</p>;
   if (q.error || !q.data?.pessoa) return <p className="p-6 text-sm text-destructive">{(q.error as Error)?.message ?? "Devedora não encontrada."}</p>;
   const d = q.data;
+  const pessoa = d.pessoa!;
   const hoje = hojeSP();
   const vencidas = d.parcelas.filter((p) => p.vencimento < hoje);
   const vencido = vencidas.reduce((a, p) => a + Number(p.saldo_cents), 0);
@@ -72,8 +73,8 @@ function Cockpit() {
       <Link to="/admin/cobranca" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Voltar à carteira</Link>
       <header className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-border bg-card p-6">
         <div>
-          <h1 className="font-display text-3xl">{d.pessoa.nome}</h1>
-          <p className="text-sm text-muted-foreground">{d.pessoa.documento ?? "Documento não informado"} · {[d.endereco?.cidade, d.endereco?.uf].filter(Boolean).join("/") || "Região não informada"}</p>
+          <h1 className="font-display text-3xl">{pessoa.nome}</h1>
+          <p className="text-sm text-muted-foreground">{pessoa.documento ?? "Documento não informado"} · {[d.endereco?.cidade, d.endereco?.uf].filter(Boolean).join("/") || "Região não informada"}</p>
           <p className="mt-1 text-sm">Responsável: {d.caso?.responsavel_nome ?? "Não informado"}{d.caso?.pausa_ate && ` · Régua pausada até ${dataBR(d.caso.pausa_ate)} (${d.caso.pausa_motivo})`}</p>
         </div>
         <select value={d.caso?.etapa ?? "novo_atraso"} onChange={async (e) => { await moverEtapa(id, e.target.value as Etapa); recarregar(); }}

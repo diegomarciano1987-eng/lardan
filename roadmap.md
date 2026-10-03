@@ -8,3 +8,5 @@
 - [x] Etapa 4: Pix Asaas real, cartão, dinheiro, misto
 - [x] Etapa 5: vendas, clientes, comissão, comprovante
 - [ ] Etapa 6: testes e prontidão (bateria isolada do PDV ok; falta Pix real em sandbox Asaas com loja configurada)
+- [ ] PDV: comprovante em cupom com logo Lardan, imprimir/PDF
+- [ ] PDV: Pix em janela grande com QR + copia-e-cola; corrigir "Sem permissão para este tipo de título"

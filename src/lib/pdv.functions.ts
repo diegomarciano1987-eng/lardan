@@ -108,7 +108,10 @@ export const pdvPixGerar = createServerFn({ method: "POST" })
   .inputValidator((d: { venda: string }) => ({ venda: str(d?.venda, 40) }))
   .handler(async ({ data }) => {
     const th = await token();
-    const t = await rpc<{ installment_id: string; actor: string }>("pdv_pix_titulo", { _token_hash: th, _venda: data.venda });
+    const t = await rpc<{ installment_id: string; actor: string }>("pdv_pix_titulo", { _token_hash: th, _venda: data.venda }).catch((e: Error) => {
+      if (/Sem permissão para este tipo de título/.test(e.message)) throw new Error("O responsável pelo Pix desta loja não tem permissão de contas a receber. A gestão precisa trocar em PDV Loja → Acesso por alguém do financeiro.");
+      throw e;
+    });
     const { solicitarCobranca } = await import("./asaas/operacoes");
     const { bancoExecutor } = await import("./asaas/servidor.server");
     const { envDoServidor } = await import("./asaas/configuracao.server");
@@ -119,7 +122,19 @@ export const pdvPixGerar = createServerFn({ method: "POST" })
     if ((r as { state: string }).state === "indisponivel") throw new Error((r as { aviso?: string }).aviso || "Pix indisponível no momento.");
     const rr = r as { charge_id?: string | null; invoice_url?: string | null };
     await rpc("pdv_pix_registrar", { _token_hash: th, _venda: data.venda, _charge: rr.charge_id ?? null, _url: rr.invoice_url ?? null });
-    return { url: rr.invoice_url ?? null };
+    // Copia-e-cola e QR oficiais do Asaas; se não vierem, a tela usa o link da fatura.
+    let copia: string | null = null; let qr: string | null = null;
+    const ext = (r as { external_id?: string | null; simulado?: boolean }).external_id;
+    if (ext && !(r as { simulado?: boolean }).simulado) {
+      try {
+        const { resolverPorParcela } = await import("./asaas/servidor.server");
+        const { transporteDaResolucao } = await import("./asaas/configuracao.server");
+        const tr = (await transporteDaResolucao(await resolverPorParcela(t.installment_id, t.actor))) as unknown as { pixQrCode?: (id: string) => Promise<{ payload: string | null; encodedImage: string | null }> };
+        const px = await tr.pixQrCode?.(ext);
+        copia = px?.payload ?? null; qr = px?.encodedImage ? `data:image/png;base64,${px.encodedImage}` : null;
+      } catch (e) { console.error("pix qrcode", (e as Error).message); }
+    }
+    return { url: rr.invoice_url ?? null, copia, qr };
   });
 
 export const pdvPixSituacao = createServerFn({ method: "GET" })
@@ -133,3 +148,27 @@ export const pdvCancelar = createServerFn({ method: "POST" })
 export const pdvComprovante = createServerFn({ method: "GET" })
   .inputValidator((d: { venda: string }) => ({ venda: str(d?.venda, 40) }))
   .handler(async ({ data }) => rpc("pdv_comprovante", { _token_hash: await token(), _venda: data.venda }));
+
+export type ClientePdv = { party_id?: string; nome: string; doc?: string; telefone?: string; email?: string; instagram?: string; nascimento?: string; cep?: string; rua?: string; numero?: string; complemento?: string; bairro?: string; cidade?: string; uf?: string; observacoes?: string };
+const CAMPOS_CLIENTE = ["party_id", "nome", "doc", "telefone", "email", "instagram", "nascimento", "cep", "rua", "numero", "complemento", "bairro", "cidade", "uf", "observacoes"] as const;
+
+/** Grava (ou atualiza) a cliente no cadastro oficial e liga à loja. Não associa por nome: só CPF ou WhatsApp já da loja. */
+export const pdvClienteSalvar = createServerFn({ method: "POST" })
+  .inputValidator((d: ClientePdv) => {
+    const o: Record<string, string> = {};
+    for (const k of CAMPOS_CLIENTE) o[k] = str((d as Record<string, unknown>)?.[k], k === "observacoes" ? 500 : 160).trim();
+    return o as unknown as ClientePdv;
+  })
+  .handler(async ({ data }) => rpc<{ party_id: string; nome: string }>("pdv_cliente_salvar", { _token_hash: await token(), _c: data }));
+
+export const pdvVendaVincularCliente = createServerFn({ method: "POST" })
+  .inputValidator((d: { venda: string; party: string }) => ({ venda: str(d?.venda, 40), party: str(d?.party, 40) }))
+  .handler(async ({ data }) => rpc("pdv_venda_vincular_cliente", { _token_hash: await token(), _venda: data.venda, _party: data.party }));
+
+export const pdvClientes = createServerFn({ method: "GET" })
+  .inputValidator((d: { q: string }) => ({ q: str(d?.q, 80) }))
+  .handler(async ({ data }) => rpc<any[]>("pdv_clientes_listar", { _token_hash: await token(), _q: data.q }));
+
+export const pdvVendas = createServerFn({ method: "GET" })
+  .inputValidator((d: { dias: number }) => ({ dias: Math.min(Math.max(Math.round(Number(d?.dias) || 1), 1), 365) }))
+  .handler(async ({ data }) => rpc<any[]>("pdv_vendas_listar", { _token_hash: await token(), _dias: data.dias }));

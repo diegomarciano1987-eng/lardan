@@ -284,6 +284,13 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     return p;
   }
 
+  /** Pix copia-e-cola e QR oficial da cobrança. */
+  async pixQrCode(id: string) {
+    const c = await this.enviar<Json>("GET", `/payments/${encodeURIComponent(id)}/pixQrCode`, {}, true);
+    const o = (c ?? {}) as Record<string, unknown>;
+    return { payload: typeof o["payload"] === "string" ? o["payload"] : null, encodedImage: typeof o["encodedImage"] === "string" ? o["encodedImage"] : null };
+  }
+
   async consultarCobranca(id: string) {
     const c = await this.enviar<Json>("GET", `/payments/${encodeURIComponent(id)}`, {}, true);
     return c ? traduzirCobranca(c) : null;

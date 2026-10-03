@@ -362,7 +362,8 @@ function Acesso({ u, onSaved }: { u: any; onSaved: () => void }) {
   const [numero, setNumero] = React.useState(u.numero ?? ""); const [senha, setSenha] = React.useState("");
   const [resp, setResp] = React.useState(u.pix_responsavel_user_id ?? "");
   React.useEffect(() => { setNumero(u.numero ?? ""); setResp(u.pix_responsavel_user_id ?? ""); }, [u.id]);
-  const users = useQuery({ queryKey: ["pdv", "usuarios"], queryFn: () => ok<any[]>(db.rpc("pdv_usuarios_disponiveis")) });
+  const users = useQuery({ queryKey: ["pdv", "responsaveis-pix"], queryFn: () => ok<any[]>(db.rpc("pdv_responsaveis_pix")) });
+  const respInvalido = !!resp && !!users.data && !users.data.some((x) => x.user_id === resp);
   const salvar = async () => {
     try {
       await ok(db.rpc("pdv_unidade_acesso", { _unidade: u.id, _numero: numero, _senha: senha }));
@@ -375,7 +376,7 @@ function Acesso({ u, onSaved }: { u: any; onSaved: () => void }) {
       <div className="grid gap-4 md:grid-cols-3">
         <Campo r="Número da loja"><input className={inp} inputMode="numeric" value={numero} onChange={(e) => setNumero(e.target.value.replace(/\D/g, ""))} placeholder="12026" /></Campo>
         <Campo r={u.senha_alterada_em ? `Nova senha (atual definida em ${new Date(u.senha_alterada_em).toLocaleDateString("pt-BR")})` : "Senha da loja (ainda não definida)"}><input className={inp} type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="mínimo 6 caracteres" /></Campo>
-        <Campo r="Responsável pelo Pix (precisa poder emitir cobranças)"><SmartSelect value={resp} onChange={setResp} options={(users.data ?? []).map((x) => ({ value: x.user_id, label: x.nome, hint: x.email }))} /></Campo>
+        <Campo r="Responsável pelo Pix (precisa poder emitir cobranças)"><SmartSelect value={resp} onChange={setResp} options={(users.data ?? []).map((x) => ({ value: x.user_id, label: x.nome, hint: x.email }))} />{respInvalido && <span className="text-xs text-destructive">A pessoa escolhida hoje não tem permissão de contas a receber — o Pix falha. Escolha alguém do financeiro.</span>}</Campo>
       </div>
       <button onClick={salvar} className="h-10 rounded-lg bg-primary px-5 text-sm text-primary-foreground">Salvar acesso</button>
     </Panel>

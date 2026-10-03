@@ -92,6 +92,13 @@
       "when": 1791033337383,
       "tag": "0012_cobranca_crm_fix_colunas",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791034029577,
+      "tag": "0013_pdv_configuracao",
+      "breakpoints": true
     }
   ]
 }

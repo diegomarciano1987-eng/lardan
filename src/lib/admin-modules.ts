@@ -309,11 +309,12 @@ export const ADMIN_MODULES: AdminModule[] = [
   },
   {
     slug: "pdv",
+    path: "/admin/pdv",
     label: "PDV Loja",
-    description: "Frente de caixa da loja física.",
+    description: "Configuração das lojas: unidade, vendedoras, comissão, metas, maquininhas, preço e estoque.",
     icon: Store,
-    roles: ALL_STAFF,
-    state: "em_breve",
+    roles: ["master", "diretoria"],
+    state: "ativo",
   },
 ];
 

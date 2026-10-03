@@ -120,6 +120,13 @@
       "when": 1791034665425,
       "tag": "0016_pdv_audit_sem_segredos",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791035410615,
+      "tag": "0017_pdv_codigo_email",
+      "breakpoints": true
     }
   ]
 }

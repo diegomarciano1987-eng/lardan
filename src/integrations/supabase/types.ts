@@ -7736,6 +7736,54 @@ export type Database = {
           },
         ]
       }
+      pdv_login_codigos: {
+        Row: {
+          codigo_hash: string
+          created_at: string
+          expira_em: string
+          id: string
+          membro_id: string
+          tentativas: number
+          unidade_id: string
+          usado_em: string | null
+        }
+        Insert: {
+          codigo_hash: string
+          created_at?: string
+          expira_em?: string
+          id?: string
+          membro_id: string
+          tentativas?: number
+          unidade_id: string
+          usado_em?: string | null
+        }
+        Update: {
+          codigo_hash?: string
+          created_at?: string
+          expira_em?: string
+          id?: string
+          membro_id?: string
+          tentativas?: number
+          unidade_id?: string
+          usado_em?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_login_codigos_membro_id_fkey"
+            columns: ["membro_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_login_codigos_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pdv_login_tentativas: {
         Row: {
           created_at: string
@@ -7951,6 +7999,7 @@ export type Database = {
           created_at: string
           expira_em: string
           id: string
+          login_membro_id: string | null
           membro_id: string | null
           revogada_em: string | null
           token_hash: string
@@ -7962,6 +8011,7 @@ export type Database = {
           created_at?: string
           expira_em?: string
           id?: string
+          login_membro_id?: string | null
           membro_id?: string | null
           revogada_em?: string | null
           token_hash: string
@@ -7973,6 +8023,7 @@ export type Database = {
           created_at?: string
           expira_em?: string
           id?: string
+          login_membro_id?: string | null
           membro_id?: string | null
           revogada_em?: string | null
           token_hash?: string
@@ -7981,6 +8032,13 @@ export type Database = {
           user_agent?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pdv_sessoes_login_membro_id_fkey"
+            columns: ["login_membro_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pdv_sessoes_membro_id_fkey"
             columns: ["membro_id"]
@@ -11724,6 +11782,19 @@ export type Database = {
         }
         Returns: Json
       }
+      pdv_entrar_confirmar: {
+        Args: {
+          _codigo: string
+          _desafio: string
+          _token_hash: string
+          _ua: string
+        }
+        Returns: Json
+      }
+      pdv_entrar_iniciar: {
+        Args: { _email: string; _numero: string; _senha: string }
+        Returns: Json
+      }
       pdv_estado: { Args: { _token_hash: string }; Returns: Json }
       pdv_estoque_resumo: { Args: { _unidade: string }; Returns: Json }
       pdv_exigir_operadora: {
@@ -11798,6 +11869,7 @@ export type Database = {
           created_at: string
           expira_em: string
           id: string
+          login_membro_id: string | null
           membro_id: string | null
           revogada_em: string | null
           token_hash: string

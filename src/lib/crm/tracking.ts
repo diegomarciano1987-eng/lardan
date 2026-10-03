@@ -143,10 +143,10 @@ const CHAVE_INDICACAO = "lardan.indicacao.v1";
 const VALIDADE_INDICACAO = 60 * 86_400_000;
 
 /** Guarda o código do link de indicação (?indica=). A primeira indicação vale por 60 dias. */
-export function registrarIndicacao(): string | undefined {
+export function registrarIndicacao(codigo?: string): string | undefined {
   if (typeof window === "undefined") return undefined;
   try {
-    const atual = new URLSearchParams(window.location.search).get("indica");
+    const atual = codigo ?? new URLSearchParams(window.location.search).get("indica");
     const bruto = window.localStorage.getItem(CHAVE_INDICACAO);
     const salvo = bruto ? (JSON.parse(bruto) as { c: string; em: number }) : null;
     if (salvo && Date.now() - salvo.em < VALIDADE_INDICACAO) return salvo.c;

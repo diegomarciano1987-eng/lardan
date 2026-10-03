@@ -78,6 +78,13 @@
       "when": 1791032348030,
       "tag": "0010_asaas_baixa_pendentes_conta_financeira",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791033296755,
+      "tag": "0011_cobranca_crm_base",
+      "breakpoints": true
     }
   ]
 }

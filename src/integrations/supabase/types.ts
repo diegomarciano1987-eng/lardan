@@ -2177,6 +2177,277 @@ export type Database = {
           },
         ]
       }
+      cob_casos: {
+        Row: {
+          created_at: string
+          etapa: string
+          party_id: string
+          pausa_ate: string | null
+          pausa_motivo: string | null
+          responsavel_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          etapa?: string
+          party_id: string
+          pausa_ate?: string | null
+          pausa_motivo?: string | null
+          responsavel_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          etapa?: string
+          party_id?: string
+          pausa_ate?: string | null
+          pausa_motivo?: string | null
+          responsavel_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_casos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_casos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      cob_interacoes: {
+        Row: {
+          autor_id: string
+          corrige_id: string | null
+          created_at: string
+          id: string
+          installment_ids: string[]
+          observacao: string | null
+          party_id: string
+          resultado: string | null
+          tipo: string
+        }
+        Insert: {
+          autor_id: string
+          corrige_id?: string | null
+          created_at?: string
+          id?: string
+          installment_ids?: string[]
+          observacao?: string | null
+          party_id: string
+          resultado?: string | null
+          tipo: string
+        }
+        Update: {
+          autor_id?: string
+          corrige_id?: string | null
+          created_at?: string
+          id?: string
+          installment_ids?: string[]
+          observacao?: string | null
+          party_id?: string
+          resultado?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_interacoes_corrige_id_fkey"
+            columns: ["corrige_id"]
+            isOneToOne: false
+            referencedRelation: "cob_interacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_interacoes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_interacoes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      cob_promessas: {
+        Row: {
+          autor_id: string
+          avaliada_em: string | null
+          cancel_motivo: string | null
+          created_at: string
+          data_prometida: string
+          id: string
+          installment_ids: string[]
+          observacao: string | null
+          party_id: string
+          responsavel_id: string | null
+          saldo_inicial_cents: number
+          status: string
+          valor_cents: number
+        }
+        Insert: {
+          autor_id: string
+          avaliada_em?: string | null
+          cancel_motivo?: string | null
+          created_at?: string
+          data_prometida: string
+          id?: string
+          installment_ids: string[]
+          observacao?: string | null
+          party_id: string
+          responsavel_id?: string | null
+          saldo_inicial_cents: number
+          status?: string
+          valor_cents: number
+        }
+        Update: {
+          autor_id?: string
+          avaliada_em?: string | null
+          cancel_motivo?: string | null
+          created_at?: string
+          data_prometida?: string
+          id?: string
+          installment_ids?: string[]
+          observacao?: string | null
+          party_id?: string
+          responsavel_id?: string | null
+          saldo_inicial_cents?: number
+          status?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_promessas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_promessas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      cob_regua_etapas: {
+        Row: {
+          acao: string
+          ativo: boolean
+          dias: number
+          id: string
+          mensagem: string
+          prazo_dias: number
+          responsavel_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          acao: string
+          ativo?: boolean
+          dias: number
+          id?: string
+          mensagem?: string
+          prazo_dias?: number
+          responsavel_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          acao?: string
+          ativo?: boolean
+          dias?: number
+          id?: string
+          mensagem?: string
+          prazo_dias?: number
+          responsavel_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cob_tarefas: {
+        Row: {
+          autor_id: string | null
+          chave: string | null
+          concluida_em: string | null
+          concluida_por: string | null
+          created_at: string
+          id: string
+          installment_ids: string[]
+          motivo_fim: string | null
+          origem: string
+          party_id: string
+          regua_dias: number | null
+          responsavel_id: string | null
+          status: string
+          titulo: string
+          vence_em: string
+        }
+        Insert: {
+          autor_id?: string | null
+          chave?: string | null
+          concluida_em?: string | null
+          concluida_por?: string | null
+          created_at?: string
+          id?: string
+          installment_ids?: string[]
+          motivo_fim?: string | null
+          origem?: string
+          party_id: string
+          regua_dias?: number | null
+          responsavel_id?: string | null
+          status?: string
+          titulo: string
+          vence_em: string
+        }
+        Update: {
+          autor_id?: string | null
+          chave?: string | null
+          concluida_em?: string | null
+          concluida_por?: string | null
+          created_at?: string
+          id?: string
+          installment_ids?: string[]
+          motivo_fim?: string | null
+          origem?: string
+          party_id?: string
+          regua_dias?: number | null
+          responsavel_id?: string | null
+          status?: string
+          titulo?: string
+          vence_em?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_tarefas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_tarefas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       collections: {
         Row: {
           created_at: string
@@ -9711,6 +9982,76 @@ export type Database = {
       categoria_por_nome: { Args: { _nome: string }; Returns: string }
       claim_master_role: { Args: never; Returns: boolean }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }
+      cob_carteira: {
+        Args: never
+        Returns: {
+          a_vencer_cents: number
+          cidade: string
+          documento: string
+          etapa: string
+          maior_atraso: number
+          nome: string
+          parcelas_vencidas: number
+          party_id: string
+          pausa_ate: string
+          promessa_data: string
+          promessa_status: string
+          proxima_acao: string
+          proxima_acao_titulo: string
+          responsavel_id: string
+          responsavel_nome: string
+          uf: string
+          vencido_cents: number
+        }[]
+      }
+      cob_devedor: { Args: { _party: string }; Returns: Json }
+      cob_mover_etapa: {
+        Args: { _etapa: string; _party: string; _responsavel?: string }
+        Returns: undefined
+      }
+      cob_parcelas_abertas: {
+        Args: never
+        Returns: {
+          installment_id: string
+          numero: string
+          party_id: string
+          saldo_cents: number
+          title_id: string
+          valor_cents: number
+          vencimento: string
+        }[]
+      }
+      cob_pode: { Args: { _u: string }; Returns: boolean }
+      cob_promessa_cancelar: {
+        Args: { _id: string; _motivo: string }
+        Returns: undefined
+      }
+      cob_promessa_criar: {
+        Args: {
+          _data: string
+          _obs: string
+          _parcelas: string[]
+          _party: string
+          _valor: number
+        }
+        Returns: string
+      }
+      cob_registrar: {
+        Args: {
+          _obs: string
+          _parcelas?: string[]
+          _party: string
+          _resultado: string
+          _tipo: string
+        }
+        Returns: string
+      }
+      cob_regua_executar: { Args: never; Returns: Json }
+      cob_tarefa_concluir: { Args: { _id: string }; Returns: undefined }
+      cob_tarefa_criar: {
+        Args: { _party: string; _titulo: string; _vence: string }
+        Returns: string
+      }
       confirm_stock_reservation: {
         Args: {
           _idempotency_key?: string

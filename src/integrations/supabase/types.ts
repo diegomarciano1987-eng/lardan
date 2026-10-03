@@ -7545,6 +7545,115 @@ export type Database = {
         }
         Relationships: []
       }
+      pdv_caixa_movs: {
+        Row: {
+          caixa_id: string
+          created_at: string
+          id: string
+          membro_id: string
+          motivo: string
+          tipo: string
+          valor_cents: number
+        }
+        Insert: {
+          caixa_id: string
+          created_at?: string
+          id?: string
+          membro_id: string
+          motivo: string
+          tipo: string
+          valor_cents: number
+        }
+        Update: {
+          caixa_id?: string
+          created_at?: string
+          id?: string
+          membro_id?: string
+          motivo?: string
+          tipo?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_caixa_movs_caixa_id_fkey"
+            columns: ["caixa_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_caixas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_caixa_movs_membro_id_fkey"
+            columns: ["membro_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdv_caixas: {
+        Row: {
+          aberto_em: string
+          aberto_por: string
+          contado_cents: number | null
+          esperado_cents: number | null
+          fechado_em: string | null
+          fechado_por: string | null
+          fundo_cents: number
+          id: string
+          observacao: string | null
+          status: string
+          unidade_id: string
+        }
+        Insert: {
+          aberto_em?: string
+          aberto_por: string
+          contado_cents?: number | null
+          esperado_cents?: number | null
+          fechado_em?: string | null
+          fechado_por?: string | null
+          fundo_cents: number
+          id?: string
+          observacao?: string | null
+          status?: string
+          unidade_id: string
+        }
+        Update: {
+          aberto_em?: string
+          aberto_por?: string
+          contado_cents?: number | null
+          esperado_cents?: number | null
+          fechado_em?: string | null
+          fechado_por?: string | null
+          fundo_cents?: number
+          id?: string
+          observacao?: string | null
+          status?: string
+          unidade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_caixas_aberto_por_fkey"
+            columns: ["aberto_por"]
+            isOneToOne: false
+            referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_caixas_fechado_por_fkey"
+            columns: ["fechado_por"]
+            isOneToOne: false
+            referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_caixas_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pdv_comissoes: {
         Row: {
           base: string
@@ -7627,6 +7736,30 @@ export type Database = {
           },
         ]
       }
+      pdv_login_tentativas: {
+        Row: {
+          created_at: string
+          id: string
+          numero: string
+          ok: boolean
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          numero: string
+          ok: boolean
+          tipo?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          numero?: string
+          ok?: boolean
+          tipo?: string
+        }
+        Relationships: []
+      }
       pdv_maquininhas: {
         Row: {
           adquirente: string
@@ -7678,6 +7811,7 @@ export type Database = {
           created_by: string | null
           id: string
           papel: string
+          pin_hash: string | null
           unidade_id: string
           updated_at: string
           user_id: string
@@ -7689,6 +7823,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           papel: string
+          pin_hash?: string | null
           unidade_id: string
           updated_at?: string
           user_id: string
@@ -7700,6 +7835,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           papel?: string
+          pin_hash?: string | null
           unidade_id?: string
           updated_at?: string
           user_id?: string
@@ -7753,6 +7889,114 @@ export type Database = {
           },
         ]
       }
+      pdv_pagamentos: {
+        Row: {
+          created_at: string
+          forma: string
+          id: string
+          maquininha_id: string | null
+          nsu: string | null
+          parcelas: number | null
+          recebido_cents: number | null
+          status: string
+          troco_cents: number
+          valor_cents: number
+          venda_id: string
+        }
+        Insert: {
+          created_at?: string
+          forma: string
+          id?: string
+          maquininha_id?: string | null
+          nsu?: string | null
+          parcelas?: number | null
+          recebido_cents?: number | null
+          status?: string
+          troco_cents?: number
+          valor_cents: number
+          venda_id: string
+        }
+        Update: {
+          created_at?: string
+          forma?: string
+          id?: string
+          maquininha_id?: string | null
+          nsu?: string | null
+          parcelas?: number | null
+          recebido_cents?: number | null
+          status?: string
+          troco_cents?: number
+          valor_cents?: number
+          venda_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_pagamentos_maquininha_id_fkey"
+            columns: ["maquininha_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_maquininhas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_pagamentos_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdv_sessoes: {
+        Row: {
+          created_at: string
+          expira_em: string
+          id: string
+          membro_id: string | null
+          revogada_em: string | null
+          token_hash: string
+          ultimo_uso: string
+          unidade_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          expira_em?: string
+          id?: string
+          membro_id?: string | null
+          revogada_em?: string | null
+          token_hash: string
+          ultimo_uso?: string
+          unidade_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          expira_em?: string
+          id?: string
+          membro_id?: string | null
+          revogada_em?: string | null
+          token_hash?: string
+          ultimo_uso?: string
+          unidade_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_sessoes_membro_id_fkey"
+            columns: ["membro_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_sessoes_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pdv_terminais: {
         Row: {
           ativo: boolean
@@ -7799,8 +8043,12 @@ export type Database = {
           id: string
           location_id: string
           nome: string
+          numero: string | null
+          pix_responsavel_user_id: string | null
           regra_preco: string
           reserva_minutos: number
+          senha_alterada_em: string | null
+          senha_hash: string | null
           texto_comprovante: string
           updated_at: string
           updated_by: string | null
@@ -7818,8 +8066,12 @@ export type Database = {
           id?: string
           location_id: string
           nome: string
+          numero?: string | null
+          pix_responsavel_user_id?: string | null
           regra_preco?: string
           reserva_minutos?: number
+          senha_alterada_em?: string | null
+          senha_hash?: string | null
           texto_comprovante?: string
           updated_at?: string
           updated_by?: string | null
@@ -7837,8 +8089,12 @@ export type Database = {
           id?: string
           location_id?: string
           nome?: string
+          numero?: string | null
+          pix_responsavel_user_id?: string | null
           regra_preco?: string
           reserva_minutos?: number
+          senha_alterada_em?: string | null
+          senha_hash?: string | null
           texto_comprovante?: string
           updated_at?: string
           updated_by?: string | null
@@ -7877,6 +8133,157 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: true
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdv_venda_itens: {
+        Row: {
+          id: string
+          nome: string
+          preco_unit_cents: number
+          qtd: number
+          sku: string | null
+          total_cents: number
+          variant_id: string
+          venda_id: string
+        }
+        Insert: {
+          id?: string
+          nome: string
+          preco_unit_cents: number
+          qtd: number
+          sku?: string | null
+          total_cents: number
+          variant_id: string
+          venda_id: string
+        }
+        Update: {
+          id?: string
+          nome?: string
+          preco_unit_cents?: number
+          qtd?: number
+          sku?: string | null
+          total_cents?: number
+          variant_id?: string
+          venda_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_venda_itens_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_venda_itens_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdv_vendas: {
+        Row: {
+          caixa_id: string
+          cancel_motivo: string | null
+          cancelada_por: string | null
+          cliente_doc: string | null
+          cliente_nome: string | null
+          cliente_telefone: string | null
+          codigo: number
+          comissao_cents: number | null
+          comissao_pct: number | null
+          concluida_em: string | null
+          created_at: string
+          desconto_cents: number
+          id: string
+          idempotency_key: string | null
+          installment_id: string | null
+          membro_id: string
+          party_id: string | null
+          pix_charge_id: string | null
+          pix_url: string | null
+          status: string
+          subtotal_cents: number
+          title_id: string | null
+          total_cents: number
+          unidade_id: string
+        }
+        Insert: {
+          caixa_id: string
+          cancel_motivo?: string | null
+          cancelada_por?: string | null
+          cliente_doc?: string | null
+          cliente_nome?: string | null
+          cliente_telefone?: string | null
+          codigo?: number
+          comissao_cents?: number | null
+          comissao_pct?: number | null
+          concluida_em?: string | null
+          created_at?: string
+          desconto_cents?: number
+          id?: string
+          idempotency_key?: string | null
+          installment_id?: string | null
+          membro_id: string
+          party_id?: string | null
+          pix_charge_id?: string | null
+          pix_url?: string | null
+          status: string
+          subtotal_cents: number
+          title_id?: string | null
+          total_cents: number
+          unidade_id: string
+        }
+        Update: {
+          caixa_id?: string
+          cancel_motivo?: string | null
+          cancelada_por?: string | null
+          cliente_doc?: string | null
+          cliente_nome?: string | null
+          cliente_telefone?: string | null
+          codigo?: number
+          comissao_cents?: number | null
+          comissao_pct?: number | null
+          concluida_em?: string | null
+          created_at?: string
+          desconto_cents?: number
+          id?: string
+          idempotency_key?: string | null
+          installment_id?: string | null
+          membro_id?: string
+          party_id?: string | null
+          pix_charge_id?: string | null
+          pix_url?: string | null
+          status?: string
+          subtotal_cents?: number
+          title_id?: string | null
+          total_cents?: number
+          unidade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_vendas_caixa_id_fkey"
+            columns: ["caixa_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_caixas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_vendas_membro_id_fkey"
+            columns: ["membro_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_vendas_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_unidades"
             referencedColumns: ["id"]
           },
         ]
@@ -11281,11 +11688,137 @@ export type Database = {
         Returns: Json
       }
       party_doc_reveal: { Args: { _id: string }; Returns: string }
+      pdv_asaas_preparar: {
+        Args: { _actor: string; _payload: Json }
+        Returns: Json
+      }
+      pdv_caixa_abrir: {
+        Args: { _fundo: number; _token_hash: string }
+        Returns: string
+      }
+      pdv_caixa_esperado: { Args: { _caixa: string }; Returns: number }
+      pdv_caixa_fechar: {
+        Args: { _contado: number; _obs: string; _token_hash: string }
+        Returns: Json
+      }
+      pdv_caixa_mov: {
+        Args: {
+          _motivo: string
+          _tipo: string
+          _token_hash: string
+          _valor: number
+        }
+        Returns: undefined
+      }
+      pdv_como: { Args: { _actor: string }; Returns: undefined }
+      pdv_comprovante: {
+        Args: { _token_hash: string; _venda: string }
+        Returns: Json
+      }
+      pdv_entrar: {
+        Args: {
+          _numero: string
+          _senha: string
+          _token_hash: string
+          _ua: string
+        }
+        Returns: Json
+      }
+      pdv_estado: { Args: { _token_hash: string }; Returns: Json }
       pdv_estoque_resumo: { Args: { _unidade: string }; Returns: Json }
+      pdv_exigir_operadora: {
+        Args: { s: Database["public"]["Tables"]["pdv_sessoes"]["Row"] }
+        Returns: {
+          ativo: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          papel: string
+          pin_hash: string | null
+          unidade_id: string
+          updated_at: string
+          user_id: string
+          vende: boolean
+        }
+        SetofOptions: {
+          from: "pdv_sessoes"
+          to: "pdv_membros"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       pdv_gestao: { Args: { _u: string }; Returns: boolean }
       pdv_membro_de: {
         Args: { _u: string; _unidade: string }
         Returns: boolean
+      }
+      pdv_membro_pin: {
+        Args: { _membro: string; _pin: string }
+        Returns: undefined
+      }
+      pdv_membros_pin_status: {
+        Args: { _unidade: string }
+        Returns: {
+          membro_id: string
+          tem_pin: boolean
+        }[]
+      }
+      pdv_nome_usuario: { Args: { _u: string }; Returns: string }
+      pdv_operadora: {
+        Args: { _membro: string; _pin: string; _token_hash: string }
+        Returns: Json
+      }
+      pdv_operadora_sair: { Args: { _token_hash: string }; Returns: undefined }
+      pdv_pix_registrar: {
+        Args: {
+          _charge: string
+          _token_hash: string
+          _url: string
+          _venda: string
+        }
+        Returns: undefined
+      }
+      pdv_pix_situacao: {
+        Args: { _token_hash: string; _venda: string }
+        Returns: Json
+      }
+      pdv_pix_titulo: {
+        Args: { _token_hash: string; _venda: string }
+        Returns: Json
+      }
+      pdv_preco: { Args: { _variant: string }; Returns: number }
+      pdv_produto_buscar: {
+        Args: { _q: string; _token_hash: string }
+        Returns: Json
+      }
+      pdv_sair: { Args: { _token_hash: string }; Returns: undefined }
+      pdv_sessao: {
+        Args: { _token_hash: string }
+        Returns: {
+          created_at: string
+          expira_em: string
+          id: string
+          membro_id: string | null
+          revogada_em: string | null
+          token_hash: string
+          ultimo_uso: string
+          unidade_id: string
+          user_agent: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pdv_sessoes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pdv_unidade_acesso: {
+        Args: { _numero: string; _senha: string; _unidade: string }
+        Returns: undefined
+      }
+      pdv_unidade_criar: {
+        Args: { _nome: string; _numero: string; _senha: string }
+        Returns: string
       }
       pdv_usuarios_disponiveis: {
         Args: never
@@ -11294,6 +11827,14 @@ export type Database = {
           nome: string
           user_id: string
         }[]
+      }
+      pdv_venda_cancelar: {
+        Args: { _motivo: string; _token_hash: string; _venda: string }
+        Returns: undefined
+      }
+      pdv_venda_concluir: {
+        Args: { _p: Json; _token_hash: string }
+        Returns: Json
       }
       phone_canon: { Args: { v: string }; Returns: string }
       product_costs_read: { Args: { _product: string }; Returns: Json }

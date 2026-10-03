@@ -99,6 +99,13 @@
       "when": 1791034029577,
       "tag": "0013_pdv_configuracao",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791034599865,
+      "tag": "0014_pdv_frente_de_venda",
+      "breakpoints": true
     }
   ]
 }

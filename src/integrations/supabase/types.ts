@@ -9339,6 +9339,8 @@ export type Database = {
         Args: { _actor: string; _cap: string }
         Returns: boolean
       }
+      asaas_baixa_automatica: { Args: { _charge: string }; Returns: Json }
+      asaas_baixa_pendentes: { Args: { _executar?: boolean }; Returns: Json }
       asaas_charge_vincular: {
         Args: {
           _alterar?: boolean

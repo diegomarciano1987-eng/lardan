@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { formatBRLFromCents } from "@/lib/format";
+import { formatBRLFromCents } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { gerarLinkCobranca } from "@/lib/asaas/cobranca.functions";
 

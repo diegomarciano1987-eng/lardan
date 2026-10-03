@@ -23,6 +23,7 @@ import { useCapabilities } from "@/lib/capabilities";
 import { supabase } from "@/integrations/supabase/client";
 import { ClassificarTituloDialog } from "@/components/admin/financeiro/ClassificacaoCampos";
 import { PedirDadosDialog } from "@/components/admin/financeiro/PedirDadosDialog";
+import { CobrarAsaas } from "@/components/admin/financeiro/CobrarAsaas";
 import {
   cancelarTitulo,
   estornarBaixa,
@@ -416,6 +417,13 @@ export function TituloSheet({
                   {baixar.isPending ? "Gravando…" : "Gravar baixa"}
                 </button>
               </section>
+            )}
+
+            {t.titulo.direction === "receivable" && t.titulo.status !== "cancelado" && (
+              <CobrarAsaas
+                tituloId={t.titulo.id}
+                parcelas={t.parcelas.map((p) => ({ id: p.id, numero: p.numero, vencimento: p.vencimento, saldo: saldoParcela(p) }))}
+              />
             )}
 
             <section>

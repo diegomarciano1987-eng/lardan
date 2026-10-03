@@ -7,6 +7,7 @@ import QRCode from "qrcode";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { LogOut, Search, Trash2, Printer, MessageCircle, Lock, Wallet, Receipt, Users, ShoppingCart } from "lucide-react";
 import { ClienteForm, Calculadora, Vendas, Clientes, clienteVazio } from "@/components/pdv/PdvExtras";
+import { abrirCupom } from "@/components/pdv/cupom";
 import {
   pdvEntrarIniciar, pdvEntrarConfirmar, pdvSair, pdvEstado, pdvOperadora, pdvOperadoraSair, pdvCaixaAbrir, pdvCaixaMov, pdvCaixaFechar,
   pdvBuscar, pdvConcluir, pdvPixGerar, pdvPixSituacao, pdvCancelar, pdvComprovante, pdvClienteSalvar, pdvVendaVincularCliente, type PagamentoPdv, type ClientePdv,
@@ -286,50 +287,72 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
 
 function Finalizada({ v, nova, ok }: { v: any; nova: () => void; ok: () => void }) {
   const gerar = useServerFn(pdvPixGerar); const sit = useServerFn(pdvPixSituacao);
-  const [status, setStatus] = React.useState<string>(v.status); const [url, setUrl] = React.useState<string | null>(null); const [qr, setQr] = React.useState(""); const [busy, setBusy] = React.useState(false);
-  React.useEffect(() => { if (url) QRCode.toDataURL(url, { width: 280, margin: 1 }).then(setQr); }, [url]);
+  const [status, setStatus] = React.useState<string>(v.status);
+  const [pix, setPix] = React.useState<{ url: string | null; copia: string | null; qr: string | null } | null>(null);
+  const [img, setImg] = React.useState(""); const [busy, setBusy] = React.useState(false); const [aberto, setAberto] = React.useState(false);
   React.useEffect(() => {
-    if (status !== "aguardando_pix" || !url) return;
-    const t = setInterval(async () => { try { const r = await sit({ data: { venda: v.venda } }); if (r.status !== "aguardando_pix") { setStatus(r.status); ok(); } } catch { /* tenta de novo */ } }, 5000);
+    if (!pix) return;
+    if (pix.qr) setImg(pix.qr.startsWith("data:") ? pix.qr : `data:image/png;base64,${pix.qr}`);
+    else { const alvo = pix.copia ?? pix.url; if (alvo) QRCode.toDataURL(alvo, { width: 420, margin: 1 }).then(setImg); }
+  }, [pix]);
+  React.useEffect(() => {
+    if (status !== "aguardando_pix" || !pix) return;
+    const t = setInterval(async () => { try { const r = await sit({ data: { venda: v.venda } }); if (r.status !== "aguardando_pix") { setStatus(r.status); setAberto(false); ok(); } } catch { /* tenta de novo */ } }, 5000);
     return () => clearInterval(t);
-  }, [status, url]);
+  }, [status, pix]);
+  const gerarPix = async () => {
+    if (pix) { setAberto(true); return; }
+    setBusy(true);
+    try { const r: any = await gerar({ data: { venda: v.venda } }); if (!r.url && !r.copia) throw new Error("O Asaas não devolveu o Pix."); setPix({ url: r.url ?? null, copia: r.copia ?? null, qr: r.qr ?? null }); setAberto(true); }
+    catch (x) { erro(x); } finally { setBusy(false); }
+  };
+  const textoPix = pix?.copia ?? pix?.url ?? "";
+  const copiar = async () => { try { await navigator.clipboard.writeText(textoPix); toast.success("Pix copiado. Cole no WhatsApp da cliente."); } catch { toast.error("Não foi possível copiar."); } };
+  const tel = (v.telefone ?? "").replace(/\D/g, "");
   return (
     <div className="mx-auto max-w-lg space-y-4 p-8 text-center">
       <h2 className="font-display text-3xl">Venda nº {v.codigo}</h2>
       {status === "aguardando_pix" ? (
-        <div className="space-y-3">
-          {!url ? <button className={btn} disabled={busy} onClick={async () => { setBusy(true); try { const r = await gerar({ data: { venda: v.venda } }); if (!r.url) throw new Error("O Asaas não devolveu o link do Pix."); setUrl(r.url); } catch (x) { erro(x); } finally { setBusy(false); } }}>{busy ? "Gerando Pix…" : "Gerar Pix (Asaas)"}</button>
-            : <><p className="text-sm text-muted-foreground">A cliente lê o QR com a câmera do celular e paga o Pix na página do Asaas. A venda conclui sozinha quando o Asaas confirmar.</p>{qr && <img src={qr} alt="QR do Pix" className="mx-auto rounded-lg border border-border" />}<p className="animate-pulse text-sm">Aguardando confirmação do Asaas…</p></>}
-        </div>
+        <button className={btn} disabled={busy} onClick={gerarPix}>{busy ? "Gerando Pix…" : pix ? "Mostrar Pix" : "Gerar Pix (Asaas)"}</button>
       ) : status === "concluida" ? <p className="text-lg">Venda concluída.</p> : <p>Situação: {status}</p>}
       <Comprovante venda={v.venda} telefone={v.telefone} />
       <button className={btn} onClick={nova}>Nova venda</button>
+      {aberto && pix && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4" role="dialog" aria-label="Pix da venda">
+          <div className="w-full max-w-xl space-y-4 rounded-2xl bg-background p-8 shadow-2xl">
+            <div className="flex items-start justify-between"><div className="text-left"><p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Pix Lardan · Asaas</p><h3 className="font-display text-3xl">Venda nº {v.codigo}</h3></div><button className={btn2} onClick={() => setAberto(false)}>Fechar</button></div>
+            {img ? <img src={img} alt="QR Code do Pix" className="mx-auto w-full max-w-[360px] rounded-xl border border-border bg-background p-2" /> : <p>Gerando QR…</p>}
+            <p className="text-sm text-muted-foreground">A cliente aponta a câmera do celular ou o app do banco para o QR. A venda conclui sozinha quando o Asaas confirmar.</p>
+            {textoPix && <div className="break-all rounded-lg border border-border bg-muted p-3 text-left font-mono text-xs">{textoPix}</div>}
+            <div className="grid grid-cols-2 gap-2">
+              <button className={btn} onClick={copiar}>Copiar Pix (copia e cola)</button>
+              <button className={btn2} onClick={() => window.open(`https://wa.me/${tel ? (tel.length <= 11 ? "55" + tel : tel) : ""}?text=${encodeURIComponent(`Pix da sua compra Lardan (venda nº ${v.codigo}). Copie e cole no app do seu banco:\n\n${textoPix}`)}`, "_blank")}><MessageCircle className="mr-1 inline h-4 w-4" />Enviar no WhatsApp</button>
+            </div>
+            <p className="animate-pulse text-sm">Aguardando confirmação do Asaas…</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function Comprovante({ venda, telefone }: { venda: string; telefone?: string }) {
   const f = useServerFn(pdvComprovante);
-  const texto = async () => {
-    const c: any = await f({ data: { venda } });
-    const l = [`*${c.loja}* — Comprovante nº ${c.codigo}`, new Date(c.data).toLocaleString("pt-BR"), `Atendimento: ${c.vendedora}`, "",
-      ...(c.itens ?? []).map((i: any) => `${i.qtd}x ${i.nome} — ${brl(i.total)}`), "",
-      `Subtotal: ${brl(c.subtotal)}`, ...(c.desconto ? [`Desconto: ${brl(c.desconto)}`] : []), `*Total: ${brl(c.total)}*`,
-      ...(c.pagamentos ?? []).map((p: any) => `${FORMA[p.forma]}${p.parcelas > 1 ? ` ${p.parcelas}x` : ""}: ${brl(p.valor)}${p.troco ? ` (troco ${brl(p.troco)})` : ""}${p.status === "pendente" ? " — aguardando" : ""}`),
-      "", "Documento sem valor fiscal.", ...(c.rodape ? [c.rodape] : [])];
-    return { c, l };
-  };
-  const imprimir = async () => {
+  const dados = async () => (await f({ data: { venda } })) as any;
+  const imprimir = async (formato: "termica" | "a4") => { try { abrirCupom(await dados(), formato); } catch (x) { erro(x); } };
+  const whats = async () => {
     try {
-      const { l } = await texto(); const w = window.open("", "_blank", "width=380,height=600"); if (!w) return;
-      w.document.write(`<pre style="font:13px monospace;white-space:pre-wrap;width:72mm">${l.join("\n").replace(/\*/g, "").replace(/</g, "&lt;")}</pre>`);
-      w.document.close(); w.print();
+      const c = await dados();
+      const l = [`*Lardan · ${c.loja}*`, `Comprovante nº ${c.codigo}`, new Date(c.data).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }), `Atendimento: ${c.vendedora}`, "",
+        ...(c.itens ?? []).map((i: any) => `${i.qtd}x ${i.nome} — ${brl(i.total)}`), "",
+        `Subtotal: ${brl(c.subtotal)}`, ...(c.desconto ? [`Desconto: ${brl(c.desconto)}`] : []), `*Total: ${brl(c.total)}*`,
+        ...(c.pagamentos ?? []).map((p: any) => `${FORMA[p.forma]}${p.parcelas > 1 ? ` ${p.parcelas}x` : ""}: ${brl(p.valor)}${p.troco ? ` (troco ${brl(p.troco)})` : ""}`),
+        "", "Obrigada pela preferência! Documento sem valor fiscal."];
+      const tel = (telefone ?? "").replace(/\D/g, "");
+      window.open(`https://wa.me/${tel ? (tel.length <= 11 ? "55" + tel : tel) : ""}?text=${encodeURIComponent(l.join("\n"))}`, "_blank");
     } catch (x) { erro(x); }
   };
-  const whats = async () => {
-    try { const { l } = await texto(); const tel = (telefone ?? "").replace(/\D/g, ""); window.open(`https://wa.me/${tel ? (tel.length <= 11 ? "55" + tel : tel) : ""}?text=${encodeURIComponent(l.join("\n"))}`, "_blank"); } catch (x) { erro(x); }
-  };
-  return <div className="flex justify-center gap-2"><button className={btn2} onClick={imprimir}><Printer className="mr-1 inline h-4 w-4" />Imprimir</button><button className={btn2} onClick={whats}><MessageCircle className="mr-1 inline h-4 w-4" />WhatsApp</button></div>;
+  return <div className="flex flex-wrap justify-center gap-2"><button className={btn2} onClick={() => imprimir("termica")}><Printer className="mr-1 inline h-4 w-4" />Cupom (térmica)</button><button className={btn2} onClick={() => imprimir("a4")}><Receipt className="mr-1 inline h-4 w-4" />A4 / PDF</button><button className={btn2} onClick={whats}><MessageCircle className="mr-1 inline h-4 w-4" />WhatsApp</button></div>;
 }
 
 function VendasHoje({ e, ok }: { e: any; ok: () => void }) {

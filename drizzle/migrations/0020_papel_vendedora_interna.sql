@@ -1,0 +1,1 @@
+ALTER TYPE public.party_role_kind ADD VALUE IF NOT EXISTS 'vendedora_interna';

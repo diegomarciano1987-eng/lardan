@@ -22,12 +22,12 @@ async function ok<T>(p: PromiseLike<{ data: T; error: { message: string } | null
   const { data, error } = await p; if (error) throw new Error(error.message); return data;
 }
 
-type Aba = "unidade" | "equipe" | "maquininhas" | "preco" | "estoque" | "historico";
+type Aba = "unidade" | "equipe" | "maquininhas" | "preco" | "estoque" | "vendas" | "historico";
 const PAPEL: Record<string, string> = { operadora: "Operadora/vendedora", supervisora: "Supervisora", gestao: "Gestão" };
 
 function PdvConfig() {
   const qc = useQueryClient();
-  const unidades = useQuery({ queryKey: ["pdv", "unidades"], queryFn: () => ok<any[]>(db.from("pdv_unidades").select("*").order("nome")) });
+  const unidades = useQuery({ queryKey: ["pdv", "unidades"], queryFn: () => ok<any[]>(db.from("pdv_unidades").select("id,nome,location_id,business_entity_id,conta_dinheiro_id,conta_cartao_id,conta_pix_id,regra_preco,desconto_max_operadora_pct,desconto_max_supervisora_pct,reserva_minutos,comissao_libera_em,texto_comprovante,ativo,updated_at,created_at,numero,senha_alterada_em,pix_responsavel_user_id").order("nome")) });
   const [uid, setUid] = React.useState<string>("");
   React.useEffect(() => { if (!uid && unidades.data?.[0]) setUid(unidades.data[0].id); }, [unidades.data, uid]);
   const u = unidades.data?.find((x) => x.id === uid);
@@ -42,20 +42,25 @@ function PdvConfig() {
           <h1 className="font-display text-3xl">PDV Loja — Configuração</h1>
           <p className="text-sm text-muted-foreground">Tudo que a loja usa para vender fica aqui. Cada alteração é registrada no histórico.</p>
         </div>
+        <div className="flex items-end gap-2">
+        <CriarLoja onCriada={(id) => { refetch(); setUid(id); }} />
+        <a href="/pdv" target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-lg border border-border px-4 text-sm">Abrir PDV (lardan.com.br/pdv)</a>
         {(unidades.data?.length ?? 0) > 1 && (
-          <SmartSelect className="w-72" value={uid} onChange={setUid} options={(unidades.data ?? []).map((x) => ({ value: x.id, label: x.nome }))} />
+          <SmartSelect className="w-72" value={uid} onChange={setUid} options={(unidades.data ?? []).map((x) => ({ value: x.id, label: `${x.nome}${x.numero ? " · nº " + x.numero : ""}` }))} />
         )}
+        </div>
       </header>
 
       {unidades.isLoading ? <p className="text-sm text-muted-foreground">Carregando…</p> : !u ? <p className="text-sm text-muted-foreground">Sem lojas configuradas.</p> : (
         <>
           <Prontidao u={u} />
           <nav className="flex flex-wrap gap-1 border-b border-border">
-            {([["unidade", "Unidade", Store], ["equipe", "Equipe, comissão e metas", Users], ["maquininhas", "Maquininhas e terminais", CreditCard], ["preco", "Preço e descontos", Tag], ["estoque", "Estoque", Package], ["historico", "Histórico", History]] as const).map(([k, r, I]) => (
+            {([["unidade", "Unidade", Store], ["equipe", "Equipe, comissão e metas", Users], ["maquininhas", "Maquininhas e terminais", CreditCard], ["preco", "Preço e descontos", Tag], ["estoque", "Estoque", Package], ["vendas", "Vendas e caixas", Monitor], ["historico", "Histórico", History]] as const).map(([k, r, I]) => (
               <button key={k} onClick={() => setAba(k)} className={`inline-flex items-center gap-2 border-b-2 px-4 py-2 text-sm ${aba === k ? "border-primary text-foreground" : "border-transparent text-muted-foreground"}`}><I className="h-4 w-4" />{r}</button>
             ))}
           </nav>
-          {aba === "unidade" && <Unidade u={u} onSaved={refetch} />}
+          {aba === "unidade" && <><Acesso u={u} onSaved={refetch} /><Unidade u={u} onSaved={refetch} /></>}
+          {aba === "vendas" && <Vendas u={u} />}
           {aba === "equipe" && <Equipe u={u} />}
           {aba === "maquininhas" && <Maquininhas u={u} />}
           {aba === "preco" && <Preco u={u} onSaved={refetch} />}
@@ -96,7 +101,9 @@ function Prontidao({ u }: { u: any }) {
   });
   const d = q.data;
   const itens: [string, boolean][] = d ? [
+    ["Número e senha da loja", !!u.numero && !!u.senha_alterada_em],
     ["Empresa responsável", !!u.business_entity_id],
+    ["Responsável pelo Pix", !!u.pix_responsavel_user_id],
     ["Contas de dinheiro, cartão e Pix", !!(u.conta_dinheiro_id && u.conta_cartao_id && u.conta_pix_id)],
     [`Vendedoras (${d.vend})`, d.vend > 0],
     [`Supervisora (${d.sup})`, d.sup > 0],
@@ -111,7 +118,7 @@ function Prontidao({ u }: { u: any }) {
       <div className="grid gap-1 text-sm md:grid-cols-4">
         {itens.map(([r, okk]) => <span key={r} className={okk ? "text-foreground" : "text-destructive"}>{okk ? "✓" : "✕"} {r}</span>)}
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">Pix Asaas, caixa e comprovante entram na conferência quando a frente de venda for liberada.</p>
+      <p className="mt-2 text-xs text-muted-foreground">Cada vendedora também precisa de um PIN (aba Equipe) para entrar no PDV.</p>
     </div>
   );
 }
@@ -151,7 +158,7 @@ function Equipe({ u }: { u: any }) {
   const q = useQuery({
     queryKey: k,
     queryFn: async () => {
-      const m = await ok<any[]>(db.from("pdv_membros").select("*").eq("unidade_id", u.id).order("created_at"));
+      const m = await ok<any[]>(db.from("pdv_membros").select("id,unidade_id,user_id,papel,vende,ativo,created_at").eq("unidade_id", u.id).order("created_at"));
       const ids = m.map((x) => x.id);
       const [c, mt, users] = await Promise.all([
         ids.length ? ok<any[]>(db.from("pdv_comissoes").select("*").in("membro_id", ids).order("vigente_de", { ascending: false })) : [],
@@ -197,6 +204,7 @@ function Membro({ m, nome, com, metas, run }: { m: any; nome: string; com: any[]
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div><p className="font-medium">{nome}</p><p className="text-xs text-muted-foreground">{PAPEL[m.papel]} · {m.vende ? "vende" : "não vende"} · {m.ativo ? "ativa" : "inativa"}</p></div>
         <div className="flex gap-2 text-xs">
+          <button className="rounded-lg border border-border px-3 py-2" onClick={() => { const p = window.prompt(`Novo PIN de ${nome} (4 a 6 números):`); if (p) run(db.rpc("pdv_membro_pin", { _membro: m.id, _pin: p }), "PIN definido. Informe a vendedora pessoalmente."); }}>Definir PIN</button>
           <button className="rounded-lg border border-border px-3 py-2" onClick={() => run(db.from("pdv_membros").update({ vende: !m.vende, updated_at: new Date().toISOString() }).eq("id", m.id), "Atualizado.")}>{m.vende ? "Não vende" : "Vende"}</button>
           <button className="rounded-lg border border-border px-3 py-2" onClick={() => run(db.from("pdv_membros").update({ ativo: !m.ativo, updated_at: new Date().toISOString() }).eq("id", m.id), m.ativo ? "Acesso à loja bloqueado." : "Acesso reativado.")}>{m.ativo ? "Bloquear" : "Reativar"}</button>
         </div>
@@ -328,5 +336,82 @@ function Historico({ u }: { u: any }) {
         <p key={e.id} className="border-t border-border pt-2 text-sm">{new Date(e.created_at).toLocaleString("pt-BR")} · {T[e.tabela] ?? e.tabela} · {e.acao === "INSERT" ? "criado" : "alterado"}</p>
       ))}
     </Panel>
+  );
+}
+
+function CriarLoja({ onCriada }: { onCriada: (id: string) => void }) {
+  const [aberto, setAberto] = React.useState(false);
+  const [f, setF] = React.useState({ nome: "", numero: "", senha: "" });
+  const criar = async () => {
+    try { const id = await ok<string>(db.rpc("pdv_unidade_criar", { _nome: f.nome, _numero: f.numero, _senha: f.senha })); toast.success(`Loja nº ${f.numero} criada com local de estoque próprio.`); setAberto(false); setF({ nome: "", numero: "", senha: "" }); onCriada(id); }
+    catch (e) { toast.error((e as Error).message); }
+  };
+  if (!aberto) return <button onClick={() => setAberto(true)} className="h-10 rounded-lg bg-primary px-4 text-sm text-primary-foreground">Criar loja</button>;
+  return (
+    <div className="flex items-end gap-2 rounded-xl border border-border bg-card p-3">
+      <Campo r="Nome"><input className={inp + " w-48"} value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} /></Campo>
+      <Campo r="Número"><input className={inp + " w-28"} inputMode="numeric" value={f.numero} onChange={(e) => setF({ ...f, numero: e.target.value.replace(/\D/g, "") })} placeholder="12026" /></Campo>
+      <Campo r="Senha da loja"><input className={inp + " w-40"} type="password" value={f.senha} onChange={(e) => setF({ ...f, senha: e.target.value })} /></Campo>
+      <button onClick={criar} className="h-10 rounded-lg bg-primary px-4 text-sm text-primary-foreground">Criar</button>
+      <button onClick={() => setAberto(false)} className="h-10 px-2 text-sm underline">cancelar</button>
+    </div>
+  );
+}
+
+function Acesso({ u, onSaved }: { u: any; onSaved: () => void }) {
+  const [numero, setNumero] = React.useState(u.numero ?? ""); const [senha, setSenha] = React.useState("");
+  const [resp, setResp] = React.useState(u.pix_responsavel_user_id ?? "");
+  React.useEffect(() => { setNumero(u.numero ?? ""); setResp(u.pix_responsavel_user_id ?? ""); }, [u.id]);
+  const users = useQuery({ queryKey: ["pdv", "usuarios"], queryFn: () => ok<any[]>(db.rpc("pdv_usuarios_disponiveis")) });
+  const salvar = async () => {
+    try {
+      await ok(db.rpc("pdv_unidade_acesso", { _unidade: u.id, _numero: numero, _senha: senha }));
+      await ok(db.from("pdv_unidades").update({ pix_responsavel_user_id: resp || null, updated_at: new Date().toISOString() }).eq("id", u.id));
+      toast.success(senha ? "Acesso salvo. Aparelhos conectados foram desligados e precisam da nova senha." : "Acesso salvo."); setSenha(""); onSaved();
+    } catch (e) { toast.error((e as Error).message); }
+  };
+  return (
+    <Panel title="Acesso do PDV" hint="O aparelho da loja entra em lardan.com.br/pdv (ou /loja) com o número e a senha. Depois cada vendedora escolhe o nome e digita o PIN dela — a comissão vai para quem atendeu.">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Campo r="Número da loja"><input className={inp} inputMode="numeric" value={numero} onChange={(e) => setNumero(e.target.value.replace(/\D/g, ""))} placeholder="12026" /></Campo>
+        <Campo r={u.senha_alterada_em ? `Nova senha (atual definida em ${new Date(u.senha_alterada_em).toLocaleDateString("pt-BR")})` : "Senha da loja (ainda não definida)"}><input className={inp} type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="mínimo 6 caracteres" /></Campo>
+        <Campo r="Responsável pelo Pix (precisa poder emitir cobranças)"><SmartSelect value={resp} onChange={setResp} options={(users.data ?? []).map((x) => ({ value: x.user_id, label: x.nome, hint: x.email }))} /></Campo>
+      </div>
+      <button onClick={salvar} className="h-10 rounded-lg bg-primary px-5 text-sm text-primary-foreground">Salvar acesso</button>
+    </Panel>
+  );
+}
+
+function Vendas({ u }: { u: any }) {
+  const q = useQuery({
+    queryKey: ["pdv", "vendas", u.id],
+    queryFn: async () => {
+      const [v, c, m, users] = await Promise.all([
+        ok<any[]>(db.from("pdv_vendas").select("id,codigo,status,total_cents,desconto_cents,comissao_cents,comissao_pct,membro_id,created_at,cliente_nome").eq("unidade_id", u.id).order("created_at", { ascending: false }).limit(200)),
+        ok<any[]>(db.from("pdv_caixas").select("*").eq("unidade_id", u.id).order("aberto_em", { ascending: false }).limit(30)),
+        ok<any[]>(db.from("pdv_membros").select("id,user_id").eq("unidade_id", u.id)),
+        ok<any[]>(db.rpc("pdv_usuarios_disponiveis")),
+      ]);
+      const nome = (mid: string) => { const uid = m.find((x) => x.id === mid)?.user_id; return users.find((x) => x.user_id === uid)?.nome ?? "—"; };
+      return { v, c, nome };
+    },
+  });
+  const d = q.data; const conc = (d?.v ?? []).filter((x) => x.status === "concluida");
+  const porV = new Map<string, { t: number; c: number; n: number }>();
+  conc.forEach((x) => { const k = d!.nome(x.membro_id); const a = porV.get(k) ?? { t: 0, c: 0, n: 0 }; a.t += Number(x.total_cents); a.c += Number(x.comissao_cents ?? 0); a.n++; porV.set(k, a); });
+  return (
+    <div className="space-y-4">
+      <Panel title="Por vendedora (últimas 200 vendas)">
+        {porV.size === 0 ? <p className="text-sm text-muted-foreground">Sem vendas.</p> : [...porV].map(([k, a]) => <p key={k} className="text-sm">{k}: {a.n} vendas · <b className="font-mono">{brl(a.t)}</b> · comissão <b className="font-mono">{brl(a.c)}</b></p>)}
+      </Panel>
+      <Panel title="Caixas">
+        {(d?.c ?? []).length === 0 ? <p className="text-sm text-muted-foreground">Nenhum caixa aberto ainda.</p> : d!.c.map((c) => (
+          <p key={c.id} className="border-t border-border pt-2 text-sm">{new Date(c.aberto_em).toLocaleString("pt-BR")} · {c.status === "aberto" ? "aberto" : `fechado · esperado ${brl(Number(c.esperado_cents))} · contado ${brl(Number(c.contado_cents))}${Number(c.contado_cents) !== Number(c.esperado_cents) ? ` · diferença ${brl(Number(c.contado_cents) - Number(c.esperado_cents))}${c.observacao ? " (" + c.observacao + ")" : ""}` : ""}`}</p>))}
+      </Panel>
+      <Panel title="Vendas">
+        {(d?.v ?? []).length === 0 ? <p className="text-sm text-muted-foreground">Sem vendas.</p> : d!.v.map((x) => (
+          <p key={x.id} className="border-t border-border pt-2 text-sm">nº {x.codigo} · {new Date(x.created_at).toLocaleString("pt-BR")} · {d!.nome(x.membro_id)} · {x.status} · <b className="font-mono">{brl(Number(x.total_cents))}</b>{x.comissao_cents != null && ` · comissão ${brl(Number(x.comissao_cents))}`}</p>))}
+      </Panel>
+    </div>
   );
 }

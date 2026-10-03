@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import QRCode from "qrcode";
+import { SmartSelect } from "@/components/premium/SmartSelect";
 import { LogOut, Search, Trash2, Printer, MessageCircle, Lock, Wallet } from "lucide-react";
 import {
   pdvEntrar, pdvSair, pdvEstado, pdvOperadora, pdvOperadoraSair, pdvCaixaAbrir, pdvCaixaMov, pdvCaixaFechar,
@@ -238,7 +239,7 @@ function Venda({ e, ok }: { e: any; ok: () => void }) {
           <input className={inp} placeholder={`Valor (falta ${brl(falta)})`} inputMode="decimal" value={val} onChange={(x) => setVal(x.target.value)} />
           {forma === "dinheiro" && <input className={inp} placeholder="Recebido em dinheiro (para troco)" inputMode="decimal" value={rec} onChange={(x) => setRec(x.target.value)} />}
           {(forma === "debito" || forma === "credito") && <div className="grid grid-cols-3 gap-2">
-            <select className={inp + " col-span-3"} value={maq} onChange={(x) => setMaq(x.target.value)}>{e.maquininhas.length === 0 && <option value="">Sem maquininha cadastrada</option>}{e.maquininhas.map((m: any) => <option key={m.id} value={m.id}>{m.nome}</option>)}</select>
+            <div className="col-span-3"><SmartSelect value={maq} onChange={setMaq} options={e.maquininhas.map((m: any) => ({ value: m.id, label: m.nome }))} /></div>
             {forma === "credito" && <input className={inp} placeholder="Parcelas" inputMode="numeric" value={parc} onChange={(x) => setParc(x.target.value.replace(/\D/g, ""))} />}
             <input className={inp + (forma === "credito" ? " col-span-2" : " col-span-3")} placeholder="NSU / autorização" value={nsu} onChange={(x) => setNsu(x.target.value)} />
           </div>}

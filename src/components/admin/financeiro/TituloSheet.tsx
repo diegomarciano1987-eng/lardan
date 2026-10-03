@@ -9,6 +9,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { DateField } from "@/components/premium/DateField";
+import { format } from "date-fns";
 import {
   EmptyState,
   ErrorState,
@@ -91,6 +93,7 @@ export function TituloSheet({
   const [tarifa, setTarifa] = React.useState("");
   const [juros, setJuros] = React.useState("");
   const [desconto, setDesconto] = React.useState("");
+  const [dataBaixa, setDataBaixa] = React.useState<Date | undefined>(() => new Date());
   const [chave] = React.useState(() => crypto.randomUUID());
   const [estornando, setEstornando] = React.useState<string | null>(null);
   const [cancelando, setCancelando] = React.useState(false);
@@ -140,6 +143,10 @@ export function TituloSheet({
       const jc = reaisParaCentavos(juros) ?? 0;
       const dc = reaisParaCentavos(desconto) ?? 0;
       if (tc < 0 || jc < 0 || dc < 0) throw new Error("Tarifa, juros e desconto não podem ser negativos.");
+      if (!dataBaixa) throw new Error("Informe a data do pagamento/recebimento.");
+      const dataIso = format(dataBaixa, "yyyy-MM-dd");
+      const hojeSP = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+      if (dataIso > hojeSP) throw new Error("A data da baixa não pode ser futura.");
       return registrarBaixa({
         tarifa_cents: tc,
         juros_cents: jc,
@@ -147,8 +154,9 @@ export function TituloSheet({
         direction: t.titulo.direction,
         financial_account_id: conta,
         valor_cents: cents,
+        data: dataIso,
         ...(referencia.trim() ? { referencia: referencia.trim() } : {}),
-        idempotency_key: `${chave}-${parcela}-${cents}-${tc}-${jc}-${dc}`,
+        idempotency_key: `${chave}-${parcela}-${cents}-${tc}-${jc}-${dc}-${dataIso}`,
         alocacoes: [{ installment_id: parcela, valor_cents: cents }],
       });
     },
@@ -366,6 +374,12 @@ export function TituloSheet({
                     placeholder="Referência (opcional)"
                     className={inputCls}
                   />
+                </div>
+                <div className="mt-3">
+                  <label className="mb-1 block text-xs font-medium text-ledger-muted">
+                    Data do pagamento/recebimento
+                  </label>
+                  <DateField value={dataBaixa} onChange={setDataBaixa} toYear={new Date().getFullYear()} />
                 </div>
                 <div className="mt-3 grid gap-3 sm:grid-cols-3">
                   <input

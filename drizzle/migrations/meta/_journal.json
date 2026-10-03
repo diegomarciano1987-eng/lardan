@@ -71,6 +71,13 @@
       "when": 1791032151749,
       "tag": "0009_asaas_baixa_automatica",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791032348030,
+      "tag": "0010_asaas_baixa_pendentes_conta_financeira",
+      "breakpoints": true
     }
   ]
 }

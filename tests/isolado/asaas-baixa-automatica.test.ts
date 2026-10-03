@@ -20,12 +20,13 @@ let plano: string;
 
 async function cenario(valor = 10000, ligar: "direto" | "match" | "nenhum" = "direto") {
   const fin = (await um<{ id: string }>(`insert into public.financial_accounts (nome, kind) values ($1,'provedor') returning id`, [`ISO Asaas ${marca()}`])).id;
+  const emp = (await um<{ id: string }>(`insert into public.business_entities (legal_name, trade_name) values ($1,$1) returning id`, [`ISO Emp ${marca()}`])).id;
   const acc = (await um<{ id: string }>(
-    `insert into public.asaas_accounts (label, environment, financial_account_id) values ($1,'sandbox',$2) returning id`, [`ISO ${marca()}`, fin])).id;
+    `insert into public.asaas_accounts (label, environment, financial_account_id, owner_entity_id) values ($1,'sandbox',$2,$3) returning id`, [`ISO ${marca()}`, fin, emp])).id;
   const p = await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status) values ('pessoa',$1,$1,'ativo') returning id`, [`ISO P ${marca()}`]);
   const r = await rpc<string>(master, "fin_title_create", {
     _payload: { direction: "receivable", party_id: p.id, descricao: `ISO ${marca()}`, valor_cents: valor, emissao: DIA, competencia: DIA,
-      chart_account_id: plano, parcelas: [{ vencimento: DIA, valor_cents: valor }] } });
+      business_entity_id: emp, chart_account_id: plano, parcelas: [{ vencimento: DIA, valor_cents: valor }] } });
   if (!r.ok) throw new Error(r.erro!);
   const inst = (await um<{ id: string }>(`select id from public.financial_installments where title_id=$1`, [r.dados])).id;
   const ext = `pay_${marca()}`;

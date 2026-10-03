@@ -7,7 +7,7 @@ import QRCode from "qrcode";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { LogOut, Search, Trash2, Printer, MessageCircle, Lock, Wallet } from "lucide-react";
 import {
-  pdvEntrar, pdvSair, pdvEstado, pdvOperadora, pdvOperadoraSair, pdvCaixaAbrir, pdvCaixaMov, pdvCaixaFechar,
+  pdvEntrarIniciar, pdvEntrarConfirmar, pdvSair, pdvEstado, pdvOperadora, pdvOperadoraSair, pdvCaixaAbrir, pdvCaixaMov, pdvCaixaFechar,
   pdvBuscar, pdvConcluir, pdvPixGerar, pdvPixSituacao, pdvCancelar, pdvComprovante, type PagamentoPdv,
 } from "@/lib/pdv.functions";
 
@@ -48,19 +48,41 @@ function Tela({ children }: { children: React.ReactNode }) {
 }
 
 function Entrar() {
-  const qc = useQueryClient(); const f = useServerFn(pdvEntrar);
-  const [numero, setNumero] = React.useState(""); const [senha, setSenha] = React.useState(""); const [busy, setBusy] = React.useState(false);
-  const go = async (ev: React.FormEvent) => {
-    ev.preventDefault(); setBusy(true);
-    try { await f({ data: { numero, senha } }); qc.invalidateQueries({ queryKey: ["pdv-loja"] }); } catch (e) { erro(e); } finally { setBusy(false); }
+  const qc = useQueryClient(); const ini = useServerFn(pdvEntrarIniciar); const conf = useServerFn(pdvEntrarConfirmar);
+  const [numero, setNumero] = React.useState(""); const [senha, setSenha] = React.useState(""); const [email, setEmail] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const [desafio, setDesafio] = React.useState<{ desafio: string; email: string } | null>(null);
+  const [codigo, setCodigo] = React.useState(""); const [espera, setEspera] = React.useState(0);
+  React.useEffect(() => { if (espera <= 0) return; const t = setTimeout(() => setEspera(espera - 1), 1000); return () => clearTimeout(t); }, [espera]);
+  const pedir = async (ev?: React.FormEvent) => {
+    ev?.preventDefault(); setBusy(true);
+    try { setDesafio(await ini({ data: { numero, senha, email } })); setCodigo(""); setEspera(60); toast.success("Código enviado para o seu e-mail."); } catch (e) { erro(e); } finally { setBusy(false); }
   };
+  const confirmar = async (ev: React.FormEvent) => {
+    ev.preventDefault(); if (!desafio) return; setBusy(true);
+    try { await conf({ data: { desafio: desafio.desafio, codigo } }); qc.invalidateQueries({ queryKey: ["pdv-loja"] }); } catch (e) { erro(e); setCodigo(""); } finally { setBusy(false); }
+  };
+  if (desafio) return (
+    <Tela>
+      <form onSubmit={confirmar} className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-8">
+        <div><p className="ledger-eyebrow">Lardan</p><h1 className="font-display text-3xl">Código de confirmação</h1><p className="text-sm text-muted-foreground">Enviamos um código de 6 dígitos para <b>{desafio.email}</b>. Ele vale por 10 minutos.</p></div>
+        <input aria-label="Código" className={inp + " text-center text-2xl tracking-[0.5em]"} inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={codigo} onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))} autoFocus />
+        <button disabled={busy || codigo.length !== 6} className={btn + " w-full"}>{busy ? "Conferindo…" : "Confirmar e entrar"}</button>
+        <div className="flex justify-between text-sm">
+          <button type="button" className="text-muted-foreground underline" onClick={() => setDesafio(null)}>Voltar</button>
+          <button type="button" disabled={espera > 0 || busy} className="underline disabled:no-underline disabled:text-muted-foreground" onClick={() => pedir()}>{espera > 0 ? `Reenviar em ${espera}s` : "Reenviar código"}</button>
+        </div>
+      </form>
+    </Tela>
+  );
   return (
     <Tela>
-      <form onSubmit={go} className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-8">
-        <div><p className="ledger-eyebrow">Lardan</p><h1 className="font-display text-3xl">PDV da loja</h1><p className="text-sm text-muted-foreground">Digite o número da loja e a senha criada pela gestão.</p></div>
+      <form onSubmit={pedir} className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-8">
+        <div><p className="ledger-eyebrow">Lardan</p><h1 className="font-display text-3xl">PDV da loja</h1><p className="text-sm text-muted-foreground">Digite o número da loja, a senha criada pela gestão e o seu e-mail. Você vai receber um código para entrar.</p></div>
         <label className="block space-y-1 text-sm"><span>Número da loja</span><input className={inp} inputMode="numeric" value={numero} onChange={(e) => setNumero(e.target.value)} autoFocus /></label>
-        <label className="block space-y-1 text-sm"><span>Senha</span><input className={inp} type="password" value={senha} onChange={(e) => setSenha(e.target.value)} /></label>
-        <button disabled={busy || !numero || !senha} className={btn + " w-full"}>{busy ? "Entrando…" : "Entrar"}</button>
+        <label className="block space-y-1 text-sm"><span>Senha da loja</span><input className={inp} type="password" value={senha} onChange={(e) => setSenha(e.target.value)} /></label>
+        <label className="block space-y-1 text-sm"><span>Seu e-mail</span><input className={inp} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
+        <button disabled={busy || !numero || !senha || !email.includes("@")} className={btn + " w-full"}>{busy ? "Enviando…" : "Receber código"}</button>
       </form>
     </Tela>
   );

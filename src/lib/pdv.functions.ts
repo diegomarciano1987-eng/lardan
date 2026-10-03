@@ -29,13 +29,31 @@ async function token() {
 const str = (v: unknown, max = 200) => (typeof v === "string" ? v.slice(0, max) : "");
 const num = (v: unknown) => { const n = Math.round(Number(v)); if (!Number.isFinite(n)) throw new Error("Valor inválido."); return n; };
 
-export const pdvEntrar = createServerFn({ method: "POST" })
-  .inputValidator((d: { numero: string; senha: string }) => ({ numero: str(d?.numero, 10).replace(/\D/g, ""), senha: str(d?.senha, 100) }))
+const mascarar = (e: string) => { const [u, d] = e.split("@"); return `${(u ?? "").slice(0, 1)}***@${d ?? ""}`; };
+
+/** Passo 1: número + senha + e-mail da pessoa. O código vai só por e-mail; nunca volta ao navegador. */
+export const pdvEntrarIniciar = createServerFn({ method: "POST" })
+  .inputValidator((d: { numero: string; senha: string; email: string }) => ({ numero: str(d?.numero, 10).replace(/\D/g, ""), senha: str(d?.senha, 100), email: str(d?.email, 255).trim().toLowerCase() }))
+  .handler(async ({ data }) => {
+    const r = await rpc<{ desafio: string; codigo: string; email: string; nome: string | null; unidade: string; numero: string }>("pdv_entrar_iniciar", { _numero: data.numero, _senha: data.senha, _email: data.email });
+    const { sendTemplateEmail } = await import("./email-templates/send-email");
+    const env = await sendTemplateEmail("codigo-pdv", r.email, {
+      templateData: { nome: r.nome?.split(" ")[0], codigo: r.codigo, loja: `${r.unidade} nº ${r.numero}` },
+      idempotencyKey: `pdv-codigo-${r.desafio}`,
+    });
+    if (!env.sent) throw new Error("Este e-mail está bloqueado para recebimento. Fale com a gestão.");
+    return { desafio: r.desafio, email: mascarar(r.email) };
+  });
+
+/** Passo 2: código recebido por e-mail. Só aqui o aparelho ganha a sessão da loja. */
+export const pdvEntrarConfirmar = createServerFn({ method: "POST" })
+  .inputValidator((d: { desafio: string; codigo: string }) => ({ desafio: str(d?.desafio, 40), codigo: str(d?.codigo, 6).replace(/\D/g, "") }))
   .handler(async ({ data }) => {
     const bruto = crypto.randomUUID() + crypto.randomUUID();
-    const r = await rpc("pdv_entrar", { _numero: data.numero, _senha: data.senha, _token_hash: await sha256(bruto), _ua: getRequestHeader("user-agent") ?? "" });
+    const r = await rpc<{ ok: boolean; erro?: string }>("pdv_entrar_confirmar", { _desafio: data.desafio, _codigo: data.codigo, _token_hash: await sha256(bruto), _ua: getRequestHeader("user-agent") ?? "" });
+    if (!r.ok) throw new Error(r.erro || "Código incorreto.");
     setCookie(COOKIE, bruto, { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 60 * 60 * 16 });
-    return r as { unidade: string; numero: string };
+    return r;
   });
 
 export const pdvSair = createServerFn({ method: "POST" }).handler(async () => {

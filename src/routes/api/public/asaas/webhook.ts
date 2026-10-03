@@ -7,8 +7,9 @@
  *
  * Fluxo: autentica pelo token da conta ativa → registra o evento antes de
  * qualquer efeito (dedupe por conteúdo) → processa (espelha situação).
- * Repetido não repete efeito. Nenhuma baixa financeira nasce aqui: a baixa
- * segue pela rotina humana existente na tela de recebíveis.
+ * Repetido não repete efeito. PAYMENT_RECEIVED de cobrança ligada a parcela
+ * gera a baixa automática no banco (asaas_baixa_automatica, idempotente);
+ * dinheiro, estornos e disputas continuam em revisão humana.
  */
 import { createFileRoute } from "@tanstack/react-router";
 

@@ -55,8 +55,9 @@ describe("PDV Loja", async () => {
     expect((await rpc<{ user_id: string }[]>(master, "pdv_usuarios_disponiveis", {})).dados.map((x) => x.user_id)).not.toContain(sup.uid);
     await adm.unsafe("update public.vendedora_profiles set situacao='ativa' where party_id=$1", [pv!.party_id]);
     // fora da gestão: não lê nem escreve a ficha
-    expect((await ler(intruso, "select pix_key from public.vendedora_profiles")).ok).toBe(true);
-    expect(((await ler(intruso, "select pix_key from public.vendedora_profiles")) as { linhas?: unknown[] }).linhas?.length ?? 0).toBe(0);
+    const curioso = await criarConta({ nome: "pdv-curioso", papeis: [] });
+    expect((await ler(curioso, "select pix_key from public.vendedora_profiles")).linhas.length).toBe(0);
+    expect((await ler(curioso, "update public.vendedora_profiles set pix_key='x' returning 1")).linhas.length).toBe(0);
   });
 
   test("equipe vinculada à loja, PIN e comissão", async () => {

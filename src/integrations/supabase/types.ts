@@ -7545,6 +7545,342 @@ export type Database = {
         }
         Relationships: []
       }
+      pdv_comissoes: {
+        Row: {
+          base: string
+          created_at: string
+          created_by: string | null
+          id: string
+          membro_id: string
+          percentual: number
+          vigente_ate: string | null
+          vigente_de: string
+        }
+        Insert: {
+          base?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          membro_id: string
+          percentual: number
+          vigente_ate?: string | null
+          vigente_de: string
+        }
+        Update: {
+          base?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          membro_id?: string
+          percentual?: number
+          vigente_ate?: string | null
+          vigente_de?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_comissoes_membro_id_fkey"
+            columns: ["membro_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdv_config_eventos: {
+        Row: {
+          acao: string
+          autor_id: string | null
+          created_at: string
+          dados: Json | null
+          id: string
+          registro_id: string | null
+          tabela: string
+          unidade_id: string | null
+        }
+        Insert: {
+          acao: string
+          autor_id?: string | null
+          created_at?: string
+          dados?: Json | null
+          id?: string
+          registro_id?: string | null
+          tabela: string
+          unidade_id?: string | null
+        }
+        Update: {
+          acao?: string
+          autor_id?: string | null
+          created_at?: string
+          dados?: Json | null
+          id?: string
+          registro_id?: string | null
+          tabela?: string
+          unidade_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_config_eventos_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdv_maquininhas: {
+        Row: {
+          adquirente: string
+          ativo: boolean
+          created_at: string
+          id: string
+          max_parcelas: number
+          nome: string
+          taxa_credito_pct: number | null
+          taxa_debito_pct: number | null
+          unidade_id: string
+        }
+        Insert: {
+          adquirente: string
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          max_parcelas?: number
+          nome: string
+          taxa_credito_pct?: number | null
+          taxa_debito_pct?: number | null
+          unidade_id: string
+        }
+        Update: {
+          adquirente?: string
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          max_parcelas?: number
+          nome?: string
+          taxa_credito_pct?: number | null
+          taxa_debito_pct?: number | null
+          unidade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_maquininhas_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdv_membros: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          papel: string
+          unidade_id: string
+          updated_at: string
+          user_id: string
+          vende: boolean
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          papel: string
+          unidade_id: string
+          updated_at?: string
+          user_id: string
+          vende?: boolean
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          papel?: string
+          unidade_id?: string
+          updated_at?: string
+          user_id?: string
+          vende?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_membros_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdv_metas: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          membro_id: string
+          meta_cents: number
+          periodo_ate: string
+          periodo_de: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          membro_id: string
+          meta_cents: number
+          periodo_ate: string
+          periodo_de: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          membro_id?: string
+          meta_cents?: number
+          periodo_ate?: string
+          periodo_de?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_metas_membro_id_fkey"
+            columns: ["membro_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdv_terminais: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          nome: string
+          unidade_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome: string
+          unidade_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome?: string
+          unidade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_terminais_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdv_unidades: {
+        Row: {
+          ativo: boolean
+          business_entity_id: string | null
+          comissao_libera_em: string
+          conta_cartao_id: string | null
+          conta_dinheiro_id: string | null
+          conta_pix_id: string | null
+          created_at: string
+          desconto_max_operadora_pct: number
+          desconto_max_supervisora_pct: number
+          id: string
+          location_id: string
+          nome: string
+          regra_preco: string
+          reserva_minutos: number
+          texto_comprovante: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          business_entity_id?: string | null
+          comissao_libera_em?: string
+          conta_cartao_id?: string | null
+          conta_dinheiro_id?: string | null
+          conta_pix_id?: string | null
+          created_at?: string
+          desconto_max_operadora_pct?: number
+          desconto_max_supervisora_pct?: number
+          id?: string
+          location_id: string
+          nome: string
+          regra_preco?: string
+          reserva_minutos?: number
+          texto_comprovante?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          business_entity_id?: string | null
+          comissao_libera_em?: string
+          conta_cartao_id?: string | null
+          conta_dinheiro_id?: string | null
+          conta_pix_id?: string | null
+          created_at?: string
+          desconto_max_operadora_pct?: number
+          desconto_max_supervisora_pct?: number
+          id?: string
+          location_id?: string
+          nome?: string
+          regra_preco?: string
+          reserva_minutos?: number
+          texto_comprovante?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_unidades_business_entity_id_fkey"
+            columns: ["business_entity_id"]
+            isOneToOne: false
+            referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_unidades_conta_cartao_id_fkey"
+            columns: ["conta_cartao_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_unidades_conta_dinheiro_id_fkey"
+            columns: ["conta_dinheiro_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_unidades_conta_pix_id_fkey"
+            columns: ["conta_pix_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_unidades_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: true
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plating_types: {
         Row: {
           code: string
@@ -10945,6 +11281,20 @@ export type Database = {
         Returns: Json
       }
       party_doc_reveal: { Args: { _id: string }; Returns: string }
+      pdv_estoque_resumo: { Args: { _unidade: string }; Returns: Json }
+      pdv_gestao: { Args: { _u: string }; Returns: boolean }
+      pdv_membro_de: {
+        Args: { _u: string; _unidade: string }
+        Returns: boolean
+      }
+      pdv_usuarios_disponiveis: {
+        Args: never
+        Returns: {
+          email: string
+          nome: string
+          user_id: string
+        }[]
+      }
       phone_canon: { Args: { v: string }; Returns: string }
       product_costs_read: { Args: { _product: string }; Returns: Json }
       product_import_apply: {

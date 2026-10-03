@@ -85,6 +85,13 @@
       "when": 1791033296755,
       "tag": "0011_cobranca_crm_base",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791033337383,
+      "tag": "0012_cobranca_crm_fix_colunas",
+      "breakpoints": true
     }
   ]
 }

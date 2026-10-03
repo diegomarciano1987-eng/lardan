@@ -1,4 +1,5 @@
 import * as React from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import QRCode from "qrcode";
 import {
@@ -642,7 +643,8 @@ function PainelCompartilhar({ d, muda, party, img, origem, publicadoSlug, onLink
     <div className="space-y-4">
       <Campo rotulo="Endereço da vitrine" dica="Só letras, números e hífen. Ex.: maria-joias">
         <div className="flex items-center gap-1"><span className="text-xs text-ledger-muted">{origem.replace(/^https?:\/\//, "")}/</span>
-          <input className="admin-input flex-1" value={d.slug} onChange={(e) => muda((x) => { x.slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40); return x; })} placeholder="seunome" /></div>
+          <input className="admin-input flex-1" value={d.slug} onChange={(e) => muda((x) => { x.slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40); return x; })} placeholder="seunome" aria-describedby="slug-situacao" /></div>
+        <SituacaoEndereco slug={d.slug} />
       </Campo>
       <Campo rotulo="Título ao compartilhar" limite={LIMITES.titulo} valor={d.compartilhar.titulo}>
         <input className="admin-input" value={d.compartilhar.titulo} placeholder={titulo} onChange={(e) => muda((x) => { x.compartilhar.titulo = e.target.value.slice(0, LIMITES.titulo); return x; })} />
@@ -689,5 +691,36 @@ function Historico({ versoes, onRestaurar }: { versoes: { id: string; numero: nu
       </ul>
       <p className="mt-2 text-[0.7rem] text-ledger-muted">Restaurar volta apenas o visual e os textos. Peças, preços e disponibilidade continuam sempre os atuais.</p>
     </details>
+  );
+}
+
+const MOTIVO_ENDERECO: Record<string, { ok: boolean; t: string }> = {
+  livre: { ok: true, t: "Disponível. Este endereço pode ser seu." },
+  seu: { ok: true, t: "Este já é o seu endereço." },
+  curto: { ok: false, t: "Use pelo menos 3 letras." },
+  formato: { ok: false, t: "Use só letras, números e um hífen entre palavras." },
+  em_uso: { ok: false, t: "Este endereço já pertence a outra consultora. Escolha outro." },
+  reservado: { ok: false, t: "Este endereço é usado pelo site da Lardan. Escolha outro." },
+};
+
+/** Confere o endereço enquanto a consultora digita, como no Instagram. */
+function SituacaoEndereco({ slug }: { slug: string }) {
+  const [r, setR] = React.useState<{ slug: string; motivo: string } | null>(null);
+  React.useEffect(() => {
+    if (!slug) { setR(null); return; }
+    const t = setTimeout(() => {
+      void supabase.rpc("vitrine_endereco_disponivel" as never, { _slug: slug } as never).then(({ data }) => {
+        const m = (data as { motivo?: string } | null)?.motivo;
+        if (m) setR({ slug, motivo: m });
+      });
+    }, 350);
+    return () => clearTimeout(t);
+  }, [slug]);
+  if (!slug) return null;
+  const info = r && r.slug === slug ? MOTIVO_ENDERECO[r.motivo] : null;
+  return (
+    <p id="slug-situacao" role="status" className={`mt-1.5 text-xs font-semibold ${!info ? "text-ledger-muted" : info.ok ? "text-success" : "text-danger"}`}>
+      {info ? `${info.ok ? "✓" : "✕"} ${info.t}` : "Conferindo…"}
+    </p>
   );
 }

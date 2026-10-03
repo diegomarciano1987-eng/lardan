@@ -2504,11 +2504,14 @@ export type Database = {
           pix_holder_doc: string | null
           pix_key: string | null
           pix_key_type: string | null
+          referral_code: string | null
           region: string | null
           representative_party_id: string | null
           restricted_notes: string | null
           sale_profile: string | null
+          sponsor_origin: string | null
           sponsor_party_id: string | null
+          sponsor_set_at: string | null
           updated_at: string
           wallet: string | null
         }
@@ -2531,11 +2534,14 @@ export type Database = {
           pix_holder_doc?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
+          referral_code?: string | null
           region?: string | null
           representative_party_id?: string | null
           restricted_notes?: string | null
           sale_profile?: string | null
+          sponsor_origin?: string | null
           sponsor_party_id?: string | null
+          sponsor_set_at?: string | null
           updated_at?: string
           wallet?: string | null
         }
@@ -2558,11 +2564,14 @@ export type Database = {
           pix_holder_doc?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
+          referral_code?: string | null
           region?: string | null
           representative_party_id?: string | null
           restricted_notes?: string | null
           sale_profile?: string | null
+          sponsor_origin?: string | null
           sponsor_party_id?: string | null
+          sponsor_set_at?: string | null
           updated_at?: string
           wallet?: string | null
         }
@@ -6551,6 +6560,8 @@ export type Database = {
           priority: string
           privacy_version: string
           protocol: string
+          referred_at: string | null
+          referred_by_party_id: string | null
           referrer: string | null
           source: string | null
           source_normalized: string
@@ -6619,6 +6630,8 @@ export type Database = {
           priority?: string
           privacy_version: string
           protocol?: string
+          referred_at?: string | null
+          referred_by_party_id?: string | null
           referrer?: string | null
           source?: string | null
           source_normalized?: string
@@ -6687,6 +6700,8 @@ export type Database = {
           priority?: string
           privacy_version?: string
           protocol?: string
+          referred_at?: string | null
+          referred_by_party_id?: string | null
           referrer?: string | null
           source?: string | null
           source_normalized?: string
@@ -6724,6 +6739,20 @@ export type Database = {
           {
             foreignKeyName: "leads_party_id_fkey"
             columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "leads_referred_by_party_id_fkey"
+            columns: ["referred_by_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_referred_by_party_id_fkey"
+            columns: ["referred_by_party_id"]
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
@@ -8004,6 +8033,138 @@ export type Database = {
           },
         ]
       }
+      referral_commissions: {
+        Row: {
+          comissao_cents: number
+          created_at: string
+          cycle_id: string
+          faixa: string
+          id: string
+          indicada_party_id: string
+          indicadas_aprovadas: number
+          itens: Json
+          pecas_vendidas: number
+          percentual: number
+          sponsor_party_id: string
+          status: string
+          venda_cents: number
+        }
+        Insert: {
+          comissao_cents: number
+          created_at?: string
+          cycle_id: string
+          faixa: string
+          id?: string
+          indicada_party_id: string
+          indicadas_aprovadas: number
+          itens?: Json
+          pecas_vendidas: number
+          percentual: number
+          sponsor_party_id: string
+          status?: string
+          venda_cents: number
+        }
+        Update: {
+          comissao_cents?: number
+          created_at?: string
+          cycle_id?: string
+          faixa?: string
+          id?: string
+          indicada_party_id?: string
+          indicadas_aprovadas?: number
+          itens?: Json
+          pecas_vendidas?: number
+          percentual?: number
+          sponsor_party_id?: string
+          status?: string
+          venda_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_commissions_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: true
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_indicada_party_id_fkey"
+            columns: ["indicada_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_indicada_party_id_fkey"
+            columns: ["indicada_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_sponsor_party_id_fkey"
+            columns: ["sponsor_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_sponsor_party_id_fkey"
+            columns: ["sponsor_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      referral_settings: {
+        Row: {
+          ativo: boolean
+          id: number
+          observacao: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          id?: number
+          observacao?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          id?: number
+          observacao?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      referral_tiers: {
+        Row: {
+          created_at: string
+          id: string
+          min_indicadas: number
+          percentual: number
+          titulo: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          min_indicadas: number
+          percentual: number
+          titulo?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          min_indicadas?: number
+          percentual?: number
+          titulo?: string
+        }
+        Relationships: []
+      }
       role_capabilities: {
         Row: {
           capability: string
@@ -8368,6 +8529,39 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "product_variants"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      showcase_slug_history: {
+        Row: {
+          created_at: string
+          party_id: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          party_id: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          party_id?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "showcase_slug_history_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "showcase_slug_history_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -10172,6 +10366,9 @@ export type Database = {
         }
         Returns: Json
       }
+      indicacao_aprovadas: { Args: { _sponsor: string }; Returns: number }
+      indicacao_painel_admin: { Args: never; Returns: Json }
+      indicacao_publica: { Args: { _code: string }; Returns: Json }
       integration_health: {
         Args: never
         Returns: {
@@ -10315,6 +10512,7 @@ export type Database = {
       mask_doc: { Args: { _doc: string }; Returns: string }
       mask_reference: { Args: { v: string }; Returns: string }
       master_exists: { Args: never; Returns: boolean }
+      minhas_indicacoes: { Args: never; Returns: Json }
       my_capabilities: {
         Args: never
         Returns: {
@@ -10774,6 +10972,7 @@ export type Database = {
       }
       variant_ean_next: { Args: never; Returns: string }
       variant_save: { Args: { _id: string; _payload: Json }; Returns: Json }
+      vitrine_endereco_disponivel: { Args: { _slug: string }; Returns: Json }
     }
     Enums: {
       app_role:

@@ -70,6 +70,7 @@ import { Route as AuthenticatedAdminCadastrosLocaisRouteImport } from './routes/
 import { Route as AuthenticatedAdminCadastrosPessoasRouteImport } from './routes/_authenticated/admin/cadastros/pessoas'
 import { Route as AuthenticatedAdminCadastrosProdutosRouteImport } from './routes/_authenticated/admin/cadastros/produtos'
 import { Route as AuthenticatedAdminCandidaturasIdRouteImport } from './routes/_authenticated/admin/candidaturas_.$id'
+import { Route as AuthenticatedAdminCandidaturasIndicacaoRouteImport } from './routes/_authenticated/admin/candidaturas_.indicacao'
 import { Route as AuthenticatedAdminFinanceiroIndexRouteImport } from './routes/_authenticated/admin/financeiro/index'
 import { Route as AuthenticatedAdminFinanceiroAprovacoesRouteImport } from './routes/_authenticated/admin/financeiro/aprovacoes'
 import { Route as AuthenticatedAdminFinanceiroAsaasRouteImport } from './routes/_authenticated/admin/financeiro/asaas'
@@ -433,6 +434,12 @@ const AuthenticatedAdminCandidaturasIdRoute =
     path: '/candidaturas/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminCandidaturasIndicacaoRoute =
+  AuthenticatedAdminCandidaturasIndicacaoRouteImport.update({
+    id: '/candidaturas_/indicacao',
+    path: '/candidaturas/indicacao',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminFinanceiroIndexRoute =
   AuthenticatedAdminFinanceiroIndexRouteImport.update({
     id: '/',
@@ -688,6 +695,7 @@ export interface FileRoutesByFullPath {
   '/admin/cadastros/pessoas': typeof AuthenticatedAdminCadastrosPessoasRoute
   '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
+  '/admin/candidaturas/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -781,6 +789,7 @@ export interface FileRoutesByTo {
   '/admin/cadastros/pessoas': typeof AuthenticatedAdminCadastrosPessoasRoute
   '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
+  '/admin/candidaturas/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -878,6 +887,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cadastros/pessoas': typeof AuthenticatedAdminCadastrosPessoasRoute
   '/_authenticated/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/_authenticated/admin/candidaturas_/$id': typeof AuthenticatedAdminCandidaturasIdRoute
+  '/_authenticated/admin/candidaturas_/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   '/_authenticated/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/_authenticated/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/_authenticated/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -975,6 +985,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/pessoas'
     | '/admin/cadastros/produtos'
     | '/admin/candidaturas/$id'
+    | '/admin/candidaturas/indicacao'
     | '/admin/financeiro/aprovacoes'
     | '/admin/financeiro/asaas'
     | '/admin/financeiro/asaas-extrato'
@@ -1068,6 +1079,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/pessoas'
     | '/admin/cadastros/produtos'
     | '/admin/candidaturas/$id'
+    | '/admin/candidaturas/indicacao'
     | '/admin/financeiro/aprovacoes'
     | '/admin/financeiro/asaas'
     | '/admin/financeiro/asaas-extrato'
@@ -1164,6 +1176,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cadastros/pessoas'
     | '/_authenticated/admin/cadastros/produtos'
     | '/_authenticated/admin/candidaturas_/$id'
+    | '/_authenticated/admin/candidaturas_/indicacao'
     | '/_authenticated/admin/financeiro/aprovacoes'
     | '/_authenticated/admin/financeiro/asaas'
     | '/_authenticated/admin/financeiro/asaas-extrato'
@@ -1672,6 +1685,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCandidaturasIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/candidaturas_/indicacao': {
+      id: '/_authenticated/admin/candidaturas_/indicacao'
+      path: '/candidaturas/indicacao'
+      fullPath: '/admin/candidaturas/indicacao'
+      preLoaderRoute: typeof AuthenticatedAdminCandidaturasIndicacaoRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/financeiro/': {
       id: '/_authenticated/admin/financeiro/'
       path: '/'
@@ -1997,6 +2017,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCadastrosPessoasRoute: typeof AuthenticatedAdminCadastrosPessoasRoute
   AuthenticatedAdminCadastrosProdutosRoute: typeof AuthenticatedAdminCadastrosProdutosRoute
   AuthenticatedAdminCandidaturasIdRoute: typeof AuthenticatedAdminCandidaturasIdRoute
+  AuthenticatedAdminCandidaturasIndicacaoRoute: typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   AuthenticatedAdminMaletasIdRoute: typeof AuthenticatedAdminMaletasIdRoute
   AuthenticatedAdminMaletasEntradaRoute: typeof AuthenticatedAdminMaletasEntradaRoute
   AuthenticatedAdminCadastrosIndexRoute: typeof AuthenticatedAdminCadastrosIndexRoute
@@ -2043,6 +2064,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminCadastrosProdutosRoute,
     AuthenticatedAdminCandidaturasIdRoute:
       AuthenticatedAdminCandidaturasIdRoute,
+    AuthenticatedAdminCandidaturasIndicacaoRoute:
+      AuthenticatedAdminCandidaturasIndicacaoRoute,
     AuthenticatedAdminMaletasIdRoute: AuthenticatedAdminMaletasIdRoute,
     AuthenticatedAdminMaletasEntradaRoute:
       AuthenticatedAdminMaletasEntradaRoute,

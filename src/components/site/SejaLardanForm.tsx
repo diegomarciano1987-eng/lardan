@@ -4,7 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Search } from "lucide-react";
 import { PRIVACY_VERSION } from "@/lib/privacy";
 import { isValidCpf, maskDocInput, onlyDigits } from "@/lib/docs-br";
-import { capturarTracking, registrarPrimeiroContato } from "@/lib/crm/tracking";
+import { capturarTracking, registrarIndicacao } from "@/lib/crm/tracking";
+import { supabase } from "@/integrations/supabase/client";
 import { enviarCandidatura } from "@/lib/crm/candidaturas.functions";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { Button } from "@/components/ui/button";
@@ -110,6 +111,18 @@ export function SejaLardanForm() {
   const [estadoCep, setEstadoCep] = useState<string | null>(null);
   const consultarCepFn = useServerFn(consultarCepPublico);
   const enviarFn = useServerFn(enviarCandidatura);
+
+  const [madrinha, setMadrinha] = useState<string | null>(null);
+  useEffect(() => {
+    const codigo = registrarIndicacao();
+    if (!codigo) return;
+    void supabase
+      .rpc("indicacao_publica" as never, { _code: codigo } as never)
+      .then(({ data }) => {
+        const nome = (data as { nome?: string } | null)?.nome;
+        if (nome) setMadrinha(nome);
+      });
+  }, []);
 
   // O primeiro contato é registrado uma única vez, no SiteLayout.
   const listarMunicipiosFn = useServerFn(listarMunicipiosPublico);
@@ -251,6 +264,11 @@ export function SejaLardanForm() {
 
   return (
     <form onSubmit={enviar} className="mx-auto max-w-2xl space-y-8" noValidate={false}>
+      {madrinha && (
+        <p role="status" className="rounded-xl border border-primary/30 bg-primary/5 px-5 py-4 text-sm text-foreground">
+          Você chegou pelo convite de <strong>{madrinha}</strong>, Consultora Lardan.
+        </p>
+      )}
       <fieldset className="space-y-4">
         <legend className="brand-eyebrow mb-4">Dados de contato</legend>
         <div className="grid gap-4 sm:grid-cols-2">

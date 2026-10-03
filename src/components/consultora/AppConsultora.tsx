@@ -19,7 +19,7 @@ import {
   meuParty, obterCliente, ETAPAS, historicoEtapas, linkInstagram, moverEtapa, pausarPessoa, rotuloEtapa, type Etapa, pecasDisponiveis, registrarAtendimento, salvarCliente, type Atendimento, type Cliente, type Peca,
 } from "@/lib/consultora";
 
-export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "mais" | "novo";
+export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "mais" | "novo";
 export type Nav = { aba: AbaApp; id?: string | undefined; modo?: "nova" | "editar" | undefined; q?: string | undefined };
 export type Ir = (n: Nav) => void;
 
@@ -37,9 +37,10 @@ const PRINCIPAIS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
 const EXTRAS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
   { aba: "vitrine", rotulo: "Minha vitrine", icone: Store },
   { aba: "historico", rotulo: "Entregas da maleta", icone: PackageCheck },
+  { aba: "indicacoes", rotulo: "Indicações", icone: UserPlus },
 ];
 
-const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : a === "vitrine" || a === "historico" ? "mais" : a);
+const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : a === "vitrine" || a === "historico" || a === "indicacoes" ? "mais" : a);
 
 export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir; ajuda: string; children: React.ReactNode }) {
   const ativo = grupoDe(nav.aba);
@@ -786,6 +787,7 @@ export function Mais({ ir }: { ir: Ir }) {
   const itens = [
     { r: "Minha vitrine", d: "Foto, capa, peças e link para compartilhar", i: Store, n: { aba: "vitrine" } as Nav },
     { r: "Entregas da maleta", d: "Histórico de envios e recebimentos", i: PackageCheck, n: { aba: "historico" } as Nav },
+    { r: "Indicações", d: "Seu link, suas indicadas e comissões", i: UserPlus, n: { aba: "indicacoes" } as Nav },
   ];
   return (
     <div>

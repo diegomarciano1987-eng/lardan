@@ -258,6 +258,7 @@ function CandidaturasPage() {
         actions={
           <div className="flex flex-wrap items-center gap-2">
           <AvisosPush />
+          <Link to="/admin/candidaturas/indicacao" className="admin-btn">Configuração de indicação</Link>
           <div className="flex items-center gap-1 rounded-xl border border-line bg-surface p-1">
             {(
               [

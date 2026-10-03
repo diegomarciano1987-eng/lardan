@@ -4,7 +4,24 @@
  * bruto na parcela, tarifa como saída separada, sem duplicar.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, rpc, rpcServico, type Conta } from "./base";
+import { adm, criarConta, rpc, type Conta } from "./base";
+
+/** Executor interno do servidor (service_role), como o webhook chama. */
+async function rpcServico<T = unknown>(fn: string, args: Record<string, unknown>): Promise<{ dados: T; erro: string | null }> {
+  const [k, v] = Object.entries(args)[0]!;
+  const c = await adm.reserve();
+  try {
+    await c.unsafe(`set role service_role`);
+    await c.unsafe(`select set_config('lardan.test_role','service_role',false), set_config('lardan.test_uid','',false)`);
+    const r = (await c.unsafe(`select public.${fn}(${k} => $1) as r`, [v])) as { r: T }[];
+    return { dados: r[0]!.r, erro: null };
+  } catch (e) {
+    return { dados: null as T, erro: (e as Error).message };
+  } finally {
+    try { await c.unsafe(`reset role`); await c.unsafe(`select set_config('lardan.test_role','',false)`); } catch { /* */ }
+    c.release();
+  }
+}
 
 let master: Conta, semAcesso: Conta;
 let n = 0;
@@ -22,7 +39,7 @@ async function cenario(valor = 10000, ligar: "direto" | "match" | "nenhum" = "di
   const fin = (await um<{ id: string }>(`insert into public.financial_accounts (nome, kind) values ($1,'provedor') returning id`, [`ISO Asaas ${marca()}`])).id;
   const emp = (await um<{ id: string }>(`insert into public.business_entities (legal_name, trade_name) values ($1,$1) returning id`, [`ISO Emp ${marca()}`])).id;
   const acc = (await um<{ id: string }>(
-    `insert into public.asaas_accounts (label, environment, financial_account_id, owner_entity_id) values ($1,'sandbox',$2,$3) returning id`, [`ISO ${marca()}`, fin, emp])).id;
+    `insert into public.asaas_accounts (label, environment, financial_account_id, owner_entity_id, is_active) values ($1,'sandbox',$2,$3,true) returning id`, [`ISO ${marca()}`, fin, emp])).id;
   const p = await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status) values ('pessoa',$1,$1,'ativo') returning id`, [`ISO P ${marca()}`]);
   const r = await rpc<string>(master, "fin_title_create", {
     _payload: { direction: "receivable", party_id: p.id, descricao: `ISO ${marca()}`, valor_cents: valor, emissao: DIA, competencia: DIA,

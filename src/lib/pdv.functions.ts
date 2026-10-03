@@ -96,7 +96,7 @@ export const pdvPixGerar = createServerFn({ method: "POST" })
     const { envDoServidor } = await import("./asaas/configuracao.server");
     const executor = await bancoExecutor();
     // A preparação roda em nome do responsável Pix definido pela gestão da loja.
-    const usuario = { rpc: <T,>(_f: string, a: Record<string, unknown>) => rpc<T>("pdv_asaas_preparar", { _actor: t.actor, _payload: a._payload }) };
+    const usuario = { rpc: <T,>(_f: string, a: Record<string, unknown>) => rpc<T>("pdv_asaas_preparar", { _actor: t.actor, _payload: a["_payload"] }) };
     const r = await solicitarCobranca(usuario as never, executor, t.actor, { installmentId: t.installment_id, billingType: "PIX" }, { env: envDoServidor() });
     if ((r as { state: string }).state === "indisponivel") throw new Error((r as { aviso?: string }).aviso || "Pix indisponível no momento.");
     const rr = r as { charge_id?: string | null; invoice_url?: string | null };

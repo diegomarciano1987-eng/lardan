@@ -73,7 +73,7 @@ export function VendedoraInternaForm({
     setSalvando(true);
     const { error } = await db.from("vendedora_profiles").upsert(payload, { onConflict: "party_id" });
     setSalvando(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Ficha da vendedora salva.");
     await qc.invalidateQueries({ queryKey: ["registry"] });
   };

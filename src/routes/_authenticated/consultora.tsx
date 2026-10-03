@@ -1,3 +1,4 @@
+import { Indicacoes } from "@/components/consultora/Indicacoes";
 import { FotoPeca } from "@/components/FotoPeca";
 import * as React from "react";
 import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
@@ -28,7 +29,7 @@ import {
   type TipoDivergencia,
 } from "@/lib/maletas";
 
-const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "mais", "novo"];
+const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "mais", "novo"];
 const str = (v: unknown) => (typeof v === "string" && v.length > 0 && v.length < 200 ? v : undefined);
 
 export const Route = createFileRoute("/_authenticated/consultora")({
@@ -438,7 +439,7 @@ function AreaConsultoraLiberada() {
   const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
   const aba = nav.aba ?? "inicio";
-  const ajuda = aba === "historico" ? "maleta" : aba === "novo" ? "pedidos" : aba;
+  const ajuda = aba === "indicacoes" ? "inicio" : aba === "historico" ? "maleta" : aba === "novo" ? "pedidos" : aba;
 
   const seletorMaleta = abertas.length > 1 && (
     <div role="radiogroup" aria-label="Maleta em uso" className="mb-5 grid gap-2">
@@ -467,6 +468,7 @@ function AreaConsultoraLiberada() {
       {aba === "maleta" && (<><Topo titulo="Minha maleta" ajuda="maleta" />{seletorMaleta}<div className="max-w-3xl"><MinhaMaleta cycleId={atual} /></div></>)}
       {aba === "historico" && (<><Topo titulo="Entregas da maleta" ajuda="maleta" voltar={() => ir({ aba: "mais" })} />{seletorMaleta}<div className="max-w-3xl"><Historico cycleId={atual} /></div></>)}
       {aba === "vitrine" && (<><Topo titulo="Minha vitrine" ajuda="vitrine" voltar={() => ir({ aba: "mais" })} /><Estudio /></>)}
+      {aba === "indicacoes" && (<><Topo titulo="Indicações" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Indicacoes /></>)}
       {aba === "mais" && <Mais ir={ir} />}
     </CascaConsultora>
   );

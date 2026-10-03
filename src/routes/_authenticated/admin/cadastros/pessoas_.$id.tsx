@@ -19,6 +19,7 @@ import {
 } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
+import { VendedoraInternaForm } from "@/components/admin/cadastros/VendedoraInternaForm";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   addRole,
@@ -531,6 +532,11 @@ function FichaPessoa() {
 
         {/* COMERCIAL */}
         <TabsContent value="comercial" className="mt-4">
+          {d.papeis.some((p) => p.role === "vendedora_interna") && (
+            <div className="mb-4">
+              <VendedoraInternaForm partyId={id} podeEditar={podeEditar} podeVerFin={podeVerFin} />
+            </div>
+          )}
           {d.papeis.some((p) => p.role === "consultora") ? (
             <ConsultoraForm
               partyId={id}
@@ -539,7 +545,7 @@ function FichaPessoa() {
               secao="comercial"
               onSaved={() => qc.invalidateQueries({ queryKey: ["registry"] })}
             />
-          ) : (
+          ) : d.papeis.some((p) => p.role === "vendedora_interna") ? null : (
             <Panel>
               <EmptyState
                 title="Sem relacionamento comercial"

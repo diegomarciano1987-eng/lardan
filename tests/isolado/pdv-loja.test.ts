@@ -45,14 +45,14 @@ describe("PDV Loja", async () => {
     expect(consult).toContain("vendedoras internas");
     // seletor da equipe só lista vendedoras internas
     await virarVendedora(vend.uid); await virarVendedora(sup.uid);
-    const lista = await rpc<{ user_id: string }[]>(master, "pdv_usuarios_disponiveis", {});
-    const ids = lista.dados.map((x) => x.user_id);
+    const disp = async () => (await ler<{ user_id: string }>(master, "select user_id from public.pdv_usuarios_disponiveis()")).linhas.map((x) => x.user_id);
+    const ids = await disp();
     expect(ids).toContain(vend.uid); expect(ids).toContain(sup.uid);
     expect(ids).not.toContain(consultoraExt.uid); expect(ids).not.toContain(intruso.uid);
     // ficha completa gravada; desligada sai do seletor
     const [pv] = (await adm.unsafe("select party_id from public.profiles where id=$1", [sup.uid])) as { party_id: string }[];
     await adm.unsafe("insert into public.vendedora_profiles(party_id, situacao, comissao_padrao_pct, pix_key_type, pix_key) values ($1,'desligada',5,'cpf','00000000000')", [pv!.party_id]);
-    expect((await rpc<{ user_id: string }[]>(master, "pdv_usuarios_disponiveis", {})).dados.map((x) => x.user_id)).not.toContain(sup.uid);
+    expect(await disp()).not.toContain(sup.uid);
     await adm.unsafe("update public.vendedora_profiles set situacao='ativa' where party_id=$1", [pv!.party_id]);
     // fora da gestão: não lê nem escreve a ficha
     const curioso = await criarConta({ nome: "pdv-curioso", papeis: [] });

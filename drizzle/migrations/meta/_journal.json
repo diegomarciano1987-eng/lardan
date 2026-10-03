@@ -127,6 +127,13 @@
       "when": 1791035410615,
       "tag": "0017_pdv_codigo_email",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791035543042,
+      "tag": "0018_pdv_codigo_email_fix",
+      "breakpoints": true
     }
   ]
 }

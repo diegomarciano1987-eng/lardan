@@ -57,7 +57,7 @@ async function cenario(valor = 10000, ligar: "direto" | "match" | "nenhum" = "di
 async function evento(acc: string, ext: string, tipo: string, pago: number, tarifa: number) {
   return (await um<{ id: string }>(
     `insert into public.asaas_events (account_id, external_id, event, charge_external_id, event_at, payload)
-     values ($1,$2,$3,$4,now(),$5::jsonb) returning id`,
+     values ($1,$2,$3,$4,now(),$5::text::jsonb) returning id`,
     [acc, `evt_${marca()}`, tipo, ext, JSON.stringify({ valuePaidCents: pago, feeCents: tarifa, netValueCents: pago - tarifa, paymentDate: DIA })])).id;
 }
 const saldoParcela = async (i: string) => Number((await um<{ s: string }>(`select public.fin_installment_saldo($1) s`, [i])).s);

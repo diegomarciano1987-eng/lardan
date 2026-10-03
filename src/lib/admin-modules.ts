@@ -233,12 +233,12 @@ export const ADMIN_MODULES: AdminModule[] = [
   },
   {
     slug: "cobranca",
+    path: "/admin/cobranca",
     label: "Cobrança",
-    description: "Régua de cobrança e acompanhamento de inadimplência.",
+    description: "Carteira de devedoras, promessas, régua D+1/3/7/15, agenda e BI de recuperação.",
     icon: BellRing,
     roles: ["master", "diretoria", "cobranca", "financeiro"],
-    capability: "finance.view",
-    state: "em_breve",
+    state: "ativo",
   },
   {
     slug: "qualidade",

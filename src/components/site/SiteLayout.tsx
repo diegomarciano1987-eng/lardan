@@ -4,7 +4,7 @@ import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { VoltarLink } from "./VoltarLink";
 import { useAppleWebKit } from "@/hooks/use-scroll-progress";
-import { registrarPrimeiroContato, registrarVisitaEditorial } from "@/lib/crm/tracking";
+import { registrarIndicacao, registrarPrimeiroContato, registrarVisitaEditorial } from "@/lib/crm/tracking";
 import { CAMINHOS_EDITORIAIS } from "@/lib/editorial/rotas";
 import { EcossistemaLardanProvider } from "./EcossistemaLardan";
 
@@ -22,6 +22,7 @@ export function SiteLayout({ children, brandedHeader = false }: { children: Reac
   useEffect(() => {
     if (SEM_TRACKING.some((p) => pathname.startsWith(p))) return;
     registrarPrimeiroContato();
+    registrarIndicacao();
     if ((CAMINHOS_EDITORIAIS as readonly string[]).includes(pathname)) {
       registrarVisitaEditorial(pathname);
     }

@@ -41,6 +41,7 @@ export interface TrackingCliente {
   msclkid?: string | undefined;
   utm: Record<string, string>;
   jornada?: JornadaEditorial | undefined;
+  indicacao?: string | undefined;
 }
 
 const corta = (v: string | null | undefined) =>
@@ -138,6 +139,28 @@ export function registrarCliqueCta(ctaId: string, destino: string): void {
 }
 
 /** Monta os dados de origem desta visita, somados ao primeiro contato conhecido. */
+const CHAVE_INDICACAO = "lardan.indicacao.v1";
+const VALIDADE_INDICACAO = 60 * 86_400_000;
+
+/** Guarda o código do link de indicação (?indica=). A primeira indicação vale por 60 dias. */
+export function registrarIndicacao(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const atual = new URLSearchParams(window.location.search).get("indica");
+    const bruto = window.localStorage.getItem(CHAVE_INDICACAO);
+    const salvo = bruto ? (JSON.parse(bruto) as { c: string; em: number }) : null;
+    if (salvo && Date.now() - salvo.em < VALIDADE_INDICACAO) return salvo.c;
+    if (atual && /^[a-z0-9]{4,20}$/i.test(atual)) {
+      const c = atual.toLowerCase();
+      window.localStorage.setItem(CHAVE_INDICACAO, JSON.stringify({ c, em: Date.now() }));
+      return c;
+    }
+  } catch {
+    /* sem armazenamento */
+  }
+  return undefined;
+}
+
 export function capturarTracking(): TrackingCliente {
   if (typeof window === "undefined") return { utm: {} };
   const params = new URLSearchParams(window.location.search);
@@ -159,5 +182,6 @@ export function capturarTracking(): TrackingCliente {
     msclkid: corta(params.get("msclkid")) ?? primeiro.msclkid,
     utm: Object.keys(utm).length > 0 ? utm : (primeiro.utm ?? {}),
     jornada: lerJornada(),
+    indicacao: registrarIndicacao(),
   };
 }

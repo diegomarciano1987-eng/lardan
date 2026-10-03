@@ -169,6 +169,13 @@
       "when": 1791042103194,
       "tag": "0023_pdv_cliente_salvar_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791042485144,
+      "tag": "0024_pdv_responsaveis_pix",
+      "breakpoints": true
     }
   ]
 }

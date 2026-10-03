@@ -12018,6 +12018,14 @@ export type Database = {
         Args: { _q: string; _token_hash: string }
         Returns: Json
       }
+      pdv_responsaveis_pix: {
+        Args: never
+        Returns: {
+          email: string
+          nome: string
+          user_id: string
+        }[]
+      }
       pdv_sair: { Args: { _token_hash: string }; Returns: undefined }
       pdv_sessao: {
         Args: { _token_hash: string }

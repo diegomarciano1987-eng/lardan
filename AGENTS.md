@@ -24,3 +24,5 @@
 - Every database change is also saved as a file in supabase/migrations (the isolated test bench applies only that folder); why: one source of truth for migrations.
 - Bank fees in reconciliation are a separate ledger movement, never an installment adjustment (receipt: line = allocated − fee; payment: line = allocated + fee); why: fees must not raise the amount owed.
 - DRE gerencial reads only from fin_dre_base and its lucro líquido must equal fin_dre for the same filters; why: one calculation rule, two views.
+- Referral (indicação) commissions are computed only by a DB trigger when a kit cycle closes, stored once per cycle in referral_commissions with an item snapshot; why: transparent, idempotent, never recalculated retroactively when tiers change.
+- Showcase addresses are checked by showcase_slug_reserved (site routes, categories, pages, and old addresses kept forever in showcase_slug_history); why: one consultant's link can never be taken by another.

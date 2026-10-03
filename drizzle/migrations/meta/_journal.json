@@ -50,6 +50,13 @@
       "when": 1791023122176,
       "tag": "0006_extrato_repetida_por_conteudo",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791028873763,
+      "tag": "0007_indicacao_consultoras_e_endereco_vitrine",
+      "breakpoints": true
     }
   ]
 }

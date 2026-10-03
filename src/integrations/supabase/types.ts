@@ -9774,6 +9774,7 @@ export type Database = {
       fin_encargos_contas: { Args: never; Returns: Json }
       fin_encargos_contas_set: { Args: { _payload: Json }; Returns: Json }
       fin_fingerprint: { Args: { _intent: Json }; Returns: string }
+      fin_hist_norm: { Args: { _t: string }; Returns: string }
       fin_historico_chave: { Args: { _h: string }; Returns: string }
       fin_import_ap_apply: {
         Args: { _limite?: number; _lote: string }

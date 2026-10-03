@@ -43,6 +43,13 @@
       "when": 1790972630816,
       "tag": "0005_dre_gerencial_desempenho",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791023122176,
+      "tag": "0006_extrato_repetida_por_conteudo",
+      "breakpoints": true
     }
   ]
 }

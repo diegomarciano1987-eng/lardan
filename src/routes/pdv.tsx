@@ -5,10 +5,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { LogOut, Search, Trash2, Printer, MessageCircle, Lock, Wallet } from "lucide-react";
+import { LogOut, Search, Trash2, Printer, MessageCircle, Lock, Wallet, Receipt, Users, ShoppingCart } from "lucide-react";
+import { ClienteForm, Calculadora, Vendas, Clientes, clienteVazio } from "@/components/pdv/PdvExtras";
 import {
   pdvEntrarIniciar, pdvEntrarConfirmar, pdvSair, pdvEstado, pdvOperadora, pdvOperadoraSair, pdvCaixaAbrir, pdvCaixaMov, pdvCaixaFechar,
-  pdvBuscar, pdvConcluir, pdvPixGerar, pdvPixSituacao, pdvCancelar, pdvComprovante, type PagamentoPdv,
+  pdvBuscar, pdvConcluir, pdvPixGerar, pdvPixSituacao, pdvCancelar, pdvComprovante, pdvClienteSalvar, pdvVendaVincularCliente, type PagamentoPdv, type ClientePdv,
 } from "@/lib/pdv.functions";
 
 export const Route = createFileRoute("/pdv")({
@@ -91,7 +92,8 @@ function Entrar() {
 function Loja({ e }: { e: any }) {
   const qc = useQueryClient(); const sair = useServerFn(pdvSair); const opSair = useServerFn(pdvOperadoraSair);
   const recarregar = () => qc.invalidateQueries({ queryKey: ["pdv-loja"] });
-  const [tela, setTela] = React.useState<"venda" | "caixa">("venda");
+  const [tela, setTela] = React.useState<"venda" | "vendas" | "clientes" | "caixa">("venda");
+  const [cliPre, setCliPre] = React.useState<ClientePdv | null>(null);
   return (
     <div className="min-h-screen bg-background">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-3">
@@ -99,14 +101,16 @@ function Loja({ e }: { e: any }) {
           <p className="text-xs text-muted-foreground">{e.caixa ? `Caixa aberto por ${e.caixa.aberto_por}` : "Caixa fechado"}</p></div>
         <div className="flex items-center gap-2">
           {e.operadora && <>
-            <button onClick={() => setTela("venda")} className={tela === "venda" ? btn : btn2}>Venda</button>
+            <button onClick={() => setTela("venda")} className={tela === "venda" ? btn : btn2}><ShoppingCart className="mr-1 inline h-4 w-4" />Venda</button>
+            <button onClick={() => setTela("vendas")} className={tela === "vendas" ? btn : btn2}><Receipt className="mr-1 inline h-4 w-4" />Vendas</button>
+            <button onClick={() => setTela("clientes")} className={tela === "clientes" ? btn : btn2}><Users className="mr-1 inline h-4 w-4" />Clientes</button>
             <button onClick={() => setTela("caixa")} className={tela === "caixa" ? btn : btn2}><Wallet className="mr-1 inline h-4 w-4" />Caixa</button>
             <button onClick={async () => { await opSair(); recarregar(); }} className={btn2}><Lock className="mr-1 inline h-4 w-4" />{e.operadora.nome} · trocar</button>
           </>}
           <button onClick={async () => { await sair(); recarregar(); }} className={btn2} title="Desconectar este aparelho"><LogOut className="h-4 w-4" /></button>
         </div>
       </header>
-      {!e.operadora ? <EscolherVendedora e={e} ok={recarregar} /> : !e.caixa ? <AbrirCaixa ok={recarregar} /> : tela === "caixa" ? <Caixa e={e} ok={recarregar} /> : <Venda e={e} ok={recarregar} />}
+      {!e.operadora ? <EscolherVendedora e={e} ok={recarregar} /> : !e.caixa ? <AbrirCaixa ok={recarregar} /> : tela === "caixa" ? <Caixa e={e} ok={recarregar} /> : tela === "vendas" ? <Vendas Comprovante={Comprovante} ok={recarregar} /> : tela === "clientes" ? <Clientes vender={(c) => { setCliPre(c); setTela("venda"); }} /> : <Venda e={e} ok={recarregar} pre={cliPre} limparPre={() => setCliPre(null)} />}
     </div>
   );
 }
@@ -182,11 +186,12 @@ function Caixa({ e, ok }: { e: any; ok: () => void }) {
 
 type Item = { variant_id: string; nome: string; sku: string; preco: number; qtd: number; saldo: number };
 
-function Venda({ e, ok }: { e: any; ok: () => void }) {
-  const buscar = useServerFn(pdvBuscar); const concluir = useServerFn(pdvConcluir);
+function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: ClientePdv | null; limparPre: () => void }) {
+  const buscar = useServerFn(pdvBuscar); const concluir = useServerFn(pdvConcluir); const salvarCli = useServerFn(pdvClienteSalvar); const vincular = useServerFn(pdvVendaVincularCliente);
   const [q, setQ] = React.useState(""); const [res, setRes] = React.useState<any[]>([]);
   const [itens, setItens] = React.useState<Item[]>([]); const [desc, setDesc] = React.useState("");
-  const [cli, setCli] = React.useState({ nome: "", doc: "", telefone: "" });
+  const [cli, setCli] = React.useState<ClientePdv>(clienteVazio());
+  React.useEffect(() => { if (pre) { setCli(pre); limparPre(); } }, [pre]);
   const [pags, setPags] = React.useState<PagamentoPdv[]>([]);
   const [forma, setForma] = React.useState<PagamentoPdv["forma"]>("dinheiro"); const [val, setVal] = React.useState(""); const [rec, setRec] = React.useState("");
   const [maq, setMaq] = React.useState(e.maquininhas[0]?.id ?? ""); const [parc, setParc] = React.useState("1"); const [nsu, setNsu] = React.useState("");
@@ -216,11 +221,18 @@ function Venda({ e, ok }: { e: any; ok: () => void }) {
   const fechar = async () => {
     setBusy(true);
     try {
-      const r = await concluir({ data: { idem, itens: itens.map((i) => ({ variant_id: i.variant_id, qtd: i.qtd })), desconto_cents: dc, cliente: cli, pagamentos: pags } });
-      setFeita({ ...r, telefone: cli.telefone }); ok();
+      const d = (v?: string) => (v ?? "").replace(/\D/g, "");
+      if (cli.doc && d(cli.doc).length !== 11) throw new Error("CPF deve ter 11 dígitos.");
+      if (cli.telefone && ![10, 11].includes(d(cli.telefone).length)) throw new Error("WhatsApp deve ter DDD + número.");
+      // Toda venda com nome grava/atualiza a cliente da loja antes de concluir.
+      let party = cli.party_id;
+      if (cli.nome.trim()) { const g = await salvarCli({ data: cli }); party = g.party_id; setCli({ ...cli, party_id: party }); }
+      const r: any = await concluir({ data: { idem, itens: itens.map((i) => ({ variant_id: i.variant_id, qtd: i.qtd })), desconto_cents: dc, cliente: { nome: cli.nome, doc: d(cli.doc), telefone: d(cli.telefone) }, pagamentos: pags } });
+      if (party && r?.venda) await vincular({ data: { venda: r.venda, party } }).catch(() => undefined);
+      setFeita({ ...r, telefone: d(cli.telefone) }); ok();
     } catch (x) { erro(x); } finally { setBusy(false); }
   };
-  const nova = () => { setItens([]); setDesc(""); setCli({ nome: "", doc: "", telefone: "" }); setPags([]); setIdem(crypto.randomUUID()); setFeita(null); };
+  const nova = () => { setItens([]); setDesc(""); setCli(clienteVazio()); setPags([]); setIdem(crypto.randomUUID()); setFeita(null); };
 
   if (feita) return <Finalizada v={feita} nova={nova} ok={ok} />;
   return (
@@ -243,11 +255,7 @@ function Venda({ e, ok }: { e: any; ok: () => void }) {
               <button onClick={() => setItens(itens.filter((y) => y !== i))} aria-label="Remover"><Trash2 className="h-4 w-4 text-muted-foreground" /></button>
             </div>))}
         </div>
-        <div className="grid gap-3 md:grid-cols-3">
-          <input className={inp} placeholder="Nome da cliente" value={cli.nome} onChange={(x) => setCli({ ...cli, nome: x.target.value })} />
-          <input className={inp} placeholder="CPF (obrigatório no Pix)" inputMode="numeric" value={cli.doc} onChange={(x) => setCli({ ...cli, doc: x.target.value })} />
-          <input className={inp} placeholder="WhatsApp" inputMode="tel" value={cli.telefone} onChange={(x) => setCli({ ...cli, telefone: x.target.value })} />
-        </div>
+        <ClienteForm c={cli} set={setCli} />
       </section>
       <aside className="space-y-4 rounded-xl border border-border bg-card p-5">
         <div className="space-y-1 text-sm">
@@ -269,6 +277,7 @@ function Venda({ e, ok }: { e: any; ok: () => void }) {
           {pags.map((p, i) => <p key={i} className="flex justify-between text-sm"><span>{FORMA[p.forma]}{p.parcelas && p.parcelas > 1 ? ` ${p.parcelas}x` : ""}{p.recebido_cents && p.recebido_cents > p.valor_cents ? ` · troco ${brl(p.recebido_cents - p.valor_cents)}` : ""}</span><span><b className="font-mono">{brl(p.valor_cents)}</b> <button onClick={() => setPags(pags.filter((_, j) => j !== i))} className="ml-2 text-xs underline">tirar</button></span></p>)}
         </div>
         <button className={btn + " w-full text-base"} disabled={busy || itens.length === 0 || falta !== 0} onClick={fechar}>{busy ? "Finalizando…" : falta > 0 ? `Falta ${brl(falta)}` : "Finalizar venda"}</button>
+        <Calculadora usar={(v) => setVal(v)} />
       </aside>
       <div className="lg:col-span-2"><VendasHoje e={e} ok={ok} /></div>
     </div>

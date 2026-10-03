@@ -7654,6 +7654,71 @@ export type Database = {
           },
         ]
       }
+      pdv_clientes: {
+        Row: {
+          created_at: string
+          criado_por: string | null
+          email: string | null
+          id: string
+          instagram: string | null
+          observacoes: string | null
+          party_id: string
+          unidade_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          criado_por?: string | null
+          email?: string | null
+          id?: string
+          instagram?: string | null
+          observacoes?: string | null
+          party_id: string
+          unidade_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string | null
+          email?: string | null
+          id?: string
+          instagram?: string | null
+          observacoes?: string | null
+          party_id?: string
+          unidade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdv_clientes_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_clientes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_clientes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "pdv_clientes_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pdv_comissoes: {
         Row: {
           base: string
@@ -11851,6 +11916,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      pdv_cliente_salvar: {
+        Args: { _c: Json; _token_hash: string }
+        Returns: Json
+      }
+      pdv_clientes_listar: {
+        Args: { _q: string; _token_hash: string }
+        Returns: Json
+      }
       pdv_como: { Args: { _actor: string }; Returns: undefined }
       pdv_comprovante: {
         Args: { _token_hash: string; _venda: string }
@@ -11989,6 +12062,14 @@ export type Database = {
       }
       pdv_venda_concluir: {
         Args: { _p: Json; _token_hash: string }
+        Returns: Json
+      }
+      pdv_venda_vincular_cliente: {
+        Args: { _party: string; _token_hash: string; _venda: string }
+        Returns: undefined
+      }
+      pdv_vendas_listar: {
+        Args: { _dias: number; _token_hash: string }
         Returns: Json
       }
       phone_canon: { Args: { v: string }; Returns: string }

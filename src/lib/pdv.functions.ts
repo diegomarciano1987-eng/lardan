@@ -133,3 +133,27 @@ export const pdvCancelar = createServerFn({ method: "POST" })
 export const pdvComprovante = createServerFn({ method: "GET" })
   .inputValidator((d: { venda: string }) => ({ venda: str(d?.venda, 40) }))
   .handler(async ({ data }) => rpc("pdv_comprovante", { _token_hash: await token(), _venda: data.venda }));
+
+export type ClientePdv = { party_id?: string; nome: string; doc?: string; telefone?: string; email?: string; instagram?: string; nascimento?: string; cep?: string; rua?: string; numero?: string; complemento?: string; bairro?: string; cidade?: string; uf?: string; observacoes?: string };
+const CAMPOS_CLIENTE = ["party_id", "nome", "doc", "telefone", "email", "instagram", "nascimento", "cep", "rua", "numero", "complemento", "bairro", "cidade", "uf", "observacoes"] as const;
+
+/** Grava (ou atualiza) a cliente no cadastro oficial e liga à loja. Não associa por nome: só CPF ou WhatsApp já da loja. */
+export const pdvClienteSalvar = createServerFn({ method: "POST" })
+  .inputValidator((d: ClientePdv) => {
+    const o: Record<string, string> = {};
+    for (const k of CAMPOS_CLIENTE) o[k] = str((d as Record<string, unknown>)?.[k], k === "observacoes" ? 500 : 160).trim();
+    return o as unknown as ClientePdv;
+  })
+  .handler(async ({ data }) => rpc<{ party_id: string; nome: string }>("pdv_cliente_salvar", { _token_hash: await token(), _c: data }));
+
+export const pdvVendaVincularCliente = createServerFn({ method: "POST" })
+  .inputValidator((d: { venda: string; party: string }) => ({ venda: str(d?.venda, 40), party: str(d?.party, 40) }))
+  .handler(async ({ data }) => rpc("pdv_venda_vincular_cliente", { _token_hash: await token(), _venda: data.venda, _party: data.party }));
+
+export const pdvClientes = createServerFn({ method: "GET" })
+  .inputValidator((d: { q: string }) => ({ q: str(d?.q, 80) }))
+  .handler(async ({ data }) => rpc<any[]>("pdv_clientes_listar", { _token_hash: await token(), _q: data.q }));
+
+export const pdvVendas = createServerFn({ method: "GET" })
+  .inputValidator((d: { dias: number }) => ({ dias: Math.min(Math.max(Math.round(Number(d?.dias) || 1), 1), 365) }))
+  .handler(async ({ data }) => rpc<any[]>("pdv_vendas_listar", { _token_hash: await token(), _dias: data.dias }));

@@ -155,6 +155,31 @@ describe("PDV Loja", async () => {
     expect(f.dados.esperado).toBe(7000); expect(f.dados.diferenca).toBe(-100);
   });
 
+  test("cliente da loja: grava, valida dígitos, não duplica e aparece em clientes e vendas", async () => {
+    expect((await rpcServico("pdv_cliente_salvar", { _token_hash: tok, _c: { nome: "Ana Prova", doc: "123" } })).erro).toContain("11 dígitos");
+    expect((await rpcServico("pdv_cliente_salvar", { _token_hash: tok, _c: { nome: "Ana Prova", telefone: "4499" } })).erro).toContain("WhatsApp");
+    const b = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10));
+    const dv = (a: number[]) => { const r = (a.reduce((s, n, i) => s + n * (a.length + 1 - i), 0) * 10) % 11; return r === 10 ? 0 : r; };
+    b.push(dv(b)); b.push(dv(b)); const cpf = b.join("");
+    const g = await rpcServico<{ party_id: string }>("pdv_cliente_salvar", { _token_hash: tok, _c: { nome: "Ana Prova", doc: cpf, telefone: "44991165911", instagram: "@ana.prova", email: "ana@prova.com", nascimento: "1990-05-10", cep: "87000000", cidade: "Maringá", uf: "PR" } });
+    expect(g.erro).toBeNull();
+    const g2 = await rpcServico<{ party_id: string }>("pdv_cliente_salvar", { _token_hash: tok, _c: { nome: "Outro Nome", telefone: "(44) 99116-5911" } });
+    expect(g2.dados.party_id).toBe(g.dados.party_id);
+    const [papel] = (await adm.unsafe("select count(*)::int n from public.party_roles where party_id=$1 and role='cliente'", [g.dados.party_id])) as { n: number }[];
+    expect(papel!.n).toBe(1);
+    const cl = await rpcServico<any[]>("pdv_clientes_listar", { _token_hash: tok, _q: "ana.pro" });
+    expect(cl.dados.length).toBe(1); expect(cl.dados[0].instagram).toBe("ana.prova"); expect(cl.dados[0].doc).not.toContain(cpf);
+    await rpcServico("pdv_caixa_abrir", { _token_hash: tok, _fundo: 0 });
+    const v = await rpcServico<{ venda: string }>("pdv_venda_concluir", { _token_hash: tok, _p: { idem: `cli-${numero}`, itens: [{ variant_id: variante, qtd: 1 }], desconto_cents: 0, cliente: { nome: "Ana Prova" }, pagamentos: [{ forma: "dinheiro", valor_cents: 20000 }] } });
+    expect((await rpcServico("pdv_venda_vincular_cliente", { _token_hash: tok, _venda: v.dados.venda, _party: g.dados.party_id })).erro).toBeNull();
+    const cl2 = await rpcServico<any[]>("pdv_clientes_listar", { _token_hash: tok, _q: "" });
+    expect(cl2.dados.find((x) => x.party_id === g.dados.party_id).compras).toBe(1);
+    const vs = await rpcServico<any[]>("pdv_vendas_listar", { _token_hash: tok, _dias: 1 });
+    const card = vs.dados.find((x) => x.id === v.dados.venda);
+    expect(card.vendedora).toBeTruthy(); expect(card.itens.length).toBe(1); expect(card.pagamentos[0].forma).toBe("dinheiro");
+    expect((await rpc(vend, "pdv_clientes_listar", { _token_hash: tok, _q: "" })).ok).toBe(false);
+  });
+
   test("trocar a senha desliga aparelhos conectados", async () => {
     expect((await rpc(master, "pdv_unidade_acesso", { _unidade: unidade, _numero: numero, _senha: "novaSenha9" })).erro).toBeNull();
     expect((await rpcServico("pdv_estado", { _token_hash: tok })).erro).toContain("PDV_SESSAO_INVALIDA");

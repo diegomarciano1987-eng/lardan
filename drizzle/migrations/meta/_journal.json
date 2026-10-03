@@ -155,6 +155,20 @@
       "when": 1791036767551,
       "tag": "0021_vendedora_interna_ficha_e_trava_pdv",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1791042057184,
+      "tag": "0022_pdv_clientes_historico",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791042103194,
+      "tag": "0023_pdv_cliente_salvar_fix",
+      "breakpoints": true
     }
   ]
 }

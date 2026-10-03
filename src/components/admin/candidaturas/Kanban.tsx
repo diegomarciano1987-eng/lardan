@@ -18,6 +18,8 @@ import {
   type Opcoes,
 } from "@/lib/crm/api";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------- selos -- */
@@ -268,6 +270,7 @@ export function Kanban({
         return resto;
       });
       toast.success("Etapa atualizada.");
+      if (board.etapas.find((e) => e.id === v.etapa)?.chave === "aprovada") setConvidar(v.lead);
     },
     onError: (e: Error, v) => {
       setOtimista((o) => {
@@ -284,10 +287,22 @@ export function Kanban({
     mover.mutate({ lead: c.id, etapa });
   }
 
+  const [convidar, setConvidar] = useState<string | null>(null);
   const etapaDe = (c: CandidaturaCard) => otimista[c.id] ?? c.etapa_id;
 
   return (
     <div>
+      <Dialog open={!!convidar} onOpenChange={(o) => !o && setConvidar(null)}>
+        <DialogContent className="admin-scope max-w-md">
+          <DialogHeader>
+            <DialogTitle>Aprovada — convite ao Portal da Consultora</DialogTitle>
+            <DialogDescription>
+              O convite sai automaticamente por e-mail. Use também o link no WhatsApp da futura consultora.
+            </DialogDescription>
+          </DialogHeader>
+          {convidar && <ConviteConsultora leadId={convidar} auto />}
+        </DialogContent>
+      </Dialog>
       <div className="mb-2.5 flex items-center justify-end gap-1.5">
         <span className="mr-1 text-[0.6875rem] text-ledger-muted">
           {board.etapas.length} etapas

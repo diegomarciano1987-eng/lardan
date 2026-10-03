@@ -149,7 +149,7 @@ function CockpitCandidata() {
   const mover = useMutation(
     acao(async (etapa: string) => {
       await moverEtapa(id, etapa);
-      if (opcoes.data?.etapas.find((e) => e.id === etapa)?.key === "aprovada") setAutoConvite(true);
+      if (opcoes.data?.etapas.find((e) => e.id === etapa)?.chave === "aprovada") setAutoConvite(true);
     }, "Etapa atualizada."),
   );
   const responsavel = useMutation(

@@ -37,7 +37,7 @@ export function Indicacoes() {
   if (q.isLoading) return <p className="text-base text-muted-foreground">Carregando…</p>;
   if (q.error || !q.data) return <p className="text-base text-destructive">{traduzir(q.error)}</p>;
   const d = q.data;
-  const link = typeof window !== "undefined" && d.codigo ? `${window.location.origin}/seja-lardan?indica=${d.codigo}#candidatura` : "";
+  const link = typeof window !== "undefined" && d.codigo ? `${window.location.origin}/indicacao/${d.codigo}` : "";
   const texto = `Oi! Sou Consultora Lardan e acho que você vai amar. Conheça e faça sua candidatura: ${link}`;
   const total = d.comissoes.filter((c) => c.status !== "cancelada").reduce((s, c) => s + c.comissao_cents, 0);
 

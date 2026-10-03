@@ -61,6 +61,20 @@ for f in "$RAIZ"/supabase/migrations/*.sql; do
   total=$((total + 1))
 done
 
+# Migrações registradas pela ferramenta de banco (drizzle/migrations) que ainda
+# não têm cópia em supabase/migrations: aplicadas na ordem, depois das demais.
+for f in "$RAIZ"/drizzle/migrations/*.sql; do
+  [ -e "$f" ] || continue
+  sufixo=$(basename "$f" | sed -E 's/^[0-9]+_//')
+  if ls "$RAIZ"/supabase/migrations/*_"$sufixo" >/dev/null 2>&1; then continue; fi
+  if ! psql "$ISO" -v ON_ERROR_STOP=1 -q -f "$f" >"$BASE/ultima.log" 2>&1; then
+    echo "FALHOU: $(basename "$f")"
+    tail -20 "$BASE/ultima.log"
+    exit 1
+  fi
+  total=$((total + 1))
+done
+
 # Mudanças preparadas e ainda NÃO aplicadas ao banco compartilhado.
 pendentes=0
 PACOTE_PENDENTE="$BASE/pendentes-atomicos.sql"

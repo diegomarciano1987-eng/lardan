@@ -9691,6 +9691,8 @@ export type Database = {
       can_manage_leads: { Args: { _user_id: string }; Returns: boolean }
       can_view_costs: { Args: { _user_id: string }; Returns: boolean }
       can_view_kits: { Args: { _user_id: string }; Returns: boolean }
+      candidata_acesso_situacao: { Args: { _lead: string }; Returns: Json }
+      candidata_preparar_acesso: { Args: { _lead: string }; Returns: string }
       catalog_markup_get: { Args: never; Returns: number }
       catalog_markup_set: { Args: { _percent: number }; Returns: number }
       catalog_overview: { Args: never; Returns: Json }
@@ -9735,6 +9737,8 @@ export type Database = {
           variante: string
         }[]
       }
+      consultora_acesso_situacao: { Args: { _party: string }; Returns: Json }
+      consultora_ativar: { Args: { _party: string }; Returns: Json }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string

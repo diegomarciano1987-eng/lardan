@@ -49,6 +49,7 @@ import { Route as AuthenticatedAdminAjudaRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminAvisosRouteImport } from './routes/_authenticated/admin/avisos'
 import { Route as AuthenticatedAdminCandidaturasRouteImport } from './routes/_authenticated/admin/candidaturas'
+import { Route as AuthenticatedAdminCobrancaRouteImport } from './routes/_authenticated/admin/cobranca'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminEstoqueRouteImport } from './routes/_authenticated/admin/estoque'
 import { Route as AuthenticatedAdminFinanceiroRouteRouteImport } from './routes/_authenticated/admin/financeiro/route'
@@ -72,6 +73,7 @@ import { Route as AuthenticatedAdminCadastrosPessoasRouteImport } from './routes
 import { Route as AuthenticatedAdminCadastrosProdutosRouteImport } from './routes/_authenticated/admin/cadastros/produtos'
 import { Route as AuthenticatedAdminCandidaturasIdRouteImport } from './routes/_authenticated/admin/candidaturas_.$id'
 import { Route as AuthenticatedAdminCandidaturasIndicacaoRouteImport } from './routes/_authenticated/admin/candidaturas_.indicacao'
+import { Route as AuthenticatedAdminCobrancaIdRouteImport } from './routes/_authenticated/admin/cobranca_.$id'
 import { Route as AuthenticatedAdminFinanceiroIndexRouteImport } from './routes/_authenticated/admin/financeiro/index'
 import { Route as AuthenticatedAdminFinanceiroAprovacoesRouteImport } from './routes/_authenticated/admin/financeiro/aprovacoes'
 import { Route as AuthenticatedAdminFinanceiroAsaasRouteImport } from './routes/_authenticated/admin/financeiro/asaas'
@@ -312,6 +314,12 @@ const AuthenticatedAdminCandidaturasRoute =
     path: '/candidaturas',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminCobrancaRoute =
+  AuthenticatedAdminCobrancaRouteImport.update({
+    id: '/cobranca',
+    path: '/cobranca',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminConfiguracoesRoute =
   AuthenticatedAdminConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -444,6 +452,12 @@ const AuthenticatedAdminCandidaturasIndicacaoRoute =
   AuthenticatedAdminCandidaturasIndicacaoRouteImport.update({
     id: '/candidaturas_/indicacao',
     path: '/candidaturas/indicacao',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminCobrancaIdRoute =
+  AuthenticatedAdminCobrancaIdRouteImport.update({
+    id: '/cobranca_/$id',
+    path: '/cobranca/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminFinanceiroIndexRoute =
@@ -681,6 +695,7 @@ export interface FileRoutesByFullPath {
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/avisos': typeof AuthenticatedAdminAvisosRoute
   '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
+  '/admin/cobranca': typeof AuthenticatedAdminCobrancaRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
@@ -703,6 +718,7 @@ export interface FileRoutesByFullPath {
   '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/admin/candidaturas/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
+  '/admin/cobranca/$id': typeof AuthenticatedAdminCobrancaIdRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -776,6 +792,7 @@ export interface FileRoutesByTo {
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/avisos': typeof AuthenticatedAdminAvisosRoute
   '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
+  '/admin/cobranca': typeof AuthenticatedAdminCobrancaRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
@@ -798,6 +815,7 @@ export interface FileRoutesByTo {
   '/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/admin/candidaturas/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
+  '/admin/cobranca/$id': typeof AuthenticatedAdminCobrancaIdRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -875,6 +893,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/avisos': typeof AuthenticatedAdminAvisosRoute
   '/_authenticated/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
+  '/_authenticated/admin/cobranca': typeof AuthenticatedAdminCobrancaRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
   '/_authenticated/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
@@ -897,6 +916,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cadastros/produtos': typeof AuthenticatedAdminCadastrosProdutosRoute
   '/_authenticated/admin/candidaturas_/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/_authenticated/admin/candidaturas_/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
+  '/_authenticated/admin/cobranca_/$id': typeof AuthenticatedAdminCobrancaIdRoute
   '/_authenticated/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/_authenticated/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/_authenticated/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -974,6 +994,7 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/avisos'
     | '/admin/candidaturas'
+    | '/admin/cobranca'
     | '/admin/configuracoes'
     | '/admin/estoque'
     | '/admin/importacao'
@@ -996,6 +1017,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos'
     | '/admin/candidaturas/$id'
     | '/admin/candidaturas/indicacao'
+    | '/admin/cobranca/$id'
     | '/admin/financeiro/aprovacoes'
     | '/admin/financeiro/asaas'
     | '/admin/financeiro/asaas-extrato'
@@ -1069,6 +1091,7 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/avisos'
     | '/admin/candidaturas'
+    | '/admin/cobranca'
     | '/admin/configuracoes'
     | '/admin/estoque'
     | '/admin/importacao'
@@ -1091,6 +1114,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos'
     | '/admin/candidaturas/$id'
     | '/admin/candidaturas/indicacao'
+    | '/admin/cobranca/$id'
     | '/admin/financeiro/aprovacoes'
     | '/admin/financeiro/asaas'
     | '/admin/financeiro/asaas-extrato'
@@ -1167,6 +1191,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/avisos'
     | '/_authenticated/admin/candidaturas'
+    | '/_authenticated/admin/cobranca'
     | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/estoque'
     | '/_authenticated/admin/importacao'
@@ -1189,6 +1214,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cadastros/produtos'
     | '/_authenticated/admin/candidaturas_/$id'
     | '/_authenticated/admin/candidaturas_/indicacao'
+    | '/_authenticated/admin/cobranca_/$id'
     | '/_authenticated/admin/financeiro/aprovacoes'
     | '/_authenticated/admin/financeiro/asaas'
     | '/_authenticated/admin/financeiro/asaas-extrato'
@@ -1551,6 +1577,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCandidaturasRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/cobranca': {
+      id: '/_authenticated/admin/cobranca'
+      path: '/cobranca'
+      fullPath: '/admin/cobranca'
+      preLoaderRoute: typeof AuthenticatedAdminCobrancaRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/configuracoes': {
       id: '/_authenticated/admin/configuracoes'
       path: '/configuracoes'
@@ -1710,6 +1743,13 @@ declare module '@tanstack/react-router' {
       path: '/candidaturas/indicacao'
       fullPath: '/admin/candidaturas/indicacao'
       preLoaderRoute: typeof AuthenticatedAdminCandidaturasIndicacaoRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/cobranca_/$id': {
+      id: '/_authenticated/admin/cobranca_/$id'
+      path: '/cobranca/$id'
+      fullPath: '/admin/cobranca/$id'
+      preLoaderRoute: typeof AuthenticatedAdminCobrancaIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/financeiro/': {
@@ -2017,6 +2057,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminAvisosRoute: typeof AuthenticatedAdminAvisosRoute
   AuthenticatedAdminCandidaturasRoute: typeof AuthenticatedAdminCandidaturasRoute
+  AuthenticatedAdminCobrancaRoute: typeof AuthenticatedAdminCobrancaRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminEstoqueRoute: typeof AuthenticatedAdminEstoqueRoute
   AuthenticatedAdminImportacaoRoute: typeof AuthenticatedAdminImportacaoRoute
@@ -2038,6 +2079,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCadastrosProdutosRoute: typeof AuthenticatedAdminCadastrosProdutosRoute
   AuthenticatedAdminCandidaturasIdRoute: typeof AuthenticatedAdminCandidaturasIdRoute
   AuthenticatedAdminCandidaturasIndicacaoRoute: typeof AuthenticatedAdminCandidaturasIndicacaoRoute
+  AuthenticatedAdminCobrancaIdRoute: typeof AuthenticatedAdminCobrancaIdRoute
   AuthenticatedAdminMaletasIdRoute: typeof AuthenticatedAdminMaletasIdRoute
   AuthenticatedAdminMaletasEntradaRoute: typeof AuthenticatedAdminMaletasEntradaRoute
   AuthenticatedAdminCadastrosIndexRoute: typeof AuthenticatedAdminCadastrosIndexRoute
@@ -2055,6 +2097,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
     AuthenticatedAdminAvisosRoute: AuthenticatedAdminAvisosRoute,
     AuthenticatedAdminCandidaturasRoute: AuthenticatedAdminCandidaturasRoute,
+    AuthenticatedAdminCobrancaRoute: AuthenticatedAdminCobrancaRoute,
     AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
     AuthenticatedAdminEstoqueRoute: AuthenticatedAdminEstoqueRoute,
     AuthenticatedAdminImportacaoRoute: AuthenticatedAdminImportacaoRoute,
@@ -2086,6 +2129,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminCandidaturasIdRoute,
     AuthenticatedAdminCandidaturasIndicacaoRoute:
       AuthenticatedAdminCandidaturasIndicacaoRoute,
+    AuthenticatedAdminCobrancaIdRoute: AuthenticatedAdminCobrancaIdRoute,
     AuthenticatedAdminMaletasIdRoute: AuthenticatedAdminMaletasIdRoute,
     AuthenticatedAdminMaletasEntradaRoute:
       AuthenticatedAdminMaletasEntradaRoute,

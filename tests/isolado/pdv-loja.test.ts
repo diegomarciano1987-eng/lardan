@@ -11,8 +11,11 @@ const h = (s: string) => `hash-${s}-${Math.random()}`;
 
 describe("PDV Loja", async () => {
   const master = await criarConta({ nome: "pdv-master", papeis: ["master"] });
-  const vend = await criarConta({ nome: "pdv-vend", papeis: [] });
-  const sup = await criarConta({ nome: "pdv-sup", papeis: [] });
+  const vend = await criarConta({ nome: "pdv-vend", papeis: [], comParty: true });
+  const sup = await criarConta({ nome: "pdv-sup", papeis: [], comParty: true });
+  const consultoraExt = await criarConta({ nome: "pdv-consultora", papeis: ["consultora"], comParty: true });
+  const virarVendedora = async (uid: string) =>
+    adm.unsafe("insert into public.party_roles(party_id, role, status) select party_id, 'vendedora_interna', 'ativo' from public.profiles where id=$1", [uid]);
   const intruso = await criarConta({ nome: "pdv-intruso", papeis: ["financeiro"] });
   const numero = String(10000 + Math.floor(Math.random() * 89999));
   let unidade = "", loc = "", mV = "", mS = "", tok = "", venda = "", variante = "";
@@ -31,6 +34,30 @@ describe("PDV Loja", async () => {
     await adm.unsafe("update public.pdv_unidades set desconto_max_operadora_pct=10, desconto_max_supervisora_pct=30 where id=$1", [unidade]);
     const ev = (await adm.unsafe("select count(*)::int n from public.pdv_config_eventos where dados ? 'senha_hash'")) as { n: number }[];
     expect(ev[0]!.n).toBe(0);
+  });
+
+  test("só vendedora interna entra na equipe da loja", async () => {
+    // sem papel de vendedora interna: recusado (financeiro e consultora externa)
+    const semPapel = await adm.unsafe("insert into public.pdv_membros(unidade_id,user_id,papel) values ($1,$2,'operadora')", [unidade, intruso.uid]).then(() => null, (e) => String(e));
+    expect(semPapel).toContain("vendedoras internas");
+    await adm.unsafe("insert into public.party_roles(party_id, role, status) select party_id, 'consultora', 'ativo' from public.profiles where id=$1", [consultoraExt.uid]);
+    const consult = await adm.unsafe("insert into public.pdv_membros(unidade_id,user_id,papel) values ($1,$2,'operadora')", [unidade, consultoraExt.uid]).then(() => null, (e) => String(e));
+    expect(consult).toContain("vendedoras internas");
+    // seletor da equipe só lista vendedoras internas
+    await virarVendedora(vend.uid); await virarVendedora(sup.uid);
+    const disp = async () => (await ler<{ user_id: string }>(master, "select user_id from public.pdv_usuarios_disponiveis()")).linhas.map((x) => x.user_id);
+    const ids = await disp();
+    expect(ids).toContain(vend.uid); expect(ids).toContain(sup.uid);
+    expect(ids).not.toContain(consultoraExt.uid); expect(ids).not.toContain(intruso.uid);
+    // ficha completa gravada; desligada sai do seletor
+    const [pv] = (await adm.unsafe("select party_id from public.profiles where id=$1", [sup.uid])) as { party_id: string }[];
+    await adm.unsafe("insert into public.vendedora_profiles(party_id, situacao, comissao_padrao_pct, pix_key_type, pix_key) values ($1,'desligada',5,'cpf','00000000000')", [pv!.party_id]);
+    expect(await disp()).not.toContain(sup.uid);
+    await adm.unsafe("update public.vendedora_profiles set situacao='ativa' where party_id=$1", [pv!.party_id]);
+    // fora da gestão: não lê nem escreve a ficha
+    const curioso = await criarConta({ nome: "pdv-curioso", papeis: [] });
+    expect((await ler(curioso, "select pix_key from public.vendedora_profiles")).linhas.length).toBe(0);
+    expect((await ler(curioso, "update public.vendedora_profiles set pix_key='x' returning 1")).linhas.length).toBe(0);
   });
 
   test("equipe vinculada à loja, PIN e comissão", async () => {

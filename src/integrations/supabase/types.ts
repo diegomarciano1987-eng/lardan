@@ -10292,6 +10292,88 @@ export type Database = {
           },
         ]
       }
+      vendedora_profiles: {
+        Row: {
+          admitida_em: string | null
+          bank_info: string | null
+          comissao_padrao_pct: number | null
+          contato_emergencia_fone: string | null
+          contato_emergencia_nome: string | null
+          created_at: string
+          meta_mensal_cents: number | null
+          observacoes: string | null
+          party_id: string
+          pix_holder: string | null
+          pix_key: string | null
+          pix_key_type: string | null
+          situacao: string
+          tamanho_uniforme: string | null
+          unidade_base_id: string | null
+          updated_at: string
+          vinculo: string | null
+        }
+        Insert: {
+          admitida_em?: string | null
+          bank_info?: string | null
+          comissao_padrao_pct?: number | null
+          contato_emergencia_fone?: string | null
+          contato_emergencia_nome?: string | null
+          created_at?: string
+          meta_mensal_cents?: number | null
+          observacoes?: string | null
+          party_id: string
+          pix_holder?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          situacao?: string
+          tamanho_uniforme?: string | null
+          unidade_base_id?: string | null
+          updated_at?: string
+          vinculo?: string | null
+        }
+        Update: {
+          admitida_em?: string | null
+          bank_info?: string | null
+          comissao_padrao_pct?: number | null
+          contato_emergencia_fone?: string | null
+          contato_emergencia_nome?: string | null
+          created_at?: string
+          meta_mensal_cents?: number | null
+          observacoes?: string | null
+          party_id?: string
+          pix_holder?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          situacao?: string
+          tamanho_uniforme?: string | null
+          unidade_base_id?: string | null
+          updated_at?: string
+          vinculo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendedora_profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendedora_profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "vendedora_profiles_unidade_base_id_fkey"
+            columns: ["unidade_base_id"]
+            isOneToOne: false
+            referencedRelation: "pdv_unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       v_network_consultants: {
@@ -10994,6 +11076,7 @@ export type Database = {
       crm_whatsapp_click: { Args: { _lead: string }; Returns: Json }
       doc_canon: { Args: { v: string }; Returns: string }
       doc_is_valid: { Args: { v: string }; Returns: boolean }
+      e_vendedora_interna: { Args: { _user: string }; Returns: boolean }
       ean13_check_digit: { Args: { _body12: string }; Returns: string }
       ensure_profile: {
         Args: never
@@ -12400,6 +12483,7 @@ export type Database = {
         | "custodiante"
         | "usuario"
         | "loja"
+        | "vendedora_interna"
       party_status:
         | "rascunho"
         | "em_analise"
@@ -12687,6 +12771,7 @@ export const Constants = {
         "custodiante",
         "usuario",
         "loja",
+        "vendedora_interna",
       ],
       party_status: [
         "rascunho",

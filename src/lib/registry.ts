@@ -36,7 +36,8 @@ export type PartyRoleKind =
   | "transportadora"
   | "prestador"
   | "custodiante"
-  | "usuario";
+  | "usuario"
+  | "vendedora_interna";
 
 export const PARTY_ROLE_LABEL: Record<PartyRoleKind, string> = {
   candidata: "Candidata",
@@ -52,6 +53,7 @@ export const PARTY_ROLE_LABEL: Record<PartyRoleKind, string> = {
   prestador: "Prestador",
   custodiante: "Custodiante",
   usuario: "Usuária do sistema",
+  vendedora_interna: "Vendedora interna",
 };
 
 /**
@@ -62,6 +64,7 @@ export const PARTY_ROLE_LABEL: Record<PartyRoleKind, string> = {
 export const PARTY_ROLE_OPTIONS: PartyRoleKind[] = [
   "candidata",
   "consultora",
+  "vendedora_interna",
   "representante",
   "colaborador",
   "cliente",

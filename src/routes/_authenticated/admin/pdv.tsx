@@ -174,7 +174,7 @@ function Equipe({ u }: { u: any }) {
 
   return (
     <div className="space-y-4">
-      <Panel title="Adicionar pessoa à loja" hint="Cada pessoa entra com o próprio login. Quem ainda não tem acesso deve ser convidada em Usuários e Convites.">
+      <Panel title="Adicionar vendedora à loja" hint="Só aparecem vendedoras internas ativas com login. Cadastre em Central de Cadastros → Novo → Vendedora interna e vincule o acesso em Usuários e Convites.">
         <div className="flex flex-wrap items-end gap-3">
           <Campo r="Usuária"><SmartSelect className="w-80" value={novo.user} onChange={(v) => setNovo({ ...novo, user: v })} options={(q.data?.users ?? []).filter((x) => !q.data?.m.some((m) => m.user_id === x.user_id)).map((x) => ({ value: x.user_id, label: x.nome, hint: x.email }))} /></Campo>
           <Campo r="Papel"><SmartSelect className="w-56" value={novo.papel} onChange={(v) => setNovo({ ...novo, papel: v })} options={Object.entries(PAPEL).map(([value, label]) => ({ value, label }))} /></Campo>

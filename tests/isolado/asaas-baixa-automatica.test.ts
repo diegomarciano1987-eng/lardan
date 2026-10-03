@@ -9,6 +9,11 @@ import { adm, criarConta, rpc, rpcServico, type Conta } from "./base";
 let master: Conta, semAcesso: Conta;
 let n = 0;
 const marca = () => `${Date.now().toString(36)}-${++n}`;
+const oficial = async <T>(sql: string, p: unknown[] = []) =>
+  (await adm.begin(async (tx) => {
+    await tx.unsafe(`select set_config('lardann.asaas_link','on',true)`);
+    return (await tx.unsafe(sql, p)) as T[];
+  }))[0]!;
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const DIA = "2026-09-15";
 let plano: string;
@@ -24,7 +29,7 @@ async function cenario(valor = 10000, ligar: "direto" | "match" | "nenhum" = "di
   if (!r.ok) throw new Error(r.erro!);
   const inst = (await um<{ id: string }>(`select id from public.financial_installments where title_id=$1`, [r.dados])).id;
   const ext = `pay_${marca()}`;
-  const ch = (await um<{ id: string }>(
+  const ch = (await oficial<{ id: string }>(
     `insert into public.asaas_charges (account_id, external_id, value_cents, due_date, billing_type, external_status, installment_id)
      values ($1,$2,$3,$4,'PIX','PENDING',$5) returning id`, [acc, ext, valor, DIA, ligar === "direto" ? inst : null])).id;
   if (ligar === "match") await adm.unsafe(
@@ -135,7 +140,7 @@ describe("baixa automática do Asaas", () => {
 
   test("repasse de cobranças já pagas e ligadas depois", async () => {
     const c = await cenario(7000);
-    await adm.unsafe(`update public.asaas_charges set external_status='RECEIVED', received_cents=7000, payment_date=$2 where id=$1`, [c.ch, DIA]);
+    await oficial(`update public.asaas_charges set external_status='RECEIVED', received_cents=7000, payment_date=$2 where id=$1`, [c.ch, DIA]);
     const previa = await rpc<{ encontradas: number }>(master, "asaas_baixa_pendentes", { _executar: false });
     expect(previa.erro).toBeNull();
     expect(previa.dados.encontradas).toBeGreaterThanOrEqual(1);

@@ -39,6 +39,7 @@ import { Route as AuthenticatedConsultoraRouteImport } from './routes/_authentic
 import { Route as AuthenticatedRepresentanteRouteImport } from './routes/_authenticated/representante'
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as DCodigoRouteImport } from './routes/d.$codigo'
+import { Route as IndicacaoCodigoRouteImport } from './routes/indicacao.$codigo'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
 import { Route as SemijoiasCategoriaRouteImport } from './routes/semijoias.$categoria'
@@ -256,6 +257,11 @@ const ConviteTokenRoute = ConviteTokenRouteImport.update({
 const DCodigoRoute = DCodigoRouteImport.update({
   id: '/d/$codigo',
   path: '/d/$codigo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndicacaoCodigoRoute = IndicacaoCodigoRouteImport.update({
+  id: '/indicacao/$codigo',
+  path: '/indicacao/$codigo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProdutoSlugRoute = ProdutoSlugRouteImport.update({
@@ -665,6 +671,7 @@ export interface FileRoutesByFullPath {
   '/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
+  '/indicacao/$codigo': typeof IndicacaoCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -760,6 +767,7 @@ export interface FileRoutesByTo {
   '/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
+  '/indicacao/$codigo': typeof IndicacaoCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -857,6 +865,7 @@ export interface FileRoutesById {
   '/_authenticated/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
+  '/indicacao/$codigo': typeof IndicacaoCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -955,6 +964,7 @@ export interface FileRouteTypes {
     | '/representante'
     | '/convite/$token'
     | '/d/$codigo'
+    | '/indicacao/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -1050,6 +1060,7 @@ export interface FileRouteTypes {
     | '/representante'
     | '/convite/$token'
     | '/d/$codigo'
+    | '/indicacao/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -1146,6 +1157,7 @@ export interface FileRouteTypes {
     | '/_authenticated/representante'
     | '/convite/$token'
     | '/d/$codigo'
+    | '/indicacao/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -1241,6 +1253,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ConviteTokenRoute: typeof ConviteTokenRoute
   DCodigoRoute: typeof DCodigoRoute
+  IndicacaoCodigoRoute: typeof IndicacaoCodigoRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
   SitemapProductsPaginaRoute: typeof SitemapProductsPaginaRoute
@@ -1466,6 +1479,13 @@ declare module '@tanstack/react-router' {
       path: '/d/$codigo'
       fullPath: '/d/$codigo'
       preLoaderRoute: typeof DCodigoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/indicacao/$codigo': {
+      id: '/indicacao/$codigo'
+      path: '/indicacao/$codigo'
+      fullPath: '/indicacao/$codigo'
+      preLoaderRoute: typeof IndicacaoCodigoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/produto/$slug': {
@@ -2132,6 +2152,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ConviteTokenRoute: ConviteTokenRoute,
   DCodigoRoute: DCodigoRoute,
+  IndicacaoCodigoRoute: IndicacaoCodigoRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,
   SitemapProductsPaginaRoute: SitemapProductsPaginaRoute,

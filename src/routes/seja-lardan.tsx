@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { SejaLardanForm } from "@/components/site/SejaLardanForm";
@@ -34,6 +34,13 @@ const DESCRIPTION =
   "Conheça a oportunidade de ser Consultora Lardan e conte com semijoias, CRM, ferramentas de vendas, organização financeira, treinamento e suporte para desenvolver seu negócio.";
 
 export const Route = createFileRoute("/seja-lardan")({
+  // Links antigos de indicação (?indica=) vão para a página exclusiva de cadastro.
+  beforeLoad: ({ location }) => {
+    const c = (location.search as Record<string, unknown>)["indica"];
+    if (typeof c === "string" && /^[a-z0-9]{4,20}$/i.test(c)) {
+      throw redirect({ to: "/indicacao/$codigo", params: { codigo: c.toLowerCase() } });
+    }
+  },
   component: SejaLardanPage,
   head: () => ({
     meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/seja-lardan" }),

@@ -20,6 +20,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { useCapabilities } from "@/lib/capabilities";
 import { FollowupDialog } from "@/components/admin/candidaturas/FollowupDialog";
 import { EnvioRepresentante } from "@/components/admin/candidaturas/EnvioRepresentante";
+import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import {
   Dialog,
   DialogContent,
@@ -130,8 +131,10 @@ function CockpitCandidata() {
     staleTime: 60_000,
   });
 
+  const [autoConvite, setAutoConvite] = useState(false);
   const recarregar = async () => {
     await qc.invalidateQueries({ queryKey: ["crm"] });
+    await qc.invalidateQueries({ queryKey: ["acesso-consultora", id] });
   };
   const acao = <T,>(fn: (v: T) => Promise<unknown>, sucesso: string) =>
     ({
@@ -143,7 +146,12 @@ function CockpitCandidata() {
       onError: (e: Error) => toast.error(e.message),
     }) as const;
 
-  const mover = useMutation(acao((etapa: string) => moverEtapa(id, etapa), "Etapa atualizada."));
+  const mover = useMutation(
+    acao(async (etapa: string) => {
+      await moverEtapa(id, etapa);
+      if (opcoes.data?.etapas.find((e) => e.id === etapa)?.chave === "aprovada") setAutoConvite(true);
+    }, "Etapa atualizada."),
+  );
   const responsavel = useMutation(
     acao((u: string) => atribuir(id, u || null), "Responsável atualizado."),
   );
@@ -156,7 +164,12 @@ function CockpitCandidata() {
   );
   const concluir = useMutation(acao((f: string) => concluirFollowup(f), "Follow-up concluído."));
   const cancelar = useMutation(acao((f: string) => cancelarFollowup(f), "Follow-up cancelado."));
-  const ganho = useMutation(acao((obs: string) => marcarGanho(id, obs || undefined), "Candidatura aprovada."));
+  const ganho = useMutation(
+    acao(async (obs: string) => {
+      await marcarGanho(id, obs || undefined);
+      setAutoConvite(true);
+    }, "Candidatura aprovada."),
+  );
   const perda = useMutation(
     acao((v: { motivo: string; obs: string }) => marcarPerdido(id, v.motivo, v.obs || undefined), "Candidatura marcada como perdida."),
   );
@@ -752,6 +765,10 @@ function CockpitCandidata() {
               </div>
             </Panel>
           )}
+
+          <Panel title="Acesso ao Portal da Consultora">
+            <ConviteConsultora key={autoConvite ? "auto" : "manual"} leadId={id} auto={autoConvite} />
+          </Panel>
 
           <Panel title="Ligação com cadastros">
             <p className="text-xs text-ledger-muted">

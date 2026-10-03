@@ -18,6 +18,7 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
+import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   addRole,
@@ -629,6 +630,15 @@ function FichaPessoa() {
                   Nenhum login vinculado. Desvincular ou vincular um acesso nunca apaga a pessoa.
                 </p>
               )}
+            </div>
+          </Panel>
+          <Panel title="Ativar consultora e convidar para o Portal da Consultora" flush className="mt-4">
+            <div className="max-w-xl space-y-3 p-5">
+              <p className="text-sm text-ledger-muted">
+                Ao gerar o convite, esta pessoa passa a ser consultora ativa (sem criar outro cadastro) e
+                recebe o link para criar a senha do Portal da Consultora — não do sistema Lardan.
+              </p>
+              <ConviteConsultora partyId={id} />
             </div>
           </Panel>
         </TabsContent>

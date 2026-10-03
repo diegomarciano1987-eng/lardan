@@ -148,3 +148,61 @@ export const removerAutenticador = createServerFn({ method: "POST" })
     } as never);
     return { removidos: f.factors.length };
   });
+
+/**
+ * Convite ao Portal da Consultora, a partir da candidatura aprovada (lead_id)
+ * ou do cadastro da pessoa (party_id). Ativa a consultora sem duplicar pessoa
+ * e cria o convite; se já houver convite pendente, gera link novo (o anterior
+ * deixa de valer) e reenvia.
+ */
+export const convidarConsultora = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { lead_id?: string | undefined; party_id?: string | undefined; email: string; origem: string }) => {
+    const uuid = /^[0-9a-f-]{36}$/;
+    if (!(i.lead_id && uuid.test(i.lead_id)) && !(i.party_id && uuid.test(i.party_id))) throw new Error("Cadastro inválido.");
+    const email = (i.email ?? "").trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 200) throw new Error("Informe um e-mail válido.");
+    return { ...i, email };
+  })
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase;
+    let party = data.party_id ?? "";
+    if (data.lead_id) {
+      const { data: pid, error } = await sb.rpc("candidata_preparar_acesso" as never, { _lead: data.lead_id } as never);
+      if (error) throw new Error(error.message);
+      party = pid as unknown as string;
+    } else {
+      const { error } = await sb.rpc("consultora_ativar" as never, { _party: party } as never);
+      if (error) throw new Error(error.message);
+    }
+    const { data: sit, error: e1 } = await sb.rpc("consultora_acesso_situacao" as never, { _party: party } as never);
+    if (e1) throw new Error(e1.message);
+    const s = sit as unknown as { nome: string; conta_email: string | null; convite: { id: string; status: string; email: string } | null };
+    if (s.conta_email) return { ok: false as const, erro: `Esta consultora já tem acesso (${s.conta_email}).` };
+
+    const pendente = s.convite && ["pendente", "falha_envio", "expirado"].includes(s.convite.status) ? s.convite : null;
+    if (pendente && pendente.email !== data.email) {
+      await sb.rpc("access_invite_revoke" as never, { _id: pendente.id } as never);
+    } else if (pendente) {
+      const { token, hash } = await novoToken();
+      const { error } = await sb.rpc("access_invite_resend" as never, { _id: pendente.id, _token_hash: hash } as never);
+      if (error) throw new Error(error.message);
+      const { data: inv } = await sb.from("access_invites" as never).select("envios").eq("id", pendente.id).maybeSingle();
+      const link = `${origemSegura(data.origem)}/convite/${token}`;
+      const env = await enviar(data.email, s.nome, link, `convite-${pendente.id}-${((inv as { envios?: number } | null)?.envios ?? 0) + 1}`);
+      await sb.rpc("access_invite_envio" as never, { _id: pendente.id, _ok: env.ok, _erro: env.erro } as never);
+      return { ok: true as const, party_id: party, link, enviado: env.ok, erro: env.erro, reenvio: true };
+    }
+
+    const { token, hash } = await novoToken();
+    const { data: r, error } = await sb.rpc("access_invite_create" as never, {
+      _party: party, _email: data.email, _roles: ["consultora"], _token_hash: hash,
+    } as never);
+    if (error) throw new Error(error.message);
+    const res = r as unknown as { ok: boolean; id?: string; conflito?: string };
+    if (!res.ok) return { ok: false as const, erro: res.conflito ?? "Conflito." };
+    const link = `${origemSegura(data.origem)}/convite/${token}`;
+    const env = await enviar(data.email, s.nome, link, `convite-${res.id}-1`);
+    await sb.rpc("access_invite_envio" as never, { _id: res.id, _ok: env.ok, _erro: env.erro } as never);
+    return { ok: true as const, party_id: party, link, enviado: env.ok, erro: env.erro, reenvio: false };
+  });

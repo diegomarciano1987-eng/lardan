@@ -89,7 +89,7 @@ function Label({ htmlFor, children }: { htmlFor: string; children: React.ReactNo
   );
 }
 
-export function SejaLardanForm() {
+export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: string | undefined; modo?: "site" | "indicacao" } = {}) {
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);
@@ -114,7 +114,7 @@ export function SejaLardanForm() {
 
   const [madrinha, setMadrinha] = useState<string | null>(null);
   useEffect(() => {
-    const codigo = registrarIndicacao();
+    const codigo = registrarIndicacao(indicacao);
     if (!codigo) return;
     void supabase
       .rpc("indicacao_publica" as never, { _code: codigo } as never)
@@ -122,7 +122,7 @@ export function SejaLardanForm() {
         const nome = (data as { nome?: string } | null)?.nome;
         if (nome) setMadrinha(nome);
       });
-  }, []);
+  }, [indicacao]);
 
   // O primeiro contato é registrado uma única vez, no SiteLayout.
   const listarMunicipiosFn = useServerFn(listarMunicipiosPublico);
@@ -218,7 +218,7 @@ export function SejaLardanForm() {
             motivation: texto("motivation"),
             dream: texto("dream"),
             dream_value_cents: centavosDoValor(sonhoValor),
-            source: "site/seja-lardan",
+            source: modo === "indicacao" ? "indicacao/link" : "site/seja-lardan",
             privacy_version: PRIVACY_VERSION,
             marketing_consent: marketingConsent,
           }) as never,
@@ -243,6 +243,22 @@ export function SejaLardanForm() {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (protocolo && modo === "indicacao") {
+    return (
+      <div role="status" className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 text-center">
+        <p className="brand-eyebrow mb-3">Candidatura recebida</p>
+        <h2 className="text-3xl text-foreground">Estamos avaliando a sua candidatura</h2>
+        <p className="mt-4 text-base leading-relaxed text-muted-foreground">Retornaremos em breve.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Protocolo <strong className="text-foreground">{protocolo}</strong>
+        </p>
+        <a href="/seja-lardan" className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground">
+          Conheça nosso site e tudo que está à sua disposição
+        </a>
+      </div>
+    );
   }
 
   if (protocolo) {

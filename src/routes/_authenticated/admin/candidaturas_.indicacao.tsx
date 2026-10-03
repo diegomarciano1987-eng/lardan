@@ -100,7 +100,7 @@ function ConfigIndicacao() {
             <thead><tr className="text-left text-xs uppercase tracking-widest text-ledger-muted"><th className="py-2">Consultora</th><th>Link</th><th>Indicada por</th><th className="text-right">Candidaturas</th><th className="text-right">Aprovadas</th><th className="text-right">Comissão apurada</th></tr></thead>
             <tbody>{painel.data!.rede.map((r) => (
               <tr key={r.party_id} className="border-t border-line-soft">
-                <td className="py-2 font-semibold">{r.nome}</td><td className="font-mono text-xs">?indica={r.codigo}</td><td>{r.madrinha ?? "—"}</td>
+                <td className="py-2 font-semibold">{r.nome}</td><td className="font-mono text-xs">/indicacao/{r.codigo}</td><td>{r.madrinha ?? "—"}</td>
                 <td className="text-right num">{r.candidaturas}</td><td className="text-right num">{r.aprovadas}</td><td className="text-right num">{brl(r.comissao_cents)}</td>
               </tr>))}</tbody>
           </table>

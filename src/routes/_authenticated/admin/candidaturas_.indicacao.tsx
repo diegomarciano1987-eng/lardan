@@ -54,7 +54,7 @@ function ConfigIndicacao() {
       if (antigos.length) { const d = await t("referral_tiers").delete().in("id", antigos as string[]); if (d.error) throw d.error; }
       // grava em duas fases para não colidir no número mínimo único
       for (const f of faixas.filter((x) => x.id)) {
-        const u = await t("referral_tiers").update({ min_indicadas: -0 + 100000 + f.min_indicadas } as never).eq("id", f.id!);
+        const u = await t("referral_tiers").update({ min_indicadas: 100000 + f.min_indicadas } as never).eq("id", f.id!);
         if (u.error) throw u.error;
       }
       for (const f of faixas) {

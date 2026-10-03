@@ -218,7 +218,7 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
             motivation: texto("motivation"),
             dream: texto("dream"),
             dream_value_cents: centavosDoValor(sonhoValor),
-            source: "site/seja-lardan",
+            source: modo === "indicacao" ? "indicacao/link" : "site/seja-lardan",
             privacy_version: PRIVACY_VERSION,
             marketing_consent: marketingConsent,
           }) as never,

@@ -36,6 +36,7 @@ const PAGE_SIZE = 20;
 
 const TITULO_POR_PAPEL: Record<string, { titulo: string; descricao: string }> = {
   consultora: { titulo: "Consultoras", descricao: "Pessoas aprovadas que trabalham com maletas LARDAN. É a mesma ficha da base de pessoas." },
+  vendedora_interna: { titulo: "Vendedoras internas", descricao: "Equipe de balcão das lojas. Só elas podem ser vinculadas a uma loja e vender no PDV." },
   representante: { titulo: "Representantes", descricao: "Quem leva, acompanha e recolhe as maletas. É a mesma ficha da base de pessoas." },
   colaborador: { titulo: "Colaboradores", descricao: "Time interno da LARDAN. É a mesma ficha da base de pessoas." },
   cliente: { titulo: "Clientes", descricao: "Consumidoras finais atendidas pela rede. É a mesma ficha da base de pessoas." },

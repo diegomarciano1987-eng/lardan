@@ -38,6 +38,12 @@ const OPCOES: Opcao[] = [
   },
   {
     grupo: "Pessoas e rede",
+    label: "Vendedora interna",
+    descricao: "Equipe de balcão das lojas; única que pode vender no PDV.",
+    destino: { tipo: "pessoa", role: "vendedora_interna" },
+  },
+  {
+    grupo: "Pessoas e rede",
     label: "Representante",
     descricao: "Responsável por região e carteira de consultoras.",
     destino: { tipo: "pessoa", role: "representante" },

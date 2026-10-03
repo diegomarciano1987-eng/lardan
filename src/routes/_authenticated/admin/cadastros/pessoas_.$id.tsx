@@ -18,6 +18,7 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
+import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   addRole,

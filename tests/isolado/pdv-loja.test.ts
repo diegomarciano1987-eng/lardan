@@ -44,15 +44,33 @@ describe("PDV Loja", async () => {
   });
 
   test("navegador não executa rotinas do terminal", async () => {
-    const r = await rpc(vend, "pdv_entrar", { _numero: numero, _senha: "segredo123", _token_hash: "x", _ua: "" });
+    const r = await rpc(vend, "pdv_entrar_iniciar", { _numero: numero, _senha: "segredo123", _email: "x@y.z" });
     expect(r.ok).toBe(false);
   });
 
-  test("entrada: senha errada recusa, certa abre sessão; PIN identifica a vendedora", async () => {
-    expect((await rpcServico("pdv_entrar", { _numero: numero, _senha: "errada", _token_hash: h("e"), _ua: "t" })).erro).toContain("incorretos");
+  test("entrada exige número, senha, e-mail da equipe e código por e-mail", async () => {
+    const [e] = (await adm.unsafe("select email from auth.users where id=$1", [vend.uid])) as { email: string }[];
+    const [ei] = (await adm.unsafe("select email from auth.users where id=$1", [intruso.uid])) as { email: string }[];
+    expect((await rpcServico("pdv_entrar", { _numero: numero, _senha: "segredo123", _token_hash: h("old"), _ua: "" })).ok).toBe(false);
+    expect((await rpcServico("pdv_entrar_iniciar", { _numero: numero, _senha: "errada", _email: e!.email })).erro).toContain("incorretos");
+    expect((await rpcServico("pdv_entrar_iniciar", { _numero: numero, _senha: "segredo123", _email: ei!.email })).erro).toContain("não faz parte");
+    const d = await rpcServico<{ desafio: string; codigo: string; email: string }>("pdv_entrar_iniciar", { _numero: numero, _senha: "segredo123", _email: e!.email.toUpperCase() });
+    expect(d.erro).toBeNull(); expect(d.dados.codigo).toMatch(/^\d{6}$/); expect(d.dados.email).toBe(e!.email);
+    const [hc] = (await adm.unsafe("select codigo_hash from public.pdv_login_codigos where id=$1", [d.dados.desafio])) as { codigo_hash: string }[];
+    expect(hc!.codigo_hash).not.toContain(d.dados.codigo);
+    expect((await ler(master, "select codigo_hash from public.pdv_login_codigos limit 1")).ok).toBe(false);
+    const errado = d.dados.codigo === "000000" ? "111111" : "000000";
+    const r1 = await rpcServico<{ ok: boolean; erro: string }>("pdv_entrar_confirmar", { _desafio: d.dados.desafio, _codigo: errado, _token_hash: h("x"), _ua: "t" });
+    expect(r1.dados.ok).toBe(false); expect(r1.dados.erro).toContain("incorreto");
     tok = h("ok");
-    expect((await rpcServico("pdv_entrar", { _numero: numero, _senha: "segredo123", _token_hash: tok, _ua: "t" })).erro).toBeNull();
-    expect((await rpcServico("pdv_caixa_abrir", { _token_hash: tok, _fundo: 10000 })).erro).toContain("vendedora");
+    const r2 = await rpcServico<{ ok: boolean }>("pdv_entrar_confirmar", { _desafio: d.dados.desafio, _codigo: d.dados.codigo, _token_hash: tok, _ua: "t" });
+    expect(r2.dados.ok).toBe(true);
+    expect((await rpcServico("pdv_entrar_confirmar", { _desafio: d.dados.desafio, _codigo: d.dados.codigo, _token_hash: h("y"), _ua: "t" })).erro).toContain("expirado");
+    const d2 = await rpcServico<{ desafio: string; codigo: string }>("pdv_entrar_iniciar", { _numero: numero, _senha: "segredo123", _email: e!.email });
+    for (let i = 0; i < 5; i++) await rpcServico("pdv_entrar_confirmar", { _desafio: d2.dados.desafio, _codigo: errado, _token_hash: h("z"), _ua: "t" });
+    expect((await rpcServico("pdv_entrar_confirmar", { _desafio: d2.dados.desafio, _codigo: d2.dados.codigo, _token_hash: h("z"), _ua: "t" })).erro).toContain("bloqueado");
+    const [s] = (await adm.unsafe("select membro_id, login_membro_id from public.pdv_sessoes where token_hash=$1", [tok])) as { membro_id: string; login_membro_id: string }[];
+    expect(s!.login_membro_id).toBe(mV); expect(s!.membro_id).toBe(mV);
     expect((await rpcServico("pdv_operadora", { _token_hash: tok, _membro: mV, _pin: "0000" })).erro).toContain("PIN incorreto");
     expect((await rpcServico("pdv_operadora", { _token_hash: tok, _membro: mV, _pin: "1234" })).erro).toBeNull();
     expect((await rpcServico("pdv_estado", { _token_hash: "invalido" })).erro).toContain("PDV_SESSAO_INVALIDA");

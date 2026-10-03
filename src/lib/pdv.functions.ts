@@ -108,7 +108,10 @@ export const pdvPixGerar = createServerFn({ method: "POST" })
   .inputValidator((d: { venda: string }) => ({ venda: str(d?.venda, 40) }))
   .handler(async ({ data }) => {
     const th = await token();
-    const t = await rpc<{ installment_id: string; actor: string }>("pdv_pix_titulo", { _token_hash: th, _venda: data.venda });
+    const t = await rpc<{ installment_id: string; actor: string }>("pdv_pix_titulo", { _token_hash: th, _venda: data.venda }).catch((e: Error) => {
+      if (/Sem permissão para este tipo de título/.test(e.message)) throw new Error("O responsável pelo Pix desta loja não tem permissão de contas a receber. A gestão precisa trocar em PDV Loja → Acesso por alguém do financeiro.");
+      throw e;
+    });
     const { solicitarCobranca } = await import("./asaas/operacoes");
     const { bancoExecutor } = await import("./asaas/servidor.server");
     const { envDoServidor } = await import("./asaas/configuracao.server");
@@ -119,7 +122,19 @@ export const pdvPixGerar = createServerFn({ method: "POST" })
     if ((r as { state: string }).state === "indisponivel") throw new Error((r as { aviso?: string }).aviso || "Pix indisponível no momento.");
     const rr = r as { charge_id?: string | null; invoice_url?: string | null };
     await rpc("pdv_pix_registrar", { _token_hash: th, _venda: data.venda, _charge: rr.charge_id ?? null, _url: rr.invoice_url ?? null });
-    return { url: rr.invoice_url ?? null };
+    // Copia-e-cola e QR oficiais do Asaas; se não vierem, a tela usa o link da fatura.
+    let copia: string | null = null; let qr: string | null = null;
+    const ext = (r as { external_id?: string | null; simulado?: boolean }).external_id;
+    if (ext && !(r as { simulado?: boolean }).simulado) {
+      try {
+        const { resolverPorParcela } = await import("./asaas/servidor.server");
+        const { transporteDaResolucao } = await import("./asaas/configuracao.server");
+        const tr = (await transporteDaResolucao(await resolverPorParcela(t.installment_id, t.actor))) as unknown as { pixQrCode?: (id: string) => Promise<{ payload: string | null; encodedImage: string | null }> };
+        const px = await tr.pixQrCode?.(ext);
+        copia = px?.payload ?? null; qr = px?.encodedImage ? `data:image/png;base64,${px.encodedImage}` : null;
+      } catch (e) { console.error("pix qrcode", (e as Error).message); }
+    }
+    return { url: rr.invoice_url ?? null, copia, qr };
   });
 
 export const pdvPixSituacao = createServerFn({ method: "GET" })

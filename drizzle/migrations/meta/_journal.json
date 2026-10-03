@@ -148,6 +148,13 @@
       "when": 1791036733753,
       "tag": "0020_papel_vendedora_interna",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791036767551,
+      "tag": "0021_vendedora_interna_ficha_e_trava_pdv",
+      "breakpoints": true
     }
   ]
 }

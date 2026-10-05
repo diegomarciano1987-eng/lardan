@@ -98,6 +98,7 @@ import { Route as AuthenticatedAdminMaletasIdRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminMaletasEntradaRouteImport } from './routes/_authenticated/admin/maletas_.entrada'
 import { Route as AuthenticatedFinanceiroSimulacaoIdRouteImport } from './routes/_authenticated/financeiro/simulacao.$id'
 import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
+import { Route as ApiPublicClicksignWebhookRouteImport } from './routes/api/public/clicksign/webhook'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
 import { Route as ApiPublicVitrineImgSplatRouteImport } from './routes/api/public/vitrine-img.$'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -603,6 +604,12 @@ const ApiPublicAsaasWebhookRoute = ApiPublicAsaasWebhookRouteImport.update({
   path: '/api/public/asaas/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicClicksignWebhookRoute =
+  ApiPublicClicksignWebhookRouteImport.update({
+    id: '/api/public/clicksign/webhook',
+    path: '/api/public/clicksign/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicMidiaIdRoute = ApiPublicMidiaIdRouteImport.update({
   id: '/api/public/midia/$id',
   path: '/api/public/midia/$id',
@@ -760,6 +767,7 @@ export interface FileRoutesByFullPath {
   '/admin/maletas/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
+  '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -860,6 +868,7 @@ export interface FileRoutesByTo {
   '/admin/maletas/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
+  '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -964,6 +973,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/maletas_/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/_authenticated/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
+  '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1068,6 +1078,7 @@ export interface FileRouteTypes {
     | '/admin/maletas/entrada'
     | '/financeiro/simulacao/$id'
     | '/api/public/asaas/webhook'
+    | '/api/public/clicksign/webhook'
     | '/api/public/midia/$id'
     | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
@@ -1168,6 +1179,7 @@ export interface FileRouteTypes {
     | '/admin/maletas/entrada'
     | '/financeiro/simulacao/$id'
     | '/api/public/asaas/webhook'
+    | '/api/public/clicksign/webhook'
     | '/api/public/midia/$id'
     | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
@@ -1271,6 +1283,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/maletas_/entrada'
     | '/_authenticated/financeiro/simulacao/$id'
     | '/api/public/asaas/webhook'
+    | '/api/public/clicksign/webhook'
     | '/api/public/midia/$id'
     | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
@@ -1324,6 +1337,7 @@ export interface RootRouteChildren {
   SemijoiasIndexRoute: typeof SemijoiasIndexRoute
   ApiPublicGaConfigRoute: typeof ApiPublicGaConfigRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
+  ApiPublicClicksignWebhookRoute: typeof ApiPublicClicksignWebhookRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
   ApiPublicVitrineImgSplatRoute: typeof ApiPublicVitrineImgSplatRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -1958,6 +1972,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAsaasWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/clicksign/webhook': {
+      id: '/api/public/clicksign/webhook'
+      path: '/api/public/clicksign/webhook'
+      fullPath: '/api/public/clicksign/webhook'
+      preLoaderRoute: typeof ApiPublicClicksignWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/midia/$id': {
       id: '/api/public/midia/$id'
       path: '/api/public/midia/$id'
@@ -2266,6 +2287,7 @@ const rootRouteChildren: RootRouteChildren = {
   SemijoiasIndexRoute: SemijoiasIndexRoute,
   ApiPublicGaConfigRoute: ApiPublicGaConfigRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
+  ApiPublicClicksignWebhookRoute: ApiPublicClicksignWebhookRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,
   ApiPublicVitrineImgSplatRoute: ApiPublicVitrineImgSplatRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

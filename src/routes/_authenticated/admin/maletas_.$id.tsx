@@ -17,6 +17,7 @@ import {
 } from "@/components/admin/ui";
 import { VariantPicker, type VariantOption } from "@/components/admin/VariantPicker";
 import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
+import { TermosMaleta } from "@/components/maletas/TermoAssinatura";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   SITUACAO_MALETA,
@@ -277,6 +278,13 @@ function MaletaFicha() {
             podeGerir={podeMontar}
             podeAcrescentar={podeMontar || caps.includes("kit.acrescimo")}
           />
+
+          <Panel title="Assinatura do termo">
+            <TermosMaleta cycleId={id} titulo="Termos desta maleta" />
+            <p className="mt-3 text-xs text-ledger-muted">
+              Só a consultora destinatária assina. A gestão acompanha e baixa os arquivos, mas não aceita no lugar dela.
+            </p>
+          </Panel>
 
           <Panel title="Linha do tempo" flush>
             {d.eventos.length === 0 ? (

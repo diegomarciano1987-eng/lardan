@@ -285,16 +285,18 @@ export function ArtigoEditorial({ guia }: { guia: Guia }) {
                 {guia.ctaFinal.texto}
               </p>
               <LinkCta
-                to="/seja-lardan"
+                to={guia.ctaFinal.to ?? "/seja-lardan"}
                 ctaId={guia.ctaFinal.ctaId}
                 className="btn-premium mt-6 inline-flex"
               >
                 {guia.ctaFinal.rotulo}
               </LinkCta>
-              <p className="mt-3 text-xs text-muted-foreground">
-                Cadastro sujeito à análise. A Lardan não promete renda: resultado depende de
-                vendas, rotina, clientes e execução.
-              </p>
+              {(guia.ctaFinal.to ?? "/seja-lardan") === "/seja-lardan" ? (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Cadastro sujeito à análise. A Lardan não promete renda: resultado depende de
+                  vendas, rotina, clientes e execução.
+                </p>
+              ) : null}
             </aside>
 
             {/* FAQ visível */}

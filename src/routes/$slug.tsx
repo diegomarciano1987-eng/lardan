@@ -14,7 +14,9 @@ export const Route = createFileRoute("/$slug")({
     return dados;
   },
   component: VitrineConsultora,
-  head: ({ loaderData }) => {
+  head: ({ loaderData, params }) => {
+    // Canonical próprio: cada vitrine aponta para si mesma (sem herdar a home).
+    const url = `${SITE}/${params.slug}`;
     const d = loaderData?.design;
     const nome = loaderData?.nome ?? "Vitrine";
     const titulo = d?.compartilhar?.titulo || `${nome} · Semijoias LARDAN`;
@@ -28,9 +30,11 @@ export const Route = createFileRoute("/$slug")({
         { property: "og:title", content: titulo },
         { property: "og:description", content: descricao },
         { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
         { name: "twitter:card", content: "summary_large_image" },
         ...(og ? [{ property: "og:image", content: og }, { name: "twitter:image", content: og }] : []),
       ],
+      links: [{ rel: "canonical", href: url }],
     };
   },
 });

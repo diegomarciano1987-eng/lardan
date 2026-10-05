@@ -343,6 +343,12 @@ export const GUIA_RENDA_EXTRA: Guia = {
       descricao: "Quem são Daniel e Larissa e como a marca nasceu de uma decisão familiar.",
       ctaId: "p1_to_alardan",
     },
+    {
+      to: "/perguntas-sobre-revenda-de-semijoias",
+      titulo: "Revenda de semijoias: perguntas e respostas",
+      descricao: "Consignado ou atacado, maleta, acerto, garantia, MEI e WhatsApp.",
+      ctaId: "p1_to_p5",
+    },
   ],
   ctaFinal: {
     titulo: "Quer conhecer a estrutura que a Lardan oferece à consultora?",

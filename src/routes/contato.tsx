@@ -5,8 +5,9 @@ import { ContatoForm } from "@/components/site/ContatoForm";
 import { ENDERECO_LINHAS, MAPA_URL } from "@/lib/institucional";
 import { canonical, jsonLdScript, pageMeta, webPageLd } from "@/lib/seo";
 
-const TITULO = "Contato — LARDAN";
-const DESCRICAO = "Fale com a Lardan: atendimento e contato oficial.";
+const TITULO = "Contato | Lardan Semijoias";
+const DESCRICAO =
+  "Fale com a Lardan, marca de semijoias de Ibiporã/PR com 2 anos de garantia: dúvidas sobre peças, garantia, consultoras e parcerias.";
 
 export const Route = createFileRoute("/contato")({
   component: ContatoPage,

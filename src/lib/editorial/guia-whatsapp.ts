@@ -385,6 +385,12 @@ export const GUIA_WHATSAPP: Guia = {
       descricao: "O modelo de maleta em consignação explicado com clareza.",
       ctaId: "p4_to_p3",
     },
+    {
+      to: "/perguntas-sobre-revenda-de-semijoias",
+      titulo: "Revenda de semijoias: perguntas e respostas",
+      descricao: "Consignado ou atacado, maleta, acerto, garantia, MEI e WhatsApp.",
+      ctaId: "p4_to_p5",
+    },
   ],
   ctaFinal: {
     titulo: "Quer conhecer a estrutura da Consultora Lardan?",

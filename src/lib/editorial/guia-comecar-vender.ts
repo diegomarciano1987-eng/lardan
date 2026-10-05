@@ -425,6 +425,12 @@ export const GUIA_COMECAR_VENDER: Guia = {
       descricao: "Peças com fabricação própria, curadoria de importação e 2 anos de garantia.",
       ctaId: "p2_to_catalogo",
     },
+    {
+      to: "/perguntas-sobre-revenda-de-semijoias",
+      titulo: "Revenda de semijoias: perguntas e respostas",
+      descricao: "Consignado ou atacado, maleta, acerto, garantia, MEI e WhatsApp.",
+      ctaId: "p2_to_p5",
+    },
   ],
   ctaFinal: {
     titulo: "Veja como funciona ser Consultora Lardan",

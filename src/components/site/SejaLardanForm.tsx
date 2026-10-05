@@ -559,8 +559,9 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
       </label>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Ao enviar, os dados acima são registrados para análise da candidatura, sob o aviso de
-        privacidade versão {PRIVACY_VERSION}.
+        {/* Link abre em nova aba para não perder o que já foi digitado. */}
+        Ao enviar, os dados acima são registrados para análise da candidatura, sob o{" "}
+        <a href="/privacidade" target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-foreground">aviso de privacidade</a> versão {PRIVACY_VERSION}.
       </p>
 
       {erro && (

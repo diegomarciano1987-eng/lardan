@@ -19,7 +19,6 @@ const COLUNAS: { titulo: string; links: { label: string; to: string }[] }[] = [
     titulo: "Descubra",
     links: [
       { label: "Todas as semijoias", to: "/semijoias" },
-      { label: "Coleções", to: "/colecoes" },
       { label: "Brincos", to: "/semijoias/brincos" },
       { label: "Colares", to: "/semijoias/colares" },
       { label: "Pulseiras", to: "/semijoias/pulseiras" },
@@ -30,9 +29,10 @@ const COLUNAS: { titulo: string; links: { label: string; to: string }[] }[] = [
     titulo: "Lardan",
     links: [
       { label: "Sobre a Lardan", to: "/a-lardan" },
-      { label: "Qualidade e garantia", to: "/a-lardan" },
+      { label: "Garantia e cuidados", to: "/como-cuidar-de-semijoias" },
       { label: "Seja Consultora Lardan", to: "/seja-lardan" },
       { label: "Contato", to: "/contato" },
+      { label: "Aviso de privacidade", to: "/privacidade" },
     ],
   },
   {
@@ -42,6 +42,9 @@ const COLUNAS: { titulo: string; links: { label: string; to: string }[] }[] = [
       { label: "Como começar a vender semijoias", to: "/como-comecar-a-vender-semijoias" },
       { label: "Semijoias consignadas", to: "/semijoias-consignadas-para-revenda" },
       { label: "Vendas pelo WhatsApp", to: "/como-vender-semijoias-pelo-whatsapp" },
+      { label: "Perguntas sobre revenda", to: "/perguntas-sobre-revenda-de-semijoias" },
+      { label: "Como cuidar de semijoias", to: "/como-cuidar-de-semijoias" },
+      { label: "Semijoia, folheado ou bijuteria", to: "/semijoia-folheado-ou-bijuteria" },
     ],
   },
 ];

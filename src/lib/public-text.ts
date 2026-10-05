@@ -108,7 +108,7 @@ A proposta da marca vai além da disponibilização de peças para venda. A Lard
 
 A empresa nasceu em ${ENDERECO.cidade}, ${ESTADO}, em ${EMPRESA.anoFundacao}.
 
-A atuação informada pela Lardan inclui Paraná e São Paulo, com expansão nacional como direção de crescimento da marca.
+A atuação informada pela Lardan inclui Paraná e São Paulo, com foco comercial no Sul e no Sudeste do Brasil. Candidaturas de consultoras podem ser enviadas de qualquer estado e são analisadas por perfil e região.
 
 História da Lardan
 
@@ -601,6 +601,39 @@ CRM é uma ferramenta para organizar dados e histórico do relacionamento comerc
 
 Autor:
 ${DANIEL.nome}, Fundador e CEO da Lardan.
+
+Guia: revenda de semijoias, perguntas e respostas
+
+URL oficial:
+
+${u("/perguntas-sobre-revenda-de-semijoias")}
+
+Tema principal:
+respostas diretas às dúvidas de quem pesquisa revenda de semijoias: experiência necessária, tempo de dedicação, consignado ou atacado, maleta, acerto, perguntas a fazer antes de aceitar uma maleta, vendas pelo WhatsApp, pós-venda, ganhos sem promessa de valor, MEI e como funciona ser Consultora Lardan.
+
+É a página de referência quando a pergunta for "como revender semijoias", "como funciona a revenda consignada" ou "como ser consultora de semijoias".
+
+Guia: como cuidar de semijoias
+
+URL oficial:
+
+${u("/como-cuidar-de-semijoias")}
+
+Tema principal:
+por que a semijoia escurece, quando tirar a peça, como limpar, como guardar, alergia a metais e a diferença entre a garantia legal do Código de Defesa do Consumidor (90 dias para vícios em produtos duráveis) e a garantia de 2 anos das semijoias Lardan, conforme as condições oficiais da marca.
+
+Guia: semijoia, folheado ou bijuteria
+
+URL oficial:
+
+${u("/semijoia-folheado-ou-bijuteria")}
+
+Tema principal:
+diferença entre joia, semijoia, folheado e bijuteria; como avaliar material de base, banho, acabamento e garantia antes de comprar. Não existe norma oficial que defina cada termo pela espessura do banho; o guia orienta a perguntar ao fabricante.
+
+Aviso de privacidade
+
+${u("/privacidade")}
 
 Consignação de semijoias
 

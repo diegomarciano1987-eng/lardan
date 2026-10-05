@@ -21,9 +21,9 @@ import {
 } from "@/lib/seo";
 
 const POR_PAGINA = 12;
-const TITULO = "Semijoias — LARDAN";
+const TITULO = "Semijoias com 2 anos de garantia | Lardan";
 const DESCRICAO =
-  "Catálogo de semijoias Lardan por categoria: anéis, colares, pulseiras e brincos.";
+  "Catálogo oficial de semijoias Lardan: anéis, colares, pulseiras e brincos com fabricação própria, curadoria de importação e 2 anos de garantia.";
 
 interface Dados {
   categorias: CategoriaPublica[];

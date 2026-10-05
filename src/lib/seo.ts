@@ -2,7 +2,7 @@
 import ogAsset from "@/assets/lardan-og.jpg.asset.json";
 // Logo oficial da identidade (não é fotografia editorial) — usada em Organization.logo.
 import logoAsset from "@/assets/lardan-logo-completa.png.asset.json";
-import { INSTAGRAM_URL } from "@/lib/brand";
+import { INSTAGRAM_URL, PERFIL_GOOGLE_URL } from "@/lib/brand";
 import { DANIEL, EMPRESA, ENDERECO, LARISSA } from "@/lib/institucional";
 
 /**
@@ -114,7 +114,7 @@ export function organizationLd(): Json {
     url: SITE_URL,
     logo: LOGO_URL,
     image: OG_IMAGE.url,
-    sameAs: [INSTAGRAM_URL],
+    sameAs: [INSTAGRAM_URL, PERFIL_GOOGLE_URL],
     foundingDate: EMPRESA.anoFundacao,
     address: {
       "@type": "PostalAddress",
@@ -124,9 +124,16 @@ export function organizationLd(): Json {
       postalCode: ENDERECO.cep,
       addressCountry: "BR",
     },
+    // Foco comercial no Sul e no Sudeste, com atendimento a todo o Brasil.
     areaServed: [
       { "@type": "State", name: "Paraná" },
+      { "@type": "State", name: "Santa Catarina" },
+      { "@type": "State", name: "Rio Grande do Sul" },
       { "@type": "State", name: "São Paulo" },
+      { "@type": "State", name: "Rio de Janeiro" },
+      { "@type": "State", name: "Minas Gerais" },
+      { "@type": "State", name: "Espírito Santo" },
+      { "@type": "Country", name: "Brasil" },
     ],
     founder: [{ "@id": `${SITE_URL}/#daniel` }, { "@id": `${SITE_URL}/#larissa` }],
     description:

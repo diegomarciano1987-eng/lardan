@@ -4,6 +4,7 @@ import { ShieldCheck, LockKeyhole, BadgeCheck, FileCheck2, ServerCog } from "luc
  * Selos de segurança exibidos no rodapé do site, junto à marca da SmallData.
  *
  * Só entram aqui afirmações verdadeiras sobre a infraestrutura:
+ * - garantia oficial de 2 anos das peças;
  * - tráfego criptografado de ponta a ponta (HTTPS/TLS);
  * - dados criptografados em repouso na infraestrutura;
  * - plataforma com certificações SOC 2 Tipo II e ISO 27001;
@@ -18,8 +19,10 @@ const SELOS = [
   },
   {
     icone: ShieldCheck,
-    titulo: "Compra segura",
-    descricao: "Pagamentos protegidos",
+    // "Compra segura · Pagamentos protegidos" saiu enquanto o pagamento online
+    // do site estiver desligado. A garantia é fato oficial da marca.
+    titulo: "Garantia de 2 anos",
+    descricao: "Semijoias Lardan",
   },
   {
     icone: ServerCog,

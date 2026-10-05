@@ -119,7 +119,8 @@ export function ContatoForm() {
       </label>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Mensagem registrada sob o aviso de privacidade versão {PRIVACY_VERSION}.
+        {/* Link abre em nova aba para não perder o que já foi digitado. */}
+        Mensagem registrada sob o <a href="/privacidade" target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-foreground">aviso de privacidade</a> versão {PRIVACY_VERSION}.
       </p>
 
       {erro && (

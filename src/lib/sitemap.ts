@@ -48,6 +48,7 @@ const ESTATICAS: UrlSitemap[] = [
   { loc: "/a-lardan", priority: "0.7", changefreq: "monthly" },
   { loc: "/semijoias", priority: "0.8", changefreq: "weekly" },
   { loc: "/contato", priority: "0.5", changefreq: "yearly" },
+  { loc: "/privacidade", lastmod: "2026-10-05", priority: "0.3", changefreq: "yearly" },
 ];
 
 /** Páginas fixas + guias (com data editorial real) + categorias com peças. */

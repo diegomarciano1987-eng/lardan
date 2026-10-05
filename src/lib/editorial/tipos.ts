@@ -59,7 +59,14 @@ export interface Guia {
   fontes: string[];
   relacionados: LinkRelacionado[];
   /** CTA comercial forte, próximo ao final. */
-  ctaFinal: { titulo: string; texto: string; rotulo: string; ctaId: string };
+  ctaFinal: {
+    titulo: string;
+    texto: string;
+    rotulo: string;
+    ctaId: string;
+    /** Destino do botão. Padrão: /seja-lardan (guias para consultoras). */
+    to?: string;
+  };
   /** Chave da imagem de herói (ver src/lib/editorial/imagens.ts). */
   imagem: string;
 }

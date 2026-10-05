@@ -4,6 +4,9 @@ export const CAMINHOS_EDITORIAIS = [
   "/como-comecar-a-vender-semijoias",
   "/semijoias-consignadas-para-revenda",
   "/como-vender-semijoias-pelo-whatsapp",
+  "/perguntas-sobre-revenda-de-semijoias",
+  "/como-cuidar-de-semijoias",
+  "/semijoia-folheado-ou-bijuteria",
 ] as const;
 
 export type CaminhoEditorial = (typeof CAMINHOS_EDITORIAIS)[number];

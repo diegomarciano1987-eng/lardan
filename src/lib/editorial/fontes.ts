@@ -41,6 +41,13 @@ export const FONTES: Record<string, Fonte> = {
     ano: "2026",
     url: "https://www.gov.br/empresas-e-negocios/pt-br/empreendedor",
   },
+  cdc: {
+    chave: "cdc",
+    instituicao: "Presidência da República",
+    titulo: "Código de Defesa do Consumidor (Lei nº 8.078/1990), arts. 26 e 50",
+    ano: "1990",
+    url: "https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm",
+  },
   lardan_institucional: {
     chave: "lardan_institucional",
     instituicao: "Lardan",

@@ -437,6 +437,12 @@ export const GUIA_CONSIGNADO: Guia = {
       descricao: "As peças que compõem as maletas, com 2 anos de garantia.",
       ctaId: "p3_to_catalogo",
     },
+    {
+      to: "/perguntas-sobre-revenda-de-semijoias",
+      titulo: "Revenda de semijoias: perguntas e respostas",
+      descricao: "Consignado ou atacado, maleta, acerto, garantia, MEI e WhatsApp.",
+      ctaId: "p3_to_p5",
+    },
   ],
   ctaFinal: {
     titulo: "Quer saber como funciona uma maleta Lardan?",

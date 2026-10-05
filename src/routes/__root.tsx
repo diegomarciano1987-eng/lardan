@@ -84,6 +84,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // Title padrão: só aparece onde a rota não define o próprio (ex.: 404).
+      { title: "Página não encontrada — LARDAN" },
       // Cor da barra do navegador em celulares (marfim da identidade).
       { name: "theme-color", content: "#f7f3ee" },
       // Verificação de propriedade do Google Search Console.

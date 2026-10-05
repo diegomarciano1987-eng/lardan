@@ -12,6 +12,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { fetchMyRoles } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
+import { useServerFn } from "@tanstack/react-start";
+import { iniciarAssinatura } from "@/lib/clicksign.functions";
+import { TermosMaleta, useSituacaoTermo } from "@/components/maletas/TermoAssinatura";
 import {
   SITUACAO_MALETA,
   SITUACAO_PEDIDO,
@@ -84,7 +87,14 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
     queryFn: () => detalheMaleta(cycleId!),
     enabled: !!cycleId,
   });
-  const recarregar = () => qc.invalidateQueries({ queryKey: ["consultora"] });
+  const termo = useSituacaoTermo(cycleId);
+  const exigeTermo = !!termo.data && termo.data.modo !== "desligado";
+  const termoAtivo = termo.data?.termos.find((t) => t.estado === "enviado" || t.estado === "assinado");
+  const assinar = useServerFn(iniciarAssinatura);
+  const recarregar = () => {
+    qc.invalidateQueries({ queryKey: ["consultora"] });
+    qc.invalidateQueries({ queryKey: ["termo-maleta"] });
+  };
 
   const confirmar = useMutation({
     mutationFn: (transfer: string) => confirmarEntrega(transfer),
@@ -113,10 +123,17 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
             : {}),
         };
       });
-      return aceitar(cycleId!, itens, chave);
+      if (exigeTermo) {
+        return assinar({ data: { cycleId: cycleId!, itens, chave } }).then((r) => {
+          if (!r.ok) throw new Error(r.faltando?.length ? `${r.erro} Falta: ${r.faltando.join(", ")}.` : r.erro);
+          return { termo: true, canal: r.canal } as { termo: boolean; canal?: string; repetida?: boolean };
+        });
+      }
+      return aceitar(cycleId!, itens, chave).then((r) => ({ termo: false, repetida: r.repetida }) as { termo: boolean; canal?: string; repetida?: boolean });
     },
     onSuccess: (r) => {
-      toast.success(r.repetida ? "Aceite já registrado." : "Aceite registrado. Suas peças já estão liberadas.");
+      if (r.termo) toast.success(`Termo gerado. Enviamos o link de assinatura para o seu ${r.canal === "whatsapp" ? "WhatsApp" : "e-mail"}.`);
+      else toast.success(r.repetida ? "Aceite já registrado." : "Aceite registrado. Suas peças já estão liberadas.");
       recarregar();
     },
     onError: (e) => toast.error(traduzir(e)),
@@ -177,7 +194,26 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         </Cartao>
       )}
 
-      {precisaAceitar && (
+      {termoAtivo && (
+        <Cartao className="border-warning">
+          <p className="font-semibold">Aguardando confirmação da assinatura</p>
+          <p className="mt-1 text-sm text-ledger-muted">
+            Abra o link que enviamos e assine o termo. Assim que a assinatura for confirmada, sua maleta fica pronta para operação.
+          </p>
+        </Cartao>
+      )}
+      {termo.data?.termos.some((t) => t.estado === "finalizado") && (
+        <Cartao className="border-success">
+          <p className="font-semibold">Seu termo foi assinado e a maleta está pronta para operação.</p>
+        </Cartao>
+      )}
+      {cycleId && (termo.data?.termos.length ?? 0) > 0 && (
+        <Cartao>
+          <TermosMaleta cycleId={cycleId} />
+        </Cartao>
+      )}
+
+      {precisaAceitar && !termoAtivo && (
         <Cartao>
           <p className="font-semibold">Conferência</p>
           <p className="mt-1 text-sm text-ledger-muted">
@@ -246,8 +282,13 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
             disabled={aceite.isPending}
             onClick={() => aceite.mutate()}
           >
-            {aceite.isPending ? "Registrando…" : "Aceitar maleta"}
+            {aceite.isPending ? "Registrando…" : exigeTermo ? "Gerar termo e assinar" : "Aceitar maleta"}
           </button>
+          {exigeTermo && (
+            <p className="mt-2 text-sm text-ledger-muted">
+              Revise as informações acima. O termo será gerado exatamente com esta conferência.
+            </p>
+          )}
         </Cartao>
       )}
 

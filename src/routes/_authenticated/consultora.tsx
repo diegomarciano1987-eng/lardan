@@ -126,10 +126,10 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
       if (exigeTermo) {
         return assinar({ data: { cycleId: cycleId!, itens, chave } }).then((r) => {
           if (!r.ok) throw new Error(r.faltando?.length ? `${r.erro} Falta: ${r.faltando.join(", ")}.` : r.erro);
-          return { termo: true as const, canal: r.canal };
+          return { termo: true, canal: r.canal } as { termo: boolean; canal?: string; repetida?: boolean };
         });
       }
-      return aceitar(cycleId!, itens, chave).then((r) => ({ termo: false as const, repetida: r.repetida }));
+      return aceitar(cycleId!, itens, chave).then((r) => ({ termo: false, repetida: r.repetida }) as { termo: boolean; canal?: string; repetida?: boolean });
     },
     onSuccess: (r) => {
       if (r.termo) toast.success(`Termo gerado. Enviamos o link de assinatura para o seu ${r.canal === "whatsapp" ? "WhatsApp" : "e-mail"}.`);

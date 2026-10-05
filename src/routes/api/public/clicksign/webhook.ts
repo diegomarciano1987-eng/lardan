@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/public/clicksign/webhook")({
         const b = Buffer.from(esperado, "utf8");
         if (a.length !== b.length || !timingSafeEqual(a, b)) return new Response("Assinatura inválida.", { status: 401 });
 
-        let corpo: Record<string, any>;
+        let corpo: any;
         try {
           corpo = JSON.parse(bruto);
         } catch {

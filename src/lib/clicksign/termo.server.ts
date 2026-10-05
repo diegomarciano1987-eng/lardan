@@ -119,6 +119,6 @@ export async function gerarTermoPdf(s: SnapshotTermo, cpfCompleto: string, sha25
 }
 
 export async function sha256Hex(bytes: Uint8Array) {
-  const h = await crypto.subtle.digest("SHA-256", bytes);
+  const h = await crypto.subtle.digest("SHA-256", bytes as unknown as ArrayBuffer);
   return [...new Uint8Array(h)].map((x) => x.toString(16).padStart(2, "0")).join("");
 }

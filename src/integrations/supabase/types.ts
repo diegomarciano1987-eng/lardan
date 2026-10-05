@@ -2177,6 +2177,74 @@ export type Database = {
           },
         ]
       }
+      clicksign_events: {
+        Row: {
+          dedupe_key: string
+          envelope_id: string | null
+          evento: string
+          id: string
+          recebido_em: string
+          request_id: string | null
+          resultado: string | null
+        }
+        Insert: {
+          dedupe_key: string
+          envelope_id?: string | null
+          evento: string
+          id?: string
+          recebido_em?: string
+          request_id?: string | null
+          resultado?: string | null
+        }
+        Update: {
+          dedupe_key?: string
+          envelope_id?: string | null
+          evento?: string
+          id?: string
+          recebido_em?: string
+          request_id?: string | null
+          resultado?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clicksign_events_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "kit_signature_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clicksign_settings: {
+        Row: {
+          autenticacao: string
+          id: number
+          modo: string
+          termo_aprovado: boolean
+          termo_versao: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          autenticacao?: string
+          id?: number
+          modo?: string
+          termo_aprovado?: boolean
+          termo_versao?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          autenticacao?: string
+          id?: number
+          modo?: string
+          termo_aprovado?: boolean
+          termo_versao?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       cob_casos: {
         Row: {
           created_at: string
@@ -6579,6 +6647,109 @@ export type Database = {
           },
         ]
       }
+      kit_signature_requests: {
+        Row: {
+          acceptance_id: string | null
+          assinado_em: string | null
+          consultora_party_id: string
+          created_at: string
+          cycle_id: string
+          document_id: string | null
+          envelope_id: string | null
+          enviado_em: string | null
+          estado: string
+          finalizado_em: string | null
+          id: string
+          idempotency_key: string
+          modo: string
+          motivo: string | null
+          pdf_path: string | null
+          pdf_sha256: string | null
+          signed_path: string | null
+          signed_sha256: string | null
+          signer_id: string | null
+          signer_user_id: string
+          snapshot: Json
+          snapshot_sha256: string
+          tentativas_download: number
+          termo_versao: string
+        }
+        Insert: {
+          acceptance_id?: string | null
+          assinado_em?: string | null
+          consultora_party_id: string
+          created_at?: string
+          cycle_id: string
+          document_id?: string | null
+          envelope_id?: string | null
+          enviado_em?: string | null
+          estado?: string
+          finalizado_em?: string | null
+          id?: string
+          idempotency_key: string
+          modo: string
+          motivo?: string | null
+          pdf_path?: string | null
+          pdf_sha256?: string | null
+          signed_path?: string | null
+          signed_sha256?: string | null
+          signer_id?: string | null
+          signer_user_id: string
+          snapshot: Json
+          snapshot_sha256: string
+          tentativas_download?: number
+          termo_versao: string
+        }
+        Update: {
+          acceptance_id?: string | null
+          assinado_em?: string | null
+          consultora_party_id?: string
+          created_at?: string
+          cycle_id?: string
+          document_id?: string | null
+          envelope_id?: string | null
+          enviado_em?: string | null
+          estado?: string
+          finalizado_em?: string | null
+          id?: string
+          idempotency_key?: string
+          modo?: string
+          motivo?: string | null
+          pdf_path?: string | null
+          pdf_sha256?: string | null
+          signed_path?: string | null
+          signed_sha256?: string | null
+          signer_id?: string | null
+          signer_user_id?: string
+          snapshot?: Json
+          snapshot_sha256?: string
+          tentativas_download?: number
+          termo_versao?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_signature_requests_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_signature_requests_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_signature_requests_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kit_transfers: {
         Row: {
           carrier: string | null
@@ -10929,6 +11100,10 @@ export type Database = {
       catalog_street_value: { Args: never; Returns: Json }
       categoria_por_nome: { Args: { _nome: string }; Returns: string }
       claim_master_role: { Args: never; Returns: boolean }
+      clicksign_modo_definir: {
+        Args: { _autenticacao?: string; _modo: string }
+        Returns: Json
+      }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }
       cob_carteira: {
         Args: never
@@ -11689,6 +11864,31 @@ export type Database = {
         Args: { _movement: string; _payload?: Json }
         Returns: Json
       }
+      kit_assinatura_evento: {
+        Args: { _dedupe: string; _envelope: string; _evento: string }
+        Returns: Json
+      }
+      kit_assinatura_falha: {
+        Args: { _motivo: string; _request: string }
+        Returns: Json
+      }
+      kit_assinatura_falha_download: {
+        Args: { _motivo: string; _request: string }
+        Returns: undefined
+      }
+      kit_assinatura_finalizar: {
+        Args: { _request: string; _signed_path: string; _signed_sha256: string }
+        Returns: Json
+      }
+      kit_assinatura_preparar: {
+        Args: { _cycle: string; _idempotency_key: string; _itens: Json }
+        Returns: Json
+      }
+      kit_assinatura_registrar_envio: {
+        Args: { _payload: Json; _request: string }
+        Returns: Json
+      }
+      kit_assinatura_situacao: { Args: { _cycle: string }; Returns: Json }
       kit_blocked_location: { Args: never; Returns: string }
       kit_board: {
         Args: { _filtros?: Json; _limit?: number; _offset?: number }

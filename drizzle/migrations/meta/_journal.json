@@ -176,6 +176,20 @@
       "when": 1791042485144,
       "tag": "0024_pdv_responsaveis_pix",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1791203058546,
+      "tag": "0025_clicksign_termo_maleta",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791203142413,
+      "tag": "0026_clicksign_termo_maleta_estrutura",
+      "breakpoints": true
     }
   ]
 }

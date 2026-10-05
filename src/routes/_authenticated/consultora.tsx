@@ -194,7 +194,26 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         </Cartao>
       )}
 
-      {precisaAceitar && (
+      {termoAtivo && (
+        <Cartao className="border-warning">
+          <p className="font-semibold">Aguardando confirmação da assinatura</p>
+          <p className="mt-1 text-sm text-ledger-muted">
+            Abra o link que enviamos e assine o termo. Assim que a assinatura for confirmada, sua maleta fica pronta para operação.
+          </p>
+        </Cartao>
+      )}
+      {termo.data?.termos.some((t) => t.estado === "finalizado") && (
+        <Cartao className="border-success">
+          <p className="font-semibold">Seu termo foi assinado e a maleta está pronta para operação.</p>
+        </Cartao>
+      )}
+      {cycleId && (termo.data?.termos.length ?? 0) > 0 && (
+        <Cartao>
+          <TermosMaleta cycleId={cycleId} />
+        </Cartao>
+      )}
+
+      {precisaAceitar && !termoAtivo && (
         <Cartao>
           <p className="font-semibold">Conferência</p>
           <p className="mt-1 text-sm text-ledger-muted">

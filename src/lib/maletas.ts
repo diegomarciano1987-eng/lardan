@@ -258,6 +258,26 @@ export const aceitar = (
   _idempotency_key: chave,
 });
 
+/* ---------------- termo de recebimento (Clicksign) ---------------- */
+export interface TermoMaleta {
+  id: string;
+  estado: "preparado" | "enviado" | "assinado" | "finalizado" | "recusado" | "cancelado" | "expirado" | "falha";
+  modo: "sandbox" | "producao";
+  versao: string;
+  sha256: string;
+  tem_pdf: boolean;
+  tem_assinado: boolean;
+  motivo: string | null;
+  criado_em: string;
+  enviado_em: string | null;
+  assinado_em: string | null;
+  finalizado_em: string | null;
+  total_aceito: number;
+  total_divergente: number;
+}
+export const situacaoAssinatura = (cycleId: string) =>
+  rpc<{ modo: "desligado" | "sandbox" | "producao"; termos: TermoMaleta[] }>("kit_assinatura_situacao", { _cycle: cycleId });
+
 export const publicarPeca = (cycleId: string, variantId: string, publicar: boolean) =>
   rpc<unknown>("kit_item_publish", { _cycle: cycleId, _variant: variantId, _publicar: publicar });
 

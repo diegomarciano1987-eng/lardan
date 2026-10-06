@@ -146,6 +146,9 @@ export function SiteFooter() {
             />
           </a>
         </div>
+        <p className="pb-6 text-center text-[11px] tracking-[0.08em] text-muted-foreground/70">
+          © 2025 Small Data — http://www.smalldata.cloud · Todos os direitos reservados
+        </p>
       </div>
     </footer>
   );

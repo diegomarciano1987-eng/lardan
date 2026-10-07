@@ -31,6 +31,7 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
   const podeCatalogo = caps.includes("catalog.view");
   const podeLeads = caps.includes("leads.view");
 
+  const blocoCatalogo = async () => {
   if (podeCatalogo) {
     const [produtos, variantes, paginas] = await Promise.all([
       supabase
@@ -78,6 +79,8 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
     }
   }
 
+  };
+  const blocoLeads = async () => {
   if (podeLeads) {
     const [leads, contatos] = await Promise.all([
       supabase
@@ -113,6 +116,8 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
     }
   }
 
+  };
+  const blocoResto = async () => {
   // Pessoas: todas (ativas e inativas), por nome, razão social, código ou CPF/CNPJ.
   const digitos = term.replace(/\D/g, "");
   const safe = term.replace(/[,()]/g, " ");
@@ -130,7 +135,7 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
   type Titulo = { id: string; descricao: string | null; valor_cents: number | null; status: string; numero: number | string | null };
   const titulos = async (direction: "payable" | "receivable"): Promise<{ data: Titulo[] }> => {
     const { data, error } = await supabase.rpc("fin_titles_list" as never, {
-      _direction: direction, _search: term, _limit: 6, _offset: 0,
+      _direction: direction, _search: term, _limit: 6, _offset: 0, _de: null, _ate: null,
     } as never);
     if (error) return { data: [] };
     const rows = ((data as { rows?: Record<string, unknown>[] } | null)?.rows ?? []);
@@ -204,6 +209,8 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
     hits.push({ id: `for-${f.id}`, group: "Fornecedores", icon: ContactRound, title: f.name, context: f.trade_name ?? "", to: "/admin/cadastros" });
   }
 
+  };
+  await Promise.allSettled([blocoCatalogo(), blocoLeads(), blocoResto()]);
   return hits;
 }
 

@@ -587,7 +587,7 @@ function PainelAsaas({ de, ate }: { de: string; ate: string }) {
   const m = useMutation({
     mutationFn: () => sync({ data: { de, ate } }),
     onSuccess: (r) => {
-      toast.success(`Asaas: ${r.recebidas} cobrança(s) lidas, ${r.inseridas} novas, ${r.atualizadas} atualizadas.`);
+      toast.success(`Asaas: ${r.recebidas} lidas, ${r.inseridas} novas · ${r.vinculadas} conciliadas automaticamente · ${r.baixas} baixa(s)${r.ambiguas ? ` · ${r.ambiguas} para conferir` : ""}.`);
       void qc.invalidateQueries({ queryKey: ["fin-pagar-receber"] });
       void qc.invalidateQueries({ queryKey: ["fin-overview"] });
       void qc.invalidateQueries({ queryKey: ["asaas-sync-ultima"] });
@@ -606,7 +606,7 @@ function PainelAsaas({ de, ate }: { de: string; ate: string }) {
               ? `Última sincronização: ${new Date(u.iniciado_em).toLocaleString("pt-BR")} · ${u.status === "concluida" ? `${u.recebidas} cobranças lidas (todas as datas)` : u.status === "falhou" ? `falhou: ${u.erro ?? ""}` : "em andamento"}`
               : "Nenhuma sincronização ainda."}
         </p>
-        <p className="text-xs text-ledger-muted">Somente leitura: não cria cobrança, não avisa cliente e não dá baixa.</p>
+        <p className="text-xs text-ledger-muted">Não cria cobrança nem avisa cliente. Liga sozinha a cobrança ao título quando CPF, valor e vencimento batem de forma única, e dá baixa nas pagas.</p>
       </div>
       <button
         type="button"

@@ -30,3 +30,4 @@
 
 - Consultant orders can be charged directly by Lardan via consultora_pagamento_titulo (consultant-owned order, valid CPF) + Asaas official engine signed by consultora_cobranca_config.ator_user_id; paid amount is recorded on sales_orders (pay_*) to offset the kit settlement. Why: charge stays in Lardan's name without giving consultants finance permissions.
 - Asaas sync runs asaas_conciliacao_automatica after mirroring: links charge↔receivable installment only on unique same person (party or customer CPF/CNPJ) + cents + due date, then settles RECEIVED via asaas_baixa_pendentes. Why: auto-reconcile without guessing or double settlement.
+- Asaas charge mirror sync runs daily via pg_cron → /api/public/asaas/sync-matinal (token ASAAS_SYNC_CRON_TOKEN, actor = consultora_cobranca_config.ator_user_id), sharing executarSyncAsaas with the manual button. Why: baixas must not depend on someone opening a screen.

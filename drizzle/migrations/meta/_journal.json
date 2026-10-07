@@ -288,6 +288,13 @@
       "when": 1791408338493,
       "tag": "0040_consultora_receber_depois_lembrete",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1791408574175,
+      "tag": "0041_fin_titulo_empresa_padrao",
+      "breakpoints": true
     }
   ]
 }

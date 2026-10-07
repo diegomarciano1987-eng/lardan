@@ -113,7 +113,7 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
           {forma === "depois" && (
             <div>
               <span className="mb-1 block text-[1rem] font-medium">Vencimento</span>
-              <DateField value={venc} onChange={(v) => setVenc(v || somarDias(hoje(), 7))} />
+              <DateField value={new Date(venc + "T12:00:00")} onChange={(v) => setVenc(v ? new Date(v).toISOString().slice(0, 10) : somarDias(hoje(), 7))} />
             </div>
           )}
           <button type="button" className="btn-app-principal w-full" disabled={cpf.length !== 11 || m.isPending} onClick={() => m.mutate()}>

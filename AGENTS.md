@@ -29,3 +29,4 @@
 - Fiado histórico entra como título a receber (sistema_origem fiado_historico, conta ativo FIADO-HIST fora da DRE) via cob_fiado_importar (service_role, idempotente por lote+linha), com a linha original imutável em cob_fiado_linhas. Why: lastro rastreável sem inflar receita.
 
 - Consultant orders can be charged directly by Lardan via consultora_pagamento_titulo (consultant-owned order, valid CPF) + Asaas official engine signed by consultora_cobranca_config.ator_user_id; paid amount is recorded on sales_orders (pay_*) to offset the kit settlement. Why: charge stays in Lardan's name without giving consultants finance permissions.
+- Asaas sync runs asaas_conciliacao_automatica after mirroring: links charge↔receivable installment only on unique same person (party or customer CPF/CNPJ) + cents + due date, then settles RECEIVED via asaas_baixa_pendentes. Why: auto-reconcile without guessing or double settlement.

@@ -1,4 +1,4 @@
-import { PagamentoLardan } from "@/components/consultora/PagamentoLardan";
+import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -197,6 +197,8 @@ export function Inicio({ ir }: { ir: Ir }) {
         </div>
         <span className="lg:hidden"><BotaoAjuda tela="inicio" /></span>
       </header>
+      <LembretesPagamento ir={ir} />
+
 
       <CartaoNovidades />
 

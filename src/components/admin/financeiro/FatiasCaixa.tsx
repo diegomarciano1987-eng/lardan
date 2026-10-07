@@ -92,7 +92,7 @@ export function FatiasCaixa({ accountId }: { accountId: string }) {
             <button type="button" className="admin-btn-primary" disabled={lancar.isPending} onClick={() => lancar.mutate(1)}>
               Separar fatia
             </button>
-            <button type="button" className="admin-btn-secondary" disabled={lancar.isPending} onClick={() => lancar.mutate(-1)}>
+            <button type="button" className="inline-flex h-11 items-center rounded-[10px] border border-line bg-surface px-4 text-sm font-semibold text-ledger-text hover:bg-cream-2" disabled={lancar.isPending} onClick={() => lancar.mutate(-1)}>
               Baixar fatia
             </button>
           </div>

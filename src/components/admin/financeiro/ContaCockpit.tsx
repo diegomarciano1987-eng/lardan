@@ -1,3 +1,4 @@
+import { FatiasCaixa } from "@/components/admin/financeiro/FatiasCaixa";
 import * as React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,7 +77,7 @@ const ACAO: Record<string, string> = {
   "transferencia.estorno": "Transferência estornada",
 };
 
-type Aba = "movimentos" | "dados" | "transferir" | "auditoria";
+type Aba = "movimentos" | "fatias" | "dados" | "transferir" | "auditoria";
 
 export function ContaCockpit({ id }: { id: string }) {
   const caps = useCapabilities();
@@ -97,6 +98,7 @@ export function ContaCockpit({ id }: { id: string }) {
   const d = dados.data;
   const abas: { k: Aba; label: string }[] = [
     { k: "movimentos", label: "Movimentações" },
+    ...(conta.kind === "caixa" ? [{ k: "fatias" as Aba, label: "De quem é o dinheiro" }] : []),
     { k: "dados", label: "Dados da conta" },
     ...(podeGerir && (contas.data?.length ?? 0) > 1
       ? [{ k: "transferir" as Aba, label: "Transferir entre contas" }]
@@ -156,6 +158,7 @@ export function ContaCockpit({ id }: { id: string }) {
       </nav>
 
       {aba === "movimentos" && <Movimentos id={id} />}
+      {aba === "fatias" && <FatiasCaixa accountId={id} />}
       {aba === "dados" && <Dados id={id} dados={d} podeGerir={podeGerir} />}
       {aba === "transferir" && <Transferir id={id} />}
       {aba === "auditoria" && <Auditoria id={id} />}

@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { carteira, moverEtapa, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
+import { carteira, kpisCobranca, moverEtapa, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
 
 const busca = z.object({
   v: z.enum(["lista", "kanban", "agenda", "bi"]).catch("lista"),
@@ -14,6 +14,7 @@ const busca = z.object({
   faixa: z.string().catch(""),
   praca: z.string().catch(""),
   rep: z.string().catch(""),
+  p: z.number().int().min(1).catch(1),
 });
 
 export const Route = createFileRoute("/_authenticated/admin/cobranca")({
@@ -29,15 +30,16 @@ const FAIXAS: Record<string, [number, number, string]> = {
 function Cobranca() {
   const s = Route.useSearch();
   const nav = useNavigate({ from: "/admin/cobranca" });
-  const set = (p: Partial<z.infer<typeof busca>>) => nav({ search: (o) => ({ ...o, ...p }), replace: true });
+  const set = (p: Partial<z.infer<typeof busca>>) => nav({ search: (o) => ({ ...o, p: 1, ...p }), replace: true });
   const q = useQuery({ queryKey: ["cob", "carteira"], queryFn: carteira });
+  const qk = useQuery({ queryKey: ["cob", "kpis"], queryFn: kpisCobranca });
   const qc = useQueryClient();
   const hoje = hojeSP();
   const todos = q.data ?? [];
 
   const pracas = [...new Map(todos.filter((d) => d.praca_id).map((d) => [d.praca_id!, `${d.praca_codigo} · ${d.praca_nome}`])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
   const reps = [...new Map(todos.filter((d) => d.representante_id).map((d) => [d.representante_id!, d.representante_nome ?? ""])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
-  const kpi = {
+  const kpiLocal = {
     vencido: todos.reduce((a, d) => a + Number(d.vencido_cents), 0),
     devedores: todos.length,
     hoje: todos.filter((d) => d.proxima_acao === hoje).length,
@@ -45,6 +47,8 @@ function Cobranca() {
     vencendo: todos.filter((d) => d.promessa_status === "vigente" && d.promessa_data && d.promessa_data <= addDias(hoje, 2)).length,
     descumpridas: todos.filter((d) => d.promessa_status === "descumprida").length,
   };
+  // Indicadores vêm do banco (contagem completa, sem limite de linhas)
+  const kpi = qk.data ? { vencido: Number(qk.data.vencido_cents), devedores: qk.data.devedoras, hoje: qk.data.hoje, atrasadas: qk.data.atrasadas, vencendo: qk.data.vencendo, descumpridas: qk.data.descumpridas } : kpiLocal;
   const filtroKpi: Record<string, (d: Devedor) => boolean> = {
     hoje: (d) => d.proxima_acao === hoje,
     atrasadas: (d) => !!d.proxima_acao && d.proxima_acao < hoje,
@@ -115,9 +119,9 @@ function Cobranca() {
       {q.isLoading ? <p className="text-sm text-muted-foreground">Carregando a carteira…</p>
         : q.error ? <p className="text-sm text-destructive">{(q.error as Error).message}</p>
         : lista.length === 0 && s.v !== "bi" ? <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">Sem dados para estes filtros.</p>
-        : s.v === "lista" ? <Lista lista={lista} hoje={hoje} />
+        : s.v === "lista" ? <Lista lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
         : s.v === "kanban" ? <Kanban lista={lista} onMover={mover} />
-        : s.v === "agenda" ? <Agenda lista={lista} hoje={hoje} />
+        : s.v === "agenda" ? <Agenda lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
         : <BI todos={todos} />}
     </div>
   );
@@ -136,7 +140,32 @@ function Chips({ valor, opcoes, onChange }: { valor: string; opcoes: string[][];
   );
 }
 
-function Lista({ lista, hoje }: { lista: Devedor[]; hoje: string }) {
+const POR_PAGINA = 50;
+
+function Paginacao({ total, pagina, onPagina }: { total: number; pagina: number; onPagina: (p: number) => void }) {
+  const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
+  if (paginas <= 1) return null;
+  const atual = Math.min(pagina, paginas);
+  const ini = Math.max(1, Math.min(atual - 4, paginas - 9));
+  const nums = Array.from({ length: Math.min(10, paginas) }, (_, i) => ini + i);
+  const Btn = ({ p, children, ativo }: { p: number; children: React.ReactNode; ativo?: boolean }) => (
+    <button disabled={p < 1 || p > paginas} onClick={() => { onPagina(p); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+      className={`h-9 min-w-9 rounded-md border px-3 text-sm disabled:opacity-40 ${ativo ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/50"}`}>{children}</button>
+  );
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
+      <p className="text-xs text-muted-foreground">{(atual - 1) * POR_PAGINA + 1}–{Math.min(atual * POR_PAGINA, total)} de {total}</p>
+      <div className="flex flex-wrap gap-1">
+        <Btn p={atual - 1}>Anterior</Btn>
+        {nums.map((n) => <Btn key={n} p={n} ativo={n === atual}>{n}</Btn>)}
+        <Btn p={atual + 1}>Próxima</Btn>
+      </div>
+    </div>
+  );
+}
+
+function Lista({ lista, hoje, pagina, onPagina }: { lista: Devedor[]; hoje: string; pagina: number; onPagina: (p: number) => void }) {
+  const atual = Math.min(pagina, Math.max(1, Math.ceil(lista.length / POR_PAGINA)));
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <table className="w-full text-sm">
@@ -144,7 +173,7 @@ function Lista({ lista, hoje }: { lista: Devedor[]; hoje: string }) {
           <tr>{["Devedora", "Praça / representante", "Etapa", "Vencido", "A vencer", "Parcelas", "Maior atraso", "Próxima ação"].map((h) => <th key={h} className="px-4 py-3 font-medium">{h}</th>)}</tr>
         </thead>
         <tbody>
-          {lista.slice(0, 300).map((d) => (
+          {lista.slice((atual - 1) * POR_PAGINA, atual * POR_PAGINA).map((d) => (
             <tr key={d.party_id} className="border-t border-border hover:bg-muted/30">
               <td className="px-4 py-3">
                 <Link to="/admin/cobranca/$id" params={{ id: d.party_id }} className="font-medium hover:underline">{d.nome}</Link>
@@ -161,7 +190,7 @@ function Lista({ lista, hoje }: { lista: Devedor[]; hoje: string }) {
           ))}
         </tbody>
       </table>
-      {lista.length > 300 && <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground">Mostrando as 300 maiores de {lista.length}. Use a busca, a praça ou o representante para afunilar.</p>}
+      <Paginacao total={lista.length} pagina={atual} onPagina={onPagina} />
     </div>
   );
 }
@@ -198,10 +227,11 @@ function Kanban({ lista, onMover }: { lista: Devedor[]; onMover: (d: Devedor, e:
   );
 }
 
-function Agenda({ lista, hoje }: { lista: Devedor[]; hoje: string }) {
-  const comAcao = lista.filter((d) => d.proxima_acao).sort((a, b) => a.proxima_acao!.localeCompare(b.proxima_acao!));
+function Agenda({ lista, hoje, pagina, onPagina }: { lista: Devedor[]; hoje: string; pagina: number; onPagina: (p: number) => void }) {
+  const comAcao = lista.filter((d) => d.proxima_acao).sort((a, b) => a.proxima_acao!.localeCompare(b.proxima_acao!) || Number(b.vencido_cents) - Number(a.vencido_cents));
+  const atual = Math.min(pagina, Math.max(1, Math.ceil(comAcao.length / POR_PAGINA)));
   const grupos = new Map<string, Devedor[]>();
-  comAcao.forEach((d) => { const k = d.proxima_acao! < hoje ? "Atrasadas" : d.proxima_acao === hoje ? "Hoje" : dataBR(d.proxima_acao); grupos.set(k, [...(grupos.get(k) ?? []), d]); });
+  comAcao.slice((atual - 1) * POR_PAGINA, atual * POR_PAGINA).forEach((d) => { const k = d.proxima_acao! < hoje ? "Atrasadas" : d.proxima_acao === hoje ? "Hoje" : dataBR(d.proxima_acao); grupos.set(k, [...(grupos.get(k) ?? []), d]); });
   if (!comAcao.length) return <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">Nenhuma ação agendada. A régua cria as tarefas todo dia.</p>;
   return (
     <div className="space-y-4">
@@ -215,6 +245,7 @@ function Agenda({ lista, hoje }: { lista: Devedor[]; hoje: string }) {
           ))}
         </section>
       ))}
+      <div className="rounded-xl border border-border bg-card"><Paginacao total={comAcao.length} pagina={atual} onPagina={onPagina} /></div>
     </div>
   );
 }

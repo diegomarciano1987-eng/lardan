@@ -282,3 +282,24 @@ function BI({ todos }: { todos: Devedor[] }) {
     </div>
   );
 }
+
+function BuscaLocal({ valor, onBuscar }: { valor: string; onBuscar: (q: string) => void }) {
+  const [texto, setTexto] = React.useState(valor);
+  const ultimo = React.useRef(valor);
+  const cb = React.useRef(onBuscar);
+  cb.current = onBuscar;
+  React.useEffect(() => {
+    if (valor !== ultimo.current) { ultimo.current = valor; setTexto(valor); }
+  }, [valor]);
+  React.useEffect(() => {
+    if (texto === ultimo.current) return;
+    const t = setTimeout(() => { ultimo.current = texto; cb.current(texto); }, 300);
+    return () => clearTimeout(t);
+  }, [texto]);
+  return (
+    <input value={texto} onChange={(e) => setTexto(e.target.value)}
+      onKeyDown={(e) => { if (e.key === "Enter") { ultimo.current = texto; cb.current(texto); } }}
+      placeholder="Buscar nome, CPF, código do cliente, cidade, praça, representante…"
+      className="h-10 min-w-72 flex-1 rounded-lg border border-border bg-background px-3 text-sm" />
+  );
+}

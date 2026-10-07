@@ -35,6 +35,12 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     capacidade: "finance.bank.view",
   },
   {
+    to: "/admin/financeiro/cheques",
+    label: "Cheques",
+    descricao: "Carteira: em mãos, repassados e depositados",
+    capacidade: "finance.bank.view",
+  },
+  {
     to: "/admin/financeiro/conciliacao",
     label: "Conciliação",
     descricao: "Extratos bancários",

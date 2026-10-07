@@ -274,6 +274,13 @@
       "when": 1791408145548,
       "tag": "0038_drop_fin_titles_list_overload_antiga",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1791408264416,
+      "tag": "0039_habilitar_pg_net",
+      "breakpoints": true
     }
   ]
 }

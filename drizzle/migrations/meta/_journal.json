@@ -281,6 +281,13 @@
       "when": 1791408264416,
       "tag": "0039_habilitar_pg_net",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1791408338493,
+      "tag": "0040_consultora_receber_depois_lembrete",
+      "breakpoints": true
     }
   ]
 }

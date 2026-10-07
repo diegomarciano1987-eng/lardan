@@ -11923,6 +11923,22 @@ export type Database = {
       }
       consultora_ativar: { Args: { _party: string }; Returns: Json }
       consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }
+      consultora_lembretes_vencimento: {
+        Args: never
+        Returns: {
+          code: string
+          customer_name: string
+          customer_phone: string
+          dias: number
+          order_id: string
+          valor_cents: number
+          vencimento: string
+        }[]
+      }
+      consultora_pagamento_lembrete: {
+        Args: { _order: string; _venc: string }
+        Returns: Json
+      }
       consultora_pagamento_registrar: {
         Args: { _charge: string; _order: string; _url: string }
         Returns: undefined

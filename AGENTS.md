@@ -32,3 +32,4 @@
 - Maleta acceptance under signature mode goes only through kit_assinatura_finalizar (Clicksign signed file stored first; trigger on kit_acceptances blocks direct accept unless mode is desligado). Why: release requires the consultant's own signed term.
 - Cheques are custody (fin_cheques, via fin_cheque_* RPCs), never bank balance; cash earmarks per person are insert-only fin_caixa_fatias and move no money. Why: no fake accounts.
 - Card purchases (fin_cartao_lancamentos) hit DRE by purchase date/category; the invoice's single payable (origem cartao_fatura) is excluded from competência and its payment split by line category. Why: no double counting.
+- Fiado histórico entra como título a receber (sistema_origem fiado_historico, conta ativo FIADO-HIST fora da DRE) via cob_fiado_importar (service_role, idempotente por lote+linha), com a linha original imutável em cob_fiado_linhas. Why: lastro rastreável sem inflar receita.

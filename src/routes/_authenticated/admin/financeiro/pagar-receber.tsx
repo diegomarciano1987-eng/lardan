@@ -187,7 +187,7 @@ function PagarReceber() {
               </>
             ) : null}
             <ListaUnificada
-              filtros={{ natureza, de, ate, situacao: s.situacao ?? "todos", origem: s.origem ?? "todas", busca: s.busca ?? "", limit: POR, offset: (pagina - 1) * POR }}
+              filtros={{ natureza, de: s.busca ? "2000-01-01" : de, ate: s.busca ? "2099-12-31" : ate, situacao: s.situacao ?? "todos", origem: s.origem ?? "todas", busca: s.busca ?? "", limit: POR, offset: (pagina - 1) * POR }}
               busca={busca}
               setBusca={setBusca}
               onFiltro={ir}

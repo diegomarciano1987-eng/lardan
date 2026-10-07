@@ -106,6 +106,7 @@ import { Route as AuthenticatedAdminFinanceiroReceberRouteImport } from './route
 import { Route as AuthenticatedAdminMaletasIdRouteImport } from './routes/_authenticated/admin/maletas_.$id'
 import { Route as AuthenticatedAdminMaletasEntradaRouteImport } from './routes/_authenticated/admin/maletas_.entrada'
 import { Route as AuthenticatedFinanceiroSimulacaoIdRouteImport } from './routes/_authenticated/financeiro/simulacao.$id'
+import { Route as ApiPublicAsaasSyncMatinalRouteImport } from './routes/api/public/asaas/sync-matinal'
 import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
 import { Route as ApiPublicClicksignWebhookRouteImport } from './routes/api/public/clicksign/webhook'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
@@ -656,6 +657,12 @@ const AuthenticatedFinanceiroSimulacaoIdRoute =
     path: '/financeiro/simulacao/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicAsaasSyncMatinalRoute =
+  ApiPublicAsaasSyncMatinalRouteImport.update({
+    id: '/api/public/asaas/sync-matinal',
+    path: '/api/public/asaas/sync-matinal',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAsaasWebhookRoute = ApiPublicAsaasWebhookRouteImport.update({
   id: '/api/public/asaas/webhook',
   path: '/api/public/asaas/webhook',
@@ -832,6 +839,7 @@ export interface FileRoutesByFullPath {
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/admin/maletas/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
+  '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
@@ -942,6 +950,7 @@ export interface FileRoutesByTo {
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/admin/maletas/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
+  '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
@@ -1056,6 +1065,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/maletas_/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/_authenticated/admin/maletas_/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/_authenticated/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
+  '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
@@ -1170,6 +1180,7 @@ export interface FileRouteTypes {
     | '/admin/maletas/$id'
     | '/admin/maletas/entrada'
     | '/financeiro/simulacao/$id'
+    | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
     | '/api/public/clicksign/webhook'
     | '/api/public/midia/$id'
@@ -1280,6 +1291,7 @@ export interface FileRouteTypes {
     | '/admin/maletas/$id'
     | '/admin/maletas/entrada'
     | '/financeiro/simulacao/$id'
+    | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
     | '/api/public/clicksign/webhook'
     | '/api/public/midia/$id'
@@ -1393,6 +1405,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/maletas_/$id'
     | '/_authenticated/admin/maletas_/entrada'
     | '/_authenticated/financeiro/simulacao/$id'
+    | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
     | '/api/public/clicksign/webhook'
     | '/api/public/midia/$id'
@@ -1455,6 +1468,7 @@ export interface RootRouteChildren {
   SitemapProductsPaginaRoute: typeof SitemapProductsPaginaRoute
   SemijoiasIndexRoute: typeof SemijoiasIndexRoute
   ApiPublicGaConfigRoute: typeof ApiPublicGaConfigRoute
+  ApiPublicAsaasSyncMatinalRoute: typeof ApiPublicAsaasSyncMatinalRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
   ApiPublicClicksignWebhookRoute: typeof ApiPublicClicksignWebhookRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
@@ -2147,6 +2161,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceiroSimulacaoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/asaas/sync-matinal': {
+      id: '/api/public/asaas/sync-matinal'
+      path: '/api/public/asaas/sync-matinal'
+      fullPath: '/api/public/asaas/sync-matinal'
+      preLoaderRoute: typeof ApiPublicAsaasSyncMatinalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/asaas/webhook': {
       id: '/api/public/asaas/webhook'
       path: '/api/public/asaas/webhook'
@@ -2479,6 +2500,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapProductsPaginaRoute: SitemapProductsPaginaRoute,
   SemijoiasIndexRoute: SemijoiasIndexRoute,
   ApiPublicGaConfigRoute: ApiPublicGaConfigRoute,
+  ApiPublicAsaasSyncMatinalRoute: ApiPublicAsaasSyncMatinalRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
   ApiPublicClicksignWebhookRoute: ApiPublicClicksignWebhookRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,

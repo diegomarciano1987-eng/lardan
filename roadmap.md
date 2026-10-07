@@ -11,4 +11,5 @@
 - [ ] PDV: comprovante em cupom com logo Lardan, imprimir/PDF
 - [ ] PDV: Pix em janela grande com QR + copia-e-cola; corrigir "Sem permissão para este tipo de título"
 
-- [ ] Consultora: fechar pedido com Pix Lardan (QR/copia-cola), receber depois, ou cartão Asaas (avaliar celular como maquininha)
+- [ ] Consultora: fechar pedido com Pix Lardan / receber depois / cartão por link Asaas (sem maquininha)
+- [ ] Cockpit da pessoa: vincular papéis vendedora interna, consultora, colaboradora na mesma pessoa

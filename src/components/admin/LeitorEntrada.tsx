@@ -59,6 +59,8 @@ export function LeitorEntrada() {
     [categorias.data],
   );
 
+  const [modo, setModo] = React.useState<"entrada" | "transferencia">("entrada");
+  const [origem, setOrigem] = React.useState("");
   const [local, setLocal] = React.useState("");
   const [categoria, setCategoria] = React.useState("");
   const [codigo, setCodigo] = React.useState("");
@@ -78,7 +80,9 @@ export function LeitorEntrada() {
     }
   }, [locais.data, local]);
 
-  const pronto = Boolean(local && categoria && referencia.trim());
+  const pronto = Boolean(
+    local && referencia.trim() && (modo === "entrada" || (origem && origem !== local)),
+  );
   React.useEffect(() => {
     if (pronto) campo.current?.focus();
   }, [pronto]);
@@ -146,7 +150,7 @@ export function LeitorEntrada() {
       .single();
     const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     const temCategoria = Boolean(p?.category_id || p?.subcategory_id);
-    const ok = temCategoria
+    const ok = !categoria ? true : temCategoria
       ? pertence(p?.category_id ?? null, categoria, mapa) || pertence(p?.subcategory_id ?? null, categoria, mapa)
       : Boolean(r.categoria_nome) && semAcento(nomeCategoria) === r.categoria_nome;
     if (!ok) {
@@ -173,19 +177,44 @@ export function LeitorEntrada() {
       r.variante_criada ? "variação de tamanho criada" : null,
     ].filter(Boolean).join(" · ");
     try {
-      await registerMovement({
-        kind: "entrada",
-        variantId: r.variant_id!,
-        quantity: 1,
-        toLocationId: local,
-        reasonCode: "compra",
-        reference: referencia.trim(),
-        note: `Entrada por leitor (${nomeCategoria}) · lido ${cod}`,
-      });
+      const rotuloCat = nomeCategoria || "todas as categorias";
+      let semSaldoOrigem = false;
+      if (modo === "transferencia") {
+        try {
+          await registerMovement({
+            kind: "transferencia",
+            variantId: r.variant_id!,
+            quantity: 1,
+            fromLocationId: origem,
+            toLocationId: local,
+            reasonCode: "transferencia",
+            reference: referencia.trim(),
+            note: `Transferência por leitor (${rotuloCat}) · lido ${cod}`,
+          });
+        } catch (e) {
+          if (!/saldo|insuficiente|dispon[ií]ve/i.test((e as Error).message)) throw e;
+          semSaldoOrigem = true;
+        }
+      }
+      if (modo === "entrada" || semSaldoOrigem) {
+        // Combinado: se bipou, a peça existe. Sem saldo na origem, entra direto no destino, marcado.
+        await registerMovement({
+          kind: "entrada",
+          variantId: r.variant_id!,
+          quantity: 1,
+          toLocationId: local,
+          reasonCode: "compra",
+          reference: referencia.trim(),
+          note: semSaldoOrigem
+            ? `Bipada sem saldo na origem — entrada direta no destino · lido ${cod}`
+            : `Entrada por leitor (${rotuloCat}) · lido ${cod}`,
+        });
+      }
+      const extraFinal = [extra, semSaldoOrigem ? "sem saldo na origem: entrou direto" : ""].filter(Boolean).join(" · ");
       apito(true);
       setContador((n) => n + 1);
       setPorPeca((m) => ({ ...m, [r.variant_id!]: { nome, qtd: (m[r.variant_id!]?.qtd ?? 0) + 1 } }));
-      registrar({ codigo: cod, ok: true, texto: nome, ...(extra ? { detalhe: extra } : {}) });
+      registrar({ codigo: cod, ok: true, texto: nome, ...(extraFinal ? { detalhe: extraFinal } : {}) });
     } catch (e) {
       apito(false);
       setRecusados((n) => n + 1);
@@ -214,18 +243,46 @@ export function LeitorEntrada() {
     value: l.id,
     label: l.code ? `${l.name} (${l.code})` : l.name,
   }));
-  const opcoesCat = (categorias.data ?? [])
-    .filter((c) => !c.parent_id)
-    .map((c) => ({ value: c.id, label: c.name }));
+  const opcoesCat = [
+    { value: "", label: "Todas" },
+    ...(categorias.data ?? []).filter((c) => !c.parent_id).map((c) => ({ value: c.id, label: c.name })),
+  ];
   const ultima = leituras[0];
 
   return (
     <TelaCheia>
     <div className="space-y-5">
-      <Panel title="Entrada rápida por leitor">
-        <div className="grid gap-4 md:grid-cols-3">
+      <Panel title="Leitor de estoque — bipe para dar entrada ou transferir">
+        <div className="mb-5 flex flex-wrap gap-2">
+          {(
+            [
+              ["entrada", "Entrada (chegou peça)"],
+              ["transferencia", "Transferência (ex.: depósito → loja)"],
+            ] as const
+          ).map(([v, l]) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setModo(v)}
+              className={
+                modo === v
+                  ? "rounded-[10px] bg-ink px-6 py-3 text-base font-semibold text-warm-ivory"
+                  : "rounded-[10px] border border-line px-6 py-3 text-base font-semibold text-ledger-muted hover:bg-surface-muted"
+              }
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+        <div className={`grid gap-4 ${modo === "transferencia" ? "md:grid-cols-4" : "md:grid-cols-3"}`}>
+          {modo === "transferencia" && (
+            <div>
+              <p className="ledger-eyebrow mb-2">1. Sai de</p>
+              <SmartSelect options={opcoesLocal} value={origem} onChange={setOrigem} placeholder="Local de origem" />
+            </div>
+          )}
           <div>
-            <p className="ledger-eyebrow mb-2">1. Local de entrada</p>
+            <p className="ledger-eyebrow mb-2">{modo === "transferencia" ? "2. Vai para (ex.: a loja)" : "1. Local de entrada"}</p>
             <SmartSelect options={opcoesLocal} value={local} onChange={setLocal} placeholder="Escolha o local" />
           </div>
           <div>
@@ -239,7 +296,7 @@ export function LeitorEntrada() {
             />
           </div>
           <div>
-            <p className="ledger-eyebrow mb-2">2. Categoria desta entrada</p>
+            <p className="ledger-eyebrow mb-2">Conferir categoria (opcional)</p>
             <div className="flex flex-wrap gap-2">
               {opcoesCat.map((c) => (
                 <button
@@ -262,7 +319,7 @@ export function LeitorEntrada() {
 
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         <div className="ledger-panel p-6">
-          <p className="ledger-eyebrow mb-3">3. Bipe as peças {nomeCategoria && `— entrada de ${nomeCategoria}`}</p>
+          <p className="ledger-eyebrow mb-3">Bipe as peças {modo === "transferencia" ? "— transferência" : "— entrada"}{nomeCategoria && ` de ${nomeCategoria}`}</p>
           <form onSubmit={enviar}>
             <label className="flex items-center gap-4 rounded-2xl border-2 border-ink bg-background px-6 py-6 focus-within:ring-4 focus-within:ring-ring/30">
               <ScanBarcode className="h-12 w-12 shrink-0 text-ledger-text" />
@@ -275,7 +332,7 @@ export function LeitorEntrada() {
                 autoComplete="off"
                 inputMode="none"
                 aria-label="Código de barras"
-                placeholder={pronto ? "Aguardando leitura…" : "Preencha local, referência e categoria"}
+                placeholder={pronto ? "Aguardando leitura…" : modo === "transferencia" ? "Escolha origem, destino e nota" : "Escolha local e nota"}
                 className="w-full bg-transparent font-display text-4xl font-bold tracking-wide text-ledger-text outline-none placeholder:text-ledger-muted/60"
               />
             </label>
@@ -285,7 +342,7 @@ export function LeitorEntrada() {
               role="status"
               className={`mt-5 rounded-2xl px-6 py-5 ${ultima.ok ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}
             >
-              <p className="text-2xl font-bold">{ultima.ok ? "✓ Entrou" : "✕ Recusado"} — {ultima.texto}</p>
+              <p className="text-2xl font-bold">{ultima.ok ? (modo === "transferencia" ? "✓ Transferida" : "✓ Entrou") : "✕ Recusado"} — {ultima.texto}</p>
               {ultima.detalhe && <p className="mt-1 text-base">{ultima.detalhe}</p>}
               <p className="mt-1 text-sm opacity-70">Código {ultima.codigo}</p>
             </div>
@@ -304,7 +361,7 @@ export function LeitorEntrada() {
 
         <aside className="space-y-4">
           <div className="ledger-panel p-6 text-center">
-            <p className="ledger-eyebrow">Peças que entraram</p>
+            <p className="ledger-eyebrow">{modo === "transferencia" ? "Peças transferidas" : "Peças que entraram"}</p>
             <p data-testid="contador" className="font-display text-8xl font-bold tabular-nums text-ledger-text">
               {formatInt(contador)}
             </p>

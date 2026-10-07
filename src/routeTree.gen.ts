@@ -91,6 +91,7 @@ import { Route as AuthenticatedAdminFinanceiroAsaasRouteImport } from './routes/
 import { Route as AuthenticatedAdminFinanceiroAsaasExtratoRouteImport } from './routes/_authenticated/admin/financeiro/asaas-extrato'
 import { Route as AuthenticatedAdminFinanceiroAuditoriaRouteImport } from './routes/_authenticated/admin/financeiro/auditoria'
 import { Route as AuthenticatedAdminFinanceiroCentrosCustoRouteImport } from './routes/_authenticated/admin/financeiro/centros-custo'
+import { Route as AuthenticatedAdminFinanceiroChequesRouteImport } from './routes/_authenticated/admin/financeiro/cheques'
 import { Route as AuthenticatedAdminFinanceiroConciliacaoRouteImport } from './routes/_authenticated/admin/financeiro/conciliacao'
 import { Route as AuthenticatedAdminFinanceiroConfiguracoesRouteImport } from './routes/_authenticated/admin/financeiro/configuracoes'
 import { Route as AuthenticatedAdminFinanceiroContasRouteImport } from './routes/_authenticated/admin/financeiro/contas'
@@ -565,6 +566,12 @@ const AuthenticatedAdminFinanceiroCentrosCustoRoute =
     path: '/centros-custo',
     getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
   } as any)
+const AuthenticatedAdminFinanceiroChequesRoute =
+  AuthenticatedAdminFinanceiroChequesRouteImport.update({
+    id: '/cheques',
+    path: '/cheques',
+    getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
+  } as any)
 const AuthenticatedAdminFinanceiroConciliacaoRoute =
   AuthenticatedAdminFinanceiroConciliacaoRouteImport.update({
     id: '/conciliacao',
@@ -810,6 +817,7 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
   '/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
+  '/admin/financeiro/cheques': typeof AuthenticatedAdminFinanceiroChequesRoute
   '/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
   '/admin/financeiro/configuracoes': typeof AuthenticatedAdminFinanceiroConfiguracoesRoute
   '/admin/financeiro/contas': typeof AuthenticatedAdminFinanceiroContasRoute
@@ -919,6 +927,7 @@ export interface FileRoutesByTo {
   '/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
   '/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
+  '/admin/financeiro/cheques': typeof AuthenticatedAdminFinanceiroChequesRoute
   '/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
   '/admin/financeiro/configuracoes': typeof AuthenticatedAdminFinanceiroConfiguracoesRoute
   '/admin/financeiro/contas': typeof AuthenticatedAdminFinanceiroContasRoute
@@ -1032,6 +1041,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
   '/_authenticated/admin/financeiro/auditoria': typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   '/_authenticated/admin/financeiro/centros-custo': typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
+  '/_authenticated/admin/financeiro/cheques': typeof AuthenticatedAdminFinanceiroChequesRoute
   '/_authenticated/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
   '/_authenticated/admin/financeiro/configuracoes': typeof AuthenticatedAdminFinanceiroConfiguracoesRoute
   '/_authenticated/admin/financeiro/contas': typeof AuthenticatedAdminFinanceiroContasRoute
@@ -1145,6 +1155,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/asaas-extrato'
     | '/admin/financeiro/auditoria'
     | '/admin/financeiro/centros-custo'
+    | '/admin/financeiro/cheques'
     | '/admin/financeiro/conciliacao'
     | '/admin/financeiro/configuracoes'
     | '/admin/financeiro/contas'
@@ -1254,6 +1265,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/asaas-extrato'
     | '/admin/financeiro/auditoria'
     | '/admin/financeiro/centros-custo'
+    | '/admin/financeiro/cheques'
     | '/admin/financeiro/conciliacao'
     | '/admin/financeiro/configuracoes'
     | '/admin/financeiro/contas'
@@ -1366,6 +1378,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financeiro/asaas-extrato'
     | '/_authenticated/admin/financeiro/auditoria'
     | '/_authenticated/admin/financeiro/centros-custo'
+    | '/_authenticated/admin/financeiro/cheques'
     | '/_authenticated/admin/financeiro/conciliacao'
     | '/_authenticated/admin/financeiro/configuracoes'
     | '/_authenticated/admin/financeiro/contas'
@@ -2029,6 +2042,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroCentrosCustoRouteImport
       parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
     }
+    '/_authenticated/admin/financeiro/cheques': {
+      id: '/_authenticated/admin/financeiro/cheques'
+      path: '/cheques'
+      fullPath: '/admin/financeiro/cheques'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceiroChequesRouteImport
+      parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
+    }
     '/_authenticated/admin/financeiro/conciliacao': {
       id: '/_authenticated/admin/financeiro/conciliacao'
       path: '/conciliacao'
@@ -2234,6 +2254,7 @@ interface AuthenticatedAdminFinanceiroRouteRouteChildren {
   AuthenticatedAdminFinanceiroAsaasExtratoRoute: typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
   AuthenticatedAdminFinanceiroAuditoriaRoute: typeof AuthenticatedAdminFinanceiroAuditoriaRoute
   AuthenticatedAdminFinanceiroCentrosCustoRoute: typeof AuthenticatedAdminFinanceiroCentrosCustoRoute
+  AuthenticatedAdminFinanceiroChequesRoute: typeof AuthenticatedAdminFinanceiroChequesRoute
   AuthenticatedAdminFinanceiroConciliacaoRoute: typeof AuthenticatedAdminFinanceiroConciliacaoRoute
   AuthenticatedAdminFinanceiroConfiguracoesRoute: typeof AuthenticatedAdminFinanceiroConfiguracoesRoute
   AuthenticatedAdminFinanceiroContasRoute: typeof AuthenticatedAdminFinanceiroContasRoute
@@ -2261,6 +2282,8 @@ const AuthenticatedAdminFinanceiroRouteRouteChildren: AuthenticatedAdminFinancei
       AuthenticatedAdminFinanceiroAuditoriaRoute,
     AuthenticatedAdminFinanceiroCentrosCustoRoute:
       AuthenticatedAdminFinanceiroCentrosCustoRoute,
+    AuthenticatedAdminFinanceiroChequesRoute:
+      AuthenticatedAdminFinanceiroChequesRoute,
     AuthenticatedAdminFinanceiroConciliacaoRoute:
       AuthenticatedAdminFinanceiroConciliacaoRoute,
     AuthenticatedAdminFinanceiroConfiguracoesRoute:

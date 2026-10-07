@@ -3303,6 +3303,204 @@ export type Database = {
           },
         ]
       }
+      fin_caixa_fatias: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data: string
+          financial_account_id: string
+          id: string
+          motivo: string
+          party_id: string
+          valor_cents: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data?: string
+          financial_account_id: string
+          id?: string
+          motivo: string
+          party_id: string
+          valor_cents: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data?: string
+          financial_account_id?: string
+          id?: string
+          motivo?: string
+          party_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_caixa_fatias_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_caixa_fatias_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_caixa_fatias_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      fin_cheque_eventos: {
+        Row: {
+          cheque_id: string
+          created_at: string
+          created_by: string | null
+          de: string | null
+          detalhe: Json | null
+          id: string
+          motivo: string | null
+          para: string
+        }
+        Insert: {
+          cheque_id: string
+          created_at?: string
+          created_by?: string | null
+          de?: string | null
+          detalhe?: Json | null
+          id?: string
+          motivo?: string | null
+          para: string
+        }
+        Update: {
+          cheque_id?: string
+          created_at?: string
+          created_by?: string | null
+          de?: string | null
+          detalhe?: Json | null
+          id?: string
+          motivo?: string | null
+          para?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_cheque_eventos_cheque_id_fkey"
+            columns: ["cheque_id"]
+            isOneToOne: false
+            referencedRelation: "fin_cheques"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fin_cheques: {
+        Row: {
+          agencia: string | null
+          banco: string | null
+          bom_para: string
+          conta: string | null
+          created_at: string
+          created_by: string | null
+          deposito_account_id: string | null
+          emitente_doc: string | null
+          emitente_nome: string
+          id: string
+          numero: string
+          observacao: string | null
+          recebido_de_party_id: string | null
+          recebido_em: string
+          repassado_para_nome: string | null
+          repassado_para_party_id: string | null
+          status: string
+          updated_at: string
+          valor_cents: number
+        }
+        Insert: {
+          agencia?: string | null
+          banco?: string | null
+          bom_para: string
+          conta?: string | null
+          created_at?: string
+          created_by?: string | null
+          deposito_account_id?: string | null
+          emitente_doc?: string | null
+          emitente_nome: string
+          id?: string
+          numero: string
+          observacao?: string | null
+          recebido_de_party_id?: string | null
+          recebido_em?: string
+          repassado_para_nome?: string | null
+          repassado_para_party_id?: string | null
+          status?: string
+          updated_at?: string
+          valor_cents: number
+        }
+        Update: {
+          agencia?: string | null
+          banco?: string | null
+          bom_para?: string
+          conta?: string | null
+          created_at?: string
+          created_by?: string | null
+          deposito_account_id?: string | null
+          emitente_doc?: string | null
+          emitente_nome?: string
+          id?: string
+          numero?: string
+          observacao?: string | null
+          recebido_de_party_id?: string | null
+          recebido_em?: string
+          repassado_para_nome?: string | null
+          repassado_para_party_id?: string | null
+          status?: string
+          updated_at?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_cheques_deposito_account_id_fkey"
+            columns: ["deposito_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cheques_recebido_de_party_id_fkey"
+            columns: ["recebido_de_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cheques_recebido_de_party_id_fkey"
+            columns: ["recebido_de_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "fin_cheques_repassado_para_party_id_fkey"
+            columns: ["repassado_para_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cheques_repassado_para_party_id_fkey"
+            columns: ["repassado_para_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       fin_dre_estrutura: {
         Row: {
           ativo: boolean
@@ -11398,6 +11596,15 @@ export type Database = {
         Args: { _ativo: boolean; _id: string }
         Returns: undefined
       }
+      fin_cheque_mudar: {
+        Args: { _id: string; _para: string; _payload: Json }
+        Returns: undefined
+      }
+      fin_cheque_registrar: { Args: { _payload: Json }; Returns: string }
+      fin_cheques_lista: {
+        Args: { _q?: string; _status?: string }
+        Returns: Json
+      }
       fin_classificacoes: { Args: { _filtros?: Json }; Returns: Json }
       fin_cost_center_list: { Args: { _filtros?: Json }; Returns: Json }
       fin_cost_center_save: { Args: { _payload: Json }; Returns: string }
@@ -11438,6 +11645,8 @@ export type Database = {
       }
       fin_encargos_contas: { Args: never; Returns: Json }
       fin_encargos_contas_set: { Args: { _payload: Json }; Returns: Json }
+      fin_fatia_lancar: { Args: { _payload: Json }; Returns: string }
+      fin_fatias_conta: { Args: { _account: string }; Returns: Json }
       fin_fingerprint: { Args: { _intent: Json }; Returns: string }
       fin_hist_norm: { Args: { _t: string }; Returns: string }
       fin_historico_chave: { Args: { _h: string }; Returns: string }

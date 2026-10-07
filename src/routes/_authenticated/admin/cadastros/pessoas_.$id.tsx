@@ -18,6 +18,7 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
+import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import { VendedoraInternaForm } from "@/components/admin/cadastros/VendedoraInternaForm";
 import { useCapabilities } from "@/lib/capabilities";
@@ -279,6 +280,7 @@ function FichaPessoa() {
           <TabsTrigger value="enderecos">Endereços</TabsTrigger>
           <TabsTrigger value="comercial">Dados comerciais</TabsTrigger>
           <TabsTrigger value="financeiro">Financeiro / PIX</TabsTrigger>
+          {podeVerFin && <TabsTrigger value="debitos">Débitos, fiado e comissões</TabsTrigger>}
           <TabsTrigger value="vinculos">Vínculos</TabsTrigger>
           <TabsTrigger value="operacao">Estoque e maletas</TabsTrigger>
           <TabsTrigger value="acesso">Acesso</TabsTrigger>
@@ -581,6 +583,12 @@ function FichaPessoa() {
             </Panel>
           )}
         </TabsContent>
+
+        {podeVerFin && (
+          <TabsContent value="debitos" className="mt-4">
+            <CockpitFinanceiroConsultora partyId={id} />
+          </TabsContent>
+        )}
 
         {/* VÍNCULOS */}
         <TabsContent value="vinculos" className="mt-4">

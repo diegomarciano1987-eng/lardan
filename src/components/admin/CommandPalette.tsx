@@ -141,9 +141,9 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
     const rows = ((data as { rows?: Record<string, unknown>[] } | null)?.rows ?? []);
     return {
       data: rows.map((r) => ({
-        id: String(r.id), descricao: (r.descricao as string) ?? null,
-        valor_cents: (r.valor_cents as number) ?? (r.total_cents as number) ?? null,
-        status: String(r.status ?? ""), numero: (r.numero as string) ?? null,
+        id: String(r["id"]), descricao: (r["descricao"] as string) ?? null,
+        valor_cents: (r["valor_cents"] as number) ?? (r["total_cents"] as number) ?? null,
+        status: String(r["status"] ?? ""), numero: (r["numero"] as string) ?? null,
       })),
     };
   };

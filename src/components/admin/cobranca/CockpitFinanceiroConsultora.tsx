@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cockpitFinanceiro, brl, dataBR, hojeSP, rotuloEtapa } from "@/lib/cobranca";
+import { CobrarParcelaAsaas } from "@/components/admin/financeiro/CobrarParcelaAsaas";
 
 type Aba = "abertas" | "fiado" | "recebimentos" | "comissoes" | "maletas";
 const SIT: Record<string, string> = { nao_liquidado: "Em aberto", parcial: "Parcial", liquidado: "Pago", excedente: "Pago a mais" };
@@ -49,11 +50,12 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
           <button key={k} onClick={() => setAba(k)} className={`border-b-2 px-4 py-2 text-sm ${aba === k ? "border-primary text-foreground" : "border-transparent text-muted-foreground"}`}>{t}</button>
         ))}
       </div>
-      {aba === "abertas" && (d.parcelas.length ? <Tabela cab={["Título", "Descrição", "Origem", "Vencimento", "Valor", "Saldo", "Atraso"]} linhas={d.parcelas.map((p) => [
+      {aba === "abertas" && (d.parcelas.length ? <Tabela cab={["Título", "Descrição", "Origem", "Vencimento", "Valor", "Saldo", "Atraso", "Asaas"]} linhas={d.parcelas.map((p) => [
         p.numero ?? "—", p.descricao, p.origem === "fiado_historico" ? "Fiado" : p.origem ?? "Manual",
         <span className={p.vencimento < hoje ? "text-destructive" : ""}>{dataBR(p.vencimento)}</span>,
         <span className="font-mono tabular-nums">{brl(Number(p.valor_cents))}</span>, <span className="font-mono tabular-nums">{brl(Number(p.saldo_cents))}</span>,
-        p.atraso ? `${p.atraso} dias` : "—"])} /> : vazio("Sem débitos em aberto."))}
+        p.atraso ? `${p.atraso} dias` : "—",
+        <CobrarParcelaAsaas installmentId={p.installment_id} saldoCents={Number(p.saldo_cents)} vencimento={p.vencimento} compacto />])} /> : vazio("Sem débitos em aberto."))}
       {aba === "fiado" && (d.fiado.length ? <>
         <p className="text-xs text-muted-foreground">Cada linha é a linha original da planilha de fiados, guardada sem alteração e ligada ao título a receber que ela gerou.</p>
         <Tabela cab={["Lote / linha", "Data da cobrança", "Vencimento", "Parcela", "Valor", "Situação hoje"]} linhas={d.fiado.map((f) => [

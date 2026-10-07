@@ -9,6 +9,7 @@ import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShe
 import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import { ListaTitulos } from "@/components/admin/financeiro/ListaTitulos";
 import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
+import { CobrarParcelaAsaas } from "@/components/admin/financeiro/CobrarParcelaAsaas";
 import { CobrancaAsaasSheet, ConferenciaAsaas, useSincronizacaoDiariaAsaas } from "@/components/admin/financeiro/AsaasConferencia";
 import { useCapabilities } from "@/lib/capabilities";
 import {
@@ -382,7 +383,12 @@ function ListaUnificada({
                       ) : null}
                     </td>
                     <td className="px-5 py-2 text-right">
-                      <AcaoLinha r={r} podeBaixar={podeBaixar} onAbrir={abrir} />
+                      <div className="flex flex-col items-end gap-1.5">
+                        <AcaoLinha r={r} podeBaixar={podeBaixar} onAbrir={abrir} />
+                        {r.tipo === "parcela" && r.direction === "receivable" && r.saldo_cents > 0 && !r.invoice_url ? (
+                          <CobrarParcelaAsaas installmentId={r.id} saldoCents={r.saldo_cents} vencimento={r.vencimento} nome={r.pessoa} compacto />
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))}

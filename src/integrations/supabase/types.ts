@@ -11438,6 +11438,10 @@ export type Database = {
         }
       }
       asaas_cobranca_preparar: { Args: { _payload: Json }; Returns: Json }
+      asaas_conciliacao_automatica: {
+        Args: { _actor: string; _executar?: boolean }
+        Returns: Json
+      }
       asaas_conferencia_decidir: {
         Args: { _aceitar: boolean; _match: string; _motivo?: string }
         Returns: undefined

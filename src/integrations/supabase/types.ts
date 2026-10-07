@@ -3358,6 +3358,214 @@ export type Database = {
           },
         ]
       }
+      fin_cartao_faturas: {
+        Row: {
+          account_id: string
+          created_at: string
+          created_by: string | null
+          fechada_em: string | null
+          fechada_por: string | null
+          id: string
+          referencia: string
+          status: string
+          title_id: string | null
+          vencimento: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          created_by?: string | null
+          fechada_em?: string | null
+          fechada_por?: string | null
+          id?: string
+          referencia: string
+          status?: string
+          title_id?: string | null
+          vencimento: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          created_by?: string | null
+          fechada_em?: string | null
+          fechada_por?: string | null
+          id?: string
+          referencia?: string
+          status?: string
+          title_id?: string | null
+          vencimento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_cartao_faturas_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cartao_faturas_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fin_cartao_lancamentos: {
+        Row: {
+          account_id: string
+          chart_account_id: string | null
+          classificado_por: string | null
+          cost_center_id: string | null
+          created_at: string
+          created_by: string | null
+          data: string
+          descricao: string
+          fatura_id: string
+          hash: string
+          ia_confianca: number | null
+          ia_motivo: string | null
+          id: string
+          parcela: string | null
+          updated_at: string
+          valor_cents: number
+        }
+        Insert: {
+          account_id: string
+          chart_account_id?: string | null
+          classificado_por?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data: string
+          descricao: string
+          fatura_id: string
+          hash: string
+          ia_confianca?: number | null
+          ia_motivo?: string | null
+          id?: string
+          parcela?: string | null
+          updated_at?: string
+          valor_cents: number
+        }
+        Update: {
+          account_id?: string
+          chart_account_id?: string | null
+          classificado_por?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data?: string
+          descricao?: string
+          fatura_id?: string
+          hash?: string
+          ia_confianca?: number | null
+          ia_motivo?: string | null
+          id?: string
+          parcela?: string | null
+          updated_at?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_cartao_lancamentos_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cartao_lancamentos_chart_account_id_fkey"
+            columns: ["chart_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cartao_lancamentos_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cartao_lancamentos_fatura_id_fkey"
+            columns: ["fatura_id"]
+            isOneToOne: false
+            referencedRelation: "fin_cartao_faturas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fin_cartoes: {
+        Row: {
+          account_id: string
+          bandeira: string | null
+          conta_pagamento_id: string | null
+          created_at: string
+          dia_fechamento: number | null
+          dia_vencimento: number
+          emissor_party_id: string | null
+          final_cartao: string | null
+          limite_cents: number | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          bandeira?: string | null
+          conta_pagamento_id?: string | null
+          created_at?: string
+          dia_fechamento?: number | null
+          dia_vencimento: number
+          emissor_party_id?: string | null
+          final_cartao?: string | null
+          limite_cents?: number | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          bandeira?: string | null
+          conta_pagamento_id?: string | null
+          created_at?: string
+          dia_fechamento?: number | null
+          dia_vencimento?: number
+          emissor_party_id?: string | null
+          final_cartao?: string | null
+          limite_cents?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_cartoes_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cartoes_conta_pagamento_id_fkey"
+            columns: ["conta_pagamento_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cartoes_emissor_party_id_fkey"
+            columns: ["emissor_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cartoes_emissor_party_id_fkey"
+            columns: ["emissor_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       fin_cheque_eventos: {
         Row: {
           cheque_id: string
@@ -11588,6 +11796,34 @@ export type Database = {
       fin_audit_list: { Args: { _filtros?: Json }; Returns: Json }
       fin_auditoria_asaas_duplicidade: { Args: never; Returns: Json }
       fin_auditoria_tarifa_conciliacao: { Args: never; Returns: Json }
+      fin_cartao_classificar: { Args: { _itens: Json }; Returns: number }
+      fin_cartao_config_set: {
+        Args: { _account: string; _payload: Json }
+        Returns: undefined
+      }
+      fin_cartao_criar: { Args: { _payload: Json }; Returns: string }
+      fin_cartao_fatura_abrir: {
+        Args: { _account: string; _referencia: string; _vencimento: string }
+        Returns: string
+      }
+      fin_cartao_fatura_detalhe: { Args: { _fatura: string }; Returns: Json }
+      fin_cartao_fechar: {
+        Args: { _fatura: string; _payload: Json }
+        Returns: string
+      }
+      fin_cartao_importar: {
+        Args: { _fatura: string; _linhas: Json }
+        Returns: Json
+      }
+      fin_cartao_lancamento_excluir: {
+        Args: { _id: string; _motivo: string }
+        Returns: undefined
+      }
+      fin_cartao_painel: { Args: { _account: string }; Returns: Json }
+      fin_cartao_reabrir: {
+        Args: { _fatura: string; _motivo: string }
+        Returns: undefined
+      }
       fin_cashflow: { Args: { _filtros?: Json }; Returns: Json }
       fin_cashflow_detail: { Args: { _filtros: Json }; Returns: Json }
       fin_chart_list: { Args: { _filtros?: Json }; Returns: Json }
@@ -12888,6 +13124,7 @@ export type Database = {
         | "compensacao"
         | "provedor"
         | "investimento"
+        | "cartao_credito"
       fin_account_nature:
         | "receita"
         | "deducao"
@@ -13165,6 +13402,7 @@ export const Constants = {
         "compensacao",
         "provedor",
         "investimento",
+        "cartao_credito",
       ],
       fin_account_nature: [
         "receita",

@@ -1,4 +1,5 @@
 import { FatiasCaixa } from "@/components/admin/financeiro/FatiasCaixa";
+import { CartaoFaturas } from "@/components/admin/financeiro/CartaoFaturas";
 import * as React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,6 +52,7 @@ const TIPO_CONTA: Record<string, string> = {
   compensacao: "Compensação",
   provedor: "Provedor de pagamento",
   investimento: "Investimento",
+  cartao_credito: "Cartão de crédito",
 };
 
 const CAMPOS: { k: string; label: string; wide?: boolean }[] = [
@@ -77,7 +79,7 @@ const ACAO: Record<string, string> = {
   "transferencia.estorno": "Transferência estornada",
 };
 
-type Aba = "movimentos" | "fatias" | "dados" | "transferir" | "auditoria";
+type Aba = "faturas" | "movimentos" | "fatias" | "dados" | "transferir" | "auditoria";
 
 export function ContaCockpit({ id }: { id: string }) {
   const caps = useCapabilities();
@@ -96,7 +98,11 @@ export function ContaCockpit({ id }: { id: string }) {
     );
 
   const d = dados.data;
-  const abas: { k: Aba; label: string }[] = [
+  const cartao = conta.kind === "cartao_credito";
+  const abaAtual: Aba = cartao && (aba === "movimentos" || aba === "transferir") ? "faturas" : aba;
+  const abas: { k: Aba; label: string }[] = cartao
+    ? [{ k: "faturas", label: "Faturas" }, { k: "dados", label: "Dados da conta" }, { k: "auditoria", label: "Auditoria" }]
+    : [
     { k: "movimentos", label: "Movimentações" },
     ...(conta.kind === "caixa" ? [{ k: "fatias" as Aba, label: "De quem é o dinheiro" }] : []),
     { k: "dados", label: "Dados da conta" },
@@ -131,10 +137,12 @@ export function ContaCockpit({ id }: { id: string }) {
             <StatusBadge tone={conta.is_active ? "success" : "neutral"}>
               {conta.is_active ? "Ativa" : "Inativa"}
             </StatusBadge>
-            <p className="mt-2 text-xs font-semibold tracking-wide text-ledger-muted uppercase">Saldo atual</p>
-            <p className={`font-display text-3xl font-bold tabular-nums ${conta.saldo_cents < 0 ? "text-danger" : "text-ledger-text"}`}>
-              {formatBRLFromCents(conta.saldo_cents)}
-            </p>
+            {!cartao && <p className="mt-2 text-xs font-semibold tracking-wide text-ledger-muted uppercase">Saldo atual</p>}
+            {!cartao && (
+              <p className={`font-display text-3xl font-bold tabular-nums ${conta.saldo_cents < 0 ? "text-danger" : "text-ledger-text"}`}>
+                {formatBRLFromCents(conta.saldo_cents)}
+              </p>
+            )}
           </div>
         </div>
       </Panel>
@@ -145,9 +153,9 @@ export function ContaCockpit({ id }: { id: string }) {
             key={a.k}
             type="button"
             onClick={() => setAba(a.k)}
-            aria-current={aba === a.k ? "page" : undefined}
+            aria-current={abaAtual === a.k ? "page" : undefined}
             className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold ${
-              aba === a.k
+              abaAtual === a.k
                 ? "border-champagne bg-surface text-ledger-text shadow-sm"
                 : "border-line-soft bg-cream-2 text-ledger-muted hover:text-ledger-text"
             }`}
@@ -157,11 +165,12 @@ export function ContaCockpit({ id }: { id: string }) {
         ))}
       </nav>
 
-      {aba === "movimentos" && <Movimentos id={id} />}
-      {aba === "fatias" && <FatiasCaixa accountId={id} />}
-      {aba === "dados" && <Dados id={id} dados={d} podeGerir={podeGerir} />}
-      {aba === "transferir" && <Transferir id={id} />}
-      {aba === "auditoria" && <Auditoria id={id} />}
+      {abaAtual === "faturas" && <CartaoFaturas accountId={id} />}
+      {abaAtual === "movimentos" && <Movimentos id={id} />}
+      {abaAtual === "fatias" && <FatiasCaixa accountId={id} />}
+      {abaAtual === "dados" && <Dados id={id} dados={d} podeGerir={podeGerir} />}
+      {abaAtual === "transferir" && <Transferir id={id} />}
+      {abaAtual === "auditoria" && <Auditoria id={id} />}
     </div>
   );
 }

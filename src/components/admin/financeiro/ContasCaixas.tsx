@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, CreditCard, Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import {
   EmptyState,
@@ -12,6 +12,7 @@ import {
   formatBRLFromCents,
 } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { NovoCartaoSheet } from "@/components/admin/financeiro/NovoCartaoSheet";
 import { RecordSheet, type RecordValues } from "@/components/admin/RecordSheet";
 import { useCapabilities } from "@/lib/capabilities";
 import {
@@ -39,6 +40,7 @@ export function ContasCaixas() {
   const caps = useCapabilities();
   const podeGerir = caps.includes("finance.bank.manage");
   const [nova, setNova] = React.useState(false);
+  const [novoCartao, setNovoCartao] = React.useState(false);
   const [origem, setOrigem] = React.useState("");
   const [destino, setDestino] = React.useState("");
   const [valor, setValor] = React.useState("");
@@ -90,7 +92,7 @@ export function ContasCaixas() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const opcoes = (contas.data ?? []).map((c) => ({ value: c.id, label: c.nome }));
+  const opcoes = (contas.data ?? []).filter((c) => c.kind !== "cartao_credito").map((c) => ({ value: c.id, label: c.nome }));
 
   return (
     <div className="space-y-6">
@@ -98,9 +100,14 @@ export function ContasCaixas() {
         title="Contas e caixas — clique numa conta para abrir o painel dela"
         action={
           podeGerir ? (
-            <button type="button" className="admin-btn-primary" onClick={() => setNova(true)}>
-              <Plus aria-hidden className="size-4" /> Nova conta
-            </button>
+            <span className="flex gap-2">
+              <button type="button" className="admin-btn" onClick={() => setNovoCartao(true)}>
+                <CreditCard aria-hidden className="size-4" /> Novo cartão de crédito
+              </button>
+              <button type="button" className="admin-btn-primary" onClick={() => setNova(true)}>
+                <Plus aria-hidden className="size-4" /> Nova conta
+              </button>
+            </span>
           ) : undefined
         }
       >
@@ -125,7 +132,9 @@ export function ContasCaixas() {
                   <p className="font-semibold text-ledger-text">{c.nome}</p>
                   <p className="text-xs text-ledger-muted">
                     {c.banco ? `${c.banco} · ` : ""}
-                    {c.ultimo_movimento
+                    {c.kind === "cartao_credito"
+                      ? "Cartão de crédito · faturas e gastos por competência"
+                      : c.ultimo_movimento
                       ? `último movimento em ${new Intl.DateTimeFormat("pt-BR").format(new Date(`${c.ultimo_movimento}T12:00:00`))}`
                       : "sem movimentos"}
                   </p>
@@ -134,7 +143,7 @@ export function ContasCaixas() {
                   <StatusBadge tone={c.is_active ? "success" : "neutral"}>
                     {c.is_active ? "Ativa" : "Inativa"}
                   </StatusBadge>
-                  <span className="flex flex-col items-end">
+                  {c.kind !== "cartao_credito" && <span className="flex flex-col items-end">
                     <span className="text-sm font-semibold tabular-nums text-ledger-text">
                       {formatBRLFromCents(c.saldo_cents)}
                     </span>
@@ -143,7 +152,7 @@ export function ContasCaixas() {
                         Previsto (data futura): {formatBRLFromCents(c.previsto_futuro_cents ?? 0)}
                       </span>
                     )}
-                  </span>
+                  </span>}
                   <ChevronRight aria-hidden className="size-4 text-ledger-muted" />
                 </span>
                 </Link>
@@ -188,6 +197,7 @@ export function ContasCaixas() {
         </Panel>
       )}
 
+      <NovoCartaoSheet open={novoCartao} onOpenChange={setNovoCartao} />
       <RecordSheet
         open={nova}
         onOpenChange={setNova}

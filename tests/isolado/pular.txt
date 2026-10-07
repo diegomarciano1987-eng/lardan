@@ -9,3 +9,7 @@
 # Qualquer migração com estrutura NUNCA entra nesta lista.
 
 20260907164454_dfe40288-1827-412d-8d4d-4ca40b40eb41.sql
+
+# Cópia da estrutura já aplicada por supabase/migrations/20261005130000_clicksign_termo_maleta.sql
+# (mesmo conteúdo registrado de novo pela ferramenta de banco; reaplicar falharia por política duplicada).
+0026_clicksign_termo_maleta_estrutura.sql

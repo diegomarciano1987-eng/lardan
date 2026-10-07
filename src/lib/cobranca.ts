@@ -31,7 +31,17 @@ async function call<T>(fn: string, args?: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-export const carteira = () => call<Devedor[]>("cob_carteira2");
+export async function carteira(): Promise<Devedor[]> {
+  // A API devolve no máximo 1000 linhas por vez: busca a carteira inteira em páginas
+  const todas: Devedor[] = [];
+  for (let de = 0; ; de += 1000) {
+    const { data, error } = await (supabase.rpc as unknown as (f: string) => { range: (a: number, b: number) => Promise<{ data: unknown; error: { message: string } | null }> })("cob_carteira2").range(de, de + 999);
+    if (error) throw new Error(error.message);
+    const pg = (data ?? []) as Devedor[];
+    todas.push(...pg);
+    if (pg.length < 1000) return todas;
+  }
+}
 export const devedor = (party: string) => call<DevedorFicha>("cob_devedor", { _party: party });
 export const registrar = (a: { party: string; tipo: string; resultado?: string | null; obs?: string; parcelas?: string[] }) =>
   call<string>("cob_registrar", { _party: a.party, _tipo: a.tipo, _resultado: a.resultado ?? null, _obs: a.obs ?? null, _parcelas: a.parcelas ?? [] });

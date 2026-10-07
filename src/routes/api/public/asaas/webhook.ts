@@ -119,6 +119,21 @@ export const Route = createFileRoute("/api/public/asaas/webhook")({
           if (reg.novo !== false || reg.pendente === true) {
             processado = await executor.rpc(ROTINAS.eventoProcessar, { _evento: reg.id });
           }
+          // sem parcela ligada: tenta reconhecer pela pessoa (CPF) e valor e já baixar
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            const { data: ch } = await supabaseAdmin.from("asaas_charges").select("id, installment_id")
+              .eq("account_id", conta.id).eq("external_id", txt(pagamento["id"])).maybeSingle();
+            if (ch && !ch.installment_id) {
+              const { data: cfg } = await supabaseAdmin.from("consultora_cobranca_config" as never).select("ator_user_id").limit(1).maybeSingle();
+              const actor = (cfg as { ator_user_id: string } | null)?.ator_user_id;
+              if (actor) {
+                await supabaseAdmin.rpc("asaas_clientes_cadastrar" as never, { _actor: actor } as never);
+                const { data: conc } = await supabaseAdmin.rpc("asaas_conciliar_cobranca" as never, { _charge: ch.id, _actor: actor } as never);
+                processado = { evento: processado, conciliacao: conc };
+              }
+            }
+          } catch { /* a mesa de conciliação mostra o que não casou */ }
           return Response.json({ received: true, novo: reg.novo !== false, resultado: processado });
         } catch (e) {
           // erro aqui devolve 5xx e o Asaas reenvia; dedupe protege contra efeito duplo

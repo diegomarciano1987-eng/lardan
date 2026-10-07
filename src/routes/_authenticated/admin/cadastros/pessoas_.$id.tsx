@@ -318,6 +318,47 @@ function FichaPessoa() {
             </div>
           </Panel>
 
+          <Panel title="Vínculos de atuação" flush>
+            <div className="space-y-1 p-5">
+              <p className="mb-3 text-sm font-medium text-ledger-muted">
+                A mesma pessoa pode atuar em mais de uma frente. Cada vínculo libera a ficha própria na aba Comercial.
+              </p>
+              {([
+                ["consultora", "Consultora", "Maleta, vitrine, pedidos e comissões de indicação"],
+                ["vendedora_interna", "Vendedora interna", "Pode entrar na equipe das lojas e do PDV"],
+                ["colaborador", "Colaboradora", "Faz parte do time interno da Lardan"],
+              ] as const).map(([role, rotulo, dica]) => {
+                const atual = d.papeis.find((p) => p.role === role);
+                return (
+                  <label key={role} className="flex items-center justify-between gap-4 rounded-lg border border-line bg-surface px-4 py-3">
+                    <span>
+                      <span className="block text-sm font-semibold text-ledger-text">{rotulo}</span>
+                      <span className="block text-xs font-medium text-ledger-muted">{dica}</span>
+                    </span>
+                    <Switch
+                      checked={!!atual}
+                      disabled={!podeEditar}
+                      aria-label={`${atual ? "Remover" : "Adicionar"} vínculo ${rotulo}`}
+                      onCheckedChange={async (on) => {
+                        try {
+                          if (on) await addRole(id, role);
+                          else if (atual) {
+                            if (!window.confirm(`Remover o vínculo de ${rotulo}? A ficha fica guardada no histórico.`)) return;
+                            await removeRole(atual.id);
+                          }
+                          await qc.invalidateQueries({ queryKey: ["registry"] });
+                          toast.success(on ? `Vínculo de ${rotulo} adicionado.` : `Vínculo de ${rotulo} removido.`);
+                        } catch (e) {
+                          toast.error((e as Error).message);
+                        }
+                      }}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          </Panel>
+
           <Panel title="Papéis desta pessoa" flush>
             <div className="space-y-3 p-5">
               {d.papeis.length === 0 ? (

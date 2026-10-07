@@ -10,3 +10,5 @@
 - [ ] Etapa 6: testes e prontidão (bateria isolada do PDV ok; falta Pix real em sandbox Asaas com loja configurada)
 - [ ] PDV: comprovante em cupom com logo Lardan, imprimir/PDF
 - [ ] PDV: Pix em janela grande com QR + copia-e-cola; corrigir "Sem permissão para este tipo de título"
+
+- [ ] Consultora: fechar pedido com Pix Lardan (QR/copia-cola), receber depois, ou cartão Asaas (avaliar celular como maquininha)

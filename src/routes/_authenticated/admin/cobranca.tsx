@@ -105,8 +105,7 @@ function Cobranca() {
 
       {s.v !== "bi" && (
         <div className="flex flex-wrap gap-2">
-          <input value={s.q} onChange={(e) => set({ q: e.target.value })} placeholder="Buscar nome, CPF, código do cliente, cidade, praça, representante…"
-            className="h-10 min-w-72 flex-1 rounded-lg border border-border bg-background px-3 text-sm" />
+          <BuscaLocal valor={s.q} onBuscar={(q) => set({ q })} />
           <SmartSelect className="w-64" value={s.praca} onChange={(praca) => set({ praca })} placeholder="Todas as praças" searchPlaceholder="Buscar praça…"
             options={[{ value: "", label: "Todas as praças" }, ...pracas.map(([value, label]) => ({ value, label }))]} />
           <SmartSelect className="w-64" value={s.rep} onChange={(rep) => set({ rep })} placeholder="Todos os representantes" searchPlaceholder="Buscar representante…"
@@ -281,5 +280,26 @@ function BI({ todos }: { todos: Devedor[] }) {
         <Bloco t="Por UF" dados={porChave((d) => d.uf ?? "")} />
       </div>
     </div>
+  );
+}
+
+function BuscaLocal({ valor, onBuscar }: { valor: string; onBuscar: (q: string) => void }) {
+  const [texto, setTexto] = React.useState(valor);
+  const ultimo = React.useRef(valor);
+  const cb = React.useRef(onBuscar);
+  cb.current = onBuscar;
+  React.useEffect(() => {
+    if (valor !== ultimo.current) { ultimo.current = valor; setTexto(valor); }
+  }, [valor]);
+  React.useEffect(() => {
+    if (texto === ultimo.current) return;
+    const t = setTimeout(() => { ultimo.current = texto; cb.current(texto); }, 300);
+    return () => clearTimeout(t);
+  }, [texto]);
+  return (
+    <input value={texto} onChange={(e) => setTexto(e.target.value)}
+      onKeyDown={(e) => { if (e.key === "Enter") { ultimo.current = texto; cb.current(texto); } }}
+      placeholder="Buscar nome, CPF, código do cliente, cidade, praça, representante…"
+      className="h-10 min-w-72 flex-1 rounded-lg border border-border bg-background px-3 text-sm" />
   );
 }

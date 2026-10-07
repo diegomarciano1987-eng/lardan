@@ -332,7 +332,7 @@ export function LeitorEntrada() {
                 autoComplete="off"
                 inputMode="none"
                 aria-label="Código de barras"
-                placeholder={pronto ? "Aguardando leitura…" : modo === "transferencia" ? "Escolha origem, destino (diferentes) e referência" : "Escolha o local e a referência"}
+                placeholder={pronto ? "Aguardando leitura…" : modo === "transferencia" ? "Escolha origem, destino e nota" : "Escolha local e nota"}
                 className="w-full bg-transparent font-display text-4xl font-bold tracking-wide text-ledger-text outline-none placeholder:text-ledger-muted/60"
               />
             </label>

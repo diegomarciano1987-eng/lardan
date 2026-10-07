@@ -192,7 +192,7 @@ export function LeitorEntrada() {
             note: `Transferência por leitor (${rotuloCat}) · lido ${cod}`,
           });
         } catch (e) {
-          if (!/saldo|insuficiente|negativ/i.test((e as Error).message)) throw e;
+          if (!/saldo|insuficiente|dispon[ií]ve/i.test((e as Error).message)) throw e;
           semSaldoOrigem = true;
         }
       }

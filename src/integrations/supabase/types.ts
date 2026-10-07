@@ -11738,6 +11738,7 @@ export type Database = {
         Args: { _linhas: Json; _lote: string }
         Returns: Json
       }
+      cob_kpis: { Args: never; Returns: Json }
       cob_mover_etapa: {
         Args: { _etapa: string; _party: string; _responsavel?: string }
         Returns: undefined
@@ -11784,6 +11785,10 @@ export type Database = {
       cob_tarefa_criar: {
         Args: { _party: string; _titulo: string; _vence: string }
         Returns: string
+      }
+      cob_vincular_asaas_fiado: {
+        Args: { _actor: string; _desde?: string }
+        Returns: Json
       }
       confirm_stock_reservation: {
         Args: {

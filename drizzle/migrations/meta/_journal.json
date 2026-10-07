@@ -246,6 +246,13 @@
       "when": 1791400878775,
       "tag": "0034_cob_fiado_importar_rpc",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1791401623879,
+      "tag": "0035_cobranca_vinculo_asaas_kpis_regua",
+      "breakpoints": true
     }
   ]
 }

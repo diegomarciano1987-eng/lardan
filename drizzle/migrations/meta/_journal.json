@@ -295,6 +295,13 @@
       "when": 1791408574175,
       "tag": "0041_fin_titulo_empresa_padrao",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1791417364532,
+      "tag": "0042_asaas_conciliacao_inteligente",
+      "breakpoints": true
     }
   ]
 }

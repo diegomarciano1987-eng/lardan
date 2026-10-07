@@ -11437,9 +11437,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      asaas_clientes_cadastrar: { Args: { _actor: string }; Returns: Json }
       asaas_cobranca_preparar: { Args: { _payload: Json }; Returns: Json }
       asaas_conciliacao_automatica: {
         Args: { _actor: string; _executar?: boolean }
+        Returns: Json
+      }
+      asaas_conciliar_cobranca: {
+        Args: { _actor: string; _charge: string }
         Returns: Json
       }
       asaas_conferencia_decidir: {
@@ -11715,6 +11720,22 @@ export type Database = {
           _stage: string
           _title?: string
         }
+        Returns: Json
+      }
+      asaas_mesa_candidatas: {
+        Args: { _busca?: string; _charge: string }
+        Returns: Json
+      }
+      asaas_mesa_novo_titulo: {
+        Args: { _charge: string; _descricao?: string }
+        Returns: Json
+      }
+      asaas_mesa_pendentes: {
+        Args: { _busca?: string; _offset?: number }
+        Returns: Json
+      }
+      asaas_mesa_vincular: {
+        Args: { _charge: string; _installment: string }
         Returns: Json
       }
       asaas_origin_key: { Args: { _account: string }; Returns: string }

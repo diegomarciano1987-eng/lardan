@@ -124,47 +124,45 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
     `display_name.ilike.${likeSafe}`,
     `legal_name.ilike.${likeSafe}`,
     `code.ilike.${likeSafe}`,
-    ...(digitos.length >= 3 ? [`doc_digits.ilike.%${digitos}%`] : []),
-  ].join(",");
-  const tituloFiltro = [
-    `descricao.ilike.${likeSafe}`,
-    `documento.ilike.${likeSafe}`,
-    `id_externo.ilike.${likeSafe}`,
-    ...(/^\d+$/.test(term) ? [`numero.eq.${term}`] : []),
+    ...(digitos.length >= 3 ? [`doc_masked.ilike.%${digitos.slice(-4)}%`] : []),
   ].join(",");
 
+  type Titulo = { id: string; descricao: string | null; valor_cents: number | null; status: string; numero: number | string | null };
+  const titulos = async (direction: "payable" | "receivable"): Promise<{ data: Titulo[] }> => {
+    const { data, error } = await supabase.rpc("fin_titles_list" as never, {
+      _direction: direction, _search: term, _limit: 6, _offset: 0,
+    } as never);
+    if (error) return { data: [] };
+    const rows = ((data as { rows?: Record<string, unknown>[] } | null)?.rows ?? []);
+    return {
+      data: rows.map((r) => ({
+        id: String(r.id), descricao: (r.descricao as string) ?? null,
+        valor_cents: (r.valor_cents as number) ?? (r.total_cents as number) ?? null,
+        status: String(r.status ?? ""), numero: (r.numero as string) ?? null,
+      })),
+    };
+  };
+  const vazio = { data: [] as never[] };
+  const seguro = async <T,>(p: PromiseLike<{ data: T[] | null }>) => {
+    try { const r = await p; return { data: r.data ?? [] }; } catch { return { data: [] as T[] }; }
+  };
+
   const [pessoas, pagar, receber, maletas, contas, fornecedores] = await Promise.all([
-    supabase
+    seguro(supabase
       .from("parties")
       .select("id,display_name,legal_name,code,status,doc_masked")
       .or(pessoaFiltro)
       .order("display_name")
-      .limit(8),
-    podeFinPagar
-      ? supabase
-          .from("financial_titles")
-          .select("id,descricao,valor_cents,status,numero")
-          .eq("direction", "payable")
-          .or(tituloFiltro)
-          .order("created_at", { ascending: false })
-          .limit(6)
-      : Promise.resolve({ data: [] as never[] }),
-    podeFinReceber
-      ? supabase
-          .from("financial_titles")
-          .select("id,descricao,valor_cents,status,numero")
-          .eq("direction", "receivable")
-          .or(tituloFiltro)
-          .order("created_at", { ascending: false })
-          .limit(6)
-      : Promise.resolve({ data: [] as never[] }),
-    supabase.from("kits").select("id,code,label").or(`code.ilike.${likeSafe},label.ilike.${likeSafe}`).limit(LIMIT),
-    supabase.from("financial_accounts").select("id,nome,kind").ilike("nome", likeSafe).limit(LIMIT),
-    supabase
+      .limit(8)),
+    podeFinPagar ? titulos("payable") : Promise.resolve(vazio),
+    podeFinReceber ? titulos("receivable") : Promise.resolve(vazio),
+    seguro(supabase.from("kits").select("id,code,label").or(`code.ilike.${likeSafe},label.ilike.${likeSafe}`).limit(LIMIT)),
+    seguro(supabase.from("financial_accounts").select("id,nome,kind").ilike("nome", likeSafe).limit(LIMIT)),
+    seguro(supabase
       .from("suppliers")
       .select("id,name,trade_name")
       .or(`name.ilike.${likeSafe},trade_name.ilike.${likeSafe}`)
-      .limit(LIMIT),
+      .limit(LIMIT)),
   ]);
 
   const reais = (c: number | null) =>

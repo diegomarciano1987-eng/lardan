@@ -105,8 +105,7 @@ function Cobranca() {
 
       {s.v !== "bi" && (
         <div className="flex flex-wrap gap-2">
-          <input value={s.q} onChange={(e) => set({ q: e.target.value })} placeholder="Buscar nome, CPF, código do cliente, cidade, praça, representante…"
-            className="h-10 min-w-72 flex-1 rounded-lg border border-border bg-background px-3 text-sm" />
+          <BuscaLocal valor={s.q} onBuscar={(q) => set({ q })} />
           <SmartSelect className="w-64" value={s.praca} onChange={(praca) => set({ praca })} placeholder="Todas as praças" searchPlaceholder="Buscar praça…"
             options={[{ value: "", label: "Todas as praças" }, ...pracas.map(([value, label]) => ({ value, label }))]} />
           <SmartSelect className="w-64" value={s.rep} onChange={(rep) => set({ rep })} placeholder="Todos os representantes" searchPlaceholder="Buscar representante…"

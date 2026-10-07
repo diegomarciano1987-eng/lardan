@@ -89,3 +89,6 @@ export interface CockpitFinanceiro {
   promessas: { valor_cents: number; data: string; status: string }[];
 }
 export const cockpitFinanceiro = (party: string) => call<CockpitFinanceiro>("consultora_cockpit_financeiro", { _party: party });
+
+export interface KpisCobranca { devedoras: number; vencido_cents: number; hoje: number; atrasadas: number; vencendo: number; descumpridas: number }
+export const kpisCobranca = () => call<KpisCobranca>("cob_kpis");

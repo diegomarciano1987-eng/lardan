@@ -54,8 +54,8 @@ export function DepoimentoGrazi() {
           </CinematicTitle>
           <div className="rose-rule mt-8 w-20" />
           <p className="mt-8 max-w-xl font-display text-[clamp(1.25rem,2.3vw,1.75rem)] leading-[1.42] text-foreground">
-            Sem roteiro e sem produção: a Grazi conta, do jeito dela, como a Lardan entrou na sua
-            rotina e a ajudou a crescer.
+            Vender semijoias no dia a dia: a Grazi conta como a Lardan entrou na sua rotina e a
+            ajudou a crescer.
           </p>
           <ul className="mt-8 max-w-xl space-y-3 text-base text-muted-foreground">
             <li className="flex gap-3"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-rose" />Como começou com a maleta consignada, sem investir para começar</li>

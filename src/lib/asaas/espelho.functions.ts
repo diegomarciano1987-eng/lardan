@@ -75,7 +75,14 @@ export const sincronizarCobrancasAsaas = createServerFn({ method: "POST" })
         .from("asaas_charge_sync_runs" as never)
         .update({ status: "concluida", paginas, recebidas, inseridas, atualizadas, concluido_em: new Date().toISOString() } as never)
         .eq("id", runId as never);
-      return { paginas, recebidas, inseridas, atualizadas };
+      // Conciliação automática (mesmo CPF/CNPJ + valor + vencimento, casamento único) e
+      // baixa das recebidas pelo motor oficial — idempotente, nunca duplica.
+      let vinculadas = 0, ambiguas = 0, baixas = 0;
+      const { data: conc, error: ec } = await supabaseAdmin.rpc("asaas_conciliacao_automatica" as never, {
+        _actor: context.userId, _executar: true,
+      } as never);
+      if (!ec && conc) ({ vinculadas, ambiguas, baixas } = conc as { vinculadas: number; ambiguas: number; baixas: number });
+      return { paginas, recebidas, inseridas, atualizadas, vinculadas, ambiguas, baixas, conciliacaoErro: ec?.message ?? null };
     } catch (e) {
       const msg = (e as Error).message.replace(/\$aact_[A-Za-z0-9_]+/g, "[oculto]").slice(0, 300);
       await supabaseAdmin

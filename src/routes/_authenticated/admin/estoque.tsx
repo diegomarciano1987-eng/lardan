@@ -550,7 +550,7 @@ function EstoquePage() {
                 : "rounded-[10px] border border-line px-4 py-2 text-sm font-semibold text-ledger-muted hover:bg-surface-muted"
             }
           >
-            {v === "saldos" ? "Saldos" : v === "movimentos" ? "Movimentações" : v === "leitor" ? "Leitor de entrada" : "Reservas"}
+            {v === "saldos" ? "Saldos" : v === "movimentos" ? "Movimentações" : v === "leitor" ? "Bipar (entrada / transferência)" : "Reservas"}
           </button>
         ))}
       </div>

@@ -11734,6 +11734,10 @@ export type Database = {
         }[]
       }
       cob_devedor: { Args: { _party: string }; Returns: Json }
+      cob_fiado_importar: {
+        Args: { _linhas: Json; _lote: string }
+        Returns: Json
+      }
       cob_mover_etapa: {
         Args: { _etapa: string; _party: string; _responsavel?: string }
         Returns: undefined

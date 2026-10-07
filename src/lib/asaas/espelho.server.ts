@@ -53,12 +53,31 @@ export async function executarSyncAsaas(p: { actor: string; de: string; ate: str
       .from("asaas_charge_sync_runs" as never)
       .update({ status: "concluida", paginas, recebidas, inseridas, atualizadas, concluido_em: new Date().toISOString() } as never)
       .eq("id", runId as never);
+    // clientes do Asaas que ainda não estão no espelho (necessários para achar a pessoa pelo CPF)
+    let clientesNovos = 0;
+    try {
+      const { data: ch } = await supabaseAdmin.from("asaas_charges" as never).select("customer_external_id")
+        .eq("account_id", CONTA_PRODUCAO as never).not("customer_external_id", "is", null).limit(20000);
+      const { data: cu } = await supabaseAdmin.from("asaas_customers" as never).select("external_id")
+        .eq("account_id", CONTA_PRODUCAO as never).limit(20000);
+      const tem = new Set(((cu ?? []) as { external_id: string }[]).map((x) => x.external_id));
+      const faltam = [...new Set(((ch ?? []) as { customer_external_id: string }[]).map((x) => x.customer_external_id))].filter((x) => !tem.has(x)).slice(0, 300);
+      for (const id of faltam) {
+        const r = await fetch(`https://api.asaas.com/v3/customers/${encodeURIComponent(id)}`, { headers: { access_token: chave, "User-Agent": "lardan-espelho" } });
+        if (!r.ok) continue;
+        const c = (await r.json()) as Record<string, unknown>;
+        const { error } = await supabaseAdmin.from("asaas_customers" as never).upsert({
+          account_id: CONTA_PRODUCAO, external_id: id, name: c["name"] ?? null, doc: c["cpfCnpj"] ?? null, email: c["email"] ?? null, raw: c,
+        } as never, { onConflict: "account_id,external_id" });
+        if (!error) clientesNovos++;
+      }
+    } catch { /* segue: conciliação usa o que já existe */ }
     let vinculadas = 0, ambiguas = 0, baixas = 0;
     const { data: conc, error: ec } = await supabaseAdmin.rpc("asaas_conciliacao_automatica" as never, {
       _actor: p.actor, _executar: true,
     } as never);
     if (!ec && conc) ({ vinculadas, ambiguas, baixas } = conc as { vinculadas: number; ambiguas: number; baixas: number });
-    return { paginas, recebidas, inseridas, atualizadas, vinculadas, ambiguas, baixas, conciliacaoErro: ec?.message ?? null };
+    return { paginas, recebidas, inseridas, atualizadas, clientesNovos, vinculadas, ambiguas, baixas, conciliacaoErro: ec?.message ?? null };
   } catch (e) {
     const msg = (e as Error).message.replace(/\$aact_[A-Za-z0-9_]+/g, "[oculto]").slice(0, 300);
     await supabaseAdmin

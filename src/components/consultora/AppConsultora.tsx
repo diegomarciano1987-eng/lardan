@@ -1,3 +1,4 @@
+import { PagamentoLardan } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

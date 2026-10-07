@@ -161,6 +161,7 @@ function Lista({ lista, hoje }: { lista: Devedor[]; hoje: string }) {
           ))}
         </tbody>
       </table>
+      {lista.length > 300 && <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground">Mostrando as 300 maiores de {lista.length}. Use a busca, a praça ou o representante para afunilar.</p>}
     </div>
   );
 }

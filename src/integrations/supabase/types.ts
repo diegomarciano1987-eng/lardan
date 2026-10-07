@@ -3160,6 +3160,45 @@ export type Database = {
           },
         ]
       }
+      consultora_cobranca_config: {
+        Row: {
+          ator_user_id: string
+          business_entity_id: string
+          financial_account_id: string
+          id: boolean
+          updated_at: string
+        }
+        Insert: {
+          ator_user_id: string
+          business_entity_id: string
+          financial_account_id: string
+          id?: boolean
+          updated_at?: string
+        }
+        Update: {
+          ator_user_id?: string
+          business_entity_id?: string
+          financial_account_id?: string
+          id?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultora_cobranca_config_business_entity_id_fkey"
+            columns: ["business_entity_id"]
+            isOneToOne: false
+            referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_cobranca_config_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_points: {
         Row: {
           created_at: string
@@ -10189,6 +10228,15 @@ export type Database = {
           idempotency_key: string | null
           items_count: number
           offer_valid_until: string | null
+          pay_charge_id: string | null
+          pay_doc_masked: string | null
+          pay_due_date: string | null
+          pay_installment_id: string | null
+          pay_method: string | null
+          pay_paid_at: string | null
+          pay_party_id: string | null
+          pay_title_id: string | null
+          pay_url: string | null
           payment_status: Database["public"]["Enums"]["sales_payment_status"]
           reserve_expires_at: string | null
           status: Database["public"]["Enums"]["sales_order_status"]
@@ -10214,6 +10262,15 @@ export type Database = {
           idempotency_key?: string | null
           items_count?: number
           offer_valid_until?: string | null
+          pay_charge_id?: string | null
+          pay_doc_masked?: string | null
+          pay_due_date?: string | null
+          pay_installment_id?: string | null
+          pay_method?: string | null
+          pay_paid_at?: string | null
+          pay_party_id?: string | null
+          pay_title_id?: string | null
+          pay_url?: string | null
           payment_status?: Database["public"]["Enums"]["sales_payment_status"]
           reserve_expires_at?: string | null
           status?: Database["public"]["Enums"]["sales_order_status"]
@@ -10239,6 +10296,15 @@ export type Database = {
           idempotency_key?: string | null
           items_count?: number
           offer_valid_until?: string | null
+          pay_charge_id?: string | null
+          pay_doc_masked?: string | null
+          pay_due_date?: string | null
+          pay_installment_id?: string | null
+          pay_method?: string | null
+          pay_paid_at?: string | null
+          pay_party_id?: string | null
+          pay_title_id?: string | null
+          pay_url?: string | null
           payment_status?: Database["public"]["Enums"]["sales_payment_status"]
           reserve_expires_at?: string | null
           status?: Database["public"]["Enums"]["sales_order_status"]
@@ -10280,6 +10346,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "sales_orders_pay_installment_id_fkey"
+            columns: ["pay_installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_pay_party_id_fkey"
+            columns: ["pay_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_pay_party_id_fkey"
+            columns: ["pay_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "sales_orders_pay_title_id_fkey"
+            columns: ["pay_title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -11819,8 +11913,21 @@ export type Database = {
         }[]
       }
       consultora_acesso_situacao: { Args: { _party: string }; Returns: Json }
+      consultora_asaas_preparar: {
+        Args: { _actor: string; _payload: Json }
+        Returns: Json
+      }
       consultora_ativar: { Args: { _party: string }; Returns: Json }
       consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }
+      consultora_pagamento_registrar: {
+        Args: { _charge: string; _order: string; _url: string }
+        Returns: undefined
+      }
+      consultora_pagamento_situacao: { Args: { _order: string }; Returns: Json }
+      consultora_pagamento_titulo: {
+        Args: { _doc: string; _forma: string; _order: string; _venc: string }
+        Returns: Json
+      }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string

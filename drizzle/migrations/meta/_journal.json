@@ -253,6 +253,13 @@
       "when": 1791401623879,
       "tag": "0035_cobranca_vinculo_asaas_kpis_regua",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1791406682598,
+      "tag": "0036_consultora_pedido_pagamento_asaas",
+      "breakpoints": true
     }
   ]
 }

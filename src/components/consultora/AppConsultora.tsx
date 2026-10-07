@@ -1,3 +1,4 @@
+import { PagamentoLardan } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -632,7 +633,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
   const [qtd, setQtd] = React.useState<Record<string, number>>({});
   const [busca, setBusca] = React.useState("");
   const [chave] = React.useState(chaveIdempotencia);
-  const [resultado, setResultado] = React.useState<{ codigo: string; total_cents: number } | null>(null);
+  const [resultado, setResultado] = React.useState<{ order_id: string; codigo: string; total_cents: number } | null>(null);
   const clientes = useQuery({ queryKey: ["consultora", "clientes"], queryFn: listarClientes });
   const pecas = useQuery({ queryKey: ["consultora", "pecas"], queryFn: pecasDisponiveis });
   const cl = clientes.data?.find((c) => c.id === cliente);
@@ -766,6 +767,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
             <p className="mt-1 text-[1.05rem]">{cl?.nome} · {brl(resultado.total_cents)}</p>
             <p className="mt-2 text-[0.98rem] text-muted-foreground">Situação: em atendimento. As peças não foram reservadas.</p>
           </div>
+          {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} />}
           {cl && linkWhats(cl.telefone) && (
             <a className="btn-app-principal w-full" target="_blank" rel="noreferrer"
               href={linkWhats(cl.telefone, `Olá, ${cl.nome.split(" ")[0]}! Anotei seu pedido ${resultado.codigo}:\n${escolhidas.map((p) => `• ${qtd[k(p)]}x ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents * (qtd[k(p)] ?? 0))}`).join("\n")}\nTotal: ${brl(resultado.total_cents)}`)!}>

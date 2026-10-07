@@ -232,6 +232,20 @@
       "when": 1791397956959,
       "tag": "0032_cartao_dre_pendentes",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1791400737309,
+      "tag": "0033_cobranca_fiado_pracas_cockpit",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1791400878775,
+      "tag": "0034_cob_fiado_importar_rpc",
+      "breakpoints": true
     }
   ]
 }

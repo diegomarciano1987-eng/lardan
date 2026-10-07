@@ -17,6 +17,8 @@ export interface Devedor {
   proxima_acao: string | null; proxima_acao_titulo: string | null;
   promessa_status: string | null; promessa_data: string | null;
   cidade: string | null; uf: string | null; pausa_ate: string | null;
+  parcelas_abertas: number; praca_id: string | null; praca_codigo: number | null; praca_nome: string | null;
+  representante_id: string | null; representante_nome: string | null; codigo_legado: string | null; tem_fiado: boolean;
 }
 
 // RPCs novas ainda podem não constar nos tipos gerados em todos os ambientes
@@ -29,7 +31,17 @@ async function call<T>(fn: string, args?: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-export const carteira = () => call<Devedor[]>("cob_carteira");
+export async function carteira(): Promise<Devedor[]> {
+  // A API devolve no máximo 1000 linhas por vez: busca a carteira inteira em páginas
+  const todas: Devedor[] = [];
+  for (let de = 0; ; de += 1000) {
+    const { data, error } = await (supabase.rpc as unknown as (f: string) => { range: (a: number, b: number) => Promise<{ data: unknown; error: { message: string } | null }> })("cob_carteira2").range(de, de + 999);
+    if (error) throw new Error(error.message);
+    const pg = (data ?? []) as Devedor[];
+    todas.push(...pg);
+    if (pg.length < 1000) return todas;
+  }
+}
 export const devedor = (party: string) => call<DevedorFicha>("cob_devedor", { _party: party });
 export const registrar = (a: { party: string; tipo: string; resultado?: string | null; obs?: string; parcelas?: string[] }) =>
   call<string>("cob_registrar", { _party: a.party, _tipo: a.tipo, _resultado: a.resultado ?? null, _obs: a.obs ?? null, _parcelas: a.parcelas ?? [] });
@@ -65,3 +77,15 @@ export const ROTULO_TIPO: Record<string, string> = {
 export const ROTULO_PROMESSA: Record<string, string> = {
   vigente: "Vigente", cumprida: "Cumprida", parcial: "Parcialmente cumprida", descumprida: "Descumprida", cancelada: "Cancelada",
 };
+
+export interface CockpitFinanceiro {
+  resumo: { vencido_cents: number; a_vencer_cents: number; parcelas_abertas: number; maior_atraso: number; recebido_cents: number; comissao_cents: number;
+    praca: { codigo: number; nome: string } | null; representante: string | null; codigo_legado: string | null; etapa_cobranca: string | null };
+  parcelas: (Parcela & { origem: string | null; descricao: string })[];
+  fiado: { linha: number; lote: string; data_cobranca: string | null; vencimento: string; parcela: number; valor_cents: number; situacao_titulo: string | null; title_id: string; importado_em: string }[];
+  recebimentos: { data: string; valor_cents: number; estorno: boolean; referencia: string | null; titulo: string | null }[];
+  comissoes: { id: string; data: string; indicada: string | null; venda_cents: number; percentual: number; comissao_cents: number; status: string }[];
+  maletas: { id: string; ciclo: number; status: string; valor_cents: number | null; pecas: number | null; recebida: string | null; fechada: string | null }[];
+  promessas: { valor_cents: number; data: string; status: string }[];
+}
+export const cockpitFinanceiro = (party: string) => call<CockpitFinanceiro>("consultora_cockpit_financeiro", { _party: party });

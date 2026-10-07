@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, MessageCircle, Phone } from "lucide-react";
+import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import {
   devedor, registrar, moverEtapa, criarPromessa, cancelarPromessa, criarTarefa, concluirTarefa,
   brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, ROTULO_TIPO, ROTULO_PROMESSA, type Etapa,
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/admin/cobranca_/$id")({
   component: Cockpit,
 });
 
-type Aba = "resumo" | "titulos" | "linha" | "promessas" | "agenda" | "dados";
+type Aba = "resumo" | "financeiro" | "titulos" | "linha" | "promessas" | "agenda" | "dados";
 
 function Cockpit() {
   const { id } = Route.useParams();
@@ -123,11 +124,12 @@ function Cockpit() {
       )}
 
       <nav className="flex gap-1 border-b border-border">
-        {([["resumo", "Resumo"], ["titulos", "Títulos e parcelas"], ["linha", "Linha do tempo"], ["promessas", "Negociações e promessas"], ["agenda", "Agenda"], ["dados", "Dados cadastrais"]] as const).map(([k, r]) => (
+        {([["resumo", "Resumo"], ["financeiro", "Financeiro completo"], ["titulos", "Títulos e parcelas"], ["linha", "Linha do tempo"], ["promessas", "Negociações e promessas"], ["agenda", "Agenda"], ["dados", "Dados cadastrais"]] as const).map(([k, r]) => (
           <button key={k} onClick={() => setAba(k)} className={`border-b-2 px-4 py-2 text-sm ${aba === k ? "border-primary text-foreground" : "border-transparent text-muted-foreground"}`}>{r}</button>
         ))}
       </nav>
 
+      {aba === "financeiro" && <CockpitFinanceiroConsultora partyId={id} />}
       {aba === "resumo" && (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Card r="Total em aberto" v={brl(vencido + aVencer)} />

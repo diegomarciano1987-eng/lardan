@@ -2293,6 +2293,103 @@ export type Database = {
           },
         ]
       }
+      cob_fiado_linhas: {
+        Row: {
+          created_at: string
+          data_cobranca: string | null
+          id: string
+          linha: number
+          lote: string
+          motivo: string | null
+          parcela: number | null
+          party_id: string | null
+          payload: Json
+          praca_id: string | null
+          representante_party_id: string | null
+          situacao: string
+          title_id: string | null
+          valor_cents: number
+          vencimento: string
+        }
+        Insert: {
+          created_at?: string
+          data_cobranca?: string | null
+          id?: string
+          linha: number
+          lote: string
+          motivo?: string | null
+          parcela?: number | null
+          party_id?: string | null
+          payload: Json
+          praca_id?: string | null
+          representante_party_id?: string | null
+          situacao: string
+          title_id?: string | null
+          valor_cents: number
+          vencimento: string
+        }
+        Update: {
+          created_at?: string
+          data_cobranca?: string | null
+          id?: string
+          linha?: number
+          lote?: string
+          motivo?: string | null
+          parcela?: number | null
+          party_id?: string | null
+          payload?: Json
+          praca_id?: string | null
+          representante_party_id?: string | null
+          situacao?: string
+          title_id?: string | null
+          valor_cents?: number
+          vencimento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_fiado_linhas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_fiado_linhas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "cob_fiado_linhas_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_fiado_linhas_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_fiado_linhas_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "cob_fiado_linhas_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cob_interacoes: {
         Row: {
           autor_id: string
@@ -2350,6 +2447,30 @@ export type Database = {
             referencedColumns: ["party_id"]
           },
         ]
+      }
+      cob_pracas: {
+        Row: {
+          ativo: boolean
+          codigo: number
+          created_at: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: number
+          created_at?: string
+          id?: string
+          nome: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: number
+          created_at?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
       }
       cob_promessas: {
         Row: {
@@ -2843,6 +2964,7 @@ export type Database = {
           pix_holder_doc: string | null
           pix_key: string | null
           pix_key_type: string | null
+          praca_id: string | null
           referral_code: string | null
           region: string | null
           representative_party_id: string | null
@@ -2873,6 +2995,7 @@ export type Database = {
           pix_holder_doc?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
+          praca_id?: string | null
           referral_code?: string | null
           region?: string | null
           representative_party_id?: string | null
@@ -2903,6 +3026,7 @@ export type Database = {
           pix_holder_doc?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
+          praca_id?: string | null
           referral_code?: string | null
           region?: string | null
           representative_party_id?: string | null
@@ -2928,6 +3052,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "cob_pracas"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "consultant_profiles_representative_party_id_fkey"
@@ -8005,6 +8136,45 @@ export type Database = {
           },
         ]
       }
+      party_codigos_legados: {
+        Row: {
+          codigo: string
+          created_at: string
+          id: string
+          party_id: string
+          sistema: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          id?: string
+          party_id: string
+          sistema: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          id?: string
+          party_id?: string
+          sistema?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_codigos_legados_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_codigos_legados_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       party_links: {
         Row: {
           created_at: string
@@ -11533,7 +11703,41 @@ export type Database = {
           vencido_cents: number
         }[]
       }
+      cob_carteira2: {
+        Args: never
+        Returns: {
+          a_vencer_cents: number
+          cidade: string
+          codigo_legado: string
+          documento: string
+          etapa: string
+          maior_atraso: number
+          nome: string
+          parcelas_abertas: number
+          parcelas_vencidas: number
+          party_id: string
+          pausa_ate: string
+          praca_codigo: number
+          praca_id: string
+          praca_nome: string
+          promessa_data: string
+          promessa_status: string
+          proxima_acao: string
+          proxima_acao_titulo: string
+          representante_id: string
+          representante_nome: string
+          responsavel_id: string
+          responsavel_nome: string
+          tem_fiado: boolean
+          uf: string
+          vencido_cents: number
+        }[]
+      }
       cob_devedor: { Args: { _party: string }; Returns: Json }
+      cob_fiado_importar: {
+        Args: { _linhas: Json; _lote: string }
+        Returns: Json
+      }
       cob_mover_etapa: {
         Args: { _etapa: string; _party: string; _responsavel?: string }
         Returns: undefined
@@ -11611,6 +11815,7 @@ export type Database = {
       }
       consultora_acesso_situacao: { Args: { _party: string }; Returns: Json }
       consultora_ativar: { Args: { _party: string }; Returns: Json }
+      consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string

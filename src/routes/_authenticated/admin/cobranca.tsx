@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
+import { SmartSelect } from "@/components/premium/SmartSelect";
 import { carteira, moverEtapa, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
 
 const busca = z.object({
@@ -11,6 +12,8 @@ const busca = z.object({
   f: z.string().catch(""),
   etapa: z.string().catch(""),
   faixa: z.string().catch(""),
+  praca: z.string().catch(""),
+  rep: z.string().catch(""),
 });
 
 export const Route = createFileRoute("/_authenticated/admin/cobranca")({
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/admin/cobranca")({
 });
 
 const FAIXAS: Record<string, [number, number, string]> = {
-  "1-15": [1, 15, "1 a 15 dias"], "16-30": [16, 30, "16 a 30 dias"], "31-90": [31, 90, "31 a 90 dias"], "91+": [91, 99999, "Mais de 90 dias"],
+  "1-15": [1, 15, "1 a 15 dias"], "16-30": [16, 30, "16 a 30 dias"], "31-90": [31, 90, "31 a 90 dias"], "91+": [91, 99999, "Mais de 90 dias"], "av": [0, 0, "Só a vencer"],
 };
 
 function Cobranca() {
@@ -32,6 +35,8 @@ function Cobranca() {
   const hoje = hojeSP();
   const todos = q.data ?? [];
 
+  const pracas = [...new Map(todos.filter((d) => d.praca_id).map((d) => [d.praca_id!, `${d.praca_codigo} · ${d.praca_nome}`])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  const reps = [...new Map(todos.filter((d) => d.representante_id).map((d) => [d.representante_id!, d.representante_nome ?? ""])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
   const kpi = {
     vencido: todos.reduce((a, d) => a + Number(d.vencido_cents), 0),
     devedores: todos.length,
@@ -48,7 +53,8 @@ function Cobranca() {
   };
   const termo = s.q.trim().toLowerCase();
   const lista = todos.filter((d) =>
-    (!termo || [d.nome, d.documento, d.cidade, d.uf, d.responsavel_nome].some((x) => x?.toLowerCase().includes(termo))) &&
+    (!termo || termo.split(/\s+/).every((p) => [d.nome, d.documento, (d.documento ?? "").replace(/\D/g, ""), d.cidade, d.uf, d.responsavel_nome, d.praca_nome, d.representante_nome, d.codigo_legado].some((x) => x?.toLowerCase().includes(p)))) &&
+    (!s.praca || d.praca_id === s.praca) && (!s.rep || (s.rep === "-" ? !d.representante_id : d.representante_id === s.rep)) &&
     (!s.f || (filtroKpi[s.f]?.(d) ?? true)) &&
     (!s.etapa || d.etapa === s.etapa) &&
     (!s.faixa || !FAIXAS[s.faixa] || (d.maior_atraso >= FAIXAS[s.faixa]![0] && d.maior_atraso <= FAIXAS[s.faixa]![1])),
@@ -95,8 +101,12 @@ function Cobranca() {
 
       {s.v !== "bi" && (
         <div className="flex flex-wrap gap-2">
-          <input value={s.q} onChange={(e) => set({ q: e.target.value })} placeholder="Buscar nome, documento, cidade, responsável…"
+          <input value={s.q} onChange={(e) => set({ q: e.target.value })} placeholder="Buscar nome, CPF, código do cliente, cidade, praça, representante…"
             className="h-10 min-w-72 flex-1 rounded-lg border border-border bg-background px-3 text-sm" />
+          <SmartSelect className="w-64" value={s.praca} onChange={(praca) => set({ praca })} placeholder="Todas as praças" searchPlaceholder="Buscar praça…"
+            options={[{ value: "", label: "Todas as praças" }, ...pracas.map(([value, label]) => ({ value, label }))]} />
+          <SmartSelect className="w-64" value={s.rep} onChange={(rep) => set({ rep })} placeholder="Todos os representantes" searchPlaceholder="Buscar representante…"
+            options={[{ value: "", label: "Todos os representantes" }, ...reps.map(([value, label]) => ({ value, label })), { value: "-", label: "Sem representante" }]} />
           <Chips valor={s.etapa} opcoes={ETAPAS.map((e) => [e.id, e.rotulo])} onChange={(etapa) => set({ etapa })} />
           <Chips valor={s.faixa} opcoes={Object.entries(FAIXAS).map(([k, v]) => [k, v[2]])} onChange={(faixa) => set({ faixa })} />
         </div>
@@ -131,26 +141,27 @@ function Lista({ lista, hoje }: { lista: Devedor[]; hoje: string }) {
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <table className="w-full text-sm">
         <thead className="bg-muted/40 text-left text-xs text-muted-foreground">
-          <tr>{["Devedora", "Etapa", "Vencido", "A vencer", "Parcelas", "Maior atraso", "Responsável", "Próxima ação"].map((h) => <th key={h} className="px-4 py-3 font-medium">{h}</th>)}</tr>
+          <tr>{["Devedora", "Praça / representante", "Etapa", "Vencido", "A vencer", "Parcelas", "Maior atraso", "Próxima ação"].map((h) => <th key={h} className="px-4 py-3 font-medium">{h}</th>)}</tr>
         </thead>
         <tbody>
-          {lista.map((d) => (
+          {lista.slice(0, 300).map((d) => (
             <tr key={d.party_id} className="border-t border-border hover:bg-muted/30">
               <td className="px-4 py-3">
                 <Link to="/admin/cobranca/$id" params={{ id: d.party_id }} className="font-medium hover:underline">{d.nome}</Link>
-                <p className="text-xs text-muted-foreground">{[d.cidade, d.uf].filter(Boolean).join("/") || "Não informado"}</p>
+                <p className="text-xs text-muted-foreground">{d.codigo_legado ? `Cód. ${d.codigo_legado} · ` : ""}{[d.cidade, d.uf].filter(Boolean).join("/") || "Não informado"}</p>
               </td>
+              <td className="px-4 py-3 text-xs"><p>{d.praca_nome ?? "Sem praça"}</p><p className="text-muted-foreground">{d.representante_nome ?? "Sem representante"}</p></td>
               <td className="px-4 py-3">{rotuloEtapa(d.etapa)}{d.promessa_status === "descumprida" && <span className="ml-2 rounded bg-destructive/10 px-1.5 py-0.5 text-xs text-destructive">Promessa descumprida</span>}</td>
               <td className="px-4 py-3 font-mono tabular-nums">{brl(Number(d.vencido_cents))}</td>
               <td className="px-4 py-3 font-mono tabular-nums text-muted-foreground">{brl(Number(d.a_vencer_cents))}</td>
-              <td className="px-4 py-3">{d.parcelas_vencidas}</td>
-              <td className="px-4 py-3">{d.maior_atraso} dias</td>
-              <td className="px-4 py-3">{d.responsavel_nome ?? "Não informado"}</td>
+              <td className="px-4 py-3">{d.parcelas_vencidas}/{d.parcelas_abertas}</td>
+              <td className="px-4 py-3">{d.maior_atraso ? `${d.maior_atraso} dias` : "A vencer"}</td>
               <td className={`px-4 py-3 ${d.proxima_acao && d.proxima_acao < hoje ? "text-destructive" : ""}`}>{d.proxima_acao ? `${dataBR(d.proxima_acao)} · ${d.proxima_acao_titulo}` : "—"}</td>
             </tr>
           ))}
         </tbody>
       </table>
+      {lista.length > 300 && <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground">Mostrando as 300 maiores de {lista.length}. Use a busca, a praça ou o representante para afunilar.</p>}
     </div>
   );
 }
@@ -234,7 +245,8 @@ function BI({ todos }: { todos: Devedor[] }) {
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <Bloco t="Por etapa" dados={porChave((d) => rotuloEtapa(d.etapa))} />
-        <Bloco t="Por responsável" dados={porChave((d) => d.responsavel_nome ?? "")} />
+        <Bloco t="Por representante" dados={porChave((d) => d.representante_nome ?? "")} />
+        <Bloco t="Por praça" dados={porChave((d) => d.praca_nome ?? "")} />
         <Bloco t="Por UF" dados={porChave((d) => d.uf ?? "")} />
       </div>
     </div>

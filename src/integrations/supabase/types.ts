@@ -3956,6 +3956,36 @@ export type Database = {
           },
         ]
       }
+      fin_expurgo_backup: {
+        Row: {
+          created_at: string
+          id: string
+          lote: string
+          motivo: string
+          registro: Json
+          registro_id: string
+          tabela: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lote: string
+          motivo: string
+          registro: Json
+          registro_id: string
+          tabela: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lote?: string
+          motivo?: string
+          registro?: Json
+          registro_id?: string
+          tabela?: string
+        }
+        Relationships: []
+      }
       fin_orcamento: {
         Row: {
           chart_id: string | null
@@ -12239,6 +12269,14 @@ export type Database = {
       }
       fin_encargos_contas: { Args: never; Returns: Json }
       fin_encargos_contas_set: { Args: { _payload: Json }; Returns: Json }
+      fin_expurgo_movimentos: {
+        Args: { _ids: string[]; _lote: string; _motivo: string }
+        Returns: Json
+      }
+      fin_expurgo_transferencias: {
+        Args: { _ids: string[]; _lote: string; _motivo: string }
+        Returns: Json
+      }
       fin_fatia_lancar: { Args: { _payload: Json }; Returns: string }
       fin_fatias_conta: { Args: { _account: string }; Returns: Json }
       fin_fingerprint: { Args: { _intent: Json }; Returns: string }
@@ -12423,6 +12461,10 @@ export type Database = {
       fin_transfer_reverse: {
         Args: { _motivo: string; _transfer: string }
         Returns: string
+      }
+      fin_transferencias_importar: {
+        Args: { _lote: string; _rows: Json }
+        Returns: Json
       }
       fin_transfers_list: { Args: { _ate: string; _de: string }; Returns: Json }
       fin_unaccent_lower: { Args: { _t: string }; Returns: string }

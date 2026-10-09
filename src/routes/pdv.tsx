@@ -245,8 +245,18 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
     } catch (x) { erro(x); } finally { setBusy(false); }
   };
   const nova = () => { setItens([]); setDesc(""); setCli(clienteVazio()); setPags([]); setIdem(crypto.randomUUID()); setFeita(null); };
+  const cancelarVenda = useServerFn(pdvCancelar);
+  // Volta ao carrinho para trocar a forma de pagamento: cancela a venda que ficou
+  // aguardando Pix/link (sem pagamento confirmado) e mantém peças, cliente e pagamentos.
+  const voltar = async () => {
+    if (feita?.status === "aguardando_pix" && feita?.venda) {
+      try { await cancelarVenda({ data: { venda: feita.venda, motivo: "troca da forma de pagamento" } }); }
+      catch (x) { erro(x); return; }
+    }
+    setIdem(crypto.randomUUID()); setFeita(null);
+  };
 
-  if (feita) return <Finalizada v={feita} nova={nova} ok={ok} />;
+  if (feita) return <Finalizada v={feita} nova={nova} ok={ok} voltar={voltar} />;
   return (
     <div className="grid gap-6 p-6 lg:grid-cols-[1fr_420px]">
       <section className="space-y-4">

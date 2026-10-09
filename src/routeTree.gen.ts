@@ -119,8 +119,6 @@ import { Route as AuthenticatedAdminCadastrosPessoasNovoRouteImport } from './ro
 import { Route as AuthenticatedAdminCadastrosProdutosIdRouteImport } from './routes/_authenticated/admin/cadastros/produtos_.$id'
 import { Route as AuthenticatedAdminCadastrosProdutosNovoRouteImport } from './routes/_authenticated/admin/cadastros/produtos_.novo'
 import { Route as AuthenticatedAdminFinanceiroContasIdRouteImport } from './routes/_authenticated/admin/financeiro/contas_.$id'
-import { Route as ApiPublicVitrineIlusPartyVariantRouteImport } from './routes/api/public/vitrine-ilus.$party.$variant'
-import { Route as ApiPublicVitrineIlusPecaVariantRouteImport } from './routes/api/public/vitrine-ilus.peca.$variant'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -731,18 +729,6 @@ const AuthenticatedAdminFinanceiroContasIdRoute =
     path: '/contas/$id',
     getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
   } as any)
-const ApiPublicVitrineIlusPartyVariantRoute =
-  ApiPublicVitrineIlusPartyVariantRouteImport.update({
-    id: '/api/public/vitrine-ilus/$party/$variant',
-    path: '/api/public/vitrine-ilus/$party/$variant',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicVitrineIlusPecaVariantRoute =
-  ApiPublicVitrineIlusPecaVariantRouteImport.update({
-    id: '/api/public/vitrine-ilus/peca/$variant',
-    path: '/api/public/vitrine-ilus/peca/$variant',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -854,8 +840,6 @@ export interface FileRoutesByFullPath {
   '/admin/cadastros/produtos/$id': typeof AuthenticatedAdminCadastrosProdutosIdRoute
   '/admin/cadastros/produtos/novo': typeof AuthenticatedAdminCadastrosProdutosNovoRoute
   '/admin/financeiro/contas/$id': typeof AuthenticatedAdminFinanceiroContasIdRoute
-  '/api/public/vitrine-ilus/$party/$variant': typeof ApiPublicVitrineIlusPartyVariantRoute
-  '/api/public/vitrine-ilus/peca/$variant': typeof ApiPublicVitrineIlusPecaVariantRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -965,8 +949,6 @@ export interface FileRoutesByTo {
   '/admin/cadastros/produtos/$id': typeof AuthenticatedAdminCadastrosProdutosIdRoute
   '/admin/cadastros/produtos/novo': typeof AuthenticatedAdminCadastrosProdutosNovoRoute
   '/admin/financeiro/contas/$id': typeof AuthenticatedAdminFinanceiroContasIdRoute
-  '/api/public/vitrine-ilus/$party/$variant': typeof ApiPublicVitrineIlusPartyVariantRoute
-  '/api/public/vitrine-ilus/peca/$variant': typeof ApiPublicVitrineIlusPecaVariantRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1080,8 +1062,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/cadastros/produtos_/$id': typeof AuthenticatedAdminCadastrosProdutosIdRoute
   '/_authenticated/admin/cadastros/produtos_/novo': typeof AuthenticatedAdminCadastrosProdutosNovoRoute
   '/_authenticated/admin/financeiro/contas_/$id': typeof AuthenticatedAdminFinanceiroContasIdRoute
-  '/api/public/vitrine-ilus/$party/$variant': typeof ApiPublicVitrineIlusPartyVariantRoute
-  '/api/public/vitrine-ilus/peca/$variant': typeof ApiPublicVitrineIlusPecaVariantRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1195,8 +1175,6 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos/$id'
     | '/admin/cadastros/produtos/novo'
     | '/admin/financeiro/contas/$id'
-    | '/api/public/vitrine-ilus/$party/$variant'
-    | '/api/public/vitrine-ilus/peca/$variant'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1306,8 +1284,6 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos/$id'
     | '/admin/cadastros/produtos/novo'
     | '/admin/financeiro/contas/$id'
-    | '/api/public/vitrine-ilus/$party/$variant'
-    | '/api/public/vitrine-ilus/peca/$variant'
   id:
     | '__root__'
     | '/'
@@ -1420,8 +1396,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cadastros/produtos_/$id'
     | '/_authenticated/admin/cadastros/produtos_/novo'
     | '/_authenticated/admin/financeiro/contas_/$id'
-    | '/api/public/vitrine-ilus/$party/$variant'
-    | '/api/public/vitrine-ilus/peca/$variant'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1476,8 +1450,6 @@ export interface RootRouteChildren {
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
-  ApiPublicVitrineIlusPartyVariantRoute: typeof ApiPublicVitrineIlusPartyVariantRoute
-  ApiPublicVitrineIlusPecaVariantRoute: typeof ApiPublicVitrineIlusPecaVariantRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2252,20 +2224,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroContasIdRouteImport
       parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
     }
-    '/api/public/vitrine-ilus/$party/$variant': {
-      id: '/api/public/vitrine-ilus/$party/$variant'
-      path: '/api/public/vitrine-ilus/$party/$variant'
-      fullPath: '/api/public/vitrine-ilus/$party/$variant'
-      preLoaderRoute: typeof ApiPublicVitrineIlusPartyVariantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/vitrine-ilus/peca/$variant': {
-      id: '/api/public/vitrine-ilus/peca/$variant'
-      path: '/api/public/vitrine-ilus/peca/$variant'
-      fullPath: '/api/public/vitrine-ilus/peca/$variant'
-      preLoaderRoute: typeof ApiPublicVitrineIlusPecaVariantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -2508,8 +2466,6 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
-  ApiPublicVitrineIlusPartyVariantRoute: ApiPublicVitrineIlusPartyVariantRoute,
-  ApiPublicVitrineIlusPecaVariantRoute: ApiPublicVitrineIlusPecaVariantRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -30,4 +30,4 @@
 
 - Consultant orders can be charged directly by Lardan via consultora_pagamento_titulo (consultant-owned order, valid CPF) + Asaas official engine signed by consultora_cobranca_config.ator_user_id; paid amount is recorded on sales_orders (pay_*) to offset the kit settlement. Why: charge stays in Lardan's name without giving consultants finance permissions.
 - Asaas sync (manual button + daily pg_cron → /api/public/asaas/sync-matinal, shared executarSyncAsaas) mirrors charges, links charge↔installment only on unique person+cents+due date, then settles RECEIVED. Why: auto-reconcile without guessing, independent of opening a screen.
-- Financial history is never edited; approved removals go only through service_role fin_expurgo_* functions that copy every row to fin_expurgo_backup first and log to audit_logs. Why: deletions stay reversible and auditable.
+- Approved financial removals only via service_role fin_expurgo_* (backup to fin_expurgo_backup + audit_logs). Why: reversible.

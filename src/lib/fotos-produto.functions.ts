@@ -67,7 +67,8 @@ export const capasDasPecas = createServerFn({ method: "POST" })
     const { data: urls } = await supabaseAdmin.storage.from("media").createSignedUrls(caminhos, 3600);
     const porCaminho: Record<string, string> = {};
     (urls ?? []).forEach((u, i) => {
-      if (u.signedUrl) porCaminho[caminhos[i]] = u.signedUrl;
+      const c = caminhos[i];
+      if (c && u.signedUrl) porCaminho[c] = u.signedUrl;
     });
     for (const [p, c] of Object.entries(capa)) if (porCaminho[c]) resultado[p] = porCaminho[c];
     for (const [v, p] of Object.entries(varParaProd)) if (resultado[p]) resultado[v] = resultado[p];

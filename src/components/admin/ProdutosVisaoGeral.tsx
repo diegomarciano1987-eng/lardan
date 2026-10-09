@@ -129,7 +129,7 @@ function ListaRanking({
                 className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition hover:bg-line-soft/60"
               >
                 <span className="num w-5 shrink-0 text-[0.75rem] text-ledger-muted">{idx + 1}</span>
-                    <FotoPeca productId={i.product_id} alt={i.produto} size="xs" />
+                <FotoPeca productId={i.id} alt={i.name} size="xs" />
                 <span className="min-w-0 flex-1 truncate text-[0.875rem] text-ledger-text">{i.name}</span>
                 <span className="num shrink-0 text-[0.875rem] font-semibold text-ledger-text">
                   {metrica(i)}
@@ -262,6 +262,7 @@ export function ProdutosVisaoGeral({
                     className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition hover:bg-line-soft/60"
                   >
                     <span className="num w-5 shrink-0 text-[0.75rem] text-ledger-muted">{idx + 1}</span>
+                    <FotoPeca productId={i.product_id} alt={i.produto} size="xs" />
                     <span className="min-w-0 flex-1 truncate text-[0.875rem] text-ledger-text">
                       {i.produto}
                       {i.sku ? <span className="num text-ledger-muted"> · {i.sku}</span> : null}

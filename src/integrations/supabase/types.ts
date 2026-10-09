@@ -13017,6 +13017,10 @@ export type Database = {
         }
       }
       pdv_gestao: { Args: { _u: string }; Returns: boolean }
+      pdv_links_listar: {
+        Args: { _dias: number; _token_hash: string }
+        Returns: Json
+      }
       pdv_membro_de: {
         Args: { _u: string; _unidade: string }
         Returns: boolean

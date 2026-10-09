@@ -82,6 +82,8 @@ export interface NovaCobranca {
   externalReference: string;
   /** chave de repetição do nosso lado */
   idempotencyKey: string;
+  /** parcelas máximas no cartão (conta Lardan: 3x); só faz sentido em CREDIT_CARD */
+  maxInstallmentCount?: number;
 }
 
 export interface EventoExterno {

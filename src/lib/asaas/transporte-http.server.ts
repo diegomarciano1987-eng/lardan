@@ -312,6 +312,7 @@ export class TransporteHttpAsaas implements TransporteAsaas {
         value: paraReais(n.valueCents),
         dueDate: n.dueDate,
         ...(n.description ? { description: n.description } : {}),
+        ...(n.maxInstallmentCount ? { maxInstallmentCount: n.maxInstallmentCount } : {}),
         externalReference: n.externalReference,
       },
     });

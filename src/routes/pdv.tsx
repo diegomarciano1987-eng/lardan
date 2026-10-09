@@ -342,6 +342,9 @@ function Finalizada({ v, nova, ok, voltar }: { v: any; nova: () => void; ok: () 
       {status === "aguardando_pix" ? (
         <button className={btn} disabled={busy} onClick={gerarPix}>{busy ? (cartao ? "Gerando link…" : "Gerando Pix…") : pix ? (cartao ? "Mostrar link do cartão" : "Mostrar Pix") : (cartao ? "Gerar link de cartão (Asaas)" : "Gerar Pix (Asaas)")}</button>
       ) : status === "concluida" ? <p className="text-lg">Venda concluída.</p> : <p>Situação: {status}</p>}
+      {status === "aguardando_pix" && (
+        <button className={btn2 + " w-full"} onClick={voltar}>Voltar e mudar a forma de pagamento</button>
+      )}
       <Comprovante venda={v.venda} telefone={v.telefone} />
       <button className={btn} onClick={nova}>Nova venda</button>
       {aberto && pix && (

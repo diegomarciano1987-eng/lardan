@@ -252,6 +252,7 @@ function MaletaFicha() {
             <Panel title="Saldos da maleta" flush>
               {d.saldos.map((b) => (
                 <div key={b.variant_id} className="flex flex-wrap items-center gap-4 border-b border-line-soft px-6 py-3 last:border-0">
+                  <FotoPeca variantId={b.variant_id} alt={b.produto} size="md" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-ledger-text">{b.produto}</p>
                     <p className="text-xs text-ledger-muted">{b.variante ?? "—"}</p>

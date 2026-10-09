@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FotoPeca } from "@/components/FotoPeca";
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Minus, ScanBarcode, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -237,7 +238,8 @@ export function MontagemLeitor({
                 <ul className="max-h-[50vh] space-y-1 overflow-auto text-sm">
                   {lista.map(([id, p]) => (
                     <li key={id} className="flex items-center justify-between gap-2">
-                      <span className="truncate">{p.nome}</span>
+                      <FotoPeca variantId={id} alt={p.nome} size="xs" />
+                      <span className="flex-1 truncate">{p.nome}</span>
                       <span className="flex items-center gap-2">
                         <span className="tabular-nums text-ledger-muted">{brl(p.preco * p.qtd)}</span>
                         <strong className="tabular-nums">{p.qtd}</strong>

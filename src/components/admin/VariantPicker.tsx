@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FotoPeca } from "@/components/FotoPeca";
 import { ChevronsUpDown, Search, Check } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { searchVariants } from "@/lib/stock";
@@ -111,6 +112,7 @@ export function VariantPicker({
                 <Check
                   className={cn("mt-0.5 size-4 shrink-0", value?.id === r.id ? "opacity-100" : "opacity-0")}
                 />
+                <FotoPeca variantId={r.id} alt={r.produto} size="sm" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{r.produto}</span>
                   <span className="block truncate text-xs text-muted-foreground">

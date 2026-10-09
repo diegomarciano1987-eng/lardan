@@ -23,6 +23,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
 import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import { listarTransferencias } from "@/lib/financeiro-parcelas";
+import { supabase } from "@/integrations/supabase/client";
 import {
   fetchClassificacoes,
   fetchFinAccounts,
@@ -542,7 +543,26 @@ function TransferenciasOperacoes({ de, ate }: { de: string; ate: string }) {
                   </span>
                 ) : null}
               </span>
-              <span className="font-semibold tabular-nums">{formatBRLFromCents(t.valor_cents)}</span>
+              <span className="flex items-center gap-3">
+                <span className="font-semibold tabular-nums">{formatBRLFromCents(t.valor_cents)}</span>
+                {t.estorno ? (
+                  <span className="rounded-full border border-line px-2 py-0.5 text-xs text-ledger-muted">Estorno</span>
+                ) : (
+                  <button
+                    type="button"
+                    className="rounded-md border border-line px-2 py-1 text-xs text-ledger-text hover:border-champagne"
+                    onClick={async () => {
+                      const motivo = window.prompt("Motivo do estorno (a data será a mesma da transferência original):");
+                      if (!motivo || !motivo.trim()) return;
+                      const { error } = await supabase.rpc("fin_transfer_reverse", { _transfer: t.id, _motivo: motivo.trim() });
+                      if (error) { window.alert(error.message); return; }
+                      void q.refetch();
+                    }}
+                  >
+                    Estornar
+                  </button>
+                )}
+              </span>
             </div>
             <p className="mt-1 text-xs text-ledger-muted">
               Movimentações para conciliação:{" "}

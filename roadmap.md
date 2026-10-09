@@ -1,15 +1,6 @@
-# Roadmap — Cobrança + PDV LOJA ETINERANTE
-
-- [x] Etapa 1a: banco da Cobrança (casos, interações, promessas, tarefas, régua) e telas Lista/Kanban/Agenda/BI + ficha
-- [ ] Etapa 1b: agendar régua diária (cron), recuperado/prazo médio/taxa no BI, testes isolados
-- [x] Etapa 2a: tela de configuração PDV Loja (unidade, equipe, comissão, metas, maquininhas, terminais, preço, estoque, histórico)
-- [x] Etapa 2b: unidade PDV, /pdv/login, papéis por unidade, caixa
-- [x] Etapa 3: frente de venda com leitor, cliente rápido, reserva
-- [x] Etapa 4: Pix Asaas real, cartão, dinheiro, misto
-- [x] Etapa 5: vendas, clientes, comissão, comprovante
-- [ ] Etapa 6: testes e prontidão (bateria isolada do PDV ok; falta Pix real em sandbox Asaas com loja configurada)
-- [ ] PDV: comprovante em cupom com logo Lardan, imprimir/PDF
-- [ ] PDV: Pix em janela grande com QR + copia-e-cola; corrigir "Sem permissão para este tipo de título"
-
-- [ ] Consultora: Pix/cartão/receber depois — construído; falta teste real com uma consultora (gera cobrança de verdade no Asaas)
-- [x] Cockpit da pessoa: vincular papéis vendedora interna, consultora, colaboradora na mesma pessoa
+# Roadmap
+- [x] Remover fotos/ilustrações feitas por IA (com backup e auditoria)
+- [ ] Miniatura em todas as listas de produtos
+- [ ] Fotos não aparecem nas miniaturas: investigar e corrigir
+- [ ] Mesa de conciliação: ligar linha do extrato a baixa já lançada (item 6)
+- [ ] Lista de 13 melhorias do financeiro (arquivo do Daniel): avaliar e provar cada item

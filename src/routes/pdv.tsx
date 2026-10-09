@@ -6,8 +6,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { LogOut, Search, Trash2, Printer, MessageCircle, Lock, Wallet, Receipt, Users, ShoppingCart } from "lucide-react";
-import { ClienteForm, Calculadora, Vendas, Clientes, clienteVazio } from "@/components/pdv/PdvExtras";
+import { LogOut, Search, Trash2, Printer, MessageCircle, Lock, Wallet, Receipt, Users, ShoppingCart, Link2 } from "lucide-react";
+import { ClienteForm, Calculadora, Vendas, Clientes, LinksEnviados, clienteVazio } from "@/components/pdv/PdvExtras";
 import { abrirCupom } from "@/components/pdv/cupom";
 import {
   pdvEntrarIniciar, pdvEntrarConfirmar, pdvSair, pdvEstado, pdvOperadora, pdvOperadoraSair, pdvCaixaAbrir, pdvCaixaMov, pdvCaixaFechar,
@@ -94,7 +94,7 @@ function Entrar() {
 function Loja({ e }: { e: any }) {
   const qc = useQueryClient(); const sair = useServerFn(pdvSair); const opSair = useServerFn(pdvOperadoraSair);
   const recarregar = () => qc.invalidateQueries({ queryKey: ["pdv-loja"] });
-  const [tela, setTela] = React.useState<"venda" | "vendas" | "clientes" | "caixa">("venda");
+  const [tela, setTela] = React.useState<"venda" | "vendas" | "clientes" | "caixa" | "links">("venda");
   const [cliPre, setCliPre] = React.useState<ClientePdv | null>(null);
   return (
     <div className="min-h-screen bg-background">
@@ -107,12 +107,13 @@ function Loja({ e }: { e: any }) {
             <button onClick={() => setTela("vendas")} className={tela === "vendas" ? btn : btn2}><Receipt className="mr-1 inline h-4 w-4" />Vendas</button>
             <button onClick={() => setTela("clientes")} className={tela === "clientes" ? btn : btn2}><Users className="mr-1 inline h-4 w-4" />Clientes</button>
             <button onClick={() => setTela("caixa")} className={tela === "caixa" ? btn : btn2}><Wallet className="mr-1 inline h-4 w-4" />Caixa</button>
+            <button onClick={() => setTela("links")} className={tela === "links" ? btn : btn2}><Link2 className="mr-1 inline h-4 w-4" />Links</button>
             <button onClick={async () => { await opSair(); recarregar(); }} className={btn2}><Lock className="mr-1 inline h-4 w-4" />{e.operadora.nome} · trocar</button>
           </>}
           <button onClick={async () => { await sair(); recarregar(); }} className={btn2} title="Desconectar este aparelho"><LogOut className="h-4 w-4" /></button>
         </div>
       </header>
-      {!e.operadora ? <EscolherVendedora e={e} ok={recarregar} /> : !e.caixa ? <AbrirCaixa ok={recarregar} /> : tela === "caixa" ? <Caixa e={e} ok={recarregar} /> : tela === "vendas" ? <Vendas Comprovante={Comprovante} ok={recarregar} /> : tela === "clientes" ? <Clientes vender={(c) => { setCliPre(c); setTela("venda"); }} /> : <Venda e={e} ok={recarregar} pre={cliPre} limparPre={() => setCliPre(null)} />}
+      {!e.operadora ? <EscolherVendedora e={e} ok={recarregar} /> : !e.caixa ? <AbrirCaixa ok={recarregar} /> : tela === "caixa" ? <Caixa e={e} ok={recarregar} /> : tela === "vendas" ? <Vendas Comprovante={Comprovante} ok={recarregar} /> : tela === "clientes" ? <Clientes vender={(c) => { setCliPre(c); setTela("venda"); }} /> : tela === "links" ? <LinksEnviados /> : <Venda e={e} ok={recarregar} pre={cliPre} limparPre={() => setCliPre(null)} />}
     </div>
   );
 }

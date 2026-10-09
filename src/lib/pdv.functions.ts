@@ -173,3 +173,8 @@ export const pdvClientes = createServerFn({ method: "GET" })
 export const pdvVendas = createServerFn({ method: "GET" })
   .inputValidator((d: { dias: number }) => ({ dias: Math.min(Math.max(Math.round(Number(d?.dias) || 1), 1), 365) }))
   .handler(async ({ data }) => rpc<any[]>("pdv_vendas_listar", { _token_hash: await token(), _dias: data.dias }));
+
+/** Histórico de links de pagamento enviados (Pix e link de cartão Asaas) da unidade. */
+export const pdvLinksEnviados = createServerFn({ method: "GET" })
+  .inputValidator((d: { dias?: number }) => ({ dias: Math.min(Math.max(Math.round(Number(d?.dias) || 30), 1), 365) }))
+  .handler(async ({ data }) => rpc<any[]>("pdv_links_listar", { _token_hash: await token(), _dias: data.dias }));

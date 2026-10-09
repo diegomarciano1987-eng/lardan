@@ -8,7 +8,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { maskCepInput, maskPhoneInput } from "@/lib/docs-br";
 import { UFS } from "@/lib/catalog";
 import { consultarCepPublico } from "@/lib/br/lookup.functions";
-import { pdvClienteSalvar, pdvClientes, pdvVendas, pdvCancelar, type ClientePdv } from "@/lib/pdv.functions";
+import { pdvClienteSalvar, pdvClientes, pdvVendas, pdvCancelar, pdvLinksEnviados, type ClientePdv } from "@/lib/pdv.functions";
 
 export const brl = (c: number) => (Number(c || 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const inp = "h-12 w-full rounded-lg border border-border bg-background px-3 text-base";
@@ -175,6 +175,45 @@ export function Clientes({ vender }: { vender: (c: ClientePdv) => void }) {
             <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-sm">
               <span className="flex items-center gap-1 text-muted-foreground"><ShoppingBag className="h-4 w-4" />{c.compras} compra(s) · {brl(c.total)}</span>
               <button className="text-primary underline" onClick={() => vender({ party_id: c.party_id, nome: c.nome, doc: "", telefone: c.whatsapp ? dig(String(c.whatsapp)).replace(/^55(?=\d{10,11}$)/, "") : "", instagram: c.instagram ?? "", email: c.email ?? "" })}>Vender para ela</button>
+            </div>
+          </article>))}</div>}
+    </div>
+  );
+}
+
+/** Histórico de links de pagamento enviados (Pix e link de cartão Asaas) desta loja. */
+export function LinksEnviados() {
+  const f = useServerFn(pdvLinksEnviados);
+  const [dias, setDias] = React.useState(30);
+  const r = useQuery({ queryKey: ["pdv-links", dias], queryFn: () => f({ data: { dias } }) });
+  const lista: any[] = r.data ?? [];
+  const copiar = async (url: string) => { try { await navigator.clipboard.writeText(url); toast.success("Link copiado."); } catch { toast.error("Não consegui copiar."); } };
+  const whats = (l: any) => {
+    const tel = dig(String(l.telefone ?? "")).replace(/^55(?=\d{10,11}$)/, "");
+    const msg = encodeURIComponent(`Olá${l.cliente ? ` ${String(l.cliente).split(" ")[0]}` : ""}! Aqui está o link de pagamento da sua compra na ${"Lardan"}: ${l.url}`);
+    window.open(`https://wa.me/${tel ? `55${tel}` : ""}?text=${msg}`, "_blank", "noopener");
+  };
+  return (
+    <div className="mx-auto max-w-4xl space-y-4 p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div><h2 className="font-display text-3xl">Links enviados</h2><p className="text-sm text-muted-foreground">{lista.length} link(s) nos últimos {dias} dias</p></div>
+        <div className="flex gap-2">{[7, 30, 90].map((d) => <button key={d} onClick={() => setDias(d)} className={dias === d ? btn : btn2}>{d} dias</button>)}</div>
+      </div>
+      {r.isLoading ? <p className="text-muted-foreground">Carregando…</p> : r.isError ? <p className="text-destructive">Não foi possível carregar os links.</p> : lista.length === 0 ? <p className="rounded-xl border border-border p-10 text-center text-muted-foreground">Nenhum link de pagamento gerado neste período.</p> :
+        <div className="space-y-3">{lista.map((l: any) => (
+          <article key={l.id} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${l.forma === "cartao" ? "bg-primary/10 text-primary" : "bg-emerald-500/10 text-emerald-600"}`}>{l.forma === "cartao" ? "Cartão (link)" : "Pix"}</span>
+                <div><p className="font-medium">Venda PDV-{l.codigo} · {brl(l.total)}</p>
+                  <p className="text-xs text-muted-foreground">{new Date(l.hora).toLocaleString("pt-BR")} · {l.vendedora}{l.cliente ? ` · ${l.cliente}` : ""}</p></div>
+              </div>
+              <span className={`text-xs font-semibold ${l.status === "cancelada" ? "text-destructive" : l.pago ? "text-emerald-600" : "text-amber-600"}`}>{l.status === "cancelada" ? "Cancelada" : l.pago ? "Pago" : "Aguardando pagamento"}</span>
+            </div>
+            <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+              <button className={btn2} onClick={() => copiar(l.url)}>Copiar link</button>
+              <a className={btn2 + " inline-flex items-center"} href={l.url} target="_blank" rel="noopener noreferrer">Abrir link</a>
+              <button className={btn2} onClick={() => whats(l)}>Enviar no WhatsApp</button>
             </div>
           </article>))}</div>}
     </div>

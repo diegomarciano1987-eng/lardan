@@ -12850,6 +12850,7 @@ export type Database = {
       mask_doc: { Args: { _doc: string }; Returns: string }
       mask_reference: { Args: { v: string }; Returns: string }
       master_exists: { Args: never; Returns: boolean }
+      media_publica_ok: { Args: { _media: string }; Returns: boolean }
       minhas_indicacoes: { Args: never; Returns: Json }
       my_capabilities: {
         Args: never

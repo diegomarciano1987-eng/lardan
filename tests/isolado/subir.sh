@@ -69,7 +69,7 @@ for f in "$RAIZ"/drizzle/migrations/*.sql; do
   if ls "$RAIZ"/supabase/migrations/*_"$sufixo" >/dev/null 2>&1; then continue; fi
   if grep -qx "$(basename "$f")" "$RAIZ/tests/isolado/pular.txt"; then continue; fi
   # pg_cron não existe no Postgres local: o prelúdio tem um esquema "cron" de mentira (só registra o agendamento).
-  if ! sed '/CREATE EXTENSION IF NOT EXISTS pg_cron/d' "$f" | psql "$ISO" -v ON_ERROR_STOP=1 -q -f - >"$BASE/ultima.log" 2>&1; then
+  if ! sed -E '/CREATE EXTENSION IF NOT EXISTS (pg_cron|pg_net)/d' "$f" | psql "$ISO" -v ON_ERROR_STOP=1 -q -f - >"$BASE/ultima.log" 2>&1; then
     echo "FALHOU: $(basename "$f")"
     tail -20 "$BASE/ultima.log"
     exit 1

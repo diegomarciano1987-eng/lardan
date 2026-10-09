@@ -245,8 +245,18 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
     } catch (x) { erro(x); } finally { setBusy(false); }
   };
   const nova = () => { setItens([]); setDesc(""); setCli(clienteVazio()); setPags([]); setIdem(crypto.randomUUID()); setFeita(null); };
+  const cancelarVenda = useServerFn(pdvCancelar);
+  // Volta ao carrinho para trocar a forma de pagamento: cancela a venda que ficou
+  // aguardando Pix/link (sem pagamento confirmado) e mantém peças, cliente e pagamentos.
+  const voltar = async () => {
+    if (feita?.status === "aguardando_pix" && feita?.venda) {
+      try { await cancelarVenda({ data: { venda: feita.venda, motivo: "troca da forma de pagamento" } }); }
+      catch (x) { erro(x); return; }
+    }
+    setIdem(crypto.randomUUID()); setFeita(null);
+  };
 
-  if (feita) return <Finalizada v={feita} nova={nova} ok={ok} />;
+  if (feita) return <Finalizada v={feita} nova={nova} ok={ok} voltar={voltar} />;
   return (
     <div className="grid gap-6 p-6 lg:grid-cols-[1fr_420px]">
       <section className="space-y-4">
@@ -298,7 +308,7 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
   );
 }
 
-function Finalizada({ v, nova, ok }: { v: any; nova: () => void; ok: () => void }) {
+function Finalizada({ v, nova, ok, voltar }: { v: any; nova: () => void; ok: () => void; voltar: () => void }) {
   const gerar = useServerFn(pdvPixGerar); const sit = useServerFn(pdvPixSituacao);
   const [status, setStatus] = React.useState<string>(v.status);
   const [pix, setPix] = React.useState<{ url: string | null; copia: string | null; qr: string | null; forma: string } | null>(null);
@@ -332,6 +342,9 @@ function Finalizada({ v, nova, ok }: { v: any; nova: () => void; ok: () => void 
       {status === "aguardando_pix" ? (
         <button className={btn} disabled={busy} onClick={gerarPix}>{busy ? (cartao ? "Gerando link…" : "Gerando Pix…") : pix ? (cartao ? "Mostrar link do cartão" : "Mostrar Pix") : (cartao ? "Gerar link de cartão (Asaas)" : "Gerar Pix (Asaas)")}</button>
       ) : status === "concluida" ? <p className="text-lg">Venda concluída.</p> : <p>Situação: {status}</p>}
+      {status === "aguardando_pix" && (
+        <button className={btn2 + " w-full"} onClick={voltar}>Voltar e mudar a forma de pagamento</button>
+      )}
       <Comprovante venda={v.venda} telefone={v.telefone} />
       <button className={btn} onClick={nova}>Nova venda</button>
       {aberto && pix && (

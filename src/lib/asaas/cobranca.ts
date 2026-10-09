@@ -328,6 +328,8 @@ async function executarIntencaoAposCliente(
         billingType: r.billing_type,
         externalReference: r.internal_reference,
         idempotencyKey: r.internal_reference,
+        // a conta Asaas da Lardan aceita cartão em até 3x
+        ...(r.billing_type === "CREDIT_CARD" ? { maxInstallmentCount: 3 } : {}),
       }),
       renovar,
       lease,

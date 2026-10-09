@@ -62,6 +62,17 @@ describe("montagem da requisição", () => {
     expect(c.invoiceUrl).toBe(pagamento.invoiceUrl);
   });
 
+  test("cartão de crédito leva maxInstallmentCount 3; pix não leva", async () => {
+    const { f, chamadas } = falso(() => json(200, { ...pagamento, billingType: "CREDIT_CARD" }));
+    await http(f).criarCobranca({ customer: "cus_1", valueCents: 30000, dueDate: "2026-10-10", billingType: "CREDIT_CARD", externalReference: "r", idempotencyKey: "k", maxInstallmentCount: 3 });
+    const corpo = JSON.parse(chamadas[0]!.init.body as string);
+    expect(corpo.billingType).toBe("CREDIT_CARD");
+    expect(corpo.maxInstallmentCount).toBe(3);
+    const { f: f2, chamadas: c2 } = falso(() => json(200, pagamento));
+    await http(f2).criarCobranca({ customer: "cus_1", valueCents: 100, dueDate: "2026-10-10", billingType: "PIX", externalReference: "r", idempotencyKey: "k" });
+    expect(JSON.parse(c2[0]!.init.body as string).maxInstallmentCount).toBeUndefined();
+  });
+
   test("produção usa a base de produção; GET não leva corpo", async () => {
     const { f, chamadas } = falso(() => json(200, pagamento));
     await http(f, "producao").consultarCobranca("pay_1");

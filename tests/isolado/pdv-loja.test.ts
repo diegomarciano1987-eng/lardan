@@ -103,13 +103,20 @@ describe("PDV Loja", async () => {
     expect((await rpcServico("pdv_estado", { _token_hash: "invalido" })).erro).toContain("PDV_SESSAO_INVALIDA");
   });
 
-  test("caixa abre; venda sem estoque é recusada sem deixar rastro", async () => {
+  test("caixa abre; peça sem saldo na loja vem do Depósito Principal e, sem saldo lá, entra marcada", async () => {
     expect((await rpcServico("pdv_caixa_abrir", { _token_hash: tok, _fundo: 10000 })).erro).toBeNull();
     variante = await criarVariante("pdv", 20000);
-    const r = await rpcServico("pdv_venda_concluir", { _token_hash: tok, _p: { idem: "s1", itens: [{ variant_id: variante, qtd: 1 }], desconto_cents: 0, cliente: {}, pagamentos: [{ forma: "dinheiro", valor_cents: 20000 }] } });
-    expect(r.erro).toContain("Sem estoque");
-    const n = (await adm.unsafe("select count(*)::int n from public.pdv_vendas where idempotency_key='s1'")) as { n: number }[];
-    expect(n[0]!.n).toBe(0);
+    const outra = await criarVariante("pdv-auto", 20000);
+    const [d] = (await adm.unsafe("select id from public.locations where code='DEP-01'")) as { id: string }[];
+    await porEstoque(outra, d!.id, 2);
+    const r = await rpcServico<{ status: string }>("pdv_venda_concluir", { _token_hash: tok, _p: { idem: `s1-${numero}`, itens: [{ variant_id: outra, qtd: 3 }], desconto_cents: 0, cliente: {}, pagamentos: [{ forma: "dinheiro", valor_cents: 60000 }] } });
+    expect(r.erro).toBeNull(); expect(r.dados.status).toBe("concluida");
+    expect(await saldo(outra, d!.id)).toBe(0);
+    expect(await saldo(outra, loc)).toBe(0);
+    const mv = (await adm.unsafe("select kind::text k, quantity::int q, reason_code r from public.stock_movements where variant_id=$1 and reference like 'PDV-%' order by created_at, kind", [outra])) as { k: string; q: number; r: string }[];
+    expect(mv.find((m) => m.k === "transferencia")?.q).toBe(2);
+    expect(mv.find((m) => m.r === "entrada_pdv_sem_saldo")?.q).toBe(1);
+    expect(mv.find((m) => m.k === "saida")?.q).toBe(3);
   });
 
   test("venda: preço do servidor, desconto limitado, troco, comissão, baixa de estoque, idempotente", async () => {

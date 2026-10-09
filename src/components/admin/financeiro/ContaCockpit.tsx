@@ -490,6 +490,7 @@ function Transferir({ id }: { id: string }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <SmartSelect options={opcoes} value={outra} onChange={setOutra} placeholder={sentido === "enviar" ? "Para qual conta" : "De qual conta"} />
         <input value={valor} onChange={(e) => setValor(e.target.value)} inputMode="decimal" placeholder="Valor 0,00" className={inputCls} />
+        <DateField value={dataTransf} onChange={setDataTransf} placeholder="Data da transferência" fromYear={2024} toYear={new Date().getFullYear()} />
         <input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Motivo (opcional)" className={`${inputCls} sm:col-span-2`} />
       </div>
       <button type="button" className="admin-btn-primary mt-4" disabled={transferir.isPending} onClick={() => transferir.mutate()}>

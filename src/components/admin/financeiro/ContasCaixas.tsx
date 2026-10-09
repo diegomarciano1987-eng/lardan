@@ -189,6 +189,7 @@ export function ContasCaixas() {
               placeholder="Motivo (opcional)"
               className={inputCls}
             />
+            <DateField value={dataTransf} onChange={setDataTransf} placeholder="Data da transferência" fromYear={2024} toYear={new Date().getFullYear()} />
           </div>
           <button
             type="button"

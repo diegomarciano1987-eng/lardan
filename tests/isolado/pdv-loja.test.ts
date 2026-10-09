@@ -183,10 +183,10 @@ describe("PDV Loja", async () => {
     const c = await rpcServico<{ itens: unknown[]; codigo: number }>("pdv_comprovante", { _token_hash: tok, _venda: venda });
     expect(c.dados.itens.length).toBe(1);
     expect((await rpcServico("pdv_caixa_mov", { _token_hash: tok, _tipo: "sangria", _valor: 3000, _motivo: "depósito" })).erro).toBeNull();
-    // fundo 100,00 − sangria 30,00 (venda cancelada não conta) = 70,00
-    expect((await rpcServico("pdv_caixa_fechar", { _token_hash: tok, _contado: 6900, _obs: "" })).erro).toContain("Explique");
-    const f = await rpcServico<{ esperado: number; diferenca: number }>("pdv_caixa_fechar", { _token_hash: tok, _contado: 6900, _obs: "moeda faltando" });
-    expect(f.dados.esperado).toBe(7000); expect(f.dados.diferenca).toBe(-100);
+    // fundo 100,00 + venda automática 600,00 − sangria 30,00 (venda cancelada não conta) = 670,00
+    expect((await rpcServico("pdv_caixa_fechar", { _token_hash: tok, _contado: 66900, _obs: "" })).erro).toContain("Explique");
+    const f = await rpcServico<{ esperado: number; diferenca: number }>("pdv_caixa_fechar", { _token_hash: tok, _contado: 66900, _obs: "moeda faltando" });
+    expect(f.dados.esperado).toBe(67000); expect(f.dados.diferenca).toBe(-100);
   });
 
   test("cliente da loja: grava, valida dígitos, não duplica e aparece em clientes e vendas", async () => {

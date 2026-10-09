@@ -17,6 +17,8 @@ import {
 } from "@/components/admin/ui";
 import { DateRangeField } from "@/components/premium/DateRangeField";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { DateField } from "@/components/premium/DateField";
+import { format as fmtData } from "date-fns";
 import { useCapabilities } from "@/lib/capabilities";
 import { fetchFinAccounts, reaisParaCentavos, transferirEntreContas } from "@/lib/financeiro";
 import {
@@ -438,6 +440,7 @@ function Transferir({ id }: { id: string }) {
   const [outra, setOutra] = React.useState("");
   const [valor, setValor] = React.useState("");
   const [motivo, setMotivo] = React.useState("");
+  const [dataTransf, setDataTransf] = React.useState<Date | undefined>(() => new Date());
   const [chave, setChave] = React.useState(() => crypto.randomUUID());
   const opcoes = (contas.data ?? [])
     .filter((c) => c.id !== id && c.is_active)
@@ -453,6 +456,7 @@ function Transferir({ id }: { id: string }) {
         to_account_id: sentido === "enviar" ? outra : id,
         valor_cents: cents,
         ...(motivo.trim() ? { motivo: motivo.trim() } : {}),
+        data: fmtData(dataTransf ?? new Date(), "yyyy-MM-dd"),
         idempotency_key: chave,
       });
     },
@@ -486,6 +490,7 @@ function Transferir({ id }: { id: string }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <SmartSelect options={opcoes} value={outra} onChange={setOutra} placeholder={sentido === "enviar" ? "Para qual conta" : "De qual conta"} />
         <input value={valor} onChange={(e) => setValor(e.target.value)} inputMode="decimal" placeholder="Valor 0,00" className={inputCls} />
+        <DateField value={dataTransf} onChange={setDataTransf} placeholder="Data da transferência" fromYear={2024} toYear={new Date().getFullYear()} />
         <input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Motivo (opcional)" className={`${inputCls} sm:col-span-2`} />
       </div>
       <button type="button" className="admin-btn-primary mt-4" disabled={transferir.isPending} onClick={() => transferir.mutate()}>

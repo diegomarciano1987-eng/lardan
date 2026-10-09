@@ -302,6 +302,20 @@
       "when": 1791417364532,
       "tag": "0042_asaas_conciliacao_inteligente",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1791550618311,
+      "tag": "0043_fin_classificacoes_plano_completo",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1791550765391,
+      "tag": "0044_fin_expurgo_controlado_e_importacao_transferencias",
+      "breakpoints": true
     }
   ]
 }

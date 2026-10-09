@@ -12,6 +12,8 @@ import {
   formatBRLFromCents,
 } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { DateField } from "@/components/premium/DateField";
+import { format as fmtData } from "date-fns";
 import { NovoCartaoSheet } from "@/components/admin/financeiro/NovoCartaoSheet";
 import { RecordSheet, type RecordValues } from "@/components/admin/RecordSheet";
 import { useCapabilities } from "@/lib/capabilities";
@@ -45,6 +47,7 @@ export function ContasCaixas() {
   const [destino, setDestino] = React.useState("");
   const [valor, setValor] = React.useState("");
   const [motivo, setMotivo] = React.useState("");
+  const [dataTransf, setDataTransf] = React.useState<Date | undefined>(() => new Date());
 
   const contas = useQuery({ queryKey: ["fin-accounts"], queryFn: fetchFinAccounts });
 
@@ -79,6 +82,7 @@ export function ContasCaixas() {
         to_account_id: destino,
         valor_cents: cents,
         ...(motivo.trim() ? { motivo: motivo.trim() } : {}),
+        data: fmtData(dataTransf ?? new Date(), "yyyy-MM-dd"),
         idempotency_key: crypto.randomUUID(),
       });
     },
@@ -185,6 +189,7 @@ export function ContasCaixas() {
               placeholder="Motivo (opcional)"
               className={inputCls}
             />
+            <DateField value={dataTransf} onChange={setDataTransf} placeholder="Data da transferência" fromYear={2024} toYear={new Date().getFullYear()} />
           </div>
           <button
             type="button"

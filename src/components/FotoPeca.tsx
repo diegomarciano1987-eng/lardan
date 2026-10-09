@@ -91,7 +91,10 @@ export function FotoPeca({
   className?: string;
   vazio?: React.ReactNode;
 }) {
-  const direta = mediaId ? `/api/public/midia/${mediaId}` : null;
+  const [diretaFalhou, setDiretaFalhou] = React.useState(false);
+  React.useEffect(() => setDiretaFalhou(false), [mediaId]);
+  const direta = mediaId && !diretaFalhou ? `/api/public/midia/${mediaId}` : null;
+  // Se a foto pública falhar, busca pelo caminho interno seguro.
   const chave: Chave | null = direta
     ? null
     : productId
@@ -103,6 +106,7 @@ export function FotoPeca({
   const url = direta ?? lote;
   const [falhou, setFalhou] = React.useState(false);
   React.useEffect(() => setFalhou(false), [url]);
+  const aoFalhar = () => (direta ? setDiretaFalhou(true) : setFalhou(true));
   const cls = className ?? `${TAMANHOS[size]} shrink-0 rounded-[8px] border border-line`;
   if (!url || falhou) {
     if (vazio) return <>{vazio}</>;

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { EmptyState, ErrorState, Panel, Skeleton, StatusBadge, formatDateTime } from "@/components/admin/ui";
@@ -138,7 +139,7 @@ function Conferencia({
             <tbody>
               {d.linhas.map((l) => (
                 <tr key={l.variant_id} className="border-b border-line-soft last:border-0">
-                  <td className="py-2 pr-4 font-medium text-ledger-text">{nome(l.variant_id)}</td>
+                  <td className="py-2 pr-4 font-medium text-ledger-text"><span className="flex items-center gap-2"><FotoPeca variantId={l.variant_id} size="xs" />{nome(l.variant_id)}</span></td>
                   {colunas.map((c) => (
                     <td key={c.chave} className="px-2 py-2 text-right tabular-nums text-ledger-muted">
                       {num(l[c.chave as keyof typeof l])}
@@ -346,7 +347,7 @@ function AcoesRetorno({
             return (
               <div key={l.variant_id} className="flex flex-wrap items-end gap-3 border-b border-line-soft pb-3">
                 <div className="min-w-48 flex-1">
-                  <p className="text-sm font-semibold text-ledger-text">{nome(l.variant_id)}</p>
+                  <p className="flex items-center gap-2 text-sm font-semibold text-ledger-text"><FotoPeca variantId={l.variant_id} size="xs" />{nome(l.variant_id)}</p>
                   <p className="text-xs text-ledger-muted">{num(l.sob_responsabilidade)} sob responsabilidade</p>
                 </div>
                 <input

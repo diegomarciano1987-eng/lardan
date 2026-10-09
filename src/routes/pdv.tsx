@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FotoPeca } from "@/components/FotoPeca";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -254,11 +255,12 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
         </form>
         {res.length > 0 && <div className="divide-y divide-border rounded-xl border border-border">{res.map((r) => (
           <button key={r.id} onClick={() => add(r)} className="flex w-full items-center justify-between gap-3 p-3 text-left hover:bg-muted/40">
-            <span><span className="block text-sm">{r.nome}</span><span className="text-xs text-muted-foreground">{r.sku} · {r.saldo} na loja</span></span>
+            <span className="flex items-center gap-3"><FotoPeca variantId={r.id} alt={r.nome} /><span><span className="block text-sm">{r.nome}</span><span className="text-xs text-muted-foreground">{r.sku} · {r.saldo} na loja</span></span></span>
             <b className="font-mono">{r.preco ? brl(r.preco) : "sem preço"}</b></button>))}</div>}
         <div className="rounded-xl border border-border">
           {itens.length === 0 ? <p className="p-8 text-center text-sm text-muted-foreground">Nenhuma peça no carrinho.</p> : itens.map((i) => (
             <div key={i.variant_id} className="flex items-center gap-3 border-b border-border p-3 last:border-0">
+              <FotoPeca variantId={i.variant_id} alt={i.nome} size="md" />
               <div className="flex-1"><p className="text-sm">{i.nome}</p><p className="text-xs text-muted-foreground">{i.sku} · {brl(i.preco)} {i.qtd > i.saldo && <span>· vem do depósito na venda</span>}</p></div>
               <input className="h-10 w-16 rounded-lg border border-border bg-background text-center" type="number" min={1} value={i.qtd} onChange={(x) => setItens(itens.map((y) => y === i ? { ...y, qtd: Math.max(1, Number(x.target.value) || 1) } : y))} />
               <b className="w-24 text-right font-mono">{brl(i.preco * i.qtd)}</b>

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { getCookie, getRequestHeader } from "@tanstack/react-start/server";
 
 /**
  * Capas das peças (foto de posição 0) para qualquer usuário logado,
@@ -8,7 +8,6 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  * URL assinada de 1 h. Nunca devolve mais nada além da foto.
  */
 export const capasDasPecas = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
       .object({
@@ -19,6 +18,29 @@ export const capasDasPecas = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Quem pode ver: usuário logado (gestão ou consultora) ou terminal do PDV com sessão válida.
+    let autorizado = false;
+    const bearer = getRequestHeader("authorization")?.replace(/^Bearer\s+/i, "");
+    if (bearer) {
+      const { data: u } = await supabaseAdmin.auth.getUser(bearer);
+      autorizado = Boolean(u?.user);
+    }
+    if (!autorizado) {
+      const t = getCookie("lardan_pdv");
+      if (t) {
+        const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
+        const hash = Array.from(new Uint8Array(b)).map((x) => x.toString(16).padStart(2, "0")).join("");
+        const { data: sess } = await supabaseAdmin
+          .from("pdv_sessoes")
+          .select("id")
+          .eq("token_hash", hash)
+          .is("revogada_em", null)
+          .gt("expira_em", new Date().toISOString())
+          .maybeSingle();
+        autorizado = Boolean(sess);
+      }
+    }
+    if (!autorizado) throw new Error("Sem acesso.");
     const resultado: Record<string, string> = {};
     const varParaProd: Record<string, string> = {};
     if (data.variantes.length) {

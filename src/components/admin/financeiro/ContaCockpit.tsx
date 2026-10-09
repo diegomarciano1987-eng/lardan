@@ -17,6 +17,8 @@ import {
 } from "@/components/admin/ui";
 import { DateRangeField } from "@/components/premium/DateRangeField";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { DateField } from "@/components/premium/DateField";
+import { format as fmtData } from "date-fns";
 import { useCapabilities } from "@/lib/capabilities";
 import { fetchFinAccounts, reaisParaCentavos, transferirEntreContas } from "@/lib/financeiro";
 import {
@@ -381,6 +383,7 @@ function ExcluirConta({ id }: { id: string }) {
   const navigate = useNavigate();
   const [aberto, setAberto] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
+  const [dataTransf, setDataTransf] = React.useState<Date | undefined>(() => new Date());
   const excluir = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.rpc("fin_account_excluir" as never, { _id: id, _motivo: motivo } as never);
@@ -453,6 +456,7 @@ function Transferir({ id }: { id: string }) {
         to_account_id: sentido === "enviar" ? outra : id,
         valor_cents: cents,
         ...(motivo.trim() ? { motivo: motivo.trim() } : {}),
+        data: fmtData(dataTransf ?? new Date(), "yyyy-MM-dd"),
         idempotency_key: chave,
       });
     },

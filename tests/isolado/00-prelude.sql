@@ -63,7 +63,7 @@ stable
 as $$
   select nullif(
     coalesce(
-      current_setting('lardan.test_uid', true),
+      nullif(current_setting('lardan.test_uid', true), ''),
       (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')
     ),
     ''

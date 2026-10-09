@@ -140,7 +140,7 @@ describe("PDV Loja", async () => {
 
   test("loja sem empresa herda a única empresa; com responsável, Pix e link de cartão ficam liberados", async () => {
     const ents = (await adm.unsafe("select count(*)::int n from public.business_entities where is_active")) as { n: number }[];
-    if (ents[0]!.n === 0) await adm.unsafe("insert into public.business_entities(legal_name, trade_name, doc, is_active) values ('LARDAN PROVA','LARDAN','00000000000191',true)");
+    if (ents[0]!.n === 0) await adm.unsafe("insert into public.business_entities(legal_name, trade_name, is_active) values ('LARDAN PROVA','LARDAN',true)");
     await adm.unsafe("update public.business_entities set is_active = (id = (select id from public.business_entities order by created_at limit 1))");
     await adm.unsafe("update public.pdv_unidades set business_entity_id=null, pix_responsavel_user_id=$2 where id=$1", [unidade, master.uid]);
     const [u] = (await adm.unsafe("select business_entity_id from public.pdv_unidades where id=$1", [unidade])) as { business_entity_id: string | null }[];

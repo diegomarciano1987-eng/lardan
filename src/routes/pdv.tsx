@@ -308,7 +308,7 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
   );
 }
 
-function Finalizada({ v, nova, ok }: { v: any; nova: () => void; ok: () => void }) {
+function Finalizada({ v, nova, ok, voltar }: { v: any; nova: () => void; ok: () => void; voltar: () => void }) {
   const gerar = useServerFn(pdvPixGerar); const sit = useServerFn(pdvPixSituacao);
   const [status, setStatus] = React.useState<string>(v.status);
   const [pix, setPix] = React.useState<{ url: string | null; copia: string | null; qr: string | null; forma: string } | null>(null);

@@ -11,6 +11,7 @@ import { reaisParaCentavos } from "@/lib/financeiro";
 import { listarParcelas, type ParcelaLinha } from "@/lib/financeiro-parcelas";
 import { conciliar, listarLinhasExtrato, marcarLinha, sugerirCorrespondencias, type LinhaExtratoRow } from "@/lib/conciliacao";
 import { useCapabilities } from "@/lib/capabilities";
+import { supabase } from "@/integrations/supabase/client";
 
 const dataBR = (d: string | null) =>
   d ? new Intl.DateTimeFormat("pt-BR").format(new Date(`${d}T12:00:00`)) : "—";
@@ -331,7 +332,7 @@ function Bancada({
   const direction = saida ? "payable" : "receivable";
   const valorLinha = (linha.valor_cents ?? 0) - linha.conciliado_cents;
   const [modo, setModo] = React.useState<"existente" | "novo" | null>(null);
-  const [aba, setAba] = React.useState<"sugestoes" | "buscar">("sugestoes");
+  const [aba, setAba] = React.useState<"sugestoes" | "buscar" | "baixadas">("sugestoes");
   const [busca, setBusca] = React.useState("");
   const [buscaLenta, setBuscaLenta] = React.useState("");
   const [bandeja, setBandeja] = React.useState<{ c: Candidata; texto: string }[]>([]);
@@ -847,7 +848,7 @@ function Bancada({
       ) : (
         <section className="flex min-h-0 flex-col p-6">
           <div className="flex gap-2">
-            {(["sugestoes", "buscar"] as const).map((a) => (
+            {(["sugestoes", "buscar", "baixadas"] as const).map((a) => (
               <button
                 key={a}
                 type="button"
@@ -856,10 +857,13 @@ function Bancada({
                   aba === a ? "bg-primary text-primary-foreground" : "bg-cream-2 text-ledger-text hover:bg-cream-2/70"
                 }`}
               >
-                {a === "sugestoes" ? `Sugestões${sugestoes.data ? ` (${sugestoes.data.length})` : ""}` : "Procurar outra conta"}
+                {a === "sugestoes" ? `Sugestões${sugestoes.data ? ` (${sugestoes.data.length})` : ""}` : a === "buscar" ? "Procurar outra conta" : "Baixas já realizadas"}
               </button>
             ))}
           </div>
+          {aba === "baixadas" && (
+            <BaixasJaRealizadas linha={linha} valorLinha={valorLinha} podeConciliar={podeConciliar} onFeito={onFeito} />
+          )}
           {aba === "buscar" && (
             <div className="relative mt-3">
               <Search aria-hidden className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
@@ -873,7 +877,7 @@ function Bancada({
             </div>
           )}
 
-          <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+          {aba !== "baixadas" && <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
             {carregando && <Skeleton className="h-24 w-full" />}
             {!carregando && candidatas.length === 0 && (
               <div className="rounded-[14px] bg-cream-2 p-6 text-center text-sm text-ledger-muted">
@@ -944,9 +948,76 @@ function Bancada({
               </button>
             );
           })}
-        </div>
+        </div>}
         </section>
       )}
     </>
+  );
+}
+
+type BaixaExistente = { id: string; data: string; valor_cents: number; liquido: number; titulos: string | null };
+
+/** Liga a linha do extrato a uma baixa que já foi lançada — não cria baixa nova. */
+function BaixasJaRealizadas({ linha, valorLinha, podeConciliar, onFeito }: {
+  linha: LinhaExtratoRow; valorLinha: number; podeConciliar: boolean; onFeito: () => void;
+}) {
+  const [busca, setBusca] = React.useState("");
+  const [lenta, setLenta] = React.useState("");
+  React.useEffect(() => { const t = setTimeout(() => setLenta(busca.trim()), 350); return () => clearTimeout(t); }, [busca]);
+  const q = useQuery({
+    queryKey: ["mesa-baixas-existentes", linha.id, lenta],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("fin_mesa_baixas_existentes", { _line_id: linha.id, _busca: lenta || undefined });
+      if (error) throw error;
+      return (data ?? []) as unknown as BaixaExistente[];
+    },
+  });
+  const ligar = useMutation({
+    mutationFn: async (b: BaixaExistente) => {
+      const { error } = await supabase.rpc("fin_reconcile_baixa_existente", {
+        _line_ids: [linha.id], _settlement: b.id, _idempotency_key: `existente:${linha.id}:${b.id}`,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Linha ligada à baixa já lançada."); onFeito(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const lista = q.data ?? [];
+  return (
+    <div className="mt-3 flex min-h-0 flex-1 flex-col">
+      <div className="relative">
+        <Search aria-hidden className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
+        <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Nome, descrição ou número do título já baixado"
+          className="h-12 w-full rounded-[12px] border border-line bg-surface pl-10 pr-3 text-base outline-none focus:border-champagne" />
+      </div>
+      <p className="mt-2 text-xs text-ledger-muted">Baixas desta conta, até 60 dias antes ou depois da linha, ainda sem extrato ligado. Nada é lançado de novo.</p>
+      <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+        {q.isLoading && <Skeleton className="h-24 w-full" />}
+        {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
+        {!q.isLoading && !q.error && lista.length === 0 && (
+          <div className="rounded-[14px] bg-cream-2 p-6 text-center text-sm text-ledger-muted">Nenhuma baixa já realizada encontrada.</div>
+        )}
+        {lista.map((b) => {
+          const igual = b.liquido === valorLinha;
+          return (
+            <div key={b.id} className="flex items-center gap-4 rounded-[14px] border-2 border-line bg-surface p-4">
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold text-ledger-text">{b.titulos || "Baixa sem título vinculado"}</p>
+                <p className="text-sm text-ledger-muted">Baixada em {dataBR(b.data)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold tabular-nums text-ledger-text">{formatBRLFromCents(b.liquido)}</p>
+                <p className={`text-[11px] font-semibold ${igual ? "text-bronze" : "text-ledger-muted"}`}>{igual ? "valor igual" : "valor diferente"}</p>
+              </div>
+              <button type="button" className="admin-btn" disabled={!podeConciliar || !igual || ligar.isPending}
+                title={igual ? "Ligar esta linha a esta baixa" : "O valor precisa ser igual ao da linha"}
+                onClick={() => ligar.mutate(b)}>
+                <Link2 className="size-4" /> Ligar
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

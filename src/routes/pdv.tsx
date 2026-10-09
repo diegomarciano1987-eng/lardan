@@ -6,7 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { LogOut, Search, Trash2, Printer, MessageCircle, Lock, Wallet, Receipt, Users, ShoppingCart } from "lucide-react";
+import { LogOut, Search, Trash2, Printer, MessageCircle, Lock, Wallet, Receipt, Users, ShoppingCart, Link2 } from "lucide-react";
 import { ClienteForm, Calculadora, Vendas, Clientes, LinksEnviados, clienteVazio } from "@/components/pdv/PdvExtras";
 import { abrirCupom } from "@/components/pdv/cupom";
 import {

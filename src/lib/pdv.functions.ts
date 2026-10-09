@@ -95,7 +95,7 @@ export const pdvBuscar = createServerFn({ method: "GET" })
   .inputValidator((d: { q: string }) => ({ q: str(d?.q, 80) }))
   .handler(async ({ data }) => rpc<any[]>("pdv_produto_buscar", { _token_hash: await token(), _q: data.q }));
 
-export type PagamentoPdv = { forma: "dinheiro" | "debito" | "credito" | "pix"; valor_cents: number; recebido_cents?: number; maquininha_id?: string; parcelas?: number; nsu?: string };
+export type PagamentoPdv = { forma: "dinheiro" | "debito" | "credito" | "pix" | "link_cartao"; valor_cents: number; recebido_cents?: number; maquininha_id?: string; parcelas?: number; nsu?: string };
 export const pdvConcluir = createServerFn({ method: "POST" })
   .inputValidator((d: { idem: string; itens: { variant_id: string; qtd: number }[]; desconto_cents: number; cliente: { nome?: string; doc?: string; telefone?: string }; pagamentos: PagamentoPdv[] }) => {
     if (!d?.idem || !Array.isArray(d.itens) || !Array.isArray(d.pagamentos)) throw new Error("Venda incompleta.");
@@ -103,29 +103,30 @@ export const pdvConcluir = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => rpc("pdv_venda_concluir", { _token_hash: await token(), _p: data }));
 
-/** Pix real: título a receber + cobrança no Asaas pelo motor oficial. Confirmação só pelo aviso do Asaas. */
+/** Cobrança online real (Pix ou link de cartão de crédito): título a receber + cobrança no Asaas pelo motor oficial. Confirmação só pelo aviso do Asaas. */
 export const pdvPixGerar = createServerFn({ method: "POST" })
   .inputValidator((d: { venda: string }) => ({ venda: str(d?.venda, 40) }))
   .handler(async ({ data }) => {
     const th = await token();
-    const t = await rpc<{ installment_id: string; actor: string }>("pdv_pix_titulo", { _token_hash: th, _venda: data.venda }).catch((e: Error) => {
+    const t = await rpc<{ installment_id: string; actor: string; forma?: string }>("pdv_pix_titulo", { _token_hash: th, _venda: data.venda }).catch((e: Error) => {
       if (/Sem permissão para este tipo de título/.test(e.message)) throw new Error("O responsável pelo Pix desta loja não tem permissão de contas a receber. A gestão precisa trocar em PDV Loja → Acesso por alguém do financeiro.");
       throw e;
     });
+    const cartao = t.forma === "link_cartao";
     const { solicitarCobranca } = await import("./asaas/operacoes");
     const { bancoExecutor } = await import("./asaas/servidor.server");
     const { envDoServidor } = await import("./asaas/configuracao.server");
     const executor = await bancoExecutor();
     // A preparação roda em nome do responsável Pix definido pela gestão da loja.
     const usuario = { rpc: <T,>(_f: string, a: Record<string, unknown>) => rpc<T>("pdv_asaas_preparar", { _actor: t.actor, _payload: a["_payload"] }) };
-    const r = await solicitarCobranca(usuario as never, executor, t.actor, { installmentId: t.installment_id, billingType: "PIX" }, { env: envDoServidor() });
-    if ((r as { state: string }).state === "indisponivel") throw new Error((r as { aviso?: string }).aviso || "Pix indisponível no momento.");
+    const r = await solicitarCobranca(usuario as never, executor, t.actor, { installmentId: t.installment_id, billingType: cartao ? "CREDIT_CARD" : "PIX" }, { env: envDoServidor() });
+    if ((r as { state: string }).state === "indisponivel") throw new Error((r as { aviso?: string }).aviso || "Cobrança indisponível no momento.");
     const rr = r as { charge_id?: string | null; invoice_url?: string | null };
     await rpc("pdv_pix_registrar", { _token_hash: th, _venda: data.venda, _charge: rr.charge_id ?? null, _url: rr.invoice_url ?? null });
-    // Copia-e-cola e QR oficiais do Asaas; se não vierem, a tela usa o link da fatura.
+    // Copia-e-cola e QR oficiais do Asaas (só Pix); no cartão a tela usa o link da fatura.
     let copia: string | null = null; let qr: string | null = null;
     const ext = (r as { external_id?: string | null; simulado?: boolean }).external_id;
-    if (ext && !(r as { simulado?: boolean }).simulado) {
+    if (!cartao && ext && !(r as { simulado?: boolean }).simulado) {
       try {
         const { resolverPorParcela } = await import("./asaas/servidor.server");
         const { transporteDaResolucao } = await import("./asaas/configuracao.server");
@@ -134,7 +135,7 @@ export const pdvPixGerar = createServerFn({ method: "POST" })
         copia = px?.payload ?? null; qr = px?.encodedImage ? `data:image/png;base64,${px.encodedImage}` : null;
       } catch (e) { console.error("pix qrcode", (e as Error).message); }
     }
-    return { url: rr.invoice_url ?? null, copia, qr };
+    return { url: rr.invoice_url ?? null, copia, qr, forma: cartao ? "link_cartao" : "pix" };
   });
 
 export const pdvPixSituacao = createServerFn({ method: "GET" })

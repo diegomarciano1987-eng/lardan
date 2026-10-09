@@ -34,7 +34,7 @@ const cents = (v: string) => Math.round(Number(String(v).replace(/\./g, "").repl
 const inp = "h-12 w-full rounded-lg border border-border bg-background px-3 text-base";
 const btn = "h-12 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground disabled:opacity-50";
 const btn2 = "h-12 rounded-lg border border-border px-4 text-sm disabled:opacity-50";
-const FORMA: Record<string, string> = { dinheiro: "Dinheiro", debito: "Débito", credito: "Crédito", pix: "Pix" };
+const FORMA: Record<string, string> = { dinheiro: "Dinheiro", debito: "Débito", credito: "Crédito", pix: "Pix", link_cartao: "Link cartão" };
 const erro = (e: unknown) => toast.error((e as Error).message);
 
 function PdvPage() {
@@ -239,7 +239,7 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
       if (cli.nome.trim()) { const g = await salvarCli({ data: cli }); party = g.party_id; setCli({ ...cli, party_id: party }); }
       const r: any = await concluir({ data: { idem, itens: itens.map((i) => ({ variant_id: i.variant_id, qtd: i.qtd })), desconto_cents: dc, cliente: { nome: cli.nome, doc: d(cli.doc), telefone: d(cli.telefone) }, pagamentos: pags } });
       if (party && r?.venda) await vincular({ data: { venda: r.venda, party } }).catch(() => undefined);
-      setFeita({ ...r, telefone: d(cli.telefone) }); ok();
+      setFeita({ ...r, telefone: d(cli.telefone), online: pags.find((p) => p.forma === "pix" || p.forma === "link_cartao")?.forma ?? "pix" }); ok();
     } catch (x) { erro(x); } finally { setBusy(false); }
   };
   const nova = () => { setItens([]); setDesc(""); setCli(clienteVazio()); setPags([]); setIdem(crypto.randomUUID()); setFeita(null); };
@@ -274,8 +274,9 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
           <p className="flex justify-between pt-2 text-2xl"><span>Total</span><b className="font-mono">{brl(tot)}</b></p>
         </div>
         <div className="space-y-2 border-t border-border pt-3">
-          <div className="grid grid-cols-4 gap-1">{(["dinheiro", "debito", "credito", "pix"] as const).map((f) => <button key={f} onClick={() => setForma(f)} disabled={f === "pix" && !e.unidade.pix} className={`h-11 rounded-lg border text-sm ${forma === f ? "border-primary bg-primary text-primary-foreground" : "border-border"} disabled:opacity-40`}>{FORMA[f]}</button>)}</div>
-          {forma === "pix" && !e.unidade.pix && <p className="text-xs text-muted-foreground">Pix ainda não configurado pela gestão.</p>}
+          <div className="grid grid-cols-5 gap-1">{(["dinheiro", "debito", "credito", "pix", "link_cartao"] as const).map((f) => <button key={f} onClick={() => setForma(f)} disabled={(f === "pix" || f === "link_cartao") && !e.unidade.pix} title={f === "link_cartao" ? "Link de cartão de crédito pelo Asaas, para a cliente pagar no celular" : undefined} className={`h-11 rounded-lg border text-sm ${forma === f ? "border-primary bg-primary text-primary-foreground" : "border-border"} disabled:opacity-40`}>{FORMA[f]}</button>)}</div>
+          {(forma === "pix" || forma === "link_cartao") && !e.unidade.pix && <p className="text-xs text-muted-foreground">Falta escolher o responsável pelo Pix da loja em PDV Loja → Acesso.</p>}
+          {forma === "link_cartao" && <p className="text-xs text-muted-foreground">Gera um link do Asaas para a cliente pagar no cartão de crédito pelo celular. Débito continua na maquininha.</p>}
           <input className={inp} placeholder={`Valor (falta ${brl(falta)})`} inputMode="decimal" value={val} onChange={(x) => setVal(x.target.value)} />
           {forma === "dinheiro" && <input className={inp} placeholder="Recebido em dinheiro (para troco)" inputMode="decimal" value={rec} onChange={(x) => setRec(x.target.value)} />}
           {(forma === "debito" || forma === "credito") && <div className="grid grid-cols-3 gap-2">
@@ -297,8 +298,9 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
 function Finalizada({ v, nova, ok }: { v: any; nova: () => void; ok: () => void }) {
   const gerar = useServerFn(pdvPixGerar); const sit = useServerFn(pdvPixSituacao);
   const [status, setStatus] = React.useState<string>(v.status);
-  const [pix, setPix] = React.useState<{ url: string | null; copia: string | null; qr: string | null } | null>(null);
+  const [pix, setPix] = React.useState<{ url: string | null; copia: string | null; qr: string | null; forma: string } | null>(null);
   const [img, setImg] = React.useState(""); const [busy, setBusy] = React.useState(false); const [aberto, setAberto] = React.useState(false);
+  const cartao = (pix?.forma ?? v.online) === "link_cartao";
   React.useEffect(() => {
     if (!pix) return;
     if (pix.qr) setImg(pix.qr.startsWith("data:") ? pix.qr : `data:image/png;base64,${pix.qr}`);
@@ -312,30 +314,33 @@ function Finalizada({ v, nova, ok }: { v: any; nova: () => void; ok: () => void 
   const gerarPix = async () => {
     if (pix) { setAberto(true); return; }
     setBusy(true);
-    try { const r: any = await gerar({ data: { venda: v.venda } }); if (!r.url && !r.copia) throw new Error("O Asaas não devolveu o Pix."); setPix({ url: r.url ?? null, copia: r.copia ?? null, qr: r.qr ?? null }); setAberto(true); }
+    try { const r: any = await gerar({ data: { venda: v.venda } }); if (!r.url && !r.copia) throw new Error("O Asaas não devolveu a cobrança."); setPix({ url: r.url ?? null, copia: r.copia ?? null, qr: r.qr ?? null, forma: r.forma ?? "pix" }); setAberto(true); }
     catch (x) { erro(x); } finally { setBusy(false); }
   };
-  const textoPix = pix?.copia ?? pix?.url ?? "";
-  const copiar = async () => { try { await navigator.clipboard.writeText(textoPix); toast.success("Pix copiado. Cole no WhatsApp da cliente."); } catch { toast.error("Não foi possível copiar."); } };
+  const textoPix = cartao ? (pix?.url ?? "") : (pix?.copia ?? pix?.url ?? "");
+  const copiar = async () => { try { await navigator.clipboard.writeText(textoPix); toast.success(cartao ? "Link copiado. Cole no WhatsApp da cliente." : "Pix copiado. Cole no WhatsApp da cliente."); } catch { toast.error("Não foi possível copiar."); } };
   const tel = (v.telefone ?? "").replace(/\D/g, "");
+  const msgWhats = cartao
+    ? `Link para pagar sua compra Lardan no cartão de crédito (venda nº ${v.codigo}):\n\n${textoPix}`
+    : `Pix da sua compra Lardan (venda nº ${v.codigo}). Copie e cole no app do seu banco:\n\n${textoPix}`;
   return (
     <div className="mx-auto max-w-lg space-y-4 p-8 text-center">
       <h2 className="font-display text-3xl">Venda nº {v.codigo}</h2>
       {status === "aguardando_pix" ? (
-        <button className={btn} disabled={busy} onClick={gerarPix}>{busy ? "Gerando Pix…" : pix ? "Mostrar Pix" : "Gerar Pix (Asaas)"}</button>
+        <button className={btn} disabled={busy} onClick={gerarPix}>{busy ? (cartao ? "Gerando link…" : "Gerando Pix…") : pix ? (cartao ? "Mostrar link do cartão" : "Mostrar Pix") : (cartao ? "Gerar link de cartão (Asaas)" : "Gerar Pix (Asaas)")}</button>
       ) : status === "concluida" ? <p className="text-lg">Venda concluída.</p> : <p>Situação: {status}</p>}
       <Comprovante venda={v.venda} telefone={v.telefone} />
       <button className={btn} onClick={nova}>Nova venda</button>
       {aberto && pix && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4" role="dialog" aria-label="Pix da venda">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4" role="dialog" aria-label={cartao ? "Link de cartão da venda" : "Pix da venda"}>
           <div className="w-full max-w-xl space-y-4 rounded-2xl bg-background p-8 shadow-2xl">
-            <div className="flex items-start justify-between"><div className="text-left"><p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Pix Lardan · Asaas</p><h3 className="font-display text-3xl">Venda nº {v.codigo}</h3></div><button className={btn2} onClick={() => setAberto(false)}>Fechar</button></div>
-            {img ? <img src={img} alt="QR Code do Pix" className="mx-auto w-full max-w-[360px] rounded-xl border border-border bg-background p-2" /> : <p>Gerando QR…</p>}
-            <p className="text-sm text-muted-foreground">A cliente aponta a câmera do celular ou o app do banco para o QR. A venda conclui sozinha quando o Asaas confirmar.</p>
+            <div className="flex items-start justify-between"><div className="text-left"><p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{cartao ? "Cartão de crédito · Asaas" : "Pix Lardan · Asaas"}</p><h3 className="font-display text-3xl">Venda nº {v.codigo}</h3></div><button className={btn2} onClick={() => setAberto(false)}>Fechar</button></div>
+            {img ? <img src={img} alt={cartao ? "QR Code do link de pagamento" : "QR Code do Pix"} className="mx-auto w-full max-w-[360px] rounded-xl border border-border bg-background p-2" /> : <p>Gerando QR…</p>}
+            <p className="text-sm text-muted-foreground">{cartao ? "A cliente aponta a câmera para o QR ou abre o link no celular e paga no cartão de crédito. A venda conclui sozinha quando o Asaas confirmar." : "A cliente aponta a câmera do celular ou o app do banco para o QR. A venda conclui sozinha quando o Asaas confirmar."}</p>
             {textoPix && <div className="break-all rounded-lg border border-border bg-muted p-3 text-left font-mono text-xs">{textoPix}</div>}
             <div className="grid grid-cols-2 gap-2">
-              <button className={btn} onClick={copiar}>Copiar Pix (copia e cola)</button>
-              <button className={btn2} onClick={() => window.open(`https://wa.me/${tel ? (tel.length <= 11 ? "55" + tel : tel) : ""}?text=${encodeURIComponent(`Pix da sua compra Lardan (venda nº ${v.codigo}). Copie e cole no app do seu banco:\n\n${textoPix}`)}`, "_blank")}><MessageCircle className="mr-1 inline h-4 w-4" />Enviar no WhatsApp</button>
+              <button className={btn} onClick={copiar}>{cartao ? "Copiar link" : "Copiar Pix (copia e cola)"}</button>
+              <button className={btn2} onClick={() => window.open(`https://wa.me/${tel ? (tel.length <= 11 ? "55" + tel : tel) : ""}?text=${encodeURIComponent(msgWhats)}`, "_blank")}><MessageCircle className="mr-1 inline h-4 w-4" />Enviar no WhatsApp</button>
             </div>
             <p className="animate-pulse text-sm">Aguardando confirmação do Asaas…</p>
           </div>
@@ -375,7 +380,7 @@ function VendasHoje({ e, ok }: { e: any; ok: () => void }) {
         <div key={v.id} className="flex flex-wrap items-center gap-3 border-t border-border py-2 text-sm">
           <span className="w-16 font-mono">nº {v.codigo}</span><span className="w-14">{new Date(v.hora).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
           <span className="flex-1">{v.vendedora}</span>
-          <span className={v.status === "cancelada" ? "text-destructive" : v.status === "aguardando_pix" ? "text-muted-foreground" : ""}>{v.status === "concluida" ? "Concluída" : v.status === "cancelada" ? "Cancelada" : "Aguardando Pix"}</span>
+          <span className={v.status === "cancelada" ? "text-destructive" : v.status === "aguardando_pix" ? "text-muted-foreground" : ""}>{v.status === "concluida" ? "Concluída" : v.status === "cancelada" ? "Cancelada" : v.online === "link_cartao" ? "Aguardando cartão" : "Aguardando Pix"}</span>
           <b className="w-24 text-right font-mono">{brl(v.total)}</b>
           <button className="text-xs underline" onClick={() => setVer(ver === v.id ? null : v.id)}>comprovante</button>
           {v.status !== "cancelada" && <button className="text-xs text-destructive underline" onClick={async () => { const m = window.prompt("Motivo do cancelamento:"); if (!m) return; try { await cancelar({ data: { venda: v.id, motivo: m } }); toast.success("Venda cancelada e peças devolvidas ao estoque da loja."); ok(); } catch (x) { erro(x); } }}>cancelar</button>}

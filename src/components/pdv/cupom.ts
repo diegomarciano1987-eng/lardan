@@ -1,6 +1,6 @@
 import logo from "@/assets/lardan-wordmark.png.asset.json";
 
-const FORMA: Record<string, string> = { dinheiro: "Dinheiro", debito: "Cartão de débito", credito: "Cartão de crédito", pix: "Pix" };
+const FORMA: Record<string, string> = { dinheiro: "Dinheiro", debito: "Cartão de débito", credito: "Cartão de crédito", pix: "Pix", link_cartao: "Cartão de crédito (link Asaas)" };
 const brl = (c: number) => ((Number(c) || 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[m]!);
 

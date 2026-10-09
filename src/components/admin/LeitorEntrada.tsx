@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FotoPeca } from "@/components/FotoPeca";
 import { useQuery } from "@tanstack/react-query";
 import { ScanBarcode, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -384,8 +385,9 @@ export function LeitorEntrada() {
             ) : (
               <ul className="space-y-1 text-sm">
                 {Object.entries(porPeca).map(([id, p]) => (
-                  <li key={id} className="flex justify-between gap-2">
-                    <span className="truncate">{p.nome}</span>
+                  <li key={id} className="flex items-center justify-between gap-2">
+                    <FotoPeca variantId={id} alt={p.nome} size="xs" />
+                    <span className="flex-1 truncate">{p.nome}</span>
                     <strong className="tabular-nums">{p.qtd}</strong>
                   </li>
                 ))}

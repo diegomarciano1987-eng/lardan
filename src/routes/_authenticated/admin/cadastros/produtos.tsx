@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FotoPeca } from "@/components/FotoPeca";
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -108,6 +109,7 @@ function ProdutosPage() {
     categorias.data?.find((c) => c.id === id)?.name ?? "—";
 
   const columns: Column<ProdutoLinha>[] = [
+    { key: "foto", header: "Foto", render: (r) => <FotoPeca productId={r.id} alt={r.name} /> },
     { key: "name", header: "Produto", render: (r) => r.name },
     { key: "legacy_code", header: "Código", render: (r) => <span className="num">{r.legacy_code ?? "—"}</span> },
     { key: "categoria", header: "Categoria", render: (r) => nomeCategoria(r.category_id) },

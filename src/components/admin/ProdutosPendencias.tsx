@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FotoPeca } from "@/components/FotoPeca";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,6 +60,7 @@ export function ProdutosPendencias({ tipoInicial = "sem_custo" }: { tipoInicial?
   });
 
   const columns: Column<Pendencia>[] = [
+    { key: "foto", header: "Foto", render: (r) => <FotoPeca productId={r.id} alt={r.name} /> },
     { key: "name", header: "Produto", render: (r) => r.name },
     {
       key: "barcode",

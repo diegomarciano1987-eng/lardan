@@ -12324,6 +12324,10 @@ export type Database = {
         }
         Returns: Json
       }
+      fin_mesa_baixas_existentes: {
+        Args: { _busca?: string; _line_id: string }
+        Returns: Json
+      }
       fin_mesa_centros: { Args: never; Returns: Json }
       fin_mesa_contrapartes: { Args: { _busca?: string }; Returns: Json }
       fin_mesa_novo_conciliar: { Args: { _payload: Json }; Returns: Json }
@@ -12388,6 +12392,15 @@ export type Database = {
         Returns: Json
       }
       fin_reconcile: { Args: { _payload: Json }; Returns: Json }
+      fin_reconcile_baixa_existente: {
+        Args: {
+          _idempotency_key?: string
+          _line_ids: string[]
+          _observacao?: string
+          _settlement: string
+        }
+        Returns: Json
+      }
       fin_reconcile_undo: {
         Args: { _motivo: string; _reconciliation: string }
         Returns: string

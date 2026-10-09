@@ -967,7 +967,7 @@ function BaixasJaRealizadas({ linha, valorLinha, podeConciliar, onFeito }: {
   const q = useQuery({
     queryKey: ["mesa-baixas-existentes", linha.id, lenta],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("fin_mesa_baixas_existentes", { _line_id: linha.id, _busca: lenta || undefined });
+      const { data, error } = await supabase.rpc("fin_mesa_baixas_existentes", { _line_id: linha.id, _busca: lenta });
       if (error) throw error;
       return (data ?? []) as unknown as BaixaExistente[];
     },

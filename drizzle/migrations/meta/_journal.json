@@ -316,6 +316,13 @@
       "when": 1791550765391,
       "tag": "0044_fin_expurgo_controlado_e_importacao_transferencias",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1791552500581,
+      "tag": "0045_pdv_busca_referencia_nome",
+      "breakpoints": true
     }
   ]
 }

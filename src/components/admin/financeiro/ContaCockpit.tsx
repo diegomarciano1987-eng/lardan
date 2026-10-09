@@ -383,7 +383,6 @@ function ExcluirConta({ id }: { id: string }) {
   const navigate = useNavigate();
   const [aberto, setAberto] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
-  const [dataTransf, setDataTransf] = React.useState<Date | undefined>(() => new Date());
   const excluir = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.rpc("fin_account_excluir" as never, { _id: id, _motivo: motivo } as never);
@@ -441,6 +440,7 @@ function Transferir({ id }: { id: string }) {
   const [outra, setOutra] = React.useState("");
   const [valor, setValor] = React.useState("");
   const [motivo, setMotivo] = React.useState("");
+  const [dataTransf, setDataTransf] = React.useState<Date | undefined>(() => new Date());
   const [chave, setChave] = React.useState(() => crypto.randomUUID());
   const opcoes = (contas.data ?? [])
     .filter((c) => c.id !== id && c.is_active)

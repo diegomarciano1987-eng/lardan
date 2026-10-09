@@ -136,7 +136,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
         return (
           <li key={i.variant_id} className={`${cartao} ${a.grade === "lista" ? "flex gap-3" : "flex flex-col"}`}>
             <div className={`relative overflow-hidden bg-[var(--v-line)] ${a.cartao === "suave" ? "rounded-xl" : ""} ${a.grade === "lista" ? "size-24 shrink-0" : a.tema === "editorial" ? "aspect-[3/4]" : "aspect-square"}`}>
-              {src && <img src={src} alt={i.produto} loading="lazy" width={800} height={800} className="size-full object-cover" />}
+              {src && <img src={src} alt={i.produto} loading="lazy" width={800} height={800} className="size-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
               {!real && i.ilustracao && (
                 <span className="absolute bottom-1.5 left-1.5 rounded-full bg-[var(--v-bg)]/85 px-2 py-0.5 text-[0.6rem] font-medium tracking-wide text-[var(--v-muted)]">
                   Imagem ilustrativa

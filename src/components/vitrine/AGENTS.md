@@ -6,3 +6,4 @@
 - Help content lives in help_articles (audience publico|consultora, rascunho|publicado, RLS by audience, edited only by can_manage_content); screens open it in a side sheet via BotaoAjuda so in-progress forms are never lost.
 - Consultant area uses the .area-consultora scope and keeps the active tab in ?aba= so back/refresh return there.
 - Showcase addresses are checked by showcase_slug_reserved (site routes, categories, pages, showcase_slug_history); why: one consultant's link can never be taken by another.
+- Product photos are served publicly by /api/public/midia only via media_publica_ok (published product/hero, or variant currently available in an operating kit cycle); why: draft catalog stays private while consultant showcases always show their pieces.

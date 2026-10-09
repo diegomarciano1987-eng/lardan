@@ -24,33 +24,8 @@ export const Route = createFileRoute("/api/public/midia/$id")({
           return new Response("Not found", { status: 404 });
         }
 
-        // só imagens ligadas a algo publicado saem daqui
-        const [vinculo, heroCategoria, heroColecao] = await Promise.all([
-          supabaseAdmin
-            .from("product_media")
-            .select("product_id, products!inner(status)")
-            .eq("media_id", id)
-            .eq("products.status", "publicado")
-            .limit(1),
-          supabaseAdmin
-            .from("categories")
-            .select("id")
-            .eq("hero_media_id", id)
-            .eq("status", "publicado")
-            .limit(1),
-          supabaseAdmin
-            .from("collections")
-            .select("id")
-            .eq("hero_media_id", id)
-            .eq("status", "publicado")
-            .limit(1),
-        ]);
-
-        const publicoAgora =
-          (vinculo.data?.length ?? 0) > 0 ||
-          (heroCategoria.data?.length ?? 0) > 0 ||
-          (heroColecao.data?.length ?? 0) > 0;
-
+        // só imagens de peça publicada, capa publicada ou peça hoje na maleta de uma consultora em operação
+        const { data: publicoAgora } = await supabaseAdmin.rpc("media_publica_ok", { _media: id });
         if (!publicoAgora) {
           return new Response("Not found", { status: 404 });
         }

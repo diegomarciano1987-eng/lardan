@@ -207,10 +207,19 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
     setItens((xs) => { const f = xs.find((x) => x.variant_id === r.id); if (f) return xs.map((x) => x === f ? { ...x, qtd: x.qtd + 1 } : x); return [...xs, { variant_id: r.id, nome: r.nome, sku: r.sku, preco: Number(r.preco), qtd: 1, saldo: Number(r.saldo) }]; });
     setQ(""); setRes([]);
   };
+  const seq = React.useRef(0);
   const procurar = async (ev?: React.FormEvent) => {
     ev?.preventDefault(); if (q.trim().length < 2) return;
-    try { const r = await buscar({ data: { q } }); if (r.length === 1 && r[0].exato) add(r[0]); else setRes(r); if (!r.length) toast.message("Nenhuma peça encontrada."); } catch (x) { erro(x); }
+    const n = ++seq.current;
+    try { const r = await buscar({ data: { q } }); if (n !== seq.current) return; if (r.length === 1 && r[0].exato) add(r[0]); else setRes(r); if (!r.length) toast.message("Nenhuma peça encontrada."); } catch (x) { erro(x); }
   };
+  // Busca enquanto digita (nome/referência); Enter do leitor continua imediato.
+  React.useEffect(() => {
+    const t = q.trim();
+    if (t.length < 3 || /^\d{6,}$/.test(t)) { if (t.length < 2) setRes([]); return; }
+    const h = setTimeout(async () => { const n = ++seq.current; try { const r = await buscar({ data: { q: t } }); if (n === seq.current) setRes(r); } catch { /* silencioso */ } }, 300);
+    return () => clearTimeout(h);
+  }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
   const addPag = () => {
     const v = cents(val) || falta; if (v <= 0) return;
     if (v > falta) { toast.error("Valor maior que o que falta."); return; }
@@ -240,7 +249,7 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
     <div className="grid gap-6 p-6 lg:grid-cols-[1fr_420px]">
       <section className="space-y-4">
         <form onSubmit={procurar} className="flex gap-2">
-          <div className="relative flex-1"><Search className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" /><input className={inp + " pl-9"} autoFocus placeholder="Leia o código de barras ou digite código / nome da peça" value={q} onChange={(x) => setQ(x.target.value)} /></div>
+          <div className="relative flex-1"><Search className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" /><input className={inp + " pl-9"} autoFocus placeholder="Bipe o código de barras, ou digite a referência (ex.: AN4668) ou o nome da peça" value={q} onChange={(x) => setQ(x.target.value)} /></div>
           <button className={btn}>Buscar</button>
         </form>
         {res.length > 0 && <div className="divide-y divide-border rounded-xl border border-border">{res.map((r) => (

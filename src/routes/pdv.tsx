@@ -259,7 +259,7 @@ function Venda({ e, ok, pre, limparPre }: { e: any; ok: () => void; pre: Cliente
         <div className="rounded-xl border border-border">
           {itens.length === 0 ? <p className="p-8 text-center text-sm text-muted-foreground">Nenhuma peça no carrinho.</p> : itens.map((i) => (
             <div key={i.variant_id} className="flex items-center gap-3 border-b border-border p-3 last:border-0">
-              <div className="flex-1"><p className="text-sm">{i.nome}</p><p className="text-xs text-muted-foreground">{i.sku} · {brl(i.preco)} {i.qtd > i.saldo && <span className="text-destructive">· só {i.saldo} na loja</span>}</p></div>
+              <div className="flex-1"><p className="text-sm">{i.nome}</p><p className="text-xs text-muted-foreground">{i.sku} · {brl(i.preco)} {i.qtd > i.saldo && <span>· vem do depósito na venda</span>}</p></div>
               <input className="h-10 w-16 rounded-lg border border-border bg-background text-center" type="number" min={1} value={i.qtd} onChange={(x) => setItens(itens.map((y) => y === i ? { ...y, qtd: Math.max(1, Number(x.target.value) || 1) } : y))} />
               <b className="w-24 text-right font-mono">{brl(i.preco * i.qtd)}</b>
               <button onClick={() => setItens(itens.filter((y) => y !== i))} aria-label="Remover"><Trash2 className="h-4 w-4 text-muted-foreground" /></button>

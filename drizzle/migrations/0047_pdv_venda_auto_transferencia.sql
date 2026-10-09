@@ -1,0 +1,1 @@
+-- PDV: peça bipada/buscada sem saldo na loja vem automaticamente do Depósito Principal (DEP-01); sem saldo lá, entra marcada para conferência.

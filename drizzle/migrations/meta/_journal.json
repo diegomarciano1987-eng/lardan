@@ -330,6 +330,20 @@
       "when": 1791552854608,
       "tag": "0046_pdv_pix_padroes_link_cartao",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1791554620653,
+      "tag": "0047_pdv_venda_auto_transferencia",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1791554674326,
+      "tag": "0048_pdv_venda_auto_transferencia_funcao",
+      "breakpoints": true
     }
   ]
 }

@@ -128,7 +128,7 @@ export function FotoPeca({
       width={80}
       height={80}
       className={`${cls} bg-surface object-cover`}
-      onError={() => setFalhou(true)}
+      onError={aoFalhar}
     />
   );
 }

@@ -8,7 +8,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { maskCepInput, maskPhoneInput } from "@/lib/docs-br";
 import { UFS } from "@/lib/catalog";
 import { consultarCepPublico } from "@/lib/br/lookup.functions";
-import { pdvClienteSalvar, pdvClientes, pdvVendas, pdvCancelar, type ClientePdv } from "@/lib/pdv.functions";
+import { pdvClienteSalvar, pdvClientes, pdvVendas, pdvCancelar, pdvLinksEnviados, type ClientePdv } from "@/lib/pdv.functions";
 
 export const brl = (c: number) => (Number(c || 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const inp = "h-12 w-full rounded-lg border border-border bg-background px-3 text-base";

@@ -323,6 +323,13 @@
       "when": 1791552500581,
       "tag": "0045_pdv_busca_referencia_nome",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1791552854608,
+      "tag": "0046_pdv_pix_padroes_link_cartao",
+      "breakpoints": true
     }
   ]
 }

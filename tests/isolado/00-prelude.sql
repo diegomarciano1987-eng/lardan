@@ -63,7 +63,7 @@ stable
 as $$
   select nullif(
     coalesce(
-      current_setting('lardan.test_uid', true),
+      nullif(current_setting('lardan.test_uid', true), ''),
       (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')
     ),
     ''
@@ -142,3 +142,11 @@ alter default privileges in schema public grant usage, select on sequences to an
 -- ------------------------------------------------- storage.extension
 -- A nuvem traz esta função; políticas de armazenamento a usam.
 create or replace function storage.extension(name text) returns text language sql immutable as $$ select lower(substring(name from '\.([^./]+)$')) $$;
+
+-- ------------------------------------------------- cron (stub)
+-- pg_cron não existe no Postgres local; este esquema só registra os agendamentos.
+create schema if not exists cron;
+create table if not exists cron.job(jobid bigserial primary key, jobname text unique, schedule text, command text);
+create or replace function cron.schedule(_n text, _s text, _c text) returns bigint language sql as $$
+  insert into cron.job(jobname,schedule,command) values (_n,_s,_c) on conflict (jobname) do update set schedule=excluded.schedule, command=excluded.command returning jobid $$;
+create or replace function cron.unschedule(_n text) returns boolean language sql as $$ delete from cron.job where jobname=_n returning true $$;

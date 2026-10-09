@@ -358,6 +358,13 @@
       "when": 1791565416113,
       "tag": "0050_mesa_conciliar_baixa_existente",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1791565590987,
+      "tag": "0051_mesa_baixas_existentes_sem_unaccent",
+      "breakpoints": true
     }
   ]
 }

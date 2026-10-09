@@ -351,6 +351,13 @@
       "when": 1791564436209,
       "tag": "0049_estorno_data_original_e_planos_500",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1791565416113,
+      "tag": "0050_mesa_conciliar_baixa_existente",
+      "breakpoints": true
     }
   ]
 }

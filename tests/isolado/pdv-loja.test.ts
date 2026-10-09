@@ -138,6 +138,33 @@ describe("PDV Loja", async () => {
     expect(await saldo(variante, loc)).toBe(1);
   });
 
+  test("loja sem empresa herda a única empresa; com responsável, Pix e link de cartão ficam liberados", async () => {
+    const ents = (await adm.unsafe("select count(*)::int n from public.business_entities where is_active")) as { n: number }[];
+    if (ents[0]!.n === 0) await adm.unsafe("insert into public.business_entities(legal_name, trade_name, doc, is_active) values ('LARDAN PROVA','LARDAN','00000000000191',true)");
+    await adm.unsafe("update public.business_entities set is_active = (id = (select id from public.business_entities order by created_at limit 1))");
+    await adm.unsafe("update public.pdv_unidades set business_entity_id=null, pix_responsavel_user_id=$2 where id=$1", [unidade, master.uid]);
+    const [u] = (await adm.unsafe("select business_entity_id from public.pdv_unidades where id=$1", [unidade])) as { business_entity_id: string | null }[];
+    expect(u!.business_entity_id).not.toBeNull();
+    const est = await rpcServico<{ unidade: { pix: boolean } }>("pdv_estado", { _token_hash: tok });
+    expect(est.dados.unidade.pix).toBe(true);
+    const semCpf = await rpcServico("pdv_venda_concluir", { _token_hash: tok, _p: { idem: `lc0-${numero}`, itens: [{ variant_id: variante, qtd: 1 }], desconto_cents: 0, cliente: { nome: "Ana" }, pagamentos: [{ forma: "link_cartao", valor_cents: 20000 }] } });
+    expect(semCpf.erro).toContain("CPF");
+    const dois = await rpcServico("pdv_venda_concluir", { _token_hash: tok, _p: { idem: `lc1-${numero}`, itens: [{ variant_id: variante, qtd: 1 }], desconto_cents: 0, cliente: { nome: "Ana", doc: "52998224725" }, pagamentos: [{ forma: "pix", valor_cents: 10000 }, { forma: "link_cartao", valor_cents: 10000 }] } });
+    expect(dois.erro).toContain("único");
+    const r = await rpcServico<{ venda: string; status: string }>("pdv_venda_concluir", { _token_hash: tok, _p: { idem: `lc2-${numero}`, itens: [{ variant_id: variante, qtd: 1 }], desconto_cents: 0, cliente: { nome: "Ana Cartão", doc: "52998224725" }, pagamentos: [{ forma: "link_cartao", valor_cents: 20000 }] } });
+    expect(r.erro).toBeNull(); expect(r.dados.status).toBe("aguardando_pix");
+    const [pg] = (await adm.unsafe("select forma, status from public.pdv_pagamentos where venda_id=$1", [r.dados.venda])) as { forma: string; status: string }[];
+    expect(pg!.forma).toBe("link_cartao"); expect(pg!.status).toBe("pendente");
+    const t = await rpcServico<{ installment_id: string; forma: string }>("pdv_pix_titulo", { _token_hash: tok, _venda: r.dados.venda });
+    expect(t.erro).toBeNull(); expect(t.dados.forma).toBe("link_cartao");
+    const [ti] = (await adm.unsafe("select t.business_entity_id, t.direction::text d, t.descricao from public.financial_installments i join public.financial_titles t on t.id=i.title_id where i.id=$1", [t.dados.installment_id])) as { business_entity_id: string; d: string; descricao: string }[];
+    expect(ti!.business_entity_id).toBe(u!.business_entity_id); expect(ti!.d).toBe("receivable"); expect(ti!.descricao).toContain("link cartão");
+    const s = await rpcServico<{ status: string }>("pdv_pix_situacao", { _token_hash: tok, _venda: r.dados.venda });
+    expect(s.dados.status).toBe("aguardando_pix");
+    expect((await rpcServico("pdv_venda_cancelar", { _token_hash: tok, _venda: r.dados.venda, _motivo: "prova link" })).erro).toBeNull();
+    expect(await saldo(variante, loc)).toBe(1);
+  });
+
   test("vendedora não cancela concluída; supervisora cancela e estoque volta", async () => {
     expect((await rpcServico("pdv_venda_cancelar", { _token_hash: tok, _venda: venda, _motivo: "teste" })).erro).toContain("supervisora");
     await rpcServico("pdv_operadora", { _token_hash: tok, _membro: mS, _pin: "9999" });

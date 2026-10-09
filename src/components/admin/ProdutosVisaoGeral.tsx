@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { FotoPeca } from "@/components/FotoPeca";
 import { useNavigate } from "@tanstack/react-router";
 import {
   AlertTriangle,
@@ -128,6 +129,7 @@ function ListaRanking({
                 className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition hover:bg-line-soft/60"
               >
                 <span className="num w-5 shrink-0 text-[0.75rem] text-ledger-muted">{idx + 1}</span>
+                    <FotoPeca productId={i.product_id} alt={i.produto} size="xs" />
                 <span className="min-w-0 flex-1 truncate text-[0.875rem] text-ledger-text">{i.name}</span>
                 <span className="num shrink-0 text-[0.875rem] font-semibold text-ledger-text">
                   {metrica(i)}

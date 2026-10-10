@@ -34,8 +34,11 @@ interface Projecao {
   vencidos_pagar_cents: number;
   fiado_no_periodo_cents: number;
   cheques_sem_data_cents: number;
+  cheques_ja_no_titulo_cents?: number;
+  fiado_pct?: number;
+  fiado_pct_historico?: number | null;
   criterio: string;
-  linhas: { data: string; receber_cents: number; cheques_cents: number; pagar_cents: number; outros_cents: number; saldo_projetado_cents: number }[];
+  linhas: { data: string; receber_cents: number; fiado_cents?: number; cheques_cents: number; pagar_cents: number; outros_cents: number; saldo_projetado_cents: number }[];
 }
 
 async function rpc<T>(f: string, a: Record<string, unknown>): Promise<T> {
@@ -144,17 +147,44 @@ function DfcPainel() {
 
 function ProjecaoPainel() {
   const [dias, setDias] = React.useState(60);
-  const q = useQuery({ queryKey: ["fin-projecao", dias], queryFn: () => rpc<Projecao>("fin_projecao_diaria", { _dias: dias }) });
+  const [comFiado, setComFiado] = React.useState(false);
+  const [pctTxt, setPctTxt] = React.useState("");
+  const pct = comFiado ? Math.min(100, Math.max(0, Number(pctTxt.replace(",", ".")) || 0)) : null;
+  const q = useQuery({
+    queryKey: ["fin-projecao", dias, pct],
+    queryFn: () => rpc<Projecao>("fin_projecao_diaria", { _dias: dias, _fiado_pct: pct }),
+  });
   const d = q.data;
+  const hist = d?.fiado_pct_historico ?? null;
+  React.useEffect(() => {
+    if (comFiado && pctTxt === "" && hist != null) setPctTxt(String(hist).replace(".", ","));
+  }, [comFiado, hist, pctTxt]);
   const menor = d?.linhas.reduce((m, l) => (l.saldo_projetado_cents < m.saldo_projetado_cents ? l : m), d.linhas[0]!);
   return (
     <Panel title="Fluxo de caixa projetado — dia a dia">
-      <div className="mb-3 flex gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         {[30, 60, 90].map((n) => (
           <button key={n} type="button" onClick={() => setDias(n)} className={`admin-btn ${dias === n ? "admin-btn-primary" : ""}`}>
             {n} dias
           </button>
         ))}
+        <span className="mx-2 h-6 w-px bg-line-soft" />
+        <button type="button" onClick={() => setComFiado((v) => !v)} className={`admin-btn ${comFiado ? "admin-btn-primary" : ""}`}>
+          {comFiado ? "Somando fiado previsto" : "Somar fiado/consignado previsto"}
+        </button>
+        {comFiado ? (
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              inputMode="decimal"
+              value={pctTxt}
+              onChange={(e) => setPctTxt(e.target.value.replace(/[^\d,.]/g, ""))}
+              className="admin-input w-20 text-right tabular-nums"
+              aria-label="Percentual de recebimento do fiado"
+            />
+            % de recebimento
+            {hist != null ? <span className="text-xs text-ledger-muted">(histórico: {String(hist).replace(".", ",")}%)</span> : null}
+          </label>
+        ) : null}
       </div>
       {q.isLoading ? <Skeleton className="h-40" /> : null}
       {q.error ? <ErrorState message={(q.error as Error).message} /> : null}
@@ -168,7 +198,9 @@ function ProjecaoPainel() {
             <Caixa rotulo="Vencido a pagar (fora)" v={d.vencidos_pagar_cents} />
           </div>
           <p className="text-xs text-ledger-muted">
-            Fiado histórico da Cobrança vencendo no período (fora da linha): {formatBRLFromCents(d.fiado_no_periodo_cents)} · cheques em mãos já vencidos ou sem data: {formatBRLFromCents(d.cheques_sem_data_cents)}
+            Fiado histórico vencendo no período: {formatBRLFromCents(d.fiado_no_periodo_cents)}
+            {comFiado ? ` (somando ${String(d.fiado_pct ?? 0).replace(".", ",")}% na linha)` : " (fora da linha)"} · cheques em mãos já vencidos ou sem data: {formatBRLFromCents(d.cheques_sem_data_cents)}
+            {d.cheques_ja_no_titulo_cents ? ` · cheques que já estão como parcela a receber (não somados de novo): ${formatBRLFromCents(d.cheques_ja_no_titulo_cents)}` : ""}
           </p>
           <div className="h-56">
             <ResponsiveContainer>
@@ -186,10 +218,10 @@ function ProjecaoPainel() {
                 <tr><th className="py-2">Dia</th><th className="text-right">A receber</th><th className="text-right">Cheques</th><th className="text-right">A pagar</th><th className="text-right">Outros</th><th className="text-right">Saldo previsto</th></tr>
               </thead>
               <tbody>
-                {d.linhas.filter((l) => l.receber_cents || l.cheques_cents || l.pagar_cents || l.outros_cents).map((l) => (
+                {d.linhas.filter((l) => l.receber_cents || l.fiado_cents || l.cheques_cents || l.pagar_cents || l.outros_cents).map((l) => (
                   <tr key={l.data} className="border-t border-line-soft">
                     <td className="py-1.5">{dataBR(l.data)}</td>
-                    <td className="text-right tabular-nums">{formatBRLFromCents(l.receber_cents)}</td>
+                    <td className="text-right tabular-nums">{formatBRLFromCents(l.receber_cents + (l.fiado_cents ?? 0))}</td>
                     <td className="text-right tabular-nums">{formatBRLFromCents(l.cheques_cents)}</td>
                     <td className="text-right tabular-nums">{formatBRLFromCents(-l.pagar_cents)}</td>
                     <td className="text-right tabular-nums">{formatBRLFromCents(l.outros_cents)}</td>

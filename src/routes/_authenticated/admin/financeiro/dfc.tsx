@@ -34,8 +34,11 @@ interface Projecao {
   vencidos_pagar_cents: number;
   fiado_no_periodo_cents: number;
   cheques_sem_data_cents: number;
+  cheques_ja_no_titulo_cents?: number;
+  fiado_pct?: number;
+  fiado_pct_historico?: number | null;
   criterio: string;
-  linhas: { data: string; receber_cents: number; cheques_cents: number; pagar_cents: number; outros_cents: number; saldo_projetado_cents: number }[];
+  linhas: { data: string; receber_cents: number; fiado_cents?: number; cheques_cents: number; pagar_cents: number; outros_cents: number; saldo_projetado_cents: number }[];
 }
 
 async function rpc<T>(f: string, a: Record<string, unknown>): Promise<T> {

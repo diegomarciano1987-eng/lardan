@@ -104,7 +104,6 @@ export default function MapaCidadeLeaflet({
       const enquadrar = () => {
         mapa.invalidateSize();
         const b = L.latLngBounds(base.map((g) => [g.lat, g.lng] as [number, number])).pad(0.12);
-        console.log("[mapa] enquadrar", base.length, JSON.stringify(b.toBBoxString()), "size", JSON.stringify(mapa.getSize()));
         mapa.fitBounds(b, { maxZoom: 13 });
       };
       enquadrar();

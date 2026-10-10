@@ -32,6 +32,7 @@ export function PainelRepresentante({ rep }: { rep: string }) {
   const mp = useQuery({ queryKey: ["rep", rep, "mapa"], queryFn: () => chamar<Mapa>("rep_portal_mapa", { _rep: rep }) });
   const grupos: GrupoCep[] = (mp.data?.cidades ?? []).map((c) => ({ chave: c.chave, lat: c.lat, lng: c.lng, cep: null, total: c.total, ativas: c.ativas, aproximado: false }));
   const [sel, setSel] = React.useState<string | null>(null);
+  const [ficha, setFicha] = React.useState<string | null>(null);
   const cidadeSel = mp.data?.cidades.find((c) => c.chave === sel);
   const r = rk.data;
 

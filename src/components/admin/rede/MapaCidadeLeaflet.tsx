@@ -59,6 +59,7 @@ export default function MapaCidadeLeaflet({
     }).addTo(mapa);
     camadaRef.current = L.layerGroup().addTo(mapa);
     mapaRef.current = mapa;
+    ultimosGruposRef.current = null;
     const t = setTimeout(() => mapa.invalidateSize(), 250);
     const ro = new ResizeObserver(() => mapa.invalidateSize());
     ro.observe(divRef.current);

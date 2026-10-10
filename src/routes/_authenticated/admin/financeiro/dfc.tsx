@@ -218,10 +218,10 @@ function ProjecaoPainel() {
                 <tr><th className="py-2">Dia</th><th className="text-right">A receber</th><th className="text-right">Cheques</th><th className="text-right">A pagar</th><th className="text-right">Outros</th><th className="text-right">Saldo previsto</th></tr>
               </thead>
               <tbody>
-                {d.linhas.filter((l) => l.receber_cents || l.cheques_cents || l.pagar_cents || l.outros_cents).map((l) => (
+                {d.linhas.filter((l) => l.receber_cents || l.fiado_cents || l.cheques_cents || l.pagar_cents || l.outros_cents).map((l) => (
                   <tr key={l.data} className="border-t border-line-soft">
                     <td className="py-1.5">{dataBR(l.data)}</td>
-                    <td className="text-right tabular-nums">{formatBRLFromCents(l.receber_cents)}</td>
+                    <td className="text-right tabular-nums">{formatBRLFromCents(l.receber_cents + (l.fiado_cents ?? 0))}</td>
                     <td className="text-right tabular-nums">{formatBRLFromCents(l.cheques_cents)}</td>
                     <td className="text-right tabular-nums">{formatBRLFromCents(-l.pagar_cents)}</td>
                     <td className="text-right tabular-nums">{formatBRLFromCents(l.outros_cents)}</td>

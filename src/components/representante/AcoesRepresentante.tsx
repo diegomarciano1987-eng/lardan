@@ -34,7 +34,7 @@ type Alvo = { party_id: string; display_name: string };
  * Cobrança de uma parcela existente (c) ou com valor digitado (avulsa).
  * Valor digitado cria um título a receber da Lardan (ex.: acerto de maleta) e cobra no Asaas.
  */
-export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo, antes }: { c?: RepCobranca; avulsa?: Alvo; rep: string; whatsapp?: string | null; rotulo?: string; antes?: () => Promise<unknown> }) {
+export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo, antes }: { c?: RepCobranca; avulsa?: Alvo; rep: string; whatsapp?: string | null; rotulo?: string; antes?: (() => Promise<unknown>) | undefined }) {
   const alvo: Alvo = c ? { party_id: c.party_id, display_name: c.display_name } : avulsa!;
   const primeiro = alvo.display_name.split(" ")[0] ?? "";
   const [aberto, setAberto] = React.useState(false);

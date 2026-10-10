@@ -83,7 +83,32 @@ export function PainelRepresentante({ rep }: { rep: string }) {
             </React.Suspense>
           </ClientOnly>
         ) : mp.data ? <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Sem dados: nenhuma consultora com endereço localizado.</p> : null}
-        {cidadeSel && <p className="text-sm"><b>{cidadeSel.city}/{cidadeSel.uf}</b> · {cidadeSel.total} consultoras · {cidadeSel.ativas} ativas</p>}
+        {cidadeSel && (
+          <div className="space-y-3 rounded-xl border border-border bg-muted/40 p-4">
+            <p className="text-sm font-semibold">
+              {cidadeSel.city}/{cidadeSel.uf} · {cidadeSel.total} consultoras · {cidadeSel.ativas} ativas
+            </p>
+            {(cidadeSel.pessoas ?? []).length > 0 ? (
+              <ul className="max-h-64 space-y-1 overflow-y-auto">
+                {(cidadeSel.pessoas ?? []).map((p) => (
+                  <li key={p.id}>
+                    <button type="button" onClick={() => setFicha(p.id)}
+                      className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-background">
+                      <span className="min-w-0 truncate">{p.nome}</span>
+                      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nomes indisponíveis para esta cidade.</p>
+            )}
+            {cidadeSel.total > (cidadeSel.pessoas?.length ?? 0) && (
+              <p className="text-xs text-muted-foreground">E mais {cidadeSel.total - (cidadeSel.pessoas?.length ?? 0)} nesta cidade — use a busca na aba Consultoras.</p>
+            )}
+          </div>
+        )}
+        <FichaConsultora party={ficha} rep={rep} onClose={() => setFicha(null)} />
       </section>
     </div>
   );

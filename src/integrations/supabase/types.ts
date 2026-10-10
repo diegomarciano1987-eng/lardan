@@ -12656,7 +12656,10 @@ export type Database = {
         Args: { _ent: string; _mes: string; _motivo: string }
         Returns: Json
       }
-      fin_projecao_diaria: { Args: { _dias?: number }; Returns: Json }
+      fin_projecao_diaria: {
+        Args: { _dias?: number; _fiado_pct?: number }
+        Returns: Json
+      }
       fin_reconcile: { Args: { _payload: Json }; Returns: Json }
       fin_reconcile_baixa_existente: {
         Args: {

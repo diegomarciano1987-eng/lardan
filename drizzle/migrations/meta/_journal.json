@@ -456,6 +456,13 @@
       "when": 1791654859626,
       "tag": "0064_fin_filtro_gerado_por_representante",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1791672857194,
+      "tag": "0065_fin_asaas_vinculo_fatura_correcoes",
+      "breakpoints": true
     }
   ]
 }

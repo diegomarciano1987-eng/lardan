@@ -46,7 +46,7 @@ export default function MapaCidadeLeaflet({
   const mapaRef = useRef<L.Map | null>(null);
   const camadaRef = useRef<L.LayerGroup | null>(null);
   const contornoRef = useRef<L.GeoJSON | null>(null);
-  const enquadrado = useRef(false);
+  const ultimosGruposRef = useRef<GrupoCep[] | null>(null);
   const cbRef = useRef(onSelecionar);
   cbRef.current = onSelecionar;
 
@@ -59,6 +59,7 @@ export default function MapaCidadeLeaflet({
     }).addTo(mapa);
     camadaRef.current = L.layerGroup().addTo(mapa);
     mapaRef.current = mapa;
+    ultimosGruposRef.current = null;
     const t = setTimeout(() => mapa.invalidateSize(), 250);
     const ro = new ResizeObserver(() => mapa.invalidateSize());
     ro.observe(divRef.current);
@@ -96,11 +97,17 @@ export default function MapaCidadeLeaflet({
       m.on("click", () => cbRef.current(g.chave));
       camada.addLayer(m);
     }
-    if (!enquadrado.current && grupos.length > 0) {
+    if (grupos.length > 0 && ultimosGruposRef.current !== grupos) {
+      ultimosGruposRef.current = grupos;
       const precisos = grupos.filter((g) => !g.aproximado);
       const base = precisos.length >= 3 ? precisos : grupos;
-      mapa.fitBounds(L.latLngBounds(base.map((g) => [g.lat, g.lng] as [number, number])).pad(0.08), { maxZoom: 15 });
-      enquadrado.current = true;
+      const enquadrar = () => {
+        mapa.invalidateSize();
+        const b = L.latLngBounds(base.map((g) => [g.lat, g.lng] as [number, number])).pad(0.12);
+        mapa.fitBounds(b, { maxZoom: 13 });
+      };
+      enquadrar();
+      setTimeout(enquadrar, 300);
     }
   }, [grupos, selecionado]);
 

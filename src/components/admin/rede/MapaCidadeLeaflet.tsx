@@ -46,7 +46,7 @@ export default function MapaCidadeLeaflet({
   const mapaRef = useRef<L.Map | null>(null);
   const camadaRef = useRef<L.LayerGroup | null>(null);
   const contornoRef = useRef<L.GeoJSON | null>(null);
-  const enquadrado = useRef(false);
+  const ultimosGruposRef = useRef<GrupoCep[] | null>(null);
   const cbRef = useRef(onSelecionar);
   cbRef.current = onSelecionar;
 

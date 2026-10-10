@@ -12572,6 +12572,7 @@ export type Database = {
           _direction: string
           _limit?: number
           _offset?: number
+          _rep?: string
           _search?: string
           _situacao?: string
         }
@@ -12670,6 +12671,7 @@ export type Database = {
         Args: { _motivo: string; _reconciliation: string }
         Returns: string
       }
+      fin_representantes_filtro: { Args: never; Returns: Json }
       fin_safe_date: { Args: { _t: string }; Returns: string }
       fin_saldo_conta: {
         Args: { _ate: string; _conta: string }
@@ -12724,6 +12726,7 @@ export type Database = {
           _entidade?: string
           _limit?: number
           _offset?: number
+          _rep?: string
           _search?: string
           _sem_classificacao?: boolean
           _situacao?: string
@@ -13633,6 +13636,13 @@ export type Database = {
         Returns: boolean
       }
       rep_representantes_lista: { Args: never; Returns: Json }
+      rep_titulos_gerados: {
+        Args: never
+        Returns: {
+          rep_party_id: string
+          title_id: string
+        }[]
+      }
       resync_all_public_prices: { Args: never; Returns: number }
       revoke_role: {
         Args: {

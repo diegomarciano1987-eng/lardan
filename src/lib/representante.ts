@@ -23,8 +23,22 @@ async function chamar<T>(fn: string, args: Record<string, unknown>): Promise<T> 
 export const repResumo = (rep: string) => chamar<RepResumo>("rep_portal_resumo", { _rep: rep });
 export const repConsultoras = (rep: string, busca: string, filtro: string, pagina: number) =>
   chamar<Pagina<RepConsultora>>("rep_portal_consultoras", { _rep: rep, _busca: busca, _filtro: filtro, _pagina: pagina });
-export const repCobrancas = (rep: string, filtro: string, pagina: number) =>
-  chamar<Pagina<RepCobranca>>("rep_portal_cobrancas", { _rep: rep, _filtro: filtro, _pagina: pagina });
+export const repCobrancas = (rep: string, filtro: string, pagina: number, busca = "") =>
+  chamar<Pagina<RepCobranca>>("rep_portal_cobrancas", { _rep: rep, _filtro: filtro, _pagina: pagina, _busca: busca || null });
+
+export type RepFicha = {
+  id: string; code: string; nome: string; status: string; doc_masked: string | null; rep: string;
+  contatos: { kind: string; value: string }[];
+  endereco: { rua: string | null; numero: string | null; complemento: string | null; bairro: string | null; cidade: string | null; uf: string | null; cep: string | null; referencia: string | null } | null;
+  parcelas: RepCobranca[]; aberto_cents: number; vencido_cents: number;
+  cheques: { numero: string; valor_cents: number; bom_para: string; status: string }[];
+};
+export const repFicha = (party: string) => chamar<RepFicha>("rep_consultora_ficha", { _party: party });
+export const repAvulsa = (party: string, valorCents: number, descricao: string, chave: string) =>
+  chamar<string>("rep_cobranca_avulsa", { _party: party, _valor_cents: valorCents, _descricao: descricao, _chave: chave });
+export const repLeadCriar = (rep: string, f: { nome: string; whatsapp: string; cidade: string; uf: string; nota: string }) =>
+  chamar<string>("rep_crm_lead_criar", { _rep: rep, _nome: f.nome, _whatsapp: f.whatsapp, _cidade: f.cidade, _uf: f.uf, _nota: f.nota || null });
+export const repEtapaNova = (rep: string, nome: string) => chamar<string>("rep_crm_etapa_nova", { _rep: rep, _nome: nome });
 
 export const brl = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 export const dataBR = (d: string) => d.split("-").reverse().join("/");

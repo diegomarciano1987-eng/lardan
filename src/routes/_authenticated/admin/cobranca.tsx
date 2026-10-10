@@ -4,7 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { carteira, kpisCobranca, moverEtapa, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
+import { LembretesGaveta } from "@/components/admin/cobranca/LembretesGaveta";
+import { carteira, kpisCobranca, moverEtapa, cobConfig, salvarConfig, type CobConfig, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
 
 const busca = z.object({
   v: z.enum(["lista", "kanban", "agenda", "bi"]).catch("lista"),
@@ -85,14 +86,16 @@ function Cobranca() {
           <h1 className="font-display text-3xl">Central de Cobrança</h1>
           <p className="text-sm text-muted-foreground">Valores vêm do financeiro oficial. Aqui só se registra o atendimento.</p>
         </div>
+        <div className="flex items-center gap-2"><ConfigEncargos />
         <div className="flex rounded-lg border border-border p-1">
           {(["lista", "kanban", "agenda", "bi"] as const).map((v) => (
             <button key={v} onClick={() => set({ v })} className={`rounded-md px-4 py-1.5 text-sm ${s.v === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
               {{ lista: "Lista", kanban: "Kanban", agenda: "Agenda", bi: "BI" }[v]}
             </button>
           ))}
-        </div>
+        </div></div>
       </header>
+      <LembretesGaveta />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
         <Kpi id="" rotulo="Saldo vencido" valor={brl(kpi.vencido)} />
@@ -196,32 +199,76 @@ function Lista({ lista, hoje, pagina, onPagina }: { lista: Devedor[]; hoje: stri
 
 function Kanban({ lista, onMover }: { lista: Devedor[]; onMover: (d: Devedor, e: Etapa) => void }) {
   const [arr, setArr] = React.useState<Devedor | null>(null);
+  const [sobre, setSobre] = React.useState<string | null>(null);
   return (
     <div className="grid grid-cols-5 gap-3">
       {ETAPAS.map((e) => {
         const col = lista.filter((d) => d.etapa === e.id);
         return (
-          <div key={e.id} onDragOver={(ev) => ev.preventDefault()} onDrop={() => { if (arr && arr.etapa !== e.id) onMover(arr, e.id); setArr(null); }}
-            className="min-h-96 rounded-xl border border-border bg-muted/30 p-2">
-            <div className="flex items-center justify-between px-2 py-2 text-xs font-medium">
-              <span>{e.rotulo}</span><span className="text-muted-foreground">{col.length} · {brl(col.reduce((a, d) => a + Number(d.vencido_cents), 0))}</span>
-            </div>
-            <div className="space-y-2">
+          <section key={e.id} data-etapa={e.id}
+            onDragOver={(ev) => { ev.preventDefault(); setSobre(e.id); }} onDragLeave={() => setSobre(null)}
+            onDrop={() => { if (arr && arr.etapa !== e.id) onMover(arr, e.id); setArr(null); setSobre(null); }}
+            className={`flex min-h-96 flex-col overflow-hidden rounded-2xl border bg-warm-ivory/60 transition ${sobre === e.id ? "border-bronze ring-2 ring-bronze/30" : "border-line-soft"}`}>
+            <div className={`h-1.5 ${e.faixa}`} />
+            <header className={`px-3 py-3 ${e.fundo}`}>
+              <div className="flex items-center justify-between gap-2">
+                <h3 className={`text-sm font-semibold ${e.tom}`}>{e.rotulo}</h3>
+                <span className="rounded-md bg-surface px-1.5 py-0.5 text-xs font-semibold text-ledger-text tabular-nums">{col.length}</span>
+              </div>
+              <p className="mt-0.5 font-mono text-xs text-ledger-muted tabular-nums">{brl(col.reduce((a, d) => a + Number(d.vencido_cents), 0))} vencido</p>
+            </header>
+            <div className="flex-1 space-y-2 p-2">
+              {col.length === 0 && <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-ledger-muted">Nenhuma devedora nesta etapa.</p>}
               {col.slice(0, 80).map((d) => (
-                <div key={d.party_id} draggable onDragStart={() => setArr(d)}
-                  className={`cursor-grab rounded-lg border bg-card p-3 text-xs shadow-sm ${d.promessa_status === "descumprida" ? "border-destructive/60" : "border-border"}`}>
-                  <Link to="/admin/cobranca/$id" params={{ id: d.party_id }} className="block text-sm font-medium hover:underline">{d.nome}</Link>
-                  <p className="mt-1 font-mono text-sm tabular-nums">{brl(Number(d.vencido_cents))}</p>
-                  <p className="text-muted-foreground">{d.parcelas_vencidas} parcela(s) · {d.maior_atraso} dias</p>
-                  {d.promessa_status === "descumprida" && <p className="mt-1 text-destructive">Promessa descumprida</p>}
-                  {d.proxima_acao && <p className="mt-1 text-muted-foreground">Próxima: {dataBR(d.proxima_acao)}</p>}
-                </div>
+                <article key={d.party_id} draggable onDragStart={() => setArr(d)}
+                  className={`relative cursor-grab overflow-hidden rounded-xl border bg-surface p-3 pl-4 text-xs shadow-sm transition hover:shadow-md ${d.promessa_status === "descumprida" ? "border-danger/60" : "border-line-soft hover:border-bronze/50"}`}>
+                  <span aria-hidden className={`absolute inset-y-0 left-0 w-1 ${e.faixa}`} />
+                  <Link to="/admin/cobranca/$id" params={{ id: d.party_id }} className="block truncate text-sm font-semibold text-ledger-text hover:text-bronze">{d.nome}</Link>
+                  <p className="truncate text-ledger-muted">{d.codigo_legado ? `Cód. ${d.codigo_legado} · ` : ""}{d.praca_nome ?? [d.cidade, d.uf].filter(Boolean).join("/") ?? ""}</p>
+                  <div className="mt-2 flex items-baseline justify-between">
+                    <span className="font-mono text-base font-semibold tabular-nums text-ledger-text">{brl(Number(d.vencido_cents))}</span>
+                    <span className={`font-semibold ${d.maior_atraso > 90 ? "text-danger" : d.maior_atraso > 30 ? "text-warning" : "text-ledger-muted"}`}>{d.maior_atraso} dias</span>
+                  </div>
+                  <p className="text-ledger-muted">{d.parcelas_vencidas} parcela(s) vencida(s)</p>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {d.promessa_status === "descumprida" && <span className="rounded border border-danger/40 bg-danger/10 px-1.5 py-0.5 text-[0.625rem] font-semibold uppercase text-danger">Promessa descumprida</span>}
+                    {d.promessa_status === "vigente" && d.promessa_data && <span className="rounded border border-success/40 bg-success/10 px-1.5 py-0.5 text-[0.625rem] font-semibold uppercase text-success">Paga {dataBR(d.promessa_data)}</span>}
+                    {d.proxima_acao && <span className="rounded border border-line bg-surface-muted px-1.5 py-0.5 text-[0.625rem] font-semibold uppercase text-ledger-muted">Próx. {dataBR(d.proxima_acao)}</span>}
+                  </div>
+                </article>
               ))}
-              {col.length > 80 && <p className="px-2 text-xs text-muted-foreground">+{col.length - 80} — use a busca.</p>}
+              {col.length > 80 && <p className="px-2 text-xs text-ledger-muted">+{col.length - 80} — use a busca.</p>}
             </div>
-          </div>
+          </section>
         );
       })}
+    </div>
+  );
+}
+
+function ConfigEncargos() {
+  const qc = useQueryClient();
+  const q = useQuery({ queryKey: ["cob", "config"], queryFn: cobConfig });
+  const [aberto, setAberto] = React.useState(false);
+  const [c, setC] = React.useState<CobConfig | null>(null);
+  const v = c ?? q.data ?? null;
+  const salvar = async () => {
+    if (!v) return;
+    try { await salvarConfig(v); toast.success("Encargos salvos."); qc.invalidateQueries({ queryKey: ["cob", "config"] }); setAberto(false); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Não salvou."); }
+  };
+  return (
+    <div className="relative">
+      <button onClick={() => setAberto((x) => !x)} className="h-10 rounded-lg border border-border px-4 text-sm">Juros e multa{q.data ? ` · ${q.data.multa_pct}% + ${q.data.juros_mes_pct}% a.m.` : ""}</button>
+      {aberto && v && (
+        <div className="absolute right-0 z-30 mt-2 w-80 space-y-3 rounded-xl border border-line bg-surface p-4 shadow-xl">
+          <p className="text-xs text-ledger-muted">Padrão das simulações. Pode ser tirado ou alterado em cada acordo. Não muda nenhum título.</p>
+          {([["multa_pct", "Multa por atraso (%)"], ["juros_mes_pct", "Juros ao mês (%)"], ["carencia_dias", "Carência (dias)"]] as const).map(([k, r]) => (
+            <label key={k} className="flex items-center justify-between text-sm">{r}<input type="number" step="0.1" value={v[k]} onChange={(e) => setC({ ...v, [k]: Number(e.target.value) })} className="h-9 w-24 rounded-lg border border-line bg-surface px-2 text-right" /></label>
+          ))}
+          <button onClick={salvar} className="h-9 w-full rounded-lg bg-primary text-sm font-semibold text-primary-foreground">Salvar</button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,14 +1,46 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type Etapa = "novo_atraso" | "em_contato" | "em_negociacao" | "promessa" | "acompanhamento";
-export const ETAPAS: { id: Etapa; rotulo: string }[] = [
-  { id: "novo_atraso", rotulo: "Novo atraso" },
-  { id: "em_contato", rotulo: "Em contato" },
-  { id: "em_negociacao", rotulo: "Em negociação" },
-  { id: "promessa", rotulo: "Promessa de pagamento" },
-  { id: "acompanhamento", rotulo: "Acompanhamento" },
+/** Cada etapa tem um tom fixo (topo da coluna e faixa do card). */
+export const ETAPAS: { id: Etapa; rotulo: string; tom: string; faixa: string; fundo: string }[] = [
+  { id: "novo_atraso", rotulo: "Novo atraso", tom: "text-danger", faixa: "bg-danger", fundo: "bg-danger/5" },
+  { id: "em_contato", rotulo: "Em contato", tom: "text-info", faixa: "bg-info", fundo: "bg-info/5" },
+  { id: "em_negociacao", rotulo: "Acordo", tom: "text-warning", faixa: "bg-warning", fundo: "bg-warning/5" },
+  { id: "promessa", rotulo: "Promessa de pagamento", tom: "text-success", faixa: "bg-success", fundo: "bg-success/5" },
+  { id: "acompanhamento", rotulo: "Judicial", tom: "text-bronze", faixa: "bg-bronze", fundo: "bg-bronze/5" },
 ];
 export const rotuloEtapa = (e: string) => ETAPAS.find((x) => x.id === e)?.rotulo ?? e;
+
+export interface Lembrete { id: string; party_id: string; nome: string; titulo: string; vence_em: string; origem: string }
+export const lembretes = () => call<Lembrete[]>("cob_lembretes");
+export interface CobConfig { multa_pct: number; juros_mes_pct: number; carencia_dias: number }
+export async function cobConfig(): Promise<CobConfig> {
+  const { data, error } = await (supabase.from as unknown as (t: string) => { select: (c: string) => { maybeSingle: () => Promise<{ data: CobConfig | null; error: { message: string } | null }> } })("cob_config").select("multa_pct,juros_mes_pct,carencia_dias").maybeSingle();
+  if (error) throw new Error(error.message);
+  const c = data ?? { multa_pct: 2, juros_mes_pct: 1, carencia_dias: 0 };
+  return { multa_pct: Number(c.multa_pct), juros_mes_pct: Number(c.juros_mes_pct), carencia_dias: Number(c.carencia_dias) };
+}
+export const salvarConfig = (c: CobConfig) => call<void>("cob_config_salvar", { _multa: c.multa_pct, _juros: c.juros_mes_pct, _carencia: c.carencia_dias });
+export interface Simulacao {
+  id: string; installment_ids: string[]; data_base: string; multa_pct: number; juros_mes_pct: number;
+  principal_cents: number; encargos_cents: number; desconto_cents: number; total_cents: number;
+  entrada_cents: number; entrada_data: string | null; parcelas: number; primeira_data: string | null;
+  plano: { numero: number; data: string; valor_cents: number }[]; observacao: string | null; status: string; created_at: string;
+}
+export async function simulacoes(party: string): Promise<Simulacao[]> {
+  const { data, error } = await (supabase.from as unknown as (t: string) => { select: (c: string) => { eq: (a: string, b: string) => { order: (c: string, o: { ascending: boolean }) => Promise<{ data: Simulacao[] | null; error: { message: string } | null }> } } })("cob_simulacoes").select("*").eq("party_id", party).order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+export const salvarSimulacao = (party: string, dados: Record<string, unknown>) => call<string>("cob_simulacao_salvar", { _party: party, _dados: dados });
+export const statusSimulacao = (id: string, status: "efetivada" | "cancelada", motivo: string) => call<void>("cob_simulacao_status", { _id: id, _status: status, _motivo: motivo });
+export async function suspensao(party: string): Promise<{ suspensa: boolean; suspensa_motivo: string | null } | null> {
+  const { data, error } = await (supabase.from as unknown as (t: string) => { select: (c: string) => { eq: (a: string, b: string) => { maybeSingle: () => Promise<{ data: { suspensa: boolean; suspensa_motivo: string | null } | null; error: { message: string } | null }> } } })("cob_casos").select("suspensa,suspensa_motivo").eq("party_id", party).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data;
+}
+export const suspender = (party: string, suspensa: boolean, motivo: string) => call<void>("cob_suspender", { _party: party, _suspensa: suspensa, _motivo: motivo });
+export const ROTULO_SIMULACAO: Record<string, string> = { simulada: "Simulada", aguardando_entrada: "Aguardando entrada", efetivada: "Efetivada", cancelada: "Cancelada" };
 
 export interface Devedor {
   party_id: string; nome: string; documento: string | null; etapa: Etapa;

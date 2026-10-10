@@ -10,6 +10,7 @@ import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { AberturaApp, InstalarApp } from "@/components/consultora/InstalarApp";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { PainelRepresentante } from "@/components/representante/PainelRepresentante";
 import { brl, dataBR, repCobrancas, repConsultoras, repReativar, repResumo } from "@/lib/representante";
 import { Captacao, CobrarParcela } from "@/components/representante/AcoesRepresentante";
 
@@ -148,11 +149,7 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
         {aba === "cobranca" && <Cobrancas rep={rep} espelho={espelho} />}
         {aba === "consultoras" && <Consultoras rep={rep} espelho={espelho} />}
         {aba === "captacao" && <Captacao rep={rep} espelho={espelho} />}
-        {aba === "painel" && (
-          <section className="rounded-2xl border border-border bg-card p-6">
-            <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Sem dados por enquanto. Esta parte chega na etapa 4.</p>
-          </section>
-        )}
+        {aba === "painel" && <PainelRepresentante rep={rep} />}
         {!espelho && <div className="md:hidden"><InstalarApp /></div>}
       </main>
     </>

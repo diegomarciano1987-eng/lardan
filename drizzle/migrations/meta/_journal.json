@@ -421,6 +421,13 @@
       "when": 1791652620379,
       "tag": "0059_portal_representante_cobranca_e_crm",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1791653044023,
+      "tag": "0060_portal_representante_painel",
+      "breakpoints": true
     }
   ]
 }

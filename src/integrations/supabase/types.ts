@@ -13574,7 +13574,12 @@ export type Database = {
         }
         Returns: Json
       }
+      rep_portal_mapa: { Args: { _rep: string }; Returns: Json }
       rep_portal_pode: { Args: { _rep: string }; Returns: boolean }
+      rep_portal_ranking: {
+        Args: { _ate: string; _de: string; _rep: string }
+        Returns: Json
+      }
       rep_portal_resumo: { Args: { _rep: string }; Returns: Json }
       rep_publico: { Args: { _code: string }; Returns: Json }
       rep_reativar_interno: {

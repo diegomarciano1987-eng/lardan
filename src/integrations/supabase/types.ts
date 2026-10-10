@@ -2253,6 +2253,9 @@ export type Database = {
           pausa_ate: string | null
           pausa_motivo: string | null
           responsavel_id: string | null
+          suspensa: boolean
+          suspensa_em: string | null
+          suspensa_motivo: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -2263,6 +2266,9 @@ export type Database = {
           pausa_ate?: string | null
           pausa_motivo?: string | null
           responsavel_id?: string | null
+          suspensa?: boolean
+          suspensa_em?: string | null
+          suspensa_motivo?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -2273,6 +2279,9 @@ export type Database = {
           pausa_ate?: string | null
           pausa_motivo?: string | null
           responsavel_id?: string | null
+          suspensa?: boolean
+          suspensa_em?: string | null
+          suspensa_motivo?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -2292,6 +2301,33 @@ export type Database = {
             referencedColumns: ["party_id"]
           },
         ]
+      }
+      cob_config: {
+        Row: {
+          carencia_dias: number
+          id: boolean
+          juros_mes_pct: number
+          multa_pct: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          carencia_dias?: number
+          id?: boolean
+          juros_mes_pct?: number
+          multa_pct?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          carencia_dias?: number
+          id?: boolean
+          juros_mes_pct?: number
+          multa_pct?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       cob_fiado_linhas: {
         Row: {
@@ -2567,6 +2603,93 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      cob_simulacoes: {
+        Row: {
+          autor_id: string | null
+          created_at: string
+          data_base: string
+          desconto_cents: number
+          encargos_cents: number
+          entrada_cents: number
+          entrada_data: string | null
+          id: string
+          installment_ids: string[]
+          juros_mes_pct: number
+          multa_pct: number
+          observacao: string | null
+          parcelas: number
+          party_id: string
+          plano: Json
+          primeira_data: string | null
+          principal_cents: number
+          promessa_id: string | null
+          status: string
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          autor_id?: string | null
+          created_at?: string
+          data_base: string
+          desconto_cents?: number
+          encargos_cents: number
+          entrada_cents?: number
+          entrada_data?: string | null
+          id?: string
+          installment_ids: string[]
+          juros_mes_pct: number
+          multa_pct: number
+          observacao?: string | null
+          parcelas?: number
+          party_id: string
+          plano?: Json
+          primeira_data?: string | null
+          principal_cents: number
+          promessa_id?: string | null
+          status?: string
+          total_cents: number
+          updated_at?: string
+        }
+        Update: {
+          autor_id?: string | null
+          created_at?: string
+          data_base?: string
+          desconto_cents?: number
+          encargos_cents?: number
+          entrada_cents?: number
+          entrada_data?: string | null
+          id?: string
+          installment_ids?: string[]
+          juros_mes_pct?: number
+          multa_pct?: number
+          observacao?: string | null
+          parcelas?: number
+          party_id?: string
+          plano?: Json
+          primeira_data?: string | null
+          principal_cents?: number
+          promessa_id?: string | null
+          status?: string
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_simulacoes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_simulacoes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
       }
       cob_tarefas: {
         Row: {
@@ -11882,12 +12005,27 @@ export type Database = {
           vencido_cents: number
         }[]
       }
+      cob_config_salvar: {
+        Args: { _carencia: number; _juros: number; _multa: number }
+        Returns: undefined
+      }
       cob_devedor: { Args: { _party: string }; Returns: Json }
       cob_fiado_importar: {
         Args: { _linhas: Json; _lote: string }
         Returns: Json
       }
       cob_kpis: { Args: never; Returns: Json }
+      cob_lembretes: {
+        Args: never
+        Returns: {
+          id: string
+          nome: string
+          origem: string
+          party_id: string
+          titulo: string
+          vence_em: string
+        }[]
+      }
       cob_mover_etapa: {
         Args: { _etapa: string; _party: string; _responsavel?: string }
         Returns: undefined
@@ -11930,6 +12068,18 @@ export type Database = {
         Returns: string
       }
       cob_regua_executar: { Args: never; Returns: Json }
+      cob_simulacao_salvar: {
+        Args: { _dados: Json; _party: string }
+        Returns: string
+      }
+      cob_simulacao_status: {
+        Args: { _id: string; _motivo: string; _status: string }
+        Returns: undefined
+      }
+      cob_suspender: {
+        Args: { _motivo: string; _party: string; _suspensa: boolean }
+        Returns: undefined
+      }
       cob_tarefa_concluir: { Args: { _id: string }; Returns: undefined }
       cob_tarefa_criar: {
         Args: { _party: string; _titulo: string; _vence: string }

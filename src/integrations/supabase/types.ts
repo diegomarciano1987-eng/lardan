@@ -13416,6 +13416,31 @@ export type Database = {
         }
         Returns: Json
       }
+      rep_portal_abertos: {
+        Args: { _rep: string }
+        Returns: {
+          installment_id: string
+          numero: string
+          party_id: string
+          saldo_cents: number
+          vencimento: string
+        }[]
+      }
+      rep_portal_cobrancas: {
+        Args: { _filtro?: string; _pagina?: number; _rep: string }
+        Returns: Json
+      }
+      rep_portal_consultoras: {
+        Args: {
+          _busca?: string
+          _filtro?: string
+          _pagina?: number
+          _rep: string
+        }
+        Returns: Json
+      }
+      rep_portal_pode: { Args: { _rep: string }; Returns: boolean }
+      rep_portal_resumo: { Args: { _rep: string }; Returns: Json }
       resync_all_public_prices: { Args: never; Returns: number }
       revoke_role: {
         Args: {

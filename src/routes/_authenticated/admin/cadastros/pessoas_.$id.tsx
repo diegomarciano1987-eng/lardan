@@ -232,6 +232,11 @@ function FichaPessoa() {
         actions={
           <>
             {sujo && <StatusBadge tone="warning">Alterações não salvas</StatusBadge>}
+            {d.papeis.some((p) => p.role === "representante") && (
+              <Link to="/representante" search={{ rep: id }} className="admin-btn">
+                Ver sistema de {nome.split(" ")[0]?.charAt(0)}{nome.split(" ")[0]?.slice(1).toLowerCase()}
+              </Link>
+            )}
             {podeEditar && (
               <button
                 type="button"

@@ -28,3 +28,14 @@ export const repCobrancas = (rep: string, filtro: string, pagina: number) =>
 
 export const brl = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 export const dataBR = (d: string) => d.split("-").reverse().join("/");
+
+export type RepCrm = {
+  codigo: string | null;
+  etapas: { id: string; nome: string }[];
+  cards: { lead_id: string; protocolo: string; nome: string; whatsapp: string; cidade: string; status_lardan: string; origem: string | null; criado: string; etapa_id: string; nota: string | null }[];
+};
+export const repCrm = (rep: string) => chamar<RepCrm>("rep_crm", { _rep: rep });
+export const repCrmMover = (lead: string, etapa: string, nota?: string | null) => chamar<null>("rep_crm_mover", { _lead: lead, _etapa: etapa, _nota: nota ?? null });
+export const repEtapaSalvar = (id: string | null, nome: string, ordem: number | null) => chamar<string>("rep_crm_etapa_salvar", { _id: id, _nome: nome, _ordem: ordem });
+export const repCheque = (payload: Record<string, unknown>) => chamar<string>("rep_cheque_registrar", { _payload: payload });
+export const repReativar = (party: string) => chamar<boolean>("rep_consultora_reativar", { _party: party });

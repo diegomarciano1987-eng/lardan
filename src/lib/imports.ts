@@ -344,7 +344,7 @@ export interface LinhaProblema {
   raw: Record<string, unknown>;
 }
 
-const rpc = supabase.rpc.bind(supabase) as unknown as (
+const rpc = (supabase as unknown as { rpc: (...a: unknown[]) => unknown }).rpc.bind(supabase) as unknown as (
   fn: string,
   args: Record<string, unknown>,
 ) => Promise<{ data: unknown; error: { message: string } | null }>;

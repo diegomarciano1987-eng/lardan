@@ -414,6 +414,13 @@
       "when": 1791652067730,
       "tag": "0058_portal_representante_busca_sem_acento",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1791652620379,
+      "tag": "0059_portal_representante_cobranca_e_crm",
+      "breakpoints": true
     }
   ]
 }

@@ -7734,6 +7734,8 @@ export type Database = {
           referred_at: string | null
           referred_by_party_id: string | null
           referrer: string | null
+          representante_origem: string | null
+          representante_party_id: string | null
           source: string | null
           source_normalized: string
           stage_entered_at: string
@@ -7804,6 +7806,8 @@ export type Database = {
           referred_at?: string | null
           referred_by_party_id?: string | null
           referrer?: string | null
+          representante_origem?: string | null
+          representante_party_id?: string | null
           source?: string | null
           source_normalized?: string
           stage_entered_at?: string
@@ -7874,6 +7878,8 @@ export type Database = {
           referred_at?: string | null
           referred_by_party_id?: string | null
           referrer?: string | null
+          representante_origem?: string | null
+          representante_party_id?: string | null
           source?: string | null
           source_normalized?: string
           stage_entered_at?: string
@@ -7924,6 +7930,20 @@ export type Database = {
           {
             foreignKeyName: "leads_referred_by_party_id_fkey"
             columns: ["referred_by_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "leads_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_representante_party_id_fkey"
+            columns: ["representante_party_id"]
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
@@ -10240,6 +10260,98 @@ export type Database = {
           titulo?: string
         }
         Relationships: []
+      }
+      rep_crm_cards: {
+        Row: {
+          etapa_id: string | null
+          lead_id: string
+          nota: string | null
+          rep_party_id: string
+          updated_at: string
+        }
+        Insert: {
+          etapa_id?: string | null
+          lead_id: string
+          nota?: string | null
+          rep_party_id: string
+          updated_at?: string
+        }
+        Update: {
+          etapa_id?: string | null
+          lead_id?: string
+          nota?: string | null
+          rep_party_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_crm_cards_etapa_id_fkey"
+            columns: ["etapa_id"]
+            isOneToOne: false
+            referencedRelation: "rep_crm_etapas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_crm_cards_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_crm_cards_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_crm_cards_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      rep_crm_etapas: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          rep_party_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          rep_party_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          rep_party_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_crm_etapas_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_crm_etapas_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
       }
       role_capabilities: {
         Row: {
@@ -13416,6 +13528,29 @@ export type Database = {
         }
         Returns: Json
       }
+      rep_asaas_preparar: {
+        Args: { _actor: string; _payload: Json; _rep_user: string }
+        Returns: Json
+      }
+      rep_cheque_registrar: { Args: { _payload: Json }; Returns: string }
+      rep_consultora_reativar: { Args: { _party: string }; Returns: boolean }
+      rep_crm: { Args: { _rep: string }; Returns: Json }
+      rep_crm_etapa_salvar: {
+        Args: { _id: string; _nome: string; _ordem: number }
+        Returns: string
+      }
+      rep_crm_etapas_garantir: { Args: { _rep: string }; Returns: undefined }
+      rep_crm_mover: {
+        Args: { _etapa: string; _lead: string; _nota?: string }
+        Returns: undefined
+      }
+      rep_eu: { Args: never; Returns: string }
+      rep_lead_encaminhar: {
+        Args: { _lead: string; _rep: string }
+        Returns: undefined
+      }
+      rep_parcela_cobravel: { Args: { _inst: string }; Returns: Json }
+      rep_parcela_dono: { Args: { _inst: string }; Returns: string }
       rep_portal_abertos: {
         Args: { _rep: string }
         Returns: {
@@ -13441,6 +13576,12 @@ export type Database = {
       }
       rep_portal_pode: { Args: { _rep: string }; Returns: boolean }
       rep_portal_resumo: { Args: { _rep: string }; Returns: Json }
+      rep_publico: { Args: { _code: string }; Returns: Json }
+      rep_reativar_interno: {
+        Args: { _actor: string; _motivo: string; _party: string }
+        Returns: boolean
+      }
+      rep_representantes_lista: { Args: never; Returns: Json }
       resync_all_public_prices: { Args: never; Returns: number }
       revoke_role: {
         Args: {

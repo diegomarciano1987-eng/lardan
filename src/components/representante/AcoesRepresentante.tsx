@@ -134,7 +134,7 @@ export function Captacao({ rep, espelho }: { rep: string; espelho: boolean }) {
   if (q.error) return <p className="text-sm text-destructive">{(q.error as Error).message}</p>;
   if (!q.data) return <p className="text-sm text-muted-foreground">Carregando…</p>;
   const d = q.data;
-  const link = d.codigo && typeof window !== "undefined" ? `${window.location.origin}/seja-lardan?rep=${d.codigo}` : null;
+  const link = d.codigo ? `https://www.lardan.com.br/seja-lardan?rep=${d.codigo}` : null;
   const STATUS: Record<string, string> = { novo: "Aguardando Lardan", em_analise: "Em análise na Lardan", qualificado: "Qualificada", aprovado: "Aprovada pela Lardan", recusado: "Não aprovada" };
 
   return (

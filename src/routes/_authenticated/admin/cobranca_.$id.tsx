@@ -2,11 +2,14 @@ import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, MessageCircle, Phone } from "lucide-react";
+import { ArrowLeft, MessageCircle, Phone, Ban } from "lucide-react";
+import { LembretesGaveta } from "@/components/admin/cobranca/LembretesGaveta";
+import { SimuladorAcordo } from "@/components/admin/cobranca/SimuladorAcordo";
+import { DateField } from "@/components/premium/DateField";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import {
   devedor, registrar, moverEtapa, criarPromessa, cancelarPromessa, criarTarefa, concluirTarefa,
-  brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, ROTULO_TIPO, ROTULO_PROMESSA, type Etapa,
+  brl, dataBR, hojeSP, suspensao, suspender, ETAPAS, rotuloEtapa, ROTULO_TIPO, ROTULO_PROMESSA, type Etapa,
 } from "@/lib/cobranca";
 
 export const Route = createFileRoute("/_authenticated/admin/cobranca_/$id")({
@@ -14,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/admin/cobranca_/$id")({
   component: Cockpit,
 });
 
-type Aba = "resumo" | "financeiro" | "titulos" | "linha" | "promessas" | "agenda" | "dados";
+type Aba = "acordos" | "resumo" | "financeiro" | "titulos" | "linha" | "promessas" | "agenda" | "dados";
 
 function Cockpit() {
   const { id } = Route.useParams();
@@ -27,7 +30,14 @@ function Cockpit() {
   const [resultado, setResultado] = React.useState("sucesso");
   const [valor, setValor] = React.useState("");
   const [data, setData] = React.useState(hojeSP());
+  const susp = useQuery({ queryKey: ["cob", "susp", id], queryFn: () => suspensao(id) });
   const recarregar = () => qc.invalidateQueries({ queryKey: ["cob"] });
+  const alternarSuspensao = async () => {
+    const s = !susp.data?.suspensa;
+    const m = prompt(s ? "Motivo da suspensão (bloqueia nova maleta e novo pedido)" : "Motivo da liberação");
+    if (!m) return;
+    try { await suspender(id, s, m); toast.success(s ? "Suspensa para novas maletas e pedidos." : "Liberada."); recarregar(); } catch (e) { toast.error(e instanceof Error ? e.message : "Falhou."); }
+  };
 
   if (q.isLoading) return <p className="p-6 text-sm text-muted-foreground">Carregando…</p>;
   if (q.error || !q.data?.pessoa) return <p className="p-6 text-sm text-destructive">{(q.error as Error)?.message ?? "Devedora não encontrada."}</p>;
@@ -71,6 +81,12 @@ function Cockpit() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 p-6">
+      <LembretesGaveta />
+      {susp.data?.suspensa && (
+        <div role="alert" className="flex items-center gap-2 rounded-xl border border-danger/50 bg-danger/10 p-4 text-sm font-semibold text-danger">
+          <Ban className="size-4" /> Suspensa: não recebe nova maleta nem novo pedido. Motivo: {susp.data.suspensa_motivo}
+        </div>
+      )}
       <Link to="/admin/cobranca" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Voltar à carteira</Link>
       <header className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-border bg-card p-6">
         <div>
@@ -87,6 +103,8 @@ function Cockpit() {
       <div className="flex flex-wrap gap-2">
         <button onClick={() => setAcao("ligacao")} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm"><Phone className="h-4 w-4" />Registrar ligação</button>
         <button onClick={abrirWhats} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm"><MessageCircle className="h-4 w-4" />Abrir WhatsApp</button>
+        <button onClick={() => setAba("acordos")} className="h-10 rounded-lg border border-bronze bg-champagne-soft px-4 text-sm font-semibold text-bronze">Simular acordo / juros</button>
+        <button onClick={alternarSuspensao} className={`inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm ${susp.data?.suspensa ? "border-success text-success" : "border-danger text-danger"}`}><Ban className="h-4 w-4" />{susp.data?.suspensa ? "Liberar maleta/pedido" : "Suspender maleta/pedido"}</button>
         {([["negociacao", "Registrar negociação"], ["promessa", "Registrar promessa"], ["desconto_solicitado", "Solicitar desconto"], ["retorno", "Agendar retorno"], ["negativacao_encaminhada", "Encaminhar negativação"]] as const).map(([k, r]) => (
           <button key={k} onClick={() => setAcao(k)} className="h-10 rounded-lg border border-border px-4 text-sm">{r}</button>
         ))}
@@ -104,8 +122,7 @@ function Cockpit() {
           {(acao === "promessa" || acao === "retorno") && (
             <div className="flex gap-2">
               {acao === "promessa" && <input value={valor} onChange={(e) => setValor(e.target.value)} placeholder="Valor (R$)" className="h-10 w-40 rounded-lg border border-border bg-background px-3 text-sm" />}
-              <input type="text" value={dataBR(data)} onChange={(e) => { const m = e.target.value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/); if (m) setData(`${m[3]}-${m[2]}-${m[1]}`); }}
-                className="h-10 w-36 rounded-lg border border-border bg-background px-3 text-sm" aria-label="Data (dd/mm/aaaa)" />
+              <label className="text-xs text-muted-foreground">{acao === "promessa" ? "Data em que vai pagar (gera lembrete)" : "Data do retorno"}<DateField value={new Date(data + "T12:00:00")} onChange={(v) => v && setData(v.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }))} /></label>
             </div>
           )}
           {acao !== "retorno" && d.parcelas.length > 0 && (
@@ -124,11 +141,12 @@ function Cockpit() {
       )}
 
       <nav className="flex gap-1 border-b border-border">
-        {([["resumo", "Resumo"], ["financeiro", "Financeiro completo"], ["titulos", "Títulos e parcelas"], ["linha", "Linha do tempo"], ["promessas", "Negociações e promessas"], ["agenda", "Agenda"], ["dados", "Dados cadastrais"]] as const).map(([k, r]) => (
+        {([["resumo", "Resumo"], ["acordos", "Acordos e simulações"], ["financeiro", "Financeiro completo"], ["titulos", "Títulos e parcelas"], ["linha", "Linha do tempo"], ["promessas", "Negociações e promessas"], ["agenda", "Agenda"], ["dados", "Dados cadastrais"]] as const).map(([k, r]) => (
           <button key={k} onClick={() => setAba(k)} className={`border-b-2 px-4 py-2 text-sm ${aba === k ? "border-primary text-foreground" : "border-transparent text-muted-foreground"}`}>{r}</button>
         ))}
       </nav>
 
+      {aba === "acordos" && <SimuladorAcordo partyId={id} parcelas={d.parcelas} />}
       {aba === "financeiro" && <CockpitFinanceiroConsultora partyId={id} />}
       {aba === "resumo" && (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

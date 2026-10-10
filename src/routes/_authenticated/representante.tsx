@@ -233,7 +233,6 @@ function Cobrancas({ rep }: { rep: string; espelho: boolean }) {
         ))}
       </ul>
       {q.data && <Paginas pagina={pagina} total={q.data.total} set={setPagina} />}
-      </>)}
       <FichaConsultora party={ficha} rep={rep} onClose={() => setFicha(null)} />
     </section>
   );

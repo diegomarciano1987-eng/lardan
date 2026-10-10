@@ -20,7 +20,7 @@ const ETAPA: Record<Aba, number> = { cobranca: 2, consultoras: 2, captacao: 3, p
 
 export const Route = createFileRoute("/_authenticated/representante")({
   validateSearch: (s: Record<string, unknown>): { aba?: Aba } => {
-    const a = s.aba as Aba;
+    const a = s["aba"] as Aba;
     return ABAS.some((x) => x.id === a) ? { aba: a } : {};
   },
   head: () => ({
@@ -51,7 +51,7 @@ async function meuCadastro() {
   if (partyId) {
     const { data: party } = await supabase.from("parties").select("*").eq("id", partyId).maybeSingle();
     const r = party as Record<string, unknown> | null;
-    nome = (r?.display_name ?? r?.full_name ?? r?.name ?? null) as string | null;
+    nome = (r?.["display_name"] ?? r?.["full_name"] ?? r?.["name"] ?? null) as string | null;
   }
   return { email: u.user.email ?? "", partyId, nome };
 }

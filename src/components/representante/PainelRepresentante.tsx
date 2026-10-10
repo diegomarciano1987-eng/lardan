@@ -11,7 +11,7 @@ const MapaCidadeLeaflet = React.lazy(() => import("@/components/admin/rede/MapaC
 
 type Linha = { nome: string; code: string; valor: number; pecas: number; maletas: number };
 type Ranking = { consultoras: number; valor_cents: number; pecas: number; top_valor: Linha[]; pior_valor: Linha[]; top_pecas: Linha[]; pior_pecas: Linha[] };
-type Mapa = { sem_local: number; cidades: { chave: string; city: string; uf: string; lat: number; lng: number; total: number; ativas: number }[] };
+type Mapa = { sem_local: number; cidades: { chave: string; city: string; uf: string; lat: number; lng: number; total: number; ativas: number; pessoas?: { id: string; nome: string }[] }[] };
 
 async function chamar<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.rpc(fn as never, args as never);

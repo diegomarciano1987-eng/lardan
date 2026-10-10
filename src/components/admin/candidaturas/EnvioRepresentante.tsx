@@ -14,6 +14,12 @@ import { Panel } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { Button } from "@/components/ui/button";
 import { linkWhatsapp } from "@/lib/crm/api";
+import { supabase } from "@/integrations/supabase/client";
+
+async function encaminhar(leadId: string, rep: string | null) {
+  const { error } = await supabase.rpc("rep_lead_encaminhar" as never, { _lead: leadId, _rep: rep } as never);
+  if (error) throw new Error(error.message);
+}
 import { gerarDossieCandidatura, listarRepresentantes } from "@/lib/crm/dossie.functions";
 
 export function EnvioRepresentante({ leadId }: { leadId: string }) {
@@ -35,6 +41,7 @@ export function EnvioRepresentante({ leadId }: { leadId: string }) {
       const dossie = await gerar({
         data: { leadId, representanteId: rep.id, representanteNome: rep.nome },
       });
+      await encaminhar(leadId, rep.id);
       return { rep, dossie };
     },
     onSuccess: ({ rep, dossie }) => {
@@ -51,8 +58,14 @@ export function EnvioRepresentante({ leadId }: { leadId: string }) {
         "(link interno, válido por 30 dias)",
       ].join("\n");
       window.open(linkWhatsapp(rep.whatsapp, texto), "_blank", "noopener,noreferrer");
-      toast.success("PDF pronto. O WhatsApp abriu com a mensagem.");
+      toast.success("PDF pronto, candidatura no CRM do representante e WhatsApp aberto.");
     },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const so = useMutation({
+    mutationFn: () => encaminhar(leadId, escolhido),
+    onSuccess: () => toast.success("Candidatura colocada no CRM do representante. A decisão de entrada continua com a Lardan."),
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -75,6 +88,9 @@ export function EnvioRepresentante({ leadId }: { leadId: string }) {
         >
           <Send aria-hidden className="size-4" />
           {envio.isPending ? "Montando o PDF..." : "Gerar PDF e abrir WhatsApp"}
+        </Button>
+        <Button type="button" variant="outline" className="w-full" disabled={!escolhido || so.isPending} onClick={() => so.mutate()}>
+          {so.isPending ? "Encaminhando..." : "Só colocar no CRM do representante"}
         </Button>
         {representantes.data?.length === 0 && !representantes.isLoading && (
           <p className="text-xs text-ledger-muted">

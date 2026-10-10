@@ -102,7 +102,9 @@ export default function MapaCidadeLeaflet({
       const base = precisos.length >= 3 ? precisos : grupos;
       const enquadrar = () => {
         mapa.invalidateSize();
-        mapa.fitBounds(L.latLngBounds(base.map((g) => [g.lat, g.lng] as [number, number])).pad(0.12), { maxZoom: 13 });
+        const b = L.latLngBounds(base.map((g) => [g.lat, g.lng] as [number, number])).pad(0.12);
+        console.log("[mapa] enquadrar", base.length, JSON.stringify(b.toBBoxString()), "size", JSON.stringify(mapa.getSize()));
+        mapa.fitBounds(b, { maxZoom: 13 });
       };
       enquadrar();
       setTimeout(enquadrar, 300);

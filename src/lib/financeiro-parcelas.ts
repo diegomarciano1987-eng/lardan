@@ -42,6 +42,7 @@ export async function listarParcelas(p: {
   situacao?: string;
   limit: number;
   offset: number;
+  rep?: string;
 }): Promise<ListaParcelas> {
   const { data, error } = await rpc("fin_installments_list", {
     _direction: p.direction,
@@ -51,6 +52,7 @@ export async function listarParcelas(p: {
     _situacao: p.situacao ?? null,
     _limit: p.limit,
     _offset: p.offset,
+    ...(p.rep ? { _rep: p.rep } : {}),
   });
   if (error) throw new Error(error.message);
   return data as ListaParcelas;

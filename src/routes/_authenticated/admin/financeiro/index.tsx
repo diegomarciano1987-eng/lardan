@@ -160,7 +160,7 @@ function VisaoGeral() {
               <CardComposicao
                 rotulo="Vencido a receber no período"
                 valor={formatBRLFromCents(d.vencido_receber_cents)}
-                nota={`${formatInt(d.vencido_receber_qtd)} vencidas antes de ${dataBR(d.data_referencia_vencidos)} (Asaas: ${formatInt(d.vencido_receber_asaas_qtd)}) · atrasos anteriores ao período: ${formatBRLFromCents(d.atraso_anterior_receber_cents)}, sendo Asaas ${formatBRLFromCents(d.atraso_anterior_receber_asaas_cents)}`}
+                nota={`${formatInt(d.vencido_receber_qtd)} vencidas antes de ${dataBR(d.data_referencia_vencidos)} (Asaas: ${formatInt(d.vencido_receber_asaas_qtd)}) · atrasos antigos (fiado) ficam na Cobrança`}
                 tom="entrada"
                 to="/admin/financeiro/pagar-receber"
                 search={{ ...per, natureza: "receber", situacao: "vencido" }}
@@ -168,7 +168,7 @@ function VisaoGeral() {
               <CardComposicao
                 rotulo="Vencido a pagar no período"
                 valor={formatBRLFromCents(d.vencido_pagar_cents)}
-                nota={`${formatInt(d.vencido_pagar_qtd)} parcela(s) vencidas antes de ${dataBR(d.data_referencia_vencidos)} · atrasos anteriores ao período: ${formatBRLFromCents(d.atraso_anterior_pagar_cents)}`}
+                nota={`${formatInt(d.vencido_pagar_qtd)} parcela(s) vencidas antes de ${dataBR(d.data_referencia_vencidos)}`}
                 tom="saida"
                 to="/admin/financeiro/pagar-receber"
                 search={{ ...per, natureza: "pagar", situacao: "vencido" }}

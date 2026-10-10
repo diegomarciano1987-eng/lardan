@@ -240,6 +240,7 @@ export async function registrarBaixa(input: {
   tarifa_cents?: number;
   juros_cents?: number;
   desconto_cents?: number;
+  payment_method_id?: string;
 }): Promise<{ id: string; repetido: boolean; nao_alocado_cents: number }> {
   const { data, error } = await supabase.rpc("fin_settlement_create_ajustes" as never, {
     _payload: input,

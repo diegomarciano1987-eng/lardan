@@ -95,6 +95,7 @@ import { Route as AuthenticatedAdminFinanceiroChequesRouteImport } from './route
 import { Route as AuthenticatedAdminFinanceiroConciliacaoRouteImport } from './routes/_authenticated/admin/financeiro/conciliacao'
 import { Route as AuthenticatedAdminFinanceiroConfiguracoesRouteImport } from './routes/_authenticated/admin/financeiro/configuracoes'
 import { Route as AuthenticatedAdminFinanceiroContasRouteImport } from './routes/_authenticated/admin/financeiro/contas'
+import { Route as AuthenticatedAdminFinanceiroDfcRouteImport } from './routes/_authenticated/admin/financeiro/dfc'
 import { Route as AuthenticatedAdminFinanceiroDreRouteImport } from './routes/_authenticated/admin/financeiro/dre'
 import { Route as AuthenticatedAdminFinanceiroDreSimplesRouteImport } from './routes/_authenticated/admin/financeiro/dre-simples'
 import { Route as AuthenticatedAdminFinanceiroFluxoCaixaRouteImport } from './routes/_authenticated/admin/financeiro/fluxo-caixa'
@@ -589,6 +590,12 @@ const AuthenticatedAdminFinanceiroContasRoute =
     path: '/contas',
     getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
   } as any)
+const AuthenticatedAdminFinanceiroDfcRoute =
+  AuthenticatedAdminFinanceiroDfcRouteImport.update({
+    id: '/dfc',
+    path: '/dfc',
+    getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
+  } as any)
 const AuthenticatedAdminFinanceiroDreRoute =
   AuthenticatedAdminFinanceiroDreRouteImport.update({
     id: '/dre',
@@ -814,6 +821,7 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
   '/admin/financeiro/configuracoes': typeof AuthenticatedAdminFinanceiroConfiguracoesRoute
   '/admin/financeiro/contas': typeof AuthenticatedAdminFinanceiroContasRoute
+  '/admin/financeiro/dfc': typeof AuthenticatedAdminFinanceiroDfcRoute
   '/admin/financeiro/dre': typeof AuthenticatedAdminFinanceiroDreRoute
   '/admin/financeiro/dre-simples': typeof AuthenticatedAdminFinanceiroDreSimplesRoute
   '/admin/financeiro/fluxo-caixa': typeof AuthenticatedAdminFinanceiroFluxoCaixaRoute
@@ -923,6 +931,7 @@ export interface FileRoutesByTo {
   '/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
   '/admin/financeiro/configuracoes': typeof AuthenticatedAdminFinanceiroConfiguracoesRoute
   '/admin/financeiro/contas': typeof AuthenticatedAdminFinanceiroContasRoute
+  '/admin/financeiro/dfc': typeof AuthenticatedAdminFinanceiroDfcRoute
   '/admin/financeiro/dre': typeof AuthenticatedAdminFinanceiroDreRoute
   '/admin/financeiro/dre-simples': typeof AuthenticatedAdminFinanceiroDreSimplesRoute
   '/admin/financeiro/fluxo-caixa': typeof AuthenticatedAdminFinanceiroFluxoCaixaRoute
@@ -1036,6 +1045,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/financeiro/conciliacao': typeof AuthenticatedAdminFinanceiroConciliacaoRoute
   '/_authenticated/admin/financeiro/configuracoes': typeof AuthenticatedAdminFinanceiroConfiguracoesRoute
   '/_authenticated/admin/financeiro/contas': typeof AuthenticatedAdminFinanceiroContasRoute
+  '/_authenticated/admin/financeiro/dfc': typeof AuthenticatedAdminFinanceiroDfcRoute
   '/_authenticated/admin/financeiro/dre': typeof AuthenticatedAdminFinanceiroDreRoute
   '/_authenticated/admin/financeiro/dre-simples': typeof AuthenticatedAdminFinanceiroDreSimplesRoute
   '/_authenticated/admin/financeiro/fluxo-caixa': typeof AuthenticatedAdminFinanceiroFluxoCaixaRoute
@@ -1149,6 +1159,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/conciliacao'
     | '/admin/financeiro/configuracoes'
     | '/admin/financeiro/contas'
+    | '/admin/financeiro/dfc'
     | '/admin/financeiro/dre'
     | '/admin/financeiro/dre-simples'
     | '/admin/financeiro/fluxo-caixa'
@@ -1258,6 +1269,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/conciliacao'
     | '/admin/financeiro/configuracoes'
     | '/admin/financeiro/contas'
+    | '/admin/financeiro/dfc'
     | '/admin/financeiro/dre'
     | '/admin/financeiro/dre-simples'
     | '/admin/financeiro/fluxo-caixa'
@@ -1370,6 +1382,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financeiro/conciliacao'
     | '/_authenticated/admin/financeiro/configuracoes'
     | '/_authenticated/admin/financeiro/contas'
+    | '/_authenticated/admin/financeiro/dfc'
     | '/_authenticated/admin/financeiro/dre'
     | '/_authenticated/admin/financeiro/dre-simples'
     | '/_authenticated/admin/financeiro/fluxo-caixa'
@@ -2056,6 +2069,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroContasRouteImport
       parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
     }
+    '/_authenticated/admin/financeiro/dfc': {
+      id: '/_authenticated/admin/financeiro/dfc'
+      path: '/dfc'
+      fullPath: '/admin/financeiro/dfc'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceiroDfcRouteImport
+      parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
+    }
     '/_authenticated/admin/financeiro/dre': {
       id: '/_authenticated/admin/financeiro/dre'
       path: '/dre'
@@ -2237,6 +2257,7 @@ interface AuthenticatedAdminFinanceiroRouteRouteChildren {
   AuthenticatedAdminFinanceiroConciliacaoRoute: typeof AuthenticatedAdminFinanceiroConciliacaoRoute
   AuthenticatedAdminFinanceiroConfiguracoesRoute: typeof AuthenticatedAdminFinanceiroConfiguracoesRoute
   AuthenticatedAdminFinanceiroContasRoute: typeof AuthenticatedAdminFinanceiroContasRoute
+  AuthenticatedAdminFinanceiroDfcRoute: typeof AuthenticatedAdminFinanceiroDfcRoute
   AuthenticatedAdminFinanceiroDreRoute: typeof AuthenticatedAdminFinanceiroDreRoute
   AuthenticatedAdminFinanceiroDreSimplesRoute: typeof AuthenticatedAdminFinanceiroDreSimplesRoute
   AuthenticatedAdminFinanceiroFluxoCaixaRoute: typeof AuthenticatedAdminFinanceiroFluxoCaixaRoute
@@ -2269,6 +2290,7 @@ const AuthenticatedAdminFinanceiroRouteRouteChildren: AuthenticatedAdminFinancei
       AuthenticatedAdminFinanceiroConfiguracoesRoute,
     AuthenticatedAdminFinanceiroContasRoute:
       AuthenticatedAdminFinanceiroContasRoute,
+    AuthenticatedAdminFinanceiroDfcRoute: AuthenticatedAdminFinanceiroDfcRoute,
     AuthenticatedAdminFinanceiroDreRoute: AuthenticatedAdminFinanceiroDreRoute,
     AuthenticatedAdminFinanceiroDreSimplesRoute:
       AuthenticatedAdminFinanceiroDreSimplesRoute,

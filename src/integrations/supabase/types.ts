@@ -12236,6 +12236,7 @@ export type Database = {
         Args: { _ativo: boolean; _id: string }
         Returns: undefined
       }
+      fin_dfc: { Args: { _ate: string; _de: string }; Returns: Json }
       fin_dre: { Args: { _filtros?: Json }; Returns: Json }
       fin_dre_base: {
         Args: {
@@ -12347,6 +12348,7 @@ export type Database = {
         Returns: Json
       }
       fin_overview: { Args: { _ate?: string; _de?: string }; Returns: Json }
+      fin_pagar_faixas: { Args: never; Returns: Json }
       fin_pagar_receber: {
         Args: {
           _ate?: string
@@ -12391,6 +12393,7 @@ export type Database = {
         Args: { _ent: string; _mes: string; _motivo: string }
         Returns: Json
       }
+      fin_projecao_diaria: { Args: { _dias?: number }; Returns: Json }
       fin_reconcile: { Args: { _payload: Json }; Returns: Json }
       fin_reconcile_baixa_existente: {
         Args: {

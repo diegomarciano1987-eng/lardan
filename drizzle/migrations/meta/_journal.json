@@ -407,6 +407,13 @@
       "when": 1791652019572,
       "tag": "0057_portal_representante_leitura",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1791652067730,
+      "tag": "0058_portal_representante_busca_sem_acento",
+      "breakpoints": true
     }
   ]
 }

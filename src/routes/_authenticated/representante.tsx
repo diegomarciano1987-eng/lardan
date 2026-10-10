@@ -8,7 +8,10 @@ import { portaLiberada } from "@/lib/portas";
 import { supabase } from "@/integrations/supabase/client";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { AberturaApp, InstalarApp } from "@/components/consultora/InstalarApp";
-import { brl, dataBR, repCobrancas, repConsultoras, repResumo } from "@/lib/representante";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { brl, dataBR, repCobrancas, repConsultoras, repReativar, repResumo } from "@/lib/representante";
+import { Captacao, CobrarParcela } from "@/components/representante/AcoesRepresentante";
 
 type Aba = "cobranca" | "consultoras" | "captacao" | "painel";
 const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = [
@@ -142,11 +145,12 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
           <Kpi rotulo="Em aberto" valor={s ? brl(s.aberto_cents) : "—"} sub={s ? `${s.parcelas} parcelas · ${s.devedoras} devedoras` : ""} />
           <Kpi rotulo="Consultoras" valor={s ? String(s.consultoras) : "—"} sub={s ? `${s.ativas} ativas · ${s.maletas_campo} maletas em campo` : ""} />
         </div>
-        {aba === "cobranca" && <Cobrancas rep={rep} />}
-        {aba === "consultoras" && <Consultoras rep={rep} />}
-        {(aba === "captacao" || aba === "painel") && (
+        {aba === "cobranca" && <Cobrancas rep={rep} espelho={espelho} />}
+        {aba === "consultoras" && <Consultoras rep={rep} espelho={espelho} />}
+        {aba === "captacao" && <Captacao rep={rep} espelho={espelho} />}
+        {aba === "painel" && (
           <section className="rounded-2xl border border-border bg-card p-6">
-            <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Sem dados por enquanto. Esta parte chega na etapa {aba === "captacao" ? 3 : 4}.</p>
+            <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Sem dados por enquanto. Esta parte chega na etapa 4.</p>
           </section>
         )}
         {!espelho && <div className="md:hidden"><InstalarApp /></div>}
@@ -189,7 +193,7 @@ function Paginas({ pagina, total, set }: { pagina: number; total: number; set: (
   );
 }
 
-function Cobrancas({ rep }: { rep: string }) {
+function Cobrancas({ rep, espelho }: { rep: string; espelho: boolean }) {
   const [filtro, setFiltro] = React.useState("vencidas");
   const [pagina, setPagina] = React.useState(1);
   const q = useQuery({ queryKey: ["rep", rep, "cob", filtro, pagina], queryFn: () => repCobrancas(rep, filtro, pagina), placeholderData: keepPreviousData });
@@ -206,7 +210,10 @@ function Cobrancas({ rep }: { rep: string }) {
               <p className="truncate font-medium">{c.display_name}</p>
               <p className="text-xs text-muted-foreground">{c.code} · título {c.numero ?? "—"} · vence {dataBR(c.vencimento)}</p>
             </div>
-            <span className="shrink-0 font-semibold tabular-nums">{brl(c.saldo_cents)}</span>
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="font-semibold tabular-nums">{brl(c.saldo_cents)}</span>
+              {!espelho && <CobrarParcela c={c} rep={rep} />}
+            </div>
           </li>
         ))}
       </ul>
@@ -215,7 +222,13 @@ function Cobrancas({ rep }: { rep: string }) {
   );
 }
 
-function Consultoras({ rep }: { rep: string }) {
+function Consultoras({ rep, espelho }: { rep: string; espelho: boolean }) {
+  const qc = useQueryClient();
+  const reativar = useMutation({
+    mutationFn: (id: string) => repReativar(id),
+    onSuccess: () => { toast.success("Consultora reativada em todo o sistema."); void qc.invalidateQueries({ queryKey: ["rep", rep] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
   const [texto, setTexto] = React.useState("");
   const [busca, setBusca] = React.useState("");
   const [filtro, setFiltro] = React.useState("todas");
@@ -245,6 +258,9 @@ function Consultoras({ rep }: { rep: string }) {
                   <p className="font-semibold tabular-nums">{brl(c.aberto_cents)}</p>
                   {c.vencido_cents > 0 && <p className="text-xs text-destructive tabular-nums">{brl(c.vencido_cents)} vencido</p>}
                 </div>
+              )}
+              {!espelho && c.status !== "ativo" && (
+                <button type="button" disabled={reativar.isPending} onClick={() => reativar.mutate(c.id)} className="rounded-full border border-primary px-3 py-1.5 text-xs font-semibold text-primary">Reativar</button>
               )}
               {c.whatsapp && (
                 <a href={`https://wa.me/55${c.whatsapp.replace(/\D/g, "").replace(/^55/, "")}`} target="_blank" rel="noreferrer" className="grid size-10 place-items-center rounded-full border border-border" aria-label="WhatsApp">

@@ -30,6 +30,7 @@ export interface JornadaEditorial {
 }
 
 export interface TrackingCliente {
+  representante?: string | undefined;
   landing_page?: string | undefined;
   referrer?: string | undefined;
   first_referrer?: string | undefined;
@@ -161,6 +162,26 @@ export function registrarIndicacao(codigo?: string): string | undefined {
   return undefined;
 }
 
+const CHAVE_REP = "lardan-rep";
+/** Código do representante (?rep=lc-000123), lembrado por 30 dias; o primeiro vale. */
+export function registrarRepresentante(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const bruto = window.localStorage.getItem(CHAVE_REP);
+    const salvo = bruto ? (JSON.parse(bruto) as { c: string; em: number }) : null;
+    if (salvo && Date.now() - salvo.em < 30 * 86400_000) return salvo.c;
+    const atual = new URLSearchParams(window.location.search).get("rep");
+    if (atual && /^lc-\d{6}$/i.test(atual)) {
+      const c = atual.toLowerCase();
+      window.localStorage.setItem(CHAVE_REP, JSON.stringify({ c, em: Date.now() }));
+      return c;
+    }
+  } catch {
+    /* sem armazenamento */
+  }
+  return undefined;
+}
+
 export function capturarTracking(): TrackingCliente {
   if (typeof window === "undefined") return { utm: {} };
   const params = new URLSearchParams(window.location.search);
@@ -183,5 +204,6 @@ export function capturarTracking(): TrackingCliente {
     utm: Object.keys(utm).length > 0 ? utm : (primeiro.utm ?? {}),
     jornada: lerJornada(),
     indicacao: registrarIndicacao(),
+    representante: registrarRepresentante(),
   };
 }

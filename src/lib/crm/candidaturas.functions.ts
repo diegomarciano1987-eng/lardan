@@ -51,6 +51,7 @@ const Entrada = z.object({
       fbclid: texto(200),
       msclkid: texto(200),
       indicacao: z.string().trim().regex(/^[a-z0-9]{4,20}$/).optional(),
+      representante: z.string().trim().regex(/^lc-\d{6}$/).optional(),
       utm: z.record(z.string(), z.string().max(300)).default({}),
       // Jornada interna de conteúdo: somente caminhos do próprio site e o
       // identificador do CTA editorial. Nenhum dado pessoal.

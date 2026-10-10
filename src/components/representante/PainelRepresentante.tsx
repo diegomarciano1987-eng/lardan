@@ -2,7 +2,9 @@ import * as React from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { DateRange } from "react-day-picker";
+import { ChevronRight } from "lucide-react";
 import { DateRangeField } from "@/components/premium/DateRangeField";
+import { FichaConsultora } from "@/components/representante/FichaConsultora";
 import { supabase } from "@/integrations/supabase/client";
 import { brl } from "@/lib/representante";
 import type { GrupoCep } from "@/components/admin/rede/MapaCidadeLeaflet";
@@ -11,7 +13,7 @@ const MapaCidadeLeaflet = React.lazy(() => import("@/components/admin/rede/MapaC
 
 type Linha = { nome: string; code: string; valor: number; pecas: number; maletas: number };
 type Ranking = { consultoras: number; valor_cents: number; pecas: number; top_valor: Linha[]; pior_valor: Linha[]; top_pecas: Linha[]; pior_pecas: Linha[] };
-type Mapa = { sem_local: number; cidades: { chave: string; city: string; uf: string; lat: number; lng: number; total: number; ativas: number }[] };
+type Mapa = { sem_local: number; cidades: { chave: string; city: string; uf: string; lat: number; lng: number; total: number; ativas: number; pessoas?: { id: string; nome: string }[] }[] };
 
 async function chamar<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.rpc(fn as never, args as never);
@@ -30,6 +32,7 @@ export function PainelRepresentante({ rep }: { rep: string }) {
   const mp = useQuery({ queryKey: ["rep", rep, "mapa"], queryFn: () => chamar<Mapa>("rep_portal_mapa", { _rep: rep }) });
   const grupos: GrupoCep[] = (mp.data?.cidades ?? []).map((c) => ({ chave: c.chave, lat: c.lat, lng: c.lng, cep: null, total: c.total, ativas: c.ativas, aproximado: false }));
   const [sel, setSel] = React.useState<string | null>(null);
+  const [ficha, setFicha] = React.useState<string | null>(null);
   const cidadeSel = mp.data?.cidades.find((c) => c.chave === sel);
   const r = rk.data;
 
@@ -83,7 +86,32 @@ export function PainelRepresentante({ rep }: { rep: string }) {
             </React.Suspense>
           </ClientOnly>
         ) : mp.data ? <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Sem dados: nenhuma consultora com endereço localizado.</p> : null}
-        {cidadeSel && <p className="text-sm"><b>{cidadeSel.city}/{cidadeSel.uf}</b> · {cidadeSel.total} consultoras · {cidadeSel.ativas} ativas</p>}
+        {cidadeSel && (
+          <div className="space-y-3 rounded-xl border border-border bg-muted/40 p-4">
+            <p className="text-sm font-semibold">
+              {cidadeSel.city}/{cidadeSel.uf} · {cidadeSel.total} consultoras · {cidadeSel.ativas} ativas
+            </p>
+            {(cidadeSel.pessoas ?? []).length > 0 ? (
+              <ul className="max-h-64 space-y-1 overflow-y-auto">
+                {(cidadeSel.pessoas ?? []).map((p) => (
+                  <li key={p.id}>
+                    <button type="button" onClick={() => setFicha(p.id)}
+                      className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-background">
+                      <span className="min-w-0 truncate">{p.nome}</span>
+                      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nomes indisponíveis para esta cidade.</p>
+            )}
+            {cidadeSel.total > (cidadeSel.pessoas?.length ?? 0) && (
+              <p className="text-xs text-muted-foreground">E mais {cidadeSel.total - (cidadeSel.pessoas?.length ?? 0)} nesta cidade — use a busca na aba Consultoras.</p>
+            )}
+          </div>
+        )}
+        <FichaConsultora party={ficha} rep={rep} onClose={() => setFicha(null)} />
       </section>
     </div>
   );

@@ -8,11 +8,10 @@ import { portaLiberada } from "@/lib/portas";
 import { supabase } from "@/integrations/supabase/client";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { AberturaApp, InstalarApp } from "@/components/consultora/InstalarApp";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { PainelRepresentante } from "@/components/representante/PainelRepresentante";
-import { brl, dataBR, repCobrancas, repConsultoras, repReativar, repResumo } from "@/lib/representante";
+import { brl, dataBR, repCobrancas, repConsultoras, repResumo } from "@/lib/representante";
 import { Captacao, CobrarParcela } from "@/components/representante/AcoesRepresentante";
+import { FichaConsultora } from "@/components/representante/FichaConsultora";
 
 type Aba = "cobranca" | "consultoras" | "captacao" | "painel";
 const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = [
@@ -92,7 +91,7 @@ function AreaRepresentante() {
       <div className="flex min-w-0 flex-1 flex-col pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
         {espelho && (
           <div className="flex flex-wrap items-center justify-between gap-2 bg-primary px-5 py-2 text-sm text-primary-foreground md:px-10">
-            <span className="flex items-center gap-2"><Eye className="size-4" /> Você está vendo exatamente o sistema deste representante (somente leitura).</span>
+            <span className="flex items-center gap-2"><Eye className="size-4" /> Você está no sistema deste representante, com os mesmos números e ações (tudo fica registrado com o seu usuário).</span>
             <Link to="/admin/cadastros/pessoas/$id" params={{ id: repEspelho! }} className="flex items-center gap-1 underline">
               <ArrowLeft className="size-4" /> Voltar à ficha
             </Link>
@@ -190,85 +189,93 @@ function Paginas({ pagina, total, set }: { pagina: number; total: number; set: (
   );
 }
 
-function Cobrancas({ rep, espelho }: { rep: string; espelho: boolean }) {
+function Busca({ valor, set, ph }: { valor: string; set: (v: string) => void; ph: string }) {
+  return (
+    <label className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 focus-within:border-primary">
+      <Search className="size-4 text-muted-foreground" />
+      <input value={valor} onChange={(e) => set(e.target.value)} placeholder={ph} className="h-11 w-full bg-transparent outline-none" />
+    </label>
+  );
+}
+function useDebounce(v: string) {
+  const [d, setD] = React.useState(v);
+  React.useEffect(() => { const t = setTimeout(() => setD(v), 300); return () => clearTimeout(t); }, [v]);
+  return d;
+}
+
+function Cobrancas({ rep }: { rep: string; espelho: boolean }) {
   const [filtro, setFiltro] = React.useState("vencidas");
   const [pagina, setPagina] = React.useState(1);
-  const q = useQuery({ queryKey: ["rep", rep, "cob", filtro, pagina], queryFn: () => repCobrancas(rep, filtro, pagina), placeholderData: keepPreviousData });
+  const [texto, setTexto] = React.useState("");
+  const busca = useDebounce(texto);
+  const [ficha, setFicha] = React.useState<string | null>(null);
+  React.useEffect(() => setPagina(1), [busca]);
+  const q = useQuery({ queryKey: ["rep", rep, "cob", filtro, pagina, busca], queryFn: () => repCobrancas(rep, filtro, pagina, busca), placeholderData: keepPreviousData });
   return (
     <section className="space-y-4 rounded-2xl border border-border bg-card p-5 md:p-6">
       <h2 className="text-lg font-semibold">Cobranças da carteira</h2>
+      <Busca valor={texto} set={setTexto} ph="Buscar consultora por nome (sem acento), código ou título" />
       <Chips op={[["vencidas", "Vencidas"], ["hoje", "Hoje"], ["a_vencer", "A vencer"], ["todas", "Todas"]]} valor={filtro} set={(v) => { setFiltro(v); setPagina(1); }} />
       {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
       {q.data && q.data.itens.length === 0 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Nenhuma parcela neste filtro.</p>}
       <ul className="divide-y divide-border">
         {q.data?.itens.map((c) => (
           <li key={c.installment_id} className="flex items-center justify-between gap-3 py-3">
-            <div className="min-w-0">
-              <p className="truncate font-medium">{c.display_name}</p>
+            <button type="button" onClick={() => setFicha(c.party_id)} className="min-w-0 text-left">
+              <p className="truncate font-medium underline-offset-2 hover:underline">{c.display_name}</p>
               <p className="text-xs text-muted-foreground">{c.code} · título {c.numero ?? "—"} · vence {dataBR(c.vencimento)}</p>
-            </div>
+            </button>
             <div className="flex shrink-0 items-center gap-3">
               <span className="font-semibold tabular-nums">{brl(c.saldo_cents)}</span>
-              {!espelho && <CobrarParcela c={c} rep={rep} />}
+              <CobrarParcela c={c} rep={rep} />
             </div>
           </li>
         ))}
       </ul>
       {q.data && <Paginas pagina={pagina} total={q.data.total} set={setPagina} />}
+      <FichaConsultora party={ficha} rep={rep} onClose={() => setFicha(null)} />
     </section>
   );
 }
 
-function Consultoras({ rep, espelho }: { rep: string; espelho: boolean }) {
-  const qc = useQueryClient();
-  const reativar = useMutation({
-    mutationFn: (id: string) => repReativar(id),
-    onSuccess: () => { toast.success("Consultora reativada em todo o sistema."); void qc.invalidateQueries({ queryKey: ["rep", rep] }); },
-    onError: (e: Error) => toast.error(e.message),
-  });
+function Consultoras({ rep }: { rep: string; espelho: boolean }) {
   const [texto, setTexto] = React.useState("");
-  const [busca, setBusca] = React.useState("");
+  const busca = useDebounce(texto);
   const [filtro, setFiltro] = React.useState("todas");
   const [pagina, setPagina] = React.useState(1);
-  React.useEffect(() => { const t = setTimeout(() => { setBusca(texto); setPagina(1); }, 300); return () => clearTimeout(t); }, [texto]);
+  const [ficha, setFicha] = React.useState<string | null>(null);
+  React.useEffect(() => setPagina(1), [busca]);
   const q = useQuery({ queryKey: ["rep", rep, "cons", busca, filtro, pagina], queryFn: () => repConsultoras(rep, busca, filtro, pagina), placeholderData: keepPreviousData });
   return (
     <section className="space-y-4 rounded-2xl border border-border bg-card p-5 md:p-6">
       <h2 className="text-lg font-semibold">Minhas consultoras</h2>
-      <label className="flex items-center gap-2 rounded-xl border border-border bg-background px-3">
-        <Search className="size-4 text-muted-foreground" />
-        <input value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Buscar por nome ou código" className="h-11 w-full bg-transparent outline-none" />
-      </label>
+      <Busca valor={texto} set={setTexto} ph="Buscar por nome (sem acento) ou código" />
       <Chips op={[["todas", "Todas"], ["ativas", "Ativas"], ["inativas", "Inativas"], ["devedoras", "Com débito"]]} valor={filtro} set={(v) => { setFiltro(v); setPagina(1); }} />
       {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
       {q.data && q.data.itens.length === 0 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Nenhuma consultora encontrada.</p>}
       <ul className="divide-y divide-border">
         {q.data?.itens.map((c) => (
-          <li key={c.id} className="flex items-center justify-between gap-3 py-3">
-            <div className="min-w-0">
-              <p className="truncate font-medium">{c.display_name}</p>
-              <p className="text-xs text-muted-foreground">{c.code} · {c.cidade ?? "sem cidade"} · {c.status === "ativo" ? "ativa" : "inativa"}</p>
-            </div>
-            <div className="flex shrink-0 items-center gap-3">
-              {c.aberto_cents > 0 && (
-                <div className="text-right">
-                  <p className="font-semibold tabular-nums">{brl(c.aberto_cents)}</p>
-                  {c.vencido_cents > 0 && <p className="text-xs text-destructive tabular-nums">{brl(c.vencido_cents)} vencido</p>}
-                </div>
-              )}
-              {!espelho && c.status !== "ativo" && (
-                <button type="button" disabled={reativar.isPending} onClick={() => reativar.mutate(c.id)} className="rounded-full border border-primary px-3 py-1.5 text-xs font-semibold text-primary">Reativar</button>
-              )}
-              {c.whatsapp && (
-                <a href={`https://wa.me/55${c.whatsapp.replace(/\D/g, "").replace(/^55/, "")}`} target="_blank" rel="noreferrer" className="grid size-10 place-items-center rounded-full border border-border" aria-label="WhatsApp">
-                  <MessageCircle className="size-4" />
-                </a>
-              )}
-            </div>
+          <li key={c.id}>
+            <button type="button" onClick={() => setFicha(c.id)} className="flex w-full items-center justify-between gap-3 py-3 text-left hover:bg-muted/40">
+              <div className="min-w-0">
+                <p className="truncate font-medium">{c.display_name}</p>
+                <p className="text-xs text-muted-foreground">{c.code} · {c.cidade ?? "sem cidade"} · {c.status === "ativo" ? "ativa" : "inativa"}</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2 text-right">
+                {c.aberto_cents > 0 && (
+                  <div>
+                    <p className="font-semibold tabular-nums">{brl(c.aberto_cents)}</p>
+                    {c.vencido_cents > 0 && <p className="text-xs text-destructive tabular-nums">{brl(c.vencido_cents)} vencido</p>}
+                  </div>
+                )}
+                <ChevronRight className="size-4 text-muted-foreground" />
+              </div>
+            </button>
           </li>
         ))}
       </ul>
       {q.data && <Paginas pagina={pagina} total={q.data.total} set={setPagina} />}
+      <FichaConsultora party={ficha} rep={rep} onClose={() => setFicha(null)} />
     </section>
   );
 }

@@ -393,6 +393,13 @@
       "when": 1791643555583,
       "tag": "0055_cobranca_juros_acordos_lembretes_suspensao",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1791643586339,
+      "tag": "0056_cob_config_salvar_audit_fix",
+      "breakpoints": true
     }
   ]
 }

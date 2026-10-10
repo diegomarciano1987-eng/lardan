@@ -14,9 +14,8 @@ export type RepCobranca = {
 };
 type Pagina<T> = { total: number; itens: T[] };
 
-const rpc = supabase.rpc.bind(supabase) as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
 async function chamar<T>(fn: string, args: Record<string, unknown>): Promise<T> {
-  const { data, error } = await rpc(fn, args);
+  const { data, error } = await supabase.rpc(fn as never, args as never);
   if (error) throw new Error(error.message);
   return data as T;
 }

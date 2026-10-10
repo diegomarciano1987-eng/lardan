@@ -31,3 +31,5 @@
 - Consultant orders can be charged directly by Lardan via consultora_pagamento_titulo (consultant-owned order, valid CPF) + Asaas official engine signed by consultora_cobranca_config.ator_user_id; paid amount is recorded on sales_orders (pay_*) to offset the kit settlement. Why: charge stays in Lardan's name without giving consultants finance permissions.
 - Asaas sync (manual button + daily pg_cron → /api/public/asaas/sync-matinal, shared executarSyncAsaas) mirrors charges, links charge↔installment only on unique person+cents+due date, then settles RECEIVED. Why: auto-reconcile without guessing, independent of opening a screen.
 - Approved financial removals only via service_role fin_expurgo_* (backup to fin_expurgo_backup + audit_logs). Why: reversible.
+
+- Representative portal reads only via rep_portal_* RPCs gated by rep_portal_pode (own party as representante, or master/diretoria/financeiro/cobranca mirroring via /representante?rep=<party>); why: Daniel sees exactly the same numbers, scoped server-side.

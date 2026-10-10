@@ -10,6 +10,8 @@ import { useCapabilities } from "@/lib/capabilities";
 import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import {
   listFinTitles,
+  listarRepresentantesFiltro,
+  opcoesRepresentante,
   TITLE_STATUS_LABEL,
   type FinDirection,
   type FinTitleRow,
@@ -50,6 +52,8 @@ export function ListaTitulos({
   const [pagina, setPagina] = React.useState(0);
   const [situacao, setSituacao] = React.useState(situacaoInicial);
   const [classificacao, setClassificacao] = React.useState("todos");
+  const [rep, setRep] = React.useState("");
+  const reps = useQuery({ queryKey: ["fin-rep-filtro"], queryFn: listarRepresentantesFiltro, enabled: direction === "receivable", staleTime: 60_000 });
   const [novo, setNovo] = React.useState(false);
   const [aberto, setAberto] = React.useState<string | null>(null);
 
@@ -59,14 +63,14 @@ export function ListaTitulos({
   const de = todoPeriodo ? undefined : periodo.de;
   const ate = todoPeriodo ? undefined : periodo.ate;
 
-  React.useEffect(() => setPagina(0), [buscaLenta, situacao, classificacao, de, ate]);
+  React.useEffect(() => setPagina(0), [buscaLenta, situacao, classificacao, de, ate, rep]);
   React.useEffect(() => {
     onFiltrosChange?.({ busca: buscaLenta, situacao });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buscaLenta, situacao]);
 
   const q = useQuery({
-    queryKey: ["fin-titles", direction, buscaLenta, situacao, classificacao, pagina, de, ate],
+    queryKey: ["fin-titles", direction, buscaLenta, situacao, classificacao, pagina, de, ate, rep],
     queryFn: () =>
       listFinTitles({
         direction,
@@ -77,6 +81,7 @@ export function ListaTitulos({
         ...(de ? { de } : {}),
         ...(ate ? { ate } : {}),
         ...(classificacao === "pendentes" ? { semClassificacao: true } : {}),
+        ...(rep ? { rep } : {}),
       }),
   });
 
@@ -270,6 +275,9 @@ export function ListaTitulos({
               onChange={setClassificacao}
               className="w-64"
             />
+            {direction === "receivable" && (
+              <SmartSelect options={opcoesRepresentante(reps.data)} value={rep} onChange={setRep} className="w-72" />
+            )}
           </>
         }
         actions={

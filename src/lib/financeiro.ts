@@ -174,6 +174,7 @@ export async function listFinTitles(params: {
   semClassificacao?: boolean;
   de?: string;
   ate?: string;
+  rep?: string;
 }): Promise<FinTitleList> {
   const args: Record<string, unknown> = {
     _direction: params.direction,
@@ -188,9 +189,26 @@ export async function listFinTitles(params: {
   if (params.centro) args["_cc"] = params.centro;
   if (params.entidade) args["_entidade"] = params.entidade;
   if (params.semClassificacao) args["_sem_classificacao"] = true;
+  if (params.rep) args["_rep"] = params.rep;
   const { data, error } = await supabase.rpc("fin_titles_list", args as never);
   if (error) throw error;
   return data as unknown as FinTitleList;
+}
+
+/** Representantes para o filtro "gerado por representante" (com quantos títulos cada um gerou). */
+export async function listarRepresentantesFiltro(): Promise<{ id: string; nome: string; titulos: number }[]> {
+  const { data, error } = await supabase.rpc("fin_representantes_filtro" as never);
+  if (error) throw error;
+  return (data ?? []) as unknown as { id: string; nome: string; titulos: number }[];
+}
+
+/** Opções do filtro: todos, qualquer representante, ou um deles pelo nome. */
+export function opcoesRepresentante(lista: { id: string; nome: string; titulos: number }[] | undefined) {
+  return [
+    { value: "", label: "Todas as origens" },
+    { value: "qualquer", label: "Gerado por representante (todos)" },
+    ...(lista ?? []).map((r) => ({ value: r.id, label: `${r.nome} (${r.titulos})` })),
+  ];
 }
 
 export async function fetchFinTitle(id: string): Promise<FinTitleDetail> {

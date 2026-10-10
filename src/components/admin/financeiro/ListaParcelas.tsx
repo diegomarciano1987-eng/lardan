@@ -4,6 +4,7 @@ import { ErrorState, Panel, Skeleton, formatBRLFromCents } from "@/components/ad
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import { listarParcelas } from "@/lib/financeiro-parcelas";
+import { listarRepresentantesFiltro, opcoesRepresentante } from "@/lib/financeiro";
 
 const dataBR = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString("pt-BR");
 const mesBR = (d: string) =>
@@ -15,9 +16,11 @@ export function ListaParcelas({ direction }: { direction: "payable" | "receivabl
   const [busca, setBusca] = React.useState("");
   const [situacao, setSituacao] = React.useState("todos");
   const [pagina, setPagina] = React.useState(0);
+  const [rep, setRep] = React.useState("");
+  const reps = useQuery({ queryKey: ["fin-rep-filtro"], queryFn: listarRepresentantesFiltro, enabled: direction === "receivable", staleTime: 60_000 });
   const POR = 50;
   const q = useQuery({
-    queryKey: ["fin-parcelas", direction, periodo.de, periodo.ate, busca, situacao, pagina],
+    queryKey: ["fin-parcelas", direction, periodo.de, periodo.ate, busca, situacao, pagina, rep],
     queryFn: () =>
       listarParcelas({
         direction,
@@ -27,6 +30,7 @@ export function ListaParcelas({ direction }: { direction: "payable" | "receivabl
         situacao,
         limit: POR,
         offset: pagina * POR,
+        ...(rep ? { rep } : {}),
       }),
   });
   const d = q.data;
@@ -57,6 +61,9 @@ export function ListaParcelas({ direction }: { direction: "payable" | "receivabl
           }}
           className="w-52"
         />
+        {direction === "receivable" && (
+          <SmartSelect options={opcoesRepresentante(reps.data)} value={rep} onChange={(v) => { setRep(v); setPagina(0); }} className="w-72" />
+        )}
         {d ? (
           <p className="text-sm font-medium text-ledger-text">
             {d.total} parcela(s) · valor {formatBRLFromCents(d.valor_parcelas_cents)} · saldo{" "}

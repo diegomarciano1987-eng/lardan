@@ -379,6 +379,13 @@
       "when": 1791583907758,
       "tag": "0053_media_publica_ok",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1791634106518,
+      "tag": "0054_fin_dfc_projecao_faixas",
+      "breakpoints": true
     }
   ]
 }

@@ -29,6 +29,7 @@ import {
   estornarBaixa,
   fetchFinAccounts,
   fetchFinTitle,
+  fetchClassificacoes,
   registrarBaixa,
   registrarReconhecimento,
   submeterTitulo,
@@ -95,6 +96,12 @@ export function TituloSheet({
   const [juros, setJuros] = React.useState("");
   const [desconto, setDesconto] = React.useState("");
   const [dataBaixa, setDataBaixa] = React.useState<Date | undefined>(() => new Date());
+  const [forma, setForma] = React.useState("");
+  const formas = useQuery({
+    queryKey: ["fin-formas-baixa"],
+    queryFn: () => fetchClassificacoes({}),
+    staleTime: 300_000,
+  });
   const [chave] = React.useState(() => crypto.randomUUID());
   const [estornando, setEstornando] = React.useState<string | null>(null);
   const [cancelando, setCancelando] = React.useState(false);
@@ -110,6 +117,7 @@ export function TituloSheet({
     const alvo = t.parcelas.find((p) => p.id === parcelaInicial) ?? t.parcelas.find((p) => saldoParcela(p) > 0);
     if (alvo) {
       setParcela(alvo.id);
+      if (t.titulo.payment_method_id) setForma(t.titulo.payment_method_id);
       const sd = saldoParcela(alvo);
       if (sd > 0) setValor((sd / 100).toFixed(2).replace(".", ","));
     }
@@ -157,6 +165,7 @@ export function TituloSheet({
         valor_cents: cents,
         data: dataIso,
         ...(referencia.trim() ? { referencia: referencia.trim() } : {}),
+        ...(forma ? { payment_method_id: forma } : {}),
         idempotency_key: `${chave}-${parcela}-${cents}-${tc}-${jc}-${dc}-${dataIso}`,
         alocacoes: [{ installment_id: parcela, valor_cents: cents }],
       });
@@ -361,6 +370,13 @@ export function TituloSheet({
                     onChange={setConta}
                     placeholder="Conta ou caixa"
                     emptyLabel="Nenhuma conta cadastrada"
+                  />
+                  <SmartSelect
+                    options={(formas.data?.formas ?? []).map((f) => ({ value: f.id, label: f.nome }))}
+                    value={forma}
+                    onChange={setForma}
+                    placeholder="Forma de pagamento (Pix, boleto, cheque…)"
+                    emptyLabel="Nenhuma forma cadastrada"
                   />
                   <input
                     value={valor}

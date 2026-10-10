@@ -59,6 +59,12 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     capacidade: "finance.dashboard.view",
   },
   {
+    to: "/admin/financeiro/dfc",
+    label: "DFC e projeção",
+    descricao: "Método direto e saldo dia a dia",
+    capacidade: "finance.dashboard.view",
+  },
+  {
     to: "/admin/financeiro/aprovacoes",
     label: "Aprovações",
     descricao: "Fila de decisão",

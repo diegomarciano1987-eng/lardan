@@ -1,4 +1,5 @@
 import * as React from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -168,6 +169,9 @@ function PagarReceber() {
             ))}
           </div>
         </div>
+
+        {visao === "parcela" ? <AtalhosVencimento ir={ir} situacao={s.situacao} /> : null}
+        {visao === "parcela" && natureza === "pagar" ? <FaixasPagar /> : null}
 
         {visao === "titulo" && natureza !== "todos" ? (
           <ListaTitulos
@@ -617,5 +621,75 @@ function PainelAsaas({ de, ate }: { de: string; ate: string }) {
         {m.isPending ? "Sincronizando…" : "Sincronizar todas as cobranças do Asaas"}
       </button>
     </div>
+  );
+}
+
+const isoSP = (dt: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(dt);
+const somaDias = (base: string, n: number) => {
+  const d = new Date(`${base}T12:00:00`);
+  d.setDate(d.getDate() + n);
+  return isoSP(d);
+};
+
+/** Atalhos de vencimento: gravam o período na barra de endereço. */
+function AtalhosVencimento({ ir, situacao }: { ir: (p: PatchPR) => void; situacao?: string | undefined }) {
+  const { de, ate } = usePeriodoFinanceiro();
+  const hoje = isoSP(new Date());
+  const dow = (new Date(`${hoje}T12:00:00`).getDay() + 6) % 7;
+  const seg = somaDias(hoje, -dow);
+  const opcoes: { r: string; de: string; ate: string; sit: string }[] = [
+    { r: "Hoje", de: hoje, ate: hoje, sit: "aberto" },
+    { r: "Esta semana", de: seg, ate: somaDias(seg, 6), sit: "aberto" },
+    { r: "Próxima semana", de: somaDias(seg, 7), ate: somaDias(seg, 13), sit: "aberto" },
+    { r: "Próximos 30 dias", de: hoje, ate: somaDias(hoje, 30), sit: "aberto" },
+    { r: "Vencidos", de: "2000-01-01", ate: somaDias(hoje, -1), sit: "vencido" },
+  ];
+  return (
+    <div className="flex flex-wrap items-center gap-2" aria-label="Atalhos de vencimento">
+      {opcoes.map((o) => {
+        const ativo = o.de === de && o.ate === ate && (situacao ?? "todos") === o.sit;
+        return (
+          <button key={o.r} type="button" onClick={() => ir({ de: o.de, ate: o.ate, situacao: o.sit })} className={`admin-btn ${ativo ? "admin-btn-primary" : ""}`}>
+            {o.r}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+const FAIXAS: [string, string][] = [
+  ["vencidas", "Vencidas"],
+  ["ate_7", "Em até 7 dias"],
+  ["ate_15", "8 a 15 dias"],
+  ["ate_30", "16 a 30 dias"],
+  ["acima_30", "Acima de 30 dias"],
+];
+
+function FaixasPagar() {
+  const q = useQuery({
+    queryKey: ["fin-pagar-faixas"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("fin_pagar_faixas" as never);
+      if (error) throw new Error((error as { message: string }).message);
+      return data as unknown as { faixas: Record<string, { qtd: number; saldo_cents: number }> };
+    },
+  });
+  if (q.error) return <ErrorState message={(q.error as Error).message} />;
+  return (
+    <Panel title="Contas a pagar por vencimento (saldo em aberto, a partir de hoje)">
+      <div className="grid gap-3 sm:grid-cols-5">
+        {FAIXAS.map(([k, r]) => {
+          const f = q.data?.faixas[k];
+          return (
+            <div key={k} className="rounded-[12px] border border-line-soft bg-cream-2 p-4">
+              <p className="ledger-eyebrow">{r}</p>
+              <p className="mt-1 font-display text-lg font-bold tabular-nums text-ledger-text">{formatBRLFromCents(f?.saldo_cents ?? 0)}</p>
+              <p className="text-xs text-ledger-muted">{formatInt(f?.qtd ?? 0)} parcela(s)</p>
+            </div>
+          );
+        })}
+      </div>
+    </Panel>
   );
 }

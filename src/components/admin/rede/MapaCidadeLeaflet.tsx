@@ -96,11 +96,16 @@ export default function MapaCidadeLeaflet({
       m.on("click", () => cbRef.current(g.chave));
       camada.addLayer(m);
     }
-    if (!enquadrado.current && grupos.length > 0) {
+    if (grupos.length > 0 && ultimosGruposRef.current !== grupos) {
+      ultimosGruposRef.current = grupos;
       const precisos = grupos.filter((g) => !g.aproximado);
       const base = precisos.length >= 3 ? precisos : grupos;
-      mapa.fitBounds(L.latLngBounds(base.map((g) => [g.lat, g.lng] as [number, number])).pad(0.08), { maxZoom: 15 });
-      enquadrado.current = true;
+      const enquadrar = () => {
+        mapa.invalidateSize();
+        mapa.fitBounds(L.latLngBounds(base.map((g) => [g.lat, g.lng] as [number, number])).pad(0.12), { maxZoom: 13 });
+      };
+      enquadrar();
+      setTimeout(enquadrar, 300);
     }
   }, [grupos, selecionado]);
 

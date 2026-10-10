@@ -13533,13 +13533,38 @@ export type Database = {
         Returns: Json
       }
       rep_cheque_registrar: { Args: { _payload: Json }; Returns: string }
+      rep_cobranca_avulsa: {
+        Args: {
+          _chave: string
+          _descricao: string
+          _party: string
+          _valor_cents: number
+        }
+        Returns: string
+      }
+      rep_consultora_ficha: { Args: { _party: string }; Returns: Json }
       rep_consultora_reativar: { Args: { _party: string }; Returns: boolean }
       rep_crm: { Args: { _rep: string }; Returns: Json }
+      rep_crm_etapa_nova: {
+        Args: { _nome: string; _rep: string }
+        Returns: string
+      }
       rep_crm_etapa_salvar: {
         Args: { _id: string; _nome: string; _ordem: number }
         Returns: string
       }
       rep_crm_etapas_garantir: { Args: { _rep: string }; Returns: undefined }
+      rep_crm_lead_criar: {
+        Args: {
+          _cidade: string
+          _nome: string
+          _nota?: string
+          _rep: string
+          _uf: string
+          _whatsapp: string
+        }
+        Returns: string
+      }
       rep_crm_mover: {
         Args: { _etapa: string; _lead: string; _nota?: string }
         Returns: undefined
@@ -13562,7 +13587,12 @@ export type Database = {
         }[]
       }
       rep_portal_cobrancas: {
-        Args: { _filtro?: string; _pagina?: number; _rep: string }
+        Args: {
+          _busca?: string
+          _filtro?: string
+          _pagina?: number
+          _rep: string
+        }
         Returns: Json
       }
       rep_portal_consultoras: {

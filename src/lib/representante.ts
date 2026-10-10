@@ -32,8 +32,17 @@ export type RepFicha = {
   endereco: { rua: string | null; numero: string | null; complemento: string | null; bairro: string | null; cidade: string | null; uf: string | null; cep: string | null; referencia: string | null } | null;
   parcelas: RepCobranca[]; aberto_cents: number; vencido_cents: number;
   cheques: { numero: string; valor_cents: number; bom_para: string; status: string }[];
+  na_carteira: boolean; rep_nome: string | null; maletas: { status: string; desde: string }[];
 };
-export const repFicha = (party: string) => chamar<RepFicha>("rep_consultora_ficha", { _party: party });
+export const repFicha = (party: string, rep: string) => chamar<RepFicha>("rep_consultora_ficha_rep", { _party: party, _rep: rep });
+export type RepBuscaTodas = {
+  id: string; code: string; display_name: string; status: string; cidade: string | null; rep_nome: string | null;
+  na_carteira: boolean; pode_assumir: boolean; maletas: number; aberto_cents: number;
+};
+export const repBuscaTodas = (rep: string, busca: string, pagina: number) =>
+  chamar<Pagina<RepBuscaTodas>>("rep_portal_busca_todas", { _rep: rep, _busca: busca, _pagina: pagina });
+/** Traz a consultora para a carteira antes de cobrar/reativar (no-op se já é dela). */
+export const repAssumir = (party: string, rep: string) => chamar<boolean>("rep_consultora_assumir", { _party: party, _rep: rep });
 export const repAvulsa = (party: string, valorCents: number, descricao: string, chave: string) =>
   chamar<string>("rep_cobranca_avulsa", { _party: party, _valor_cents: valorCents, _descricao: descricao, _chave: chave });
 export const repLeadCriar = (rep: string, f: { nome: string; whatsapp: string; cidade: string; uf: string; nota: string }) =>

@@ -34,7 +34,7 @@ type Alvo = { party_id: string; display_name: string };
  * Cobrança de uma parcela existente (c) ou com valor digitado (avulsa).
  * Valor digitado cria um título a receber da Lardan (ex.: acerto de maleta) e cobra no Asaas.
  */
-export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo }: { c?: RepCobranca; avulsa?: Alvo; rep: string; whatsapp?: string | null; rotulo?: string }) {
+export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo, antes }: { c?: RepCobranca; avulsa?: Alvo; rep: string; whatsapp?: string | null; rotulo?: string; antes?: (() => Promise<unknown>) | undefined }) {
   const alvo: Alvo = c ? { party_id: c.party_id, display_name: c.display_name } : avulsa!;
   const primeiro = alvo.display_name.split(" ")[0] ?? "";
   const [aberto, setAberto] = React.useState(false);
@@ -48,14 +48,17 @@ export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo }: { c?: RepCob
   const [bomPara, setBomPara] = React.useState<Date | undefined>();
   const qc = useQueryClient();
   const cobrar = useServerFn(repCobrar);
-  const valorCents = c ? c.saldo_cents : centavos(valor);
+  const valorCents = centavos(valor);
+  const parcialDeTitulo = !!c && valorCents !== c.saldo_cents;
 
   const gerar = useMutation({
     mutationFn: async () => {
-      let inst = c?.installment_id;
+      if (valorCents <= 0) throw new Error("Digite o valor da cobrança.");
+      await antes?.();
+      let inst = c && !parcialDeTitulo ? c.installment_id : undefined;
       if (!inst) {
-        if (valorCents <= 0) throw new Error("Digite o valor da cobrança.");
-        inst = await repAvulsa(alvo.party_id, valorCents, descricao, chave);
+        const desc = c ? `${descricao || "Pagamento parcial"} — ref. título ${c.numero ?? ""}`.trim() : descricao;
+        inst = await repAvulsa(alvo.party_id, valorCents, desc, chave);
       }
       const r = await cobrar({ data: { installmentId: inst, forma: forma as "PIX" | "BOLETO" | "CREDIT_CARD" } });
       return { ...r, valor: valorCents };
@@ -69,8 +72,8 @@ export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo }: { c?: RepCob
     onError: (e: Error) => toast.error(e.message),
   });
   const cheque = useMutation({
-    mutationFn: () => repCheque({ ...ch, valor_cents: centavos(ch.valor), bom_para: bomPara ? iso(bomPara) : "", recebido_de_party_id: alvo.party_id,
-      observacao: `${c ? `parcela ${c.numero ?? ""}` : descricao} · ${ch.observacao}`.trim() }),
+    mutationFn: async () => { await antes?.(); return repCheque({ ...ch, valor_cents: centavos(ch.valor), bom_para: bomPara ? iso(bomPara) : "", recebido_de_party_id: alvo.party_id,
+      observacao: `${c ? `parcela ${c.numero ?? ""}` : descricao} · ${ch.observacao}`.trim() }); },
     onSuccess: () => { toast.success("Cheque registrado em custódia. A baixa é feita pelo financeiro quando compensar."); setAberto(false); void qc.invalidateQueries({ queryKey: ["rep"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -81,7 +84,7 @@ export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo }: { c?: RepCob
     <label className="block text-sm"><span className="mb-1 block text-xs text-muted-foreground">{rot}</span>
       <input value={ch[k]} placeholder={ph} inputMode={mask ? "numeric" : undefined} onChange={(e) => setCh({ ...ch, [k]: mask ? mascaraValor(e.target.value) : e.target.value })} className="h-11 w-full rounded-xl border border-border bg-background px-3 outline-none" /></label>
   );
-  const abrir = () => { setRes(null); setQrLink(null); setValor(""); setChave(crypto.randomUUID()); setAberto(true); };
+  const abrir = () => { setRes(null); setQrLink(null); setValor(c ? mascaraValor(String(c.saldo_cents)) : ""); setDescricao(c ? "Pagamento parcial" : "Acerto de maleta"); setChave(crypto.randomUUID()); setAberto(true); };
 
   return (
     <>
@@ -94,17 +97,22 @@ export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo }: { c?: RepCob
           <DialogHeader>
             <DialogTitle>Cobrar {primeiro}</DialogTitle>
             <DialogDescription>
-              {c ? `${brl(c.saldo_cents)} · título ${c.numero ?? "—"} · vence ${dataBR(c.vencimento)}. ` : "Digite o valor. "}
+              {c ? `Saldo ${brl(c.saldo_cents)} · título ${c.numero ?? "—"} · vence ${dataBR(c.vencimento)}. Digite outro valor se precisar. ` : "Digite o valor. "}
               Em nome da Lardan; a baixa é automática quando o Asaas confirmar o pagamento.
             </DialogDescription>
           </DialogHeader>
-          {!res && !c && (
+          {!res && forma !== "CHEQUE" && (
             <div className="space-y-3">
               <label className="block text-sm"><span className="mb-1 block text-xs text-muted-foreground">Valor da cobrança (R$)</span>
                 <input autoFocus inputMode="numeric" value={valor} onChange={(e) => setValor(mascaraValor(e.target.value))} placeholder="0,00"
                   className="h-14 w-full rounded-xl border border-border bg-background px-4 text-2xl font-semibold tabular-nums outline-none focus:border-asaas" /></label>
-              <label className="block text-sm"><span className="mb-1 block text-xs text-muted-foreground">Referente a</span>
-                <input value={descricao} onChange={(e) => setDescricao(e.target.value)} className="h-11 w-full rounded-xl border border-border bg-background px-3 outline-none" /></label>
+              {(!c || parcialDeTitulo) && (
+                <label className="block text-sm"><span className="mb-1 block text-xs text-muted-foreground">Referente a</span>
+                  <input value={descricao} onChange={(e) => setDescricao(e.target.value)} className="h-11 w-full rounded-xl border border-border bg-background px-3 outline-none" /></label>
+              )}
+              {parcialDeTitulo && (
+                <p className="rounded-xl bg-muted px-3 py-2 text-xs text-muted-foreground">Valor diferente do saldo: vira uma cobrança própria ligada a este título. Quando for paga, o financeiro abate do título {c?.numero ?? ""}.</p>
+              )}
             </div>
           )}
           {!res && (

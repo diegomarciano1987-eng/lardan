@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { AberturaApp, InstalarApp } from "@/components/consultora/InstalarApp";
 import { PainelRepresentante } from "@/components/representante/PainelRepresentante";
-import { brl, dataBR, repCobrancas, repConsultoras, repResumo } from "@/lib/representante";
+import { brl, dataBR, repBuscaTodas, repCobrancas, repConsultoras, repResumo } from "@/lib/representante";
 import { Captacao, CobrarParcela } from "@/components/representante/AcoesRepresentante";
 import { FichaConsultora } from "@/components/representante/FichaConsultora";
 
@@ -245,11 +245,36 @@ function Consultoras({ rep }: { rep: string; espelho: boolean }) {
   const [pagina, setPagina] = React.useState(1);
   const [ficha, setFicha] = React.useState<string | null>(null);
   React.useEffect(() => setPagina(1), [busca]);
-  const q = useQuery({ queryKey: ["rep", rep, "cons", busca, filtro, pagina], queryFn: () => repConsultoras(rep, busca, filtro, pagina), placeholderData: keepPreviousData });
+  const [onde, setOnde] = React.useState<"minhas" | "sistema">("minhas");
+  const q = useQuery({ queryKey: ["rep", rep, "cons", busca, filtro, pagina], queryFn: () => repConsultoras(rep, busca, filtro, pagina), placeholderData: keepPreviousData, enabled: onde === "minhas" });
+  const g = useQuery({ queryKey: ["rep", rep, "todas", busca, pagina], queryFn: () => repBuscaTodas(rep, busca, pagina), placeholderData: keepPreviousData, enabled: onde === "sistema" && busca.trim().length >= 2 });
   return (
     <section className="space-y-4 rounded-2xl border border-border bg-card p-5 md:p-6">
-      <h2 className="text-lg font-semibold">Minhas consultoras</h2>
-      <Busca valor={texto} set={setTexto} ph="Buscar por nome (sem acento) ou código" />
+      <h2 className="text-lg font-semibold">Consultoras</h2>
+      <Chips op={[["minhas", "Minha carteira"], ["sistema", "Buscar em todas do sistema"]]} valor={onde} set={(v) => { setOnde(v as "minhas" | "sistema"); setPagina(1); }} />
+      <Busca valor={texto} set={setTexto} ph={onde === "sistema" ? "Nome ou código de qualquer consultora (inclusive inativas)" : "Buscar por nome (sem acento) ou código"} />
+      {onde === "sistema" ? (
+        <>
+          {busca.trim().length < 2 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Digite ao menos 2 letras. Encontrou? Abra a ficha e cobre com o valor que quiser: ela passa para a sua carteira e é reativada.</p>}
+          {g.error && <p className="text-sm text-destructive">{(g.error as Error).message}</p>}
+          {g.data && busca.trim().length >= 2 && g.data.itens.length === 0 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Nenhuma consultora com esse nome no sistema.</p>}
+          <ul className="divide-y divide-border">
+            {g.data?.itens.map((c) => (
+              <li key={c.id}>
+                <button type="button" disabled={!c.pode_assumir && !c.na_carteira} onClick={() => setFicha(c.id)} className="flex w-full items-center justify-between gap-3 py-3 text-left hover:bg-muted/40 disabled:opacity-60">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{c.display_name}</p>
+                    <p className="text-xs text-muted-foreground">{c.code} · {c.cidade ?? "sem cidade"} · {c.status === "ativo" ? "ativa" : "inativa"} · {c.na_carteira ? "na sua carteira" : c.rep_nome ? `carteira de ${c.rep_nome}` : "sem representante"}{c.maletas > 0 ? ` · ${c.maletas} maleta(s) com ela` : ""}</p>
+                    {!c.pode_assumir && !c.na_carteira && <p className="text-xs text-destructive">Ativa com outro representante — fale com a Lardan.</p>}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">{c.aberto_cents > 0 && <p className="font-semibold tabular-nums">{brl(c.aberto_cents)}</p>}<ChevronRight className="size-4 text-muted-foreground" /></div>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {g.data && busca.trim().length >= 2 && <Paginas pagina={pagina} total={g.data.total} set={setPagina} />}
+        </>
+      ) : (<>
       <Chips op={[["todas", "Todas"], ["ativas", "Ativas"], ["inativas", "Inativas"], ["devedoras", "Com débito"]]} valor={filtro} set={(v) => { setFiltro(v); setPagina(1); }} />
       {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
       {q.data && q.data.itens.length === 0 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Nenhuma consultora encontrada.</p>}
@@ -275,6 +300,7 @@ function Consultoras({ rep }: { rep: string; espelho: boolean }) {
         ))}
       </ul>
       {q.data && <Paginas pagina={pagina} total={q.data.total} set={setPagina} />}
+      </>)}
       <FichaConsultora party={ficha} rep={rep} onClose={() => setFicha(null)} />
     </section>
   );

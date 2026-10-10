@@ -2,21 +2,22 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { MapPin, MessageCircle, Phone } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { brl, dataBR, repFicha, repReativar } from "@/lib/representante";
+import { brl, dataBR, repAssumir, repFicha, repReativar } from "@/lib/representante";
 import { CobrarParcela } from "@/components/representante/AcoesRepresentante";
 
 /** Tela da consultora dentro da área do representante: cadastro, débitos e cobrança. */
 export function FichaConsultora({ party, rep, onClose }: { party: string | null; rep: string; onClose: () => void }) {
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: ["rep", rep, "ficha", party], queryFn: () => repFicha(party!), enabled: !!party });
+  const q = useQuery({ queryKey: ["rep", rep, "ficha", party], queryFn: () => repFicha(party!, rep), enabled: !!party });
   const reativar = useMutation({
-    mutationFn: () => repReativar(party!),
+    mutationFn: async () => { await repAssumir(party!, rep); return repReativar(party!); },
     onSuccess: () => { toast.success("Consultora reativada em todo o sistema."); void qc.invalidateQueries({ queryKey: ["rep"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
   const f = q.data;
   const whats = f?.contatos.find((c) => c.kind === "whatsapp")?.value ?? f?.contatos.find((c) => c.kind === "telefone")?.value ?? null;
   const e = f?.endereco;
+  const antes = f && !f.na_carteira ? () => repAssumir(f.id, rep) : undefined;
   return (
     <Sheet open={!!party} onOpenChange={(o) => { if (!o) onClose(); }}>
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg">
@@ -32,7 +33,15 @@ export function FichaConsultora({ party, rep, onClose }: { party: string | null;
               <div className="rounded-2xl border border-border p-4"><p className="text-xs uppercase text-muted-foreground">Vencido</p><p className="text-xl font-semibold tabular-nums text-destructive">{brl(f.vencido_cents)}</p></div>
             </div>
 
-            <CobrarParcela avulsa={{ party_id: f.id, display_name: f.nome }} rep={rep} whatsapp={whats} rotulo="Nova cobrança — digitar valor (Pix, cartão 3x, boleto, cheque)" />
+            {!f.na_carteira && (
+              <p className="rounded-xl bg-muted px-4 py-3 text-sm">
+                {f.rep_nome ? `Hoje está ligada a ${f.rep_nome}.` : "Ainda sem representante."} Ao cobrar, registrar cheque ou reativar, ela passa para esta carteira (fica registrado).
+              </p>
+            )}
+            {(f.maletas ?? []).length > 0 && (
+              <p className="rounded-xl border border-border px-4 py-3 text-sm"><span className="font-semibold">Maleta com ela:</span> {f.maletas.map((m) => `${m.status} desde ${dataBR(m.desde.slice(0, 10))}`).join(" · ")}</p>
+            )}
+            <CobrarParcela antes={antes} avulsa={{ party_id: f.id, display_name: f.nome }} rep={rep} whatsapp={whats} rotulo="Nova cobrança — digitar valor (Pix, cartão 3x, boleto, cheque)" />
             {f.status !== "ativo" && (
               <button type="button" disabled={reativar.isPending} onClick={() => reativar.mutate()} className="w-full rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary">Reativar consultora</button>
             )}
@@ -60,7 +69,7 @@ export function FichaConsultora({ party, rep, onClose }: { party: string | null;
                 {f.parcelas.map((p) => (
                   <li key={p.installment_id} className="flex items-center justify-between gap-3 px-4 py-3">
                     <div className="min-w-0"><p className="text-sm font-medium">Título {p.numero ?? "—"}</p><p className="text-xs text-muted-foreground">vence {dataBR(p.vencimento)}</p></div>
-                    <div className="flex items-center gap-3"><span className="font-semibold tabular-nums">{brl(p.saldo_cents)}</span><CobrarParcela c={p} rep={rep} whatsapp={whats} /></div>
+                    <div className="flex items-center gap-3"><span className="font-semibold tabular-nums">{brl(p.saldo_cents)}</span><CobrarParcela antes={antes} c={p} rep={rep} whatsapp={whats} /></div>
                   </li>
                 ))}
               </ul>

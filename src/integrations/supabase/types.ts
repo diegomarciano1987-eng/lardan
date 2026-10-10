@@ -13542,7 +13542,15 @@ export type Database = {
         }
         Returns: string
       }
+      rep_consultora_assumir: {
+        Args: { _party: string; _rep: string }
+        Returns: boolean
+      }
       rep_consultora_ficha: { Args: { _party: string }; Returns: Json }
+      rep_consultora_ficha_rep: {
+        Args: { _party: string; _rep: string }
+        Returns: Json
+      }
       rep_consultora_reativar: { Args: { _party: string }; Returns: boolean }
       rep_crm: { Args: { _rep: string }; Returns: Json }
       rep_crm_etapa_nova: {
@@ -13576,6 +13584,10 @@ export type Database = {
       }
       rep_parcela_cobravel: { Args: { _inst: string }; Returns: Json }
       rep_parcela_dono: { Args: { _inst: string }; Returns: string }
+      rep_pode_assumir: {
+        Args: { _party: string; _rep: string }
+        Returns: boolean
+      }
       rep_portal_abertos: {
         Args: { _rep: string }
         Returns: {
@@ -13585,6 +13597,10 @@ export type Database = {
           saldo_cents: number
           vencimento: string
         }[]
+      }
+      rep_portal_busca_todas: {
+        Args: { _busca: string; _pagina?: number; _rep: string }
+        Returns: Json
       }
       rep_portal_cobrancas: {
         Args: {

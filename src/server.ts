@@ -44,17 +44,25 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+/** 404/500: buscadores nunca devem indexar páginas de erro. */
+function comNoindexEmErro(response: Response): Response {
+  if (response.status < 400 || response.headers.has("x-robots-tag")) return response;
+  const r = new Response(response.body, response);
+  r.headers.set("x-robots-tag", "noindex, nofollow");
+  return r;
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return comNoindexEmErro(await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
         status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
+        headers: { "content-type": "text/html; charset=utf-8", "x-robots-tag": "noindex, nofollow" },
       });
     }
   },

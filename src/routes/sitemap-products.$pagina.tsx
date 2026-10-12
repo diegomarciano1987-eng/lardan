@@ -14,11 +14,7 @@ export const Route = createFileRoute("/sitemap-products/$pagina")({
         }
         return new Response(
           xmlUrlset(
-            fatia.map((slug) => ({
-              loc: `/produto/${slug}`,
-              priority: "0.7",
-              changefreq: "weekly",
-            })),
+            fatia.map((slug) => ({ loc: `/produto/${slug}` })),
           ),
           { headers: CABECALHOS_XML },
         );

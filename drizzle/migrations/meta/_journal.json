@@ -463,6 +463,13 @@
       "when": 1791672857194,
       "tag": "0065_fin_asaas_vinculo_fatura_correcoes",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1791844064347,
+      "tag": "0066_crm_origem_direto_sem_referencia",
+      "breakpoints": true
     }
   ]
 }

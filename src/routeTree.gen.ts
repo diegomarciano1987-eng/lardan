@@ -73,6 +73,7 @@ import { Route as AuthenticatedAdminRedeRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminSiteRouteImport } from './routes/_authenticated/admin/site'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as ApiPublicGaConfigRouteImport } from './routes/api/public/ga-config'
+import { Route as ApiPublicIndexnowRouteImport } from './routes/api/public/indexnow'
 import { Route as AuthenticatedAdminCadastrosIndexRouteImport } from './routes/_authenticated/admin/cadastros/index'
 import { Route as AuthenticatedAdminCadastrosCategoriasRouteImport } from './routes/_authenticated/admin/cadastros/categorias'
 import { Route as AuthenticatedAdminCadastrosColecoesRouteImport } from './routes/_authenticated/admin/cadastros/colecoes'
@@ -458,6 +459,11 @@ const ApiPublicGaConfigRoute = ApiPublicGaConfigRouteImport.update({
   path: '/api/public/ga-config',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicIndexnowRoute = ApiPublicIndexnowRouteImport.update({
+  id: '/api/public/indexnow',
+  path: '/api/public/indexnow',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminCadastrosIndexRoute =
   AuthenticatedAdminCadastrosIndexRouteImport.update({
     id: '/cadastros/',
@@ -800,6 +806,7 @@ export interface FileRoutesByFullPath {
   '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
+  '/api/public/indexnow': typeof ApiPublicIndexnowRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/cadastros/categorias': typeof AuthenticatedAdminCadastrosCategoriasRoute
   '/admin/cadastros/colecoes': typeof AuthenticatedAdminCadastrosColecoesRoute
@@ -910,6 +917,7 @@ export interface FileRoutesByTo {
   '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
+  '/api/public/indexnow': typeof ApiPublicIndexnowRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/cadastros/categorias': typeof AuthenticatedAdminCadastrosCategoriasRoute
   '/admin/cadastros/colecoes': typeof AuthenticatedAdminCadastrosColecoesRoute
@@ -1024,6 +1032,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/site': typeof AuthenticatedAdminSiteRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
+  '/api/public/indexnow': typeof ApiPublicIndexnowRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/cadastros/categorias': typeof AuthenticatedAdminCadastrosCategoriasRoute
   '/_authenticated/admin/cadastros/colecoes': typeof AuthenticatedAdminCadastrosColecoesRoute
@@ -1138,6 +1147,7 @@ export interface FileRouteTypes {
     | '/admin/site'
     | '/admin/usuarios'
     | '/api/public/ga-config'
+    | '/api/public/indexnow'
     | '/admin/'
     | '/admin/cadastros/categorias'
     | '/admin/cadastros/colecoes'
@@ -1248,6 +1258,7 @@ export interface FileRouteTypes {
     | '/admin/site'
     | '/admin/usuarios'
     | '/api/public/ga-config'
+    | '/api/public/indexnow'
     | '/admin'
     | '/admin/cadastros/categorias'
     | '/admin/cadastros/colecoes'
@@ -1361,6 +1372,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/site'
     | '/_authenticated/admin/usuarios'
     | '/api/public/ga-config'
+    | '/api/public/indexnow'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/cadastros/categorias'
     | '/_authenticated/admin/cadastros/colecoes'
@@ -1455,6 +1467,7 @@ export interface RootRouteChildren {
   SitemapProductsPaginaRoute: typeof SitemapProductsPaginaRoute
   SemijoiasIndexRoute: typeof SemijoiasIndexRoute
   ApiPublicGaConfigRoute: typeof ApiPublicGaConfigRoute
+  ApiPublicIndexnowRoute: typeof ApiPublicIndexnowRoute
   ApiPublicAsaasSyncMatinalRoute: typeof ApiPublicAsaasSyncMatinalRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
   ApiPublicClicksignWebhookRoute: typeof ApiPublicClicksignWebhookRoute
@@ -1913,6 +1926,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/ga-config'
       fullPath: '/api/public/ga-config'
       preLoaderRoute: typeof ApiPublicGaConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/indexnow': {
+      id: '/api/public/indexnow'
+      path: '/api/public/indexnow'
+      fullPath: '/api/public/indexnow'
+      preLoaderRoute: typeof ApiPublicIndexnowRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/cadastros/': {
@@ -2480,6 +2500,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapProductsPaginaRoute: SitemapProductsPaginaRoute,
   SemijoiasIndexRoute: SemijoiasIndexRoute,
   ApiPublicGaConfigRoute: ApiPublicGaConfigRoute,
+  ApiPublicIndexnowRoute: ApiPublicIndexnowRoute,
   ApiPublicAsaasSyncMatinalRoute: ApiPublicAsaasSyncMatinalRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
   ApiPublicClicksignWebhookRoute: ApiPublicClicksignWebhookRoute,

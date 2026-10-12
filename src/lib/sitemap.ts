@@ -43,12 +43,12 @@ export const CABECALHOS_XML = {
 
 /** Páginas institucionais sempre publicadas. /colecoes fica fora: sem conteúdo real. */
 const ESTATICAS: UrlSitemap[] = [
-  { loc: "/", priority: "1.0", changefreq: "weekly" },
-  { loc: "/seja-lardan", priority: "0.9", changefreq: "weekly" },
-  { loc: "/a-lardan", priority: "0.7", changefreq: "monthly" },
-  { loc: "/semijoias", priority: "0.8", changefreq: "weekly" },
-  { loc: "/contato", priority: "0.5", changefreq: "yearly" },
-  { loc: "/privacidade", lastmod: "2026-10-05", priority: "0.3", changefreq: "yearly" },
+  { loc: "/" },
+  { loc: "/seja-lardan" },
+  { loc: "/a-lardan" },
+  { loc: "/semijoias" },
+  { loc: "/contato" },
+  { loc: "/privacidade", lastmod: "2026-10-05" },
 ];
 
 /** Páginas fixas + guias (com data editorial real) + categorias com peças. */
@@ -59,8 +59,6 @@ export async function urlsPaginas(): Promise<UrlSitemap[]> {
     urls.push({
       loc: g.path,
       lastmod: g.atualizadoEm,
-      priority: "0.8",
-      changefreq: "monthly",
     });
   }
 
@@ -69,7 +67,7 @@ export async function urlsPaginas(): Promise<UrlSitemap[]> {
     for (const c of categorias) {
       // Categoria publicada sem peça é noindex — não entra no sitemap.
       if (!c.produtos || c.produtos <= 0) continue;
-      urls.push({ loc: `/semijoias/${c.slug}`, priority: "0.8", changefreq: "weekly" });
+      urls.push({ loc: `/semijoias/${c.slug}` });
     }
   } catch {
     /* catálogo indisponível: o sitemap segue válido com as rotas fixas */

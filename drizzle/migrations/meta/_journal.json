@@ -470,6 +470,13 @@
       "when": 1791844064347,
       "tag": "0066_crm_origem_direto_sem_referencia",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1791984858175,
+      "tag": "0067_cob_interacoes_resultados_acordo",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE public.cob_interacoes VALIDATE CONSTRAINT cob_interacoes_resultado_check;

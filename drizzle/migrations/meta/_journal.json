@@ -477,6 +477,13 @@
       "when": 1791984858175,
       "tag": "0067_cob_interacoes_resultados_acordo",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1791985500622,
+      "tag": "0068_cob_interacoes_resultado_validar",
+      "breakpoints": true
     }
   ]
 }

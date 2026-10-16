@@ -60,6 +60,37 @@ async function resolver(cod: string, criar: boolean) {
   return data as unknown as Res;
 }
 
+type Sugestao = { codigo: string; nome: string };
+
+/** Busca inteligente por nome, código interno ou código de barras — para digitar além de bipar. */
+async function buscarPecas(termo: string): Promise<Sugestao[]> {
+  const t = termo.trim().replace(/[%,()]/g, " ");
+  if (t.length < 3) return [];
+  const partes = t.split(/\s+/).filter(Boolean);
+  let q = supabase
+    .from("products")
+    .select("id, name, internal_code, product_variants(id, label, barcode, sku, is_active)")
+    .limit(12);
+  if (/^\d+$/.test(t)) {
+    q = q.or(`internal_code.ilike.%${t}%,barcode.ilike.%${t}%,name.ilike.%${t}%`);
+  } else {
+    for (const p of partes) q = q.ilike("name", `%${p}%`);
+  }
+  const { data, error } = await q;
+  if (error) throw error;
+  const out: Sugestao[] = [];
+  type V = { id: string; label: string | null; barcode: string | null; sku: string | null; is_active: boolean };
+  for (const p of (data ?? []) as unknown as { id: string; name: string; internal_code: string | null; product_variants: V[] }[]) {
+    for (const v of p.product_variants ?? []) {
+      if (!v.is_active) continue;
+      const codigo = v.barcode || v.sku || p.internal_code;
+      if (!codigo) continue;
+      out.push({ codigo, nome: [p.name, v.label].filter(Boolean).join(" · ") });
+    }
+  }
+  return out.slice(0, 12);
+}
+
 const ORDEM_TIPOS: TipoPeca[] = ["brinco", "anel", "colar", "pulseira", "tornozeleira"];
 
 /** Tela única de montagem por leitor: cada bipe entra na maleta na hora. */

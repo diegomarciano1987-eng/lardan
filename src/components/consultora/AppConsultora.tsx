@@ -1,3 +1,7 @@
+import { Button } from "@/components/ui/button";
+import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
+import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande";
+import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -31,7 +35,7 @@ const deIso = (s: string | null) => (s ? new Date(s + "T12:00:00") : undefined);
 
 const PRINCIPAIS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
   { aba: "inicio", rotulo: "Início", icone: Home },
-  { aba: "clientes", rotulo: "Jornada", icone: Users },
+  { aba: "clientes", rotulo: "Minhas clientes", icone: Users },
   { aba: "pedidos", rotulo: "Pedidos", icone: ShoppingBag },
   { aba: "maleta", rotulo: "Maleta", icone: BriefcaseBusiness },
 ];
@@ -45,6 +49,7 @@ const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : a === "vitrin
 
 export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir; ajuda: string; children: React.ReactNode }) {
   const ativo = grupoDe(nav.aba);
+  const grande = useLetraGrande();
   const [menuAberto, setMenuAberto] = React.useState(false);
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/equipe"; };
   const abrir = (aba: AbaApp) => {
@@ -53,7 +58,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
   };
   return (
     <CentralAvisosProvider>
-    <div className="area-consultora min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex">
+    <div className={`area-consultora ${grande ? "letra-grande" : ""} min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex`}>
       <AberturaApp />
       {/* Menu lateral no computador */}
       <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex">
@@ -128,7 +133,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
       </Sheet>
 
       {/* Navegação inferior no celular */}
-      <nav aria-label="Menu" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card/95 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+      {nav.aba !== "novo" && <nav aria-label="Menu" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card/95 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
         {[...PRINCIPAIS, { aba: "mais" as AbaApp, rotulo: "Mais", icone: Menu }].map((i) => {
           const on = ativo === i.aba;
           return (
@@ -139,7 +144,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
             </button>
           );
         })}
-      </nav>
+      </nav>}
     </div>
     </CentralAvisosProvider>
   );
@@ -253,7 +258,7 @@ export function Inicio({ ir }: { ir: Ir }) {
           <h2 id="mes" className="mb-3 text-xl font-semibold">Seu resumo</h2>
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              ["Pessoas na Jornada", d.clientes],
+              ["Minhas clientes", d.clientes],
               ["Pedidos em aberto", d.pedidos_abertos],
               ["Pedidos neste mês", d.pedidos_mes],
               ["Peças disponíveis na maleta", d.pecas_disponiveis],
@@ -275,23 +280,19 @@ export function Inicio({ ir }: { ir: Ir }) {
 const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
-  const q = useQuery({ queryKey: ["consultora", "clientes"], queryFn: listarClientes });
   const busca = nav.q ?? "";
-  const partes = semAcento(busca).split(/\s+/).filter(Boolean);
-  const lista = (q.data ?? []).filter((c) => {
-    const t = semAcento(`${c.nome} ${c.telefone} ${formatarTelefone(c.telefone)} ${c.email ?? ""} ${c.instagram ?? ""} ${c.preferencias}`);
-    return partes.every((p) => t.includes(p));
-  });
+  const q = useQuery({ queryKey: ["consultora", "clientes", busca], queryFn: () => listarClientes(busca) });
+  const lista = q.data ?? [];
   const ativas = lista.filter((c) => !c.encerrada);
   const pausadas = lista.filter((c) => c.encerrada);
-  const [aberta, setAberta] = React.useState<string>(() => (typeof window !== "undefined" && sessionStorage.getItem("jornada-aberta")) || "nova");
+  const [aberta, setAberta] = React.useState<string>("nova");
   const abrir = (id: string) => { const v = aberta === id ? "" : id; setAberta(v); sessionStorage.setItem("jornada-aberta", v); };
   const grupos = [...ETAPAS.map((e) => ({ id: e.id as string, rotulo: e.rotulo, dica: e.dica, itens: ativas.filter((c) => c.etapa === e.id) })),
     { id: "pausadas", rotulo: "Pausadas / Encerradas", dica: "Arquivadas com motivo. Dá para reativar.", itens: pausadas }];
 
   return (
     <div>
-      <Topo titulo="Jornada" ajuda="clientes" />
+      <Topo titulo="Minhas clientes" ajuda="clientes" />
       <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_auto]">
         <label className="block">
           <span className="sr-only">Buscar pessoa</span>
@@ -310,7 +311,7 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
       {q.isLoading && <Estado tipo="carregando" texto="Carregando sua jornada…" />}
       {q.isError && <Estado tipo="erro" texto="Não foi possível carregar sua jornada." acao={<button className="admin-btn" onClick={() => q.refetch()}>Tentar de novo</button>} />}
       {q.data && q.data.length === 0 && (
-        <Estado tipo="vazio" texto="Ninguém na sua jornada ainda. Cadastre a primeira interessada: só o nome é obrigatório, não precisa ter comprado." />
+        <Estado tipo="vazio" texto="Ninguém na sua jornada ainda. Cadastre a primeira interessada: nome e telefone são obrigatórios, não precisa ter comprado." />
       )}
       {q.data && q.data.length > 0 && lista.length === 0 && <Estado tipo="vazio" texto={`Ninguém encontrado para “${busca}”.`} />}
 
@@ -387,7 +388,7 @@ function CartaoPessoa({ c, onAbrir, compacto }: { c: Cliente; onAbrir: () => voi
 
 export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: Ir; depois?: (id: string) => void }) {
   const qc = useQueryClient();
-  const atual = useQuery({ queryKey: ["consultora", "cliente", id], queryFn: () => obterCliente(id!), enabled: !!id });
+  const atual = useQuery({ queryKey: ["consultora", "cliente", id], queryFn: () => id ? obterCliente(id) : Promise.resolve(null), enabled: !!id });
   const [f, setF] = React.useState<Partial<Cliente>>({});
   const [erros, setErros] = React.useState<Record<string, string>>({});
   React.useEffect(() => { if (atual.data) setF(atual.data); }, [atual.data]);
@@ -405,6 +406,7 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
     const er: Record<string, string> = {};
     if (!f.nome || f.nome.trim().length < 2) er["nome"] = "Escreva o nome da pessoa (pelo menos 2 letras).";
     const tel = (f.telefone ?? "").replace(/\D/g, "");
+    if (!id && !tel) er["telefone"] = "Informe o telefone com DDD.";
     if (tel && (tel.length < 10 || tel.length > 13)) er["telefone"] = "Confira o telefone: use DDD + número, por exemplo (11) 98765-4321.";
     const ig = (f.instagram ?? "").trim().toLowerCase().replace(/^(https?:\/\/)?(www\.|m\.)?instagram\.com\//, "").replace(/^@/, "").replace(/[/?#].*$/, "");
     if (ig && !/^[a-z0-9._]{1,30}$/.test(ig)) er["instagram"] = "Confira o Instagram: use @usuario ou o link do perfil.";
@@ -421,7 +423,7 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
         <Campo rotulo="Nome" obrigatorio erro={erros["nome"]}>
           <input className="admin-input min-h-14 text-[1.05rem]" autoComplete="off" autoCapitalize="words" {...campo("nome")} />
         </Campo>
-        <Campo rotulo="Telefone / WhatsApp" dica="Com DDD. Pode colar o número como estiver." erro={erros["telefone"]}>
+        <Campo rotulo="Telefone / WhatsApp" obrigatorio={!id} dica="Com DDD. Pode colar o número como estiver." erro={erros["telefone"]}>
           <input className="admin-input min-h-14 text-[1.05rem]" type="tel" inputMode="tel" autoComplete="off"
             value={formatarTelefone(f.telefone ?? "")} onChange={(e) => setF({ ...f, telefone: e.target.value.replace(/\D/g, "").slice(0, 13) })} />
         </Campo>
@@ -636,7 +638,9 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
   const [busca, setBusca] = React.useState("");
   const [chave] = React.useState(chaveIdempotencia);
   const [resultado, setResultado] = React.useState<{ order_id: string; codigo: string; total_cents: number } | null>(null);
-  const clientes = useQuery({ queryKey: ["consultora", "clientes"], queryFn: listarClientes });
+  const [buscaCliente, setBuscaCliente] = React.useState("");
+  const [novaCliente, setNovaCliente] = React.useState(false);
+  const clientes = useQuery({ queryKey: ["consultora", "clientes", buscaCliente], queryFn: () => listarClientes(buscaCliente) });
   const pecas = useQuery({ queryKey: ["consultora", "pecas"], queryFn: pecasDisponiveis });
   const cl = clientes.data?.find((c) => c.id === cliente);
   const k = (p: Peca) => `${p.cycle_id}:${p.variant_id}`;
@@ -645,13 +649,18 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
   const unidades = escolhidas.reduce((s, p) => s + (qtd[k(p)] ?? 0), 0);
 
   const enviar = useMutation({
-    mutationFn: () => criarPedido(cliente!, escolhidas.map((p) => ({ cycle_id: p.cycle_id, variant_id: p.variant_id, quantidade: qtd[k(p)]! })), chave),
+    mutationFn: () => {
+      if (!cliente || escolhidas.length === 0) throw new Error("Escolha a cliente e as peças.");
+      return criarPedido(cliente, escolhidas.map((p) => ({ cycle_id: p.cycle_id, variant_id: p.variant_id, quantidade: qtd[k(p)] ?? 0 })), chave);
+    },
     onSuccess: (r) => { setResultado(r); setPasso(4); qc.invalidateQueries({ queryKey: ["consultora"] }); qc.invalidateQueries({ queryKey: ["consultora-pedidos"] }); },
     onError: (e) => toast.error("O pedido não foi criado. Nada se perdeu: revise e tente de novo. " + traduzir(e)),
   });
 
   const ETAPAS = ["Cliente", "Peças", "Revisão"];
   const voltar = () => (passo > 1 && passo < 4 ? setPasso((passo - 1) as 1 | 2 | 3) : ir(cliente && clienteInicial ? { aba: "clientes", id: cliente } : { aba: "inicio" }));
+
+  if (novaCliente) return <FormCliente ir={() => setNovaCliente(false)} depois={(id) => { setNovaCliente(false); setCliente(id); setPasso(2); }} />;
 
   return (
     <div>
@@ -677,6 +686,9 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
       {passo === 1 && (
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">Para quem é o pedido?</h2>
+          <Button type="button" className="btn-app-principal w-full" onClick={() => setNovaCliente(true)}><UserPlus /> Nova cliente</Button>
+          <input type="search" aria-label="Buscar cliente por nome ou telefone" placeholder="Nome ou telefone" value={buscaCliente} onChange={(e) => setBuscaCliente(e.target.value)} className="admin-input min-h-14" />
+          <p className="text-base">Clientes recentes primeiro · até 200 resultados</p>
           {clientes.isLoading && <Estado tipo="carregando" texto="Carregando clientes…" />}
           {clientes.data?.length === 0 && <Estado tipo="vazio" texto="Cadastre a cliente primeiro." />}
           <ul className="grid grid-cols-1 gap-2 lg:grid-cols-2">
@@ -691,9 +703,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
               </li>
             ))}
           </ul>
-          <button type="button" className="admin-btn min-h-13 w-full justify-center text-base" onClick={() => ir({ aba: "clientes", modo: "nova" })}>
-            <UserPlus className="size-5" aria-hidden /> Cadastrar nova cliente
-          </button>
+
         </div>
       )}
 
@@ -710,25 +720,26 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
               const set = (v: number) => setQtd((q) => ({ ...q, [k(p)]: Math.max(0, Math.min(p.disponivel, v)) }));
               return (
                 <li key={k(p)} className={`flex gap-3 rounded-2xl border bg-card p-3 ${n > 0 ? "border-primary" : "border-border"}`}>
-                  <FotoPeca mediaId={p.media_id} variantId={p.variant_id} className="size-24 shrink-0 rounded-xl" vazio={<div className="grid size-24 shrink-0 place-items-center rounded-xl bg-muted text-center text-sm text-muted-foreground">Sem foto</div>} />
+                  <FotoAmpliavel mediaId={p.media_id} variantId={p.variant_id} nome={p.produto} />
                   <div className="flex min-w-0 flex-1 flex-col">
                     <p className="text-[1.05rem] font-semibold leading-snug">{p.produto}</p>
                     <p className="text-[0.95rem] text-muted-foreground">{p.variante ?? "Tamanho único"} · {p.disponivel} disponível{p.disponivel > 1 ? "is" : ""}</p>
                     <p className="text-[1.1rem] font-semibold">{brl(p.preco_cents)}</p>
-                    <div className="mt-auto flex items-center gap-2 pt-2" role="group" aria-label={`Quantidade de ${p.produto}`}>
-                      <button type="button" className="grid size-12 place-items-center rounded-full border border-border text-2xl disabled:opacity-40" disabled={n <= 0} onClick={() => set(n - 1)} aria-label="Diminuir">−</button>
+                    <Button type="button" variant={n ? "secondary" : "default"} className="mt-auto min-h-12 w-full" onClick={() => set(n ? 0 : 1)}>{n ? "✓ Adicionada" : "Adicionar"}</Button>
+                    {n > 0 && p.disponivel > 1 && <div className="mt-2 flex items-center justify-between gap-3" role="group" aria-label={`Quantidade de ${p.produto}`}>
+                      <Button type="button" variant="outline" className="size-12 p-0 text-2xl" onClick={() => set(n - 1)} aria-label="Diminuir">−</Button>
                       <span className="num w-8 text-center text-xl font-semibold" aria-live="polite">{n}</span>
-                      <button type="button" className="grid size-12 place-items-center rounded-full border border-border text-2xl disabled:opacity-40" disabled={n >= p.disponivel} onClick={() => set(n + 1)} aria-label="Aumentar">+</button>
-                    </div>
+                      <Button type="button" variant="outline" className="size-12 p-0 text-2xl" disabled={n >= p.disponivel} onClick={() => set(n + 1)} aria-label="Aumentar">+</Button>
+                    </div>}
                   </div>
                 </li>
               );
             })}
           </ul>
-          {(pecas.data?.length ?? 0) > 0 && <div className="fixed inset-x-0 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur lg:static lg:rounded-2xl lg:border">
+          {(pecas.data?.length ?? 0) > 0 && <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur lg:static lg:rounded-2xl lg:border">
             <div className="mx-auto flex max-w-5xl items-center gap-3">
-              <p className="min-w-0 flex-1 text-[1.02rem]"><strong>{unidades}</strong> peça{unidades === 1 ? "" : "s"} · <strong>{brl(total)}</strong></p>
-              <button type="button" className="btn-app-principal" disabled={unidades === 0} onClick={() => setPasso(3)}>Revisar pedido</button>
+              <p className="min-w-0 flex-1 text-[1.02rem]">{unidades === 0 && <span className="block">Escolha pelo menos 1 peça</span>}<strong>{unidades}</strong> peça{unidades === 1 ? "" : "s"} · <strong>{brl(total)}</strong></p>
+              <button type="button" className="btn-app-principal" onClick={() => unidades ? setPasso(3) : toast.info("Escolha pelo menos 1 peça.")}>Revisar pedido</button>
             </div>
           </div>}
         </div>
@@ -752,7 +763,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
           </ul>
           <div className="rounded-2xl border border-border bg-muted/60 p-4 text-[1.02rem] leading-relaxed">
             <p><strong>Pagamento e entrega:</strong> você combina diretamente com a cliente.</p>
-            <p className="mt-1">Este pedido fica <strong>em atendimento</strong>. Ele <strong>não reserva as peças</strong> e ainda <strong>não é uma venda</strong>: o registro de venda e pagamento será liberado quando a Lardan definir essas regras.</p>
+            <p className="mt-1">Este pedido fica <strong>em atendimento</strong> e <strong>não reserva as peças</strong>. A cobrança oficial fica disponível depois de confirmar; pagamento só aparece após confirmação.</p>
           </div>
           <button type="button" className="btn-app-principal w-full" disabled={enviar.isPending} aria-busy={enviar.isPending} onClick={() => !enviar.isPending && enviar.mutate()}>
             {enviar.isPending ? "Criando pedido…" : "Confirmar pedido"}
@@ -772,7 +783,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
           {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} />}
           {cl && linkWhats(cl.telefone) && (
             <a className="btn-app-principal w-full" target="_blank" rel="noreferrer"
-              href={linkWhats(cl.telefone, `Olá, ${cl.nome.split(" ")[0]}! Anotei seu pedido ${resultado.codigo}:\n${escolhidas.map((p) => `• ${qtd[k(p)]}x ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents * (qtd[k(p)] ?? 0))}`).join("\n")}\nTotal: ${brl(resultado.total_cents)}`)!}>
+              href={linkWhats(cl.telefone, `Olá, ${cl.nome.split(" ")[0]}! Anotei seu pedido ${resultado.codigo}:\n${escolhidas.map((p) => `• ${qtd[k(p)]}x ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents * (qtd[k(p)] ?? 0))}`).join("\n")}\nTotal: ${brl(resultado.total_cents)}\nGarantia de dois anos seguindo o manual: ${MANUAL_CUIDADOS_URL}`) ?? undefined}>
               <MessageCircle className="size-5" aria-hidden /> Enviar resumo pelo WhatsApp
             </a>
           )}
@@ -798,6 +809,7 @@ export function Mais({ ir }: { ir: Ir }) {
       <Topo titulo="Mais" ajuda="inicio" />
       <ul className="space-y-3">
         <li><InstalarApp /></li>
+        <li><LetraGrande /></li>
         {itens.map((x) => (
           <li key={x.r}>
             <button type="button" onClick={() => ir(x.n)} className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-5 text-left active:bg-muted">

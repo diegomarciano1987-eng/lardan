@@ -547,6 +547,13 @@
       "when": 1792172592013,
       "tag": "0077_kit_entrada_detalhe_ids_foto",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1792173793270,
+      "tag": "0078_fin_conta_azul_ajustes",
+      "breakpoints": true
     }
   ]
 }

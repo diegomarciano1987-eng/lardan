@@ -12749,6 +12749,10 @@ export type Database = {
         Args: { _ids: string[]; _lote: string; _motivo: string }
         Returns: Json
       }
+      fin_expurgo_titulos_estornados: {
+        Args: { _lote: string; _motivo: string; _titles: string[] }
+        Returns: Json
+      }
       fin_expurgo_transferencias: {
         Args: { _ids: string[]; _lote: string; _motivo: string }
         Returns: Json
@@ -12771,6 +12775,15 @@ export type Database = {
       fin_import_ar_refs: { Args: { _lote: string }; Returns: undefined }
       fin_installment_competencia_set: {
         Args: { _competencia: string; _installment: string; _motivo: string }
+        Returns: Json
+      }
+      fin_installment_editar: {
+        Args: {
+          _installment: string
+          _motivo: string
+          _valor_cents: number
+          _vencimento: string
+        }
         Returns: Json
       }
       fin_installment_refresh: {
@@ -12898,6 +12911,10 @@ export type Database = {
       fin_settlement_create_ajustes: { Args: { _payload: Json }; Returns: Json }
       fin_settlement_reverse: {
         Args: { _motivo: string; _settlement: string }
+        Returns: string
+      }
+      fin_settlement_reverse_data: {
+        Args: { _data: string; _motivo: string; _settlement: string }
         Returns: string
       }
       fin_statement_file_register: { Args: { _payload: Json }; Returns: Json }

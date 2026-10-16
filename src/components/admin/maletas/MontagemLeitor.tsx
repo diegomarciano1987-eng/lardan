@@ -417,20 +417,35 @@ export function MontagemLeitor({
 
           <div className="ledger-panel p-6">
             <p className="ledger-eyebrow mb-3">Bipe as peças — cada leitura entra nesta maleta na hora</p>
-            <form onSubmit={enviar}>
+            <form onSubmit={enviar} className="relative">
               <label className="flex items-center gap-4 rounded-2xl border-2 border-ink bg-background px-6 py-6 focus-within:ring-4 focus-within:ring-ring/30">
                 <ScanBarcode className="h-12 w-12 shrink-0 text-ledger-text" />
                 <input
                   ref={campo}
                   value={codigo}
-                  onChange={(e) => setCodigo(e.target.value)}
+                  onChange={(e) => aoDigitar(e.target.value)}
                   autoComplete="off"
-                  inputMode="none"
-                  aria-label="Código de barras"
-                  placeholder="Aguardando leitura…"
+                  aria-label="Código de barras ou nome da peça"
+                  placeholder="Bipe, digite o código ou o nome da peça…"
                   className="w-full bg-transparent font-display text-4xl font-bold tracking-wide text-ledger-text outline-none placeholder:text-ledger-muted/60"
                 />
               </label>
+              {sugestoes.length > 0 && (
+                <ul className="absolute inset-x-0 top-full z-10 mt-2 max-h-72 overflow-auto rounded-2xl border border-line-soft bg-surface shadow-xl">
+                  {sugestoes.map((s) => (
+                    <li key={s.codigo}>
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between gap-3 px-5 py-3 text-left text-sm hover:bg-surface-muted"
+                        onClick={() => escolher(s)}
+                      >
+                        <span className="truncate text-ledger-text">{s.nome}</span>
+                        <span className="shrink-0 tabular-nums text-ledger-muted">{s.codigo}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </form>
             {ultima && (
               <div role="status" className={`mt-5 rounded-2xl px-6 py-5 ${ultima.ok ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>

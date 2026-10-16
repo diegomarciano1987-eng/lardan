@@ -86,6 +86,7 @@ import { Route as AuthenticatedAdminCadastrosProdutosRouteImport } from './route
 import { Route as AuthenticatedAdminCandidaturasIdRouteImport } from './routes/_authenticated/admin/candidaturas_.$id'
 import { Route as AuthenticatedAdminCandidaturasIndicacaoRouteImport } from './routes/_authenticated/admin/candidaturas_.indicacao'
 import { Route as AuthenticatedAdminCobrancaIdRouteImport } from './routes/_authenticated/admin/cobranca_.$id'
+import { Route as AuthenticatedAdminCobrancaLoteRouteImport } from './routes/_authenticated/admin/cobranca_.lote'
 import { Route as AuthenticatedAdminFinanceiroIndexRouteImport } from './routes/_authenticated/admin/financeiro/index'
 import { Route as AuthenticatedAdminFinanceiroAprovacoesRouteImport } from './routes/_authenticated/admin/financeiro/aprovacoes'
 import { Route as AuthenticatedAdminFinanceiroAsaasRouteImport } from './routes/_authenticated/admin/financeiro/asaas'
@@ -536,6 +537,12 @@ const AuthenticatedAdminCobrancaIdRoute =
     path: '/cobranca/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminCobrancaLoteRoute =
+  AuthenticatedAdminCobrancaLoteRouteImport.update({
+    id: '/cobranca_/lote',
+    path: '/cobranca/lote',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminFinanceiroIndexRoute =
   AuthenticatedAdminFinanceiroIndexRouteImport.update({
     id: '/',
@@ -819,6 +826,7 @@ export interface FileRoutesByFullPath {
   '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/admin/candidaturas/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   '/admin/cobranca/$id': typeof AuthenticatedAdminCobrancaIdRoute
+  '/admin/cobranca/lote': typeof AuthenticatedAdminCobrancaLoteRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -930,6 +938,7 @@ export interface FileRoutesByTo {
   '/admin/candidaturas/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/admin/candidaturas/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   '/admin/cobranca/$id': typeof AuthenticatedAdminCobrancaIdRoute
+  '/admin/cobranca/lote': typeof AuthenticatedAdminCobrancaLoteRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -1045,6 +1054,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/candidaturas_/$id': typeof AuthenticatedAdminCandidaturasIdRoute
   '/_authenticated/admin/candidaturas_/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   '/_authenticated/admin/cobranca_/$id': typeof AuthenticatedAdminCobrancaIdRoute
+  '/_authenticated/admin/cobranca_/lote': typeof AuthenticatedAdminCobrancaLoteRoute
   '/_authenticated/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/_authenticated/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/_authenticated/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -1160,6 +1170,7 @@ export interface FileRouteTypes {
     | '/admin/candidaturas/$id'
     | '/admin/candidaturas/indicacao'
     | '/admin/cobranca/$id'
+    | '/admin/cobranca/lote'
     | '/admin/financeiro/aprovacoes'
     | '/admin/financeiro/asaas'
     | '/admin/financeiro/asaas-extrato'
@@ -1271,6 +1282,7 @@ export interface FileRouteTypes {
     | '/admin/candidaturas/$id'
     | '/admin/candidaturas/indicacao'
     | '/admin/cobranca/$id'
+    | '/admin/cobranca/lote'
     | '/admin/financeiro/aprovacoes'
     | '/admin/financeiro/asaas'
     | '/admin/financeiro/asaas-extrato'
@@ -1385,6 +1397,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/candidaturas_/$id'
     | '/_authenticated/admin/candidaturas_/indicacao'
     | '/_authenticated/admin/cobranca_/$id'
+    | '/_authenticated/admin/cobranca_/lote'
     | '/_authenticated/admin/financeiro/aprovacoes'
     | '/_authenticated/admin/financeiro/asaas'
     | '/_authenticated/admin/financeiro/asaas-extrato'
@@ -2019,6 +2032,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCobrancaIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/cobranca_/lote': {
+      id: '/_authenticated/admin/cobranca_/lote'
+      path: '/cobranca/lote'
+      fullPath: '/admin/cobranca/lote'
+      preLoaderRoute: typeof AuthenticatedAdminCobrancaLoteRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/financeiro/': {
       id: '/_authenticated/admin/financeiro/'
       path: '/'
@@ -2367,6 +2387,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCandidaturasIdRoute: typeof AuthenticatedAdminCandidaturasIdRoute
   AuthenticatedAdminCandidaturasIndicacaoRoute: typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   AuthenticatedAdminCobrancaIdRoute: typeof AuthenticatedAdminCobrancaIdRoute
+  AuthenticatedAdminCobrancaLoteRoute: typeof AuthenticatedAdminCobrancaLoteRoute
   AuthenticatedAdminMaletasIdRoute: typeof AuthenticatedAdminMaletasIdRoute
   AuthenticatedAdminMaletasEntradaRoute: typeof AuthenticatedAdminMaletasEntradaRoute
   AuthenticatedAdminCadastrosIndexRoute: typeof AuthenticatedAdminCadastrosIndexRoute
@@ -2418,6 +2439,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminCandidaturasIndicacaoRoute:
       AuthenticatedAdminCandidaturasIndicacaoRoute,
     AuthenticatedAdminCobrancaIdRoute: AuthenticatedAdminCobrancaIdRoute,
+    AuthenticatedAdminCobrancaLoteRoute: AuthenticatedAdminCobrancaLoteRoute,
     AuthenticatedAdminMaletasIdRoute: AuthenticatedAdminMaletasIdRoute,
     AuthenticatedAdminMaletasEntradaRoute:
       AuthenticatedAdminMaletasEntradaRoute,

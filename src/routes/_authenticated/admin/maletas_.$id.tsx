@@ -183,7 +183,21 @@ function MaletaFicha() {
               cycleId={id}
               titulo={`Maleta ${d.maleta.codigo} · ${d.consultora ?? "sem consultora"}`}
               composicao={d.composicao}
+              codigoMaleta={d.maleta.codigo}
+              dataAcerto={(d.ciclo as { due_at?: string | null }).due_at ?? null}
               aoFechar={() => setLeitor(false)}
+            />
+          )}
+          {conferindo && (
+            <ConferenciaMaleta
+              cycleId={id}
+              titulo={`Maleta ${d.maleta.codigo} · ${d.consultora ?? "sem consultora"}`}
+              composicao={d.composicao}
+              aoConcluir={() => {
+                setConferindo(false);
+                recarregar();
+              }}
+              aoVoltar={() => setConferindo(false)}
             />
           )}
           {podeMontar && montando && (

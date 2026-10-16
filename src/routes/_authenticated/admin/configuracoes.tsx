@@ -9,6 +9,8 @@ import { ModuleAvailabilityBadge, PageHeader, Panel } from "@/components/admin/u
 import { can, useCapabilities } from "@/lib/capabilities";
 import { lerMarkupGlobal, salvarMarkupGlobal } from "@/lib/produto";
 import { mensagemDeErro } from "@/lib/catalog";
+import { supabase } from "@/integrations/supabase/client";
+import { PARAMETROS_PADRAO, type ParametrosRemessa } from "@/lib/remessa";
 
 export const Route = createFileRoute("/_authenticated/admin/configuracoes")({
   component: Configuracoes,

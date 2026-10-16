@@ -645,6 +645,13 @@
       "when": 1792194333357,
       "tag": "0091_consultora_historico_clientes",
       "breakpoints": true
+    },
+    {
+      "idx": 92,
+      "version": "7",
+      "when": 1792194399687,
+      "tag": "0092_consultora_trocas_garantias_protocolos",
+      "breakpoints": true
     }
   ]
 }

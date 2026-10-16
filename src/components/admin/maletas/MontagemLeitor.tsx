@@ -231,11 +231,41 @@ export function MontagemLeitor({
     fila.current = fila.current.then(fn).finally(() => setPendentes((n) => n - 1));
   }
 
+  const [sugestoes, setSugestoes] = React.useState<Sugestao[]>([]);
+  const buscaTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function aoDigitar(valor: string) {
+    setCodigo(valor);
+    if (buscaTimer.current) clearTimeout(buscaTimer.current);
+    const t = valor.trim();
+    if (t.length < 3) {
+      setSugestoes([]);
+      return;
+    }
+    buscaTimer.current = setTimeout(() => {
+      void buscarPecas(t).then(setSugestoes).catch(() => setSugestoes([]));
+    }, 250);
+  }
+
+  function escolher(s: Sugestao) {
+    setCodigo("");
+    setSugestoes([]);
+    enfileirar(() => processar(s.codigo));
+    campo.current?.focus();
+  }
+
   function enviar(e: React.FormEvent) {
     e.preventDefault();
     const cod = codigo.trim();
     setCodigo("");
-    if (cod) enfileirar(() => processar(cod));
+    setSugestoes([]);
+    if (!cod) return;
+    // Digitou um nome e sobrou uma única sugestão: entra ela. Senão, vai como código.
+    if (!/^[A-Za-z0-9-]+$/.test(cod) && sugestoes.length === 1) {
+      enfileirar(() => processar(sugestoes[0]!.codigo));
+      return;
+    }
+    enfileirar(() => processar(cod));
   }
 
   function tirarUma(variantId: string, nome: string) {

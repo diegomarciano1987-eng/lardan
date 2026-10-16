@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Aplicar patch de auditoria de segurança/cobrança e registrar pdv_links_listar — aguarda decisão de Diego sobre conflitos com alterações posteriores (numeração 0084 e AGENTS.md); depois testes e consultas somente leitura, sem publicar
 - [x] Cancelar as sete maletas de teste autorizadas por Diego e conferir devolução ao estoque — 48 peças, 40 transferências, sete auditorias; tela conferida
 - [x] Larissa: acesso total ao cadastro
 - [x] Etapa 2: cobranças Asaas das parcelas do acordo + baixa que abate a dívida original

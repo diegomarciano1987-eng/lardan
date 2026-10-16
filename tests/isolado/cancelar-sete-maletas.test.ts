@@ -40,7 +40,7 @@ test('somente serviço interno pode executar',async()=>{
   expect(r.ok).toBe(false);
 });
 test('cancela exatamente sete, devolve com contrapartida e registra auditoria',async()=>{
-  const r=await executar(); expect(r.ok).toBe(true); expect(r.dados.cycles).toBe(7); expect(r.dados.pieces).toBe(20);
+  const r=await executar(); if(!r.ok) throw new Error(r.erro ?? 'Falha'); expect(r.dados.cycles).toBe(7); expect(r.dados.pieces).toBe(20);
   expect(await saldo(variante,origem)).toBe(30);
   const rows=await adm.unsafe("select count(*)::int n from public.audit_logs where action='kit.testes.cancelar' and payload->>'chave'=$1",[chave]);
   expect(rows[0]?.n).toBe(7);

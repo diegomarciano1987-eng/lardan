@@ -34,6 +34,7 @@ function dataPorExtenso(d: Date) {
 
 function dataCurta(iso: string | null | undefined) {
   if (!iso) return "—";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso.split("-").reverse().join("/");
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("pt-BR");
 }

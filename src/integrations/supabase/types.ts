@@ -10431,6 +10431,39 @@ export type Database = {
         }
         Relationships: []
       }
+      remessa_parametros: {
+        Row: {
+          id: boolean
+          meta_aneis: number
+          meta_colares: number
+          meta_pulseiras: number
+          meta_tornozeleiras: number
+          pecas_cliente_nova: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: boolean
+          meta_aneis?: number
+          meta_colares?: number
+          meta_pulseiras?: number
+          meta_tornozeleiras?: number
+          pecas_cliente_nova?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: boolean
+          meta_aneis?: number
+          meta_colares?: number
+          meta_pulseiras?: number
+          meta_tornozeleiras?: number
+          pecas_cliente_nova?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       rep_crm_cards: {
         Row: {
           etapa_id: string | null
@@ -13239,6 +13272,7 @@ export type Database = {
       }
       kit_conciliacao: { Args: { _cycle: string }; Returns: Json }
       kit_conferir: { Args: { _cycle: string; _note?: string }; Returns: Json }
+      kit_consultora_info: { Args: { _cycle: string }; Returns: Json }
       kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
       kit_detail: { Args: { _cycle: string }; Returns: Json }
@@ -13639,6 +13673,43 @@ export type Database = {
         Returns: Json
       }
       phone_canon: { Args: { v: string }; Returns: string }
+      praca_alternar: {
+        Args: { _ativo: boolean; _id: string }
+        Returns: undefined
+      }
+      praca_consultoras: {
+        Args: { _praca: string; _search?: string }
+        Returns: {
+          display_name: string
+          party_id: string
+        }[]
+      }
+      praca_criar: {
+        Args: { _nome: string }
+        Returns: {
+          ativo: boolean
+          codigo: number
+          created_at: string
+          id: string
+          nome: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cob_pracas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pracas_resumo: {
+        Args: never
+        Returns: {
+          ativo: boolean
+          codigo: number
+          consultoras: number
+          id: string
+          nome: string
+        }[]
+      }
       product_costs_read: { Args: { _product: string }; Returns: Json }
       product_import_apply: {
         Args: { _limite?: number; _lote: string }

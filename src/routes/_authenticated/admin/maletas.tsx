@@ -88,6 +88,7 @@ async function buscarDepositos() {
 
 function NovaMaleta({ aoCriar }: { aoCriar: (cycleId: string) => void }) {
   const [aberto, setAberto] = React.useState(false);
+  const [praca, setPraca] = React.useState("");
   const [consultora, setConsultora] = React.useState("");
   const [representante, setRepresentante] = React.useState("");
   const [deposito, setDeposito] = React.useState("");
@@ -95,9 +96,12 @@ function NovaMaleta({ aoCriar }: { aoCriar: (cycleId: string) => void }) {
   const [buscaC, setBuscaC] = React.useState("");
   const [buscaR, setBuscaR] = React.useState("");
 
+  const pracas = useQuery({ queryKey: ["maletas", "pracas"], queryFn: buscarPracas, enabled: aberto });
+
   const consultoras = useQuery({
-    queryKey: ["maletas", "pessoas", "consultora", buscaC],
-    queryFn: () => buscarPessoas("consultora", buscaC),
+    queryKey: ["maletas", "pessoas", "consultora", praca || "todas", buscaC],
+    queryFn: () =>
+      praca ? buscarConsultorasPraca(praca, buscaC) : buscarPessoas("consultora", buscaC),
     enabled: aberto,
   });
   const representantes = useQuery({

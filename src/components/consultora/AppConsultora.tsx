@@ -90,7 +90,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
             <Menu className="size-6" aria-hidden />
           </button>
         </header>
-        <main className="mx-auto w-full max-w-5xl px-4 pt-5 pb-[calc(6.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-7 lg:pb-12">
+        <main className="mx-auto w-full max-w-5xl px-4 pt-5 pb-[calc(7.75rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-7 lg:pb-12">
           {children}
         </main>
       </div>
@@ -133,8 +133,8 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
           const on = ativo === i.aba;
           return (
             <button key={i.aba} type="button" aria-current={on ? "page" : undefined} onClick={() => ir({ aba: i.aba })}
-              className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl text-[0.8rem] leading-tight ${on ? "font-semibold text-acao" : "text-foreground"}`}>
-              <span className={`grid h-8 w-12 place-items-center rounded-full ${on ? "bg-primary/12" : ""}`}><i.icone className="size-6" aria-hidden /></span>
+              className={`flex min-h-[4.375rem] flex-col items-center justify-center gap-0.5 rounded-xl text-[1rem] leading-tight ${on ? "font-semibold text-acao" : "text-foreground"}`}>
+              <span className={`grid h-10 w-[3.75rem] place-items-center rounded-full ${on ? "bg-primary/12" : ""}`}><i.icone className="size-[1.875rem]" aria-hidden /></span>
               {i.rotulo}
             </button>
           );
@@ -725,7 +725,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
               );
             })}
           </ul>
-          {(pecas.data?.length ?? 0) > 0 && <div className="fixed inset-x-0 bottom-[calc(4.6rem+env(safe-area-inset-bottom))] z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur lg:static lg:rounded-2xl lg:border">
+          {(pecas.data?.length ?? 0) > 0 && <div className="fixed inset-x-0 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur lg:static lg:rounded-2xl lg:border">
             <div className="mx-auto flex max-w-5xl items-center gap-3">
               <p className="min-w-0 flex-1 text-[1.02rem]"><strong>{unidades}</strong> peça{unidades === 1 ? "" : "s"} · <strong>{brl(total)}</strong></p>
               <button type="button" className="btn-app-principal" disabled={unidades === 0} onClick={() => setPasso(3)}>Revisar pedido</button>

@@ -353,6 +353,8 @@ export type Database = {
       asaas_charge_intents: {
         Row: {
           account_id: string
+          acordo_parcela: number | null
+          acordo_simulacao_id: string | null
           attempts: number
           billing_type: string
           charge_id: string | null
@@ -389,6 +391,8 @@ export type Database = {
         }
         Insert: {
           account_id: string
+          acordo_parcela?: number | null
+          acordo_simulacao_id?: string | null
           attempts?: number
           billing_type: string
           charge_id?: string | null
@@ -425,6 +429,8 @@ export type Database = {
         }
         Update: {
           account_id?: string
+          acordo_parcela?: number | null
+          acordo_simulacao_id?: string | null
           attempts?: number
           billing_type?: string
           charge_id?: string | null
@@ -465,6 +471,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "asaas_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_charge_intents_acordo_simulacao_id_fkey"
+            columns: ["acordo_simulacao_id"]
+            isOneToOne: false
+            referencedRelation: "cob_simulacoes"
             referencedColumns: ["id"]
           },
           {
@@ -11940,6 +11953,8 @@ export type Database = {
         Args: { _intent: string; _tentativa: number; _worker: string }
         Returns: {
           account_id: string
+          acordo_parcela: number | null
+          acordo_simulacao_id: string | null
           attempts: number
           billing_type: string
           charge_id: string | null
@@ -12157,6 +12172,28 @@ export type Database = {
         Returns: Json
       }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }
+      cob_acordo_baixa: {
+        Args: { _charge: string; _intent: string }
+        Returns: Json
+      }
+      cob_acordo_cobrancas: {
+        Args: { _sim: string }
+        Returns: {
+          erro: string
+          external_status: string
+          forma: string
+          intent_id: string
+          invoice_url: string
+          parcela: number
+          state: string
+          valor_cents: number
+          vencimento: string
+        }[]
+      }
+      cob_acordo_cobrancas_preparar: {
+        Args: { _forma: string; _incluir_entrada?: boolean; _sim: string }
+        Returns: Json
+      }
       cob_cadastro_ler: { Args: { _party: string }; Returns: Json }
       cob_cadastro_salvar: {
         Args: { _d: Json; _party: string }

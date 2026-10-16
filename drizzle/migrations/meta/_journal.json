@@ -505,6 +505,13 @@
       "when": 1792169210980,
       "tag": "0071_cob_etapa2_acordo_editavel_cadastro_comprovante",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1792170161117,
+      "tag": "0072_cob_acordo_cobrancas_asaas",
+      "breakpoints": true
     }
   ]
 }

@@ -8,6 +8,7 @@ import { EmptyState, ErrorState, Panel, Skeleton, StatusBadge, formatBRLFromCent
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { DateField } from "@/components/premium/DateField";
 import { useCapabilities } from "@/lib/capabilities";
+import { supabase } from "@/integrations/supabase/client";
 import { buscarContrapartes, fetchFinAccounts, reaisParaCentavos } from "@/lib/financeiro";
 import {
   STATUS_CHEQUE,
@@ -184,13 +185,45 @@ function LinhaCheque({ c, podeGerir }: { c: Cheque; podeGerir: boolean }) {
   const [nome, setNome] = React.useState("");
   const [conta, setConta] = React.useState("");
   const [motivo, setMotivo] = React.useState("");
+  const [dataComp, setDataComp] = React.useState<Date | undefined>(() => new Date());
+  const [parcelaComp, setParcelaComp] = React.useState("");
   const pessoas = usePessoas();
-  const contas = useQuery({ queryKey: ["fin-accounts"], queryFn: fetchFinAccounts, enabled: acao === "depositado" });
+  const contas = useQuery({ queryKey: ["fin-accounts"], queryFn: fetchFinAccounts, enabled: acao === "depositado" || acao === "compensado" });
+  // parcelas a receber em aberto com o mesmo valor do cheque, para baixar junto
+  const parcelas = useQuery({
+    queryKey: ["cheque-parcelas", c.id, c.valor_cents],
+    enabled: acao === "compensado",
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("financial_installments")
+        .select("id, numero, total_parcelas, vencimento, valor_cents, settlement_status, financial_titles!inner(descricao, numero, direction, status)")
+        .eq("valor_cents", c.valor_cents)
+        .eq("financial_titles.direction", "receivable")
+        .in("financial_titles.status", ["ativo", "aprovado"])
+        .in("settlement_status", ["nao_liquidado", "parcial"])
+        .order("vencimento")
+        .limit(30);
+      if (error) throw error;
+      return (data ?? []) as unknown as {
+        id: string; numero: number; total_parcelas: number; vencimento: string;
+        financial_titles: { descricao: string; numero: string | null };
+      }[];
+    },
+  });
   const mudar = useMutation({
-    mutationFn: (para: StatusCheque) =>
-      mudarCheque(c.id, para, { party_id: party, nome, account_id: conta, motivo }),
-    onSuccess: () => {
-      toast.success("Cheque atualizado.");
+    mutationFn: (para: StatusCheque) => {
+      if (para === "compensado" && !dataComp) throw new Error("Informe a data em que o cheque compensou.");
+      return mudarCheque(c.id, para, {
+        party_id: party,
+        nome,
+        account_id: conta,
+        motivo,
+        ...(para === "compensado" ? { data: iso(dataComp as Date), ...(parcelaComp ? { installment_id: parcelaComp } : {}) } : {}),
+      });
+    },
+    onSuccess: (_r, para) => {
+      toast.success(para === "compensado" ? "Cheque compensado e dinheiro lançado na conta." : "Cheque atualizado.");
+      void qc.invalidateQueries({ queryKey: ["fin-accounts"] });
       setAcao(null);
       void qc.invalidateQueries({ queryKey: ["fin-cheques"] });
     },
@@ -255,6 +288,33 @@ function LinhaCheque({ c, podeGerir }: { c: Cheque; podeGerir: boolean }) {
               onChange={setConta}
               placeholder="Conta do depósito"
             />
+          )}
+          {acao === "compensado" && (
+            <>
+              <DateField value={dataComp} onChange={setDataComp} placeholder="Data que compensou *" />
+              <SmartSelect
+                options={(contas.data ?? []).filter((a) => a.is_active).map((a) => ({ value: a.id, label: a.nome }))}
+                value={conta}
+                onChange={setConta}
+                placeholder={c.conta_deposito ? `Conta: ${c.conta_deposito}` : "Conta onde compensou *"}
+              />
+              <SmartSelect
+                options={(parcelas.data ?? []).map((p) => ({
+                  value: p.id,
+                  label: `${p.financial_titles.descricao} · ${p.numero}/${p.total_parcelas}`,
+                  hint: `vence ${dataBR(p.vencimento)}${p.financial_titles.numero ? ` · nº ${p.financial_titles.numero}` : ""}`,
+                }))}
+                value={parcelaComp}
+                onChange={setParcelaComp}
+                loading={parcelas.isLoading}
+                placeholder="Baixar junto a conta a receber (opcional)"
+                searchPlaceholder="Buscar pela descrição"
+              />
+              <p className="text-xs font-medium text-ledger-muted sm:col-span-3">
+                Escolhendo a conta a receber, ela já fica paga e o dinheiro entra no banco uma vez só. Sem escolher, o dinheiro
+                entra no banco como entrada avulsa — nesse caso não dê baixa de novo no título.
+              </p>
+            </>
           )}
           <input className={inputCls} placeholder={acao === "devolvido" || acao === "cancelado" ? "Motivo (obrigatório)" : "Observação"} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
           <button type="button" className="admin-btn-primary" disabled={mudar.isPending} onClick={() => mudar.mutate(acao)}>

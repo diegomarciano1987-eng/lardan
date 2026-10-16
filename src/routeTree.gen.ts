@@ -69,6 +69,7 @@ import { Route as AuthenticatedAdminLeadsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminMaletasRouteImport } from './routes/_authenticated/admin/maletas'
 import { Route as AuthenticatedAdminPdvRouteImport } from './routes/_authenticated/admin/pdv'
 import { Route as AuthenticatedAdminPerfilRouteImport } from './routes/_authenticated/admin/perfil'
+import { Route as AuthenticatedAdminPracasRouteImport } from './routes/_authenticated/admin/pracas'
 import { Route as AuthenticatedAdminRedeRouteImport } from './routes/_authenticated/admin/rede'
 import { Route as AuthenticatedAdminSiteRouteImport } from './routes/_authenticated/admin/site'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
@@ -437,6 +438,12 @@ const AuthenticatedAdminPerfilRoute =
   AuthenticatedAdminPerfilRouteImport.update({
     id: '/perfil',
     path: '/perfil',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminPracasRoute =
+  AuthenticatedAdminPracasRouteImport.update({
+    id: '/pracas',
+    path: '/pracas',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminRedeRoute = AuthenticatedAdminRedeRouteImport.update({
@@ -809,6 +816,7 @@ export interface FileRoutesByFullPath {
   '/admin/maletas': typeof AuthenticatedAdminMaletasRoute
   '/admin/pdv': typeof AuthenticatedAdminPdvRoute
   '/admin/perfil': typeof AuthenticatedAdminPerfilRoute
+  '/admin/pracas': typeof AuthenticatedAdminPracasRoute
   '/admin/rede': typeof AuthenticatedAdminRedeRoute
   '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
@@ -921,6 +929,7 @@ export interface FileRoutesByTo {
   '/admin/maletas': typeof AuthenticatedAdminMaletasRoute
   '/admin/pdv': typeof AuthenticatedAdminPdvRoute
   '/admin/perfil': typeof AuthenticatedAdminPerfilRoute
+  '/admin/pracas': typeof AuthenticatedAdminPracasRoute
   '/admin/rede': typeof AuthenticatedAdminRedeRoute
   '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
@@ -1037,6 +1046,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/maletas': typeof AuthenticatedAdminMaletasRoute
   '/_authenticated/admin/pdv': typeof AuthenticatedAdminPdvRoute
   '/_authenticated/admin/perfil': typeof AuthenticatedAdminPerfilRoute
+  '/_authenticated/admin/pracas': typeof AuthenticatedAdminPracasRoute
   '/_authenticated/admin/rede': typeof AuthenticatedAdminRedeRoute
   '/_authenticated/admin/site': typeof AuthenticatedAdminSiteRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
@@ -1153,6 +1163,7 @@ export interface FileRouteTypes {
     | '/admin/maletas'
     | '/admin/pdv'
     | '/admin/perfil'
+    | '/admin/pracas'
     | '/admin/rede'
     | '/admin/site'
     | '/admin/usuarios'
@@ -1265,6 +1276,7 @@ export interface FileRouteTypes {
     | '/admin/maletas'
     | '/admin/pdv'
     | '/admin/perfil'
+    | '/admin/pracas'
     | '/admin/rede'
     | '/admin/site'
     | '/admin/usuarios'
@@ -1380,6 +1392,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/maletas'
     | '/_authenticated/admin/pdv'
     | '/_authenticated/admin/perfil'
+    | '/_authenticated/admin/pracas'
     | '/_authenticated/admin/rede'
     | '/_authenticated/admin/site'
     | '/_authenticated/admin/usuarios'
@@ -1913,6 +1926,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPerfilRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/pracas': {
+      id: '/_authenticated/admin/pracas'
+      path: '/pracas'
+      fullPath: '/admin/pracas'
+      preLoaderRoute: typeof AuthenticatedAdminPracasRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/rede': {
       id: '/_authenticated/admin/rede'
       path: '/rede'
@@ -2372,6 +2392,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminMaletasRoute: typeof AuthenticatedAdminMaletasRoute
   AuthenticatedAdminPdvRoute: typeof AuthenticatedAdminPdvRoute
   AuthenticatedAdminPerfilRoute: typeof AuthenticatedAdminPerfilRoute
+  AuthenticatedAdminPracasRoute: typeof AuthenticatedAdminPracasRoute
   AuthenticatedAdminRedeRoute: typeof AuthenticatedAdminRedeRoute
   AuthenticatedAdminSiteRoute: typeof AuthenticatedAdminSiteRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
@@ -2414,6 +2435,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminMaletasRoute: AuthenticatedAdminMaletasRoute,
     AuthenticatedAdminPdvRoute: AuthenticatedAdminPdvRoute,
     AuthenticatedAdminPerfilRoute: AuthenticatedAdminPerfilRoute,
+    AuthenticatedAdminPracasRoute: AuthenticatedAdminPracasRoute,
     AuthenticatedAdminRedeRoute: AuthenticatedAdminRedeRoute,
     AuthenticatedAdminSiteRoute: AuthenticatedAdminSiteRoute,
     AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,

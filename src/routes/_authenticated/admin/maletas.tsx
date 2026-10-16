@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/admin/maletas")({
   component: MaletasPage,
   head: () => ({
     meta: [
-      { title: "Maletas — Administração LARDAN" },
+      { title: "Remessas — Administração LARDAN" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -48,6 +48,30 @@ async function buscarPessoas(papel: "consultora" | "representante", termo: strin
   return {
     total: Number(linhas[0]?.total ?? linhas.length),
     opcoes: linhas.map((p) => ({ value: p.id, label: p.display_name })),
+  };
+}
+
+async function buscarPracas() {
+  const { data, error } = await supabase
+    .from("cob_pracas")
+    .select("id, nome")
+    .eq("ativo", true)
+    .order("nome");
+  if (error) throw error;
+  return (data ?? []).map((p) => ({ value: p.id as string, label: p.nome as string }));
+}
+
+/** Consultoras da praça da remessa: só elas aparecem na montagem. */
+async function buscarConsultorasPraca(pracaId: string, termo: string) {
+  const { data, error } = await supabase.rpc("praca_consultoras" as never, {
+    _praca: pracaId,
+    _search: termo.trim() || null,
+  } as never);
+  if (error) throw error;
+  const linhas = (data ?? []) as unknown as { party_id: string; display_name: string }[];
+  return {
+    total: linhas.length,
+    opcoes: linhas.map((p) => ({ value: p.party_id, label: p.display_name })),
   };
 }
 

@@ -77,3 +77,24 @@ export const consultorasDaPraca = async (praca: string, termo: string) => {
 export const dataBR = (d: string | null) => (d ? d.slice(0, 10).split("-").reverse().join("/") : "—");
 export const isoDia = (d?: Date) =>
   d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : null;
+
+export interface FiltrosRemessa {
+  busca?: string;
+  status?: string;
+  praca?: string;
+  representante?: string;
+  de?: string | null;
+  ate?: string | null;
+  campoData?: "emissao" | "acerto";
+}
+
+export const buscarRemessas = (f: FiltrosRemessa) =>
+  rpc<RemessaCard[]>("remessas_buscar", {
+    _busca: f.busca?.trim() || null,
+    _status: f.status && f.status !== "todas" ? f.status : null,
+    _praca: f.praca || null,
+    _representante: f.representante || null,
+    _de: f.de ?? null,
+    _ate: f.ate ?? null,
+    _campo_data: f.campoData ?? "emissao",
+  });

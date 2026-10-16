@@ -1,15 +1,17 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BriefcaseBusiness, Plus, ScanLine } from "lucide-react";
+import { BriefcaseBusiness, Plus, ScanLine, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState, ErrorState, PageHeader, Panel, StatusBadge, Skeleton } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { DateField } from "@/components/premium/DateField";
+import { DateRangeField } from "@/components/premium/DateRangeField";
+import type { DateRange } from "react-day-picker";
 import { useCapabilities } from "@/lib/capabilities";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, traduzir } from "@/lib/maletas";
-import { STATUS_REMESSA, criarRemessa, dataBR, isoDia, listarRemessas, type RemessaCard } from "@/lib/remessas";
+import { STATUS_REMESSA, buscarRemessas, criarRemessa, dataBR, isoDia, type RemessaCard } from "@/lib/remessas";
 
 export const Route = createFileRoute("/_authenticated/admin/maletas")({
   component: RemessasPage,
@@ -172,8 +174,33 @@ function RemessasPage() {
   const qc = useQueryClient();
   const [situacao, setSituacao] = React.useState("todas");
   const [qr, setQr] = React.useState("");
+  const [texto, setTexto] = React.useState("");
+  const [busca, setBusca] = React.useState("");
+  const [praca, setPraca] = React.useState("");
+  const [rep, setRep] = React.useState("");
+  const [buscaRep, setBuscaRep] = React.useState("");
+  const [periodo, setPeriodo] = React.useState<DateRange | undefined>();
+  const [campoData, setCampoData] = React.useState<"emissao" | "acerto">("emissao");
+  React.useEffect(() => {
+    const t = setTimeout(() => setBusca(texto), 300);
+    return () => clearTimeout(t);
+  }, [texto]);
 
-  const lista = useQuery({ queryKey: ["remessas", "lista", situacao], queryFn: () => listarRemessas(situacao) });
+  const pracas = useQuery({ queryKey: ["remessas", "pracas"], queryFn: buscarPracas });
+  const reps = useQuery({ queryKey: ["remessas", "reps", buscaRep], queryFn: () => buscarRepresentantes(buscaRep) });
+  const filtros = {
+    busca, status: situacao, praca, representante: rep,
+    de: isoDia(periodo?.from), ate: isoDia(periodo?.to ?? periodo?.from), campoData,
+  };
+  const lista = useQuery({ queryKey: ["remessas", "busca", filtros], queryFn: () => buscarRemessas(filtros) });
+  const tot = (lista.data ?? []).reduce(
+    (a, r) => ({ n: a.n + 1, m: a.m + Number(r.maletas), c: a.c + Number(r.maletas_conferidas), p: a.p + Number(r.pecas), v: a.v + Number(r.valor_cents) }),
+    { n: 0, m: 0, c: 0, p: 0, v: 0 },
+  );
+  const temFiltro = !!(texto || praca || rep || periodo || situacao !== "todas");
+  function limpar() {
+    setTexto(""); setPraca(""); setRep(""); setPeriodo(undefined); setSituacao("todas");
+  }
 
   async function abrirPorQr() {
     const bruto = qr.trim();
@@ -216,18 +243,68 @@ function RemessasPage() {
         }
       />
 
-      <div className="flex flex-wrap items-end gap-4">
-        <div className="w-64">
-          <SmartSelect value={situacao} onChange={setSituacao} options={SITUACOES} placeholder="Situação" />
+      <Panel>
+        <div className="grid gap-4 lg:grid-cols-12">
+          <label className="grid gap-1.5 text-sm lg:col-span-5">
+            <span className="ledger-eyebrow">Buscar</span>
+            <span className="relative">
+              <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
+              <input className="admin-input w-full pl-9" value={texto} onChange={(e) => setTexto(e.target.value)}
+                placeholder="Nº da remessa, praça, representante ou consultora" />
+            </span>
+          </label>
+          <label className="grid gap-1.5 text-sm lg:col-span-4">
+            <span className="ledger-eyebrow">Praça / região</span>
+            <SmartSelect value={praca} onChange={setPraca}
+              options={[{ value: "", label: "Todas as praças" }, ...(pracas.data ?? [])]} placeholder="Todas as praças" />
+          </label>
+          <label className="grid gap-1.5 text-sm lg:col-span-3">
+            <span className="ledger-eyebrow">Situação</span>
+            <SmartSelect value={situacao} onChange={setSituacao} options={SITUACOES} placeholder="Situação" />
+          </label>
+          <label className="grid gap-1.5 text-sm lg:col-span-4">
+            <span className="ledger-eyebrow">Representante</span>
+            <SmartSelect value={rep} onChange={setRep} onSearch={setBuscaRep} loading={reps.isFetching}
+              options={[{ value: "", label: "Todos os representantes" }, ...(reps.data ?? [])]}
+              searchPlaceholder="Buscar representante" placeholder="Todos os representantes" />
+          </label>
+          <label className="grid gap-1.5 text-sm lg:col-span-2">
+            <span className="ledger-eyebrow">Período por</span>
+            <SmartSelect value={campoData} onChange={(v) => setCampoData(v as "emissao" | "acerto")}
+              options={[{ value: "emissao", label: "Data de emissão" }, { value: "acerto", label: "Data de acerto" }]} />
+          </label>
+          <label className="grid gap-1.5 text-sm lg:col-span-3">
+            <span className="ledger-eyebrow">Período</span>
+            <DateRangeField value={periodo} onChange={setPeriodo} placeholder="Qualquer data" />
+          </label>
+          <div className="flex items-end gap-2 lg:col-span-3">
+            <input className="admin-input min-w-0 flex-1" value={qr} onChange={(e) => setQr(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") void abrirPorQr(); }} placeholder="Bipar QR da maleta" />
+            <button type="button" className="admin-btn" onClick={() => void abrirPorQr()} aria-label="Abrir maleta pelo QR">
+              <ScanLine aria-hidden className="size-4" />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <input className="admin-input w-72" value={qr} onChange={(e) => setQr(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") void abrirPorQr(); }}
-            placeholder="Bipar QR ou colar o código da maleta" />
-          <button type="button" className="admin-btn" onClick={() => void abrirPorQr()}>
-            <ScanLine aria-hidden className="size-4" /> Abrir
+        {temFiltro && (
+          <button type="button" className="mt-4 inline-flex items-center gap-1 text-sm text-ledger-muted hover:text-ledger-text" onClick={limpar}>
+            <X aria-hidden className="size-4" /> Limpar filtros
           </button>
-        </div>
+        )}
+      </Panel>
+
+      <div className="grid gap-3 md:grid-cols-5">
+        {[
+          ["Remessas", tot.n],
+          ["Maletas", tot.m],
+          ["Conferidas", tot.c],
+          ["Peças", tot.p],
+          ["Valor consignado", brl(tot.v)],
+        ].map(([r, v]) => (
+          <div key={r as string} className="rounded-xl border border-line-soft bg-surface p-4">
+            <p className="ledger-eyebrow">{r}</p>
+            <p className="mt-1 font-display text-2xl font-bold tabular-nums text-ledger-text">{v}</p>
+          </div>
+        ))}
       </div>
 
       <Panel flush>
@@ -237,7 +314,7 @@ function RemessasPage() {
         )}
         {lista.data?.length === 0 && (
           <div className="px-6">
-            <EmptyState title="Nenhuma remessa nesta situação"
+            <EmptyState title={temFiltro ? "Nenhuma remessa com estes filtros" : "Nenhuma remessa aberta ainda"}
               description="Abra uma nova remessa escolhendo a praça; depois as maletas das consultoras são abertas dentro dela." />
           </div>
         )}

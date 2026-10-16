@@ -87,6 +87,7 @@ function Cobranca() {
           <p className="text-sm text-muted-foreground">Valores vêm do financeiro oficial. Aqui só se registra o atendimento.</p>
         </div>
         <div className="flex items-center gap-2"><ConfigEncargos />
+        <Link to="/admin/cobranca/lote" className="inline-flex h-10 items-center rounded-lg bg-asaas px-4 text-sm font-semibold text-asaas-foreground">Cobrança em lote Asaas</Link>
         <div className="flex rounded-lg border border-border p-1">
           {(["lista", "kanban", "agenda", "bi"] as const).map((v) => (
             <button key={v} onClick={() => set({ v })} className={`rounded-md px-4 py-1.5 text-sm ${s.v === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>

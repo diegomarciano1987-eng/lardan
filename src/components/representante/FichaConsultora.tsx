@@ -23,7 +23,7 @@ export function FichaConsultora({ party, rep, onClose }: { party: string | null;
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>{f?.nome ?? "Consultora"}</SheetTitle>
-          <SheetDescription>{f ? `${f.code} · ${f.doc_masked ?? "CPF não informado"} · ${f.status === "ativo" ? "ativa" : "inativa"}` : "Carregando…"}</SheetDescription>
+          <SheetDescription>{f ? `${f.code} · ${f.doc_masked ?? "CPF não informado"} · ${f.status === "ativo" ? "ativa" : f.status === "bloqueado" ? "bloqueada" : f.status === "desligado" ? "desligada" : "inativa"}` : "Carregando…"}</SheetDescription>
         </SheetHeader>
         {q.error && <p className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{(q.error as Error).message}</p>}
         {f && (
@@ -42,13 +42,19 @@ export function FichaConsultora({ party, rep, onClose }: { party: string | null;
               <p className="rounded-xl border border-border px-4 py-3 text-sm"><span className="font-semibold">Maleta com ela:</span> {f.maletas.map((m) => `${m.status} desde ${dataBR(m.desde.slice(0, 10))}`).join(" · ")}</p>
             )}
             <CobrarParcela antes={antes} avulsa={{ party_id: f.id, display_name: f.nome }} rep={rep} whatsapp={whats} rotulo="Nova cobrança — digitar valor (Pix, cartão 3x, boleto, cheque)" />
-            {f.status !== "ativo" && (
+            {(f.status === "bloqueado" || f.status === "desligado") && (
+              <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                Consultora {f.status}: só o financeiro da Lardan pode reativar.
+              </p>
+            )}
+            {f.status !== "ativo" && f.status !== "bloqueado" && f.status !== "desligado" && (
               <button type="button" disabled={reativar.isPending} onClick={() => reativar.mutate()} className="w-full rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary">Reativar consultora</button>
             )}
 
             <section className="space-y-2 rounded-2xl border border-border p-4">
               <h3 className="text-sm font-semibold">Contato e endereço</h3>
-              {f.contatos.length === 0 && <p className="text-sm text-muted-foreground">Sem dados de contato.</p>}
+              {f.restrito && <p className="text-sm text-muted-foreground">Contato e endereço aparecem quando ela passar para a sua carteira.</p>}
+              {!f.restrito && f.contatos.length === 0 && <p className="text-sm text-muted-foreground">Sem dados de contato.</p>}
               {f.contatos.map((c, i) => (
                 <p key={i} className="flex items-center gap-2 text-sm">
                   {c.kind === "whatsapp" ? <MessageCircle className="size-4" /> : <Phone className="size-4" />}
@@ -59,7 +65,7 @@ export function FichaConsultora({ party, rep, onClose }: { party: string | null;
                 <p className="flex items-start gap-2 text-sm"><MapPin className="mt-0.5 size-4 shrink-0" />
                   {[e.rua && `${e.rua}${e.numero ? `, ${e.numero}` : ""}`, e.complemento, e.bairro, e.cidade && `${e.cidade}/${e.uf ?? ""}`, e.cep].filter(Boolean).join(" · ")}
                   {e.referencia ? ` (ref.: ${e.referencia})` : ""}</p>
-              ) : <p className="text-sm text-muted-foreground">Sem endereço cadastrado.</p>}
+              ) : f.restrito ? null : <p className="text-sm text-muted-foreground">Sem endereço cadastrado.</p>}
             </section>
 
             <section className="space-y-2">

@@ -16,10 +16,14 @@ export const Route = createFileRoute("/api/public/asaas/sync-matinal")({
         const { data: cfg } = await supabaseAdmin.from("consultora_cobranca_config" as never).select("ator_user_id").limit(1).maybeSingle();
         const actor = (cfg as { ator_user_id: string } | null)?.ator_user_id;
         if (!actor) return new Response("Sem responsável técnico configurado", { status: 500 });
-        const hoje = new Date(Date.now() - 3 * 3600_000).toISOString().slice(0, 10);
+        const agoraSP = new Date(Date.now() - 3 * 3600_000);
+        const hoje = agoraSP.toISOString().slice(0, 10);
+        const inicio = new Date(agoraSP.getTime() - 45 * 86_400_000).toISOString().slice(0, 10);
+        // Domingo: conferência completa (sem teto); demais dias: só a janela dos últimos 45 dias.
+        const modo = agoraSP.getUTCDay() === 0 ? "completo" : "diario";
         try {
           const { executarSyncAsaas } = await import("@/lib/asaas/espelho.server");
-          const r = await executarSyncAsaas({ actor, de: "2020-01-01", ate: hoje, ignorarIntervalo: true });
+          const r = await executarSyncAsaas({ actor, de: modo === "completo" ? "2020-01-01" : inicio, ate: hoje, ignorarIntervalo: true, modo });
           return Response.json({ ok: true, ...r });
         } catch (e) {
           return Response.json({ ok: false, erro: (e as Error).message }, { status: 500 });

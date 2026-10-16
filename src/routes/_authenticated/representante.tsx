@@ -33,6 +33,10 @@ export const Route = createFileRoute("/_authenticated/representante")({
     meta: [
       { title: "Área do representante — LARDAN" },
       { name: "description", content: "Área do representante LARDAN." },
+      { property: "og:title", content: "Área do representante — LARDAN" },
+      { property: "og:description", content: "Área do representante LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
       { name: "theme-color", content: "#1c1614" },
       { name: "mobile-web-app-capable", content: "yes" },
@@ -264,8 +268,8 @@ function Consultoras({ rep }: { rep: string; espelho: boolean }) {
                 <button type="button" disabled={!c.pode_assumir && !c.na_carteira} onClick={() => setFicha(c.id)} className="flex w-full items-center justify-between gap-3 py-3 text-left hover:bg-muted/40 disabled:opacity-60">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{c.display_name}</p>
-                    <p className="text-xs text-muted-foreground">{c.code} · {c.cidade ?? "sem cidade"} · {c.status === "ativo" ? "ativa" : "inativa"} · {c.na_carteira ? "na sua carteira" : c.rep_nome ? `carteira de ${c.rep_nome}` : "sem representante"}{c.maletas > 0 ? ` · ${c.maletas} maleta(s) com ela` : ""}</p>
-                    {!c.pode_assumir && !c.na_carteira && <p className="text-xs text-destructive">Ativa com outro representante — fale com a Lardan.</p>}
+                    <p className="text-xs text-muted-foreground">{c.code} · {c.cidade ?? "sem cidade"} · {c.status === "ativo" ? "ativa" : c.status === "bloqueado" ? "bloqueada" : c.status === "desligado" ? "desligada" : "inativa"} · {c.na_carteira ? "na sua carteira" : c.rep_nome ? `carteira de ${c.rep_nome}` : "sem representante"}{c.maletas > 0 ? ` · ${c.maletas} maleta(s) com ela` : ""}</p>
+                    {!c.pode_assumir && !c.na_carteira && <p className="text-xs text-destructive">{c.status === "bloqueado" || c.status === "desligado" ? `Consultora ${c.status === "bloqueado" ? "bloqueada" : "desligada"} — fale com a Lardan.` : "Ativa com outro representante — fale com a Lardan."}</p>}
                   </div>
                   <div className="flex shrink-0 items-center gap-2">{c.aberto_cents > 0 && <p className="font-semibold tabular-nums">{brl(c.aberto_cents)}</p>}<ChevronRight className="size-4 text-muted-foreground" /></div>
                 </button>
@@ -284,7 +288,7 @@ function Consultoras({ rep }: { rep: string; espelho: boolean }) {
             <button type="button" onClick={() => setFicha(c.id)} className="flex w-full items-center justify-between gap-3 py-3 text-left hover:bg-muted/40">
               <div className="min-w-0">
                 <p className="truncate font-medium">{c.display_name}</p>
-                <p className="text-xs text-muted-foreground">{c.code} · {c.cidade ?? "sem cidade"} · {c.status === "ativo" ? "ativa" : "inativa"}</p>
+                <p className="text-xs text-muted-foreground">{c.code} · {c.cidade ?? "sem cidade"} · {c.status === "ativo" ? "ativa" : c.status === "bloqueado" ? "bloqueada" : c.status === "desligado" ? "desligada" : "inativa"}</p>
               </div>
               <div className="flex shrink-0 items-center gap-2 text-right">
                 {c.aberto_cents > 0 && (

@@ -42,6 +42,11 @@ export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
     meta: [
       { title: "Inteligência Operacional — Administração LARDAN" },
+      { name: "description", content: "Visão operacional de estoque, finanças e rede LARDAN." },
+      { property: "og:title", content: "Inteligência Operacional — Administração LARDAN" },
+      { property: "og:description", content: "Visão operacional de estoque, finanças e rede LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -144,7 +149,7 @@ function VisaoGeral() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("catalog_street_value");
       if (error) throw error;
-      return data as { total_cents: number; pecas: number; custo_cents: number };
+      return data as { total_cents: number; pecas: number; custo_cents: number | null };
     },
   });
 

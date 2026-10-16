@@ -29,4 +29,8 @@
 - Settlement reversal also reverses the interest/discount adjustments of that settlement; DFC nets reversals inside the original line; projected cash flow skips cheques already represented by an equal open receivable installment. Why: no residues and no double counting.
 - Person merges only via party_unificar (preview first, all-or-nothing, imported fiado/Asaas staging rows preserved, moved ids kept in party_unificacoes for reversal). Why: no lost history.
 - Subfolders may have their own AGENTS.md; read it before editing there.
+- pdv_como (assinatura técnica) só dentro de rotina que já validou o usuário real, e sempre gravando o ator real em audit_logs antes. Nunca exposto por GRANT. Why: a auditoria precisa mostrar quem clicou, não o usuário técnico.
+- Representante fora da carteira vê só nome, código, status e débitos (restrito=true); bloqueada/desligada nunca muda de carteira nem é reativada pelo portal. Why: LGPD e controle do financeiro.
+- Cartão no Asaas: com asaas_accounts.conta_cartao_receber_id preenchida, a baixa entra nessa conta na data do pagamento e asaas_cartao_creditar transfere para a conta Asaas na credit_date (idempotente). Vazio = comportamento anterior.
+- fin_installment_saldo = valor + juros/multa − desconto/abatimento − alocações (igual a fin_installment_refresh). Why: parcela com desconto não pode parecer liquidada e ainda ser cobrada.
 - Test-kit cancellation uses service-only kit_testes_cancelar with seven explicit expected cycles and physical quantities, official stock transfers and immutable before-snapshots; never delete history. Why: authorized cleanup must not lose stock or touch real remessas.

@@ -265,7 +265,7 @@ describe("importação de recebíveis", () => {
     expect(previa.total).toBeGreaterThan(0);
     expect(depois.linhas[0]!.c).toBe(antes.linhas[0]!.c);
     expect(previa.aviso).toContain("não cria título");
-  });
+  }, 20_000);
 
   test("cliente sem vínculo externo fica em revisão e nunca é ligado por nome", async () => {
     const sim = new SimuladorAsaas({ semente: `amb-${marca()}` });

@@ -62,6 +62,11 @@ export const Route = createFileRoute("/_authenticated/admin/candidaturas_/$id")(
   head: () => ({
     meta: [
       { title: "Ficha da candidata — Lardan Cloud" },
+      { name: "description", content: "Cadastro, acompanhamento e histórico da candidata LARDAN." },
+      { property: "og:title", content: "Ficha da candidata — Lardan Cloud" },
+      { property: "og:description", content: "Cadastro, acompanhamento e histórico da candidata LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -555,9 +560,7 @@ function CockpitCandidata() {
                           : (d.avaliacoes.find((a) => a.tipo === "disc")?.situacao ?? "Não realizado")}
                       </p>
                     </div>
-                    <button type="button" className="admin-btn" disabled title="Recurso preparado para futura ativação">
-                      Enviar teste DISC
-                    </button>
+                    {/* "Enviar teste DISC" volta quando o envio existir; botão morto removido. */}
                   </div>
                   <p className="mt-3 text-xs text-ledger-muted">
                     DISC, recurso preparado para futura ativação. Não existe questionário, pontuação

@@ -33,6 +33,8 @@ export type RepFicha = {
   parcelas: RepCobranca[]; aberto_cents: number; vencido_cents: number;
   cheques: { numero: string; valor_cents: number; bom_para: string; status: string }[];
   na_carteira: boolean; rep_nome: string | null; maletas: { status: string; desde: string }[];
+  /** Fora da sua carteira: contato, endereço, cheques e maletas ficam ocultos até ela passar para você. */
+  restrito?: boolean;
 };
 export const repFicha = (party: string, rep: string) => chamar<RepFicha>("rep_consultora_ficha_rep", { _party: party, _rep: rep });
 export type RepBuscaTodas = {

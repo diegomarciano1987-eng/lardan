@@ -27,6 +27,7 @@ import {
 import { consultarCep, consultarCnpj, listarMunicipios } from "@/lib/br/lookup.functions";
 import { UFS } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 interface Busca {
   kind?: PartyKind | undefined;
@@ -114,6 +115,7 @@ function NovoCadastro() {
   const [consultandoCep, setConsultandoCep] = useState(false);
   const [consultandoDoc, setConsultandoDoc] = useState(false);
   const [buscaDuplicados, setBuscaDuplicados] = useState({ nome: "", doc: "" });
+  const [homonimoConfirmado, setHomonimoConfirmado] = useState("");
   useEffect(() => {
     const timer = setTimeout(() => setBuscaDuplicados({ nome: form.display_name.trim(), doc: form.doc }), 350);
     return () => clearTimeout(timer);
@@ -218,7 +220,7 @@ function NovoCadastro() {
         throw new Error(email.erro ?? "E-mail inválido.");
       const iguais = await consultarDuplicados(nome, form.doc);
       if (iguais.some((p) => p.motivo === "documento")) throw new Error("Este documento já está cadastrado. Abra a ficha existente.");
-      if (iguais.length) throw new Error("Há cadastro com o mesmo nome. Confira a ficha existente antes de criar outro.");
+      if (iguais.length && homonimoConfirmado !== `${nome}|${form.doc}`) throw new Error("Há cadastro com o mesmo nome. Confira a ficha ou confirme que é outra pessoa.");
       const id = await saveParty({
         kind: pessoa ? "pessoa" : "organizacao",
         display_name: nome,
@@ -295,6 +297,7 @@ function NovoCadastro() {
           <div className="space-y-2 border-b border-line-soft px-5 py-4">
             <p className="text-sm font-semibold text-destructive">Possível cadastro duplicado</p>
             {duplicados.data?.map((p) => <Link key={p.id} className="admin-link block text-sm" to="/admin/cadastros/pessoas/$id" params={{ id: p.id }}>{p.code} · {p.display_name}{p.doc_masked ? ` · ${p.doc_masked}` : ""}</Link>)}
+            {!duplicados.data?.some((p) => p.motivo === "documento") ? <Button variant="outline" onClick={() => setHomonimoConfirmado(`${form.display_name.trim()}|${form.doc}`)} disabled={homonimoConfirmado === `${form.display_name.trim()}|${form.doc}`}>{homonimoConfirmado === `${form.display_name.trim()}|${form.doc}` ? "Outra pessoa confirmada" : "Conferi: é outra pessoa com o mesmo nome"}</Button> : null}
           </div>
         ) : null}
         <div className="grid gap-4 p-5 md:grid-cols-2">

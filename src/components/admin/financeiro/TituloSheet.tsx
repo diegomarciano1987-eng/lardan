@@ -233,8 +233,11 @@ export function TituloSheet({
       void qc.invalidateQueries({ queryKey: ["fin-title-audit", id] });
       void qc.invalidateQueries({ queryKey: ["fin-overview"] });
       void qc.invalidateQueries({ queryKey: ["fin-accounts"] });
-      void qc.invalidateQueries({ queryKey: ["fin-conta"] });
-      void qc.invalidateQueries({ queryKey: ["fin-fluxo"] });
+      void qc.invalidateQueries({ queryKey: ["fin-account-cockpit"] });
+      void qc.invalidateQueries({ queryKey: ["fin-account-auditoria"] });
+      void qc.invalidateQueries({ queryKey: ["fin-cashflow"] });
+      void qc.invalidateQueries({ queryKey: ["fin-cashflow-detalhe"] });
+      void qc.invalidateQueries({ queryKey: ["fin-pagar-receber"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });

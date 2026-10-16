@@ -533,6 +533,13 @@
       "when": 1792170415610,
       "tag": "0075_party_unificar_ajustes",
       "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1792170793214,
+      "tag": "0076_party_unificar_preserva_lastro",
+      "breakpoints": true
     }
   ]
 }

@@ -624,6 +624,13 @@
       "when": 1792192323223,
       "tag": "0088_financeiro_parcela_estorno_data_duplicados",
       "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "7",
+      "when": 1792192426297,
+      "tag": "0089_registry_duplicate_candidates_variaveis",
+      "breakpoints": true
     }
   ]
 }

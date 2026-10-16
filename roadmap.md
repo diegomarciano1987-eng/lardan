@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Cancelar as sete maletas de teste autorizadas por Diego e conferir devolução ao estoque — 48 peças, 40 transferências, sete auditorias; tela conferida
 - [x] Larissa: acesso total ao cadastro
 - [x] Etapa 2: cobranças Asaas das parcelas do acordo + baixa que abate a dívida original
 - [x] Etapa 3: cobrança em lote no Asaas (acordos e dívidas)

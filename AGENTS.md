@@ -29,3 +29,4 @@
 - Settlement reversal also reverses the interest/discount adjustments of that settlement; DFC nets reversals inside the original line; projected cash flow skips cheques already represented by an equal open receivable installment. Why: no residues and no double counting.
 - Person merges only via party_unificar (preview first, all-or-nothing, imported fiado/Asaas staging rows preserved, moved ids kept in party_unificacoes for reversal). Why: no lost history.
 - Subfolders may have their own AGENTS.md; read it before editing there.
+- Test-kit cancellation uses service-only kit_testes_cancelar with seven explicit expected cycles and physical quantities, official stock transfers and immutable before-snapshots; never delete history. Why: authorized cleanup must not lose stock or touch real remessas.

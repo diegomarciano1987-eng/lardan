@@ -2,8 +2,9 @@ import { FotoPeca } from "@/components/FotoPeca";
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, FileText, Printer, ScanBarcode, Send, Truck } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, FileText, Printer, ScanBarcode, Send, Truck } from "lucide-react";
 import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
+import { ConferenciaMaleta } from "@/components/admin/maletas/ConferenciaMaleta";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import {
@@ -74,6 +75,7 @@ function MaletaFicha() {
   const [divergencias, setDivergencias] = React.useState<Record<string, number>>({});
   const [chave] = React.useState(chaveIdempotencia);
   const [leitor, setLeitor] = React.useState(false);
+  const [conferindo, setConferindo] = React.useState(false);
   const [confirmando, setConfirmando] = React.useState(false);
 
   const add = useMutation({

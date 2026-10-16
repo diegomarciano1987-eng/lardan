@@ -204,9 +204,19 @@ function MaletaFicha() {
           )}
           {podeMontar && montando && (
             <Panel title="Montagem">
-              <button type="button" className="admin-btn admin-btn-primary mb-4 w-full justify-center py-4 text-base" onClick={() => setLeitor(true)}>
-                <ScanBarcode aria-hidden className="size-5" /> Montar com leitor de código
-              </button>
+              <div className="mb-4 grid gap-2 sm:grid-cols-2">
+                <button type="button" className="admin-btn admin-btn-primary justify-center py-4 text-base" onClick={() => setLeitor(true)}>
+                  <ScanBarcode aria-hidden className="size-5" /> Montar com leitor de código
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn justify-center py-4 text-base"
+                  disabled={d.composicao.length === 0}
+                  onClick={() => setConferindo(true)}
+                >
+                  <ClipboardCheck aria-hidden className="size-5" /> Conferência
+                </button>
+              </div>
               <div className="flex flex-wrap items-end gap-3">
                 <div className="min-w-72 flex-1">
                   <VariantPicker value={peca} onChange={setPeca} />

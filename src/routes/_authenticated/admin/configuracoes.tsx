@@ -32,6 +32,7 @@ function Configuracoes() {
         description="Usuários e papéis, integrações e parâmetros do sistema."
       />
       <MargemPadrao />
+      <ParametrosRemessa />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {itens.map((m) => (
           <Panel key={m.slug} flush>

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { fimGarantia, idadePedido, precoFinal90, tomIdade } from "../../src/lib/consultora-regras";
+import { dentroPrazoTroca, fimGarantia, idadePedido, precoFinal90, tomIdade } from "../../src/lib/consultora-regras";
 
 describe("Regras aprovadas do app da consultora", () => {
+  it("prazo oficial de troca é 45 dias", () => {
+    expect(dentroPrazoTroca("2026-09-01", "2026-10-16")).toBe(true);
+    expect(dentroPrazoTroca("2026-09-01", "2026-10-17")).toBe(false);
+  });
   it("novas precificações sobem para ,90 sem baixar o preço", () => {
     expect(precoFinal90(7989)).toBe(7990);
     expect(precoFinal90(9776)).toBe(9790);

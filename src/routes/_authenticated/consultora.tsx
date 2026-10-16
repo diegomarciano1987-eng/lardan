@@ -1,4 +1,5 @@
 import { Indicacoes } from "@/components/consultora/Indicacoes";
+import { PedidosConsultora } from "@/components/consultora/PedidosConsultora";
 import { FotoPeca } from "@/components/FotoPeca";
 import * as React from "react";
 import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
@@ -46,6 +47,11 @@ export const Route = createFileRoute("/_authenticated/consultora")({
   head: () => ({
     meta: [
       { title: "Minha área — Consultora LARDAN" },
+      { name: "description", content: "Clientes, pedidos, maleta e vitrine da consultora LARDAN." },
+      { property: "og:title", content: "Minha área — Consultora LARDAN" },
+      { property: "og:description", content: "Área de atendimento e vendas da consultora LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
       { name: "theme-color", content: "#1c1614" },
       { name: "mobile-web-app-capable", content: "yes" },
@@ -170,13 +176,12 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         <p className="text-xs uppercase tracking-widest text-ledger-muted">
           Maleta {d.maleta.codigo} · ciclo {d.ciclo.cycle_no}
         </p>
-        <p className="mt-1 text-2xl font-semibold">{s?.rotulo ?? d.ciclo.status}</p>
+        <p className="mt-1 text-2xl font-semibold">{d.ciclo.status === "operacao" ? "Está com você" : s?.rotulo ?? d.ciclo.status}</p>
         <p className="mt-1 text-sm text-ledger-muted">
-          {d.ciclo.quantity_total} peças · valor de referência {brl(Number(d.ciclo.reference_total_cents ?? 0))}
+          {d.ciclo.quantity_total} peças · valor de venda {brl(Number(d.ciclo.reference_total_cents ?? 0))}
         </p>
         <p className="mt-3 text-xs text-ledger-muted">
-          Valor de referência é o preço de varejo das peças. Não é dívida sua: as regras de acerto ainda
-          não estão ativas.
+          Valor de venda das peças enviadas para você. Não é o valor do acerto.
         </p>
       </Cartao>
 
@@ -476,7 +481,10 @@ function AreaConsultoraLiberada() {
   };
   const [escolhida, setEscolhida] = React.useState<string | null>(null);
   const maletas = useQuery({ queryKey: ["consultora", "maletas"], queryFn: () => listarMaletas() });
-  const abertas = (maletas.data ?? []).filter((m) => !["encerrada", "cancelada"].includes(m.situacao));
+  const abertas = (maletas.data ?? []).filter((m) => ["operacao", "recebida", "transito", "expedida", "acerto"].includes(m.situacao)).sort((a, b) => {
+    const prioridade = ["operacao", "recebida", "transito", "expedida", "acerto"];
+    return prioridade.indexOf(a.situacao) - prioridade.indexOf(b.situacao);
+  });
   const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
   const aba = nav.aba ?? "inicio";
@@ -505,7 +513,7 @@ function AreaConsultoraLiberada() {
       {aba === "clientes" && (nav.modo ? <FormCliente id={nav.modo === "editar" ? nav.id : undefined} ir={ir} />
         : nav.id ? <FichaCliente id={nav.id} nav={nav} ir={ir} /> : <Clientes nav={nav} ir={ir} />)}
       {aba === "novo" && <NovoPedido clienteInicial={nav.id} ir={ir} />}
-      {aba === "pedidos" && (<><Topo titulo="Pedidos" ajuda="pedidos"><button type="button" className="btn-app-principal hidden sm:inline-flex" onClick={() => ir({ aba: "novo" })}>Nova venda</button></Topo><div className="max-w-3xl"><Pedidos /></div></>)}
+      {aba === "pedidos" && (<><Topo titulo="Pedidos" ajuda="pedidos"><button type="button" className="btn-app-principal hidden sm:inline-flex" onClick={() => ir({ aba: "novo" })}>Nova venda</button></Topo><PedidosConsultora /></>)}
       {aba === "maleta" && (<><Topo titulo="Minha maleta" ajuda="maleta" />{seletorMaleta}<div className="max-w-3xl"><MinhaMaleta cycleId={atual} /></div></>)}
       {aba === "historico" && (<><Topo titulo="Entregas da maleta" ajuda="maleta" voltar={() => ir({ aba: "mais" })} />{seletorMaleta}<div className="max-w-3xl"><Historico cycleId={atual} /></div></>)}
       {aba === "vitrine" && (<><Topo titulo="Minha vitrine" ajuda="vitrine" voltar={() => ir({ aba: "mais" })} /><Estudio /></>)}

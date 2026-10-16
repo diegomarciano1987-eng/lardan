@@ -67,6 +67,7 @@ const STOCK: AppRole[] = ["master", "diretoria", "estoque"];
 const FINANCE: AppRole[] = ["master", "diretoria", "financeiro"];
 
 export const ADMIN_MODULES: AdminModule[] = [
+  { slug: "trocas-garantias", path: "/admin/trocas-garantias", label: "Trocas e garantias", description: "Solicitações de pós-venda e análise com histórico.", icon: ShieldCheck, roles: ["master", "qualidade"], state: "ativo" },
   {
     slug: "visao-geral",
     path: "/admin",

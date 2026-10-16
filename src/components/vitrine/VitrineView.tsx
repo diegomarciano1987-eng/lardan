@@ -1,4 +1,6 @@
 import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
 import { Clock, Facebook, Instagram, MapPin, MessageCircle, Music2, Share2, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { brl, imagem, type VitrineItem } from "@/lib/maletas";
@@ -134,7 +136,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
         const real = foto(i);
         const src = real ?? i.ilustracao ?? null;
         return (
-          <li key={i.variant_id} className={`${cartao} ${a.grade === "lista" ? "flex gap-3" : "flex flex-col"}`}>
+          <li id={`peca-${i.variant_id}`} key={i.variant_id} className={`${cartao} ${a.grade === "lista" ? "flex gap-3" : "flex flex-col"}`}>
             <div className={`relative overflow-hidden bg-[var(--v-line)] ${a.cartao === "suave" ? "rounded-xl" : ""} ${a.grade === "lista" ? "size-24 shrink-0" : a.tema === "editorial" ? "aspect-[3/4]" : "aspect-square"}`}>
               {src && <img src={src} alt={i.produto} loading="lazy" width={800} height={800} className="size-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
               {!real && i.ilustracao && (
@@ -147,6 +149,11 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
               <p className="text-sm font-medium leading-snug">{i.produto}</p>
               <p className="text-xs text-[var(--v-muted)]">{[i.variante, i.tamanho, i.cor].filter(Boolean).join(" · ") || "Peça única"}</p>
               <p className="mt-1 text-sm font-semibold">{brl(i.preco_cents)}</p>
+              <a href={MANUAL_CUIDADOS_URL} target="_blank" rel="noreferrer" className="mt-2 block text-sm underline underline-offset-4">Garantia de dois anos e cuidados</a>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button asChild variant="outline" className="h-auto min-h-12 whitespace-normal"><a href={zap ? `${zap}${zap.includes("?") ? "&" : "?"}text=${encodeURIComponent(`Olá! Quero esta peça: ${i.produto}${i.variante ? ` (${i.variante})` : ""}, ${brl(i.preco_cents)}. Você confirma a disponibilidade?`)}` : undefined} aria-disabled={!zap} target="_blank" rel="noreferrer"><MessageCircle /> Quero esta</a></Button>
+                <Button asChild variant="outline" className="h-auto min-h-12 whitespace-normal"><a href={`https://wa.me/?text=${encodeURIComponent(`${i.produto}${i.variante ? ` · ${i.variante}` : ""}\n${brl(i.preco_cents)}${real ? `\nFoto: ${real}` : ""}\n${urlCompartilhar ? `${urlCompartilhar.split("#")[0]}#peca-${i.variant_id}` : ""}`)}`} target="_blank" rel="noreferrer"><Share2 /> Enviar esta peça</a></Button>
+              </div>
               <div className="mt-2 flex items-center gap-2">
                 <button type="button" aria-label="Tirar uma" className="size-8 rounded-full border border-[var(--v-line)]" onClick={() => setSacola((s) => ({ ...s, [i.variant_id]: Math.max(q - 1, 0) }))}>−</button>
                 <span className="w-6 text-center text-sm tabular-nums">{q}</span>

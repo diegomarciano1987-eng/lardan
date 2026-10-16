@@ -55,6 +55,12 @@ export type Peca = {
   preco_cents: number;
   media_id: string | null;
   maleta: string;
+  categoria?: string | null;
+  banho?: string | null;
+  collection_id?: string | null;
+  barcode?: string | null;
+  sku?: string | null;
+  internal_code?: string | null;
 };
 
 export type Inicio = {
@@ -86,6 +92,7 @@ export const CANAL: Record<Atendimento["canal"], string> = {
 
 export const carregarInicio = () => rpc<Inicio>("consultant_home");
 export const pecasDisponiveis = () => rpc<Peca[]>("consultant_pieces");
+export const buscarPecas = (busca = "", categoria = "", banho = "") => rpc<Peca[]>("consultora_pecas_buscar", { _busca: busca, _categoria: categoria, _banho: banho });
 
 export async function listarClientes(busca = ""): Promise<Cliente[]> {
   let query = t("consultant_clients").select("*").order("ultima_interacao", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).limit(200);

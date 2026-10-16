@@ -3437,6 +3437,136 @@ export type Database = {
           },
         ]
       }
+      consultora_pos_venda: {
+        Row: {
+          compra_em: string
+          consultora_party_id: string
+          created_at: string
+          created_by: string
+          excecao: boolean
+          fotos: Json
+          id: string
+          idempotency_key: string
+          item_id: string
+          motivo: string
+          observacao: string | null
+          order_id: string
+          protocolo: number
+          resposta: string | null
+          snapshot: Json
+          solucao: string
+          status: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          compra_em: string
+          consultora_party_id: string
+          created_at?: string
+          created_by: string
+          excecao?: boolean
+          fotos?: Json
+          id?: string
+          idempotency_key: string
+          item_id: string
+          motivo: string
+          observacao?: string | null
+          order_id: string
+          protocolo?: never
+          resposta?: string | null
+          snapshot: Json
+          solucao: string
+          status?: string
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          compra_em?: string
+          consultora_party_id?: string
+          created_at?: string
+          created_by?: string
+          excecao?: boolean
+          fotos?: Json
+          id?: string
+          idempotency_key?: string
+          item_id?: string
+          motivo?: string
+          observacao?: string | null
+          order_id?: string
+          protocolo?: never
+          resposta?: string | null
+          snapshot?: Json
+          solucao?: string
+          status?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultora_pos_venda_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_pos_venda_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "consultora_pos_venda_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "sales_order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_pos_venda_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultora_pos_venda_eventos: {
+        Row: {
+          actor_id: string
+          created_at: string
+          id: string
+          request_id: string
+          resposta: string | null
+          status: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          id?: string
+          request_id: string
+          resposta?: string | null
+          status: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+          resposta?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultora_pos_venda_eventos_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "consultora_pos_venda"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_points: {
         Row: {
           created_at: string
@@ -12619,6 +12749,8 @@ export type Database = {
         Returns: Json
       }
       consultora_ativar: { Args: { _party: string }; Returns: Json }
+      consultora_cliente_compras: { Args: { _cliente: string }; Returns: Json }
+      consultora_clientes_resumo: { Args: never; Returns: Json }
       consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }
       consultora_lembretes_vencimento: {
         Args: never
@@ -12645,6 +12777,28 @@ export type Database = {
         Args: { _doc: string; _forma: string; _order: string; _venc: string }
         Returns: Json
       }
+      consultora_pecas_buscar: {
+        Args: { _banho?: string; _busca?: string; _categoria?: string }
+        Returns: Json
+      }
+      consultora_pos_venda_abrir: {
+        Args: {
+          _chave: string
+          _excecao: boolean
+          _fotos: Json
+          _item: string
+          _motivo: string
+          _observacao: string
+          _solucao: string
+          _tipo: string
+        }
+        Returns: Json
+      }
+      consultora_pos_venda_analisar: {
+        Args: { _id: string; _resposta: string; _status: string }
+        Returns: undefined
+      }
+      consultora_pos_venda_prazo: { Args: { _order: string }; Returns: Json }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string

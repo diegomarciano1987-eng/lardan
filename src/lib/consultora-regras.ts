@@ -1,5 +1,10 @@
 export const MANUAL_CUIDADOS_URL = "https://www.lardan.com.br/cuidados";
 export const GARANTIA_ANOS = 2;
+export const TROCA_DIAS = 45;
+export function dentroPrazoTroca(compra: string, hoje: string) {
+  const dias = Math.floor((Date.parse(hoje.slice(0, 10)) - Date.parse(compra.slice(0, 10))) / 86400000);
+  return dias >= 0 && dias <= TROCA_DIAS;
+}
 
 export function precoFinal90(cents: number) {
   if (!Number.isSafeInteger(cents) || cents < 0) throw new Error("Preço inválido");

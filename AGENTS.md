@@ -28,6 +28,7 @@
 - Date correction uses fin_estorno_data_corrigir with expected date, reason, immutable snapshots and atomic settlement/movement updates; invalidate account/cashflow queries. Why: consistent dated balances and concurrency protection.
 - Person merges only via party_unificar after preview, all-or-nothing; preserve imported fiado/Asaas stage and moved ids in party_unificacoes. Why: traceable history/reversal.
 - Subfolders have their own AGENTS.md; read before editing there. Why: preserve scoped rules.
+- Consultant modules keep owner-scoped reads and paid-item after-sale snapshots; review never auto-moves stock or money. Why: preserve privacy and official engines.
 - pdv_como only follows real-user validation and audit_logs with real actor; never exposed by GRANT. Why: audit identifies the clicker.
 - Outside portfolio, representative sees only name/code/status/debt with restrito=true; blocked/departed consultants never move portfolio or reactivate through portal. Why: privacy and finance control.
 - With asaas_accounts.conta_cartao_receber_id set, payment settles there, then asaas_cartao_creditar transfers to Asaas on credit_date idempotently; empty preserves old behavior. Why: accurate card credit timing.

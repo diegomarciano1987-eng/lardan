@@ -631,6 +631,41 @@
       "when": 1792192426297,
       "tag": "0089_registry_duplicate_candidates_variaveis",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1792194148090,
+      "tag": "0090_consultora_pecas_busca_segura",
+      "breakpoints": true
+    },
+    {
+      "idx": 91,
+      "version": "7",
+      "when": 1792194333357,
+      "tag": "0091_consultora_historico_clientes",
+      "breakpoints": true
+    },
+    {
+      "idx": 92,
+      "version": "7",
+      "when": 1792194399687,
+      "tag": "0092_consultora_trocas_garantias_protocolos",
+      "breakpoints": true
+    },
+    {
+      "idx": 93,
+      "version": "7",
+      "when": 1792194437524,
+      "tag": "0093_consultora_pos_venda_fotos_privadas",
+      "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "7",
+      "when": 1792194594242,
+      "tag": "0094_consultora_pos_venda_prazo_oficial",
+      "breakpoints": true
     }
   ]
 }

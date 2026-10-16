@@ -73,6 +73,7 @@ import { Route as AuthenticatedAdminPerfilRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminPracasRouteImport } from './routes/_authenticated/admin/pracas'
 import { Route as AuthenticatedAdminRedeRouteImport } from './routes/_authenticated/admin/rede'
 import { Route as AuthenticatedAdminSiteRouteImport } from './routes/_authenticated/admin/site'
+import { Route as AuthenticatedAdminTrocasGarantiasRouteImport } from './routes/_authenticated/admin/trocas-garantias'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as ApiPublicGaConfigRouteImport } from './routes/api/public/ga-config'
 import { Route as ApiPublicIndexnowRouteImport } from './routes/api/public/indexnow'
@@ -463,6 +464,12 @@ const AuthenticatedAdminSiteRoute = AuthenticatedAdminSiteRouteImport.update({
   path: '/site',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminTrocasGarantiasRoute =
+  AuthenticatedAdminTrocasGarantiasRouteImport.update({
+    id: '/trocas-garantias',
+    path: '/trocas-garantias',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminUsuariosRoute =
   AuthenticatedAdminUsuariosRouteImport.update({
     id: '/usuarios',
@@ -833,6 +840,7 @@ export interface FileRoutesByFullPath {
   '/admin/pracas': typeof AuthenticatedAdminPracasRoute
   '/admin/rede': typeof AuthenticatedAdminRedeRoute
   '/admin/site': typeof AuthenticatedAdminSiteRoute
+  '/admin/trocas-garantias': typeof AuthenticatedAdminTrocasGarantiasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
   '/api/public/indexnow': typeof ApiPublicIndexnowRoute
@@ -948,6 +956,7 @@ export interface FileRoutesByTo {
   '/admin/pracas': typeof AuthenticatedAdminPracasRoute
   '/admin/rede': typeof AuthenticatedAdminRedeRoute
   '/admin/site': typeof AuthenticatedAdminSiteRoute
+  '/admin/trocas-garantias': typeof AuthenticatedAdminTrocasGarantiasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
   '/api/public/indexnow': typeof ApiPublicIndexnowRoute
@@ -1067,6 +1076,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/pracas': typeof AuthenticatedAdminPracasRoute
   '/_authenticated/admin/rede': typeof AuthenticatedAdminRedeRoute
   '/_authenticated/admin/site': typeof AuthenticatedAdminSiteRoute
+  '/_authenticated/admin/trocas-garantias': typeof AuthenticatedAdminTrocasGarantiasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
   '/api/public/indexnow': typeof ApiPublicIndexnowRoute
@@ -1186,6 +1196,7 @@ export interface FileRouteTypes {
     | '/admin/pracas'
     | '/admin/rede'
     | '/admin/site'
+    | '/admin/trocas-garantias'
     | '/admin/usuarios'
     | '/api/public/ga-config'
     | '/api/public/indexnow'
@@ -1301,6 +1312,7 @@ export interface FileRouteTypes {
     | '/admin/pracas'
     | '/admin/rede'
     | '/admin/site'
+    | '/admin/trocas-garantias'
     | '/admin/usuarios'
     | '/api/public/ga-config'
     | '/api/public/indexnow'
@@ -1419,6 +1431,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/pracas'
     | '/_authenticated/admin/rede'
     | '/_authenticated/admin/site'
+    | '/_authenticated/admin/trocas-garantias'
     | '/_authenticated/admin/usuarios'
     | '/api/public/ga-config'
     | '/api/public/indexnow'
@@ -1980,6 +1993,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSiteRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/trocas-garantias': {
+      id: '/_authenticated/admin/trocas-garantias'
+      path: '/trocas-garantias'
+      fullPath: '/admin/trocas-garantias'
+      preLoaderRoute: typeof AuthenticatedAdminTrocasGarantiasRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/usuarios': {
       id: '/_authenticated/admin/usuarios'
       path: '/usuarios'
@@ -2435,6 +2455,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminPracasRoute: typeof AuthenticatedAdminPracasRoute
   AuthenticatedAdminRedeRoute: typeof AuthenticatedAdminRedeRoute
   AuthenticatedAdminSiteRoute: typeof AuthenticatedAdminSiteRoute
+  AuthenticatedAdminTrocasGarantiasRoute: typeof AuthenticatedAdminTrocasGarantiasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminCadastrosCategoriasRoute: typeof AuthenticatedAdminCadastrosCategoriasRoute
@@ -2479,6 +2500,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminPracasRoute: AuthenticatedAdminPracasRoute,
     AuthenticatedAdminRedeRoute: AuthenticatedAdminRedeRoute,
     AuthenticatedAdminSiteRoute: AuthenticatedAdminSiteRoute,
+    AuthenticatedAdminTrocasGarantiasRoute:
+      AuthenticatedAdminTrocasGarantiasRoute,
     AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdminCadastrosCategoriasRoute:

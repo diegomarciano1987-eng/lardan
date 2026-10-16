@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { SmartSelect } from "@/components/premium/SmartSelect";
+import { LeitorEtiqueta } from "@/components/consultora/LeitorEtiqueta";
 import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
 import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
@@ -21,7 +23,7 @@ import { BotaoNovidades, CartaoNovidades, CentralAvisosProvider } from "@/compon
 import { brl, chaveIdempotencia, imagem, traduzir } from "@/lib/maletas";
 import {
   CANAL, carregarInicio, criarPedido, dataBR, formatarTelefone, hojeISO, linkWhats, listarAtendimentos, listarClientes,
-  meuParty, obterCliente, ETAPAS, historicoEtapas, linkInstagram, moverEtapa, pausarPessoa, rotuloEtapa, type Etapa, pecasDisponiveis, registrarAtendimento, salvarCliente, type Atendimento, type Cliente, type Peca,
+  meuParty, obterCliente, ETAPAS, historicoEtapas, linkInstagram, moverEtapa, pausarPessoa, rotuloEtapa, type Etapa, buscarPecas, registrarAtendimento, salvarCliente, type Atendimento, type Cliente, type Peca,
 } from "@/lib/consultora";
 
 export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "mais" | "novo";
@@ -640,11 +642,16 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
   const [resultado, setResultado] = React.useState<{ order_id: string; codigo: string; total_cents: number } | null>(null);
   const [buscaCliente, setBuscaCliente] = React.useState("");
   const [novaCliente, setNovaCliente] = React.useState(false);
+  const [categoria, setCategoria] = React.useState("");
+  const [banho, setBanho] = React.useState("");
+  const [selecionadas, setSelecionadas] = React.useState<Record<string, Peca>>({});
   const clientes = useQuery({ queryKey: ["consultora", "clientes", buscaCliente], queryFn: () => listarClientes(buscaCliente) });
-  const pecas = useQuery({ queryKey: ["consultora", "pecas"], queryFn: pecasDisponiveis });
-  const cl = clientes.data?.find((c) => c.id === cliente);
+  const opcoes = useQuery({ queryKey: ["consultora", "pecas", "opcoes"], queryFn: () => buscarPecas() });
+  const pecas = useQuery({ queryKey: ["consultora", "pecas", busca, categoria, banho], queryFn: () => buscarPecas(busca, categoria, banho) });
+  const clienteFicha = useQuery({ queryKey: ["consultora", "cliente", cliente], queryFn: () => cliente ? obterCliente(cliente) : Promise.resolve(null), enabled: !!cliente });
+  const cl = clienteFicha.data ?? clientes.data?.find((c) => c.id === cliente);
   const k = (p: Peca) => `${p.cycle_id}:${p.variant_id}`;
-  const escolhidas = (pecas.data ?? []).filter((p) => (qtd[k(p)] ?? 0) > 0);
+  const escolhidas = Object.values(selecionadas).filter((p) => (qtd[k(p)] ?? 0) > 0);
   const total = escolhidas.reduce((s, p) => s + p.preco_cents * (qtd[k(p)] ?? 0), 0);
   const unidades = escolhidas.reduce((s, p) => s + (qtd[k(p)] ?? 0), 0);
 
@@ -659,6 +666,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
 
   const ETAPAS = ["Cliente", "Peças", "Revisão"];
   const voltar = () => (passo > 1 && passo < 4 ? setPasso((passo - 1) as 1 | 2 | 3) : ir(cliente && clienteInicial ? { aba: "clientes", id: cliente } : { aba: "inicio" }));
+  const lerEtiqueta = React.useCallback((codigo: string) => { setBusca(codigo); setCategoria(""); setBanho(""); }, []);
 
   if (novaCliente) return <FormCliente ir={() => setNovaCliente(false)} depois={(id) => { setNovaCliente(false); setCliente(id); setPasso(2); }} />;
 
@@ -711,13 +719,18 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
         <div className="space-y-4 pb-28 lg:pb-0">
           <h2 className="text-xl font-semibold">Escolha as peças da sua maleta</h2>
           <input type="search" className="admin-input min-h-14 rounded-2xl text-[1.05rem]" placeholder="Buscar peça" value={busca} onChange={(e) => setBusca(e.target.value)} aria-label="Buscar peça" />
+          <div className="grid gap-3 sm:grid-cols-3">
+            <SmartSelect value={categoria} onChange={setCategoria} placeholder="Categoria" options={[{ value: "", label: "Todas as categorias" }, ...Array.from(new Set((opcoes.data ?? []).map((p) => p.categoria).filter((c): c is string => !!c))).map((c) => ({ value: c, label: c }))]} />
+            <SmartSelect value={banho} onChange={setBanho} placeholder="Banho" options={[{ value: "", label: "Todos os banhos" }, ...Array.from(new Set((opcoes.data ?? []).map((p) => p.banho).filter((c): c is string => !!c))).map((c) => ({ value: c, label: c }))]} />
+            <LeitorEtiqueta encontrado={lerEtiqueta} />
+          </div>
           {pecas.isLoading && <Estado tipo="carregando" texto="Carregando peças…" />}
           {pecas.isError && <Estado tipo="erro" texto="Não foi possível carregar as peças." acao={<button className="admin-btn" onClick={() => pecas.refetch()}>Tentar de novo</button>} />}
           {pecas.data?.length === 0 && <Estado tipo="vazio" texto="Você não tem peças disponíveis. Os pedidos usam as peças de uma maleta recebida e conferida." />}
           <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {(pecas.data ?? []).filter((p) => semAcento(`${p.produto} ${p.variante ?? ""}`).includes(semAcento(busca))).map((p) => {
+            {(pecas.data ?? []).map((p) => {
               const n = qtd[k(p)] ?? 0;
-              const set = (v: number) => setQtd((q) => ({ ...q, [k(p)]: Math.max(0, Math.min(p.disponivel, v)) }));
+              const set = (v: number) => { setSelecionadas((s) => ({ ...s, [k(p)]: p })); setQtd((q) => ({ ...q, [k(p)]: Math.max(0, Math.min(p.disponivel, v)) })); };
               return (
                 <li key={k(p)} className={`flex gap-3 rounded-2xl border bg-card p-3 ${n > 0 ? "border-primary" : "border-border"}`}>
                   <FotoAmpliavel mediaId={p.media_id} variantId={p.variant_id} nome={p.produto} />
@@ -736,7 +749,8 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
               );
             })}
           </ul>
-          {(pecas.data?.length ?? 0) > 0 && <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur lg:static lg:rounded-2xl lg:border">
+          {escolhidas.some((p) => p.collection_id) && <section className="border-t border-border pt-4"><h3 className="mb-3 text-xl font-semibold">Combina com</h3><div className="flex flex-wrap gap-3">{(opcoes.data ?? []).filter((p) => !qtd[k(p)] && p.collection_id && escolhidas.some((e) => e.collection_id === p.collection_id && e.categoria !== p.categoria)).slice(0, 3).map((p) => <Button key={k(p)} variant="outline" className="h-auto min-h-12" onClick={() => { setSelecionadas((s) => ({ ...s, [k(p)]: p })); setQtd((s) => ({ ...s, [k(p)]: 1 })); }}>{p.produto} · {brl(p.preco_cents)} · Adicionar</Button>)}</div></section>}
+          {(opcoes.data?.length ?? 0) > 0 && <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur lg:static lg:rounded-2xl lg:border">
             <div className="mx-auto flex max-w-5xl items-center gap-3">
               <p className="min-w-0 flex-1 text-[1.02rem]">{unidades === 0 && <span className="block">Escolha pelo menos 1 peça</span>}<strong>{unidades}</strong> peça{unidades === 1 ? "" : "s"} · <strong>{brl(total)}</strong></p>
               <button type="button" className="btn-app-principal" onClick={() => unidades ? setPasso(3) : toast.info("Escolha pelo menos 1 peça.")}>Revisar pedido</button>

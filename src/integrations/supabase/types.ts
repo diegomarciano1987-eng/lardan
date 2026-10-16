@@ -12273,6 +12273,11 @@ export type Database = {
           vence_em: string
         }[]
       }
+      cob_lote_candidatos: { Args: never; Returns: Json }
+      cob_lote_registrar: {
+        Args: { _forma: string; _resultado: Json }
+        Returns: undefined
+      }
       cob_mover_etapa: {
         Args: { _etapa: string; _party: string; _responsavel?: string }
         Returns: undefined

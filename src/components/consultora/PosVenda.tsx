@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { detalhePedido, traduzir } from "@/lib/maletas";
-import { dentroPrazoTroca, fimGarantia } from "@/lib/consultora-regras";
 
 export function AbrirPosVenda({ pedido }: { pedido: string }) {
   const [aberto, setAberto] = React.useState(false);
@@ -15,6 +14,7 @@ export function AbrirPosVenda({ pedido }: { pedido: string }) {
 function Formulario({ pedido }: { pedido: string }) {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["consultora", "pedido", pedido], queryFn: () => detalhePedido(pedido) });
+  const prazo = useQuery({ queryKey: ["consultora", "pos-venda-prazo", pedido], queryFn: async () => { const { data, error } = await supabase.rpc("consultora_pos_venda_prazo", { _order: pedido }); if (error) throw error; return data as { compra_em: string; hoje: string; troca_ate: string; garantia_ate: string } | null; } });
   const [passo, setPasso] = React.useState(1);
   const [item, setItem] = React.useState("");
   const [tipo, setTipo] = React.useState("troca");
@@ -25,9 +25,9 @@ function Formulario({ pedido }: { pedido: string }) {
   const [excecao, setExcecao] = React.useState(false);
   const [protocolo, setProtocolo] = React.useState("");
   const [chave] = React.useState(() => crypto.randomUUID());
-  const compra = q.data?.pedido.created_at.slice(0, 10) ?? "";
-  const hoje = new Date().toISOString().slice(0, 10);
-  const dentro = compra ? tipo === "troca" ? dentroPrazoTroca(compra, hoje) : hoje <= fimGarantia(compra) : false;
+  const compra = prazo.data?.compra_em ?? "";
+  const hoje = prazo.data?.hoje ?? "";
+  const dentro = !!prazo.data && hoje >= compra && hoje <= (tipo === "troca" ? prazo.data.troca_ate : prazo.data.garantia_ate);
   const m = useMutation({ mutationFn: async () => {
     const { data: auth, error: authErro } = await supabase.auth.getUser();
     if (authErro || !auth.user) throw new Error("Entre novamente para continuar.");
@@ -43,8 +43,8 @@ function Formulario({ pedido }: { pedido: string }) {
     const { data, error } = await supabase.rpc("consultora_pos_venda_abrir", { _item: item, _tipo: tipo, _motivo: motivo, _observacao: obs, _solucao: solucao, _fotos: paths, _excecao: excecao, _chave: chave });
     if (error) throw error; return data as { protocolo?: string };
   }, onSuccess: (r) => { setProtocolo(r.protocolo ?? ""); void qc.invalidateQueries({ queryKey: ["consultora", "pos-venda"] }); }, onError: (e) => toast.error(traduzir(e)) });
-  if (q.isLoading) return <p>Carregando compra…</p>;
-  if (q.isError) return <p role="alert">{traduzir(q.error)}</p>;
+  if (q.isLoading || prazo.isLoading) return <p>Carregando compra…</p>;
+  if (q.isError || prazo.isError || !prazo.data) return <p role="alert">Não foi possível conferir a compra e o prazo.</p>;
   if (protocolo) return <div role="status" className="py-6 text-center"><h3 className="text-2xl font-semibold">Solicitação enviada</h3><p className="mt-3 text-xl">{protocolo}</p><p className="mt-3">Aguardando análise da Lardan. Nenhum crédito ou troca de estoque foi feito.</p></div>;
   return <div className="space-y-4"><p className="font-semibold">Etapa {passo} de 4</p>
     {passo === 1 && <><h3 className="text-xl">Qual peça?</h3><SmartSelect value={item} onChange={setItem} placeholder="Escolha a peça comprada" options={(q.data?.itens ?? []).map((i) => ({ value: i.id, label: `${i.quantity}× ${i.product_name}` }))} /><p>Compra registrada em {compra ? new Date(compra + "T12:00:00").toLocaleDateString("pt-BR") : "—"}</p></>}

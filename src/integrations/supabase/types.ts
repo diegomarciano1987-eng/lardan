@@ -12645,6 +12645,10 @@ export type Database = {
         Args: { _doc: string; _forma: string; _order: string; _venc: string }
         Returns: Json
       }
+      consultora_pecas_buscar: {
+        Args: { _banho?: string; _busca?: string; _categoria?: string }
+        Returns: Json
+      }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string

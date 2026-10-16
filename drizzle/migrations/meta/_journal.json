@@ -631,6 +631,13 @@
       "when": 1792192426297,
       "tag": "0089_registry_duplicate_candidates_variaveis",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1792194148090,
+      "tag": "0090_consultora_pecas_busca_segura",
+      "breakpoints": true
     }
   ]
 }

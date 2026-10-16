@@ -6949,6 +6949,7 @@ export type Database = {
           quantity_total: number
           received_at: string | null
           reference_total_cents: number
+          remessa_id: string | null
           representante_party_id: string | null
           settlement_started_at: string | null
           shipped_at: string | null
@@ -6975,6 +6976,7 @@ export type Database = {
           quantity_total?: number
           received_at?: string | null
           reference_total_cents?: number
+          remessa_id?: string | null
           representante_party_id?: string | null
           settlement_started_at?: string | null
           shipped_at?: string | null
@@ -7001,6 +7003,7 @@ export type Database = {
           quantity_total?: number
           received_at?: string | null
           reference_total_cents?: number
+          remessa_id?: string | null
           representante_party_id?: string | null
           settlement_started_at?: string | null
           shipped_at?: string | null
@@ -7063,6 +7066,13 @@ export type Database = {
             columns: ["origin_location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "remessas"
             referencedColumns: ["id"]
           },
           {
@@ -10464,6 +10474,80 @@ export type Database = {
         }
         Relationships: []
       }
+      remessas: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_acerto: string | null
+          data_emissao: string
+          id: string
+          numero: number
+          observacoes: string | null
+          origin_location_id: string | null
+          praca_id: string
+          representante_party_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_acerto?: string | null
+          data_emissao?: string
+          id?: string
+          numero: number
+          observacoes?: string | null
+          origin_location_id?: string | null
+          praca_id: string
+          representante_party_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_acerto?: string | null
+          data_emissao?: string
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          origin_location_id?: string | null
+          praca_id?: string
+          representante_party_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remessas_origin_location_id_fkey"
+            columns: ["origin_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessas_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessas_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessas_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       rep_crm_cards: {
         Row: {
           etapa_id: string | null
@@ -13846,6 +13930,44 @@ export type Database = {
         }
         Returns: Json
       }
+      remessa_abrir_maleta: {
+        Args: { _consultora: string; _remessa: string }
+        Returns: Json
+      }
+      remessa_atualizar: {
+        Args: {
+          _data_acerto: string
+          _id: string
+          _observacoes: string
+          _representante: string
+          _status: string
+        }
+        Returns: undefined
+      }
+      remessa_criar: {
+        Args: {
+          _data_acerto?: string
+          _data_emissao?: string
+          _deposito?: string
+          _numero?: number
+          _observacoes?: string
+          _praca: string
+          _representante?: string
+        }
+        Returns: Json
+      }
+      remessa_maletas: {
+        Args: { _remessa: string }
+        Returns: {
+          consultora: string
+          consultora_party_id: string
+          created_at: string
+          cycle_id: string
+          pecas: number
+          status: string
+          valor_cents: number
+        }[]
+      }
       remessa_parametros_salvar: {
         Args: {
           _meta_aneis: number
@@ -13855,6 +13977,24 @@ export type Database = {
           _pecas_cliente_nova: number
         }
         Returns: undefined
+      }
+      remessas_lista: {
+        Args: { _status?: string }
+        Returns: {
+          consultoras_praca: number
+          data_acerto: string
+          data_emissao: string
+          id: string
+          maletas: number
+          maletas_conferidas: number
+          numero: number
+          pecas: number
+          praca: string
+          praca_id: string
+          representante: string
+          status: string
+          valor_cents: number
+        }[]
       }
       rep_asaas_preparar: {
         Args: { _actor: string; _payload: Json; _rep_user: string }

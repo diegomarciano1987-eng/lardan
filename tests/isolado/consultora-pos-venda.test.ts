@@ -6,7 +6,7 @@ beforeAll(async () => {
  eu=await criarConta({nome:"posvenda",papeis:["consultora"],comParty:true}); outra=await criarConta({nome:"posvenda-outra",papeis:["consultora"],comParty:true}); qualidade=await criarConta({nome:"posvenda-qualidade",papeis:["qualidade"]});
  const v=await criarVariante("posvenda",7990);
  const rows=await adm.unsafe("insert into public.sales_orders(consultora_party_id,customer_name,subtotal_cents,status,payment_status,created_at,pay_paid_at) values($1,'ISO Cliente',7990,'concluido','pago',now()-interval '100 days',now()-interval '45 days') returning id",[eu.partyId]); order=rows[0].id;
- const itens=await adm.unsafe("insert into public.sales_order_items(order_id,variant_id,quantity,unit_price_cents) values($1,$2,1,7990) returning id",[order,v]); item=itens[0].id;
+ const itens=await adm.unsafe("insert into public.sales_order_items(order_id,variant_id,product_name,quantity,unit_price_cents) values($1,$2,'ISO Peça pós-venda',1,7990) returning id",[order,v]); item=itens[0].id;
 });
 describe("Pós-venda protegido e auditado",()=>{
  test("prazo de 45 dias usa pagamento e não criação de 100 dias",async()=>{const r=await rpc<{compra_em:string;troca_ate:string;hoje:string}>(eu,"consultora_pos_venda_prazo",{_order:order});expect(r.ok).toBe(true);expect(r.dados.troca_ate).toBe(r.dados.hoje);});

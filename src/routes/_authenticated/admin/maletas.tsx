@@ -143,6 +143,21 @@ function NovaMaleta({ aoCriar }: { aoCriar: (cycleId: string) => void }) {
     <Panel title="Nova maleta" className="w-full">
       <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-1.5 text-sm">
+          <span className="ledger-eyebrow">Praça da remessa</span>
+          <SmartSelect
+            value={praca}
+            onChange={(v) => {
+              setPraca(v);
+              setConsultora("");
+            }}
+            options={pracas.data ?? []}
+            placeholder="Todas as praças"
+          />
+          <span className="text-xs text-ledger-muted">
+            Escolhendo a praça, só as consultoras dela aparecem na montagem.
+          </span>
+        </label>
+        <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Consultora</span>
           <SmartSelect
             value={consultora}

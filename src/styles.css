@@ -808,31 +808,41 @@
 /* Área da consultora: pensada para celular e leitura confortável.
    Toque mínimo 48px, ação principal 52px+, texto nunca abaixo de ~15px. */
 .area-consultora {
-  font-size: 1rem;
+  font-size: 1.125rem;
+  --consultora-texto: 1.125rem;
 }
+.area-consultora.letra-grande { --consultora-texto: 1.35rem; }
+.area-consultora :is(p, label, dt, small, input, textarea, button, a, summary) {
+  font-size: max(var(--consultora-texto), 1em);
+  overflow-wrap: anywhere;
+}
+.area-consultora.letra-grande :is(h1, h2, h3) { font-size: 1.2em; }
+.area-consultora.letra-grande nav button { min-height: 5.25rem; }
+.area-consultora :is(.text-muted-foreground, .text-ledger-muted) { color: var(--foreground); opacity: 0.82; }
+.area-consultora button { white-space: normal; }
 .area-consultora .admin-btn,
 .area-consultora button.admin-btn {
   min-height: 3rem;
-  font-size: 0.95rem;
+  font-size: var(--consultora-texto);
 }
 .area-consultora .admin-btn-primary {
   min-height: 3.375rem;
-  font-size: 0.85rem;
+  font-size: var(--consultora-texto);
 }
 .area-consultora .text-xs,
 .area-consultora .text-\[0\.7rem\],
 .area-consultora .text-\[11px\],
 .area-consultora .text-\[10px\] {
-  font-size: 0.875rem;
+  font-size: var(--consultora-texto);
   line-height: 1.35;
 }
 .area-consultora .text-sm {
-  font-size: 0.95rem;
+  font-size: var(--consultora-texto);
 }
 .area-consultora input,
 .area-consultora textarea,
 .area-consultora select {
-  font-size: max(1rem, 16px);
+  font-size: var(--consultora-texto);
 }
 .area-consultora input[type="checkbox"],
 .area-consultora input[type="radio"] {

@@ -27,6 +27,7 @@ import { Route as ComoComecarAVenderSemijoiasRouteImport } from './routes/como-c
 import { Route as ComoCuidarDeSemijoiasRouteImport } from './routes/como-cuidar-de-semijoias'
 import { Route as ComoVenderSemijoiasPeloWhatsappRouteImport } from './routes/como-vender-semijoias-pelo-whatsapp'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as CuidadosRouteImport } from './routes/cuidados'
 import { Route as EquipeRouteImport } from './routes/equipe'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LojaRouteImport } from './routes/loja'
@@ -214,6 +215,11 @@ const ComoVenderSemijoiasPeloWhatsappRoute =
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CuidadosRoute = CuidadosRouteImport.update({
+  id: '/cuidados',
+  path: '/cuidados',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EquipeRoute = EquipeRouteImport.update({
@@ -782,6 +788,7 @@ export interface FileRoutesByFullPath {
   '/como-cuidar-de-semijoias': typeof ComoCuidarDeSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
+  '/cuidados': typeof CuidadosRoute
   '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/loja': typeof LojaRoute
@@ -898,6 +905,7 @@ export interface FileRoutesByTo {
   '/como-cuidar-de-semijoias': typeof ComoCuidarDeSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
+  '/cuidados': typeof CuidadosRoute
   '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/loja': typeof LojaRoute
@@ -1014,6 +1022,7 @@ export interface FileRoutesById {
   '/como-cuidar-de-semijoias': typeof ComoCuidarDeSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
   '/contato': typeof ContatoRoute
+  '/cuidados': typeof CuidadosRoute
   '/equipe': typeof EquipeRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/loja': typeof LojaRoute
@@ -1132,6 +1141,7 @@ export interface FileRouteTypes {
     | '/como-cuidar-de-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
+    | '/cuidados'
     | '/equipe'
     | '/llms.txt'
     | '/loja'
@@ -1248,6 +1258,7 @@ export interface FileRouteTypes {
     | '/como-cuidar-de-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
+    | '/cuidados'
     | '/equipe'
     | '/llms.txt'
     | '/loja'
@@ -1363,6 +1374,7 @@ export interface FileRouteTypes {
     | '/como-cuidar-de-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
     | '/contato'
+    | '/cuidados'
     | '/equipe'
     | '/llms.txt'
     | '/loja'
@@ -1481,6 +1493,7 @@ export interface RootRouteChildren {
   ComoCuidarDeSemijoiasRoute: typeof ComoCuidarDeSemijoiasRoute
   ComoVenderSemijoiasPeloWhatsappRoute: typeof ComoVenderSemijoiasPeloWhatsappRoute
   ContatoRoute: typeof ContatoRoute
+  CuidadosRoute: typeof CuidadosRoute
   EquipeRoute: typeof EquipeRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   LojaRoute: typeof LojaRoute
@@ -1643,6 +1656,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cuidados': {
+      id: '/cuidados'
+      path: '/cuidados'
+      fullPath: '/cuidados'
+      preLoaderRoute: typeof CuidadosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/equipe': {
@@ -2542,6 +2562,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComoCuidarDeSemijoiasRoute: ComoCuidarDeSemijoiasRoute,
   ComoVenderSemijoiasPeloWhatsappRoute: ComoVenderSemijoiasPeloWhatsappRoute,
   ContatoRoute: ContatoRoute,
+  CuidadosRoute: CuidadosRoute,
   EquipeRoute: EquipeRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   LojaRoute: LojaRoute,

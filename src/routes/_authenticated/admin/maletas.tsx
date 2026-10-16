@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/admin/maletas")({
   component: MaletasPage,
   head: () => ({
     meta: [
-      { title: "Maletas — Administração LARDAN" },
+      { title: "Remessas — Administração LARDAN" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -51,6 +51,30 @@ async function buscarPessoas(papel: "consultora" | "representante", termo: strin
   };
 }
 
+async function buscarPracas() {
+  const { data, error } = await supabase
+    .from("cob_pracas")
+    .select("id, nome")
+    .eq("ativo", true)
+    .order("nome");
+  if (error) throw error;
+  return (data ?? []).map((p) => ({ value: p.id as string, label: p.nome as string }));
+}
+
+/** Consultoras da praça da remessa: só elas aparecem na montagem. */
+async function buscarConsultorasPraca(pracaId: string, termo: string) {
+  const { data, error } = await supabase.rpc("praca_consultoras" as never, {
+    _praca: pracaId,
+    _search: termo.trim() || null,
+  } as never);
+  if (error) throw error;
+  const linhas = (data ?? []) as unknown as { party_id: string; display_name: string }[];
+  return {
+    total: linhas.length,
+    opcoes: linhas.map((p) => ({ value: p.party_id, label: p.display_name })),
+  };
+}
+
 async function buscarDepositos() {
   const { data, error } = await supabase
     .from("locations")
@@ -64,6 +88,7 @@ async function buscarDepositos() {
 
 function NovaMaleta({ aoCriar }: { aoCriar: (cycleId: string) => void }) {
   const [aberto, setAberto] = React.useState(false);
+  const [praca, setPraca] = React.useState("");
   const [consultora, setConsultora] = React.useState("");
   const [representante, setRepresentante] = React.useState("");
   const [deposito, setDeposito] = React.useState("");
@@ -71,9 +96,12 @@ function NovaMaleta({ aoCriar }: { aoCriar: (cycleId: string) => void }) {
   const [buscaC, setBuscaC] = React.useState("");
   const [buscaR, setBuscaR] = React.useState("");
 
+  const pracas = useQuery({ queryKey: ["maletas", "pracas"], queryFn: buscarPracas, enabled: aberto });
+
   const consultoras = useQuery({
-    queryKey: ["maletas", "pessoas", "consultora", buscaC],
-    queryFn: () => buscarPessoas("consultora", buscaC),
+    queryKey: ["maletas", "pessoas", "consultora", praca || "todas", buscaC],
+    queryFn: () =>
+      praca ? buscarConsultorasPraca(praca, buscaC) : buscarPessoas("consultora", buscaC),
     enabled: aberto,
   });
   const representantes = useQuery({
@@ -114,6 +142,21 @@ function NovaMaleta({ aoCriar }: { aoCriar: (cycleId: string) => void }) {
   return (
     <Panel title="Nova maleta" className="w-full">
       <div className="grid gap-4 md:grid-cols-2">
+        <label className="grid gap-1.5 text-sm">
+          <span className="ledger-eyebrow">Praça da remessa</span>
+          <SmartSelect
+            value={praca}
+            onChange={(v) => {
+              setPraca(v);
+              setConsultora("");
+            }}
+            options={pracas.data ?? []}
+            placeholder="Todas as praças"
+          />
+          <span className="text-xs text-ledger-muted">
+            Escolhendo a praça, só as consultoras dela aparecem na montagem.
+          </span>
+        </label>
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Consultora</span>
           <SmartSelect
@@ -251,8 +294,8 @@ function MaletasPage() {
     <div className="space-y-8">
       <PageHeader
         eyebrow="Núcleo comercial"
-        title="Maletas"
-        description="Montagem, conferência, expedição, cadeia de custódia e aceite. Todas as ações usam as regras transacionais do banco."
+        title="Remessas"
+        description="Remessas por praça: montagem, conferência, expedição, cadeia de custódia e aceite das maletas. Todas as ações usam as regras transacionais do banco."
         actions={
           <div className="flex flex-wrap gap-2">
             {caps.includes("stock.operate") && (

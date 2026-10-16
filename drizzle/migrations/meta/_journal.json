@@ -554,6 +554,34 @@
       "when": 1792173793270,
       "tag": "0078_fin_conta_azul_ajustes",
       "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1792175008176,
+      "tag": "0079_remessas_pracas_parametros",
+      "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1792175134241,
+      "tag": "0080_kit_consultora_doc_impressao",
+      "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1792175156984,
+      "tag": "0081_kit_consultora_doc_fix_colunas",
+      "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1792175341037,
+      "tag": "0082_remessa_parametros_salvar",
+      "breakpoints": true
     }
   ]
 }

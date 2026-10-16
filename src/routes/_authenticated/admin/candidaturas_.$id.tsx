@@ -62,6 +62,11 @@ export const Route = createFileRoute("/_authenticated/admin/candidaturas_/$id")(
   head: () => ({
     meta: [
       { title: "Ficha da candidata — Lardan Cloud" },
+      { name: "description", content: "Cadastro, acompanhamento e histórico da candidata LARDAN." },
+      { property: "og:title", content: "Ficha da candidata — Lardan Cloud" },
+      { property: "og:description", content: "Cadastro, acompanhamento e histórico da candidata LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

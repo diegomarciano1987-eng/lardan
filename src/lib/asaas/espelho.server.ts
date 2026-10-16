@@ -105,7 +105,7 @@ export async function executarSyncAsaas(p: { actor: string; de: string; ate: str
           const { data } = await supabaseAdmin.from(tabela as never).select(coluna)
             .eq("account_id", CONTA_PRODUCAO as never).not(coluna, "is", null).range(de, de + 999);
           const linhas = (data ?? []) as unknown as Record<string, string>[];
-          out.push(...linhas.map((x) => x[coluna]!));
+          out.push(...linhas.flatMap((x) => typeof x[coluna] === "string" ? [x[coluna]] : []));
           if (linhas.length < 1000) break;
         }
         return out;

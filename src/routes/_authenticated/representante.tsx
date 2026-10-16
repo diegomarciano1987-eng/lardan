@@ -33,6 +33,10 @@ export const Route = createFileRoute("/_authenticated/representante")({
     meta: [
       { title: "Área do representante — LARDAN" },
       { name: "description", content: "Área do representante LARDAN." },
+      { property: "og:title", content: "Área do representante — LARDAN" },
+      { property: "og:description", content: "Área do representante LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
       { name: "theme-color", content: "#1c1614" },
       { name: "mobile-web-app-capable", content: "yes" },

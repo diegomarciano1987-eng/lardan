@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, expect, test } from 'bun:test';
+import { beforeAll, expect, test } from 'bun:test';
 import { adm, criarConta, criarDeposito, criarVariante, porEstoque, rpcServico, rpc, saldo } from './base';
 
 let ator = ''; let origem = ''; let variante = ''; let plano: Record<string, unknown>[] = [];
@@ -20,7 +20,6 @@ beforeAll(async () => {
     plano.push({cycle_id:id,code,status:'transito',pieces:i<5?4:0});
   }
 });
-afterAll(async () => { await adm.close(); });
 const executar = (p=plano, run=true, key=chave) => rpcServico<{cycles:number;pieces:number;repetida?:boolean}>('kit_testes_cancelar',{
   _plano:p,_ator:ator,_motivo:motivo,_chave:key,_executar:run,
 });

@@ -648,10 +648,22 @@ function Bancada({
             <p className="ledger-eyebrow">Classificação para o DRE</p>
             <p className="mt-1 mb-3 text-xs text-ledger-muted">
               {modo === "existente"
-                ? "Opcional: o que for escolhido aqui atualiza o título vinculado, com registro no histórico."
+                ? "Classificação do título vinculado."
                 : "O lançamento nasce já classificado. O que ficar em branco aparece como pendente de classificação."}
             </p>
-            <div className="grid gap-3 sm:grid-cols-2">
+            {modo === "existente" ? (
+              <div className="space-y-2">
+                {classificacoesVinculadas.isFetching ? <p className="text-sm text-ledger-muted">Carregando classificação…</p> : null}
+                {classificacoesVinculadas.error ? <p className="text-sm text-destructive">Não foi possível ler a classificação.</p> : null}
+                {(classificacoesVinculadas.data ?? []).map((t, i) => (
+                  <div key={`${t.title_id}-${i}`} className="border-b border-line-soft py-2 text-sm text-ledger-text">
+                    <p className="font-semibold">{bandeja[i]?.c.titulo}</p>
+                    <p>Conta contábil: {classes.data?.planos.find((p) => p.id === t.chart_account_id)?.codigo} · {classes.data?.planos.find((p) => p.id === t.chart_account_id)?.nome ?? "Pendente de classificação"}</p>
+                    <p>Centro de custo: {centros.data?.find((c) => c.id === t.cost_center_id)?.nome ?? "Pendente de classificação"}</p>
+                  </div>
+                ))}
+              </div>
+            ) : <div className="grid gap-3 sm:grid-cols-2">
               {modo === "novo" && (
                 <div className="sm:col-span-2">
                   <Rotulo>{saida ? "Pago para" : "Recebido de"} (obrigatório)</Rotulo>
@@ -704,7 +716,7 @@ function Bancada({
                   placeholder="Não informada"
                 />
               </div>
-            </div>
+            </div>}
 
             <p className="ledger-eyebrow mt-5">Informações complementares</p>
             <div className="mt-2 grid gap-3 sm:grid-cols-2">

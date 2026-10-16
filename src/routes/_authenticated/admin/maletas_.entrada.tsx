@@ -287,14 +287,31 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
     await recarregar();
   }
 
-  function enviar(e: React.FormEvent) {
-    e.preventDefault();
-    const cod = codigo.trim();
+  function lancar(cod: string) {
     setCodigo("");
+    setTermo("");
     if (!cod || !aberta) return;
     setPendentes((n) => n + 1);
     fila.current = fila.current.then(() => processar(cod)).finally(() => setPendentes((n) => n - 1));
+    campo.current?.focus();
   }
+
+  function enviar(e: React.FormEvent) {
+    e.preventDefault();
+    const txt = codigo.trim();
+    // Digitou nome: Enter lança a primeira sugestão.
+    if (/[a-zA-ZÀ-ú]/.test(txt) && /\s/.test(txt) && sugestoes.data?.length === 1) {
+      lancar(sugestoes.data[0].codigo);
+      return;
+    }
+    if (/[a-zA-ZÀ-ú]/.test(txt) && txt.includes(" ")) return; // nome: escolha na lista
+    lancar(txt);
+  }
+
+  const ultimaFoto = React.useMemo(
+    () => detalhe.data?.leituras.find((l) => !l.estornada),
+    [detalhe.data],
+  );
 
   const desfazer = useMutation({
     mutationFn: (item: string) => rpc("kit_entrada_desfazer", { _item: item }),

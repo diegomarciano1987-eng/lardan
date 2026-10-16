@@ -287,6 +287,7 @@ const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, 
 export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
   const busca = nav.q ?? "";
   const q = useQuery({ queryKey: ["consultora", "clientes", busca], queryFn: () => listarClientes(busca) });
+  const resumos = useQuery({ queryKey: ["consultora", "clientes-resumo"], queryFn: async () => { const { data, error } = await supabase.rpc("consultora_clientes_resumo"); if (error) throw error; return data as unknown as { client_id: string; pedidos_abertos: number }[]; } });
   const lista = q.data ?? [];
   const ativas = lista.filter((c) => !c.encerrada);
   const pausadas = lista.filter((c) => c.encerrada);
@@ -339,7 +340,7 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
                   {on && (
                     <ul className="space-y-2 px-3 pb-3">
                       {g.itens.length === 0 && <li className="px-2 py-3 text-[1rem] text-muted-foreground">Ninguém nesta etapa.</li>}
-                      {g.itens.map((c) => <li key={c.id} className="min-w-0"><CartaoPessoa c={c} onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}
+              {g.itens.map((c) => <li key={c.id} className="min-w-0"><CartaoPessoa c={c} pedidos={resumos.data?.find((r) => r.client_id === c.id)?.pedidos_abertos} onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}
                     </ul>
                   )}
                 </section>
@@ -354,7 +355,7 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
                   <span className="truncate">{g.rotulo}</span><span className="rounded-full bg-card px-2.5 text-base text-primary">{g.itens.length}</span>
                 </h2>
                 <ul className="space-y-2">
-                  {g.itens.map((c) => <li key={c.id}><CartaoPessoa c={c} compacto onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}
+                  {g.itens.map((c) => <li key={c.id}><CartaoPessoa c={c} pedidos={resumos.data?.find((r) => r.client_id === c.id)?.pedidos_abertos} compacto onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}
                   {g.itens.length === 0 && <li className="px-1 text-[0.98rem] text-muted-foreground">Ninguém aqui.</li>}
                 </ul>
               </section>
@@ -372,7 +373,7 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
   );
 }
 
-function CartaoPessoa({ c, onAbrir, compacto }: { c: Cliente; onAbrir: () => void; compacto?: boolean }) {
+function CartaoPessoa({ c, onAbrir, compacto, pedidos }: { c: Cliente; onAbrir: () => void; compacto?: boolean; pedidos?: number }) {
   const hoje = hojeISO();
   const atrasado = c.proximo_retorno && c.proximo_retorno < hoje;
   const ehHoje = c.proximo_retorno === hoje;
@@ -381,6 +382,7 @@ function CartaoPessoa({ c, onAbrir, compacto }: { c: Cliente; onAbrir: () => voi
       {!compacto && <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/12 text-lg font-semibold text-primary" aria-hidden>{c.nome.trim().slice(0, 1).toUpperCase()}</span>}
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[1.05rem] font-semibold">{c.nome}</span>
+        {!!pedidos && <span className="block font-semibold">{pedidos} {pedidos === 1 ? "pedido em aberto" : "pedidos em aberto"}</span>}
         <span className={`block text-[0.95rem] ${atrasado ? "font-medium text-destructive" : "text-muted-foreground"}`}>
           {c.proximo_retorno ? (atrasado ? `⚠ Retorno atrasado: ${dataBR(c.proximo_retorno)}` : ehHoje ? "Retorno hoje" : `Retorno: ${dataBR(c.proximo_retorno)}`) : "Sem retorno agendado"}
         </span>
@@ -670,7 +672,15 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
 
   const ETAPAS = ["Cliente", "Peças", "Revisão"];
   const voltar = () => (passo > 1 && passo < 4 ? setPasso((passo - 1) as 1 | 2 | 3) : ir(cliente && clienteInicial ? { aba: "clientes", id: cliente } : { aba: "inicio" }));
-  const lerEtiqueta = React.useCallback((codigo: string) => { setBusca(codigo); setCategoria(""); setBanho(""); }, []);
+  const lerEtiqueta = React.useCallback((codigo: string) => {
+    setBusca(codigo); setCategoria(""); setBanho("");
+    void buscarPecas(codigo).then((lista) => {
+      const exatas = lista.filter((p) => [p.barcode, p.sku, p.internal_code].some((v) => v?.toLowerCase() === codigo.toLowerCase()));
+      if (exatas.length !== 1) { toast.info(exatas.length ? "Mais de uma peça corresponde à etiqueta. Escolha na lista." : "Confira as peças encontradas para esta etiqueta."); return; }
+      const p = exatas[0]; if (!p) return; const key = `${p.cycle_id}:${p.variant_id}`;
+      setSelecionadas((s) => ({ ...s, [key]: p })); setQtd((s) => ({ ...s, [key]: Math.min(p.disponivel, (s[key] ?? 0) + 1) })); toast.success("Peça adicionada.");
+    }).catch((e) => toast.error(traduzir(e)));
+  }, []);
 
   if (novaCliente) return <FormCliente ir={() => setNovaCliente(false)} depois={(id) => { setNovaCliente(false); setCliente(id); setPasso(2); }} />;
 

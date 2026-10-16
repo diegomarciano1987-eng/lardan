@@ -498,6 +498,13 @@
       "when": 1792168752167,
       "tag": "0070_cob_regua_respeita_followup_e_backfill_extrato",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1792169210980,
+      "tag": "0071_cob_etapa2_acordo_editavel_cadastro_comprovante",
+      "breakpoints": true
     }
   ]
 }

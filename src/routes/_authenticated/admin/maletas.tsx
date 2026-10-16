@@ -294,8 +294,8 @@ function MaletasPage() {
     <div className="space-y-8">
       <PageHeader
         eyebrow="Núcleo comercial"
-        title="Maletas"
-        description="Montagem, conferência, expedição, cadeia de custódia e aceite. Todas as ações usam as regras transacionais do banco."
+        title="Remessas"
+        description="Remessas por praça: montagem, conferência, expedição, cadeia de custódia e aceite das maletas. Todas as ações usam as regras transacionais do banco."
         actions={
           <div className="flex flex-wrap gap-2">
             {caps.includes("stock.operate") && (

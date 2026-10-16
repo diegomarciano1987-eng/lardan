@@ -8585,6 +8585,71 @@ export type Database = {
           },
         ]
       }
+      party_unificacoes: {
+        Row: {
+          antes_duplicada: Json | null
+          autor_id: string | null
+          canonica_id: string
+          created_at: string
+          duplicada_id: string
+          id: string
+          motivo: string
+          movidos: Json
+          removidos: Json
+        }
+        Insert: {
+          antes_duplicada?: Json | null
+          autor_id?: string | null
+          canonica_id: string
+          created_at?: string
+          duplicada_id: string
+          id?: string
+          motivo: string
+          movidos?: Json
+          removidos?: Json
+        }
+        Update: {
+          antes_duplicada?: Json | null
+          autor_id?: string | null
+          canonica_id?: string
+          created_at?: string
+          duplicada_id?: string
+          id?: string
+          motivo?: string
+          movidos?: Json
+          removidos?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_unificacoes_canonica_id_fkey"
+            columns: ["canonica_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_unificacoes_canonica_id_fkey"
+            columns: ["canonica_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "party_unificacoes_duplicada_id_fkey"
+            columns: ["duplicada_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_unificacoes_duplicada_id_fkey"
+            columns: ["duplicada_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           codigo: string
@@ -13356,6 +13421,16 @@ export type Database = {
         Returns: Json
       }
       party_doc_reveal: { Args: { _id: string }; Returns: string }
+      party_duplicados: { Args: never; Returns: Json }
+      party_unificar: {
+        Args: {
+          _canonica: string
+          _duplicada: string
+          _executar?: boolean
+          _motivo: string
+        }
+        Returns: Json
+      }
       pdv_asaas_preparar: {
         Args: { _actor: string; _payload: Json }
         Returns: Json

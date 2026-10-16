@@ -246,6 +246,18 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
   const fila = React.useRef<Promise<void>>(Promise.resolve());
   const campo = React.useRef<HTMLInputElement>(null);
   const aberta = detalhe.data?.status === "aberta";
+  const [termo, setTermo] = React.useState("");
+  React.useEffect(() => {
+    const t = window.setTimeout(() => setTermo(codigo), 250);
+    return () => window.clearTimeout(t);
+  }, [codigo]);
+  // Só sugere por nome quando há letras (leitor bipa números e dá Enter na hora).
+  const sugestoes = useQuery({
+    queryKey: ["entrada-maleta", "busca", termo],
+    queryFn: () => buscarPecas(termo),
+    enabled: aberta && termo.trim().length >= 3 && /[a-zA-ZÀ-ú]/.test(termo),
+    staleTime: 60_000,
+  });
 
   React.useEffect(() => {
     if (!aberta) return;

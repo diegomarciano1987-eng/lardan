@@ -62,7 +62,7 @@ BEGIN
       total := total+b.quantity; linhas := linhas+1;
     END LOOP;
     IF _executar THEN
-      UPDATE public.kit_balances SET qty_available=0,is_published=false,updated_at=now() WHERE cycle_id=c.id;
+      UPDATE public.kit_balances SET qty_returned=qty_returned+greatest(qty_available,0),is_published=false,updated_at=now() WHERE cycle_id=c.id;
       UPDATE public.kit_transfers SET status='cancelada',updated_by=_ator,note=coalesce(note,'')||' | '||_motivo WHERE cycle_id=c.id AND status IN ('pendente','transito');
       UPDATE public.kit_cycles SET status='cancelada',cancelled_at=now(),cancel_reason=_motivo,updated_by=_ator WHERE id=c.id;
       UPDATE public.kits SET is_active=false,updated_by=_ator WHERE id=c.kit_id;

@@ -373,7 +373,7 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
   );
 }
 
-function CartaoPessoa({ c, onAbrir, compacto, pedidos }: { c: Cliente; onAbrir: () => void; compacto?: boolean; pedidos?: number }) {
+function CartaoPessoa({ c, onAbrir, compacto, pedidos }: { c: Cliente; onAbrir: () => void; compacto?: boolean; pedidos?: number | undefined }) {
   const hoje = hojeISO();
   const atrasado = c.proximo_retorno && c.proximo_retorno < hoje;
   const ehHoje = c.proximo_retorno === hoje;

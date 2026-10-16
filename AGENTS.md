@@ -9,7 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Salvar múltiplos papéis de um colaborador por uma única função protegida e auditada, evitando estado parcial entre concessões.
+- Save a collaborator's roles in one audited protected function. Why: no partial grants.
 - Account balance = sum of financial_account_movements up to the cutoff date (America/Sao_Paulo); saldo_inicial is itself a movement, never add financial_accounts.saldo_inicial_cents again. Why: avoids double counting across Visão geral/Contas/Fluxo.
 - Movements dated after today are forecast only (previsto), never realized, in every financial RPC. Why: realized reports cannot include future dates.
 - fin_dre reports unclassified titles, missing cost center, out-of-DRE natures, open installments and unreconciled lines as separate indicators. Why: "unpaid" is not "unclassified".
@@ -22,12 +22,12 @@
 - Asaas PAYMENT_RECEIVED on a charge linked to an installment settles it automatically via asaas_baixa_automatica (official settlement engine, gross on installment, fee as separate movement, idempotency key asaas:baixa:<account>:<charge>); cash receipts, refunds and disputes stay manual. Why: paid in Asaas must be paid in Lardan without double counting.
 - The isolated bench applies supabase/migrations plus drizzle/migrations files without a copy there (duplicates listed in tests/isolado/pular.txt). Why: the migration tool writes only to drizzle/migrations.
 - Maleta acceptance under signature mode goes only through kit_assinatura_finalizar (Clicksign signed file stored first; trigger on kit_acceptances blocks direct accept unless mode is desligado). Why: release requires the consultant's own signed term.
-- Cheques are custody (fin_cheques, via fin_cheque_* RPCs), never bank balance; cash earmarks per person are insert-only fin_caixa_fatias and move no money. Why: no fake accounts.
+- Cheques are custody (fin_cheques, via fin_cheque_* RPCs), never bank balance until "compensado", which posts the money (official settlement when an installment is given); cash earmarks are insert-only fin_caixa_fatias. Why: no fake accounts, no double counting.
 - Card purchases (fin_cartao_lancamentos) hit DRE by purchase date/category; the invoice's single payable (origem cartao_fatura) is excluded from competência and its payment split by line category. Why: no double counting.
 - Fiado histórico entra como título a receber (sistema_origem fiado_historico, conta ativo FIADO-HIST fora da DRE) via cob_fiado_importar (service_role, idempotente por lote+linha), com a linha original imutável em cob_fiado_linhas. Why: lastro rastreável sem inflar receita.
 
 - Consultant orders can be charged directly by Lardan via consultora_pagamento_titulo (consultant-owned order, valid CPF) + Asaas official engine signed by consultora_cobranca_config.ator_user_id; paid amount is recorded on sales_orders (pay_*) to offset the kit settlement. Why: charge stays in Lardan's name without giving consultants finance permissions.
-- Approved financial removals only via service_role fin_expurgo_* (backup to fin_expurgo_backup + audit_logs). Why: reversible.
+- Approved financial removals only via service_role fin_expurgo_* (backup to fin_expurgo_backup + audit_logs; zero-sum reversed cancelled titles via fin_expurgo_titulos_estornados). Why: reversible.
 
 - Asaas sync (button + daily pg_cron → /api/public/asaas/sync-matinal) and asaas_conciliar_cobranca link charge↔installment by person (party, CPF or legacy client code = first 5 digits of externalReference) only on a unique person+value+due date match (or unique value within 60 days, no competing charge), then settle RECEIVED; cash stays manual. Why: never match a paid plan installment to a different one.
 - Settlement reversal also reverses the interest/discount adjustments of that settlement; DFC nets reversals inside the original line; projected cash flow skips cheques already represented by an equal open receivable installment. Why: no residues and no double counting.

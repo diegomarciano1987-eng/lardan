@@ -267,9 +267,20 @@ export async function registrarBaixa(input: {
   return data as unknown as { id: string; repetido: boolean; nao_alocado_cents: number };
 }
 
-export async function estornarBaixa(settlementId: string, motivo: string) {
-  const { error } = await supabase.rpc("fin_settlement_reverse", {
-    _settlement: settlementId,
+export async function estornarBaixa(settlementId: string, motivo: string, data?: string) {
+  const { error } = data
+    ? await supabase.rpc("fin_settlement_reverse_data", { _settlement: settlementId, _motivo: motivo, _data: data })
+    : await supabase.rpc("fin_settlement_reverse", { _settlement: settlementId, _motivo: motivo });
+  if (error) throw error;
+}
+
+/** Edita vencimento e valor de uma parcela, com motivo e histórico. */
+export async function editarParcelaFin(installmentId: string, vencimento: string, valorCents: number, motivo: string) {
+  if (!vencimento) throw new Error("Informe o vencimento.");
+  const { error } = await supabase.rpc("fin_installment_editar", {
+    _installment: installmentId,
+    _vencimento: vencimento,
+    _valor_cents: valorCents,
     _motivo: motivo,
   });
   if (error) throw error;

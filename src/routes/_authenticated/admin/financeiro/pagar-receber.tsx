@@ -10,6 +10,8 @@ import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShe
 import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGlobal";
 import { ListaTitulos } from "@/components/admin/financeiro/ListaTitulos";
 import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
+import { NovoTituloDialog } from "@/components/admin/financeiro/NovoTituloDialog";
+import { Plus } from "lucide-react";
 import { CobrarParcelaAsaas } from "@/components/admin/financeiro/CobrarParcelaAsaas";
 import { CobrancaAsaasSheet, ConferenciaAsaas, useSincronizacaoDiariaAsaas } from "@/components/admin/financeiro/AsaasConferencia";
 import { useCapabilities } from "@/lib/capabilities";
@@ -124,6 +126,10 @@ function PagarReceber() {
 
   const podeRec = caps.includes("finance.receivable.view");
   const podePag = caps.includes("finance.payable.view");
+  const criaRec = caps.includes("finance.receivable.manage");
+  const criaPag = caps.includes("finance.payable.manage");
+  const [novo, setNovo] = React.useState(false);
+  const dirNovo = natureza === "receber" ? "receivable" : natureza === "pagar" ? "payable" : criaPag ? "payable" : "receivable";
   const naturezas: { v: Natureza; r: string }[] = [
     ...(podeRec && podePag ? [{ v: "todos" as const, r: "Todos" }] : []),
     ...(podeRec ? [{ v: "receber" as const, r: "A receber" }] : []),
@@ -168,7 +174,14 @@ function PagarReceber() {
               </button>
             ))}
           </div>
+          {(natureza === "pagar" ? criaPag : natureza === "receber" ? criaRec : criaPag || criaRec) ? (
+            <button type="button" className="admin-btn-primary ml-auto min-h-11" onClick={() => setNovo(true)}>
+              <Plus aria-hidden className="size-4" />
+              {natureza === "pagar" ? "Nova conta a pagar" : natureza === "receber" ? "Nova conta a receber" : "Nova conta a pagar / a receber"}
+            </button>
+          ) : null}
         </div>
+        <NovoTituloDialog open={novo} onOpenChange={setNovo} direction={dirNovo} escolherDirecao={natureza === "todos" && criaPag && criaRec} />
 
         {visao === "parcela" ? <AtalhosVencimento ir={ir} situacao={s.situacao} /> : null}
         {visao === "parcela" && natureza === "pagar" ? <FaixasPagar /> : null}

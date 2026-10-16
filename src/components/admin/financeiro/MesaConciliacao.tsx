@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowDownLeft, ArrowUpRight, Brain, Check, ChevronRight, FilePlus2, Link2, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { classificarTitulo, fetchClassificacoes } from "@/lib/financeiro";
+import { fetchClassificacoes } from "@/lib/financeiro";
 import { centrosMesa, contrapartesMesa, ehMicrotarifa, microtarifasConciliar, microtarifasPrevia, faltaConciliar, novoLancamentoConciliar, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
 import { DateField } from "@/components/premium/DateField";
 import { formatBRLFromCents, Skeleton } from "@/components/admin/ui";
@@ -352,6 +352,11 @@ function Bancada({
   const [observacao, setObservacao] = React.useState("");
   const [competencia, setCompetencia] = React.useState(linha.data ?? "");
   const [palpiteAplicado, setPalpiteAplicado] = React.useState(false);
+  const classificacoesVinculadas = useQuery({
+    queryKey: ["mesa-classificacao-titulos", bandeja.map((b) => b.c.installment_id)],
+    queryFn: () => Promise.all(bandeja.map((b) => tituloDaParcela(b.c.installment_id))),
+    enabled: modo === "existente" && bandeja.length > 0,
+  });
 
   React.useEffect(() => {
     const t = setTimeout(() => setBuscaLenta(busca.trim()), 350);
@@ -387,13 +392,13 @@ function Bancada({
   // Aprendizado: preenche com o que foi usado nas vezes anteriores, sem sobrescrever escolha.
   React.useEffect(() => {
     const p = palpite.data;
-    if (!p || palpiteAplicado || !p.vezes) return;
+    if (modo !== "novo" || !p || palpiteAplicado || !p.vezes) return;
     setPalpiteAplicado(true);
-    if (p.cost_center_id) setCentro((v) => v || p.cost_center_id!);
-    if (p.chart_account_id) setPlano((v) => v || p.chart_account_id!);
-    if (p.payment_method_id) setForma((v) => v || p.payment_method_id!);
-    if (p.party_id) setParty((v) => v || p.party_id!);
-  }, [palpite.data, palpiteAplicado]);
+    setCentro((v) => v || p.cost_center_id || "");
+    setPlano((v) => v || p.chart_account_id || "");
+    setForma((v) => v || p.payment_method_id || "");
+    setParty((v) => v || p.party_id || "");
+  }, [palpite.data, palpiteAplicado, modo]);
 
   const centroSel = (centros.data ?? []).find((c) => c.id === centro);
   const partyOpcoes = React.useMemo(() => {
@@ -449,29 +454,7 @@ function Bancada({
         .map((b) => ({ installment_id: b.c.installment_id, valor_cents: reaisParaCentavos(b.texto) ?? 0 }))
         .filter((a) => a.valor_cents > 0);
       if (!alocacoes.length) throw new Error("Escolha ao menos uma conta para vincular.");
-      // Classificação para o DRE: só grava o que mudou, sempre com motivo no histórico do título.
-      if (centro || plano || forma) {
-        const vistos = new Set<string>();
-        for (const a of alocacoes) {
-          const t = await tituloDaParcela(a.installment_id);
-          if (!t || vistos.has(t.title_id)) continue;
-          vistos.add(t.title_id);
-          const novoCentro = centro || t.cost_center_id;
-          const novoPlano = plano || t.chart_account_id;
-          const novaForma = forma || t.payment_method_id;
-          if (novoCentro === t.cost_center_id && novoPlano === t.chart_account_id && novaForma === t.payment_method_id) continue;
-          await classificarTitulo({
-            title_id: t.title_id,
-            motivo: "Classificado na mesa de conciliação bancária",
-            esperado_updated_at: t.updated_at,
-            business_entity_id: t.business_entity_id,
-            financial_account_id: t.financial_account_id,
-            cost_center_id: novoCentro,
-            chart_account_id: novoPlano,
-            payment_method_id: novaForma,
-          });
-        }
-      }
+      // Vincular não reclassifica títulos existentes: cada título mantém seus próprios dados.
       return conciliar({
         line_ids: [linha.id],
         alocacoes,
@@ -501,8 +484,8 @@ function Bancada({
   React.useEffect(() => {
     const h = (e: KeyboardEvent) => {
       const alvo = e.target as HTMLElement;
+      if (e.defaultPrevented || alvo.closest('input, textarea, select, [contenteditable="true"], [role="combobox"], [role="listbox"]') || document.querySelector('[aria-haspopup="listbox"][aria-expanded="true"], [data-radix-popper-content-wrapper]')) return;
       if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && pronto && !aplicar.isPending) aplicar.mutate();
-      if (alvo.tagName === "INPUT" || alvo.tagName === "TEXTAREA") return;
       if (e.key.toLowerCase() === "p") onPular();
       if (e.key === "1") setModo("existente");
       if (e.key === "2") setModo("novo");
@@ -590,7 +573,7 @@ function Bancada({
           ))}
         </div>
 
-        {pal && pal.vezes > 0 && (
+        {modo === "novo" && pal && pal.vezes > 0 && (
           <div className="mt-4 flex items-start gap-3 rounded-[14px] border border-champagne/60 bg-cream-2 p-3 text-sm">
             <Brain aria-hidden className="mt-0.5 size-5 shrink-0 text-bronze" />
             <p className="text-ledger-text">

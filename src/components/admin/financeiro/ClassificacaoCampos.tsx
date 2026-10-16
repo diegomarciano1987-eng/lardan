@@ -108,6 +108,10 @@ export function CamposClassificacao({
           value={valores.chart_account_id}
           onChange={(v) => set("chart_account_id", v)}
           placeholder="Pendente de classificação"
+          searchThreshold={0}
+          searchPlaceholder="Buscar por código ou nome"
+          onSearch={setBusca}
+          loading={q.isFetching}
         />
       </Campo>
       <Campo label="Centro de custo">

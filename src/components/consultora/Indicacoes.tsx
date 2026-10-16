@@ -67,7 +67,7 @@ export function Indicacoes() {
         <div className="rounded-2xl border border-border bg-card p-5"><p className="text-sm text-muted-foreground">Sua faixa</p><p className="mt-1 text-2xl font-semibold">{d.faixa ? `${d.faixa.titulo} · ${Number(d.faixa.percentual)}%` : "Ainda sem faixa"}</p></div>
         <div className="rounded-2xl border border-border bg-card p-5"><p className="text-sm text-muted-foreground">Comissões apuradas</p><p className="mt-1 text-2xl font-semibold num">{brl(total)}</p></div>
       </section>
-      {d.proxima && <p className="text-[0.98rem] text-muted-foreground">Faltam <strong className="text-foreground">{d.proxima.faltam}</strong> aprovadas para virar <strong className="text-foreground">{d.proxima.titulo}</strong> ({Number(d.proxima.percentual)}%).</p>}
+      {d.proxima && <p className="text-[0.98rem] text-muted-foreground">{d.proxima.faltam === 1 ? "Falta" : "Faltam"} <strong className="text-foreground">{d.proxima.faltam}</strong> {d.proxima.faltam === 1 ? "aprovada" : "aprovadas"} para virar <strong className="text-foreground">{d.proxima.titulo}</strong> ({Number(d.proxima.percentual)}%).</p>}
       <p className="text-sm text-muted-foreground">Regras: {d.faixas.map((f) => `${f.min}+ aprovadas = ${Number(f.percentual)}% (${f.titulo})`).join(" · ")}. A comissão é calculada sobre as peças realmente vendidas, quando a maleta da indicada é encerrada.</p>
 
       <section>

@@ -23,7 +23,7 @@ export const ETAPAS: { id: Etapa; rotulo: string; dica: string }[] = [
   { id: "nova", rotulo: "Nova interessada", dica: "Cadastrada, ainda sem conversa registrada" },
   { id: "conversa", rotulo: "Em conversa", dica: "Contato iniciado" },
   { id: "escolhendo", rotulo: "Escolhendo peças", dica: "Já sabe do que ela gosta" },
-  { id: "combinado", rotulo: "Pedido combinado", dica: "Pedido em atendimento, ainda não é venda" },
+  { id: "combinado", rotulo: "Vai comprar", dica: "Pedido combinado, aguardando conclusão" },
   { id: "cliente", rotulo: "Cliente", dica: "Já tem venda registrada" },
 ];
 export const rotuloEtapa = (e: string) => ETAPAS.find((x) => x.id === e)?.rotulo ?? (e === "pausada" ? "Pausada" : e === "reativada" ? "Reativada" : e);
@@ -87,8 +87,13 @@ export const CANAL: Record<Atendimento["canal"], string> = {
 export const carregarInicio = () => rpc<Inicio>("consultant_home");
 export const pecasDisponiveis = () => rpc<Peca[]>("consultant_pieces");
 
-export async function listarClientes(): Promise<Cliente[]> {
-  const { data, error } = await t("consultant_clients").select("*").order("nome");
+export async function listarClientes(busca = ""): Promise<Cliente[]> {
+  let query = t("consultant_clients").select("*").order("ultima_interacao", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).limit(200);
+  for (const parte of busca.replace(/[,()%]/g, " ").trim().split(/\s+/).filter(Boolean).slice(0, 5)) {
+    const digitos = parte.replace(/\D/g, "");
+    query = query.or(`nome.ilike.%${parte}%,telefone.ilike.%${digitos || parte}%,instagram.ilike.%${parte}%,preferencias.ilike.%${parte}%`);
+  }
+  const { data, error } = await query;
   if (error) throw error;
   return (data ?? []) as unknown as Cliente[];
 }

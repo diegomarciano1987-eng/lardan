@@ -12443,6 +12443,10 @@ export type Database = {
           value_cents: number
         }[]
       }
+      fin_asaas_extrato_autoconciliar: {
+        Args: { _payment: string }
+        Returns: Json
+      }
       fin_audit_list: { Args: { _filtros?: Json }; Returns: Json }
       fin_auditoria_asaas_duplicidade: { Args: never; Returns: Json }
       fin_auditoria_tarifa_conciliacao: { Args: never; Returns: Json }

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { DateField } from "@/components/premium/DateField";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import {
   EmptyState,
@@ -26,6 +27,7 @@ import { PedirDadosDialog } from "@/components/admin/financeiro/PedirDadosDialog
 import { CobrarAsaas } from "@/components/admin/financeiro/CobrarAsaas";
 import {
   cancelarTitulo,
+  corrigirDataEstorno,
   editarParcelaFin,
   estornarBaixa,
   fetchFinAccounts,
@@ -105,6 +107,7 @@ export function TituloSheet({
   });
   const [chave] = React.useState(() => crypto.randomUUID());
   const [estornando, setEstornando] = React.useState<string | null>(null);
+  const [corrigindoEstorno, setCorrigindoEstorno] = React.useState<{ id: string; data: string } | null>(null);
   const [cancelando, setCancelando] = React.useState(false);
   const [editandoParcela, setEditandoParcela] = React.useState<FinInstallment | null>(null);
   const [reconhecendo, setReconhecendo] = React.useState(false);
@@ -214,6 +217,24 @@ export function TituloSheet({
       void qc.invalidateQueries({ queryKey: ["fin-title", id] });
       void qc.invalidateQueries({ queryKey: ["fin-titles"] });
       void qc.invalidateQueries({ queryKey: ["fin-pagar-receber"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const corrigirEstorno = useMutation({
+    mutationFn: async (v: Record<string, string>) => {
+      if (!corrigindoEstorno) throw new Error("Estorno não escolhido.");
+      return corrigirDataEstorno(corrigindoEstorno.id, v["data"] ?? "", v["motivo"] ?? "", corrigindoEstorno.data);
+    },
+    onSuccess: () => {
+      toast.success("Data do estorno corrigida com histórico preservado.");
+      setCorrigindoEstorno(null);
+      void qc.invalidateQueries({ queryKey: ["fin-title", id] });
+      void qc.invalidateQueries({ queryKey: ["fin-title-audit", id] });
+      void qc.invalidateQueries({ queryKey: ["fin-overview"] });
+      void qc.invalidateQueries({ queryKey: ["fin-accounts"] });
+      void qc.invalidateQueries({ queryKey: ["fin-conta"] });
+      void qc.invalidateQueries({ queryKey: ["fin-fluxo"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -483,13 +504,16 @@ export function TituloSheet({
                     >
                       <span className="text-sm font-medium text-ledger-text">
                         {dataBR(b.data)} · parcela {b.parcela} · {b.conta ?? "—"}
-                        {b.estorno ? " · estorno" : ""}
+                        {b.estorno ? " · estorno" : b.ja_estornada ? " · estornada" : ""}
                       </span>
                       <span className="flex items-center gap-3">
                         <span className="text-sm tabular-nums text-ledger-muted">
                           {formatBRLFromCents(b.valor_cents)}
                         </span>
-                        {podeEstornar && !b.estorno && b.valor_cents > 0 && (
+                        {podeEstornar && b.estorno && (
+                          <Button variant="outline" onClick={() => setCorrigindoEstorno({ id: b.settlement_id, data: b.data })}>Editar data</Button>
+                        )}
+                        {podeEstornar && !b.estorno && !b.ja_estornada && b.valor_cents > 0 && (
                           <button
                             type="button"
                             className="admin-btn"
@@ -608,6 +632,19 @@ export function TituloSheet({
           confirmar="Salvar parcela"
           onOpenChange={(v) => !v && setEditandoParcela(null)}
           onConfirmar={(vals) => editarParcela.mutate(vals)}
+        />
+
+        <PedirDadosDialog
+          open={!!corrigindoEstorno}
+          titulo="Editar data do estorno"
+          descricao="A correção preserva valores, vínculos e a data anterior no histórico."
+          campos={[
+            { nome: "data", rotulo: "Data do estorno", tipo: "data", obrigatorio: true, padrao: corrigindoEstorno?.data ?? "" },
+            { nome: "motivo", rotulo: "Motivo da correção", tipo: "area", obrigatorio: true },
+          ]}
+          confirmar="Salvar data do estorno"
+          onOpenChange={(v) => !v && setCorrigindoEstorno(null)}
+          onConfirmar={(vals) => corrigirEstorno.mutate(vals)}
         />
 
         <PedirDadosDialog

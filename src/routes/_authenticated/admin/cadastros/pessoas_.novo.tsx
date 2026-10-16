@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -26,6 +26,7 @@ import {
 } from "@/lib/br/canonico";
 import { consultarCep, consultarCnpj, listarMunicipios } from "@/lib/br/lookup.functions";
 import { UFS } from "@/lib/catalog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Busca {
   kind?: PartyKind | undefined;
@@ -41,6 +42,11 @@ export const Route = createFileRoute("/_authenticated/admin/cadastros/pessoas_/n
   head: () => ({
     meta: [
       { title: "Novo cadastro — Central de Cadastros LARDAN" },
+      { name: "description", content: "Cadastro de pessoas e empresas da LARDAN." },
+      { property: "og:title", content: "Novo cadastro — Central de Cadastros LARDAN" },
+      { property: "og:description", content: "Cadastro de pessoas e empresas da LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -107,6 +113,21 @@ function NovoCadastro() {
   const listarMunicipiosFn = useServerFn(listarMunicipios);
   const [consultandoCep, setConsultandoCep] = useState(false);
   const [consultandoDoc, setConsultandoDoc] = useState(false);
+  const [buscaDuplicados, setBuscaDuplicados] = useState({ nome: "", doc: "" });
+  useEffect(() => {
+    const timer = setTimeout(() => setBuscaDuplicados({ nome: form.display_name.trim(), doc: form.doc }), 350);
+    return () => clearTimeout(timer);
+  }, [form.display_name, form.doc]);
+  const consultarDuplicados = async (nome: string, doc: string) => {
+    const { data, error } = await supabase.rpc("registry_duplicate_candidates", { _nome: nome, _doc: doc });
+    if (error) throw error;
+    return (data ?? []) as unknown as { id: string; code: string; display_name: string; doc_masked: string | null; motivo: string }[];
+  };
+  const duplicados = useQuery({
+    queryKey: ["registry-duplicados-novo", buscaDuplicados],
+    queryFn: () => consultarDuplicados(buscaDuplicados.nome, buscaDuplicados.doc),
+    enabled: podeEditar && (buscaDuplicados.nome.length >= 3 || buscaDuplicados.doc.replace(/\D/g, "").length >= 11),
+  });
 
   const municipios = useQuery({
     queryKey: ["ibge-municipios", form.uf],
@@ -195,6 +216,9 @@ function NovoCadastro() {
       const email = normalizarEmail(form.email);
       if (form.email.trim() && email.estado !== "valido")
         throw new Error(email.erro ?? "E-mail inválido.");
+      const iguais = await consultarDuplicados(nome, form.doc);
+      if (iguais.some((p) => p.motivo === "documento")) throw new Error("Este documento já está cadastrado. Abra a ficha existente.");
+      if (iguais.length) throw new Error("Há cadastro com o mesmo nome. Confira a ficha existente antes de criar outro.");
       const id = await saveParty({
         kind: pessoa ? "pessoa" : "organizacao",
         display_name: nome,
@@ -265,6 +289,14 @@ function NovoCadastro() {
       />
 
       <Panel title="Identificação" flush>
+        {duplicados.isFetching ? <p className="px-5 pt-5 text-sm text-ledger-muted">Conferindo possíveis duplicados…</p> : null}
+        {duplicados.error ? <p className="px-5 pt-5 text-sm text-destructive">Não foi possível conferir duplicados. Tente novamente antes de salvar.</p> : null}
+        {(duplicados.data?.length ?? 0) > 0 ? (
+          <div className="space-y-2 border-b border-line-soft px-5 py-4">
+            <p className="text-sm font-semibold text-destructive">Possível cadastro duplicado</p>
+            {duplicados.data?.map((p) => <Link key={p.id} className="admin-link block text-sm" to="/admin/cadastros/pessoas/$id" params={{ id: p.id }}>{p.code} · {p.display_name}{p.doc_masked ? ` · ${p.doc_masked}` : ""}</Link>)}
+          </div>
+        ) : null}
         <div className="grid gap-4 p-5 md:grid-cols-2">
           <Campo label={pessoa ? "Nome completo" : "Razão social"}>
             <input

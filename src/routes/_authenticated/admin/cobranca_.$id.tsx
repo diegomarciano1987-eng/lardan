@@ -2,9 +2,10 @@ import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, MessageCircle, Phone, Ban } from "lucide-react";
+import { ArrowLeft, MessageCircle, Phone, Ban, UserPen } from "lucide-react";
 import { LembretesGaveta } from "@/components/admin/cobranca/LembretesGaveta";
 import { SimuladorAcordo } from "@/components/admin/cobranca/SimuladorAcordo";
+import { EditarDadosDialog } from "@/components/admin/cobranca/EditarDadosDialog";
 import { DateField } from "@/components/premium/DateField";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import {
@@ -31,6 +32,7 @@ function Cockpit() {
   const [valor, setValor] = React.useState("");
   const [data, setData] = React.useState(hojeSP());
   const susp = useQuery({ queryKey: ["cob", "susp", id], queryFn: () => suspensao(id) });
+  const [editar, setEditar] = React.useState(false);
   const recarregar = () => qc.invalidateQueries({ queryKey: ["cob"] });
   const alternarSuspensao = async () => {
     const s = !susp.data?.suspensa;
@@ -82,6 +84,7 @@ function Cockpit() {
   return (
     <div className="mx-auto max-w-6xl space-y-5 p-6">
       <LembretesGaveta />
+      <EditarDadosDialog open={editar} onOpenChange={setEditar} partyId={id} onSalvo={recarregar} />
       {susp.data?.suspensa && (
         <div role="alert" className="flex items-center gap-2 rounded-xl border border-danger/50 bg-danger/10 p-4 text-sm font-semibold text-danger">
           <Ban className="size-4" /> Suspensa: não recebe nova maleta nem novo pedido. Motivo: {susp.data.suspensa_motivo}
@@ -101,6 +104,7 @@ function Cockpit() {
       </header>
 
       <div className="flex flex-wrap gap-2">
+        <button onClick={() => setEditar(true)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-primary bg-primary/10 px-4 text-sm font-semibold"><UserPen className="h-4 w-4" />Editar dados</button>
         <button onClick={() => setAcao("ligacao")} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm"><Phone className="h-4 w-4" />Registrar ligação</button>
         <button onClick={abrirWhats} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm"><MessageCircle className="h-4 w-4" />Abrir WhatsApp</button>
         <button onClick={() => setAba("acordos")} className="h-10 rounded-lg border border-bronze bg-champagne-soft px-4 text-sm font-semibold text-bronze">Simular acordo / juros</button>

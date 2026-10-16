@@ -1,2 +1,4 @@
 # Maletas e remessas
 - Remessa (table remessas, unique numero, one praça) is the parent of maletas: kit_cycles.remessa_id, opened only via remessa_abrir_maleta (consultant must belong to the remessa's praça, one maleta per consultant per remessa); print docs read número/praça/acerto from the remessa. Why: remessa is the master control entity.
+- Referral (indicação) commissions are computed only by a DB trigger when a kit cycle closes, stored once per cycle in referral_commissions with an item snapshot; why: transparent, idempotent, never recalculated retroactively when tiers change.
+- Maleta acceptance under signature mode goes only through kit_assinatura_finalizar (Clicksign signed file stored first; trigger on kit_acceptances blocks direct accept unless mode is desligado). Why: release requires the consultant's own signed term.

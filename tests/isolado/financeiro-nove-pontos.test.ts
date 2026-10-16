@@ -1,5 +1,5 @@
 import { beforeAll, expect, test } from 'bun:test';
-import { adm, criarConta, rpc, type Conta } from './base';
+import { adm, criarConta, rpc, escritaDireta, type Conta } from './base';
 
 let master: Conta;
 let consultora: Conta;
@@ -88,17 +88,8 @@ test('2 vínculo existente mantém categoria 5.2.4 Aluguel e centro do título',
 });
 
 test('3 escrita direta não muda estorno nem seus movimentos apesar de existir correção registrada', async () => {
-  const c = await adm.reserve();
-  try {
-    await c.unsafe('set role authenticated');
-    await c.unsafe("select set_config('lardan.test_uid',$1,false)",[master.uid ?? '']);
-    await expect(c.unsafe("update financial_settlements set data='2026-10-10' where id=$1",[estorno])).rejects.toThrow();
-    await expect(c.unsafe("update financial_account_movements set data='2026-10-10' where settlement_id=$1",[estorno])).rejects.toThrow();
-  } finally {
-    await c.unsafe('reset role');
-    await c.unsafe("select set_config('lardan.test_uid','',false)");
-    c.release();
-  }
+  expect((await escritaDireta(master,"update financial_settlements set data='2026-10-10' where id=$1",[estorno])).ok).toBe(false);
+  expect((await escritaDireta(master,"update financial_account_movements set data='2026-10-10' where settlement_id=$1",[estorno])).ok).toBe(false);
 });
 
 test('5 unificação oficial move título para Daniel canônico preservando número, valor e histórico', async () => {

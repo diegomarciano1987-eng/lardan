@@ -9,11 +9,9 @@ import { DateField } from "@/components/premium/DateField";
 import { repCobrar } from "@/lib/representante.functions";
 import { brl, dataBR, repAvulsa, repCheque, repCrm, repCrmMover, repEtapaNova, repLeadCriar, type RepCobranca } from "@/lib/representante";
 
-type Forma = "PIX" | "BOLETO" | "CREDIT_CARD" | "CHEQUE";
+type Forma = "LINK" | "CHEQUE";
 const FORMAS: { id: Forma; rotulo: string; dica: string }[] = [
-  { id: "PIX", rotulo: "Pix", dica: "QR na tela" },
-  { id: "BOLETO", rotulo: "Boleto", dica: "com Pix junto" },
-  { id: "CREDIT_CARD", rotulo: "Cartão", dica: "link até 12x" },
+  { id: "LINK", rotulo: "Link de cobrança", dica: "ela escolhe Pix, boleto ou cartão" },
   { id: "CHEQUE", rotulo: "Cheque", dica: "fica em custódia" },
 ];
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -38,7 +36,7 @@ export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo, antes }: { c?:
   const alvo: Alvo = c ? { party_id: c.party_id, display_name: c.display_name } : avulsa!;
   const primeiro = alvo.display_name.split(" ")[0] ?? "";
   const [aberto, setAberto] = React.useState(false);
-  const [forma, setForma] = React.useState<Forma>("PIX");
+  const [forma, setForma] = React.useState<Forma>("LINK");
   const [valor, setValor] = React.useState("");
   const [descricao, setDescricao] = React.useState("Acerto de maleta");
   const [chave, setChave] = React.useState(() => crypto.randomUUID());
@@ -60,7 +58,7 @@ export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo, antes }: { c?:
         const desc = c ? `${descricao || "Pagamento parcial"} — ref. título ${c.numero ?? ""}`.trim() : descricao;
         inst = await repAvulsa(alvo.party_id, valorCents, desc, chave);
       }
-      const r = await cobrar({ data: { installmentId: inst, forma: forma as "PIX" | "BOLETO" | "CREDIT_CARD" } });
+      const r = await cobrar({ data: { installmentId: inst, forma: "UNDEFINED" } });
       return { ...r, valor: valorCents };
     },
     onSuccess: async (r) => {
@@ -116,7 +114,7 @@ export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo, antes }: { c?:
             </div>
           )}
           {!res && (
-            <div className="grid grid-cols-4 gap-2" role="group" aria-label="Forma">
+            <div className="grid grid-cols-2 gap-2" role="group" aria-label="Forma">
               {FORMAS.map((f) => (
                 <button key={f.id} type="button" aria-pressed={forma === f.id} onClick={() => setForma(f.id)}
                   className={`rounded-xl border px-2 py-2 text-left text-xs ${forma === f.id ? (f.id === "CHEQUE" ? "border-primary bg-primary text-primary-foreground" : "border-asaas bg-asaas text-asaas-foreground") : "border-border text-muted-foreground"}`}>
@@ -144,7 +142,7 @@ export function CobrarParcela({ c, avulsa, rep, whatsapp, rotulo, antes }: { c?:
             </div>
           ) : !res ? (
             <button type="button" disabled={gerar.isPending || valorCents <= 0} onClick={() => gerar.mutate()} className="w-full rounded-xl bg-asaas px-4 py-3 text-sm font-semibold text-asaas-foreground disabled:opacity-50">
-              {gerar.isPending ? "Gerando no Asaas…" : `Gerar ${FORMAS.find((f) => f.id === forma)?.rotulo} de ${brl(valorCents)}`}
+              {gerar.isPending ? "Gerando no Asaas…" : `Gerar link de cobrança de ${brl(valorCents)}`}
             </button>
           ) : (
             <div className="space-y-3 text-center">

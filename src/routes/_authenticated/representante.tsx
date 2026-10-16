@@ -88,7 +88,7 @@ function AreaRepresentante() {
         )}
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
+      <div className="flex min-w-0 flex-1 flex-col pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-0">
         {espelho && (
           <div className="flex flex-wrap items-center justify-between gap-2 bg-primary px-5 py-2 text-sm text-primary-foreground md:px-10">
             <span className="flex items-center gap-2"><Eye className="size-4" /> Você está no sistema deste representante, com os mesmos números e ações (tudo fica registrado com o seu usuário).</span>
@@ -109,8 +109,8 @@ function AreaRepresentante() {
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
         {ABAS.map((a) => (
           <button key={a.id} type="button" onClick={() => ir(a.id)}
-            className={`flex flex-col items-center gap-1 py-3 text-[0.7rem] ${aba === a.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
-            <a.icone className="size-5" aria-hidden /> {a.curto}
+            className={`flex flex-col items-center gap-1.5 py-[1.05rem] text-[0.98rem] leading-tight ${aba === a.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+            <a.icone className="size-7" aria-hidden /> {a.curto}
           </button>
         ))}
       </nav>
@@ -138,6 +138,7 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
         )}
       </header>
       <main className="flex-1 space-y-6 px-5 py-6 md:px-10">
+        {!espelho && <div className="md:hidden"><InstalarApp /></div>}
         {resumo.error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{(resumo.error as Error).message}</p>}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Kpi rotulo="Vencido" valor={s ? brl(s.vencido_cents) : "—"} destaque />
@@ -149,7 +150,6 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
         {aba === "consultoras" && <Consultoras rep={rep} espelho={espelho} />}
         {aba === "captacao" && <Captacao rep={rep} espelho={espelho} />}
         {aba === "painel" && <PainelRepresentante rep={rep} />}
-        {!espelho && <div className="md:hidden"><InstalarApp /></div>}
       </main>
     </>
   );

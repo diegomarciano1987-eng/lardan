@@ -7,7 +7,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-type Forma = "PIX" | "BOLETO" | "CREDIT_CARD";
+type Forma = "PIX" | "BOLETO" | "CREDIT_CARD" | "UNDEFINED";
 
 async function admin() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -21,7 +21,7 @@ export const repCobrar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { installmentId: string; forma: Forma }) => {
     if (!d?.installmentId || !/^[0-9a-f-]{36}$/i.test(d.installmentId)) throw new Error("Parcela inválida.");
-    if (!["PIX", "BOLETO", "CREDIT_CARD"].includes(d.forma)) throw new Error("Forma inválida.");
+    if (!["PIX", "BOLETO", "CREDIT_CARD", "UNDEFINED"].includes(d.forma)) throw new Error("Forma inválida.");
     return { installmentId: d.installmentId, forma: d.forma };
   })
   .handler(async ({ data, context }) => {

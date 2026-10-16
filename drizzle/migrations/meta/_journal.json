@@ -610,6 +610,13 @@
       "when": 1792191859141,
       "tag": "0086_auditoria_seguranca_cobranca",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1792191896053,
+      "tag": "0087_registrar_pdv_links_e_alinhar_retorno_patch",
+      "breakpoints": true
     }
   ]
 }

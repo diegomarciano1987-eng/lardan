@@ -3,6 +3,7 @@ import type { Capability } from "@/lib/capabilities";
 import {
   LayoutDashboard,
   MapPinned,
+  MapPin,
   Globe2,
   Tag,
   Boxes,
@@ -175,13 +176,23 @@ export const ADMIN_MODULES: AdminModule[] = [
   {
     slug: "maletas",
     path: "/admin/maletas",
-    label: "Maletas",
-    description: "Montagem, conferência, expedição, cadeia de custódia e aceite das maletas.",
+    label: "Remessas",
+    description: "Remessas por praça: montagem, conferência, expedição, cadeia de custódia e aceite das maletas.",
     icon: BriefcaseBusiness,
     roles: [...STOCK, "financeiro"],
     capability: "kit.view",
     state: "ativo",
     spec: "Toda transição é transacional no banco: conferência reserva estoque, expedição move para o local da maleta, aceite integral ou parcial registra divergências.",
+  },
+  {
+    slug: "pracas",
+    path: "/admin/pracas",
+    label: "Praças",
+    description: "Praças da operação: cadastro e consultoras por praça, base do BI territorial.",
+    icon: MapPin,
+    roles: [...STOCK, "montagem"],
+    capability: "kit.view",
+    state: "ativo",
   },
   {
     slug: "consultoras",

@@ -2302,6 +2302,89 @@ export type Database = {
           },
         ]
       }
+      cob_comprovantes: {
+        Row: {
+          autor_id: string | null
+          banco: string | null
+          content_type: string | null
+          created_at: string
+          data_pagamento: string
+          file_name: string
+          id: string
+          installment_id: string | null
+          observacao: string | null
+          party_id: string
+          referente: string
+          simulacao_id: string | null
+          status: string
+          storage_path: string
+          valor_cents: number
+        }
+        Insert: {
+          autor_id?: string | null
+          banco?: string | null
+          content_type?: string | null
+          created_at?: string
+          data_pagamento: string
+          file_name: string
+          id?: string
+          installment_id?: string | null
+          observacao?: string | null
+          party_id: string
+          referente?: string
+          simulacao_id?: string | null
+          status?: string
+          storage_path: string
+          valor_cents: number
+        }
+        Update: {
+          autor_id?: string | null
+          banco?: string | null
+          content_type?: string | null
+          created_at?: string
+          data_pagamento?: string
+          file_name?: string
+          id?: string
+          installment_id?: string | null
+          observacao?: string | null
+          party_id?: string
+          referente?: string
+          simulacao_id?: string | null
+          status?: string
+          storage_path?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_comprovantes_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_comprovantes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_comprovantes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "cob_comprovantes_simulacao_id_fkey"
+            columns: ["simulacao_id"]
+            isOneToOne: false
+            referencedRelation: "cob_simulacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cob_config: {
         Row: {
           carencia_dias: number
@@ -2613,6 +2696,9 @@ export type Database = {
           encargos_cents: number
           entrada_cents: number
           entrada_data: string | null
+          excluida_em: string | null
+          excluida_motivo: string | null
+          excluida_por: string | null
           id: string
           installment_ids: string[]
           juros_mes_pct: number
@@ -2636,6 +2722,9 @@ export type Database = {
           encargos_cents: number
           entrada_cents?: number
           entrada_data?: string | null
+          excluida_em?: string | null
+          excluida_motivo?: string | null
+          excluida_por?: string | null
           id?: string
           installment_ids: string[]
           juros_mes_pct: number
@@ -2659,6 +2748,9 @@ export type Database = {
           encargos_cents?: number
           entrada_cents?: number
           entrada_data?: string | null
+          excluida_em?: string | null
+          excluida_motivo?: string | null
+          excluida_por?: string | null
           id?: string
           installment_ids?: string[]
           juros_mes_pct?: number
@@ -12065,6 +12157,11 @@ export type Database = {
         Returns: Json
       }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }
+      cob_cadastro_ler: { Args: { _party: string }; Returns: Json }
+      cob_cadastro_salvar: {
+        Args: { _d: Json; _party: string }
+        Returns: undefined
+      }
       cob_carteira: {
         Args: never
         Returns: {
@@ -12117,6 +12214,7 @@ export type Database = {
           vencido_cents: number
         }[]
       }
+      cob_comprovante_registrar: { Args: { _d: Json }; Returns: string }
       cob_config_salvar: {
         Args: { _carencia: number; _juros: number; _multa: number }
         Returns: undefined
@@ -12180,6 +12278,10 @@ export type Database = {
         Returns: string
       }
       cob_regua_executar: { Args: never; Returns: Json }
+      cob_simulacao_excluir: {
+        Args: { _id: string; _motivo: string }
+        Returns: undefined
+      }
       cob_simulacao_salvar: {
         Args: { _dados: Json; _party: string }
         Returns: string

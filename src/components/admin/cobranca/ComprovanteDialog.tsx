@@ -10,7 +10,7 @@ const iso = (d?: Date) => (d ? d.toLocaleDateString("en-CA", { timeZone: "Americ
 const reais = (s: string) => Math.round(Number(s.replace(/\./g, "").replace(",", ".") || 0) * 100);
 
 export function ComprovanteDialog({ open, onOpenChange, partyId, simulacaoId, referente, valorSugerido, onSalvo }: {
-  open: boolean; onOpenChange: (v: boolean) => void; partyId: string; simulacaoId?: string | null; referente: string; valorSugerido?: number; onSalvo: () => void;
+  open: boolean; onOpenChange: (v: boolean) => void; partyId: string; simulacaoId?: string | null | undefined; referente: string; valorSugerido?: number | undefined; onSalvo: () => void;
 }) {
   const enviar = useServerFn(enviarComprovante);
   const [valor, setValor] = React.useState("");

@@ -31,3 +31,4 @@
 
 - Asaas sync (button + daily pg_cron → /api/public/asaas/sync-matinal) and asaas_conciliar_cobranca link charge↔installment by person (party, CPF or legacy client code = first 5 digits of externalReference) only on a unique person+value+due date match (or unique value within 60 days, no competing charge), then settle RECEIVED; cash stays manual. Why: never match a paid plan installment to a different one.
 - Settlement reversal also reverses the interest/discount adjustments of that settlement; DFC nets reversals inside the original line; projected cash flow skips cheques already represented by an equal open receivable installment. Why: no residues and no double counting.
+- Person merges only via party_unificar (preview first, all-or-nothing, imported fiado/Asaas staging rows preserved, moved ids kept in party_unificacoes for reversal). Why: duplicates must collapse without losing history.

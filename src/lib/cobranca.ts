@@ -40,7 +40,18 @@ export async function suspensao(party: string): Promise<{ suspensa: boolean; sus
   return data;
 }
 export const suspender = (party: string, suspensa: boolean, motivo: string) => call<void>("cob_suspender", { _party: party, _suspensa: suspensa, _motivo: motivo });
-export const ROTULO_SIMULACAO: Record<string, string> = { simulada: "Simulada", aguardando_entrada: "Aguardando entrada", efetivada: "Efetivada", cancelada: "Cancelada" };
+export const ROTULO_SIMULACAO: Record<string, string> = { simulada: "Simulada", aguardando_entrada: "Aguardando entrada", efetivada: "Efetivada", cancelada: "Cancelada", excluida: "Excluída" };
+export const excluirSimulacao = (id: string, motivo: string) => call<void>("cob_simulacao_excluir", { _id: id, _motivo: motivo });
+export interface Cadastro { nome: string | null; cpf: string | null; tem_cpf: boolean; whatsapp: string | null; telefone: string | null; email: string | null;
+  endereco: { cep: string | null; rua: string | null; numero: string | null; complemento: string | null; bairro: string | null; cidade: string | null; uf: string | null } | null }
+export const lerCadastro = (party: string) => call<Cadastro>("cob_cadastro_ler", { _party: party });
+export const salvarCadastro = (party: string, d: Record<string, unknown>) => call<void>("cob_cadastro_salvar", { _party: party, _d: d });
+export interface Comprovante { id: string; simulacao_id: string | null; referente: string; valor_cents: number; data_pagamento: string; banco: string | null; file_name: string; status: string; created_at: string }
+export async function comprovantes(party: string): Promise<Comprovante[]> {
+  const { data, error } = await (supabase.from as unknown as (t: string) => { select: (c: string) => { eq: (a: string, b: string) => { order: (c: string, o: { ascending: boolean }) => Promise<{ data: Comprovante[] | null; error: { message: string } | null }> } } })("cob_comprovantes").select("id,simulacao_id,referente,valor_cents,data_pagamento,banco,file_name,status,created_at").eq("party_id", party).order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
 
 export interface Devedor {
   party_id: string; nome: string; documento: string | null; etapa: Etapa;

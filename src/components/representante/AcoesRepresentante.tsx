@@ -13,7 +13,7 @@ type Forma = "PIX" | "BOLETO" | "CREDIT_CARD" | "CHEQUE";
 const FORMAS: { id: Forma; rotulo: string; dica: string }[] = [
   { id: "PIX", rotulo: "Pix", dica: "QR na tela" },
   { id: "BOLETO", rotulo: "Boleto", dica: "com Pix junto" },
-  { id: "CREDIT_CARD", rotulo: "Cartão", dica: "link até 3x" },
+  { id: "CREDIT_CARD", rotulo: "Cartão", dica: "link até 12x" },
   { id: "CHEQUE", rotulo: "Cheque", dica: "fica em custódia" },
 ];
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;

@@ -137,7 +137,8 @@ export function NovoTituloDialog({
   };
 
   React.useEffect(() => {
-    if (!open) {
+    if (open) {
+      setBusca("");
       setParty("");
       setDescricao("");
       setDocumento("");
@@ -147,6 +148,11 @@ export function NovoTituloDialog({
       setDivQtd("");
       setDivTotal("");
       setDivInicio(undefined);
+      setRecQtd("");
+      setRecInicio(undefined);
+      setRecValor("");
+      setEmissao(new Date());
+      setCompetencia(new Date());
       setJaPago(false);
       setContaBaixa("");
       setDataBaixa(new Date());
@@ -294,6 +300,8 @@ export function NovoTituloDialog({
                 placeholder="Buscar pessoa ou empresa"
                 searchPlaceholder="Digite nome, documento ou código"
                 searchThreshold={0}
+                onSearch={setBusca}
+                loading={contrapartes.isFetching}
               />
             </Campo>
             <input

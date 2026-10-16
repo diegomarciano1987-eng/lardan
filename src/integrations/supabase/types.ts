@@ -4194,6 +4194,53 @@ export type Database = {
           },
         ]
       }
+      fin_estorno_data_correcoes: {
+        Row: {
+          actor_id: string
+          antes_movements: Json
+          antes_settlement: Json
+          created_at: string
+          data_anterior: string
+          data_nova: string
+          id: string
+          motivo: string
+          settlement_id: string
+          transaction_id: number
+        }
+        Insert: {
+          actor_id: string
+          antes_movements: Json
+          antes_settlement: Json
+          created_at?: string
+          data_anterior: string
+          data_nova: string
+          id?: string
+          motivo: string
+          settlement_id: string
+          transaction_id: number
+        }
+        Update: {
+          actor_id?: string
+          antes_movements?: Json
+          antes_settlement?: Json
+          created_at?: string
+          data_anterior?: string
+          data_nova?: string
+          id?: string
+          motivo?: string
+          settlement_id?: string
+          transaction_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_estorno_data_correcoes_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fin_expurgo_backup: {
         Row: {
           created_at: string
@@ -12873,6 +12920,15 @@ export type Database = {
       }
       fin_encargos_contas: { Args: never; Returns: Json }
       fin_encargos_contas_set: { Args: { _payload: Json }; Returns: Json }
+      fin_estorno_data_set: {
+        Args: {
+          _data: string
+          _esperada: string
+          _motivo: string
+          _settlement: string
+        }
+        Returns: Json
+      }
       fin_expurgo_movimentos: {
         Args: { _ids: string[]; _lote: string; _motivo: string }
         Returns: Json
@@ -13933,6 +13989,10 @@ export type Database = {
         Returns: string
       }
       registry_counts: { Args: never; Returns: Json }
+      registry_duplicate_candidates: {
+        Args: { _doc?: string; _nome?: string }
+        Returns: Json
+      }
       registry_duplicates: {
         Args: { _limit?: number }
         Returns: {

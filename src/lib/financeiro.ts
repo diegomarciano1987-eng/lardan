@@ -124,6 +124,8 @@ export interface FinTitleDetail {
     valor_cents: number;
     conta: string | null;
     estorno: boolean;
+    ja_estornada?: boolean;
+    reversed_of?: string | null;
     parcela: number;
     settlement_id: string;
   }[];
@@ -271,6 +273,13 @@ export async function estornarBaixa(settlementId: string, motivo: string, data?:
   const { error } = data
     ? await supabase.rpc("fin_settlement_reverse_data", { _settlement: settlementId, _motivo: motivo, _data: data })
     : await supabase.rpc("fin_settlement_reverse", { _settlement: settlementId, _motivo: motivo });
+  if (error) throw error;
+}
+
+export async function corrigirDataEstorno(settlementId: string, data: string, motivo: string, esperada: string) {
+  const { error } = await supabase.rpc("fin_estorno_data_set", {
+    _settlement: settlementId, _data: data, _motivo: motivo, _esperada: esperada,
+  });
   if (error) throw error;
 }
 

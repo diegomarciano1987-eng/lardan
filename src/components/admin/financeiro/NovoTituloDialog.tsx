@@ -234,7 +234,7 @@ export function NovoTituloDialog({
       if (r.falhas.length)
         toast.error(`Título gravado, mas ${r.falhas.length} baixa(s) não entraram: ${r.falhas.join("; ")}. Dê a baixa pela ficha do título.`);
       else toast.success(r.baixas ? `Título registrado e ${r.baixas} parcela(s) já baixada(s).` : "Título registrado.");
-      void qc.invalidateQueries({ queryKey: ["fin-pr"] });
+      void qc.invalidateQueries({ queryKey: ["fin-pagar-receber"] });
       void qc.invalidateQueries({ queryKey: ["fin-accounts"] });
       void qc.invalidateQueries({ queryKey: ["fin-titles"] });
       void qc.invalidateQueries({ queryKey: ["fin-overview"] });

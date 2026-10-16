@@ -213,7 +213,7 @@ export function TituloSheet({
       setEditandoParcela(null);
       void qc.invalidateQueries({ queryKey: ["fin-title", id] });
       void qc.invalidateQueries({ queryKey: ["fin-titles"] });
-      void qc.invalidateQueries({ queryKey: ["fin-pr"] });
+      void qc.invalidateQueries({ queryKey: ["fin-pagar-receber"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });

@@ -9,7 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Salvar múltiplos papéis de um colaborador por uma única função protegida e auditada, evitando estado parcial entre concessões.
+- Save a collaborator's roles in one audited protected function. Why: no partial grants.
 - Account balance = sum of financial_account_movements up to the cutoff date (America/Sao_Paulo); saldo_inicial is itself a movement, never add financial_accounts.saldo_inicial_cents again. Why: avoids double counting across Visão geral/Contas/Fluxo.
 - Movements dated after today are forecast only (previsto), never realized, in every financial RPC. Why: realized reports cannot include future dates.
 - fin_dre reports unclassified titles, missing cost center, out-of-DRE natures, open installments and unreconciled lines as separate indicators. Why: "unpaid" is not "unclassified".

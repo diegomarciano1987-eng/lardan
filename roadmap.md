@@ -1,5 +1,6 @@
 # Roadmap
-- [ ] Aplicar patch de auditoria de segurança/cobrança e registrar pdv_links_listar — aguarda decisão de Diego sobre conflitos com alterações posteriores (numeração 0084 e AGENTS.md); depois testes e consultas somente leitura, sem publicar
+- [x] Aplicar patch como 0086 e registrar pdv_links_listar — 235 testes aprovados; consultas reais somente leitura; provas em docs/lardan/AUDITORIA-PATCH-2026-10-16.md; sem publicar
+- [ ] Limitações do pacote (crédito posterior do cartão, auditoria de recusas, saldo na ficha do representante) — aguardam autorização para alterar o patch; conta de cartão vazia
 - [x] Cancelar as sete maletas de teste autorizadas por Diego e conferir devolução ao estoque — 48 peças, 40 transferências, sete auditorias; tela conferida
 - [x] Larissa: acesso total ao cadastro
 - [x] Etapa 2: cobranças Asaas das parcelas do acordo + baixa que abate a dívida original

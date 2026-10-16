@@ -13432,6 +13432,16 @@ export type Database = {
         Returns: Json
       }
       kit_scope_all: { Args: never; Returns: boolean }
+      kit_testes_cancelar: {
+        Args: {
+          _ator: string
+          _chave: string
+          _executar?: boolean
+          _motivo: string
+          _plano: Json
+        }
+        Returns: Json
+      }
       kit_totals_refresh: { Args: { _cycle: string }; Returns: undefined }
       kit_transfer_confirm: {
         Args: { _payload?: Json; _transfer: string }

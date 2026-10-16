@@ -337,12 +337,13 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
   const d = detalhe.data;
   const validas = d.leituras.filter((l) => !l.estornada);
   const porPeca = Object.values(
-    validas.reduce<Record<string, { peca: string; qtd: number }>>((m, l) => {
-      m[l.peca] = { peca: l.peca, qtd: (m[l.peca]?.qtd ?? 0) + 1 };
+    validas.reduce<Record<string, { peca: string; qtd: number; product_id?: string | null; variant_id?: string | null }>>((m, l) => {
+      m[l.peca] = { peca: l.peca, qtd: (m[l.peca]?.qtd ?? 0) + 1, product_id: l.product_id, variant_id: l.variant_id };
       return m;
     }, {}),
   ).sort((a, b) => b.qtd - a.qtd);
   const s = SITUACAO[d.status];
+  const mostrarSugestoes = aberta && /[a-zA-ZÀ-ú]/.test(codigo) && codigo.trim().length >= 3;
 
   return (
     <TelaCheia>
@@ -361,9 +362,9 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
         </div>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
+      <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
         <div className="ledger-panel p-6">
-          <form onSubmit={enviar}>
+          <form onSubmit={enviar} className="relative">
             <label className="flex items-center gap-4 rounded-2xl border-2 border-ink bg-background px-6 py-6 focus-within:ring-4 focus-within:ring-ring/30">
               <ScanBarcode className="h-12 w-12 shrink-0 text-ledger-text" />
               <input
@@ -372,12 +373,34 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
                 onChange={(e) => setCodigo(e.target.value)}
                 disabled={!aberta}
                 autoComplete="off"
-                inputMode="none"
-                aria-label="Código de barras"
-                placeholder={aberta ? "Bipe as peças da maleta…" : "Entrada encerrada"}
+                aria-label="Código de barras, número ou nome da peça"
+                placeholder={aberta ? "Bipe, digite o código ou o nome da peça…" : "Entrada encerrada"}
                 className="w-full bg-transparent font-display text-4xl font-bold tracking-wide text-ledger-text outline-none placeholder:text-ledger-muted/60"
               />
             </label>
+            <p className="mt-2 text-xs text-ledger-muted">
+              Leitor: bipe direto. Teclado: digite o número e Enter, ou escreva o nome e clique na peça.
+            </p>
+            {mostrarSugestoes && (
+              <div className="absolute inset-x-0 top-full z-20 mt-1 max-h-96 overflow-auto rounded-2xl border border-line bg-background p-2 shadow-lg">
+                {sugestoes.isFetching && !sugestoes.data && <p className="p-3 text-sm text-ledger-muted">Buscando…</p>}
+                {sugestoes.data?.length === 0 && <p className="p-3 text-sm text-ledger-muted">Nenhuma peça encontrada.</p>}
+                {sugestoes.data?.map((sg) => (
+                  <button
+                    key={sg.variant_id}
+                    type="button"
+                    onClick={() => lancar(sg.codigo)}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left hover:bg-surface-muted"
+                  >
+                    <FotoPeca productId={sg.product_id} variantId={sg.variant_id} size="md" alt={sg.nome} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-ledger-text">{sg.nome}</span>
+                      <span className="text-xs text-ledger-muted">Código {sg.codigo}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </form>
           {ultimo && (
             <div
@@ -390,11 +413,14 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
               <p className="mt-1 text-sm opacity-70">Código {ultimo.codigo}</p>
             </div>
           )}
-          <ul className="mt-5 max-h-80 divide-y divide-line overflow-auto text-sm">
+          <ul className="mt-5 max-h-96 divide-y divide-line overflow-auto text-sm">
             {d.leituras.map((l) => (
               <li key={l.id} className="flex items-center justify-between gap-3 py-2">
-                <span className={l.estornada ? "text-ledger-muted line-through" : "text-ledger-text"}>
-                  {l.peca} <span className="text-ledger-muted">· {l.codigo}</span>
+                <span className="flex min-w-0 items-center gap-3">
+                  <FotoPeca productId={l.product_id} variantId={l.variant_id} size="sm" alt={l.peca} />
+                  <span className={l.estornada ? "text-ledger-muted line-through" : "text-ledger-text"}>
+                    {l.peca} <span className="text-ledger-muted">· {l.codigo}</span>
+                  </span>
                 </span>
                 <span className="flex items-center gap-3 text-ledger-muted">
                   {new Date(l.quando).toLocaleTimeString("pt-BR")}
@@ -421,6 +447,19 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
             <p className="mt-2 font-display text-7xl font-bold tabular-nums text-ledger-text" aria-label="Contador">
               {d.total_pecas}
             </p>
+            {ultimaFoto && (
+              <div className="mt-5">
+                <FotoPeca
+                  key={ultimaFoto.id}
+                  productId={ultimaFoto.product_id}
+                  variantId={ultimaFoto.variant_id}
+                  alt={ultimaFoto.peca}
+                  className="mx-auto aspect-square w-full rounded-2xl border border-line"
+                />
+                <p className="mt-3 text-sm font-semibold text-ledger-text">{ultimaFoto.peca}</p>
+                <p className="text-xs text-ledger-muted">Última peça · código {ultimaFoto.codigo}</p>
+              </div>
+            )}
             {pendentes > 0 && <p className="mt-2 text-sm text-ledger-muted">Gravando {pendentes}…</p>}
             {aberta && (
               <button
@@ -439,8 +478,11 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
             ) : (
               <ul className="space-y-2 text-sm">
                 {porPeca.map((p) => (
-                  <li key={p.peca} className="flex justify-between gap-3">
-                    <span className="text-ledger-text">{p.peca}</span>
+                  <li key={p.peca} className="flex items-center justify-between gap-3">
+                    <span className="flex min-w-0 items-center gap-3">
+                      <FotoPeca productId={p.product_id} variantId={p.variant_id} size="xs" alt={p.peca} />
+                      <span className="text-ledger-text">{p.peca}</span>
+                    </span>
                     <span className="tabular-nums font-semibold">{p.qtd}</span>
                   </li>
                 ))}

@@ -26,6 +26,7 @@ import { PedirDadosDialog } from "@/components/admin/financeiro/PedirDadosDialog
 import { CobrarAsaas } from "@/components/admin/financeiro/CobrarAsaas";
 import {
   cancelarTitulo,
+  editarParcelaFin,
   estornarBaixa,
   fetchFinAccounts,
   fetchFinTitle,
@@ -105,6 +106,7 @@ export function TituloSheet({
   const [chave] = React.useState(() => crypto.randomUUID());
   const [estornando, setEstornando] = React.useState<string | null>(null);
   const [cancelando, setCancelando] = React.useState(false);
+  const [editandoParcela, setEditandoParcela] = React.useState<FinInstallment | null>(null);
   const [reconhecendo, setReconhecendo] = React.useState(false);
   const [classificando, setClassificando] = React.useState(false);
 
@@ -185,9 +187,9 @@ export function TituloSheet({
   });
 
   const estornar = useMutation({
-    mutationFn: async (v: { settlementId: string; motivo: string }) => {
+    mutationFn: async (v: { settlementId: string; motivo: string; data: string }) => {
       if (!v.motivo.trim()) throw new Error("Estorno exige motivo.");
-      return estornarBaixa(v.settlementId, v.motivo.trim());
+      return estornarBaixa(v.settlementId, v.motivo.trim(), v.data || undefined);
     },
     onSuccess: () => {
       toast.success("Estorno registrado com lançamento compensatório.");
@@ -195,6 +197,23 @@ export function TituloSheet({
       void qc.invalidateQueries({ queryKey: ["fin-title", id] });
       void qc.invalidateQueries({ queryKey: ["fin-overview"] });
       void qc.invalidateQueries({ queryKey: ["fin-accounts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const editarParcela = useMutation({
+    mutationFn: async (v: Record<string, string>) => {
+      if (!editandoParcela) throw new Error("Parcela não escolhida.");
+      const cents = reaisParaCentavos(v["valor"] ?? "");
+      if (!cents || cents <= 0) throw new Error("Informe um valor maior que zero.");
+      return editarParcelaFin(editandoParcela.id, v["vencimento"] ?? "", cents, (v["motivo"] ?? "").trim());
+    },
+    onSuccess: () => {
+      toast.success("Parcela alterada. A mudança ficou no histórico.");
+      setEditandoParcela(null);
+      void qc.invalidateQueries({ queryKey: ["fin-title", id] });
+      void qc.invalidateQueries({ queryKey: ["fin-titles"] });
+      void qc.invalidateQueries({ queryKey: ["fin-pr"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -337,9 +356,15 @@ export function TituloSheet({
                     <span className="text-sm font-medium text-ledger-text">
                       {p.numero}/{p.total_parcelas} · vence {dataBR(p.vencimento)}
                     </span>
-                    <span className="text-sm tabular-nums text-ledger-muted">
+                    <span className="flex items-center gap-2 text-sm tabular-nums text-ledger-muted">
                       {formatBRLFromCents(p.pago_cents)} de {formatBRLFromCents(p.valor_cents)} ·
                       saldo {formatBRLFromCents(saldoParcela(p))}
+                      {t.titulo.status !== "cancelado" &&
+                      caps.includes(t.titulo.direction === "payable" ? "finance.payable.manage" : "finance.receivable.manage") ? (
+                        <button type="button" className="admin-btn min-h-9 px-3 text-xs" onClick={() => setEditandoParcela(p)}>
+                          Editar
+                        </button>
+                      ) : null}
                     </span>
                   </li>
                 ))}
@@ -555,8 +580,9 @@ export function TituloSheet({
         <PedirDadosDialog
           open={!!estornando}
           titulo="Estornar baixa"
-          descricao="O estorno gera lançamento compensatório e fica registrado no histórico."
+          descricao="O estorno gera lançamento compensatório na data escolhida e fica registrado no histórico."
           campos={[
+            { nome: "data", rotulo: "Data do estorno", tipo: "data", obrigatorio: true, padrao: new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date()) },
             { nome: "motivo", rotulo: "Motivo do estorno", tipo: "area", obrigatorio: true },
           ]}
           confirmar="Estornar"
@@ -565,8 +591,23 @@ export function TituloSheet({
             estornar.mutate({
               settlementId: estornando as string,
               motivo: vals["motivo"] ?? "",
+              data: vals["data"] ?? "",
             })
           }
+        />
+
+        <PedirDadosDialog
+          open={!!editandoParcela}
+          titulo={editandoParcela ? `Editar parcela ${editandoParcela.numero}/${editandoParcela.total_parcelas}` : "Editar parcela"}
+          descricao="Muda vencimento e valor. Parcela já paga só muda o vencimento; o total do título é recalculado."
+          campos={[
+            { nome: "vencimento", rotulo: "Vencimento", tipo: "data", obrigatorio: true, padrao: editandoParcela?.vencimento ?? "" },
+            { nome: "valor", rotulo: "Valor (R$)", tipo: "valor", obrigatorio: true, padrao: editandoParcela ? (editandoParcela.valor_cents / 100).toFixed(2).replace(".", ",") : "" },
+            { nome: "motivo", rotulo: "Motivo", tipo: "area", obrigatorio: true },
+          ]}
+          confirmar="Salvar parcela"
+          onOpenChange={(v) => !v && setEditandoParcela(null)}
+          onConfirmar={(vals) => editarParcela.mutate(vals)}
         />
 
         <PedirDadosDialog

@@ -8,11 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DateField } from "@/components/premium/DateField";
 
 export interface CampoPedido {
   nome: string;
   rotulo: string;
-  tipo?: "texto" | "valor" | "area";
+  tipo?: "texto" | "valor" | "area" | "data";
   obrigatorio?: boolean;
   padrao?: string;
   placeholder?: string;
@@ -79,7 +80,19 @@ export function PedirDadosDialog({
                 {c.rotulo}
                 {c.obrigatorio ? " *" : ""}
               </span>
-              {c.tipo === "area" ? (
+              {c.tipo === "data" ? (
+                <DateField
+                  value={valores[c.nome] ? new Date(`${valores[c.nome]}T12:00:00`) : undefined}
+                  onChange={(d) =>
+                    setValores((v) => ({
+                      ...v,
+                      [c.nome]: d
+                        ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+                        : "",
+                    }))
+                  }
+                />
+              ) : c.tipo === "area" ? (
                 <textarea
                   rows={3}
                   value={valores[c.nome] ?? ""}

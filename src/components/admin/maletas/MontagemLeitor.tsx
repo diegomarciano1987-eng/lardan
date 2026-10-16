@@ -113,7 +113,7 @@ export function MontagemLeitor({
 
   React.useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => {
-      const nome = data.user?.user_metadata?.full_name ?? data.user?.email;
+      const nome = data.user?.user_metadata?.["full_name"] ?? data.user?.email;
       if (nome) setOperador(String(nome));
     });
   }, []);

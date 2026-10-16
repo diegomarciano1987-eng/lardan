@@ -34,7 +34,7 @@ function Configuracoes() {
         description="Usuários e papéis, integrações e parâmetros do sistema."
       />
       <MargemPadrao />
-      <ParametrosRemessa />
+      <ParametrosRemessaPanel />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {itens.map((m) => (
           <Panel key={m.slug} flush>
@@ -134,7 +134,7 @@ const CAMPOS_REMessa: { chave: keyof ParametrosRemessa; rotulo: string; ajuda: s
 ];
 
 /** Parâmetros de montagem das remessas — o que cada maleta precisa ter por tipo de peça. */
-function ParametrosRemessa() {
+function ParametrosRemessaPanel() {
   const qc = useQueryClient();
   const caps = useCapabilities();
   const pode = can(caps, "kit.manage");

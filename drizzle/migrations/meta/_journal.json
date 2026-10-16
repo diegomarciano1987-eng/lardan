@@ -659,6 +659,13 @@
       "when": 1792194437524,
       "tag": "0093_consultora_pos_venda_fotos_privadas",
       "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "7",
+      "when": 1792194594242,
+      "tag": "0094_consultora_pos_venda_prazo_oficial",
+      "breakpoints": true
     }
   ]
 }

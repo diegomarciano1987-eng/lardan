@@ -12798,6 +12798,7 @@ export type Database = {
         Args: { _id: string; _resposta: string; _status: string }
         Returns: undefined
       }
+      consultora_pos_venda_prazo: { Args: { _order: string }; Returns: Json }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string

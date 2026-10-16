@@ -568,6 +568,13 @@
       "when": 1792175134241,
       "tag": "0080_kit_consultora_doc_impressao",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1792175156984,
+      "tag": "0081_kit_consultora_doc_fix_colunas",
+      "breakpoints": true
     }
   ]
 }

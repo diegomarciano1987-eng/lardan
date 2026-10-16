@@ -1,4 +1,18 @@
 # Roadmap
+## App da consultora — PDF de melhorias (16/10)
+- [ ] Conferir todos os itens do PDF contra o app e registrar evidências e dependências
+- [ ] Corrigir maleta ativa, pedidos/clientes, formulários e navegação da venda
+- [ ] Facilitar venda: busca, filtros, fotos ampliadas, etiqueta, revisão e comprovante
+- [ ] Melhorar vitrine, compartilhamento, clientes, lembretes e mensagens
+- [ ] Mostrar ganhos, metas, acerto, indicações e conteúdo com dados reais
+- [ ] Implementar troca/garantia ligada à venda, análise, fotos e histórico — prazos a definir
+- [ ] Implementar entregas, acessibilidade, letra grande e instalação
+- [ ] Conferir pagamentos/parcelas com o motor oficial, sem duplicar baixas
+- [ ] Aplicar preço final ,90 apenas após definir arredondamento e alcance
+- [ ] Identificar dados de teste e apresentar limpeza auditada antes de executar
+- [ ] Validar os fluxos autenticados em celular e computador; entregar provas item a item
+- [ ] Publicar somente quando solicitado
+
 ## Financeiro — nove pontos enviados em 16/10
 - [x] 1 Edição de parcela — teste R$ 138,15 → R$ 138,13
 - [x] 2 Conciliação preserva classificação do título — teste Aluguel; sem conciliação real nova

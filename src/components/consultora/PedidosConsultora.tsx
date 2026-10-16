@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PagamentoLardan } from "@/components/consultora/PagamentoLardan";
+import { AbrirPosVenda } from "@/components/consultora/PosVenda";
 import { brl, detalhePedido, listarPedidos, mudarSituacaoPedido, SITUACAO_PEDIDO, traduzir, type PedidoResumo } from "@/lib/maletas";
 import { linkWhats } from "@/lib/consultora";
 import { idadePedido, mensagemPedido, tomIdade } from "@/lib/consultora-regras";
@@ -45,6 +46,7 @@ export function PedidosConsultora() {
         <span className={`mt-3 inline-block rounded px-3 py-1 text-lg font-semibold ${cor}`}>Há {dias} {dias === 1 ? "dia" : "dias"}</span>
         <div className="mt-4 flex flex-wrap gap-3">
           <Button variant="outline" className="h-auto min-h-12" onClick={() => setAberto(p)}><ShoppingBag /> Ver peças e pagamento</Button>
+          {p.payment_status === "pago" && p.status !== "cancelado" && <AbrirPosVenda pedido={p.id} />}
           {whats && <Button asChild variant="outline" className="h-auto min-h-12"><a href={whats} target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a></Button>}
           {p.status === "aguardando_atendimento" && <Button className="h-auto min-h-12" disabled={mudar.isPending} onClick={() => mudar.mutate({ id: p.id, status: "em_atendimento" })}>Começar atendimento</Button>}
           {p.status === "em_atendimento" && <Button className="h-auto min-h-12" disabled={mudar.isPending} onClick={() => mudar.mutate({ id: p.id, status: "aguardando_pagamento" })}>Combinar pagamento</Button>}

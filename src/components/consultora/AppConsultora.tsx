@@ -1,4 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { ComprasCliente } from "@/components/consultora/ComprasCliente";
+import { MensagensProntas } from "@/components/consultora/MensagensProntas";
+import { ListaPosVenda } from "@/components/consultora/PosVenda";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { LeitorEtiqueta } from "@/components/consultora/LeitorEtiqueta";
 import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
@@ -525,6 +528,7 @@ export function FichaCliente({ id, nav, ir }: { id: string; nav: Nav; ir: Ir }) 
         </div>
 
         <section className="space-y-3">
+          <ComprasCliente cliente={id} />
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-xl font-semibold">Atendimentos</h2>
             {!abrirReg && <button type="button" className="admin-btn min-h-12 text-base" onClick={() => setAbrirReg(true)}><Plus className="size-5" aria-hidden /> Registrar</button>}
@@ -840,6 +844,8 @@ export function Mais({ ir }: { ir: Ir }) {
         </li>
       </ul>
       <button type="button" onClick={sair} className="admin-btn mt-8 min-h-13 w-full justify-center text-base"><LogOut className="size-5" aria-hidden /> Sair da conta</button>
+      <MensagensProntas />
+      <ListaPosVenda />
     </div>
   );
 }

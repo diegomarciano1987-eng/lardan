@@ -9,11 +9,9 @@ import {
   Boxes,
   BriefcaseBusiness,
   WalletCards,
-  UserRound,
   UsersRound,
   ContactRound,
   UserRoundSearch,
-  ShoppingBag,
   CloudUpload,
   BellRing,
   ShieldCheck,
@@ -35,6 +33,7 @@ import {
  * em_breve      — sem rota, item desabilitado
  */
 export type ModuleState = "ativo" | "em_construcao" | "em_breve";
+// Consultoras, Representantes, Clientes e Vendas saíram do menu: já existem em Cadastros, Rede, Maletas, Cobrança e PDV.
 
 export interface AdminModule {
   slug: string;
@@ -193,42 +192,6 @@ export const ADMIN_MODULES: AdminModule[] = [
     roles: [...STOCK, "montagem"],
     capability: "kit.view",
     state: "ativo",
-  },
-  {
-    slug: "consultoras",
-    label: "Consultoras",
-    description: "Cadastro, carteira, maletas e situação das consultoras.",
-    icon: UserRound,
-    roles: ["master", "diretoria", "suporte"],
-    capability: "partners.view",
-    state: "em_breve",
-  },
-  {
-    slug: "representantes",
-    label: "Representantes",
-    description: "Regiões, carteira de consultoras e situação.",
-    icon: UsersRound,
-    roles: ["master", "diretoria"],
-    capability: "partners.view",
-    state: "em_breve",
-  },
-  {
-    slug: "clientes",
-    label: "Clientes",
-    description: "Base de clientes com dados mínimos autorizados.",
-    icon: ContactRound,
-    roles: ["master", "diretoria", "suporte"],
-    capability: "partners.view",
-    state: "em_breve",
-  },
-  {
-    slug: "vendas",
-    label: "Vendas",
-    description: "Pedidos, devoluções e acerto de maleta.",
-    icon: ShoppingBag,
-    roles: ["master", "diretoria", "financeiro"],
-    capability: "finance.view",
-    state: "em_breve",
   },
   {
     slug: "importacao",

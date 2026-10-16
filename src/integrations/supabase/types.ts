@@ -172,6 +172,7 @@ export type Database = {
           billing_default: boolean
           config_status: string
           config_version: number
+          conta_cartao_receber_id: string | null
           created_at: string
           cutover_date: string | null
           environment: string
@@ -201,6 +202,7 @@ export type Database = {
           billing_default?: boolean
           config_status?: string
           config_version?: number
+          conta_cartao_receber_id?: string | null
           created_at?: string
           cutover_date?: string | null
           environment: string
@@ -230,6 +232,7 @@ export type Database = {
           billing_default?: boolean
           config_status?: string
           config_version?: number
+          conta_cartao_receber_id?: string | null
           created_at?: string
           cutover_date?: string | null
           environment?: string
@@ -255,6 +258,13 @@ export type Database = {
           webhook_secret_ref?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "asaas_accounts_conta_cartao_receber_id_fkey"
+            columns: ["conta_cartao_receber_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "asaas_accounts_financial_account_id_fkey"
             columns: ["financial_account_id"]
@@ -11953,6 +11963,7 @@ export type Database = {
       }
       asaas_baixa_automatica: { Args: { _charge: string }; Returns: Json }
       asaas_baixa_pendentes: { Args: { _executar?: boolean }; Returns: Json }
+      asaas_cartao_creditar: { Args: { _charge: string }; Returns: Json }
       asaas_charge_vincular: {
         Args: {
           _alterar?: boolean

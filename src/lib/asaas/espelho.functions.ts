@@ -16,7 +16,7 @@ export const sincronizarCobrancasAsaas = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: pode } = await context.supabase.rpc("has_capability", {
       _user_id: context.userId,
-      _cap: "finance.receivable.view",
+      _cap: "finance.receivable.manage",
     } as never);
     if (!pode) throw new Error("Sem permissão.");
     const { executarSyncAsaas } = await import("./espelho.server");

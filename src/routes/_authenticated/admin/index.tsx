@@ -144,7 +144,7 @@ function VisaoGeral() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("catalog_street_value");
       if (error) throw error;
-      return data as { total_cents: number; pecas: number; custo_cents: number };
+      return data as { total_cents: number; pecas: number; custo_cents: number | null };
     },
   });
 

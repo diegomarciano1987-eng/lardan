@@ -555,9 +555,7 @@ function CockpitCandidata() {
                           : (d.avaliacoes.find((a) => a.tipo === "disc")?.situacao ?? "Não realizado")}
                       </p>
                     </div>
-                    <button type="button" className="admin-btn" disabled title="Recurso preparado para futura ativação">
-                      Enviar teste DISC
-                    </button>
+                    {/* "Enviar teste DISC" volta quando o envio existir; botão morto removido. */}
                   </div>
                   <p className="mt-3 text-xs text-ledger-muted">
                     DISC, recurso preparado para futura ativação. Não existe questionário, pontuação

@@ -582,6 +582,13 @@
       "when": 1792175341037,
       "tag": "0082_remessa_parametros_salvar",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1792176250779,
+      "tag": "0083_remessas_entidade_mestre",
+      "breakpoints": true
     }
   ]
 }

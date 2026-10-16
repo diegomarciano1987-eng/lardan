@@ -5,19 +5,14 @@ import { BriefcaseBusiness, Plus, ScanLine } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState, ErrorState, PageHeader, Panel, StatusBadge, Skeleton } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { DateField } from "@/components/premium/DateField";
 import { useCapabilities } from "@/lib/capabilities";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  SITUACAO_MALETA,
-  brl,
-  criarCiclo,
-  listarMaletas,
-  traduzir,
-  type MaletaCard,
-} from "@/lib/maletas";
+import { brl, traduzir } from "@/lib/maletas";
+import { STATUS_REMESSA, criarRemessa, dataBR, isoDia, listarRemessas, type RemessaCard } from "@/lib/remessas";
 
 export const Route = createFileRoute("/_authenticated/admin/maletas")({
-  component: MaletasPage,
+  component: RemessasPage,
   head: () => ({
     meta: [
       { title: "Remessas — Administração LARDAN" },
@@ -26,53 +21,28 @@ export const Route = createFileRoute("/_authenticated/admin/maletas")({
   }),
 });
 
-const TOM = { neutro: "neutral", aviso: "warning", ok: "success", erro: "danger" } as const;
-const TAMANHO = 100;
-
 const SITUACOES = [
   { value: "todas", label: "Todas as situações" },
-  ...Object.entries(SITUACAO_MALETA).map(([value, v]) => ({ value, label: v.rotulo })),
+  ...Object.entries(STATUS_REMESSA).map(([value, v]) => ({ value, label: v.rotulo })),
 ];
 
-/** Busca no servidor: a lista nunca é um recorte filtrado no navegador. */
-async function buscarPessoas(papel: "consultora" | "representante", termo: string) {
+async function buscarPracas() {
+  const { data, error } = await supabase.rpc("pracas_resumo" as never);
+  if (error) throw error;
+  return ((data ?? []) as unknown as { id: string; nome: string; ativo: boolean; consultoras: number }[])
+    .filter((p) => p.ativo)
+    .map((p) => ({ value: p.id, label: `${p.nome} · ${p.consultoras} consultoras` }));
+}
+
+async function buscarRepresentantes(termo: string) {
   const { data, error } = await supabase.rpc("list_parties", {
     _limit: 40,
     _offset: 0,
-    _role: papel,
-    _status: "ativo",
+    _role: "representante",
     ...(termo.trim() ? { _search: termo.trim() } : {}),
   } as never);
   if (error) throw error;
-  const linhas = (data ?? []) as unknown as { id: string; display_name: string; total?: number }[];
-  return {
-    total: Number(linhas[0]?.total ?? linhas.length),
-    opcoes: linhas.map((p) => ({ value: p.id, label: p.display_name })),
-  };
-}
-
-async function buscarPracas() {
-  const { data, error } = await supabase
-    .from("cob_pracas")
-    .select("id, nome")
-    .eq("ativo", true)
-    .order("nome");
-  if (error) throw error;
-  return (data ?? []).map((p) => ({ value: p.id as string, label: p.nome as string }));
-}
-
-/** Consultoras da praça da remessa: só elas aparecem na montagem. */
-async function buscarConsultorasPraca(pracaId: string, termo: string) {
-  const { data, error } = await supabase.rpc("praca_consultoras" as never, {
-    _praca: pracaId,
-    _search: termo.trim() || null,
-  } as never);
-  if (error) throw error;
-  const linhas = (data ?? []) as unknown as { party_id: string; display_name: string }[];
-  return {
-    total: linhas.length,
-    opcoes: linhas.map((p) => ({ value: p.party_id, label: p.display_name })),
-  };
+  return ((data ?? []) as unknown as { id: string; display_name: string }[]).map((p) => ({ value: p.id, label: p.display_name }));
 }
 
 async function buscarDepositos() {
@@ -86,47 +56,39 @@ async function buscarDepositos() {
   return (data ?? []).map((l) => ({ value: l.id, label: `${l.code} · ${l.name}` }));
 }
 
-function NovaMaleta({ aoCriar }: { aoCriar: (cycleId: string) => void }) {
+function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
   const [aberto, setAberto] = React.useState(false);
   const [praca, setPraca] = React.useState("");
-  const [consultora, setConsultora] = React.useState("");
+  const [numero, setNumero] = React.useState("");
+  const [emissao, setEmissao] = React.useState<Date | undefined>(new Date());
+  const [acerto, setAcerto] = React.useState<Date | undefined>();
   const [representante, setRepresentante] = React.useState("");
-  const [deposito, setDeposito] = React.useState("");
-  const [etiqueta, setEtiqueta] = React.useState("");
-  const [buscaC, setBuscaC] = React.useState("");
   const [buscaR, setBuscaR] = React.useState("");
+  const [deposito, setDeposito] = React.useState("");
 
-  const pracas = useQuery({ queryKey: ["maletas", "pracas"], queryFn: buscarPracas, enabled: aberto });
-
-  const consultoras = useQuery({
-    queryKey: ["maletas", "pessoas", "consultora", praca || "todas", buscaC],
-    queryFn: () =>
-      praca ? buscarConsultorasPraca(praca, buscaC) : buscarPessoas("consultora", buscaC),
-    enabled: aberto,
-  });
-  const representantes = useQuery({
-    queryKey: ["maletas", "pessoas", "representante", buscaR],
-    queryFn: () => buscarPessoas("representante", buscaR),
-    enabled: aberto,
-  });
-  const depositos = useQuery({ queryKey: ["maletas", "depositos"], queryFn: buscarDepositos, enabled: aberto });
-
+  const pracas = useQuery({ queryKey: ["remessas", "pracas"], queryFn: buscarPracas, enabled: aberto });
+  const reps = useQuery({ queryKey: ["remessas", "reps", buscaR], queryFn: () => buscarRepresentantes(buscaR), enabled: aberto });
+  const depositos = useQuery({ queryKey: ["remessas", "depositos"], queryFn: buscarDepositos, enabled: aberto });
   React.useEffect(() => {
     if (depositos.data?.length === 1 && !deposito) setDeposito(depositos.data[0]!.value);
   }, [depositos.data, deposito]);
 
   const criar = useMutation({
-    mutationFn: () =>
-      criarCiclo({
-        consultora_party_id: consultora || null,
-        representante_party_id: representante || null,
-        origin_location_id: deposito || null,
-        label: etiqueta || null,
-      }),
+    mutationFn: () => {
+      if (!praca) throw new Error("Escolha a praça da remessa.");
+      return criarRemessa({
+        praca,
+        numero: numero.trim() ? Number(numero) : null,
+        data_emissao: isoDia(emissao),
+        data_acerto: isoDia(acerto),
+        representante: representante || null,
+        deposito: deposito || null,
+      });
+    },
     onSuccess: (r) => {
-      toast.success("Maleta aberta para montagem.");
+      toast.success(`Remessa nº ${r.numero} aberta.`);
       setAberto(false);
-      aoCriar(r.cycle_id);
+      aoCriar(r.id);
     },
     onError: (e) => toast.error(traduzir(e)),
   });
@@ -134,155 +96,96 @@ function NovaMaleta({ aoCriar }: { aoCriar: (cycleId: string) => void }) {
   if (!aberto) {
     return (
       <button type="button" className="admin-btn admin-btn-primary" onClick={() => setAberto(true)}>
-        <Plus aria-hidden className="size-4" /> Nova maleta
+        <Plus aria-hidden className="size-4" /> Nova remessa
       </button>
     );
   }
 
   return (
-    <Panel title="Nova maleta" className="w-full">
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-1.5 text-sm">
-          <span className="ledger-eyebrow">Praça da remessa</span>
-          <SmartSelect
-            value={praca}
-            onChange={(v) => {
-              setPraca(v);
-              setConsultora("");
-            }}
-            options={pracas.data ?? []}
-            placeholder="Todas as praças"
-          />
-          <span className="text-xs text-ledger-muted">
-            Escolhendo a praça, só as consultoras dela aparecem na montagem.
-          </span>
+    <Panel title="Nova remessa" className="w-full">
+      <div className="grid gap-4 md:grid-cols-3">
+        <label className="grid gap-1.5 text-sm md:col-span-2">
+          <span className="ledger-eyebrow">Praça</span>
+          <SmartSelect value={praca} onChange={setPraca} options={pracas.data ?? []} loading={pracas.isFetching} placeholder="Escolher praça" />
         </label>
         <label className="grid gap-1.5 text-sm">
-          <span className="ledger-eyebrow">Consultora</span>
-          <SmartSelect
-            value={consultora}
-            onChange={setConsultora}
-            options={consultoras.data?.opcoes ?? []}
-            onSearch={setBuscaC}
-            loading={consultoras.isFetching}
-            searchPlaceholder="Buscar por nome, código ou documento"
-            placeholder="Escolher consultora"
-          />
-          <span className="text-xs text-ledger-muted">
-            {consultoras.data
-              ? `${consultoras.data.total} consultora(s) encontradas · mostrando ${consultoras.data.opcoes.length}`
-              : "Digite para buscar em toda a base."}
-          </span>
+          <span className="ledger-eyebrow">Número da remessa</span>
+          <input className="admin-input" inputMode="numeric" value={numero}
+            onChange={(e) => setNumero(e.target.value.replace(/\D/g, ""))} placeholder="Automático (próximo número)" />
         </label>
         <label className="grid gap-1.5 text-sm">
-          <span className="ledger-eyebrow">Representante (opcional)</span>
-          <SmartSelect
-            value={representante}
-            onChange={setRepresentante}
-            options={representantes.data?.opcoes ?? []}
-            onSearch={setBuscaR}
-            loading={representantes.isFetching}
-            searchPlaceholder="Buscar representante"
-            placeholder="Entrega direta"
-          />
+          <span className="ledger-eyebrow">Data de emissão</span>
+          <DateField value={emissao} onChange={setEmissao} />
+        </label>
+        <label className="grid gap-1.5 text-sm">
+          <span className="ledger-eyebrow">Data de acerto</span>
+          <DateField value={acerto} onChange={setAcerto} />
+        </label>
+        <label className="grid gap-1.5 text-sm">
+          <span className="ledger-eyebrow">Representante</span>
+          <SmartSelect value={representante} onChange={setRepresentante} options={reps.data ?? []} onSearch={setBuscaR}
+            loading={reps.isFetching} searchPlaceholder="Buscar representante" placeholder="Entrega direta" />
         </label>
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Depósito de origem</span>
-          <SmartSelect
-            value={deposito}
-            onChange={setDeposito}
-            options={depositos.data ?? []}
-            placeholder="Escolher depósito"
-          />
-          <span className="text-xs text-ledger-muted">
-            As peças saem deste depósito. Com mais de um ativo, a escolha é obrigatória.
-          </span>
-        </label>
-        <label className="grid gap-1.5 text-sm">
-          <span className="ledger-eyebrow">Etiqueta</span>
-          <input
-            className="admin-input"
-            value={etiqueta}
-            onChange={(e) => setEtiqueta(e.target.value)}
-            placeholder="Ex.: Maleta primavera"
-          />
+          <SmartSelect value={deposito} onChange={setDeposito} options={depositos.data ?? []} placeholder="Escolher depósito" />
         </label>
       </div>
       <div className="mt-5 flex gap-2">
-        <button
-          type="button"
-          className="admin-btn admin-btn-primary"
-          disabled={criar.isPending}
-          onClick={() => criar.mutate()}
-        >
-          {criar.isPending ? "Abrindo…" : "Abrir montagem"}
+        <button type="button" className="admin-btn admin-btn-primary" disabled={criar.isPending} onClick={() => criar.mutate()}>
+          {criar.isPending ? "Abrindo…" : "Abrir remessa"}
         </button>
-        <button type="button" className="admin-btn" onClick={() => setAberto(false)}>
-          Cancelar
-        </button>
+        <button type="button" className="admin-btn" onClick={() => setAberto(false)}>Cancelar</button>
       </div>
     </Panel>
   );
 }
 
-function Linha({ m }: { m: MaletaCard }) {
-  const s = SITUACAO_MALETA[m.situacao] ?? { rotulo: m.situacao, tom: "neutro" as const };
+function Linha({ r }: { r: RemessaCard }) {
+  const s = STATUS_REMESSA[r.status] ?? { rotulo: r.status, tom: "neutral" as const };
   return (
-    <Link
-      to="/admin/maletas/$id"
-      params={{ id: m.cycle_id }}
-      className="flex flex-wrap items-center justify-between gap-4 border-b border-line-soft px-6 py-4 transition hover:bg-surface-muted"
-    >
+    <Link to="/admin/maletas/remessa/$id" params={{ id: r.id }}
+      className="flex flex-wrap items-center justify-between gap-4 border-b border-line-soft px-6 py-4 transition hover:bg-surface-muted">
       <div className="min-w-0">
         <p className="font-semibold text-ledger-text">
-          {m.codigo} <span className="text-ledger-muted">· ciclo {m.ciclo}</span>
+          Remessa {r.numero} <span className="text-ledger-muted">· {r.praca}</span>
         </p>
         <p className="text-sm text-ledger-muted">
-          {m.consultora ?? "Sem consultora definida"}
-          {m.representante ? ` · via ${m.representante}` : ""}
+          Emissão {dataBR(r.data_emissao)} · Acerto {dataBR(r.data_acerto)}
+          {r.representante ? ` · ${r.representante}` : ""}
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-6 text-sm">
-        <span className="tabular-nums text-ledger-muted">{m.pecas} peças</span>
-        <span className="tabular-nums font-semibold text-ledger-text">{brl(Number(m.valor_cents ?? 0))}</span>
-        <StatusBadge tone={TOM[s.tom]}>{s.rotulo}</StatusBadge>
+        <span className="tabular-nums text-ledger-muted">{r.maletas} maletas · {r.maletas_conferidas} conferidas</span>
+        <span className="tabular-nums text-ledger-muted">{r.pecas} peças</span>
+        <span className="tabular-nums font-semibold text-ledger-text">{brl(Number(r.valor_cents ?? 0))}</span>
+        <StatusBadge tone={s.tom}>{s.rotulo}</StatusBadge>
       </div>
     </Link>
   );
 }
 
-function MaletasPage() {
+function RemessasPage() {
   const caps = useCapabilities();
   const podeMontar = caps.includes("kit.manage");
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [situacao, setSituacao] = React.useState("todas");
-  const [pagina, setPagina] = React.useState(0);
   const [qr, setQr] = React.useState("");
-  React.useEffect(() => setPagina(0), [situacao]);
 
-  const lista = useQuery({
-    queryKey: ["maletas", "board", situacao, pagina],
-    queryFn: () => listarMaletas(situacao, pagina, TAMANHO),
-  });
+  const lista = useQuery({ queryKey: ["remessas", "lista", situacao], queryFn: () => listarRemessas(situacao) });
 
   async function abrirPorQr() {
     const bruto = qr.trim();
     const token = (/[?&]qr=([^&#\s]+)/.exec(bruto)?.[1] ?? bruto.split("/").pop() ?? "").trim();
     if (!token) return;
-    // busca direta no servidor, com as permissões de quem está logado
     const { data, error } = await supabase.from("kits").select("id").eq("qr_token", token).maybeSingle();
     if (error || !data) {
       toast.error("Maleta não encontrada para este código.");
       return;
     }
-    const { data: ciclo } = await supabase
-      .from("kit_cycles")
-      .select("id")
-      .eq("kit_id", data.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data: ciclo } = await supabase.from("kit_cycles").select("id").eq("kit_id", data.id)
+      .order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (!ciclo) {
       toast.error("Nenhum ciclo desta maleta está visível para você.");
       return;
@@ -295,7 +198,7 @@ function MaletasPage() {
       <PageHeader
         eyebrow="Núcleo comercial"
         title="Remessas"
-        description="Remessas por praça: montagem, conferência, expedição, cadeia de custódia e aceite das maletas. Todas as ações usam as regras transacionais do banco."
+        description="Cada remessa tem seu número e sua praça. As maletas das consultoras são abertas dentro da remessa."
         actions={
           <div className="flex flex-wrap gap-2">
             {caps.includes("stock.operate") && (
@@ -304,12 +207,10 @@ function MaletasPage() {
               </Link>
             )}
             {podeMontar && (
-              <NovaMaleta
-                aoCriar={(id) => {
-                  qc.invalidateQueries({ queryKey: ["maletas"] });
-                  navigate({ to: "/admin/maletas/$id", params: { id } });
-                }}
-              />
+              <NovaRemessa aoCriar={(id) => {
+                qc.invalidateQueries({ queryKey: ["remessas"] });
+                navigate({ to: "/admin/maletas/remessa/$id", params: { id } });
+              }} />
             )}
           </div>
         }
@@ -320,15 +221,9 @@ function MaletasPage() {
           <SmartSelect value={situacao} onChange={setSituacao} options={SITUACOES} placeholder="Situação" />
         </div>
         <div className="flex items-center gap-2">
-          <input
-            className="admin-input w-72"
-            value={qr}
-            onChange={(e) => setQr(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void abrirPorQr();
-            }}
-            placeholder="Bipar QR ou colar o código da maleta"
-          />
+          <input className="admin-input w-72" value={qr} onChange={(e) => setQr(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") void abrirPorQr(); }}
+            placeholder="Bipar QR ou colar o código da maleta" />
           <button type="button" className="admin-btn" onClick={() => void abrirPorQr()}>
             <ScanLine aria-hidden className="size-4" /> Abrir
           </button>
@@ -338,28 +233,15 @@ function MaletasPage() {
       <Panel flush>
         {lista.isLoading && <div className="space-y-2 p-6">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14" />)}</div>}
         {lista.isError && (
-          <div className="px-6">
-            <ErrorState message={traduzir(lista.error)} onRetry={() => void lista.refetch()} />
-          </div>
+          <div className="px-6"><ErrorState message={traduzir(lista.error)} onRetry={() => void lista.refetch()} /></div>
         )}
         {lista.data?.length === 0 && (
           <div className="px-6">
-            <EmptyState
-              title="Nenhuma maleta nesta situação"
-              description="Abra uma nova maleta para começar a montagem, ou mude o filtro de situação."
-            />
+            <EmptyState title="Nenhuma remessa nesta situação"
+              description="Abra uma nova remessa escolhendo a praça; depois as maletas das consultoras são abertas dentro dela." />
           </div>
         )}
-        {lista.data?.map((m) => <Linha key={m.cycle_id} m={m} />)}
-        {(pagina > 0 || (lista.data?.length ?? 0) === TAMANHO) && (
-          <div className="flex items-center justify-between px-6 pb-4 pt-2 text-sm">
-            <button type="button" className="rounded-lg border border-ledger-line px-3 py-1.5 disabled:opacity-40"
-              disabled={pagina === 0} onClick={() => setPagina((p) => Math.max(0, p - 1))}>Anteriores</button>
-            <span className="text-ledger-muted">Página {pagina + 1}</span>
-            <button type="button" className="rounded-lg border border-ledger-line px-3 py-1.5 disabled:opacity-40"
-              disabled={(lista.data?.length ?? 0) < TAMANHO} onClick={() => setPagina((p) => p + 1)}>Próximas</button>
-          </div>
-        )}
+        {lista.data?.map((r) => <Linha key={r.id} r={r} />)}
       </Panel>
 
       <p className="flex items-center gap-2 text-xs text-ledger-muted">

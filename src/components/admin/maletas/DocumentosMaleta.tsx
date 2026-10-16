@@ -17,6 +17,9 @@ interface DocConsultora {
   cep: string | null;
   whatsapp: string | null;
   vencimento: string | null;
+  remessa_numero?: number | null;
+  remessa_emissao?: string | null;
+  representante?: string | null;
 }
 
 async function docConsultora(cycleId: string): Promise<DocConsultora> {
@@ -31,6 +34,7 @@ function dataPorExtenso(d: Date) {
 
 function dataCurta(iso: string | null | undefined) {
   if (!iso) return "—";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso.split("-").reverse().join("/");
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("pt-BR");
 }
@@ -106,8 +110,9 @@ function htmlPedido(doc: DocConsultora, composicao: ItemComposicao[], codigoMale
   <h1>REMESSA KIT</h1>
   <h2>Maleta ${codigoMaleta}</h2>
   <div class="caixa">
-    <p><strong>CLIENTE:</strong> ${doc.nome} &nbsp; <strong>PRAÇA:</strong> ${doc.praca ?? "—"}</p>
-    <p><strong>DATA DE ACERTO:</strong> ${dataCurta(dataAcerto)}</p>
+    <p><strong>REMESSA:</strong> ${doc.remessa_numero ?? "—"} &nbsp; <strong>PRAÇA:</strong> ${doc.praca ?? "—"} &nbsp; <strong>EMISSÃO:</strong> ${dataCurta(doc.remessa_emissao ?? null)}</p>
+    <p><strong>CLIENTE:</strong> ${doc.nome} &nbsp; <strong>VENDEDOR/REPRESENTANTE:</strong> ${doc.representante ?? "—"}</p>
+    <p><strong>DATA DE ACERTO:</strong> ${dataCurta(doc.vencimento ?? dataAcerto)}</p>
     <p class="mutismo">SERÃO EFETUADAS DUAS TENTATIVAS DE CONTATO PARA ENCOMENDAS NA SEMANA ANTERIOR AO ACERTO,
     não havendo resposta será feita a montagem baseada no seu histórico de vendas, levando em consideração:
     tipos de produto e faturamento.</p>

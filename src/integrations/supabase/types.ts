@@ -13978,6 +13978,32 @@ export type Database = {
         }
         Returns: undefined
       }
+      remessas_buscar: {
+        Args: {
+          _ate?: string
+          _busca?: string
+          _campo_data?: string
+          _de?: string
+          _praca?: string
+          _representante?: string
+          _status?: string
+        }
+        Returns: {
+          consultoras_praca: number
+          data_acerto: string
+          data_emissao: string
+          id: string
+          maletas: number
+          maletas_conferidas: number
+          numero: number
+          pecas: number
+          praca: string
+          praca_id: string
+          representante: string
+          status: string
+          valor_cents: number
+        }[]
+      }
       remessas_lista: {
         Args: { _status?: string }
         Returns: {

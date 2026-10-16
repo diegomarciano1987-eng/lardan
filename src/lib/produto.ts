@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { precoFinal90 } from "@/lib/consultora-regras";
 
 /**
  * Camada única do cadastro de produto. Toda gravação passa pelas operações
@@ -116,7 +117,7 @@ export function precoSugerido(custoCents: number | null, margem: number | null):
   if (!custoCents || custoCents <= 0) return null;
   const m = Number(margem ?? 0);
   if (!Number.isFinite(m) || m < 0) return null;
-  return Math.round(custoCents * (1 + m / 100));
+  return precoFinal90(Math.round(custoCents * (1 + m / 100)));
 }
 
 /** Margem real praticada: (venda - custo) / custo. */

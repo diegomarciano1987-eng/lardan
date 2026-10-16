@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { lerCadastro, salvarCadastro } from "@/lib/cobranca";
 
-type Form = Record<string, string>;
+type Form = { [k: string]: string } & Partial<Record<"nome" | "cpf" | "whatsapp" | "telefone" | "email", string>>;
 const CAMPOS_END = [["cep", "CEP"], ["rua", "Rua"], ["numero", "Número"], ["complemento", "Complemento"], ["bairro", "Bairro"], ["cidade", "Cidade"], ["uf", "UF"]] as const;
 
 export function EditarDadosDialog({ open, onOpenChange, partyId, onSalvo }: { open: boolean; onOpenChange: (v: boolean) => void; partyId: string; onSalvo: () => void }) {

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FotoPeca } from "@/components/FotoPeca";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, PackageCheck, ScanBarcode, Undo2 } from "lucide-react";
@@ -33,9 +34,47 @@ type EntradaResumo = {
   criada_em: string;
   aberta_por: string | null;
 };
-type Leitura = { id: string; codigo: string; peca: string; quando: string; estornada: boolean };
+type Leitura = {
+  id: string;
+  codigo: string;
+  peca: string;
+  quando: string;
+  estornada: boolean;
+  product_id?: string | null;
+  variant_id?: string | null;
+};
 type Detalhe = EntradaResumo & { leituras: Leitura[]; consultora_status_anterior: string | null };
 type Resultado = { ok: boolean; texto: string; codigo: string };
+type Sugestao = { codigo: string; nome: string; product_id: string; variant_id: string };
+
+/** Busca peças por nome, código ou referência para entrada sem leitor. */
+async function buscarPecas(termo: string): Promise<Sugestao[]> {
+  const t = termo.trim().replace(/[%,()]/g, " ");
+  if (t.length < 2) return [];
+  const partes = t.split(/\s+/).filter(Boolean);
+  let q = supabase
+    .from("products")
+    .select("id, name, internal_code, product_variants(id, label, barcode, sku, is_active, is_default)")
+    .limit(12);
+  if (/^\d+$/.test(t)) {
+    q = q.or(`internal_code.ilike.%${t}%,barcode.ilike.%${t}%,name.ilike.%${t}%`);
+  } else {
+    for (const p of partes) q = q.ilike("name", `%${p}%`);
+  }
+  const { data, error } = await q;
+  if (error) throw error;
+  const out: Sugestao[] = [];
+  type V = { id: string; label: string | null; barcode: string | null; sku: string | null; is_active: boolean };
+  for (const p of (data ?? []) as unknown as { id: string; name: string; internal_code: string | null; product_variants: V[] }[]) {
+    for (const v of p.product_variants ?? []) {
+      if (!v.is_active) continue;
+      const codigo = v.barcode || v.sku || p.internal_code;
+      if (!codigo) continue;
+      out.push({ codigo, nome: [p.name, v.label].filter(Boolean).join(" · "), product_id: p.id, variant_id: v.id });
+    }
+  }
+  return out.slice(0, 15);
+}
 
 async function rpc<T>(nome: string, args: Record<string, unknown>) {
   const { data, error } = await supabase.rpc(nome as never, args as never);

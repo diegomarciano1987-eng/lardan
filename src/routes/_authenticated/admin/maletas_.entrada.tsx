@@ -40,8 +40,8 @@ type Leitura = {
   peca: string;
   quando: string;
   estornada: boolean;
-  product_id?: string | null;
-  variant_id?: string | null;
+  product_id: string | null;
+  variant_id: string | null;
 };
 type Detalhe = EntradaResumo & { leituras: Leitura[]; consultora_status_anterior: string | null };
 type Resultado = { ok: boolean; texto: string; codigo: string };
@@ -301,7 +301,7 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
     const txt = codigo.trim();
     // Digitou nome: Enter lança a primeira sugestão.
     if (/[a-zA-ZÀ-ú]/.test(txt) && /\s/.test(txt) && sugestoes.data?.length === 1) {
-      lancar(sugestoes.data[0].codigo);
+      lancar(sugestoes.data[0]!.codigo);
       return;
     }
     if (/[a-zA-ZÀ-ú]/.test(txt) && txt.includes(" ")) return; // nome: escolha na lista
@@ -337,7 +337,7 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
   const d = detalhe.data;
   const validas = d.leituras.filter((l) => !l.estornada);
   const porPeca = Object.values(
-    validas.reduce<Record<string, { peca: string; qtd: number; product_id?: string | null; variant_id?: string | null }>>((m, l) => {
+    validas.reduce<Record<string, { peca: string; qtd: number; product_id: string | null; variant_id: string | null }>>((m, l) => {
       m[l.peca] = { peca: l.peca, qtd: (m[l.peca]?.qtd ?? 0) + 1, product_id: l.product_id, variant_id: l.variant_id };
       return m;
     }, {}),

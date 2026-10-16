@@ -12619,6 +12619,8 @@ export type Database = {
         Returns: Json
       }
       consultora_ativar: { Args: { _party: string }; Returns: Json }
+      consultora_cliente_compras: { Args: { _cliente: string }; Returns: Json }
+      consultora_clientes_resumo: { Args: never; Returns: Json }
       consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }
       consultora_lembretes_vencimento: {
         Args: never

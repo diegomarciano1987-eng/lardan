@@ -638,6 +638,13 @@
       "when": 1792194148090,
       "tag": "0090_consultora_pecas_busca_segura",
       "breakpoints": true
+    },
+    {
+      "idx": 91,
+      "version": "7",
+      "when": 1792194333357,
+      "tag": "0091_consultora_historico_clientes",
+      "breakpoints": true
     }
   ]
 }

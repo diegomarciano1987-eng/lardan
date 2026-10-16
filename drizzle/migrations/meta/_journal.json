@@ -575,6 +575,13 @@
       "when": 1792175156984,
       "tag": "0081_kit_consultora_doc_fix_colunas",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1792175341037,
+      "tag": "0082_remessa_parametros_salvar",
+      "breakpoints": true
     }
   ]
 }

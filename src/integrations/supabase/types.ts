@@ -13846,6 +13846,16 @@ export type Database = {
         }
         Returns: Json
       }
+      remessa_parametros_salvar: {
+        Args: {
+          _meta_aneis: number
+          _meta_colares: number
+          _meta_pulseiras: number
+          _meta_tornozeleiras: number
+          _pecas_cliente_nova: number
+        }
+        Returns: undefined
+      }
       rep_asaas_preparar: {
         Args: { _actor: string; _payload: Json; _rep_user: string }
         Returns: Json

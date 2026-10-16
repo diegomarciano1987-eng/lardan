@@ -13272,6 +13272,7 @@ export type Database = {
       }
       kit_conciliacao: { Args: { _cycle: string }; Returns: Json }
       kit_conferir: { Args: { _cycle: string; _note?: string }; Returns: Json }
+      kit_consultora_doc: { Args: { _cycle: string }; Returns: Json }
       kit_consultora_info: { Args: { _cycle: string }; Returns: Json }
       kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }

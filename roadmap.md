@@ -1,16 +1,18 @@
 # Roadmap
 ## App da consultora — PDF de melhorias (16/10)
-- [ ] Conferir todos os itens do PDF contra o app e registrar evidências e dependências
+- [x] Conferir todos os itens do PDF contra o app e registrar evidências e dependências — docs/lardan/PROVAS-APP-CONSULTORA-2026-10-16.md
 - [ ] Corrigir maleta ativa, pedidos/clientes, formulários e navegação da venda
 - [ ] Facilitar venda: busca, filtros, fotos ampliadas, etiqueta, revisão e comprovante
 - [ ] Melhorar vitrine, compartilhamento, clientes, lembretes e mensagens
-- [ ] Mostrar ganhos, metas, acerto, indicações e conteúdo com dados reais
-- [ ] Implementar troca/garantia ligada à venda, análise, fotos e histórico — prazos a definir
+- [ ] Mostrar ganhos, metas, acerto, indicações e conteúdo com dados reais — bloqueio: comissão/acerto aplicado, liga e conteúdo aprovados
+- [x] Implementar abertura de troca/garantia ligada à venda, análise, fotos e histórico — 45 dias/two-year warranty; sete testes isolados de pós-venda/busca
+- [ ] Efetivar troca, diferença de preço, crédito, devolução no acerto e indicadores — bloqueio: fluxo oficial de acerto/financeiro aprovado
 - [ ] Implementar entregas, acessibilidade, letra grande e instalação
 - [ ] Conferir pagamentos/parcelas com o motor oficial, sem duplicar baixas
-- [ ] Aplicar preço final ,90 apenas após definir arredondamento e alcance
+- [x] Aplicar preço final ,90 às sugestões de nova precificação, subindo; preços atuais intactos
 - [ ] Identificar dados de teste e apresentar limpeza auditada antes de executar
-- [ ] Validar os fluxos autenticados em celular e computador; entregar provas item a item
+- [ ] Validar os fluxos autenticados em celular e computador — bloqueio: sessão atual não tem acesso consultora; manual e fila vazia conferidos, 250 testes isolados aprovados
+- [ ] Diagnosticar duas falhas preexistentes do teste REST de sigilo de custos — sem vazamento confirmado; preferir reprodução isolada
 - [ ] Publicar somente quando solicitado
 
 ## Financeiro — nove pontos enviados em 16/10

@@ -673,6 +673,13 @@
       "when": 1792197131070,
       "tag": "0095_consultora_comissao_e_combinado",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1792197416403,
+      "tag": "0096_maleta_divergencia_fotos",
+      "breakpoints": true
     }
   ]
 }

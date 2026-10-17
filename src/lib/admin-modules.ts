@@ -66,8 +66,7 @@ const CONTENT: AppRole[] = ["master", "diretoria", "marketing"];
 const STOCK: AppRole[] = ["master", "diretoria", "estoque"];
 const FINANCE: AppRole[] = ["master", "diretoria", "financeiro"];
 
-export const ADMIN_MODULES: AdminModule[] = [
-  { slug: "trocas-garantias", path: "/admin/trocas-garantias", label: "Trocas e garantias", description: "Solicitações de pós-venda e análise com histórico.", icon: ShieldCheck, roles: ["master", "qualidade"], state: "ativo" },
+export const ADMIN_MODULES: AdminModule[
   {
     slug: "visao-geral",
     path: "/admin",
@@ -87,6 +86,46 @@ export const ADMIN_MODULES: AdminModule[] = [
     capability: "finance.view",
     state: "ativo",
     spec: "Contas a pagar e a receber com parcelas, baixas parciais, estorno com motivo, conciliação manual e painéis de aging. Valores sempre em centavos; cancelamento é evento registrado.",
+  },
+  {
+    slug: "produtos",
+    path: "/admin/cadastros/produtos",
+    label: "Produtos",
+    description: "Produtos, variantes, categorias, coleções e galeria de imagens.",
+    icon: Tag,
+    roles: [...CONTENT, "estoque"],
+    capability: "catalog.view",
+    state: "ativo",
+    spec: "Ficha completa do produto, variantes com SKU único, preço público autorizado item a item, galeria com texto alternativo e fluxo rascunho/publicar. Nada é excluído: tudo vira arquivo.",
+  },
+  {
+    slug: "avisos",
+    path: "/admin/avisos",
+    label: "Central de Avisos",
+    description: "Novidades, avisos e promoções para as consultoras, com aviso crítico e lista de quem confirmou ciência.",
+    icon: Megaphone,
+    roles: CONTENT,
+    state: "ativo",
+  },
+  {
+    slug: "biblioteca",
+    path: "/admin/biblioteca",
+    label: "Biblioteca LARDAN",
+    description: "Artes da semana para stories, feed e status das consultoras: envio, publicação e arquivo.",
+    icon: Megaphone,
+    roles: CONTENT,
+    state: "ativo",
+  },
+  {
+    slug: "crm-candidaturas",
+    path: "/admin/candidaturas",
+    label: "Candidaturas do Site",
+    description:
+      "CRM das candidatas a Consultora Lardan: funil, responsável, follow-ups, origem e histórico.",
+    icon: UserRoundSearch,
+    roles: ["master", "diretoria", "marketing", "suporte"],
+    capability: "candidaturas.view",
+    state: "ativo",
   },
   {
     slug: "site",
@@ -109,24 +148,6 @@ export const ADMIN_MODULES: AdminModule[] = [
     state: "ativo",
   },
   {
-    slug: "avisos",
-    path: "/admin/avisos",
-    label: "Central de Avisos",
-    description: "Novidades, avisos e promoções para as consultoras, com aviso crítico e lista de quem confirmou ciência.",
-    icon: Megaphone,
-    roles: CONTENT,
-    state: "ativo",
-  },
-  {
-    slug: "biblioteca",
-    path: "/admin/biblioteca",
-    label: "Biblioteca LARDAN",
-    description: "Artes da semana para stories, feed e status das consultoras: envio, publicação e arquivo.",
-    icon: Megaphone,
-    roles: CONTENT,
-    state: "ativo",
-  },
-  {
     slug: "cadastros",
     path: "/admin/cadastros",
     label: "Cadastro",
@@ -136,28 +157,6 @@ export const ADMIN_MODULES: AdminModule[] = [
     capability: "registry.view",
     state: "ativo",
     spec: "Central de Cadastros: identidade canônica de pessoas e organizações, papéis acumuláveis, busca inteligente no servidor, detecção de duplicidades e conversão de candidata em consultora. Nunca duplica registros dos módulos especializados.",
-  },
-  {
-    slug: "crm-candidaturas",
-    path: "/admin/candidaturas",
-    label: "Candidaturas do Site",
-    description:
-      "CRM das candidatas a Consultora Lardan: funil, responsável, follow-ups, origem e histórico.",
-    icon: UserRoundSearch,
-    roles: ["master", "diretoria", "marketing", "suporte"],
-    capability: "candidaturas.view",
-    state: "ativo",
-  },
-  {
-    slug: "produtos",
-    path: "/admin/cadastros/produtos",
-    label: "Produtos",
-    description: "Produtos, variantes, categorias, coleções e galeria de imagens.",
-    icon: Tag,
-    roles: [...CONTENT, "estoque"],
-    capability: "catalog.view",
-    state: "ativo",
-    spec: "Ficha completa do produto, variantes com SKU único, preço público autorizado item a item, galeria com texto alternativo e fluxo rascunho/publicar. Nada é excluído: tudo vira arquivo.",
   },
   {
     slug: "estoque",
@@ -224,6 +223,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     roles: ["master", "diretoria", "cobranca", "financeiro"],
     state: "ativo",
   },
+  { slug: "trocas-garantias", path: "/admin/trocas-garantias", label: "Trocas e garantias", description: "Solicitações de pós-venda e análise com histórico.", icon: ShieldCheck, roles: ["master", "qualidade"], state: "ativo" },
   {
     slug: "qualidade",
     label: "Qualidade",
@@ -300,6 +300,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     roles: ["master", "diretoria"],
     state: "ativo",
   },
+
 ];
 
 /** Módulos internos alcançáveis fora do menu inferior. */

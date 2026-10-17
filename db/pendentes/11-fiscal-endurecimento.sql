@@ -63,6 +63,9 @@ BEGIN
   IF nullif(btrim(coalesce(_protocol,'')),'') IS NULL THEN RAISE EXCEPTION 'Protocolo de autorização obrigatório.'; END IF;
   cnpj := coalesce(d.emitter_snapshot->>'tax_id', (SELECT tax_id FROM public.business_entities WHERE id = d.emitter_entity_id));
   modelo := coalesce(d.model, '55');
+  IF nullif(regexp_replace(coalesce(cnpj,''), '\D', '', 'g'), '') IS NULL THEN
+    RAISE EXCEPTION 'Emissor sem CNPJ: não há como conferir a chave de acesso.';
+  END IF;
   IF NOT public.nfe_chave_valida(_access_key, cnpj, modelo) THEN
     RAISE EXCEPTION 'Chave de acesso inválida para este emissor e modelo.';
   END IF;

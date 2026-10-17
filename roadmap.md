@@ -1,4 +1,10 @@
 # Roadmap
+## Revisão 0100 e Biblioteca — 17/10
+- [ ] Aplicar patch exato com registro oficial da 0100; pacote 11 apenas no repositório
+- [ ] Separar artes, campanhas, informativos e materiais na Biblioteca master e consultora
+- [ ] Validar suíte esperada 265/265 e conferir sinais automáticos de compilação
+- [ ] Entregar provas de leitura/publicação de documentos, diferenças e limitações; não publicar
+
 ## Pacote prontidão fiscal — revisão 16/10, noite
 - [x] Conferir aplicação exata do patch — seis arquivos idênticos ao ZIP, sem conflitos
 - [x] Aplicar apenas a 0099 pela ferramenta oficial; pacote 11 mantido pendente

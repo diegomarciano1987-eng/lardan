@@ -159,6 +159,18 @@ describe("2. cartão Asaas", () => {
       conexao.release();
     }
   });
+
+  test("baixa estornada não entra na varredura do cartão (não trava a fila)", async () => {
+    const c = await cenario();
+    await oficial(`update public.asaas_charges set external_status='RECEIVED', credit_date='2024-03-21' where id=$1 returning id`, [c.ch]);
+    const s = (await um<{ id: string }>(`select id from public.financial_settlements where idempotency_key=$1`, [`asaas:baixa:${c.acc}:${c.ext}`])).id;
+    const est = await rpc(master, "fin_settlement_reverse", { _settlement: s, _motivo: "ISO estorno da baixa de cartão" });
+    expect(est.erro).toBeNull();
+    const previa = await comoServico<{ itens: { cobranca: string }[] }>(`select public.asaas_baixa_pendentes(false) r`);
+    expect(previa.erro).toBeNull();
+    expect(previa.dados.itens.some((i) => i.cobranca === c.ext)).toBe(false);
+    expect(await razao(c.fin)).toEqual([]);
+  });
 });
 
 describe("3. foto de divergência", () => {
@@ -276,6 +288,19 @@ describe("7. prontidão fiscal", () => {
     expect(JSON.stringify(b.dados)).not.toContain("ISO PF");
     expect(JSON.stringify(b.dados)).not.toContain("Rua A");
   });
+
+  test("peça sem preço de referência em maleta ativa vira bloqueio", async () => {
+    const party = (await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status) values ('pessoa',$1,$1,'ativo') returning id`, [`ISO SP ${marca()}`])).id;
+    await adm.unsafe(`insert into public.consultant_profiles (party_id) values ($1)`, [party]);
+    const variante = await criarVariante("pf-sem-preco", 0);
+    const kit = (await um<{ id: string }>(`insert into public.kits (label) values ($1) returning id`, [`ISO SP ${marca()}`])).id;
+    const ciclo = (await um<{ id: string }>(`insert into public.kit_cycles (kit_id, cycle_no, consultora_party_id) values ($1,1,$2) returning id`, [kit, party])).id;
+    await adm.unsafe(`update public.kit_cycles set status='operacao' where id=$1`, [ciclo]);
+    await adm.unsafe(`insert into public.kit_balances (cycle_id, variant_id, qty_allocated, qty_accepted) values ($1,$2,1,1)`, [ciclo, variante]);
+    const r = await rpc<{ bloqueios: string[] }>(master, "fiscal_prontidao");
+    expect(r.erro).toBeNull();
+    expect(r.dados.bloqueios.some((b) => b.includes("sem preço de referência"))).toBe(true);
+  });
 });
 
 describe("8. retorno do provedor só pelo servidor", () => {
@@ -316,6 +341,25 @@ describe("8. retorno do provedor só pelo servidor", () => {
     expect((await rpc(master, "fiscal_doc_cancelar_registrar", { _doc: fake, _protocolo: "x" })).ok).toBe(false);
     const r = await rpc(master, "fiscal_doc_rejeitar", { _doc: fake, _codigo: "999", _motivo: "x" });
     expect(String(r.erro)).toMatch(/permission denied|servidor/);
+  });
+
+  test("emissor sem CNPJ não autoriza nota", async () => {
+    const c = await adm.reserve();
+    try {
+      await c.unsafe(`begin`);
+      const emp = ((await c.unsafe(`insert into public.business_entities (legal_name) values ($1) returning id`, [`ISO Emissor ${marca()}`])) as { id: string }[])[0]!.id;
+      await c.unsafe(`update public.fiscal_settings set emission_active=true, provider='focus_nfe', environment='homologacao', emitter_entity_id=$1`, [emp]);
+      const doc = ((await c.unsafe(`insert into public.fiscal_documents (kind, status, emitter_entity_id, environment) values ('remessa','na_fila',$1,'homologacao') returning id`, [emp])) as { id: string }[])[0]!.id;
+      await c.unsafe(`set local role service_role`);
+      await c.unsafe(`select set_config('lardan.test_role','service_role',true), set_config('lardan.test_uid','',true)`);
+      let erro = "";
+      try { await c.unsafe(`select public.fiscal_doc_autorizar($1, $2, '141260000000001', null, null)`, [doc, chaveNfe("43319208000180", 9)]); }
+      catch (e) { erro = (e as Error).message; }
+      expect(erro).toContain("Emissor sem CNPJ");
+    } finally {
+      await c.unsafe(`rollback`);
+      c.release();
+    }
   });
 });
 

@@ -2,11 +2,12 @@ import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, MessageCircle, Phone, Ban, UserPen } from "lucide-react";
+import { ArrowLeft, MessageCircle, Phone, Ban, UserPen, Gavel, LayoutDashboard, Calculator, Wallet, ListOrdered, History, Handshake, CalendarClock, IdCard } from "lucide-react";
 import { LembretesGaveta } from "@/components/admin/cobranca/LembretesGaveta";
 import { SimuladorAcordo } from "@/components/admin/cobranca/SimuladorAcordo";
 import { EditarDadosDialog } from "@/components/admin/cobranca/EditarDadosDialog";
 import { DateField } from "@/components/premium/DateField";
+import { AbaJudicial, FormProcesso } from "@/components/admin/cobranca/Judicial";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import {
   devedor, registrar, moverEtapa, criarPromessa, cancelarPromessa, criarTarefa, concluirTarefa,
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/admin/cobranca_/$id")({
   component: Cockpit,
 });
 
-type Aba = "acordos" | "resumo" | "financeiro" | "titulos" | "linha" | "promessas" | "agenda" | "dados";
+type Aba = "judicial" | "acordos" | "resumo" | "financeiro" | "titulos" | "linha" | "promessas" | "agenda" | "dados";
 
 function Cockpit() {
   const { id } = Route.useParams();
@@ -33,6 +34,7 @@ function Cockpit() {
   const [data, setData] = React.useState(hojeSP());
   const susp = useQuery({ queryKey: ["cob", "susp", id], queryFn: () => suspensao(id) });
   const [editar, setEditar] = React.useState(false);
+  const [encaminhar, setEncaminhar] = React.useState(false);
   const recarregar = () => qc.invalidateQueries({ queryKey: ["cob"] });
   const alternarSuspensao = async () => {
     const s = !susp.data?.suspensa;
@@ -51,6 +53,7 @@ function Cockpit() {
   const aVencer = d.parcelas.filter((p) => p.vencimento >= hoje).reduce((a, p) => a + Number(p.saldo_cents), 0);
   const inicioMes = hoje.slice(0, 8) + "01";
   const recuperadoMes = d.recebimentos.filter((r) => r.data >= inicioMes).reduce((a, r) => a + Number(r.valor_cents) * (r.estorno ? -1 : 1), 0);
+  const ehJudicial = d.caso?.etapa === "acompanhamento";
   const prox = d.tarefas.find((t) => t.status === "aberta");
   const fone = d.contatos.find((c) => c.tipo === "whatsapp" || c.tipo === "telefone")?.valor?.replace(/\D/g, "");
 
@@ -107,13 +110,17 @@ function Cockpit() {
         <button onClick={() => setEditar(true)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-primary bg-primary/10 px-4 text-sm font-semibold"><UserPen className="h-4 w-4" />Editar dados</button>
         <button onClick={() => setAcao("ligacao")} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm"><Phone className="h-4 w-4" />Registrar ligação</button>
         <button onClick={abrirWhats} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm"><MessageCircle className="h-4 w-4" />Abrir WhatsApp</button>
-        <button onClick={() => setAba("acordos")} className="h-10 rounded-lg border border-bronze bg-champagne-soft px-4 text-sm font-semibold text-bronze">Simular acordo / juros</button>
+        {ehJudicial
+          ? <button onClick={() => setAba("judicial")} className="inline-flex h-10 items-center gap-2 rounded-lg border border-bronze bg-champagne-soft px-4 text-sm font-semibold text-bronze"><Gavel className="h-4 w-4" />Acordo judicial</button>
+          : <button onClick={() => setAba("acordos")} className="h-10 rounded-lg border border-bronze bg-champagne-soft px-4 text-sm font-semibold text-bronze">Simular acordo / juros</button>}
         <button onClick={alternarSuspensao} className={`inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm ${susp.data?.suspensa ? "border-success text-success" : "border-danger text-danger"}`}><Ban className="h-4 w-4" />{susp.data?.suspensa ? "Liberar maleta/pedido" : "Suspender maleta/pedido"}</button>
         {([["negociacao", "Registrar negociação"], ["promessa", "Registrar promessa"], ["desconto_solicitado", "Solicitar desconto"], ["retorno", "Agendar retorno"], ["negativacao_encaminhada", "Encaminhar negativação"]] as const).map(([k, r]) => (
           <button key={k} onClick={() => setAcao(k)} className="h-10 rounded-lg border border-border px-4 text-sm">{r}</button>
         ))}
+        {!ehJudicial && <button onClick={() => setEncaminhar(true)} className="inline-flex h-10 items-center gap-2 rounded-lg bg-bronze px-4 text-sm font-semibold text-primary-foreground"><Gavel className="h-4 w-4" />Encaminhar para judicial</button>}
       </div>
 
+      {encaminhar && <FormProcesso partyId={id} onFim={() => { setEncaminhar(false); recarregar(); setAba("judicial"); }} />}
       {acao && (
         <section className="space-y-3 rounded-xl border border-primary/40 bg-primary/5 p-5">
           <h3 className="font-medium">{acao === "retorno" ? "Agendar retorno" : acao === "promessa" ? "Promessa de pagamento" : ROTULO_TIPO[acao]}</h3>
@@ -144,13 +151,17 @@ function Cockpit() {
         </section>
       )}
 
-      <nav className="flex gap-1 border-b border-border">
-        {([["resumo", "Resumo"], ["acordos", "Acordos e simulações"], ["financeiro", "Financeiro completo"], ["titulos", "Títulos e parcelas"], ["linha", "Linha do tempo"], ["promessas", "Negociações e promessas"], ["agenda", "Agenda"], ["dados", "Dados cadastrais"]] as const).map(([k, r]) => (
-          <button key={k} onClick={() => setAba(k)} className={`border-b-2 px-4 py-2 text-sm ${aba === k ? "border-primary text-foreground" : "border-transparent text-muted-foreground"}`}>{r}</button>
+      <nav aria-label="Seções da devedora" className="flex flex-wrap gap-1.5 rounded-2xl border border-border bg-muted/50 p-1.5">
+        {(([["resumo", "Resumo", LayoutDashboard], ...(ehJudicial ? [["judicial", "Judicial", Gavel]] : [["acordos", "Acordos e simulações", Calculator]]), ["financeiro", "Financeiro completo", Wallet], ["titulos", "Títulos e parcelas", ListOrdered], ["linha", "Linha do tempo", History], ["promessas", "Negociações e promessas", Handshake], ["agenda", "Agenda", CalendarClock], ["dados", "Dados cadastrais", IdCard]]) as [Aba, string, typeof Gavel][]).map(([k, r, I]) => (
+          <button key={k} onClick={() => setAba(k)} aria-current={aba === k ? "page" : undefined}
+            className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-medium transition ${aba === k ? (k === "judicial" ? "bg-bronze text-primary-foreground shadow-sm" : "bg-foreground text-background shadow-sm") : "text-foreground/70 hover:bg-background hover:text-foreground"}`}>
+            <I className="h-4 w-4" />{r}
+          </button>
         ))}
       </nav>
 
-      {aba === "acordos" && <SimuladorAcordo partyId={id} parcelas={d.parcelas} />}
+      {aba === "judicial" && ehJudicial && <AbaJudicial partyId={id} parcelas={d.parcelas} />}
+      {aba === "acordos" && !ehJudicial && <SimuladorAcordo partyId={id} parcelas={d.parcelas} />}
       {aba === "financeiro" && <CockpitFinanceiroConsultora partyId={id} />}
       {aba === "resumo" && (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

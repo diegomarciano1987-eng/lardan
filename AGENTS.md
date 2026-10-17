@@ -22,13 +22,13 @@
 - Card purchases hit DRE by purchase date/category; cartao_fatura payable is excluded from competencia; invoice payments split by line category. Why: no double counting.
 - Historical fiado: service-only cob_fiado_importar, batch+line idempotency, receivable sistema_origem fiado_historico, FIADO-HIST asset outside DRE, immutable cob_fiado_linhas. Why: traceable debt, no inflated revenue.
 - Consultant charges: consultora_pagamento_titulo on owned orders, valid CPF, Asaas actor consultora_cobranca_config.ator_user_id; sales_orders.pay_* offsets kit settlement. Why: no finance permissions.
-- Approved removals use service-only fin_expurgo_* with fin_expurgo_backup/audit_logs; zero-sum cancelled reversals use fin_expurgo_titulos_estornados. Why: reversible cleanup.
+- Approved cleanup: service-only fin_expurgo_* with fin_expurgo_backup/audit_logs; zero-sum cancelled reversals: fin_expurgo_titulos_estornados. Why: reversible.
 - Asaas button/daily cron: /api/public/asaas/sync-matinal. asaas_conciliar_cobranca matches party/CPF/legacy first five externalReference digits only for unique person+value+due date or unique value within 60 days without competing charge; RECEIVED settles, cash manual. Why: no wrong match.
 - Settlement reversal reverses its interest/discount; DFC nets reversal in original line; projected flow skips cheques represented by equal open receivable. Why: no residues/doubling.
 - Date correction: fin_estorno_data_corrigir, expected date, reason, immutable snapshots, atomic settlement/movement updates; invalidate account/cashflow queries. Why: dated balances/concurrency.
 - Merges: party_unificar after preview, atomic; preserve fiado/Asaas stage and moved IDs in party_unificacoes. Why: history/reversal.
 - Subfolders have their own AGENTS.md; read before editing there. Why: preserve scoped rules.
-- Consultant modules keep owner-scoped reads and paid-item after-sale snapshots; review never auto-moves stock or money. Why: preserve privacy and official engines.
+- Consultant reads are owner-scoped; preserve paid-item after-sale snapshots; review never moves stock/money automatically. Why: privacy/official engines.
 - pdv_como only follows real-user validation and audit_logs with real actor; never exposed by GRANT. Why: audit identifies the clicker.
 - Outside portfolio: only name/code/status/debt, restrito=true. Blocked/departed consultants cannot move portfolio/reactivate via portal. Why: privacy/finance.
 - With asaas_accounts.conta_cartao_receber_id set, settle there; asaas_cartao_creditar transfers to Asaas idempotently on/after credit_date, skipping reversed settlements. Empty preserves old behavior; asaas_baixa_pendentes sweeps lost-webhook credits. Why: accurate cash timing/recovery.
@@ -36,4 +36,4 @@
 - Test-kit cleanup: service-only kit_testes_cancelar, seven expected cycles/quantities, official transfers, immutable snapshots; retain history. Why: stock/remessas.
 - Fiscal results (attempt/authorization/rejection/homologated cancellation): service_role only (db/pendentes/11). Authorization requires nfe_chave_valida with emitter CNPJ; model/series/number from key. Why: no manual authorization.
 - fiscal_settings emission/provider/environment/emitter changes: Master only, provider+emitter+environment required before activation, disable before environment change, audit fiscal.configuracao_alterada. Why: controlled fiscal switch.
-- fiscal_prontidao returns counts only (no names, documents or addresses). Why: readiness report without exposing personal data.
+- fiscal_prontidao: counts only, no names/documents/addresses. Why: private readiness report.

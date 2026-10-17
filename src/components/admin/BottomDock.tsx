@@ -189,7 +189,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
 
           {/* Prioritários: seis destinos; o restante fica em Mais módulos */}
           <ul className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex [scrollbar-width:none]">
-            {permitted.map((m) => {
+            {primary.map((m) => {
               const active = isActive(pathname, m.path);
               return (
                 <li key={m.slug}>

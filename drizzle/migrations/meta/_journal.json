@@ -701,6 +701,13 @@
       "when": 1792200827348,
       "tag": "0099_prontidao_fiscal_e_ajustes",
       "breakpoints": true
+    },
+    {
+      "idx": 100,
+      "version": "7",
+      "when": 1792242705519,
+      "tag": "0100_prontidao_ajustes_revisao_lovable",
+      "breakpoints": true
     }
   ]
 }

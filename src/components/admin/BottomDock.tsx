@@ -33,7 +33,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
   const [submenu, setSubmenu] = useState<"modulos" | "financeiro">("modulos");
 
   const permitted = ADMIN_MODULES.filter((m) => moduleAllowed(m, caps, roles));
-  const primary = permitted.slice(0, 5);
+  const primary = permitted.slice(0, 6);
   const areasFinanceiras = AREAS_FINANCEIRAS.filter((a) => caps.includes(a.capacidade));
   const fecharGaveta = () => {
     setDrawer(false);
@@ -187,7 +187,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
             <img src={wordmark.url} alt="Lardan" className="h-4 w-auto opacity-80" />
           </Link>
 
-          {/* Desktop: todos os módulos com rolagem controlada */}
+          {/* Prioritários: seis destinos; o restante fica em Mais módulos */}
           <ul className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex [scrollbar-width:none]">
             {permitted.map((m) => {
               const active = isActive(pathname, m.path);

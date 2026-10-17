@@ -7308,6 +7308,48 @@ export type Database = {
           },
         ]
       }
+      kit_divergencia_fotos: {
+        Row: {
+          created_at: string
+          cycle_id: string
+          enviado_por: string
+          id: string
+          path: string
+          variant_id: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: string
+          enviado_por: string
+          id?: string
+          path: string
+          variant_id: string
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string
+          enviado_por?: string
+          id?: string
+          path?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_divergencia_fotos_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_divergencia_fotos_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kit_entrada_itens: {
         Row: {
           chave: string
@@ -13632,6 +13674,10 @@ export type Database = {
       kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
       kit_detail: { Args: { _cycle: string }; Returns: Json }
+      kit_divergencia_foto_registrar: {
+        Args: { _cycle: string; _path: string; _variant: string }
+        Returns: Json
+      }
       kit_entrada_abrir: {
         Args: {
           _consultora: string

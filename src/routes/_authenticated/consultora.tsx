@@ -35,6 +35,7 @@ import {
   type EntregaMaleta,
 } from "@/lib/maletas";
 import { buscarPecas } from "@/lib/consultora";
+import { FotosDivergencia } from "@/components/consultora/FotosDivergencia";
 import { iconeCategoria } from "@/lib/consultora-combinado";
 const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -286,6 +287,7 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
                           onChange={(e) => setMotivos((v) => ({ ...v, [c.variant_id]: e.target.value }))}
                         />
                       </label>
+                      <FotosDivergencia cycleId={cycleId} variantId={c.variant_id} produto={c.produto} />
                     </div>
                   )}
                 </div>

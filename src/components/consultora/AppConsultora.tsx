@@ -8,6 +8,8 @@ import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
 import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
 import { FORMAS_COMBINADAS, iconeCategoria, salvarCombinado, type FormaCombinada } from "@/lib/consultora-combinado";
+import { LembretesClientes } from "@/components/consultora/LembretesClientes";
+import { CombinaComEla } from "@/components/consultora/CombinaComEla";
 import { GanhosConsultora } from "@/components/consultora/GanhosConsultora";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link } from "@tanstack/react-router";
@@ -326,6 +328,7 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
         </button>
       </div>
 
+      {!busca && q.data && <LembretesClientes clientes={q.data} abrir={(id) => ir({ aba: "clientes", id })} />}
       {q.isLoading && <Estado tipo="carregando" texto="Carregando sua jornada…" />}
       {q.isError && <Estado tipo="erro" texto="Não foi possível carregar sua jornada." acao={<button className="admin-btn" onClick={() => q.refetch()}>Tentar de novo</button>} />}
       {q.data && q.data.length === 0 && (
@@ -542,6 +545,7 @@ export function FichaCliente({ id, nav, ir }: { id: string; nav: Nav; ir: Ir }) 
         </div>
 
         <section className="space-y-3">
+          <CombinaComEla cl={cl} />
           <ComprasCliente cliente={id} />
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-xl font-semibold">Atendimentos</h2>

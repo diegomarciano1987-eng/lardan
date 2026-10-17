@@ -66,7 +66,7 @@ const CONTENT: AppRole[] = ["master", "diretoria", "marketing"];
 const STOCK: AppRole[] = ["master", "diretoria", "estoque"];
 const FINANCE: AppRole[] = ["master", "diretoria", "financeiro"];
 
-export const ADMIN_MODULES: AdminModule[
+export const ADMIN_MODULES: AdminModule[] = [
   {
     slug: "visao-geral",
     path: "/admin",

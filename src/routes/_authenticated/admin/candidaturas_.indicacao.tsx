@@ -75,7 +75,7 @@ function ConfigIndicacao() {
       <Link to="/admin/candidaturas" className="inline-flex items-center gap-1.5 text-sm text-ledger-muted hover:text-bronze"><ArrowLeft className="size-4" /> Candidaturas</Link>
       <PageHeader eyebrow="Comercial" title="Indicação e comissão" actions={<a href="#comissao" className="admin-btn admin-btn-primary">Configurações de comissão</a>} description="Cada consultora tem um link único. Quem se candidata por ele fica ligada a ela. Ao encerrar a maleta da indicada, o sistema apura a comissão sobre as peças vendidas, pela faixa da madrinha." />
 
-      <Panel title="Faixas de comissão" action={<button type="button" className="admin-btn" onClick={() => setFaixas((l) => [...l, { min_indicadas: (l.at(-1)?.min_indicadas ?? 0) + 10, percentual: 0, titulo: "" }])}><Plus className="size-4" /> Faixa</button>}>
+      <Panel title="Comissão de indicação (madrinha)" action={<button type="button" className="admin-btn" onClick={() => setFaixas((l) => [...l, { min_indicadas: (l.at(-1)?.min_indicadas ?? 0) + 10, percentual: 0, titulo: "" }])}><Plus className="size-4" /> Faixa</button>}>
         {cfg.isLoading ? <Skeleton className="h-32" /> : cfg.error ? <ErrorState message={String(cfg.error)} /> : (
           <div className="space-y-3">
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={ativo} onChange={(e) => setAtivo(e.target.checked)} /> Programa de indicação ativo</label>

@@ -17,14 +17,14 @@ const inp = "h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm";
 const ROT_ST: Record<string, string> = { vigente: "Vigente", cumprido: "Cumprido", descumprido: "Descumprido", cancelado: "Cancelado" };
 
 /** Formulário de dados do processo — usado no botão "Encaminhar para judicial" e na edição. */
-export function FormProcesso({ partyId, inicial, onFim }: { partyId: string; inicial?: Record<string, string | null> | null; onFim: () => void }) {
+export function FormProcesso({ partyId, inicial, onFim }: { partyId: string; inicial?: Partial<Record<"processo" | "vara" | "comarca" | "advogado" | "data_ajuizamento" | "observacao", string | null>> | null; onFim: () => void }) {
   const qc = useQueryClient();
-  const [f, setF] = React.useState<Record<string, string>>({
+  const [f, setF] = React.useState({
     processo: inicial?.processo ?? "", vara: inicial?.vara ?? "", comarca: inicial?.comarca ?? "", advogado: inicial?.advogado ?? "",
     data_ajuizamento: inicial?.data_ajuizamento ?? "", observacao: inicial?.observacao ?? "",
   });
   const [salv, setSalv] = React.useState(false);
-  const campo = (k: string, r: string, ph = "") => (
+  const campo = (k: keyof typeof f, r: string, ph = "") => (
     <label className="text-xs font-medium text-ledger-muted">{r}<input value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} placeholder={ph} className={`${inp} mt-1`} /></label>
   );
   const salvar = async () => {

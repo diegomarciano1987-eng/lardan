@@ -12,7 +12,7 @@ import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeft, BriefcaseBusiness, CalendarClock, Check, ChevronRight, CircleHelp, Home, LogOut, Menu, MessageCircle,
+  ArrowLeft, BriefcaseBusiness, CalendarClock, CalendarDays, Check, ChevronRight, CircleHelp, Home, LogOut, Menu, MessageCircle,
   PackageCheck, Phone, Plus, Search, ShoppingBag, Store, UserPlus, Users,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -259,18 +259,23 @@ export function Inicio({ ir }: { ir: Ir }) {
       </section>
 
       {d && (
-        <section aria-labelledby="mes">
-          <h2 id="mes" className="mb-3 text-xl font-semibold">Seu resumo</h2>
-          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <section aria-labelledby="mes" className="consultora-resumo">
+          <h2 id="mes" className="mb-4 font-sans text-xl font-semibold">Seu resumo</h2>
+          <dl className="grid grid-cols-2 gap-3 xl:grid-cols-4 lg:gap-4">
             {[
-              ["Minhas clientes", d.clientes],
-              ["Pedidos em aberto", d.pedidos_abertos],
-              ["Pedidos neste mês", d.pedidos_mes],
-              ["Peças disponíveis na maleta", d.pecas_disponiveis],
-            ].map(([r, n]) => (
-              <div key={r as string} className="rounded-2xl border border-border bg-card p-4">
-                <dd className="num text-3xl font-semibold">{n as number}</dd>
-                <dt className="mt-1 text-[0.95rem] leading-snug text-muted-foreground">{r as string}</dt>
+              { rotulo: "Minhas clientes", valor: d.clientes, icone: Users, tom: "clientes" },
+              { rotulo: "Pedidos em aberto", valor: d.pedidos_abertos, icone: ShoppingBag, tom: "abertos" },
+              { rotulo: "Pedidos neste mês", valor: d.pedidos_mes, icone: CalendarDays, tom: "mes" },
+              { rotulo: "Peças disponíveis na maleta", valor: d.pecas_disponiveis, icone: BriefcaseBusiness, tom: "pecas" },
+            ].map(({ rotulo, valor, icone: Icone, tom }) => (
+              <div key={tom} data-tone={tom} className="consultora-resumo-card relative flex min-w-0 flex-col overflow-hidden rounded-lg border p-5 sm:p-6">
+                <dt className="flex flex-1 flex-col items-start gap-4">
+                  <span className="consultora-resumo-icone grid size-11 shrink-0 place-items-center rounded-lg">
+                    <Icone className="size-6" strokeWidth={1.7} aria-hidden />
+                  </span>
+                  <span className="min-w-0 font-sans text-lg font-medium leading-snug">{rotulo}</span>
+                </dt>
+                <dd className="mt-4 font-numeric text-5xl leading-none font-semibold tabular-nums">{valor}</dd>
               </div>
             ))}
           </dl>

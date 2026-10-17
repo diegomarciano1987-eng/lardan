@@ -1,5 +1,6 @@
 # Roadmap
 ## App da consultora — PDF de melhorias (16/10)
+- [ ] Redesenhar os quatro cartões de Seu resumo conforme o print e conferir no celular e computador, sem alterar indicadores.
 - [x] Melhorar visual da lista de pedidos no celular e desktop — cartões, resumos, ações e detalhe reorganizados; capturas com dados autorizados, sem gravações; docs/lardan/DESIGN-PEDIDOS-CONSULTORA-2026-10-17.md
 - [x] Conferir todos os itens do PDF contra o app e registrar evidências e dependências — docs/lardan/PROVAS-APP-CONSULTORA-2026-10-16.md
 - [ ] Corrigir maleta ativa, pedidos/clientes, formulários e navegação da venda

@@ -1,4 +1,12 @@
 # Roadmap
+## Pacote prontidão fiscal — revisão 16/10, noite
+- [ ] Conferir aplicação exata do patch; apresentar conflitos antes de decidir
+- [ ] Aplicar apenas a 0099 pela ferramenta oficial; manter pacote 11 pendente
+- [ ] Adicionar leitura de prontidão em Integrações para quem vê financeiro
+- [ ] Executar suíte isolada e conferir sinais automáticos de compilação e tipos
+- [ ] Conferir JSON como Master, buckets, cron sem segredos e ausência de fiscal_outbox/kit_acertos
+- [ ] Entregar provas e diferenças; não publicar nem ativar emissão
+
 ## App da consultora — PDF de melhorias (16/10)
 - [x] Redesenhar os quatro cartões de Seu resumo conforme o print — ícones, contraste, números e respiro; capturas 390/1156/1280 px sem transbordamento; leitura autenticada bloqueada para Master, prova visual isolada com valores do print; sem alterar indicadores ou publicar.
 - [x] Melhorar visual da lista de pedidos no celular e desktop — cartões, resumos, ações e detalhe reorganizados; capturas com dados autorizados, sem gravações; docs/lardan/DESIGN-PEDIDOS-CONSULTORA-2026-10-17.md

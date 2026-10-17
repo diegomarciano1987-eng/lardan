@@ -1,3 +1,4 @@
+import { ArtesSemana } from "@/components/consultora/ArtesSemana";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, FileDown, MessageCircle, ShieldCheck } from "lucide-react";
 import { CUIDADOS, GARANTIA_ANOS, MANUAL_CUIDADOS_URL, TROCA_DIAS } from "@/lib/consultora-regras";
@@ -6,6 +7,7 @@ export function Biblioteca() {
   const whats = `https://wa.me/?text=${encodeURIComponent(`Olá! Aqui está o manual de cuidados das suas semijoias LARDAN. Seguindo essas dicas você mantém a garantia de ${GARANTIA_ANOS} anos: ${MANUAL_CUIDADOS_URL}`)}`;
   return (
     <div className="space-y-5">
+      <ArtesSemana />
       <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
         <div className="flex items-start gap-4">
           <BookOpen className="mt-1 size-8 shrink-0 text-primary" aria-hidden />

@@ -2632,6 +2632,195 @@ export type Database = {
           },
         ]
       }
+      cob_judicial: {
+        Row: {
+          advogado: string | null
+          comarca: string | null
+          data_ajuizamento: string | null
+          encaminhado_em: string
+          encaminhado_por: string | null
+          observacao: string | null
+          party_id: string
+          processo: string | null
+          updated_at: string
+          updated_by: string | null
+          vara: string | null
+        }
+        Insert: {
+          advogado?: string | null
+          comarca?: string | null
+          data_ajuizamento?: string | null
+          encaminhado_em?: string
+          encaminhado_por?: string | null
+          observacao?: string | null
+          party_id: string
+          processo?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vara?: string | null
+        }
+        Update: {
+          advogado?: string | null
+          comarca?: string | null
+          data_ajuizamento?: string | null
+          encaminhado_em?: string
+          encaminhado_por?: string | null
+          observacao?: string | null
+          party_id?: string
+          processo?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vara?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_judicial_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_judicial_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      cob_judicial_acordos: {
+        Row: {
+          autor_id: string
+          cartorio_cents: number
+          created_at: string
+          custas_cents: number
+          data_acordo: string
+          desconto_cents: number
+          honorarios_cents: number
+          id: string
+          installment_ids: string[]
+          observacao: string | null
+          outros_cents: number
+          outros_descricao: string | null
+          party_id: string
+          plano: Json
+          principal_cents: number
+          status: string
+          status_motivo: string | null
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          autor_id: string
+          cartorio_cents?: number
+          created_at?: string
+          custas_cents?: number
+          data_acordo: string
+          desconto_cents?: number
+          honorarios_cents?: number
+          id?: string
+          installment_ids?: string[]
+          observacao?: string | null
+          outros_cents?: number
+          outros_descricao?: string | null
+          party_id: string
+          plano?: Json
+          principal_cents?: number
+          status?: string
+          status_motivo?: string | null
+          total_cents: number
+          updated_at?: string
+        }
+        Update: {
+          autor_id?: string
+          cartorio_cents?: number
+          created_at?: string
+          custas_cents?: number
+          data_acordo?: string
+          desconto_cents?: number
+          honorarios_cents?: number
+          id?: string
+          installment_ids?: string[]
+          observacao?: string | null
+          outros_cents?: number
+          outros_descricao?: string | null
+          party_id?: string
+          plano?: Json
+          principal_cents?: number
+          status?: string
+          status_motivo?: string | null
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_judicial_acordos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_judicial_acordos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      cob_judicial_docs: {
+        Row: {
+          autor_id: string
+          content_type: string
+          created_at: string
+          file_name: string
+          id: string
+          party_id: string
+          storage_path: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          autor_id: string
+          content_type: string
+          created_at?: string
+          file_name: string
+          id?: string
+          party_id: string
+          storage_path: string
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          autor_id?: string
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          party_id?: string
+          storage_path?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_judicial_docs_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_judicial_docs_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       cob_pracas: {
         Row: {
           ativo: boolean
@@ -12754,6 +12943,19 @@ export type Database = {
       cob_fiado_importar: {
         Args: { _linhas: Json; _lote: string }
         Returns: Json
+      }
+      cob_judicial_acordo_salvar: {
+        Args: { _d: Json; _party: string }
+        Returns: string
+      }
+      cob_judicial_acordo_status: {
+        Args: { _id: string; _motivo: string; _status: string }
+        Returns: undefined
+      }
+      cob_judicial_doc_registrar: { Args: { _d: Json }; Returns: string }
+      cob_judicial_encaminhar: {
+        Args: { _d: Json; _party: string }
+        Returns: undefined
       }
       cob_kpis: { Args: never; Returns: Json }
       cob_lembretes: {

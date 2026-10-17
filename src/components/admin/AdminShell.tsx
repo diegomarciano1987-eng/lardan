@@ -65,7 +65,7 @@ export function AdminShell({
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line-soft bg-surface pr-3">
           <Link
             to="/admin"
-            className="flex h-16 w-[220px] shrink-0 items-center gap-3 self-stretch rounded-r-[16px] bg-graphite px-5 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-champagne lg:w-[320px]"
+            className="flex h-16 w-[188px] shrink-0 items-center gap-3 self-stretch rounded-r-[16px] bg-graphite px-4 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-champagne lg:w-[320px]"
           >
             <img src={logo.url} alt="Lardan" className="h-7 w-auto" />
             <span className="hidden text-[0.625rem] tracking-[0.28em] text-warm-ivory/70 sm:block">

@@ -326,7 +326,7 @@ function VisaoGeral() {
               description="Toda alteração em produtos, páginas, usuários, papéis e configurações é gravada aqui automaticamente."
             />
           ) : (
-            <table className="w-full text-left text-sm">
+            <div className="overflow-x-auto"><table className="w-full text-left text-sm">
               <thead className="sticky top-0 bg-surface">
                 <tr className="border-b border-line text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-bronze">
                   <th className="px-5 py-2.5">Data</th>
@@ -347,7 +347,7 @@ function VisaoGeral() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </Panel>
       </div>

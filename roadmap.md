@@ -1,4 +1,9 @@
 # Roadmap
+## Menu do painel Master (reordenação) — 17/10
+- [x] Reordenar: Visão Geral, Financeiro, Produtos, Central de Avisos, Biblioteca, Candidaturas primeiro; Trocas/Garantias depois de Cobrança — src/lib/admin-modules.ts
+- [x] Desktop com os seis prioritários e celular com cinco + Mais módulos — BottomDock
+- [x] Zero rolagem horizontal no celular — dock compacto, tabela da Visão Geral com rolagem própria e cabeçalho ajustado; 1280 e 390 px conferidos
+- [x] Typecheck limpo; nada publicado
 ## Revisão 0100 e Biblioteca — 17/10
 - [x] Aplicar patch exato com registro oficial da 0100; pacote 11 apenas no repositório — quatro arquivos conferidos idênticos
 - [x] Separar artes, campanhas, informativos e materiais na Biblioteca master e consultora — formulário Master e quatro categorias na conta autorizada, 390/1280 px

@@ -58,4 +58,5 @@ Provas: docs/lardan/AUDITORIA-FINANCEIRO-NOVE-PONTOS-2026-10-16.md; 243 testes i
 - [x] Etapa 3: Quanto eu ganho, meta, acerto (4.6, 6.1–6.3) + Configurações de comissão em Indicação e comissão — faixas a preencher pela LARDAN
 - [x] Etapa 4: aniversariantes/30 dias (5.2), combina com ela (5.5), link nominal (6.7 já existia)
 - [x] 6.5 artes da semana na Biblioteca (painel /admin/biblioteca)
-- [ ] Etapa 5: limpeza dos testes (1.6) — aguarda autorização
+- [x] Etapa 5: conta teste projetos.diegosilva limpa (backup lote limpeza-conta-teste-projetos-diegosilva-2026-10-17)
+- [ ] 4 pedidos com Pix no Asaas (PED-000057/59/61/63) — cancelar cobranças antes de apagar; aguarda decisão

@@ -20,6 +20,22 @@ const recusa = async (fn: () => Promise<unknown>) => {
   }
 };
 
+/** Executor do servidor (service_role), como a integração com o provedor chama. */
+async function comoServico<T = unknown>(sql: string, p: unknown[] = []) {
+  const c = await adm.reserve();
+  try {
+    await c.unsafe(`set role service_role`);
+    await c.unsafe(`select set_config('lardan.test_role','service_role',false), set_config('lardan.test_uid','',false)`);
+    const r = (await c.unsafe(sql, p)) as { r: T }[];
+    return { dados: r[0]!.r, erro: null as string | null };
+  } catch (e) {
+    return { dados: null as T, erro: (e as Error).message };
+  } finally {
+    try { await c.unsafe(`reset role`); await c.unsafe(`select set_config('lardan.test_role','',false)`); } catch { /* */ }
+    c.release();
+  }
+}
+
 let fiscal: Conta, comum: Conta, pessoa: Conta;
 let entidade = "", variante = "", origemItem = "", doc = "";
 const marca = `ISO-FC-${Date.now().toString(36)}`;
@@ -145,22 +161,27 @@ describe("Preparação e travas", () => {
   });
 
   it("8. resposta simulada nunca vira autorização", async () => {
-    const t = await rpc<{ simulado: boolean }>(fiscal, "fiscal_doc_registrar_retorno", {
+    // Pessoa nenhuma registra retorno do provedor nem autoriza pela tela (pacote 11).
+    const humano = await rpc(fiscal, "fiscal_doc_registrar_retorno", {
       _doc: doc,
       _status: "erro",
       _payload: { motivo: "simulação local" },
     });
-    expect(t.ok).toBe(true);
+    expect(humano.ok).toBe(false);
+    const humanoAutoriza = await rpc(fiscal, "fiscal_doc_autorizar", {
+      _doc: doc, _access_key: "0".repeat(44), _protocol: "simulado", _xml_path: null, _xml_hash: null,
+    });
+    expect(humanoAutoriza.ok).toBe(false);
+
+    // O servidor registra a tentativa, que continua simulada com a emissão desligada.
+    const t = await comoServico<{ simulado: boolean }>(
+      `select public.fiscal_doc_registrar_retorno($1::uuid, 'erro', '{"motivo":"simulação local"}'::jsonb) r`, [doc]);
+    expect(t.erro).toBeNull();
     expect(t.dados.simulado).toBe(true);
 
-    const a = await rpc(fiscal, "fiscal_doc_autorizar", {
-      _doc: doc,
-      _access_key: "0".repeat(44),
-      _protocol: "simulado",
-      _xml_path: null,
-      _xml_hash: null,
-    });
-    expect(a.ok).toBe(false);
+    const a = await comoServico(
+      `select public.fiscal_doc_autorizar($1::uuid, $2, 'simulado', null, null) r`, [doc, "0".repeat(44)]);
+    expect(a.erro).not.toBeNull();
     expect(String(a.erro)).toContain("simulada");
 
     expect(

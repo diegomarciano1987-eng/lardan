@@ -6,12 +6,19 @@ import { ModulePlaceholder } from "@/components/admin/AdminShell";
 import { Panel } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { reprocessarAssinados, situacaoClicksign } from "@/lib/clicksign.functions";
+import { FiscalProntidao } from "@/components/admin/FiscalProntidao";
+import { can, useCapabilities } from "@/lib/capabilities";
 
 export const Route = createFileRoute("/_authenticated/admin/integracoes")({
   component: Integracoes,
   head: () => ({
     meta: [
       { title: "Integrações — Administração LARDAN" },
+      { name: "description", content: "Configurações das integrações LARDAN e relatório de prontidão para emissão de notas fiscais." },
+      { property: "og:title", content: "Integrações — Administração LARDAN" },
+      { property: "og:description", content: "Assinaturas de maletas e pendências fiscais da operação LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -24,6 +31,7 @@ const MODOS = [
 ] as const;
 
 function Integracoes() {
+  const caps = useCapabilities();
   const qc = useQueryClient();
   const ler = useServerFn(situacaoClicksign);
   const reproc = useServerFn(reprocessarAssinados);
@@ -48,6 +56,7 @@ function Integracoes() {
 
   return (
     <div className="space-y-6">
+      {can(caps, "finance.view") && <FiscalProntidao />}
       <Panel title="Clicksign — termo de recebimento da maleta">
         {!s ? (
           <p className="text-sm text-ledger-muted">Carregando…</p>

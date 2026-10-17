@@ -666,13 +666,6 @@
       "when": 1792194594242,
       "tag": "0094_consultora_pos_venda_prazo_oficial",
       "breakpoints": true
-    },
-    {
-      "idx": 95,
-      "version": "7",
-      "when": 1792195000000,
-      "tag": "0095_pedido_condicao_combinada",
-      "breakpoints": true
     }
   ]
 }

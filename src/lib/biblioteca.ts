@@ -1,21 +1,26 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const BUCKET_BIBLIOTECA = "biblioteca-lardan";
-export type Arte = { id: string; titulo: string; legenda: string; formato: "story" | "feed" | "status"; path: string; publicado: boolean; semana: string; created_at: string };
+export type TipoConteudo = "arte" | "campanha" | "informativo" | "material";
+export const TIPOS: Record<TipoConteudo, string> = { arte: "Artes de redes sociais", campanha: "Campanhas", informativo: "Informativos gerais", material: "Manuais e materiais" };
+export type Arte = { id: string; titulo: string; legenda: string; tipo: TipoConteudo; formato: "story" | "feed" | "status"; path: string; publicado: boolean; semana: string; created_at: string };
 export const FORMATOS: Record<Arte["formato"], string> = { story: "Story (vertical)", feed: "Feed (quadrado)", status: "Status do WhatsApp" };
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "video/mp4": "mp4", "application/pdf": "pdf" };
 
-export async function listarArtes(soPublicadas: boolean) {
+export async function listarArtes(soPublicadas: boolean, tipo?: TipoConteudo) {
   let q = supabase.from("biblioteca_artes").select("*").order("semana", { ascending: false }).order("created_at", { ascending: false }).limit(120);
   if (soPublicadas) q = q.eq("publicado", true);
+  if (tipo) q = q.eq("tipo", tipo);
   const { data, error } = await q;
   if (error) throw error;
   const artes = (data ?? []) as Arte[];
-  const urls = artes.length ? (await supabase.storage.from(BUCKET_BIBLIOTECA).createSignedUrls(artes.map((a) => a.path), 3600)).data ?? [] : [];
+  const assinadas = artes.length ? await supabase.storage.from(BUCKET_BIBLIOTECA).createSignedUrls(artes.map((a) => a.path), 3600) : null;
+  if (assinadas?.error) throw assinadas.error;
+  const urls = assinadas?.data ?? [];
   return artes.map((a) => ({ ...a, url: urls.find((u) => u.path === a.path)?.signedUrl ?? null }));
 }
 
-export async function enviarArte(arq: File, dados: { titulo: string; legenda: string; formato: Arte["formato"]; semana: string }) {
+export async function enviarArte(arq: File, dados: { titulo: string; legenda: string; tipo: TipoConteudo; formato: Arte["formato"]; semana: string }) {
   const ext = EXT[arq.type];
   if (!ext) throw new Error("Envie JPG, PNG, WEBP, MP4 ou PDF.");
   if (arq.size > 25 * 1024 * 1024) throw new Error("Arquivo acima de 25 MB.");

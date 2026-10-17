@@ -73,7 +73,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
     <div className={`area-consultora ${grande ? "letra-grande" : ""} min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex`}>
       <AberturaApp />
       {/* Menu lateral no computador */}
-      <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex">
+      <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex overflow-y-auto overscroll-contain">
         <img src={nomeLardan.url} alt="LARDAN" className="mb-6 h-auto w-32 object-contain object-left" />
         <AvatarConsultora />
         <button type="button" onClick={() => ir({ aba: "novo" })} className="btn-app-principal mb-5 w-full">

@@ -1,3 +1,4 @@
+import { Biblioteca } from "@/components/consultora/Biblioteca";
 import { Indicacoes } from "@/components/consultora/Indicacoes";
 import { PedidosConsultora } from "@/components/consultora/PedidosConsultora";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -33,7 +34,7 @@ import {
   type TipoDivergencia,
 } from "@/lib/maletas";
 
-const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "mais", "novo"];
+const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "biblioteca", "mais", "novo"];
 const str = (v: unknown) => (typeof v === "string" && v.length > 0 && v.length < 200 ? v : undefined);
 
 export const Route = createFileRoute("/_authenticated/consultora")({
@@ -488,7 +489,7 @@ function AreaConsultoraLiberada() {
   const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
   const aba = nav.aba ?? "inicio";
-  const ajuda = aba === "indicacoes" ? "inicio" : aba === "historico" ? "maleta" : aba === "novo" ? "pedidos" : aba;
+  const ajuda = aba === "indicacoes" || aba === "biblioteca" ? "inicio" : aba === "historico" ? "maleta" : aba === "novo" ? "pedidos" : aba;
 
   const seletorMaleta = abertas.length > 1 && (
     <div role="radiogroup" aria-label="Maleta em uso" className="mb-5 grid gap-2">
@@ -518,6 +519,7 @@ function AreaConsultoraLiberada() {
       {aba === "historico" && (<><Topo titulo="Entregas da maleta" ajuda="maleta" voltar={() => ir({ aba: "mais" })} />{seletorMaleta}<div className="max-w-3xl"><Historico cycleId={atual} /></div></>)}
       {aba === "vitrine" && (<><Topo titulo="Minha vitrine" ajuda="vitrine" voltar={() => ir({ aba: "mais" })} /><Estudio /></>)}
       {aba === "indicacoes" && (<><Topo titulo="Indicações" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Indicacoes /></>)}
+      {aba === "biblioteca" && (<><Topo titulo="Biblioteca LARDAN" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Biblioteca /></>)}
       {aba === "mais" && <Mais ir={ir} />}
     </CascaConsultora>
   );

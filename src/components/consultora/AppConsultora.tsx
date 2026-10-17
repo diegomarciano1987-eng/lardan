@@ -7,12 +7,14 @@ import { LeitorEtiqueta } from "@/components/consultora/LeitorEtiqueta";
 import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
 import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
+import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
+import { Link } from "@tanstack/react-router";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeft, BriefcaseBusiness, CalendarClock, CalendarDays, Check, ChevronRight, CircleHelp, Home, LogOut, Menu, MessageCircle,
+  ArrowLeft, BookOpen, BriefcaseBusiness, FileText, CalendarClock, CalendarDays, Check, ChevronRight, CircleHelp, Home, LogOut, Menu, MessageCircle,
   PackageCheck, Phone, Plus, Search, ShoppingBag, Store, UserPlus, Users,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -29,7 +31,7 @@ import {
   meuParty, obterCliente, ETAPAS, historicoEtapas, linkInstagram, moverEtapa, pausarPessoa, rotuloEtapa, type Etapa, buscarPecas, registrarAtendimento, salvarCliente, type Atendimento, type Cliente, type Peca,
 } from "@/lib/consultora";
 
-export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "mais" | "novo";
+export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "biblioteca" | "mais" | "novo";
 export type Nav = { aba: AbaApp; id?: string | undefined; modo?: "nova" | "editar" | undefined; q?: string | undefined };
 export type Ir = (n: Nav) => void;
 
@@ -48,9 +50,10 @@ const EXTRAS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
   { aba: "vitrine", rotulo: "Minha vitrine", icone: Store },
   { aba: "historico", rotulo: "Entregas da maleta", icone: PackageCheck },
   { aba: "indicacoes", rotulo: "Indicações", icone: UserPlus },
+  { aba: "biblioteca", rotulo: "Biblioteca LARDAN", icone: BookOpen },
 ];
 
-const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : a === "vitrine" || a === "historico" || a === "indicacoes" ? "mais" : a);
+const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : a === "vitrine" || a === "historico" || a === "indicacoes" || a === "biblioteca" ? "mais" : a);
 
 export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir; ajuda: string; children: React.ReactNode }) {
   const ativo = grupoDe(nav.aba);
@@ -67,9 +70,8 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
       <AberturaApp />
       {/* Menu lateral no computador */}
       <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex">
-        <img src={nomeLardan.url} alt="LARDAN" className="mb-7 h-auto w-32 object-contain object-left" />
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Minha área</p>
-        <p className="mb-6 mt-1 text-xl font-semibold">Consultora</p>
+        <img src={nomeLardan.url} alt="LARDAN" className="mb-6 h-auto w-32 object-contain object-left" />
+        <AvatarConsultora />
         <button type="button" onClick={() => ir({ aba: "novo" })} className="btn-app-principal mb-5 w-full">
           <Plus className="size-5" aria-hidden /> Nova venda
         </button>
@@ -92,7 +94,8 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
       </aside>
 
       <div className="min-w-0 flex-1">
-        <header className="grid h-16 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 border-b border-border bg-card px-4 sm:px-6 lg:hidden">
+        <header className="grid h-16 grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 border-b border-border bg-card px-4 sm:px-6 lg:hidden">
+          <AvatarConsultora tamanho="pequeno" />
           <img src={nomeLardan.url} alt="LARDAN" className="h-auto w-24 min-w-0 object-contain object-left sm:w-28" />
           <BotaoNovidades />
           <button type="button" onClick={() => setMenuAberto(true)} aria-label="Abrir menu" aria-expanded={menuAberto}
@@ -820,6 +823,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
               <MessageCircle className="size-5" aria-hidden /> Enviar resumo pelo WhatsApp
             </a>
           )}
+          <Link to="/consultora-garantia/$id" params={{ id: resultado.order_id }} target="_blank" className="btn-app-principal w-full"><FileText className="size-5" aria-hidden /> Comprovante e certificado de garantia</Link>
           <button type="button" className="admin-btn min-h-13 w-full justify-center text-base" onClick={() => ir({ aba: "pedidos" })}>Ver meus pedidos</button>
           <button type="button" className="admin-btn min-h-13 w-full justify-center text-base" onClick={() => ir({ aba: "inicio" })}>Voltar ao início</button>
         </div>
@@ -836,6 +840,7 @@ export function Mais({ ir }: { ir: Ir }) {
     { r: "Minha vitrine", d: "Foto, capa, peças e link para compartilhar", i: Store, n: { aba: "vitrine" } as Nav },
     { r: "Entregas da maleta", d: "Histórico de envios e recebimentos", i: PackageCheck, n: { aba: "historico" } as Nav },
     { r: "Indicações", d: "Seu link, suas indicadas e comissões", i: UserPlus, n: { aba: "indicacoes" } as Nav },
+    { r: "Biblioteca LARDAN", d: "Manual de uso em PDF, garantia e troca", i: BookOpen, n: { aba: "biblioteca" } as Nav },
   ];
   return (
     <div>

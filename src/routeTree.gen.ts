@@ -47,6 +47,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as WebinarRegistrationRouteImport } from './routes/webinar-registration'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedConsultoraRouteImport } from './routes/_authenticated/consultora'
+import { Route as AuthenticatedConsultoraManualRouteImport } from './routes/_authenticated/consultora-manual'
 import { Route as AuthenticatedRepresentanteRouteImport } from './routes/_authenticated/representante'
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as DCodigoRouteImport } from './routes/d.$codigo'
@@ -75,6 +76,7 @@ import { Route as AuthenticatedAdminRedeRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminSiteRouteImport } from './routes/_authenticated/admin/site'
 import { Route as AuthenticatedAdminTrocasGarantiasRouteImport } from './routes/_authenticated/admin/trocas-garantias'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
+import { Route as AuthenticatedConsultoraGarantiaIdRouteImport } from './routes/_authenticated/consultora-garantia.$id'
 import { Route as ApiPublicGaConfigRouteImport } from './routes/api/public/ga-config'
 import { Route as ApiPublicIndexnowRouteImport } from './routes/api/public/indexnow'
 import { Route as AuthenticatedAdminCadastrosIndexRouteImport } from './routes/_authenticated/admin/cadastros/index'
@@ -321,6 +323,12 @@ const AuthenticatedConsultoraRoute = AuthenticatedConsultoraRouteImport.update({
   path: '/consultora',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConsultoraManualRoute =
+  AuthenticatedConsultoraManualRouteImport.update({
+    id: '/consultora-manual',
+    path: '/consultora-manual',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRepresentanteRoute =
   AuthenticatedRepresentanteRouteImport.update({
     id: '/representante',
@@ -475,6 +483,12 @@ const AuthenticatedAdminUsuariosRoute =
     id: '/usuarios',
     path: '/usuarios',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedConsultoraGarantiaIdRoute =
+  AuthenticatedConsultoraGarantiaIdRouteImport.update({
+    id: '/consultora-garantia/$id',
+    path: '/consultora-garantia/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const ApiPublicGaConfigRoute = ApiPublicGaConfigRouteImport.update({
   id: '/api/public/ga-config',
@@ -815,6 +829,7 @@ export interface FileRoutesByFullPath {
   '/webinar-registration': typeof WebinarRegistrationRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/consultora': typeof AuthenticatedConsultoraRoute
+  '/consultora-manual': typeof AuthenticatedConsultoraManualRoute
   '/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
@@ -842,6 +857,7 @@ export interface FileRoutesByFullPath {
   '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/trocas-garantias': typeof AuthenticatedAdminTrocasGarantiasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/consultora-garantia/$id': typeof AuthenticatedConsultoraGarantiaIdRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
   '/api/public/indexnow': typeof ApiPublicIndexnowRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -932,6 +948,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/webinar-registration': typeof WebinarRegistrationRoute
   '/consultora': typeof AuthenticatedConsultoraRoute
+  '/consultora-manual': typeof AuthenticatedConsultoraManualRoute
   '/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
@@ -958,6 +975,7 @@ export interface FileRoutesByTo {
   '/admin/site': typeof AuthenticatedAdminSiteRoute
   '/admin/trocas-garantias': typeof AuthenticatedAdminTrocasGarantiasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/consultora-garantia/$id': typeof AuthenticatedConsultoraGarantiaIdRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
   '/api/public/indexnow': typeof ApiPublicIndexnowRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -1051,6 +1069,7 @@ export interface FileRoutesById {
   '/webinar-registration': typeof WebinarRegistrationRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/consultora': typeof AuthenticatedConsultoraRoute
+  '/_authenticated/consultora-manual': typeof AuthenticatedConsultoraManualRoute
   '/_authenticated/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
@@ -1078,6 +1097,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/site': typeof AuthenticatedAdminSiteRoute
   '/_authenticated/admin/trocas-garantias': typeof AuthenticatedAdminTrocasGarantiasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/consultora-garantia/$id': typeof AuthenticatedConsultoraGarantiaIdRoute
   '/api/public/ga-config': typeof ApiPublicGaConfigRoute
   '/api/public/indexnow': typeof ApiPublicIndexnowRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1171,6 +1191,7 @@ export interface FileRouteTypes {
     | '/webinar-registration'
     | '/admin'
     | '/consultora'
+    | '/consultora-manual'
     | '/representante'
     | '/convite/$token'
     | '/d/$codigo'
@@ -1198,6 +1219,7 @@ export interface FileRouteTypes {
     | '/admin/site'
     | '/admin/trocas-garantias'
     | '/admin/usuarios'
+    | '/consultora-garantia/$id'
     | '/api/public/ga-config'
     | '/api/public/indexnow'
     | '/admin/'
@@ -1288,6 +1310,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/webinar-registration'
     | '/consultora'
+    | '/consultora-manual'
     | '/representante'
     | '/convite/$token'
     | '/d/$codigo'
@@ -1314,6 +1337,7 @@ export interface FileRouteTypes {
     | '/admin/site'
     | '/admin/trocas-garantias'
     | '/admin/usuarios'
+    | '/consultora-garantia/$id'
     | '/api/public/ga-config'
     | '/api/public/indexnow'
     | '/admin'
@@ -1406,6 +1430,7 @@ export interface FileRouteTypes {
     | '/webinar-registration'
     | '/_authenticated/admin'
     | '/_authenticated/consultora'
+    | '/_authenticated/consultora-manual'
     | '/_authenticated/representante'
     | '/convite/$token'
     | '/d/$codigo'
@@ -1433,6 +1458,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/site'
     | '/_authenticated/admin/trocas-garantias'
     | '/_authenticated/admin/usuarios'
+    | '/_authenticated/consultora-garantia/$id'
     | '/api/public/ga-config'
     | '/api/public/indexnow'
     | '/_authenticated/admin/'
@@ -1811,6 +1837,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConsultoraRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/consultora-manual': {
+      id: '/_authenticated/consultora-manual'
+      path: '/consultora-manual'
+      fullPath: '/consultora-manual'
+      preLoaderRoute: typeof AuthenticatedConsultoraManualRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/representante': {
       id: '/_authenticated/representante'
       path: '/representante'
@@ -2006,6 +2039,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/usuarios'
       preLoaderRoute: typeof AuthenticatedAdminUsuariosRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/consultora-garantia/$id': {
+      id: '/_authenticated/consultora-garantia/$id'
+      path: '/consultora-garantia/$id'
+      fullPath: '/consultora-garantia/$id'
+      preLoaderRoute: typeof AuthenticatedConsultoraGarantiaIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/ga-config': {
       id: '/api/public/ga-config'
@@ -2551,14 +2591,19 @@ const AuthenticatedAdminRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedConsultoraRoute: typeof AuthenticatedConsultoraRoute
+  AuthenticatedConsultoraManualRoute: typeof AuthenticatedConsultoraManualRoute
   AuthenticatedRepresentanteRoute: typeof AuthenticatedRepresentanteRoute
+  AuthenticatedConsultoraGarantiaIdRoute: typeof AuthenticatedConsultoraGarantiaIdRoute
   AuthenticatedFinanceiroSimulacaoIdRoute: typeof AuthenticatedFinanceiroSimulacaoIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedConsultoraRoute: AuthenticatedConsultoraRoute,
+  AuthenticatedConsultoraManualRoute: AuthenticatedConsultoraManualRoute,
   AuthenticatedRepresentanteRoute: AuthenticatedRepresentanteRoute,
+  AuthenticatedConsultoraGarantiaIdRoute:
+    AuthenticatedConsultoraGarantiaIdRoute,
   AuthenticatedFinanceiroSimulacaoIdRoute:
     AuthenticatedFinanceiroSimulacaoIdRoute,
 }

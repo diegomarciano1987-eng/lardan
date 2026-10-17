@@ -12895,6 +12895,15 @@ export type Database = {
           vencimento: string
         }[]
       }
+      consultora_limpar_conta_teste: {
+        Args: {
+          _confirmacao: string
+          _lote: string
+          _motivo: string
+          _party: string
+        }
+        Returns: Json
+      }
       consultora_pagamento_lembrete: {
         Args: { _order: string; _venc: string }
         Returns: Json

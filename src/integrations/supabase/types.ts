@@ -3437,6 +3437,36 @@ export type Database = {
           },
         ]
       }
+      consultora_comissao_faixas: {
+        Row: {
+          created_at: string
+          id: string
+          meta_cents: number | null
+          min_vendido_cents: number
+          percentual: number
+          titulo: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meta_cents?: number | null
+          min_vendido_cents: number
+          percentual: number
+          titulo?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meta_cents?: number | null
+          min_vendido_cents?: number
+          percentual?: number
+          titulo?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       consultora_pos_venda: {
         Row: {
           compra_em: string
@@ -10955,6 +10985,9 @@ export type Database = {
           client_id: string | null
           closed_at: string | null
           code: string
+          combinado_forma: string | null
+          combinado_parcelas: number | null
+          combinado_vencimento: string | null
           consultora_party_id: string
           created_at: string
           customer_email: string | null
@@ -10989,6 +11022,9 @@ export type Database = {
           client_id?: string | null
           closed_at?: string | null
           code?: string
+          combinado_forma?: string | null
+          combinado_parcelas?: number | null
+          combinado_vencimento?: string | null
           consultora_party_id: string
           created_at?: string
           customer_email?: string | null
@@ -11023,6 +11059,9 @@ export type Database = {
           client_id?: string | null
           closed_at?: string | null
           code?: string
+          combinado_forma?: string | null
+          combinado_parcelas?: number | null
+          combinado_vencimento?: string | null
           consultora_party_id?: string
           created_at?: string
           customer_email?: string | null
@@ -12726,6 +12765,15 @@ export type Database = {
         Returns: Json
       }
       consultant_home: { Args: never; Returns: Json }
+      consultant_order_combinado_set: {
+        Args: {
+          _forma: string
+          _order: string
+          _parcelas: number
+          _vencimento: string
+        }
+        Returns: Json
+      }
       consultant_order_create: {
         Args: { _client: string; _idempotency_key: string; _itens: Json }
         Returns: Json
@@ -12752,6 +12800,8 @@ export type Database = {
       consultora_cliente_compras: { Args: { _cliente: string }; Returns: Json }
       consultora_clientes_resumo: { Args: never; Returns: Json }
       consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }
+      consultora_comissao_tabela: { Args: never; Returns: Json }
+      consultora_ganhos: { Args: never; Returns: Json }
       consultora_lembretes_vencimento: {
         Args: never
         Returns: {

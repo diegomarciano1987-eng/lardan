@@ -24,7 +24,11 @@ export type Papel =
   | "estoque"
   | "qualidade"
   | "representante"
-  | "consultora";
+  | "consultora"
+  | "marketing"
+  | "suporte"
+  | "cobranca"
+  | "montagem";
 
 export interface Conta {
   nome: string;

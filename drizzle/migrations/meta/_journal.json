@@ -708,6 +708,13 @@
       "when": 1792242705519,
       "tag": "0100_prontidao_ajustes_revisao_lovable",
       "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "7",
+      "when": 1792242739294,
+      "tag": "0101_biblioteca_tipos_conteudo",
+      "breakpoints": true
     }
   ]
 }

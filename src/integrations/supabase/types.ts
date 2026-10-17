@@ -1539,6 +1539,7 @@ export type Database = {
           path: string
           publicado: boolean
           semana: string
+          tipo: string
           titulo: string
           updated_at: string
         }
@@ -1551,6 +1552,7 @@ export type Database = {
           path: string
           publicado?: boolean
           semana?: string
+          tipo?: string
           titulo: string
           updated_at?: string
         }
@@ -1563,6 +1565,7 @@ export type Database = {
           path?: string
           publicado?: boolean
           semana?: string
+          tipo?: string
           titulo?: string
           updated_at?: string
         }

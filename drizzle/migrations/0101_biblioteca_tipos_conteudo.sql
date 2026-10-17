@@ -1,0 +1,2 @@
+ALTER TABLE public.biblioteca_artes ADD COLUMN tipo text NOT NULL DEFAULT 'arte' CHECK (tipo IN ('arte', 'campanha', 'informativo', 'material'));
+COMMENT ON COLUMN public.biblioteca_artes.tipo IS 'Organização do conteúdo da Biblioteca; formato social legado permanece preservado.';

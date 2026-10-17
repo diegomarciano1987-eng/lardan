@@ -132,7 +132,7 @@ describe("montagem da requisição", () => {
     await http(f).prepararCliente({ name: "ISO", cpfCnpj: "24971563792", ref: "lardan:party:p" });
     const corpo = JSON.parse(chamadas[0]!.init.body as string);
     expect(corpo.externalReference).toBe("lardan:party:p");
-    expect(corpo.notificationDisabled).toBe(true);
+    expect(corpo.notificationDisabled).toBe(false);
   });
 });
 

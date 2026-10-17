@@ -255,6 +255,7 @@ export async function executarIntencao(
         await persistirCliente(rc.token, c);
         clienteId = c.id;
       }
+      await ativarAvisosCliente(servico, transporte, r.party_id, clienteId);
       return executarIntencaoAposCliente(transporte, r, clienteId, gravar, recuperavel, renovarIntencao, lease);
     } catch (e) {
       if (e instanceof ReferenciaAmbigua) return revisar(e);
@@ -305,8 +306,20 @@ export async function executarIntencao(
     }
   }
 
-  // ---- cobrança
+  // ---- avisos do Asaas: liga e completa contato antes de criar (falha aqui nunca impede a cobrança)
+  await ativarAvisosCliente(servico, transporte, r.party_id, cliente!);
   return executarIntencaoAposCliente(transporte, r, cliente!, gravar, recuperavel, renovarIntencao, lease);
+}
+
+async function ativarAvisosCliente(servico: BancoAsaas, transporte: TransporteAsaas, partyId: string, cliente: string) {
+  const t = transporte as TransporteAsaas & { ativarAvisos?: (id: string, d: { email?: string | null; celular?: string | null }) => Promise<void> };
+  if (!t.ativarAvisos) return;
+  try {
+    const c = await servico.rpc<{ email: string | null; celular: string | null }>("asaas_exec_contato", { _party: partyId });
+    await t.ativarAvisos(cliente, c ?? {});
+  } catch (e) {
+    console.error("asaas avisos cliente", e instanceof Error ? e.message : e);
+  }
 }
 
 async function executarIntencaoAposCliente(

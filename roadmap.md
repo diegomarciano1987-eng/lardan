@@ -57,5 +57,5 @@ Provas: docs/lardan/AUDITORIA-FINANCEIRO-NOVE-PONTOS-2026-10-16.md; 243 testes i
 - [x] 8.3 foto da avaria ao receber a maleta
 - [x] Etapa 3: Quanto eu ganho, meta, acerto (4.6, 6.1–6.3) + Configurações de comissão em Indicação e comissão — faixas a preencher pela LARDAN
 - [x] Etapa 4: aniversariantes/30 dias (5.2), combina com ela (5.5), link nominal (6.7 já existia)
-- [ ] 6.5 artes da semana — aguarda a LARDAN definir onde publicar as artes
+- [x] 6.5 artes da semana na Biblioteca (painel /admin/biblioteca)
 - [ ] Etapa 5: limpeza dos testes (1.6) — aguarda autorização

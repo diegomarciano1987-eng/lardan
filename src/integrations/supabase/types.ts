@@ -1529,6 +1529,45 @@ export type Database = {
           },
         ]
       }
+      biblioteca_artes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          formato: string
+          id: string
+          legenda: string
+          path: string
+          publicado: boolean
+          semana: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          formato?: string
+          id?: string
+          legenda?: string
+          path: string
+          publicado?: boolean
+          semana?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          formato?: string
+          id?: string
+          legenda?: string
+          path?: string
+          publicado?: boolean
+          semana?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_entities: {
         Row: {
           city: string | null
@@ -12855,6 +12894,15 @@ export type Database = {
           valor_cents: number
           vencimento: string
         }[]
+      }
+      consultora_limpar_conta_teste: {
+        Args: {
+          _confirmacao: string
+          _lote: string
+          _motivo: string
+          _party: string
+        }
+        Returns: Json
       }
       consultora_pagamento_lembrete: {
         Args: { _order: string; _venc: string }

@@ -60,6 +60,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminAjudaRouteImport } from './routes/_authenticated/admin/ajuda'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminAvisosRouteImport } from './routes/_authenticated/admin/avisos'
+import { Route as AuthenticatedAdminBibliotecaRouteImport } from './routes/_authenticated/admin/biblioteca'
 import { Route as AuthenticatedAdminCandidaturasRouteImport } from './routes/_authenticated/admin/candidaturas'
 import { Route as AuthenticatedAdminCobrancaRouteImport } from './routes/_authenticated/admin/cobranca'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
@@ -390,6 +391,12 @@ const AuthenticatedAdminAvisosRoute =
   AuthenticatedAdminAvisosRouteImport.update({
     id: '/avisos',
     path: '/avisos',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminBibliotecaRoute =
+  AuthenticatedAdminBibliotecaRouteImport.update({
+    id: '/biblioteca',
+    path: '/biblioteca',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminCandidaturasRoute =
@@ -842,6 +849,7 @@ export interface FileRoutesByFullPath {
   '/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/avisos': typeof AuthenticatedAdminAvisosRoute
+  '/admin/biblioteca': typeof AuthenticatedAdminBibliotecaRoute
   '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/admin/cobranca': typeof AuthenticatedAdminCobrancaRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -960,6 +968,7 @@ export interface FileRoutesByTo {
   '/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/avisos': typeof AuthenticatedAdminAvisosRoute
+  '/admin/biblioteca': typeof AuthenticatedAdminBibliotecaRoute
   '/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/admin/cobranca': typeof AuthenticatedAdminCobrancaRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -1082,6 +1091,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/avisos': typeof AuthenticatedAdminAvisosRoute
+  '/_authenticated/admin/biblioteca': typeof AuthenticatedAdminBibliotecaRoute
   '/_authenticated/admin/candidaturas': typeof AuthenticatedAdminCandidaturasRoute
   '/_authenticated/admin/cobranca': typeof AuthenticatedAdminCobrancaRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
@@ -1204,6 +1214,7 @@ export interface FileRouteTypes {
     | '/admin/ajuda'
     | '/admin/auditoria'
     | '/admin/avisos'
+    | '/admin/biblioteca'
     | '/admin/candidaturas'
     | '/admin/cobranca'
     | '/admin/configuracoes'
@@ -1322,6 +1333,7 @@ export interface FileRouteTypes {
     | '/admin/ajuda'
     | '/admin/auditoria'
     | '/admin/avisos'
+    | '/admin/biblioteca'
     | '/admin/candidaturas'
     | '/admin/cobranca'
     | '/admin/configuracoes'
@@ -1443,6 +1455,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/ajuda'
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/avisos'
+    | '/_authenticated/admin/biblioteca'
     | '/_authenticated/admin/candidaturas'
     | '/_authenticated/admin/cobranca'
     | '/_authenticated/admin/configuracoes'
@@ -1926,6 +1939,13 @@ declare module '@tanstack/react-router' {
       path: '/avisos'
       fullPath: '/admin/avisos'
       preLoaderRoute: typeof AuthenticatedAdminAvisosRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/biblioteca': {
+      id: '/_authenticated/admin/biblioteca'
+      path: '/biblioteca'
+      fullPath: '/admin/biblioteca'
+      preLoaderRoute: typeof AuthenticatedAdminBibliotecaRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/candidaturas': {
@@ -2482,6 +2502,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminAjudaRoute: typeof AuthenticatedAdminAjudaRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminAvisosRoute: typeof AuthenticatedAdminAvisosRoute
+  AuthenticatedAdminBibliotecaRoute: typeof AuthenticatedAdminBibliotecaRoute
   AuthenticatedAdminCandidaturasRoute: typeof AuthenticatedAdminCandidaturasRoute
   AuthenticatedAdminCobrancaRoute: typeof AuthenticatedAdminCobrancaRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
@@ -2527,6 +2548,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminAjudaRoute: AuthenticatedAdminAjudaRoute,
     AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
     AuthenticatedAdminAvisosRoute: AuthenticatedAdminAvisosRoute,
+    AuthenticatedAdminBibliotecaRoute: AuthenticatedAdminBibliotecaRoute,
     AuthenticatedAdminCandidaturasRoute: AuthenticatedAdminCandidaturasRoute,
     AuthenticatedAdminCobrancaRoute: AuthenticatedAdminCobrancaRoute,
     AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,

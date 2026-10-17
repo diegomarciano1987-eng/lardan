@@ -118,6 +118,15 @@ export const ADMIN_MODULES: AdminModule[] = [
     state: "ativo",
   },
   {
+    slug: "biblioteca",
+    path: "/admin/biblioteca",
+    label: "Biblioteca LARDAN",
+    description: "Artes da semana para stories, feed e status das consultoras: envio, publicação e arquivo.",
+    icon: Megaphone,
+    roles: CONTENT,
+    state: "ativo",
+  },
+  {
     slug: "cadastros",
     path: "/admin/cadastros",
     label: "Cadastro",

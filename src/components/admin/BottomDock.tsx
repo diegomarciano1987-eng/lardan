@@ -84,7 +84,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
             </div>
 
             {submenu === "financeiro" ? (
-              <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="grid gap-1 sm:mx-auto sm:w-fit sm:grid-cols-2 lg:grid-cols-3">
                 {areasFinanceiras.map((a) => {
                   const active =
                     a.to === "/admin/financeiro" ? pathname === a.to : pathname.startsWith(a.to);
@@ -113,7 +113,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
                 })}
               </ul>
             ) : (
-              <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="grid gap-1 sm:mx-auto sm:w-fit sm:grid-cols-2 lg:grid-cols-3">
                 {permitted.map((m) => {
                   const active = isActive(pathname, m.path);
                   const Icon = m.icon;
@@ -189,7 +189,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
           </Link>
 
           {/* Prioritários: seis destinos; o restante fica em Mais módulos */}
-          <ul className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex [scrollbar-width:none]">
+          <ul className="hidden min-w-0 flex-1 items-center justify-center gap-1 overflow-x-auto md:flex [scrollbar-width:none]">
             {primary.map((m) => {
               const active = isActive(pathname, m.path);
               return (

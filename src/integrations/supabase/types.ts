@@ -10955,6 +10955,9 @@ export type Database = {
           client_id: string | null
           closed_at: string | null
           code: string
+          combinado_forma: string | null
+          combinado_parcelas: number | null
+          combinado_vencimento: string | null
           consultora_party_id: string
           created_at: string
           customer_email: string | null
@@ -10989,6 +10992,9 @@ export type Database = {
           client_id?: string | null
           closed_at?: string | null
           code?: string
+          combinado_forma?: string | null
+          combinado_parcelas?: number | null
+          combinado_vencimento?: string | null
           consultora_party_id: string
           created_at?: string
           customer_email?: string | null
@@ -11023,6 +11029,9 @@ export type Database = {
           client_id?: string | null
           closed_at?: string | null
           code?: string
+          combinado_forma?: string | null
+          combinado_parcelas?: number | null
+          combinado_vencimento?: string | null
           consultora_party_id?: string
           created_at?: string
           customer_email?: string | null
@@ -12726,6 +12735,15 @@ export type Database = {
         Returns: Json
       }
       consultant_home: { Args: never; Returns: Json }
+      consultant_order_combinado_set: {
+        Args: {
+          _forma: string
+          _order: string
+          _parcelas: number
+          _vencimento: string
+        }
+        Returns: Json
+      }
       consultant_order_create: {
         Args: { _client: string; _idempotency_key: string; _itens: Json }
         Returns: Json

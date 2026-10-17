@@ -9,6 +9,7 @@ import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
 import { FORMAS_COMBINADAS, iconeCategoria, salvarCombinado, type FormaCombinada } from "@/lib/consultora-combinado";
 import { LembretesClientes } from "@/components/consultora/LembretesClientes";
+import { CombinaComEla } from "@/components/consultora/CombinaComEla";
 import { GanhosConsultora } from "@/components/consultora/GanhosConsultora";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link } from "@tanstack/react-router";
@@ -544,6 +545,7 @@ export function FichaCliente({ id, nav, ir }: { id: string; nav: Nav; ir: Ir }) 
         </div>
 
         <section className="space-y-3">
+          <CombinaComEla cl={cl} />
           <ComprasCliente cliente={id} />
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-xl font-semibold">Atendimentos</h2>

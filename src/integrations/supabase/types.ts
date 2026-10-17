@@ -12421,6 +12421,7 @@ export type Database = {
         Returns: Json
       }
       asaas_exec_contas: { Args: { _actor: string }; Returns: Json }
+      asaas_exec_contato: { Args: { _party: string }; Returns: Json }
       asaas_exec_exigir: {
         Args: { _actor: string; _cap: string }
         Returns: undefined

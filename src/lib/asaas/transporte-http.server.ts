@@ -258,10 +258,18 @@ export class TransporteHttpAsaas implements TransporteAsaas {
         ...(d.cpfCnpj ? { cpfCnpj: d.cpfCnpj } : {}),
         ...(d.email ? { email: d.email } : {}),
         externalReference: d.ref,
-        notificationDisabled: true,
+        // Avisos do Asaas ligados (e-mail, SMS, WhatsApp) — decisão da LARDAN.
+        notificationDisabled: false,
       },
     });
     return traduzirCliente(c!);
+  }
+
+  /** Liga os avisos do Asaas na cliente e completa e-mail/celular quando conhecidos. */
+  async ativarAvisos(id: string, d: { email?: string | null; celular?: string | null }) {
+    await this.enviar<Json>("POST", `/customers/${encodeURIComponent(id)}`, {
+      corpo: { notificationDisabled: false, ...(d.email ? { email: d.email } : {}), ...(d.celular ? { mobilePhone: d.celular } : {}) },
+    });
   }
 
   async listarCobrancas(f: FiltroCobrancas) {

@@ -8,6 +8,7 @@ import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
 import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
 import { FORMAS_COMBINADAS, iconeCategoria, salvarCombinado, type FormaCombinada } from "@/lib/consultora-combinado";
+import { GanhosConsultora } from "@/components/consultora/GanhosConsultora";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link } from "@tanstack/react-router";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
@@ -215,6 +216,8 @@ export function Inicio({ ir }: { ir: Ir }) {
 
 
       <CartaoNovidades />
+
+      <GanhosConsultora />
 
       <section className="grid gap-3 lg:grid-cols-[1.2fr_1fr]">
         <button type="button" onClick={() => ir({ aba: "novo" })}

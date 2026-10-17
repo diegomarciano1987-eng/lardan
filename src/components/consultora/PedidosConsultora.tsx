@@ -1,4 +1,6 @@
 import * as React from "react";
+import { Link } from "@tanstack/react-router";
+import { FileText } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal, MessageCircle, ShoppingBag, ArrowRight, Clock3, CheckCircle2, CalendarDays, XCircle, Package, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -53,7 +55,7 @@ export function PedidosConsultora() {
         <div className="grid gap-3 border-t border-border px-5 py-4 sm:px-6">
           {p.status === "aguardando_atendimento" && <Button className="h-auto min-h-12 justify-between px-4 py-3" disabled={mudar.isPending} onClick={() => mudar.mutate({ id: p.id, status: "em_atendimento" })}>Começar atendimento<ArrowRight aria-hidden /></Button>}
           {p.status === "em_atendimento" && <Button className="h-auto min-h-12 justify-between px-4 py-3" disabled={mudar.isPending} onClick={() => mudar.mutate({ id: p.id, status: "aguardando_pagamento" })}>Combinar pagamento<ArrowRight aria-hidden /></Button>}
-          <div className={`grid gap-2 ${whats ? "sm:grid-cols-[minmax(0,1fr)_auto]" : "grid-cols-1"}`}><Button variant="outline" className="h-auto min-h-12 min-w-0 whitespace-normal px-3 py-3 shadow-none" onClick={() => setAberto(p)}><ShoppingBag aria-hidden />Ver peças e pagamento</Button>
+          <div className={`grid gap-2 ${whats ? "sm:grid-cols-[minmax(0,1fr)_auto]" : "grid-cols-1"}`}><Button variant="outline" className="h-auto min-h-12 min-w-0 whitespace-normal px-3 py-3 shadow-none" onClick={() => setAberto(p)}><ShoppingBag aria-hidden />Ver peças e pagamento</Button><Button asChild variant="outline" className="h-auto min-h-12 min-w-0 whitespace-normal px-3 py-3 shadow-none"><Link to="/consultora-garantia/$id" params={{ id: p.id }} target="_blank"><FileText aria-hidden />Comprovante e garantia</Link></Button>
           {whats && <Button asChild variant="ghost" className="h-auto min-h-12 px-3 py-3"><a href={whats} target="_blank" rel="noreferrer"><MessageCircle aria-hidden />WhatsApp</a></Button>}</div>
           {p.payment_status === "pago" && p.status !== "cancelado" && <AbrirPosVenda pedido={p.id} />}
         </div>

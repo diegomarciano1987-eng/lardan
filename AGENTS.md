@@ -34,3 +34,8 @@
 - With asaas_accounts.conta_cartao_receber_id set, payment settles there, then asaas_cartao_creditar transfers to Asaas on credit_date idempotently; empty preserves old behavior. Why: accurate card credit timing.
 - fin_installment_saldo = amount + interest/fine - discount/abatement - allocations, matching fin_installment_refresh. Why: discounted installments cannot falsely appear settled.
 - Test-kit cleanup uses service-only kit_testes_cancelar with seven explicit expected cycles/quantities, official stock transfers and immutable snapshots; never delete history. Why: preserve stock and real remessas.
+- Every installment balance reads fin_installment_saldo, never valor − alocações (rep portal and statement suggestions included). Why: one balance everywhere.
+- Card credit transfer (asaas_cartao_creditar) never runs before credit_date, skips reversed settlements, and asaas_baixa_pendentes also sweeps card credits whose webhook was lost. Why: no anticipated cash, no stuck money.
+- Fiscal provider results (attempt, authorization, rejection, homologated cancellation) only via service_role (db/pendentes/11); authorization requires nfe_chave_valida with the emitter CNPJ and takes model/series/number from the key. Why: nobody marks a note authorized by hand.
+- fiscal_settings emission/provider/environment/emitter change only by Master, coherent (provider+emitter+environment before turning on, turn off before changing environment) and audited as fiscal.configuracao_alterada. Why: the fiscal switch is a production decision.
+- fiscal_prontidao returns counts only (no names, documents or addresses). Why: readiness report without exposing personal data.

@@ -13483,6 +13483,7 @@ export type Database = {
           status: Database["public"]["Enums"]["party_status"]
         }[]
       }
+      fiscal_prontidao: { Args: never; Returns: Json }
       gen_protocol: { Args: { prefix: string }; Returns: string }
       get_party_full: { Args: { _id: string }; Returns: Json }
       grant_role: {
@@ -13902,6 +13903,10 @@ export type Database = {
       }
       network_scope: { Args: never; Returns: Json }
       network_scope_party: { Args: never; Returns: string }
+      nfe_chave_valida: {
+        Args: { _chave: string; _cnpj?: string; _modelo?: string }
+        Returns: boolean
+      }
       norm_code: { Args: { _v: string }; Returns: string }
       norm_name: { Args: { _v: string }; Returns: string }
       only_digits: { Args: { _v: string }; Returns: string }

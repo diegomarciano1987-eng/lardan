@@ -347,7 +347,7 @@ function VisaoGeral() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </Panel>
       </div>

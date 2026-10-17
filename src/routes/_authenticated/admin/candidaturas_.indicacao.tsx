@@ -6,6 +6,7 @@ import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ErrorState, PageHeader, Panel, Skeleton } from "@/components/admin/ui";
 import { brl } from "@/lib/maletas";
+import { ComissaoConsultora } from "@/components/admin/ComissaoConsultora";
 
 export const Route = createFileRoute("/_authenticated/admin/candidaturas_/indicacao")({
   head: () => ({ meta: [{ title: "Configuração de indicação · Lardan" }, { name: "robots", content: "noindex" }] }),
@@ -72,7 +73,7 @@ function ConfigIndicacao() {
   return (
     <div className="space-y-6">
       <Link to="/admin/candidaturas" className="inline-flex items-center gap-1.5 text-sm text-ledger-muted hover:text-bronze"><ArrowLeft className="size-4" /> Candidaturas</Link>
-      <PageHeader eyebrow="Comercial" title="Configuração de indicação" description="Cada consultora tem um link único. Quem se candidata por ele fica ligada a ela. Ao encerrar a maleta da indicada, o sistema apura a comissão sobre as peças vendidas, pela faixa da madrinha." />
+      <PageHeader eyebrow="Comercial" title="Indicação e comissão" actions={<a href="#comissao" className="admin-btn admin-btn-primary">Configurações de comissão</a>} description="Cada consultora tem um link único. Quem se candidata por ele fica ligada a ela. Ao encerrar a maleta da indicada, o sistema apura a comissão sobre as peças vendidas, pela faixa da madrinha." />
 
       <Panel title="Faixas de comissão" action={<button type="button" className="admin-btn" onClick={() => setFaixas((l) => [...l, { min_indicadas: (l.at(-1)?.min_indicadas ?? 0) + 10, percentual: 0, titulo: "" }])}><Plus className="size-4" /> Faixa</button>}>
         {cfg.isLoading ? <Skeleton className="h-32" /> : cfg.error ? <ErrorState message={String(cfg.error)} /> : (
@@ -93,6 +94,8 @@ function ConfigIndicacao() {
           </div>
         )}
       </Panel>
+
+      <ComissaoConsultora />
 
       <Panel title="Rede de indicações">
         {painel.isLoading ? <Skeleton className="h-24" /> : painel.error ? <ErrorState message={String(painel.error)} /> : (

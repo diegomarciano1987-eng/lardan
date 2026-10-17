@@ -31,15 +31,11 @@ export function ComissaoConsultora() {
       if (new Set(mins).size !== mins.length) throw new Error("Duas faixas com o mesmo valor mínimo.");
       if (faixas.some((f) => f.min_vendido_cents < 0 || f.percentual < 0 || f.percentual > 80)) throw new Error("Confira: valor mínimo a partir de R$ 0,00 e percentual entre 0% e 80%.");
       const uid = (await supabase.auth.getUser()).data.user?.id;
-      const removidas = (q.data ?? []).map((f) => f.id).filter((id) => !faixas.some((f) => f.id === id));
-      if (removidas.length) { const d = await t().delete().in("id", removidas as string[]); if (d.error) throw d.error; }
-      for (const f of faixas.filter((x) => x.id)) {
-        const u = await t().update({ min_vendido_cents: -1 - f.min_vendido_cents - 1e12 } as never).eq("id", f.id!);
-        if (u.error && !String(u.error.message).includes("check")) throw u.error;
-      }
-      for (const f of faixas) {
-        const linha = { min_vendido_cents: f.min_vendido_cents, percentual: f.percentual, titulo: f.titulo.trim(), updated_by: uid };
-        const r = f.id ? await t().update(linha as never).eq("id", f.id) : await t().insert(linha as never);
+      // Regrava a tabela inteira (auditada linha a linha) para nunca colidir no valor mínimo único.
+      const antigas = (q.data ?? []).map((f) => f.id!).filter(Boolean);
+      if (antigas.length) { const d = await t().delete().in("id", antigas); if (d.error) throw d.error; }
+      if (faixas.length) {
+        const r = await t().insert(faixas.map((f) => ({ min_vendido_cents: f.min_vendido_cents, percentual: f.percentual, titulo: f.titulo.trim(), updated_by: uid })) as never);
         if (r.error) throw r.error;
       }
     },

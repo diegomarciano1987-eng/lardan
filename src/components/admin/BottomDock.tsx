@@ -34,6 +34,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
 
   const permitted = ADMIN_MODULES.filter((m) => moduleAllowed(m, caps, roles));
   const primary = permitted.slice(0, 6);
+  const primaryMobile = permitted.slice(0, 5);
   const areasFinanceiras = AREAS_FINANCEIRAS.filter((a) => caps.includes(a.capacidade));
   const fecharGaveta = () => {
     setDrawer(false);
@@ -224,7 +225,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
 
           {/* Mobile: cinco destinos + Mais */}
           <ul className="flex min-w-0 flex-1 items-center justify-between gap-1 md:hidden">
-            {primary.map((m) => {
+            {primaryMobile.map((m) => {
               const active = isActive(pathname, m.path);
               const Icon = m.icon;
               return (

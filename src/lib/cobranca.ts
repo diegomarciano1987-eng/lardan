@@ -135,3 +135,17 @@ export const cockpitFinanceiro = (party: string) => call<CockpitFinanceiro>("con
 
 export interface KpisCobranca { devedoras: number; vencido_cents: number; hoje: number; atrasadas: number; vencendo: number; descumpridas: number }
 export const kpisCobranca = () => call<KpisCobranca>("cob_kpis");
+
+// ---------- Judicial (nunca gera cobrança Asaas) ----------
+export interface Judicial { party_id: string; processo: string | null; vara: string | null; comarca: string | null; advogado: string | null; data_ajuizamento: string | null; observacao: string | null; encaminhado_em: string }
+export interface JudicialDoc { id: string; tipo: string; titulo: string; file_name: string; content_type: string; created_at: string }
+export interface AcordoJudicial { id: string; data_acordo: string; principal_cents: number; honorarios_cents: number; cartorio_cents: number; custas_cents: number; outros_cents: number; outros_descricao: string | null; desconto_cents: number; total_cents: number; plano: { numero: number; data: string; valor_cents: number }[]; observacao: string | null; status: string; status_motivo: string | null; created_at: string }
+type Sel<T> = { select: (c: string) => { eq: (a: string, b: string) => { maybeSingle: () => Promise<{ data: T | null; error: { message: string } | null }>; order: (c: string, o: { ascending: boolean }) => Promise<{ data: T[] | null; error: { message: string } | null }> } } };
+const tab = <T,>(t: string) => (supabase.from as unknown as (t: string) => Sel<T>)(t);
+export async function judicial(party: string) { const r = await tab<Judicial>("cob_judicial").select("*").eq("party_id", party).maybeSingle(); if (r.error) throw new Error(r.error.message); return r.data; }
+export async function judicialDocs(party: string) { const r = await tab<JudicialDoc>("cob_judicial_docs").select("id,tipo,titulo,file_name,content_type,created_at").eq("party_id", party).order("created_at", { ascending: false }); if (r.error) throw new Error(r.error.message); return r.data ?? []; }
+export async function acordosJudiciais(party: string) { const r = await tab<AcordoJudicial>("cob_judicial_acordos").select("*").eq("party_id", party).order("created_at", { ascending: false }); if (r.error) throw new Error(r.error.message); return r.data ?? []; }
+export const encaminharJudicial = (party: string, d: Record<string, string>) => call<void>("cob_judicial_encaminhar", { _party: party, _d: d });
+export const salvarAcordoJudicial = (party: string, d: Record<string, unknown>) => call<string>("cob_judicial_acordo_salvar", { _party: party, _d: d });
+export const statusAcordoJudicial = (id: string, status: "cumprido" | "descumprido" | "cancelado", motivo: string) => call<void>("cob_judicial_acordo_status", { _id: id, _status: status, _motivo: motivo });
+export const TIPOS_DOC_JUDICIAL: [string, string][] = [["termo_assinado", "Termo/acordo assinado"], ["peticao", "Petição"], ["certidao", "Certidão / protocolo"], ["sentenca", "Sentença / homologação"], ["comprovante", "Comprovante"], ["outro", "Outro"]];

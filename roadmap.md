@@ -54,7 +54,8 @@ Provas: docs/lardan/AUDITORIA-FINANCEIRO-NOVE-PONTOS-2026-10-16.md; 243 testes i
 ## App consultora — PDF Daniel (17/10)
 - [x] Etapa 1: categorias por botões (2.3), forma de pagamento combinada na revisão (2.10); aviso único já resolvido (1.4)
 - [x] Etapa 2: filtro/busca em Minha maleta (8.1), detalhes da entrega e rastreio (8.4)
-- [ ] 8.3 foto da avaria ao receber a maleta (próxima)
+- [x] 8.3 foto da avaria ao receber a maleta
 - [x] Etapa 3: Quanto eu ganho, meta, acerto (4.6, 6.1–6.3) + Configurações de comissão em Indicação e comissão — faixas a preencher pela LARDAN
-- [ ] Etapa 4: aniversariantes/30 dias (5.2), combina com ela (5.5), link nominal (6.7), artes da semana (6.5)
+- [x] Etapa 4: aniversariantes/30 dias (5.2), combina com ela (5.5), link nominal (6.7 já existia)
+- [ ] 6.5 artes da semana — aguarda a LARDAN definir onde publicar as artes
 - [ ] Etapa 5: limpeza dos testes (1.6) — aguarda autorização

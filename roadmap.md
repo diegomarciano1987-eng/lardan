@@ -50,3 +50,10 @@ Provas: docs/lardan/AUDITORIA-FINANCEIRO-NOVE-PONTOS-2026-10-16.md; 243 testes i
 - [x] 6 Ajustes Itaú e Caixa removidos — [ ] Infinity Pay aguarda vendas/taxas de setembro certas
 - [ ] 7 API Rede — precisa das credenciais da Rede
 - [ ] 8 Diferenças de centavos dos cartões — conferir junto com Diego
+
+## App consultora — PDF Daniel (17/10)
+- [x] Etapa 1: categorias por botões (2.3), forma de pagamento combinada na revisão (2.10); aviso único já resolvido (1.4)
+- [ ] Etapa 2: filtro/busca em Minha maleta (8.1), foto de avaria na chegada (8.3), status da entrega (8.4)
+- [ ] Etapa 3: Quanto eu ganho, meta, acerto (4.6, 6.1–6.3) — aguarda tabela oficial de comissão
+- [ ] Etapa 4: aniversariantes/30 dias (5.2), combina com ela (5.5), link nominal (6.7), artes da semana (6.5)
+- [ ] Etapa 5: limpeza dos testes (1.6) — aguarda autorização

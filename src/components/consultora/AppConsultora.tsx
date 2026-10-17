@@ -7,6 +7,7 @@ import { LeitorEtiqueta } from "@/components/consultora/LeitorEtiqueta";
 import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
 import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
+import { FORMAS_COMBINADAS, iconeCategoria, salvarCombinado, type FormaCombinada } from "@/lib/consultora-combinado";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link } from "@tanstack/react-router";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
@@ -669,14 +670,25 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
   const total = escolhidas.reduce((s, p) => s + p.preco_cents * (qtd[k(p)] ?? 0), 0);
   const unidades = escolhidas.reduce((s, p) => s + (qtd[k(p)] ?? 0), 0);
 
+  const [forma, setForma] = React.useState<FormaCombinada | "">("");
+  const [parcelas, setParcelas] = React.useState("1");
+  const [vencimento, setVencimento] = React.useState<Date | undefined>();
   const enviar = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!cliente || escolhidas.length === 0) throw new Error("Escolha a cliente e as peças.");
-      return criarPedido(cliente, escolhidas.map((p) => ({ cycle_id: p.cycle_id, variant_id: p.variant_id, quantidade: qtd[k(p)] ?? 0 })), chave);
+      if (forma === "a_prazo" && !vencimento) throw new Error("Informe a data combinada para o pagamento a prazo.");
+      const r = await criarPedido(cliente, escolhidas.map((p) => ({ cycle_id: p.cycle_id, variant_id: p.variant_id, quantidade: qtd[k(p)] ?? 0 })), chave);
+      if (forma) {
+        try { await salvarCombinado(r.order_id, forma, Number(parcelas), forma === "a_prazo" ? iso(vencimento) : null); }
+        catch (e) { toast.error("Pedido criado, mas a forma de pagamento não foi salva: " + traduzir(e)); }
+      }
+      return r;
     },
     onSuccess: (r) => { setResultado(r); setPasso(4); qc.invalidateQueries({ queryKey: ["consultora"] }); qc.invalidateQueries({ queryKey: ["consultora-pedidos"] }); },
     onError: (e) => toast.error("O pedido não foi criado. Nada se perdeu: revise e tente de novo. " + traduzir(e)),
   });
+  const combinadoTexto = forma ? `${FORMAS_COMBINADAS[forma]}${(forma === "credito" || forma === "a_prazo") && Number(parcelas) > 1 ? ` em ${parcelas}x` : ""}${forma === "a_prazo" && vencimento ? ` · 1º pagamento ${vencimento.toLocaleDateString("pt-BR")}` : ""}` : "";
+  const categorias = Array.from((opcoes.data ?? []).reduce((m, p) => (p.categoria ? m.set(p.categoria, (m.get(p.categoria) ?? 0) + 1) : m), new Map<string, number>()));
 
   const ETAPAS = ["Cliente", "Peças", "Revisão"];
   const voltar = () => (passo > 1 && passo < 4 ? setPasso((passo - 1) as 1 | 2 | 3) : ir(cliente && clienteInicial ? { aba: "clientes", id: cliente } : { aba: "inicio" }));
@@ -741,8 +753,21 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
         <div className="space-y-4 pb-28 lg:pb-0">
           <h2 className="text-xl font-semibold">Escolha as peças da sua maleta</h2>
           <input type="search" className="admin-input min-h-14 rounded-2xl text-[1.05rem]" placeholder="Buscar peça" value={busca} onChange={(e) => setBusca(e.target.value)} aria-label="Buscar peça" />
-          <div className="grid gap-3 sm:grid-cols-3">
-            <SmartSelect value={categoria} onChange={setCategoria} placeholder="Categoria" options={[{ value: "", label: "Todas as categorias" }, ...Array.from(new Set((opcoes.data ?? []).map((p) => p.categoria).filter((c): c is string => !!c))).map((c) => ({ value: c, label: c }))]} />
+          {categorias.length > 0 && (
+            <div role="radiogroup" aria-label="Categoria" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+              {[["", (opcoes.data ?? []).length] as [string, number], ...categorias].map(([c, n]) => {
+                const sel = categoria === c;
+                return (
+                  <button key={c || "todas"} type="button" role="radio" aria-checked={sel} onClick={() => setCategoria(c)}
+                    className={`flex min-h-12 shrink-0 items-center gap-2 rounded-full border px-4 text-[1rem] font-medium ${sel ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}>
+                    <span aria-hidden>{iconeCategoria(c)}</span>{c || "Todas"}
+                    <span className={`num rounded-full px-2 text-[0.85rem] ${sel ? "bg-primary-foreground/20" : "bg-muted"}`}>{n}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <div className="grid gap-3 sm:grid-cols-2">
             <SmartSelect value={banho} onChange={setBanho} placeholder="Banho" options={[{ value: "", label: "Todos os banhos" }, ...Array.from(new Set((opcoes.data ?? []).map((p) => p.banho).filter((c): c is string => !!c))).map((c) => ({ value: c, label: c }))]} />
             <LeitorEtiqueta encontrado={lerEtiqueta} />
           </div>
@@ -797,10 +822,24 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
             ))}
             <li className="flex items-center justify-between p-4 text-xl"><span>Total</span><strong className="num">{brl(total)}</strong></li>
           </ul>
-          <div className="rounded-2xl border border-border bg-muted/60 p-4 text-[1.02rem] leading-relaxed">
-            <p><strong>Pagamento e entrega:</strong> você combina diretamente com a cliente.</p>
-            <p className="mt-1">Este pedido fica <strong>em atendimento</strong> e <strong>não reserva as peças</strong>. A cobrança oficial fica disponível depois de confirmar; pagamento só aparece após confirmação.</p>
-          </div>
+          <section aria-labelledby="comb" className="rounded-2xl border border-border bg-card p-4">
+            <h3 id="comb" className="text-[1.1rem] font-semibold">Como a cliente vai pagar? <span className="font-normal text-muted-foreground">(opcional)</span></h3>
+            <div role="radiogroup" aria-label="Forma combinada" className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {(Object.keys(FORMAS_COMBINADAS) as FormaCombinada[]).map((f) => (
+                <button key={f} type="button" role="radio" aria-checked={forma === f} onClick={() => setForma(forma === f ? "" : f)}
+                  className={`min-h-12 rounded-xl border px-3 text-[1rem] font-medium ${forma === f ? "border-primary bg-primary/10" : "border-border bg-background"}`}>
+                  {forma === f ? "✓ " : ""}{FORMAS_COMBINADAS[f]}
+                </button>
+              ))}
+            </div>
+            {(forma === "credito" || forma === "a_prazo") && (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <SmartSelect value={parcelas} onChange={setParcelas} placeholder="Parcelas" options={Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: i ? `${i + 1}x de ${brl(Math.round(total / (i + 1)))}` : `À vista · ${brl(total)}` }))} />
+                {forma === "a_prazo" && <DateField value={vencimento} onChange={setVencimento} placeholder="Data do 1º pagamento" />}
+              </div>
+            )}
+          </section>
+          <p className="rounded-2xl bg-muted/60 px-4 py-3 text-[0.98rem] leading-relaxed">O pedido fica <strong>em atendimento</strong> e <strong>não reserva as peças</strong>. O combinado é só um registro seu; a cobrança oficial continua em "Combinar pagamento".</p>
           <button type="button" className="btn-app-principal w-full" disabled={enviar.isPending} aria-busy={enviar.isPending} onClick={() => !enviar.isPending && enviar.mutate()}>
             {enviar.isPending ? "Criando pedido…" : "Confirmar pedido"}
           </button>
@@ -814,12 +853,13 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
             <span className="mx-auto mb-3 grid size-16 place-items-center rounded-full bg-acao text-acao-foreground"><Check className="size-8" aria-hidden /></span>
             <p className="text-xl font-semibold">Pedido {resultado.codigo} criado</p>
             <p className="mt-1 text-[1.05rem]">{cl?.nome} · {brl(resultado.total_cents)}</p>
+            {combinadoTexto && <p className="mt-2 text-[1rem]">Pagamento combinado: <strong>{combinadoTexto}</strong></p>}
             <p className="mt-2 text-[0.98rem] text-muted-foreground">Situação: em atendimento. As peças não foram reservadas.</p>
           </div>
           {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} />}
           {cl && linkWhats(cl.telefone) && (
             <a className="btn-app-principal w-full" target="_blank" rel="noreferrer"
-              href={linkWhats(cl.telefone, `Olá, ${cl.nome.split(" ")[0]}! Anotei seu pedido ${resultado.codigo}:\n${escolhidas.map((p) => `• ${qtd[k(p)]}x ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents * (qtd[k(p)] ?? 0))}`).join("\n")}\nTotal: ${brl(resultado.total_cents)}\nGarantia de dois anos seguindo o manual: ${MANUAL_CUIDADOS_URL}`) ?? undefined}>
+              href={linkWhats(cl.telefone, `Olá, ${cl.nome.split(" ")[0]}! Anotei seu pedido ${resultado.codigo}:\n${escolhidas.map((p) => `• ${qtd[k(p)]}x ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents * (qtd[k(p)] ?? 0))}`).join("\n")}\nTotal: ${brl(resultado.total_cents)}${combinadoTexto ? `\nPagamento combinado: ${combinadoTexto}` : ""}\nGarantia de dois anos seguindo o manual: ${MANUAL_CUIDADOS_URL}`) ?? undefined}>
               <MessageCircle className="size-5" aria-hidden /> Enviar resumo pelo WhatsApp
             </a>
           )}

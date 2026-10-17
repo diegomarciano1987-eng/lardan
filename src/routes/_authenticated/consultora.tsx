@@ -32,7 +32,11 @@ import {
   publicarPeca,
   traduzir,
   type TipoDivergencia,
+  type EntregaMaleta,
 } from "@/lib/maletas";
+import { buscarPecas } from "@/lib/consultora";
+import { iconeCategoria } from "@/lib/consultora-combinado";
+const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "biblioteca", "mais", "novo"];
 const str = (v: unknown) => (typeof v === "string" && v.length > 0 && v.length < 200 ? v : undefined);
@@ -88,6 +92,11 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
   const [tipos, setTipos] = React.useState<Record<string, TipoDivergencia>>({});
   const [motivos, setMotivos] = React.useState<Record<string, string>>({});
   const [chave] = React.useState(chaveIdempotencia);
+  const [buscaPeca, setBuscaPeca] = React.useState("");
+  const [catPeca, setCatPeca] = React.useState("");
+  const [soDisp, setSoDisp] = React.useState(false);
+  const opcoes = useQuery({ queryKey: ["consultora", "pecas", "opcoes"], queryFn: () => buscarPecas() });
+  const catDe = React.useMemo(() => Object.fromEntries((opcoes.data ?? []).filter((p) => p.cycle_id === cycleId && p.categoria).map((p) => [p.variant_id, p.categoria as string])), [opcoes.data, cycleId]);
 
   const ficha = useQuery({
     queryKey: ["consultora", "maleta", cycleId],
@@ -190,6 +199,7 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         <Cartao className="border-warning">
           <p className="font-semibold">Sua maleta chegou?</p>
           <p className="mt-1 text-sm text-ledger-muted">Confirme o recebimento para depois conferir peça por peça.</p>
+          <DetalheEntrega t={aguardandoRecebimento} />
           <button
             type="button"
             className="admin-btn admin-btn-primary mt-3 w-full"
@@ -298,11 +308,28 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         </Cartao>
       )}
 
-      {d.saldos.length > 0 && (
+      {d.saldos.length > 0 && (() => {
+        const termo = semAcento(buscaPeca.trim());
+        const lista = d.saldos.filter((b) => (!catPeca || catDe[b.variant_id] === catPeca) && (!soDisp || b.disponivel > 0)
+          && (!termo || semAcento(`${b.produto} ${b.variante ?? ""}`).includes(termo)));
+        const cats = Array.from(new Set(d.saldos.map((b) => catDe[b.variant_id]).filter((c): c is string => !!c)));
+        return (
         <Cartao>
-          <p className="font-semibold">Minhas peças</p>
+          <p className="font-semibold">Minhas peças <span className="font-normal text-ledger-muted">· {lista.length} de {d.saldos.length}</span></p>
+          <input type="search" aria-label="Buscar peça na maleta" placeholder="Buscar peça pelo nome" value={buscaPeca} onChange={(e) => setBuscaPeca(e.target.value)} className="admin-input mt-3 min-h-12 text-base" />
+          <div role="radiogroup" aria-label="Categoria" className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">
+            {["", ...cats].map((c) => (
+              <button key={c || "todas"} type="button" role="radio" aria-checked={catPeca === c} onClick={() => setCatPeca(c)}
+                className={`flex min-h-12 shrink-0 items-center gap-2 rounded-full border px-4 text-[0.98rem] font-medium ${catPeca === c ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}>
+                <span aria-hidden>{iconeCategoria(c)}</span>{c || "Todas"}
+              </button>
+            ))}
+            <button type="button" role="switch" aria-checked={soDisp} onClick={() => setSoDisp(!soDisp)}
+              className={`min-h-12 shrink-0 rounded-full border px-4 text-[0.98rem] font-medium ${soDisp ? "border-primary bg-primary/10" : "border-border bg-card"}`}>{soDisp ? "✓ " : ""}Só disponíveis</button>
+          </div>
+          {lista.length === 0 && <p className="mt-4 text-base text-ledger-muted">Nenhuma peça com esse filtro.</p>}
           <div className="mt-4 space-y-3">
-            {d.saldos.map((b) => (
+            {lista.map((b) => (
               <div key={b.variant_id} className="flex items-center gap-3">
                 <FotoPeca mediaId={b.media_id} variantId={b.variant_id} className="size-14 rounded-xl" />
                 <div className="min-w-0 flex-1">
@@ -323,7 +350,8 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
             ))}
           </div>
         </Cartao>
-      )}
+        );
+      })()}
 
       <Movimentacoes
         cycleId={cycleId}
@@ -427,6 +455,23 @@ function Pedidos() {
   );
 }
 
+const SITUACAO_ENTREGA: Record<string, string> = { pendente: "Preparando envio", transito: "A caminho", entregue: "Entregue", recusada: "Recusada", cancelada: "Cancelada" };
+const quando = (s: string | null) => (s ? new Date(s).toLocaleDateString("pt-BR") : null);
+function DetalheEntrega({ t }: { t: EntregaMaleta }) {
+  const linhas = [
+    t.enviada_em && `Enviada em ${quando(t.enviada_em)}`,
+    t.entregue_em && `Entregue em ${quando(t.entregue_em)}`,
+    t.transportadora && `Transportadora: ${t.transportadora}`,
+    t.recusada_em && `Recusada em ${quando(t.recusada_em)}${t.motivo ? ` · ${t.motivo}` : ""}`,
+  ].filter(Boolean) as string[];
+  return (
+    <div className="mt-1 space-y-0.5 text-[0.95rem] text-ledger-muted">
+      {linhas.map((l) => <p key={l}>{l}</p>)}
+      {t.rastreio && <p>Rastreio: <span className="font-mono">{t.rastreio}</span> <button type="button" className="underline" onClick={() => { void navigator.clipboard?.writeText(t.rastreio!); toast.success("Código de rastreio copiado."); }}>Copiar</button></p>}
+    </div>
+  );
+}
+
 /* ---------------- histórico ---------------- */
 function Historico({ cycleId }: { cycleId: string | null }) {
   const ficha = useQuery({
@@ -442,9 +487,10 @@ function Historico({ cycleId }: { cycleId: string | null }) {
       <Cartao>
         <p className="font-semibold">Entregas</p>
         {(d?.entregas ?? []).map((t) => (
-          <p key={t.id} className="mt-2 text-sm text-ledger-muted">
-            #{t.seq} {t.de ?? "Matriz"} → {t.para ?? "—"} · {t.situacao}
-          </p>
+          <div key={t.id} className="mt-3 border-t border-line-soft pt-3 first:border-0">
+            <p className="text-base font-semibold">Envio {t.seq}: {t.de ?? "Matriz"} → {t.para ?? "—"} · {SITUACAO_ENTREGA[t.situacao] ?? t.situacao}</p>
+            <DetalheEntrega t={t} />
+          </div>
         ))}
       </Cartao>
       <Cartao>

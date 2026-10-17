@@ -238,32 +238,32 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
                       aria-haspopup="dialog"
                       aria-expanded={drawer && submenu === "financeiro"}
                       className={cn(
-                        "flex flex-col items-center gap-1 rounded-xl px-2.5 py-1.5 text-[0.625rem]",
+                        "flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[0.625rem]",
                         active ? "bg-champagne-soft text-ink" : "text-warm-ivory/80",
                       )}
                     >
                       <Icon aria-hidden className="size-[18px]" />
-                      <span className="max-w-14 truncate">{m.label}</span>
+                      <span className="max-w-11 truncate">{m.label}</span>
                     </button>
                   ) : m.path ? (
                     <Link
                       to={m.path}
                       aria-label={m.label}
                       className={cn(
-                        "flex flex-col items-center gap-1 rounded-xl px-2.5 py-1.5 text-[0.625rem]",
+                        "flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[0.625rem]",
                         active ? "bg-champagne-soft text-ink" : "text-warm-ivory/80",
                       )}
                     >
                       <Icon aria-hidden className="size-[18px]" />
-                      <span className="max-w-14 truncate">{m.label}</span>
+                      <span className="max-w-11 truncate">{m.label}</span>
                     </Link>
                   ) : (
                     <span
                       aria-disabled="true"
-                      className="flex flex-col items-center gap-1 px-2.5 py-1.5 text-[0.625rem] text-warm-ivory/40"
+                      className="flex flex-col items-center gap-1 px-1 py-1.5 text-[0.625rem] text-warm-ivory/40"
                     >
                       <Icon aria-hidden className="size-[18px]" />
-                      <span className="max-w-14 truncate">{m.label}</span>
+                      <span className="max-w-11 truncate">{m.label}</span>
                     </span>
                   )}
                 </li>

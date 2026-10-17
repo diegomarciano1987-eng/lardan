@@ -715,6 +715,13 @@
       "when": 1792242739294,
       "tag": "0101_biblioteca_tipos_conteudo",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "7",
+      "when": 1792247672559,
+      "tag": "0102_migration",
+      "breakpoints": true
     }
   ]
 }

@@ -24,7 +24,7 @@
 - [x] 6 Busca limpa ao reabrir nova conta — conferida na tela
 - [x] 7 Parcelamento reiniciado ao reabrir — conferido na tela
 - [x] 8 Busca contábil sempre disponível — A receber, 3.1.1 conferido
-- [x] 9 Guarda de atalhos implementada — interação da Mesa não exercitada nesta etapa
+- [x] 9 Guarda de atalhos validada na Mesa real — inputs e seletor aberto preservam modo/linha; busca, classificação e fechamento conferidos sem confirmar conciliação; docs/lardan/VALIDACAO-MESA-TELA-2026-10-16.md
 
 Provas: docs/lardan/AUDITORIA-FINANCEIRO-NOVE-PONTOS-2026-10-16.md; 243 testes isolados + 10 financeiros aprovados; compilação OK; sem publicar.
 

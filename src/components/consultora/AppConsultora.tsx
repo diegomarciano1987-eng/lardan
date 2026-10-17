@@ -7,6 +7,7 @@ import { LeitorEtiqueta } from "@/components/consultora/LeitorEtiqueta";
 import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
 import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
+import { FORMAS_COMBINADAS, iconeCategoria, salvarCombinado, type FormaCombinada } from "@/lib/consultora-combinado";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link } from "@tanstack/react-router";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
@@ -852,12 +853,13 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
             <span className="mx-auto mb-3 grid size-16 place-items-center rounded-full bg-acao text-acao-foreground"><Check className="size-8" aria-hidden /></span>
             <p className="text-xl font-semibold">Pedido {resultado.codigo} criado</p>
             <p className="mt-1 text-[1.05rem]">{cl?.nome} · {brl(resultado.total_cents)}</p>
+            {combinadoTexto && <p className="mt-2 text-[1rem]">Pagamento combinado: <strong>{combinadoTexto}</strong></p>}
             <p className="mt-2 text-[0.98rem] text-muted-foreground">Situação: em atendimento. As peças não foram reservadas.</p>
           </div>
           {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} />}
           {cl && linkWhats(cl.telefone) && (
             <a className="btn-app-principal w-full" target="_blank" rel="noreferrer"
-              href={linkWhats(cl.telefone, `Olá, ${cl.nome.split(" ")[0]}! Anotei seu pedido ${resultado.codigo}:\n${escolhidas.map((p) => `• ${qtd[k(p)]}x ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents * (qtd[k(p)] ?? 0))}`).join("\n")}\nTotal: ${brl(resultado.total_cents)}\nGarantia de dois anos seguindo o manual: ${MANUAL_CUIDADOS_URL}`) ?? undefined}>
+              href={linkWhats(cl.telefone, `Olá, ${cl.nome.split(" ")[0]}! Anotei seu pedido ${resultado.codigo}:\n${escolhidas.map((p) => `• ${qtd[k(p)]}x ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents * (qtd[k(p)] ?? 0))}`).join("\n")}\nTotal: ${brl(resultado.total_cents)}${combinadoTexto ? `\nPagamento combinado: ${combinadoTexto}` : ""}\nGarantia de dois anos seguindo o manual: ${MANUAL_CUIDADOS_URL}`) ?? undefined}>
               <MessageCircle className="size-5" aria-hidden /> Enviar resumo pelo WhatsApp
             </a>
           )}

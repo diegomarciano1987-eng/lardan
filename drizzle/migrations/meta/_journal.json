@@ -680,6 +680,13 @@
       "when": 1792197416403,
       "tag": "0096_maleta_divergencia_fotos",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "7",
+      "when": 1792197731200,
+      "tag": "0097_biblioteca_artes",
+      "breakpoints": true
     }
   ]
 }

@@ -1529,6 +1529,45 @@ export type Database = {
           },
         ]
       }
+      biblioteca_artes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          formato: string
+          id: string
+          legenda: string
+          path: string
+          publicado: boolean
+          semana: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          formato?: string
+          id?: string
+          legenda?: string
+          path: string
+          publicado?: boolean
+          semana?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          formato?: string
+          id?: string
+          legenda?: string
+          path?: string
+          publicado?: boolean
+          semana?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       business_entities: {
         Row: {
           city: string | null

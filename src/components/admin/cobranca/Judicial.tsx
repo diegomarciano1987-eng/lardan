@@ -2,12 +2,13 @@ import * as React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Gavel, FileText, Upload, Scale, ShieldOff } from "lucide-react";
+import { Gavel, FileText, Upload, Scale, Landmark } from "lucide-react";
 import { DateField } from "@/components/premium/DateField";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { brl, dataBR, hojeSP, judicial, judicialDocs, acordosJudiciais, encaminharJudicial, salvarAcordoJudicial, statusAcordoJudicial, TIPOS_DOC_JUDICIAL, type Parcela } from "@/lib/cobranca";
 import { enviarDocJudicial, abrirDocJudicial } from "@/lib/cobranca.functions";
 import { montarPlano, addMeses } from "@/lib/cobranca-acordo";
+import { AcordoAsaas } from "./AcordoAsaas";
 
 const iso = (d?: Date) => (d ? d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }) : "");
 const paraData = (s: string) => (s ? new Date(s + "T12:00:00") : undefined);
@@ -71,7 +72,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
   const [out, setOut] = React.useState(""); const [outDesc, setOutDesc] = React.useState(""); const [desc, setDesc] = React.useState("");
   const [totalManual, setTotalManual] = React.useState("");
   const [n, setN] = React.useState(1); const [primeira, setPrimeira] = React.useState(addMeses(hojeSP(), 1));
-  const [manual, setManual] = React.useState<{ data: string; valor: string }[] | null>(null);
+  const [manual, setManual] = React.useState<{ data: string; valor: string; asaas: boolean }[] | null>(null);
   const [obs, setObs] = React.useState(""); const [salv, setSalv] = React.useState(false);
 
   // Já está na etapa Judicial: abre a área direto (registro do processo criado vazio, dados preenchidos depois).
@@ -97,9 +98,10 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
   const custos = reais(hon) + reais(cart) + reais(cust) + reais(out);
   const calculado = Math.max(0, principal + custos - reais(desc));
   const total = totalManual ? reais(totalManual) : calculado;
-  const auto = total > 0 ? montarPlano(total, 0, n, primeira).map((x) => ({ data: x.data, valor: txt(x.valor_cents) })) : [];
+  const auto = total > 0 ? montarPlano(total, 0, n, primeira).map((x) => ({ data: x.data, valor: txt(x.valor_cents), asaas: true })) : [];
   const plano = manual ?? auto;
   const dif = total - plano.reduce((a, x) => a + reais(x.valor), 0);
+  const noAsaas = plano.filter((x) => x.asaas); const totAsaas = noAsaas.reduce((a, x) => a + reais(x.valor), 0);
   const reset = <T,>(f: (v: T) => void) => (v: T) => { f(v); setManual(null); };
 
   const subir = async (file: File) => {
@@ -115,8 +117,8 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
     if (dif !== 0) { toast.error(`As parcelas precisam fechar o total. Diferença: ${brl(dif)}.`); return; }
     setSalv(true);
     try {
-      await salvarAcordoJudicial(partyId, { data_acordo: dataAc, installment_ids: sel, honorarios_cents: reais(hon), cartorio_cents: reais(cart), custas_cents: reais(cust), outros_cents: reais(out), outros_descricao: outDesc, desconto_cents: reais(desc), total_cents: total, plano: plano.map((x, i) => ({ numero: i + 1, data: x.data, valor_cents: reais(x.valor) })), observacao: obs });
-      toast.success("Acordo judicial salvo. Nenhuma cobrança foi gerada no Asaas.");
+      await salvarAcordoJudicial(partyId, { data_acordo: dataAc, installment_ids: sel, honorarios_cents: reais(hon), cartorio_cents: reais(cart), custas_cents: reais(cust), outros_cents: reais(out), outros_descricao: outDesc, desconto_cents: reais(desc), total_cents: total, plano: plano.map((x, i) => ({ numero: i + 1, data: x.data, valor_cents: reais(x.valor), asaas: x.asaas, alvara: !x.asaas })), observacao: obs });
+      toast.success(noAsaas.length ? `Acordo salvo. ${noAsaas.length} parcela(s) prontas para cobrar no Asaas — use o botão azul abaixo ou o Envio em lote.` : "Acordo salvo. Nenhuma parcela vai para o Asaas (alvará/judicial).");
       setManual(null); setHon(""); setCart(""); setCust(""); setOut(""); setOutDesc(""); setDesc(""); setTotalManual(""); setObs("");
       qc.invalidateQueries({ queryKey: ["cob"] });
     } catch (e) { toast.error(e instanceof Error ? e.message : "Não salvou."); } finally { setSalv(false); }
@@ -132,7 +134,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 rounded-xl border border-bronze/50 bg-bronze/10 px-5 py-3 text-sm font-medium text-ledger-text">
-        <ShieldOff className="size-4 text-bronze" /> Área judicial: acordos lançados aqui não geram cobrança no Asaas e não mexem no financeiro.
+        <Landmark className="size-4 text-bronze" /> Área judicial: em cada parcela do acordo, marque “Cobrar no Asaas” ou deixe desmarcada para alvará / depósito judicial (sem cobrança).
       </div>
 
       <section className="rounded-2xl border border-line bg-surface p-6">
@@ -199,17 +201,22 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
           </div>
           {plano.length > 0 && (
             <div className="space-y-2 rounded-lg border border-line-soft p-3">
-              <div className="flex justify-between text-xs text-ledger-muted"><span>Datas e valores editáveis</span>{manual && <button className="underline" onClick={() => setManual(null)}>Dividir igual de novo</button>}</div>
+              <div className="flex justify-between text-xs text-ledger-muted"><span>Datas, valores e onde cada parcela é paga</span>{manual && <button className="underline" onClick={() => setManual(null)}>Dividir igual de novo</button>}</div>
               <ul className="max-h-72 space-y-2 overflow-auto">{plano.map((x, i) => (
                 <li key={i} className="flex items-center gap-2 text-sm"><span className="w-8 text-xs text-ledger-muted">{i + 1}ª</span>
                   <div className="flex-1"><DateField value={paraData(x.data)} onChange={(d) => d && setManual(plano.map((y, k) => (k === i ? { ...y, data: iso(d) } : y)))} /></div>
                   <input value={x.valor} onChange={(e) => setManual(plano.map((y, k) => (k === i ? { ...y, valor: e.target.value } : y)))} className="h-10 w-28 rounded-lg border border-line bg-surface px-3 text-right font-mono text-sm" />
+                  <label data-testid={`jud-asaas-${i + 1}`} className={`flex h-10 w-40 cursor-pointer items-center gap-2 rounded-lg border px-2 text-xs font-semibold ${x.asaas ? "border-asaas/60 bg-asaas/10 text-asaas" : "border-bronze/50 bg-bronze/10 text-bronze"}`}>
+                    <input type="checkbox" checked={x.asaas} onChange={(e) => setManual(plano.map((y, k) => (k === i ? { ...y, asaas: e.target.checked } : y)))} />
+                    {x.asaas ? "Cobrar no Asaas" : "Alvará / judicial"}
+                  </label>
                 </li>))}</ul>
+              <p className="text-xs text-ledger-muted"><b className="text-asaas">{noAsaas.length} parcela(s) · {brl(totAsaas)}</b> vão para o Asaas · <b className="text-bronze">{plano.length - noAsaas.length} · {brl(total - totAsaas)}</b> por alvará / judicial (sem cobrança).</p>
               <p className={`text-xs ${dif === 0 ? "text-success" : "text-danger"}`}>{dif === 0 ? "Parcelas fecham o total." : `Falta ${dif > 0 ? "distribuir" : "tirar"} ${brl(Math.abs(dif))}.`}</p>
             </div>
           )}
           <textarea value={obs} onChange={(e) => setObs(e.target.value)} rows={2} placeholder="Observação (ex.: homologado na audiência)" className="w-full rounded-lg border border-line bg-surface p-2 text-sm" />
-          <button disabled={salv || dif !== 0 || total <= 0} onClick={salvar} className="h-11 w-full rounded-lg bg-bronze text-sm font-semibold text-primary-foreground disabled:opacity-50">Salvar acordo judicial (sem Asaas)</button>
+          <button disabled={salv || dif !== 0 || total <= 0} onClick={salvar} className="h-11 w-full rounded-lg bg-bronze text-sm font-semibold text-primary-foreground disabled:opacity-50">Salvar acordo judicial</button>
         </section>
       </div>
 
@@ -222,7 +229,9 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
               {a.status === "vigente" && <span className="flex gap-3 text-xs"><button className="underline" onClick={() => mudar(a.id, "cumprido")}>Cumprido</button><button className="underline" onClick={() => mudar(a.id, "descumprido")}>Descumprido</button><button className="text-danger underline" onClick={() => mudar(a.id, "cancelado")}>Cancelar</button></span>}
             </div>
             <p className="text-xs text-ledger-muted">Dívida {brl(Number(a.principal_cents))} · honorários {brl(Number(a.honorarios_cents))} · cartório {brl(Number(a.cartorio_cents))} · custas {brl(Number(a.custas_cents))}{Number(a.outros_cents) > 0 && ` · ${a.outros_descricao ?? "outros"} ${brl(Number(a.outros_cents))}`}{Number(a.desconto_cents) > 0 && ` · desconto ${brl(Number(a.desconto_cents))}`}</p>
-            <p className="text-xs text-ledger-muted">{a.plano.map((x) => `${x.numero}ª ${dataBR(x.data)} ${brl(x.valor_cents)}`).join(" · ")}</p>
+            <p className="text-xs text-ledger-muted">{a.plano.map((x) => `${x.numero}ª ${dataBR(x.data)} ${brl(x.valor_cents)}${x.asaas ? " (Asaas)" : " (alvará/judicial)"}`).join(" · ")}</p>
+            {a.simulacao_id && a.status === "vigente" && <AcordoAsaas simId={a.simulacao_id} temEntrada={false} />}
+            {!a.simulacao_id && <p className="text-xs text-bronze">Sem parcelas no Asaas: aguarda alvará / pagamento em juízo.</p>}
           </div>
         ))}
       </section>

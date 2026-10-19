@@ -2706,6 +2706,7 @@ export type Database = {
           party_id: string
           plano: Json
           principal_cents: number
+          simulacao_id: string | null
           status: string
           status_motivo: string | null
           total_cents: number
@@ -2727,6 +2728,7 @@ export type Database = {
           party_id: string
           plano?: Json
           principal_cents?: number
+          simulacao_id?: string | null
           status?: string
           status_motivo?: string | null
           total_cents: number
@@ -2748,6 +2750,7 @@ export type Database = {
           party_id?: string
           plano?: Json
           principal_cents?: number
+          simulacao_id?: string | null
           status?: string
           status_motivo?: string | null
           total_cents?: number
@@ -2955,6 +2958,7 @@ export type Database = {
           excluida_por: string | null
           id: string
           installment_ids: string[]
+          judicial_acordo_id: string | null
           juros_mes_pct: number
           multa_pct: number
           observacao: string | null
@@ -2981,6 +2985,7 @@ export type Database = {
           excluida_por?: string | null
           id?: string
           installment_ids: string[]
+          judicial_acordo_id?: string | null
           juros_mes_pct: number
           multa_pct: number
           observacao?: string | null
@@ -3007,6 +3012,7 @@ export type Database = {
           excluida_por?: string | null
           id?: string
           installment_ids?: string[]
+          judicial_acordo_id?: string | null
           juros_mes_pct?: number
           multa_pct?: number
           observacao?: string | null
@@ -3021,6 +3027,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "cob_simulacoes_judicial_acordo_id_fkey"
+            columns: ["judicial_acordo_id"]
+            isOneToOne: false
+            referencedRelation: "cob_judicial_acordos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cob_simulacoes_party_id_fkey"
             columns: ["party_id"]

@@ -743,6 +743,13 @@
       "when": 1792440149384,
       "tag": "0105_cob_judicial_asaas",
       "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "7",
+      "when": 1792446834562,
+      "tag": "0106_larissa_financeiro_alvara",
+      "breakpoints": true
     }
   ]
 }

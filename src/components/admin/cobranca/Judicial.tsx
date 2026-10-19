@@ -74,14 +74,21 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
   const [manual, setManual] = React.useState<{ data: string; valor: string }[] | null>(null);
   const [obs, setObs] = React.useState(""); const [salv, setSalv] = React.useState(false);
 
+  // Já está na etapa Judicial: abre a área direto (registro do processo criado vazio, dados preenchidos depois).
+  const abrindo = React.useRef(false);
+  const [falhaAbrir, setFalhaAbrir] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    if (proc.isLoading || proc.data || abrindo.current) return;
+    abrindo.current = true;
+    encaminharJudicial(partyId, {}).then(() => qc.invalidateQueries({ queryKey: ["cob"] }))
+      .catch((e) => setFalhaAbrir(e instanceof Error ? e.message : "Não abriu a área judicial."));
+  }, [proc.isLoading, proc.data, partyId, qc]);
+
   if (proc.isLoading) return <p className="text-sm text-ledger-muted">Carregando…</p>;
   if (!proc.data || editProc) {
-    if (!proc.data) return (
-      <div className="space-y-4">
-        <p className="rounded-xl border border-line bg-warm-ivory/60 p-4 text-sm text-ledger-text">Esta devedora ainda não foi encaminhada para judicial. Preencha os dados do processo para abrir a área judicial.</p>
-        <FormProcesso partyId={partyId} onFim={() => undefined} />
-      </div>
-    );
+    if (!proc.data) return falhaAbrir
+      ? <p className="rounded-xl border border-danger/40 bg-danger/5 p-4 text-sm text-ledger-text">{falhaAbrir}</p>
+      : <p className="text-sm text-ledger-muted">Abrindo área judicial…</p>;
     return <FormProcesso partyId={partyId} inicial={proc.data} onFim={() => setEditProc(false)} />;
   }
   const p = proc.data;

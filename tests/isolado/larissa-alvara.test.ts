@@ -15,7 +15,7 @@ beforeAll(async () => {
   consultora = await criarConta({ nome: "cons-alvara", papeis: ["consultora"] });
   const liberado = await rpcServico("access_financial_full_set", { _user: larissa.uid, _enabled: true, _actor: master.uid, _reason: "Autorização de acesso completo" });
   expect(liberado.ok).toBe(true);
-  conta = (await um<{id:string}>("insert into financial_accounts(nome,kind) values('ISO Alvará','conta_corrente') returning id")).id;
+  conta = (await um<{id:string}>("insert into financial_accounts(nome,kind) values($1,'conta_corrente') returning id",[`ISO Alvará ${larissa.uid}`])).id;
   const r = await rpc<string>(larissa, "fin_title_create", { _payload: { direction: "receivable", party_id: larissa.partyId, descricao: "ISO dívida alvará", valor_cents: 100000, parcelas: [{ vencimento: "2026-01-10", valor_cents: 100000 }] } });
   expect(r.ok).toBe(true); titulo=r.dados;
   parcela=(await um<{id:string}>("select id from financial_installments where title_id=$1",[titulo])).id;
@@ -90,4 +90,10 @@ test("estornar alvará após quitar acordo retira desconto R$100; novo alvará r
   expect((await rpc(larissa,"cob_judicial_alvara_liberar",{_acordo:acordo,_numero:1,_conta:conta,_data:"2026-10-19",_referencia:"ALV-ISO-004"})).ok).toBe(true);
   expect(Number((await um<{v:string}>("select fin_installment_saldo($1) v",[parcela])).v)).toBe(0);
   expect(Number((await um<{v:string}>("select sum(valor_cents) v from financial_adjustments where installment_id=$1 and kind='desconto'",[parcela])).v)).toBe(10000);
+});
+test("estorno da última baixa Asaas retira desconto uma vez, repetição do callback não recria recebimento",async()=>{
+  const s=await um<{id:string}>("select id from financial_settlements where idempotency_key like 'asaas:baixa:%' and exists(select 1 from financial_allocations a where a.settlement_id=financial_settlements.id and a.installment_id=$1) order by created_at desc limit 1",[parcela]);
+  expect((await rpc(larissa,"fin_settlement_reverse",{_settlement:s.id,_motivo:"Correção da baixa Asaas"})).ok).toBe(true);
+  expect(Number((await um<{v:string}>("select fin_installment_saldo($1) v",[parcela])).v)).toBe(30000);
+  expect(Number((await um<{v:string}>("select sum(valor_cents) v from financial_adjustments where installment_id=$1 and kind='desconto'",[parcela])).v)).toBe(0);
 });

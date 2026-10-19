@@ -26,7 +26,7 @@ async function executarIntencoes(ids: string[], actor: string) {
       const r = await transporteDaIntencao(id, actor);
       const x = await executarIntencao(r.executor, r.transporte, id, { actor });
       if (x.invoice_url) links.push(x.invoice_url);
-      else if (x.state !== "criada") erros.push(x.erro || `Situação: ${x.state}`);
+      else if (x.state !== "criada") erros.push(erroAmigavel(x.erro || `Situação: ${x.state}`));
     } catch (e) { erros.push(msg(e)); }
   }
   return { links, erros };

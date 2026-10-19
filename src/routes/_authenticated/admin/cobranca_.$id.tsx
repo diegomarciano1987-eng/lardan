@@ -16,7 +16,7 @@ import {
 } from "@/lib/cobranca";
 
 export const Route = createFileRoute("/_authenticated/admin/cobranca_/$id")({
-  head: () => ({ meta: [{ title: "Devedora — Cobrança Lardan" }, { name: "robots", content: "noindex, nofollow" }] }),
+  head: () => ({ meta: [{ title: "Ficha de cobrança e acordos judiciais — LARDAN" }, { name: "description", content: "Controle de dívidas, acordos judiciais, documentos e recebimentos da LARDAN." }, { property: "og:title", content: "Ficha de cobrança — LARDAN" }, { property: "og:description", content: "Acordos e recebimentos judiciais integrados ao financeiro LARDAN." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: Cockpit,
 });
 

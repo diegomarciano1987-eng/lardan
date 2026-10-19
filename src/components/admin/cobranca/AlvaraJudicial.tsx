@@ -20,7 +20,7 @@ export function AlvaraJudicial({ acordo }: { acordo: AcordoJudicial }) {
   const [referencia, setReferencia] = React.useState("");
   const [salvando, setSalvando] = React.useState(false);
   const [erro, setErro] = React.useState("");
-  const contas = useQuery({ queryKey: ["fin", "accounts"], queryFn: fetchFinAccounts, enabled: numero !== null });
+  const contas = useQuery({ queryKey: ["fin-accounts"], queryFn: fetchFinAccounts, enabled: numero !== null });
   const itens = acordo.plano.filter((x) => !x.asaas || x.alvara);
   if (!itens.length) return null;
   const item = itens.find((x) => x.numero === numero);
@@ -29,7 +29,7 @@ export function AlvaraJudicial({ acordo }: { acordo: AcordoJudicial }) {
     setSalvando(true); setErro("");
     try {
       await liberarAlvaraJudicial(acordo.id, item.numero, conta, dia, referencia.trim());
-      await Promise.all([qc.invalidateQueries({ queryKey: ["cob"] }), qc.invalidateQueries({ queryKey: ["fin"] }), qc.invalidateQueries({ queryKey: ["asaas"] })]);
+      await qc.invalidateQueries({ predicate: (q) => typeof q.queryKey[0] === "string" && /^(cob$|fin($|-)|asaas($|-))/.test(q.queryKey[0]) });
       toast.success("Alvará registrado: dívida abatida e entrada lançada no Financeiro.");
       setNumero(null);
     } catch (e) { setErro(e instanceof Error ? e.message : "Não foi possível registrar o alvará."); }

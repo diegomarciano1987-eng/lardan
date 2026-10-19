@@ -9,6 +9,7 @@ import { brl, dataBR, hojeSP, judicial, judicialDocs, acordosJudiciais, encaminh
 import { enviarDocJudicial, abrirDocJudicial } from "@/lib/cobranca.functions";
 import { montarPlano, addMeses } from "@/lib/cobranca-acordo";
 import { AcordoAsaas } from "./AcordoAsaas";
+import { AlvaraJudicial } from "./AlvaraJudicial";
 
 const iso = (d?: Date) => (d ? d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }) : "");
 const paraData = (s: string) => (s ? new Date(s + "T12:00:00") : undefined);
@@ -161,7 +162,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
         </div>
         {(docs.data ?? []).length === 0 ? <p className="rounded-lg border border-dashed border-line p-6 text-center text-sm text-ledger-muted">Sem documentos anexados.</p> : (
           <ul className="divide-y divide-line-soft rounded-xl border border-line">
-            {docs.data!.map((d) => (
+            {(docs.data ?? []).map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                 <span><b className="text-ledger-text">{d.titulo}</b> <span className="text-xs text-ledger-muted">· {TIPOS_DOC_JUDICIAL.find((t) => t[0] === d.tipo)?.[1]} · {dataBR(d.created_at)}</span></span>
                 <button onClick={() => ver(d.id)} className="h-9 rounded-lg border border-line px-4 text-xs font-semibold">Abrir</button>
@@ -222,7 +223,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
 
       <section className="space-y-2">
         <h3 className="text-sm font-semibold text-ledger-text">Acordos judiciais lançados</h3>
-        {(acs.data ?? []).length === 0 ? <p className="text-sm text-ledger-muted">Nenhum acordo judicial.</p> : acs.data!.map((a) => (
+        {(acs.data ?? []).length === 0 ? <p className="text-sm text-ledger-muted">Nenhum acordo judicial.</p> : (acs.data ?? []).map((a) => (
           <div key={a.id} className={`space-y-1 rounded-xl border border-line bg-surface p-4 text-sm ${a.status === "cancelado" ? "opacity-60" : ""}`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span>Acordo de <b>{dataBR(a.data_acordo)}</b> · total <b className="font-mono">{brl(Number(a.total_cents))}</b> · {a.plano.length}x · <b>{ROT_ST[a.status]}</b>{a.status_motivo && ` (${a.status_motivo})`}</span>
@@ -231,6 +232,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
             <p className="text-xs text-ledger-muted">Dívida {brl(Number(a.principal_cents))} · honorários {brl(Number(a.honorarios_cents))} · cartório {brl(Number(a.cartorio_cents))} · custas {brl(Number(a.custas_cents))}{Number(a.outros_cents) > 0 && ` · ${a.outros_descricao ?? "outros"} ${brl(Number(a.outros_cents))}`}{Number(a.desconto_cents) > 0 && ` · desconto ${brl(Number(a.desconto_cents))}`}</p>
             <p className="text-xs text-ledger-muted">{a.plano.map((x) => `${x.numero}ª ${dataBR(x.data)} ${brl(x.valor_cents)}${x.asaas ? " (Asaas)" : " (alvará/judicial)"}`).join(" · ")}</p>
             {a.simulacao_id && a.status === "vigente" && <AcordoAsaas simId={a.simulacao_id} temEntrada={false} />}
+            <AlvaraJudicial acordo={a} />
             {!a.simulacao_id && <p className="text-xs text-bronze">Sem parcelas no Asaas: aguarda alvará / pagamento em juízo.</p>}
           </div>
         ))}

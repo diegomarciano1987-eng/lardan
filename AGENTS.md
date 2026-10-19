@@ -9,7 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Save roles atomically in one protected audited function. Why: no partial grants.
+- Save roles atomically via protected audited RPCs. Full finance grants live in user_financial_access, never Master; preserve MFA. Why: no unrelated grants.
 - Balances sum financial_account_movements through America/Sao_Paulo cutoff; never re-add saldo_inicial. All financial RPCs treat future movements as forecast. Why: no double/future cash.
 - fin_dre separates unclassified titles, missing cost centers, non-DRE natures, open installments and unreconciled lines; gerencial uses fin_dre_base and matches net profit. Why: one calculation, distinct indicators.
 - Installment competencia falls back to title; changes only via fin_installment_competencia_set with reason/event; DRE sums by installment. Why: recurring contracts span months.
@@ -33,7 +33,7 @@
 - Biblioteca type is separate from social format; shared publication/storage policies. Why: preserve arts/privacy.
 - Outside portfolio: name/code/status/debt only, restrito=true; blocked/departed cannot move portfolio/reactivate. Why: privacy/finance.
 - With asaas_accounts.conta_cartao_receber_id set, settle there; asaas_cartao_creditar transfers to Asaas idempotently on/after credit_date, skipping reversed settlements. Empty preserves old behavior; asaas_baixa_pendentes sweeps lost-webhook credits. Why: accurate cash timing/recovery.
-- All installment balances use fin_installment_saldo (rep portal/statement suggestions included): amount + interest/fine - discount/abatement - allocations, matching fin_installment_refresh. Never valor minus allocations. Why: one correct balance.
+- All installment balances use fin_installment_saldo: amount + interest/fine - discount/abatement - allocations. Never valor minus allocations. Why: one balance.
 - Test-kit cleanup: service-only kit_testes_cancelar, seven expected cycles/quantities, official transfers, immutable snapshots; retain history. Why: stock/remessas.
 - Fiscal results (attempt/authorization/rejection/homologated cancellation): service_role only (db/pendentes/11). Authorization requires nfe_chave_valida with emitter CNPJ; model/series/number from key. Why: no manual authorization.
 - fiscal_settings emission/provider/environment/emitter changes: Master only, provider+emitter+environment required before activation, disable before environment change, audit fiscal.configuracao_alterada. Why: controlled fiscal switch.

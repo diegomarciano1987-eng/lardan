@@ -4,13 +4,15 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { erroAmigavel } from "./cobranca-lote-erros";
 
 type Forma = "PIX" | "BOLETO" | "CREDIT_CARD" | "UNDEFINED";
 const FORMAS: Forma[] = ["PIX", "BOLETO", "CREDIT_CARD", "UNDEFINED"];
 type Rpc = { rpc: (f: string, a: object) => PromiseLike<{ data: unknown; error: { message: string } | null }> };
 type Ctx = { supabase: Rpc; userId: string };
 const uuid = /^[0-9a-f-]{36}$/i;
-const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
+const msgBruta = (e: unknown) => (e instanceof Error ? e.message : String(e));
+const msg = (e: unknown) => { const b = msgBruta(e); console.error("[cobranca-lote]", b); return erroAmigavel(b); };
 
 export interface ItemLote { tipo: "acordo" | "parcela"; id: string; nome?: string }
 export interface ResultadoItem { tipo: string; id: string; nome?: string; ok: boolean; cobrancas: number; links: string[]; erro?: string }
@@ -24,7 +26,7 @@ async function executarIntencoes(ids: string[], actor: string) {
       const r = await transporteDaIntencao(id, actor);
       const x = await executarIntencao(r.executor, r.transporte, id, { actor });
       if (x.invoice_url) links.push(x.invoice_url);
-      else if (x.state !== "criada") erros.push(x.erro || `Situação: ${x.state}`);
+      else if (x.state !== "criada") erros.push(erroAmigavel(x.erro || `Situação: ${x.state}`));
     } catch (e) { erros.push(msg(e)); }
   }
   return { links, erros };

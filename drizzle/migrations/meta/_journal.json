@@ -771,6 +771,13 @@
       "when": 1792447807060,
       "tag": "0109_judicial_estorno_desconto_protegido",
       "breakpoints": true
+    },
+    {
+      "idx": 110,
+      "version": "7",
+      "when": 1792447830482,
+      "tag": "0110_judicial_baixa_ordem_travas",
+      "breakpoints": true
     }
   ]
 }

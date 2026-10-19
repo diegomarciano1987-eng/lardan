@@ -13101,6 +13101,10 @@ export type Database = {
         Args: { _d: Json; _party: string }
         Returns: undefined
       }
+      cob_judicial_estorno_desconto: {
+        Args: { _estorno: string; _original: string }
+        Returns: undefined
+      }
       cob_kpis: { Args: never; Returns: Json }
       cob_lembretes: {
         Args: never

@@ -1,5 +1,5 @@
 import { beforeAll, expect, test } from "bun:test";
-import { adm, criarConta, rpc, rpcServico, type Conta } from "./base";
+import { adm, criarConta, rpc, rpcServico, ler, type Conta } from "./base";
 
 let master: Conta, larissa: Conta, outro: Conta, consultora: Conta;
 let conta: string, parcela: string, acordo: string, titulo: string;
@@ -24,8 +24,8 @@ beforeAll(async () => {
   expect(ac.ok).toBe(true); acordo=ac.dados;
 });
 test("Larissa possui todas as 28 permissões financeiras, sem Master; outro financeiro permanece restrito",async()=>{
-  const caps=await rpc<{capability:string}[]>(larissa,"my_capabilities");
-  expect(caps.dados.filter(x=>x.capability.startsWith("finance.")).length).toBe(28);
+  const caps=await ler<{capability:string}>(larissa,"select * from my_capabilities()");
+  expect(caps.linhas.filter(x=>x.capability.startsWith("finance.")).length).toBe(28);
   expect((await rpc(larissa,"has_role",{_user_id:larissa.uid,_role:"master"})).dados).toBe(false);
   expect((await rpc(outro,"has_capability",{_user_id:outro.uid,_cap:"finance.settings.manage"})).dados).toBe(false);
   expect((await rpc(larissa,"access_financial_full_set",{_user:outro.uid,_enabled:true,_actor:master.uid,_reason:"Tentativa indevida"})).ok).toBe(false);
@@ -58,4 +58,27 @@ test("estorno oficial reabre dívida e alvará, nova baixa não duplica o saldo"
   const hist=await rpc<{estornado:boolean}[]>(larissa,"cob_judicial_alvaras",{_acordo:acordo});expect(hist.dados[0]?.estornado).toBe(true);
   expect((await rpc(larissa,"cob_judicial_alvara_liberar",{_acordo:acordo,_numero:1,_conta:conta,_data:"2026-10-19",_referencia:"ALV-ISO-003"})).ok).toBe(true);
   expect(Number((await um<{v:string}>("select sum(valor_cents) v from financial_account_movements where financial_account_id=$1",[conta])).v)).toBe(50000);
+});
+test("desconto judicial R$100 só no último recebimento Asaas e alvará",async()=>{
+  const sim=(await um<{simulacao_id:string}>("select simulacao_id from cob_judicial_acordos where id=$1",[acordo])).simulacao_id;
+  const emp=(await um<{id:string}>("insert into business_entities(legal_name) values('ISO Empresa Alvará') returning id")).id;
+  await adm.unsafe("update financial_titles set business_entity_id=$2 where id=$1",[titulo,emp]);
+  const acc=(await um<{id:string}>("insert into asaas_accounts(label,environment,financial_account_id,owner_entity_id) values('ISO Asaas Alvará','sandbox',$1,$2) returning id",[conta,emp])).id;
+  for(const numero of [2,3]) {
+    const ext=`pay_iso_alvara_${acordo.slice(0,8)}_${numero}`;
+    const ch=await adm.begin(async tx=>{
+      await tx.unsafe("select set_config('lardann.asaas_link','on',true)");
+      const rows=await tx.unsafe("insert into asaas_charges(account_id,external_id,value_cents,due_date,billing_type,external_status,installment_id,title_id,party_id,payment_date) values($1,$2,20000,'2026-10-19','PIX','RECEIVED',$3,$4,$5,'2026-10-19') returning id",[acc,ext,parcela,titulo,larissa.partyId]) as {id:string}[];
+      if(!rows[0]) throw new Error('Cobrança isolada não criada');return rows[0].id;
+    });
+    await adm.begin(async tx=>{
+      await tx.unsafe("select set_config('lardann.asaas_intent','on',true)");
+      await tx.unsafe("insert into asaas_charge_intents(account_id,title_id,installment_id,party_id,value_cents,due_date,billing_type,internal_reference,idempotency_key,content_hash,acordo_simulacao_id,acordo_parcela,charge_id,external_id) values($1,$2,$3,$4,20000,'2026-10-19','PIX',$5,$5,$5,$6,$7,$8,$9)",[acc,titulo,parcela,larissa.partyId,`iso:${acordo}:${numero}`,sim,numero,ch,ext]);
+    });
+    const r=await rpcServico<{baixa:boolean}>("asaas_baixa_automatica",{_charge:ch}); expect(r.dados.baixa).toBe(true);
+    const sd=Number((await um<{v:string}>("select fin_installment_saldo($1) v",[parcela])).v);
+    expect(sd).toBe(numero===2?30000:0);
+  }
+  expect(Number((await um<{v:string}>("select sum(valor_cents) v from financial_adjustments where installment_id=$1 and kind='desconto'",[parcela])).v)).toBe(10000);
+  expect(Number((await um<{v:string}>("select sum(valor_cents) v from financial_account_movements where financial_account_id=$1",[conta])).v)).toBe(90000);
 });

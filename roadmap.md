@@ -1,4 +1,8 @@
 # Roadmap
+## Larissa — financeiro completo e alvará judicial (19/10)
+- [ ] Liberar todas as operações financeiras somente para Larissa Reginalda, com autorização e auditoria.
+- [ ] Registrar liberação de alvará pela aba Judicial com conta/data, baixa oficial e proteção contra repetição.
+- [ ] Validar permissões, sincronismo e fluxo na tela; entregar provas e texto para WhatsApp, sem publicar.
 ## Menu do painel Master (reordenação) — 17/10
 - [x] Reordenar: Visão Geral, Financeiro, Produtos, Central de Avisos, Biblioteca, Candidaturas primeiro; Trocas/Garantias depois de Cobrança — src/lib/admin-modules.ts
 - [x] Desktop com os seis prioritários e celular com cinco + Mais módulos — BottomDock

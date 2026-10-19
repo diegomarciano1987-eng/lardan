@@ -136,7 +136,10 @@ export const cockpitFinanceiro = (party: string) => call<CockpitFinanceiro>("con
 export interface KpisCobranca { devedoras: number; vencido_cents: number; hoje: number; atrasadas: number; vencendo: number; descumpridas: number }
 export const kpisCobranca = () => call<KpisCobranca>("cob_kpis");
 
-// ---------- Judicial (nunca gera cobrança Asaas) ----------
+// ---------- Judicial (Asaas e alvará) ----------
+export interface AlvaraRecebido { numero: number; data: string; valor_cents: number; conta: string; settlement_id: string; estornado: boolean }
+export const alvarasJudiciais = (acordo: string) => call<AlvaraRecebido[]>("cob_judicial_alvaras", { _acordo: acordo });
+export const liberarAlvaraJudicial = (acordo: string, numero: number, conta: string, data: string, referencia: string) => call<{ settlement_id: string; repetido: boolean }>("cob_judicial_alvara_liberar", { _acordo: acordo, _numero: numero, _conta: conta, _data: data, _referencia: referencia });
 export interface Judicial { party_id: string; processo: string | null; vara: string | null; comarca: string | null; advogado: string | null; data_ajuizamento: string | null; observacao: string | null; encaminhado_em: string }
 export interface JudicialDoc { id: string; tipo: string; titulo: string; file_name: string; content_type: string; created_at: string }
 export interface AcordoJudicial { id: string; data_acordo: string; principal_cents: number; honorarios_cents: number; cartorio_cents: number; custas_cents: number; outros_cents: number; outros_descricao: string | null; desconto_cents: number; total_cents: number; plano: { numero: number; data: string; valor_cents: number; asaas?: boolean; alvara?: boolean }[]; observacao: string | null; status: string; status_motivo: string | null; simulacao_id: string | null; created_at: string }

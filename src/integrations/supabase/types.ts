@@ -2773,6 +2773,74 @@ export type Database = {
           },
         ]
       }
+      cob_judicial_alvara_recebimentos: {
+        Row: {
+          acordo_id: string
+          autor_id: string
+          conta_id: string
+          created_at: string
+          data: string
+          id: string
+          parcela_numero: number
+          referencia: string
+          settlement_id: string
+          valor_cents: number
+        }
+        Insert: {
+          acordo_id: string
+          autor_id: string
+          conta_id: string
+          created_at?: string
+          data: string
+          id?: string
+          parcela_numero: number
+          referencia: string
+          settlement_id: string
+          valor_cents: number
+        }
+        Update: {
+          acordo_id?: string
+          autor_id?: string
+          conta_id?: string
+          created_at?: string
+          data?: string
+          id?: string
+          parcela_numero?: number
+          referencia?: string
+          settlement_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_judicial_alvara_recebimentos_acordo_id_fkey"
+            columns: ["acordo_id"]
+            isOneToOne: false
+            referencedRelation: "cob_judicial_acordos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_judicial_alvara_recebimentos_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_judicial_alvara_recebimentos_conta_id_fkey"
+            columns: ["conta_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_judicial_alvara_recebimentos_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: true
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cob_judicial_docs: {
         Row: {
           autor_id: string
@@ -12083,6 +12151,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_financial_access: {
+        Row: {
+          enabled: boolean
+          granted_by: string | null
+          reason: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          enabled?: boolean
+          granted_by?: string | null
+          reason: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          enabled?: boolean
+          granted_by?: string | null
+          reason?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_financial_access_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_financial_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -12386,6 +12493,15 @@ export type Database = {
       }
     }
     Functions: {
+      access_financial_full_set: {
+        Args: {
+          _actor: string
+          _enabled: boolean
+          _reason: string
+          _user: string
+        }
+        Returns: undefined
+      }
       access_invite_accept: { Args: { _token_hash: string }; Returns: Json }
       access_invite_create: {
         Args: {
@@ -12963,6 +13079,21 @@ export type Database = {
       }
       cob_judicial_acordo_status: {
         Args: { _id: string; _motivo: string; _status: string }
+        Returns: undefined
+      }
+      cob_judicial_alvara_liberar: {
+        Args: {
+          _acordo: string
+          _conta: string
+          _data: string
+          _numero: number
+          _referencia: string
+        }
+        Returns: Json
+      }
+      cob_judicial_alvaras: { Args: { _acordo: string }; Returns: Json }
+      cob_judicial_desconto_final: {
+        Args: { _acordo: string; _settlement: string }
         Returns: undefined
       }
       cob_judicial_doc_registrar: { Args: { _d: Json }; Returns: string }

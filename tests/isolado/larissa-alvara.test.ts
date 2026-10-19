@@ -82,3 +82,12 @@ test("desconto judicial R$100 só no último recebimento Asaas e alvará",async(
   expect(Number((await um<{v:string}>("select sum(valor_cents) v from financial_adjustments where installment_id=$1 and kind='desconto'",[parcela])).v)).toBe(10000);
   expect(Number((await um<{v:string}>("select sum(valor_cents) v from financial_account_movements where financial_account_id=$1",[conta])).v)).toBe(90000);
 });
+test("estornar alvará após quitar acordo retira desconto R$100; novo alvará reaplica só uma vez",async()=>{
+  const s=await um<{settlement_id:string}>("select ar.settlement_id from cob_judicial_alvara_recebimentos ar where acordo_id=$1 and not exists(select 1 from financial_settlements rev where rev.reversed_of=ar.settlement_id)",[acordo]);
+  expect((await rpc(larissa,"fin_settlement_reverse",{_settlement:s.settlement_id,_motivo:"Revisão do alvará após quitação"})).ok).toBe(true);
+  expect(Number((await um<{v:string}>("select fin_installment_saldo($1) v",[parcela])).v)).toBe(60000);
+  expect(Number((await um<{v:string}>("select sum(valor_cents) v from financial_adjustments where installment_id=$1 and kind='desconto'",[parcela])).v)).toBe(0);
+  expect((await rpc(larissa,"cob_judicial_alvara_liberar",{_acordo:acordo,_numero:1,_conta:conta,_data:"2026-10-19",_referencia:"ALV-ISO-004"})).ok).toBe(true);
+  expect(Number((await um<{v:string}>("select fin_installment_saldo($1) v",[parcela])).v)).toBe(0);
+  expect(Number((await um<{v:string}>("select sum(valor_cents) v from financial_adjustments where installment_id=$1 and kind='desconto'",[parcela])).v)).toBe(10000);
+});

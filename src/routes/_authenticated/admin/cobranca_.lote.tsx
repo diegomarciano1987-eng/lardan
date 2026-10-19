@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, dataBR, rotuloEtapa, ROTULO_SIMULACAO } from "@/lib/cobranca";
 import { dispararLoteAsaas, type ResultadoItem } from "@/lib/cobranca-asaas.functions";
+import { erroAmigavel } from "@/lib/cobranca-lote-erros";
 
 export const Route = createFileRoute("/_authenticated/admin/cobranca_/lote")({
   head: () => ({ meta: [{ title: "Cobrança em lote Asaas — Lardan" }, { name: "robots", content: "noindex, nofollow" }] }),
@@ -49,11 +50,19 @@ function Lote() {
     setEnviando(true); setRes(null);
     try {
       const r = await disparar({ data: { itens, forma } });
-      setRes(r); setSelA([]); setSelP([]);
+      setRes(r);
+      const falhas = r.filter((x) => !x.ok).map((x) => x.id);
+      setSelA((s) => s.filter((id) => falhas.includes(id))); setSelP((s) => s.filter((id) => falhas.includes(id)));
       const ok = r.filter((x) => x.ok).length;
-      toast.success(`${ok} de ${r.length} enviados ao Asaas.`);
+      if (ok === r.length) toast.success(`Pronto! ${ok} de ${r.length} enviados ao Asaas.`);
+      else if (ok === 0) toast.error(`Nenhum envio foi concluído (0 de ${r.length}). Veja o motivo de cada um abaixo.`);
+      else toast.warning(`${ok} de ${r.length} enviados. ${r.length - ok} não foram — veja o motivo abaixo.`);
       qc.invalidateQueries({ queryKey: ["cob"] });
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Falhou."); } finally { setEnviando(false); }
+    } catch (e) {
+      const m = erroAmigavel(e instanceof Error ? e.message : String(e));
+      setRes(itens.map((i) => ({ tipo: i.tipo, id: i.id, nome: i.nome, ok: false, cobrancas: 0, links: [], erro: m })));
+      toast.error(`Nada foi enviado: ${m}`);
+    } finally { setEnviando(false); }
   };
   const toggle = (lista: string[], set: (v: string[]) => void, id: string) => set(lista.includes(id) ? lista.filter((x) => x !== id) : [...lista, id]);
   const th = "px-3 py-2 text-left text-xs text-muted-foreground";
@@ -110,14 +119,31 @@ function Lote() {
         <button disabled={enviando || nSel === 0} onClick={enviar} className="h-10 rounded-lg bg-asaas px-6 text-sm font-semibold text-asaas-foreground disabled:opacity-50">{enviando ? "Enviando ao Asaas…" : "Enviar ao Asaas"}</button>
       </div>
 
-      {res && (
-        <section className="space-y-2 rounded-xl border border-border bg-card p-5" data-testid="resultado-lote">
+      {res && (() => {
+        const ok = res.filter((r) => r.ok); const nok = res.filter((r) => !r.ok);
+        const cob = ok.reduce((s, r) => s + r.cobrancas, 0);
+        return (
+        <section className="space-y-4 rounded-xl border border-border bg-card p-5" data-testid="resultado-lote">
           <h2 className="font-semibold">Resultado do envio</h2>
-          {res.map((r) => (
-            <p key={r.tipo + r.id} className={`text-sm ${r.ok ? "" : "text-destructive"}`}>{r.ok ? "Enviado" : "Não enviado"} · {r.nome ?? r.id} · {r.cobrancas} cobrança(s){r.links[0] && <> · <a href={r.links[0]} target="_blank" rel="noopener noreferrer" className="underline">abrir fatura</a></>}{r.erro && ` — ${r.erro}`}</p>
-          ))}
-        </section>
-      )}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-lg border border-border p-4"><p className="text-xs text-muted-foreground">Enviados</p><p className="font-display text-3xl">{ok.length}<span className="text-base text-muted-foreground"> de {res.length}</span></p></div>
+            <div className="rounded-lg border border-border p-4"><p className="text-xs text-muted-foreground">Cobranças criadas no Asaas</p><p className="font-display text-3xl">{cob}</p></div>
+            <div className={`rounded-lg border p-4 ${nok.length ? "border-destructive/50" : "border-border"}`}><p className="text-xs text-muted-foreground">Não enviados</p><p className={`font-display text-3xl ${nok.length ? "text-destructive" : ""}`}>{nok.length}</p></div>
+          </div>
+          {nok.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-destructive">Não foram enviados — e por quê (continuam marcados para tentar de novo):</p>
+              {nok.map((r) => <p key={r.tipo + r.id} className="rounded-md bg-destructive/10 px-3 py-2 text-sm"><b>{r.nome ?? r.id}</b> — {r.erro ?? "Motivo não informado."}</p>)}
+            </div>
+          )}
+          {ok.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Enviados:</p>
+              {ok.map((r) => <p key={r.tipo + r.id} className="text-sm">{r.nome ?? r.id} · {r.cobrancas} cobrança(s){r.links[0] && <> · <a href={r.links[0]} target="_blank" rel="noopener noreferrer" className="underline">abrir fatura</a></>}</p>)}
+            </div>
+          )}
+        </section>);
+      })()}
     </div>
   );
 }

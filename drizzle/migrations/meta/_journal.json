@@ -750,6 +750,13 @@
       "when": 1792446834562,
       "tag": "0106_larissa_financeiro_alvara",
       "breakpoints": true
+    },
+    {
+      "idx": 107,
+      "version": "7",
+      "when": 1792446860280,
+      "tag": "0107_financial_access_executor_guard",
+      "breakpoints": true
     }
   ]
 }

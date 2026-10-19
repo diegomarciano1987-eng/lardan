@@ -46,6 +46,6 @@ export const ligarAvisosCliente = createServerFn({ method: "POST" })
         falhas.push(e instanceof Error ? e.message : "O Asaas não respondeu.");
       }
     }
-    await supabaseAdmin.from("audit_logs" as never).insert({ actor_id: c.userId, action: "asaas.avisos_ligados", entity: "party", entity_id: data.partyId, detail: { ligados, falhas } } as never).then(() => undefined, () => undefined);
+    await supabaseAdmin.from("audit_logs" as never).insert({ actor_id: c.userId, action: "asaas.avisos_ligados", entity: "party", entity_id: data.partyId, payload: { ligados, falhas } } as never).then(() => undefined, () => undefined);
     return { ligados, falhas, semCadastro: false };
   });

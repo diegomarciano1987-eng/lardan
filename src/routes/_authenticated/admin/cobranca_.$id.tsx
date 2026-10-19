@@ -2,8 +2,9 @@ import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, MessageCircle, Phone, Ban, UserPen, Gavel, LayoutDashboard, Calculator, Wallet, ListOrdered, History, Handshake, CalendarClock, IdCard } from "lucide-react";
+import { ArrowLeft, MessageCircle, Phone, Ban, UserPen, Gavel, LayoutDashboard, Calculator, Wallet, ListOrdered, History, Handshake, CalendarClock, IdCard, BellRing } from "lucide-react";
 import { LembretesGaveta } from "@/components/admin/cobranca/LembretesGaveta";
+import { ligarAvisosCliente } from "@/lib/asaas/avisos.functions";
 import { SimuladorAcordo } from "@/components/admin/cobranca/SimuladorAcordo";
 import { EditarDadosDialog } from "@/components/admin/cobranca/EditarDadosDialog";
 import { DateField } from "@/components/premium/DateField";
@@ -35,6 +36,7 @@ function Cockpit() {
   const susp = useQuery({ queryKey: ["cob", "susp", id], queryFn: () => suspensao(id) });
   const [editar, setEditar] = React.useState(false);
   const [encaminhar, setEncaminhar] = React.useState(false);
+  const [ligando, setLigando] = React.useState(false);
   const recarregar = () => qc.invalidateQueries({ queryKey: ["cob"] });
   const alternarSuspensao = async () => {
     const s = !susp.data?.suspensa;
@@ -62,6 +64,18 @@ function Cockpit() {
     window.open(`https://wa.me/55${fone.replace(/^55/, "")}`, "_blank", "noopener");
     await registrar({ party: id, tipo: "whatsapp_aberto", obs: "Contato aberto no WhatsApp" });
     recarregar();
+  };
+
+  const ligarAvisos = async () => {
+    setLigando(true);
+    try {
+      const r = await ligarAvisosCliente({ data: { partyId: id } });
+      if (r.semCadastro) toast.error("Esta cliente ainda não tem cadastro no Asaas. Os avisos já saem ligados na primeira cobrança.");
+      else if (r.ligados && !r.falhas.length) toast.success("Avisos ligados no Asaas. Os próximos lembretes das cobranças dela saem por e-mail, SMS e WhatsApp. Avisos que já passaram não são reenviados.");
+      else if (r.ligados) toast.warning(`Avisos ligados em ${r.ligados} conta(s). Não foi possível em ${r.falhas.length}: ${r.falhas.join(" ")}`);
+      else toast.error(`Avisos não foram ligados. Motivo: ${r.falhas.join(" ")}`);
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível ligar os avisos."); }
+    finally { setLigando(false); }
   };
 
   const salvar = async () => {
@@ -110,6 +124,7 @@ function Cockpit() {
         <button onClick={() => setEditar(true)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-primary bg-primary/10 px-4 text-sm font-semibold"><UserPen className="h-4 w-4" />Editar dados</button>
         <button onClick={() => setAcao("ligacao")} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm"><Phone className="h-4 w-4" />Registrar ligação</button>
         <button onClick={abrirWhats} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm"><MessageCircle className="h-4 w-4" />Abrir WhatsApp</button>
+        <button onClick={ligarAvisos} disabled={ligando} className="inline-flex h-10 items-center gap-2 rounded-lg bg-asaas px-4 text-sm font-semibold text-asaas-foreground disabled:opacity-60"><BellRing className="h-4 w-4" />{ligando ? "Ligando avisos…" : "Ligar avisos desta cliente no Asaas"}</button>
         {ehJudicial
           ? <button onClick={() => setAba("judicial")} className="inline-flex h-10 items-center gap-2 rounded-lg border border-bronze bg-champagne-soft px-4 text-sm font-semibold text-bronze"><Gavel className="h-4 w-4" />Acordo judicial</button>
           : <button onClick={() => setAba("acordos")} className="h-10 rounded-lg border border-bronze bg-champagne-soft px-4 text-sm font-semibold text-bronze">Simular acordo / juros</button>}

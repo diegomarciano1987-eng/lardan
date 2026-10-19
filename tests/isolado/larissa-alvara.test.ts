@@ -96,4 +96,8 @@ test("estorno da última baixa Asaas retira desconto uma vez, repetição do cal
   expect((await rpc(larissa,"fin_settlement_reverse",{_settlement:s.id,_motivo:"Correção da baixa Asaas"})).ok).toBe(true);
   expect(Number((await um<{v:string}>("select fin_installment_saldo($1) v",[parcela])).v)).toBe(30000);
   expect(Number((await um<{v:string}>("select sum(valor_cents) v from financial_adjustments where installment_id=$1 and kind='desconto'",[parcela])).v)).toBe(0);
+  const ch=await um<{id:string}>("select ch.id from asaas_charges ch join financial_settlements s on s.idempotency_key='asaas:baixa:'||ch.account_id||':'||ch.external_id where s.id=$1",[s.id]);
+  const replay=await rpcServico<{repetido:boolean}>("asaas_baixa_automatica",{_charge:ch.id});
+  expect(replay.dados.repetido).toBe(true);
+  expect(Number((await um<{v:string}>("select fin_installment_saldo($1) v",[parcela])).v)).toBe(30000);
 });

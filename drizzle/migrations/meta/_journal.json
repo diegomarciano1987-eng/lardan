@@ -855,6 +855,13 @@
       "when": 1792708081586,
       "tag": "0121_maletas_visibilidade",
       "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1792708179453,
+      "tag": "0122_ganhos_agrupados_por_remessa",
+      "breakpoints": true
     }
   ]
 }

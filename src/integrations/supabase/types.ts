@@ -6448,6 +6448,130 @@ export type Database = {
           },
         ]
       }
+      fiscal_focus_envios: {
+        Row: {
+          ambiente: string
+          caminho_danfe: string | null
+          caminho_xml: string | null
+          caminho_xml_cancelamento: string | null
+          chave_nfe: string | null
+          created_at: string
+          criado_por: string | null
+          erros: Json | null
+          id: string
+          mensagem_sefaz: string | null
+          numero: string | null
+          operacao: string
+          party_id: string | null
+          payload: Json
+          ref: string
+          ref_origem: string | null
+          serie: string | null
+          status: string
+          status_sefaz: string | null
+          tentativas: number
+          teste: boolean
+          updated_at: string
+        }
+        Insert: {
+          ambiente: string
+          caminho_danfe?: string | null
+          caminho_xml?: string | null
+          caminho_xml_cancelamento?: string | null
+          chave_nfe?: string | null
+          created_at?: string
+          criado_por?: string | null
+          erros?: Json | null
+          id?: string
+          mensagem_sefaz?: string | null
+          numero?: string | null
+          operacao: string
+          party_id?: string | null
+          payload: Json
+          ref: string
+          ref_origem?: string | null
+          serie?: string | null
+          status?: string
+          status_sefaz?: string | null
+          tentativas?: number
+          teste?: boolean
+          updated_at?: string
+        }
+        Update: {
+          ambiente?: string
+          caminho_danfe?: string | null
+          caminho_xml?: string | null
+          caminho_xml_cancelamento?: string | null
+          chave_nfe?: string | null
+          created_at?: string
+          criado_por?: string | null
+          erros?: Json | null
+          id?: string
+          mensagem_sefaz?: string | null
+          numero?: string | null
+          operacao?: string
+          party_id?: string | null
+          payload?: Json
+          ref?: string
+          ref_origem?: string | null
+          serie?: string | null
+          status?: string
+          status_sefaz?: string | null
+          tentativas?: number
+          teste?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_focus_envios_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_focus_envios_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "fiscal_focus_envios_ref_origem_fkey"
+            columns: ["ref_origem"]
+            isOneToOne: false
+            referencedRelation: "fiscal_focus_envios"
+            referencedColumns: ["ref"]
+          },
+        ]
+      }
+      fiscal_focus_eventos: {
+        Row: {
+          created_at: string
+          dedupe: string | null
+          fonte: string
+          id: number
+          ref: string
+          resposta: Json
+        }
+        Insert: {
+          created_at?: string
+          dedupe?: string | null
+          fonte: string
+          id?: number
+          ref: string
+          resposta: Json
+        }
+        Update: {
+          created_at?: string
+          dedupe?: string | null
+          fonte?: string
+          id?: number
+          ref?: string
+          resposta?: Json
+        }
+        Relationships: []
+      }
       fiscal_pendencias: {
         Row: {
           created_at: string
@@ -14475,6 +14599,36 @@ export type Database = {
           motivo: string
           status: Database["public"]["Enums"]["party_status"]
         }[]
+      }
+      fiscal_focus_dados: {
+        Args: { _itens: Json; _party: string }
+        Returns: Json
+      }
+      fiscal_focus_emitente: { Args: never; Returns: Json }
+      fiscal_focus_envio: { Args: { _ref: string }; Returns: Json }
+      fiscal_focus_envio_registrar: {
+        Args: {
+          _ambiente: string
+          _ator: string
+          _operacao: string
+          _party: string
+          _payload: Json
+          _ref: string
+          _ref_origem: string
+        }
+        Returns: Json
+      }
+      fiscal_focus_envios_lista: { Args: { _limite?: number }; Returns: Json }
+      fiscal_focus_exigir_servidor: { Args: never; Returns: undefined }
+      fiscal_focus_pode: { Args: { _acao?: string }; Returns: boolean }
+      fiscal_focus_retorno: {
+        Args: {
+          _dedupe?: string
+          _fonte: string
+          _ref: string
+          _resposta: Json
+        }
+        Returns: Json
       }
       fiscal_prontidao: { Args: never; Returns: Json }
       fiscal_roteiro_observado: { Args: never; Returns: Json }

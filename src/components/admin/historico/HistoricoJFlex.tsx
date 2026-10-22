@@ -393,7 +393,7 @@ function CategoriasTipo({ ehMaster }: { ehMaster: boolean }) {
             <tbody>
               {q.data.map((c) => (
                 <tr key={c.categoria} className={`border-b border-line-soft last:border-0 ${c.mapeada ? "" : "bg-warning/10"}`}>
-                  <td className="px-6 py-3 font-medium text-ledger-text">{c.categoria}</td>
+                  <td className="px-6 py-3 font-medium text-ledger-text">{c.categoria.trim() || "(sem categoria no JFLEX)"}</td>
                   <td className="px-6 py-3">
                     {c.mapeada ? <StatusBadge tone="success">Ajustada</StatusBadge> : <StatusBadge tone="warning">Sem ajuste</StatusBadge>}
                   </td>

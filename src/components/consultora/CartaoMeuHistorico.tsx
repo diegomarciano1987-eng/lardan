@@ -5,7 +5,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { meuHistorico } from "@/lib/historico-jflex";
-import { comissaoMaleta, faixasComissao } from "@/lib/comissao-maletas";
+import { comissaoPorRemessa, faixasComissao } from "@/lib/comissao-maletas";
 import { brl } from "@/lib/maletas";
 
 function Barra({ nome, pct, detalhe }: { nome: string; pct: number; detalhe: string }) {
@@ -26,17 +26,16 @@ function MinhasComissoes({ maletas }: { maletas: { remessa: number; kit: number;
   const f = useQuery({ queryKey: ["consultora", "comissao-faixas"], queryFn: faixasComissao });
   const faixas = f.data ?? [];
   if (faixas.length === 0) return null;
-  const linhas = maletas.filter((m) => m.tipo !== "perdida" && m.fechamento && m.valor_vendido_cents != null).slice(0, 6)
-    .map((m) => ({ m, c: comissaoMaleta(m.valor_vendido_cents, faixas)! }));
+  const linhas = comissaoPorRemessa(maletas, faixas).filter((g) => g.comissao_cents != null).slice(0, 6);
   if (linhas.length === 0) return null;
   return (
     <div className="mt-5 space-y-2">
-      <p className="text-[1.02rem] font-semibold">Minha comissão nas últimas maletas</p>
+      <p className="text-[1.02rem] font-semibold">Minha comissão nas últimas remessas</p>
       <ul className="space-y-1 text-[1.02rem]">
-        {linhas.map(({ m, c }, i) => (
-          <li key={`${m.remessa}-${m.kit}-${i}`} className="flex items-baseline justify-between gap-3">
-            <span>Remessa {m.remessa} · vendeu {brl(m.valor_vendido_cents ?? 0)}{c.faixa ? ` (${c.faixa.percentual.toLocaleString("pt-BR")}%)` : ""}</span>
-            <strong className="tabular-nums">{brl(c.comissao_cents)}</strong>
+        {linhas.map((g) => (
+          <li key={g.remessa} className="flex items-baseline justify-between gap-3">
+            <span>Remessa {g.remessa}{g.kits.length > 1 ? ` (${g.kits.length} kits somados)` : ""} · vendeu {brl(g.vendido_cents ?? 0)}{g.faixa ? ` (${g.faixa.percentual.toLocaleString("pt-BR")}%)` : ""}</span>
+            <strong className="tabular-nums">{brl(g.comissao_cents ?? 0)}</strong>
           </li>
         ))}
       </ul>

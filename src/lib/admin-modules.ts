@@ -18,6 +18,7 @@ import {
   GraduationCap,
   ChartNoAxesCombined,
   FileClock,
+  History,
   SlidersHorizontal,
   Store,
   Plug,
@@ -324,6 +325,15 @@ export const ADMIN_SUBMODULES: AdminModule[] = [
     icon: ContactRound,
     roles: ["master", "diretoria", "marketing", "suporte"],
     capability: "leads.view",
+    state: "ativo",
+  },
+  {
+    slug: "historico-jflex",
+    path: "/admin/historico-jflex",
+    label: "Histórico JFLEX",
+    description: "Importação e leitura do histórico antigo da rede. Somente leitura; só o Master importa.",
+    icon: History,
+    roles: ["master"],
     state: "ativo",
   },
 ];

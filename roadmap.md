@@ -1,9 +1,11 @@
 # Roadmap
 ## Histórico JFlex — pacote recebido em 22/10
 - [ ] Na carga operacional das maletas na rua, ativar consultoras vinculadas e atribuir a praça da remessa; aguarda arquivos de maletas e revisão do caminho de carga, separado do histórico somente leitura.
-- [ ] Conferir 0112 exata e conflitos; aplicar apenas pela ferramenta oficial, sem alterar pacote sem decisão do Diego.
-- [ ] Integrar importação Master, fichas, remessas, rede, início consultora, sugestão de montagem e referência fiscal usando a biblioteca fornecida.
-- [ ] Rodar testes isolados, conferir permissões e telas vazias; não importar CSV reais nem publicar.
+- [x] Conferir 0112 exata e conflitos; aplicada pela ferramenta oficial, sem alterar pacote.
+- [x] Integrar importação Master, fichas, remessas, rede, início consultora, sugestão de montagem e referência fiscal usando a biblioteca fornecida — provas em docs/lardan/JFLEX-TELAS-2026-10-22.md.
+- [x] Rodar testes isolados, conferir permissões e telas vazias; typecheck limpo, suíte isolada 298/298, nenhum CSV real importado, nada publicado.
+- [ ] Diego importa os 10 CSV pela tela Histórico JFLEX (Configurações, só Master); CSVs ficam só na memória do navegador.
+
 ## Unificações autorizadas — 22/10
 - [x] Reconferir Larissa Persinato e Saylla por documento, nome e endereço; não unir homônimos nem alterar Daniel/guilherme.
 - [x] Unificar Saylla LC-003392 → LC-007428 pela rotina oficial; títulos, parcelas, valores, vencimentos e auditoria relidos; ficha aberta e recarregada.

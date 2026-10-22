@@ -15,7 +15,14 @@ export const URL_ISO =
   process.env["LARDAN_ISO_URL"] ?? "postgresql://postgres@127.0.0.1:55432/lardan_iso?sslmode=disable";
 
 /** Conexão administrativa: só monta e inspeciona o cenário. */
-export const adm = new SQL(URL_ISO, { max: 5 });
+// O bun ignora o banco na URL e conecta no banco "postgres": passamos o nome
+// do banco explicitamente, lido da própria URL.
+const URL_ISO_BANCO = (() => {
+  const caminho = new URL(URL_ISO.replace(/^postgresql:/, "postgres:")).pathname.replace(/^\//, "");
+  return caminho.split("?")[0] || "taron_iso";
+})();
+
+export const adm = new SQL(URL_ISO, { max: 5, database: URL_ISO_BANCO });
 
 export type Papel =
   | "master"

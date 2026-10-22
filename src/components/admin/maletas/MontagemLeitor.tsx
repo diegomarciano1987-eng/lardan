@@ -1,8 +1,9 @@
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, ClipboardCheck, Minus, ScanBarcode, X } from "lucide-react";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Sparkles, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { metasMontagem, type MetasMontagem } from "@/lib/historico-jflex";
 import { brl, definirItem, traduzir, type ItemComposicao } from "@/lib/maletas";
 import {
   PARAMETROS_PADRAO,
@@ -93,6 +94,151 @@ async function buscarPecas(termo: string): Promise<Sugestao[]> {
 
 const ORDEM_TIPOS: TipoPeca[] = ["brinco", "anel", "colar", "pulseira", "tornozeleira"];
 
+type ModoMetas = "historico" | "padrao";
+const CONFIANCA_LABEL: Record<MetasMontagem["confianca"], string> = {
+  alta: "histórico forte",
+  media: "histórico médio",
+  baixa: "pouco histórico",
+};
+const nomeCategoria = (c: string) => (c ? c.charAt(0) + c.slice(1).toLowerCase() : "Sem categoria");
+
+/**
+ * Faixa acima dos cartões de meta: de onde vêm as metas desta maleta.
+ * Só leitura (montagem_metas_ciclo, 0113): não reserva nem adiciona peça.
+ * Sem input de texto: o leitor devolve o foco ao campo de bipagem a cada 400 ms.
+ */
+function FaixaHistorico({
+  dados,
+  carregando,
+  modo,
+  somaPadrao,
+  aoModo,
+  aoTotal,
+}: {
+  dados: MetasMontagem | undefined;
+  carregando: boolean;
+  modo: ModoMetas;
+  somaPadrao: number;
+  aoModo: (m: ModoMetas) => void;
+  aoTotal: (n: number | null) => void;
+}) {
+  if (carregando && !dados) {
+    return <p className="ledger-panel px-5 py-3 text-sm text-ledger-muted">Lendo o histórico de venda da consultora…</p>;
+  }
+  if (!dados) return null; // sem permissão ou sem histórico importado: segue o padrão, sem alarde
+  const temHistorico = dados.metas_historico !== null && dados.vinculada;
+  const origem =
+    dados.total_origem === "historico"
+      ? "o tamanho das últimas maletas dela"
+      : dados.total_origem === "informado"
+        ? "ajustado aqui"
+        : "padrão de cliente nova";
+  return (
+    <div className="ledger-panel space-y-3 p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Sparkles aria-hidden className="size-5 text-ledger-text" />
+          <p className="ledger-eyebrow">Metas desta maleta</p>
+          <div role="group" aria-label="Origem das metas" className="ml-2 inline-flex overflow-hidden rounded-full border border-line">
+            <button
+              type="button"
+              disabled={!temHistorico}
+              aria-pressed={modo === "historico"}
+              className={`px-3 py-1 text-sm ${modo === "historico" ? "bg-ink text-background" : "text-ledger-text hover:bg-surface-muted"} disabled:opacity-40`}
+              onClick={() => aoModo("historico")}
+            >
+              Pelo histórico dela
+            </button>
+            <button
+              type="button"
+              aria-pressed={modo === "padrao"}
+              className={`px-3 py-1 text-sm ${modo === "padrao" ? "bg-ink text-background" : "text-ledger-text hover:bg-surface-muted"}`}
+              onClick={() => aoModo("padrao")}
+            >
+              Padrão Lardan
+            </button>
+          </div>
+        </div>
+        {modo === "historico" ? (
+          <div className="flex items-center gap-2 text-sm">
+            <button type="button" aria-label="Menos 5 peças" className="rounded-md border border-line p-1 hover:bg-surface-muted"
+              onClick={() => aoTotal(Math.max(5, dados.total_pecas - 5))}>
+              <Minus className="size-3" />
+            </button>
+            <span className="font-display text-xl font-bold tabular-nums text-ledger-text">{dados.total_pecas}</span>
+            <button type="button" aria-label="Mais 5 peças" className="rounded-md border border-line p-1 hover:bg-surface-muted"
+              onClick={() => aoTotal(Math.min(1000, dados.total_pecas + 5))}>
+              <Plus className="size-3" />
+            </button>
+            <span className="text-ledger-muted">peças · {origem}</span>
+            {dados.total_origem === "informado" && (
+              <button type="button" className="text-ledger-muted underline" onClick={() => aoTotal(null)}>voltar ao sugerido</button>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-ledger-muted">{somaPadrao} peças · parâmetros de remessa</p>
+        )}
+      </div>
+
+      {temHistorico ? (
+        <p className="text-sm text-ledger-muted">
+          <span className={`mr-2 rounded-full px-2 py-0.5 text-xs font-semibold ${dados.confianca === "alta" ? "bg-success/15 text-success" : dados.confianca === "media" ? "bg-warning/15 text-warning" : "bg-surface-muted text-ledger-muted"}`}>
+            {CONFIANCA_LABEL[dados.confianca]}
+          </span>
+          {dados.pecas_vendidas_historico ?? 0} peças vendidas em {dados.maletas_fechadas ?? 0} maletas no JFLEX
+          {typeof dados.giro_geral_pct === "number" && ` · gira ${dados.giro_geral_pct}% do que recebe`}
+          {" · "}
+          {dados.referencia === "praca" ? `praça ${dados.praca_nome ?? ""}` : "rede"}
+          {typeof dados.referencia_giro_geral_pct === "number" && `: ${dados.referencia_giro_geral_pct}%`}
+        </p>
+      ) : (
+        <p className="text-sm text-ledger-muted">
+          {dados.vinculada ? "Pouco histórico de venda: metas do padrão." : "Sem histórico do JFLEX ligado a esta consultora: metas do padrão."}
+        </p>
+      )}
+
+      {temHistorico && dados.destaques.length > 0 && (
+        <ul className="flex flex-wrap gap-2 text-sm">
+          {dados.destaques.slice(0, 4).map((d) => (
+            <li key={d.categoria} className={`rounded-full px-3 py-1 ${d.sinal === "forte" ? "bg-success/15 text-success" : "bg-warning/15 text-warning"}`}>
+              {d.sinal === "forte" ? "▲ vende bem" : "▼ vende pouco"} {nomeCategoria(d.categoria)}: {d.giro_pct}% ({dados.referencia === "praca" ? "praça" : "rede"} {d.referencia_giro_pct}%)
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {temHistorico && dados.categorias.length > 0 && (
+        <details className="text-sm">
+          <summary className="cursor-pointer text-ledger-muted">Ver por categoria</summary>
+          <table className="mt-2 w-full text-left tabular-nums">
+            <thead className="text-ledger-muted">
+              <tr>
+                <th className="py-1 font-medium">Categoria</th>
+                <th className="py-1 text-right font-medium">Sugeridas</th>
+                <th className="py-1 text-right font-medium">Vendidas por ela</th>
+                <th className="py-1 text-right font-medium">Giro dela</th>
+                <th className="py-1 text-right font-medium">Giro {dados.referencia === "praca" ? "praça" : "rede"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dados.categorias.map((c) => (
+                <tr key={c.categoria} className="border-t border-line">
+                  <td className="py-1">{nomeCategoria(c.categoria)}</td>
+                  <td className="py-1 text-right font-semibold">{c.pecas_sugeridas}</td>
+                  <td className="py-1 text-right">{c.consultora_pecas_vendidas}</td>
+                  <td className="py-1 text-right">{c.consultora_giro_pct === null ? "—" : `${c.consultora_giro_pct}%`}</td>
+                  <td className="py-1 text-right">{c.referencia_giro_pct === null ? "—" : `${c.referencia_giro_pct}%`}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-2 text-xs text-ledger-muted">{dados.como_ler}</p>
+        </details>
+      )}
+    </div>
+  );
+}
+
 /** Tela única de montagem por leitor: cada bipe entra na maleta na hora. */
 export function MontagemLeitor({
   cycleId,
@@ -141,6 +287,21 @@ export function MontagemLeitor({
       return (data as unknown as ParametrosRemessa | null) ?? PARAMETROS_PADRAO;
     },
   });
+
+  // Metas pelo histórico de venda dela (0113). Erro = sem permissão ou sem histórico: fica no padrão.
+  const [totalMetas, setTotalMetas] = React.useState<number | null>(null);
+  const [modoEscolhido, setModoEscolhido] = React.useState<ModoMetas | null>(null);
+  const historico = useQuery({
+    queryKey: ["maletas", "metas-historico", cycleId, totalMetas],
+    queryFn: () => metasMontagem(cycleId, totalMetas),
+    retry: false,
+    staleTime: 5 * 60_000,
+    placeholderData: keepPreviousData,
+  });
+  const campeas = React.useRef<Set<string>>(new Set());
+  React.useEffect(() => {
+    campeas.current = new Set(historico.data?.variantes_campeas ?? []);
+  }, [historico.data]);
 
   React.useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => {
@@ -216,6 +377,7 @@ export function MontagemLeitor({
       apito(true);
       setNesta((n) => n + 1);
       const extra = [
+        campeas.current.has(r.variant_id) ? "★ campeã de venda dela" : null,
         r.unidade ? "unidade" : null,
         r.forma === "anel_tamanho" && r.tamanho ? `aro ${r.tamanho}` : null,
       ].filter(Boolean).join(" · ");
@@ -316,7 +478,12 @@ export function MontagemLeitor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itens]);
 
-  const metas = metasPorTipo(parametros.data ?? PARAMETROS_PADRAO);
+  const metasPadrao = metasPorTipo(parametros.data ?? PARAMETROS_PADRAO);
+  const somaPadrao = Object.values(metasPadrao).reduce((s, n) => s + n, 0);
+  const metasHistorico = historico.data?.vinculada ? historico.data.metas_historico : null;
+  const modoMetas: ModoMetas = metasHistorico ? (modoEscolhido ?? historico.data!.modo_sugerido) : "padrao";
+  const metas: Record<TipoPeca, number> = modoMetas === "historico" && metasHistorico ? metasHistorico : metasPadrao;
+  const tiposVisiveis: TipoPeca[] = metas.outro > 0 || bipadoPorTipo.outro > 0 ? [...ORDEM_TIPOS, "outro"] : ORDEM_TIPOS;
 
   if (etapa === "conferencia") {
     return (
@@ -366,9 +533,18 @@ export function MontagemLeitor({
           </div>
         </div>
 
+        <FaixaHistorico
+          dados={historico.data}
+          carregando={historico.isLoading}
+          modo={modoMetas}
+          somaPadrao={somaPadrao}
+          aoModo={setModoEscolhido}
+          aoTotal={setTotalMetas}
+        />
+
         {/* Cards de meta por tipo: o que a maleta precisa × o que já foi bipado */}
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-          {ORDEM_TIPOS.map((t) => {
+        <div className={`grid grid-cols-2 gap-3 ${tiposVisiveis.length > 5 ? "md:grid-cols-6" : "md:grid-cols-5"}`}>
+          {tiposVisiveis.map((t) => {
             const meta = metas[t];
             const feito = bipadoPorTipo[t];
             const ok = meta > 0 && feito >= meta;
@@ -409,6 +585,21 @@ export function MontagemLeitor({
                     <dd className="text-ledger-text">{info.data.whatsapp ?? "—"}</dd>
                   </div>
                 </dl>
+                {(historico.data?.ultimas_maletas.length ?? 0) > 0 && (
+                  <div className="border-t border-line pt-3">
+                    <p className="ledger-eyebrow mb-1">Últimas remessas (JFLEX)</p>
+                    <ul className="space-y-1 text-sm tabular-nums">
+                      {historico.data!.ultimas_maletas.map((m) => (
+                        <li key={m.remessa} className="flex justify-between gap-2">
+                          <span className="text-ledger-muted">Rem. {m.remessa}{m.maletas > 1 ? ` · ${m.maletas} maletas` : ""}</span>
+                          <span className="text-ledger-text">
+                            {m.pecas_vendidas}/{m.pecas_enviadas} vendidas{m.giro_pct === null ? "" : ` · ${m.giro_pct}%`}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </>
             ) : (
               !info.isLoading && <p className="text-sm text-ledger-muted">Sem consultora definida nesta maleta.</p>

@@ -10,6 +10,9 @@ import { EmptyState, ErrorState, Panel, Skeleton, StatusBadge, formatBRLFromCent
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { ARQUIVOS_HISTORICO, conferirColunas, lerCsv } from "@/lib/historico-jflex-csv";
 import {
+  categoriaTipoDefinir,
+  categoriaTipoLista,
+  type TipoMeta,
   importarArquivoHistorico,
   pendenciasVinculo,
   resumoHistorico,
@@ -344,6 +347,75 @@ export function HistoricoJFlexImportacao({ ehMaster }: { ehMaster: boolean }) {
       )}
 
       <Pendencias />
+      <CategoriasTipo ehMaster={ehMaster} />
     </div>
   );
 }
+
+const TIPOS_PECA: { value: TipoMeta; label: string }[] = [
+  { value: "brinco", label: "Brinco" },
+  { value: "anel", label: "Anel" },
+  { value: "colar", label: "Colar" },
+  { value: "pulseira", label: "Pulseira" },
+  { value: "tornozeleira", label: "Tornozeleira" },
+  { value: "outro", label: "Outros" },
+];
+
+function CategoriasTipo({ ehMaster }: { ehMaster: boolean }) {
+  const qc = useQueryClient();
+  const q = useQuery({ queryKey: ["historico-jflex", "categoria-tipo"], queryFn: categoriaTipoLista });
+  const definir = useMutation({
+    mutationFn: (v: { categoria: string; tipo: TipoMeta }) => categoriaTipoDefinir(v.categoria, v.tipo),
+    onSuccess: () => {
+      toast.success("Tipo de peça atualizado.");
+      void qc.invalidateQueries({ queryKey: ["historico-jflex", "categoria-tipo"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível gravar."),
+  });
+  return (
+    <Panel title="Categorias → tipo de peça" flush>
+      <p className="px-6 pt-4 text-sm text-ledger-muted">
+        Define em qual cartão da bipagem (Brincos, Anéis, Colares…) cada categoria do JFLEX entra nas metas. Categoria sem ajuste conta como "Outros".
+      </p>
+      {q.isLoading && <div className="space-y-2 p-6"><Skeleton className="h-10" /><Skeleton className="h-10" /></div>}
+      {q.isError && <div className="px-6 py-4"><ErrorState message={(q.error as Error).message} onRetry={() => void q.refetch()} /></div>}
+      {q.data?.length === 0 && <div className="px-6 py-5"><EmptyState title="Sem dados" description="Nenhuma categoria encontrada." /></div>}
+      {q.data && q.data.length > 0 && (
+        <div className="overflow-x-auto pb-2">
+          <table className="w-full min-w-[36rem] text-sm">
+            <thead className="border-b border-line-soft text-left text-xs uppercase tracking-[0.08em] text-ledger-muted">
+              <tr>
+                <th className="px-6 py-3">Categoria do JFLEX</th>
+                <th className="px-6 py-3">Situação</th>
+                <th className="px-6 py-3">Tipo de peça</th>
+              </tr>
+            </thead>
+            <tbody>
+              {q.data.map((c) => (
+                <tr key={c.categoria} className={`border-b border-line-soft last:border-0 ${c.mapeada ? "" : "bg-warning/10"}`}>
+                  <td className="px-6 py-3 font-medium text-ledger-text">{c.categoria.trim() || "(sem categoria no JFLEX)"}</td>
+                  <td className="px-6 py-3">
+                    {c.mapeada ? <StatusBadge tone="success">Ajustada</StatusBadge> : <StatusBadge tone="warning">Sem ajuste</StatusBadge>}
+                  </td>
+                  <td className="px-6 py-3 w-56">
+                    {ehMaster ? (
+                      <SmartSelect
+                        options={TIPOS_PECA}
+                        value={c.tipo}
+                        disabled={definir.isPending}
+                        onChange={(v) => definir.mutate({ categoria: c.categoria, tipo: v as TipoMeta })}
+                      />
+                    ) : (
+                      <span>{TIPOS_PECA.find((t) => t.value === c.tipo)?.label ?? c.tipo}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Panel>
+  );
+}
+

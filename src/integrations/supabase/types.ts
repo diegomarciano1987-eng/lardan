@@ -8769,6 +8769,24 @@ export type Database = {
         }
         Relationships: []
       }
+      legado_categoria_tipo: {
+        Row: {
+          atualizado_em: string
+          categoria: string
+          tipo: string
+        }
+        Insert: {
+          atualizado_em?: string
+          categoria: string
+          tipo: string
+        }
+        Update: {
+          atualizado_em?: string
+          categoria?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       legado_consultoras: {
         Row: {
           apelido: string | null
@@ -14790,6 +14808,11 @@ export type Database = {
         Args: { _cycle: string; _payload?: Json }
         Returns: Json
       }
+      legado_categoria_tipo_definir: {
+        Args: { _categoria: string; _tipo: string }
+        Returns: undefined
+      }
+      legado_categoria_tipo_lista: { Args: never; Returns: Json }
       legado_consultora_dados: { Args: { _codclis: number[] }; Returns: Json }
       legado_consultora_historico: { Args: { _party: string }; Returns: Json }
       legado_consultora_vincular: {
@@ -14873,6 +14896,10 @@ export type Database = {
       master_exists: { Args: never; Returns: boolean }
       media_publica_ok: { Args: { _media: string }; Returns: boolean }
       minhas_indicacoes: { Args: never; Returns: Json }
+      montagem_metas_ciclo: {
+        Args: { _cycle: string; _total?: number }
+        Returns: Json
+      }
       montagem_sugestao: {
         Args: { _party: string; _total?: number }
         Returns: Json

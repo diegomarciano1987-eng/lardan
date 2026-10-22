@@ -813,6 +813,20 @@
       "when": 1792702769362,
       "tag": "0115_legado_consultoras_cadastrar_ajuste",
       "breakpoints": true
+    },
+    {
+      "idx": 116,
+      "version": "7",
+      "when": 1792704748726,
+      "tag": "0116_historico_correcoes",
+      "breakpoints": true
+    },
+    {
+      "idx": 117,
+      "version": "7",
+      "when": 1792704897316,
+      "tag": "0117_bi_historico",
+      "breakpoints": true
     }
   ]
 }

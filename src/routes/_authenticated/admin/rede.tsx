@@ -10,6 +10,7 @@ import { MapaRede, type ValorTerritorio } from "@/components/admin/rede/MapaRede
 import { PainelTerritorio } from "@/components/admin/rede/PainelTerritorio";
 import { CoberturaRede } from "@/components/admin/rede/CoberturaRede";
 import { RedeHistorico } from "@/components/admin/historico/RedeHistorico";
+import { BiHistorico } from "@/components/admin/historico/BiHistorico";
 import { CidadeConsultoras } from "@/components/admin/rede/CidadeConsultoras";
 import { OPCOES_UF } from "@/lib/br/ufs";
 import { UF_CODIGO_IBGE, CODIGO_IBGE_UF, type Malha } from "@/lib/rede/geo";
@@ -298,7 +299,15 @@ function RedePage() {
         ))}
       </nav>
 
-      {aba === "jflex" && <RedeHistorico />}
+      {aba === "jflex" && (
+        <div className="space-y-8">
+          <BiHistorico />
+          <section className="space-y-3">
+            <h2 className="ledger-eyebrow">Ranking livre (agrupe como quiser)</h2>
+            <RedeHistorico />
+          </section>
+        </div>
+      )}
 
       {aba === "mapa" && uf && ibge ? (
         <CidadeConsultoras key={ibge} ibge={ibge} uf={uf} nome={titulo} onVoltar={() => setIbge(null)} />

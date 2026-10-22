@@ -20,6 +20,7 @@ import {
   vincularHistorico,
   type ProgressoImportacao,
 } from "@/lib/historico-jflex";
+import { ajustarCadastros, revisaoCadastros } from "@/lib/historico-bi";
 import { supabase } from "@/integrations/supabase/client";
 
 const brl = formatBRLFromCents;
@@ -347,6 +348,7 @@ export function HistoricoJFlexImportacao({ ehMaster }: { ehMaster: boolean }) {
       )}
 
       <Pendencias />
+      {ehMaster && <RevisaoCadastros />}
       <CategoriasTipo ehMaster={ehMaster} />
     </div>
   );
@@ -419,3 +421,82 @@ function CategoriasTipo({ ehMaster }: { ehMaster: boolean }) {
   );
 }
 
+/**
+ * Cadastros criados a partir do histórico (rotina de 22/10): confere situação,
+ * praça e possíveis duplicadas por nome. O ajuste só mexe em quem ainda não
+ * tem nenhuma operação no Lardan (maleta, título, pedido ou login). Só Master.
+ */
+function RevisaoCadastros() {
+  const qc = useQueryClient();
+  const q = useQuery({ queryKey: ["historico-jflex", "revisao-cadastros"], queryFn: revisaoCadastros });
+  const previa = useQuery({ queryKey: ["historico-jflex", "ajuste-previa"], queryFn: () => ajustarCadastros(false) });
+  const aplicar = useMutation({
+    mutationFn: () => ajustarCadastros(true),
+    onSuccess: (r) => {
+      toast.success(`${formatInt(r.inativadas)} cadastro(s) inativado(s) e ${formatInt(r.praca_definida)} com praça definida.`);
+      void qc.invalidateQueries({ queryKey: ["historico-jflex"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível ajustar."),
+  });
+  const r = q.data;
+  const pv = previa.data;
+  return (
+    <Panel title="Cadastros criados a partir do histórico" flush>
+      {q.isLoading && <div className="space-y-2 p-6"><Skeleton className="h-10" /><Skeleton className="h-10" /></div>}
+      {q.isError && <div className="px-6 py-4"><ErrorState message={(q.error as Error).message} onRetry={() => void q.refetch()} /></div>}
+      {r && (
+        <div className="space-y-4 px-6 py-5">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <Cartao rotulo="Criados pelo histórico" valor={`${formatInt(r.criadas)} · ativos ${formatInt(r.ativas)}`} />
+            <Cartao rotulo="Ativos que estavam inativos no SmallData" valor={formatInt(r.deveriam_estar_inativas)} destaque={r.deveriam_estar_inativas > 0} />
+            <Cartao rotulo="Sem praça" valor={`${formatInt(r.sem_praca)} · praça conhecida para ${formatInt(r.praca_disponivel)}`} destaque={r.praca_disponivel > 0} />
+            <Cartao rotulo="Possíveis duplicadas (mesmo nome)" valor={formatInt(r.possiveis_duplicadas)} destaque={r.possiveis_duplicadas > 0} />
+          </div>
+          {pv && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line-soft px-4 py-3 text-sm">
+              <p className="text-ledger-text">
+                Ajuste proposto: inativar {formatInt(pv.inativadas)} e definir a praça de {formatInt(pv.praca_definida)}, entre {formatInt(pv.cadastros_sem_operacao)} cadastros
+                ainda sem operação no Lardan. Quem já tem maleta, título, pedido ou login não é tocado.
+              </p>
+              <button
+                type="button"
+                className="admin-btn admin-btn-primary"
+                disabled={aplicar.isPending || (pv.inativadas === 0 && pv.praca_definida === 0)}
+                onClick={() => aplicar.mutate()}
+              >
+                {aplicar.isPending ? "Ajustando…" : "Aplicar ajuste"}
+              </button>
+            </div>
+          )}
+          {r.duplicadas.length > 0 && (
+            <div className="overflow-x-auto">
+              <p className="mb-2 text-sm text-ledger-muted">
+                Mesmo nome de um cadastro que já existia. Confira e, se for a mesma pessoa, use a unificação de cadastros (a prévia mostra o que move).
+              </p>
+              <table className="w-full min-w-[40rem] text-sm">
+                <thead className="border-b border-line-soft text-left text-xs uppercase tracking-[0.08em] text-ledger-muted">
+                  <tr>
+                    <th className="px-4 py-2.5">Criado pelo histórico</th>
+                    <th className="px-4 py-2.5">Código SmallData</th>
+                    <th className="px-4 py-2.5">Cadastro que já existia</th>
+                    <th className="px-4 py-2.5">CPF dele</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {r.duplicadas.map((d) => (
+                    <tr key={`${d.criada}-${d.outra}`} className="border-b border-line-soft last:border-0">
+                      <td className="px-4 py-2.5"><a className="admin-link" href={`/admin/cadastros/pessoas/${d.criada}`}>{d.display_name}</a></td>
+                      <td className="px-4 py-2.5 tabular-nums">{d.codcli}</td>
+                      <td className="px-4 py-2.5"><a className="admin-link" href={`/admin/cadastros/pessoas/${d.outra}`}>{d.outra_nome}</a></td>
+                      <td className="px-4 py-2.5 tabular-nums text-ledger-muted">{d.outra_cpf ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </Panel>
+  );
+}

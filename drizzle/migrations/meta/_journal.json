@@ -827,6 +827,13 @@
       "when": 1792704897316,
       "tag": "0117_bi_historico",
       "breakpoints": true
+    },
+    {
+      "idx": 118,
+      "version": "7",
+      "when": 1792705590561,
+      "tag": "0118_focus_nfe",
+      "breakpoints": true
     }
   ]
 }

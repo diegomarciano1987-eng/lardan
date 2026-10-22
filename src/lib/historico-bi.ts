@@ -1,6 +1,6 @@
 /**
  * BI do histórico SmallData (migração 0117). Só leitura, só equipe.
- * Recorte comum: período (emissão da maleta), praça e representante (códigos do JFLEX).
+ * Recorte comum: período (emissão da maleta), praça e representante (códigos do SmallData).
  */
 import { supabase } from "@/integrations/supabase/client";
 

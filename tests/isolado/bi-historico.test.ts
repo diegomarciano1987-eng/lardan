@@ -65,7 +65,7 @@ beforeAll(async () => {
     maleta(REM + 2, cod(3), 40, 40, "2025-02-01", "2025-03-15"),       // 0
     maleta(REM + 4, cod(3), 40, 40, "2025-04-01", "2025-05-15"),       // 0 (acertada em remessa aberta)
     maleta(REM + 2, cod(4), 40, 0, "2025-02-01", "2025-03-15"),        // interna: fora do BI
-    // valor devolvido ZERADO no arquivo (defeito real do JFLEX): categorias trazem o certo
+    // valor devolvido ZERADO no arquivo (defeito real do SmallData): categorias trazem o certo
     maleta(REM + 3, cod(1), 40, 30, "2025-03-01", "2025-04-15", 2, 0),   // 10, 2º kit da mesma remessa
   ]);
   await importar("maleta_categorias", [
@@ -190,7 +190,7 @@ describe("5. acesso", () => {
 });
 
 describe("6. cadastros criados pelo histórico", () => {
-  test("rotina nova: pula nome repetido, cria inativa quem está inativa no JFLEX e já com praça", async () => {
+  test("rotina nova: pula nome repetido, cria inativa quem está inativa no SmallData e já com praça", async () => {
     const praca = await um<{ id: string }>(`insert into public.cob_pracas (codigo, nome) values ($1, $2)
       on conflict (codigo) do update set nome = excluded.nome returning id`, [P1, `ISO BI ${base}`]);
     await adm.unsafe(`update public.legado_pracas set praca_id = $2 where codigo = $1`, [P1, praca.id]);

@@ -28,14 +28,14 @@ Rotinas: `legado_bi_*` (só equipe, via `legado_pode_ver`), biblioteca `src/lib/
 - Curvas por maleta (faixas, tamanho, dias na rua, sazonalidade) usam maletas com **10+ peças**: kit de complemento não distorce.
 - Jornada conta "maleta" por **remessa** da consultora (kits da mesma remessa somados).
 - "Parou" = sem maleta nova há mais de 120 dias da última emissão registrada.
-- Cadastros internos do JFLEX (LARDAN, maleta de fotos/design) ficam fora: coluna gerada `legado_consultoras.interna`.
+- Cadastros internos do SmallData (LARDAN, maleta de fotos/design) ficam fora: coluna gerada `legado_consultoras.interna`.
 
 ## Correções (0116)
 
 1. **Valor devolvido zerado**: 282 maletas (quase todas das remessas 857–874) vieram com peças devolvidas e valor devolvido = 0, e o valor vendido saía igual ao enviado: **R$ 1,6 mi a mais de venda (14% do total)**. O valor certo vem das categorias da própria maleta; gatilhos corrigem em qualquer ordem de importação e o que já está no banco.
 2. **Cadastros criados pelo histórico** (0114/0115): entraram todos "ativo", sem praça e sem checar nome repetido. Agora:
    - `legado_cadastros_revisao()` (Master): contagens e possíveis duplicadas por nome (CPF mascarado);
-   - `legado_cadastros_ajustar(_aplicar)` (Master, prévia por padrão): define a praça e inativa quem estava inativa no JFLEX ou sem maleta há 12+ meses — **só em cadastro sem nenhuma operação no Lardan**;
+   - `legado_cadastros_ajustar(_aplicar)` (Master, prévia por padrão): define a praça e inativa quem estava inativa no SmallData ou sem maleta há 12+ meses — **só em cadastro sem nenhuma operação no Lardan**;
    - a rotina de cadastro passou a fazer isso sozinha e a pular quem tem o mesmo nome de um cadastro existente.
 3. Bancada isolada agora em **UTF-8** (era SQL_ASCII): acentos se comportam como no Supabase.
 

@@ -292,3 +292,15 @@ describe("7. venda pelo acerto da consultora (0119)", () => {
     expect((await rpc(financeiro, "legado_bi_painel", { _data: "ontem" })).ok).toBe(false);
   });
 });
+
+describe("8. acerto com a remessa ainda aberta (0123)", () => {
+  test("ranking livre conta a maleta acertada de remessa aberta e filtra pela data do acerto", async () => {
+    const r = await rpc<{ chave: string; maletas: number }[]>(financeiro, "legado_rede_ranking", { _agrupar: "consultora", _praca: P2 });
+    expect(r.erro).toBeNull();
+    expect(r.dados.find((x) => x.chave === String(cod(3)))?.maletas).toBe(2);   // REM+2 (fechada) + REM+4 (aberta, acertada)
+    const maio = await rpc<{ chave: string }[]>(financeiro, "legado_rede_ranking", { _agrupar: "consultora", _praca: P2, _de: "2025-05-01", _ate: "2025-05-31" });
+    expect(maio.dados.map((x) => x.chave)).toEqual([String(cod(3))]);          // acertada em 15/05
+    const saida = await rpc<{ chave: string }[]>(financeiro, "legado_rede_ranking", { _agrupar: "consultora", _praca: P2, _de: "2025-05-01", _ate: "2025-05-31", _data: "saida" });
+    expect(saida.dados).toEqual([]);                                            // saiu em abril
+  });
+});

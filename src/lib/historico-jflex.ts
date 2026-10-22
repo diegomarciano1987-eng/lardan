@@ -152,9 +152,11 @@ export const remessasHistorico = (f: { busca?: string; praca?: number | null; re
     _de: f.de ?? null, _ate: f.ate ?? null, _status: f.status ?? null, _limite: f.limite ?? 100, _offset: f.offset ?? 0,
   });
 export const remessaHistorico = (numero: number) => rpc<Record<string, unknown> | null>("legado_remessa_detalhe", { _numero: numero });
-export const rankingRede = (agrupar: AgrupamentoRede, f: { de?: string | null; ate?: string | null; praca?: number | null; categoria?: string | null; limite?: number } = {}) =>
+/** data: "acerto" (padrão, igual ao SmallData) filtra o período pela data do acerto; "saida", pela saída da maleta. */
+export const rankingRede = (agrupar: AgrupamentoRede, f: { de?: string | null; ate?: string | null; praca?: number | null; categoria?: string | null; limite?: number; data?: "acerto" | "saida" } = {}) =>
   rpc<LinhaRanking[]>("legado_rede_ranking", {
     _agrupar: agrupar, _de: f.de ?? null, _ate: f.ate ?? null, _praca: f.praca ?? null, _categoria: f.categoria ?? null, _limite: f.limite ?? 50,
+    _data: f.data ?? "acerto",
   });
 /** data: "acerto" (padrão, igual ao SmallData) agrupa pelo mês do acerto; "saida", pelo mês em que a maleta saiu. */
 export const redeMensal = (f: { de?: string | null; ate?: string | null; praca?: number | null; representante?: number | null; data?: "acerto" | "saida" } = {}) =>

@@ -266,7 +266,7 @@ describe("6. numeração de remessa", () => {
     expect(resumo.dados.numeracao.proxima_remessa_lardan).toBeGreaterThan(REM + 1); // REM é maior que qualquer remessa real
     const ruim = await rpc(master, "remessa_criar", { _praca: praca.id, _numero: REM });
     expect(ruim.ok).toBe(false);
-    expect(String(ruim.erro)).toContain("JFLEX");
+    expect(String(ruim.erro)).toContain("SmallData");
   });
 });
 

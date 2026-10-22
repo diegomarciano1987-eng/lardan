@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { MaletasDaConsultora } from "@/components/admin/maletas/MaletasDaConsultora";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -667,12 +668,7 @@ function FichaPessoa() {
         </TabsContent>
 
         <TabsContent value="operacao" className="mt-4">
-          <Panel title="Estoque e maletas" flush>
-            <EmptyState
-              title="Em implantação"
-              description="Maletas, peças sob custódia, acertos e devoluções dependem do motor de estoque. Nada é exibido aqui até existir movimento real."
-            />
-          </Panel>
+          <MaletasDaConsultora partyId={id} />
         </TabsContent>
 
         <TabsContent value="acesso" className="mt-4">

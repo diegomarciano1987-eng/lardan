@@ -255,7 +255,7 @@ describe("7. venda pelo acerto da consultora (0119)", () => {
       { remessa: REM + 1, codcli: cod(1), valor: "1500.00", data: "2025-02-15", tipo: "remessa", dinheiro: "", cheque: "", prazo: "", boleto: "", cartao: "" },
       { remessa: REM + 3, codcli: cod(1), valor: "2500.00", data: "2025-04-15", tipo: "remessa", dinheiro: "", cheque: "", prazo: "", boleto: "", cartao: "" },
     ]);
-    const m = (await adm.unsafe(`select remessa, kit, valor_vendido_cents::bigint v, acerto_divergente d from public.legado_maletas
+    const m = (await adm.unsafe(`select remessa, kit, valor_venda_cents::bigint v, acerto_divergente d from public.legado_maletas
                                    where codcli=$1 order by remessa, kit`, [cod(1)])) as { remessa: number; kit: number; v: string; d: boolean }[];
     // REM+1: peças diziam R$ 2.000, o acerto cobrou R$ 1.500 → vale o acerto e fica marcada
     expect(m.find((x) => x.remessa === REM + 1)).toMatchObject({ v: "150000", d: true });
@@ -263,9 +263,18 @@ describe("7. venda pelo acerto da consultora (0119)", () => {
     expect(m.filter((x) => x.remessa === REM + 3).map((x) => [x.kit, x.v, x.d])).toEqual([[1, "150000", false], [2, "100000", false]]);
   });
 
+  test("coluna antiga continua existindo, marcada como desativada", async () => {
+    const c = await um<{ n: number; nota: string }>(`select count(*)::int n, max(col_description('public.legado_maletas'::regclass, attnum)) nota
+      from pg_attribute where attrelid = 'public.legado_maletas'::regclass and attname = 'valor_vendido_cents' and not attisdropped`);
+    expect(c.n).toBe(1);
+    expect(c.nota).toContain("DESATIVADA");
+    const antiga = await um<{ v: string }>(`select valor_vendido_cents::bigint v from public.legado_maletas where remessa=$1 and codcli=$2`, [REM + 1, cod(1)]);
+    expect(antiga.v).toBe("200000");   // pelas peças, como antes
+  });
+
   test("reimportar a maleta não perde o acerto", async () => {
     await importar("maletas", [maleta(REM + 1, cod(1), 50, 30, "2025-01-01", "2025-02-15")]);
-    const v = await um<{ v: string }>(`select valor_vendido_cents::bigint v from public.legado_maletas where remessa=$1 and codcli=$2`, [REM + 1, cod(1)]);
+    const v = await um<{ v: string }>(`select valor_venda_cents::bigint v from public.legado_maletas where remessa=$1 and codcli=$2`, [REM + 1, cod(1)]);
     expect(v.v).toBe("150000");
   });
 

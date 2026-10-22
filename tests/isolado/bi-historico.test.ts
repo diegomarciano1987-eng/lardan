@@ -83,7 +83,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  for (const t of ["legado_maleta_vendidos", "legado_maleta_categorias", "legado_maletas"])
+  for (const t of ["legado_acertos_consultora", "legado_maleta_vendidos", "legado_maleta_categorias", "legado_maletas"])
     await adm.unsafe(`delete from public.${t} where codcli between $1 and $2`, [base, base + 99]);
   await adm.unsafe(`delete from public.legado_remessas where numero between $1 and $2`, [REM, REM + 99]);
   await adm.unsafe(`update public.legado_consultoras set party_id = null where codcli between $1 and $2`, [base, base + 99]);
@@ -246,5 +246,40 @@ describe("6. cadastros criados pelo histórico", () => {
     await adm.unsafe(`insert into public.kit_cycles (kit_id, cycle_no, consultora_party_id) values ($1,1,$2)`, [kit.id, e.id]);
     await rpc(master, "legado_cadastros_ajustar", { _aplicar: true });
     expect((await um<{ status: string }>(`select status from public.parties where id=$1`, [e.id])).status).toBe("ativo");
+  });
+});
+
+describe("7. venda pelo acerto da consultora (0119)", () => {
+  test("acerto vira o valor vendido, repartido entre os kits, e marca divergência", async () => {
+    await importar("acertos_consultora", [
+      { remessa: REM + 1, codcli: cod(1), valor: "1500.00", data: "2025-02-15", tipo: "remessa", dinheiro: "", cheque: "", prazo: "", boleto: "", cartao: "" },
+      { remessa: REM + 3, codcli: cod(1), valor: "2500.00", data: "2025-04-15", tipo: "remessa", dinheiro: "", cheque: "", prazo: "", boleto: "", cartao: "" },
+    ]);
+    const m = (await adm.unsafe(`select remessa, kit, valor_vendido_cents::bigint v, acerto_divergente d from public.legado_maletas
+                                   where codcli=$1 order by remessa, kit`, [cod(1)])) as { remessa: number; kit: number; v: string; d: boolean }[];
+    // REM+1: peças diziam R$ 2.000, o acerto cobrou R$ 1.500 → vale o acerto e fica marcada
+    expect(m.find((x) => x.remessa === REM + 1)).toMatchObject({ v: "150000", d: true });
+    // REM+3: dois kits (R$ 1.500 + R$ 1.000 em peças), acerto de R$ 2.500 → repartido igual, sem divergência
+    expect(m.filter((x) => x.remessa === REM + 3).map((x) => [x.kit, x.v, x.d])).toEqual([[1, "150000", false], [2, "100000", false]]);
+  });
+
+  test("reimportar a maleta não perde o acerto", async () => {
+    await importar("maletas", [maleta(REM + 1, cod(1), 50, 30, "2025-01-01", "2025-02-15")]);
+    const v = await um<{ v: string }>(`select valor_vendido_cents::bigint v from public.legado_maletas where remessa=$1 and codcli=$2`, [REM + 1, cod(1)]);
+    expect(v.v).toBe("150000");
+  });
+
+  test("mês do acerto (padrão) × mês de saída", async () => {
+    const acerto = await rpc<{ mes: string; valor_vendido_cents: number }[]>(financeiro, "legado_rede_mensal", { _praca: P1 });
+    expect(acerto.erro).toBeNull();
+    expect(acerto.dados.find((x) => x.mes === "2025-02")!.valor_vendido_cents).toBe(150000 + 50000);  // Estrela (acerto) + Média
+    expect(acerto.dados.some((x) => x.mes === "2025-01")).toBe(false);
+    const saida = await rpc<{ mes: string; valor_vendido_cents: number }[]>(financeiro, "legado_rede_mensal", { _praca: P1, _data: "saida" });
+    expect(saida.dados.find((x) => x.mes === "2025-01")!.valor_vendido_cents).toBe(200000);
+    const p = await rpc<{ kpis: { maletas: number } }>(financeiro, "legado_bi_painel", { _praca: P1, _de: "2025-02-01", _ate: "2025-02-28" });
+    expect(p.dados.kpis.maletas).toBe(2);
+    const ps = await rpc<{ kpis: { maletas: number } }>(financeiro, "legado_bi_painel", { _praca: P1, _de: "2025-02-01", _ate: "2025-02-28", _data: "saida" });
+    expect(ps.dados.kpis.maletas).toBe(0);
+    expect((await rpc(financeiro, "legado_bi_painel", { _data: "ontem" })).ok).toBe(false);
   });
 });

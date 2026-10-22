@@ -156,8 +156,9 @@ export const rankingRede = (agrupar: AgrupamentoRede, f: { de?: string | null; a
   rpc<LinhaRanking[]>("legado_rede_ranking", {
     _agrupar: agrupar, _de: f.de ?? null, _ate: f.ate ?? null, _praca: f.praca ?? null, _categoria: f.categoria ?? null, _limite: f.limite ?? 50,
   });
-export const redeMensal = (f: { de?: string | null; ate?: string | null; praca?: number | null; representante?: number | null } = {}) =>
-  rpc<MesRede[]>("legado_rede_mensal", { _de: f.de ?? null, _ate: f.ate ?? null, _praca: f.praca ?? null, _representante: f.representante ?? null });
+/** data: "acerto" (padrão, igual ao SmallData) agrupa pelo mês do acerto; "saida", pelo mês em que a maleta saiu. */
+export const redeMensal = (f: { de?: string | null; ate?: string | null; praca?: number | null; representante?: number | null; data?: "acerto" | "saida" } = {}) =>
+  rpc<MesRede[]>("legado_rede_mensal", { _de: f.de ?? null, _ate: f.ate ?? null, _praca: f.praca ?? null, _representante: f.representante ?? null, _data: f.data ?? "acerto" });
 export const sugestaoMontagem = (party: string, total: number) => rpc<SugestaoMontagem>("montagem_sugestao", { _party: party, _total: total });
 export const resumoHistorico = () => rpc<Record<string, unknown>>("legado_resumo");
 

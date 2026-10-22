@@ -69,6 +69,7 @@ export const ARQUIVOS_HISTORICO = [
   { tipo: "maleta_vendidos", arquivo: "maleta_vendidos.csv", rotulo: "Peças vendidas", colunas: ["remessa", "codcli", "kit", "produto", "quantidade"] },
   { tipo: "notas", arquivo: "notas.csv", rotulo: "Notas fiscais", colunas: ["nf_id", "numero", "serie"] },
   { tipo: "acertos_praca", arquivo: "acertos_praca.csv", rotulo: "Acertos de praça", colunas: ["codigo", "praca", "data"] },
+  { tipo: "acertos_consultora", arquivo: "acertos_consultora.csv", rotulo: "Acertos das consultoras (valor da venda)", colunas: ["remessa", "codcli", "valor", "data"] },
 ] as const;
 
 export type TipoHistorico = (typeof ARQUIVOS_HISTORICO)[number]["tipo"];

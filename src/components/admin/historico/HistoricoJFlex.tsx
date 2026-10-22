@@ -222,7 +222,11 @@ export function HistoricoJFlexImportacao({ ehMaster }: { ehMaster: boolean }) {
   };
 
   const faltando = ARQUIVOS_HISTORICO.filter((a) => !arquivos[a.tipo] || arquivos[a.tipo]!.erro || arquivos[a.tipo]!.linhas === 0);
-  const podeImportar = ehMaster && !executando && faltando.length === 0;
+  const selecionados = ARQUIVOS_HISTORICO.filter((a) => arquivos[a.tipo]);
+  const comErro = selecionados.filter((a) => arquivos[a.tipo]!.erro || arquivos[a.tipo]!.linhas === 0);
+  // Primeira carga: todos os arquivos. Depois: pode reenviar só os escolhidos (ex.: acertos_consultora.csv).
+  const jaImportado = Number((resumo.data as { arquivos?: Record<string, number> } | undefined)?.arquivos?.["maletas"] ?? 0) > 0;
+  const podeImportar = ehMaster && !executando && selecionados.length > 0 && comErro.length === 0 && (jaImportado || faltando.length === 0);
 
   const executar = async () => {
     setExecutando(true);
@@ -277,7 +281,7 @@ export function HistoricoJFlexImportacao({ ehMaster }: { ehMaster: boolean }) {
         <div className="px-6 py-5">
           <label className="flex cursor-pointer flex-wrap items-center gap-3 text-sm">
             <span className="admin-btn admin-btn-primary">
-              <FileUp aria-hidden className="size-4" /> Escolher os 10 CSV
+              <FileUp aria-hidden className="size-4" /> Escolher os CSV
             </span>
             <input type="file" accept=".csv,text/csv" multiple className="sr-only" onChange={(e) => { if (e.target.files?.length) void ler(e.target.files); e.target.value = ""; }} />
             <span className="text-ledger-muted">
@@ -317,7 +321,9 @@ export function HistoricoJFlexImportacao({ ehMaster }: { ehMaster: boolean }) {
 
           {faltando.length > 0 && !executando && (
             <p className="mt-4 text-sm font-medium text-ledger-muted">
-              Importação fica disponível com os 10 arquivos reconhecidos. {faltando.length} pendente(s).
+              {jaImportado
+                ? `O histórico já foi importado: você pode enviar só os arquivos escolhidos (${selecionados.length} escolhido(s)).`
+                : `A primeira importação precisa dos ${ARQUIVOS_HISTORICO.length} arquivos. ${faltando.length} pendente(s).`}
             </p>
           )}
           {!ehMaster && <p className="mt-4 text-sm font-medium text-warning">Só o Master importa. Seu perfil pode ler o histórico, mas não envia arquivos.</p>}

@@ -834,6 +834,13 @@
       "when": 1792705590561,
       "tag": "0118_focus_nfe",
       "breakpoints": true
+    },
+    {
+      "idx": 119,
+      "version": "7",
+      "when": 1792706863926,
+      "tag": "0119_comissao_faixas_leitura",
+      "breakpoints": true
     }
   ]
 }

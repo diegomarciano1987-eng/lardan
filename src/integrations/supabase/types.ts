@@ -13951,6 +13951,7 @@ export type Database = {
         Args: { _actor: string; _desde?: string }
         Returns: Json
       }
+      comissao_faixas_leitura: { Args: never; Returns: Json }
       confirm_stock_reservation: {
         Args: {
           _idempotency_key?: string

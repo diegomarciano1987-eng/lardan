@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Panel, StatusBadge } from "@/components/admin/ui";
+import { roteiroFiscalObservado } from "@/lib/historico-jflex";
 import { supabase } from "@/integrations/supabase/client";
 
 type Prontidao = {
@@ -75,6 +77,61 @@ export function FiscalProntidao() {
             </dl>
           </div>
         </div>
+        <RoteiroJFlex />
       </div> : <p className="text-sm text-ledger-muted">Sem dados.</p>}
   </Panel>;
+}
+
+/** Bloco recolhível com o roteiro fiscal observado nas notas do JFLEX (referência, não ativa nada). */
+function RoteiroJFlex() {
+  const [aberto, setAberto] = useState(false);
+  const q = useQuery({ queryKey: ["historico-jflex", "roteiro-fiscal"], queryFn: roteiroFiscalObservado, enabled: aberto });
+  return (
+    <section className="border-t border-line-soft pt-4">
+      <button type="button" className="flex w-full items-center justify-between gap-3 text-left" aria-expanded={aberto} onClick={() => setAberto((v) => !v)}>
+        <span className="font-semibold text-ledger-text">Roteiro observado no JFLEX</span>
+        <span className="text-sm text-ledger-muted">{aberto ? "Fechar" : "Abrir"}</span>
+      </button>
+      {aberto && (
+        q.isPending ? <p className="mt-3 text-sm text-ledger-muted">Carregando roteiro…</p>
+        : q.error ? <p role="alert" className="mt-3 text-sm text-danger">Não foi possível ler o roteiro: {q.error.message}</p>
+        : (q.data ?? []).length === 0 ? <p className="mt-3 text-sm text-ledger-muted">Sem dados.</p>
+        : (
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[48rem] text-sm">
+              <thead className="border-b border-line-soft text-left text-xs uppercase tracking-[0.08em] text-ledger-muted">
+                <tr>
+                  <th className="py-2 pr-4">Operação</th>
+                  <th className="py-2 pr-4">Natureza</th>
+                  <th className="py-2 pr-4">CFOP PR</th>
+                  <th className="py-2 pr-4">CFOP fora do PR</th>
+                  <th className="py-2 pr-4">Tipo</th>
+                  <th className="py-2 pr-4">CSOSN</th>
+                  <th className="py-2 pr-4">PIS / COFINS</th>
+                  <th className="py-2 pr-4">NCM</th>
+                  <th className="py-2">Texto complementar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(q.data as Record<string, string | null>[]).map((r, i) => (
+                  <tr key={i} className="border-b border-line-soft last:border-0 align-top">
+                    <td className="py-2 pr-4 font-medium text-ledger-text">{r.operacao ?? "—"}</td>
+                    <td className="py-2 pr-4">{r.natureza ?? "—"}</td>
+                    <td className="py-2 pr-4">{r.cfop_interno ?? "—"}</td>
+                    <td className="py-2 pr-4">{r.cfop_fora ?? "—"}</td>
+                    <td className="py-2 pr-4">{r.tipo ?? "—"}</td>
+                    <td className="py-2 pr-4">{r.csosn ?? "—"}</td>
+                    <td className="py-2 pr-4">{r.pis_cofins ?? "—"}</td>
+                    <td className="py-2 pr-4">{r.ncm ?? "—"}</td>
+                    <td className="py-2">{r.texto ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="mt-2 text-xs text-ledger-muted">Referência observada nas notas do JFLEX. Não ativa nem altera a emissão fiscal.</p>
+          </div>
+        )
+      )}
+    </section>
+  );
 }

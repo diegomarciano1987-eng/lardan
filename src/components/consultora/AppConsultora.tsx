@@ -220,6 +220,7 @@ export function Inicio({ ir }: { ir: Ir }) {
 
       <CartaoNovidades />
 
+      <GanhosConsultora />
       <CartaoMeuHistorico />
 
       <section className="grid gap-3 lg:grid-cols-[1.2fr_1fr]">

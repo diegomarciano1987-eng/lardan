@@ -54,3 +54,13 @@ Total: 27.197 maletas acertadas, 3.895 consultoras, 1,81 mi de peças enviadas, 
 - Novembro é o melhor mês (giro 8,8%).
 - Maleta acertada entre 35 e 64 dias gira 7,6%; acima de 65 dias, 5,4%.
 - Praças: Teodoro Sampaio 8,8–9,0% de giro; Ventania, Ponta Grossa e Votuporanga perto de 5,6%.
+
+## Venda pelo acerto (0119)
+
+O relatório de vendas do SmallData soma o **valor cobrado no acerto** de cada consultora (`T_REM_CLIENTE.TOTALREMESSA`) pela **data do acerto**. Conferido ao centavo na carga real: agosto/2026 **R$ 271.290,19**, fevereiro/2026 **R$ 303.105,16**.
+
+- Arquivo novo `acertos_consultora.csv` (11º da importação): remessa, consultora, valor, data, tipo e formas de pagamento.
+- `legado_maletas.valor_vendido_cents` passa a ser o valor do acerto (repartido entre os kits da consultora na remessa, proporcional às peças vendidas). Sem acerto importado, continua peças enviadas − devolvidas.
+- `legado_maletas.acerto_divergente`: o acerto difere em mais de R$ 1 das peças marcadas como vendidas no próprio SmallData. São 36 acertos em ~23 mil, somando R$ 76,6 mil de peças "vendidas" que o acerto não cobrou. Exemplo: remessa 644, consultora 6742, com 76 peças devolvidas no resumo da maleta e nenhuma no detalhe das peças.
+- O BI e a série mensal têm o parâmetro `_data`: `acerto` (padrão) ou `saida`. A tela tem o seletor "Contar a venda pelo mês do acerto / mês de saída".
+- Peças vendidas e giro continuam vindo do detalhe das peças.

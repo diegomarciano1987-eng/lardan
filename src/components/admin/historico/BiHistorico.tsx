@@ -41,6 +41,7 @@ import {
   type ConsultoraTop,
   type CriterioTop,
   type InsightBi,
+  type DataBi,
   type KpisBi,
   type RecorteBi,
 } from "@/lib/historico-bi";
@@ -134,6 +135,7 @@ function useRecorte() {
   const [periodo, setPeriodo] = React.useState<DateRange | undefined>();
   const [praca, setPraca] = React.useState("");
   const [representante, setRepresentante] = React.useState("");
+  const [data, setData] = React.useState<DataBi>("acerto");
 
   const recorte = React.useMemo<RecorteBi>(() => {
     let de: string | null = null;
@@ -152,10 +154,10 @@ function useRecorte() {
       de = isoDia(periodo?.from);
       ate = isoDia(periodo?.to ?? periodo?.from);
     }
-    return { de, ate, praca: praca ? Number(praca) : null, representante: representante ? Number(representante) : null };
-  }, [preset, ano, periodo, praca, representante]);
+    return { de, ate, praca: praca ? Number(praca) : null, representante: representante ? Number(representante) : null, data };
+  }, [preset, ano, periodo, praca, representante, data]);
 
-  return { recorte, preset, setPreset, ano, setAno, periodo, setPeriodo, praca, setPraca, representante, setRepresentante };
+  return { recorte, preset, setPreset, ano, setAno, periodo, setPeriodo, praca, setPraca, representante, setRepresentante, data, setData };
 }
 
 function BotaoPreset({ ativo, children, onClick }: { ativo: boolean; children: React.ReactNode; onClick: () => void }) {
@@ -394,12 +396,12 @@ function TopConsultoras({ recorte, pracas }: { recorte: RecorteBi; pracas: { cod
 function EvolucaoMensal({ recorte }: { recorte: RecorteBi }) {
   const q = useQuery({
     queryKey: ["historico-bi", "mensal", recorte],
-    queryFn: () => redeMensal({ de: recorte.de ?? null, ate: recorte.ate ?? null, praca: recorte.praca ?? null, representante: recorte.representante ?? null }),
+    queryFn: () => redeMensal({ de: recorte.de ?? null, ate: recorte.ate ?? null, praca: recorte.praca ?? null, representante: recorte.representante ?? null, data: recorte.data ?? "acerto" }),
     placeholderData: keepPreviousData,
   });
   const dados = (q.data ?? []).map((m) => ({ mes: m.mes, valor: m.valor_vendido_cents ?? 0, giro: m.giro_pct ?? 0, maletas: m.maletas }));
   return (
-    <Panel title="Valor vendido e giro por mês de saída">
+    <Panel title={recorte.data === "saida" ? "Valor vendido e giro por mês de saída da maleta" : "Valor vendido e giro por mês do acerto"}>
       {q.isLoading ? <Carregando /> : q.isError ? <Erro q={q} /> : dados.length === 0 ? <p className="text-sm text-ledger-muted">Sem dados.</p> : (
         <div className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -417,7 +419,11 @@ function EvolucaoMensal({ recorte }: { recorte: RecorteBi }) {
           </ResponsiveContainer>
         </div>
       )}
-      <p className="mt-2 text-xs text-ledger-muted">Meses recentes ainda têm maletas na rua: o valor sobe conforme os acertos entram.</p>
+      <p className="mt-2 text-xs text-ledger-muted">
+        {recorte.data === "saida"
+          ? "Pelo mês de saída: meses recentes ainda têm maletas na rua e o valor sobe conforme os acertos entram."
+          : "Pelo mês do acerto, com o valor cobrado no acerto: é o mesmo número do relatório de vendas do SmallData."}
+      </p>
     </Panel>
   );
 }
@@ -434,7 +440,7 @@ function corIndice(i: number | null | undefined) {
 
 function MapaPracaCategoria({ recorte }: { recorte: RecorteBi }) {
   const q = useQuery({
-    queryKey: ["historico-bi", "praca-categoria", recorte.de, recorte.ate, recorte.representante],
+    queryKey: ["historico-bi", "praca-categoria", recorte.de, recorte.ate, recorte.representante, recorte.data],
     queryFn: () => biPracaCategoria(recorte),
     placeholderData: keepPreviousData,
   });
@@ -656,11 +662,15 @@ export function BiHistorico() {
             <BotaoPreset key={y} ativo={f.preset === "ano" && f.ano === y} onClick={() => { f.setAno(y); f.setPreset("ano"); }}>{y}</BotaoPreset>
           ))}
           <BotaoPreset ativo={f.preset === "custom"} onClick={() => f.setPreset("custom")}>Outro período</BotaoPreset>
+          <span className="mx-1 h-6 w-px bg-line" aria-hidden />
+          <span className="text-sm text-ledger-muted">Contar a venda pelo</span>
+          <BotaoPreset ativo={f.data === "acerto"} onClick={() => f.setData("acerto")}>mês do acerto</BotaoPreset>
+          <BotaoPreset ativo={f.data === "saida"} onClick={() => f.setData("saida")}>mês de saída</BotaoPreset>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           {f.preset === "custom" && (
             <label className="grid gap-1.5 text-sm">
-              <span className="ledger-eyebrow">Período (saída da maleta)</span>
+              <span className="ledger-eyebrow">{f.data === "saida" ? "Período (saída da maleta)" : "Período (data do acerto)"}</span>
               <DateRangeField value={f.periodo} onChange={f.setPeriodo} placeholder="Escolha o período" />
             </label>
           )}

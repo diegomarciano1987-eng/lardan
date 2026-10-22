@@ -1,6 +1,6 @@
 /**
  * BI do histórico SmallData (migração 0117). Só leitura, só equipe.
- * Recorte comum: período (emissão da maleta), praça e representante (códigos do SmallData).
+ * Recorte comum: período (pelo acerto ou pela saída da maleta), praça e representante (códigos do SmallData).
  */
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,13 +10,18 @@ async function rpc<T>(fn: string, args: Record<string, unknown> = {}): Promise<T
   return data as T;
 }
 
+export type DataBi = "acerto" | "saida";
 export interface RecorteBi {
   de?: string | null;
   ate?: string | null;
   praca?: number | null;
   representante?: number | null;
+  /** "acerto" (padrão, igual ao SmallData e ao financeiro) ou "saida" (mês em que a maleta saiu) */
+  data?: DataBi;
 }
-const args = (r: RecorteBi) => ({ _de: r.de ?? null, _ate: r.ate ?? null, _praca: r.praca ?? null, _representante: r.representante ?? null });
+const args = (r: RecorteBi) => ({
+  _de: r.de ?? null, _ate: r.ate ?? null, _praca: r.praca ?? null, _representante: r.representante ?? null, _data: r.data ?? "acerto",
+});
 
 export interface KpisBi {
   maletas: number;
@@ -137,8 +142,8 @@ export const biTop = (r: RecorteBi, o: { criterio?: CriterioTop; porPraca?: bool
 export const biJornada = (r: RecorteBi) => rpc<JornadaBi>("legado_bi_jornada", args(r));
 export const biAlertas = (r: Pick<RecorteBi, "praca" | "representante">, limite = 30) =>
   rpc<AlertasBi>("legado_bi_alertas", { _praca: r.praca ?? null, _representante: r.representante ?? null, _limite: limite });
-export const biPracaCategoria = (r: Pick<RecorteBi, "de" | "ate" | "representante">) =>
-  rpc<PracaCategoriaBi>("legado_bi_praca_categoria", { _de: r.de ?? null, _ate: r.ate ?? null, _representante: r.representante ?? null });
+export const biPracaCategoria = (r: Pick<RecorteBi, "de" | "ate" | "representante" | "data">) =>
+  rpc<PracaCategoriaBi>("legado_bi_praca_categoria", { _de: r.de ?? null, _ate: r.ate ?? null, _representante: r.representante ?? null, _data: r.data ?? "acerto" });
 export const biProdutos = (r: RecorteBi, categoria: string | null = null, limite = 20) =>
   rpc<ProdutoBi[]>("legado_bi_produtos", { ...args(r), _categoria: categoria, _limite: limite });
 export const biInsights = (r: RecorteBi) => rpc<InsightBi[]>("legado_bi_insights", args(r));

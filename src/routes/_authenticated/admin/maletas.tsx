@@ -12,6 +12,7 @@ import { useCapabilities } from "@/lib/capabilities";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, traduzir } from "@/lib/maletas";
 import { RemessasHistorico } from "@/components/admin/historico/RemessasHistorico";
+import { MaletasNaRua } from "@/components/admin/maletas/MaletasNaRua";
 import { STATUS_REMESSA, buscarRemessas, criarRemessa, dataBR, isoDia, type RemessaCard } from "@/lib/remessas";
 
 export const Route = createFileRoute("/_authenticated/admin/maletas")({
@@ -254,6 +255,8 @@ function RemessasPage() {
           Histórico SmallData
         </button>
       </nav>
+
+      <MaletasNaRua />
 
       {fonte === "jflex" ? (
         <RemessasHistorico abrir={remessaAberta} aoAbrir={setRemessaAberta} />

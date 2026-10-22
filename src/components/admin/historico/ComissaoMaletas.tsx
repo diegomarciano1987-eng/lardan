@@ -44,7 +44,7 @@ export function ComissaoMaletas({ maletas }: { maletas: Maleta[] }) {
                 <Fragment key={g.remessa}>
                   <tr key={`r-${g.remessa}`} className="border-b border-line-soft bg-surface-muted/40">
                     <td className="px-6 py-3 font-semibold">{g.remessa}</td>
-                    <td className="px-6 py-3">{g.kits.length > 1 ? `${g.kits.length} kits` : g.kits[0].kit}</td>
+                    <td className="px-6 py-3">{g.kits.length > 1 ? `${g.kits.length} kits` : g.kits[0]?.kit}</td>
                     <td className="px-6 py-3">{data(g.kits.map((k) => k.emissao ?? "").sort()[0] || null)}</td>
                     <td className="px-6 py-3">{data(g.acerto)}{g.parcial ? " (parcial)" : ""}</td>
                     <td className="px-6 py-3 text-right tabular-nums font-semibold">{g.vendido_cents != null ? brl(g.vendido_cents) : "sem acerto"}</td>

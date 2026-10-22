@@ -806,6 +806,13 @@
       "when": 1792702720631,
       "tag": "0114_legado_consultoras_cadastrar",
       "breakpoints": true
+    },
+    {
+      "idx": 115,
+      "version": "7",
+      "when": 1792702769362,
+      "tag": "0115_legado_consultoras_cadastrar_ajuste",
+      "breakpoints": true
     }
   ]
 }

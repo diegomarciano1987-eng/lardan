@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { EmptyState, ErrorState, Panel, Skeleton, formatBRLFromCents } from "@/components/admin/ui";
 import { historicoConsultora, type CategoriaHistorico } from "@/lib/historico-jflex";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ComissaoMaletas } from "@/components/admin/historico/ComissaoMaletas";
 
 const brl = formatBRLFromCents;
 const data = (v?: string | null) => (v ? v.slice(0, 10).split("-").reverse().join("/") : "—");
@@ -69,6 +71,13 @@ export function HistoricoJFlexPessoa({ partyId }: { partyId: string }) {
   const r = d.resumo;
 
   return (
+    <Tabs defaultValue="visao">
+      <TabsList>
+        <TabsTrigger value="visao">Visão geral e vendas</TabsTrigger>
+        <TabsTrigger value="comissao">Comissão por maletas</TabsTrigger>
+      </TabsList>
+      <TabsContent value="comissao" className="mt-4"><ComissaoMaletas maletas={(d.maletas ?? []) as never} /></TabsContent>
+      <TabsContent value="visao" className="mt-4">
     <div className="space-y-6">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Dado rotulo="Maletas" valor={`${r?.maletas ?? 0} (${r?.maletas_fechadas ?? 0} fechadas)`} />
@@ -194,5 +203,7 @@ export function HistoricoJFlexPessoa({ partyId }: { partyId: string }) {
         )}
       </Panel>
     </div>
+      </TabsContent>
+    </Tabs>
   );
 }

@@ -5,6 +5,8 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { meuHistorico } from "@/lib/historico-jflex";
+import { comissaoMaleta, faixasComissao } from "@/lib/comissao-maletas";
+import { brl } from "@/lib/maletas";
 
 function Barra({ nome, pct, detalhe }: { nome: string; pct: number; detalhe: string }) {
   return (
@@ -16,6 +18,29 @@ function Barra({ nome, pct, detalhe }: { nome: string; pct: number; detalhe: str
       <div className="mt-1 h-3 w-full overflow-hidden rounded-full bg-muted">
         <div className="h-full rounded-full bg-primary/70" style={{ width: `${Math.max(pct, 4)}%` }} />
       </div>
+    </div>
+  );
+}
+
+function MinhasComissoes({ maletas }: { maletas: { remessa: number; kit: number; tipo: string; fechamento: string | null; valor_vendido_cents: number | null }[] }) {
+  const f = useQuery({ queryKey: ["consultora", "comissao-faixas"], queryFn: faixasComissao });
+  const faixas = f.data ?? [];
+  if (faixas.length === 0) return null;
+  const linhas = maletas.filter((m) => m.tipo !== "perdida" && m.fechamento && m.valor_vendido_cents != null).slice(0, 6)
+    .map((m) => ({ m, c: comissaoMaleta(m.valor_vendido_cents, faixas)! }));
+  if (linhas.length === 0) return null;
+  return (
+    <div className="mt-5 space-y-2">
+      <p className="text-[1.02rem] font-semibold">Minha comissão nas últimas maletas</p>
+      <ul className="space-y-1 text-[1.02rem]">
+        {linhas.map(({ m, c }, i) => (
+          <li key={`${m.remessa}-${m.kit}-${i}`} className="flex items-baseline justify-between gap-3">
+            <span>Remessa {m.remessa} · vendeu {brl(m.valor_vendido_cents ?? 0)}{c.faixa ? ` (${c.faixa.percentual.toLocaleString("pt-BR")}%)` : ""}</span>
+            <strong className="tabular-nums">{brl(c.comissao_cents)}</strong>
+          </li>
+        ))}
+      </ul>
+      <p className="text-[0.92rem] text-muted-foreground">Estimativa pela tabela de comissão atual da LARDAN.</p>
     </div>
   );
 }
@@ -72,6 +97,7 @@ export function CartaoMeuHistorico() {
           </ol>
         </div>
       )}
+      <MinhasComissoes maletas={(d.maletas ?? []) as never} />
     </section>
   );
 }

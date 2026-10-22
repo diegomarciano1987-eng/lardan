@@ -293,7 +293,7 @@ function RedePage() {
                 : "admin-btn"
             }
           >
-            {a === "mapa" ? "Mapa territorial" : a === "cobertura" ? "Cobertura" : "Histórico JFLEX"}
+            {a === "mapa" ? "Mapa territorial" : a === "cobertura" ? "Cobertura" : "Histórico SmallData"}
           </button>
         ))}
       </nav>

@@ -291,7 +291,7 @@ function FichaPessoa() {
           <TabsTrigger value="operacao">Estoque e maletas</TabsTrigger>
           <TabsTrigger value="acesso">Acesso</TabsTrigger>
           <TabsTrigger value="historico">Histórico</TabsTrigger>
-          <TabsTrigger value="historico-jflex">Histórico JFLEX</TabsTrigger>
+          <TabsTrigger value="historico-jflex">Histórico SmallData</TabsTrigger>
         </TabsList>
 
         {/* RESUMO */}

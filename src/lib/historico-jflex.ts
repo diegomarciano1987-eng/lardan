@@ -1,5 +1,5 @@
 /**
- * Histórico do JFLEX (migração 0112): importação pelo Master e leituras para
+ * Histórico do SmallData (migração 0112): importação pelo Master e leituras para
  * ficha da consultora, cockpit de remessas, inteligência de rede, app da
  * consultora e sugestão de montagem. Tudo só leitura sobre a operação.
  */
@@ -166,7 +166,7 @@ export type TipoMeta = "brinco" | "anel" | "colar" | "pulseira" | "tornozeleira"
 export interface MetasMontagem {
   party_id: string | null;
   vinculada: boolean;
-  /** "historico" quando há 10+ peças vendidas no JFLEX; senão "padrao" (remessa_parametros) */
+  /** "historico" quando há 10+ peças vendidas no SmallData; senão "padrao" (remessa_parametros) */
   modo_sugerido: "historico" | "padrao";
   confianca: "alta" | "media" | "baixa";
   pecas_vendidas_historico?: number;

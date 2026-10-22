@@ -1,5 +1,5 @@
 /**
- * Lista de remessas do histórico JFLEX no cockpit, com painel lateral de
+ * Lista de remessas do histórico SmallData no cockpit, com painel lateral de
  * detalhe. Somente leitura: nada muda na operação.
  */
 import * as React from "react";
@@ -147,7 +147,7 @@ export function RemessasHistorico({ abrir, aoAbrir }: { abrir: number | null; ao
       {lista.isError && <ErrorState message={(lista.error as Error).message} onRetry={() => void lista.refetch()} />}
       {!lista.isLoading && !lista.isError && itens.length === 0 && (
         <EmptyState title={busca || status !== "todas" || periodo ? "Nenhuma remessa histórica com estes filtros" : "Nenhuma remessa histórica importada"}
-          description="O histórico aparece aqui depois da importação do JFLEX nas Configurações." />
+          description="O histórico aparece aqui depois da importação do SmallData nas Configurações." />
       )}
 
       {itens.length > 0 && (

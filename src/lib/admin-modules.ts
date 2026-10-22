@@ -330,7 +330,7 @@ export const ADMIN_SUBMODULES: AdminModule[] = [
   {
     slug: "historico-jflex",
     path: "/admin/historico-jflex",
-    label: "Histórico JFLEX",
+    label: "Histórico SmallData",
     description: "Importação e leitura do histórico antigo da rede. Somente leitura; só o Master importa.",
     icon: History,
     roles: ["master"],

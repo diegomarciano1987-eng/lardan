@@ -1,5 +1,5 @@
 /**
- * Inteligência da rede sobre o histórico JFLEX: ranking por agrupamento e
+ * Inteligência da rede sobre o histórico SmallData: ranking por agrupamento e
  * evolução mensal. Somente leitura.
  */
 import * as React from "react";
@@ -60,7 +60,7 @@ export function RedeHistorico() {
 
   return (
     <div className="space-y-5">
-      <Panel title="Filtros do histórico JFLEX">
+      <Panel title="Filtros do histórico SmallData">
         <div className="grid gap-4 md:grid-cols-4">
           <label className="grid gap-1.5 text-sm">
             <span className="ledger-eyebrow">Agrupar por</span>
@@ -89,7 +89,7 @@ export function RedeHistorico() {
         {ranking.isLoading && <div className="space-y-2 p-6"><Skeleton className="h-10" /><Skeleton className="h-10" /></div>}
         {ranking.isError && <div className="px-6 py-4"><ErrorState message={(ranking.error as Error).message} onRetry={() => void ranking.refetch()} /></div>}
         {!ranking.isLoading && !ranking.isError && linhas.length === 0 && (
-          <div className="px-6 py-5"><EmptyState title="Nenhum dado no histórico com estes filtros" description="Os números aparecem depois da importação do JFLEX." /></div>
+          <div className="px-6 py-5"><EmptyState title="Nenhum dado no histórico com estes filtros" description="Os números aparecem depois da importação do SmallData." /></div>
         )}
         {linhas.length > 0 && (
           <div className="overflow-x-auto">

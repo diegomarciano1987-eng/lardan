@@ -82,7 +82,7 @@ export function FiscalProntidao() {
   </Panel>;
 }
 
-/** Bloco recolhível com o roteiro fiscal observado nas notas do JFLEX (referência, não ativa nada). */
+/** Bloco recolhível com o roteiro fiscal observado nas notas do SmallData (referência, não ativa nada). */
 type LinhaRoteiro = {
   operacao: string | null;
   natureza: string | null;
@@ -100,7 +100,7 @@ function RoteiroJFlex() {
   return (
     <section className="border-t border-line-soft pt-4">
       <button type="button" className="flex w-full items-center justify-between gap-3 text-left" aria-expanded={aberto} onClick={() => setAberto((v) => !v)}>
-        <span className="font-semibold text-ledger-text">Roteiro observado no JFLEX</span>
+        <span className="font-semibold text-ledger-text">Roteiro observado no SmallData</span>
         <span className="text-sm text-ledger-muted">{aberto ? "Fechar" : "Abrir"}</span>
       </button>
       {aberto && (
@@ -139,7 +139,7 @@ function RoteiroJFlex() {
                 ))}
               </tbody>
             </table>
-            <p className="mt-2 text-xs text-ledger-muted">Referência observada nas notas do JFLEX. Não ativa nem altera a emissão fiscal.</p>
+            <p className="mt-2 text-xs text-ledger-muted">Referência observada nas notas do SmallData. Não ativa nem altera a emissão fiscal.</p>
           </div>
         )
       )}

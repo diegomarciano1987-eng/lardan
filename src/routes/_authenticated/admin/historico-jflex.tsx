@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/admin/historico-jflex")({
   component: HistoricoJFlexPage,
   head: () => ({
     meta: [
-      { title: "Histórico JFLEX — Administração LARDAN" },
+      { title: "Histórico SmallData — Administração LARDAN" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -22,7 +22,7 @@ function HistoricoJFlexPage() {
     <div className="space-y-8">
       <PageHeader
         eyebrow="Configurações · Histórico"
-        title="Histórico JFLEX"
+        title="Histórico SmallData"
         description="Importação e leitura do histórico antigo da rede. O histórico é só leitura: nenhuma tela grava em maletas, estoque, pedidos, financeiro ou fiscal."
       />
       {ehMaster ? (

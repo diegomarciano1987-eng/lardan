@@ -1,5 +1,6 @@
 # Roadmap
 ## Histórico JFlex — pacote recebido em 22/10
+- [ ] Na carga operacional das maletas na rua, ativar consultoras vinculadas e atribuir a praça da remessa; aguarda arquivos de maletas e revisão do caminho de carga, separado do histórico somente leitura.
 - [ ] Conferir 0112 exata e conflitos; aplicar apenas pela ferramenta oficial, sem alterar pacote sem decisão do Diego.
 - [ ] Integrar importação Master, fichas, remessas, rede, início consultora, sugestão de montagem e referência fiscal usando a biblioteca fornecida.
 - [ ] Rodar testes isolados, conferir permissões e telas vazias; não importar CSV reais nem publicar.

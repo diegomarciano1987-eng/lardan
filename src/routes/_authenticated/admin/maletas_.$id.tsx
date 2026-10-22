@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, ClipboardCheck, FileText, Printer, ScanBarcode, Send, Truck } from "lucide-react";
 import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
 import { ConferenciaMaleta } from "@/components/admin/maletas/ConferenciaMaleta";
+import { SugestaoMontagem } from "@/components/admin/historico/SugestaoMontagem";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import {
@@ -242,6 +243,9 @@ function MaletaFicha() {
                 disponível no depósito aparece só como aviso, e a contagem regulariza depois.
               </p>
             </Panel>
+          )}
+          {podeMontar && montando && d.ciclo.consultora_party_id && (
+            <SugestaoMontagem partyId={d.ciclo.consultora_party_id} />
           )}
 
           <Panel title="Composição" flush>

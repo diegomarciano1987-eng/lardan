@@ -11,6 +11,7 @@ import { FORMAS_COMBINADAS, iconeCategoria, salvarCombinado, type FormaCombinada
 import { LembretesClientes } from "@/components/consultora/LembretesClientes";
 import { CombinaComEla } from "@/components/consultora/CombinaComEla";
 import { GanhosConsultora } from "@/components/consultora/GanhosConsultora";
+import { CartaoMeuHistorico } from "@/components/consultora/CartaoMeuHistorico";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link } from "@tanstack/react-router";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
@@ -219,7 +220,7 @@ export function Inicio({ ir }: { ir: Ir }) {
 
       <CartaoNovidades />
 
-      <GanhosConsultora />
+      <CartaoMeuHistorico />
 
       <section className="grid gap-3 lg:grid-cols-[1.2fr_1fr]">
         <button type="button" onClick={() => ir({ aba: "novo" })}

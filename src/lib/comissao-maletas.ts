@@ -32,7 +32,8 @@ type MaletaKit = { remessa: number; kit: number; tipo?: string; fechamento: stri
 export function comissaoPorRemessa<T extends MaletaKit>(maletas: T[], faixas: FaixaComissao[]) {
   const grupos = new Map<number, T[]>();
   for (const m of maletas) if (m.tipo !== "perdida") grupos.set(m.remessa, [...(grupos.get(m.remessa) ?? []), m]);
-  return [...grupos.entries()].map(([remessa, kits]) => {
+  return [...grupos.entries()].map(([remessa, kits0]) => {
+    const kits = [...kits0].sort((a, b) => a.kit - b.kit);
     const acertados = kits.filter((k) => k.fechamento && k.valor_vendido_cents != null);
     const vendido = acertados.length ? acertados.reduce((s, k) => s + (k.valor_vendido_cents ?? 0), 0) : null;
     const c = comissaoMaleta(vendido, faixas);

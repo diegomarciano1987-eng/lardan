@@ -8803,6 +8803,7 @@ export type Database = {
           cpf: string | null
           email: string | null
           ibge: string | null
+          interna: boolean | null
           limite_venda: number | null
           motivo_inativacao: string | null
           nascimento: string | null
@@ -8833,6 +8834,7 @@ export type Database = {
           cpf?: string | null
           email?: string | null
           ibge?: string | null
+          interna?: boolean | null
           limite_venda?: number | null
           motivo_inativacao?: string | null
           nascimento?: string | null
@@ -8863,6 +8865,7 @@ export type Database = {
           cpf?: string | null
           email?: string | null
           ibge?: string | null
+          interna?: boolean | null
           limite_venda?: number | null
           motivo_inativacao?: string | null
           nascimento?: string | null
@@ -14808,6 +14811,98 @@ export type Database = {
         Args: { _cycle: string; _payload?: Json }
         Returns: Json
       }
+      legado_bi_alertas: {
+        Args: { _limite?: number; _praca?: number; _representante?: number }
+        Returns: Json
+      }
+      legado_bi_base: {
+        Args: {
+          _ate: string
+          _de: string
+          _praca: number
+          _representante: number
+        }
+        Returns: {
+          codcli: number
+          dias: number
+          emissao: string
+          fechamento: string
+          kit: number
+          pecas_enviadas: number
+          pecas_vendidas: number
+          praca: number
+          remessa: number
+          representante: number
+          valor_enviado_cents: number
+          valor_vendido_cents: number
+        }[]
+      }
+      legado_bi_exigir: { Args: never; Returns: undefined }
+      legado_bi_insights: {
+        Args: {
+          _ate?: string
+          _de?: string
+          _praca?: number
+          _representante?: number
+        }
+        Returns: Json
+      }
+      legado_bi_jornada: {
+        Args: {
+          _ate?: string
+          _de?: string
+          _praca?: number
+          _representante?: number
+        }
+        Returns: Json
+      }
+      legado_bi_kpis: {
+        Args: {
+          _ate: string
+          _de: string
+          _praca: number
+          _representante: number
+        }
+        Returns: Json
+      }
+      legado_bi_opcoes: { Args: never; Returns: Json }
+      legado_bi_painel: {
+        Args: {
+          _ate?: string
+          _de?: string
+          _praca?: number
+          _representante?: number
+        }
+        Returns: Json
+      }
+      legado_bi_praca_categoria: {
+        Args: { _ate?: string; _de?: string; _representante?: number }
+        Returns: Json
+      }
+      legado_bi_produtos: {
+        Args: {
+          _ate?: string
+          _categoria?: string
+          _de?: string
+          _limite?: number
+          _praca?: number
+          _representante?: number
+        }
+        Returns: Json
+      }
+      legado_bi_top: {
+        Args: {
+          _ate?: string
+          _criterio?: string
+          _de?: string
+          _limite?: number
+          _min_maletas?: number
+          _por_praca?: boolean
+          _praca?: number
+          _representante?: number
+        }
+        Returns: Json
+      }
       legado_cadastro_sem_operacao: {
         Args: { _party: string }
         Returns: boolean
@@ -14827,6 +14922,7 @@ export type Database = {
       }
       legado_consultoras_cadastrar: { Args: { _lote: string }; Returns: Json }
       legado_exigir_importador: { Args: never; Returns: undefined }
+      legado_fmt_int: { Args: { _n: number }; Returns: string }
       legado_importar: {
         Args: { _linhas: Json; _lote: string; _tipo: string }
         Returns: Json

@@ -26,7 +26,7 @@ mkdir -p "$BASE/pgdata"
 [ -n "$AS" ] && chown -R 1000:1000 "$BASE"
 
 export HOME=$BASE
-$AS $SEM_PG initdb -D "$BASE/pgdata" -U postgres --auth=trust >"$BASE/initdb.log" 2>&1
+$AS $SEM_PG initdb -D "$BASE/pgdata" -U postgres --auth=trust -E UTF8 --locale=C >"$BASE/initdb.log" 2>&1
 $AS $SEM_PG pg_ctl -D "$BASE/pgdata" \
   -o "-k $BASE -p $PORTA -c listen_addresses=127.0.0.1 -c max_connections=100" \
   -l "$BASE/pg.log" -w start >/dev/null

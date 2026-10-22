@@ -15172,6 +15172,7 @@ export type Database = {
           _agrupar?: string
           _ate?: string
           _categoria?: string
+          _data?: string
           _de?: string
           _limite?: number
           _praca?: number

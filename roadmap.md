@@ -1,8 +1,9 @@
 # Roadmap
 ## Unificações autorizadas — 22/10
-- [ ] Reconferir Larissa Persinato e Saylla por documento, nome e endereço; não unir homônimos nem alterar Daniel/guilherme.
-- [ ] Executar somente pares confirmados pela rotina oficial e verificar histórico, vínculos e valores antes/depois.
-- [ ] Entregar provas; preservar status das consultoras e maletas, sem publicar.
+- [x] Reconferir Larissa Persinato e Saylla por documento, nome e endereço; não unir homônimos nem alterar Daniel/guilherme.
+- [x] Unificar Saylla LC-003392 → LC-007428 pela rotina oficial; títulos, parcelas, valores, vencimentos e auditoria relidos; ficha aberta e recarregada.
+- [ ] Unificar Larissa LC-007427 → LC-003310 — bloqueio: duas fichas de consultora e bairros Centro/Setor 5; exige revisão específica das fichas e confirmação cadastral, sem contornar a proteção.
+- [x] Entregar provas em docs/lardan/UNIFICACOES-2026-10-22.md; nenhum status de consultora alterado, nenhuma maleta modificada, sem publicar.
 ## Larissa — financeiro completo e alvará judicial (19/10)
 - [x] Liberar as 28 permissões financeiras somente para Larissa Reginalda, com autorização, auditoria e sem Master; Configurações/Auditoria abertas na sessão real.
 - [x] Registrar liberação de alvará pela aba Judicial com conta/data, baixa oficial, repetição e estorno protegidos; formulário real aberto sem confirmar valores.

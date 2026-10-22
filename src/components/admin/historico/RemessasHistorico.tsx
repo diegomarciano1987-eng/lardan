@@ -125,11 +125,16 @@ export function RemessasHistorico({ abrir, aoAbrir }: { abrir: number | null; ao
         </label>
         <label className="grid gap-1.5 text-sm lg:col-span-3">
           <span className="ledger-eyebrow">Situação</span>
-          <select className="admin-input" value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="todas">Todas as situações</option>
-            <option value="aberta">Aberta</option>
-            <option value="fechada">Fechada</option>
-          </select>
+          <SmartSelect
+            value={status}
+            onChange={setStatus}
+            options={[
+              { value: "todas", label: "Todas as situações" },
+              { value: "aberta", label: "Aberta" },
+              { value: "fechada", label: "Fechada" },
+            ]}
+            placeholder="Situação"
+          />
         </label>
         <label className="grid gap-1.5 text-sm lg:col-span-4">
           <span className="ledger-eyebrow">Período</span>

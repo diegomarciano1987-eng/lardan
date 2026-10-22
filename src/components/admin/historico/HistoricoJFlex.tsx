@@ -28,6 +28,14 @@ type RelatorioVinculo = {
   pracas: { total: number; vinculadas: number };
   produtos: { total: number; vinculados: number };
 };
+type Resumo = {
+  arquivos: Record<string, number>;
+  vinculo: { consultoras_vinculadas: number; consultoras_com_maleta_sem_cadastro: number };
+  periodo: { de: string; ate: string } | null;
+  numeracao: { ultima_remessa_jflex: number | null; ultima_remessa_lardan: number | null; proxima_remessa_lardan: number; conflitos: number[] };
+  fiscal: { ultima_nf_por_serie: Record<string, number>; numeros_repetidos: number };
+  totais: { pecas_enviadas: number; pecas_vendidas: number; valor_vendido_cents: number; giro_pct: number | null };
+};
 
 function loteAtual() {
   return `jflex-${new Date().toLocaleString("sv-SE", { timeZone: "America/Sao_Paulo" }).replace(/[-: ]/g, "").slice(0, 12)}`;
@@ -240,9 +248,7 @@ export function HistoricoJFlexImportacao({ ehMaster }: { ehMaster: boolean }) {
     }
   };
 
-  const rs = resumo.data;
-  const numeracao = rs?.numeracao as { ultima_remessa_jflex: number | null; ultima_remessa_lardan: number | null; proxima_remessa_lardan: number; conflitos: number[] } | undefined;
-  const fiscais = rs?.fiscal as { ultima_nf_por_serie: Record<string, number>; numeros_repetidos: number } | undefined;
+  const rs = resumo.data as Resumo | undefined;
 
   return (
     <div className="space-y-8">
@@ -250,16 +256,16 @@ export function HistoricoJFlexImportacao({ ehMaster }: { ehMaster: boolean }) {
       {resumo.isError && <ErrorState message={(resumo.error as Error).message} onRetry={() => void resumo.refetch()} />}
       {rs && (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Cartao rotulo="Registros importados" valor={formatInt((rs.arquivos as Record<string, number> | undefined)?.maletas ?? 0) + " maletas"} />
-          <Cartao rotulo="Período" valor={[rs.periodo?.de, rs.periodo?.ate].filter(Boolean).map((v: string) => v.slice(0, 10).split("-").reverse().join("/")).join(" · ") || "Sem dados"} />
+          <Cartao rotulo="Registros importados" valor={formatInt(rs.arquivos?.maletas ?? 0) + " maletas"} />
+          <Cartao rotulo="Período" valor={[rs.periodo?.de, rs.periodo?.ate].filter(Boolean).map((v) => (v as string).slice(0, 10).split("-").reverse().join("/")).join(" · ") || "Sem dados"} />
           <Cartao rotulo="Peças enviadas · vendidas" valor={`${formatInt(rs.totais?.pecas_enviadas ?? 0)} · ${formatInt(rs.totais?.pecas_vendidas ?? 0)}`} />
           <Cartao rotulo="Valor vendido" valor={brl(rs.totais?.valor_vendido_cents ?? 0)} />
           <Cartao rotulo="Giro" valor={rs.totais?.giro_pct != null ? `${rs.totais.giro_pct}%` : "Sem dados"} />
           <Cartao rotulo="Consultoras ligadas" valor={`${rs.vinculo?.consultoras_vinculadas ?? 0} · sem cadastro: ${rs.vinculo?.consultoras_com_maleta_sem_cadastro ?? 0}`} />
-          <Cartao rotulo="Numeração" valor={`Última JFLEX ${numeracao?.ultima_remessa_jflex ?? "—"} · próxima Lardan ${numeracao?.proxima_remessa_lardan ?? "—"}`} destaque={(numeracao?.conflitos?.length ?? 0) > 0} />
-          <Cartao rotulo="Conflitos de numeração" valor={(numeracao?.conflitos?.length ?? 0) > 0 ? numeracao!.conflitos.join(", ") : "Nenhum"} destaque={(numeracao?.conflitos?.length ?? 0) > 0} />
-          <Cartao rotulo="Última NF por série" valor={Object.entries(fiscais?.ultima_nf_por_serie ?? {}).map(([serie, n]) => `Série ${serie}: ${formatInt(n)}`).join(" · ") || "Sem dados"} />
-          <Cartao rotulo="Números de NF repetidos" valor={formatInt(fiscais?.numeros_repetidos ?? 0)} destaque={(fiscais?.numeros_repetidos ?? 0) > 0} />
+          <Cartao rotulo="Numeração" valor={`Última JFLEX ${rs.numeracao?.ultima_remessa_jflex ?? "—"} · próxima Lardan ${rs.numeracao?.proxima_remessa_lardan ?? "—"}`} destaque={(rs.numeracao?.conflitos?.length ?? 0) > 0} />
+          <Cartao rotulo="Conflitos de numeração" valor={(rs.numeracao?.conflitos?.length ?? 0) > 0 ? rs.numeracao!.conflitos.join(", ") : "Nenhum"} destaque={(rs.numeracao?.conflitos?.length ?? 0) > 0} />
+          <Cartao rotulo="Última NF por série" valor={Object.entries(rs.fiscal?.ultima_nf_por_serie ?? {}).map(([serie, n]) => `Série ${serie}: ${formatInt(n)}`).join(" · ") || "Sem dados"} />
+          <Cartao rotulo="Números de NF repetidos" valor={formatInt(rs.fiscal?.numeros_repetidos ?? 0)} destaque={(rs.fiscal?.numeros_repetidos ?? 0) > 0} />
         </div>
       )}
 

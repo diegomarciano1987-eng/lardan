@@ -1,4 +1,8 @@
 # Roadmap
+## Pacote 0123 — acertos com remessa aberta (22/10)
+- [x] Aplicar SQL exato pela ferramenta oficial e atualizar leitura do ranking, teste e documentação do pacote.
+- [x] Recriar bancada e executar toda a suíte isolada: 335/0; base real: 22.977 acertos, 36/36 meses iguais; ranking Master com 30 linhas reais.
+- [x] Entregar provas e limitações em docs/lardan/APLICACAO-0123-PROVAS.md e anexos; não publicar.
 ## Histórico JFlex — pacote recebido em 22/10
 - [ ] Na carga operacional das maletas na rua, ativar consultoras vinculadas e atribuir a praça da remessa; aguarda arquivos de maletas e revisão do caminho de carga, separado do histórico somente leitura.
 - [x] Conferir 0112 exata e conflitos; aplicada pela ferramenta oficial, sem alterar pacote.

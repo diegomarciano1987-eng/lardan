@@ -64,3 +64,7 @@ O relatório de vendas do SmallData soma o **valor cobrado no acerto** de cada c
 - `legado_maletas.acerto_divergente`: o acerto difere em mais de R$ 1 das peças marcadas como vendidas no próprio SmallData. São 36 acertos em ~23 mil, somando R$ 76,6 mil de peças "vendidas" que o acerto não cobrou. Exemplo: remessa 644, consultora 6742, com 76 peças devolvidas no resumo da maleta e nenhuma no detalhe das peças.
 - O BI e a série mensal têm o parâmetro `_data`: `acerto` (padrão) ou `saida`. A tela tem o seletor "Contar a venda pelo mês do acerto / mês de saída".
 - Peças vendidas e giro continuam vindo do detalhe das peças.
+
+## Acerto com a remessa aberta (0123)
+
+No SmallData a consultora é acertada uma a uma e a remessa só fecha quando a última maleta volta. Ficha, resumo, ranking livre e sugestão de montagem exigiam remessa encerrada e deixavam de fora os acertos recentes. Desde a 0123 conta toda maleta com acerto. O ranking livre filtra pela data do acerto (ou pela saída, com `_data = 'saida'`). A série mensal soma também os cadastros internos. A comparação dos 36 meses na base compartilhada é registrada no relatório de aplicação da 0123; o resultado depende da importação dos acertos.

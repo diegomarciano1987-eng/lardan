@@ -66,6 +66,7 @@ import { Route as AuthenticatedAdminCobrancaRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminEstoqueRouteImport } from './routes/_authenticated/admin/estoque'
 import { Route as AuthenticatedAdminFinanceiroRouteRouteImport } from './routes/_authenticated/admin/financeiro/route'
+import { Route as AuthenticatedAdminHistoricoJflexRouteImport } from './routes/_authenticated/admin/historico-jflex'
 import { Route as AuthenticatedAdminImportacaoRouteImport } from './routes/_authenticated/admin/importacao'
 import { Route as AuthenticatedAdminIntegracoesRouteImport } from './routes/_authenticated/admin/integracoes'
 import { Route as AuthenticatedAdminLeadsRouteImport } from './routes/_authenticated/admin/leads'
@@ -427,6 +428,12 @@ const AuthenticatedAdminFinanceiroRouteRoute =
   AuthenticatedAdminFinanceiroRouteRouteImport.update({
     id: '/financeiro',
     path: '/financeiro',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminHistoricoJflexRoute =
+  AuthenticatedAdminHistoricoJflexRouteImport.update({
+    id: '/historico-jflex',
+    path: '/historico-jflex',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminImportacaoRoute =
@@ -854,6 +861,7 @@ export interface FileRoutesByFullPath {
   '/admin/cobranca': typeof AuthenticatedAdminCobrancaRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
+  '/admin/historico-jflex': typeof AuthenticatedAdminHistoricoJflexRoute
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
@@ -973,6 +981,7 @@ export interface FileRoutesByTo {
   '/admin/cobranca': typeof AuthenticatedAdminCobrancaRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
+  '/admin/historico-jflex': typeof AuthenticatedAdminHistoricoJflexRoute
   '/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
@@ -1096,6 +1105,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cobranca': typeof AuthenticatedAdminCobrancaRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/estoque': typeof AuthenticatedAdminEstoqueRoute
+  '/_authenticated/admin/historico-jflex': typeof AuthenticatedAdminHistoricoJflexRoute
   '/_authenticated/admin/importacao': typeof AuthenticatedAdminImportacaoRoute
   '/_authenticated/admin/integracoes': typeof AuthenticatedAdminIntegracoesRoute
   '/_authenticated/admin/leads': typeof AuthenticatedAdminLeadsRoute
@@ -1219,6 +1229,7 @@ export interface FileRouteTypes {
     | '/admin/cobranca'
     | '/admin/configuracoes'
     | '/admin/estoque'
+    | '/admin/historico-jflex'
     | '/admin/importacao'
     | '/admin/integracoes'
     | '/admin/leads'
@@ -1338,6 +1349,7 @@ export interface FileRouteTypes {
     | '/admin/cobranca'
     | '/admin/configuracoes'
     | '/admin/estoque'
+    | '/admin/historico-jflex'
     | '/admin/importacao'
     | '/admin/integracoes'
     | '/admin/leads'
@@ -1460,6 +1472,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cobranca'
     | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/estoque'
+    | '/_authenticated/admin/historico-jflex'
     | '/_authenticated/admin/importacao'
     | '/_authenticated/admin/integracoes'
     | '/_authenticated/admin/leads'
@@ -1981,6 +1994,13 @@ declare module '@tanstack/react-router' {
       path: '/financeiro'
       fullPath: '/admin/financeiro'
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroRouteRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/historico-jflex': {
+      id: '/_authenticated/admin/historico-jflex'
+      path: '/historico-jflex'
+      fullPath: '/admin/historico-jflex'
+      preLoaderRoute: typeof AuthenticatedAdminHistoricoJflexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/importacao': {
@@ -2507,6 +2527,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCobrancaRoute: typeof AuthenticatedAdminCobrancaRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminEstoqueRoute: typeof AuthenticatedAdminEstoqueRoute
+  AuthenticatedAdminHistoricoJflexRoute: typeof AuthenticatedAdminHistoricoJflexRoute
   AuthenticatedAdminImportacaoRoute: typeof AuthenticatedAdminImportacaoRoute
   AuthenticatedAdminIntegracoesRoute: typeof AuthenticatedAdminIntegracoesRoute
   AuthenticatedAdminLeadsRoute: typeof AuthenticatedAdminLeadsRoute
@@ -2553,6 +2574,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminCobrancaRoute: AuthenticatedAdminCobrancaRoute,
     AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
     AuthenticatedAdminEstoqueRoute: AuthenticatedAdminEstoqueRoute,
+    AuthenticatedAdminHistoricoJflexRoute:
+      AuthenticatedAdminHistoricoJflexRoute,
     AuthenticatedAdminImportacaoRoute: AuthenticatedAdminImportacaoRoute,
     AuthenticatedAdminIntegracoesRoute: AuthenticatedAdminIntegracoesRoute,
     AuthenticatedAdminLeadsRoute: AuthenticatedAdminLeadsRoute,

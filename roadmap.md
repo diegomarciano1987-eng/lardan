@@ -1,4 +1,8 @@
 # Roadmap
+## Histórico JFlex — pacote recebido em 22/10
+- [ ] Conferir 0112 exata e conflitos; aplicar apenas pela ferramenta oficial, sem alterar pacote sem decisão do Diego.
+- [ ] Integrar importação Master, fichas, remessas, rede, início consultora, sugestão de montagem e referência fiscal usando a biblioteca fornecida.
+- [ ] Rodar testes isolados, conferir permissões e telas vazias; não importar CSV reais nem publicar.
 ## Unificações autorizadas — 22/10
 - [x] Reconferir Larissa Persinato e Saylla por documento, nome e endereço; não unir homônimos nem alterar Daniel/guilherme.
 - [x] Unificar Saylla LC-003392 → LC-007428 pela rotina oficial; títulos, parcelas, valores, vencimentos e auditoria relidos; ficha aberta e recarregada.

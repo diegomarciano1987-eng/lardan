@@ -7,6 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, X } from "lucide-react";
 import { EmptyState, ErrorState, Skeleton, StatusBadge, formatBRLFromCents } from "@/components/admin/ui";
+import { SmartSelect } from "@/components/premium/SmartSelect";
 import { DateRangeField } from "@/components/premium/DateRangeField";
 import type { DateRange } from "react-day-picker";
 import { remessaHistorico, remessasHistorico, type RemessaHistorico } from "@/lib/historico-jflex";

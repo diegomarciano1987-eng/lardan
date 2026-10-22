@@ -75,7 +75,7 @@ function BuscaPessoa({ onEscolher }: { onEscolher: (partyId: string) => void }) 
   const opcoes = useQuery({
     queryKey: ["historico-jflex", "pessoas", termo],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("list_parties", { _search: termo.trim() || null, _limit: 20, _offset: 0 });
+      const { data, error } = await supabase.rpc("list_parties", { _search: termo.trim() || undefined, _limit: 20, _offset: 0 });
       if (error) throw error;
       return ((data ?? []) as unknown as { id: string; display_name: string; code?: string | null }[]).map((p) => ({
         value: p.id,

@@ -1,4 +1,8 @@
 # Roadmap
+## Unificações autorizadas — 22/10
+- [ ] Reconferir Larissa Persinato e Saylla por documento, nome e endereço; não unir homônimos nem alterar Daniel/guilherme.
+- [ ] Executar somente pares confirmados pela rotina oficial e verificar histórico, vínculos e valores antes/depois.
+- [ ] Entregar provas; preservar status das consultoras e maletas, sem publicar.
 ## Larissa — financeiro completo e alvará judicial (19/10)
 - [x] Liberar as 28 permissões financeiras somente para Larissa Reginalda, com autorização, auditoria e sem Master; Configurações/Auditoria abertas na sessão real.
 - [x] Registrar liberação de alvará pela aba Judicial com conta/data, baixa oficial, repetição e estorno protegidos; formulário real aberto sem confirmar valores.

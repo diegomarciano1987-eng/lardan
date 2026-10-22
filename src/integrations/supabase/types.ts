@@ -14808,6 +14808,12 @@ export type Database = {
         Args: { _cycle: string; _payload?: Json }
         Returns: Json
       }
+      legado_cadastro_sem_operacao: {
+        Args: { _party: string }
+        Returns: boolean
+      }
+      legado_cadastros_ajustar: { Args: { _aplicar?: boolean }; Returns: Json }
+      legado_cadastros_revisao: { Args: never; Returns: Json }
       legado_categoria_tipo_definir: {
         Args: { _categoria: string; _tipo: string }
         Returns: undefined
@@ -14824,6 +14830,10 @@ export type Database = {
       legado_importar: {
         Args: { _linhas: Json; _lote: string; _tipo: string }
         Returns: Json
+      }
+      legado_maleta_valor_devolvido: {
+        Args: { _codcli: number; _kit: number; _remessa: number }
+        Returns: number
       }
       legado_pendencias_vinculo: {
         Args: { _busca?: string; _limite?: number }
@@ -14865,6 +14875,10 @@ export type Database = {
         Returns: Json
       }
       legado_resumo: { Args: never; Returns: Json }
+      legado_status_esperado: {
+        Args: { _codcli: number }
+        Returns: Database["public"]["Enums"]["party_status"]
+      }
       legado_vincular: { Args: { _gravar_codigos?: boolean }; Returns: Json }
       limpeza_homolog_total: { Args: { _executar?: boolean }; Returns: Json }
       list_parties: {

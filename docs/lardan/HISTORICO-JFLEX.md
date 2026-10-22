@@ -44,3 +44,15 @@ Os CSV têm dados pessoais e **não ficam no repositório**: o Master envia pela
 
 Todas: Simples Nacional (CRT 1), CSOSN 102, PIS/COFINS 07, NCM 7117.19.00, origem 0, UND, frete 9.
 Série 2; última nota do JFLEX: nº 73.963 (22/10/2026). Houve 6 números repetidos no JFLEX (rejeição de duplicidade).
+
+## Montagem por leitor (migração 0113)
+
+`montagem_metas_ciclo(maleta, total)` alimenta os cartões de meta da tela de bipagem (`MontagemLeitor`):
+
+- **Metas por tipo de peça**: `montagem_sugestao` (mistura do que ela vende com o que a praça vende, k = 30) somada por tipo do leitor via `legado_categoria_tipo`. Categoria sem de-para conta como "outro".
+- **Total**: mediana das 5 últimas maletas fechadas dela com 10+ peças (kit de complemento não puxa a média); sem histórico, `pecas_cliente_nova`; o montador ajusta de 5 em 5.
+- **Modo**: abre no histórico com 10+ peças vendidas (confiança média/alta); senão, no padrão de `remessa_parametros`.
+- **Destaques**: índice = (giro da categoria ÷ giro geral dela) ÷ (o mesmo na praça). ≥ 1,25 vende bem, ≤ 0,75 vende pouco, só com 20+ peças recebidas da categoria. Compara o mix, não o volume: quem vende muito de tudo não vira "forte em tudo".
+- **Campeãs**: variantes dos 10 produtos que ela mais vendeu (precisa do vínculo produto do JFLEX → produto do Lardan).
+
+Exemplo real (carga sem dados pessoais, consultora com 46 maletas e 974 peças vendidas, praça Teodoro Sampaio): o padrão mandaria 35 peças (25 brincos, 4 anéis, 3 colares, 3 pulseiras); pelo histórico vão 80 peças: 35 brincos, 14 anéis, 11 colares, 13 pulseiras, 4 tornozeleiras e 3 outros, com destaque para pulseira/bracelete e anel.

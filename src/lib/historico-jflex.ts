@@ -160,6 +160,42 @@ export const redeMensal = (f: { de?: string | null; ate?: string | null; praca?:
   rpc<MesRede[]>("legado_rede_mensal", { _de: f.de ?? null, _ate: f.ate ?? null, _praca: f.praca ?? null, _representante: f.representante ?? null });
 export const sugestaoMontagem = (party: string, total: number) => rpc<SugestaoMontagem>("montagem_sugestao", { _party: party, _total: total });
 export const resumoHistorico = () => rpc<Record<string, unknown>>("legado_resumo");
+
+// ------------------------------------------- montagem por leitor (0113) ---
+export type TipoMeta = "brinco" | "anel" | "colar" | "pulseira" | "tornozeleira" | "outro";
+export interface MetasMontagem {
+  party_id: string | null;
+  vinculada: boolean;
+  /** "historico" quando há 10+ peças vendidas no JFLEX; senão "padrao" (remessa_parametros) */
+  modo_sugerido: "historico" | "padrao";
+  confianca: "alta" | "media" | "baixa";
+  pecas_vendidas_historico?: number;
+  maletas_fechadas?: number;
+  referencia?: "praca" | "rede";
+  praca_nome?: string | null;
+  total_pecas: number;
+  /** historico = média das 3 últimas maletas dela; informado = o montador mudou; parametro = padrão */
+  total_origem: "historico" | "informado" | "parametro";
+  metas_padrao: Record<TipoMeta, number>;
+  metas_historico: Record<TipoMeta, number> | null;
+  categorias: (SugestaoMontagem["categorias"][number] & { tipo: TipoMeta })[];
+  /** giro geral dela e da referência (praça ou rede), maletas fechadas */
+  giro_geral_pct?: number | null;
+  referencia_giro_geral_pct?: number | null;
+  /** onde o mix dela foge da praça: índice = (giro da categoria ÷ giro geral dela) ÷ (o mesmo na praça) */
+  destaques: { categoria: string; tipo: TipoMeta; sinal: "forte" | "fraco"; indice: number; giro_pct: number; referencia_giro_pct: number }[];
+  /** últimas 3 remessas dela, somando as maletas de cada remessa */
+  ultimas_maletas: { remessa: number; fechamento: string; maletas: number; pecas_enviadas: number; pecas_vendidas: number; giro_pct: number | null; valor_vendido_cents: number }[];
+  /** variantes dos 10 produtos que ela mais vendeu: a tela marca "campeã dela" ao bipar */
+  variantes_campeas: string[];
+  como_ler: string;
+}
+/** Metas da maleta aberta no leitor. total = null usa a média das últimas maletas dela. Só leitura. */
+export const metasMontagem = (cycleId: string, total: number | null = null) =>
+  rpc<MetasMontagem>("montagem_metas_ciclo", { _cycle: cycleId, _total: total });
+export const categoriaTipoLista = () => rpc<{ categoria: string; tipo: TipoMeta; mapeada: boolean }[]>("legado_categoria_tipo_lista");
+export const categoriaTipoDefinir = (categoria: string, tipo: TipoMeta) =>
+  rpc("legado_categoria_tipo_definir", { _categoria: categoria, _tipo: tipo });
 export const roteiroFiscalObservado = () => rpc<Record<string, unknown>[]>("fiscal_roteiro_observado");
 
 // ------------------------------------------------------- importação (Master) ---

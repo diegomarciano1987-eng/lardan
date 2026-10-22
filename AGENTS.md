@@ -38,3 +38,4 @@
 - Fiscal results (attempt/authorization/rejection/homologated cancellation): service_role only (db/pendentes/11). Authorization requires nfe_chave_valida with emitter CNPJ; model/series/number from key. Why: no manual authorization.
 - fiscal_settings emission/provider/environment/emitter changes: Master only, provider+emitter+environment required before activation, disable before environment change, audit fiscal.configuracao_alterada. Why: controlled fiscal switch.
 - fiscal_prontidao: counts only, no personal data. Why: privacy.
+- Montagem-by-scanner goals come from montagem_metas_ciclo (0113): read-only, staff only, categories mapped by legado_categoria_tipo (Master edits via legado_categoria_tipo_definir, audited); on error the scanner falls back to remessa_parametros. No text input in the scanner overlay (focus returns to the barcode field every 400 ms). Why: suggestion never touches stock or the kit.

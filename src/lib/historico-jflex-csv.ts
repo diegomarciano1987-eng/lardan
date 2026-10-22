@@ -1,5 +1,5 @@
 /**
- * Leitura dos CSV do pacote "LARDAN_HISTORICO_JFLEX" (gerado pelo extrator).
+ * Leitura dos CSV do pacote "LARDAN_HISTORICO_SmallData" (gerado pelo extrator).
  * Puro, sem dependência: aspas, vírgulas e quebras de linha dentro de campo,
  * BOM e fim de linha Windows. Todo valor fica como texto: o banco converte.
  */

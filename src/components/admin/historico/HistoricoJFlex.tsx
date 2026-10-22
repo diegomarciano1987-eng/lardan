@@ -1,5 +1,5 @@
 /**
- * Tela de importação do histórico JFLEX (só Master). Os CSV têm nome, CPF e
+ * Tela de importação do histórico SmallData (só Master). Os CSV têm nome, CPF e
  * endereço: ficam só na memória do navegador, sem log e sem repositório.
  */
 import * as React from "react";
@@ -265,14 +265,14 @@ export function HistoricoJFlexImportacao({ ehMaster }: { ehMaster: boolean }) {
           <Cartao rotulo="Valor vendido" valor={brl(rs.totais?.valor_vendido_cents ?? 0)} />
           <Cartao rotulo="Giro" valor={rs.totais?.giro_pct != null ? `${rs.totais.giro_pct}%` : "Sem dados"} />
           <Cartao rotulo="Consultoras ligadas" valor={`${rs.vinculo?.consultoras_vinculadas ?? 0} · sem cadastro: ${rs.vinculo?.consultoras_com_maleta_sem_cadastro ?? 0}`} />
-          <Cartao rotulo="Numeração" valor={`Última JFLEX ${rs.numeracao?.ultima_remessa_jflex ?? "—"} · próxima Lardan ${rs.numeracao?.proxima_remessa_lardan ?? "—"}`} destaque={(rs.numeracao?.conflitos?.length ?? 0) > 0} />
+          <Cartao rotulo="Numeração" valor={`Última SmallData ${rs.numeracao?.ultima_remessa_jflex ?? "—"} · próxima Lardan ${rs.numeracao?.proxima_remessa_lardan ?? "—"}`} destaque={(rs.numeracao?.conflitos?.length ?? 0) > 0} />
           <Cartao rotulo="Conflitos de numeração" valor={(rs.numeracao?.conflitos?.length ?? 0) > 0 ? rs.numeracao!.conflitos.join(", ") : "Nenhum"} destaque={(rs.numeracao?.conflitos?.length ?? 0) > 0} />
           <Cartao rotulo="Última NF por série" valor={Object.entries(rs.fiscal?.ultima_nf_por_serie ?? {}).map(([serie, n]) => `Série ${serie}: ${formatInt(n)}`).join(" · ") || "Sem dados"} />
           <Cartao rotulo="Números de NF repetidos" valor={formatInt(rs.fiscal?.numeros_repetidos ?? 0)} destaque={(rs.fiscal?.numeros_repetidos ?? 0) > 0} />
         </div>
       )}
 
-      <Panel title="Importação dos arquivos do JFLEX" flush>
+      <Panel title="Importação dos arquivos do SmallData" flush>
         <div className="px-6 py-5">
           <label className="flex cursor-pointer flex-wrap items-center gap-3 text-sm">
             <span className="admin-btn admin-btn-primary">
@@ -375,7 +375,7 @@ function CategoriasTipo({ ehMaster }: { ehMaster: boolean }) {
   return (
     <Panel title="Categorias → tipo de peça" flush>
       <p className="px-6 pt-4 text-sm text-ledger-muted">
-        Define em qual cartão da bipagem (Brincos, Anéis, Colares…) cada categoria do JFLEX entra nas metas. Categoria sem ajuste conta como "Outros".
+        Define em qual cartão da bipagem (Brincos, Anéis, Colares…) cada categoria do SmallData entra nas metas. Categoria sem ajuste conta como "Outros".
       </p>
       {q.isLoading && <div className="space-y-2 p-6"><Skeleton className="h-10" /><Skeleton className="h-10" /></div>}
       {q.isError && <div className="px-6 py-4"><ErrorState message={(q.error as Error).message} onRetry={() => void q.refetch()} /></div>}
@@ -385,7 +385,7 @@ function CategoriasTipo({ ehMaster }: { ehMaster: boolean }) {
           <table className="w-full min-w-[36rem] text-sm">
             <thead className="border-b border-line-soft text-left text-xs uppercase tracking-[0.08em] text-ledger-muted">
               <tr>
-                <th className="px-6 py-3">Categoria do JFLEX</th>
+                <th className="px-6 py-3">Categoria do SmallData</th>
                 <th className="px-6 py-3">Situação</th>
                 <th className="px-6 py-3">Tipo de peça</th>
               </tr>
@@ -393,7 +393,7 @@ function CategoriasTipo({ ehMaster }: { ehMaster: boolean }) {
             <tbody>
               {q.data.map((c) => (
                 <tr key={c.categoria} className={`border-b border-line-soft last:border-0 ${c.mapeada ? "" : "bg-warning/10"}`}>
-                  <td className="px-6 py-3 font-medium text-ledger-text">{c.categoria.trim() || "(sem categoria no JFLEX)"}</td>
+                  <td className="px-6 py-3 font-medium text-ledger-text">{c.categoria.trim() || "(sem categoria no SmallData)"}</td>
                   <td className="px-6 py-3">
                     {c.mapeada ? <StatusBadge tone="success">Ajustada</StatusBadge> : <StatusBadge tone="warning">Sem ajuste</StatusBadge>}
                   </td>

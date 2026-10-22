@@ -1,6 +1,6 @@
 /**
  * Cartão "O que eu mais vendo" para o início da consultora: leitura do
- * histórico do JFLEX dela, com linguagem simples. Escondido quando o cadastro
+ * histórico do SmallData dela, com linguagem simples. Escondido quando o cadastro
  * dela não está ligado a nenhuma consultora do histórico.
  */
 import { useQuery } from "@tanstack/react-query";

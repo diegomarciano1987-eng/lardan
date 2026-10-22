@@ -1,6 +1,6 @@
 /**
  * Painel "Sugestão de composição" na montagem da maleta: só mostra a leitura
- * do histórico JFLEX. Não reserva, não acrescenta peça e não muda nada.
+ * do histórico SmallData. Não reserva, não acrescenta peça e não muda nada.
  */
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -38,7 +38,7 @@ export function SugestaoMontagem({ partyId }: { partyId: string }) {
   const d = q.data;
 
   return (
-    <Panel title="Sugestão de composição (histórico JFLEX)">
+    <Panel title="Sugestão de composição (histórico SmallData)">
       <div className="flex flex-wrap items-end gap-4">
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Total de peças</span>

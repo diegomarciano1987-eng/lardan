@@ -185,7 +185,7 @@ function FaixaHistorico({
           <span className={`mr-2 rounded-full px-2 py-0.5 text-xs font-semibold ${dados.confianca === "alta" ? "bg-success/15 text-success" : dados.confianca === "media" ? "bg-warning/15 text-warning" : "bg-surface-muted text-ledger-muted"}`}>
             {CONFIANCA_LABEL[dados.confianca]}
           </span>
-          {dados.pecas_vendidas_historico ?? 0} peças vendidas em {dados.maletas_fechadas ?? 0} maletas no JFLEX
+          {dados.pecas_vendidas_historico ?? 0} peças vendidas em {dados.maletas_fechadas ?? 0} maletas no SmallData
           {typeof dados.giro_geral_pct === "number" && ` · gira ${dados.giro_geral_pct}% do que recebe`}
           {" · "}
           {dados.referencia === "praca" ? `praça ${dados.praca_nome ?? ""}` : "rede"}
@@ -193,7 +193,7 @@ function FaixaHistorico({
         </p>
       ) : (
         <p className="text-sm text-ledger-muted">
-          {dados.vinculada ? "Pouco histórico de venda: metas do padrão." : "Sem histórico do JFLEX ligado a esta consultora: metas do padrão."}
+          {dados.vinculada ? "Pouco histórico de venda: metas do padrão." : "Sem histórico do SmallData ligado a esta consultora: metas do padrão."}
         </p>
       )}
 
@@ -587,7 +587,7 @@ export function MontagemLeitor({
                 </dl>
                 {(historico.data?.ultimas_maletas.length ?? 0) > 0 && (
                   <div className="border-t border-line pt-3">
-                    <p className="ledger-eyebrow mb-1">Últimas remessas (JFLEX)</p>
+                    <p className="ledger-eyebrow mb-1">Últimas remessas (SmallData)</p>
                     <ul className="space-y-1 text-sm tabular-nums">
                       {historico.data!.ultimas_maletas.map((m) => (
                         <li key={m.remessa} className="flex justify-between gap-2">

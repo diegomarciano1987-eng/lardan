@@ -168,7 +168,7 @@ function Cockpit() {
       )}
 
       <nav aria-label="Seções da devedora" className="flex flex-wrap gap-1.5 rounded-2xl border border-border bg-muted/50 p-1.5">
-        {(([["resumo", "Resumo", LayoutDashboard], ...(ehJudicial ? [["judicial", "Judicial", Gavel]] : [["acordos", "Acordos e simulações", Calculator]]), ["financeiro", "Financeiro completo", Wallet], ["titulos", "Títulos e parcelas", ListOrdered], ["linha", "Linha do tempo", History], ["promessas", "Negociações e promessas", Handshake], ["agenda", "Agenda", CalendarClock], ["dados", "Dados cadastrais", IdCard], ["hist", "Histórico JFLEX", Archive]]) as [Aba, string, typeof Gavel][]).map(([k, r, I]) => (
+        {(([["resumo", "Resumo", LayoutDashboard], ...(ehJudicial ? [["judicial", "Judicial", Gavel]] : [["acordos", "Acordos e simulações", Calculator]]), ["financeiro", "Financeiro completo", Wallet], ["titulos", "Títulos e parcelas", ListOrdered], ["linha", "Linha do tempo", History], ["promessas", "Negociações e promessas", Handshake], ["agenda", "Agenda", CalendarClock], ["dados", "Dados cadastrais", IdCard], ["hist", "Histórico SmallData", Archive]]) as [Aba, string, typeof Gavel][]).map(([k, r, I]) => (
           <button key={k} onClick={() => setAba(k)} aria-current={aba === k ? "page" : undefined}
             className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-medium transition ${aba === k ? (k === "judicial" ? "bg-bronze text-primary-foreground shadow-sm" : "bg-foreground text-background shadow-sm") : "text-foreground/70 hover:bg-background hover:text-foreground"}`}>
             <I className="h-4 w-4" />{r}

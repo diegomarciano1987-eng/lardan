@@ -251,7 +251,7 @@ function RemessasPage() {
           Operação Lardan
         </button>
         <button type="button" className={fonte === "jflex" ? "admin-btn admin-btn-primary" : "admin-btn"} onClick={() => setFonte("jflex")}>
-          Histórico JFLEX
+          Histórico SmallData
         </button>
       </nav>
 

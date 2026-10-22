@@ -1,5 +1,5 @@
 /**
- * Histórico do JFLEX ligado a um cadastro de pessoa. Somente leitura sobre a
+ * Histórico do SmallData ligado a um cadastro de pessoa. Somente leitura sobre a
  * operação; o banco decide quem vê (consultora só vê o próprio histórico).
  */
 import { useQuery } from "@tanstack/react-query";
@@ -61,8 +61,8 @@ export function HistoricoJFlexPessoa({ partyId }: { partyId: string }) {
   if (!d?.vinculada) {
     return (
       <EmptyState
-        title="Nenhum histórico do JFLEX ligado a este cadastro"
-        description="Este cadastro não está ligado a nenhuma consultora do histórico JFLEX. O vínculo manual é feito na tela Histórico JFLEX das Configurações, só pelo Master."
+        title="Nenhum histórico do SmallData ligado a este cadastro"
+        description="Este cadastro não está ligado a nenhuma consultora do histórico SmallData. O vínculo manual é feito na tela Histórico SmallData das Configurações, só pelo Master."
       />
     );
   }
@@ -78,7 +78,7 @@ export function HistoricoJFlexPessoa({ partyId }: { partyId: string }) {
         <Dado rotulo="Ticket médio por maleta" valor={r?.ticket_medio_maleta_cents ? brl(r.ticket_medio_maleta_cents) : "Sem dados"} />
         <Dado rotulo="Maletas perdidas" valor={`${r?.maletas_perdidas ?? 0}`} />
         <Dado rotulo="Peças com defeito" valor={`${r?.pecas_defeito ?? 0}`} />
-        {d.praca?.nome && <Dado rotulo="Praça no JFLEX" valor={d.praca.nome} />}
+        {d.praca?.nome && <Dado rotulo="Praça no SmallData" valor={d.praca.nome} />}
       </div>
 
       <Panel title="Categorias — participação nas vendas e giro comparado à praça">

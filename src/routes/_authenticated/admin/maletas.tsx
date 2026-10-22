@@ -11,6 +11,7 @@ import type { DateRange } from "react-day-picker";
 import { useCapabilities } from "@/lib/capabilities";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, traduzir } from "@/lib/maletas";
+import { RemessasHistorico } from "@/components/admin/historico/RemessasHistorico";
 import { STATUS_REMESSA, buscarRemessas, criarRemessa, dataBR, isoDia, type RemessaCard } from "@/lib/remessas";
 
 export const Route = createFileRoute("/_authenticated/admin/maletas")({
@@ -179,6 +180,8 @@ function RemessasPage() {
   const [praca, setPraca] = React.useState("");
   const [rep, setRep] = React.useState("");
   const [buscaRep, setBuscaRep] = React.useState("");
+  const [fonte, setFonte] = React.useState<"lardan" | "jflex">("lardan");
+  const [remessaAberta, setRemessaAberta] = React.useState<number | null>(null);
   const [periodo, setPeriodo] = React.useState<DateRange | undefined>();
   const [campoData, setCampoData] = React.useState<"emissao" | "acerto">("emissao");
   React.useEffect(() => {
@@ -243,6 +246,19 @@ function RemessasPage() {
         }
       />
 
+      <nav aria-label="Fonte dos dados de remessas" className="flex flex-wrap gap-2">
+        <button type="button" className={fonte === "lardan" ? "admin-btn admin-btn-primary" : "admin-btn"} onClick={() => setFonte("lardan")}>
+          Operação Lardan
+        </button>
+        <button type="button" className={fonte === "jflex" ? "admin-btn admin-btn-primary" : "admin-btn"} onClick={() => setFonte("jflex")}>
+          Histórico JFLEX
+        </button>
+      </nav>
+
+      {fonte === "jflex" ? (
+        <RemessasHistorico abrir={remessaAberta} aoAbrir={setRemessaAberta} />
+      ) : (
+        <>
       <Panel>
         <div className="grid gap-4 lg:grid-cols-12">
           <label className="grid gap-1.5 text-sm lg:col-span-5">
@@ -325,6 +341,8 @@ function RemessasPage() {
         <BriefcaseBusiness aria-hidden className="size-4" />
         Peças em trânsito, divergentes ou reservadas não contam como disponíveis para venda.
       </p>
+        </>
+      )}
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { MapaRede, type ValorTerritorio } from "@/components/admin/rede/MapaRede";
 import { PainelTerritorio } from "@/components/admin/rede/PainelTerritorio";
 import { CoberturaRede } from "@/components/admin/rede/CoberturaRede";
+import { RedeHistorico } from "@/components/admin/historico/RedeHistorico";
 import { CidadeConsultoras } from "@/components/admin/rede/CidadeConsultoras";
 import { OPCOES_UF } from "@/lib/br/ufs";
 import { UF_CODIGO_IBGE, CODIGO_IBGE_UF, type Malha } from "@/lib/rede/geo";
@@ -36,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/admin/rede")({
 });
 
 type Camada = "quantidade" | "ativas" | "concentracao";
-type Aba = "mapa" | "cobertura";
+type Aba = "mapa" | "cobertura" | "jflex";
 
 function RedePage() {
   const caps = useCapabilities();
@@ -281,7 +282,7 @@ function RedePage() {
       </Panel>
 
       <nav className="flex gap-2" aria-label="Visões da rede">
-        {(["mapa", "cobertura"] as Aba[]).map((a) => (
+        {(["mapa", "cobertura", "jflex"] as Aba[]).map((a) => (
           <button
             key={a}
             type="button"
@@ -292,10 +293,12 @@ function RedePage() {
                 : "admin-btn"
             }
           >
-            {a === "mapa" ? "Mapa territorial" : "Cobertura"}
+            {a === "mapa" ? "Mapa territorial" : a === "cobertura" ? "Cobertura" : "Histórico JFLEX"}
           </button>
         ))}
       </nav>
+
+      {aba === "jflex" && <RedeHistorico />}
 
       {aba === "mapa" && uf && ibge ? (
         <CidadeConsultoras key={ibge} ibge={ibge} uf={uf} nome={titulo} onVoltar={() => setIbge(null)} />

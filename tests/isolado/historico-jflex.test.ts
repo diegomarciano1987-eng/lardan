@@ -66,6 +66,14 @@ beforeAll(async () => {
   for (const n of ["Dupla 1", "Dupla 2"]) {
     await adm.unsafe(`insert into public.parties (kind, display_name, legal_name, status, doc) values ('pessoa',$1,$1,'ativo',$2)`, [`ISO ${n} ${base}`, cpfDuplo]);
   }
+  // Roteiro fiscal observado no JFLEX: as mesmas referências já cadastradas no
+  // projeto, reproduzidas aqui de forma idempotente para a bancada.
+  await adm.unsafe(`insert into public.fiscal_roteiro_referencia (operacao,natureza,cfop_interno,cfop_interestadual,tipo_documento,finalidade,csosn,pis_cst,cofins_cst,ncm_padrao,origem,unidade,mod_frete,valor_base,texto_complementar,fonte,observacao) values
+    ('remessa','- REM/CONSIG.','5917','6917','saida','1 normal','102','07','07','71171900','0','UND','9','1/3 do valor de varejo da peça','----- REMESSA: {remessa} KIT: {kit} -----','JFLEX série 2, nov/2023–out/2026 (28.390 notas)','Destinatária pessoa física, consumidor final; 30% das notas para SP (6917).'),
+    ('devolucao','- DEVOLUCAO REMESSA','1918','2918','entrada','4 devolução','102','07','07','71171900','0','UND','9','1/3 do valor de varejo da peça','----- REMESSA: {remessa} KIT: {kit} -----;DEVOLUCAO DAS MERCADORIAS RECEBIDAS EM CONSIGNACAO MERCANTIL ATRAVES DA NF N. {nf_remessa}, DE {data_remessa}','JFLEX série 2 (26.269 notas)','Nota de entrada emitida pela própria Lardan, sempre referenciando a NF de remessa.'),
+    ('venda','- VENDA CONSIGNADO','5114','6114','saida','1 normal','102','07','07','71171900','0','UND','9','1/3 do valor de varejo da peça','----- REMESSA: {remessa} KIT: {kit} -----;SIMPLES FATURAMENTO DE MERCADORIA EM CONSIGNACAO - NF N. {nf_remessa}, DE {data_remessa}','JFLEX série 2 (18.476 notas)','Só as peças vendidas. Não há nota de devolução simbólica no roteiro atual.'),
+    ('perda','- PERDA DE PRODUTOS','5927','6949','saida','1 normal','102','07','07','71171900','0','UND','9','1/3 do valor de varejo da peça','----- REMESSA: {remessa} KIT: {kit} -----;NOTA REFERENTE A PERDA DE MERCADORIA EM CONSIGNACAO','JFLEX série 2 (276 notas)','Fora do PR o JFLEX usou 6949 (outras saídas): confirmar com o contador.')
+    on conflict (operacao) do update set natureza=excluded.natureza, cfop_interno=excluded.cfop_interno, cfop_interestadual=excluded.cfop_interestadual, tipo_documento=excluded.tipo_documento, finalidade=excluded.finalidade, csosn=excluded.csosn, pis_cst=excluded.pis_cst, cofins_cst=excluded.cofins_cst, ncm_padrao=excluded.ncm_padrao, origem=excluded.origem, unidade=excluded.unidade, mod_frete=excluded.mod_frete, valor_base=excluded.valor_base, texto_complementar=excluded.texto_complementar, fonte=excluded.fonte, observacao=excluded.observacao`);
   antes = await contagem();
 });
 

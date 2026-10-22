@@ -119,6 +119,7 @@ import { Route as AuthenticatedFinanceiroSimulacaoIdRouteImport } from './routes
 import { Route as ApiPublicAsaasSyncMatinalRouteImport } from './routes/api/public/asaas/sync-matinal'
 import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
 import { Route as ApiPublicClicksignWebhookRouteImport } from './routes/api/public/clicksign/webhook'
+import { Route as ApiPublicFocusWebhookRouteImport } from './routes/api/public/focus/webhook'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
 import { Route as ApiPublicVitrineImgSplatRouteImport } from './routes/api/public/vitrine-img.$'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -741,6 +742,11 @@ const ApiPublicClicksignWebhookRoute =
     path: '/api/public/clicksign/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicFocusWebhookRoute = ApiPublicFocusWebhookRouteImport.update({
+  id: '/api/public/focus/webhook',
+  path: '/api/public/focus/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMidiaIdRoute = ApiPublicMidiaIdRouteImport.update({
   id: '/api/public/midia/$id',
   path: '/api/public/midia/$id',
@@ -913,6 +919,7 @@ export interface FileRoutesByFullPath {
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
+  '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1033,6 +1040,7 @@ export interface FileRoutesByTo {
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
+  '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1157,6 +1165,7 @@ export interface FileRoutesById {
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
+  '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1281,6 +1290,7 @@ export interface FileRouteTypes {
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
     | '/api/public/clicksign/webhook'
+    | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
     | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
@@ -1401,6 +1411,7 @@ export interface FileRouteTypes {
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
     | '/api/public/clicksign/webhook'
+    | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
     | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
@@ -1524,6 +1535,7 @@ export interface FileRouteTypes {
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
     | '/api/public/clicksign/webhook'
+    | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
     | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
@@ -1588,6 +1600,7 @@ export interface RootRouteChildren {
   ApiPublicAsaasSyncMatinalRoute: typeof ApiPublicAsaasSyncMatinalRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
   ApiPublicClicksignWebhookRoute: typeof ApiPublicClicksignWebhookRoute
+  ApiPublicFocusWebhookRoute: typeof ApiPublicFocusWebhookRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
   ApiPublicVitrineImgSplatRoute: typeof ApiPublicVitrineImgSplatRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -2367,6 +2380,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicClicksignWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/focus/webhook': {
+      id: '/api/public/focus/webhook'
+      path: '/api/public/focus/webhook'
+      fullPath: '/api/public/focus/webhook'
+      preLoaderRoute: typeof ApiPublicFocusWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/midia/$id': {
       id: '/api/public/midia/$id'
       path: '/api/public/midia/$id'
@@ -2705,6 +2725,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAsaasSyncMatinalRoute: ApiPublicAsaasSyncMatinalRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
   ApiPublicClicksignWebhookRoute: ApiPublicClicksignWebhookRoute,
+  ApiPublicFocusWebhookRoute: ApiPublicFocusWebhookRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,
   ApiPublicVitrineImgSplatRoute: ApiPublicVitrineImgSplatRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

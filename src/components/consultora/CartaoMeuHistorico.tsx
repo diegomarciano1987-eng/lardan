@@ -97,6 +97,7 @@ export function CartaoMeuHistorico() {
           </ol>
         </div>
       )}
+      <MinhasComissoes maletas={(d.maletas ?? []) as never} />
     </section>
   );
 }

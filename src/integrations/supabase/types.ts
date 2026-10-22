@@ -6478,6 +6478,69 @@ export type Database = {
         }
         Relationships: []
       }
+      fiscal_roteiro_referencia: {
+        Row: {
+          cfop_interestadual: string | null
+          cfop_interno: string
+          cofins_cst: string | null
+          csosn: string | null
+          finalidade: string
+          fonte: string
+          mod_frete: string | null
+          natureza: string
+          ncm_padrao: string | null
+          observacao: string | null
+          operacao: string
+          origem: string | null
+          pis_cst: string | null
+          referencia_obrigatoria: boolean
+          texto_complementar: string | null
+          tipo_documento: string
+          unidade: string | null
+          valor_base: string | null
+        }
+        Insert: {
+          cfop_interestadual?: string | null
+          cfop_interno: string
+          cofins_cst?: string | null
+          csosn?: string | null
+          finalidade: string
+          fonte: string
+          mod_frete?: string | null
+          natureza: string
+          ncm_padrao?: string | null
+          observacao?: string | null
+          operacao: string
+          origem?: string | null
+          pis_cst?: string | null
+          referencia_obrigatoria?: boolean
+          texto_complementar?: string | null
+          tipo_documento: string
+          unidade?: string | null
+          valor_base?: string | null
+        }
+        Update: {
+          cfop_interestadual?: string | null
+          cfop_interno?: string
+          cofins_cst?: string | null
+          csosn?: string | null
+          finalidade?: string
+          fonte?: string
+          mod_frete?: string | null
+          natureza?: string
+          ncm_padrao?: string | null
+          observacao?: string | null
+          operacao?: string
+          origem?: string | null
+          pis_cst?: string | null
+          referencia_obrigatoria?: boolean
+          texto_complementar?: string | null
+          tipo_documento?: string
+          unidade?: string | null
+          valor_base?: string | null
+        }
+        Relationships: []
+      }
       fiscal_settings: {
         Row: {
           emission_active: boolean
@@ -8640,6 +8703,560 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidatura_stages"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      legado_acertos_praca: {
+        Row: {
+          boleto_cents: number | null
+          cartao_cents: number | null
+          cheque_cents: number | null
+          codigo: number
+          comissao_pct: number | null
+          consultoras_fiado: number | null
+          consultoras_venda: number | null
+          data: string | null
+          deposito_cents: number | null
+          dinheiro_cents: number | null
+          encerrado_em: string | null
+          praca: number | null
+          representante: number | null
+          status: string | null
+          total_desconto_cents: number | null
+          total_fiado_cents: number | null
+          total_remessa_cents: number | null
+          total_venda_cents: number | null
+        }
+        Insert: {
+          boleto_cents?: number | null
+          cartao_cents?: number | null
+          cheque_cents?: number | null
+          codigo: number
+          comissao_pct?: number | null
+          consultoras_fiado?: number | null
+          consultoras_venda?: number | null
+          data?: string | null
+          deposito_cents?: number | null
+          dinheiro_cents?: number | null
+          encerrado_em?: string | null
+          praca?: number | null
+          representante?: number | null
+          status?: string | null
+          total_desconto_cents?: number | null
+          total_fiado_cents?: number | null
+          total_remessa_cents?: number | null
+          total_venda_cents?: number | null
+        }
+        Update: {
+          boleto_cents?: number | null
+          cartao_cents?: number | null
+          cheque_cents?: number | null
+          codigo?: number
+          comissao_pct?: number | null
+          consultoras_fiado?: number | null
+          consultoras_venda?: number | null
+          data?: string | null
+          deposito_cents?: number | null
+          dinheiro_cents?: number | null
+          encerrado_em?: string | null
+          praca?: number | null
+          representante?: number | null
+          status?: string | null
+          total_desconto_cents?: number | null
+          total_fiado_cents?: number | null
+          total_remessa_cents?: number | null
+          total_venda_cents?: number | null
+        }
+        Relationships: []
+      }
+      legado_consultoras: {
+        Row: {
+          apelido: string | null
+          asaas_id: string | null
+          ativo: boolean | null
+          atualizado_em: string
+          bairro: string | null
+          cadastro_em: string | null
+          celular: string | null
+          cep: string | null
+          cidade: string | null
+          codcli: number
+          complemento: string | null
+          cpf: string | null
+          email: string | null
+          ibge: string | null
+          limite_venda: number | null
+          motivo_inativacao: string | null
+          nascimento: string | null
+          nome: string | null
+          numero: string | null
+          party_id: string | null
+          praca: number | null
+          representante: number | null
+          rua: string | null
+          sexo: string | null
+          telefone: string | null
+          uf: string | null
+          vinculado_em: string | null
+          vinculo: string | null
+        }
+        Insert: {
+          apelido?: string | null
+          asaas_id?: string | null
+          ativo?: boolean | null
+          atualizado_em?: string
+          bairro?: string | null
+          cadastro_em?: string | null
+          celular?: string | null
+          cep?: string | null
+          cidade?: string | null
+          codcli: number
+          complemento?: string | null
+          cpf?: string | null
+          email?: string | null
+          ibge?: string | null
+          limite_venda?: number | null
+          motivo_inativacao?: string | null
+          nascimento?: string | null
+          nome?: string | null
+          numero?: string | null
+          party_id?: string | null
+          praca?: number | null
+          representante?: number | null
+          rua?: string | null
+          sexo?: string | null
+          telefone?: string | null
+          uf?: string | null
+          vinculado_em?: string | null
+          vinculo?: string | null
+        }
+        Update: {
+          apelido?: string | null
+          asaas_id?: string | null
+          ativo?: boolean | null
+          atualizado_em?: string
+          bairro?: string | null
+          cadastro_em?: string | null
+          celular?: string | null
+          cep?: string | null
+          cidade?: string | null
+          codcli?: number
+          complemento?: string | null
+          cpf?: string | null
+          email?: string | null
+          ibge?: string | null
+          limite_venda?: number | null
+          motivo_inativacao?: string | null
+          nascimento?: string | null
+          nome?: string | null
+          numero?: string | null
+          party_id?: string | null
+          praca?: number | null
+          representante?: number | null
+          rua?: string | null
+          sexo?: string | null
+          telefone?: string | null
+          uf?: string | null
+          vinculado_em?: string | null
+          vinculo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legado_consultoras_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_consultoras_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      legado_importacoes: {
+        Row: {
+          ator_id: string | null
+          created_at: string
+          id: string
+          linhas: number
+          lote: string
+          tipo: string
+        }
+        Insert: {
+          ator_id?: string | null
+          created_at?: string
+          id?: string
+          linhas: number
+          lote: string
+          tipo: string
+        }
+        Update: {
+          ator_id?: string | null
+          created_at?: string
+          id?: string
+          linhas?: number
+          lote?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
+      legado_maleta_categorias: {
+        Row: {
+          categoria: string
+          codcli: number
+          kit: number
+          pecas_devolvidas: number
+          pecas_enviadas: number
+          remessa: number
+          valor_devolvido_cents: number
+          valor_enviado_cents: number
+        }
+        Insert: {
+          categoria: string
+          codcli: number
+          kit: number
+          pecas_devolvidas?: number
+          pecas_enviadas?: number
+          remessa: number
+          valor_devolvido_cents?: number
+          valor_enviado_cents?: number
+        }
+        Update: {
+          categoria?: string
+          codcli?: number
+          kit?: number
+          pecas_devolvidas?: number
+          pecas_enviadas?: number
+          remessa?: number
+          valor_devolvido_cents?: number
+          valor_enviado_cents?: number
+        }
+        Relationships: []
+      }
+      legado_maleta_vendidos: {
+        Row: {
+          codcli: number
+          kit: number
+          produto: number
+          quantidade: number
+          remessa: number
+          tamanho: string
+          valor_unitario_cents: number
+        }
+        Insert: {
+          codcli: number
+          kit: number
+          produto: number
+          quantidade: number
+          remessa: number
+          tamanho?: string
+          valor_unitario_cents?: number
+        }
+        Update: {
+          codcli?: number
+          kit?: number
+          produto?: number
+          quantidade?: number
+          remessa?: number
+          tamanho?: string
+          valor_unitario_cents?: number
+        }
+        Relationships: []
+      }
+      legado_maletas: {
+        Row: {
+          atualizado_em: string
+          codcli: number
+          emissao: string | null
+          fechamento: string | null
+          kit: number
+          nf_devolucao: string | null
+          nf_perda: string | null
+          nf_remessa: string | null
+          nf_venda: string | null
+          pecas_defeito: number
+          pecas_devolvidas: number
+          pecas_enviadas: number
+          pecas_vendidas: number | null
+          remessa: number
+          tipo: string
+          valor_devolvido_cents: number
+          valor_enviado_cents: number
+          valor_vendido_cents: number | null
+        }
+        Insert: {
+          atualizado_em?: string
+          codcli: number
+          emissao?: string | null
+          fechamento?: string | null
+          kit: number
+          nf_devolucao?: string | null
+          nf_perda?: string | null
+          nf_remessa?: string | null
+          nf_venda?: string | null
+          pecas_defeito?: number
+          pecas_devolvidas?: number
+          pecas_enviadas?: number
+          pecas_vendidas?: number | null
+          remessa: number
+          tipo?: string
+          valor_devolvido_cents?: number
+          valor_enviado_cents?: number
+          valor_vendido_cents?: number | null
+        }
+        Update: {
+          atualizado_em?: string
+          codcli?: number
+          emissao?: string | null
+          fechamento?: string | null
+          kit?: number
+          nf_devolucao?: string | null
+          nf_perda?: string | null
+          nf_remessa?: string | null
+          nf_venda?: string | null
+          pecas_defeito?: number
+          pecas_devolvidas?: number
+          pecas_enviadas?: number
+          pecas_vendidas?: number | null
+          remessa?: number
+          tipo?: string
+          valor_devolvido_cents?: number
+          valor_enviado_cents?: number
+          valor_vendido_cents?: number | null
+        }
+        Relationships: []
+      }
+      legado_notas: {
+        Row: {
+          cfop: string | null
+          chave: string | null
+          codcli: number | null
+          emitida_em: string | null
+          kit: number | null
+          natureza: string | null
+          nf_id: number
+          numero: number
+          operacao: string | null
+          pecas: number | null
+          remessa: number | null
+          serie: number
+          situacao: string | null
+          tipo: string | null
+          valor_cents: number
+        }
+        Insert: {
+          cfop?: string | null
+          chave?: string | null
+          codcli?: number | null
+          emitida_em?: string | null
+          kit?: number | null
+          natureza?: string | null
+          nf_id: number
+          numero: number
+          operacao?: string | null
+          pecas?: number | null
+          remessa?: number | null
+          serie: number
+          situacao?: string | null
+          tipo?: string | null
+          valor_cents?: number
+        }
+        Update: {
+          cfop?: string | null
+          chave?: string | null
+          codcli?: number | null
+          emitida_em?: string | null
+          kit?: number | null
+          natureza?: string | null
+          nf_id?: number
+          numero?: number
+          operacao?: string | null
+          pecas?: number | null
+          remessa?: number | null
+          serie?: number
+          situacao?: string | null
+          tipo?: string | null
+          valor_cents?: number
+        }
+        Relationships: []
+      }
+      legado_pracas: {
+        Row: {
+          atualizado_em: string
+          cidades: string | null
+          codigo: number
+          dias: number | null
+          nome: string
+          praca_id: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          cidades?: string | null
+          codigo: number
+          dias?: number | null
+          nome: string
+          praca_id?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          cidades?: string | null
+          codigo?: number
+          dias?: number | null
+          nome?: string
+          praca_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legado_pracas_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "cob_pracas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legado_produtos: {
+        Row: {
+          ativo: boolean | null
+          atualizado_em: string
+          cadastro_em: string | null
+          categoria: string | null
+          codigo: number
+          codigo_barras: string | null
+          nome: string | null
+          preco_venda_cents: number | null
+          product_id: string | null
+          referencia: string | null
+          subcategoria: string | null
+          variant_id: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          atualizado_em?: string
+          cadastro_em?: string | null
+          categoria?: string | null
+          codigo: number
+          codigo_barras?: string | null
+          nome?: string | null
+          preco_venda_cents?: number | null
+          product_id?: string | null
+          referencia?: string | null
+          subcategoria?: string | null
+          variant_id?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          atualizado_em?: string
+          cadastro_em?: string | null
+          categoria?: string | null
+          codigo?: number
+          codigo_barras?: string | null
+          nome?: string | null
+          preco_venda_cents?: number | null
+          product_id?: string | null
+          referencia?: string | null
+          subcategoria?: string | null
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legado_produtos_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_produtos_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legado_remessas: {
+        Row: {
+          atualizado_em: string
+          emissao: string | null
+          numero: number
+          praca: number | null
+          representante: number | null
+          status: string
+          vencimento: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          emissao?: string | null
+          numero: number
+          praca?: number | null
+          representante?: number | null
+          status: string
+          vencimento?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          emissao?: string | null
+          numero?: number
+          praca?: number | null
+          representante?: number | null
+          status?: string
+          vencimento?: string | null
+        }
+        Relationships: []
+      }
+      legado_representantes: {
+        Row: {
+          ativo: boolean | null
+          atualizado_em: string
+          codigo: number
+          comissao_pct: number | null
+          cpf: string | null
+          nome: string | null
+          party_id: string | null
+          pracas: number[] | null
+          vinculo: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          atualizado_em?: string
+          codigo: number
+          comissao_pct?: number | null
+          cpf?: string | null
+          nome?: string | null
+          party_id?: string | null
+          pracas?: number[] | null
+          vinculo?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          atualizado_em?: string
+          codigo?: number
+          comissao_pct?: number | null
+          cpf?: string | null
+          nome?: string | null
+          party_id?: string | null
+          pracas?: number[] | null
+          vinculo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legado_representantes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_representantes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
           },
         ]
       }
@@ -13258,6 +13875,7 @@ export type Database = {
         }
         Returns: Json
       }
+      consultora_meu_historico: { Args: never; Returns: Json }
       consultora_pagamento_lembrete: {
         Args: { _order: string; _venc: string }
         Returns: Json
@@ -13838,6 +14456,7 @@ export type Database = {
         }[]
       }
       fiscal_prontidao: { Args: never; Returns: Json }
+      fiscal_roteiro_observado: { Args: never; Returns: Json }
       gen_protocol: { Args: { prefix: string }; Returns: string }
       get_party_full: { Args: { _id: string }; Returns: Json }
       grant_role: {
@@ -14171,6 +14790,58 @@ export type Database = {
         Args: { _cycle: string; _payload?: Json }
         Returns: Json
       }
+      legado_consultora_dados: { Args: { _codclis: number[] }; Returns: Json }
+      legado_consultora_historico: { Args: { _party: string }; Returns: Json }
+      legado_consultora_vincular: {
+        Args: { _codcli: number; _party: string }
+        Returns: Json
+      }
+      legado_exigir_importador: { Args: never; Returns: undefined }
+      legado_importar: {
+        Args: { _linhas: Json; _lote: string; _tipo: string }
+        Returns: Json
+      }
+      legado_pendencias_vinculo: {
+        Args: { _busca?: string; _limite?: number }
+        Returns: Json
+      }
+      legado_pode_ver: { Args: { _uid: string }; Returns: boolean }
+      legado_rede_mensal: {
+        Args: {
+          _ate?: string
+          _de?: string
+          _praca?: number
+          _representante?: number
+        }
+        Returns: Json
+      }
+      legado_rede_ranking: {
+        Args: {
+          _agrupar?: string
+          _ate?: string
+          _categoria?: string
+          _de?: string
+          _limite?: number
+          _praca?: number
+        }
+        Returns: Json
+      }
+      legado_remessa_detalhe: { Args: { _numero: number }; Returns: Json }
+      legado_remessas_lista: {
+        Args: {
+          _ate?: string
+          _busca?: string
+          _de?: string
+          _limite?: number
+          _offset?: number
+          _praca?: number
+          _representante?: number
+          _status?: string
+        }
+        Returns: Json
+      }
+      legado_resumo: { Args: never; Returns: Json }
+      legado_vincular: { Args: { _gravar_codigos?: boolean }; Returns: Json }
       limpeza_homolog_total: { Args: { _executar?: boolean }; Returns: Json }
       list_parties: {
         Args: {
@@ -14202,6 +14873,10 @@ export type Database = {
       master_exists: { Args: never; Returns: boolean }
       media_publica_ok: { Args: { _media: string }; Returns: boolean }
       minhas_indicacoes: { Args: never; Returns: Json }
+      montagem_sugestao: {
+        Args: { _party: string; _total?: number }
+        Returns: Json
+      }
       my_capabilities: {
         Args: never
         Returns: {

@@ -785,6 +785,13 @@
       "when": 1792447906075,
       "tag": "0111_judicial_desconto_estorno_ultima_parcela",
       "breakpoints": true
+    },
+    {
+      "idx": 112,
+      "version": "7",
+      "when": 1792701262823,
+      "tag": "0112_historico_jflex",
+      "breakpoints": true
     }
   ]
 }

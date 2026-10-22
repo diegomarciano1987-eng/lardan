@@ -3,7 +3,7 @@
  * endereço: ficam só na memória do navegador, sem log e sem repositório.
  */
 import * as React from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CheckCircle2, CircleAlert, FileUp, Link2, Search } from "lucide-react";
 import { EmptyState, ErrorState, Panel, Skeleton, StatusBadge, formatBRLFromCents, formatInt } from "@/components/admin/ui";
@@ -75,7 +75,7 @@ function BuscaPessoa({ onEscolher }: { onEscolher: (partyId: string) => void }) 
   const opcoes = useQuery({
     queryKey: ["historico-jflex", "pessoas", termo],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("list_parties" as never, { _search: termo.trim() || null, _limit: 20, _offset: 0 });
+      const { data, error } = await supabase.rpc("list_parties", { _search: termo.trim() || null, _limit: 20, _offset: 0 });
       if (error) throw error;
       return ((data ?? []) as unknown as { id: string; display_name: string; code?: string | null }[]).map((p) => ({
         value: p.id,
@@ -256,7 +256,7 @@ export function HistoricoJFlexImportacao({ ehMaster }: { ehMaster: boolean }) {
       {resumo.isError && <ErrorState message={(resumo.error as Error).message} onRetry={() => void resumo.refetch()} />}
       {rs && (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Cartao rotulo="Registros importados" valor={formatInt(rs.arquivos?.maletas ?? 0) + " maletas"} />
+          <Cartao rotulo="Registros importados" valor={formatInt(rs.arquivos?.["maletas"] ?? 0) + " maletas"} />
           <Cartao rotulo="Período" valor={[rs.periodo?.de, rs.periodo?.ate].filter(Boolean).map((v) => (v as string).slice(0, 10).split("-").reverse().join("/")).join(" · ") || "Sem dados"} />
           <Cartao rotulo="Peças enviadas · vendidas" valor={`${formatInt(rs.totais?.pecas_enviadas ?? 0)} · ${formatInt(rs.totais?.pecas_vendidas ?? 0)}`} />
           <Cartao rotulo="Valor vendido" valor={brl(rs.totais?.valor_vendido_cents ?? 0)} />

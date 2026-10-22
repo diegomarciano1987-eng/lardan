@@ -83,6 +83,17 @@ export function FiscalProntidao() {
 }
 
 /** Bloco recolhível com o roteiro fiscal observado nas notas do JFLEX (referência, não ativa nada). */
+type LinhaRoteiro = {
+  operacao: string | null;
+  natureza: string | null;
+  cfop_interno: string | null;
+  cfop_fora: string | null;
+  tipo: string | null;
+  csosn: string | null;
+  pis_cofins: string | null;
+  ncm: string | null;
+  texto: string | null;
+};
 function RoteiroJFlex() {
   const [aberto, setAberto] = useState(false);
   const q = useQuery({ queryKey: ["historico-jflex", "roteiro-fiscal"], queryFn: roteiroFiscalObservado, enabled: aberto });
@@ -113,7 +124,7 @@ function RoteiroJFlex() {
                 </tr>
               </thead>
               <tbody>
-                {(q.data as Record<string, string | null>[]).map((r, i) => (
+                {(q.data as LinhaRoteiro[]).map((r, i) => (
                   <tr key={i} className="border-b border-line-soft last:border-0 align-top">
                     <td className="py-2 pr-4 font-medium text-ledger-text">{r.operacao ?? "—"}</td>
                     <td className="py-2 pr-4">{r.natureza ?? "—"}</td>

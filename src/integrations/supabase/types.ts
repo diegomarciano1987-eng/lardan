@@ -14072,6 +14072,7 @@ export type Database = {
         }
         Returns: Json
       }
+      consultora_maletas: { Args: { _party: string }; Returns: Json }
       consultora_meu_historico: { Args: never; Returns: Json }
       consultora_pagamento_lembrete: {
         Args: { _order: string; _venc: string }
@@ -15223,6 +15224,9 @@ export type Database = {
           updated_at: string
         }[]
       }
+      maleta_motivo_invisivel: { Args: { _cycle: string }; Returns: string }
+      maletas_pode_ver: { Args: never; Returns: boolean }
+      maletas_visibilidade: { Args: { _limite?: number }; Returns: Json }
       mask_doc: { Args: { _doc: string }; Returns: string }
       mask_reference: { Args: { v: string }; Returns: string }
       master_exists: { Args: never; Returns: boolean }

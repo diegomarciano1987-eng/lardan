@@ -8830,6 +8830,48 @@ export type Database = {
           },
         ]
       }
+      legado_acertos_consultora: {
+        Row: {
+          atualizado_em: string
+          boleto_cents: number | null
+          cartao_cents: number | null
+          cheque_cents: number | null
+          codcli: number
+          data: string | null
+          dinheiro_cents: number | null
+          prazo_cents: number | null
+          remessa: number
+          tipo: string
+          valor_cents: number
+        }
+        Insert: {
+          atualizado_em?: string
+          boleto_cents?: number | null
+          cartao_cents?: number | null
+          cheque_cents?: number | null
+          codcli: number
+          data?: string | null
+          dinheiro_cents?: number | null
+          prazo_cents?: number | null
+          remessa: number
+          tipo?: string
+          valor_cents?: number
+        }
+        Update: {
+          atualizado_em?: string
+          boleto_cents?: number | null
+          cartao_cents?: number | null
+          cheque_cents?: number | null
+          codcli?: number
+          data?: string | null
+          dinheiro_cents?: number | null
+          prazo_cents?: number | null
+          remessa?: number
+          tipo?: string
+          valor_cents?: number
+        }
+        Relationships: []
+      }
       legado_acertos_praca: {
         Row: {
           boleto_cents: number | null
@@ -9114,6 +9156,7 @@ export type Database = {
       }
       legado_maletas: {
         Row: {
+          acerto_divergente: boolean
           atualizado_em: string
           codcli: number
           emissao: string | null
@@ -9129,11 +9172,14 @@ export type Database = {
           pecas_vendidas: number | null
           remessa: number
           tipo: string
+          valor_acerto_cents: number | null
           valor_devolvido_cents: number
           valor_enviado_cents: number
+          valor_venda_cents: number | null
           valor_vendido_cents: number | null
         }
         Insert: {
+          acerto_divergente?: boolean
           atualizado_em?: string
           codcli: number
           emissao?: string | null
@@ -9149,11 +9195,14 @@ export type Database = {
           pecas_vendidas?: number | null
           remessa: number
           tipo?: string
+          valor_acerto_cents?: number | null
           valor_devolvido_cents?: number
           valor_enviado_cents?: number
+          valor_venda_cents?: number | null
           valor_vendido_cents?: number | null
         }
         Update: {
+          acerto_divergente?: boolean
           atualizado_em?: string
           codcli?: number
           emissao?: string | null
@@ -9169,8 +9218,10 @@ export type Database = {
           pecas_vendidas?: number | null
           remessa?: number
           tipo?: string
+          valor_acerto_cents?: number | null
           valor_devolvido_cents?: number
           valor_enviado_cents?: number
+          valor_venda_cents?: number | null
           valor_vendido_cents?: number | null
         }
         Relationships: []
@@ -14966,6 +15017,7 @@ export type Database = {
         Args: { _cycle: string; _payload?: Json }
         Returns: Json
       }
+      legado_acertos_distribuir: { Args: { _chaves: Json }; Returns: number }
       legado_bi_alertas: {
         Args: { _limite?: number; _praca?: number; _representante?: number }
         Returns: Json
@@ -14973,12 +15025,14 @@ export type Database = {
       legado_bi_base: {
         Args: {
           _ate: string
+          _data?: string
           _de: string
           _praca: number
           _representante: number
         }
         Returns: {
           codcli: number
+          data_ref: string
           dias: number
           emissao: string
           fechamento: string
@@ -14996,6 +15050,7 @@ export type Database = {
       legado_bi_insights: {
         Args: {
           _ate?: string
+          _data?: string
           _de?: string
           _praca?: number
           _representante?: number
@@ -15005,6 +15060,7 @@ export type Database = {
       legado_bi_jornada: {
         Args: {
           _ate?: string
+          _data?: string
           _de?: string
           _praca?: number
           _representante?: number
@@ -15014,6 +15070,7 @@ export type Database = {
       legado_bi_kpis: {
         Args: {
           _ate: string
+          _data?: string
           _de: string
           _praca: number
           _representante: number
@@ -15024,6 +15081,7 @@ export type Database = {
       legado_bi_painel: {
         Args: {
           _ate?: string
+          _data?: string
           _de?: string
           _praca?: number
           _representante?: number
@@ -15031,13 +15089,19 @@ export type Database = {
         Returns: Json
       }
       legado_bi_praca_categoria: {
-        Args: { _ate?: string; _de?: string; _representante?: number }
+        Args: {
+          _ate?: string
+          _data?: string
+          _de?: string
+          _representante?: number
+        }
         Returns: Json
       }
       legado_bi_produtos: {
         Args: {
           _ate?: string
           _categoria?: string
+          _data?: string
           _de?: string
           _limite?: number
           _praca?: number
@@ -15049,6 +15113,7 @@ export type Database = {
         Args: {
           _ate?: string
           _criterio?: string
+          _data?: string
           _de?: string
           _limite?: number
           _min_maletas?: number
@@ -15094,6 +15159,7 @@ export type Database = {
       legado_rede_mensal: {
         Args: {
           _ate?: string
+          _data?: string
           _de?: string
           _praca?: number
           _representante?: number

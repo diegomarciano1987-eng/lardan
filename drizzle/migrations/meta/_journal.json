@@ -841,6 +841,13 @@
       "when": 1792706863926,
       "tag": "0119_comissao_faixas_leitura",
       "breakpoints": true
+    },
+    {
+      "idx": 120,
+      "version": "7",
+      "when": 1792708026689,
+      "tag": "0120_venda_pelo_acerto",
+      "breakpoints": true
     }
   ]
 }

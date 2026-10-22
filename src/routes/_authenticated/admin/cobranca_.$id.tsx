@@ -2,11 +2,12 @@ import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, MessageCircle, Phone, Ban, UserPen, Gavel, LayoutDashboard, Calculator, Wallet, ListOrdered, History, Handshake, CalendarClock, IdCard, BellRing } from "lucide-react";
+import { ArrowLeft, MessageCircle, Phone, Ban, UserPen, Gavel, LayoutDashboard, Calculator, Wallet, ListOrdered, History, Handshake, CalendarClock, IdCard, BellRing, Archive } from "lucide-react";
 import { LembretesGaveta } from "@/components/admin/cobranca/LembretesGaveta";
 import { ligarAvisosCliente } from "@/lib/asaas/avisos.functions";
 import { SimuladorAcordo } from "@/components/admin/cobranca/SimuladorAcordo";
 import { EditarDadosDialog } from "@/components/admin/cobranca/EditarDadosDialog";
+import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
 import { DateField } from "@/components/premium/DateField";
 import { AbaJudicial, FormProcesso } from "@/components/admin/cobranca/Judicial";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/admin/cobranca_/$id")({
   component: Cockpit,
 });
 
-type Aba = "judicial" | "acordos" | "resumo" | "financeiro" | "titulos" | "linha" | "promessas" | "agenda" | "dados";
+type Aba = "judicial" | "acordos" | "resumo" | "financeiro" | "titulos" | "linha" | "promessas" | "agenda" | "dados" | "hist";
 
 function Cockpit() {
   const { id } = Route.useParams();
@@ -167,7 +168,7 @@ function Cockpit() {
       )}
 
       <nav aria-label="Seções da devedora" className="flex flex-wrap gap-1.5 rounded-2xl border border-border bg-muted/50 p-1.5">
-        {(([["resumo", "Resumo", LayoutDashboard], ...(ehJudicial ? [["judicial", "Judicial", Gavel]] : [["acordos", "Acordos e simulações", Calculator]]), ["financeiro", "Financeiro completo", Wallet], ["titulos", "Títulos e parcelas", ListOrdered], ["linha", "Linha do tempo", History], ["promessas", "Negociações e promessas", Handshake], ["agenda", "Agenda", CalendarClock], ["dados", "Dados cadastrais", IdCard]]) as [Aba, string, typeof Gavel][]).map(([k, r, I]) => (
+        {(([["resumo", "Resumo", LayoutDashboard], ...(ehJudicial ? [["judicial", "Judicial", Gavel]] : [["acordos", "Acordos e simulações", Calculator]]), ["financeiro", "Financeiro completo", Wallet], ["titulos", "Títulos e parcelas", ListOrdered], ["linha", "Linha do tempo", History], ["promessas", "Negociações e promessas", Handshake], ["agenda", "Agenda", CalendarClock], ["dados", "Dados cadastrais", IdCard], ["hist", "Histórico JFLEX", Archive]]) as [Aba, string, typeof Gavel][]).map(([k, r, I]) => (
           <button key={k} onClick={() => setAba(k)} aria-current={aba === k ? "page" : undefined}
             className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-medium transition ${aba === k ? (k === "judicial" ? "bg-bronze text-primary-foreground shadow-sm" : "bg-foreground text-background shadow-sm") : "text-foreground/70 hover:bg-background hover:text-foreground"}`}>
             <I className="h-4 w-4" />{r}
@@ -177,6 +178,7 @@ function Cockpit() {
 
       {aba === "judicial" && ehJudicial && <AbaJudicial partyId={id} parcelas={d.parcelas} />}
       {aba === "acordos" && !ehJudicial && <SimuladorAcordo partyId={id} parcelas={d.parcelas} />}
+      {aba === "hist" && <HistoricoJFlexPessoa partyId={id} />}
       {aba === "financeiro" && <CockpitFinanceiroConsultora partyId={id} />}
       {aba === "resumo" && (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

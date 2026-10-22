@@ -19,6 +19,7 @@ import {
 } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
+import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import { VendedoraInternaForm } from "@/components/admin/cadastros/VendedoraInternaForm";
 import { useCapabilities } from "@/lib/capabilities";
@@ -290,6 +291,7 @@ function FichaPessoa() {
           <TabsTrigger value="operacao">Estoque e maletas</TabsTrigger>
           <TabsTrigger value="acesso">Acesso</TabsTrigger>
           <TabsTrigger value="historico">Histórico</TabsTrigger>
+          <TabsTrigger value="historico-jflex">Histórico JFLEX</TabsTrigger>
         </TabsList>
 
         {/* RESUMO */}
@@ -729,6 +731,9 @@ function FichaPessoa() {
               )}
             </div>
           </Panel>
+        </TabsContent>
+        <TabsContent value="historico-jflex" className="mt-4">
+          <HistoricoJFlexPessoa partyId={id} />
         </TabsContent>
       </Tabs>
     </div>

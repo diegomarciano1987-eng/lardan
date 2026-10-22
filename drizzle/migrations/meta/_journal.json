@@ -799,6 +799,20 @@
       "when": 1792702448531,
       "tag": "0113_montagem_metas_historico",
       "breakpoints": true
+    },
+    {
+      "idx": 114,
+      "version": "7",
+      "when": 1792702720631,
+      "tag": "0114_legado_consultoras_cadastrar",
+      "breakpoints": true
+    },
+    {
+      "idx": 115,
+      "version": "7",
+      "when": 1792702769362,
+      "tag": "0115_legado_consultoras_cadastrar_ajuste",
+      "breakpoints": true
     }
   ]
 }

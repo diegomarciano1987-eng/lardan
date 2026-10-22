@@ -14819,6 +14819,7 @@ export type Database = {
         Args: { _codcli: number; _party: string }
         Returns: Json
       }
+      legado_consultoras_cadastrar: { Args: { _lote: string }; Returns: Json }
       legado_exigir_importador: { Args: never; Returns: undefined }
       legado_importar: {
         Args: { _linhas: Json; _lote: string; _tipo: string }

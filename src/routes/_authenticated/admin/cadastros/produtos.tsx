@@ -153,6 +153,23 @@ function ProdutosPage() {
           </span>
         ),
     },
+    ...(podeVerCustos
+      ? [
+          {
+            key: "custo",
+            header: "Custo",
+            className: "text-right",
+            render: (r: ProdutoLinha) => {
+              const custo = custos.data?.get(r.id);
+              return custo == null ? (
+                "—"
+              ) : (
+                <span className="num">{centavosParaTexto(custo)}</span>
+              );
+            },
+          } satisfies Column<ProdutoLinha>,
+        ]
+      : []),
     {
       key: "status",
       header: "Situação",

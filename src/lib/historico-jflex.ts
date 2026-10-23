@@ -70,6 +70,8 @@ export interface MaletaHistorico {
 }
 export interface HistoricoConsultora {
   vinculada: boolean;
+  /** presente quando a ficha tem representante: só as remessas dele entram */
+  filtro_representante?: { party_id: string; nome: string | null; codigos: number[]; remessas: number; remessas_total: number };
   codigos?: number[];
   praca?: { codigo: number; nome: string | null } | null;
   resumo?: ResumoHistorico;

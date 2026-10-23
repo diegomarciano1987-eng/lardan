@@ -8,6 +8,7 @@ import { PageHeader, Panel } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { DateField } from "@/components/premium/DateField";
 import { useCapabilities } from "@/lib/capabilities";
+import { SemPermissaoEditar } from "@/components/admin/SemPermissaoEditar";
 import {
   addRole,
   saveAddress,
@@ -261,6 +262,7 @@ function NovoCadastro() {
   });
 
   const titulo = papel ? PARTY_ROLE_LABEL[papel] : pessoa ? "Pessoa" : "Empresa";
+  if (!podeEditar) return <SemPermissaoEditar voltar="/admin/cadastros/pessoas" rotulo="Voltar aos cadastros" />;
 
   return (
     <div className="space-y-6">

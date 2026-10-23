@@ -1037,6 +1037,13 @@
       "when": 1792779062270,
       "tag": "0147_colab_reservas_apenas_motor_oficial",
       "breakpoints": true
+    },
+    {
+      "idx": 148,
+      "version": "7",
+      "when": 1792779103102,
+      "tag": "0148_colab_remessa_identidades_carteira",
+      "breakpoints": true
     }
   ]
 }

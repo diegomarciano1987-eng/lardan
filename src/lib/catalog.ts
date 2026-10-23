@@ -57,9 +57,7 @@ export async function listPaged<T>(params: ListParams): Promise<PagedResult<T>> 
     .order(orderBy, { ascending })
     .range(page * pageSize, page * pageSize + pageSize - 1);
 
-  if (params.excludeArchived && table === "products") {
-    query = supabase.from("products").select(select, { count: "exact" }).order(orderBy, { ascending }).range(page * pageSize, page * pageSize + pageSize - 1).neq("status", "arquivado");
-  }
+  if (params.excludeArchived && table === "products") query = query.not("status", "eq", "arquivado");
 
   for (const [column, value] of Object.entries(filters)) {
     if (value === undefined || value === null || value === "" || value === "todos") continue;

@@ -1,6 +1,27 @@
 import * as React from "react";
 import { Maximize2, Minimize2 } from "lucide-react";
 
+/** Botão de tela cheia do navegador para telas que já cobrem o painel (ex.: montagem por leitor). */
+export function BotaoTelaCheia() {
+  const [ativa, setAtiva] = React.useState(false);
+  React.useEffect(() => {
+    const aoMudar = () => setAtiva(Boolean(document.fullscreenElement));
+    aoMudar();
+    document.addEventListener("fullscreenchange", aoMudar);
+    return () => document.removeEventListener("fullscreenchange", aoMudar);
+  }, []);
+  async function alternar() {
+    if (document.fullscreenElement) await document.exitFullscreen().catch(() => undefined);
+    else await document.documentElement.requestFullscreen?.().catch(() => undefined);
+  }
+  return (
+    <button type="button" className="admin-btn" onClick={() => void alternar()} aria-pressed={ativa}>
+      {ativa ? <Minimize2 aria-hidden className="size-4" /> : <Maximize2 aria-hidden className="size-4" />}
+      {ativa ? "Sair da tela cheia" : "Ver em tela cheia"}
+    </button>
+  );
+}
+
 /**
  * Tela cheia para as telas de bipagem. Usa a tela cheia do navegador na página
  * inteira e cobre o menu do painel com uma camada fixa, para que listas e

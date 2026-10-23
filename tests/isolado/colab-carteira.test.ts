@@ -1,5 +1,5 @@
 import { beforeAll, expect, test } from "bun:test";
-import { adm, criarConta, rpc, rpcServico, type Conta } from "./base";
+import { adm, criarConta, ler, rpc, rpcServico, type Conta } from "./base";
 
 let master: Conta, colab: Conta, rep: Conta, other: Conta, inside: Conta, outside: Conta;
 const seed = Math.floor(Math.random() * 1000000);
@@ -19,10 +19,10 @@ beforeAll(async () => {
   expect((await rpcServico("colab_modulos_definir", { _user_id: colab.uid, _caps: ["registry.view", "network.aggregate.view", "catalog.view", "kit.view"], _financeiro: false, _actor: master.uid })).erro).toBeNull();
 });
 test("Consultoras retorna somente o representante vinculado, antes da paginação", async () => {
-  const r = await rpc<{ id: string }[]>(colab, "list_parties", { _limit: 100 });
+  const r = await ler<{ id: string }>(colab, "select id from public.list_parties(_limit=>100)");
   expect(r.erro).toBeNull();
-  expect(r.dados.map(x => x.id)).toContain(inside.partyId);
-  expect(r.dados.map(x => x.id)).not.toContain(outside.partyId);
+  expect(r.linhas.map(x => x.id)).toContain(inside.partyId);
+  expect(r.linhas.map(x => x.id)).not.toContain(outside.partyId);
 });
 test("Ficha de outra carteira é recusada", async () => {
   expect((await rpc(colab, "get_party_full", { _id: outside.partyId })).erro).not.toBeNull();
@@ -42,7 +42,9 @@ test("Visão geral com estoque não é entregue à colaboradora", async () => {
 });
 test("Sem vínculo não retorna Consultoras nem libera rede", async () => {
   await adm.unsafe("update consultant_profiles set representative_party_id=null where party_id=$1", [colab.partyId]);
-  expect((await rpc(colab, "list_parties", { _limit: 100 })).dados).toEqual([]);
+  const empty = await ler(colab, "select id from public.list_parties(_limit=>100)");
+  expect(empty.erro).toBeNull();
+  expect(empty.linhas).toEqual([]);
   expect((await rpc(colab, "network_scope")).erro).not.toBeNull();
   await adm.unsafe("update consultant_profiles set representative_party_id=$2 where party_id=$1", [colab.partyId, rep.partyId]);
 });

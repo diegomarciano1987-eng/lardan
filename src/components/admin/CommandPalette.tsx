@@ -175,11 +175,10 @@ async function search(term: string, caps: Capability[], escopo: Escopo): Promise
       .from("parties")
       .select("id,display_name,legal_name,code,status,doc_masked")
       .or(pessoaFiltro)
-      // Cadastros inativos (inclusive os já unificados) ficam fora da busca rápida;
-      // continuam acessíveis em Cadastros → Pessoas e empresas.
-      .neq("status", "inativo")
+      // Inclui inativas: a maior parte das consultoras vindas do SmallData está "inativo".
+      // Só os cadastros que foram unificados em outro (duplicados) saem, logo abaixo.
       .order("display_name")
-      .limit(8)),
+      .limit(25)),
     emFin && podeFinPagar ? titulos("payable") : Promise.resolve(vazio),
     emFin && podeFinReceber ? titulos("receivable") : Promise.resolve(vazio),
     !emKit ? Promise.resolve(vazio) : seguro(supabase.from("kits").select("id,code,label").or(`code.ilike.${likeSafe},label.ilike.${likeSafe}`).limit(LIMIT)),
@@ -194,7 +193,17 @@ async function search(term: string, caps: Capability[], escopo: Escopo): Promise
   const reais = (c: number | null) =>
     ((c ?? 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  for (const p of pessoas.data ?? []) {
+  let listaPessoas = (pessoas.data ?? []) as { id: string; display_name: string | null; legal_name: string | null; code: string | null; status: string | null; doc_masked: string | null }[];
+  if (listaPessoas.length) {
+    const dup = await supabase.from("party_unificacoes").select("duplicada_id").in("duplicada_id", listaPessoas.map((p) => p.id));
+    const fora = new Set((dup.data ?? []).map((d) => d.duplicada_id as string));
+    const peso = (st: string | null) => (st === "ativo" ? 0 : st === "inativo" ? 2 : 1);
+    listaPessoas = listaPessoas
+      .filter((p) => !fora.has(p.id) && !/^HOMOLOG\b/i.test(p.display_name ?? ""))
+      .sort((a, b) => peso(a.status) - peso(b.status))
+      .slice(0, 8);
+  }
+  for (const p of listaPessoas) {
     hits.push({
       id: `pes-${p.id}`,
       group: "Pessoas e consultoras",

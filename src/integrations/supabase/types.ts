@@ -9127,6 +9127,54 @@ export type Database = {
         }
         Relationships: []
       }
+      legado_maleta_situacoes: {
+        Row: {
+          atualizado_em: string
+          codigo: number
+          na_rua: boolean
+          nome: string
+          ordem: number
+        }
+        Insert: {
+          atualizado_em?: string
+          codigo: number
+          na_rua?: boolean
+          nome: string
+          ordem?: number
+        }
+        Update: {
+          atualizado_em?: string
+          codigo?: number
+          na_rua?: boolean
+          nome?: string
+          ordem?: number
+        }
+        Relationships: []
+      }
+      legado_maleta_status: {
+        Row: {
+          atualizado_em: string
+          codcli: number
+          data: string | null
+          remessa: number
+          status: number
+        }
+        Insert: {
+          atualizado_em?: string
+          codcli: number
+          data?: string | null
+          remessa: number
+          status: number
+        }
+        Update: {
+          atualizado_em?: string
+          codcli?: number
+          data?: string | null
+          remessa?: number
+          status?: number
+        }
+        Relationships: []
+      }
       legado_maleta_vendidos: {
         Row: {
           codcli: number
@@ -15238,6 +15286,15 @@ export type Database = {
         Args: { _linhas: Json; _lote: string; _tipo: string }
         Returns: Json
       }
+      legado_maleta_na_rua: {
+        Args: { _codcli: number; _remessa: number }
+        Returns: boolean
+      }
+      legado_maleta_situacao_definir: {
+        Args: { _codigo: number; _na_rua: boolean; _nome: string }
+        Returns: Json
+      }
+      legado_maleta_situacoes_lista: { Args: never; Returns: Json }
       legado_maleta_valor_devolvido: {
         Args: { _codcli: number; _kit: number; _remessa: number }
         Returns: number

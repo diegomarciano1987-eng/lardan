@@ -17,7 +17,7 @@ export function MaletasNaRua() {
   const q = useQuery({ queryKey: ["maletas", "visibilidade"], queryFn: () => visibilidadeMaletas(300), staleTime: 60_000, retry: false });
   if (q.isError || !q.data) return null; // sem permissão ou carregando: não ocupa espaço
   const { lardan: l, smalldata: s } = q.data;
-  if (s.maletas === 0 && l.invisiveis === 0) return null;
+  if (s.consultoras === 0 && (s.por_situacao ?? []).length === 0 && l.invisiveis === 0) return null;
 
   return (
     <section className="rounded-2xl border border-warning/50 bg-warning/5">
@@ -25,11 +25,14 @@ export function MaletasNaRua() {
         <span className="flex items-start gap-3">
           <AlertTriangle aria-hidden className="mt-0.5 size-5 shrink-0 text-warning" />
           <span className="text-sm text-ledger-text">
-            {s.maletas > 0 && (
+            {s.consultoras > 0 && (
               <>
-                <strong>{formatInt(s.maletas)} maletas estão na rua só pelo SmallData</strong> ({formatInt(s.consultoras)} consultoras,{" "}
-                {formatInt(s.pecas)} peças, {formatBRLFromCents(s.valor_enviado_cents)} em varejo; {formatInt(s.atrasadas)} vencidas). Elas não existem na
+                <strong>{formatInt(s.consultoras)} consultoras estão com maleta na rua só pelo SmallData</strong> ({formatInt(s.maletas)} maletas
+                {s.consultoras_varias_maletas ? `, ${formatInt(s.consultoras_varias_maletas)} delas com mais de uma` : ""};{" "}
+                {formatInt(s.pecas)} peças, {formatBRLFromCents(s.valor_enviado_cents)} em varejo;{" "}
+                {formatInt(s.consultoras_atrasadas ?? s.atrasadas)} consultoras com maleta vencida). Elas não existem na
                 operação do Lardan, por isso não aparecem no app nem no cockpit da operação.{" "}
+                {s.situacao_importada === false && "Situação das maletas ainda não importada: conta toda maleta sem acerto. "}
               </>
             )}
             {l.invisiveis > 0 && (
@@ -61,15 +64,43 @@ export function MaletasNaRua() {
               </ul>
             </div>
           )}
+          {(s.por_situacao ?? []).length > 0 && (
+            <div className="overflow-x-auto">
+              <p className="ledger-eyebrow mb-2">Maletas sem acerto no SmallData, por situação</p>
+              <table className="w-full min-w-[36rem]">
+                <thead className="text-left text-xs uppercase tracking-[0.08em] text-ledger-muted">
+                  <tr>
+                    <th className="py-1.5">Situação</th>
+                    <th className="py-1.5">Conta como na rua</th>
+                    <th className="py-1.5 text-right">Consultoras</th>
+                    <th className="py-1.5 text-right">Maletas</th>
+                    <th className="py-1.5 text-right">Valor enviado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(s.por_situacao ?? []).map((x) => (
+                    <tr key={`${x.codigo ?? "sem"}`} className="border-t border-line-soft">
+                      <td className="py-1.5">{x.codigo != null ? `${x.codigo} · ` : ""}{x.situacao}</td>
+                      <td className="py-1.5">{x.na_rua ? "Sim" : "Não"}</td>
+                      <td className="py-1.5 text-right tabular-nums font-medium">{formatInt(x.consultoras)}</td>
+                      <td className="py-1.5 text-right tabular-nums">{formatInt(x.maletas)}</td>
+                      <td className="py-1.5 text-right tabular-nums">{formatBRLFromCents(x.valor_enviado_cents)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           {s.por_remessa.length > 0 && (
             <div className="overflow-x-auto">
               <p className="ledger-eyebrow mb-2">Na rua pelo SmallData, por remessa</p>
-              <table className="w-full min-w-[40rem]">
+              <table className="w-full min-w-[44rem]">
                 <thead className="text-left text-xs uppercase tracking-[0.08em] text-ledger-muted">
                   <tr>
                     <th className="py-1.5">Remessa</th>
                     <th className="py-1.5">Praça</th>
                     <th className="py-1.5">Saída · vencimento</th>
+                    <th className="py-1.5 text-right">Consultoras</th>
                     <th className="py-1.5 text-right">Maletas</th>
                     <th className="py-1.5 text-right">Peças</th>
                     <th className="py-1.5 text-right">Valor enviado</th>
@@ -81,6 +112,7 @@ export function MaletasNaRua() {
                       <td className="py-1.5 tabular-nums">{r.remessa}</td>
                       <td className="py-1.5">{r.praca ?? "—"}</td>
                       <td className="py-1.5 tabular-nums">{dataBr(r.emissao)} · {dataBr(r.vencimento)}</td>
+                      <td className="py-1.5 text-right tabular-nums font-medium">{r.consultoras != null ? formatInt(r.consultoras) : "—"}</td>
                       <td className="py-1.5 text-right tabular-nums">{formatInt(r.maletas)}</td>
                       <td className="py-1.5 text-right tabular-nums">{formatInt(r.pecas)}</td>
                       <td className="py-1.5 text-right tabular-nums">{formatBRLFromCents(r.valor_enviado_cents)}</td>

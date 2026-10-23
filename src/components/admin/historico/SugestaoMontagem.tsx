@@ -18,13 +18,14 @@ export function SugestaoMontagem({ partyId }: { partyId: string }) {
   const [total, setTotal] = React.useState<number | null>(null);
 
   const padrao = useQuery({
-    queryKey: ["historico-jflex", "parametro-total"],
+    // Média vendida nas 3 últimas maletas dela + 30%; sem histórico, 35.
+    queryKey: ["historico-jflex", "total-sugerido", partyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("remessa_parametros").select("pecas_cliente_nova").eq("id", true).maybeSingle();
+      const { data, error } = await supabase.rpc("maleta_total_sugerido" as never, { _party: partyId } as never);
       if (error) throw error;
-      return (data as { pecas_cliente_nova: number } | null)?.pecas_cliente_nova ?? 80;
+      return (data as { total: number | null } | null)?.total ?? 35;
     },
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 5,
   });
 
   const totalUsado = total ?? padrao.data ?? null;

@@ -70,8 +70,9 @@ export function AjustesMaleta({ cycleId, consultoraId, representante }: { cycleI
   const ocupado = trocar.isPending || excluir.isPending;
 
   return (
-    <Panel title="Ajustar maleta" description="Só enquanto a maleta não saiu. Tudo fica registrado com o motivo.">
+    <Panel title="Ajustar maleta">
       <div className="space-y-4">
+        <p className="text-sm text-ledger-muted">Só enquanto a maleta não saiu. Tudo fica registrado com o motivo.</p>
         <label className="block space-y-1">
           <span className="text-sm font-semibold text-ledger-text">Motivo</span>
           <input className="admin-input w-full" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ex.: consultora desistiu" />

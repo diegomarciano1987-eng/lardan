@@ -15,6 +15,10 @@ import {
   completude,
   gerarResumo,
   salvarProduto,
+  salvarBanho,
+  custoPeloBanho,
+  camadasDoBanho,
+  BANHOS,
   lerMarkupGlobal,
   lerCustos,
   margemPraticada,
@@ -48,6 +52,9 @@ const VAZIO: Form = {
   raw_weight_grams: "",
   raw_supplier_id: "",
   raw_piece_cost: "",
+  banho_tipo: "",
+  banho_camada: "",
+  banho_valor: "",
   measurements: "",
   short_description: "",
   description: "",
@@ -82,7 +89,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       const { data, error } = await supabase
         .from("products")
         .select(
-          "id, name, slug, internal_code, legacy_code, barcode, reference_code, ncm, status, category_id, subcategory_id, collection_id, short_description, description, raw_material, raw_weight_grams, raw_supplier_id, measurements, care_instructions, warranty_text, seo_title, seo_description, price_cents, price_is_public, is_featured, is_legacy, requires_catalog_review, updated_at",
+          "id, name, slug, internal_code, legacy_code, barcode, reference_code, ncm, status, category_id, subcategory_id, collection_id, short_description, description, raw_material, raw_weight_grams, raw_supplier_id, banho_tipo, banho_camada, custo_pelo_banho, measurements, care_instructions, warranty_text, seo_title, seo_description, price_cents, price_is_public, is_featured, is_legacy, requires_catalog_review, updated_at",
         )
         .eq("id", id!)
         .single();
@@ -167,6 +174,9 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       raw_weight_grams: p.raw_weight_grams == null ? "" : String(p.raw_weight_grams),
       raw_supplier_id: p.raw_supplier_id ?? "",
       raw_piece_cost: "",
+      banho_tipo: p.banho_tipo ?? "",
+      banho_camada: p.banho_camada == null ? "" : String(p.banho_camada),
+      banho_valor: "",
       measurements: p.measurements ?? "",
       short_description: p.short_description ?? "",
       description: p.description ?? "",
@@ -190,6 +200,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     setForm((f) => ({
       ...f,
       raw_piece_cost: centavosParaTexto(c.raw_piece_cost_cents),
+      banho_valor: centavosParaTexto(c.banho_valor_grama_cents ?? null),
       custo: centavosParaTexto(c.cost_price_cents),
       markup: c.markup_percent == null ? "" : String(c.markup_percent),
     }));
@@ -233,6 +244,23 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
 
   const slugPrevia = String(form["slug"] || "").trim() || slugify(String(form["name"] || ""));
 
+  // 0126 — preço de custo pelo banho: peso bruto × valor do banho por grama + peça no bruto.
+  // Vale para cadastro novo, para produto ainda sem custo e para o que já é calculado assim;
+  // produto que já tinha preço de custo não muda.
+  const pesoBruto = Number(String(form["raw_weight_grams"] || "").replace(",", ".")) || null;
+  const custoCalculado = custoPeloBanho(
+    pesoBruto,
+    parseCentavos(String(form["banho_valor"] || "")),
+    parseCentavos(String(form["raw_piece_cost"] || "")),
+  );
+  const formulaVale =
+    podeVerCustos &&
+    (!id ||
+      custos.data?.produto.custo_pelo_banho === true ||
+      (custos.isSuccess && custos.data?.produto.cost_price_cents == null));
+  const custoPelaFormula = formulaVale && custoCalculado != null;
+  const camadas = camadasDoBanho(String(form["banho_tipo"] || ""));
+
   const payload = () => ({
     name: String(form["name"] ?? "").trim(),
     slug: String(form["slug"] ?? "").trim(),
@@ -259,7 +287,8 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     price_cents: parseCentavos(String(form["preco"] ?? "")) ?? "",
     ...(podeVerCustos
       ? {
-          cost_price_cents: parseCentavos(String(form["custo"] ?? "")) ?? "",
+          // calculado pelo banho: o banco faz a conta (products_custo_pelo_banho)
+          cost_price_cents: custoPelaFormula ? "" : (parseCentavos(String(form["custo"] ?? "")) ?? ""),
           markup_percent: String(form["markup"] ?? "")
             .trim()
             .replace(",", "."),
@@ -269,13 +298,25 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     is_featured: form["is_featured"] === true,
   });
 
+  /** Ficha + banho, na ordem: o banco recalcula o custo quando o banho chega. */
+  const gravar = async (alvo: string | null) => {
+    const r = await salvarProduto(alvo, payload());
+    await salvarBanho(r.id, {
+      tipo: String(form["banho_tipo"] || ""),
+      camada: camadas.length ? String(form["banho_camada"] || "") : "",
+      valorGramaCents: parseCentavos(String(form["banho_valor"] || "")) ?? null,
+      alterarValor: podeVerCustos,
+    });
+    return r;
+  };
+
   const salvar = useMutation({
     mutationFn: async () => {
       if (salvandoRef.current) throw new Error("Salvamento em andamento.");
       // Rascunho pode ficar incompleto: o preço de custo só é exigido para publicar.
       salvandoRef.current = true;
       try {
-        return await salvarProduto(id, payload());
+        return await gravar(id);
       } finally {
         salvandoRef.current = false;
       }
@@ -288,6 +329,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
         void navigate({ to: "/admin/cadastros/produtos/$id", params: { id: r.id } });
       } else {
         void qc.invalidateQueries({ queryKey: ["produto", id] });
+        void qc.invalidateQueries({ queryKey: ["produto-custos-vigentes", id] });
       }
     },
     onError: (e) => toast.error(mensagemDeErro(e)),
@@ -309,7 +351,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
   const publicar = useMutation({
     mutationFn: async () => {
       if (!id) throw new Error("Salve o rascunho antes de publicar.");
-      if (sujo) await salvarProduto(id, payload());
+      if (sujo) await gravar(id);
       const r = await publicarProdutos([id], "ficha do produto");
       if (r.afetados === 0) {
         setImpedimentos(await checklistPublicacao(id));
@@ -357,7 +399,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       raw_weight_grams: Number(String(form["raw_weight_grams"] || "0").replace(",", ".")) || null,
       raw_supplier_id: String(form["raw_supplier_id"] || "") || null,
       raw_piece_cost_cents: parseCentavos(String(form["raw_piece_cost"] || "")),
-      cost_price_cents: parseCentavos(String(form["custo"] || "")),
+      cost_price_cents: custoPelaFormula ? custoCalculado : parseCentavos(String(form["custo"] || "")),
       measurements: String(form["measurements"] || ""),
       short_description: String(form["short_description"] || ""),
       description: String(form["description"] || ""),
@@ -370,7 +412,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     contagemVariantes > 0,
   );
 
-  const custoCents = parseCentavos(String(form["custo"] || ""));
+  const custoCents = custoPelaFormula ? custoCalculado : parseCentavos(String(form["custo"] || ""));
   const margemIndividual = String(form["markup"] || "")
     .trim()
     .replace(",", ".");
@@ -593,6 +635,43 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
                 disabled={somente}
               />
             ) : null}
+            <Selecao
+              label="Tipo do banho"
+              valor={String(form["banho_tipo"] || "")}
+              onChange={(v) => {
+                set("banho_tipo", v);
+                if (!camadasDoBanho(v).includes(Number(form["banho_camada"]))) set("banho_camada", "");
+              }}
+              disabled={somente}
+              opcoes={BANHOS.map((b) => ({ value: b.value, label: b.label }))}
+            />
+            <Selecao
+              label="Camada do banho"
+              valor={camadas.length ? String(form["banho_camada"] || "") : ""}
+              onChange={(v) => set("banho_camada", v)}
+              disabled={somente || camadas.length === 0}
+              opcoes={camadas.map((c) => ({ value: String(c), label: String(c) }))}
+              ajuda={
+                form["banho_tipo"] === "dourado"
+                  ? "Dourado: 1, 2, 3, 5 ou 7."
+                  : form["banho_tipo"] === "prata_banhada"
+                    ? "Prata banhada: 30 ou 70."
+                    : "Só para dourado e prata banhada."
+              }
+            />
+            {podeVerCustos ? (
+              <Campo
+                label="Valor do banho por grama (R$)"
+                valor={form["banho_valor"]}
+                onChange={(v) => set("banho_valor", v)}
+                disabled={somente}
+                ajuda={
+                  custoCalculado == null
+                    ? "Preço de custo = peso bruto (g) × valor do banho + valor da peça no bruto."
+                    : `${String(form["raw_weight_grams"]).replace(".", ",")} g × R$ ${String(form["banho_valor"])} + R$ ${String(form["raw_piece_cost"])} = R$ ${centavosParaTexto(custoCalculado)}${formulaVale ? "" : " (este produto mantém o preço de custo já cadastrado)"}`
+                }
+              />
+            ) : null}
             <Campo
               full
               label="Medidas"
@@ -609,10 +688,14 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
               <>
                 <Campo
                   label="Preço de custo (R$) *"
-                  valor={form["custo"]}
+                  valor={custoPelaFormula ? centavosParaTexto(custoCalculado) : form["custo"]}
                   onChange={(v) => set("custo", v)}
-                  disabled={somente}
-                  ajuda="Obrigatório: é a base do cálculo de margem."
+                  disabled={somente || custoPelaFormula}
+                  ajuda={
+                    custoPelaFormula
+                      ? "Calculado pelo material bruto: peso × valor do banho + peça no bruto."
+                      : "Obrigatório: é a base do cálculo de margem."
+                  }
                 />
                 <Campo
                   label="Margem deste produto (%)"

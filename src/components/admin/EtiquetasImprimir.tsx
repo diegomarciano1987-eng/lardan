@@ -3,11 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Printer, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { SmartSelect } from "@/components/premium/SmartSelect";
 import { CONFIG_ETIQUETA, barrasEtiqueta, documentoEtiquetas, svgEtiqueta, type EtiquetaConfig, type EtiquetaItem } from "@/lib/etiquetas";
 import { lerItensEtiquetas, type EtiquetaOrigem } from "@/lib/etiquetas-dados";
 
-const CONFIG_KEY = "lardan.etiquetas.argox.v1";
+const CONFIG_KEY = "lardan.etiquetas.argox.alca-direita.v2";
 export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = false }: { origens: EtiquetaOrigem[]; label?: string; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [config, setConfig] = useState<EtiquetaConfig>(CONFIG_ETIQUETA);
@@ -47,7 +46,7 @@ export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = fals
     </Button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="admin-scope max-h-[85vh] max-w-3xl overflow-y-auto">
-        <DialogHeader><DialogTitle>Etiquetas de peças</DialogTitle><DialogDescription>Argox OS-214 Plus · 25 × 12 mm · 3 pistas · 203 DPI</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>Etiquetas de peças</DialogTitle><DialogDescription>Argox OS-214 Plus · base 95 × 12 mm · 1 coluna · alça à direita · BOPP / resina</DialogDescription></DialogHeader>
         {query.isPending ? <p>Carregando peças…</p> : query.error ? <div role="alert"><p>Não foi possível carregar as peças.</p><Button variant="outline" onClick={() => void query.refetch()}>Tentar novamente</Button></div> : !items.length ? <p>Sem dados de peças para imprimir.</p> : <>
           <div className="max-h-64 overflow-auto divide-y divide-line">
             {items.map((item) => <div key={item.id} className="flex items-center justify-between gap-4 py-3">
@@ -62,15 +61,14 @@ export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = fals
           {sample && <div className="rounded-md border border-line bg-surface-muted p-4 text-center"><p className="mb-2 truncate text-xs font-semibold">{sample.nome}</p><div className="flex justify-center" dangerouslySetInnerHTML={{ __html: svgEtiqueta(sample.barcode ?? "") }} /><p className="mt-2 text-xs">{sample.referencia || sample.barcode}</p></div>}
           <details className="rounded-md border border-line p-4"><summary className="cursor-pointer text-sm font-semibold">Ajustes desta estação</summary>
             <div className="mt-4 grid grid-cols-2 gap-4">
-              <label className="grid gap-2 text-xs">Primeira pista<SmartSelect value={String(config.primeiraPista)} onChange={(v) => setConfig((c) => ({ ...c, primeiraPista: Number(v) }))} options={[1,2,3].map((n) => ({ value: String(n), label: `Pista ${n}` }))} /></label>
-              {([["entrePistas", "Espaço entre pistas (mm)"], ["entreLinhas", "Espaço entre linhas (mm)"], ["margemEsquerda", "Margem esquerda (mm)"], ["margemSuperior", "Margem superior (mm)"]] as const).map(([key, title]) => <label key={key} className="grid gap-2 text-xs">{title}<input className="admin-input" type="number" min={0} max={10} step={0.1} value={config[key]} onChange={(e) => setConfig((c) => ({ ...c, [key]: Number(e.target.value) }))} /></label>)}
+              {([["entreLinhas", "Espaço entre linhas (mm)"], ["margemEsquerda", "Margem esquerda (mm)"], ["margemSuperior", "Margem superior (mm)"]] as const).map(([key, title]) => <label key={key} className="grid gap-2 text-xs">{title}<input className="admin-input" type="number" min={0} max={10} step={0.1} value={config[key]} onChange={(e) => setConfig((c) => ({ ...c, [key]: Number(e.target.value) }))} /></label>)}
             </div>
           </details>
-          <p className="text-xs text-ledger-muted">No diálogo, escolha a Argox conectada neste computador, escala 100%, margens zero e sem cabeçalhos/rodapés. O papel deve ter a largura das três pistas; confira os espaços do rolo nos ajustes antes do primeiro lote.</p>
+          <p className="text-xs text-ledger-muted">Suporte 100 mm · passo 15 mm · impressão nos 30 mm à esquerda; alça sem impressão. Escolha a Argox desta estação, escala 100%, margens zero e sem cabeçalhos/rodapés. Valide uma etiqueta e a leitura antes do lote.</p>
           {invalid.length > 0 && <div role="alert" className="text-sm text-destructive">{invalid.map((msg, i) => <p key={i}>{msg}</p>)}</div>}
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           {notice && <p role="status" className="text-sm text-ledger-muted">{notice}</p>}
-          <div className="flex items-center justify-between gap-3"><span className="text-sm font-semibold">{total} {total === 1 ? "etiqueta" : "etiquetas"} · {Math.ceil((total + config.primeiraPista - 1) / 3)} {Math.ceil((total + config.primeiraPista - 1) / 3) === 1 ? "linha" : "linhas"}</span><Button disabled={!total || invalid.length > 0 || query.isFetching} onClick={print}><Printer />Abrir impressão</Button></div>
+          <div className="flex items-center justify-between gap-3"><span className="text-sm font-semibold">{total} {total === 1 ? "etiqueta · 1 linha" : "etiquetas" + ` · ${total} linhas`}</span><Button disabled={!total || invalid.length > 0 || query.isFetching} onClick={print}><Printer />Abrir impressão</Button></div>
         </>}
       </DialogContent>
     </Dialog>

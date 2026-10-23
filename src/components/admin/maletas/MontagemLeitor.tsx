@@ -705,7 +705,7 @@ export function MontagemLeitor({
                     <li key={id} className="flex items-center justify-between gap-2">
                       <FotoPeca variantId={id} alt={p.nome} size="xs" />
                       <span className="flex-1 truncate">{p.nome}</span>
-                      <EtiquetasImprimir compact label={`Imprimir etiqueta de ${p.nome}`} origens={[{ variantId: id, quantidade: 1 }]} onOpenChange={aoAbrirEtiquetas} />
+                      <span onClickCapture={() => window.setTimeout(() => campo.current?.focus(), 400)}><EtiquetasImprimir compact label={`Imprimir etiqueta de ${p.nome}`} origens={[{ variantId: id, quantidade: 1 }]} /></span>
                       <span className="flex items-center gap-2">
                         <span className="tabular-nums text-ledger-muted">{brl(p.preco * p.qtd)}</span>
                         <strong className="tabular-nums">{p.qtd}</strong>

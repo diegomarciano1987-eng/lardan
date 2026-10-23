@@ -46,7 +46,7 @@ export function AcessoColaboradora({ partyId }: { partyId: string }) {
   async function salvarAcesso() {
     setBusy(true);
     try {
-      await colabAcessoSalvar({ data: { party_id: partyId, codigo, senha: senha || undefined } });
+      await colabAcessoSalvar({ data: { party_id: partyId, codigo, senha } });
       setSenha("");
       toast.success(d.acesso ? "Acesso atualizado." : `Acesso criado. Código ${codigo}.`);
       await qc.invalidateQueries({ queryKey: ["colab-acesso", partyId] });

@@ -126,7 +126,7 @@ export const colabAcessoLer = createServerFn({ method: "POST" })
 /** Cria ou atualiza o código e a senha da colaboradora (somente Master). */
 export const colabAcessoSalvar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { party_id: string; codigo: string; senha?: string }) => {
+  .inputValidator((i: { party_id: string; codigo: string; senha?: string | undefined }) => {
     if (!uuidOk(i?.party_id)) throw new Error("Cadastro inválido.");
     if (!codigoOk(i?.codigo)) throw new Error("O código precisa ter de 3 a 8 números.");
     if (i.senha !== undefined && i.senha !== "" && (i.senha.length < 8 || i.senha.length > 72))

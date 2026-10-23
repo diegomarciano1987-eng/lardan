@@ -974,6 +974,13 @@
       "when": 1792777999593,
       "tag": "0138_colab_carteira_helpers",
       "breakpoints": true
+    },
+    {
+      "idx": 139,
+      "version": "7",
+      "when": 1792778049306,
+      "tag": "0139_colab_carteira_readers",
+      "breakpoints": true
     }
   ]
 }

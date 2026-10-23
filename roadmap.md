@@ -123,3 +123,8 @@ Provas: docs/lardan/AUDITORIA-FINANCEIRO-NOVE-PONTOS-2026-10-16.md; 243 testes i
 - [x] Prévia de produto_reclassificar(false) entregue
 - [x] produto_reclassificar(true) aplicado — lote reclass-20261023-112619
 - [ ] Publicar interface — aguarda aprovação
+
+## 0127 — situação das maletas
+- [x] Migração, telas e teste aplicados como enviados (386/0)
+- [ ] Diego importa maletas_status.csv; depois rodar consulta da seção 4
+- [ ] Publicar interface — aguarda aprovação

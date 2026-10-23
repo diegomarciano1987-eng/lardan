@@ -433,15 +433,10 @@ export const conferirRetorno = (
   }>("kit_retorno_confirmar", { _movement: movementId, _payload: payload });
 
 export async function depositosAtivos() {
-  const { data, error } = await supabase
-    .from("locations")
-    .select("id, name, kind, is_blocked, is_active")
-    .eq("kind", "deposito")
-    .eq("is_active", true)
-    .eq("is_blocked", false)
-    .order("name");
+  // Montagem e acertos: Depósito Principal primeiro; RPC também atende a colaboradora (sem leitura direta de locations).
+  const { data, error } = await supabase.rpc("kit_depositos_operacao");
   if (error) throw error;
-  return (data ?? []) as { id: string; name: string }[];
+  return (data ?? []).map((l) => ({ id: l.id, name: l.name, code: l.code }));
 }
 
 /* ---------------- vitrine ---------------- */

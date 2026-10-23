@@ -13,6 +13,7 @@ import { useCapabilities } from "@/lib/capabilities";
 import { useColabEscopo } from "@/lib/colab-escopo";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, traduzir } from "@/lib/maletas";
+import { remessasHistorico } from "@/lib/historico-jflex";
 import { RemessasHistorico } from "@/components/admin/historico/RemessasHistorico";
 import { MaletasNaRua } from "@/components/admin/maletas/MaletasNaRua";
 import { STATUS_REMESSA, buscarRemessas, criarRemessa, dataBR, isoDia, type RemessaCard } from "@/lib/remessas";
@@ -60,12 +61,8 @@ async function buscarRepresentantes(termo: string) {
 }
 
 async function buscarDepositos() {
-  const { data, error } = await supabase
-    .from("locations")
-    .select("id, code, name")
-    .eq("kind", "deposito")
-    .eq("is_active", true)
-    .order("code");
+  // RPC escopada: colaboradora não lê locations diretamente; Depósito Principal (DEP-01) vem primeiro.
+  const { data, error } = await supabase.rpc("kit_depositos_operacao");
   if (error) throw error;
   return (data ?? []).map((l) => ({ value: l.id, label: `${l.code} · ${l.name}` }));
 }
@@ -87,8 +84,8 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
   const representantes = escopo.data?.colaboradora ? (escopo.data.representante ? [{ value: escopo.data.representante, label: escopo.data.nome ?? "Representante vinculado" }] : []) : reps.data ?? [];
   const depositos = useQuery({ queryKey: ["remessas", "depositos"], queryFn: buscarDepositos, enabled: aberto });
   React.useEffect(() => {
-    const unico = depositos.data?.length === 1 ? depositos.data[0] : undefined;
-    if (unico && !deposito) setDeposito(unico.value);
+    const principal = depositos.data?.find((d) => d.label.startsWith("DEP-01")) ?? (depositos.data?.length === 1 ? depositos.data[0] : undefined);
+    if (principal && !deposito) setDeposito(principal.value);
   }, [depositos.data, deposito]);
 
   const criar = useMutation({
@@ -215,6 +212,8 @@ function RemessasPage() {
     de: isoDia(periodo?.from), ate: isoDia(periodo?.to ?? periodo?.from), campoData,
   };
   const lista = useQuery({ queryKey: ["remessas", "busca", filtros], queryFn: () => buscarRemessas(filtros) });
+  // A mesma busca também consulta o Histórico SmallData (já escopado ao representante da colaboradora no servidor).
+  const historico = useQuery({ queryKey: ["remessas", "busca-historico", busca], queryFn: () => remessasHistorico({ busca, limite: 30 }), enabled: busca.trim().length >= 2 });
   const tot = (lista.data ?? []).reduce(
     (a, r) => ({ n: a.n + 1, m: a.m + Number(r.maletas), c: a.c + Number(r.maletas_conferidas), p: a.p + Number(r.pecas), v: a.v + Number(r.valor_cents) }),
     { n: 0, m: 0, c: 0, p: 0, v: 0 },
@@ -351,6 +350,29 @@ function RemessasPage() {
         )}
         {lista.data?.map((r) => <Linha key={r.id} r={r} />)}
       </Panel>
+
+      {busca.trim().length >= 2 && (
+        <Panel flush>
+          <div className="flex items-center justify-between gap-3 border-b border-line-soft px-6 py-4">
+            <p className="ledger-eyebrow">Histórico SmallData · “{busca.trim()}”</p>
+            {historico.data && <span className="text-xs text-ledger-muted">{historico.data.total} remessa(s){historico.data.total > historico.data.itens.length ? ` · mostrando ${historico.data.itens.length}` : ""}</span>}
+          </div>
+          {historico.isLoading && <div className="space-y-2 p-6">{[0, 1].map((i) => <Skeleton key={i} className="h-12" />)}</div>}
+          {historico.isError && <div className="px-6"><ErrorState message={traduzir(historico.error)} onRetry={() => void historico.refetch()} /></div>}
+          {historico.data?.itens.length === 0 && <div className="px-6"><EmptyState title="Sem dados no Histórico SmallData" description="Nenhuma remessa histórica corresponde a esta busca." /></div>}
+          {historico.data?.itens.map((h) => (
+            <button key={h.numero} type="button" onClick={() => { setRemessaAberta(h.numero); setFonte("jflex"); }}
+              className="grid w-full grid-cols-[90px_1fr_1fr_auto_auto_auto] items-center gap-4 border-b border-line-soft px-6 py-3 text-left text-sm hover:bg-surface-muted">
+              <span className="font-semibold tabular-nums">Nº {h.numero}</span>
+              <span className="truncate">{h.praca ?? "—"}</span>
+              <span className="truncate text-ledger-muted">{h.representante ?? "—"}</span>
+              <span className="tabular-nums text-ledger-muted">{dataBR(h.emissao)}</span>
+              <span className="tabular-nums text-ledger-muted">{h.maletas} maletas · {h.pecas_vendidas}/{h.pecas_enviadas} peças</span>
+              <StatusBadge tone={h.status === "aberta" ? "warning" : "neutral"}>{h.status === "aberta" ? "Aberta" : "Fechada"}</StatusBadge>
+            </button>
+          ))}
+        </Panel>
+      )}
 
       <p className="flex items-center gap-2 text-xs text-ledger-muted">
         <BriefcaseBusiness aria-hidden className="size-4" />

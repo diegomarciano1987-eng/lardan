@@ -17587,6 +17587,14 @@ export type Database = {
       kit_consultora_info: { Args: { _cycle: string }; Returns: Json }
       kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
+      kit_depositos_operacao: {
+        Args: never
+        Returns: {
+          code: string
+          id: string
+          name: string
+        }[]
+      }
       kit_detail: { Args: { _cycle: string }; Returns: Json }
       kit_divergencia_foto_registrar: {
         Args: { _cycle: string; _path: string; _variant: string }

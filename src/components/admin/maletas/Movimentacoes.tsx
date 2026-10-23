@@ -166,6 +166,7 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
   const [nota, setNota] = React.useState("");
 
   const depositos = useQuery({ queryKey: ["maletas", "depositos"], queryFn: depositosAtivos });
+  React.useEffect(() => { const p = depositos.data?.find((d) => d.code === "DEP-01"); if (p && !origem) setOrigem(p.id); }, [depositos.data, origem]);
 
   // A chave vive enquanto o formulário não for concluído: duplo clique, reenvio
   // ou nova tentativa depois de um erro de rede usam a MESMA chave e o banco
@@ -507,6 +508,7 @@ function FormConferencia({ m, nome, onFeito }: { m: Movimento; nome: (id: string
   );
   const [deposito, setDeposito] = React.useState("");
   const depositos = useQuery({ queryKey: ["maletas", "depositos"], queryFn: depositosAtivos });
+  React.useEffect(() => { const p = depositos.data?.find((d) => d.code === "DEP-01"); if (p && !deposito) setDeposito(p.id); }, [depositos.data, deposito]);
 
   const enviar = useMutation({
     mutationFn: () =>

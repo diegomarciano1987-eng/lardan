@@ -226,18 +226,11 @@ function RemessasPage() {
     const token = (/[?&]qr=([^&#\s]+)/.exec(bruto)?.[1] ?? bruto.split("/").pop() ?? "").trim();
     if (!token) return;
     const { data: resolved, error } = await supabase.rpc("kit_identificacao_buscar", { _codigo: token });
-    const data = resolved ? { id: resolved } : null;
-    if (error || !data) {
+    if (error || !resolved) {
       toast.error("Maleta não encontrada para este código.");
       return;
     }
-    const { data: ciclo } = await supabase.from("kit_cycles").select("id").eq("kit_id", data.id)
-      .order("created_at", { ascending: false }).limit(1).maybeSingle();
-    if (!ciclo) {
-      toast.error("Nenhum ciclo desta maleta está visível para você.");
-      return;
-    }
-    navigate({ to: "/admin/maletas/$id", params: { id: ciclo.id } });
+    navigate({ to: "/admin/maletas/$id", params: { id: resolved } });
   }
 
   return (
@@ -314,10 +307,10 @@ function RemessasPage() {
           </label>
           <div className="flex items-end gap-2 lg:col-span-3">
             <input className="admin-input min-w-0 flex-1" value={qr} onChange={(e) => setQr(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") void abrirPorQr(); }} placeholder="Bipar QR da maleta" />
-            <button type="button" className="admin-btn" onClick={() => void abrirPorQr()} aria-label="Abrir maleta pelo QR">
+              onKeyDown={(e) => { if (e.key === "Enter") void abrirPorQr(); }} placeholder="Bipar código de barras da maleta" aria-label="Código de barras da maleta" />
+            <Button variant="outline" size="icon" onClick={() => void abrirPorQr()} aria-label="Abrir maleta pelo código de barras">
               <ScanLine aria-hidden className="size-4" />
-            </button>
+            </Button>
           </div>
         </div>
         {temFiltro && (

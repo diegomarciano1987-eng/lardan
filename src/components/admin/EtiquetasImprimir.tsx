@@ -70,7 +70,7 @@ export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = fals
           {invalid.length > 0 && <div role="alert" className="text-sm text-destructive">{invalid.map((msg, i) => <p key={i}>{msg}</p>)}</div>}
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           {notice && <p role="status" className="text-sm text-ledger-muted">{notice}</p>}
-          <div className="flex items-center justify-between gap-3"><span className="text-sm font-semibold">{total} etiquetas · {Math.ceil((total + config.primeiraPista - 1) / 3)} linhas</span><Button disabled={!total || invalid.length > 0 || query.isFetching} onClick={print}><Printer />Abrir impressão</Button></div>
+          <div className="flex items-center justify-between gap-3"><span className="text-sm font-semibold">{total} {total === 1 ? "etiqueta" : "etiquetas"} · {Math.ceil((total + config.primeiraPista - 1) / 3)} {Math.ceil((total + config.primeiraPista - 1) / 3) === 1 ? "linha" : "linhas"}</span><Button disabled={!total || invalid.length > 0 || query.isFetching} onClick={print}><Printer />Abrir impressão</Button></div>
         </>}
       </DialogContent>
     </Dialog>

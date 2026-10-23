@@ -1,8 +1,9 @@
 # Roadmap
 ## Etiquetas Argox — 23/10
-- [ ] Impressão pelo navegador, três pistas 25×12 mm, códigos reais sem nova numeração.
-- [ ] Acesso na ficha/variantes, lista Produtos, Estoque e remessas/maletas.
-- [ ] Testes de composição e conferência autenticada; impressão física depende da Argox local, sem publicar.
+- [x] Impressão pelo navegador, três pistas 25×12 mm, códigos reais sem nova numeração e ajustes por estação.
+- [x] Acesso na ficha/variantes, lista Produtos, saldos/detalhe Estoque, remessa, maleta e documentos pós-montagem.
+- [x] Seis testes aprovados; conta autorizada abriu folha com brinco real barcode 17942; 20 ações na lista e 20 em estoque; sem erros de navegador.
+- [ ] Impressão física e leitura na Argox local — dependem do computador/rolo da equipe; não publicado.
 ## Pacote 0136-2 — primeira montagem e login (23/10)
 - [x] Revisar e aplicar as rotinas do pacote sem apagar dados; aplicada como 0137, diferença apenas no fim de arquivo.
 - [x] Integrar login, porta Operação e classificação das peças; arquivos idênticos ao pacote e regras atualizadas.

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, UserRound } from "lucide-react";
@@ -22,6 +23,11 @@ export const Route = createFileRoute("/_authenticated/admin/maletas_/remessa/$id
   head: () => ({
     meta: [
       { title: "Remessa — Administração LARDAN" },
+      { name: "description", content: "Maletas e impressão de etiquetas das peças da remessa LARDAN." },
+      { property: "og:title", content: "Remessa — Administração LARDAN" },
+      { property: "og:description", content: "Maletas e impressão de etiquetas das peças da remessa LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -106,6 +112,7 @@ function RemessaPage() {
           </p>
         </div>
         <StatusBadge tone={s.tom}>{s.rotulo}</StatusBadge>
+        <EtiquetasImprimir origens={(maletas.data ?? []).map((m) => ({ cycleId: m.cycle_id }))} />
       </div>
 
       <div className="grid gap-3 md:grid-cols-5">

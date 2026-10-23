@@ -18256,6 +18256,7 @@ export type Database = {
       }
       maleta_motivo_invisivel: { Args: { _cycle: string }; Returns: string }
       maleta_perdida_fiado: { Args: { _perdida: string }; Returns: string }
+      maleta_total_sugerido: { Args: { _party: string }; Returns: Json }
       maletas_perdidas_smalldata_processar: {
         Args: { _aplicar?: boolean }
         Returns: Json

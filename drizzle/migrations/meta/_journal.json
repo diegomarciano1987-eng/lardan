@@ -1086,6 +1086,13 @@
       "when": 1792784874656,
       "tag": "0154_remessa_maleta_assinatura_estado",
       "breakpoints": true
+    },
+    {
+      "idx": 155,
+      "version": "7",
+      "when": 1792785048198,
+      "tag": "0155_maleta_total_sugerido_media3",
+      "breakpoints": true
     }
   ]
 }

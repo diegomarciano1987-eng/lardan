@@ -1,4 +1,13 @@
 # Roadmap
+## Sete correções autorizadas — 23/10, 17:44 UTC
+- [ ] 1 Botão destacado Imprimir etiquetas na lista de Produtos.
+- [ ] 2 Colaboradora consulta somente Consultoras em Cadastros, com rotas protegidas.
+- [ ] 3 Estoque removido e bloqueado para colaboradora.
+- [ ] 4 Inteligência e histórico restritos ao representante vinculado, no banco.
+- [ ] 5 Remessas, praças e consultoras somente do representante vinculado, no banco.
+- [ ] 6 Limpeza auditada e reversível dos registros comprovados de homologação/teste.
+- [ ] 7 Etiqueta alça à direita: base 95 mm, suporte 100 mm, área esquerda 30 mm no desenho, 12 mm, uma coluna, intervalo 3 mm; testes e sete relatórios.
+- [ ] Validar impressão física — depende da Argox e leitor na estação; não publicar sem pedido.
 ## Etiquetas Argox — 23/10
 - [x] Impressão pelo navegador, três pistas 25×12 mm, códigos reais sem nova numeração e ajustes por estação.
 - [x] Acesso na ficha/variantes, lista Produtos, saldos/detalhe Estoque, remessa, maleta e documentos pós-montagem.

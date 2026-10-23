@@ -3974,6 +3974,57 @@ export type Database = {
           },
         ]
       }
+      consultoras_vinculo_log: {
+        Row: {
+          antes: string | null
+          ator: string | null
+          campo: string
+          criado_em: string
+          depois: string | null
+          desfeito_em: string | null
+          id: number
+          lote: string
+          party_id: string
+        }
+        Insert: {
+          antes?: string | null
+          ator?: string | null
+          campo: string
+          criado_em?: string
+          depois?: string | null
+          desfeito_em?: string | null
+          id?: number
+          lote: string
+          party_id: string
+        }
+        Update: {
+          antes?: string | null
+          ator?: string | null
+          campo?: string
+          criado_em?: string
+          depois?: string | null
+          desfeito_em?: string | null
+          id?: number
+          lote?: string
+          party_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultoras_vinculo_log_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultoras_vinculo_log_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       contact_points: {
         Row: {
           created_at: string
@@ -14397,6 +14448,8 @@ export type Database = {
       }
       colab_caps_permitidas: { Args: never; Returns: string[] }
       colab_exigir_master: { Args: { _actor: string }; Returns: undefined }
+      colab_login_ok: { Args: { _user: string }; Returns: undefined }
+      colab_login_reservar: { Args: { _codigo: string }; Returns: string }
       colab_modulos_definir: {
         Args: {
           _actor: string
@@ -14514,6 +14567,14 @@ export type Database = {
         Returns: undefined
       }
       consultora_pos_venda_prazo: { Args: { _order: string }; Returns: Json }
+      consultoras_vinculo_smalldata: {
+        Args: { _aplicar?: boolean }
+        Returns: Json
+      }
+      consultoras_vinculo_smalldata_desfazer: {
+        Args: { _lote: string }
+        Returns: Json
+      }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string
@@ -15656,6 +15717,10 @@ export type Database = {
         }
         Returns: Json
       }
+      legado_representante_vincular: {
+        Args: { _codigo: number; _party: string }
+        Returns: Json
+      }
       legado_resumo: { Args: never; Returns: Json }
       legado_status_esperado: {
         Args: { _codcli: number }
@@ -15700,6 +15765,7 @@ export type Database = {
       mask_reference: { Args: { v: string }; Returns: string }
       master_exists: { Args: never; Returns: boolean }
       media_publica_ok: { Args: { _media: string }; Returns: boolean }
+      meu_acesso_colab: { Args: never; Returns: boolean }
       minhas_indicacoes: { Args: never; Returns: Json }
       montagem_metas_ciclo: {
         Args: { _cycle: string; _total?: number }
@@ -16678,6 +16744,13 @@ export type Database = {
       }
       variant_ean_next: { Args: never; Returns: string }
       variant_save: { Args: { _id: string; _payload: Json }; Returns: Json }
+      variantes_tipo_peca: {
+        Args: { _variants: string[] }
+        Returns: {
+          tipo: string
+          variant_id: string
+        }[]
+      }
       vitrine_endereco_disponivel: { Args: { _slug: string }; Returns: Json }
     }
     Enums: {

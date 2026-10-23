@@ -9,10 +9,10 @@ import {
   PARAMETROS_PADRAO,
   TIPO_PECA_LABEL,
   metasPorTipo,
-  tipoPeca,
   type ParametrosRemessa,
   type TipoPeca,
 } from "@/lib/remessa";
+import { useTiposPeca } from "@/lib/tipo-peca";
 import { ConferenciaMaleta } from "./ConferenciaMaleta";
 import { DocumentosMaleta } from "./DocumentosMaleta";
 
@@ -470,13 +470,14 @@ export function MontagemLeitor({
     media_id: null,
   }));
 
-  /** Bipado por tipo de peça, para os cards de meta. */
+  /** Bipado por tipo de peça, para os cards de meta (tipo pela categoria do produto — 0136). */
+  const tipoDe = useTiposPeca(Object.keys(itens));
   const bipadoPorTipo = React.useMemo(() => {
     const m: Record<TipoPeca, number> = { brinco: 0, anel: 0, colar: 0, pulseira: 0, tornozeleira: 0, outro: 0 };
-    for (const [, v] of lista) m[tipoPeca(v.sku, v.nome)] += v.qtd;
+    for (const [id, v] of lista) m[tipoDe(id, v.sku, v.nome)] += v.qtd;
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itens]);
+  }, [itens, tipoDe]);
 
   const metasPadrao = metasPorTipo(parametros.data ?? PARAMETROS_PADRAO);
   const somaPadrao = Object.values(metasPadrao).reduce((s, n) => s + n, 0);

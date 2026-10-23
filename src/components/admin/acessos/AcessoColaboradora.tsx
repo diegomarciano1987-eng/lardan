@@ -90,7 +90,7 @@ export function AcessoColaboradora({ partyId }: { partyId: string }) {
         </h3>
         <p className="text-sm text-ledger-muted">
           Ela entra em Sistema Lardan → Operação → <strong>Entrar com código</strong>, sem precisar de e-mail.
-          {d.acesso?.email_real && " Ela também continua podendo entrar com o e-mail dela."}
+          {d.emailReal && " Ela já tem login com o e-mail dela: o código usa a mesma senha (ela troca em “Esqueci minha senha”)."}
         </p>
         <div className="grid max-w-xl gap-3 sm:grid-cols-2">
           <label className="text-sm font-medium text-ledger-text">
@@ -98,16 +98,18 @@ export function AcessoColaboradora({ partyId }: { partyId: string }) {
             <input className={inputCls + " mt-1"} inputMode="numeric" maxLength={8} value={codigo}
               onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))} />
           </label>
-          <label className="text-sm font-medium text-ledger-text">
-            {d.acesso ? "Nova senha (deixe vazio para manter)" : "Senha"}
-            <PasswordInput className={inputCls + " mt-1"} autoComplete="new-password" value={senha}
-              onChange={(e) => setSenha(e.target.value)} />
-          </label>
+          {!d.emailReal && (
+            <label className="text-sm font-medium text-ledger-text">
+              {d.acesso ? "Nova senha (deixe vazio para manter)" : "Senha"}
+              <PasswordInput className={inputCls + " mt-1"} autoComplete="new-password" value={senha}
+                onChange={(e) => setSenha(e.target.value)} />
+            </label>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <button type="button" disabled={busy} onClick={salvarAcesso}
             className="h-11 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground disabled:opacity-60">
-            {d.acesso ? "Salvar código/senha" : "Criar acesso"}
+            {d.acesso ? (d.emailReal ? "Salvar código" : "Salvar código/senha") : "Criar acesso"}
           </button>
           {d.acesso && (
             <label className="flex items-center gap-2 text-sm text-ledger-text">

@@ -3,7 +3,8 @@ import { CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
 import { FotoPeca } from "@/components/FotoPeca";
 import { brl, conferir, traduzir, type ItemComposicao } from "@/lib/maletas";
-import { TIPO_PECA_LABEL, tipoPeca, type TipoPeca } from "@/lib/remessa";
+import { TIPO_PECA_LABEL, type TipoPeca } from "@/lib/remessa";
+import { useTiposPeca } from "@/lib/tipo-peca";
 
 const ORDEM: TipoPeca[] = ["brinco", "anel", "colar", "pulseira", "tornozeleira", "outro"];
 
@@ -29,6 +30,7 @@ export function ConferenciaMaleta({
   const [confirmando, setConfirmando] = React.useState(false);
   const [gravando, setGravando] = React.useState(false);
 
+  const tipoDe = useTiposPeca(composicao.map((c) => c.variant_id));
   const totais = React.useMemo(() => {
     const porTipo: Record<TipoPeca, number> = {
       brinco: 0,
@@ -41,12 +43,12 @@ export function ConferenciaMaleta({
     let pecas = 0;
     let valor = 0;
     for (const c of composicao) {
-      porTipo[tipoPeca(c.sku, c.produto)] += c.quantidade;
+      porTipo[tipoDe(c.variant_id, c.sku, c.produto)] += c.quantidade;
       pecas += c.quantidade;
       valor += c.quantidade * c.valor_unitario;
     }
     return { porTipo, pecas, valor };
-  }, [composicao]);
+  }, [composicao, tipoDe]);
 
   async function gravar() {
     setGravando(true);

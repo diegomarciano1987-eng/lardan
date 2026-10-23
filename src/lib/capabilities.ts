@@ -104,6 +104,13 @@ export async function fetchMyCapabilities(): Promise<Capability[]> {
   );
 }
 
+/** Acesso de colaboradora por código ativo (0136): só ele abre a Operação por módulos. */
+export async function fetchSouColab(): Promise<boolean> {
+  const { data, error } = await supabase.rpc("meu_acesso_colab" as never);
+  if (error) return false;
+  return data === true;
+}
+
 export const CapabilitiesContext = createContext<Capability[]>([]);
 export const useCapabilities = () => useContext(CapabilitiesContext);
 

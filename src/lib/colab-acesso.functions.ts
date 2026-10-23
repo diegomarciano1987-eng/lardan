@@ -1,9 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const ERRO_LOGIN = "Não foi possível entrar. Confira o código e a senha.";
-const MAX_FALHAS = 5;
-const BLOQUEIO_MIN = 15;
+const ERRO_LOGIN =
+  "Não foi possível entrar. Confira o código e a senha. Depois de 5 tentativas erradas o acesso fica travado por 15 minutos.";
 
 const codigoOk = (c: unknown) => typeof c === "string" && /^[0-9]{3,8}$/.test(c.trim());
 const uuidOk = (u: unknown) => typeof u === "string" && /^[0-9a-f-]{36}$/.test(u);
@@ -27,16 +26,13 @@ export const entrarPorCodigo = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const sb = await admin();
-    const { data: ac } = await sb
-      .from("colab_acessos")
-      .select("user_id, ativo, falhas, bloqueado_ate")
-      .eq("codigo", data.codigo)
-      .maybeSingle();
-    if (!ac || !ac.ativo) throw new Error(ERRO_LOGIN);
-    if (ac.bloqueado_ate && new Date(ac.bloqueado_ate) > new Date())
-      throw new Error(`Muitas tentativas erradas. Aguarde ${BLOQUEIO_MIN} minutos ou peça ao Daniel para liberar.`);
+    // 0136: a tentativa é reservada no banco de forma atômica (5 erradas travam 15 min, mesmo em paralelo).
+    // Código inexistente, suspenso, travado ou de conta da equipe: mesma resposta, sem dizer qual.
+    const { data: reservado, error: re } = await sb.rpc("colab_login_reservar" as never, { _codigo: data.codigo } as never);
+    const userId = re ? null : (reservado as unknown as string | null);
+    if (!userId) throw new Error(ERRO_LOGIN);
 
-    const { data: u } = await sb.auth.admin.getUserById(ac.user_id);
+    const { data: u } = await sb.auth.admin.getUserById(userId);
     const email = u?.user?.email;
     if (!email) throw new Error(ERRO_LOGIN);
 
@@ -54,21 +50,8 @@ export const entrarPorCodigo = createServerFn({ method: "POST" })
       },
     });
     const { data: s, error } = await pub.auth.signInWithPassword({ email, password: data.senha });
-    if (error || !s.session) {
-      const falhas = (ac.falhas ?? 0) + 1;
-      await sb
-        .from("colab_acessos")
-        .update({
-          falhas: falhas >= MAX_FALHAS ? 0 : falhas,
-          bloqueado_ate: falhas >= MAX_FALHAS ? new Date(Date.now() + BLOQUEIO_MIN * 60e3).toISOString() : null,
-        })
-        .eq("user_id", ac.user_id);
-      throw new Error(ERRO_LOGIN);
-    }
-    await sb.from("colab_acessos").update({ falhas: 0, bloqueado_ate: null }).eq("user_id", ac.user_id);
-    await sb.from("audit_logs").insert({
-      actor_id: ac.user_id, action: "colab.login.codigo", entity: "colab_acessos", entity_id: ac.user_id, payload: {},
-    } as never);
+    if (error || !s.session) throw new Error(ERRO_LOGIN);
+    await sb.rpc("colab_login_ok" as never, { _user: userId } as never);
     return { access_token: s.session.access_token, refresh_token: s.session.refresh_token };
   });
 
@@ -78,6 +61,8 @@ export type ColabAcesso = {
   acesso: null | { user_id: string; codigo: string; ativo: boolean; bloqueado: boolean; email_real: boolean };
   caps: string[];
   financeiro: boolean;
+  /** 0136: já tem login com e-mail próprio — a senha é dela, o Master só salva o código. */
+  emailReal: boolean;
 };
 
 export const colabAcessoLer = createServerFn({ method: "POST" })
@@ -120,6 +105,7 @@ export const colabAcessoLer = createServerFn({ method: "POST" })
         : null,
       caps,
       financeiro,
+      emailReal: Boolean(perfil?.email && !perfil.email.endsWith("@acesso.lardan.com.br")),
     };
   });
 
@@ -137,8 +123,12 @@ export const colabAcessoSalvar = createServerFn({ method: "POST" })
     await exigirMaster(context);
     const sb = await admin();
     const { data: ac } = await sb.from("colab_acessos").select("user_id").eq("party_id", data.party_id).maybeSingle();
-    const { data: perfil } = await sb.from("profiles").select("id").eq("party_id", data.party_id).limit(1).maybeSingle();
+    const { data: perfil } = await sb.from("profiles").select("id, email").eq("party_id", data.party_id).limit(1).maybeSingle();
     let userId = ac?.user_id ?? perfil?.id ?? null;
+    // 0136: quem já entra com e-mail próprio troca a senha por "Esqueci minha senha", nunca pelo Master.
+    const emailReal = Boolean(perfil?.email && !perfil.email.endsWith("@acesso.lardan.com.br"));
+    if (userId && emailReal && data.senha)
+      throw new Error("Esta pessoa já entra com o próprio e-mail: a senha é dela. Salve só o código; ela usa a mesma senha do e-mail.");
     let criado = false;
 
     if (!userId) {

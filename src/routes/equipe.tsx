@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchMyRoles } from "@/lib/session";
 import { DESTINO, PORTAS, inicioOperacao, portaLiberada, type Porta } from "@/lib/portas";
 import { PasswordInput } from "@/components/ui/password-input";
-import { fetchMyCapabilities } from "@/lib/capabilities";
+import { fetchMyCapabilities, fetchSouColab } from "@/lib/capabilities";
 import { entrarPorCodigo } from "@/lib/colab-acesso.functions";
 
 type Busca = { area?: Porta | undefined };
@@ -51,7 +51,8 @@ function EquipePage() {
   async function seguir(porta: Porta) {
     const roles = await fetchMyRoles().catch(() => []);
     const caps = porta === "operacao" ? await fetchMyCapabilities().catch(() => []) : [];
-    if (!portaLiberada(porta, roles, caps)) {
+    const colab = porta === "operacao" ? await fetchSouColab() : false;
+    if (!portaLiberada(porta, roles, caps, colab)) {
       await supabase.auth.signOut();
       setErro("Seu acesso não está liberado para esta área.");
       return;

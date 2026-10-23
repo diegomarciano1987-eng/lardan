@@ -585,12 +585,14 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
               disabled={somente}
               opcoes={(fornecedores.data ?? []).map((f) => ({ value: f.id, label: f.name }))}
             />
-            <Campo
-              label="Valor da peça no bruto (R$)"
-              valor={form["raw_piece_cost"]}
-              onChange={(v) => set("raw_piece_cost", v)}
-              disabled={somente}
-            />
+            {podeVerCustos ? (
+              <Campo
+                label="Valor da peça no bruto (R$)"
+                valor={form["raw_piece_cost"]}
+                onChange={(v) => set("raw_piece_cost", v)}
+                disabled={somente}
+              />
+            ) : null}
             <Campo
               full
               label="Medidas"

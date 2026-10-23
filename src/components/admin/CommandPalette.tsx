@@ -24,27 +24,40 @@ const LIMIT = 5;
  * Busca no servidor, sempre limitada. Nunca baixa a base inteira e nunca
  * filtra no navegador: cada grupo é uma consulta paginada com RLS ativa.
  */
-async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
+export type Escopo = "cadastros" | "produtos" | "maletas" | "financeiro" | "candidaturas" | "site";
+
+export const ESCOPOS: { id: Escopo; label: string }[] = [
+  { id: "cadastros", label: "Cadastros" },
+  { id: "produtos", label: "Produtos e SKU" },
+  { id: "maletas", label: "Maletas" },
+  { id: "financeiro", label: "Financeiro" },
+  { id: "candidaturas", label: "Candidaturas" },
+  { id: "site", label: "Páginas do site" },
+];
+
+/** Pré-filtro: só consulta as tabelas do tipo escolhido (antes eram 10 consultas por tecla). */
+async function search(term: string, caps: Capability[], escopo: Escopo): Promise<SearchHit[]> {
   const like = `%${term}%`;
   const hits: SearchHit[] = [];
 
   const podeCatalogo = caps.includes("catalog.view");
-  const podeLeads = caps.includes("leads.view");
+  const podeLeads = caps.includes("leads.view") && escopo === "candidaturas";
 
   const blocoCatalogo = async () => {
-  if (podeCatalogo) {
+  if (podeCatalogo && (escopo === "produtos" || escopo === "site")) {
+    const nada = Promise.resolve({ data: [] as never[] });
     const [produtos, variantes, paginas] = await Promise.all([
-      supabase
+      escopo === "produtos" ? supabase
         .from("products")
         .select("id,name,slug,status")
         .ilike("name", like)
-        .limit(LIMIT),
-      supabase
+        .limit(LIMIT) : nada,
+      escopo === "produtos" ? supabase
         .from("product_variants")
         .select("id,sku,label,product_id")
         .or(`sku.ilike.${like},label.ilike.${like}`)
-        .limit(LIMIT),
-      supabase.from("pages").select("id,title,slug,status").ilike("title", like).limit(LIMIT),
+        .limit(LIMIT) : nada,
+      escopo === "site" ? supabase.from("pages").select("id,title,slug,status").ilike("title", like).limit(LIMIT) : nada,
     ]);
 
     for (const p of produtos.data ?? []) {
@@ -118,6 +131,8 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
 
   };
   const blocoResto = async () => {
+  if (escopo !== "cadastros" && escopo !== "maletas" && escopo !== "financeiro") return;
+  const emCad = escopo === "cadastros", emKit = escopo === "maletas", emFin = escopo === "financeiro";
   // Pessoas: todas (ativas e inativas), por nome, razão social, código ou CPF/CNPJ.
   const digitos = term.replace(/\D/g, "");
   const safe = term.replace(/[,()]/g, " ");
@@ -153,7 +168,7 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
   };
 
   const [pessoas, pagar, receber, maletas, contas, fornecedores] = await Promise.all([
-    seguro(supabase
+    !emCad ? Promise.resolve(vazio) : seguro(supabase
       .from("parties")
       .select("id,display_name,legal_name,code,status,doc_masked")
       .or(pessoaFiltro)
@@ -162,11 +177,11 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
       .neq("status", "inativo")
       .order("display_name")
       .limit(8)),
-    podeFinPagar ? titulos("payable") : Promise.resolve(vazio),
-    podeFinReceber ? titulos("receivable") : Promise.resolve(vazio),
-    seguro(supabase.from("kits").select("id,code,label").or(`code.ilike.${likeSafe},label.ilike.${likeSafe}`).limit(LIMIT)),
-    seguro(supabase.from("financial_accounts").select("id,nome,kind").ilike("nome", likeSafe).limit(LIMIT)),
-    seguro(supabase
+    emFin && podeFinPagar ? titulos("payable") : Promise.resolve(vazio),
+    emFin && podeFinReceber ? titulos("receivable") : Promise.resolve(vazio),
+    !emKit ? Promise.resolve(vazio) : seguro(supabase.from("kits").select("id,code,label").or(`code.ilike.${likeSafe},label.ilike.${likeSafe}`).limit(LIMIT)),
+    !emFin ? Promise.resolve(vazio) : seguro(supabase.from("financial_accounts").select("id,nome,kind").ilike("nome", likeSafe).limit(LIMIT)),
+    !emCad ? Promise.resolve(vazio) : seguro(supabase
       .from("suppliers")
       .select("id,name,trade_name")
       .or(`name.ilike.${likeSafe},trade_name.ilike.${likeSafe}`)
@@ -231,6 +246,7 @@ export function CommandPalette({
   const [term, setTerm] = useState("");
   const [debounced, setDebounced] = useState("");
   const [cursor, setCursor] = useState(0);
+  const [escopo, setEscopo] = useState<Escopo>("cadastros");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -248,9 +264,9 @@ export function CommandPalette({
   }, [open]);
 
   const query = useQuery({
-    queryKey: ["global-search", debounced, caps.join(",")],
+    queryKey: ["global-search", escopo, debounced, caps.join(",")],
     enabled: open && debounced.length >= 2,
-    queryFn: () => search(debounced, caps),
+    queryFn: () => search(debounced, caps, escopo),
     staleTime: 15_000,
   });
 
@@ -313,6 +329,11 @@ export function CommandPalette({
             onChange={(e) => setTerm(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Escape") onClose();
+              if (e.key === "Tab") {
+                e.preventDefault();
+                const i = ESCOPOS.findIndex((x) => x.id === escopo);
+                setEscopo(ESCOPOS[(i + (e.shiftKey ? ESCOPOS.length - 1 : 1)) % ESCOPOS.length]!.id);
+              }
               if (e.key === "ArrowDown") {
                 e.preventDefault();
                 setCursor((c) => Math.min(c + 1, hits.length - 1));
@@ -336,6 +357,25 @@ export function CommandPalette({
               <X className="size-4" />
             </button>
           )}
+        </div>
+
+        <div role="tablist" aria-label="O que você quer buscar?" className="flex flex-wrap items-center gap-1.5 border-b border-line-soft px-4 py-2">
+          <span className="mr-1 text-xs font-medium text-ledger-muted">O que você quer buscar?</span>
+          {ESCOPOS.map((e) => (
+            <button
+              key={e.id}
+              type="button"
+              role="tab"
+              aria-selected={escopo === e.id}
+              onClick={() => { setEscopo(e.id); inputRef.current?.focus(); }}
+              className={cn(
+                "rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors",
+                escopo === e.id ? "border-champagne bg-champagne-soft text-ledger-text" : "border-line text-ledger-muted hover:bg-surface-muted",
+              )}
+            >
+              {e.label}
+            </button>
+          ))}
         </div>
 
         <div className="max-h-[52vh] overflow-y-auto py-2">
@@ -391,8 +431,8 @@ export function CommandPalette({
         </div>
 
         <div className="flex items-center justify-between border-t border-line-soft px-4 py-2 text-[0.6875rem] text-ledger-muted">
-          <span>Setas navegam · Enter abre · Esc fecha</span>
-          <span>A busca consulta o servidor com limite por grupo</span>
+          <span>Tab troca o tipo · Setas navegam · Enter abre · Esc fecha</span>
+          <span>Busca só no tipo escolhido</span>
         </div>
       </div>
     </div>

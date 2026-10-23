@@ -298,7 +298,7 @@ function RemessasPage() {
           </label>
           <label className="grid gap-1.5 text-sm lg:col-span-4">
             <span className="ledger-eyebrow">Representante</span>
-            <SmartSelect value={rep} onChange={setRep} onSearch={colab ? undefined : setBuscaRep} loading={reps.isFetching}
+            <SmartSelect value={rep} onChange={setRep} {...(!colab ? { onSearch: setBuscaRep } : {})} loading={reps.isFetching}
               options={[...(!colab ? [{ value: "", label: "Todos os representantes" }] : []), ...(reps.data ?? [])]}
               searchPlaceholder="Buscar representante" placeholder={colab ? "Representante vinculado" : "Todos os representantes"} />
           </label>

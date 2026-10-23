@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FotoPeca } from "@/components/FotoPeca";
-import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
+import { EtiquetaDireta, EtiquetasBusca } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -146,7 +146,7 @@ function ProdutosPage() {
     categorias.data?.find((c) => c.id === id)?.name ?? "—";
 
   const columns: Column<ProdutoLinha>[] = [
-    { key: "etiquetas", header: "Etiquetas", render: (r) => <EtiquetasImprimir compact label={`Etiquetas de ${r.name}`} origens={[{ productId: r.id }]} /> },
+    { key: "etiquetas", header: "Etiquetas", render: (r) => <EtiquetaDireta label={`Imprimir etiqueta de ${r.name}`} origens={[{ productId: r.id }]} /> },
     { key: "foto", header: "Foto", render: (r) => <FotoPeca productId={r.id} alt={r.name} /> },
     { key: "name", header: "Produto", render: (r) => r.name },
     { key: "legacy_code", header: "Código", render: (r) => <span className="num">{r.legacy_code ?? "—"}</span> },
@@ -198,7 +198,7 @@ function ProdutosPage() {
         description="Ficha da peça, variantes vendáveis, imagens e publicação no site."
         actions={
           <>
-          <EtiquetasImprimir label="Imprimir etiquetas" origens={idsPagina.map((productId) => ({ productId }))} />
+          <EtiquetasBusca label="Imprimir etiquetas" />
           {can(caps, "product.manage") ? (
             <Link to="/admin/cadastros/produtos/novo" className="admin-btn border-champagne">
               <Plus aria-hidden className="size-4" /> Novo produto

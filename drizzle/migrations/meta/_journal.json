@@ -1002,6 +1002,13 @@
       "when": 1792778363282,
       "tag": "0142_colab_carteira_avisos_e_ficha",
       "breakpoints": true
+    },
+    {
+      "idx": 143,
+      "version": "7",
+      "when": 1792778465853,
+      "tag": "0143_colab_catalog_overview_guard",
+      "breakpoints": true
     }
   ]
 }

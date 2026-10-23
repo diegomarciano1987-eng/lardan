@@ -117,3 +117,9 @@ Provas: docs/lardan/AUDITORIA-FINANCEIRO-NOVE-PONTOS-2026-10-16.md; 243 testes i
 - [ ] Cancelar títulos 2026-024988 e 2026-025013 (fin_title_cancel, motivo "teste do app da consultora com CPF do representante — não é cliente real") SÓ depois que o espelho Asaas mostrar as 2 cobranças como DELETED. Bloqueio: Diego cancelar no painel do Asaas.
 - [ ] Título 2026-025406 (R$ 200, Larissa LC-007427): aguardando decisão manter/cancelar.
 - [ ] Caminho B: rotina oficial de cancelar cobrança no Asaas (para depois).
+
+## 0126 — banho e reclassificação
+- [x] Migração 0126, telas e teste aplicados como enviados (383/0)
+- [x] Prévia de produto_reclassificar(false) entregue
+- [ ] produto_reclassificar(true) — aguarda aprovação do Diego
+- [ ] Publicar interface — aguarda aprovação

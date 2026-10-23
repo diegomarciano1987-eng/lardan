@@ -2,6 +2,7 @@ import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { EtiquetaMaleta } from "./EtiquetaMaleta";
+import { BotaoTelaCheia } from "@/components/admin/TelaCheia";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Sparkles, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +19,7 @@ import { useTiposPeca } from "@/lib/tipo-peca";
 import { ConferenciaMaleta } from "./ConferenciaMaleta";
 import { DocumentosMaleta } from "./DocumentosMaleta";
 
-type Leitura = { id: string; codigo: string; ok: boolean; texto: string; detalhe?: string; hora: string };
+type Leitura = { id: string; codigo: string; ok: boolean; texto: string; detalhe?: string; hora: string; variantId?: string };
 type Res = {
   encontrado: boolean;
   precisa_criar?: boolean;
@@ -342,11 +343,8 @@ export function MontagemLeitor({
     };
   }, []);
 
+  // Impressão vai direto para a impressora (sem diálogo); o foco volta ao leitor.
   const impressaoAberta = React.useRef(false);
-  function aoAbrirEtiquetas(open: boolean) {
-    impressaoAberta.current = open;
-    if (!open) window.setTimeout(() => campo.current?.focus(), 100);
-  }
 
   function registrar(l: Omit<Leitura, "id" | "hora">) {
     setLeituras((a) => [{ ...l, id: crypto.randomUUID(), hora: new Date().toLocaleTimeString("pt-BR") }, ...a].slice(0, 40));
@@ -388,9 +386,9 @@ export function MontagemLeitor({
       const extra = [
         campeas.current.has(r.variant_id) ? "★ campeã de venda dela" : null,
         r.unidade ? "unidade" : null,
-        r.forma === "anel_tamanho" && r.tamanho ? `aro ${r.tamanho}` : null,
+        r.forma === "anel_tamanho" && r.tamanho ? `aro ${r.tamanho}${r.variante_criada ? " (tamanho registrado agora)" : ""}` : null,
       ].filter(Boolean).join(" · ");
-      registrar({ codigo: cod, ok: true, texto: nome, ...(extra ? { detalhe: extra } : {}) });
+      registrar({ codigo: cod, ok: true, texto: nome, variantId: r.variant_id, ...(extra ? { detalhe: extra } : {}) });
     } catch (e) {
       apito(false);
       registrar({ codigo: cod, ok: false, texto: nome || "Não entrou", detalhe: traduzir(e) });
@@ -530,6 +528,7 @@ export function MontagemLeitor({
             <p className="font-display text-2xl font-bold text-ledger-text">{titulo}</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <BotaoTelaCheia />
             <button
               type="button"
               className="admin-btn"
@@ -650,10 +649,25 @@ export function MontagemLeitor({
               )}
             </form>
             {ultima && (
-              <div role="status" className={`mt-5 rounded-2xl px-6 py-5 ${ultima.ok ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>
-                <p className="text-2xl font-bold">{ultima.ok ? "✓ Na maleta" : "✕ Recusado"} — {ultima.texto}</p>
-                {ultima.detalhe && <p className="mt-1 text-base">{ultima.detalhe}</p>}
-                <p className="mt-1 text-sm opacity-70">Código {ultima.codigo}</p>
+              <div role="status" className={`mt-5 grid grid-cols-2 gap-5 rounded-2xl p-5 ${ultima.ok ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>
+                <div className="min-w-0 self-center">
+                  <p className="text-sm font-bold uppercase tracking-[0.12em]">{ultima.ok ? "✓ Na maleta" : "✕ Recusado"}</p>
+                  <p className="mt-1 text-2xl font-bold leading-tight break-words">{ultima.texto}</p>
+                  {ultima.detalhe && <p className="mt-2 text-lg font-semibold">{ultima.detalhe}</p>}
+                  <p className="mt-2 text-sm opacity-70">Código {ultima.codigo}</p>
+                </div>
+                <div className="flex items-center justify-center">
+                  {ultima.variantId ? (
+                    <FotoPeca
+                      key={ultima.id}
+                      variantId={ultima.variantId}
+                      alt={ultima.texto}
+                      className="aspect-square w-full max-w-[22rem] rounded-2xl border border-line bg-surface"
+                    />
+                  ) : (
+                    <div className="grid aspect-square w-full max-w-[22rem] place-items-center rounded-2xl border border-line bg-surface text-sm text-ledger-muted">Sem foto</div>
+                  )}
+                </div>
               </div>
             )}
             <ul className="mt-5 max-h-48 divide-y divide-line overflow-auto text-sm">
@@ -688,7 +702,7 @@ export function MontagemLeitor({
                     <li key={id} className="flex items-center justify-between gap-2">
                       <FotoPeca variantId={id} alt={p.nome} size="xs" />
                       <span className="flex-1 truncate">{p.nome}</span>
-                      <EtiquetasImprimir compact label={`Imprimir etiqueta de ${p.nome}`} origens={[{ variantId: id, quantidade: 1 }]} onOpenChange={aoAbrirEtiquetas} />
+                      <span onClickCapture={() => window.setTimeout(() => campo.current?.focus(), 400)}><EtiquetasImprimir compact label={`Imprimir etiqueta de ${p.nome}`} origens={[{ variantId: id, quantidade: 1 }]} /></span>
                       <span className="flex items-center gap-2">
                         <span className="tabular-nums text-ledger-muted">{brl(p.preco * p.qtd)}</span>
                         <strong className="tabular-nums">{p.qtd}</strong>

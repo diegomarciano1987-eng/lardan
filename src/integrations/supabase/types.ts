@@ -15573,6 +15573,10 @@ export type Database = {
       }
       legado_categoria_tipo_lista: { Args: never; Returns: Json }
       legado_consultora_dados: { Args: { _codclis: number[] }; Returns: Json }
+      legado_consultora_dados_rep: {
+        Args: { _codclis: number[]; _remessas: number[] }
+        Returns: Json
+      }
       legado_consultora_historico: { Args: { _party: string }; Returns: Json }
       legado_consultora_vincular: {
         Args: { _codcli: number; _party: string }

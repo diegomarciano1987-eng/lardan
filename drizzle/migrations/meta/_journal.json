@@ -1065,6 +1065,13 @@
       "when": 1792781923302,
       "tag": "0151_financeiro_smalldata_cockpit",
       "breakpoints": true
+    },
+    {
+      "idx": 152,
+      "version": "7",
+      "when": 1792783747990,
+      "tag": "0152_busca_rapida_e_anel_colaboradora",
+      "breakpoints": true
     }
   ]
 }

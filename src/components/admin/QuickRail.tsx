@@ -8,6 +8,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { useDockModules } from "@/components/admin/BottomDock";
+import type { AppRole } from "@/lib/session";
+
 type Shortcut = { to: string; label: string; icon: LucideIcon };
 
 const SHORTCUTS: Shortcut[] = [
@@ -18,7 +21,12 @@ const SHORTCUTS: Shortcut[] = [
   { to: "/admin/financeiro/fluxo-caixa", label: "Fluxo de caixa", icon: TrendingUp },
 ];
 
-export function QuickRail() {
+export function QuickRail({ roles }: { roles: AppRole[] }) {
+  const { permitted, colab } = useDockModules(roles);
+  // Colaboradora: os mesmos atalhos do menu inferior (5 primeiros com rota).
+  const shortcuts: Shortcut[] = colab
+    ? permitted.filter((m) => m.path && m.state !== "em_breve").slice(0, 5).map((m) => ({ to: m.path as string, label: m.label, icon: m.icon }))
+    : SHORTCUTS;
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (to: string) => (to === "/admin" ? pathname === "/admin" : pathname.startsWith(to));
 
@@ -28,7 +36,7 @@ export function QuickRail() {
       className="fixed left-[15px] top-1/2 z-30 hidden -translate-y-1/2 md:block"
     >
       <div className="flex flex-col items-center gap-1.5 rounded-full border border-white/10 bg-ink/95 p-2 shadow-[0_24px_50px_-20px_rgba(23,21,18,0.6)] backdrop-blur-sm">
-        {SHORTCUTS.map(({ to, label, icon: Icon }) => {
+        {shortcuts.map(({ to, label, icon: Icon }) => {
           const active = isActive(to);
           return (
             <div key={to} className="group relative">

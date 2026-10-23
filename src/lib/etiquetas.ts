@@ -6,6 +6,14 @@ export interface EtiquetaItem {
   barcode: string | null;
   referencia: string | null;
   quantidade: number;
+  precoCents?: number | null;
+}
+
+/** Linha inferior SISPR: referência à esquerda do traço, preço de venda em centavos com 6 dígitos à direita. */
+export function textoEtiqueta(referencia: string | null, precoCents?: number | null): string {
+  const ref = (referencia ?? "").trim();
+  if (precoCents == null || !Number.isInteger(precoCents) || precoCents < 0) return ref;
+  return `${ref}-${String(precoCents).padStart(6, "0")}`;
 }
 export interface EtiquetaConfig {
   entreLinhas: number;
@@ -52,8 +60,10 @@ const escapeHtml = (v: string) => v.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", 
 export function svgEtiqueta(codigo: string) {
   const bits = barrasEtiqueta(codigo);
   const width = bits.length + 20;
+  // Módulo inteiro de pontos (2, 3…) para ocupar a largura útil como na etiqueta SISPR, sem distorcer barras.
+  const k = Math.max(1, Math.floor(((ETIQUETA.areaImpressao - 1.2) * ETIQUETA.dpi / 25.4) / width));
   const rects = [...bits].map((b, i) => b === "1" ? `<rect x="${i + 10}" y="0" width="1" height="32"/>` : "").join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escapeHtml(codigo)}" viewBox="0 0 ${width} 32" width="${width * 25.4 / 203}mm" height="4mm" shape-rendering="crispEdges">${rects}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escapeHtml(codigo)}" viewBox="0 0 ${width} 32" width="${width * k * 25.4 / ETIQUETA.dpi}mm" preserveAspectRatio="none" height="4mm" shape-rendering="crispEdges">${rects}</svg>`;
 }
 
 export function documentoEtiquetas(itens: EtiquetaItem[], config: EtiquetaConfig): string {
@@ -64,15 +74,15 @@ export function documentoEtiquetas(itens: EtiquetaItem[], config: EtiquetaConfig
   if (config.margemSuperior > config.entreLinhas || config.margemEsquerda + ETIQUETA.largura > ETIQUETA.suporte) throw new Error("A calibração excede o suporte ou o intervalo do rolo.");
   const width = ETIQUETA.suporte;
   const height = ETIQUETA.altura + config.entreLinhas;
-  const body = rows.map((row) => `<section>${row.map((item) => item ? `<article><div class="nome">${escapeHtml(item.nome)}</div>${svgEtiqueta(item.barcode ?? "")}<div class="referencia">${escapeHtml(item.referencia || item.barcode || "")}</div></article>` : "<article></article>").join("")}</section>`).join("");
+  const body = rows.map((row) => `<section>${row.map((item) => item ? `<article><div class="nome">${escapeHtml(item.nome.toUpperCase())}</div>${svgEtiqueta(item.barcode ?? "")}<div class="referencia">${escapeHtml(textoEtiqueta(item.referencia || item.barcode, item.precoCents))}</div></article>` : "<article></article>").join("")}</section>`).join("");
   // Thermal output intentionally has its own fixed ink/paper tokens, independent of app theme.
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Etiquetas — LARDAN</title><style>
   :root{--ink:#000;--paper:#fff} @page{size:${width}mm ${height}mm;margin:0}
   *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--paper);color:var(--ink)}
   section{width:${width}mm;height:${height}mm;padding-left:${config.margemEsquerda}mm;padding-top:${config.margemSuperior}mm;break-after:page;page-break-after:always;overflow:hidden}
   section:last-child{break-after:auto;page-break-after:auto}
-  article{width:30mm;height:12mm;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0.5mm 0.2mm;overflow:hidden;font-family:Arial,sans-serif;letter-spacing:0}
-  .nome{font-size:5pt;font-weight:bold;line-height:1.15;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;margin-bottom:0.4mm}
-  svg{display:block;flex-shrink:0;fill:var(--ink)}.referencia{font-size:5pt;line-height:1.2;margin-top:0.4mm;white-space:nowrap;max-width:100%;font-weight:bold}
+  article{width:30mm;height:12mm;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0.4mm 0.6mm;overflow:hidden;font-family:"OCR-B","Consolas","Lucida Console","Courier New",monospace;letter-spacing:0}
+  .nome{font-size:5pt;line-height:1.1;width:100%;white-space:nowrap;overflow:hidden;text-transform:uppercase;text-align:left;margin-bottom:0.3mm}
+  svg{display:block;flex-shrink:0;fill:var(--ink);height:4.6mm;max-width:100%;margin-left:-0.6mm}.referencia{font-size:8.5pt;line-height:1;margin-top:0.3mm;white-space:nowrap;max-width:100%;text-align:left}
   </style></head><body>${body}</body></html>`;
 }

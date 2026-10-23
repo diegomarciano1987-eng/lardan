@@ -342,7 +342,7 @@ export const ALL_MODULES = [...ADMIN_MODULES, ...ADMIN_SUBMODULES];
 
 /** Módulo visível: a permissão do banco decide; papéis são só o desenho antigo. */
 export function moduleAllowed(m: AdminModule, caps: string[], roles: AppRole[]): boolean {
-  if (m.slug === "visao-geral") return true;
+  if (m.slug === "visao-geral") return roles.some((r) => ["master", "diretoria", "marketing", "suporte", "financeiro", "cobranca", "estoque", "montagem", "qualidade"].includes(r));
   if (m.capability) return caps.includes(m.capability);
   return m.roles.some((r) => roles.includes(r));
 }

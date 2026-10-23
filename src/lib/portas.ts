@@ -45,7 +45,6 @@ export function inicioOperacao(roles: AppRole[], caps: string[]): string {
   if (caps.includes("kit.view")) return "/admin/maletas";
   if (caps.includes("registry.view")) return "/admin/cadastros/pessoas";
   if (caps.includes("catalog.view")) return "/admin/cadastros/produtos";
-  if (caps.includes("stock.view")) return "/admin/estoque";
   if (caps.includes("collection.view")) return "/admin/cobranca";
   if (caps.includes("candidaturas.view")) return "/admin/candidaturas";
   return "/admin/maletas";

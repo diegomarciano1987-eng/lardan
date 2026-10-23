@@ -6,6 +6,7 @@ import { DataTable } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { NewRecordPicker } from "@/components/admin/NewRecordPicker";
 import { useCapabilities } from "@/lib/capabilities";
+import { useColabEscopo } from "@/lib/colab-escopo";
 import { maskDoc, formatDoc } from "@/lib/docs-br";
 import {
   listParties,
@@ -27,6 +28,11 @@ export const Route = createFileRoute("/_authenticated/admin/cadastros/pessoas")(
   head: () => ({
     meta: [
       { title: "Pessoas e empresas — Central de Cadastros LARDAN" },
+      { name: "description", content: "Consulta autorizada de pessoas e consultoras LARDAN." },
+      { property: "og:title", content: "Pessoas e consultoras — LARDAN" },
+      { property: "og:description", content: "Consulta autorizada de cadastros e vínculos LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -46,6 +52,8 @@ const TITULO_POR_PAPEL: Record<string, { titulo: string; descricao: string }> = 
 
 function PessoasPage() {
   const caps = useCapabilities();
+  const escopo = useColabEscopo();
+  const colab = escopo.data?.colaboradora === true;
   const podeVerDoc = caps.includes("registry.doc.view");
   const navigate = useNavigate();
   const { papel } = Route.useSearch();
@@ -55,7 +63,7 @@ function PessoasPage() {
   const [kind, setKind] = useState<PartyKind | "todos">("todos");
   const [status, setStatus] = useState<PartyStatus | "todos">("todos");
 
-  const role = (papel ?? "todos") as PartyRoleKind | "todos";
+  const role = (colab ? "consultora" : papel ?? "todos") as PartyRoleKind | "todos";
   const setRole = (v: PartyRoleKind | "todos") => {
     setPagina(0);
     void navigate({
@@ -64,16 +72,17 @@ function PessoasPage() {
       replace: true,
     });
   };
-  const cabecalho = papel ? TITULO_POR_PAPEL[papel] : undefined;
+  const cabecalho = colab ? TITULO_POR_PAPEL["consultora"] : papel ? TITULO_POR_PAPEL[papel] : undefined;
 
   const query = useQuery({
     queryKey: ["registry", "parties", busca, pagina, kind, role, status],
+    enabled: escopo.isSuccess,
     queryFn: () => listParties({ search: busca, page: pagina, pageSize: PAGE_SIZE, kind, role, status }),
   });
 
   const filtro = (
     <div className="flex flex-wrap items-center gap-2">
-      <SmartSelect
+      {!colab && <SmartSelect
         className="w-40"
         value={kind}
         onChange={(v) => {
@@ -85,8 +94,8 @@ function PessoasPage() {
           { value: "pessoa", label: "Somente pessoas" },
           { value: "organizacao", label: "Somente empresas" },
         ]}
-      />
-      <SmartSelect
+      />}
+      {!colab && <SmartSelect
         className="w-44"
         value={role}
         onChange={(v) => setRole(v as PartyRoleKind | "todos")}
@@ -94,7 +103,7 @@ function PessoasPage() {
           { value: "todos", label: "Todos os papéis" },
           ...PARTY_ROLE_OPTIONS.map((value) => ({ value, label: PARTY_ROLE_LABEL[value] })),
         ]}
-      />
+      />}
       <SmartSelect
         className="w-40"
         value={status}
@@ -119,7 +128,7 @@ function PessoasPage() {
           cabecalho?.descricao ??
           "Identidade única: a mesma pessoa pode ser candidata, consultora, cliente e colaboradora sem cadastro repetido."
         }
-        actions={caps.includes("registry.manage") ? <NewRecordPicker /> : undefined}
+        actions={!colab && caps.includes("registry.manage") ? <NewRecordPicker /> : undefined}
       />
 
       <DataTable<Party>

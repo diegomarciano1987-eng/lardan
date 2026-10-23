@@ -8,9 +8,8 @@ export type ColabModulo = { id: string; nome: string; texto: string; ver: string
 export const COLAB_MODULOS: ColabModulo[] = [
   { id: "maletas", nome: "Remessas e maletas", texto: "Montar, conferir, expedir e receber maletas; praças.", ver: ["kit.view", "kit.view.all"], alterar: ["kit.manage", "kit.ship", "kit.receive", "kit.acrescimo", "kit.accept"] },
   { id: "produtos", nome: "Produtos", texto: "Catálogo, variantes e etiquetas.", ver: ["catalog.view"], alterar: ["catalog.manage", "product.manage"] },
-  { id: "cadastros", nome: "Cadastros de consultoras e representantes", texto: "Pessoas, empresas, consultoras e representantes.", ver: ["registry.view", "partners.view"], alterar: ["registry.manage", "partners.manage"] },
-  { id: "estoque", nome: "Estoque", texto: "Saldos, movimentações e reservas.", ver: ["stock.view", "stock.reservation.view"], alterar: ["stock.operate", "stock.reservation.create", "stock.reservation.confirm", "stock.reservation.cancel"] },
-  { id: "custos", nome: "Preço de custo", texto: "Mostra o custo das peças e do estoque.", ver: ["catalog.cost.view", "stock.cost.view"], alterar: [] },
+  { id: "cadastros", nome: "Consulta de consultoras", texto: "Consultoras do representante vinculado.", ver: ["registry.view", "partners.view"], alterar: ["registry.manage", "partners.manage"] },
+  { id: "custos", nome: "Preço de custo", texto: "Mostra o custo das peças.", ver: ["catalog.cost.view"], alterar: [] },
   { id: "importacao", nome: "Importações", texto: "Importar planilhas com simulação.", ver: ["imports.run"], alterar: [] },
   { id: "cobranca", nome: "Cobrança", texto: "Carteira de devedoras, promessas e negociação.", ver: ["collection.view"], alterar: ["collection.operate", "collection.negotiate"] },
   { id: "candidaturas", nome: "Candidaturas do Site", texto: "Funil das candidatas a consultora.", ver: ["candidaturas.view", "leads.view"], alterar: ["candidaturas.edit", "candidaturas.move", "candidaturas.notes", "candidaturas.followups", "candidaturas.tags", "candidaturas.assign"] },
@@ -20,7 +19,7 @@ export const COLAB_MODULOS: ColabModulo[] = [
 ];
 
 /** Pacote pronto: tudo que é preciso para montar uma maleta, vendo e alterando. */
-export const PACOTE_MONTAGEM = ["maletas", "produtos", "cadastros", "estoque"];
+export const PACOTE_MONTAGEM = ["maletas", "produtos", "cadastros"];
 
 export type Escolha = Record<string, "nao" | "ver" | "alterar">;
 

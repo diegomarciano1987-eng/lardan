@@ -26,6 +26,7 @@ import { AcessoColaboradora } from "@/components/admin/acessos/AcessoColaborador
 import { VendedoraInternaForm } from "@/components/admin/cadastros/VendedoraInternaForm";
 import { VinculoConsultora } from "@/components/admin/cadastros/VinculoConsultora";
 import { useCapabilities } from "@/lib/capabilities";
+import { useColabEscopo } from "@/lib/colab-escopo";
 import {
   addRole,
   completude,
@@ -63,6 +64,11 @@ export const Route = createFileRoute("/_authenticated/admin/cadastros/pessoas_/$
   head: () => ({
     meta: [
       { title: "Ficha do cadastro — Central de Cadastros LARDAN" },
+      { name: "description", content: "Ficha autorizada da pessoa e consultora LARDAN." },
+      { property: "og:title", content: "Ficha cadastral — LARDAN" },
+      { property: "og:description", content: "Dados e vínculos da consultora com acesso protegido." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -104,6 +110,7 @@ const inputCls =
 function FichaPessoa() {
   const { id } = Route.useParams();
   const caps = useCapabilities();
+  const colab = useColabEscopo().data?.colaboradora === true;
   const podeEditar = caps.includes("registry.manage");
   const podeVerDoc = caps.includes("registry.doc.view");
   const podeVerFin = caps.includes("registry.finance.view");
@@ -292,8 +299,8 @@ function FichaPessoa() {
           {podeVerFin && <TabsTrigger value="debitos">Débitos, fiado e comissões</TabsTrigger>}
           <TabsTrigger value="vinculos">Vínculos</TabsTrigger>
           <TabsTrigger value="operacao">Estoque e maletas</TabsTrigger>
-          <TabsTrigger value="acesso">Acesso</TabsTrigger>
-          <TabsTrigger value="historico">Histórico</TabsTrigger>
+          {!colab && <TabsTrigger value="acesso">Acesso</TabsTrigger>}
+          {!colab && <TabsTrigger value="historico">Histórico</TabsTrigger>}
           <TabsTrigger value="historico-jflex">Histórico SmallData</TabsTrigger>
         </TabsList>
 
@@ -676,7 +683,7 @@ function FichaPessoa() {
           <MaletasDaConsultora partyId={id} />
         </TabsContent>
 
-        <TabsContent value="acesso" className="mt-4">
+        {!colab && <TabsContent value="acesso" className="mt-4">
           <Panel title="Acesso ao sistema" flush>
             <div className="p-5">
               {d.vinculos.some((v) => v.entity_type === "profile") ? (
@@ -707,7 +714,7 @@ function FichaPessoa() {
               <ConviteConsultora partyId={id} />
             </div>
           </Panel>
-        </TabsContent>
+        </TabsContent>}
 
         <TabsContent value="historico" className="mt-4">
           <Panel title="Histórico e auditoria" flush>

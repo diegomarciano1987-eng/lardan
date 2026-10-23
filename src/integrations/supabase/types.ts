@@ -9534,6 +9534,102 @@ export type Database = {
         }
         Relationships: []
       }
+      legado_cobrancas: {
+        Row: {
+          atualizado_em: string
+          boleto_cents: number
+          cartao_cents: number
+          chave: string
+          cheque_cents: number
+          cheque_devolvido_cents: number
+          codcli: number
+          credito_cartao_cents: number
+          data: string | null
+          deposito_cents: number
+          desconto_cents: number
+          dinheiro_cents: number
+          encerramento: number | null
+          fiado_anterior_cents: number
+          fiado_novo_cents: number
+          fiado_pago_cents: number
+          fiado_pendente_cents: number
+          juros_cents: number
+          multa_cents: number
+          praca: number | null
+          remessa: number | null
+          tipo: number | null
+          total_pago_cents: number
+          valor_remessa_cents: number
+          venda_bruta_cents: number
+          venda_fiado_cents: number
+          venda_liquida_cents: number
+          venda_pago_cents: number
+          vendedor: number | null
+        }
+        Insert: {
+          atualizado_em?: string
+          boleto_cents?: number
+          cartao_cents?: number
+          chave: string
+          cheque_cents?: number
+          cheque_devolvido_cents?: number
+          codcli: number
+          credito_cartao_cents?: number
+          data?: string | null
+          deposito_cents?: number
+          desconto_cents?: number
+          dinheiro_cents?: number
+          encerramento?: number | null
+          fiado_anterior_cents?: number
+          fiado_novo_cents?: number
+          fiado_pago_cents?: number
+          fiado_pendente_cents?: number
+          juros_cents?: number
+          multa_cents?: number
+          praca?: number | null
+          remessa?: number | null
+          tipo?: number | null
+          total_pago_cents?: number
+          valor_remessa_cents?: number
+          venda_bruta_cents?: number
+          venda_fiado_cents?: number
+          venda_liquida_cents?: number
+          venda_pago_cents?: number
+          vendedor?: number | null
+        }
+        Update: {
+          atualizado_em?: string
+          boleto_cents?: number
+          cartao_cents?: number
+          chave?: string
+          cheque_cents?: number
+          cheque_devolvido_cents?: number
+          codcli?: number
+          credito_cartao_cents?: number
+          data?: string | null
+          deposito_cents?: number
+          desconto_cents?: number
+          dinheiro_cents?: number
+          encerramento?: number | null
+          fiado_anterior_cents?: number
+          fiado_novo_cents?: number
+          fiado_pago_cents?: number
+          fiado_pendente_cents?: number
+          juros_cents?: number
+          multa_cents?: number
+          praca?: number | null
+          remessa?: number | null
+          tipo?: number | null
+          total_pago_cents?: number
+          valor_remessa_cents?: number
+          venda_bruta_cents?: number
+          venda_fiado_cents?: number
+          venda_liquida_cents?: number
+          venda_pago_cents?: number
+          vendedor?: number | null
+        }
+        Relationships: []
+      }
       legado_consultoras: {
         Row: {
           apelido: string | null
@@ -9651,6 +9747,132 @@ export type Database = {
             referencedColumns: ["party_id"]
           },
         ]
+      }
+      legado_fiado_vinculo: {
+        Row: {
+          ator: string | null
+          como: string
+          criado_em: string
+          fiado_id: number
+          linha_id: string
+          lote: string
+          party_id: string | null
+          title_id: string | null
+        }
+        Insert: {
+          ator?: string | null
+          como: string
+          criado_em?: string
+          fiado_id: number
+          linha_id: string
+          lote: string
+          party_id?: string | null
+          title_id?: string | null
+        }
+        Update: {
+          ator?: string | null
+          como?: string
+          criado_em?: string
+          fiado_id?: number
+          linha_id?: string
+          lote?: string
+          party_id?: string | null
+          title_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legado_fiado_vinculo_fiado_id_fkey"
+            columns: ["fiado_id"]
+            isOneToOne: true
+            referencedRelation: "legado_fiados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_fiado_vinculo_linha_id_fkey"
+            columns: ["linha_id"]
+            isOneToOne: true
+            referencedRelation: "cob_fiado_linhas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_fiado_vinculo_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_fiado_vinculo_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_fiado_vinculo_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      legado_fiados: {
+        Row: {
+          atualizado_em: string
+          chave_baixa: string | null
+          chave_cob: string | null
+          codcli: number
+          data_cob: string | null
+          data_pgto: string | null
+          data_status: string | null
+          desconto_cents: number
+          forma: string | null
+          id: number
+          juros_cents: number
+          multa_cents: number
+          parcela: number | null
+          status: string | null
+          valor_cents: number
+          vencimento: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          chave_baixa?: string | null
+          chave_cob?: string | null
+          codcli: number
+          data_cob?: string | null
+          data_pgto?: string | null
+          data_status?: string | null
+          desconto_cents?: number
+          forma?: string | null
+          id: number
+          juros_cents?: number
+          multa_cents?: number
+          parcela?: number | null
+          status?: string | null
+          valor_cents?: number
+          vencimento?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          chave_baixa?: string | null
+          chave_cob?: string | null
+          codcli?: number
+          data_cob?: string | null
+          data_pgto?: string | null
+          data_status?: string | null
+          desconto_cents?: number
+          forma?: string | null
+          id?: number
+          juros_cents?: number
+          multa_cents?: number
+          parcela?: number | null
+          status?: string | null
+          valor_cents?: number
+          vencimento?: string | null
+        }
+        Relationships: []
       }
       legado_importacoes: {
         Row: {
@@ -9949,6 +10171,63 @@ export type Database = {
           situacao?: string | null
           tipo?: string | null
           valor_cents?: number
+        }
+        Relationships: []
+      }
+      legado_pagamentos: {
+        Row: {
+          atualizado_em: string
+          chave_cob: string | null
+          codcli: number
+          data: string | null
+          data_devolucao: string | null
+          data_pgto: string | null
+          detalhe: string | null
+          id: number
+          origem: string
+          parcela: number | null
+          parcelas: number | null
+          situacao: string | null
+          taxa_cents: number
+          valor_cents: number
+          valor_pago_cents: number
+          vencimento: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          chave_cob?: string | null
+          codcli: number
+          data?: string | null
+          data_devolucao?: string | null
+          data_pgto?: string | null
+          detalhe?: string | null
+          id: number
+          origem: string
+          parcela?: number | null
+          parcelas?: number | null
+          situacao?: string | null
+          taxa_cents?: number
+          valor_cents?: number
+          valor_pago_cents?: number
+          vencimento?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          chave_cob?: string | null
+          codcli?: number
+          data?: string | null
+          data_devolucao?: string | null
+          data_pgto?: string | null
+          detalhe?: string | null
+          id?: number
+          origem?: string
+          parcela?: number | null
+          parcelas?: number | null
+          situacao?: string | null
+          taxa_cents?: number
+          valor_cents?: number
+          valor_pago_cents?: number
+          vencimento?: string | null
         }
         Relationships: []
       }
@@ -16478,6 +16757,11 @@ export type Database = {
         Args: { _linhas: Json; _lote: string }
         Returns: Json
       }
+      cob_fiado_smalldata_conciliar: {
+        Args: { _aplicar?: boolean }
+        Returns: Json
+      }
+      cob_fiado_smalldata_desfazer: { Args: { _lote: string }; Returns: Json }
       cob_judicial_acordo_salvar: {
         Args: { _d: Json; _party: string }
         Returns: string
@@ -16706,6 +16990,10 @@ export type Database = {
       consultora_clientes_resumo: { Args: never; Returns: Json }
       consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }
       consultora_comissao_tabela: { Args: never; Returns: Json }
+      consultora_financeiro_smalldata: {
+        Args: { _party: string }
+        Returns: Json
+      }
       consultora_ganhos: { Args: never; Returns: Json }
       consultora_lembretes_vencimento: {
         Args: never
@@ -17840,6 +18128,8 @@ export type Database = {
         Returns: undefined
       }
       legado_categoria_tipo_lista: { Args: never; Returns: Json }
+      legado_centavos: { Args: { _v: string }; Returns: number }
+      legado_codigos_da_pessoa: { Args: { _party: string }; Returns: number[] }
       legado_consultora_dados: { Args: { _codclis: number[] }; Returns: Json }
       legado_consultora_dados_rep: {
         Args: { _codclis: number[]; _remessas: number[] }
@@ -18088,6 +18378,7 @@ export type Database = {
         }
         Returns: Json
       }
+      party_atual: { Args: { _p: string }; Returns: string }
       party_codigo_smalldata_adotar: {
         Args: { _codigo?: string; _motivo?: string; _party: string }
         Returns: Json
@@ -18105,6 +18396,7 @@ export type Database = {
       }
       party_doc_reveal: { Args: { _id: string }; Returns: string }
       party_duplicados: { Args: never; Returns: Json }
+      party_e_unificadas: { Args: { _p: string }; Returns: string[] }
       party_unificar: {
         Args: {
           _canonica: string

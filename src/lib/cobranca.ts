@@ -133,6 +133,28 @@ export interface CockpitFinanceiro {
 }
 export const cockpitFinanceiro = (party: string) => call<CockpitFinanceiro>("consultora_cockpit_financeiro", { _party: party });
 
+/** 0149: histórico financeiro do SmallData da consultora (acertos, fiados, pagamentos). Somente leitura. */
+export interface FinanceiroSmallData {
+  codigos: number[];
+  resumo: {
+    acertos: number; primeiro_acerto: string | null; ultimo_acerto: string | null;
+    venda_bruta_cents: number; venda_liquida_cents: number; total_pago_cents: number;
+    dinheiro_cents: number; cheque_cents: number; cartao_cents: number; deposito_cents: number; boleto_cents: number; desconto_cents: number;
+    fiado_gerado_cents: number; fiado_quitado_cents: number; fiado_aberto_cents: number; fiado_aberto_parcelas: number;
+    fiado_vencido_cents: number; fiado_aberto_no_lardan_cents: number; fiado_aberto_sem_lardan_cents: number;
+  };
+  acertos: { chave: string; data: string | null; tipo: number; rotulo: string; remessa: number | null; venda_bruta_cents: number;
+    venda_liquida_cents: number; fiado_pago_cents: number; total_pago_cents: number; dinheiro_cents: number; cheque_cents: number;
+    cartao_cents: number; deposito_cents: number; boleto_cents: number; desconto_cents: number; fiado_novo_cents: number; juros_cents: number }[];
+  fiados: { id: number; parcela: number | null; data_cob: string | null; vencimento: string | null; forma: string | null;
+    situacao: "aberto" | "quitado"; atraso: number | null; valor_cents: number; juros_cents: number; desconto_cents: number;
+    data_pgto: string | null; no_lardan: boolean; title_id: string | null }[];
+  pagamentos: { origem: "boleto" | "deposito" | "cartao" | "cheque"; data: string | null; vencimento: string | null; data_pgto: string | null;
+    data_devolucao: string | null; valor_cents: number; valor_pago_cents: number; taxa_cents: number; parcela: number | null;
+    parcelas: number | null; situacao: string | null; detalhe: string | null }[];
+}
+export const financeiroSmallData = (party: string) => call<FinanceiroSmallData>("consultora_financeiro_smalldata", { _party: party });
+
 export interface KpisCobranca { devedoras: number; vencido_cents: number; hoje: number; atrasadas: number; vencendo: number; descumpridas: number }
 export const kpisCobranca = () => call<KpisCobranca>("cob_kpis");
 

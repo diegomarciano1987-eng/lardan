@@ -2,18 +2,23 @@ import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cockpitFinanceiro, brl, dataBR, hojeSP, rotuloEtapa } from "@/lib/cobranca";
 import { CobrarParcelaAsaas } from "@/components/admin/financeiro/CobrarParcelaAsaas";
+import { FinanceiroSmallData, ResumoSmallData, useFinanceiroSmallData } from "./FinanceiroSmallData";
 
-type Aba = "abertas" | "fiado" | "recebimentos" | "comissoes" | "maletas";
+type Aba = "abertas" | "fiado" | "recebimentos" | "comissoes" | "maletas" | "smalldata";
 const SIT: Record<string, string> = { nao_liquidado: "Em aberto", parcial: "Parcial", liquidado: "Pago", excedente: "Pago a mais" };
 
 /** Rastro financeiro completo da consultora: débitos, fiado (lastro da planilha), pagamentos, comissões e maletas. */
 export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
   const q = useQuery({ queryKey: ["cob", "cockpit-fin", partyId], queryFn: () => cockpitFinanceiro(partyId) });
-  const [aba, setAba] = React.useState<Aba>("abertas");
+  const sd = useFinanceiroSmallData(partyId);
+  const [aba, setAba] = React.useState<Aba | null>(null);
   if (q.isLoading) return <p className="p-5 text-sm text-muted-foreground">Carregando o financeiro…</p>;
   if (q.error) return <p className="p-5 text-sm text-destructive">{(q.error as Error).message}</p>;
   const d = q.data!;
   const r = d.resumo;
+  // sem nada no Lardan e com histórico no SmallData: abre direto no SmallData (0149)
+  const lardanVazio = !d.parcelas.length && !d.fiado.length && !d.recebimentos.length && !d.maletas.length;
+  const abaAtual: Aba = aba ?? (lardanVazio && (sd.data?.acertos.length ?? 0) > 0 ? "smalldata" : "abertas");
   const hoje = hojeSP();
   const Kpi = ({ t, v, alerta }: { t: string; v: string; alerta?: boolean }) => (
     <div className="rounded-xl border border-border bg-card p-4">
@@ -41,34 +46,38 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
         <Kpi t="Já pagou (baixas reais)" v={brl(Number(r.recebido_cents))} />
         <Kpi t="Comissões de indicação" v={brl(Number(r.comissao_cents))} />
       </div>
+      {sd.data && <ResumoSmallData d={sd.data} />}
       <p className="text-xs text-muted-foreground">
         Praça: <b>{r.praca ? `${r.praca.codigo} · ${r.praca.nome}` : "Não informada"}</b> · Representante: <b>{r.representante ?? "Não informado"}</b> · Código do cliente: <b>{r.codigo_legado ?? "Não informado"}</b>
         {r.etapa_cobranca && <> · Cobrança: <b>{rotuloEtapa(r.etapa_cobranca)}</b></>}
       </p>
       <div className="flex flex-wrap gap-1 border-b border-border">
-        {([["abertas", `Débitos em aberto (${d.parcelas.length})`], ["fiado", `Fiado — lastro (${d.fiado.length})`], ["recebimentos", `Pagamentos (${d.recebimentos.length})`], ["comissoes", `Comissões (${d.comissoes.length})`], ["maletas", `Maletas (${d.maletas.length})`]] as const).map(([k, t]) => (
-          <button key={k} onClick={() => setAba(k)} className={`border-b-2 px-4 py-2 text-sm ${aba === k ? "border-primary text-foreground" : "border-transparent text-muted-foreground"}`}>{t}</button>
+        {([["abertas", `Débitos em aberto (${d.parcelas.length})`], ["fiado", `Fiado — lastro (${d.fiado.length})`], ["recebimentos", `Pagamentos (${d.recebimentos.length})`], ["comissoes", `Comissões (${d.comissoes.length})`], ["maletas", `Maletas (${d.maletas.length})`], ["smalldata", `SmallData (${sd.data ? sd.data.acertos.length + sd.data.fiados.length : "…"})`]] as const).map(([k, t]) => (
+          <button key={k} onClick={() => setAba(k)} className={`border-b-2 px-4 py-2 text-sm ${abaAtual === k ? "border-primary text-foreground" : "border-transparent text-muted-foreground"}`}>{t}</button>
         ))}
       </div>
-      {aba === "abertas" && (d.parcelas.length ? <Tabela cab={["Título", "Descrição", "Origem", "Vencimento", "Valor", "Saldo", "Atraso", "Asaas"]} linhas={d.parcelas.map((p) => [
+      {abaAtual === "abertas" && (d.parcelas.length ? <Tabela cab={["Título", "Descrição", "Origem", "Vencimento", "Valor", "Saldo", "Atraso", "Asaas"]} linhas={d.parcelas.map((p) => [
         p.numero ?? "—", p.descricao, p.origem === "fiado_historico" ? "Fiado" : p.origem ?? "Manual",
         <span className={p.vencimento < hoje ? "text-destructive" : ""}>{dataBR(p.vencimento)}</span>,
         <span className="font-mono tabular-nums">{brl(Number(p.valor_cents))}</span>, <span className="font-mono tabular-nums">{brl(Number(p.saldo_cents))}</span>,
         p.atraso ? `${p.atraso} dias` : "—",
         <CobrarParcelaAsaas installmentId={p.installment_id} saldoCents={Number(p.saldo_cents)} vencimento={p.vencimento} compacto />])} /> : vazio("Sem débitos em aberto."))}
-      {aba === "fiado" && (d.fiado.length ? <>
+      {abaAtual === "fiado" && (d.fiado.length ? <>
         <p className="text-xs text-muted-foreground">Cada linha é a linha original da planilha de fiados, guardada sem alteração e ligada ao título a receber que ela gerou.</p>
         <Tabela cab={["Lote / linha", "Data da cobrança", "Vencimento", "Parcela", "Valor", "Situação hoje"]} linhas={d.fiado.map((f) => [
           `${f.lote} · ${f.linha}`, dataBR(f.data_cobranca), dataBR(f.vencimento), String(f.parcela),
           <span className="font-mono tabular-nums">{brl(Number(f.valor_cents))}</span>, SIT[f.situacao_titulo ?? ""] ?? "—"])} />
       </> : vazio("Sem fiado importado para esta pessoa."))}
-      {aba === "recebimentos" && (d.recebimentos.length ? <Tabela cab={["Data", "Título", "Referência", "Valor"]} linhas={d.recebimentos.map((x) => [
+      {abaAtual === "recebimentos" && (d.recebimentos.length ? <Tabela cab={["Data", "Título", "Referência", "Valor"]} linhas={d.recebimentos.map((x) => [
         dataBR(x.data), x.titulo ?? "—", x.referencia ?? "—",
         <span className={`font-mono tabular-nums ${x.estorno ? "text-destructive" : ""}`}>{x.estorno ? "− " : ""}{brl(Number(x.valor_cents))}</span>])} /> : vazio("Sem pagamentos registrados."))}
-      {aba === "comissoes" && (d.comissoes.length ? <Tabela cab={["Data", "Indicada", "Venda da maleta", "%", "Comissão", "Situação"]} linhas={d.comissoes.map((c) => [
+      {abaAtual === "comissoes" && (d.comissoes.length ? <Tabela cab={["Data", "Indicada", "Venda da maleta", "%", "Comissão", "Situação"]} linhas={d.comissoes.map((c) => [
         dataBR(c.data), c.indicada ?? "—", <span className="font-mono tabular-nums">{brl(Number(c.venda_cents))}</span>, `${c.percentual}%`,
         <span className="font-mono tabular-nums">{brl(Number(c.comissao_cents))}</span>, c.status])} /> : vazio("Sem comissões de indicação."))}
-      {aba === "maletas" && (d.maletas.length ? <Tabela cab={["Ciclo", "Situação", "Peças", "Valor de referência", "Recebida", "Fechada"]} linhas={d.maletas.map((m) => [
+      {abaAtual === "smalldata" && (sd.isLoading ? <p className="p-5 text-sm text-muted-foreground">Carregando o histórico do SmallData…</p>
+        : sd.error ? <p className="p-5 text-sm text-destructive">{(sd.error as Error).message}</p>
+        : sd.data ? <FinanceiroSmallData d={sd.data} /> : null)}
+      {abaAtual === "maletas" && (d.maletas.length ? <Tabela cab={["Ciclo", "Situação", "Peças", "Valor de referência", "Recebida", "Fechada"]} linhas={d.maletas.map((m) => [
         String(m.ciclo), m.status, String(m.pecas ?? "—"), <span className="font-mono tabular-nums">{m.valor_cents != null ? brl(Number(m.valor_cents)) : "—"}</span>,
         dataBR(m.recebida), dataBR(m.fechada)])} /> : vazio("Sem maletas."))}
     </div>

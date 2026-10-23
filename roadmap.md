@@ -1,4 +1,10 @@
 # Roadmap
+## Pacote 0136-2 — primeira montagem e login (23/10)
+- [ ] Revisar e aplicar as rotinas do pacote sem apagar dados; preservar correções existentes.
+- [ ] Integrar login, porta Operação e classificação das peças; atualizar regras do pacote.
+- [ ] Recriar bancada e executar suíte isolada; conferir telas e sinais automáticos.
+- [ ] Entregar representantes do histórico e prévia da carteira, sem aplicar vínculos ou publicar.
+- [ ] Aplicação da carteira e vínculos manuais — aguardam escolha e aprovação de Diego após a prévia.
 ## Custo no cockpit de produtos (23/10)
 - [x] Lista de produtos: coluna Custo só para Master/Diretoria/Financeiro, via product_costs_read (nunca no select da lista).
 - [x] Ficha: custo, margem, valor do bruto e preço sugerido só para quem tem catalog.cost.view; demais perfis veem aviso.

@@ -1,4 +1,9 @@
 # Roadmap
+## Custo no cockpit de produtos (23/10)
+- [x] Lista de produtos: coluna Custo só para Master/Diretoria/Financeiro, via product_costs_read (nunca no select da lista).
+- [x] Ficha: custo, margem, valor do bruto e preço sugerido só para quem tem catalog.cost.view; demais perfis veem aviso.
+- [ ] Rodar suíte isolada com o teste novo produto-custos-tela e conferir build; não publicar.
+- [ ] Achado pré-existente: products.cost_price_cents é legível por select direto (sem restrição de coluna) — informar Diego antes de qualquer correção.
 ## Pacote 0125 — venda pela cobrança (23/10)
 - [x] Aplicar o SQL do pacote, preservar funções/mensagens e atualizar a regra do histórico; diferença única de um espaço de indentação registrada em docs/lardan/APLICACAO-0125-PROVAS.md.
 - [x] Rodar toda a suíte isolada: 354/0; comprovar colunas, fontes e bloqueio das funções internas na base compartilhada; build OK.

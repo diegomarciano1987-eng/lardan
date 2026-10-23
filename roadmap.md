@@ -1,11 +1,13 @@
 # Roadmap
 ## Plano solicitado — 23/10, 18:22 UTC
-- [ ] Corrigir contraste de Etiquetas em todas as entradas, incluindo cockpit do produto.
-- [ ] Auditar busca de remessa: colaboradora nunca aparece como representante; somente vínculo autorizado.
-- [ ] Identificação da maleta por código de barras do sistema, impresso no mesmo rolo, em vez de QR.
-- [ ] Visão Geral própria da colaboradora: trabalho pessoal e bipagens por dia, sem totais inventados.
-- [ ] Etiqueta por peça na montagem, junto da foto e quantidade; preservar foco do leitor.
-- [ ] Aprovar plano e executar matriz de testes tela a tela, sem publicar automaticamente.
+- [x] Contraste explícito do botão compartilhado; cockpit e lista Produtos conferidos na sessão real de Ketllin.
+- [x] Seletores de representante alimentados diretamente pelo vínculo, sem resultados compartilhados entre perfis; filtro e Nova remessa mostram Daniel. Não reproduzida troca de identidade em registro histórico.
+- [x] Código existente kits.code em Code 128 no mesmo rolo; lookup protegido, sem sequência nova; QR antigo continua reconhecido.
+- [x] Visão Geral pessoal carrega na sessão real; registro imutável de bipagens via 0149, autoria real, manual separado, sem inventar histórico; login continua abrindo Maletas.
+- [x] Etiqueta por peça na montagem/conferência, com suspensão de foco enquanto diálogo aberto.
+- [x] Bancada limpa: 440 testes isolados, oito testes etiquetas, sem falhas; provas em docs/lardan/MONTAGEM-PESSOAL-2026-10-23.md.
+- [ ] Matriz visual montagem/conferência/documentos e bipagem → resumo com dados em tela: nenhuma maleta operacional acessível na carteira Daniel desta sessão; não criar operação fictícia na base compartilhada. Rotinas verificadas na bancada isolada, não substituem prova visual.
+- [ ] Impressão física Argox e leitura: dependem da estação; interface não publicada.
 ## Sete correções autorizadas — 23/10, 17:44 UTC
 - [x] 1 Botão destacado Imprimir etiquetas na lista de Produtos; folha real com 20 etiquetas.
 - [x] 2 Colaboradora consulta somente Consultoras em Cadastros, com rotas protegidas.

@@ -25,6 +25,10 @@ export interface ProdutoBase {
   raw_piece_cost_cents: number | null;
   cost_price_cents: number | null;
   markup_percent: number | null;
+  /** 0126: banho do produto (dourado, ródio branco, prata banhada, prata 925, aço inox) */
+  banho_tipo?: BanhoTipo | null;
+  banho_camada?: number | null;
+  custo_pelo_banho?: boolean;
   measurements: string | null;
   short_description: string | null;
   description: string | null;
@@ -211,6 +215,9 @@ export interface CustosProduto {
     raw_piece_cost_cents: number | null;
     cost_price_cents: number | null;
     markup_percent: number | null;
+    /** 0126: custo do banho por grama e se o preço de custo é calculado por ele */
+    banho_valor_grama_cents?: number | null;
+    custo_pelo_banho?: boolean;
   };
   variantes: Array<{
     id: string;
@@ -224,4 +231,50 @@ export async function lerCustos(produtoId: string): Promise<CustosProduto> {
   const { data, error } = await supabase.rpc("product_costs_read", { _product: produtoId } as never);
   if (error) throw error;
   return data as unknown as CustosProduto;
+}
+
+/* ------------------------------------------------------------ banho (0126) --- */
+
+export type BanhoTipo = "dourado" | "rodio_branco" | "prata_banhada" | "prata_925" | "aco_inox";
+
+export const BANHOS: { value: BanhoTipo; label: string; camadas: number[] }[] = [
+  { value: "dourado", label: "Dourado", camadas: [1, 2, 3, 5, 7] },
+  { value: "rodio_branco", label: "Ródio branco", camadas: [] },
+  { value: "prata_banhada", label: "Prata banhada", camadas: [30, 70] },
+  { value: "prata_925", label: "Prata 925", camadas: [] },
+  { value: "aco_inox", label: "Aço inox", camadas: [] },
+];
+
+export const rotuloBanho = (tipo: string | null | undefined) => BANHOS.find((b) => b.value === tipo)?.label ?? null;
+export const camadasDoBanho = (tipo: string | null | undefined) => BANHOS.find((b) => b.value === tipo)?.camadas ?? [];
+
+/**
+ * Preço de custo pelo banho: peso bruto (g) × valor do banho por grama + valor da peça no bruto.
+ * Mesma conta do banco (products_custo_pelo_banho). null quando falta alguma das três partes.
+ */
+export function custoPeloBanho(
+  pesoGramas: number | null,
+  banhoGramaCents: number | null,
+  pecaBrutoCents: number | null,
+): number | null {
+  if (pesoGramas == null || banhoGramaCents == null || pecaBrutoCents == null) return null;
+  if (!(pesoGramas > 0) || banhoGramaCents < 0 || pecaBrutoCents < 0) return null;
+  return Math.round(pesoGramas * banhoGramaCents) + pecaBrutoCents;
+}
+
+/** Grava tipo, camada e (para quem vê custos) o valor do banho. O banco recalcula o custo quando cabe. */
+export async function salvarBanho(
+  produtoId: string,
+  b: { tipo: string; camada: string; valorGramaCents: number | null; alterarValor: boolean },
+) {
+  const camada = b.camada ? Number(b.camada) : null;
+  const { data, error } = await supabase.rpc("product_banho_salvar" as never, {
+    _product: produtoId,
+    _tipo: b.tipo || null,
+    _camada: camada,
+    _valor_grama_cents: b.valorGramaCents,
+    _alterar_valor: b.alterarValor,
+  } as never);
+  if (error) throw error;
+  return data as unknown as { banho_tipo: string | null; banho_camada: number | null; custo_pelo_banho: boolean; cost_price_cents: number | null };
 }

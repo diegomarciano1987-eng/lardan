@@ -11275,6 +11275,10 @@ export type Database = {
       }
       products: {
         Row: {
+          banho_camada: number | null
+          banho_origem: string | null
+          banho_tipo: string | null
+          banho_valor_grama_cents: number | null
           barcode: string | null
           business_entity_id: string | null
           care_instructions: string | null
@@ -11284,6 +11288,7 @@ export type Database = {
           cost_price_cents: number | null
           created_at: string
           created_by: string | null
+          custo_pelo_banho: boolean
           description: string | null
           id: string
           internal_code: string | null
@@ -11322,6 +11327,10 @@ export type Database = {
           weight_grams: number | null
         }
         Insert: {
+          banho_camada?: number | null
+          banho_origem?: string | null
+          banho_tipo?: string | null
+          banho_valor_grama_cents?: number | null
           barcode?: string | null
           business_entity_id?: string | null
           care_instructions?: string | null
@@ -11331,6 +11340,7 @@ export type Database = {
           cost_price_cents?: number | null
           created_at?: string
           created_by?: string | null
+          custo_pelo_banho?: boolean
           description?: string | null
           id?: string
           internal_code?: string | null
@@ -11369,6 +11379,10 @@ export type Database = {
           weight_grams?: number | null
         }
         Update: {
+          banho_camada?: number | null
+          banho_origem?: string | null
+          banho_tipo?: string | null
+          banho_valor_grama_cents?: number | null
           barcode?: string | null
           business_entity_id?: string | null
           care_instructions?: string | null
@@ -11378,6 +11392,7 @@ export type Database = {
           cost_price_cents?: number | null
           created_at?: string
           created_by?: string | null
+          custo_pelo_banho?: boolean
           description?: string | null
           id?: string
           internal_code?: string | null
@@ -11459,6 +11474,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      produto_reclassificacao: {
+        Row: {
+          antes: string | null
+          autor: string | null
+          campo: string
+          category_id: string | null
+          criado_em: string
+          depois: string | null
+          desfeito_em: string | null
+          id: number
+          lote: string
+          product_id: string | null
+          regra: string | null
+        }
+        Insert: {
+          antes?: string | null
+          autor?: string | null
+          campo: string
+          category_id?: string | null
+          criado_em?: string
+          depois?: string | null
+          desfeito_em?: string | null
+          id?: number
+          lote: string
+          product_id?: string | null
+          regra?: string | null
+        }
+        Update: {
+          antes?: string | null
+          autor?: string | null
+          campo?: string
+          category_id?: string | null
+          criado_em?: string
+          depois?: string | null
+          desfeito_em?: string | null
+          id?: number
+          lote?: string
+          product_id?: string | null
+          regra?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -15605,6 +15662,16 @@ export type Database = {
           nome: string
         }[]
       }
+      product_banho_salvar: {
+        Args: {
+          _alterar_valor?: boolean
+          _camada: number
+          _product: string
+          _tipo: string
+          _valor_grama_cents?: number
+        }
+        Returns: Json
+      }
       product_costs_read: { Args: { _product: string }; Returns: Json }
       product_import_apply: {
         Args: { _limite?: number; _lote: string }
@@ -15618,6 +15685,16 @@ export type Database = {
       product_publish_blockers: { Args: { _id: string }; Returns: string[] }
       product_publish_checklist: { Args: { _id: string }; Returns: Json }
       product_save: { Args: { _id: string; _payload: Json }; Returns: Json }
+      produto_categoria_da_chave: { Args: { _chave: string }; Returns: string }
+      produto_classificar_nome: { Args: { _nome: string }; Returns: Json }
+      produto_reclassificacao_desfazer: {
+        Args: { _lote: string }
+        Returns: Json
+      }
+      produto_reclassificar: {
+        Args: { _aplicar?: boolean; _corrigir_divergentes?: boolean }
+        Returns: Json
+      }
       public_catalog_browse: {
         Args: {
           _category_slug?: string

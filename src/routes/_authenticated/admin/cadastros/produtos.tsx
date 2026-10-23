@@ -10,7 +10,7 @@ import { ProdutosPendencias } from "@/components/admin/ProdutosPendencias";
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { can, useCapabilities } from "@/lib/capabilities";
-import { lerCustos } from "@/lib/produto";
+import { lerCustos, rotuloBanho } from "@/lib/produto";
 import {
   listPaged,
   centavosParaTexto,
@@ -37,6 +37,7 @@ interface ProdutoLinha {
   price_is_public: boolean;
   category_id: string | null;
   collection_id: string | null;
+  banho_tipo: string | null;
 }
 
 const PAGE_SIZE = 20;
@@ -97,7 +98,7 @@ function ProdutosPage() {
     queryFn: () =>
       listPaged<ProdutoLinha>({
         table: "products",
-        select: "id, slug, name, legacy_code, status, price_cents, price_is_public, category_id, collection_id",
+        select: "id, slug, name, legacy_code, status, price_cents, price_is_public, category_id, collection_id, banho_tipo",
         searchColumns: ["name", "slug", "legacy_code", "material", "short_description"],
         search: idExato ? "" : busca,
         page: idExato ? 0 : pagina,
@@ -139,6 +140,7 @@ function ProdutosPage() {
     { key: "name", header: "Produto", render: (r) => r.name },
     { key: "legacy_code", header: "Código", render: (r) => <span className="num">{r.legacy_code ?? "—"}</span> },
     { key: "categoria", header: "Categoria", render: (r) => nomeCategoria(r.category_id) },
+    { key: "banho", header: "Banho", render: (r) => rotuloBanho(r.banho_tipo) ?? "—" },
     {
       key: "preco",
       header: "Preço",

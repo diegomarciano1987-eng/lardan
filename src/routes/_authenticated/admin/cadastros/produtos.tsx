@@ -12,6 +12,7 @@ import { DataTable, type Column } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { can, useCapabilities } from "@/lib/capabilities";
 import { lerCustos, rotuloBanho } from "@/lib/produto";
+import { useColabEscopo } from "@/lib/colab-escopo";
 import {
   listPaged,
   centavosParaTexto,
@@ -54,12 +55,14 @@ const tone = (status: string) =>
 function ProdutosPage() {
   const navigate = useNavigate();
   const caps = useCapabilities();
+  const escopo = useColabEscopo();
+  const colab = escopo.data?.colaboradora === true;
   const podeVerCustos = can(caps, "catalog.cost.view");
   const [busca, setBusca] = useState("");
   const [pagina, setPagina] = useState(0);
   const [status, setStatus] = useState("todos");
   const [categoria, setCategoria] = useState("todos");
-  const [aba, setAba] = useState<"visao" | "lista" | "corrigir">("visao");
+  const [aba, setAba] = useState<"visao" | "lista" | "corrigir">("lista");
   const [pendenciaTipo, setPendenciaTipo] = useState<
     "sem_custo" | "sem_preco" | "sem_ncm" | "sem_referencia"
   >("sem_custo");
@@ -209,7 +212,7 @@ function ProdutosPage() {
           ["visao", "Visão geral"],
           ["lista", "Lista de produtos"],
           ["corrigir", "Cadastros a corrigir"],
-        ] as const).map(([valor, rotulo]) => (
+        ] as const).filter(([valor]) => !colab || valor === "lista").map(([valor, rotulo]) => (
           <button
             key={valor}
             type="button"
@@ -226,7 +229,7 @@ function ProdutosPage() {
         ))}
       </div>
 
-      {aba === "visao" && (
+      {aba === "visao" && escopo.isSuccess && !colab && (
         <ProdutosVisaoGeral
           onAbrirPendencias={(tipo) => {
             setPendenciaTipo(tipo);
@@ -235,7 +238,7 @@ function ProdutosPage() {
         />
       )}
 
-      {aba === "corrigir" && <ProdutosPendencias key={pendenciaTipo} tipoInicial={pendenciaTipo} />}
+      {aba === "corrigir" && escopo.isSuccess && !colab && <ProdutosPendencias key={pendenciaTipo} tipoInicial={pendenciaTipo} />}
 
       {aba === "lista" && (
       <DataTable<ProdutoLinha>

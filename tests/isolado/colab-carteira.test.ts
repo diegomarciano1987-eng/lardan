@@ -28,9 +28,9 @@ test("Ficha de outra carteira é recusada", async () => {
   expect((await rpc(colab, "get_party_full", { _id: outside.partyId })).erro).not.toBeNull();
 });
 test("Busca inteligente não entrega cadastro de outra carteira", async () => {
-  const r = await rpc(colab, "search_registry", { _term: `carteira-outside-${seed}` });
+  const r = await ler(colab, "select * from public.search_registry($1)", [`carteira-outside-${seed}`]);
   expect(r.erro).toBeNull();
-  expect(JSON.stringify(r.dados)).not.toContain(outside.partyId);
+  expect(JSON.stringify(r.linhas)).not.toContain(outside.partyId);
 });
 test("Rede usa o representante vinculado, nunca nacional", async () => {
   expect((await rpc(colab, "network_scope")).dados).toEqual({ modo: "representante", party_id: rep.partyId });

@@ -63,8 +63,10 @@ stable
 as $$
   select nullif(
     coalesce(
-      nullif(current_setting('lardan.test_uid', true), ''),
-      (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')
+      -- o que a própria rotina troca na transação (pdv_como) vale antes do usuário simulado,
+      -- como na nuvem, onde o token é substituído pela assinatura técnica
+      (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub'),
+      nullif(current_setting('lardan.test_uid', true), '')
     ),
     ''
   )::uuid

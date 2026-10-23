@@ -869,6 +869,13 @@
       "when": 1792712196501,
       "tag": "0123_acerto_com_remessa_aberta",
       "breakpoints": true
+    },
+    {
+      "idx": 124,
+      "version": "7",
+      "when": 1792713805816,
+      "tag": "0124_cpf_unico_na_tela",
+      "breakpoints": true
     }
   ]
 }

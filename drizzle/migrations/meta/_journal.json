@@ -1051,6 +1051,13 @@
       "when": 1792780035190,
       "tag": "0149_montagem_bipagens_pessoais",
       "breakpoints": true
+    },
+    {
+      "idx": 150,
+      "version": "7",
+      "when": 1792781406403,
+      "tag": "0150_kit_depositos_operacao",
+      "breakpoints": true
     }
   ]
 }

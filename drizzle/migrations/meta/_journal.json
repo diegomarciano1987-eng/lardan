@@ -1023,6 +1023,13 @@
       "when": 1792778807709,
       "tag": "0145_colab_catalog_leitura_e_reserva_oficial",
       "breakpoints": true
+    },
+    {
+      "idx": 146,
+      "version": "7",
+      "when": 1792778927626,
+      "tag": "0146_colab_expedicao_reserva_vinculada",
+      "breakpoints": true
     }
   ]
 }

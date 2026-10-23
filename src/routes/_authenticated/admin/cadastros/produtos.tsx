@@ -113,6 +113,7 @@ function ProdutosPage() {
         page: idExato ? 0 : pagina,
         pageSize: PAGE_SIZE,
         orderBy: "created_at",
+        excludeArchived: status !== "arquivado",
         filters: idExato
           ? { id: idExato }
           : { status, category_id: categoria },

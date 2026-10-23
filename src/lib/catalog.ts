@@ -26,6 +26,7 @@ export interface ListParams {
   orderBy?: string;
   ascending?: boolean;
   filters?: Record<string, string | boolean | null | undefined>;
+  excludeArchived?: boolean;
 }
 
 function escapeOr(value: string) {
@@ -55,6 +56,8 @@ export async function listPaged<T>(params: ListParams): Promise<PagedResult<T>> 
     .select(select, { count: "exact" })
     .order(orderBy, { ascending })
     .range(page * pageSize, page * pageSize + pageSize - 1);
+
+  if (params.excludeArchived) query = query.neq("status", "arquivado");
 
   for (const [column, value] of Object.entries(filters)) {
     if (value === undefined || value === null || value === "" || value === "todos") continue;

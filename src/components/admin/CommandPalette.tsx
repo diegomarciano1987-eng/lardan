@@ -163,8 +163,11 @@ async function search(term: string, caps: Capability[], escopo: Escopo): Promise
     };
   };
   const vazio = { data: [] as never[] };
-  const seguro = async <T,>(p: PromiseLike<{ data: T[] | null }>) => {
-    try { const r = await p; return { data: r.data ?? [] }; } catch { return { data: [] as T[] }; }
+  // Falha de consulta nunca vira "nada encontrado": sobe como erro honesto na tela.
+  const seguro = async <T,>(p: PromiseLike<{ data: T[] | null; error?: { message: string } | null }>) => {
+    const r = await p;
+    if (r.error) throw new Error(r.error.message);
+    return { data: r.data ?? [] };
   };
 
   const [pessoas, pagar, receber, maletas, contas, fornecedores] = await Promise.all([
@@ -228,7 +231,7 @@ async function search(term: string, caps: Capability[], escopo: Escopo): Promise
   }
 
   };
-  await Promise.allSettled([blocoCatalogo(), blocoLeads(), blocoResto()]);
+  await Promise.all([blocoCatalogo(), blocoLeads(), blocoResto()]);
   return hits;
 }
 

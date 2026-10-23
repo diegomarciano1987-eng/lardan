@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { EmptyState, ErrorState, Panel, Skeleton, StatusBadge, formatBRLFromCents } from "@/components/admin/ui";
 import { maletasDaConsultora } from "@/lib/maletas-visibilidade";
+import { PularAcertoSmallData } from "@/components/admin/maletas/PularAcertoSmallData";
 
 const dataBr = (v?: string | null) => (v ? v.slice(0, 10).split("-").reverse().join("/") : "—");
 const SITUACAO: Record<string, string> = {
@@ -101,7 +102,7 @@ export function MaletasDaConsultora({ partyId }: { partyId: string }) {
               Estas maletas saíram pelo sistema antigo e só existem no histórico: a consultora não as vê no app do Lardan até a carga das maletas na rua.
             </p>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[52rem] text-sm">
+              <table className="w-full min-w-[58rem] text-sm">
                 <thead className="border-b border-line-soft text-left text-xs uppercase tracking-[0.08em] text-ledger-muted">
                   <tr>
                     <th className="px-4 py-2.5">Remessa</th>
@@ -112,6 +113,7 @@ export function MaletasDaConsultora({ partyId }: { partyId: string }) {
                     <th className="px-4 py-2.5 text-right">Valor enviado</th>
                     <th className="px-4 py-2.5 text-right">Dias na rua</th>
                     <th className="px-4 py-2.5">NF remessa</th>
+                    <th className="px-4 py-2.5" />
                   </tr>
                 </thead>
                 <tbody>
@@ -125,11 +127,17 @@ export function MaletasDaConsultora({ partyId }: { partyId: string }) {
                       <td className="px-4 py-2.5 text-ledger-muted">{[m.praca, m.representante].filter(Boolean).join(" · ") || "—"}</td>
                       <td className="px-4 py-2.5 tabular-nums">
                         {dataBr(m.emissao)} · {dataBr(m.vencimento)} {m.atrasada && <StatusBadge tone="danger">vencida</StatusBadge>}
+                        {m.vencimento_original && m.vencimento_original !== m.vencimento && (
+                          <span className="block text-xs text-ledger-muted">acerto pulado (era {dataBr(m.vencimento_original)})</span>
+                        )}
                       </td>
                       <td className="px-4 py-2.5 text-right tabular-nums">{m.pecas}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums">{formatBRLFromCents(m.valor_enviado_cents)}</td>
                       <td className="px-4 py-2.5 text-right tabular-nums">{m.dias_na_rua ?? "—"}</td>
                       <td className="px-4 py-2.5 tabular-nums">{m.nf_remessa ?? "—"}</td>
+                      <td className="px-4 py-2.5">
+                        {m.codcli != null && <PularAcertoSmallData remessa={m.remessa} codcli={m.codcli} />}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

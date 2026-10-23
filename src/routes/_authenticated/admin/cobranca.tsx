@@ -5,10 +5,11 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { LembretesGaveta } from "@/components/admin/cobranca/LembretesGaveta";
+import { MaletasPerdidas } from "@/components/admin/cobranca/MaletasPerdidas";
 import { carteira, kpisCobranca, moverEtapa, cobConfig, salvarConfig, type CobConfig, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
 
 const busca = z.object({
-  v: z.enum(["lista", "kanban", "agenda", "bi"]).catch("lista"),
+  v: z.enum(["lista", "kanban", "agenda", "bi", "perdidas"]).catch("lista"),
   q: z.string().catch(""),
   f: z.string().catch(""),
   etapa: z.string().catch(""),
@@ -89,9 +90,9 @@ function Cobranca() {
         <div className="flex items-center gap-2"><ConfigEncargos />
         <Link to="/admin/cobranca/lote" className="inline-flex h-10 items-center rounded-lg bg-asaas px-4 text-sm font-semibold text-asaas-foreground">Cobrança em lote Asaas</Link>
         <div className="flex rounded-lg border border-border p-1">
-          {(["lista", "kanban", "agenda", "bi"] as const).map((v) => (
+          {(["lista", "kanban", "agenda", "bi", "perdidas"] as const).map((v) => (
             <button key={v} onClick={() => set({ v })} className={`rounded-md px-4 py-1.5 text-sm ${s.v === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-              {{ lista: "Lista", kanban: "Kanban", agenda: "Agenda", bi: "BI" }[v]}
+              {{ lista: "Lista", kanban: "Kanban", agenda: "Agenda", bi: "BI", perdidas: "Maletas perdidas" }[v]}
             </button>
           ))}
         </div></div>
@@ -107,7 +108,7 @@ function Cobranca() {
         <Kpi id="descumpridas" rotulo="Promessas descumpridas" valor={String(kpi.descumpridas)} destaque={kpi.descumpridas > 0} />
       </div>
 
-      {s.v !== "bi" && (
+      {s.v !== "bi" && s.v !== "perdidas" && (
         <div className="flex flex-wrap gap-2">
           <BuscaLocal valor={s.q} onBuscar={(q) => set({ q })} />
           <SmartSelect className="w-64" value={s.praca} onChange={(praca) => set({ praca })} placeholder="Todas as praças" searchPlaceholder="Buscar praça…"
@@ -119,7 +120,8 @@ function Cobranca() {
         </div>
       )}
 
-      {q.isLoading ? <p className="text-sm text-muted-foreground">Carregando a carteira…</p>
+      {s.v === "perdidas" ? <MaletasPerdidas />
+        : q.isLoading ? <p className="text-sm text-muted-foreground">Carregando a carteira…</p>
         : q.error ? <p className="text-sm text-destructive">{(q.error as Error).message}</p>
         : lista.length === 0 && s.v !== "bi" ? <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">Sem dados para estes filtros.</p>
         : s.v === "lista" ? <Lista lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />

@@ -918,6 +918,13 @@
       "when": 1792769454113,
       "tag": "0130_0130_colaboradora_codigo_modulos",
       "breakpoints": true
+    },
+    {
+      "idx": 131,
+      "version": "7",
+      "when": 1792770178230,
+      "tag": "0131_perdidas_pular_acerto_representante",
+      "breakpoints": true
     }
   ]
 }

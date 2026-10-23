@@ -36,6 +36,9 @@ export interface MaletaSmallData {
   nf_remessa: string | null;
   /** 0127: situação no SmallData (4 = saída conferida, 5 = retorno recebido…) */
   situacao_codigo?: number | null;
+  /** 0130: código SmallData da consultora e vencimento antes de pular o acerto */
+  codcli?: number;
+  vencimento_original?: string | null;
   situacao?: string | null;
   na_rua?: boolean;
 }

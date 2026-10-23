@@ -1,7 +1,8 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, UserRound } from "lucide-react";
+import { abrirMaletaRepresentante, mensagem } from "@/lib/maletas-perdidas";
 import { toast } from "sonner";
 import { BackButton, EmptyState, ErrorState, Panel, Skeleton, StatusBadge } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
@@ -74,6 +75,19 @@ function RemessaPage() {
     onError: (e) => toast.error(traduzir(e)),
   });
 
+  // 0130: maleta sem consultora, que sai para o representante passar a uma consultora ou candidata dele
+  const abrirRep = useMutation({
+    mutationFn: () => abrirMaletaRepresentante(id),
+    onSuccess: (res) => {
+      toast.success("Maleta aberta para o representante.");
+      qc.invalidateQueries({ queryKey: ["remessas"] });
+      navigate({ to: "/admin/maletas/$id", params: { id: res.cycle_id } });
+    },
+    onError: (e) => toast.error(mensagem(e)),
+  });
+  const comConsultora = (maletas.data ?? []).filter((m) => m.consultora_party_id).length;
+  const comRepresentante = (maletas.data ?? []).length - comConsultora;
+
   if (remessa.isLoading) return <Skeleton className="h-40" />;
   if (remessa.isError) return <ErrorState message={traduzir(remessa.error)} onRetry={() => void remessa.refetch()} />;
   if (!r) return <EmptyState title="Remessa não encontrada" description="Ela pode não existir ou não estar visível para você." />;
@@ -96,7 +110,7 @@ function RemessaPage() {
 
       <div className="grid gap-3 md:grid-cols-5">
         <Card rotulo="Consultoras na praça" valor={r.consultoras_praca} />
-        <Card rotulo="Maletas abertas" valor={r.maletas} />
+        <Card rotulo="Maletas abertas" valor={`${r.maletas}${comRepresentante ? ` · ${comRepresentante} c/ representante` : ""}`} />
         <Card rotulo="Conferidas" valor={r.maletas_conferidas} />
         <Card rotulo="Peças" valor={r.pecas} />
         <Card rotulo="Valor consignado" valor={brl(Number(r.valor_cents))} />
@@ -116,6 +130,12 @@ function RemessaPage() {
             <button type="button" className="admin-btn admin-btn-primary" disabled={abrir.isPending} onClick={() => abrir.mutate()}>
               <Plus aria-hidden className="size-4" /> {abrir.isPending ? "Abrindo…" : "Abrir maleta"}
             </button>
+            {r.representante && (
+              <button type="button" className="admin-btn" disabled={abrirRep.isPending} onClick={() => abrirRep.mutate()}
+                title="A maleta sai sem consultora para o representante; ele passa para uma consultora ou candidata da carteira dele.">
+                <UserRound aria-hidden className="size-4" /> {abrirRep.isPending ? "Abrindo…" : `Maleta para o representante ${r.representante}`}
+              </button>
+            )}
           </div>
         </Panel>
       )}
@@ -130,7 +150,7 @@ function RemessaPage() {
           return (
             <Link key={m.cycle_id} to="/admin/maletas/$id" params={{ id: m.cycle_id }}
               className="flex flex-wrap items-center justify-between gap-4 border-b border-line-soft px-6 py-4 transition hover:bg-surface-muted">
-              <p className="font-semibold text-ledger-text">{m.consultora ?? "Sem consultora"}</p>
+              <p className="font-semibold text-ledger-text">{m.consultora ?? `Com o representante${r.representante ? ` ${r.representante}` : ""} · sem consultora`}</p>
               <div className="flex items-center gap-6 text-sm">
                 <span className="tabular-nums text-ledger-muted">{m.pecas} peças</span>
                 <span className="tabular-nums font-semibold text-ledger-text">{brl(Number(m.valor_cents ?? 0))}</span>

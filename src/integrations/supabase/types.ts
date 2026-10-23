@@ -9240,6 +9240,36 @@ export type Database = {
         }
         Relationships: []
       }
+      legado_maleta_vencimento: {
+        Row: {
+          autor: string | null
+          codcli: number
+          criado_em: string
+          motivo: string
+          remessa: number
+          vencimento: string
+          vencimento_original: string | null
+        }
+        Insert: {
+          autor?: string | null
+          codcli: number
+          criado_em?: string
+          motivo: string
+          remessa: number
+          vencimento: string
+          vencimento_original?: string | null
+        }
+        Update: {
+          autor?: string | null
+          codcli?: number
+          criado_em?: string
+          motivo?: string
+          remessa?: number
+          vencimento?: string
+          vencimento_original?: string | null
+        }
+        Relationships: []
+      }
       legado_maleta_vendidos: {
         Row: {
           codcli: number
@@ -9636,6 +9666,92 @@ export type Database = {
             columns: ["business_entity_id"]
             isOneToOne: false
             referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maletas_perdidas: {
+        Row: {
+          atualizado_em: string
+          autor: string | null
+          codcli: number | null
+          criado_em: string
+          cycle_id: string | null
+          data_perda: string
+          id: string
+          ja_tinha_fiado: boolean
+          motivo: string | null
+          origem: string
+          party_id: string | null
+          pecas: number
+          remessa: number | null
+          situacao: string
+          title_id: string | null
+          valor_cents: number
+        }
+        Insert: {
+          atualizado_em?: string
+          autor?: string | null
+          codcli?: number | null
+          criado_em?: string
+          cycle_id?: string | null
+          data_perda: string
+          id?: string
+          ja_tinha_fiado?: boolean
+          motivo?: string | null
+          origem: string
+          party_id?: string | null
+          pecas?: number
+          remessa?: number | null
+          situacao: string
+          title_id?: string | null
+          valor_cents?: number
+        }
+        Update: {
+          atualizado_em?: string
+          autor?: string | null
+          codcli?: number | null
+          criado_em?: string
+          cycle_id?: string | null
+          data_perda?: string
+          id?: string
+          ja_tinha_fiado?: boolean
+          motivo?: string | null
+          origem?: string
+          party_id?: string | null
+          pecas?: number
+          remessa?: number | null
+          situacao?: string
+          title_id?: string | null
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maletas_perdidas_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: true
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maletas_perdidas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maletas_perdidas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "maletas_perdidas_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
             referencedColumns: ["id"]
           },
         ]
@@ -14195,6 +14311,10 @@ export type Database = {
         Args: { _forma: string; _resultado: Json }
         Returns: undefined
       }
+      cob_maletas_perdidas: {
+        Args: { _busca?: string; _situacao?: string }
+        Returns: Json
+      }
       cob_mover_etapa: {
         Args: { _etapa: string; _party: string; _responsavel?: string }
         Returns: undefined
@@ -15258,6 +15378,10 @@ export type Database = {
         Returns: Json
       }
       kit_location_ensure: { Args: { _kit_id: string }; Returns: string }
+      kit_maleta_perdida: {
+        Args: { _cycle: string; _data?: string; _motivo: string }
+        Returns: Json
+      }
       kit_movement_open: {
         Args: {
           _actor: string
@@ -15274,6 +15398,10 @@ export type Database = {
           _transfer: string
         }
         Returns: string
+      }
+      kit_pular_acerto: {
+        Args: { _cycle: string; _motivo: string; _nova?: string }
+        Returns: Json
       }
       kit_reference_price: { Args: { _variant: string }; Returns: number }
       kit_require_cycle: { Args: { _cycle: string }; Returns: string }
@@ -15461,6 +15589,15 @@ export type Database = {
         Args: { _codcli: number; _remessa: number }
         Returns: boolean
       }
+      legado_maleta_pular_acerto: {
+        Args: {
+          _codcli: number
+          _motivo: string
+          _nova?: string
+          _remessa: number
+        }
+        Returns: Json
+      }
       legado_maleta_situacao_definir: {
         Args: { _codigo: number; _na_rua: boolean; _nome: string }
         Returns: Json
@@ -15469,6 +15606,10 @@ export type Database = {
       legado_maleta_valor_devolvido: {
         Args: { _codcli: number; _kit: number; _remessa: number }
         Returns: number
+      }
+      legado_maleta_vencimento_efetivo: {
+        Args: { _codcli: number; _remessa: number }
+        Returns: string
       }
       legado_pendencias_vinculo: {
         Args: { _busca?: string; _limite?: number }
@@ -15544,6 +15685,11 @@ export type Database = {
         }[]
       }
       maleta_motivo_invisivel: { Args: { _cycle: string }; Returns: string }
+      maleta_perdida_fiado: { Args: { _perdida: string }; Returns: string }
+      maletas_perdidas_smalldata_processar: {
+        Args: { _aplicar?: boolean }
+        Returns: Json
+      }
       maletas_pode_ver: { Args: never; Returns: boolean }
       maletas_visibilidade: { Args: { _limite?: number }; Returns: Json }
       mask_doc: { Args: { _doc: string }; Returns: string }
@@ -16068,6 +16214,10 @@ export type Database = {
         Args: { _consultora: string; _remessa: string }
         Returns: Json
       }
+      remessa_abrir_maleta_representante: {
+        Args: { _remessa: string }
+        Returns: Json
+      }
       remessa_atualizar: {
         Args: {
           _data_acerto: string
@@ -16210,6 +16360,19 @@ export type Database = {
         Args: { _lead: string; _rep: string }
         Returns: undefined
       }
+      rep_maleta_destinatarias: {
+        Args: { _busca?: string; _rep: string }
+        Returns: Json
+      }
+      rep_maleta_repassar: {
+        Args: {
+          _consultora?: string
+          _cycle: string
+          _lead?: string
+          _rep: string
+        }
+        Returns: Json
+      }
       rep_parcela_cobravel: { Args: { _inst: string }; Returns: Json }
       rep_parcela_dono: { Args: { _inst: string }; Returns: string }
       rep_pode_assumir: {
@@ -16248,6 +16411,7 @@ export type Database = {
         }
         Returns: Json
       }
+      rep_portal_maletas: { Args: { _rep: string }; Returns: Json }
       rep_portal_mapa: { Args: { _rep: string }; Returns: Json }
       rep_portal_pode: { Args: { _rep: string }; Returns: boolean }
       rep_portal_ranking: {

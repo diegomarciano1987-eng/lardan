@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BarChart3, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, MessageCircle, Search, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Briefcase, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, MessageCircle, Search, Sparkles, Users } from "lucide-react";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
@@ -12,11 +12,13 @@ import { PainelRepresentante } from "@/components/representante/PainelRepresenta
 import { brl, dataBR, repBuscaTodas, repCobrancas, repConsultoras, repResumo } from "@/lib/representante";
 import { Captacao, CobrarParcela } from "@/components/representante/AcoesRepresentante";
 import { FichaConsultora } from "@/components/representante/FichaConsultora";
+import { MaletasRepresentante } from "@/components/representante/MaletasRepresentante";
 
-type Aba = "cobranca" | "consultoras" | "captacao" | "painel";
+type Aba = "cobranca" | "consultoras" | "maletas" | "captacao" | "painel";
 const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = [
   { id: "cobranca", rotulo: "Acerto e cobrança", curto: "Cobrança", icone: HandCoins },
   { id: "consultoras", rotulo: "Consultoras", curto: "Consultoras", icone: Users },
+  { id: "maletas", rotulo: "Maletas", curto: "Maletas", icone: Briefcase },
   { id: "captacao", rotulo: "Captação", curto: "Captação", icone: Sparkles },
   { id: "painel", rotulo: "Painel", curto: "Painel", icone: BarChart3 },
 ];
@@ -110,11 +112,11 @@ function AreaRepresentante() {
         )}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
         {ABAS.map((a) => (
           <button key={a.id} type="button" onClick={() => ir(a.id)}
-            className={`flex flex-col items-center gap-1.5 py-[1.05rem] text-[0.98rem] leading-tight ${aba === a.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
-            <a.icone className="size-7" aria-hidden /> {a.curto}
+            className={`flex min-w-0 flex-col items-center gap-1 py-3.5 text-[0.78rem] leading-tight ${aba === a.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+            <a.icone className="size-6" aria-hidden /> <span className="max-w-full truncate px-0.5">{a.curto}</span>
           </button>
         ))}
       </nav>
@@ -152,6 +154,7 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
         </div>
         {aba === "cobranca" && <Cobrancas rep={rep} espelho={espelho} />}
         {aba === "consultoras" && <Consultoras rep={rep} espelho={espelho} />}
+        {aba === "maletas" && <MaletasRepresentante rep={rep} />}
         {aba === "captacao" && <Captacao rep={rep} espelho={espelho} />}
         {aba === "painel" && <PainelRepresentante rep={rep} />}
       </main>

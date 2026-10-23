@@ -9904,6 +9904,51 @@ export type Database = {
           },
         ]
       }
+      party_codigo_historico: {
+        Row: {
+          autor: string | null
+          code_antigo: string
+          code_novo: string
+          criado_em: string
+          id: number
+          motivo: string
+          party_id: string
+        }
+        Insert: {
+          autor?: string | null
+          code_antigo: string
+          code_novo: string
+          criado_em?: string
+          id?: number
+          motivo: string
+          party_id: string
+        }
+        Update: {
+          autor?: string | null
+          code_antigo?: string
+          code_novo?: string
+          criado_em?: string
+          id?: number
+          motivo?: string
+          party_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_codigo_historico_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_codigo_historico_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       party_codigos_legados: {
         Row: {
           codigo: string
@@ -15478,6 +15523,21 @@ export type Database = {
           _search?: string
           _size?: number
         }
+        Returns: Json
+      }
+      party_codigo_smalldata_adotar: {
+        Args: { _codigo?: string; _motivo?: string; _party: string }
+        Returns: Json
+      }
+      party_codigos_smalldata: {
+        Args: { _party: string }
+        Returns: {
+          ativo: boolean
+          codigo: string
+        }[]
+      }
+      party_codigos_smalldata_adotar: {
+        Args: { _aplicar?: boolean }
         Returns: Json
       }
       party_doc_reveal: { Args: { _id: string }; Returns: string }

@@ -1,4 +1,10 @@
 # Roadmap
+## Busca, anel e montagem — 23/10, 19:24 UTC
+- [x] Busca inteligente: pessoas estourava o tempo (8 s) e mostrava "nada"; regras de acesso otimizadas (0152), 0,2–0,4 s; erro real agora aparece.
+- [x] Anel com aro (base + 2 dígitos): colaboradora com montagem registra o tamanho; só "ver" não; teste isolado 3/3.
+- [x] Montagem: card dividido (descrição | foto grande), botão "Ver em tela cheia".
+- [x] Impressão em 1 clique direto para a impressora, sem janela/prévia, em todos os botões.
+- [ ] Silêncio total da pergunta do navegador depende do Chrome da estação em --kiosk-printing com Argox padrão; impressão física não validada; não publicado.
 ## Carteira SmallData autorizada — 23/10, 18:41 UTC
 - [x] Prévia oficial Master: exatamente 45 representantes e 3.617 vínculos de praça, zero perfis novos.
 - [x] Aplicados somente campos vazios; lote cvs-20261023-154230-de45; nenhum representante ligado manualmente.

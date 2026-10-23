@@ -26,8 +26,8 @@ export function barrasEtiqueta(codigo: string): string {
   JsBarcode(target as unknown as SVGElement, codigo, { format: "CODE128", displayValue: false, margin: 0 });
   const bits = (target.encodings ?? []).map((e) => e.data).join("");
   if (!bits) throw new Error("Não foi possível gerar o código de barras.");
-  // 10 quiet modules per side + 1 mm external margin, minimum module = one printer dot.
-  if ((bits.length + 20) * 25.4 / ETIQUETA.dpi > 23) {
+  // 10 quiet modules per side; minimum module = one dot, 0.1 mm outside each quiet zone.
+  if ((bits.length + 20) * 25.4 / ETIQUETA.dpi > 24.8) {
     throw new Error("Este código não cabe em 25 mm a 203 DPI sem reduzir a leitura. Revise o código cadastrado ou use uma etiqueta maior.");
   }
   return bits;
@@ -74,7 +74,7 @@ export function documentoEtiquetas(itens: EtiquetaItem[], config: EtiquetaConfig
   *{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--paper);color:var(--ink)}
   section{display:grid;grid-template-columns:repeat(3,25mm);column-gap:${config.entrePistas}mm;width:${width}mm;height:${height}mm;padding-left:${config.margemEsquerda}mm;padding-top:${config.margemSuperior}mm;break-after:page;page-break-after:always;overflow:hidden}
   section:last-child{break-after:auto;page-break-after:auto}
-  article{width:25mm;height:12mm;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0.5mm 1mm;overflow:hidden;font-family:Arial,sans-serif;letter-spacing:0}
+  article{width:25mm;height:12mm;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0.5mm 0.1mm;overflow:hidden;font-family:Arial,sans-serif;letter-spacing:0}
   .nome{font-size:5pt;font-weight:bold;line-height:1.15;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;margin-bottom:0.4mm}
   svg{display:block;flex-shrink:0;fill:var(--ink)}.referencia{font-size:5pt;line-height:1.2;margin-top:0.4mm;white-space:nowrap;max-width:100%;font-weight:bold}
   </style></head><body>${body}</body></html>`;

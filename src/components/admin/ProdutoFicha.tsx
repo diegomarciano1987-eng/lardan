@@ -603,20 +603,24 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
 
         <Panel title="Preço">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Campo
-              label="Preço de custo (R$) *"
-              valor={form["custo"]}
-              onChange={(v) => set("custo", v)}
-              disabled={somente}
-              ajuda="Obrigatório: é a base do cálculo de margem."
-            />
-            <Campo
-              label="Margem deste produto (%)"
-              valor={form["markup"]}
-              onChange={(v) => set("markup", v)}
-              disabled={somente}
-              ajuda={`Em branco usa a margem padrão do sistema (${markupGlobal.data ?? 0}%).`}
-            />
+            {podeVerCustos ? (
+              <>
+                <Campo
+                  label="Preço de custo (R$) *"
+                  valor={form["custo"]}
+                  onChange={(v) => set("custo", v)}
+                  disabled={somente}
+                  ajuda="Obrigatório: é a base do cálculo de margem."
+                />
+                <Campo
+                  label="Margem deste produto (%)"
+                  valor={form["markup"]}
+                  onChange={(v) => set("markup", v)}
+                  disabled={somente}
+                  ajuda={`Em branco usa a margem padrão do sistema (${markupGlobal.data ?? 0}%).`}
+                />
+              </>
+            ) : null}
             <Campo
               label="Preço de venda (R$)"
               valor={form["preco"]}
@@ -624,31 +628,40 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
               disabled={somente}
             />
             <div className="flex flex-col justify-center gap-2 text-sm">
-              <p className="text-ledger-muted">
-                Preço sugerido:{" "}
-                <span className="text-ledger-text">
-                  {sugerido == null ? "—" : `R$ ${centavosParaTexto(sugerido)}`}
-                </span>
-                {` (margem aplicada ${margemAplicada}%)`}
-              </p>
-              <p className="text-ledger-muted">
-                Margem praticada hoje:{" "}
-                <span className="text-ledger-text">
-                  {margemAtual == null ? "—" : `${margemAtual.toFixed(1)}%`}
-                </span>
-              </p>
-              <button
-                type="button"
-                className="admin-btn w-fit"
-                disabled={somente || sugerido == null}
-                onClick={() => {
-                  if (sugerido == null) return;
-                  set("preco", centavosParaTexto(sugerido));
-                  toast.success("Preço sugerido aplicado. Revise antes de salvar.");
-                }}
-              >
-                Aplicar preço sugerido
-              </button>
+              {podeVerCustos ? (
+                <>
+                  <p className="text-ledger-muted">
+                    Preço sugerido:{" "}
+                    <span className="text-ledger-text">
+                      {sugerido == null ? "—" : `R$ ${centavosParaTexto(sugerido)}`}
+                    </span>
+                    {` (margem aplicada ${margemAplicada}%)`}
+                  </p>
+                  <p className="text-ledger-muted">
+                    Margem praticada hoje:{" "}
+                    <span className="text-ledger-text">
+                      {margemAtual == null ? "—" : `${margemAtual.toFixed(1)}%`}
+                    </span>
+                  </p>
+                  <button
+                    type="button"
+                    className="admin-btn w-fit"
+                    disabled={somente || sugerido == null}
+                    onClick={() => {
+                      if (sugerido == null) return;
+                      set("preco", centavosParaTexto(sugerido));
+                      toast.success("Preço sugerido aplicado. Revise antes de salvar.");
+                    }}
+                  >
+                    Aplicar preço sugerido
+                  </button>
+                </>
+              ) : (
+                <p className="text-ledger-muted">
+                  Custo, margem e preço sugerido ficam visíveis apenas para Master, Diretoria e
+                  Financeiro.
+                </p>
+              )}
             </div>
             <Chave
               label="Mostrar preço no site"

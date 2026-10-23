@@ -1,4 +1,8 @@
 # Roadmap
+## Carteira SmallData autorizada — 23/10, 18:41 UTC
+- [ ] Conferir estado e prévia pelo cliente oficial na sessão Master; esperado 45 representantes e 3.617 praças.
+- [ ] Aplicar somente campos vazios se a prévia corresponder; não ligar representantes manualmente.
+- [ ] Entregar antes, aplicação e depois com lote e auditoria; sem desfazer ou publicar.
 ## Plano solicitado — 23/10, 18:22 UTC
 - [x] Contraste explícito do botão compartilhado; cockpit e lista Produtos conferidos na sessão real de Ketllin.
 - [x] Seletores de representante alimentados diretamente pelo vínculo, sem resultados compartilhados entre perfis; filtro e Nova remessa mostram Daniel. Não reproduzida troca de identidade em registro histórico.

@@ -34,6 +34,10 @@ export interface MaletaSmallData {
   dias_na_rua: number | null;
   atrasada: boolean;
   nf_remessa: string | null;
+  /** 0127: situação no SmallData (4 = saída conferida, 5 = retorno recebido…) */
+  situacao_codigo?: number | null;
+  situacao?: string | null;
+  na_rua?: boolean;
 }
 export interface MaletasConsultora {
   pessoa: { party_id: string; nome: string; codigo: string | null; status: string; tem_login: boolean; login_ativo: boolean; codigos_smalldata: number[] };
@@ -42,15 +46,20 @@ export interface MaletasConsultora {
   mesma_pessoa: { party_id: string; nome: string; codigo: string | null; status: string; motivo: string; tem_login: boolean; maletas_abertas: number }[];
 }
 export interface VisibilidadeMaletas {
-  lardan: { ativas: number; invisiveis: number; lista: { cycle_id: string; kit: string; status: string; remessa: number | null; party_id: string | null; consultora: string | null; motivo: string }[] };
+  lardan: { ativas: number; consultoras?: number; invisiveis: number; lista: { cycle_id: string; kit: string; status: string; remessa: number | null; party_id: string | null; consultora: string | null; motivo: string }[] };
   smalldata: {
-    maletas: number;
+    /** 0127: número principal é o de consultoras; maletas vem depois (há consultora com várias) */
     consultoras: number;
+    maletas: number;
+    situacao_importada?: boolean;
+    consultoras_varias_maletas?: number;
     sem_cadastro: number;
     pecas: number;
     valor_enviado_cents: number;
+    consultoras_atrasadas?: number;
     atrasadas: number;
-    por_remessa: { remessa: number; emissao: string | null; vencimento: string | null; praca: string | null; maletas: number; pecas: number; valor_enviado_cents: number }[];
+    por_situacao?: { codigo: number | null; situacao: string; na_rua: boolean; consultoras: number; maletas: number; pecas: number; valor_enviado_cents: number }[];
+    por_remessa: { remessa: number; emissao: string | null; vencimento: string | null; praca: string | null; consultoras?: number; maletas: number; pecas: number; valor_enviado_cents: number }[];
     lista: { remessa: number; kit: number; codcli: number; party_id: string | null; consultora: string; emissao: string | null; vencimento: string | null; pecas: number; valor_enviado_cents: number }[];
   };
 }

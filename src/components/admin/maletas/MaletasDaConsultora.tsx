@@ -90,7 +90,7 @@ export function MaletasDaConsultora({ partyId }: { partyId: string }) {
         )}
       </Panel>
 
-      <Panel title="Na rua pelo SmallData (ainda sem acerto)" flush>
+      <Panel title="No SmallData (ainda sem acerto)" flush>
         {d.smalldata.length === 0 ? (
           <p className="px-6 py-4 text-sm text-ledger-muted">
             {d.pessoa.codigos_smalldata.length ? "Nenhuma maleta do SmallData sem acerto." : "Este cadastro não está ligado a nenhuma consultora do SmallData."}
@@ -101,10 +101,11 @@ export function MaletasDaConsultora({ partyId }: { partyId: string }) {
               Estas maletas saíram pelo sistema antigo e só existem no histórico: a consultora não as vê no app do Lardan até a carga das maletas na rua.
             </p>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[44rem] text-sm">
+              <table className="w-full min-w-[52rem] text-sm">
                 <thead className="border-b border-line-soft text-left text-xs uppercase tracking-[0.08em] text-ledger-muted">
                   <tr>
                     <th className="px-4 py-2.5">Remessa</th>
+                    <th className="px-4 py-2.5">Situação</th>
                     <th className="px-4 py-2.5">Praça · representante</th>
                     <th className="px-4 py-2.5">Saída · vencimento</th>
                     <th className="px-4 py-2.5 text-right">Peças</th>
@@ -117,6 +118,10 @@ export function MaletasDaConsultora({ partyId }: { partyId: string }) {
                   {d.smalldata.map((m) => (
                     <tr key={`${m.remessa}-${m.kit}`} className="border-b border-line-soft last:border-0">
                       <td className="px-4 py-2.5 font-medium tabular-nums">{m.remessa}{m.kit > 1 ? ` · kit ${m.kit}` : ""}</td>
+                      <td className="px-4 py-2.5">
+                        {m.situacao ?? (m.situacao_codigo != null ? `Situação ${m.situacao_codigo}` : "—")}
+                        {m.na_rua === false && <span className="text-ledger-muted"> · fora da rua</span>}
+                      </td>
                       <td className="px-4 py-2.5 text-ledger-muted">{[m.praca, m.representante].filter(Boolean).join(" · ") || "—"}</td>
                       <td className="px-4 py-2.5 tabular-nums">
                         {dataBr(m.emissao)} · {dataBr(m.vencimento)} {m.atrasada && <StatusBadge tone="danger">vencida</StatusBadge>}

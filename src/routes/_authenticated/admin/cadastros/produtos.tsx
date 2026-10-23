@@ -9,6 +9,8 @@ import { ProdutosVisaoGeral } from "@/components/admin/ProdutosVisaoGeral";
 import { ProdutosPendencias } from "@/components/admin/ProdutosPendencias";
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { can, useCapabilities } from "@/lib/capabilities";
+import { lerCustos } from "@/lib/produto";
 import {
   listPaged,
   centavosParaTexto,
@@ -44,6 +46,8 @@ const tone = (status: string) =>
 
 function ProdutosPage() {
   const navigate = useNavigate();
+  const caps = useCapabilities();
+  const podeVerCustos = can(caps, "catalog.cost.view");
   const [busca, setBusca] = useState("");
   const [pagina, setPagina] = useState(0);
   const [status, setStatus] = useState("todos");

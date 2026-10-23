@@ -988,6 +988,13 @@
       "when": 1792778144232,
       "tag": "0140_colab_carteira_preservar_contratos",
       "breakpoints": true
+    },
+    {
+      "idx": 141,
+      "version": "7",
+      "when": 1792778314832,
+      "tag": "0141_colab_carteira_leitura_eficiente",
+      "breakpoints": true
     }
   ]
 }

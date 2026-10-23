@@ -8,8 +8,12 @@ const base = 100 + Math.floor(Math.random() * 89000);
 const cod = (n: number) => String(10000000 + base * 10 + n).slice(-8);
 let master: Conta, colab: Conta, semPapel: Conta, estoque: Conta;
 
-const caps = async (c: Conta) =>
-  ((await rpc<{ capability: string }[]>(c, "my_capabilities", {})).dados ?? []).map((r) => r.capability);
+const LISTA = ["kit.view", "catalog.view", "kit.manage", "catalog.manage"];
+const caps = async (c: Conta) => {
+  const tem: string[] = [];
+  for (const cap of LISTA) if ((await rpc<boolean>(c, "has_capability", { _user_id: c.uid, _cap: cap })).dados) tem.push(cap);
+  return tem;
+};
 
 beforeAll(async () => {
   master = await criarConta({ nome: `colab-master-${base}`, papeis: ["master"], comParty: true });

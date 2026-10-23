@@ -79,6 +79,12 @@ export function HistoricoJFlexPessoa({ partyId }: { partyId: string }) {
       <TabsContent value="comissao" className="mt-4"><ComissaoMaletas maletas={(d.maletas ?? []) as never} /></TabsContent>
       <TabsContent value="visao" className="mt-4">
     <div className="space-y-6">
+      {d.filtro_representante && (
+        <p className="rounded-xl border border-line-soft bg-surface-muted p-4 text-sm text-ledger-text">
+          Mostrando só as remessas do representante <strong>{d.filtro_representante.nome ?? "vinculado"}</strong>:{" "}
+          {d.filtro_representante.remessas} de {d.filtro_representante.remessas_total} remessas desta consultora no SmallData.
+        </p>
+      )}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Dado rotulo="Maletas" valor={`${r?.maletas ?? 0} (${r?.maletas_fechadas ?? 0} fechadas)`} />
         <Dado rotulo="Primeira · última maleta" valor={`${data(r?.primeira_maleta)} · ${data(r?.ultima_maleta)}`} />

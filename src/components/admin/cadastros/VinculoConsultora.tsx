@@ -70,6 +70,7 @@ export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; po
     toast.success("Vínculo da consultora salvo.");
     await qc.invalidateQueries({ queryKey: ["vinculo-consultora", partyId] });
     await qc.invalidateQueries({ queryKey: ["party", partyId] });
+    await qc.invalidateQueries({ queryKey: ["historico-jflex", "consultora", partyId] });
   }
 
   return (

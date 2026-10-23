@@ -186,9 +186,11 @@ function ProdutosPage() {
         title="Produtos"
         description="Ficha da peça, variantes vendáveis, imagens e publicação no site."
         actions={
-          <Link to="/admin/cadastros/produtos/novo" className="admin-btn border-champagne">
-            <Plus aria-hidden className="size-4" /> Novo produto
-          </Link>
+          can(caps, "product.manage") ? (
+            <Link to="/admin/cadastros/produtos/novo" className="admin-btn border-champagne">
+              <Plus aria-hidden className="size-4" /> Novo produto
+            </Link>
+          ) : undefined
         }
       />
 

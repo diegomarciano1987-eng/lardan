@@ -1,4 +1,5 @@
 import * as React from "react";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDownLeft, ArrowUpRight, BookmarkPlus, FileUp, MapPin, PackagePlus } from "lucide-react";
@@ -44,6 +45,11 @@ export const Route = createFileRoute("/_authenticated/admin/estoque")({
   head: () => ({
     meta: [
       { title: "Estoque — Administração LARDAN" },
+      { name: "description", content: "Saldos e etiquetas de peças do estoque LARDAN." },
+      { property: "og:title", content: "Estoque — Administração LARDAN" },
+      { property: "og:description", content: "Saldos e etiquetas de peças do estoque LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -192,6 +198,7 @@ function EstoquePage() {
   });
 
   const colunasSaldo: Column<BalanceRow>[] = [
+    { key: "etiquetas", header: "Etiquetas", render: (r) => <EtiquetasImprimir compact label={`Etiquetas de ${r.produto}`} origens={[{ variantId: r.variant_id }]} /> },
     {
       key: "foto",
       header: "Foto",

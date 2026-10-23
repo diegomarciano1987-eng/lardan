@@ -1,4 +1,5 @@
 import * as React from "react";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
@@ -70,6 +71,7 @@ export function StockItemPanel({
           <p className="mt-6 text-sm font-medium text-ledger-muted">Carregando…</p>
         ) : (
           <div className="mt-6 space-y-6">
+            {variantId && <EtiquetasImprimir origens={[{ variantId }]} />}
             <div className="flex flex-wrap gap-3">
               <StockThumb
                 url={principal ? fotos.data?.[principal] : null}

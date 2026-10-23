@@ -924,6 +924,7 @@ body:has(.area-consultora) {
 .admin-scope h2,
 .admin-scope h3,
 .admin-scope h4 {
+  font-family: "Outfit", var(--font-sans);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--color-ledger-text);
@@ -1399,4 +1400,24 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
   font-family: var(--font-numeric);
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -0.01em;
+}
+
+/* Deck de comando: topo das telas do painel (todas as páginas via PageHeader). */
+@utility admin-deck {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in oklab, var(--color-champagne) 22%, transparent), transparent 55%),
+    linear-gradient(135deg, var(--color-graphite), var(--color-ink));
+  color: var(--color-warm-ivory);
+  box-shadow: 0 28px 60px -32px color-mix(in oklab, var(--color-ink) 70%, transparent);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-champagne), transparent);
+    opacity: 0.8;
+  }
 }

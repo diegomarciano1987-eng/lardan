@@ -54,7 +54,7 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
       const rs = await buscarEtiquetas(t);
       const exatos = rs.filter((r) => r.barcode === t || r.referencia?.toUpperCase() === t.toUpperCase());
       if (exatos.length !== 1) { w.close(); setDebounced(t); if (!rs.length) toast.error("Nenhuma peça encontrada."); return; }
-      const r = exatos[0];
+      const r = exatos[0]!;
       enviar(w, [{ id: r.variantId, nome: r.nome, barcode: r.barcode, referencia: r.referencia, precoCents: r.precoCents, quantidade: 1 }]);
       toast.success(`Etiqueta enviada: ${r.nome}`); setTermo("");
     } catch (e) { w?.close(); toast.error(e instanceof Error ? e.message : "Não foi possível imprimir."); }

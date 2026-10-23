@@ -1,8 +1,8 @@
 # Roadmap
 ## Pacote 0125 — venda pela cobrança (23/10)
-- [ ] Aplicar o SQL exato, preservar funções/mensagens e atualizar a regra do histórico.
-- [ ] Rodar toda a suíte isolada e comprovar a estrutura aplicada na base compartilhada.
-- [ ] Diego importa o novo CSV pela tela; aguarda a aplicação da 0125.
+- [x] Aplicar o SQL do pacote, preservar funções/mensagens e atualizar a regra do histórico; diferença única de um espaço de indentação registrada em docs/lardan/APLICACAO-0125-PROVAS.md.
+- [x] Rodar toda a suíte isolada: 354/0; comprovar colunas, fontes e bloqueio das funções internas na base compartilhada; build OK.
+- [ ] Diego importa o novo CSV pela tela; 0125 aplicada, aguardando a importação reservada a Diego.
 - [ ] Depois da importação de Diego: conferir as fontes, os 34 meses e março/julho de 2026 na tela Master; não publicar.
 ## Pacote 0123 — acertos com remessa aberta (22/10)
 - [x] Aplicar SQL exato pela ferramenta oficial e atualizar leitura do ranking, teste e documentação do pacote.

@@ -365,7 +365,7 @@ export function MontagemLeitor({
     });
   }
 
-  async function processar(cod: string) {
+  async function processar(cod: string, origem: "bipagem" | "manual" = "bipagem") {
     let r: Res | null = null;
     try {
       r = await resolver(cod, false);
@@ -382,7 +382,7 @@ export function MontagemLeitor({
     }
     const nome = [r.produto, r.variante].filter(Boolean).join(" · ");
     try {
-      await ajustar(r.variant_id, nome, 1, r.preco_cents ?? 0, cod, "bipagem");
+      await ajustar(r.variant_id, nome, 1, r.preco_cents ?? 0, cod, origem);
       apito(true);
       setNesta((n) => n + 1);
       const extra = [
@@ -421,7 +421,7 @@ export function MontagemLeitor({
   function escolher(s: Sugestao) {
     setCodigo("");
     setSugestoes([]);
-    enfileirar(() => processar(s.codigo));
+    enfileirar(() => processar(s.codigo, "manual"));
     campo.current?.focus();
   }
 
@@ -433,7 +433,8 @@ export function MontagemLeitor({
     if (!cod) return;
     // Digitou um nome e sobrou uma única sugestão: entra ela. Senão, vai como código.
     if (!/^[A-Za-z0-9-]+$/.test(cod) && sugestoes.length === 1) {
-      enfileirar(() => processar(sugestoes[0]!.codigo));
+      const sugestao = sugestoes[0];
+      if (sugestao) enfileirar(() => processar(sugestao.codigo, "manual"));
       return;
     }
     enfileirar(() => processar(cod));

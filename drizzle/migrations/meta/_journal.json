@@ -995,6 +995,13 @@
       "when": 1792778314832,
       "tag": "0141_colab_carteira_leitura_eficiente",
       "breakpoints": true
+    },
+    {
+      "idx": 142,
+      "version": "7",
+      "when": 1792778363282,
+      "tag": "0142_colab_carteira_avisos_e_ficha",
+      "breakpoints": true
     }
   ]
 }

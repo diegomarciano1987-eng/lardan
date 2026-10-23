@@ -15312,6 +15312,10 @@ export type Database = {
       painel_visao_geral: { Args: never; Returns: Json }
       parse_cents_any: { Args: { _v: string }; Returns: number }
       parse_decimal_any: { Args: { _v: string }; Returns: number }
+      parties_doc_em_uso: {
+        Args: { _doc: string; _exceto: string }
+        Returns: string
+      }
       partner_doc_reveal: {
         Args: { _id: string; _kind: string }
         Returns: string

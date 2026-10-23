@@ -27,6 +27,11 @@ test("Consultoras retorna somente o representante vinculado, antes da paginaçã
 test("Ficha de outra carteira é recusada", async () => {
   expect((await rpc(colab, "get_party_full", { _id: outside.partyId })).erro).not.toBeNull();
 });
+test("Busca inteligente não entrega cadastro de outra carteira", async () => {
+  const r = await rpc(colab, "search_registry", { _q: `carteira-outside-${seed}` });
+  expect(r.erro).toBeNull();
+  expect(JSON.stringify(r.dados)).not.toContain(outside.partyId);
+});
 test("Rede usa o representante vinculado, nunca nacional", async () => {
   expect((await rpc(colab, "network_scope")).dados).toEqual({ modo: "representante", party_id: rep.partyId });
 });
@@ -36,6 +41,17 @@ test("Estoque bloqueado mesmo com concessão antiga", async () => {
 });
 test("Ver não permite cadastrar ou alterar produtos e pessoas", async () => {
   for (const cap of ["registry.manage", "product.manage", "catalog.manage"]) expect((await rpc(colab, "has_capability", { _user_id: colab.uid, _cap: cap })).dados).toBe(false);
+});
+test("Reservas diretas e auxiliares privadas não podem ser usadas fora do motor de maletas", async () => {
+  for (const fn of ["release_stock_reservation", "colab_kit_reserva_liberar_interna"]) {
+    const r = await rpc(colab, fn, { _reservation_id: inside.partyId });
+    expect(r.erro).not.toBeNull();
+  }
+});
+test("Mapa agregado não entrega localização identificada", async () => {
+  const r = await ler(colab, "select * from public.network_geo_municipio_consultoras('4113700')");
+  expect(r.erro).toBeNull();
+  expect(r.linhas).toEqual([]);
 });
 test("Visão geral com estoque não é entregue à colaboradora", async () => {
   expect((await rpc(colab, "catalog_overview")).erro).not.toBeNull();

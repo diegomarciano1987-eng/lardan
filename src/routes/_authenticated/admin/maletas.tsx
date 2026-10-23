@@ -115,7 +115,7 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Número da remessa</span>
           <input className="admin-input" inputMode="numeric" value={numero}
-            onChange={(e) => setNumero(e.target.value.replace(/\D/g, ""))} placeholder="Automático (próximo número)" />
+            onChange={(e) => setNumero(e.target.value.replace(/\D/g, ""))} placeholder="Automático: próximo número livre (nunca repete o SmallData)" />
         </label>
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Data de emissão</span>

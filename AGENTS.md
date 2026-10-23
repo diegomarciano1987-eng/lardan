@@ -17,7 +17,7 @@
 - Reconciliation creates titles via fin_title_create (origem conciliacao, id_externo extrato:<line>); fin_mesa_palpite learns only for new titles. Existing links preserve classification. Why: no reclassification/automatic settlement.
 - Reconciliation fees are separate movements, never installment adjustments: receipt=line allocation-fee; payment=allocation+fee. Why: fees do not increase debt.
 - Asaas PAYMENT_RECEIVED settles linked installments via asaas_baixa_automatica: gross, separate fee, key asaas:baixa:<account>:<charge>. Cash/refunds/disputes stay manual. Why: official idempotency.
-- Isolated bench applies supabase/migrations and nonduplicated drizzle/migrations; exclusions live in tests/isolado/pular.txt. Why: migration tool writes to drizzle.
+- Isolated bench applies supabase/migrations and nonduplicated drizzle/migrations; exclusions: tests/isolado/pular.txt. Why: tools write to drizzle.
 - Cheques use fin_cheque_* custody and enter bank balance only at compensado via official settlement when linked; fin_caixa_fatias is insert-only. Why: no fake accounts or double counting.
 - Card purchases hit DRE by purchase date/category; cartao_fatura payable is excluded from competencia; invoice payments split by line category. Why: no double counting.
 - Historical fiado: service-only cob_fiado_importar, batch+line idempotency, receivable sistema_origem fiado_historico, FIADO-HIST asset outside DRE, immutable cob_fiado_linhas. Why: traceable debt, no inflated revenue.
@@ -27,7 +27,7 @@
 - Settlement reversal reverses its interest/discount; DFC nets reversal in original line; projected flow skips cheques represented by equal open receivable. Why: no residues/doubling.
 - Date correction: fin_estorno_data_corrigir, expected date, reason, immutable snapshots, atomic settlement/movement updates; invalidate account/cashflow queries. Why: dated balances/concurrency.
 - Merges: party_unificar after preview, atomic; preserve fiado/Asaas stage and moved IDs in party_unificacoes. Why: history/reversal.
-- Read nested AGENTS.md before edits (fiscal rules: src/lib/focus/AGENTS.md). Why: scoped rules.
+- Read nested AGENTS.md before edits, including src/lib/focus/AGENTS.md. Why: scoped rules.
 - Consultant reads are owner-scoped; preserve paid-item after-sale snapshots; review never moves stock/money automatically. Why: privacy/official engines.
 - pdv_como validates/audits real actor; no GRANT. Why: traceability.
 - Biblioteca type is separate from social format; shared publication/storage policies. Why: preserve arts/privacy.

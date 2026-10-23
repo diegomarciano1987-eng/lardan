@@ -58,7 +58,7 @@ test("Somente ver não registra tamanho novo", async () => {
 test("Busca de cadastros da colaboradora continua só na carteira do representante", async () => {
   const r = await ler<{ id: string }>(colab, "select id from parties where display_name ilike $1", [`%${base}%`]);
   expect(r.erro).toBeNull();
-  const ids = (r.dados ?? []).map((x) => x.id);
+  const ids = (r.linhas ?? []).map((x) => x.id);
   expect(ids).toContain(naCarteira);
   expect(ids).not.toContain(foraCarteira);
 });

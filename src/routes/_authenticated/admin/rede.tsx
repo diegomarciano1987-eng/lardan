@@ -105,13 +105,13 @@ function RedePage() {
   const territorio = useQuery({
     queryKey: ["rede-territorio", uf, ibge, filtros],
     queryFn: () => territorioRede(uf, ibge, filtros),
-    enabled: podeVer && escopo.isSuccess && !colab,
+    enabled: podeVer,
   });
 
   const situacao = useQuery({
     queryKey: ["rede-situacao-localizacao"],
     queryFn: () => verSituacao({ data: undefined }),
-    enabled: podeVer,
+    enabled: podeVer && escopo.isSuccess && !colab,
   });
 
   const valores = useMemo<ValorTerritorio[]>(() => {

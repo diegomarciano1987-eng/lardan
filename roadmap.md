@@ -1,4 +1,11 @@
 # Roadmap
+## Plano solicitado — 23/10, 18:22 UTC
+- [ ] Corrigir contraste de Etiquetas em todas as entradas, incluindo cockpit do produto.
+- [ ] Auditar busca de remessa: colaboradora nunca aparece como representante; somente vínculo autorizado.
+- [ ] Identificação da maleta por código de barras do sistema, impresso no mesmo rolo, em vez de QR.
+- [ ] Visão Geral própria da colaboradora: trabalho pessoal e bipagens por dia, sem totais inventados.
+- [ ] Etiqueta por peça na montagem, junto da foto e quantidade; preservar foco do leitor.
+- [ ] Aprovar plano e executar matriz de testes tela a tela, sem publicar automaticamente.
 ## Sete correções autorizadas — 23/10, 17:44 UTC
 - [x] 1 Botão destacado Imprimir etiquetas na lista de Produtos; folha real com 20 etiquetas.
 - [x] 2 Colaboradora consulta somente Consultoras em Cadastros, com rotas protegidas.

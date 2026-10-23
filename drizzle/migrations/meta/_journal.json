@@ -1072,6 +1072,27 @@
       "when": 1792783747990,
       "tag": "0152_busca_rapida_e_anel_colaboradora",
       "breakpoints": true
+    },
+    {
+      "idx": 153,
+      "version": "7",
+      "when": 1792784802400,
+      "tag": "0153_remessa_maleta_excluir_trocar",
+      "breakpoints": true
+    },
+    {
+      "idx": 154,
+      "version": "7",
+      "when": 1792784874656,
+      "tag": "0154_remessa_maleta_assinatura_estado",
+      "breakpoints": true
+    },
+    {
+      "idx": 155,
+      "version": "7",
+      "when": 1792785048198,
+      "tag": "0155_maleta_total_sugerido_media3",
+      "breakpoints": true
     }
   ]
 }

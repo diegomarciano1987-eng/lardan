@@ -62,13 +62,15 @@ describe("situação das maletas do SmallData", () => {
     await imp("maletas_status", [{ remessa: REM, codcli: base + 2, status: "5", data: "2026-10-12" }]);
     v = await rpc<Vis>(master, "maletas_visibilidade", { _limite: 1000 });
     expect(minha(v.dados)).toMatchObject({ consultoras: 2, maletas: 4 });
-    await rpc(master, "legado_maleta_situacao_definir", { _codigo: 5, _nome: "Retorno recebido", _na_rua: false });
+    await rpc(master, "legado_maleta_situacao_definir", { _codigo: 5, _nome: "5 - Rem Importada", _na_rua: false });
   });
 
   test("só a equipe lê; só o Master define", async () => {
     expect((await rpc(consultora, "legado_maleta_situacoes_lista", {})).ok).toBe(false);
     expect((await rpc(consultora, "legado_maleta_situacao_definir", { _codigo: 4, _nome: "x", _na_rua: false })).ok).toBe(false);
     const l = await rpc<{ codigo: number; nome: string }[]>(master, "legado_maleta_situacoes_lista", {});
-    expect(l.dados.find((x) => x.codigo === 1)!.nome).toBe("Remessa aberta cliente");
+    expect(l.dados.find((x) => x.codigo === 1)!.nome).toBe("1 - Rem Aberta Cliente");
+    expect(l.dados.find((x) => x.codigo === 4)!.nome).toBe("4 - Rem Conferida");
+    expect(l.dados.find((x) => x.codigo === 7)!.nome).toBe("7 - Rem Fechada");
   });
 });

@@ -343,11 +343,8 @@ export function MontagemLeitor({
     };
   }, []);
 
+  // Impressão vai direto para a impressora (sem diálogo); o foco volta ao leitor.
   const impressaoAberta = React.useRef(false);
-  function aoAbrirEtiquetas(open: boolean) {
-    impressaoAberta.current = open;
-    if (!open) window.setTimeout(() => campo.current?.focus(), 100);
-  }
 
   function registrar(l: Omit<Leitura, "id" | "hora">) {
     setLeituras((a) => [{ ...l, id: crypto.randomUUID(), hora: new Date().toLocaleTimeString("pt-BR") }, ...a].slice(0, 40));

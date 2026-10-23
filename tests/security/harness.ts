@@ -9,6 +9,14 @@
  * privilegiada é criada no banco para esta bancada.
  */
 
+// Operação oficial: esta bancada grava dados HOMOLOG na base real. Ela só roda
+// com autorização explícita; o dia a dia usa a bancada isolada (tests/isolado).
+if (process.env["LARDAN_PERMITIR_HOMOLOG_BASE_REAL"] !== "sim") {
+  throw new Error(
+    "Bancada de homologação desligada: ela criaria dados de teste na base real. Use `bun test tests/isolado`.",
+  );
+}
+
 const URL = process.env["SUPABASE_URL"] ?? process.env["VITE_SUPABASE_URL"]!;
 const ANON =
   process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["VITE_SUPABASE_PUBLISHABLE_KEY"]!;

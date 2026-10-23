@@ -31,8 +31,8 @@ function AdminLayout() {
     if (portaLiberada("consultora", roles ?? [])) return <Navigate to="/consultora" replace />;
     return <AcessoNaoLiberado />;
   }
-  // Colaboradora por código nunca vê o painel geral (Inteligência Operacional).
-  if (soModulos(roles ?? []) && (pathname === "/admin" || pathname === "/admin/")) {
+  // Login continua abrindo Maletas; /admin oferece apenas o resumo pessoal à colaboradora.
+  if (colabQ.data !== true && soModulos(roles ?? []) && (pathname === "/admin" || pathname === "/admin/")) {
     return <Navigate to={inicioOperacao(roles ?? [], capsQ.data ?? []) as never} replace />;
   }
   if (colabQ.data === true) {

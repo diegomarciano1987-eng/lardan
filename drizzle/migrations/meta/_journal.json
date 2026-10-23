@@ -1044,6 +1044,13 @@
       "when": 1792779103102,
       "tag": "0148_colab_remessa_identidades_carteira",
       "breakpoints": true
+    },
+    {
+      "idx": 149,
+      "version": "7",
+      "when": 1792780035190,
+      "tag": "0149_montagem_bipagens_pessoais",
+      "breakpoints": true
     }
   ]
 }

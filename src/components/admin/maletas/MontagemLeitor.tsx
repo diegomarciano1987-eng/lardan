@@ -1,10 +1,12 @@
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
+import { EtiquetaMaleta } from "./EtiquetaMaleta";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Sparkles, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { metasMontagem, type MetasMontagem } from "@/lib/historico-jflex";
-import { brl, definirItem, traduzir, type ItemComposicao } from "@/lib/maletas";
+import { brl, operarMontagem, traduzir, type ItemComposicao } from "@/lib/maletas";
 import {
   PARAMETROS_PADRAO,
   TIPO_PECA_LABEL,
@@ -332,7 +334,7 @@ export function MontagemLeitor({
     campo.current?.focus();
     const t = window.setInterval(() => {
       const a = document.activeElement;
-      if (a !== campo.current && !(a instanceof HTMLButtonElement)) campo.current?.focus();
+      if (!impressaoAberta.current && a !== campo.current && !(a instanceof HTMLButtonElement)) campo.current?.focus();
     }, 400);
     return () => {
       window.clearInterval(t);
@@ -340,13 +342,20 @@ export function MontagemLeitor({
     };
   }, []);
 
+  const impressaoAberta = React.useRef(false);
+  function aoAbrirEtiquetas(open: boolean) {
+    impressaoAberta.current = open;
+    if (!open) window.setTimeout(() => campo.current?.focus(), 100);
+  }
+
   function registrar(l: Omit<Leitura, "id" | "hora">) {
     setLeituras((a) => [{ ...l, id: crypto.randomUUID(), hora: new Date().toLocaleTimeString("pt-BR") }, ...a].slice(0, 40));
   }
 
-  async function ajustar(variantId: string, nome: string, delta: number, preco = 0, sku: string | null = null) {
-    const nova = Math.max(0, (qtd.current[variantId] ?? 0) + delta);
-    await definirItem(cycleId, variantId, nova);
+  async function ajustar(variantId: string, nome: string, delta: number, preco = 0, sku: string | null = null, origem: "bipagem" | "manual" | "retirada" = "retirada") {
+    const result = await operarMontagem(cycleId, variantId, delta, origem, crypto.randomUUID());
+    const nova = result.quantidade;
+    void qc.invalidateQueries({ queryKey: ["montagem-pessoal"] });
     qtd.current[variantId] = nova;
     setItens((m) => {
       const n = { ...m };
@@ -356,7 +365,7 @@ export function MontagemLeitor({
     });
   }
 
-  async function processar(cod: string) {
+  async function processar(cod: string, origem: "bipagem" | "manual" = "bipagem") {
     let r: Res | null = null;
     try {
       r = await resolver(cod, false);
@@ -373,7 +382,7 @@ export function MontagemLeitor({
     }
     const nome = [r.produto, r.variante].filter(Boolean).join(" · ");
     try {
-      await ajustar(r.variant_id, nome, 1, r.preco_cents ?? 0, cod);
+      await ajustar(r.variant_id, nome, 1, r.preco_cents ?? 0, cod, origem);
       apito(true);
       setNesta((n) => n + 1);
       const extra = [
@@ -412,7 +421,7 @@ export function MontagemLeitor({
   function escolher(s: Sugestao) {
     setCodigo("");
     setSugestoes([]);
-    enfileirar(() => processar(s.codigo));
+    enfileirar(() => processar(s.codigo, "manual"));
     campo.current?.focus();
   }
 
@@ -424,7 +433,8 @@ export function MontagemLeitor({
     if (!cod) return;
     // Digitou um nome e sobrou uma única sugestão: entra ela. Senão, vai como código.
     if (!/^[A-Za-z0-9-]+$/.test(cod) && sugestoes.length === 1) {
-      enfileirar(() => processar(sugestoes[0]!.codigo));
+      const sugestao = sugestoes[0];
+      if (sugestao) enfileirar(() => processar(sugestao.codigo, "manual"));
       return;
     }
     enfileirar(() => processar(cod));
@@ -668,6 +678,7 @@ export function MontagemLeitor({
               <p className="text-sm text-ledger-muted">soma do preço de venda das peças</p>
             </div>
             <div className="ledger-panel p-5">
+              <EtiquetaMaleta cycleId={cycleId} />
               <p className="ledger-eyebrow mb-2">Composição</p>
               {lista.length === 0 ? (
                 <p className="text-sm text-ledger-muted">Sem dados.</p>
@@ -677,6 +688,7 @@ export function MontagemLeitor({
                     <li key={id} className="flex items-center justify-between gap-2">
                       <FotoPeca variantId={id} alt={p.nome} size="xs" />
                       <span className="flex-1 truncate">{p.nome}</span>
+                      <EtiquetasImprimir compact label={`Imprimir etiqueta de ${p.nome}`} origens={[{ variantId: id, quantidade: 1 }]} onOpenChange={aoAbrirEtiquetas} />
                       <span className="flex items-center gap-2">
                         <span className="tabular-nums text-ledger-muted">{brl(p.preco * p.qtd)}</span>
                         <strong className="tabular-nums">{p.qtd}</strong>

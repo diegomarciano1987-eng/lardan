@@ -222,6 +222,9 @@ export const criarCiclo = (payload: {
 export const definirItem = (cycleId: string, variantId: string, qty: number) =>
   rpc<unknown>("kit_item_upsert", { _cycle: cycleId, _variant: variantId, _qty: qty });
 
+export const operarMontagem = (cycleId: string, variantId: string, delta: number, origem: "bipagem" | "manual" | "retirada", operacao: string) =>
+  rpc<{ quantidade: number; repetida: boolean }>("montagem_item_operar", { _cycle: cycleId, _variant: variantId, _delta: delta, _origem: origem, _operacao: operacao });
+
 export const conferir = (cycleId: string, nota?: string) =>
   rpc<{ situacao: string; repetida?: boolean }>("kit_conferir", { _cycle: cycleId, _note: nota ?? null });
 

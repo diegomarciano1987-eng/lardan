@@ -23,6 +23,8 @@ import { useCapabilities } from "@/lib/capabilities";
 import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
 
 import { VisaoGeralPainel } from "@/components/admin/VisaoGeralPainel";
+import { VisaoGeralColaboradora } from "@/components/admin/VisaoGeralColaboradora";
+import { useColabEscopo } from "@/lib/colab-escopo";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import {
   PageHeader,
@@ -41,10 +43,10 @@ export const Route = createFileRoute("/_authenticated/admin/")({
   component: VisaoGeral,
   head: () => ({
     meta: [
-      { title: "Inteligência Operacional — Administração LARDAN" },
-      { name: "description", content: "Visão operacional de estoque, finanças e rede LARDAN." },
-      { property: "og:title", content: "Inteligência Operacional — Administração LARDAN" },
-      { property: "og:description", content: "Visão operacional de estoque, finanças e rede LARDAN." },
+      { title: "Visão Geral — Administração LARDAN" },
+      { name: "description", content: "Resumo operacional ou trabalho pessoal conforme o acesso autorizado LARDAN." },
+      { property: "og:title", content: "Visão Geral — Administração LARDAN" },
+      { property: "og:description", content: "Resumo operacional ou trabalho pessoal conforme o acesso autorizado LARDAN." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
@@ -107,6 +109,13 @@ const SHORTCUTS: { label: string; icon: LucideIcon; module: string; to?: string 
 ];
 
 function VisaoGeral() {
+  const escopo = useColabEscopo();
+  if (escopo.isPending) return <Skeleton className="h-40" />;
+  if (escopo.isError) return <ErrorState message="Não foi possível conferir seu acesso." onRetry={() => void escopo.refetch()} />;
+  return escopo.data?.colaboradora ? <VisaoGeralColaboradora /> : <VisaoGeralAdministrativa />;
+}
+
+function VisaoGeralAdministrativa() {
   const queryClient = useQueryClient();
   const roles = useAdminRoles();
   const caps = useCapabilities();

@@ -10349,6 +10349,61 @@ export type Database = {
         }
         Relationships: []
       }
+      montagem_operacoes: {
+        Row: {
+          actor_user_id: string
+          created_at: string
+          cycle_id: string
+          delta: number
+          id: string
+          origem: string
+          quantidade: number
+          variant_id: string
+        }
+        Insert: {
+          actor_user_id: string
+          created_at?: string
+          cycle_id: string
+          delta: number
+          id: string
+          origem: string
+          quantidade: number
+          variant_id: string
+        }
+        Update: {
+          actor_user_id?: string
+          created_at?: string
+          cycle_id?: string
+          delta?: number
+          id?: string
+          origem?: string
+          quantidade?: number
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "montagem_operacoes_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "montagem_operacoes_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "montagem_operacoes_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_versions: {
         Row: {
           blocks: Json
@@ -17573,6 +17628,7 @@ export type Database = {
         }
         Returns: string
       }
+      kit_identificacao_buscar: { Args: { _codigo: string }; Returns: string }
       kit_item_publish: {
         Args: { _cycle: string; _publicar: boolean; _variant: string }
         Returns: Json
@@ -17910,8 +17966,22 @@ export type Database = {
       media_publica_ok: { Args: { _media: string }; Returns: boolean }
       meu_acesso_colab: { Args: never; Returns: boolean }
       minhas_indicacoes: { Args: never; Returns: Json }
+      montagem_item_operar: {
+        Args: {
+          _cycle: string
+          _delta: number
+          _operacao: string
+          _origem: string
+          _variant: string
+        }
+        Returns: Json
+      }
       montagem_metas_ciclo: {
         Args: { _cycle: string; _total?: number }
+        Returns: Json
+      }
+      montagem_meu_resumo: {
+        Args: { _ate: string; _de: string }
         Returns: Json
       }
       montagem_sugestao: {

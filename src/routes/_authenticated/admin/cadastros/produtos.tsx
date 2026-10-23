@@ -9,6 +9,8 @@ import { ProdutosVisaoGeral } from "@/components/admin/ProdutosVisaoGeral";
 import { ProdutosPendencias } from "@/components/admin/ProdutosPendencias";
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { can, useCapabilities } from "@/lib/capabilities";
+import { lerCustos } from "@/lib/produto";
 import {
   listPaged,
   centavosParaTexto,
@@ -44,6 +46,8 @@ const tone = (status: string) =>
 
 function ProdutosPage() {
   const navigate = useNavigate();
+  const caps = useCapabilities();
+  const podeVerCustos = can(caps, "catalog.cost.view");
   const [busca, setBusca] = useState("");
   const [pagina, setPagina] = useState(0);
   const [status, setStatus] = useState("todos");
@@ -105,6 +109,28 @@ function ProdutosPage() {
       }),
   });
 
+  // Custos nunca entram no select da lista: chegam só pela leitura autorizada
+  // (product_costs_read), uma chamada por produto da página, e só para quem
+  // tem catalog.cost.view (Master, Diretoria, Financeiro).
+  const idsPagina = (query.data?.rows ?? []).map((r) => r.id);
+  const custos = useQuery({
+    queryKey: ["products-custos", idsPagina],
+    enabled: podeVerCustos && idsPagina.length > 0,
+    queryFn: async () => {
+      const lidos = await Promise.all(
+        idsPagina.map(async (pid) => {
+          try {
+            const c = await lerCustos(pid);
+            return [pid, c.produto?.cost_price_cents ?? null] as const;
+          } catch {
+            return [pid, null] as const;
+          }
+        }),
+      );
+      return new Map(lidos);
+    },
+  });
+
   const nomeCategoria = (id: string | null) =>
     categorias.data?.find((c) => c.id === id)?.name ?? "—";
 
@@ -127,6 +153,23 @@ function ProdutosPage() {
           </span>
         ),
     },
+    ...(podeVerCustos
+      ? [
+          {
+            key: "custo",
+            header: "Custo",
+            className: "text-right",
+            render: (r: ProdutoLinha) => {
+              const custo = custos.data?.get(r.id);
+              return custo == null ? (
+                "—"
+              ) : (
+                <span className="num">{centavosParaTexto(custo)}</span>
+              );
+            },
+          } satisfies Column<ProdutoLinha>,
+        ]
+      : []),
     {
       key: "status",
       header: "Situação",

@@ -102,3 +102,8 @@ Provas: docs/lardan/AUDITORIA-FINANCEIRO-NOVE-PONTOS-2026-10-16.md; 243 testes i
 - [x] 6.5 artes da semana na Biblioteca (painel /admin/biblioteca)
 - [x] Etapa 5: conta teste projetos.diegosilva limpa (backup lote limpeza-conta-teste-projetos-diegosilva-2026-10-17)
 - [ ] 4 pedidos com Pix no Asaas (PED-000057/59/61/63) — cancelar cobranças antes de apagar; aguarda decisão
+
+## Pendências 0124 (CPF repetido)
+- [ ] Cancelar títulos 2026-024988 e 2026-025013 (fin_title_cancel, motivo "teste do app da consultora com CPF do representante — não é cliente real") SÓ depois que o espelho Asaas mostrar as 2 cobranças como DELETED. Bloqueio: Diego cancelar no painel do Asaas.
+- [ ] Título 2026-025406 (R$ 200, Larissa LC-007427): aguardando decisão manter/cancelar.
+- [ ] Caminho B: rotina oficial de cancelar cobrança no Asaas (para depois).

@@ -102,6 +102,8 @@ describe("3. reclassificação pela descrição", () => {
     catBrinco = (await um<{ id: string }>(`insert into public.categories (name, slug, status) values ($1,$2,'rascunho') returning id`,
       [`Brincos`, `brincos-${marca}`]).catch(async () => um<{ id: string }>(
         `select id from public.categories where parent_id is null and upper(name) in ('BRINCO','BRINCOS') limit 1`))).id;
+    // a classificação usa a categoria oficial da chave (outra suíte pode ter criado "Brinco" antes)
+    catBrinco = (await um<{ id: string }>(`select public.produto_categoria_da_chave('brinco')::text id`)).id;
     catAnel = (await um<{ id: string } | undefined>(`select id from public.categories where parent_id is null and upper(translate(name,'é','e')) in ('ANEL','ANEIS') limit 1`))?.id ?? "";
     if (!catAnel) catAnel = (await um<{ id: string }>(`insert into public.categories (name, slug, status) values ('Anéis',$1,'rascunho') returning id`, [`aneis-${marca}`])).id;
     vazio = await produto(`BR DOU ARGOLA ${marca}`);

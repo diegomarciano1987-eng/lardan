@@ -16,10 +16,14 @@ const OPERACAO: AppRole[] = [
   "qualidade",
 ] as AppRole[];
 
-/** Papéis que abrem cada porta do sistema. */
-export function portaLiberada(porta: Porta, roles: AppRole[], caps: string[] = []): boolean {
-  // Colaboradora com login por código entra pelos módulos liberados (sem papel de equipe).
-  if (porta === "operacao") return roles.some((r) => OPERACAO.includes(r)) || caps.length > 0;
+/**
+ * Papéis que abrem cada porta do sistema.
+ * Colaboradora com acesso por código (colab = meu_acesso_colab()) entra pelos módulos liberados.
+ * Consultora e representante também têm permissões (kit.view, kit.accept…), mas não são da operação:
+ * por isso só permissões não bastam (0136).
+ */
+export function portaLiberada(porta: Porta, roles: AppRole[], caps: string[] = [], colab = false): boolean {
+  if (porta === "operacao") return roles.some((r) => OPERACAO.includes(r)) || (colab && caps.length > 0);
   if (porta === "consultora") return roles.includes("consultora" as AppRole);
   return roles.includes("representante" as AppRole);
 }

@@ -13,7 +13,7 @@ import { QuickRail } from "@/components/admin/QuickRail";
 import { ModuleAvailabilityBadge, PageHeader, Panel } from "@/components/admin/ui";
 import { UserMenu } from "@/components/admin/UserMenu";
 import { ROLE_LABEL } from "@/lib/roles";
-import logo from "@/assets/lardan-logo-completa.png.asset.json";
+import logo from "@/assets/lardan-logo-rose.png.asset.json";
 
 const RolesContext = createContext<AppRole[]>([]);
 export const useAdminRoles = () => useContext(RolesContext);
@@ -67,7 +67,7 @@ export function AdminShell({
             to="/admin"
             className="flex h-16 w-[188px] shrink-0 items-center gap-3 self-stretch rounded-r-[16px] bg-graphite px-4 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-champagne lg:w-[320px]"
           >
-            <img src={logo.url} alt="Lardan" className="h-7 w-auto" />
+            <img src={logo.url} alt="Lardan" className="h-5 w-auto" />
             <span className="hidden text-[0.625rem] tracking-[0.28em] text-warm-ivory/70 sm:block">
               CLOUD
             </span>
@@ -111,7 +111,7 @@ export function AdminShell({
 
         <main className="mx-auto min-w-0 max-w-[1600px] px-5 pb-40 pt-8 md:pl-[96px] md:pr-8"><PortaoSegundoFator>{children}</PortaoSegundoFator></main>
 
-        <QuickRail />
+        <QuickRail roles={roles} />
         <BottomDock roles={roles} />
         <CommandPalette open={palette} onClose={() => setPalette(false)} roles={roles} />
       </div>

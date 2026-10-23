@@ -4,7 +4,8 @@ import { MoreHorizontal, Lock, Clock3, X, ChevronRight, ArrowLeft } from "lucide
 import { ADMIN_MODULES, moduleAllowed, type AdminModule } from "@/lib/admin-modules";
 import { useCapabilities } from "@/lib/capabilities";
 import { AREAS_FINANCEIRAS } from "@/components/admin/financeiro/FinanceiroShell";
-import wordmark from "@/assets/lardan-wordmark.png.asset.json";
+import wordmark from "@/assets/lardan-logo-rose.png.asset.json";
+import { useColabEscopo } from "@/lib/colab-escopo";
 import { hasAny, type AppRole } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -25,14 +26,24 @@ function ItemLabel({ m }: { m: AdminModule }) {
   );
 }
 
+/** Módulos do dock; colaboradora não vê Praças e "Cadastro" vira "Consultoras" (único cadastro dela). */
+export function useDockModules(roles: AppRole[]) {
+  const caps = useCapabilities();
+  const colab = useColabEscopo().data?.colaboradora === true;
+  const permitted = ADMIN_MODULES.filter((m) => moduleAllowed(m, caps, roles))
+    .filter((m) => !(colab && m.slug === "pracas"))
+    .map((m) => (colab && m.slug === "cadastros" ? { ...m, label: "Consultoras" } : m));
+  return { permitted, colab };
+}
+
 /** Menu principal flutuante inferior: única navegação global do sistema. */
 export function BottomDock({ roles }: { roles: AppRole[] }) {
   const caps = useCapabilities();
+  const { permitted, colab } = useDockModules(roles);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [drawer, setDrawer] = useState(false);
   const [submenu, setSubmenu] = useState<"modulos" | "financeiro">("modulos");
 
-  const permitted = ADMIN_MODULES.filter((m) => moduleAllowed(m, caps, roles));
   const primary = permitted.slice(0, 6);
   const primaryMobile = permitted.slice(0, 5);
   const areasFinanceiras = AREAS_FINANCEIRAS.filter((a) => caps.includes(a.capacidade));
@@ -271,7 +282,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
             })}
           </ul>
 
-          <button
+          {!colab && <button
             type="button"
             onClick={() => {
               setDrawer((v) => !v);
@@ -281,7 +292,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
           >
             <MoreHorizontal aria-hidden className="size-4" />
             <span className="hidden sm:inline">Mais módulos</span>
-          </button>
+          </button>}
         </div>
       </nav>
     </>

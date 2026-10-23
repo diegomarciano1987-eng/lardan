@@ -24,6 +24,7 @@ import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPess
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import { AcessoColaboradora } from "@/components/admin/acessos/AcessoColaboradora";
 import { VendedoraInternaForm } from "@/components/admin/cadastros/VendedoraInternaForm";
+import { VinculoConsultora } from "@/components/admin/cadastros/VinculoConsultora";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   addRole,
@@ -642,6 +643,9 @@ function FichaPessoa() {
 
         {/* VÍNCULOS */}
         <TabsContent value="vinculos" className="mt-4">
+          {d.papeis.some((p) => p.role === "consultora") && (
+            <VinculoConsultora partyId={id} podeEditar={podeEditar} />
+          )}
           <Panel title="Onde este cadastro é usado" flush>
             <div className="p-5">
               {d.vinculos.length === 0 ? (

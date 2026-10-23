@@ -28,7 +28,7 @@ test("Ficha de outra carteira é recusada", async () => {
   expect((await rpc(colab, "get_party_full", { _id: outside.partyId })).erro).not.toBeNull();
 });
 test("Busca inteligente não entrega cadastro de outra carteira", async () => {
-  const r = await rpc(colab, "search_registry", { _q: `carteira-outside-${seed}` });
+  const r = await rpc(colab, "search_registry", { _term: `carteira-outside-${seed}` });
   expect(r.erro).toBeNull();
   expect(JSON.stringify(r.dados)).not.toContain(outside.partyId);
 });

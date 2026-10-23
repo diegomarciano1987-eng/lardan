@@ -123,9 +123,12 @@ describe("2. painel", () => {
     expect(p.dados.anterior!["maletas"]).toBe(2);   // jan–fev, mesmo tamanho de janela
   });
 
-  test("interna (LARDAN) fica fora; maleta sem acerto conta à parte", async () => {
+  test("totais incluem a conta interna (LARDAN), como o SmallData; ranking não; maleta sem acerto conta à parte", async () => {
     const r = await rpc<Painel>(master, "legado_bi_painel", { _praca: P2 });
-    expect(r.dados.kpis).toMatchObject({ maletas: 2, consultoras: 1, pecas_vendidas: 0, maletas_zeradas_pct: 100, maletas_sem_acerto: 1 });
+    // 0125: Zerada (2 maletas, 0 vendidas) + LARDAN (1 maleta, 40 vendidas)
+    expect(r.dados.kpis).toMatchObject({ maletas: 3, consultoras: 2, pecas_vendidas: 40, maletas_zeradas: 2, maletas_sem_acerto: 1 });
+    const t = await rpc<{ codcli: number }[]>(master, "legado_bi_top", { _praca: P2 });
+    expect(t.dados.some((x) => x.codcli === cod(4))).toBe(false);
   });
 });
 
@@ -281,10 +284,11 @@ describe("7. venda pelo acerto da consultora (0119)", () => {
   test("mês do acerto (padrão) × mês de saída", async () => {
     const acerto = await rpc<{ mes: string; valor_vendido_cents: number }[]>(financeiro, "legado_rede_mensal", { _praca: P1 });
     expect(acerto.erro).toBeNull();
-    expect(acerto.dados.find((x) => x.mes === "2025-02")!.valor_vendido_cents).toBe(150000 + 50000);  // Estrela (acerto) + Média
+    // 0125: só vale o que foi cobrado — Estrela tem acerto; Média fechou sem cobrança e não entra
+    expect(acerto.dados.find((x) => x.mes === "2025-02")!.valor_vendido_cents).toBe(150000);
     expect(acerto.dados.some((x) => x.mes === "2025-01")).toBe(false);
     const saida = await rpc<{ mes: string; valor_vendido_cents: number }[]>(financeiro, "legado_rede_mensal", { _praca: P1, _data: "saida" });
-    expect(saida.dados.find((x) => x.mes === "2025-01")!.valor_vendido_cents).toBe(200000);
+    expect(saida.dados.find((x) => x.mes === "2025-01")!.valor_vendido_cents).toBe(150000);
     const p = await rpc<{ kpis: { maletas: number } }>(financeiro, "legado_bi_painel", { _praca: P1, _de: "2025-02-01", _ate: "2025-02-28" });
     expect(p.dados.kpis.maletas).toBe(2);
     const ps = await rpc<{ kpis: { maletas: number } }>(financeiro, "legado_bi_painel", { _praca: P1, _de: "2025-02-01", _ate: "2025-02-28", _data: "saida" });
@@ -302,5 +306,44 @@ describe("8. acerto com a remessa ainda aberta (0123)", () => {
     expect(maio.dados.map((x) => x.chave)).toEqual([String(cod(3))]);          // acertada em 15/05
     const saida = await rpc<{ chave: string }[]>(financeiro, "legado_rede_ranking", { _agrupar: "consultora", _praca: P2, _de: "2025-05-01", _ate: "2025-05-31", _data: "saida" });
     expect(saida.dados).toEqual([]);                                            // saiu em abril
+  });
+});
+
+describe("9. venda pela cobrança do acerto (0125)", () => {
+  const dados = async (remessa: number, codcli: number) =>
+    um<{ v: string; f: string; o: string | null; s: boolean }>(
+      `select valor_venda_cents::bigint v, fechamento::text f, fechamento_smalldata::text o, sem_cobranca s
+         from public.legado_maletas where remessa=$1 and codcli=$2 and kit=1`, [remessa, codcli]);
+
+  test("a data da cobrança vira a data do acerto e a original fica guardada", async () => {
+    // Estrela REM+1 fechou em 15/02; a cobrança foi lançada em 03/03 com outro valor
+    await importar("acertos_consultora", [
+      { remessa: REM + 1, codcli: cod(1), valor: "1400.00", data: "2025-03-03", tipo: "remessa", dinheiro: "", cheque: "", prazo: "", boleto: "", cartao: "" },
+    ]);
+    expect(await dados(REM + 1, cod(1))).toMatchObject({ v: "140000", f: "2025-03-03", o: "2025-02-15", s: false });
+    const mensal = await rpc<{ mes: string; valor_vendido_cents: number }[]>(financeiro, "legado_rede_mensal", { _praca: P1 });
+    expect(mensal.dados.find((x) => x.mes === "2025-02")?.valor_vendido_cents ?? 0).toBe(0);   // só a Média, que fechou sem cobrança
+    expect(mensal.dados.find((x) => x.mes === "2025-03")!.valor_vendido_cents).toBe(140000);
+  });
+
+  test("maleta fechada sem cobrança não entra na venda e fica marcada", async () => {
+    expect(await dados(REM + 1, cod(2))).toMatchObject({ v: "0", s: true });
+  });
+
+  test("reimportar maletas e acertos não muda nada", async () => {
+    const antes = await dados(REM + 1, cod(1));
+    await importar("maletas", [maleta(REM + 1, cod(1), 50, 30, "2025-01-01", "2025-02-15")]);
+    expect(await dados(REM + 1, cod(1))).toEqual(antes);
+    await importar("acertos_consultora", [
+      { remessa: REM + 1, codcli: cod(1), valor: "1400.00", data: "2025-03-03", tipo: "remessa", dinheiro: "", cheque: "", prazo: "", boleto: "", cartao: "" },
+    ]);
+    expect(await dados(REM + 1, cod(1))).toEqual(antes);
+  });
+
+  test("a cobrança chegando depois tira a marca e conta o valor", async () => {
+    await importar("acertos_consultora", [
+      { remessa: REM + 1, codcli: cod(2), valor: "300.00", data: "2025-02-20", tipo: "remessa", dinheiro: "", cheque: "", prazo: "", boleto: "", cartao: "" },
+    ]);
+    expect(await dados(REM + 1, cod(2))).toMatchObject({ v: "30000", f: "2025-02-20", s: false });
   });
 });

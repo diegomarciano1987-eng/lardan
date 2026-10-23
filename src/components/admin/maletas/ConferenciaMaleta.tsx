@@ -2,6 +2,7 @@ import * as React from "react";
 import { CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
 import { FotoPeca } from "@/components/FotoPeca";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { brl, conferir, traduzir, type ItemComposicao } from "@/lib/maletas";
 import { TIPO_PECA_LABEL, type TipoPeca } from "@/lib/remessa";
 import { useTiposPeca } from "@/lib/tipo-peca";
@@ -115,6 +116,7 @@ export function ConferenciaMaleta({
                     </span>
                     <span className="tabular-nums text-ledger-muted">{brl(c.valor_unitario * c.quantidade)}</span>
                     <strong className="tabular-nums">{c.quantidade} un</strong>
+                    <EtiquetasImprimir compact label={`Imprimir etiqueta de ${c.produto}`} origens={[{ variantId: c.variant_id, quantidade: 1 }]} />
                   </li>
                 ))}
             </ul>

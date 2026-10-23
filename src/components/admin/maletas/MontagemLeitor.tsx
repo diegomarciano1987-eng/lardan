@@ -1,5 +1,6 @@
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Sparkles, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -332,13 +333,19 @@ export function MontagemLeitor({
     campo.current?.focus();
     const t = window.setInterval(() => {
       const a = document.activeElement;
-      if (a !== campo.current && !(a instanceof HTMLButtonElement)) campo.current?.focus();
+      if (!impressaoAberta.current && a !== campo.current && !(a instanceof HTMLButtonElement)) campo.current?.focus();
     }, 400);
     return () => {
       window.clearInterval(t);
       document.body.style.overflow = prev;
     };
   }, []);
+
+  const impressaoAberta = React.useRef(false);
+  function aoAbrirEtiquetas(open: boolean) {
+    impressaoAberta.current = open;
+    if (!open) window.setTimeout(() => campo.current?.focus(), 100);
+  }
 
   function registrar(l: Omit<Leitura, "id" | "hora">) {
     setLeituras((a) => [{ ...l, id: crypto.randomUUID(), hora: new Date().toLocaleTimeString("pt-BR") }, ...a].slice(0, 40));
@@ -677,6 +684,7 @@ export function MontagemLeitor({
                     <li key={id} className="flex items-center justify-between gap-2">
                       <FotoPeca variantId={id} alt={p.nome} size="xs" />
                       <span className="flex-1 truncate">{p.nome}</span>
+                      <EtiquetasImprimir compact label={`Imprimir etiqueta de ${p.nome}`} origens={[{ variantId: id, quantidade: 1 }]} onOpenChange={aoAbrirEtiquetas} />
                       <span className="flex items-center gap-2">
                         <span className="tabular-nums text-ledger-muted">{brl(p.preco * p.qtd)}</span>
                         <strong className="tabular-nums">{p.qtd}</strong>

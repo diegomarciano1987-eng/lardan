@@ -7,7 +7,7 @@ import { CONFIG_ETIQUETA, barrasEtiqueta, documentoEtiquetas, svgEtiqueta, type 
 import { lerItensEtiquetas, type EtiquetaOrigem } from "@/lib/etiquetas-dados";
 
 const CONFIG_KEY = "lardan.etiquetas.argox.alca-direita.v2";
-export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = false }: { origens: EtiquetaOrigem[]; label?: string; compact?: boolean }) {
+export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = false, onOpenChange }: { origens: EtiquetaOrigem[]; label?: string; compact?: boolean; onOpenChange?: (open: boolean) => void }) {
   const [open, setOpen] = useState(false);
   const [config, setConfig] = useState<EtiquetaConfig>(CONFIG_ETIQUETA);
   const [items, setItems] = useState<EtiquetaItem[]>([]);
@@ -41,11 +41,11 @@ export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = fals
     } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível preparar as etiquetas."); }
   }
   return <>
-    <Button variant="outline" size={compact ? "icon" : "default"} title={label} aria-label={label} disabled={!origens.length} onClick={(e) => { e.stopPropagation(); setOpen(true); setNotice(""); setError(""); }}>
+    <Button variant="outline" size={compact ? "icon" : "default"} title={origens.length ? label : "Sem dados de peças para imprimir"} aria-label={label} disabled={!origens.length} onClick={(e) => { e.stopPropagation(); setOpen(true); onOpenChange?.(true); setNotice(""); setError(""); }}>
       <Printer aria-hidden />{compact ? null : label}
     </Button>
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="admin-scope max-h-[85vh] max-w-3xl overflow-y-auto">
+    <Dialog open={open} onOpenChange={(value) => { setOpen(value); onOpenChange?.(value); }}>
+      <DialogContent className="admin-scope z-[150] max-h-[85vh] max-w-3xl overflow-y-auto text-ledger-text">
         <DialogHeader><DialogTitle>Etiquetas de peças</DialogTitle><DialogDescription>Argox OS-214 Plus · base 95 × 12 mm · 1 coluna · alça à direita · BOPP / resina</DialogDescription></DialogHeader>
         {query.isPending ? <p>Carregando peças…</p> : query.error ? <div role="alert"><p>Não foi possível carregar as peças.</p><Button variant="outline" onClick={() => void query.refetch()}>Tentar novamente</Button></div> : !items.length ? <p>Sem dados de peças para imprimir.</p> : <>
           <div className="max-h-64 overflow-auto divide-y divide-line">

@@ -1,7 +1,7 @@
 # Roadmap
 ## Limpeza HOMOLOG c — 23/10, 19:35 UTC
 - [x] Origem: bateria de testes da base real rodada às 19:00–19:07 criou 48 cadastros, 18 maletas e depósitos de teste; nenhum movimento no DEP-01.
-- [x] Arquivado (lote homolog-limpeza-20261023c, backup na auditoria): 18 maletas, 3 reservas, 48 cadastros, 3 logins/3 papéis, 4 produtos, 10 variações, 1 imagem, 4 depósitos; recontagem 0 fora do financeiro.
+- [x] Arquivado (lote homolog-limpeza-20261023c, backup na auditoria): 18 maletas, 3 reservas, 48 cadastros, 3 logins/3 papéis, 4 produtos, 10 variações, 1 imagem, 4 depósitos; recontagem 0 fora do financeiro. Lote c2 (19:41, última execução antes da trava): 3 cadastros, 6 maletas, 1 produto, 3 variações, 1 depósito, 1 reserva.
 - [x] Bateria da base real bloqueada sem autorização explícita.
 - [ ] 4 importações de teste concluídas continuam no histórico (sistema protege lote concluído); financeiro de teste preservado por pedido.
 ## Busca, anel e montagem — 23/10, 19:24 UTC

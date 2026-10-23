@@ -1072,6 +1072,13 @@
       "when": 1792783747990,
       "tag": "0152_busca_rapida_e_anel_colaboradora",
       "breakpoints": true
+    },
+    {
+      "idx": 153,
+      "version": "7",
+      "when": 1792784802400,
+      "tag": "0153_remessa_maleta_excluir_trocar",
+      "breakpoints": true
     }
   ]
 }

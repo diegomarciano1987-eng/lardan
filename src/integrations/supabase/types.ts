@@ -18827,6 +18827,14 @@ export type Database = {
         }
         Returns: Json
       }
+      remessa_maleta_excluir: {
+        Args: { _cycle: string; _motivo: string }
+        Returns: Json
+      }
+      remessa_maleta_trocar_consultora: {
+        Args: { _consultora: string; _cycle: string; _motivo: string }
+        Returns: Json
+      }
       remessa_maletas: {
         Args: { _remessa: string }
         Returns: {

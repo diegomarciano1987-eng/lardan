@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchMyRoles } from "@/lib/session";
 import { DESTINO, PORTAS, portaLiberada, type Porta } from "@/lib/portas";
 import { PasswordInput } from "@/components/ui/password-input";
+import { fetchMyCapabilities } from "@/lib/capabilities";
+import { entrarPorCodigo } from "@/lib/colab-acesso.functions";
 
 type Busca = { area?: Porta | undefined };
 
@@ -43,10 +45,13 @@ function EquipePage() {
   const [senha, setSenha] = useState("");
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [modo, setModo] = useState<"codigo" | "email">("codigo");
+  const [codigo, setCodigo] = useState("");
 
   async function seguir(porta: Porta) {
     const roles = await fetchMyRoles().catch(() => []);
-    if (!portaLiberada(porta, roles)) {
+    const caps = porta === "operacao" ? await fetchMyCapabilities().catch(() => []) : [];
+    if (!portaLiberada(porta, roles, caps)) {
       await supabase.auth.signOut();
       setErro("Seu acesso não está liberado para esta área.");
       return;
@@ -68,6 +73,20 @@ function EquipePage() {
     if (!area) return;
     setErro(null);
     setBusy(true);
+    if (area === "operacao" && modo === "codigo") {
+      try {
+        const t = await entrarPorCodigo({ data: { codigo, senha } });
+        const { error: se } = await supabase.auth.setSession(t);
+        if (se) throw se;
+      } catch (err) {
+        setBusy(false);
+        setErro(err instanceof Error && err.message ? err.message : "Não foi possível entrar. Confira o código e a senha.");
+        return;
+      }
+      await seguir(area);
+      setBusy(false);
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
     if (error) {
       setBusy(false);
@@ -122,19 +141,42 @@ function EquipePage() {
           <p className="brand-eyebrow mb-2">Acesso</p>
           <h1 className="mb-8 font-display text-3xl text-foreground">{escolhido.titulo}</h1>
           <form className="space-y-4" onSubmit={entrar}>
+            {area === "operacao" && (
+              <div className="grid grid-cols-2 rounded-full border border-primary/25 p-1" role="tablist" aria-label="Forma de entrar">
+                {(["codigo", "email"] as const).map((m) => (
+                  <button key={m} type="button" role="tab" aria-selected={modo === m}
+                    onClick={() => { setModo(m); setErro(null); }}
+                    className={`min-h-11 rounded-full text-sm ${modo === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+                    {m === "codigo" ? "Entrar com código" : "Entrar com e-mail"}
+                  </button>
+                ))}
+              </div>
+            )}
+            {area === "operacao" && modo === "codigo" ? (
+              <div>
+                <label htmlFor="codigo" className="mb-2 block text-base font-medium text-foreground">Código da colaboradora</label>
+                <input id="codigo" required inputMode="numeric" autoComplete="username" maxLength={8} value={codigo}
+                  onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))} className={inputClass} />
+              </div>
+            ) : (
             <div>
               <label htmlFor="email" className="mb-2 block text-base font-medium text-foreground">E-mail</label>
               <input id="email" type="email" required autoComplete="email" value={email}
                 onChange={(e) => setEmail(e.target.value)} className={inputClass} />
             </div>
+            )}
             <div>
               <label htmlFor="senha" className="mb-2 block text-base font-medium text-foreground">Senha</label>
               <PasswordInput id="senha" required autoComplete="current-password" value={senha}
                 onChange={(e) => setSenha(e.target.value)} className={inputClass} />
             </div>
+            {area === "operacao" && modo === "codigo" ? (
+              <p className="-mt-1 text-sm text-muted-foreground">Esqueceu a senha? Peça ao Daniel uma nova.</p>
+            ) : (
             <Link to="/redefinir-senha" className="-mt-1 flex min-h-12 items-center justify-end text-base text-foreground underline">
               Esqueci minha senha
             </Link>
+            )}
             {erro && <p role="alert" className="rounded-md border border-destructive/40 p-3 text-base text-destructive">⚠ {erro}</p>}
             <button
               type="submit"

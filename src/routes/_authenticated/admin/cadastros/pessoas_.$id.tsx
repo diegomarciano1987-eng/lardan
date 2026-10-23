@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
+import { AcessoColaboradora } from "@/components/admin/acessos/AcessoColaboradora";
 import { VendedoraInternaForm } from "@/components/admin/cadastros/VendedoraInternaForm";
 import { useCapabilities } from "@/lib/capabilities";
 import {
@@ -689,6 +690,9 @@ function FichaPessoa() {
                 </p>
               )}
             </div>
+          </Panel>
+          <Panel title="Login da operação (colaboradora)" flush className="mt-4">
+            <AcessoColaboradora partyId={id} />
           </Panel>
           <Panel title="Ativar consultora e convidar para o Portal da Consultora" flush className="mt-4">
             <div className="max-w-xl space-y-3 p-5">

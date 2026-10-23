@@ -3187,6 +3187,71 @@ export type Database = {
           },
         ]
       }
+      colab_acessos: {
+        Row: {
+          ativo: boolean
+          bloqueado_ate: string | null
+          codigo: string
+          created_at: string
+          criado_por: string | null
+          falhas: number
+          party_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          bloqueado_ate?: string | null
+          codigo: string
+          created_at?: string
+          criado_por?: string | null
+          falhas?: number
+          party_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          bloqueado_ate?: string | null
+          codigo?: string
+          created_at?: string
+          criado_por?: string | null
+          falhas?: number
+          party_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "colab_acessos_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "colab_acessos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "colab_acessos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "colab_acessos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collections: {
         Row: {
           created_at: string
@@ -13123,6 +13188,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_capabilities: {
+        Row: {
+          capability: string
+          created_at: string
+          granted_by: string | null
+          user_id: string
+        }
+        Insert: {
+          capability: string
+          created_at?: string
+          granted_by?: string | null
+          user_id: string
+        }
+        Update: {
+          capability?: string
+          created_at?: string
+          granted_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_capabilities_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_capabilities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_financial_access: {
         Row: {
           enabled: boolean
@@ -14161,6 +14262,31 @@ export type Database = {
         Args: { _actor: string; _desde?: string }
         Returns: Json
       }
+      colab_acesso_ativo_definir: {
+        Args: { _actor: string; _ativo: boolean; _user_id: string }
+        Returns: undefined
+      }
+      colab_acesso_registrar: {
+        Args: {
+          _actor: string
+          _codigo: string
+          _party_id: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      colab_caps_permitidas: { Args: never; Returns: string[] }
+      colab_exigir_master: { Args: { _actor: string }; Returns: undefined }
+      colab_modulos_definir: {
+        Args: {
+          _actor: string
+          _caps: string[]
+          _financeiro: boolean
+          _user_id: string
+        }
+        Returns: string[]
+      }
+      colab_proximo_codigo: { Args: never; Returns: string }
       comissao_faixas_leitura: { Args: never; Returns: Json }
       confirm_stock_reservation: {
         Args: {

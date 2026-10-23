@@ -876,6 +876,13 @@
       "when": 1792713805816,
       "tag": "0124_cpf_unico_na_tela",
       "breakpoints": true
+    },
+    {
+      "idx": 125,
+      "version": "7",
+      "when": 1792762553569,
+      "tag": "0125_0125_venda_pela_cobranca",
+      "breakpoints": true
     }
   ]
 }

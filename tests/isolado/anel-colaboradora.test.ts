@@ -21,7 +21,8 @@ beforeAll(async () => {
   base = String(70000 + Math.floor(Math.random() * 29000));
   const p = await adm.unsafe("insert into products(name,slug,status) values($1,$2,'rascunho') returning id", [`AN TESTE ARO ${base}`, `an-teste-aro-${base}`]);
   produto = String(p[0].id);
-  await adm.unsafe("insert into product_variants(product_id,label,barcode,price_cents,is_default,is_active) values($1,'Único',$2,4500,true,true)", [produto, base]);
+  // o produto já nasce com a variação padrão; ela recebe o código-base
+  await adm.unsafe("update product_variants set barcode=$2, price_cents=4500, is_active=true where product_id=$1 and is_default", [produto, base]);
   const a = await adm.unsafe("insert into parties(kind,display_name,status) values('pessoa',$1,'ativo') returning id", [`Consultora carteira ${base}`]);
   naCarteira = String(a[0].id);
   await adm.unsafe("insert into consultant_profiles(party_id,representative_party_id) values($1,$2)", [naCarteira, rep.partyId]);

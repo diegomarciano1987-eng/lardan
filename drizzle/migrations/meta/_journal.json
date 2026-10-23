@@ -1009,6 +1009,13 @@
       "when": 1792778465853,
       "tag": "0143_colab_catalog_overview_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 144,
+      "version": "7",
+      "when": 1792778663551,
+      "tag": "0144_colab_montagem_tipo_sem_escopo_global",
+      "breakpoints": true
     }
   ]
 }

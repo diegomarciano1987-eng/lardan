@@ -23,7 +23,7 @@ export function AjustesMaleta({ cycleId, consultoraId, representante }: { cycleI
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [busca, setBusca] = React.useState("");
-  const [nova, setNova] = React.useState<string | null>(null);
+  const [nova, setNova] = React.useState<string | undefined>(undefined);
   const [motivo, setMotivo] = React.useState("");
   const [confirmar, setConfirmar] = React.useState(false);
 
@@ -47,7 +47,7 @@ export function AjustesMaleta({ cycleId, consultoraId, representante }: { cycleI
   const opcoes = (consultoras.data ?? []).filter((o) => o.value !== consultoraId);
 
   const feito = () => {
-    setMotivo(""); setNova(null); setConfirmar(false);
+    setMotivo(""); setNova(undefined); setConfirmar(false);
     void qc.invalidateQueries({ queryKey: ["maletas"] });
     void qc.invalidateQueries({ queryKey: ["remessas"] });
   };
@@ -83,7 +83,7 @@ export function AjustesMaleta({ cycleId, consultoraId, representante }: { cycleI
             <span className="text-sm font-semibold text-ledger-text">Trocar consultora</span>
             <SmartSelect value={nova} onChange={setNova} options={opcoes} onSearch={setBusca} loading={consultoras.isFetching}
               searchPlaceholder="Buscar por nome ou CPF" placeholder="Escolher outra consultora da praça" />
-            <button type="button" className="admin-btn admin-btn-primary w-full justify-center" disabled={!nova || ocupado} onClick={() => trocar.mutate(nova)}>
+            <button type="button" className="admin-btn admin-btn-primary w-full justify-center" disabled={!nova || ocupado} onClick={() => trocar.mutate(nova ?? null)}>
               <UsersRound aria-hidden className="size-4" /> Trocar consultora
             </button>
           </div>

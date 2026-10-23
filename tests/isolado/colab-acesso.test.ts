@@ -24,7 +24,7 @@ describe("acesso da colaboradora por código", () => {
     expect((await rpcServico("colab_acesso_registrar", { _user_id: colab.uid, _party_id: colab.partyId, _codigo: cod(1), _actor: estoque.uid })).erro)
       .toContain("Somente o Master");
     expect((await rpcServico("colab_acesso_registrar", { _user_id: semPapel.uid, _party_id: semPapel.partyId, _codigo: cod(2), _actor: master.uid })).erro)
-      .toContain("Colaboradora");
+      .toContain("colaboradora");
     expect((await rpcServico("colab_acesso_registrar", { _user_id: colab.uid, _party_id: colab.partyId, _codigo: cod(1), _actor: master.uid })).erro).toBeNull();
     await adm.unsafe(`insert into public.party_roles (party_id, role) values ($1,'colaborador')`, [semPapel.partyId]);
     expect((await rpcServico("colab_acesso_registrar", { _user_id: semPapel.uid, _party_id: semPapel.partyId, _codigo: cod(1), _actor: master.uid })).erro)

@@ -17,8 +17,9 @@ const OPERACAO: AppRole[] = [
 ] as AppRole[];
 
 /** Papéis que abrem cada porta do sistema. */
-export function portaLiberada(porta: Porta, roles: AppRole[]): boolean {
-  if (porta === "operacao") return roles.some((r) => OPERACAO.includes(r));
+export function portaLiberada(porta: Porta, roles: AppRole[], caps: string[] = []): boolean {
+  // Colaboradora com login por código entra pelos módulos liberados (sem papel de equipe).
+  if (porta === "operacao") return roles.some((r) => OPERACAO.includes(r)) || caps.length > 0;
   if (porta === "consultora") return roles.includes("consultora" as AppRole);
   return roles.includes("representante" as AppRole);
 }

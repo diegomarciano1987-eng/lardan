@@ -4,6 +4,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { fetchMyRoles } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
+import { fetchMyCapabilities } from "@/lib/capabilities";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -18,8 +19,9 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminLayout() {
   const { user } = Route.useRouteContext();
   const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles });
-  if (isLoading) return null;
-  if (!portaLiberada("operacao", roles ?? [])) {
+  const capsQ = useQuery({ queryKey: ["my-capabilities"], queryFn: fetchMyCapabilities });
+  if (isLoading || capsQ.isLoading) return null;
+  if (!portaLiberada("operacao", roles ?? [], capsQ.data ?? [])) {
     // Quem não é da operação vai direto para a própria área, sem tela de bloqueio.
     if (portaLiberada("representante", roles ?? [])) return <Navigate to="/representante" replace />;
     if (portaLiberada("consultora", roles ?? [])) return <Navigate to="/consultora" replace />;

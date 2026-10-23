@@ -9,6 +9,7 @@ import { DateField } from "@/components/premium/DateField";
 import { DateRangeField } from "@/components/premium/DateRangeField";
 import type { DateRange } from "react-day-picker";
 import { useCapabilities } from "@/lib/capabilities";
+import { useColabEscopo } from "@/lib/colab-escopo";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, traduzir } from "@/lib/maletas";
 import { RemessasHistorico } from "@/components/admin/historico/RemessasHistorico";
@@ -20,6 +21,11 @@ export const Route = createFileRoute("/_authenticated/admin/maletas")({
   head: () => ({
     meta: [
       { title: "Remessas — Administração LARDAN" },
+      { name: "description", content: "Remessas e maletas da carteira autorizada LARDAN." },
+      { property: "og:title", content: "Remessas e maletas — LARDAN" },
+      { property: "og:description", content: "Consulta e operação autorizada das remessas por representante." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -39,6 +45,9 @@ async function buscarPracas() {
 }
 
 async function buscarRepresentantes(termo: string) {
+  const { lerColabEscopo } = await import("@/lib/colab-escopo");
+  const escopo = await lerColabEscopo();
+  if (escopo.colaboradora) return escopo.representante ? [{ value: escopo.representante, label: escopo.nome ?? "Representante vinculado" }] : [];
   const { data, error } = await supabase.rpc("list_parties", {
     _limit: 40,
     _offset: 0,
@@ -61,6 +70,7 @@ async function buscarDepositos() {
 }
 
 function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
+  const escopo = useColabEscopo();
   const [aberto, setAberto] = React.useState(false);
   const [praca, setPraca] = React.useState("");
   const [numero, setNumero] = React.useState("");
@@ -69,12 +79,14 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
   const [representante, setRepresentante] = React.useState("");
   const [buscaR, setBuscaR] = React.useState("");
   const [deposito, setDeposito] = React.useState("");
+  React.useEffect(() => { if (escopo.data?.colaboradora) setRepresentante(escopo.data.representante ?? ""); }, [escopo.data]);
 
   const pracas = useQuery({ queryKey: ["remessas", "pracas"], queryFn: buscarPracas, enabled: aberto });
   const reps = useQuery({ queryKey: ["remessas", "reps", buscaR], queryFn: () => buscarRepresentantes(buscaR), enabled: aberto });
   const depositos = useQuery({ queryKey: ["remessas", "depositos"], queryFn: buscarDepositos, enabled: aberto });
   React.useEffect(() => {
-    if (depositos.data?.length === 1 && !deposito) setDeposito(depositos.data[0]!.value);
+    const unico = depositos.data?.length === 1 ? depositos.data[0] : undefined;
+    if (unico && !deposito) setDeposito(unico.value);
   }, [depositos.data, deposito]);
 
   const criar = useMutation({

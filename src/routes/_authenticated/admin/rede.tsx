@@ -26,12 +26,18 @@ import {
 } from "@/lib/rede/consultas";
 import { obterMalha, localizarEnderecos, situacaoDaLocalizacao } from "@/lib/rede/rede.functions";
 import { useCapabilities, can } from "@/lib/capabilities";
+import { useColabEscopo } from "@/lib/colab-escopo";
 
 export const Route = createFileRoute("/_authenticated/admin/rede")({
   component: RedePage,
   head: () => ({
     meta: [
       { title: "Inteligência da Rede — LARDAN Cloud" },
+      { name: "description", content: "Inteligência territorial e histórico da rede autorizada LARDAN." },
+      { property: "og:title", content: "Inteligência da Rede — LARDAN" },
+      { property: "og:description", content: "Indicadores, praças e histórico da carteira autorizada." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -42,6 +48,8 @@ type Aba = "mapa" | "cobertura" | "jflex";
 
 function RedePage() {
   const caps = useCapabilities();
+  const escopo = useColabEscopo();
+  const colab = escopo.data?.colaboradora === true;
   const podeVer = can(caps, "partners.view");
   const podeGerir = can(caps, "partners.manage");
 
@@ -91,13 +99,13 @@ function RedePage() {
   const candidaturas = useQuery({
     queryKey: ["rede-candidaturas", filtros, uf],
     queryFn: () => candidaturasRede(uf ? { ...filtros, uf } : filtros),
-    enabled: podeVer && mostrarCandidaturas,
+    enabled: podeVer && mostrarCandidaturas && escopo.isSuccess && !colab,
   });
 
   const territorio = useQuery({
     queryKey: ["rede-territorio", uf, ibge, filtros],
     queryFn: () => territorioRede(uf, ibge, filtros),
-    enabled: podeVer,
+    enabled: podeVer && escopo.isSuccess && !colab,
   });
 
   const situacao = useQuery({
@@ -250,7 +258,7 @@ function RedePage() {
               onChange={(v) => setCamada(v as Camada)}
             />
           </Campo>
-          <Campo rotulo="Candidaturas do site">
+          {!colab && <Campo rotulo="Candidaturas do site">
             <label className="flex h-10 items-center gap-2 text-sm text-ledger-text">
               <input
                 type="checkbox"
@@ -265,7 +273,7 @@ function RedePage() {
                 </span>
               ) : null}
             </label>
-          </Campo>
+          </Campo>}
           <div className="flex items-end">
             <button
               type="button"

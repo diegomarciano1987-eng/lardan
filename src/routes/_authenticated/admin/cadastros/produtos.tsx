@@ -193,11 +193,14 @@ function ProdutosPage() {
         title="Produtos"
         description="Ficha da peça, variantes vendáveis, imagens e publicação no site."
         actions={
-          can(caps, "product.manage") ? (
+          <>
+          <EtiquetasImprimir label="Imprimir etiquetas" origens={idsPagina.map((productId) => ({ productId }))} />
+          {can(caps, "product.manage") ? (
             <Link to="/admin/cadastros/produtos/novo" className="admin-btn border-champagne">
               <Plus aria-hidden className="size-4" /> Novo produto
             </Link>
-          ) : undefined
+          ) : null}
+          </>
         }
       />
 

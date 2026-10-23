@@ -174,4 +174,4 @@ Provas: docs/lardan/AUDITORIA-FINANCEIRO-NOVE-PONTOS-2026-10-16.md; 243 testes i
 - [ ] Diego importa maletas_status.csv; depois rodar consulta da seção 4
 - [ ] Publicar interface — aguarda aprovação
 
-- [ ] Maleta: quantidade sugerida = média vendida nas 3 últimas maletas +30% (sem histórico: 35)
+- [x] Maleta: quantidade sugerida = média vendida nas 3 últimas maletas +30% (sem histórico: 35)

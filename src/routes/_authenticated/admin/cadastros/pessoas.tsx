@@ -119,7 +119,7 @@ function PessoasPage() {
           cabecalho?.descricao ??
           "Identidade única: a mesma pessoa pode ser candidata, consultora, cliente e colaboradora sem cadastro repetido."
         }
-        actions={<NewRecordPicker />}
+        actions={caps.includes("registry.manage") ? <NewRecordPicker /> : undefined}
       />
 
       <DataTable<Party>

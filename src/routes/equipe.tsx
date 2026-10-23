@@ -4,7 +4,7 @@ import { ArrowLeft, BriefcaseBusiness, Gem, Map } from "lucide-react";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMyRoles } from "@/lib/session";
-import { DESTINO, PORTAS, portaLiberada, type Porta } from "@/lib/portas";
+import { DESTINO, PORTAS, inicioOperacao, portaLiberada, type Porta } from "@/lib/portas";
 import { PasswordInput } from "@/components/ui/password-input";
 import { fetchMyCapabilities } from "@/lib/capabilities";
 import { entrarPorCodigo } from "@/lib/colab-acesso.functions";
@@ -56,7 +56,8 @@ function EquipePage() {
       setErro("Seu acesso não está liberado para esta área.");
       return;
     }
-    void navigate({ to: DESTINO[porta], replace: true });
+    const destino = porta === "operacao" ? inicioOperacao(roles, caps) : DESTINO[porta];
+    void navigate({ to: destino as never, replace: true });
   }
 
   // Já conectado: confere a porta escolhida.

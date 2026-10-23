@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { PartyRoleKind } from "@/lib/registry";
+import { useCapabilities } from "@/lib/capabilities";
 
 type Destino =
   | { tipo: "pessoa"; role?: PartyRoleKind }
@@ -136,6 +137,7 @@ const OPCOES: Opcao[] = [
 export function NewRecordPicker() {
   const [aberto, setAberto] = useState(false);
   const navigate = useNavigate();
+  const caps = useCapabilities();
 
   const grupos = [...new Set(OPCOES.map((o) => o.grupo))];
 
@@ -156,6 +158,9 @@ export function NewRecordPicker() {
       search: { kind: o.destino.tipo, papel: o.destino.role },
     });
   }
+
+  // Só quem pode alterar cadastros vê o botão (o banco também recusa a gravação).
+  if (!caps.includes("registry.manage")) return null;
 
   return (
     <>

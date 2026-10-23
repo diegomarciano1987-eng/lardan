@@ -1,15 +1,16 @@
 # Roadmap
 ## Sete correções autorizadas — 23/10, 17:44 UTC
-- [ ] 1 Botão destacado Imprimir etiquetas na lista de Produtos.
-- [ ] 2 Colaboradora consulta somente Consultoras em Cadastros, com rotas protegidas.
-- [ ] 3 Estoque removido e bloqueado para colaboradora.
-- [ ] 4 Inteligência e histórico restritos ao representante vinculado, no banco.
-- [ ] 5 Remessas, praças e consultoras somente do representante vinculado, no banco.
-- [ ] 6 Limpeza auditada e reversível dos registros comprovados de homologação/teste.
-- [ ] 7 Etiqueta alça à direita: base 95 mm, suporte 100 mm, área esquerda 30 mm no desenho, 12 mm, uma coluna, intervalo 3 mm; testes e sete relatórios.
+- [x] 1 Botão destacado Imprimir etiquetas na lista de Produtos; folha real com 20 etiquetas.
+- [x] 2 Colaboradora consulta somente Consultoras em Cadastros, com rotas protegidas.
+- [x] 3 Estoque removido e bloqueado; motor oficial de montagem preservado, reservas privadas.
+- [x] 4 Inteligência e histórico restritos ao representante vinculado, no banco; sessão real conferida.
+- [x] 5 Remessas, praças e consultoras restritas; nove opções de praça na sessão de Ketllin, 126 remessas históricas de Daniel.
+- [x] 6 Arquivamento reversível: 4 produtos e 32 cadastros HOMOLOG; 36 backups e auditoria.
+- [ ] 6b Logins e registros financeiros/Asaas de testes: aguardam rotina oficial e confirmação das dependências externas; não purgar histórico.
+- [x] 7 Rolo alça à direita: base 95 mm, suporte 100 mm, área esquerda 30 mm, 12 mm, uma coluna, intervalo 3 mm. Sete relatórios em Files e docs/lardan/SETE-CORRECOES-2026-10-23.md; 434 testes isolados + 7 etiquetas, zero falhas, build OK.
 - [ ] Validar impressão física — depende da Argox e leitor na estação; não publicar sem pedido.
 ## Etiquetas Argox — 23/10
-- [x] Impressão pelo navegador, três pistas 25×12 mm, códigos reais sem nova numeração e ajustes por estação.
+- [x] Impressão pelo navegador; formato inicial três pistas substituído pelo novo rolo de uma coluna em 23/10; códigos reais sem nova numeração e ajustes por estação.
 - [x] Acesso na ficha/variantes, lista Produtos, saldos/detalhe Estoque, remessa, maleta e documentos pós-montagem.
 - [x] Seis testes aprovados; conta autorizada abriu folha com brinco real barcode 17942; 20 ações na lista e 20 em estoque; sem erros de navegador.
 - [ ] Impressão física e leitura na Argox local — dependem do computador/rolo da equipe; não publicado.

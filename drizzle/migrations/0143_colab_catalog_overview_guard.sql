@@ -1,0 +1,1 @@
+DO $ddl$ DECLARE d text; BEGIN SELECT pg_get_functiondef('public.catalog_overview()'::regprocedure) INTO d; d:=replace(d,E'begin\n',E'begin\n if public.colab_restrita() then raise exception ''Visão geral de estoque indisponível para colaboradora.'' using errcode=''42501''; end if;\n'); EXECUTE d; END $ddl$;

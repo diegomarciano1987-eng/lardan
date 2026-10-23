@@ -1,0 +1,1 @@
+DO $ddl$ DECLARE d text; BEGIN SELECT pg_get_functiondef('public.variantes_tipo_peca(uuid[])'::regprocedure) INTO d; d:=replace(d,'IF NOT public.kit_scope_all() THEN','IF NOT (public.kit_scope_all() OR (public.colab_restrita() AND public.colab_rep() IS NOT NULL AND public.has_capability(auth.uid(),''kit.manage''))) THEN'); EXECUTE d; END $ddl$;

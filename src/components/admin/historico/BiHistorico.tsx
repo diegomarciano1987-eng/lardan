@@ -27,6 +27,7 @@ import { EmptyState, ErrorState, Panel, Skeleton, formatBRLFromCents, formatInt 
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { DateRangeField } from "@/components/premium/DateRangeField";
 import { cn } from "@/lib/utils";
+import { useColabEscopo } from "@/lib/colab-escopo";
 import { isoDia } from "@/lib/remessas";
 import { redeMensal } from "@/lib/historico-jflex";
 import {
@@ -628,6 +629,8 @@ function Produtos({ recorte }: { recorte: RecorteBi }) {
 // ---------------------------------------------------------------- tela ---
 export function BiHistorico() {
   const f = useRecorte();
+  const escopo = useColabEscopo();
+  const colab = escopo.data?.colaboradora === true;
   const { recorte } = f;
 
   const opcoes = useQuery({ queryKey: ["historico-bi", "opcoes"], queryFn: biOpcoes, staleTime: 10 * 60_000 });
@@ -681,8 +684,8 @@ export function BiHistorico() {
           </label>
           <label className="grid gap-1.5 text-sm">
             <span className="ledger-eyebrow">Representante</span>
-            <SmartSelect value={f.representante} onChange={f.setRepresentante} placeholder="Todos"
-              options={[{ value: "", label: "Todos os representantes" }, ...(opcoes.data?.representantes ?? []).map((x) => ({ value: String(x.codigo), label: x.nome }))]} />
+            <SmartSelect value={colab ? "vinculado" : f.representante} onChange={f.setRepresentante} disabled={colab} placeholder={colab ? "Representante vinculado" : "Todos"}
+              options={colab ? [{ value: "vinculado", label: escopo.data?.nome ?? "Representante vinculado" }] : [{ value: "", label: "Todos os representantes" }, ...(opcoes.data?.representantes ?? []).map((x) => ({ value: String(x.codigo), label: x.nome }))]} />
           </label>
         </div>
       </div>

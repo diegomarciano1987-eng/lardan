@@ -981,6 +981,69 @@
       "when": 1792778049306,
       "tag": "0139_colab_carteira_readers",
       "breakpoints": true
+    },
+    {
+      "idx": 140,
+      "version": "7",
+      "when": 1792778144232,
+      "tag": "0140_colab_carteira_preservar_contratos",
+      "breakpoints": true
+    },
+    {
+      "idx": 141,
+      "version": "7",
+      "when": 1792778314832,
+      "tag": "0141_colab_carteira_leitura_eficiente",
+      "breakpoints": true
+    },
+    {
+      "idx": 142,
+      "version": "7",
+      "when": 1792778363282,
+      "tag": "0142_colab_carteira_avisos_e_ficha",
+      "breakpoints": true
+    },
+    {
+      "idx": 143,
+      "version": "7",
+      "when": 1792778465853,
+      "tag": "0143_colab_catalog_overview_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 144,
+      "version": "7",
+      "when": 1792778663551,
+      "tag": "0144_colab_montagem_tipo_sem_escopo_global",
+      "breakpoints": true
+    },
+    {
+      "idx": 145,
+      "version": "7",
+      "when": 1792778807709,
+      "tag": "0145_colab_catalog_leitura_e_reserva_oficial",
+      "breakpoints": true
+    },
+    {
+      "idx": 146,
+      "version": "7",
+      "when": 1792778927626,
+      "tag": "0146_colab_expedicao_reserva_vinculada",
+      "breakpoints": true
+    },
+    {
+      "idx": 147,
+      "version": "7",
+      "when": 1792779062270,
+      "tag": "0147_colab_reservas_apenas_motor_oficial",
+      "breakpoints": true
+    },
+    {
+      "idx": 148,
+      "version": "7",
+      "when": 1792779103102,
+      "tag": "0148_colab_remessa_identidades_carteira",
+      "breakpoints": true
     }
   ]
 }

@@ -183,6 +183,8 @@ function Linha({ r }: { r: RemessaCard }) {
 
 function RemessasPage() {
   const caps = useCapabilities();
+  const escopo = useColabEscopo();
+  const colab = escopo.data?.colaboradora === true;
   const podeMontar = caps.includes("kit.manage");
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -197,6 +199,7 @@ function RemessasPage() {
   const [remessaAberta, setRemessaAberta] = React.useState<number | null>(null);
   const [periodo, setPeriodo] = React.useState<DateRange | undefined>();
   const [campoData, setCampoData] = React.useState<"emissao" | "acerto">("emissao");
+  React.useEffect(() => { if (escopo.data?.colaboradora) setRep(escopo.data.representante ?? ""); }, [escopo.data]);
   React.useEffect(() => {
     const t = setTimeout(() => setBusca(texto), 300);
     return () => clearTimeout(t);
@@ -215,7 +218,7 @@ function RemessasPage() {
   );
   const temFiltro = !!(texto || praca || rep || periodo || situacao !== "todas");
   function limpar() {
-    setTexto(""); setPraca(""); setRep(""); setPeriodo(undefined); setSituacao("todas");
+    setTexto(""); setPraca(""); setRep(colab ? escopo.data?.representante ?? "" : ""); setPeriodo(undefined); setSituacao("todas");
   }
 
   async function abrirPorQr() {
@@ -268,7 +271,7 @@ function RemessasPage() {
         </button>
       </nav>
 
-      <MaletasNaRua />
+      {escopo.isSuccess && !colab && <MaletasNaRua />}
 
       {fonte === "jflex" ? (
         <RemessasHistorico abrir={remessaAberta} aoAbrir={setRemessaAberta} />
@@ -295,9 +298,9 @@ function RemessasPage() {
           </label>
           <label className="grid gap-1.5 text-sm lg:col-span-4">
             <span className="ledger-eyebrow">Representante</span>
-            <SmartSelect value={rep} onChange={setRep} onSearch={setBuscaRep} loading={reps.isFetching}
-              options={[{ value: "", label: "Todos os representantes" }, ...(reps.data ?? [])]}
-              searchPlaceholder="Buscar representante" placeholder="Todos os representantes" />
+            <SmartSelect value={rep} onChange={setRep} {...(!colab ? { onSearch: setBuscaRep } : {})} loading={reps.isFetching}
+              options={[...(!colab ? [{ value: "", label: "Todos os representantes" }] : []), ...(reps.data ?? [])]}
+              searchPlaceholder="Buscar representante" placeholder={colab ? "Representante vinculado" : "Todos os representantes"} />
           </label>
           <label className="grid gap-1.5 text-sm lg:col-span-2">
             <span className="ledger-eyebrow">Período por</span>

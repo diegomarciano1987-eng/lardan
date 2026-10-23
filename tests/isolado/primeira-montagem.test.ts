@@ -145,6 +145,7 @@ describe("1. cadastro pelo histórico", () => {
 
 describe("2. colaboradora por código monta a maleta", () => {
   test("Master libera o pacote de montagem; a colaboradora não vê custo nem financeiro", async () => {
+    await adm.unsafe(`insert into public.consultant_profiles(party_id,representative_party_id) values ($1,$2) on conflict(party_id) do update set representative_party_id=excluded.representative_party_id`, [colab.partyId, rep.partyId]);
     expect((await rpcServico("colab_acesso_registrar", { _user_id: colab.uid, _party_id: colab.partyId, _codigo: codColab, _actor: master.uid })).erro).toBeNull();
     const esc = Object.fromEntries(COLAB_MODULOS.map((m) => [m.id, PACOTE_MONTAGEM.includes(m.id) ? "alterar" : "nao"])) as Record<string, "alterar" | "nao">;
     const r = await rpcServico<string[]>("colab_modulos_definir", { _user_id: colab.uid, _caps: capsDeEscolha(esc), _financeiro: false, _actor: master.uid });

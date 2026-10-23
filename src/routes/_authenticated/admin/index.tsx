@@ -43,10 +43,10 @@ export const Route = createFileRoute("/_authenticated/admin/")({
   component: VisaoGeral,
   head: () => ({
     meta: [
-      { title: "Inteligência Operacional — Administração LARDAN" },
-      { name: "description", content: "Visão operacional de estoque, finanças e rede LARDAN." },
-      { property: "og:title", content: "Inteligência Operacional — Administração LARDAN" },
-      { property: "og:description", content: "Visão operacional de estoque, finanças e rede LARDAN." },
+      { title: "Visão Geral — Administração LARDAN" },
+      { name: "description", content: "Resumo operacional ou trabalho pessoal conforme o acesso autorizado LARDAN." },
+      { property: "og:title", content: "Visão Geral — Administração LARDAN" },
+      { property: "og:description", content: "Resumo operacional ou trabalho pessoal conforme o acesso autorizado LARDAN." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },

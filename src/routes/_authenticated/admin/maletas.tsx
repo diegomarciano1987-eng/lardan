@@ -83,7 +83,8 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
   React.useEffect(() => { if (escopo.data?.colaboradora) setRepresentante(escopo.data.representante ?? ""); }, [escopo.data]);
 
   const pracas = useQuery({ queryKey: ["remessas", "pracas"], queryFn: buscarPracas, enabled: aberto });
-  const reps = useQuery({ queryKey: ["remessas", "reps", buscaR], queryFn: () => buscarRepresentantes(buscaR), enabled: aberto });
+  const reps = useQuery({ queryKey: ["remessas", "reps", escopo.data?.colaboradora, escopo.data?.representante, buscaR], queryFn: () => buscarRepresentantes(buscaR), enabled: aberto && escopo.isSuccess });
+  const representantes = escopo.data?.colaboradora ? (escopo.data.representante ? [{ value: escopo.data.representante, label: escopo.data.nome ?? "Representante vinculado" }] : []) : reps.data ?? [];
   const depositos = useQuery({ queryKey: ["remessas", "depositos"], queryFn: buscarDepositos, enabled: aberto });
   React.useEffect(() => {
     const unico = depositos.data?.length === 1 ? depositos.data[0] : undefined;
@@ -140,8 +141,8 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
         </label>
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Representante</span>
-          <SmartSelect value={representante} onChange={setRepresentante} options={reps.data ?? []} onSearch={setBuscaR}
-            loading={reps.isFetching} searchPlaceholder="Buscar representante" placeholder="Entrega direta" />
+          <SmartSelect value={escopo.data?.colaboradora ? escopo.data.representante ?? "" : representante} onChange={setRepresentante} options={representantes} {...(!escopo.data?.colaboradora ? { onSearch: setBuscaR } : {})}
+            loading={reps.isFetching} searchPlaceholder="Buscar representante" placeholder={escopo.data?.colaboradora ? "Sem representante vinculado" : "Entrega direta"} />
         </label>
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Depósito de origem</span>
@@ -207,7 +208,8 @@ function RemessasPage() {
   }, [texto]);
 
   const pracas = useQuery({ queryKey: ["remessas", "pracas"], queryFn: buscarPracas });
-  const reps = useQuery({ queryKey: ["remessas", "reps", buscaRep], queryFn: () => buscarRepresentantes(buscaRep) });
+  const reps = useQuery({ queryKey: ["remessas", "reps", colab, escopo.data?.representante, buscaRep], queryFn: () => buscarRepresentantes(buscaRep), enabled: escopo.isSuccess });
+  const representantes = colab ? (escopo.data?.representante ? [{ value: escopo.data.representante, label: escopo.data.nome ?? "Representante vinculado" }] : []) : reps.data ?? [];
   const filtros = {
     busca, status: situacao, praca, representante: rep,
     de: isoDia(periodo?.from), ate: isoDia(periodo?.to ?? periodo?.from), campoData,
@@ -293,8 +295,8 @@ function RemessasPage() {
           </label>
           <label className="grid gap-1.5 text-sm lg:col-span-4">
             <span className="ledger-eyebrow">Representante</span>
-            <SmartSelect value={rep} onChange={setRep} {...(!colab ? { onSearch: setBuscaRep } : {})} loading={reps.isFetching}
-              options={[...(!colab ? [{ value: "", label: "Todos os representantes" }] : []), ...(reps.data ?? [])]}
+            <SmartSelect value={colab ? escopo.data?.representante ?? "" : rep} onChange={setRep} {...(!colab ? { onSearch: setBuscaRep } : {})} loading={reps.isFetching}
+              options={[...(!colab ? [{ value: "", label: "Todos os representantes" }] : []), ...representantes]}
               searchPlaceholder="Buscar representante" placeholder={colab ? "Representante vinculado" : "Todos os representantes"} />
           </label>
           <label className="grid gap-1.5 text-sm lg:col-span-2">

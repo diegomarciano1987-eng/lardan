@@ -22,7 +22,7 @@ export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; po
         rep: perfil.data?.representative_party_id ?? "",
         praca: perfil.data?.praca_id ?? "",
         reps: ((reps.data ?? []) as unknown as Rep[]).map((r) => ({
-          value: r.party_id, label: r.parties.display_name ?? "Representante", hint: r.parties.code ?? undefined,
+          value: r.party_id, label: r.parties.display_name ?? "Representante", hint: r.parties.code ?? "",
         })),
         pracas: (pracas.data ?? []).map((p) => ({ value: p.id, label: `${p.codigo} — ${p.nome}` })),
       };
@@ -42,7 +42,10 @@ export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; po
       { onConflict: "party_id" },
     );
     setSalvando(false);
-    if (error) return toast.error("Não foi possível salvar o vínculo.", { description: error.message });
+    if (error) {
+      toast.error("Não foi possível salvar o vínculo.", { description: error.message });
+      return;
+    }
     toast.success("Vínculo da consultora salvo.");
     await qc.invalidateQueries({ queryKey: ["vinculo-consultora", partyId] });
     await qc.invalidateQueries({ queryKey: ["party", partyId] });

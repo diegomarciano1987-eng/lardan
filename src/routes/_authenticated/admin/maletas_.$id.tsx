@@ -9,7 +9,7 @@ import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
 import { ConferenciaMaleta } from "@/components/admin/maletas/ConferenciaMaleta";
 import { SugestaoMontagem } from "@/components/admin/historico/SugestaoMontagem";
 import { toast } from "sonner";
-import QRCode from "qrcode";
+import { EtiquetaMaleta } from "@/components/admin/maletas/EtiquetaMaleta";
 import {
   EmptyState,
   ErrorState,
@@ -55,16 +55,6 @@ export const Route = createFileRoute("/_authenticated/admin/maletas_/$id")({
 });
 
 const TOM = { neutro: "neutral", aviso: "warning", ok: "success", erro: "danger" } as const;
-
-function QrMaleta({ token }: { token: string }) {
-  const [url, setUrl] = React.useState<string | null>(null);
-  const alvo = `${typeof window === "undefined" ? "" : window.location.origin}/admin/maletas?qr=${token}`;
-  React.useEffect(() => {
-    void QRCode.toDataURL(alvo, { margin: 1, width: 320 }).then(setUrl).catch(() => setUrl(null));
-  }, [alvo]);
-  if (!url) return <div className="size-40 rounded-lg bg-surface-muted" aria-hidden />;
-  return <img src={url} alt="QR Code da maleta" className="size-40 rounded-lg bg-white p-2" />;
-}
 
 function MaletaFicha() {
   const { id } = Route.useParams();
@@ -351,7 +341,7 @@ function MaletaFicha() {
           )}
           <Panel title="Identificação">
             <div className="flex flex-col items-center gap-3">
-              <QrMaleta token={d.maleta.qr_token} />
+              <EtiquetaMaleta cycleId={id} preview />
               <p className="text-center text-xs text-ledger-muted">
                 O código abre a maleta dentro do sistema, para quem tem permissão. Não expõe composição,
                 pessoas nem valores a quem não está autenticado.

@@ -23,6 +23,8 @@ import { useCapabilities } from "@/lib/capabilities";
 import { fetchFinOverviewPeriodo } from "@/lib/financeiro";
 
 import { VisaoGeralPainel } from "@/components/admin/VisaoGeralPainel";
+import { VisaoGeralColaboradora } from "@/components/admin/VisaoGeralColaboradora";
+import { useColabEscopo } from "@/lib/colab-escopo";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import {
   PageHeader,
@@ -107,6 +109,13 @@ const SHORTCUTS: { label: string; icon: LucideIcon; module: string; to?: string 
 ];
 
 function VisaoGeral() {
+  const escopo = useColabEscopo();
+  if (escopo.isPending) return <Skeleton className="h-40" />;
+  if (escopo.isError) return <ErrorState message="Não foi possível conferir seu acesso." onRetry={() => void escopo.refetch()} />;
+  return escopo.data?.colaboradora ? <VisaoGeralColaboradora /> : <VisaoGeralAdministrativa />;
+}
+
+function VisaoGeralAdministrativa() {
   const queryClient = useQueryClient();
   const roles = useAdminRoles();
   const caps = useCapabilities();

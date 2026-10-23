@@ -1,11 +1,12 @@
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
+import { EtiquetaMaleta } from "./EtiquetaMaleta";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Sparkles, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { metasMontagem, type MetasMontagem } from "@/lib/historico-jflex";
-import { brl, definirItem, traduzir, type ItemComposicao } from "@/lib/maletas";
+import { brl, operarMontagem, traduzir, type ItemComposicao } from "@/lib/maletas";
 import {
   PARAMETROS_PADRAO,
   TIPO_PECA_LABEL,
@@ -351,9 +352,10 @@ export function MontagemLeitor({
     setLeituras((a) => [{ ...l, id: crypto.randomUUID(), hora: new Date().toLocaleTimeString("pt-BR") }, ...a].slice(0, 40));
   }
 
-  async function ajustar(variantId: string, nome: string, delta: number, preco = 0, sku: string | null = null) {
-    const nova = Math.max(0, (qtd.current[variantId] ?? 0) + delta);
-    await definirItem(cycleId, variantId, nova);
+  async function ajustar(variantId: string, nome: string, delta: number, preco = 0, sku: string | null = null, origem: "bipagem" | "manual" | "retirada" = "retirada") {
+    const result = await operarMontagem(cycleId, variantId, delta, origem, crypto.randomUUID());
+    const nova = result.quantidade;
+    void qc.invalidateQueries({ queryKey: ["montagem-pessoal"] });
     qtd.current[variantId] = nova;
     setItens((m) => {
       const n = { ...m };
@@ -380,7 +382,7 @@ export function MontagemLeitor({
     }
     const nome = [r.produto, r.variante].filter(Boolean).join(" · ");
     try {
-      await ajustar(r.variant_id, nome, 1, r.preco_cents ?? 0, cod);
+      await ajustar(r.variant_id, nome, 1, r.preco_cents ?? 0, cod, "bipagem");
       apito(true);
       setNesta((n) => n + 1);
       const extra = [
@@ -675,6 +677,7 @@ export function MontagemLeitor({
               <p className="text-sm text-ledger-muted">soma do preço de venda das peças</p>
             </div>
             <div className="ledger-panel p-5">
+              <EtiquetaMaleta cycleId={cycleId} />
               <p className="ledger-eyebrow mb-2">Composição</p>
               {lista.length === 0 ? (
                 <p className="text-sm text-ledger-muted">Sem dados.</p>

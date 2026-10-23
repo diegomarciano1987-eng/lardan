@@ -225,7 +225,8 @@ function RemessasPage() {
     const bruto = qr.trim();
     const token = (/[?&]qr=([^&#\s]+)/.exec(bruto)?.[1] ?? bruto.split("/").pop() ?? "").trim();
     if (!token) return;
-    const { data, error } = await supabase.from("kits").select("id").eq("qr_token", token).maybeSingle();
+    const { data: resolved, error } = await supabase.rpc("kit_identificacao_buscar", { _codigo: token });
+    const data = resolved ? { id: resolved } : null;
     if (error || !data) {
       toast.error("Maleta não encontrada para este código.");
       return;

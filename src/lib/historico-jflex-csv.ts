@@ -71,6 +71,10 @@ export const ARQUIVOS_HISTORICO = [
   { tipo: "acertos_praca", arquivo: "acertos_praca.csv", rotulo: "Acertos de praça", colunas: ["codigo", "praca", "data"] },
   { tipo: "acertos_consultora", arquivo: "acertos_consultora.csv", rotulo: "Acertos das consultoras (valor da venda)", colunas: ["remessa", "codcli", "valor", "data"] },
   { tipo: "maletas_status", arquivo: "maletas_status.csv", rotulo: "Situação das maletas (status do SmallData)", colunas: ["remessa", "codcli", "status", "data"] },
+  // 0149: financeiro de cada consultora (sem dado pessoal): como pagou cada acerto, fiados e pagamentos
+  { tipo: "cobrancas", arquivo: "cobrancas.csv", rotulo: "Cobranças dos acertos (formas de pagamento)", colunas: ["chave", "codcli", "tipo", "data", "total_pago"] },
+  { tipo: "fiados", arquivo: "fiados.csv", rotulo: "Fiados (parcelas abertas e quitadas)", colunas: ["id", "codcli", "vencimento", "status", "valor"] },
+  { tipo: "pagamentos", arquivo: "pagamentos.csv", rotulo: "Pagamentos (boleto, depósito, cartão, cheque)", colunas: ["origem", "id", "codcli", "valor"] },
 ] as const;
 
 export type TipoHistorico = (typeof ARQUIVOS_HISTORICO)[number]["tipo"];

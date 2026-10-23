@@ -2,6 +2,7 @@ import { FotoPeca } from "@/components/FotoPeca";
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AcoesMaletaRua } from "@/components/admin/maletas/AcoesMaletaRua";
 import { CheckCircle2, ClipboardCheck, FileText, Printer, ScanBarcode, Send, Truck } from "lucide-react";
 import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
 import { ConferenciaMaleta } from "@/components/admin/maletas/ConferenciaMaleta";
@@ -338,6 +339,9 @@ function MaletaFicha() {
         </div>
 
         <div className="min-w-0 space-y-6">
+          {(podeMontar || caps.includes("collection.operate") || caps.includes("finance.receivable.manage")) && (
+            <AcoesMaletaRua cycleId={id} status={d.ciclo.status} temConsultora={!!d.ciclo.consultora_party_id} />
+          )}
           <Panel title="Identificação">
             <div className="flex flex-col items-center gap-3">
               <QrMaleta token={d.maleta.qr_token} />

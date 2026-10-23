@@ -133,6 +133,13 @@ export type Database = {
             foreignKeyName: "access_invites_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_invites_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -508,6 +515,13 @@ export type Database = {
             foreignKeyName: "asaas_charge_intents_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_charge_intents_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -775,6 +789,13 @@ export type Database = {
             foreignKeyName: "asaas_charges_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_charges_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -843,6 +864,13 @@ export type Database = {
             foreignKeyName: "asaas_customer_leases_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_customer_leases_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -904,6 +932,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "asaas_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_customers_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -1299,6 +1334,13 @@ export type Database = {
             foreignKeyName: "asaas_import_stage_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_import_stage_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -1455,6 +1497,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "award_grants_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "award_grants_party_id_fkey"
             columns: ["party_id"]
@@ -1618,6 +1667,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "business_entities_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "business_entities_party_id_fkey"
             columns: ["party_id"]
@@ -2355,6 +2411,13 @@ export type Database = {
             foreignKeyName: "cob_casos_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: true
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_casos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -2425,6 +2488,13 @@ export type Database = {
             columns: ["installment_id"]
             isOneToOne: false
             referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_comprovantes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -2534,6 +2604,13 @@ export type Database = {
             foreignKeyName: "cob_fiado_linhas_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_fiado_linhas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -2549,6 +2626,20 @@ export type Database = {
             columns: ["praca_id"]
             isOneToOne: false
             referencedRelation: "cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_fiado_linhas_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_fiado_linhas_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -2620,6 +2711,13 @@ export type Database = {
             foreignKeyName: "cob_interacoes_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_interacoes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -2673,6 +2771,13 @@ export type Database = {
           vara?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "cob_judicial_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cob_judicial_party_id_fkey"
             columns: ["party_id"]
@@ -2757,6 +2862,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "cob_judicial_acordos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cob_judicial_acordos_party_id_fkey"
             columns: ["party_id"]
@@ -2880,6 +2992,13 @@ export type Database = {
             foreignKeyName: "cob_judicial_docs_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_judicial_docs_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -2963,6 +3082,13 @@ export type Database = {
           valor_cents?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "cob_promessas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cob_promessas_party_id_fkey"
             columns: ["party_id"]
@@ -3106,6 +3232,13 @@ export type Database = {
             foreignKeyName: "cob_simulacoes_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_simulacoes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -3175,6 +3308,13 @@ export type Database = {
             foreignKeyName: "cob_tarefas_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_tarefas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -3227,6 +3367,13 @@ export type Database = {
             columns: ["criado_por"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "colab_acessos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -3431,6 +3578,13 @@ export type Database = {
             foreignKeyName: "consultant_client_contacts_consultora_party_id_fkey"
             columns: ["consultora_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_client_contacts_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -3547,6 +3701,13 @@ export type Database = {
             foreignKeyName: "consultant_clients_consultora_party_id_fkey"
             columns: ["consultora_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_clients_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -3658,6 +3819,13 @@ export type Database = {
             foreignKeyName: "consultant_profiles_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: true
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -3676,6 +3844,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "consultant_profiles_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "consultant_profiles_representative_party_id_fkey"
             columns: ["representative_party_id"]
             isOneToOne: false
@@ -3688,6 +3870,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_sponsor_party_id_fkey"
+            columns: ["sponsor_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "consultant_profiles_sponsor_party_id_fkey"
@@ -3757,6 +3946,13 @@ export type Database = {
             columns: ["avatar_media_id"]
             isOneToOne: false
             referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_showcases_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -3913,6 +4109,13 @@ export type Database = {
             foreignKeyName: "consultora_pos_venda_consultora_party_id_fkey"
             columns: ["consultora_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_pos_venda_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -4013,6 +4216,13 @@ export type Database = {
             foreignKeyName: "consultoras_vinculo_log_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultoras_vinculo_log_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -4060,6 +4270,13 @@ export type Database = {
           value_norm?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contact_points_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contact_points_party_id_fkey"
             columns: ["party_id"]
@@ -4189,6 +4406,13 @@ export type Database = {
             foreignKeyName: "cost_centers_responsavel_party_id_fkey"
             columns: ["responsavel_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_centers_responsavel_party_id_fkey"
+            columns: ["responsavel_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -4287,6 +4511,13 @@ export type Database = {
             foreignKeyName: "external_data_applications_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_data_applications_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -4336,6 +4567,13 @@ export type Database = {
             columns: ["financial_account_id"]
             isOneToOne: false
             referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_caixa_fatias_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -4550,6 +4788,13 @@ export type Database = {
             foreignKeyName: "fin_cartoes_emissor_party_id_fkey"
             columns: ["emissor_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cartoes_emissor_party_id_fkey"
+            columns: ["emissor_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -4679,6 +4924,13 @@ export type Database = {
             foreignKeyName: "fin_cheques_recebido_de_party_id_fkey"
             columns: ["recebido_de_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_cheques_recebido_de_party_id_fkey"
+            columns: ["recebido_de_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -4688,6 +4940,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "fin_cheques_repassado_para_party_id_fkey"
+            columns: ["repassado_para_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "fin_cheques_repassado_para_party_id_fkey"
@@ -6222,6 +6481,13 @@ export type Database = {
             foreignKeyName: "financial_titles_pagador_party_id_fkey"
             columns: ["pagador_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_titles_pagador_party_id_fkey"
+            columns: ["pagador_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -6231,6 +6497,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "financial_titles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "financial_titles_party_id_fkey"
@@ -6489,6 +6762,13 @@ export type Database = {
             foreignKeyName: "fiscal_documents_custodian_party_id_fkey"
             columns: ["custodian_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_documents_custodian_party_id_fkey"
+            columns: ["custodian_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -6503,7 +6783,21 @@ export type Database = {
             foreignKeyName: "fiscal_documents_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_documents_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
             referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_documents_debtor_party_id_fkey"
+            columns: ["debtor_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -6539,6 +6833,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_documents_recipient_party_id_fkey"
+            columns: ["recipient_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -6638,6 +6939,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fiscal_focus_envios_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fiscal_focus_envios_party_id_fkey"
             columns: ["party_id"]
@@ -7571,7 +7879,21 @@ export type Database = {
             foreignKeyName: "kit_acceptances_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_acceptances_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
             referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_acceptances_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -7652,6 +7974,13 @@ export type Database = {
           variant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "kit_balances_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "kit_balances_cycle_id_fkey"
             columns: ["cycle_id"]
@@ -7756,6 +8085,13 @@ export type Database = {
             foreignKeyName: "kit_compositions_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_compositions_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
             referencedRelation: "kit_cycles"
             referencedColumns: ["id"]
           },
@@ -7855,6 +8191,13 @@ export type Database = {
             foreignKeyName: "kit_cycles_consultora_party_id_fkey"
             columns: ["consultora_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -7870,6 +8213,13 @@ export type Database = {
             columns: ["current_location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_custodian_party_id_fkey"
+            columns: ["custodian_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -7904,7 +8254,21 @@ export type Database = {
             foreignKeyName: "kit_cycles_remessa_id_fkey"
             columns: ["remessa_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
             referencedRelation: "remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -7949,6 +8313,13 @@ export type Database = {
           variant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "kit_divergencia_fotos_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "kit_divergencia_fotos_cycle_id_fkey"
             columns: ["cycle_id"]
@@ -8093,6 +8464,13 @@ export type Database = {
             foreignKeyName: "kit_entradas_consultora_party_id_fkey"
             columns: ["consultora_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_entradas_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -8147,6 +8525,13 @@ export type Database = {
           to_status?: Database["public"]["Enums"]["kit_status"] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "kit_events_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "kit_events_cycle_id_fkey"
             columns: ["cycle_id"]
@@ -8304,6 +8689,13 @@ export type Database = {
             foreignKeyName: "kit_movements_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movements_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
             referencedRelation: "kit_cycles"
             referencedColumns: ["id"]
           },
@@ -8312,6 +8704,13 @@ export type Database = {
             columns: ["from_location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movements_from_party_id_fkey"
+            columns: ["from_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -8340,6 +8739,13 @@ export type Database = {
             columns: ["to_location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_movements_to_party_id_fkey"
+            columns: ["to_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -8449,6 +8855,13 @@ export type Database = {
             foreignKeyName: "kit_signature_requests_consultora_party_id_fkey"
             columns: ["consultora_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_signature_requests_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -8458,6 +8871,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_signature_requests_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "kit_signature_requests_cycle_id_fkey"
@@ -8543,6 +8963,13 @@ export type Database = {
             foreignKeyName: "kit_transfers_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_transfers_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
             referencedRelation: "kit_cycles"
             referencedColumns: ["id"]
           },
@@ -8551,6 +8978,13 @@ export type Database = {
             columns: ["from_location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_transfers_from_party_id_fkey"
+            columns: ["from_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -8572,6 +9006,13 @@ export type Database = {
             columns: ["to_location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_transfers_to_party_id_fkey"
+            columns: ["to_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -8899,6 +9340,13 @@ export type Database = {
             foreignKeyName: "leads_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -8913,6 +9361,13 @@ export type Database = {
             foreignKeyName: "leads_referred_by_party_id_fkey"
             columns: ["referred_by_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_referred_by_party_id_fkey"
+            columns: ["referred_by_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -8922,6 +9377,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "leads_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "leads_representante_party_id_fkey"
@@ -9167,6 +9629,13 @@ export type Database = {
           vinculo?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "legado_consultoras_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "legado_consultoras_party_id_fkey"
             columns: ["party_id"]
@@ -9516,6 +9985,13 @@ export type Database = {
             referencedRelation: "cob_pracas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "legado_pracas_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_cob_pracas"
+            referencedColumns: ["id"]
+          },
         ]
       }
       legado_produtos: {
@@ -9643,6 +10119,13 @@ export type Database = {
           vinculo?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "legado_representantes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "legado_representantes_party_id_fkey"
             columns: ["party_id"]
@@ -9781,7 +10264,21 @@ export type Database = {
             foreignKeyName: "maletas_perdidas_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: true
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maletas_perdidas_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: true
             referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maletas_perdidas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -10124,6 +10621,13 @@ export type Database = {
             foreignKeyName: "party_addresses_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_addresses_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -10169,6 +10673,13 @@ export type Database = {
             foreignKeyName: "party_codigo_historico_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_codigo_historico_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -10208,6 +10719,13 @@ export type Database = {
             foreignKeyName: "party_codigos_legados_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_codigos_legados_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -10243,6 +10761,13 @@ export type Database = {
           party_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "party_links_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "party_links_party_id_fkey"
             columns: ["party_id"]
@@ -10301,6 +10826,13 @@ export type Database = {
             foreignKeyName: "party_roles_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_roles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -10352,6 +10884,13 @@ export type Database = {
             foreignKeyName: "party_unificacoes_canonica_id_fkey"
             columns: ["canonica_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_unificacoes_canonica_id_fkey"
+            columns: ["canonica_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -10361,6 +10900,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "party_unificacoes_duplicada_id_fkey"
+            columns: ["duplicada_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "party_unificacoes_duplicada_id_fkey"
@@ -10551,6 +11097,13 @@ export type Database = {
             columns: ["criado_por"]
             isOneToOne: false
             referencedRelation: "pdv_membros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdv_clientes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -11887,6 +12440,13 @@ export type Database = {
             foreignKeyName: "profiles_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -12135,7 +12695,21 @@ export type Database = {
             foreignKeyName: "referral_commissions_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: true
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: true
             referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_indicada_party_id_fkey"
+            columns: ["indicada_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -12151,6 +12725,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_sponsor_party_id_fkey"
+            columns: ["sponsor_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "referral_commissions_sponsor_party_id_fkey"
@@ -12308,6 +12889,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "remessas_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessas_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "remessas_representante_party_id_fkey"
             columns: ["representante_party_id"]
             isOneToOne: false
@@ -12364,6 +12959,13 @@ export type Database = {
             foreignKeyName: "rep_crm_cards_rep_party_id_fkey"
             columns: ["rep_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_crm_cards_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -12399,6 +13001,13 @@ export type Database = {
           rep_party_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "rep_crm_etapas_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "rep_crm_etapas_rep_party_id_fkey"
             columns: ["rep_party_id"]
@@ -12512,6 +13121,13 @@ export type Database = {
           variant_label?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "sales_order_items_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sales_order_items_cycle_id_fkey"
             columns: ["cycle_id"]
@@ -12659,6 +13275,13 @@ export type Database = {
             foreignKeyName: "sales_orders_consultora_party_id_fkey"
             columns: ["consultora_party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -12668,6 +13291,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "sales_orders_customer_party_id_fkey"
+            columns: ["customer_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "sales_orders_customer_party_id_fkey"
@@ -12688,6 +13318,13 @@ export type Database = {
             columns: ["pay_installment_id"]
             isOneToOne: false
             referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_orders_pay_party_id_fkey"
+            columns: ["pay_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
             referencedColumns: ["id"]
           },
           {
@@ -12785,6 +13422,13 @@ export type Database = {
             foreignKeyName: "showcase_design_versions_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "showcase_design_versions_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -12827,6 +13471,13 @@ export type Database = {
             foreignKeyName: "showcase_illustrations_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "showcase_illustrations_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -12863,6 +13514,13 @@ export type Database = {
           slug?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "showcase_slug_history_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "showcase_slug_history_party_id_fkey"
             columns: ["party_id"]
@@ -13209,6 +13867,13 @@ export type Database = {
             foreignKeyName: "stock_reservations_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -13288,6 +13953,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "suppliers_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "suppliers_party_id_fkey"
             columns: ["party_id"]
@@ -13672,6 +14344,13 @@ export type Database = {
             foreignKeyName: "vendedora_profiles_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: true
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendedora_profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
             referencedRelation: "parties"
             referencedColumns: ["id"]
           },
@@ -13693,6 +14372,1430 @@ export type Database = {
       }
     }
     Views: {
+      colab_v_cob_pracas: {
+        Row: {
+          ativo: boolean | null
+          codigo: number | null
+          created_at: string | null
+          id: string | null
+          nome: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo?: number | null
+          created_at?: string | null
+          id?: string | null
+          nome?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: number | null
+          created_at?: string | null
+          id?: string | null
+          nome?: string | null
+        }
+        Relationships: []
+      }
+      colab_v_consultant_profiles: {
+        Row: {
+          audience: string | null
+          availability: string | null
+          bank_info: string | null
+          block_reason: string | null
+          created_at: string | null
+          credit_limit_cents: number | null
+          cycle: string | null
+          experience: string | null
+          financial_status: string | null
+          goal_cents: number | null
+          joined_at: string | null
+          level: string | null
+          origin: string | null
+          party_id: string | null
+          pix_holder: string | null
+          pix_holder_doc: string | null
+          pix_key: string | null
+          pix_key_type: string | null
+          praca_id: string | null
+          referral_code: string | null
+          region: string | null
+          representative_party_id: string | null
+          restricted_notes: string | null
+          sale_profile: string | null
+          sponsor_origin: string | null
+          sponsor_party_id: string | null
+          sponsor_set_at: string | null
+          updated_at: string | null
+          wallet: string | null
+        }
+        Insert: {
+          audience?: string | null
+          availability?: string | null
+          bank_info?: string | null
+          block_reason?: string | null
+          created_at?: string | null
+          credit_limit_cents?: number | null
+          cycle?: string | null
+          experience?: string | null
+          financial_status?: string | null
+          goal_cents?: number | null
+          joined_at?: string | null
+          level?: string | null
+          origin?: string | null
+          party_id?: string | null
+          pix_holder?: string | null
+          pix_holder_doc?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          praca_id?: string | null
+          referral_code?: string | null
+          region?: string | null
+          representative_party_id?: string | null
+          restricted_notes?: string | null
+          sale_profile?: string | null
+          sponsor_origin?: string | null
+          sponsor_party_id?: string | null
+          sponsor_set_at?: string | null
+          updated_at?: string | null
+          wallet?: string | null
+        }
+        Update: {
+          audience?: string | null
+          availability?: string | null
+          bank_info?: string | null
+          block_reason?: string | null
+          created_at?: string | null
+          credit_limit_cents?: number | null
+          cycle?: string | null
+          experience?: string | null
+          financial_status?: string | null
+          goal_cents?: number | null
+          joined_at?: string | null
+          level?: string | null
+          origin?: string | null
+          party_id?: string | null
+          pix_holder?: string | null
+          pix_holder_doc?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          praca_id?: string | null
+          referral_code?: string | null
+          region?: string | null
+          representative_party_id?: string | null
+          restricted_notes?: string | null
+          sale_profile?: string | null
+          sponsor_origin?: string | null
+          sponsor_party_id?: string | null
+          sponsor_set_at?: string | null
+          updated_at?: string | null
+          wallet?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_sponsor_party_id_fkey"
+            columns: ["sponsor_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_sponsor_party_id_fkey"
+            columns: ["sponsor_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_profiles_sponsor_party_id_fkey"
+            columns: ["sponsor_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      colab_v_contact_points: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_primary: boolean | null
+          kind: Database["public"]["Enums"]["contact_kind"] | null
+          label: string | null
+          party_id: string | null
+          updated_at: string | null
+          value: string | null
+          value_norm: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          kind?: Database["public"]["Enums"]["contact_kind"] | null
+          label?: string | null
+          party_id?: string | null
+          updated_at?: string | null
+          value?: string | null
+          value_norm?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          kind?: Database["public"]["Enums"]["contact_kind"] | null
+          label?: string | null
+          party_id?: string | null
+          updated_at?: string | null
+          value?: string | null
+          value_norm?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_points_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_points_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_points_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      colab_v_kit_cycles: {
+        Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          closed_at: string | null
+          consultora_location_id: string | null
+          consultora_party_id: string | null
+          created_at: string | null
+          created_by: string | null
+          current_location_id: string | null
+          custodian_party_id: string | null
+          cycle_no: number | null
+          due_at: string | null
+          id: string | null
+          kit_id: string | null
+          notes: string | null
+          origin_location_id: string | null
+          quantity_total: number | null
+          received_at: string | null
+          reference_total_cents: number | null
+          remessa_id: string | null
+          representante_party_id: string | null
+          settlement_started_at: string | null
+          shipped_at: string | null
+          status: Database["public"]["Enums"]["kit_status"] | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          closed_at?: string | null
+          consultora_location_id?: string | null
+          consultora_party_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_location_id?: string | null
+          custodian_party_id?: string | null
+          cycle_no?: number | null
+          due_at?: string | null
+          id?: string | null
+          kit_id?: string | null
+          notes?: string | null
+          origin_location_id?: string | null
+          quantity_total?: number | null
+          received_at?: string | null
+          reference_total_cents?: number | null
+          remessa_id?: string | null
+          representante_party_id?: string | null
+          settlement_started_at?: string | null
+          shipped_at?: string | null
+          status?: Database["public"]["Enums"]["kit_status"] | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          closed_at?: string | null
+          consultora_location_id?: string | null
+          consultora_party_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_location_id?: string | null
+          custodian_party_id?: string | null
+          cycle_no?: number | null
+          due_at?: string | null
+          id?: string | null
+          kit_id?: string | null
+          notes?: string | null
+          origin_location_id?: string | null
+          quantity_total?: number | null
+          received_at?: string | null
+          reference_total_cents?: number | null
+          remessa_id?: string | null
+          representante_party_id?: string | null
+          settlement_started_at?: string | null
+          shipped_at?: string | null
+          status?: Database["public"]["Enums"]["kit_status"] | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_cycles_consultora_location_id_fkey"
+            columns: ["consultora_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_current_location_id_fkey"
+            columns: ["current_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_custodian_party_id_fkey"
+            columns: ["custodian_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_custodian_party_id_fkey"
+            columns: ["custodian_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_custodian_party_id_fkey"
+            columns: ["custodian_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_origin_location_id_fkey"
+            columns: ["origin_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_cycles_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      colab_v_legado_acertos_consultora: {
+        Row: {
+          atualizado_em: string | null
+          boleto_cents: number | null
+          cartao_cents: number | null
+          cheque_cents: number | null
+          codcli: number | null
+          data: string | null
+          dinheiro_cents: number | null
+          fonte: string | null
+          prazo_cents: number | null
+          remessa: number | null
+          tipo: string | null
+          valor_cents: number | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          boleto_cents?: number | null
+          cartao_cents?: number | null
+          cheque_cents?: number | null
+          codcli?: number | null
+          data?: string | null
+          dinheiro_cents?: number | null
+          fonte?: string | null
+          prazo_cents?: number | null
+          remessa?: number | null
+          tipo?: string | null
+          valor_cents?: number | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          boleto_cents?: number | null
+          cartao_cents?: number | null
+          cheque_cents?: number | null
+          codcli?: number | null
+          data?: string | null
+          dinheiro_cents?: number | null
+          fonte?: string | null
+          prazo_cents?: number | null
+          remessa?: number | null
+          tipo?: string | null
+          valor_cents?: number | null
+        }
+        Relationships: []
+      }
+      colab_v_legado_acertos_praca: {
+        Row: {
+          boleto_cents: number | null
+          cartao_cents: number | null
+          cheque_cents: number | null
+          codigo: number | null
+          comissao_pct: number | null
+          consultoras_fiado: number | null
+          consultoras_venda: number | null
+          data: string | null
+          deposito_cents: number | null
+          dinheiro_cents: number | null
+          encerrado_em: string | null
+          praca: number | null
+          representante: number | null
+          status: string | null
+          total_desconto_cents: number | null
+          total_fiado_cents: number | null
+          total_remessa_cents: number | null
+          total_venda_cents: number | null
+        }
+        Insert: {
+          boleto_cents?: number | null
+          cartao_cents?: number | null
+          cheque_cents?: number | null
+          codigo?: number | null
+          comissao_pct?: number | null
+          consultoras_fiado?: number | null
+          consultoras_venda?: number | null
+          data?: string | null
+          deposito_cents?: number | null
+          dinheiro_cents?: number | null
+          encerrado_em?: string | null
+          praca?: number | null
+          representante?: number | null
+          status?: string | null
+          total_desconto_cents?: number | null
+          total_fiado_cents?: number | null
+          total_remessa_cents?: number | null
+          total_venda_cents?: number | null
+        }
+        Update: {
+          boleto_cents?: number | null
+          cartao_cents?: number | null
+          cheque_cents?: number | null
+          codigo?: number | null
+          comissao_pct?: number | null
+          consultoras_fiado?: number | null
+          consultoras_venda?: number | null
+          data?: string | null
+          deposito_cents?: number | null
+          dinheiro_cents?: number | null
+          encerrado_em?: string | null
+          praca?: number | null
+          representante?: number | null
+          status?: string | null
+          total_desconto_cents?: number | null
+          total_fiado_cents?: number | null
+          total_remessa_cents?: number | null
+          total_venda_cents?: number | null
+        }
+        Relationships: []
+      }
+      colab_v_legado_consultoras: {
+        Row: {
+          apelido: string | null
+          asaas_id: string | null
+          ativo: boolean | null
+          atualizado_em: string | null
+          bairro: string | null
+          cadastro_em: string | null
+          celular: string | null
+          cep: string | null
+          cidade: string | null
+          codcli: number | null
+          complemento: string | null
+          cpf: string | null
+          email: string | null
+          ibge: string | null
+          interna: boolean | null
+          limite_venda: number | null
+          motivo_inativacao: string | null
+          nascimento: string | null
+          nome: string | null
+          numero: string | null
+          party_id: string | null
+          praca: number | null
+          representante: number | null
+          rua: string | null
+          sexo: string | null
+          telefone: string | null
+          uf: string | null
+          vinculado_em: string | null
+          vinculo: string | null
+        }
+        Insert: {
+          apelido?: string | null
+          asaas_id?: string | null
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          bairro?: string | null
+          cadastro_em?: string | null
+          celular?: string | null
+          cep?: string | null
+          cidade?: string | null
+          codcli?: number | null
+          complemento?: string | null
+          cpf?: string | null
+          email?: string | null
+          ibge?: string | null
+          interna?: boolean | null
+          limite_venda?: number | null
+          motivo_inativacao?: string | null
+          nascimento?: string | null
+          nome?: string | null
+          numero?: string | null
+          party_id?: string | null
+          praca?: number | null
+          representante?: number | null
+          rua?: string | null
+          sexo?: string | null
+          telefone?: string | null
+          uf?: string | null
+          vinculado_em?: string | null
+          vinculo?: string | null
+        }
+        Update: {
+          apelido?: string | null
+          asaas_id?: string | null
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          bairro?: string | null
+          cadastro_em?: string | null
+          celular?: string | null
+          cep?: string | null
+          cidade?: string | null
+          codcli?: number | null
+          complemento?: string | null
+          cpf?: string | null
+          email?: string | null
+          ibge?: string | null
+          interna?: boolean | null
+          limite_venda?: number | null
+          motivo_inativacao?: string | null
+          nascimento?: string | null
+          nome?: string | null
+          numero?: string | null
+          party_id?: string | null
+          praca?: number | null
+          representante?: number | null
+          rua?: string | null
+          sexo?: string | null
+          telefone?: string | null
+          uf?: string | null
+          vinculado_em?: string | null
+          vinculo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legado_consultoras_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_consultoras_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_consultoras_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      colab_v_legado_maleta_categorias: {
+        Row: {
+          categoria: string | null
+          codcli: number | null
+          kit: number | null
+          pecas_devolvidas: number | null
+          pecas_enviadas: number | null
+          remessa: number | null
+          valor_devolvido_cents: number | null
+          valor_enviado_cents: number | null
+        }
+        Insert: {
+          categoria?: string | null
+          codcli?: number | null
+          kit?: number | null
+          pecas_devolvidas?: number | null
+          pecas_enviadas?: number | null
+          remessa?: number | null
+          valor_devolvido_cents?: number | null
+          valor_enviado_cents?: number | null
+        }
+        Update: {
+          categoria?: string | null
+          codcli?: number | null
+          kit?: number | null
+          pecas_devolvidas?: number | null
+          pecas_enviadas?: number | null
+          remessa?: number | null
+          valor_devolvido_cents?: number | null
+          valor_enviado_cents?: number | null
+        }
+        Relationships: []
+      }
+      colab_v_legado_maleta_status: {
+        Row: {
+          atualizado_em: string | null
+          codcli: number | null
+          data: string | null
+          remessa: number | null
+          status: number | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          codcli?: number | null
+          data?: string | null
+          remessa?: number | null
+          status?: number | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          codcli?: number | null
+          data?: string | null
+          remessa?: number | null
+          status?: number | null
+        }
+        Relationships: []
+      }
+      colab_v_legado_maleta_vendidos: {
+        Row: {
+          codcli: number | null
+          kit: number | null
+          produto: number | null
+          quantidade: number | null
+          remessa: number | null
+          tamanho: string | null
+          valor_unitario_cents: number | null
+        }
+        Insert: {
+          codcli?: number | null
+          kit?: number | null
+          produto?: number | null
+          quantidade?: number | null
+          remessa?: number | null
+          tamanho?: string | null
+          valor_unitario_cents?: number | null
+        }
+        Update: {
+          codcli?: number | null
+          kit?: number | null
+          produto?: number | null
+          quantidade?: number | null
+          remessa?: number | null
+          tamanho?: string | null
+          valor_unitario_cents?: number | null
+        }
+        Relationships: []
+      }
+      colab_v_legado_maletas: {
+        Row: {
+          acerto_divergente: boolean | null
+          atualizado_em: string | null
+          codcli: number | null
+          emissao: string | null
+          fechamento: string | null
+          fechamento_smalldata: string | null
+          kit: number | null
+          nf_devolucao: string | null
+          nf_perda: string | null
+          nf_remessa: string | null
+          nf_venda: string | null
+          pecas_defeito: number | null
+          pecas_devolvidas: number | null
+          pecas_enviadas: number | null
+          pecas_vendidas: number | null
+          remessa: number | null
+          sem_cobranca: boolean | null
+          tipo: string | null
+          valor_acerto_cents: number | null
+          valor_devolvido_cents: number | null
+          valor_enviado_cents: number | null
+          valor_venda_cents: number | null
+          valor_vendido_cents: number | null
+        }
+        Insert: {
+          acerto_divergente?: boolean | null
+          atualizado_em?: string | null
+          codcli?: number | null
+          emissao?: string | null
+          fechamento?: string | null
+          fechamento_smalldata?: string | null
+          kit?: number | null
+          nf_devolucao?: string | null
+          nf_perda?: string | null
+          nf_remessa?: string | null
+          nf_venda?: string | null
+          pecas_defeito?: number | null
+          pecas_devolvidas?: number | null
+          pecas_enviadas?: number | null
+          pecas_vendidas?: number | null
+          remessa?: number | null
+          sem_cobranca?: boolean | null
+          tipo?: string | null
+          valor_acerto_cents?: number | null
+          valor_devolvido_cents?: number | null
+          valor_enviado_cents?: number | null
+          valor_venda_cents?: number | null
+          valor_vendido_cents?: number | null
+        }
+        Update: {
+          acerto_divergente?: boolean | null
+          atualizado_em?: string | null
+          codcli?: number | null
+          emissao?: string | null
+          fechamento?: string | null
+          fechamento_smalldata?: string | null
+          kit?: number | null
+          nf_devolucao?: string | null
+          nf_perda?: string | null
+          nf_remessa?: string | null
+          nf_venda?: string | null
+          pecas_defeito?: number | null
+          pecas_devolvidas?: number | null
+          pecas_enviadas?: number | null
+          pecas_vendidas?: number | null
+          remessa?: number | null
+          sem_cobranca?: boolean | null
+          tipo?: string | null
+          valor_acerto_cents?: number | null
+          valor_devolvido_cents?: number | null
+          valor_enviado_cents?: number | null
+          valor_venda_cents?: number | null
+          valor_vendido_cents?: number | null
+        }
+        Relationships: []
+      }
+      colab_v_legado_notas: {
+        Row: {
+          cfop: string | null
+          chave: string | null
+          codcli: number | null
+          emitida_em: string | null
+          kit: number | null
+          natureza: string | null
+          nf_id: number | null
+          numero: number | null
+          operacao: string | null
+          pecas: number | null
+          remessa: number | null
+          serie: number | null
+          situacao: string | null
+          tipo: string | null
+          valor_cents: number | null
+        }
+        Insert: {
+          cfop?: string | null
+          chave?: string | null
+          codcli?: number | null
+          emitida_em?: string | null
+          kit?: number | null
+          natureza?: string | null
+          nf_id?: number | null
+          numero?: number | null
+          operacao?: string | null
+          pecas?: number | null
+          remessa?: number | null
+          serie?: number | null
+          situacao?: string | null
+          tipo?: string | null
+          valor_cents?: number | null
+        }
+        Update: {
+          cfop?: string | null
+          chave?: string | null
+          codcli?: number | null
+          emitida_em?: string | null
+          kit?: number | null
+          natureza?: string | null
+          nf_id?: number | null
+          numero?: number | null
+          operacao?: string | null
+          pecas?: number | null
+          remessa?: number | null
+          serie?: number | null
+          situacao?: string | null
+          tipo?: string | null
+          valor_cents?: number | null
+        }
+        Relationships: []
+      }
+      colab_v_legado_pracas: {
+        Row: {
+          atualizado_em: string | null
+          cidades: string | null
+          codigo: number | null
+          dias: number | null
+          nome: string | null
+          praca_id: string | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          cidades?: string | null
+          codigo?: number | null
+          dias?: number | null
+          nome?: string | null
+          praca_id?: string | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          cidades?: string | null
+          codigo?: number | null
+          dias?: number | null
+          nome?: string | null
+          praca_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legado_pracas_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_pracas_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_cob_pracas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      colab_v_legado_remessas: {
+        Row: {
+          atualizado_em: string | null
+          emissao: string | null
+          numero: number | null
+          praca: number | null
+          representante: number | null
+          status: string | null
+          vencimento: string | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          emissao?: string | null
+          numero?: number | null
+          praca?: number | null
+          representante?: number | null
+          status?: string | null
+          vencimento?: string | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          emissao?: string | null
+          numero?: number | null
+          praca?: number | null
+          representante?: number | null
+          status?: string | null
+          vencimento?: string | null
+        }
+        Relationships: []
+      }
+      colab_v_legado_representantes: {
+        Row: {
+          ativo: boolean | null
+          atualizado_em: string | null
+          codigo: number | null
+          comissao_pct: number | null
+          cpf: string | null
+          nome: string | null
+          party_id: string | null
+          pracas: number[] | null
+          vinculo: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          codigo?: number | null
+          comissao_pct?: number | null
+          cpf?: string | null
+          nome?: string | null
+          party_id?: string | null
+          pracas?: number[] | null
+          vinculo?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          codigo?: number | null
+          comissao_pct?: number | null
+          cpf?: string | null
+          nome?: string | null
+          party_id?: string | null
+          pracas?: number[] | null
+          vinculo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legado_representantes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_representantes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_representantes_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      colab_v_parties: {
+        Row: {
+          avatar_url: string | null
+          birth_date: string | null
+          code: string | null
+          created_at: string | null
+          created_by: string | null
+          display_name: string | null
+          doc: string | null
+          doc_canon: string | null
+          doc_checked_at: string | null
+          doc_digits: string | null
+          doc_masked: string | null
+          doc_source: string | null
+          doc_verified_at: string | null
+          id: string | null
+          is_active: boolean | null
+          kind: Database["public"]["Enums"]["party_kind"] | null
+          legal_name: string | null
+          marital_status: string | null
+          notes: string | null
+          profession: string | null
+          rg: string | null
+          rg_issuer: string | null
+          social_name: string | null
+          status: Database["public"]["Enums"]["party_status"] | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          birth_date?: string | null
+          code?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          display_name?: string | null
+          doc?: string | null
+          doc_canon?: string | null
+          doc_checked_at?: string | null
+          doc_digits?: string | null
+          doc_masked?: string | null
+          doc_source?: string | null
+          doc_verified_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          kind?: Database["public"]["Enums"]["party_kind"] | null
+          legal_name?: string | null
+          marital_status?: string | null
+          notes?: string | null
+          profession?: string | null
+          rg?: string | null
+          rg_issuer?: string | null
+          social_name?: string | null
+          status?: Database["public"]["Enums"]["party_status"] | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          birth_date?: string | null
+          code?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          display_name?: string | null
+          doc?: string | null
+          doc_canon?: string | null
+          doc_checked_at?: string | null
+          doc_digits?: string | null
+          doc_masked?: string | null
+          doc_source?: string | null
+          doc_verified_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          kind?: Database["public"]["Enums"]["party_kind"] | null
+          legal_name?: string | null
+          marital_status?: string | null
+          notes?: string | null
+          profession?: string | null
+          rg?: string | null
+          rg_issuer?: string | null
+          social_name?: string | null
+          status?: Database["public"]["Enums"]["party_status"] | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      colab_v_party_addresses: {
+        Row: {
+          address_source: string | null
+          city: string | null
+          complement: string | null
+          country: string | null
+          created_at: string | null
+          ddd: string | null
+          district: string | null
+          geo_attempted_at: string | null
+          geo_error: string | null
+          geo_hash: string | null
+          geo_located_at: string | null
+          geo_normalizer_version: string | null
+          geo_precision: string | null
+          geo_source: string | null
+          geo_status: string | null
+          ibge_city_code: string | null
+          id: string | null
+          is_primary: boolean | null
+          label: string | null
+          latitude: number | null
+          longitude: number | null
+          no_number: boolean | null
+          party_id: string | null
+          postal_code: string | null
+          reference: string | null
+          street: string | null
+          street_number: string | null
+          uf: string | null
+          updated_at: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          address_source?: string | null
+          city?: string | null
+          complement?: string | null
+          country?: string | null
+          created_at?: string | null
+          ddd?: string | null
+          district?: string | null
+          geo_attempted_at?: string | null
+          geo_error?: string | null
+          geo_hash?: string | null
+          geo_located_at?: string | null
+          geo_normalizer_version?: string | null
+          geo_precision?: string | null
+          geo_source?: string | null
+          geo_status?: string | null
+          ibge_city_code?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          label?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          no_number?: boolean | null
+          party_id?: string | null
+          postal_code?: string | null
+          reference?: string | null
+          street?: string | null
+          street_number?: string | null
+          uf?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          address_source?: string | null
+          city?: string | null
+          complement?: string | null
+          country?: string | null
+          created_at?: string | null
+          ddd?: string | null
+          district?: string | null
+          geo_attempted_at?: string | null
+          geo_error?: string | null
+          geo_hash?: string | null
+          geo_located_at?: string | null
+          geo_normalizer_version?: string | null
+          geo_precision?: string | null
+          geo_source?: string | null
+          geo_status?: string | null
+          ibge_city_code?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          label?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          no_number?: boolean | null
+          party_id?: string | null
+          postal_code?: string | null
+          reference?: string | null
+          street?: string | null
+          street_number?: string | null
+          uf?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_addresses_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_addresses_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_addresses_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      colab_v_party_links: {
+        Row: {
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string | null
+          party_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string | null
+          party_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string | null
+          party_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_links_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_links_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_links_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      colab_v_party_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          ended_at: string | null
+          id: string | null
+          notes: string | null
+          party_id: string | null
+          role: Database["public"]["Enums"]["party_role_kind"] | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["party_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          ended_at?: string | null
+          id?: string | null
+          notes?: string | null
+          party_id?: string | null
+          role?: Database["public"]["Enums"]["party_role_kind"] | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["party_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          ended_at?: string | null
+          id?: string | null
+          notes?: string | null
+          party_id?: string | null
+          role?: Database["public"]["Enums"]["party_role_kind"] | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["party_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_roles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_roles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_roles_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      colab_v_remessas: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          data_acerto: string | null
+          data_emissao: string | null
+          id: string | null
+          numero: number | null
+          observacoes: string | null
+          origin_location_id: string | null
+          praca_id: string | null
+          representante_party_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          data_acerto?: string | null
+          data_emissao?: string | null
+          id?: string | null
+          numero?: number | null
+          observacoes?: string | null
+          origin_location_id?: string | null
+          praca_id?: string | null
+          representante_party_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          data_acerto?: string | null
+          data_emissao?: string | null
+          id?: string | null
+          numero?: number | null
+          observacoes?: string | null
+          origin_location_id?: string | null
+          praca_id?: string | null
+          representante_party_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remessas_origin_location_id_fkey"
+            columns: ["origin_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessas_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessas_praca_id_fkey"
+            columns: ["praca_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessas_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessas_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessas_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       v_network_consultants: {
         Row: {
           city: string | null
@@ -13715,6 +15818,13 @@ export type Database = {
           wallet: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "consultant_profiles_representative_party_id_fkey"
+            columns: ["representative_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "consultant_profiles_representative_party_id_fkey"
             columns: ["representative_party_id"]
@@ -14447,9 +16557,14 @@ export type Database = {
         Returns: undefined
       }
       colab_caps_permitidas: { Args: never; Returns: string[] }
+      colab_cycle_ok: { Args: { _id: string }; Returns: boolean }
       colab_exigir_master: { Args: { _actor: string }; Returns: undefined }
+      colab_legacy_cli_ok: { Args: { _cod: number }; Returns: boolean }
+      colab_legacy_rem_ok: { Args: { _numero: number }; Returns: boolean }
+      colab_legacy_rep_ok: { Args: { _codigo: number }; Returns: boolean }
       colab_login_ok: { Args: { _user: string }; Returns: undefined }
       colab_login_reservar: { Args: { _codigo: string }; Returns: string }
+      colab_meu_escopo: { Args: never; Returns: Json }
       colab_modulos_definir: {
         Args: {
           _actor: string
@@ -14459,7 +16574,12 @@ export type Database = {
         }
         Returns: string[]
       }
+      colab_party_ok: { Args: { _id: string }; Returns: boolean }
+      colab_praca_ok: { Args: { _id: string }; Returns: boolean }
       colab_proximo_codigo: { Args: never; Returns: string }
+      colab_rem_ok: { Args: { _id: string }; Returns: boolean }
+      colab_rep: { Args: never; Returns: string }
+      colab_restrita: { Args: never; Returns: boolean }
       comissao_faixas_leitura: { Args: never; Returns: Json }
       confirm_stock_reservation: {
         Args: {

@@ -967,6 +967,13 @@
       "when": 1792775304691,
       "tag": "0137_primeira_montagem_ligacoes",
       "breakpoints": true
+    },
+    {
+      "idx": 138,
+      "version": "7",
+      "when": 1792777999593,
+      "tag": "0138_colab_carteira_helpers",
+      "breakpoints": true
     }
   ]
 }

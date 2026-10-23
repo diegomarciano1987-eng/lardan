@@ -47,7 +47,7 @@ export async function buscarEtiquetas(termo: string): Promise<EtiquetaBusca[]> {
   const t = termo.trim().replace(/[%,()*]/g, " ").trim();
   if (t.length < 2) return [];
   const like = `%${t}%`;
-  const sel = "id,label,barcode,reference_code,sku,price_cents,products!inner(name,reference_code,price_cents,archived_at)";
+  const sel = "id,label,barcode,reference_code,sku,price_cents,products!inner(name,reference_code,price_cents,status)";
   const [porVariante, porProduto] = await Promise.all([
     supabase.from("product_variants").select(sel).eq("is_active", true).or(`barcode.eq.${t},reference_code.ilike.${like},sku.ilike.${like},label.ilike.${like}`).limit(30),
     supabase.from("product_variants").select(sel).eq("is_active", true).or(`name.ilike.${like},reference_code.ilike.${like},barcode.eq.${t}`, { referencedTable: "products" }).limit(30),
@@ -56,8 +56,8 @@ export async function buscarEtiquetas(termo: string): Promise<EtiquetaBusca[]> {
   if (porProduto.error) throw porProduto.error;
   const map = new Map<string, EtiquetaBusca>();
   for (const v of [...(porVariante.data ?? []), ...(porProduto.data ?? [])]) {
-    const p = v.products as unknown as { name: string; reference_code: string | null; price_cents: number | null; archived_at: string | null };
-    if (p.archived_at) continue;
+    const p = v.products as unknown as { name: string; reference_code: string | null; price_cents: number | null; status: string };
+    if (p.status === "arquivado") continue;
     map.set(v.id, { variantId: v.id, nome: nomeEtiqueta(p.name, v.label), barcode: v.barcode, referencia: v.reference_code ?? p.reference_code, precoCents: v.price_cents ?? p.price_cents });
   }
   const exato = (r: EtiquetaBusca) => (r.barcode === t || r.referencia?.toUpperCase() === t.toUpperCase() ? 0 : 1);

@@ -51,6 +51,7 @@ function ProdutoDetalhe() {
   const qc = useQueryClient();
   const capacidades = useCapabilities();
   const podeVerCustos = can(capacidades, "catalog.cost.view");
+  const podeEditar = can(capacidades, "product.manage");
 
 
   const [variante, setVariante] = useState<VarianteRow | null>(null);
@@ -328,6 +329,7 @@ function ProdutoDetalhe() {
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
           <Panel title="Variantes vendáveis">
+            {podeEditar ? (
             <div className="mb-4 flex justify-end">
               <button
                 type="button"
@@ -340,6 +342,7 @@ function ProdutoDetalhe() {
                 <Plus aria-hidden className="size-4" /> Nova variante
               </button>
             </div>
+            ) : null}
             {variantes.isLoading ? (
               <Skeleton className="h-24 w-full" />
             ) : (variantes.data?.length ?? 0) === 0 ? (
@@ -370,8 +373,9 @@ function ProdutoDetalhe() {
                       return (
                         <tr
                           key={v.id}
-                          className="cursor-pointer border-t border-line-soft hover:bg-surface-muted"
+                          className={podeEditar ? "cursor-pointer border-t border-line-soft hover:bg-surface-muted" : "border-t border-line-soft"}
                           onClick={() => {
+                            if (!podeEditar) return;
                             setVariante(v);
                             setVarianteAberta(true);
                           }}
@@ -409,6 +413,7 @@ function ProdutoDetalhe() {
           </Panel>
 
           <Panel title="Imagens">
+            {podeEditar ? (
             <div className="mb-4 flex justify-end">
               <input
                 ref={fileRef}
@@ -431,6 +436,7 @@ function ProdutoDetalhe() {
                 {enviarImagem.isPending ? "Enviando…" : "Adicionar imagem"}
               </button>
             </div>
+            ) : null}
             {(imagens.data?.length ?? 0) === 0 ? (
               <EmptyState title="Sem imagens" description="Envie as fotos da peça para exibir no site." />
             ) : (
@@ -450,6 +456,7 @@ function ProdutoDetalhe() {
                       onPrincipal={() => tornarPrincipal(i)}
                       onRemover={() => removerImagem.mutate(m.id)}
                       onAlt={(alt) => media && salvarAlt.mutate({ mediaId: media.id, alt })}
+                      somente={!podeEditar}
                     />
                   );
                 })}
@@ -664,6 +671,7 @@ function ImagemCard({
   onPrincipal,
   onRemover,
   onAlt,
+  somente,
 }: {
   path: string | null;
   alt: string;
@@ -675,6 +683,7 @@ function ImagemCard({
   onPrincipal: () => void;
   onRemover: () => void;
   onAlt: (alt: string) => void;
+  somente: boolean;
 }) {
   const [url, setUrl] = useState<string | null>(null);
   const [texto, setTexto] = useState(alt);
@@ -704,6 +713,10 @@ function ImagemCard({
         ) : null}
       </div>
       <figcaption className="space-y-2 p-2">
+        {somente ? (
+          <p className="truncate px-1 text-xs text-ledger-muted">{alt || "Sem descrição"}</p>
+        ) : (
+        <>
         <label className="sr-only" htmlFor={`alt-${path ?? "sem"}`}>
           Descrição da imagem
         </label>
@@ -760,6 +773,8 @@ function ImagemCard({
             </button>
           </div>
         </div>
+        </>
+        )}
       </figcaption>
     </figure>
   );

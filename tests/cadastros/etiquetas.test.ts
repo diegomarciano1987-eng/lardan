@@ -10,5 +10,5 @@ describe("Etiquetas Argox", () => {
   it("não troca referência pelo dado codificado", () => { const html = documentoEtiquetas([{ ...item, barcode: "123456", referencia: "REF-77", quantidade: 1 }], CONFIG_ETIQUETA); expect(html).toContain('aria-label="123456"'); expect(html).toContain('>REF-77</div>'); });
   it("bloqueia códigos ausentes, largos e quantidades fracionadas", () => { expect(() => comporEtiquetas([{ ...item, barcode: null }])).toThrow(); expect(() => barrasEtiqueta("ABCDEFGHIJKLMNOPQRSTUVWXYZ")).toThrow(); expect(() => comporEtiquetas([{ ...item, quantidade: 1.5 }])).toThrow(); });
   it("linha inferior = referência-preço em centavos com 6 dígitos", () => { expect(textoEtiqueta("LBRP0295", 5499)).toBe("LBRP0295-005499"); expect(textoEtiqueta("LBRP0586", 5400)).toBe("LBRP0586-005400"); expect(textoEtiqueta("LGR0321", 12380)).toBe("LGR0321-012380"); expect(textoEtiqueta("REF", null)).toBe("REF"); });
-  it("escapa conteúdo do cadastro na folha de impressão", () => { expect(documentoEtiquetas([{ ...item, nome: "<script>" }], CONFIG_ETIQUETA)).toContain("&lt;script&gt;"); });
+  it("escapa conteúdo do cadastro na folha de impressão", () => { expect(documentoEtiquetas([{ ...item, nome: "<script>" }], CONFIG_ETIQUETA)).toContain("&lt;SCRIPT&gt;"); });
 });

@@ -121,5 +121,5 @@ Provas: docs/lardan/AUDITORIA-FINANCEIRO-NOVE-PONTOS-2026-10-16.md; 243 testes i
 ## 0126 — banho e reclassificação
 - [x] Migração 0126, telas e teste aplicados como enviados (383/0)
 - [x] Prévia de produto_reclassificar(false) entregue
-- [ ] produto_reclassificar(true) — aguarda aprovação do Diego
+- [x] produto_reclassificar(true) aplicado — lote reclass-20261023-112619
 - [ ] Publicar interface — aguarda aprovação

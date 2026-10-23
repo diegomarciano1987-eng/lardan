@@ -42,12 +42,15 @@ function dataCurta(iso: string | null | undefined) {
 }
 
 function abrirImpressao(titulo: string, corpo: string) {
-  const w = window.open("", "_blank", "width=900,height=700");
-  if (!w) {
-    toast.error("O navegador bloqueou a janela de impressão. Libere pop-ups para esta tela.");
-    return;
-  }
-  w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${titulo}</title>
+  // Quadro invisível na própria página: nenhuma janela ou aba extra, vai direto para a impressão.
+  const frame = document.createElement("iframe");
+  frame.setAttribute("aria-hidden", "true");
+  frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none";
+  document.body.appendChild(frame);
+  const d = frame.contentDocument, w = frame.contentWindow;
+  if (!d || !w) { frame.remove(); toast.error("Não foi possível preparar a impressão."); return; }
+  d.open();
+  d.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${titulo}</title>
 <style>
   body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:32px;font-size:13px}
   h1{font-size:18px;text-align:center;letter-spacing:.12em;margin:0 0 4px}
@@ -62,9 +65,19 @@ function abrirImpressao(titulo: string, corpo: string) {
   .mutismo{font-size:11px;color:#333}
   @media print{body{margin:10mm}}
 </style></head><body>${corpo}</body></html>`);
-  w.document.close();
-  w.focus();
-  w.print();
+  d.close();
+  w.addEventListener("afterprint", () => window.setTimeout(() => frame.remove(), 1000), { once: true });
+  window.setTimeout(() => { w.focus(); w.print(); }, 150);
+}
+
+/** Romaneio da maleta (mesmo documento do "Pedido — Remessa Kit"), para o botão Romaneio da ficha. */
+export async function imprimirRomaneio(cycleId: string, composicao: ItemComposicao[], codigoMaleta: string, dataAcerto: string | null) {
+  if (!composicao.length) { toast.error("A maleta ainda não tem peças para o romaneio."); return; }
+  try {
+    const [doc, user] = await Promise.all([docConsultora(cycleId), supabase.auth.getUser()]);
+    const operador = String(user.data.user?.user_metadata?.["full_name"] ?? user.data.user?.email ?? "—");
+    abrirImpressao(`Romaneio — ${codigoMaleta}`, htmlPedido(doc, composicao, codigoMaleta, dataAcerto, operador));
+  } catch (e) { toast.error(traduzir(e)); }
 }
 
 const CREDOR = "TSM COMÉRCIO DE SEMIJOIAS LTDA";

@@ -1,5 +1,6 @@
 import { FotoPeca } from "@/components/FotoPeca";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
+import { imprimirRomaneio } from "@/components/admin/maletas/DocumentosMaleta";
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -168,7 +169,7 @@ function MaletaFicha() {
         actions={
           <div className="flex items-center gap-2">
             <StatusBadge tone={TOM[s.tom]}>{s.rotulo}</StatusBadge>
-            <button type="button" className="admin-btn" onClick={() => window.print()}>
+            <button type="button" className="admin-btn" onClick={() => void imprimirRomaneio(id, d.composicao, d.maleta.codigo, (d.ciclo as { due_at?: string | null }).due_at ?? null)}>
               <Printer aria-hidden className="size-4" /> Romaneio
             </button>
             <EtiquetasImprimir origens={d.composicao.map((c) => ({ variantId: c.variant_id, quantidade: c.quantidade }))} />

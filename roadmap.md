@@ -1,4 +1,8 @@
 # Roadmap
+## Carteira SmallData autorizada — 23/10, 18:41 UTC
+- [x] Prévia oficial Master: exatamente 45 representantes e 3.617 vínculos de praça, zero perfis novos.
+- [x] Aplicados somente campos vazios; lote cvs-20261023-154230-de45; nenhum representante ligado manualmente.
+- [x] Log: 45 representante + 3.617 praça, nenhum valor preexistente alterado; praças vazias 3.958 → 339; nova prévia 0/0. Provas em docs/lardan/CARTEIRA-SMALLDATA-0137-APLICADA.md; sem desfazer ou publicar.
 ## Plano solicitado — 23/10, 18:22 UTC
 - [x] Contraste explícito do botão compartilhado; cockpit e lista Produtos conferidos na sessão real de Ketllin.
 - [x] Seletores de representante alimentados diretamente pelo vínculo, sem resultados compartilhados entre perfis; filtro e Nova remessa mostram Daniel. Não reproduzida troca de identidade em registro histórico.
@@ -28,7 +32,7 @@
 - [x] Integrar login, porta Operação e classificação das peças; arquivos idênticos ao pacote e regras atualizadas.
 - [x] Bancada recriada; 424 testes / 0 falhas; tela Master e erro de código inválido conferidos. Login válido de colaboradora real não exercitado para preservar contas.
 - [x] Representantes e prévia autenticada: 45 representantes / 3.617 praças, sem aplicação; provas em docs/lardan/APLICACAO-0136-2-PROVAS.md.
-- [ ] Aplicação da carteira e vínculos manuais — aguardam escolha e aprovação de Diego após a prévia.
+- [x] Carteira aplicada conforme autorização enviada às 18:41 UTC; 45 representante e 3.617 praça. Vínculos manuais não autorizados e não executados.
 ## Custo no cockpit de produtos (23/10)
 - [x] Lista de produtos: coluna Custo só para Master/Diretoria/Financeiro, via product_costs_read (nunca no select da lista).
 - [x] Ficha: custo, margem, valor do bruto e preço sugerido só para quem tem catalog.cost.view; demais perfis veem aviso.

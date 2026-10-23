@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ExternalLink, ListChecks, Save, Sparkles, Upload } from "lucide-react";
@@ -431,6 +432,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
         description={`Código interno: ${p?.internal_code ?? "gerado no primeiro salvamento"} · Endereço: /${slugPrevia || "—"} · ${contagemVariantes} variante(s) · ${pct}% concluído`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            {id && <EtiquetasImprimir origens={[{ productId: id }]} />}
             <StatusBadge
               tone={
                 p?.status === "publicado"

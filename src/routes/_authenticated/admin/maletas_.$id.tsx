@@ -1,4 +1,5 @@
 import { FotoPeca } from "@/components/FotoPeca";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -43,6 +44,11 @@ export const Route = createFileRoute("/_authenticated/admin/maletas_/$id")({
   head: () => ({
     meta: [
       { title: "Maleta — Administração LARDAN" },
+      { name: "description", content: "Composição e etiquetas das peças da maleta LARDAN." },
+      { property: "og:title", content: "Maleta — Administração LARDAN" },
+      { property: "og:description", content: "Composição e etiquetas das peças da maleta LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -175,6 +181,7 @@ function MaletaFicha() {
             <button type="button" className="admin-btn" onClick={() => window.print()}>
               <Printer aria-hidden className="size-4" /> Romaneio
             </button>
+            <EtiquetasImprimir origens={d.composicao.map((c) => ({ variantId: c.variant_id, quantidade: c.quantidade }))} />
           </div>
         }
       />

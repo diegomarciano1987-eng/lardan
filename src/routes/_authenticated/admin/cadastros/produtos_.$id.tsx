@@ -24,6 +24,7 @@ import {
   mensagemDeErro,
 } from "@/lib/catalog";
 import { ProdutoFicha } from "@/components/admin/ProdutoFicha";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import {
   salvarVariante as salvarVarianteRpc,
   registrarCusto,
@@ -38,6 +39,11 @@ export const Route = createFileRoute("/_authenticated/admin/cadastros/produtos_/
   head: () => ({
     meta: [
       { title: "Ficha do produto — Administração LARDAN" },
+      { name: "description", content: "Ficha, variantes e etiquetas de peças LARDAN." },
+      { property: "og:title", content: "Ficha do produto — Administração LARDAN" },
+      { property: "og:description", content: "Ficha, variantes e etiquetas de peças LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -365,6 +371,7 @@ function ProdutoDetalhe() {
                         <th className="py-2 pr-4 text-right font-normal">Custo atual</th>
                       ) : null}
                       <th className="py-2 font-normal">Situação</th>
+                      <th className="py-2 font-normal">Etiquetas</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -403,6 +410,7 @@ function ProdutoDetalhe() {
                               {v.is_active ? "Ativa" : "Inativa"}
                             </StatusBadge>
                           </td>
+                          <td className="py-2" onClick={(e) => e.stopPropagation()}><EtiquetasImprimir compact label={`Etiquetas da variante ${v.label}`} origens={[{ variantId: v.id }]} /></td>
                         </tr>
                       );
                     })}

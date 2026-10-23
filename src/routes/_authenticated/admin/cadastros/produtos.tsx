@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FotoPeca } from "@/components/FotoPeca";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -22,6 +23,11 @@ export const Route = createFileRoute("/_authenticated/admin/cadastros/produtos")
   head: () => ({
     meta: [
       { title: "Produtos — Administração LARDAN" },
+      { name: "description", content: "Catálogo e impressão de etiquetas de produtos LARDAN." },
+      { property: "og:title", content: "Produtos — Administração LARDAN" },
+      { property: "og:description", content: "Catálogo e impressão de etiquetas de produtos LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -136,6 +142,7 @@ function ProdutosPage() {
     categorias.data?.find((c) => c.id === id)?.name ?? "—";
 
   const columns: Column<ProdutoLinha>[] = [
+    { key: "etiquetas", header: "Etiquetas", render: (r) => <EtiquetasImprimir compact label={`Etiquetas de ${r.name}`} origens={[{ productId: r.id }]} /> },
     { key: "foto", header: "Foto", render: (r) => <FotoPeca productId={r.id} alt={r.name} /> },
     { key: "name", header: "Produto", render: (r) => r.name },
     { key: "legacy_code", header: "Código", render: (r) => <span className="num">{r.legacy_code ?? "—"}</span> },

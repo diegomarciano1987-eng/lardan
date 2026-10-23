@@ -1,4 +1,5 @@
 import * as React from "react";
+import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { useQuery } from "@tanstack/react-query";
 import { FileText, Printer, ScrollText, X } from "lucide-react";
 import { toast } from "sonner";
@@ -181,6 +182,11 @@ export function DocumentosMaleta({
         )}
 
         <div className="grid gap-4 md:grid-cols-3">
+          <div className="ledger-panel flex flex-col gap-3 p-6">
+            <Printer aria-hidden className="size-8 text-ledger-text" />
+            <p className="font-display text-lg font-bold text-ledger-text">Etiquetas das peças</p>
+            <EtiquetasImprimir origens={composicao.map((c) => ({ variantId: c.variant_id, quantidade: c.quantidade }))} />
+          </div>
           <div className="ledger-panel flex flex-col gap-3 p-6">
             <ScrollText aria-hidden className="size-8 text-ledger-text" />
             <p className="font-display text-lg font-bold text-ledger-text">Nota promissória</p>

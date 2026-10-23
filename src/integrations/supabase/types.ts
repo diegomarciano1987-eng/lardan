@@ -16419,6 +16419,10 @@ export type Database = {
         Returns: Json
       }
       rep_portal_resumo: { Args: { _rep: string }; Returns: Json }
+      rep_pracas_vinculo: {
+        Args: { _consultora?: string; _rep: string }
+        Returns: Json
+      }
       rep_publico: { Args: { _code: string }; Returns: Json }
       rep_reativar_interno: {
         Args: { _actor: string; _motivo: string; _party: string }

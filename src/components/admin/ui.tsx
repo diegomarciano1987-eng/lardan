@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { useRouter } from "@tanstack/react-router";
+import { useRouter, useRouterState } from "@tanstack/react-router";
 import { AlertTriangle, Info, Lock, Clock3, CircleDot, ArrowLeft } from "lucide-react";
-import { STATE_LABEL, type ModuleState } from "@/lib/admin-modules";
+import { ALL_MODULES, STATE_LABEL, type ModuleState } from "@/lib/admin-modules";
+import { LayoutDashboard, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Botão Voltar — retorna para a última tela visitada. */
@@ -100,32 +101,60 @@ export function Panel({
   );
 }
 
+function useModuleIcon(): LucideIcon {
+  const pathname = useRouterState({ select: (st) => st.location.pathname });
+  let best: { len: number; icon: LucideIcon } = { len: 0, icon: LayoutDashboard };
+  for (const m of ALL_MODULES) {
+    if (m.path && (pathname === m.path || pathname.startsWith(m.path + "/")) && m.path.length > best.len) {
+      best = { len: m.path.length, icon: m.icon };
+    }
+  }
+  return best.icon;
+}
+
+/** Topo padrão de todas as telas do painel: deck grafite com ícone do módulo, título e abas/ações ao lado. */
 export function PageHeader({
   eyebrow,
   title,
   description,
   actions,
+  icon,
+  tabs,
 }: {
   eyebrow: string;
   title: string;
   description?: string;
   actions?: ReactNode;
+  icon?: LucideIcon;
+  tabs?: ReactNode;
 }) {
+  const auto = useModuleIcon();
+  const Icon = icon ?? auto;
   return (
-    <header className="flex flex-wrap items-end justify-between gap-6 border-b border-line pb-7">
-      <div className="flex min-w-0 items-start gap-4">
-        <BackButton className="mt-1" />
-        <div className="min-w-0">
-          <p className="ledger-eyebrow">{eyebrow}</p>
-          <h1 className="mt-2 text-[2.375rem] leading-[1.08] font-semibold text-ledger-text md:text-[2.875rem]">
-            {title}
-          </h1>
-          {description && (
-            <p className="mt-2 max-w-2xl text-[0.9375rem] font-medium text-ledger-muted">{description}</p>
-          )}
+    <header className="admin-deck px-6 py-5 md:px-7">
+      <div className="relative flex flex-wrap items-center justify-between gap-5">
+        <div className="flex min-w-0 items-center gap-4">
+          <BackButton className="border-warm-ivory/15 bg-warm-ivory/5 text-warm-ivory hover:border-champagne hover:text-champagne" />
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-champagne/40 bg-champagne/10 text-champagne shadow-inner">
+            <Icon aria-hidden className="size-6" strokeWidth={1.8} />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-champagne">{eyebrow}</p>
+            <h1 className="mt-1 text-[1.75rem] leading-tight font-bold tracking-tight !text-warm-ivory md:text-[2rem]">
+              {title}
+            </h1>
+            {description && (
+              <p className="mt-1 max-w-2xl text-sm font-medium !text-warm-ivory/70">{description}</p>
+            )}
+          </div>
         </div>
+        {(tabs || actions) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {tabs}
+            {actions}
+          </div>
+        )}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
   );
 }

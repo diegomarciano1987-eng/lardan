@@ -157,6 +157,9 @@ async function search(term: string, caps: Capability[]): Promise<SearchHit[]> {
       .from("parties")
       .select("id,display_name,legal_name,code,status,doc_masked")
       .or(pessoaFiltro)
+      // Cadastros inativos (inclusive os já unificados) ficam fora da busca rápida;
+      // continuam acessíveis em Cadastros → Pessoas e empresas.
+      .neq("status", "inativo")
       .order("display_name")
       .limit(8)),
     podeFinPagar ? titulos("payable") : Promise.resolve(vazio),

@@ -8839,6 +8839,7 @@ export type Database = {
           codcli: number
           data: string | null
           dinheiro_cents: number | null
+          fonte: string
           prazo_cents: number | null
           remessa: number
           tipo: string
@@ -8852,6 +8853,7 @@ export type Database = {
           codcli: number
           data?: string | null
           dinheiro_cents?: number | null
+          fonte?: string
           prazo_cents?: number | null
           remessa: number
           tipo?: string
@@ -8865,6 +8867,7 @@ export type Database = {
           codcli?: number
           data?: string | null
           dinheiro_cents?: number | null
+          fonte?: string
           prazo_cents?: number | null
           remessa?: number
           tipo?: string
@@ -9161,6 +9164,7 @@ export type Database = {
           codcli: number
           emissao: string | null
           fechamento: string | null
+          fechamento_smalldata: string | null
           kit: number
           nf_devolucao: string | null
           nf_perda: string | null
@@ -9171,6 +9175,7 @@ export type Database = {
           pecas_enviadas: number
           pecas_vendidas: number | null
           remessa: number
+          sem_cobranca: boolean
           tipo: string
           valor_acerto_cents: number | null
           valor_devolvido_cents: number
@@ -9184,6 +9189,7 @@ export type Database = {
           codcli: number
           emissao?: string | null
           fechamento?: string | null
+          fechamento_smalldata?: string | null
           kit: number
           nf_devolucao?: string | null
           nf_perda?: string | null
@@ -9194,6 +9200,7 @@ export type Database = {
           pecas_enviadas?: number
           pecas_vendidas?: number | null
           remessa: number
+          sem_cobranca?: boolean
           tipo?: string
           valor_acerto_cents?: number | null
           valor_devolvido_cents?: number
@@ -9207,6 +9214,7 @@ export type Database = {
           codcli?: number
           emissao?: string | null
           fechamento?: string | null
+          fechamento_smalldata?: string | null
           kit?: number
           nf_devolucao?: string | null
           nf_perda?: string | null
@@ -9217,6 +9225,7 @@ export type Database = {
           pecas_enviadas?: number
           pecas_vendidas?: number | null
           remessa?: number
+          sem_cobranca?: boolean
           tipo?: string
           valor_acerto_cents?: number | null
           valor_devolvido_cents?: number
@@ -15024,6 +15033,30 @@ export type Database = {
         Returns: Json
       }
       legado_bi_base: {
+        Args: {
+          _ate: string
+          _data?: string
+          _de: string
+          _praca: number
+          _representante: number
+        }
+        Returns: {
+          codcli: number
+          data_ref: string
+          dias: number
+          emissao: string
+          fechamento: string
+          kit: number
+          pecas_enviadas: number
+          pecas_vendidas: number
+          praca: number
+          remessa: number
+          representante: number
+          valor_enviado_cents: number
+          valor_vendido_cents: number
+        }[]
+      }
+      legado_bi_base_total: {
         Args: {
           _ate: string
           _data?: string

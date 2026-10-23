@@ -16559,6 +16559,29 @@ export type Database = {
       colab_caps_permitidas: { Args: never; Returns: string[] }
       colab_cycle_ok: { Args: { _id: string }; Returns: boolean }
       colab_exigir_master: { Args: { _actor: string }; Returns: undefined }
+      colab_kit_reserva_criar_interna: {
+        Args: {
+          _expires_at: string
+          _idempotency_key?: string
+          _location_id: string
+          _note?: string
+          _origin?: string
+          _party_id?: string
+          _quantity: number
+          _reference?: string
+          _variant_id: string
+        }
+        Returns: Json
+      }
+      colab_kit_reserva_liberar_interna: {
+        Args: {
+          _cancelar?: boolean
+          _idempotency_key?: string
+          _reason?: string
+          _reservation_id: string
+        }
+        Returns: Json
+      }
       colab_legacy_cli_ok: { Args: { _cod: number }; Returns: boolean }
       colab_legacy_rem_ok: { Args: { _numero: number }; Returns: boolean }
       colab_legacy_rep_ok: { Args: { _codigo: number }; Returns: boolean }

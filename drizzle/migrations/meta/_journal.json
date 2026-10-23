@@ -1030,6 +1030,13 @@
       "when": 1792778927626,
       "tag": "0146_colab_expedicao_reserva_vinculada",
       "breakpoints": true
+    },
+    {
+      "idx": 147,
+      "version": "7",
+      "when": 1792779062270,
+      "tag": "0147_colab_reservas_apenas_motor_oficial",
+      "breakpoints": true
     }
   ]
 }

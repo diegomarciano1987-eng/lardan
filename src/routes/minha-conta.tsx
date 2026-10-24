@@ -11,11 +11,13 @@ export const Route = createFileRoute("/minha-conta")({
   head: () => ({
     meta: [
       { title: "Minha conta — Lardan" },
-      { name: "description", content: "Entre ou crie sua conta de cliente na loja Lardan." },
+      { name: "description", content: "Minha conta Lardan: entre ou crie sua conta de cliente na loja de semijoias e encontre as opções de acesso e recuperação da sua senha." },
       { property: "og:title", content: "Minha conta — Lardan" },
-      { property: "og:description", content: "Entre ou crie sua conta de cliente na loja Lardan." },
+      { property: "og:description", content: "Minha conta Lardan: entre ou crie sua conta de cliente na loja de semijoias e encontre as opções de acesso e recuperação da sua senha." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Minha conta — Lardan" },
+      { name: "twitter:description", content: "Minha conta Lardan: entre ou crie sua conta de cliente na loja de semijoias e encontre as opções de acesso e recuperação da sua senha." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

@@ -6,11 +6,13 @@ export const Route = createFileRoute("/cuidados")({
   component: Cuidados,
   head: () => ({ meta: [
     { title: "Cuidados com suas semijoias — LARDAN" },
-    { name: "description", content: "Manual de uso e cuidados das semijoias LARDAN. Garantia de dois anos seguindo o manual." },
-    { property: "og:title", content: "Manual de cuidados — LARDAN" },
-    { property: "og:description", content: "Como usar, limpar e guardar suas semijoias LARDAN." },
+    { name: "description", content: "Cuidados com suas semijoias LARDAN: consulte o manual de uso, limpeza e armazenamento e as orientações para a garantia de dois anos." },
+    { property: "og:title", content: "Cuidados com suas semijoias — LARDAN" },
+    { property: "og:description", content: "Cuidados com suas semijoias LARDAN: consulte o manual de uso, limpeza e armazenamento e as orientações para a garantia de dois anos." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Cuidados com suas semijoias — LARDAN" },
+      { name: "twitter:description", content: "Cuidados com suas semijoias LARDAN: consulte o manual de uso, limpeza e armazenamento e as orientações para a garantia de dois anos." },
   ] }),
 });
 function Cuidados() {

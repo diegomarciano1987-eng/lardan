@@ -18,11 +18,13 @@ export const Route = createFileRoute("/equipe")({
   head: () => ({
     meta: [
       { title: "Sistema Lardan — Acesso da equipe" },
-      { name: "description", content: "Acesso restrito à operação, consultoras e representantes Lardan." },
+      { name: "description", content: "Acesso da equipe Lardan: entre na área da operação, das consultoras ou dos representantes usando seu login autorizado para o sistema." },
       { property: "og:title", content: "Sistema Lardan — Acesso da equipe" },
-      { property: "og:description", content: "Acesso restrito à operação, consultoras e representantes Lardan." },
+      { property: "og:description", content: "Acesso da equipe Lardan: entre na área da operação, das consultoras ou dos representantes usando seu login autorizado para o sistema." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Sistema Lardan — Acesso da equipe" },
+      { name: "twitter:description", content: "Acesso da equipe Lardan: entre na área da operação, das consultoras ou dos representantes usando seu login autorizado para o sistema." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

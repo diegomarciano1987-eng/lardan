@@ -22,13 +22,15 @@ export const Route = createFileRoute("/carrinho")({
       {
         name: "description",
         content:
-          "Revise as peças escolhidas, simule o frete e finalize com a sua consultora Lardan.",
+          "Sua sacola Lardan: revise as semijoias escolhidas, ajuste as quantidades, simule o frete e finalize o atendimento com a sua consultora.",
       },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Sua sacola — LARDAN" },
-      { property: "og:description", content: "Revise as peças escolhidas e simule o frete." },
+      { property: "og:description", content: "Sua sacola Lardan: revise as semijoias escolhidas, ajuste as quantidades, simule o frete e finalize o atendimento com a sua consultora." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Sua sacola — LARDAN" },
+      { name: "twitter:description", content: "Sua sacola Lardan: revise as semijoias escolhidas, ajuste as quantidades, simule o frete e finalize o atendimento com a sua consultora." },
       ...ogImageMeta(),
     ],
   }),

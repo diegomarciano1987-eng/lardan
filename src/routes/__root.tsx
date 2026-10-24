@@ -88,9 +88,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Página não encontrada — LARDAN" },
       // Cor da barra do navegador em celulares (marfim da identidade).
       { name: "theme-color", content: "#f7f3ee" },
-      // Verificação de propriedade do Google Search Console.
+      // Verificação de propriedade do Google Search Console (uma única tag:
+      // duas com o mesmo nome se sobrescrevem e derrubam a verificação).
       { name: "google-site-verification", content: "ONkKP7BT1UBu3XgfC1aYlfah0lblV553kdZZnWqg72I" },
-      { name: "google-site-verification", content: "rKs-OV8PqwPhAePfY0JSMR0x15GwNfOH14NBg-hB9Sw" },
     ],
     links: [
       {

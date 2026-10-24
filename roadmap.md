@@ -1,4 +1,9 @@
 # Roadmap
+## SEO sem mudança visual — 24/10
+- [ ] Arquivo IndexNow CHAVE.txt; preservar chave e fluxos existentes.
+- [ ] Metadados públicos nos limites, imagens acessíveis, head único e prova HTML pré-renderizado.
+- [ ] Preservar regras robots e declarar agentes no grupo geral; revisar lastmod sem inventar datas.
+- [ ] Testes e evidências; não publicar sem pedido.
 ## Limpeza HOMOLOG c — 23/10, 19:35 UTC
 - [x] Origem: bateria de testes da base real rodada às 19:00–19:07 criou 48 cadastros, 18 maletas e depósitos de teste; nenhum movimento no DEP-01.
 - [x] Arquivado (lote homolog-limpeza-20261023c, backup na auditoria): 18 maletas, 3 reservas, 48 cadastros, 3 logins/3 papéis, 4 produtos, 10 variações, 1 imagem, 4 depósitos; recontagem 0 fora do financeiro. Lote c2 (19:41, última execução antes da trava): 3 cadastros, 6 maletas, 1 produto, 3 variações, 1 depósito, 1 reserva.

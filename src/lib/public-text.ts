@@ -35,6 +35,15 @@ export function robotsTxt(): string {
 # Conteúdo público (páginas, guias, catálogo, CSS, JS e imagens) é livre.
 
 User-agent: *
+User-agent: Bingbot
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: PerplexityBot
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
 Allow: /
 ${liberados}
 ${bloqueios}

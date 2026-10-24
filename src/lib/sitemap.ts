@@ -64,9 +64,9 @@ export async function urlsPaginas(): Promise<UrlSitemap[]> {
 
   const categorias = await listPublicCategories();
   for (const c of categorias) {
-      // Categoria publicada sem peça é noindex — não entra no sitemap.
-      if (!c.produtos || c.produtos <= 0) continue;
-      urls.push({ loc: `/semijoias/${c.slug}` });
+    // Categoria publicada sem peça é noindex — não entra no sitemap.
+    if (!c.produtos || c.produtos <= 0) continue;
+    urls.push({ loc: `/semijoias/${c.slug}` });
   }
 
   return urls;

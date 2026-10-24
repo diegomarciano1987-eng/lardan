@@ -59,7 +59,7 @@ export function RetratoOficial({
       )}
     >
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 opacity-60">
-        <img src={diamanteAsset.url} alt="" className="h-7 w-auto" width={56} height={35} />
+        <img src={diamanteAsset.url} alt="" aria-hidden="true" className="h-7 w-auto" width={56} height={35} />
         {import.meta.env.DEV && (
           <span className="brand-eyebrow px-6 text-center text-muted-foreground">{rotulo}</span>
         )}

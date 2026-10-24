@@ -127,7 +127,7 @@ function ProdutoPage() {
                 <img
                   key={img.media_id}
                   src={mediaUrl(img.media_id) ?? ""}
-                  alt={img.alt}
+                  alt={img.alt?.trim() || `${p.name} — semijoia Lardan`}
                   loading="lazy"
                   className="w-full rounded-2xl object-cover"
                 />

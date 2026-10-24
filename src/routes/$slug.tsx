@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { vitrinePublica, type VitrineItem } from "@/lib/maletas";
 import { VitrineView } from "@/components/vitrine/VitrineView";
 import { arquivoPublico, type DesignVitrine } from "@/lib/vitrine-design";
+import { seoTexts } from "@/lib/seo-texts";
 
 const SITE = "https://www.lardan.com.br";
 type Publica = Awaited<ReturnType<typeof vitrinePublica>> & { design?: Partial<DesignVitrine> | null };
@@ -19,9 +20,10 @@ export const Route = createFileRoute("/$slug")({
     const url = `${SITE}/${params.slug}`;
     const d = loaderData?.design;
     const nome = loaderData?.nome ?? "Vitrine";
-    const titulo = d?.compartilhar?.titulo || `${nome} · Semijoias LARDAN`;
-    const descricao =
+    const tituloOriginal = d?.compartilhar?.titulo || `${nome} · Semijoias LARDAN`;
+    const descricaoOriginal =
       d?.compartilhar?.descricao || loaderData?.headline || `Peças LARDAN disponíveis com ${nome}. Escolha suas peças e fale direto com a consultora.`;
+    const { title: titulo, description: descricao } = seoTexts({ title: tituloOriginal, description: descricaoOriginal, path: `/${params.slug}` });
     const og = d?.compartilhar?.imagem ? `${SITE}${arquivoPublico(d.compartilhar.imagem)}` : null;
     return {
       meta: [
@@ -32,6 +34,8 @@ export const Route = createFileRoute("/$slug")({
         { property: "og:type", content: "website" },
         { property: "og:url", content: url },
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: titulo },
+        { name: "twitter:description", content: descricao },
         ...(og ? [{ property: "og:image", content: og }, { name: "twitter:image", content: og }] : []),
       ],
       links: [{ rel: "canonical", href: url }],

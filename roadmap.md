@@ -1,9 +1,12 @@
 # Roadmap
 ## SEO sem mudança visual — 24/10
-- [ ] Arquivo IndexNow CHAVE.txt; preservar chave e fluxos existentes.
-- [ ] Metadados públicos nos limites, imagens acessíveis, head único e prova HTML pré-renderizado.
-- [ ] Preservar regras robots e declarar agentes no grupo geral; revisar lastmod sem inventar datas.
-- [ ] Testes e evidências; não publicar sem pedido.
+- [x] Arquivo IndexNow CHAVE.txt exato (32 bytes); chave/fluxos existentes preservados.
+- [x] Metadados nos limites e og/twitter sincronizados; imagens corrigidas; 20 páginas e quatro categorias verificadas, navegação React 1/1/1 e conteúdo editorial no HTML.
+- [x] Robots com agentes no mesmo grupo e restrições intactas; datas editoriais preservadas, sem lastmod inventado; falhas públicas de leitura não geram mapa parcial.
+- [x] Dez testes SEO aprovados, build OK e evidências em docs/lardan/SEO-2026-10-24.md; não publicado.
+- [ ] lastmod nas cinco páginas sem data — bloqueio: falta timestamp real de alteração significativa; não usar hoje como fallback.
+- [ ] canonical nas páginas auxiliares sem ele — bloqueio: pedido explícito de não alterar canonical; preservados.
+- [ ] Prova de produto/vitrine pública com dados reais — leitura pública atual retorna zero produtos e não foi fornecido endereço de vitrine.
 ## Limpeza HOMOLOG c — 23/10, 19:35 UTC
 - [x] Origem: bateria de testes da base real rodada às 19:00–19:07 criou 48 cadastros, 18 maletas e depósitos de teste; nenhum movimento no DEP-01.
 - [x] Arquivado (lote homolog-limpeza-20261023c, backup na auditoria): 18 maletas, 3 reservas, 48 cadastros, 3 logins/3 papéis, 4 produtos, 10 variações, 1 imagem, 4 depósitos; recontagem 0 fora do financeiro. Lote c2 (19:41, última execução antes da trava): 3 cadastros, 6 maletas, 1 produto, 3 variações, 1 depósito, 1 reserva.

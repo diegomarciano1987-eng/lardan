@@ -67,8 +67,8 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
     <div className={`relative w-full overflow-hidden ${alto}`} aria-hidden>
       {capaD || capaM ? (
         <>
-          <img src={capaM ?? capaD!} alt="" className="absolute inset-0 size-full object-cover @3xl:hidden" style={{ objectPosition: `${fM.x}% ${fM.y}%` }} />
-          <img src={capaD ?? capaM!} alt="" className="absolute inset-0 hidden size-full object-cover @3xl:block" style={{ objectPosition: `${fD.x}% ${fD.y}%` }} />
+          <img src={capaM ?? capaD ?? undefined} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover @3xl:hidden" style={{ objectPosition: `${fM.x}% ${fM.y}%` }} />
+          <img src={capaD ?? capaM ?? undefined} alt="" aria-hidden="true" className="absolute inset-0 hidden size-full object-cover @3xl:block" style={{ objectPosition: `${fD.x}% ${fD.y}%` }} />
         </>
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,var(--v-surface),var(--v-bg)_60%),linear-gradient(135deg,var(--v-line),var(--v-bg))]">

@@ -19,11 +19,13 @@ export const Route = createFileRoute("/pdv")({
   head: () => ({
     meta: [
       { title: "PDV Loja Lardan — Frente de caixa" },
-      { name: "description", content: "Frente de caixa das lojas Lardan: acesso pelo número da loja." },
-      { property: "og:title", content: "PDV Loja Lardan" },
-      { property: "og:description", content: "Frente de caixa das lojas Lardan." },
+      { name: "description", content: "PDV Loja Lardan: frente de caixa com acesso pelo número da loja para a operação autorizada de vendas, clientes, recebimentos e comprovantes." },
+      { property: "og:title", content: "PDV Loja Lardan — Frente de caixa" },
+      { property: "og:description", content: "PDV Loja Lardan: frente de caixa com acesso pelo número da loja para a operação autorizada de vendas, clientes, recebimentos e comprovantes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "PDV Loja Lardan — Frente de caixa" },
+      { name: "twitter:description", content: "PDV Loja Lardan: frente de caixa com acesso pelo número da loja para a operação autorizada de vendas, clientes, recebimentos e comprovantes." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

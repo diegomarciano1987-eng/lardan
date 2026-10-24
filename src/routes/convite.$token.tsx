@@ -10,11 +10,13 @@ export const Route = createFileRoute("/convite/$token")({
   head: () => ({
     meta: [
       { title: "Convite de acesso — LARDAN" },
-      { name: "description", content: "Aceite seu convite de acesso ao sistema da Lardan." },
+      { name: "description", content: "Convite de acesso Lardan: confira seu convite, entre com sua conta ou siga as orientações para aceitar o acesso autorizado ao sistema." },
       { property: "og:title", content: "Convite de acesso — LARDAN" },
-      { property: "og:description", content: "Aceite seu convite de acesso ao sistema da Lardan." },
+      { property: "og:description", content: "Convite de acesso Lardan: confira seu convite, entre com sua conta ou siga as orientações para aceitar o acesso autorizado ao sistema." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Convite de acesso — LARDAN" },
+      { name: "twitter:description", content: "Convite de acesso Lardan: confira seu convite, entre com sua conta ou siga as orientações para aceitar o acesso autorizado ao sistema." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

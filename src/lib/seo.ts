@@ -4,6 +4,7 @@ import ogAsset from "@/assets/lardan-og.jpg.asset.json";
 import logoAsset from "@/assets/lardan-logo-completa.png.asset.json";
 import { INSTAGRAM_URL, PERFIL_GOOGLE_URL } from "@/lib/brand";
 import { DANIEL, EMPRESA, ENDERECO, LARISSA } from "@/lib/institucional";
+import { seoTexts } from "@/lib/seo-texts";
 
 /**
  * Configuração central de URL do site — FONTE ÚNICA DE VERDADE.
@@ -69,18 +70,19 @@ export function pageMeta(opts: {
   image?: string | ImagemSocial | null;
 }) {
   const url = abs(opts.path);
+  const { title, description } = seoTexts(opts);
   return [
-    { title: opts.title },
-    { name: "description", content: opts.description },
-    { property: "og:title", content: opts.title },
-    { property: "og:description", content: opts.description },
+    { title },
+    { name: "description", content: description },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
     { property: "og:type", content: opts.type ?? "website" },
     { property: "og:url", content: url },
     { property: "og:site_name", content: SITE_NAME },
     { property: "og:locale", content: "pt_BR" },
     { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:title", content: opts.title },
-    { name: "twitter:description", content: opts.description },
+    { name: "twitter:title", content: title },
+    { name: "twitter:description", content: description },
     ...ogImageMeta(opts.image ?? null),
   ];
 }

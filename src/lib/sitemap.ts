@@ -62,15 +62,11 @@ export async function urlsPaginas(): Promise<UrlSitemap[]> {
     });
   }
 
-  try {
-    const categorias = await listPublicCategories();
-    for (const c of categorias) {
-      // Categoria publicada sem peça é noindex — não entra no sitemap.
-      if (!c.produtos || c.produtos <= 0) continue;
-      urls.push({ loc: `/semijoias/${c.slug}` });
-    }
-  } catch {
-    /* catálogo indisponível: o sitemap segue válido com as rotas fixas */
+  const categorias = await listPublicCategories();
+  for (const c of categorias) {
+    // Categoria publicada sem peça é noindex — não entra no sitemap.
+    if (!c.produtos || c.produtos <= 0) continue;
+    urls.push({ loc: `/semijoias/${c.slug}` });
   }
 
   return urls;
@@ -84,19 +80,18 @@ export async function slugsProdutos(): Promise<string[]> {
   while (slugs.length < total) {
     const lote = await listPublicProducts({ pagina, porPagina: LOTE });
     total = lote.total;
-    if (lote.rows.length === 0) break;
+    if (lote.rows.length === 0) {
+      if (slugs.length < total) throw new Error("Catálogo incompleto no sitemap");
+      break;
+    }
     for (const p of lote.rows) if (p.slug) slugs.push(p.slug);
     pagina += 1;
-    if (pagina > 200) break; // trava de segurança (100 mil peças)
+    if (pagina > 200 && slugs.length < total) throw new Error("Limite de leitura do sitemap excedido");
   }
   return slugs;
 }
 
 export async function contarArquivosProdutos(): Promise<number> {
-  try {
-    const { total } = await listPublicProducts({ pagina: 0, porPagina: 1 });
-    return Math.max(1, Math.ceil(total / POR_SITEMAP));
-  } catch {
-    return 1;
-  }
+  const { total } = await listPublicProducts({ pagina: 0, porPagina: 1 });
+  return Math.max(1, Math.ceil(total / POR_SITEMAP));
 }

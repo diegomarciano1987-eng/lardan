@@ -11,11 +11,13 @@ export const Route = createFileRoute("/indicacao/$codigo")({
   head: () => ({
     meta: [
       { title: "Convite para ser Consultora Lardan" },
-      { name: "description", content: "Você recebeu um convite para se candidatar como Consultora Lardan. Preencha sua candidatura." },
+      { name: "description", content: "Convite para ser Consultora Lardan: preencha sua candidatura e conte sobre seu perfil. A equipe analisa as informações, sem aprovação garantida." },
       { property: "og:title", content: "Convite para ser Consultora Lardan" },
-      { property: "og:description", content: "Você recebeu um convite para se candidatar como Consultora Lardan." },
+      { property: "og:description", content: "Convite para ser Consultora Lardan: preencha sua candidatura e conte sobre seu perfil. A equipe analisa as informações, sem aprovação garantida." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Convite para ser Consultora Lardan" },
+      { name: "twitter:description", content: "Convite para ser Consultora Lardan: preencha sua candidatura e conte sobre seu perfil. A equipe analisa as informações, sem aprovação garantida." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

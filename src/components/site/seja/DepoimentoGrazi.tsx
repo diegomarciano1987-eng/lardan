@@ -32,7 +32,7 @@ export function DepoimentoGrazi() {
                   onError={(e) => {
                     e.currentTarget.src = `https://i.ytimg.com/vi/${VIDEO_ID}/hqdefault.jpg`;
                   }}
-                  alt=""
+                  alt="Grazi, Consultora Lardan de Echaporã, na capa de seu depoimento"
                   loading="lazy"
                   className="absolute inset-0 size-full object-cover"
                 />

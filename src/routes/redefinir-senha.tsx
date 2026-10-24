@@ -7,11 +7,13 @@ export const Route = createFileRoute("/redefinir-senha")({
   head: () => ({
     meta: [
       { title: "Redefinir senha — LARDAN" },
-      { name: "description", content: "Recupere o acesso à sua conta da Lardan." },
+      { name: "description", content: "Redefina sua senha Lardan: solicite pelo e-mail cadastrado o link de recuperação e crie uma nova senha para voltar a acessar sua conta." },
       { property: "og:title", content: "Redefinir senha — LARDAN" },
-      { property: "og:description", content: "Recupere o acesso à sua conta da Lardan." },
+      { property: "og:description", content: "Redefina sua senha Lardan: solicite pelo e-mail cadastrado o link de recuperação e crie uma nova senha para voltar a acessar sua conta." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Redefinir senha — LARDAN" },
+      { name: "twitter:description", content: "Redefina sua senha Lardan: solicite pelo e-mail cadastrado o link de recuperação e crie uma nova senha para voltar a acessar sua conta." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

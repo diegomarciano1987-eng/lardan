@@ -6,11 +6,13 @@ export const Route = createFileRoute("/ajuda")({
   head: () => ({
     meta: [
       { title: "Central de Ajuda — Lardan" },
-      { name: "description", content: "Como aceitar o convite, entrar e recuperar o acesso ao sistema Lardan." },
+      { name: "description", content: "Central de Ajuda Lardan: consulte orientações para aceitar seu convite, entrar no sistema e recuperar o acesso à conta com uma nova senha." },
       { property: "og:title", content: "Central de Ajuda — Lardan" },
-      { property: "og:description", content: "Como aceitar o convite, entrar e recuperar o acesso ao sistema Lardan." },
+      { property: "og:description", content: "Central de Ajuda Lardan: consulte orientações para aceitar seu convite, entrar no sistema e recuperar o acesso à conta com uma nova senha." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Central de Ajuda — Lardan" },
+      { name: "twitter:description", content: "Central de Ajuda Lardan: consulte orientações para aceitar seu convite, entrar no sistema e recuperar o acesso à conta com uma nova senha." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

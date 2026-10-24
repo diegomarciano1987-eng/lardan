@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { seoTexts } from "../../src/lib/seo-texts";
 import { robotsTxt, CAMINHOS_PRIVADOS, CAMINHOS_LIBERADOS } from "../../src/lib/public-text";
 import { pageMeta } from "../../src/lib/seo";

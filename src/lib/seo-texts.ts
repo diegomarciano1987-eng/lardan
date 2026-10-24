@@ -37,6 +37,6 @@ export function seoTexts(opts: { title: string; description: string; path: strin
     ? " Consulte as peças de semijoias e as informações publicadas no catálogo oficial da Lardan."
     : " Conheça as semijoias Lardan e consulte as informações desta página no site oficial da marca.";
   if (description.length < 120) description += complemento;
-  if (description.length < 120) description += " Site oficial Lardan.";
+  if (description.length < 120) description += " Saiba mais sobre as semijoias no site oficial da Lardan.";
   return { title, description: limitar(description, 155) };
 }

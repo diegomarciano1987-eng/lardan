@@ -371,7 +371,7 @@ body.operational-glass-active * {
   .operational-glass, body.operational-glass-active { --card: var(--background); --op-control: var(--background); }
 }
 @media print {
-  .operational-glass-backdrop, .operational-glass::before { display: none; }
+  .operational-glass::before { display: none; }
   .operational-glass, body.operational-glass-active {
     --foreground: oklch(0.20 0 0);
     --background: oklch(1 0 0);

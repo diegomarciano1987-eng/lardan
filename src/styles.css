@@ -1021,6 +1021,78 @@ body.consultora-glass-active :is([role="dialog"], [role="alertdialog"]) img[alt=
     backdrop-filter: blur(20px) saturate(135%);
   }
 }
+/* Crystal controls: tint is in the glass, never an opaque rose slab. */
+.consultora-glass-pilot,
+body.consultora-glass-active {
+  --glass-action-base: oklch(0.27 0.032 25 / 0.82);
+  --glass-action-tint: oklch(0.72 0.068 25 / 0.28);
+  --glass-action-clear: oklch(0.98 0.012 65 / 0.18);
+  --glass-action-edge: oklch(0.86 0.06 25 / 0.85);
+  --glass-action-hover: oklch(0.36 0.045 25 / 0.88);
+  --glass-control-base: oklch(0.23 0.012 320 / 0.72);
+  --glass-action-gradient: linear-gradient(115deg, var(--glass-action-clear), transparent 34%, var(--glass-action-tint)), linear-gradient(180deg, var(--glass-action-tint), transparent 52%), var(--glass-action-base);
+  --glass-control-shadow: inset 0 1px 0 var(--glass-highlight), inset 0 -1px 0 var(--glass-reflection), inset 1px 0 0 var(--glass-reflection), 0 8px 18px -12px var(--glass-shade);
+}
+:is(.consultora-glass-pilot, body.consultora-glass-active) :is(.btn-app-principal, .admin-btn-primary, button.bg-acao, button.bg-primary) {
+  background: var(--glass-action-gradient);
+  color: var(--foreground);
+  border: 1px solid var(--glass-action-edge);
+  border-radius: 8px;
+  box-shadow: var(--glass-control-shadow);
+  backdrop-filter: blur(18px) saturate(150%);
+  text-shadow: 0 1px 3px var(--glass-shade);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+:is(.consultora-glass-pilot, body.consultora-glass-active) :is(.btn-app-principal, .admin-btn-primary, button.bg-acao, button.bg-primary) svg {
+  color: var(--primary);
+}
+.consultora-glass-pilot .consultora-inicio-acoes > button > span:first-child {
+  background: var(--glass-action-tint);
+  border: 1px solid var(--glass-action-edge);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  color: var(--primary);
+}
+:is(.consultora-glass-pilot, body.consultora-glass-active) :is(button.admin-btn:not(.admin-btn-primary), button.bg-secondary, button.bg-background, button.bg-card) {
+  background: var(--glass-reflection-gradient), var(--glass-control-base);
+  color: var(--foreground);
+  box-shadow: var(--glass-control-shadow);
+  backdrop-filter: blur(16px) saturate(135%);
+}
+.consultora-glass-pilot main .sticky.bg-background\/95 {
+  background: var(--glass-reflection-gradient), var(--glass-mobile-surface);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(20px) saturate(135%);
+  box-shadow: inset 0 1px 0 var(--glass-reflection);
+}
+:is(.consultora-glass-pilot, body.consultora-glass-active) :is(.btn-app-principal, .admin-btn, button.bg-acao, button.bg-primary):focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 4px;
+}
+:is(.consultora-glass-pilot, body.consultora-glass-active) :is(.btn-app-principal, .admin-btn-primary, button.bg-acao, button.bg-primary):disabled {
+  opacity: 0.65;
+  box-shadow: none;
+}
+@media (hover: hover) {
+  :is(.consultora-glass-pilot, body.consultora-glass-active) :is(.btn-app-principal, .admin-btn-primary, button.bg-acao, button.bg-primary):not(:disabled):hover {
+    --glass-action-base: var(--glass-action-hover);
+    border-color: var(--primary);
+    box-shadow: var(--glass-control-shadow), 0 0 0 1px var(--glass-action-tint);
+    filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.consultora-glass-pilot, body.consultora-glass-active) :is(.btn-app-principal, .admin-btn-primary, button.bg-acao, button.bg-primary) { transition: none; }
+}
+@media (prefers-contrast: more) {
+  .consultora-glass-pilot,
+  body.consultora-glass-active {
+    --glass-action-base: var(--background);
+    --glass-control-base: var(--background);
+    --glass-action-clear: transparent;
+    --glass-action-tint: transparent;
+    --glass-action-edge: var(--primary);
+  }
+}
 /* Stage 3: same home order/actions, stronger text backing and crystal edges. */
 .consultora-glass-pilot:has(.consultora-inicio) {
   --glass-home-surface: oklch(0.22 0.012 320 / 0.74);

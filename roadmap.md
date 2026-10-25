@@ -1,4 +1,7 @@
 # Roadmap
+## Vidro etapa 4 — dock flutuante — 25/10
+- [x] Menu lateral desktop descolado da borda (16 px, cantos 20 px, sombra de vidro) e navegação inferior do celular em pílula flutuante; item ativo e hover em cápsulas de vidro. Somente Diego Silva, sem mover botões nem funções.
+- [x] Conta real conferida em 1440×900 e 390×844: dock flutuante e pílula visíveis, sem transbordamento nem erros; 14 testes aprovados e build OK. Provas: docs/lardan/CONSULTORA-GLASS-ETAPA-3.md. Não publicado.
 ## Vidro etapa 3 — Início e contraste — 25/10
 - [x] Botões Nova venda, Nova cliente, Salvar na Jornada e famílias de ações com vidro rosé fumê, reflexos e bordas; celular/desktop, somente Diego Silva, sem alterar funções.
 - [x] Cartões do Início com arestas coloridas e fundo mais consistente para leitura; ordem, botões, consultas e valores preservados.

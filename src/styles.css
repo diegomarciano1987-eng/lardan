@@ -893,10 +893,14 @@ body:has(.area-consultora) {
     z-index: -1;
   }
   .consultora-glass-pilot > aside {
+    top: 16px;
+    height: calc(100dvh - 32px);
+    margin-left: 16px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
     background: var(--glass-reflection-gradient), var(--glass-surface);
     backdrop-filter: blur(28px) saturate(135%);
-    border-color: var(--border);
-    box-shadow: inset -1px 0 0 var(--glass-highlight), 8px 0 32px -22px var(--glass-shade);
+    box-shadow: inset 0 1px 0 var(--glass-highlight), inset 1px 0 0 var(--glass-reflection), 0 24px 48px -24px var(--glass-shade);
   }
   .consultora-glass-pilot > aside > img { filter: brightness(0) invert(1); opacity: 0.95; }
   .consultora-glass-pilot > aside > button:not(.btn-app-principal),
@@ -915,10 +919,17 @@ body:has(.area-consultora) {
     transition: background 160ms ease, border-color 160ms ease;
   }
   .consultora-glass-pilot > aside nav button[aria-current="page"] {
-    background: var(--muted);
+    background: var(--glass-reflection-gradient), var(--muted);
     border-color: var(--border);
+    border-radius: 12px;
     color: var(--primary);
     box-shadow: inset 3px 0 0 var(--primary), inset 0 1px 0 var(--glass-highlight);
+  }
+  .consultora-glass-pilot > aside nav button:not([aria-current="page"]):hover {
+    background: var(--muted);
+    border-color: var(--border);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 var(--glass-reflection);
   }
   .consultora-glass-pilot :is(.admin-btn, .btn-app-principal) { border-radius: 8px; }
   .consultora-glass-pilot .admin-btn {
@@ -1005,6 +1016,14 @@ body.consultora-glass-active :is([role="dialog"], [role="alertdialog"]) img[alt=
     backdrop-filter: blur(18px) saturate(135%);
     box-shadow: inset 0 1px 0 var(--glass-highlight);
     border-color: var(--border);
+  }
+  .consultora-glass-pilot .consultora-mobile-nav {
+    left: 12px;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: inset 0 1px 0 var(--glass-highlight), 0 18px 36px -20px var(--glass-shade);
   }
   .consultora-glass-pilot .consultora-mobile-nav button { font-size: 0.95rem; }
   .consultora-glass-pilot .consultora-mobile-nav button[aria-current="page"] {

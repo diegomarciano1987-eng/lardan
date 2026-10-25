@@ -1,11 +1,11 @@
 /* Cinematic glass for private shells only. Public tokens remain untouched. */
 .operational-glass,
 body.operational-glass-active {
-  --background: oklch(0.19 0.009 320);
+  --background: oklch(0.228 0.009 320);
   --foreground: oklch(0.97 0.008 65);
-  --card: oklch(0.23 0.010 320 / 0.68);
+  --card: oklch(0.207 0.010 320 / 0.82);
   --card-foreground: var(--foreground);
-  --popover: oklch(0.25 0.010 320 / 0.97);
+  --popover: oklch(0.225 0.010 320 / 0.97);
   --popover-foreground: var(--foreground);
   --muted: oklch(0.65 0.014 320 / 0.13);
   --muted-foreground: oklch(0.86 0.012 65);
@@ -48,7 +48,7 @@ body.operational-glass-active {
   --op-reflection: oklch(0.99 0.006 65 / 0.12);
   --op-edge: oklch(0.99 0.006 65 / 0.48);
   --op-shadow-color: oklch(0.10 0.006 320 / 0.70);
-  --op-control: oklch(0.23 0.012 320 / 0.78);
+  --op-control: oklch(0.207 0.012 320 / 0.86);
   --op-action: oklch(0.29 0.040 25 / 0.92);
   --op-action-tint: oklch(0.72 0.068 25 / 0.26);
   --op-action-edge: oklch(0.86 0.06 25 / 0.76);
@@ -59,6 +59,9 @@ body.operational-glass-active {
   --op-panel-shadow: inset 0 1px 0 var(--op-edge), inset 1px 0 0 var(--op-reflection), inset 0 -1px 0 var(--op-reflection), 0 22px 46px -30px var(--op-shadow-color);
   --op-control-shadow: inset 0 1px 0 var(--op-edge), inset 0 -1px 0 var(--op-reflection), 0 10px 22px -16px var(--op-shadow-color);
   --op-asaas-glass: linear-gradient(125deg, var(--op-reflection), transparent 48%), color-mix(in oklab, var(--color-asaas) 80%, var(--color-ink));
+  --op-backdrop-brightness: 1.2;
+  --op-dock-reflection: oklch(0.99 0.006 65 / 0.20);
+  --op-dock-gradient: linear-gradient(125deg, var(--op-dock-reflection), transparent 35%, var(--op-reflection) 100%);
   color-scheme: dark;
 }
 .operational-glass {
@@ -75,6 +78,7 @@ body.operational-glass-active {
   height: 100dvh;
   object-fit: cover;
   object-position: center;
+  filter: brightness(var(--op-backdrop-brightness));
   pointer-events: none;
   z-index: -2;
 }
@@ -135,6 +139,63 @@ body.operational-glass-active { background: var(--background); color: var(--fore
 }
 .operational-glass [data-bottom-dock] ul { scrollbar-width: none; }
 .operational-glass [data-bottom-dock] ul::-webkit-scrollbar { display: none; }
+/* Larger private navigation, bounded by the desktop rather than scaled text. */
+@media (min-width: 768px) {
+  .operational-glass [data-bottom-dock] > div {
+    min-height: 78px;
+    padding: 12px 20px;
+    gap: 16px;
+    background: var(--op-dock-gradient), var(--card);
+    border-color: var(--op-edge);
+    border-radius: 28px;
+  }
+  .operational-glass [data-bottom-dock] :is(a, button) {
+    min-height: 50px;
+    padding: 12px 16px;
+    font-size: 15px;
+    gap: 10px;
+  }
+  .operational-glass [data-bottom-dock] svg { width: 22px; height: 22px; }
+  .operational-glass [data-bottom-dock] img { height: 24px; opacity: 1; }
+  .operational-glass [data-module-overlay] { padding: 24px 32px 118px; backdrop-filter: blur(8px); }
+  .operational-glass [data-module-panel] {
+    width: min(1120px, 100%);
+    max-width: 1120px;
+    max-height: calc(100dvh - 154px);
+    overflow-y: auto;
+    padding: 28px;
+    border-radius: 24px;
+    background: var(--op-dock-gradient), var(--popover);
+    border-color: var(--op-edge);
+    box-shadow: var(--op-panel-shadow);
+    backdrop-filter: blur(32px) saturate(145%);
+  }
+  .operational-glass [data-module-panel] > div { margin-bottom: 20px; }
+  .operational-glass [data-module-panel] .ledger-eyebrow { font-size: 14px; letter-spacing: 0; }
+  .operational-glass [data-module-panel] ul {
+    width: 100%;
+    gap: 10px 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .operational-glass [data-module-panel] li > :is(a,button,span) {
+    min-height: 60px;
+    padding: 16px;
+    font-size: 17px;
+    font-weight: 600;
+    border-radius: 12px;
+    border: 1px solid var(--color-line-soft);
+    background-image: var(--op-reflection-gradient);
+  }
+  .operational-glass [data-module-panel] .truncate { white-space: normal; overflow: visible; }
+  .operational-glass [data-module-panel] svg { width: 24px; height: 24px; flex-shrink: 0; }
+  .operational-glass [data-module-panel] li span.uppercase { font-size: 10px; text-align: right; }
+  .operational-glass [data-module-panel] button[aria-label="Fechar módulos"] { min-width: 44px; min-height: 44px; }
+  .operational-glass .admin-scope main { padding-bottom: 132px; }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .operational-glass [data-module-panel] ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .operational-glass [data-bottom-dock] :is(a,button) { padding-inline: 10px; font-size: 14px; }
+}
 /* Crystal controls. Asaas retains its own brand blue, destructive retains red. */
 :is(.operational-glass, body.operational-glass-active) :is(.admin-btn, button.border, a.border, [role="combobox"]) {
   background: var(--op-reflection-gradient), var(--op-control);

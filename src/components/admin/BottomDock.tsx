@@ -69,8 +69,8 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
     <>
       {/* Gaveta de módulos */}
       {drawer && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-4 pb-28">
-          <div className="w-full max-w-3xl rounded-2xl border border-line-soft bg-surface p-5 shadow-2xl">
+        <div data-module-overlay className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-4 pb-28">
+          <div data-module-panel role="dialog" aria-label={submenu === "financeiro" ? "Áreas do Financeiro" : "Todos os módulos"} className="w-full max-w-3xl rounded-2xl border border-line-soft bg-surface p-5 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               {submenu === "financeiro" ? (
                 <button

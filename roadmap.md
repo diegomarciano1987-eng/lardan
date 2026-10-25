@@ -1,4 +1,7 @@
 # Roadmap
+## llms.txt — 25/10
+- [ ] Preservar todo o conteúdo, converter URLs em links e acrescentar data, perguntas, atendimento e desambiguação com fontes publicadas.
+- [ ] Conferir text/plain, menos de 30 mil caracteres e preservação do documento anterior; não publicar sem pedido.
 ## SEO sem mudança visual — 24/10
 - [x] Arquivo IndexNow CHAVE.txt exato (32 bytes); chave/fluxos existentes preservados.
 - [x] Metadados nos limites e og/twitter sincronizados; imagens corrigidas; 20 páginas e quatro categorias verificadas, navegação React 1/1/1 e conteúdo editorial no HTML.

@@ -22,4 +22,5 @@
 - Barra do menu desktop: `scrollbar-width: thin`, trilha transparente; captura conferida sem faixa branca.
 - Saída para Equipe removeu o escopo visual nas três larguras.
 - Capturas e registro de navegação em `/tmp/browser/glass-etapa2`.
+- 14 testes aprovados: isolamento do piloto, regras da consultora e comissão por remessa. Sinal automático de compilação: build OK.
 - Não publicado.

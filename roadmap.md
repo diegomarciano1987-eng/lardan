@@ -1,8 +1,8 @@
 # Roadmap
 ## Vidro etapa 3 — Início e contraste — 25/10
-- [ ] Novo pedido: transformar botões chapados (Nova venda, Nova cliente e demais ações) em vidro premium, mobile/desktop, com contraste e isolamento Diego Silva.
-- [ ] Aprimorar os cartões do Início, celular primeiro, somente Diego Silva; preservar ações, posições, consultas e valores.
-- [ ] Conferir legibilidade, navegação real, isolamento e rolagem em celular e desktop; registrar provas, sem publicar.
+- [x] Botões Nova venda, Nova cliente, Salvar na Jornada e famílias de ações com vidro rosé fumê, reflexos e bordas; celular/desktop, somente Diego Silva, sem alterar funções.
+- [x] Cartões do Início com arestas coloridas e fundo mais consistente para leitura; ordem, botões, consultas e valores preservados.
+- [x] Conta real em 390×844, 360×800, 1590×889 e 1280×1800: dados 3/2/4/0, ações Pedidos/Nova cliente e retorno conferidos; sem transbordamento ou erro; 14 testes e build OK. Provas: docs/lardan/CONSULTORA-GLASS-ETAPA-3.md. Sem gravação ou publicação.
 ## Vidro etapa 2 — celular primeiro — 25/10
 - [x] Vidro em todas as abas Diego Silva no celular e desktop, menus e formulários; posições, regras e outras contas preservadas. Navegação real conferida em 390×844, 360×800 e 1590×889, sem transbordamento ou erro de execução.
 - [x] Faixa branca da rolagem substituída por trilha transparente e barra fina; captura desktop conferida. 14 testes aprovados e build OK. Maleta/histórico/Biblioteca vazios nesta conta, sem inventar dados; nenhuma gravação operacional ou publicação. Provas: docs/lardan/CONSULTORA-GLASS-ETAPA-2.md.

@@ -34,6 +34,8 @@ body.operational-glass-active {
   --color-bronze: oklch(0.82 0.064 50);
   --color-champagne: oklch(0.86 0.067 72);
   --color-champagne-soft: oklch(0.68 0.07 55 / 0.22);
+  --rose: oklch(0.82 0.085 25);
+  --rose-deep: oklch(0.78 0.12 25);
   --color-success: oklch(0.82 0.12 160);
   --color-danger: var(--destructive);
   --color-warning: oklch(0.88 0.12 85);
@@ -191,6 +193,21 @@ body.operational-glass-active [role="dialog"].fixed.inset-0 > div {
 .operational-glass thead.sticky { background: var(--popover); }
 .operational-glass tbody tr:hover { background-color: var(--muted); }
 .operational-glass :is(.text-ink, .text-graphite, .text-rose-deep) { color: var(--foreground); }
+.operational-glass .text-rose-deep { color: var(--destructive); }
+.operational-glass :is(.bg-ledger-text, .bg-champagne, .bg-champagne-soft) {
+  background: var(--op-reflection-gradient), var(--accent);
+  color: var(--foreground);
+}
+.operational-glass button[aria-selected="true"] {
+  background: var(--op-action-gradient);
+  color: var(--foreground);
+  box-shadow: var(--op-control-shadow);
+}
+.operational-glass .recharts-bar-rectangle [fill="var(--color-asaas)"],
+.operational-glass .recharts-sector[fill="var(--color-asaas)"] {
+  stroke: var(--color-info);
+  stroke-width: 1;
+}
 .operational-glass :is(.text-emerald-700, .text-green-700, .text-emerald-600, .text-green-600) { color: var(--color-success); }
 .operational-glass :is(.text-red-700, .text-red-600, .text-rose-700) { color: var(--color-danger); }
 .operational-glass :is(.text-amber-700, .text-amber-600, .text-yellow-700) { color: var(--color-warning); }

@@ -17500,6 +17500,7 @@ export type Database = {
         }
         Returns: Json
       }
+      fin_reconcile_chave_livre: { Args: { _key: string }; Returns: string }
       fin_reconcile_undo: {
         Args: { _motivo: string; _reconciliation: string }
         Returns: string

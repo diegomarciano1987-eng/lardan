@@ -1,4 +1,7 @@
 # Roadmap
+## Vidro etapa 2 — celular primeiro — 25/10
+- [ ] Aplicar vidro em todas as abas Diego Silva no celular e desktop, incluindo menus e formulários; preservar outras contas, posições e funções.
+- [ ] Corrigir a faixa branca da rolagem e conferir navegação real, legibilidade e larguras móveis.
 ## Velocidade das fotos novas — 25/10
 - [x] Foto mobile da home convertida de PNG (nome JPG) para WebP lossless: 1.409.967 → 1.022.688 bytes, redução de 27,5%, pixels RGB idênticos e mesmas dimensões. Desktop já é WebP de 100.600 bytes; Seja Lardan já é JPEG de 97.378 bytes, mantidos porque conversão lossless aumentaria o peso. Fotos carregadas em 1280×1800 e 392×719, 5 testes de metadados e build OK; não publicado.
 ## Piloto vidro — consultora desktop — 25/10

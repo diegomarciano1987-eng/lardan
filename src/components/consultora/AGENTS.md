@@ -1,1 +1,1 @@
-- Keep the glass pilot appearance-only, selected by authenticated UUID and Início tab; CSS overrides apply only at desktop widths. Why: preserve mobile, other accounts, permissions and operational behavior.
+- Keep the glass pilot appearance-only, selected by authenticated UUID and consultant tabs on mobile and desktop; apply its body scope only while the shell is mounted, including portal surfaces but excluding printed documents. Why: stage the approved visual expansion without touching other accounts, permissions or operational behavior.

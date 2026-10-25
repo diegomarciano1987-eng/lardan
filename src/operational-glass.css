@@ -156,6 +156,11 @@ body.operational-glass-active { background: var(--background); color: var(--fore
   border-color: color-mix(in oklab, var(--color-info) 70%, var(--color-asaas));
   box-shadow: var(--op-control-shadow);
 }
+.operational-glass .admin-scope .admin-btn.bg-asaas {
+  background: var(--op-asaas-glass);
+  color: var(--color-asaas-foreground);
+  border-color: var(--color-info);
+}
 :is(.operational-glass, body.operational-glass-active) .text-asaas:not(.bg-asaas) { color: var(--color-info); }
 :is(.operational-glass, body.operational-glass-active) :is(button.bg-destructive, .bg-danger) {
   background: var(--op-reflection-gradient), color-mix(in oklab, var(--destructive) 32%, var(--color-ink));
@@ -272,7 +277,7 @@ body.operational-glass-active * {
   scrollbar-color: var(--op-action-edge) transparent;
 }
 @media (hover: hover) {
-  :is(.operational-glass, body.operational-glass-active) :is(.admin-btn,button.border,a.border):hover:not(:disabled) {
+  :is(.operational-glass, body.operational-glass-active) :is(.admin-btn,button.border,a.border):hover:not(:disabled):not(.bg-asaas):not(.bg-destructive):not(.bg-danger) {
     border-color: var(--primary);
     background: var(--op-reflection-gradient), var(--accent);
   }

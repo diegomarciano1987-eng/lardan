@@ -1,4 +1,6 @@
 # Roadmap
+## Segundo ajuste de contraste — sistema privado
+- [x] Fundo mais 15% claro e cartões/controles mais 10% escuros sobre o ajuste anterior; Início autenticado com indicadores/gráficos reais conferido em 1547×889, site sem tema, zero erros, 3 testes e build OK. Consultora intacta; sem publicação.
 ## Números do mapa — contraste
 - [x] Números escuros com contorno claro no mapa territorial/agrupamentos, apenas sob tema operacional. Paraná real conferido (121 rótulos), zero erros, 3 testes e build OK; valores/paleta intactos, sem publicação.
 ## Contraste e navegação ampliada — sistema privado

@@ -44,6 +44,15 @@ interface Busca {
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/fluxo-caixa")({
   component: FluxoCaixa,
+  head: () => ({ meta: [
+    { title: "Fluxo de caixa — Financeiro LARDAN" },
+    { name: "description", content: "Movimentos realizados, valores previstos e posição do caixa da operação LARDAN." },
+    { property: "og:title", content: "Fluxo de caixa — Financeiro LARDAN" },
+    { property: "og:description", content: "Movimentos realizados, valores previstos e posição do caixa da operação LARDAN." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex, nofollow" },
+  ] }),
   validateSearch: (s: Record<string, unknown>): Busca => ({
     ...(typeof s["de"] === "string" ? { de: s["de"] } : {}),
     ...(typeof s["ate"] === "string" ? { ate: s["ate"] } : {}),
@@ -264,8 +273,8 @@ function FluxoCaixa() {
                     >
                       <defs>
                         <linearGradient id="fluxoRealizado" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#8a6a3b" stopOpacity={0.55} />
-                          <stop offset="100%" stopColor="#c8a165" stopOpacity={1} />
+                          <stop offset="0%" stopColor="var(--color-bronze)" stopOpacity={0.8} />
+                          <stop offset="100%" stopColor="var(--color-champagne)" stopOpacity={1} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 6" stroke="currentColor" opacity={0.12} />
@@ -310,7 +319,7 @@ function FluxoCaixa() {
                         ]}
                         contentStyle={{
                           borderRadius: 12,
-                          border: "1px solid rgba(0,0,0,0.08)",
+                          border: "1px solid var(--color-line)",
                           fontSize: 13,
                         }}
                       />
@@ -320,7 +329,7 @@ function FluxoCaixa() {
                         type="linear"
                         dataKey="entradas"
                         name="Entradas realizadas"
-                        stroke="#127f57"
+                        stroke="var(--color-success)"
                         strokeWidth={2}
                         dot={false}
                         activeDot={{ r: 4 }}
@@ -330,7 +339,7 @@ function FluxoCaixa() {
                         type="linear"
                         dataKey="saidas"
                         name="Saídas realizadas"
-                        stroke="#b23a34"
+                        stroke="var(--color-danger)"
                         strokeWidth={2}
                         dot={false}
                         activeDot={{ r: 4 }}
@@ -340,7 +349,7 @@ function FluxoCaixa() {
                         type="linear"
                         dataKey="aPagar"
                         name="A pagar no dia"
-                        stroke="#b23a34"
+                        stroke="var(--color-danger)"
                         strokeWidth={2}
                         strokeDasharray="4 4"
                         dot={{ r: 2 }}
@@ -351,7 +360,7 @@ function FluxoCaixa() {
                         type="linear"
                         dataKey="aReceber"
                         name="A receber no dia"
-                        stroke="#127f57"
+                        stroke="var(--color-success)"
                         strokeWidth={2}
                         strokeDasharray="4 4"
                         dot={{ r: 2 }}
@@ -372,7 +381,7 @@ function FluxoCaixa() {
                         type="linear"
                         dataKey="projetado"
                         name="Saldo projetado"
-                        stroke="#6b7280"
+                        stroke="var(--color-ledger-muted)"
                         strokeWidth={2}
                         strokeDasharray="5 5"
                         dot={false}
@@ -420,10 +429,10 @@ function FluxoCaixa() {
                           <td className="px-5 py-3 font-semibold text-ledger-text">
                             {rotuloBucket(l.bucket)}
                           </td>
-                          <td className="px-5 py-3 text-right tabular-nums text-emerald-700">
+                          <td className="px-5 py-3 text-right tabular-nums text-success">
                             {formatBRLFromCents(l.entradas_realizadas_cents)}
                           </td>
-                          <td className="px-5 py-3 text-right tabular-nums text-red-700">
+                          <td className="px-5 py-3 text-right tabular-nums text-danger">
                             {formatBRLFromCents(l.saidas_realizadas_cents)}
                           </td>
                           <td className="px-5 py-3 text-right tabular-nums text-ledger-muted">

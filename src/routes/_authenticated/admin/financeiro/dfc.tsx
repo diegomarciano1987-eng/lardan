@@ -9,7 +9,15 @@ import { usePeriodoFinanceiro } from "@/components/admin/financeiro/PeriodoGloba
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/dfc")({
   component: DfcTela,
-  head: () => ({ meta: [{ title: "DFC e projeção — Financeiro LARDAN" }] }),
+  head: () => ({ meta: [
+    { title: "DFC e projeção — Financeiro LARDAN" },
+    { name: "description", content: "Demonstração dos fluxos de caixa e projeção financeira da operação LARDAN." },
+    { property: "og:title", content: "DFC e projeção — Financeiro LARDAN" },
+    { property: "og:description", content: "Demonstração dos fluxos de caixa e projeção financeira da operação LARDAN." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex, nofollow" },
+  ] }),
 });
 
 interface Atividade {
@@ -208,7 +216,7 @@ function ProjecaoPainel() {
                 <XAxis dataKey="dia" fontSize={11} />
                 <YAxis fontSize={11} width={80} />
                 <Tooltip formatter={(v: number) => formatBRLFromCents(Math.round(v * 100))} />
-                <Line type="monotone" dataKey="saldo" stroke="hsl(var(--primary))" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="saldo" stroke="var(--primary)" dot={false} strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
           </div>

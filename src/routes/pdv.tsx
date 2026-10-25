@@ -9,6 +9,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { LogOut, Search, Trash2, Printer, MessageCircle, Lock, Wallet, Receipt, Users, ShoppingCart, Link2 } from "lucide-react";
 import { ClienteForm, Calculadora, Vendas, Clientes, LinksEnviados, clienteVazio } from "@/components/pdv/PdvExtras";
 import { abrirCupom } from "@/components/pdv/cupom";
+import { OperationalGlass } from "@/components/premium/OperationalGlass";
 import {
   pdvEntrarIniciar, pdvEntrarConfirmar, pdvSair, pdvEstado, pdvOperadora, pdvOperadoraSair, pdvCaixaAbrir, pdvCaixaMov, pdvCaixaFechar,
   pdvBuscar, pdvConcluir, pdvPixGerar, pdvPixSituacao, pdvCancelar, pdvComprovante, pdvClienteSalvar, pdvVendaVincularCliente, type PagamentoPdv, type ClientePdv,
@@ -43,13 +44,11 @@ const erro = (e: unknown) => toast.error((e as Error).message);
 function PdvPage() {
   const estadoFn = useServerFn(pdvEstado);
   const q = useQuery({ queryKey: ["pdv-loja"], queryFn: () => estadoFn(), refetchInterval: 30000 });
-  if (q.isLoading) return <Tela><p className="text-muted-foreground">Carregando…</p></Tela>;
-  if (!q.data) return <Entrar />;
-  return <Loja e={q.data} />;
+  return <OperationalGlass area="pdv">{q.isLoading ? <Tela><p className="text-muted-foreground">Carregando…</p></Tela> : !q.data ? <Entrar /> : <Loja e={q.data} />}</OperationalGlass>;
 }
 
 function Tela({ children }: { children: React.ReactNode }) {
-  return <main className="flex min-h-screen items-center justify-center bg-background p-6">{children}</main>;
+  return <main className="pdv-shell flex min-h-screen items-center justify-center bg-background p-6">{children}</main>;
 }
 
 function Entrar() {
@@ -99,7 +98,7 @@ function Loja({ e }: { e: any }) {
   const [tela, setTela] = React.useState<"venda" | "vendas" | "clientes" | "caixa" | "links">("venda");
   const [cliPre, setCliPre] = React.useState<ClientePdv | null>(null);
   return (
-    <div className="min-h-screen bg-background">
+    <div className="pdv-shell min-h-screen bg-background">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-3">
         <div><p className="font-display text-xl">{e.unidade.nome} <span className="text-sm text-muted-foreground">nº {e.unidade.numero}</span></p>
           <p className="text-xs text-muted-foreground">{e.caixa ? `Caixa aberto por ${e.caixa.aberto_por}` : "Caixa fechado"}</p></div>

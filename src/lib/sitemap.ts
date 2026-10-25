@@ -91,5 +91,5 @@ export async function slugsProdutos(): Promise<string[]> {
 
 export async function contarArquivosProdutos(): Promise<number> {
   const { total } = await listPublicProducts({ pagina: 0, porPagina: 1 });
-  return Math.max(1, Math.ceil(total / POR_SITEMAP));
+  return Math.ceil(total / POR_SITEMAP);
 }

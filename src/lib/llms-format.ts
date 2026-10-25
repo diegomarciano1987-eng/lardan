@@ -17,7 +17,7 @@ const PAGES: Record<string, [string, string]> = {
   "/como-vender-semijoias-pelo-whatsapp": ["Como vender semijoias pelo WhatsApp", "Vendas pelo WhatsApp."],
   "/perguntas-sobre-revenda-de-semijoias": ["Perguntas sobre revenda de semijoias", "Dúvidas sobre revenda."],
   "/como-cuidar-de-semijoias": ["Como cuidar de semijoias", "Cuidados e garantia."],
-  "/semijoia-folheado-ou-bijuteria": ["Semijoia, folheado ou bijuteria", "Materiais e diferenças."],
+  "/guia/semijoia-folheado-ou-bijuteria": ["Semijoia, folheado ou bijuteria", "Materiais e diferenças."],
 };
 
 export function formatLlmsLinks(document: string): string {

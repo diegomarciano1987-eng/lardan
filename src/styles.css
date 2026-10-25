@@ -1333,8 +1333,8 @@ body.consultora-glass-active {
   font-family: "Outfit", var(--font-sans);
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--color-ledger-text);
 }
+.admin-scope :is(h1,h2,h3,h4):not([class*="text-"]) { color: var(--color-ledger-text); }
 
 /* Corpo de texto do painel: nunca fino, nunca lavado.
    O guarda :not([class*="font-"]) respeita pesos definidos manualmente. */

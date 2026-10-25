@@ -2,6 +2,7 @@
 ## Velocidade das fotos novas — 25/10
 - [x] Foto mobile da home convertida de PNG (nome JPG) para WebP lossless: 1.409.967 → 1.022.688 bytes, redução de 27,5%, pixels RGB idênticos e mesmas dimensões. Desktop já é WebP de 100.600 bytes; Seja Lardan já é JPEG de 97.378 bytes, mantidos porque conversão lossless aumentaria o peso. Fotos carregadas em 1280×1800 e 392×719, 5 testes de metadados e build OK; não publicado.
 ## Piloto vidro — consultora desktop — 25/10
+- [x] Refinamento: superfícies mais translúcidas, reflexos diagonais, bordas luminosas e fundo de vidro mais visível; posições mantidas. Conta Diego real conferida em 1590×889 e 1280×1800; celular 390×844 preservado, sem transbordamento; Pedidos fora do piloto e retorno ao Início funcionando; 13 testes aprovados, build OK, não publicado.
 - [x] Glass isolado no Início desktop de Diego Silva por identidade autenticada; vidro da marca, superfícies fumê, rosé e indicadores coloridos. Sem alterar posições, consultas, valores ou permissões.
 - [x] Conta real conferida em 1440×1000, 1280×1800 e 390×844; Pedidos desativa piloto e retorno ao Início restaura; celular mantém tema original, sem transbordamento. 13 testes aprovados e build OK; link de prévia entregue, não publicado.
 ## Fotos home e Seja Lardan — 25/10

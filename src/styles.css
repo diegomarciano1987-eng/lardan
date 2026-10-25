@@ -828,22 +828,27 @@ body:has(.area-consultora) {
   .consultora-glass-pilot {
     --background: oklch(0.22 0.012 320);
     --foreground: oklch(0.97 0.008 65);
-    --card: oklch(0.32 0.015 320 / 0.80);
+    --card: oklch(0.24 0.012 320 / 0.42);
     --card-foreground: var(--foreground);
-    --muted: oklch(0.40 0.014 320 / 0.65);
-    --muted-foreground: oklch(0.85 0.016 65);
+    --muted: oklch(0.65 0.014 320 / 0.18);
+    --muted-foreground: oklch(0.92 0.010 65);
     --primary: oklch(0.83 0.070 25);
     --primary-foreground: oklch(0.23 0.018 25);
     --acao: oklch(0.82 0.072 25);
     --acao-foreground: oklch(0.23 0.018 25);
-    --border: oklch(0.84 0.025 30 / 0.28);
+    --border: oklch(0.94 0.018 65 / 0.32);
     --input: var(--border);
     --ring: var(--primary);
-    --glass-surface: oklch(0.30 0.012 320 / 0.85);
-    --glass-highlight: oklch(0.98 0.006 65 / 0.18);
-    --glass-shade: oklch(0.12 0.006 320 / 0.55);
-    --glass-overlay: oklch(0.20 0.014 320 / 0.76);
-    --glass-shadow: inset 0 1px 0 var(--glass-highlight), 0 16px 38px -22px var(--glass-shade);
+    --glass-surface: oklch(0.22 0.010 320 / 0.48);
+    --glass-highlight: oklch(0.99 0.006 65 / 0.52);
+    --glass-reflection: oklch(0.99 0.006 65 / 0.13);
+    --glass-reflection-end: oklch(0.99 0.006 65 / 0.02);
+    --glass-shade: oklch(0.12 0.006 320 / 0.65);
+    --glass-overlay: oklch(0.16 0.012 320 / 0.58);
+    --glass-overlay-end: oklch(0.18 0.008 320 / 0.36);
+    --glass-overlay-gradient: linear-gradient(120deg, var(--glass-overlay), var(--glass-overlay-end));
+    --glass-reflection-gradient: linear-gradient(135deg, var(--glass-reflection), var(--glass-reflection-end) 45%, transparent 70%);
+    --glass-shadow: inset 0 1px 0 var(--glass-highlight), inset 1px 0 0 var(--glass-reflection), inset 0 -1px 0 var(--glass-reflection), 0 14px 32px -18px var(--glass-shade);
     --shadow-app: 0 8px 24px -14px var(--primary);
     position: relative;
     isolation: isolate;
@@ -863,25 +868,25 @@ body:has(.area-consultora) {
     content: "";
     position: fixed;
     inset: 0;
-    background: var(--glass-overlay);
+    background: var(--glass-overlay-gradient);
     pointer-events: none;
     z-index: -1;
   }
   .consultora-glass-pilot > aside {
-    background: var(--glass-surface);
-    backdrop-filter: blur(24px) saturate(115%);
+    background: var(--glass-reflection-gradient), var(--glass-surface);
+    backdrop-filter: blur(28px) saturate(135%);
     border-color: var(--border);
-    box-shadow: inset -1px 0 0 var(--glass-highlight);
+    box-shadow: inset -1px 0 0 var(--glass-highlight), 8px 0 32px -22px var(--glass-shade);
   }
   .consultora-glass-pilot > aside > img { filter: brightness(0) invert(1); opacity: 0.95; }
   .consultora-glass-pilot > aside > button:not(.btn-app-principal),
   .consultora-glass-pilot main .bg-card,
   .consultora-glass-pilot .consultora-resumo-card[data-tone] {
-    background: var(--card);
+    background: var(--glass-reflection-gradient), var(--card);
     border-color: var(--border);
     color: var(--foreground);
     box-shadow: var(--glass-shadow);
-    backdrop-filter: blur(18px) saturate(115%);
+    backdrop-filter: blur(20px) saturate(145%);
     border-radius: 8px;
   }
   .consultora-glass-pilot > aside nav button {
@@ -916,11 +921,13 @@ body:has(.area-consultora) {
     --resumo-pecas: oklch(0.84 0.075 165);
   }
   .consultora-glass-pilot .consultora-resumo-card[data-tone] {
-    border-top: 3px solid var(--resumo-tom);
+    border-top: 1px solid color-mix(in oklab, var(--resumo-tom) 70%, var(--glass-highlight));
   }
   .consultora-glass-pilot .consultora-resumo-icone,
   .consultora-glass-pilot .consultora-resumo-card[data-tone="clientes"] .consultora-resumo-icone {
-    background: color-mix(in oklab, var(--resumo-tom) 16%, transparent);
+    background: color-mix(in oklab, var(--resumo-tom) 20%, transparent);
+    border: 1px solid color-mix(in oklab, var(--resumo-tom) 35%, transparent);
+    box-shadow: inset 0 1px 0 var(--glass-reflection);
     color: var(--resumo-tom);
   }
   .consultora-glass-pilot .consultora-resumo-card dd { color: var(--foreground); }

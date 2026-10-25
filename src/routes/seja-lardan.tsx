@@ -30,7 +30,7 @@ import {
   webPageLd,
 } from "@/lib/seo";
 
-const TITLE = "Seja Consultora Lardan | Venda Semijoias com Tecnologia e Suporte";
+const TITLE = "Seja revendedora Lardan Semijoias: como funciona";
 const DESCRIPTION =
   "Conheça a oportunidade de ser Consultora Lardan e conte com semijoias, CRM, ferramentas de vendas, organização financeira, treinamento e suporte para desenvolver seu negócio.";
 

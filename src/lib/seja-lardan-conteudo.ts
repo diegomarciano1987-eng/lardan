@@ -145,6 +145,21 @@ export const TREINAMENTOS = [
 /** FAQ visível na página — mesma fonte usada no JSON-LD FAQPage. */
 export const FAQ: { pergunta: string; resposta: string }[] = [
   {
+    pergunta: "Qual é o investimento inicial para revender semijoias Lardan?",
+    resposta:
+      "O site não publica um valor de investimento inicial. As condições comerciais de cada maleta são apresentadas pela equipe Lardan durante a conversa de entrada, antes de você começar. Confirme essas condições com a equipe ao se candidatar.",
+  },
+  {
+    pergunta: "Qual é a margem ou comissão da Consultora Lardan?",
+    resposta:
+      "O site não publica um percentual de margem ou comissão da Consultora Lardan. Confirme as condições comerciais vigentes com a equipe durante a conversa de entrada. Não há promessa de renda ou de resultado.",
+  },
+  {
+    pergunta: "Como recebo as peças para começar a vender Lardan?",
+    resposta:
+      "Depois da aprovação e do onboarding, a consultora recebe a primeira maleta: uma seleção de peças para apresentar às suas clientes. As condições comerciais de cada maleta são apresentadas pela equipe Lardan durante a conversa de entrada.",
+  },
+  {
     pergunta: "O que é uma Consultora Lardan?",
     resposta:
       "Uma Consultora Lardan comercializa semijoias da marca e utiliza a estrutura comercial e tecnológica disponibilizada pela Lardan para organizar produtos, clientes, vendas e seu desenvolvimento dentro da rede. Não é emprego CLT nem contrato de trabalho: é uma parceria comercial.",

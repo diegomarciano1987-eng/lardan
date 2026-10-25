@@ -10,6 +10,21 @@ declare global {
 
 let measurementId: string | null = null;
 let initPromise: Promise<string | null> | null = null;
+let currentPath = "";
+
+/** ERP, login and account pages never use the public site's measurement ID. */
+export function isPublicAnalyticsPath(path: string): boolean {
+  const pathname = path.split(/[?#]/)[0] ?? "";
+  if (!pathname.startsWith("/")) return false;
+  return !/^\/(admin|consultora|representante|financeiro|pdv|acesso|equipe|convite|redefinir-senha|lovable|api|minha-conta)(?:\/|-|$)/i.test(pathname);
+}
+
+/** Also disables gtag's automatic events before entering the ERP. */
+export function setAnalyticsRoute(path: string): void {
+  currentPath = path;
+  if (typeof window === "undefined" || !measurementId) return;
+  Object.assign(window, { [`ga-disable-${measurementId}`]: !isPublicAnalyticsPath(path) });
+}
 
 async function loadMeasurementId(): Promise<string | null> {
   if (measurementId) return measurementId;
@@ -34,14 +49,14 @@ function injectGtag(id: string) {
   // visita chegava ao Google Analytics.
   window.dataLayer = window.dataLayer ?? [];
   function gtag() {
+    if (!isPublicAnalyticsPath(currentPath)) return;
     // eslint-disable-next-line prefer-rest-params
-    window.dataLayer!.push(arguments);
+    window.dataLayer?.push(arguments);
   }
   window.gtag = gtag as unknown as (...args: unknown[]) => void;
   window.gtag("js", new Date());
-  // A primeira page_view é enviada pelo próprio config; as trocas de rota
-  // internas são enviadas por trackPageView().
-  window.gtag("config", id, { send_page_view: true });
+  // All initial and SPA views go through the same public-only guard.
+  window.gtag("config", id, { send_page_view: false });
 
   const script = document.createElement("script");
   script.async = true;
@@ -52,17 +67,26 @@ function injectGtag(id: string) {
 
 /** Inicializa o GA uma única vez. Seguro chamar em todo carregamento. */
 export async function initAnalytics(): Promise<void> {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !isPublicAnalyticsPath(currentPath)) return;
   const id = await loadMeasurementId();
-  if (id) injectGtag(id);
+  setAnalyticsRoute(currentPath);
+  // The visitor may have entered the ERP while the config request was pending.
+  if (id && isPublicAnalyticsPath(currentPath)) injectGtag(id);
 }
 
 /** Registra a visualização de uma rota interna (SPA). */
-export function trackPageView(path: string): void {
-  if (typeof window === "undefined" || !window.gtag || !measurementId) return;
+export async function trackPageView(path: string): Promise<void> {
+  setAnalyticsRoute(path);
+  if (!isPublicAnalyticsPath(path)) return;
+  await initAnalytics();
+  if (currentPath !== path || typeof window === "undefined" || !window.gtag || !measurementId) return;
   window.gtag("event", "page_view", {
     page_path: path,
     page_location: window.location.href,
     page_title: document.title,
+    // Do not leak the previous ERP URL into a public page's referrer.
+    page_referrer: document.referrer && isPublicAnalyticsPath(new URL(document.referrer).pathname)
+      ? document.referrer : "",
+    send_to: measurementId,
   });
 }

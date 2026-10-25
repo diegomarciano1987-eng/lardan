@@ -1,8 +1,8 @@
 # Roadmap
 ## Analytics público e Seja Lardan — 25/10
-- [ ] Reservar o ID atual às páginas públicas, inclusive em navegação entre site e ERP; ERP sem Analytics.
-- [ ] Aplicar título solicitado e FAQ factual sobre investimento, margem, peças e cadastro, sem mudar rotas ou canonical.
-- [ ] Testar regras, conferir HTML e navegação; não publicar sem pedido.
+- [x] ID atual só no site público; ERP/login sem script em entrada direta e desativado antes da navegação interna; eventos explícitos protegidos e referrer ERP omitido.
+- [x] Título solicitado em title/og/twitter; FAQ investimento/margem sem valores publicados, recebimento após aprovação/onboarding e cadastro existente preservado; rotas/canonical intactos.
+- [x] 39 testes SEO aprovados, build OK; HTML pré-renderizado com título/FAQ/canonical, navegação site → equipe sem evento ERP, acesso direto e painel Master de Diego sem script público. GA simulado para não contaminar métricas; não publicado.
 ## llms.txt — 25/10
 - [x] Todo o conteúdo anterior preservado (comparação integral); URLs em Markdown, data 2026-10-25, 20 perguntas e quatro desambiguações; fatos conferidos no site publicado.
 - [x] HTTP 200 text/plain; 29.936 caracteres, quinze testes SEO aprovados e build OK; WhatsApp/e-mail/horário não publicados, sem inventar; não publicado.

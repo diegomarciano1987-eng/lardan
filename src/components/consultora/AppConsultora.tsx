@@ -21,7 +21,7 @@ import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeft, BookOpen, BriefcaseBusiness, FileText, CalendarClock, CalendarDays, Check, ChevronRight, CircleHelp, Home, LogOut, Menu, MessageCircle,
+  ArrowLeft, BookOpen, BriefcaseBusiness, FileText, CalendarClock, CalendarDays, Check, ChevronDown, ChevronRight, ChevronUp, CircleHelp, Home, LogOut, Menu, MessageCircle,
   PackageCheck, Phone, Plus, Search, ShoppingBag, Store, UserPlus, Users,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -68,6 +68,30 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
   const ativo = grupoDe(nav.aba);
   const grande = useLetraGrande();
   const [menuAberto, setMenuAberto] = React.useState(false);
+  const menuRef = React.useRef<HTMLElement | null>(null);
+  const [rolagemMenu, setRolagemMenu] = React.useState<"baixo" | "cima" | null>(null);
+  const medirRolagemMenu = React.useCallback(() => {
+    const el = menuRef.current;
+    if (!el) { setRolagemMenu(null); return; }
+    const resto = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (resto > 24) setRolagemMenu("baixo");
+    else if (el.scrollTop > 24) setRolagemMenu("cima");
+    else setRolagemMenu(null);
+  }, []);
+  React.useEffect(() => {
+    if (!pilotoGlass) { setRolagemMenu(null); return; }
+    medirRolagemMenu();
+    const el = menuRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", medirRolagemMenu, { passive: true });
+    window.addEventListener("resize", medirRolagemMenu);
+    const t = window.setTimeout(medirRolagemMenu, 500);
+    return () => {
+      el.removeEventListener("scroll", medirRolagemMenu);
+      window.removeEventListener("resize", medirRolagemMenu);
+      window.clearTimeout(t);
+    };
+  }, [pilotoGlass, medirRolagemMenu]);
   React.useEffect(() => {
     if (!pilotoGlass) return;
     document.body.classList.add("consultora-glass-active");
@@ -84,7 +108,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
       {pilotoGlass && <img src={vidroLardan.url} alt="" aria-hidden="true" className="consultora-glass-backdrop" />}
       <AberturaApp />
       {/* Menu lateral no computador */}
-      <aside className="consultora-sidebar sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex overflow-y-auto overscroll-contain">
+      <aside ref={menuRef} className="consultora-sidebar relative sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex overflow-y-auto overscroll-contain">
         <img src={nomeLardan.url} alt="LARDAN" className="mb-6 h-auto w-32 object-contain object-left" />
         <AvatarConsultora />
         <button type="button" onClick={() => ir({ aba: "novo" })} className="btn-app-principal mb-5 w-full">
@@ -106,6 +130,17 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
           <BotaoAjuda tela={ajuda} className="w-full justify-start" />
           <button type="button" onClick={sair} className="admin-btn min-h-12 w-full text-base"><LogOut className="size-5" aria-hidden /> Sair</button>
         </div>
+        {rolagemMenu && (
+          <button type="button" onClick={() => {
+            const el = menuRef.current;
+            if (!el) return;
+            el.scrollBy({ top: rolagemMenu === "baixo" ? 240 : -el.scrollHeight, behavior: "smooth" });
+          }}
+            aria-label={rolagemMenu === "baixo" ? "Ver mais itens do menu" : "Voltar ao topo do menu"}
+            className="consultora-menu-indicador">
+            {rolagemMenu === "baixo" ? <ChevronDown className="size-5" aria-hidden /> : <ChevronUp className="size-5" aria-hidden />}
+          </button>
+        )}
       </aside>
 
       <div className="min-w-0 flex-1">

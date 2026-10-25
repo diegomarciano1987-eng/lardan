@@ -1,4 +1,6 @@
 # Roadmap
+## Fundo bordô LARDAN
+- [x] Aplicada variação clara do bordô da referência com imagem de fundo 30% menos brilhante; cartões/textos preservados. Painel autenticado conferido em 1223×889, 3 testes e build OK; sem publicação.
 ## Clareamento visível — correção da camada do fundo
 - [x] Confirmado no navegador: fundo do shell herdava a cor escura dos controles e encobria a imagem. Corrigida prioridade do fundo transparente e reduzido véu escuro; painel autenticado com gráficos/indicadores reais conferido em 1547×889, 3 testes e build OK. Site e consultora intactos; sem publicação.
 ## Segundo ajuste de contraste — sistema privado

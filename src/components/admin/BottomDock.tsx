@@ -44,6 +44,7 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [drawer, setDrawer] = useState(false);
   const [submenu, setSubmenu] = useState<"modulos" | "financeiro">("modulos");
+  const [theme, setTheme] = useOperationalTheme();
 
   const primary = permitted.slice(0, 6);
   const primaryMobile = permitted.slice(0, 5);
@@ -283,13 +284,24 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
             })}
           </ul>
 
+          <button
+            type="button"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label={theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro"}
+            title={theme === "dark" ? "Tema claro" : "Tema escuro"}
+            aria-pressed={theme === "light"}
+            className="ml-auto inline-flex shrink-0 items-center justify-center rounded-xl border border-white/10 px-3 py-2 text-warm-ivory/85 transition-colors hover:bg-white/8"
+          >
+            {theme === "dark" ? <Sun aria-hidden className="size-4" /> : <Moon aria-hidden className="size-4" />}
+          </button>
+
           {!colab && <button
             type="button"
             onClick={() => {
               setDrawer((v) => !v);
               setSubmenu("modulos");
             }}
-            className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-[0.75rem] text-warm-ivory/85 transition-colors hover:bg-white/8"
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-[0.75rem] text-warm-ivory/85 transition-colors hover:bg-white/8"
           >
             <MoreHorizontal aria-hidden className="size-4" />
             <span className="hidden sm:inline">Mais módulos</span>

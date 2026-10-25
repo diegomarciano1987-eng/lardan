@@ -1,4 +1,7 @@
 # Roadmap
+## Vidro etapa 2 — celular primeiro — 25/10
+- [x] Vidro em todas as abas Diego Silva no celular e desktop, menus e formulários; posições, regras e outras contas preservadas. Navegação real conferida em 390×844, 360×800 e 1590×889, sem transbordamento ou erro de execução.
+- [x] Faixa branca da rolagem substituída por trilha transparente e barra fina; captura desktop conferida. 14 testes aprovados e build OK. Maleta/histórico/Biblioteca vazios nesta conta, sem inventar dados; nenhuma gravação operacional ou publicação. Provas: docs/lardan/CONSULTORA-GLASS-ETAPA-2.md.
 ## Velocidade das fotos novas — 25/10
 - [x] Foto mobile da home convertida de PNG (nome JPG) para WebP lossless: 1.409.967 → 1.022.688 bytes, redução de 27,5%, pixels RGB idênticos e mesmas dimensões. Desktop já é WebP de 100.600 bytes; Seja Lardan já é JPEG de 97.378 bytes, mantidos porque conversão lossless aumentaria o peso. Fotos carregadas em 1280×1800 e 392×719, 5 testes de metadados e build OK; não publicado.
 ## Piloto vidro — consultora desktop — 25/10

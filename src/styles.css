@@ -822,10 +822,10 @@ body:has(.area-consultora) {
 }
 .area-consultora.letra-grande { --consultora-texto: 1.35rem; }
 
-/* Appearance-only pilot: authenticated Diego Silva + Início. Mobile is untouched. */
+/* Appearance-only stage 2: authenticated Diego Silva, consultant tabs only. */
 .consultora-glass-backdrop { display: none; }
-@media (min-width: 1024px) {
-  .consultora-glass-pilot {
+  .consultora-glass-pilot,
+  body.consultora-glass-active {
     --background: oklch(0.22 0.012 320);
     --foreground: oklch(0.97 0.008 65);
     --card: oklch(0.24 0.012 320 / 0.42);
@@ -839,6 +839,20 @@ body:has(.area-consultora) {
     --border: oklch(0.94 0.018 65 / 0.32);
     --input: var(--border);
     --ring: var(--primary);
+    --popover: oklch(0.27 0.012 320 / 0.96);
+    --popover-foreground: var(--foreground);
+    --secondary: oklch(0.65 0.014 320 / 0.18);
+    --secondary-foreground: var(--foreground);
+    --accent: oklch(0.72 0.025 25 / 0.22);
+    --accent-foreground: var(--foreground);
+    --destructive: oklch(0.78 0.14 25);
+    --color-surface: var(--card);
+    --color-surface-muted: var(--muted);
+    --color-line: var(--border);
+    --color-line-soft: var(--border);
+    --color-ledger-text: var(--foreground);
+    --color-ledger-muted: var(--muted-foreground);
+    --color-champagne: var(--primary);
     --glass-surface: oklch(0.22 0.010 320 / 0.48);
     --glass-highlight: oklch(0.99 0.006 65 / 0.52);
     --glass-reflection: oklch(0.99 0.006 65 / 0.13);
@@ -846,10 +860,16 @@ body:has(.area-consultora) {
     --glass-shade: oklch(0.12 0.006 320 / 0.65);
     --glass-overlay: oklch(0.16 0.012 320 / 0.58);
     --glass-overlay-end: oklch(0.18 0.008 320 / 0.36);
+    --glass-scroll-thumb: oklch(0.87 0.025 25 / 0.5);
+    --glass-scroll-hover: oklch(0.9 0.04 25 / 0.8);
+    --glass-mobile-surface: oklch(0.22 0.010 320 / 0.72);
     --glass-overlay-gradient: linear-gradient(120deg, var(--glass-overlay), var(--glass-overlay-end));
     --glass-reflection-gradient: linear-gradient(135deg, var(--glass-reflection), var(--glass-reflection-end) 45%, transparent 70%);
     --glass-shadow: inset 0 1px 0 var(--glass-highlight), inset 1px 0 0 var(--glass-reflection), inset 0 -1px 0 var(--glass-reflection), 0 14px 32px -18px var(--glass-shade);
     --shadow-app: 0 8px 24px -14px var(--primary);
+    color-scheme: dark;
+  }
+  .consultora-glass-pilot {
     position: relative;
     isolation: isolate;
     background: var(--background);
@@ -936,6 +956,69 @@ body:has(.area-consultora) {
   }
   @supports not (backdrop-filter: blur(18px)) {
     .consultora-glass-pilot { --card: oklch(0.30 0.012 320); --glass-surface: var(--card); }
+  }
+/* Native scrolling remains available; no broad white track or arrow gutter. */
+body.consultora-glass-active,
+html:has(body.consultora-glass-active),
+body.consultora-glass-active * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--glass-scroll-thumb, oklch(0.87 0.025 25 / 0.5)) transparent;
+}
+/* Chromium legacy fallback where the standard scrollbar properties are absent. */
+@supports not (scrollbar-width: thin) {
+  body.consultora-glass-active ::-webkit-scrollbar { width: 6px; height: 6px; }
+  body.consultora-glass-active ::-webkit-scrollbar-track { background: transparent; }
+  body.consultora-glass-active ::-webkit-scrollbar-thumb { background: var(--glass-scroll-thumb); border-radius: 8px; }
+  body.consultora-glass-active ::-webkit-scrollbar-thumb:hover { background: var(--glass-scroll-hover); }
+  body.consultora-glass-active ::-webkit-scrollbar-button { display: none; }
+}
+.consultora-glass-pilot :is(.admin-input, input.bg-background, textarea.bg-background) {
+  background: var(--glass-surface);
+  color: var(--foreground);
+  border-color: var(--border);
+  box-shadow: inset 0 1px 0 var(--glass-reflection);
+}
+.consultora-glass-pilot input::placeholder,
+.consultora-glass-pilot textarea::placeholder { color: var(--muted-foreground); opacity: 0.85; }
+.consultora-glass-pilot main :is(.sticky.bg-background\/95, .sticky.bg-card) {
+  background: var(--glass-mobile-surface);
+  backdrop-filter: blur(16px);
+}
+body.consultora-glass-active :is([role="dialog"], [role="alertdialog"], [data-radix-popper-content-wrapper] > *) {
+  background: var(--glass-reflection-gradient), var(--popover);
+  color: var(--foreground);
+  border-color: var(--border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(20px) saturate(135%);
+}
+body.consultora-glass-active :is([role="dialog"], [role="alertdialog"]) img[alt="LARDAN"],
+.consultora-glass-pilot .consultora-mobile-header img[alt="LARDAN"] { filter: brightness(0) invert(1); }
+@media (max-width: 1023px) {
+  .consultora-glass-pilot {
+    --card: oklch(0.24 0.012 320 / 0.58);
+    --glass-overlay: oklch(0.16 0.012 320 / 0.7);
+    --glass-overlay-end: oklch(0.18 0.008 320 / 0.48);
+  }
+  .consultora-glass-pilot .consultora-glass-backdrop { object-position: 65% center; }
+  .consultora-glass-pilot :is(.consultora-mobile-header, .consultora-mobile-nav) {
+    background: var(--glass-reflection-gradient), var(--glass-mobile-surface);
+    backdrop-filter: blur(18px) saturate(135%);
+    box-shadow: inset 0 1px 0 var(--glass-highlight);
+    border-color: var(--border);
+  }
+  .consultora-glass-pilot .consultora-mobile-nav button { font-size: 0.95rem; }
+  .consultora-glass-pilot .consultora-mobile-nav button[aria-current="page"] {
+    color: var(--primary);
+  }
+  .consultora-glass-pilot .consultora-mobile-nav button[aria-current="page"] > span {
+    background: var(--accent);
+    box-shadow: inset 0 1px 0 var(--glass-reflection);
+  }
+  .consultora-glass-pilot main .bg-card { backdrop-filter: blur(12px) saturate(125%); }
+  .consultora-glass-pilot .consultora-resumo-card { min-height: 216px; }
+  body.consultora-glass-active .consultora-mobile-sheet {
+    background: var(--glass-reflection-gradient), var(--glass-mobile-surface);
+    backdrop-filter: blur(20px) saturate(135%);
   }
 }
 .consultora-resumo {

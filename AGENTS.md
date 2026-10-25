@@ -27,7 +27,7 @@
 - Settlement reversal reverses its interest/discount; DFC nets reversal in original line; projected flow skips cheques represented by equal open receivable. Why: no residues/doubling.
 - Date correction: fin_estorno_data_corrigir, expected date, reason, immutable snapshots, atomic settlement/movement updates; invalidate account/cashflow queries. Why: dated balances/concurrency.
 - Merges: party_unificar after preview, atomic; preserve fiado/Asaas stage and moved IDs in party_unificacoes. Why: history/reversal.
-- Read nested AGENTS.md, including src/lib/focus and src/components/consultora. Why: scoped rules.
+- Read nested AGENTS.md. Glass body scope is temporary and themes portals/scrollbars. Why: isolation.
 - Consultant reads are owner-scoped; preserve paid-item after-sale snapshots; review never moves stock/money automatically. Why: privacy/official engines.
 - pdv_como validates/audits real actor; no GRANT. Why: traceability.
 - Biblioteca type is separate from social format; shared publication/storage policies. Why: preserve arts/privacy.

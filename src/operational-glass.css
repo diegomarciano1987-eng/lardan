@@ -52,8 +52,8 @@ body.operational-glass-active {
   --op-action: oklch(0.29 0.040 25 / 0.92);
   --op-action-tint: oklch(0.72 0.068 25 / 0.26);
   --op-action-edge: oklch(0.86 0.06 25 / 0.76);
-  --op-veil: oklch(0.16 0.009 320 / 0.58);
-  --op-veil-end: oklch(0.18 0.009 320 / 0.40);
+  --op-veil: oklch(0.16 0.009 320 / 0.18);
+  --op-veil-end: oklch(0.18 0.009 320 / 0.12);
   --op-reflection-gradient: linear-gradient(130deg, var(--op-reflection), transparent 45%, var(--op-reflection) 140%);
   --op-action-gradient: linear-gradient(115deg, var(--op-reflection), transparent 36%, var(--op-action-tint)), linear-gradient(180deg, var(--op-action-tint), transparent 58%), var(--op-action);
   --op-panel-shadow: inset 0 1px 0 var(--op-edge), inset 1px 0 0 var(--op-reflection), inset 0 -1px 0 var(--op-reflection), 0 22px 46px -30px var(--op-shadow-color);
@@ -112,7 +112,8 @@ body.operational-glass-active { background: var(--background); color: var(--fore
 :is(.operational-glass, body.operational-glass-active) :is(.bg-background, .bg-warm-ivory, .bg-cream-2, .bg-cream, .bg-ivory) {
   background-color: var(--op-control);
 }
-.operational-glass > :is(.admin-scope, .representante-shell, .pdv-shell) { background: transparent; }
+/* Outrank the generic dark control backgrounds: shells must expose the backdrop. */
+.operational-glass > :is(.admin-scope.bg-warm-ivory, .representante-shell, .pdv-shell) { background: transparent; }
 .operational-glass .admin-deck {
   background: var(--op-reflection-gradient), var(--card);
   border: 1px solid var(--border);

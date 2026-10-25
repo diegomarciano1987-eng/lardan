@@ -1,0 +1,1 @@
+- Keep the glass pilot appearance-only, selected by authenticated UUID and Início tab; CSS overrides apply only at desktop widths. Why: preserve mobile, other accounts, permissions and operational behavior.

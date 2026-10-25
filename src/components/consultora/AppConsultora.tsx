@@ -115,7 +115,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
           <Plus className="size-5" aria-hidden /> Nova venda
         </button>
         <div className="relative mt-1 min-h-0 flex-1">
-          <nav ref={menuRef} aria-label="Menu" className="flex h-full flex-col gap-1 overflow-y-auto overscroll-contain pb-2">
+          <nav ref={menuRef} aria-label="Menu" className="flex h-full flex-col gap-1 overflow-y-auto overscroll-contain pb-[2.9rem]">
           {[...PRINCIPAIS, ...EXTRAS].map((i) => {
             const on = nav.aba === i.aba || (i.aba === "pedidos" && nav.aba === "novo");
             return (

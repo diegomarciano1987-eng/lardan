@@ -1,7 +1,7 @@
 # Roadmap
 ## Piloto vidro — consultora desktop — 25/10
-- [ ] Aplicar acabamento glass somente ao Início desktop da conta Diego Silva, preservando funções, posições e celular.
-- [ ] Conferir conta real, navegação e capturas desktop/mobile; entregar link de avaliação sem publicar.
+- [x] Glass isolado no Início desktop de Diego Silva por identidade autenticada; vidro da marca, superfícies fumê, rosé e indicadores coloridos. Sem alterar posições, consultas, valores ou permissões.
+- [x] Conta real conferida em 1440×1000, 1280×1800 e 390×844; Pedidos desativa piloto e retorno ao Início restaura; celular mantém tema original, sem transbordamento. 13 testes aprovados e build OK; link de prévia entregue, não publicado.
 ## Fotos home e Seja Lardan — 25/10
 - [x] Topo do cabelo prolongado naturalmente até o header, eliminando a faixa e o corte horizontal; lateral direita e pixels abaixo do topo preservados exatamente. Conferido na página em 1547×889 e 1280×1800, sem erros; textos/enquadramento/mobile inalterados, não publicado.
 - [x] Retirada a sobreposição larga de vidro sobre cabelo, brinco e pescoço na home; fotos carregadas em 1590×889, 1280×1800 e 390×844, capturas conferidas, sem erros de execução e build OK. Textos, animação e Seja Lardan inalterados; não publicado.

@@ -370,6 +370,8 @@ body.operational-glass-light-active {
   --primary-foreground: oklch(0.98 0.005 65);
   --accent: oklch(0.62 0.08 25 / 0.16);
   --border: oklch(0.30 0.014 320 / 0.22);
+  --color-line: oklch(0.32 0.014 320 / 0.30);
+  --color-line-soft: oklch(0.32 0.014 320 / 0.20);
   --destructive: oklch(0.55 0.19 25);
   --color-ink: oklch(0.96 0.005 65);
   --color-graphite: oklch(0.90 0.006 65);

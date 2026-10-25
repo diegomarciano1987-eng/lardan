@@ -1,7 +1,7 @@
 /* Cinematic glass for private shells only. Public tokens remain untouched. */
 .operational-glass,
 body.operational-glass-active {
-  --background: oklch(0.2622 0.009 320);
+  --background: oklch(0.40 0.045 23);
   --foreground: oklch(0.97 0.008 65);
   --card: oklch(0.1863 0.010 320 / 0.82);
   --card-foreground: var(--foreground);
@@ -52,14 +52,14 @@ body.operational-glass-active {
   --op-action: oklch(0.29 0.040 25 / 0.92);
   --op-action-tint: oklch(0.72 0.068 25 / 0.26);
   --op-action-edge: oklch(0.86 0.06 25 / 0.76);
-  --op-veil: oklch(0.16 0.009 320 / 0.45);
-  --op-veil-end: oklch(0.18 0.009 320 / 0.35);
+  --op-veil: oklch(0.36 0.045 23 / 0.70);
+  --op-veil-end: oklch(0.38 0.045 23 / 0.70);
   --op-reflection-gradient: linear-gradient(130deg, var(--op-reflection), transparent 45%, var(--op-reflection) 140%);
   --op-action-gradient: linear-gradient(115deg, var(--op-reflection), transparent 36%, var(--op-action-tint)), linear-gradient(180deg, var(--op-action-tint), transparent 58%), var(--op-action);
   --op-panel-shadow: inset 0 1px 0 var(--op-edge), inset 1px 0 0 var(--op-reflection), inset 0 -1px 0 var(--op-reflection), 0 22px 46px -30px var(--op-shadow-color);
   --op-control-shadow: inset 0 1px 0 var(--op-edge), inset 0 -1px 0 var(--op-reflection), 0 10px 22px -16px var(--op-shadow-color);
   --op-asaas-glass: linear-gradient(125deg, var(--op-reflection), transparent 48%), color-mix(in oklab, var(--color-asaas) 80%, var(--color-ink));
-  --op-backdrop-brightness: 1.38;
+  --op-backdrop-brightness: 0.966;
   --op-map-label: oklch(0.20 0.009 320);
   --op-map-label-halo: oklch(0.99 0.002 65);
   --op-dock-reflection: oklch(0.99 0.006 65 / 0.20);

@@ -1,4 +1,6 @@
 # Roadmap
+## Números do mapa — contraste
+- [ ] Trocar branco ilegível por número escuro com contorno claro no mapa territorial/agrupamentos; conferir Paraná real, sem alterar valores ou paleta.
 ## Contraste e navegação ampliada — sistema privado
 - [x] Barra inferior ampliada (78px); Mais módulos 1120×672 em 1590×889, aproximadamente o dobro da área anterior; itens de 60px com texto de 17px. Fundo +20% no brilho da imagem, superfícies com luminosidade OKLCH -10% e mais opacidade para leitura; consultora/público preservados. Navegação real Financeiro → Fluxo e fechamento conferidos, 1280 sem transbordamento, zero erros, 7 testes e build OK; sem publicação.
 ## Vidro cinematográfico — sistema privado — 25/10

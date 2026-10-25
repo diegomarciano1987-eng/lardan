@@ -60,6 +60,8 @@ body.operational-glass-active {
   --op-control-shadow: inset 0 1px 0 var(--op-edge), inset 0 -1px 0 var(--op-reflection), 0 10px 22px -16px var(--op-shadow-color);
   --op-asaas-glass: linear-gradient(125deg, var(--op-reflection), transparent 48%), color-mix(in oklab, var(--color-asaas) 80%, var(--color-ink));
   --op-backdrop-brightness: 1.2;
+  --op-map-label: oklch(0.20 0.009 320);
+  --op-map-label-halo: oklch(0.99 0.002 65);
   --op-dock-reflection: oklch(0.99 0.006 65 / 0.20);
   --op-dock-gradient: linear-gradient(125deg, var(--op-dock-reflection), transparent 35%, var(--op-reflection) 100%);
   color-scheme: dark;
@@ -294,6 +296,14 @@ body.operational-glass-active [role="dialog"].fixed.inset-0 > div {
 .operational-glass .recharts-tooltip-label { color: var(--foreground); }
 .operational-glass .recharts-legend-item-text { color: var(--muted-foreground) !important; }
 .operational-glass .recharts-tooltip-cursor { fill: var(--muted); stroke: var(--border); }
+.operational-glass svg[aria-label="Mapa da rede Lardan por território"] text {
+  fill: var(--op-map-label);
+  stroke: var(--op-map-label-halo);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  font-weight: 700;
+}
 .operational-glass :is(.recharts-line-curve,.recharts-area-curve) { filter: drop-shadow(0 2px 3px var(--op-shadow-color)); }
 /* Representative navigation, same buttons and order. */
 .operational-glass .representante-shell > aside {

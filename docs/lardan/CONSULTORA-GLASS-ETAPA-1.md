@@ -15,3 +15,9 @@ Outras contas são excluídas pelo UUID exato, com teste automatizado; não fora
 
 ## Avaliação
 Na prévia, acessar `/consultora?aba=inicio` com o login de Diego Silva em computador. O site oficial permanece sem esta mudança.
+
+## Refinamento de vidro — 25/10
+- Reduzida a opacidade das superfícies, com reflexos diagonais, arestas claras e saturação sob o vidro; fundo existente mais visível, sem mudar posições ou gerar novas imagens.
+- Sessão autenticada Diego Silva conferida em 1590×889 e 1280×1800, com os mesmos valores reais do resumo; navegação Pedidos → Início preserva o isolamento.
+- Celular 390×844 permanece com o tema original e fundo decorativo oculto; nenhum transbordamento nas três larguras. Capturas em `/tmp/browser/glass-refino`.
+- Treze testes aprovados; build automático OK. Sem alterações de dados, permissões, regras financeiras ou publicação.

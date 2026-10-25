@@ -108,13 +108,14 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
       {pilotoGlass && <img src={vidroLardan.url} alt="" aria-hidden="true" className="consultora-glass-backdrop" />}
       <AberturaApp />
       {/* Menu lateral no computador */}
-      <aside ref={menuRef} className="consultora-sidebar relative sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex overflow-y-auto overscroll-contain">
+      <aside className="consultora-sidebar sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex">
         <img src={nomeLardan.url} alt="LARDAN" className="mb-6 h-auto w-32 object-contain object-left" />
         <AvatarConsultora />
         <button type="button" onClick={() => ir({ aba: "novo" })} className="btn-app-principal mb-5 w-full">
           <Plus className="size-5" aria-hidden /> Nova venda
         </button>
-        <nav aria-label="Menu" className="flex flex-col gap-1">
+        <div className="relative mt-1 min-h-0 flex-1">
+          <nav ref={menuRef} aria-label="Menu" className="flex h-full flex-col gap-1 overflow-y-auto overscroll-contain pb-2">
           {[...PRINCIPAIS, ...EXTRAS].map((i) => {
             const on = nav.aba === i.aba || (i.aba === "pedidos" && nav.aba === "novo");
             return (
@@ -124,23 +125,24 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
               </button>
             );
           })}
-        </nav>
-        <div className="mt-auto flex flex-col gap-2">
+          </nav>
+          {rolagemMenu && (
+            <button type="button" onClick={() => {
+              const el = menuRef.current;
+              if (!el) return;
+              el.scrollBy({ top: rolagemMenu === "baixo" ? 240 : -el.scrollHeight, behavior: "smooth" });
+            }}
+              aria-label={rolagemMenu === "baixo" ? "Ver mais itens do menu" : "Voltar ao topo do menu"}
+              className="consultora-menu-indicador">
+              {rolagemMenu === "baixo" ? <ChevronDown className="size-5" aria-hidden /> : <ChevronUp className="size-5" aria-hidden />}
+            </button>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 pt-2">
           <BotaoNovidades />
           <BotaoAjuda tela={ajuda} className="w-full justify-start" />
           <button type="button" onClick={sair} className="admin-btn min-h-12 w-full text-base"><LogOut className="size-5" aria-hidden /> Sair</button>
         </div>
-        {rolagemMenu && (
-          <button type="button" onClick={() => {
-            const el = menuRef.current;
-            if (!el) return;
-            el.scrollBy({ top: rolagemMenu === "baixo" ? 240 : -el.scrollHeight, behavior: "smooth" });
-          }}
-            aria-label={rolagemMenu === "baixo" ? "Ver mais itens do menu" : "Voltar ao topo do menu"}
-            className="consultora-menu-indicador">
-            {rolagemMenu === "baixo" ? <ChevronDown className="size-5" aria-hidden /> : <ChevronUp className="size-5" aria-hidden />}
-          </button>
-        )}
       </aside>
 
       <div className="min-w-0 flex-1">

@@ -984,15 +984,15 @@ body.consultora-glass-active * {
   body.consultora-glass-active ::-webkit-scrollbar-button { display: none; }
 }
 /* Dock lateral do piloto: rolagem sem barra visível, com indicador flutuante de continuação. */
-.consultora-glass-pilot .consultora-sidebar {
+.consultora-glass-pilot .consultora-sidebar nav {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.consultora-glass-pilot .consultora-sidebar::-webkit-scrollbar { display: none; }
+.consultora-glass-pilot .consultora-sidebar nav::-webkit-scrollbar { display: none; }
 .consultora-glass-pilot .consultora-menu-indicador {
   position: absolute;
   left: 50%;
-  bottom: 0.6rem;
+  bottom: 0.4rem;
   transform: translateX(-50%);
   display: grid;
   place-items: center;

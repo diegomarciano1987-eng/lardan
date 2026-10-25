@@ -13,7 +13,9 @@ import { CombinaComEla } from "@/components/consultora/CombinaComEla";
 import { GanhosConsultora } from "@/components/consultora/GanhosConsultora";
 import { CartaoMeuHistorico } from "@/components/consultora/CartaoMeuHistorico";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouteContext } from "@tanstack/react-router";
+import { mostrarPilotoGlass } from "@/lib/consultora-glass";
+import vidroLardan from "@/assets/lardan-hero-vidro.jpg.asset.json";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -61,6 +63,8 @@ const EXTRAS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
 const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : a === "vitrine" || a === "historico" || a === "indicacoes" || a === "biblioteca" ? "mais" : a);
 
 export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir; ajuda: string; children: React.ReactNode }) {
+  const { user } = useRouteContext({ from: "/_authenticated" });
+  const pilotoGlass = mostrarPilotoGlass(user.id, nav.aba);
   const ativo = grupoDe(nav.aba);
   const grande = useLetraGrande();
   const [menuAberto, setMenuAberto] = React.useState(false);
@@ -71,7 +75,8 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
   };
   return (
     <CentralAvisosProvider>
-    <div className={`area-consultora ${grande ? "letra-grande" : ""} min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex`}>
+    <div className={`area-consultora ${pilotoGlass ? "consultora-glass-pilot" : ""} ${grande ? "letra-grande" : ""} min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex`}>
+      {pilotoGlass && <img src={vidroLardan.url} alt="" aria-hidden="true" className="consultora-glass-backdrop" />}
       <AberturaApp />
       {/* Menu lateral no computador */}
       <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex overflow-y-auto overscroll-contain">

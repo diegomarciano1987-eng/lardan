@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { MoreHorizontal, Lock, Clock3, X, ChevronRight, ArrowLeft } from "lucide-react";
+import { MoreHorizontal, Lock, Clock3, X, ChevronRight, ArrowLeft, Sun, Moon } from "lucide-react";
 import { ADMIN_MODULES, moduleAllowed, type AdminModule } from "@/lib/admin-modules";
 import { useCapabilities } from "@/lib/capabilities";
 import { AREAS_FINANCEIRAS } from "@/components/admin/financeiro/FinanceiroShell";
 import wordmark from "@/assets/lardan-logo-rose.png.asset.json";
 import { useColabEscopo } from "@/lib/colab-escopo";
 import { hasAny, type AppRole } from "@/lib/session";
+import { useOperationalTheme } from "@/lib/operational-theme";
 import { cn } from "@/lib/utils";
 
 function isActive(pathname: string, path?: string) {

@@ -1,4 +1,6 @@
 # Roadmap
+## Velocidade das fotos novas — 25/10
+- [ ] Otimizar apenas as fotos novas da home e Seja Lardan, mantendo dimensões, enquadramento e aparência; conferir arquivos servidos e páginas.
 ## Piloto vidro — consultora desktop — 25/10
 - [x] Glass isolado no Início desktop de Diego Silva por identidade autenticada; vidro da marca, superfícies fumê, rosé e indicadores coloridos. Sem alterar posições, consultas, valores ou permissões.
 - [x] Conta real conferida em 1440×1000, 1280×1800 e 390×844; Pedidos desativa piloto e retorno ao Início restaura; celular mantém tema original, sem transbordamento. 13 testes aprovados e build OK; link de prévia entregue, não publicado.

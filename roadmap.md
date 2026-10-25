@@ -1,4 +1,7 @@
 # Roadmap
+## Vidro cinematográfico — sistema privado — 25/10
+- [ ] Aplicar tema compartilhado ao operacional, financeiro, dashboards, gráficos, menus, PDV e representante; preservar site público, posições e regras.
+- [ ] Conferir navegação autenticada, menus e formulários, gráficos e isolamento ao voltar ao site; testes de escopo e contraste, provas e publicação pendente.
 ## Vidro etapa 4 — dock flutuante — 25/10
 - [x] Menu lateral desktop descolado da borda (16 px, cantos 20 px, sombra de vidro) e navegação inferior do celular em pílula flutuante; item ativo e hover em cápsulas de vidro. Somente Diego Silva, sem mover botões nem funções.
 - [x] Conta real conferida em 1440×900 e 390×844: dock flutuante e pílula visíveis, sem transbordamento nem erros; 14 testes aprovados e build OK. Provas: docs/lardan/CONSULTORA-GLASS-ETAPA-3.md. Não publicado.

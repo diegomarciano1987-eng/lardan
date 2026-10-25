@@ -1,8 +1,8 @@
 /**
  * LARDAN — construção do sitemap a partir da MESMA fonte de verdade de domínio.
  *
- * Regras: só entram URLs 200, canônicas, indexáveis, públicas e com conteúdo
- * real. <lastmod> só aparece quando existe data verdadeira.
+ * Regras: URLs canônicas públicas; categorias publicadas entram mesmo sem peças.
+ * <lastmod> só aparece quando existe data verdadeira.
  */
 import { SITE_URL } from "@/lib/seo";
 import { GUIAS } from "@/lib/editorial";
@@ -51,7 +51,7 @@ const ESTATICAS: UrlSitemap[] = [
   { loc: "/privacidade", lastmod: "2026-10-05" },
 ];
 
-/** Páginas fixas + guias (com data editorial real) + categorias com peças. */
+/** Páginas fixas + guias (com data editorial real) + todas as categorias publicadas. */
 export async function urlsPaginas(): Promise<UrlSitemap[]> {
   const urls: UrlSitemap[] = [...ESTATICAS];
 
@@ -64,8 +64,6 @@ export async function urlsPaginas(): Promise<UrlSitemap[]> {
 
   const categorias = await listPublicCategories();
   for (const c of categorias) {
-    // Categoria publicada sem peça é noindex — não entra no sitemap.
-    if (!c.produtos || c.produtos <= 0) continue;
     urls.push({ loc: `/semijoias/${c.slug}` });
   }
 

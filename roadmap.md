@@ -1,4 +1,6 @@
 # Roadmap
+## Contraste e navegação ampliada — sistema privado
+- [ ] Ampliar barra inferior e Mais módulos; fundo +20% de brilho, superfícies de leitura -10%, preservando consultora e público; conferir navegação e limites da tela.
 ## Vidro cinematográfico — sistema privado — 25/10
 - [x] Aplicar tema compartilhado ao operacional, financeiro, dashboards, gráficos, menus, PDV e representante; preservar site público, posições e regras.
 - [x] Conferir navegação Master, sistema real do Daniel em modo espelho, menus/formulário financeiro, gráficos e retorno ao site sem vidro; 43 testes e build OK. Provas em docs/lardan/OPERACIONAL-GLASS.md; sem publicação.

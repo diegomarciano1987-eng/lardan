@@ -20,3 +20,8 @@
 - Ganhos e peças de maleta não apareceram nesta conta; não foram fabricados dados nem operações para inspecionar estados indisponíveis.
 - Legibilidade conferida visualmente; não foi executada certificação integral WCAG de todos os estados e telas.
 - Sem publicação; o site oficial permanece inalterado.
+## Etapa 4 — dock lateral flutuante (2026-10-25)
+- Desktop: menu lateral descolado da borda (16 px), altura calc(100dvh - 32px), cantos 20 px, borda de vidro e sombra flutuante; item ativo e hover viram cápsulas de vidro com reflexo.
+- Celular: navegação inferior virou pílula flutuante (12 px das bordas, cantos 20 px, sombra de vidro), sem mudar botões nem ordem.
+- Escopo inalterado: somente conta Diego Silva, aparência apenas; posições, funções e demais contas preservados.
+- Provas: Playwright 1440x900 e 390x844 (aside left/top 16 px, radius 20 px; nav móvel flutuante), sem overflow horizontal nem erros; 14 testes aprovados; build OK. Não publicado.

@@ -4,6 +4,17 @@ import { listPublicCategories, listPublicProducts } from "../../src/lib/storefro
 import { contarArquivosProdutos, urlsPaginas, slugsProdutos, xmlUrlset } from "../../src/lib/sitemap";
 
 describe("Honest sitemap", () => {
+  it("includes every published category even without published products, without inventing dates", async () => {
+    const slugs = ["brincos", "colares", "aneis", "pulseiras"];
+    vi.mocked(listPublicCategories).mockResolvedValueOnce(slugs.map((slug, ordem) => ({
+      id: slug, slug, name: slug, description: null, ordem, produtos: 0,
+    })));
+    const urls = await urlsPaginas();
+    for (const slug of slugs) {
+      expect(urls).toContainEqual({ loc: `/semijoias/${slug}` });
+    }
+    expect(xmlUrlset(urls.filter((url) => url.loc.startsWith("/semijoias/")))).not.toContain("<lastmod>");
+  });
   it("discovers the new guide without removing the existing article", async () => {
     vi.mocked(listPublicCategories).mockResolvedValueOnce([]);
     const urls = await urlsPaginas();

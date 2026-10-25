@@ -8,7 +8,7 @@ import {
   easeOut,
 } from "@/hooks/use-scroll-progress";
 import sessao2Img from "@/assets/lardan-sessao2-cabeca-unica.webp";
-import sessao2MobileImg from "@/assets/lardan-sessao2-mulher-sem-sobreposicao-mobile.jpg";
+import sessao2MobileAsset from "@/assets/lardan-sessao2-mobile-lossless.webp.asset.json";
 import { Button } from "@/components/ui/button";
 import { useEcossistemaLardan } from "./EcossistemaLardan";
 
@@ -57,7 +57,7 @@ export function SessaoSemijoias() {
         }}
       >
         <picture>
-          <source media="(max-width: 767px)" srcSet={sessao2MobileImg} />
+          <source media="(max-width: 767px)" type="image/webp" srcSet={sessao2MobileAsset.url} />
           <img
             src={sessao2Img}
             alt="Mulher com brinco em formato de gota segurando uma caixa Lardan sobre ondas de vidro"

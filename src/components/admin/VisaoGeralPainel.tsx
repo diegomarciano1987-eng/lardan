@@ -133,7 +133,7 @@ export function VisaoGeralPainel({ saldoContas, vencidoReceber, vencidoPagar }: 
           ["financeiro", "Financeiro e Asaas"],
           ["operacao", "Operação e rede"],
         ] as [Aba, string][]).map(([a, r]) => (
-          <button key={a} type="button" onClick={() => setAba(a)} className={aba === a ? "admin-btn-primary text-warm-ivory" : "admin-btn"}>
+          <button key={a} type="button" onClick={() => setAba(a)} className={a === "financeiro" ? "admin-btn bg-asaas text-asaas-foreground" : aba === a ? "admin-btn-primary text-warm-ivory" : "admin-btn"} aria-current={aba === a ? "page" : undefined}>
             {r}
           </button>
         ))}

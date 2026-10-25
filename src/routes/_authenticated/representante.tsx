@@ -97,10 +97,10 @@ function AreaRepresentante() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-0">
-        {espelho && (
+        {repEspelho && (
           <div className="flex flex-wrap items-center justify-between gap-2 bg-primary px-5 py-2 text-sm text-primary-foreground md:px-10">
             <span className="flex items-center gap-2"><Eye className="size-4" /> Você está no sistema deste representante, com os mesmos números e ações (tudo fica registrado com o seu usuário).</span>
-            <Link to="/admin/cadastros/pessoas/$id" params={{ id: repEspelho ?? "" }} className="flex items-center gap-1 underline">
+            <Link to="/admin/cadastros/pessoas/$id" params={{ id: repEspelho }} className="flex items-center gap-1 underline">
               <ArrowLeft className="size-4" /> Voltar à ficha
             </Link>
           </div>

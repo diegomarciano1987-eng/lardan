@@ -7,7 +7,7 @@ import {
   ease,
   easeOut,
 } from "@/hooks/use-scroll-progress";
-import sessao2Img from "@/assets/lardan-sessao2-mulher-sem-sobreposicao.jpg";
+import sessao2Img from "@/assets/lardan-sessao2-topo-final.webp";
 import sessao2MobileImg from "@/assets/lardan-sessao2-mulher-sem-sobreposicao-mobile.jpg";
 import { Button } from "@/components/ui/button";
 import { useEcossistemaLardan } from "./EcossistemaLardan";

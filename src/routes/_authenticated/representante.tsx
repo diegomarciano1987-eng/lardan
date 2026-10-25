@@ -13,6 +13,7 @@ import { brl, dataBR, repBuscaTodas, repCobrancas, repConsultoras, repResumo } f
 import { Captacao, CobrarParcela } from "@/components/representante/AcoesRepresentante";
 import { FichaConsultora } from "@/components/representante/FichaConsultora";
 import { MaletasRepresentante } from "@/components/representante/MaletasRepresentante";
+import { OperationalGlass } from "@/components/premium/OperationalGlass";
 
 type Aba = "cobranca" | "consultoras" | "maletas" | "captacao" | "painel";
 const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = [
@@ -74,14 +75,15 @@ function AreaRepresentante() {
   const ir = (id: Aba) => void navigate({ search: (s) => ({ ...s, aba: id }), replace: true });
 
   return (
-    <div className="min-h-screen bg-background text-foreground md:flex">
+    <OperationalGlass area="representante">
+    <div className="representante-shell min-h-screen bg-background text-foreground md:flex">
       {!espelho && <AberturaApp />}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card p-6 md:flex">
         <img src={wordmarkAsset.url} alt="Lardan" className="mb-2 w-32" width={650} height={210} />
         <p className="brand-eyebrow mb-8">Representante</p>
         <nav className="flex flex-col gap-1">
           {ABAS.map((a) => (
-            <button key={a.id} type="button" onClick={() => ir(a.id)}
+            <button key={a.id} type="button" onClick={() => ir(a.id)} aria-current={aba === a.id ? "page" : undefined}
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${aba === a.id ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted"}`}>
               <a.icone className="size-4" aria-hidden /> {a.rotulo}
             </button>
@@ -98,7 +100,7 @@ function AreaRepresentante() {
         {espelho && (
           <div className="flex flex-wrap items-center justify-between gap-2 bg-primary px-5 py-2 text-sm text-primary-foreground md:px-10">
             <span className="flex items-center gap-2"><Eye className="size-4" /> Você está no sistema deste representante, com os mesmos números e ações (tudo fica registrado com o seu usuário).</span>
-            <Link to="/admin/cadastros/pessoas/$id" params={{ id: repEspelho! }} className="flex items-center gap-1 underline">
+            <Link to="/admin/cadastros/pessoas/$id" params={{ id: repEspelho ?? "" }} className="flex items-center gap-1 underline">
               <ArrowLeft className="size-4" /> Voltar à ficha
             </Link>
           </div>
@@ -114,13 +116,14 @@ function AreaRepresentante() {
 
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
         {ABAS.map((a) => (
-          <button key={a.id} type="button" onClick={() => ir(a.id)}
+          <button key={a.id} type="button" onClick={() => ir(a.id)} aria-current={aba === a.id ? "page" : undefined}
             className={`flex min-w-0 flex-col items-center gap-1 py-3.5 text-[0.78rem] leading-tight ${aba === a.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
             <a.icone className="size-6" aria-hidden /> <span className="max-w-full truncate px-0.5">{a.curto}</span>
           </button>
         ))}
       </nav>
     </div>
+    </OperationalGlass>
   );
 }
 

@@ -14,6 +14,7 @@ import { ModuleAvailabilityBadge, PageHeader, Panel } from "@/components/admin/u
 import { UserMenu } from "@/components/admin/UserMenu";
 import { ROLE_LABEL } from "@/lib/roles";
 import logo from "@/assets/lardan-logo-rose.png.asset.json";
+import { OperationalGlass } from "@/components/premium/OperationalGlass";
 
 const RolesContext = createContext<AppRole[]>([]);
 export const useAdminRoles = () => useContext(RolesContext);
@@ -61,7 +62,8 @@ export function AdminShell({
   return (
     <RolesContext.Provider value={roles}>
       <CapabilitiesContext.Provider value={caps}>
-      <div className="admin-scope min-h-screen bg-warm-ivory text-ledger-text">
+       <OperationalGlass area="admin">
+       <div className="admin-scope min-h-screen bg-warm-ivory text-ledger-text">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line-soft bg-surface pr-3">
           <Link
             to="/admin"
@@ -115,6 +117,7 @@ export function AdminShell({
         <BottomDock roles={roles} />
         <CommandPalette open={palette} onClose={() => setPalette(false)} roles={roles} />
       </div>
+       </OperationalGlass>
       </CapabilitiesContext.Provider>
     </RolesContext.Provider>
   );

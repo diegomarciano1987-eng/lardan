@@ -20,7 +20,7 @@ describe("Public Analytics isolation", () => {
     const browser: Record<string, unknown> = { location: { href: "https://www.lardan.com.br/seja-lardan" } };
     vi.stubGlobal("window", browser);
     vi.stubGlobal("fetch", fetchConfig);
-    vi.stubGlobal("document", { querySelector: () => null, createElement: () => ({ dataset: {} }), head: { appendChild }, title: "Lardan", referrer: "https://www.lardan.com.br/admin" });
+    vi.stubGlobal("document", { querySelector: () => appendChild.mock.calls.length ? {} : null, createElement: () => ({ dataset: {} }), head: { appendChild }, title: "Lardan", referrer: "https://www.lardan.com.br/admin" });
     const { trackPageView, setAnalyticsRoute } = await import("../../src/lib/analytics");
     await trackPageView("/admin");
     expect(fetchConfig).not.toHaveBeenCalled();

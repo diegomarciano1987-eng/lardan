@@ -15,3 +15,6 @@
 - [ ] 10. Relatório de vendas por praça e representante
 - [ ] 11. Inadimplência por representante no DRE
 - [ ] 12. Filtro por tipo nas 693 pendências do DRE
+
+## Fundo do sistema (vidro cinematográfico)
+- [x] 13. Fundo cinza carbono 30% mais claro (base oklch L 0.235 → 0.3055; camadas de luz elevadas na mesma proporção). Cartões, menus, dock, gráficos e consultora intactos. Medido na prévia: fundo central #322f33 (antes #201d20). Falta publicar

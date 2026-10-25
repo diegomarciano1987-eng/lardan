@@ -1,5 +1,6 @@
 # Roadmap
 ## Vidro etapa 3 — Início e contraste — 25/10
+- [ ] Novo pedido: transformar botões chapados (Nova venda, Nova cliente e demais ações) em vidro premium, mobile/desktop, com contraste e isolamento Diego Silva.
 - [ ] Aprimorar os cartões do Início, celular primeiro, somente Diego Silva; preservar ações, posições, consultas e valores.
 - [ ] Conferir legibilidade, navegação real, isolamento e rolagem em celular e desktop; registrar provas, sem publicar.
 ## Vidro etapa 2 — celular primeiro — 25/10

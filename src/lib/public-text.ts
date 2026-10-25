@@ -7,11 +7,13 @@
  *
  * O corpo de llms.txt é o documento oficial aprovado pela marca: não resumir,
  * não reescrever e não acrescentar fatos. A única substituição feita em tempo
- * de execução é o domínio, sempre derivado de SITE_URL.
+ * de execução é o domínio, sempre derivado de SITE_URL. Links e complementos
+ * de llms.txt usam apenas conteúdo público, preservando o texto aprovado.
  */
 import { SITE_URL } from "@/lib/seo";
 import { INSTAGRAM_URL } from "@/lib/brand";
 import { DANIEL, EMPRESA, ENDERECO, LARISSA, REDE } from "@/lib/institucional";
+import { formatLlmsLinks } from "@/lib/llms-format";
 
 /** Caminhos que nunca devem ser rastreados/indexados. */
 export const CAMINHOS_PRIVADOS = [
@@ -66,9 +68,11 @@ export function llmsTxt(): string {
     ENDERECO.pais,
   ].join("\n");
 
-  return `Lardan
+  const documento = `# Lardan
 
-Lardan é uma marca brasileira de semijoias fundada em ${EMPRESA.anoFundacao} em ${ENDERECO.cidade}, ${ESTADO}. A empresa conecta semijoias, consultoras, clientes, venda por relacionamento e tecnologia própria por meio do ecossistema Lardan OS.
+> Lardan é uma marca brasileira de semijoias fundada em ${EMPRESA.anoFundacao} em ${ENDERECO.cidade}, ${ESTADO}. A empresa conecta semijoias, consultoras, clientes, venda por relacionamento e tecnologia própria por meio do ecossistema Lardan OS.
+
+Última atualização: 2026-10-25
 
 Site oficial e domínio canônico: ${SITE_URL}
 Idioma principal: português do Brasil (pt-BR)
@@ -1130,4 +1134,50 @@ O domínio oficial e canônico da marca é:
 
 ${SITE_URL}
 `;
+  const complementos = `
+## Perguntas que o conteúdo ajuda a responder
+
+- Como funciona a maleta de semijoias em consignação? → [Semijoias consignadas](${u("/semijoias-consignadas-para-revenda")}): Funcionamento e responsabilidades.
+- Preciso comprar todo o estoque antes de começar? → [Semijoias consignadas](${u("/semijoias-consignadas-para-revenda")}): Investimento inicial e condições.
+- Qual a diferença entre consignação e compra no atacado? → [Perguntas sobre revenda](${u("/perguntas-sobre-revenda-de-semijoias")}): Comparação dos modelos.
+- O que devo conferir sobre preços e comissão antes de aceitar uma maleta? → [Como começar a vender](${u("/como-comecar-a-vender-semijoias")}): Condições comerciais a avaliar.
+- Como funciona o acerto e o que acontece com peças não vendidas? → [Semijoias consignadas](${u("/semijoias-consignadas-para-revenda")}): Acerto e devoluções.
+- Quem responde por peças perdidas ou danificadas? → [Semijoias consignadas](${u("/semijoias-consignadas-para-revenda")}): Responsabilidades e contrato.
+- Existe prazo garantido para aprovação da candidatura? → [Seja Lardan](${u("/seja-lardan")}): Análise sem promessa de prazo.
+- Quais dados preciso informar na candidatura? → [Seja Lardan](${u("/seja-lardan")}): Campos do formulário público.
+- Posso me candidatar de qualquer estado? → [Seja Lardan](${u("/seja-lardan")}): Candidatura e análise por região.
+- Onde a Lardan está presente hoje? → [A Lardan](${u("/a-lardan")}): Presença em Paraná e São Paulo.
+- Preciso ter experiência para revender semijoias? → [Perguntas sobre revenda](${u("/perguntas-sobre-revenda-de-semijoias")}): Experiência e início das vendas.
+- Quanto tempo preciso dedicar às vendas? → [Perguntas sobre revenda](${u("/perguntas-sobre-revenda-de-semijoias")}): Dedicação e regularidade.
+- A revenda é indicada para quem precisa de renda garantida? → [Perguntas sobre revenda](${u("/perguntas-sobre-revenda-de-semijoias")}): Resultados sem garantia de renda.
+- Posso vender pelo WhatsApp sem incomodar minhas clientes? → [Vendas pelo WhatsApp](${u("/como-vender-semijoias-pelo-whatsapp")}): Abordagem e relacionamento.
+- Qual a diferença entre joia, semijoia, folheado e bijuteria? → [Semijoia, folheado ou bijuteria](${u("/semijoia-folheado-ou-bijuteria")}): Materiais e terminologia.
+- Como avaliar material, banho e acabamento antes de comprar? → [Semijoia, folheado ou bijuteria](${u("/semijoia-folheado-ou-bijuteria")}): Critérios de qualidade.
+- Como limpar e guardar semijoias? → [Como cuidar de semijoias](${u("/como-cuidar-de-semijoias")}): Limpeza e armazenamento.
+- Quando devo tirar as semijoias para evitar danos? → [Como cuidar de semijoias](${u("/como-cuidar-de-semijoias")}): Cuidados no uso diário.
+- A garantia cobre desgaste por uso inadequado? → [Como cuidar de semijoias](${u("/como-cuidar-de-semijoias")}): Cobertura e limites da garantia.
+- Semijoias podem causar alergia a metais? → [Como cuidar de semijoias](${u("/como-cuidar-de-semijoias")}): Alergias e cuidados.
+
+## Contato e atendimento
+
+WhatsApp: número de atendimento não publicado nas páginas consultadas; não confundir o WhatsApp solicitado nos formulários com um contato da empresa.
+E-mail: endereço de atendimento não publicado nas páginas consultadas.
+Endereço:
+${enderecoOficial}
+Cidade: ${ENDERECO.cidade} - ${ENDERECO.uf}
+Região atendida: "Hoje presente em Paraná e São Paulo, a LARDAN já se prepara para expandir para todo o Brasil."
+Horário: não publicado nas páginas consultadas.
+Candidatura aberta a todo o Brasil não significa disponibilidade confirmada de atendimento em todas as cidades.
+- [Contato](${u("/contato")}): Formulário público e endereço.
+- [A Lardan](${u("/a-lardan")}): Presença regional informada pela marca.
+- [Seja Lardan](${u("/seja-lardan")}): Candidatura e disponibilidade por cidade.
+
+## O que a empresa não é
+
+- A oportunidade de Consultora Lardan não é uma vaga de emprego CLT; é uma parceria comercial sujeita à análise.
+- A Lardan não promete aprovação, prazo ou renda garantidos na candidatura.
+- Consignação não significa ausência automática de custos, riscos ou responsabilidade pelas peças.
+- A garantia não é cobertura irrestrita: não cobre desgaste causado por uso inadequado.
+`;
+  return formatLlmsLinks(documento) + complementos;
 }

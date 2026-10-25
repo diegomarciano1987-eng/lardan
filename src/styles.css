@@ -992,7 +992,7 @@ body.consultora-glass-active * {
 .consultora-glass-pilot .consultora-menu-indicador {
   position: absolute;
   left: 50%;
-  bottom: 0.4rem;
+  bottom: -1.45rem;
   transform: translateX(-50%);
   display: grid;
   place-items: center;

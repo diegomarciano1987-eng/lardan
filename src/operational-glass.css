@@ -1,7 +1,7 @@
 /* Cinematic glass for private shells only. Public tokens remain untouched. */
 .operational-glass,
 body.operational-glass-active {
-  --background: oklch(0.235 0.008 320);
+  --background: oklch(0.3055 0.008 320);
   --foreground: oklch(0.97 0.008 65);
   --card: oklch(0.1863 0.010 320 / 0.82);
   --card-foreground: var(--foreground);
@@ -80,10 +80,10 @@ body.operational-glass-active {
   pointer-events: none;
   z-index: -1;
   background:
-    radial-gradient(1200px 820px at 10% -12%, oklch(0.36 0.035 20 / 0.32), transparent 62%),
-    radial-gradient(1050px 760px at 106% 112%, oklch(0.31 0.02 320 / 0.38), transparent 58%),
-    radial-gradient(760px 540px at 82% -6%, oklch(0.32 0.016 65 / 0.22), transparent 60%),
-    linear-gradient(158deg, oklch(0.268 0.009 320), oklch(0.208 0.008 320));
+    radial-gradient(1200px 820px at 10% -12%, oklch(0.468 0.035 20 / 0.32), transparent 62%),
+    radial-gradient(1050px 760px at 106% 112%, oklch(0.403 0.02 320 / 0.38), transparent 58%),
+    radial-gradient(760px 540px at 82% -6%, oklch(0.416 0.016 65 / 0.22), transparent 60%),
+    linear-gradient(158deg, oklch(0.3484 0.009 320), oklch(0.2704 0.008 320));
 }
 .operational-glass > :is(.admin-scope, .representante-shell, .pdv-shell) {
   background: transparent;

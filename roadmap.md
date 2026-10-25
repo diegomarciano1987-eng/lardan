@@ -1,4 +1,8 @@
 # Roadmap
+## Títulos e guia comparativo — 25/10
+- [ ] Aplicar os três títulos exatos só nos metadados, sem mudar URLs/canonical existentes.
+- [ ] Criar /guia/semijoia-folheado-ou-bijuteria com conteúdo editorial existente, tabela incluindo folheado e links ao catálogo/candidatura.
+- [ ] Conferir FAQ factual de Seja Lardan, isolamento do Analytics, HTML pré-renderizado e navegação; não publicar.
 ## Analytics público e Seja Lardan — 25/10
 - [x] ID atual só no site público; ERP/login sem script em entrada direta e desativado antes da navegação interna; eventos explícitos protegidos e referrer ERP omitido.
 - [x] Título solicitado em title/og/twitter; FAQ investimento/margem sem valores publicados, recebimento após aprovação/onboarding e cadastro existente preservado; rotas/canonical intactos.

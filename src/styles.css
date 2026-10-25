@@ -876,7 +876,7 @@ body:has(.area-consultora) {
   .consultora-glass-pilot > aside > img { filter: brightness(0) invert(1); opacity: 0.95; }
   .consultora-glass-pilot > aside > button:not(.btn-app-principal),
   .consultora-glass-pilot main .bg-card,
-  .consultora-glass-pilot .consultora-resumo-card {
+  .consultora-glass-pilot .consultora-resumo-card[data-tone] {
     background: var(--card);
     border-color: var(--border);
     color: var(--foreground);
@@ -915,7 +915,7 @@ body:has(.area-consultora) {
     --resumo-mes: oklch(0.84 0.065 225);
     --resumo-pecas: oklch(0.84 0.075 165);
   }
-  .consultora-glass-pilot .consultora-resumo-card {
+  .consultora-glass-pilot .consultora-resumo-card[data-tone] {
     border-top: 3px solid var(--resumo-tom);
   }
   .consultora-glass-pilot .consultora-resumo-icone,

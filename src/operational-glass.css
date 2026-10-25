@@ -1,70 +1,70 @@
-/* Light glass for private shells only. Public tokens remain untouched. */
+/* Cinematic glass for private shells only. Public tokens remain untouched. */
 .operational-glass,
 body.operational-glass-active {
-  --background: oklch(0.930 0.006 65);
-  --foreground: oklch(0.23 0.014 320);
-  --card: oklch(0.988 0.004 65 / 0.72);
+  --background: oklch(0.2622 0.009 320);
+  --foreground: oklch(0.97 0.008 65);
+  --card: oklch(0.1863 0.010 320 / 0.82);
   --card-foreground: var(--foreground);
-  --popover: oklch(0.992 0.003 65 / 0.94);
+  --popover: oklch(0.2025 0.010 320 / 0.97);
   --popover-foreground: var(--foreground);
-  --muted: oklch(0.35 0.014 320 / 0.07);
-  --muted-foreground: oklch(0.45 0.016 320);
-  --primary: oklch(0.62 0.100 25);
-  --primary-foreground: oklch(0.99 0.005 65);
+  --muted: oklch(0.65 0.014 320 / 0.13);
+  --muted-foreground: oklch(0.86 0.012 65);
+  --primary: oklch(0.83 0.070 25);
+  --primary-foreground: var(--foreground);
   --secondary: var(--muted);
   --secondary-foreground: var(--foreground);
-  --accent: oklch(0.60 0.080 25 / 0.10);
+  --accent: oklch(0.72 0.025 25 / 0.20);
   --accent-foreground: var(--foreground);
   --acao: var(--primary);
-  --acao-foreground: var(--primary-foreground);
-  --border: oklch(0.35 0.014 320 / 0.18);
+  --acao-foreground: var(--foreground);
+  --border: oklch(0.94 0.018 65 / 0.26);
   --input: var(--border);
   --ring: var(--primary);
-  --destructive: oklch(0.55 0.190 25);
-  --destructive-foreground: oklch(0.99 0.005 65);
+  --destructive: oklch(0.80 0.12 25);
+  --destructive-foreground: var(--foreground);
   --color-ink: oklch(0.17 0.009 320);
-  --color-graphite: oklch(0.30 0.010 320);
+  --color-graphite: oklch(0.22 0.010 320);
   --color-warm-ivory: var(--foreground);
   --color-surface: var(--card);
   --color-surface-muted: var(--muted);
   --color-line: var(--border);
-  --color-line-soft: oklch(0.35 0.012 320 / 0.14);
+  --color-line-soft: oklch(0.94 0.018 65 / 0.16);
   --color-ledger-text: var(--foreground);
   --color-ledger-muted: var(--muted-foreground);
-  --color-bronze: oklch(0.50 0.070 55);
-  --color-champagne: oklch(0.52 0.080 80);
-  --color-champagne-soft: oklch(0.85 0.070 80 / 0.30);
-  --rose: oklch(0.62 0.100 25);
-  --rose-deep: oklch(0.50 0.130 25);
-  --color-success: oklch(0.46 0.125 160);
+  --color-bronze: oklch(0.82 0.064 50);
+  --color-champagne: oklch(0.86 0.067 72);
+  --color-champagne-soft: oklch(0.68 0.07 55 / 0.22);
+  --rose: oklch(0.82 0.085 25);
+  --rose-deep: oklch(0.78 0.12 25);
+  --color-success: oklch(0.82 0.12 160);
   --color-danger: var(--destructive);
-  --color-warning: oklch(0.58 0.125 85);
-  --color-info: oklch(0.50 0.110 250);
+  --color-warning: oklch(0.88 0.12 85);
+  --color-info: oklch(0.82 0.085 235);
   --chart-1: var(--primary);
   --chart-2: var(--color-success);
   --chart-3: var(--color-champagne);
   --chart-4: var(--color-info);
   --chart-5: var(--color-danger);
-  --op-reflection: oklch(1 0 0 / 0.55);
-  --op-edge: oklch(1 0 0 / 0.80);
-  --op-shadow-color: oklch(0.30 0.020 320 / 0.28);
-  --op-control: oklch(0.990 0.004 65 / 0.82);
-  --op-action: oklch(0.58 0.100 25 / 0.96);
-  --op-action-tint: oklch(1 0 0 / 0.22);
-  --op-action-edge: oklch(0.80 0.080 25 / 0.70);
-  --op-action-foreground: oklch(0.99 0.005 65);
-  --op-veil: oklch(1 0 0 / 0.14);
-  --op-veil-end: oklch(0.88 0.006 65 / 0.30);
+  --op-reflection: oklch(0.99 0.006 65 / 0.12);
+  --op-edge: oklch(0.99 0.006 65 / 0.48);
+  --op-shadow-color: oklch(0.10 0.006 320 / 0.70);
+  --op-control: oklch(0.1863 0.012 320 / 0.86);
+  --op-action: oklch(0.29 0.040 25 / 0.92);
+  --op-action-tint: oklch(0.72 0.068 25 / 0.26);
+  --op-action-edge: oklch(0.86 0.06 25 / 0.76);
+  --op-veil: oklch(0.16 0.009 320 / 0.45);
+  --op-veil-end: oklch(0.18 0.009 320 / 0.35);
   --op-reflection-gradient: linear-gradient(130deg, var(--op-reflection), transparent 45%, var(--op-reflection) 140%);
   --op-action-gradient: linear-gradient(115deg, var(--op-reflection), transparent 36%, var(--op-action-tint)), linear-gradient(180deg, var(--op-action-tint), transparent 58%), var(--op-action);
   --op-panel-shadow: inset 0 1px 0 var(--op-edge), inset 1px 0 0 var(--op-reflection), inset 0 -1px 0 var(--op-reflection), 0 22px 46px -30px var(--op-shadow-color);
   --op-control-shadow: inset 0 1px 0 var(--op-edge), inset 0 -1px 0 var(--op-reflection), 0 10px 22px -16px var(--op-shadow-color);
   --op-asaas-glass: linear-gradient(125deg, var(--op-reflection), transparent 48%), color-mix(in oklab, var(--color-asaas) 80%, var(--color-ink));
+  --op-backdrop-brightness: 1.38;
   --op-map-label: oklch(0.20 0.009 320);
   --op-map-label-halo: oklch(0.99 0.002 65);
-  --op-dock-reflection: oklch(1 0 0 / 0.30);
+  --op-dock-reflection: oklch(0.99 0.006 65 / 0.20);
   --op-dock-gradient: linear-gradient(125deg, var(--op-dock-reflection), transparent 35%, var(--op-reflection) 100%);
-  color-scheme: light;
+  color-scheme: dark;
 }
 .operational-glass {
   position: relative;
@@ -72,6 +72,17 @@ body.operational-glass-active {
   min-height: 100dvh;
   color: var(--foreground);
   background: var(--background);
+}
+.operational-glass-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(var(--op-backdrop-brightness));
+  pointer-events: none;
+  z-index: -2;
 }
 .operational-glass::before {
   content: "";
@@ -197,7 +208,7 @@ body.operational-glass-active { background: var(--background); color: var(--fore
 }
 :is(.operational-glass, body.operational-glass-active) :is(.admin-btn-primary, .btn-app-principal, button.bg-primary, a.bg-primary, button.bg-acao) {
   background: var(--op-action-gradient);
-  color: var(--op-action-foreground);
+  color: var(--foreground);
   border: 1px solid var(--op-action-edge);
   box-shadow: var(--op-control-shadow);
   backdrop-filter: blur(18px) saturate(150%);
@@ -216,9 +227,9 @@ body.operational-glass-active { background: var(--background); color: var(--fore
 }
 :is(.operational-glass, body.operational-glass-active) .text-asaas:not(.bg-asaas) { color: var(--color-info); }
 :is(.operational-glass, body.operational-glass-active) :is(button.bg-destructive, .bg-danger) {
-  background: var(--op-reflection-gradient), color-mix(in oklab, var(--destructive) 10%, var(--card));
-  color: var(--destructive);
-  border-color: color-mix(in oklab, var(--destructive) 45%, transparent);
+  background: var(--op-reflection-gradient), color-mix(in oklab, var(--destructive) 32%, var(--color-ink));
+  color: var(--foreground);
+  border-color: var(--destructive);
 }
 :is(.operational-glass, body.operational-glass-active) :is(input:not([type="checkbox"]):not([type="radio"]), textarea, .admin-input) {
   background: var(--op-control);
@@ -258,7 +269,7 @@ body.operational-glass-active [role="dialog"].fixed.inset-0 > div {
 }
 .operational-glass button[aria-selected="true"] {
   background: var(--op-action-gradient);
-  color: var(--op-action-foreground);
+  color: var(--foreground);
   box-shadow: var(--op-control-shadow);
 }
 .operational-glass .recharts-bar-rectangle [fill="var(--color-asaas)"],
@@ -304,10 +315,10 @@ body.operational-glass-active [role="dialog"].fixed.inset-0 > div {
   border: 1px solid var(--border);
   border-radius: 20px;
 }
-.operational-glass .representante-shell > aside > img { filter: none; }
+.operational-glass .representante-shell > aside > img { filter: brightness(0) invert(1); }
 .operational-glass .representante-shell > div > .bg-primary {
   background: var(--op-action-gradient);
-  color: var(--op-action-foreground);
+  color: var(--foreground);
   border-bottom: 1px solid var(--op-action-edge);
   box-shadow: var(--op-control-shadow);
 }
@@ -335,7 +346,7 @@ body.operational-glass-active,
 html:has(body.operational-glass-active),
 body.operational-glass-active * {
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklab, var(--foreground) 32%, transparent) transparent;
+  scrollbar-color: var(--op-action-edge) transparent;
 }
 @media (hover: hover) {
   :is(.operational-glass, body.operational-glass-active) :is(.admin-btn,button.border,a.border):hover:not(:disabled):not(.bg-asaas):not(.bg-destructive):not(.bg-danger) {
@@ -366,7 +377,7 @@ body.operational-glass-active * {
   .operational-glass, body.operational-glass-active { --card: var(--background); --op-control: var(--background); }
 }
 @media print {
-  .operational-glass::before { display: none; }
+  .operational-glass-backdrop, .operational-glass::before { display: none; }
   .operational-glass, body.operational-glass-active {
     --foreground: oklch(0.20 0 0);
     --background: oklch(1 0 0);

@@ -1017,6 +1017,14 @@ body.consultora-glass-active :is([role="dialog"], [role="alertdialog"]) img[alt=
     box-shadow: inset 0 1px 0 var(--glass-highlight);
     border-color: var(--border);
   }
+  .consultora-glass-pilot .consultora-mobile-nav {
+    left: 12px;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: inset 0 1px 0 var(--glass-highlight), 0 18px 36px -20px var(--glass-shade);
+  }
   .consultora-glass-pilot .consultora-mobile-nav button { font-size: 0.95rem; }
   .consultora-glass-pilot .consultora-mobile-nav button[aria-current="page"] {
     color: var(--primary);

@@ -1,4 +1,6 @@
 # Roadmap
+## Clareamento visível — correção da camada do fundo
+- [x] Confirmado no navegador: fundo do shell herdava a cor escura dos controles e encobria a imagem. Corrigida prioridade do fundo transparente e reduzido véu escuro; painel autenticado com gráficos/indicadores reais conferido em 1547×889, 3 testes e build OK. Site e consultora intactos; sem publicação.
 ## Segundo ajuste de contraste — sistema privado
 - [x] Fundo mais 15% claro e cartões/controles mais 10% escuros sobre o ajuste anterior; Início autenticado com indicadores/gráficos reais conferido em 1547×889, site sem tema, zero erros, 3 testes e build OK. Consultora intacta; sem publicação.
 ## Números do mapa — contraste

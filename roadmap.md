@@ -1,4 +1,8 @@
 # Roadmap
+## Fotos home e Seja Lardan — 25/10
+- [ ] Trocar somente a mulher da segunda seção pela imagem enviada, preservando vidro, textos e animação; afastar o recorte da borda direita.
+- [ ] Trocar a foto inicial de Seja Lardan por CM_74, mantendo texto e enquadramento harmonioso.
+- [ ] Conferir as duas páginas no navegador sem publicar.
 ## Consolidação do guia e sitemap — 25/10
 - [x] Índice HTTP 200 contém somente sitemap-pages.xml com catálogo público vazio; contagem 0/1/5000/5001 e paginação de 501 produtos verificadas em testes sem inserir dados.
 - [x] Artigo antigo responde HTTP 301 para /guia/semijoia-folheado-ou-bijuteria, mantido HTTP 200 com tabela no HTML; endereço antigo ausente no sitemap/llms.txt, conteúdo visual preservado.

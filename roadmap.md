@@ -1,4 +1,9 @@
 # Roadmap
+## Consolidação do guia e sitemap — 25/10
+- [ ] Excluir sitemap de produtos do índice quando não houver produtos públicos; manter listagem paginada quando houver.
+- [ ] Redirecionar artigo antigo com 301 para /guia/semijoia-folheado-ou-bijuteria e retirar endereço antigo do sitemap/llms.txt, sem mudar conteúdo visual.
+- [ ] Conferir datas de todas as páginas; lastmod integral depende de datas editoriais reais para páginas e categorias sem registro.
+- [ ] Executar testes SEO e conferir HTTP/HTML na prévia; não publicar sem pedido.
 ## Títulos e guia comparativo — 25/10
 - [x] Aplicar os três títulos exatos só nos metadados, sem mudar URLs/canonical existentes.
 - [x] Criar /guia/semijoia-folheado-ou-bijuteria reutilizando conteúdo publicado, com tabela incluindo folheado e links ao catálogo/candidatura; artigo antigo preservado e nova página no registro editorial/sitemap.

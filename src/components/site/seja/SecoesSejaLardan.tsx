@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import heroAsset from "@/assets/lardan-consultora-hero.webp.asset.json";
+import heroAsset from "@/assets/lardan-mulher-caixa-seja.jpg.asset.json";
 import vidaRealAsset from "@/assets/lardan-consultora-vida-real.webp.asset.json";
 import ferramentasAsset from "@/assets/lardan-consultora-ferramentas.webp.asset.json";
 
@@ -73,9 +73,9 @@ export function SejaHero() {
 
       <img
         src={heroImg}
-        alt="Mulher usando semijoias Lardan, sorrindo em ambiente iluminado por luz natural"
-        width={1280}
-        height={1600}
+        alt="Mulher segurando uma caixa de semijoias Lardan diante de um fundo rosé"
+        width={721}
+        height={960}
         fetchPriority="high"
         decoding="async"
         className="aspect-[4/5] w-full rounded-sm object-cover"

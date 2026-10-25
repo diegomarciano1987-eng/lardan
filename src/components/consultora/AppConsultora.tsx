@@ -217,7 +217,7 @@ export function Inicio({ ir }: { ir: Ir }) {
   }
 
   return (
-    <div className="space-y-7">
+    <div className="consultora-inicio space-y-7">
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[1.05rem] text-muted-foreground">{saudacao}{primeiroNome ? "," : ""}</p>
@@ -233,7 +233,7 @@ export function Inicio({ ir }: { ir: Ir }) {
       <GanhosConsultora />
       <CartaoMeuHistorico />
 
-      <section className="grid gap-3 lg:grid-cols-[1.2fr_1fr]">
+      <section className="consultora-inicio-acoes grid gap-3 lg:grid-cols-[1.2fr_1fr]">
         <button type="button" onClick={() => ir({ aba: "novo" })}
           className="flex min-h-24 items-center gap-4 rounded-3xl bg-acao px-6 py-5 text-left text-acao-foreground shadow-[var(--shadow-app)] active:scale-[0.99]">
           <span className="grid size-14 shrink-0 place-items-center rounded-full bg-acao-foreground/15"><Plus className="size-7" aria-hidden /></span>
@@ -256,7 +256,7 @@ export function Inicio({ ir }: { ir: Ir }) {
         </div>
       </section>
 
-      <section aria-labelledby="pend">
+      <section className="consultora-inicio-pendencias" aria-labelledby="pend">
         <h2 id="pend" className="mb-3 text-xl font-semibold">O que fazer agora</h2>
         {q.isLoading && <Estado tipo="carregando" texto="Buscando suas pendências…" />}
         {q.isError && <Estado tipo="erro" texto="Não foi possível carregar agora. Verifique sua internet." acao={<button className="admin-btn" onClick={() => q.refetch()}>Tentar de novo</button>} />}

@@ -1,1 +1,2 @@
 - Keep the glass pilot appearance-only, selected by authenticated UUID and consultant tabs on mobile and desktop; apply its body scope only while the shell is mounted, including portal surfaces but excluding printed documents. Why: stage the approved visual expansion without touching other accounts, permissions or operational behavior.
+- Refine the home through pilot-scoped presentation hooks without reordering actions or metrics; use stronger text backing and a high-contrast fallback. Why: keep the mobile-first glass readable without changing workflows or other accounts.

@@ -1,6 +1,6 @@
 # Roadmap
 ## Fotos home e Seja Lardan — 25/10
-- [ ] Corrigir somente o topo da foto, aproximando o cabelo do header e eliminando o corte horizontal; lateral direita aprovada, preservar intacta. Nova edição autorizada em 25/10.
+- [x] Topo do cabelo prolongado naturalmente até o header, eliminando a faixa e o corte horizontal; lateral direita e pixels abaixo do topo preservados exatamente. Conferido na página em 1547×889 e 1280×1800, sem erros; textos/enquadramento/mobile inalterados, não publicado.
 - [x] Retirada a sobreposição larga de vidro sobre cabelo, brinco e pescoço na home; fotos carregadas em 1590×889, 1280×1800 e 390×844, capturas conferidas, sem erros de execução e build OK. Textos, animação e Seja Lardan inalterados; não publicado.
 - [x] Mulher da segunda seção substituída pela foto real enviada; fundo reconstruído somente na silhueta antiga, vidro exterior/textos/animação preservados, bordas da foto suavizadas e margem direita.
 - [x] Foto inicial de Seja Lardan substituída por CM_74, mantendo texto e moldura existente; versões anteriores preservadas.

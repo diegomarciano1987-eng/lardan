@@ -824,10 +824,9 @@ body:has(.area-consultora) {
 .area-consultora.letra-grande { --consultora-texto: 1.35rem; }
 
 /* Appearance-only glass pilot: authenticated Diego Silva, consultant tabs only. */
-.consultora-glass-backdrop { display: none; }
   .consultora-glass-pilot,
   body.consultora-glass-active {
-    --background: oklch(0.22 0.012 320);
+    --background: oklch(0.235 0.008 320);
     --foreground: oklch(0.97 0.008 65);
     --card: oklch(0.24 0.012 320 / 0.42);
     --card-foreground: var(--foreground);

@@ -15,7 +15,6 @@ import { CartaoMeuHistorico } from "@/components/consultora/CartaoMeuHistorico";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link, useRouteContext } from "@tanstack/react-router";
 import { mostrarPilotoGlass } from "@/lib/consultora-glass";
-import vidroLardan from "@/assets/lardan-hero-vidro.jpg.asset.json";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -105,7 +104,6 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
   return (
     <CentralAvisosProvider>
     <div className={`area-consultora ${pilotoGlass ? "consultora-glass-pilot" : ""} ${grande ? "letra-grande" : ""} min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex`}>
-      {pilotoGlass && <img src={vidroLardan.url} alt="" aria-hidden="true" className="consultora-glass-backdrop" />}
       <AberturaApp />
       {/* Menu lateral no computador */}
       <aside className="consultora-sidebar sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex">

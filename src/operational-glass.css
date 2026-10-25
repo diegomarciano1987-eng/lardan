@@ -370,6 +370,8 @@ body.operational-glass-light-active {
   --primary-foreground: oklch(0.98 0.005 65);
   --accent: oklch(0.62 0.08 25 / 0.16);
   --border: oklch(0.30 0.014 320 / 0.22);
+  --color-line: oklch(0.32 0.014 320 / 0.30);
+  --color-line-soft: oklch(0.32 0.014 320 / 0.20);
   --destructive: oklch(0.55 0.19 25);
   --color-ink: oklch(0.96 0.005 65);
   --color-graphite: oklch(0.90 0.006 65);
@@ -401,6 +403,49 @@ body.operational-glass-light-active {
     radial-gradient(1050px 760px at 106% 112%, oklch(0.88 0.015 320 / 0.40), transparent 58%),
     radial-gradient(760px 540px at 82% -6%, oklch(0.90 0.020 65 / 0.30), transparent 60%),
     linear-gradient(158deg, oklch(0.945 0.006 65), oklch(0.905 0.007 320));
+}
+/* ---- Acabamento premium exclusivo do modo luz (o escuro acima não muda) ---- */
+/* Cortina da gaveta de módulos: --color-ink é claro no tema luz, então o véu some; aqui ele volta escuro. */
+.operational-glass-light [data-module-overlay] { background: oklch(0.25 0.014 320 / 0.38); }
+/* Itens da gaveta (módulos e áreas do Financeiro): cartões de vidro com borda, relevo e reflexo visíveis. */
+.operational-glass-light [data-module-panel] li > :is(a,button,span) {
+  background: var(--op-reflection-gradient), oklch(0.99 0.003 65 / 0.80);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px var(--op-shadow-color), inset 0 1px 0 var(--op-edge);
+  backdrop-filter: blur(14px) saturate(130%);
+}
+.operational-glass-light [data-module-panel] li > :is(a,button):hover {
+  border-color: var(--op-action-edge);
+  box-shadow: 0 10px 26px var(--op-shadow-color), inset 0 1px 0 var(--op-edge);
+}
+.operational-glass-light [data-module-panel] li > :is(a,button).bg-champagne-soft,
+.operational-glass-light [data-module-panel] li > :is(a,button)[aria-current="page"] {
+  background: var(--op-reflection-gradient), var(--op-action-tint);
+  border-color: var(--op-action-edge);
+}
+/* Item ativo da barra inferior: texto escuro sobre o destaque champanhe. */
+.operational-glass-light [data-bottom-dock] .bg-champagne-soft { color: oklch(0.30 0.03 40); }
+/* Raias dos kanbans (Candidaturas e Cobrança) e cartões da gaveta de lembretes:
+   bg-warm-ivory/60 é escuro no tema luz; aqui vira vidro claro com borda e sombra. */
+.operational-glass-light .bg-warm-ivory\/60 {
+  background-color: oklch(0.985 0.004 65 / 0.60);
+  border-color: var(--color-line);
+  box-shadow: 0 10px 28px var(--op-shadow-color), inset 0 1px 0 var(--op-edge);
+  backdrop-filter: blur(18px) saturate(130%);
+}
+/* Gaveta de lembretes: cabeçalho em gradiente bronze e botão de fechar sempre visível. */
+.operational-glass-light aside[aria-label="Lembretes de cobrança"] header {
+  background: linear-gradient(135deg, oklch(0.56 0.10 50), oklch(0.40 0.09 40));
+}
+.operational-glass-light aside[aria-label="Lembretes de cobrança"] header button {
+  background: oklch(1 0 0 / 0.16);
+  border: 1px solid oklch(1 0 0 / 0.50);
+  border-radius: 10px;
+  padding: 6px;
+}
+.operational-glass-light aside[aria-label="Lembretes de cobrança"] header button:hover {
+  background: oklch(1 0 0 / 0.30);
 }
 /* Logo do representante só é invertida no tema escuro. */
 .operational-glass-light .representante-shell > aside > img { filter: none; }

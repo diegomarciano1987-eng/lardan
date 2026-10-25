@@ -18,3 +18,6 @@
 
 ## Fundo do sistema (vidro cinematográfico)
 - [x] 13. Fundo cinza carbono 30% mais claro (base oklch L 0.235 → 0.3055; camadas de luz elevadas na mesma proporção). Cartões, menus, dock, gráficos e consultora intactos. Medido na prévia: fundo central #322f33 (antes #201d20). Falta publicar
+
+## Fundo da consultora igual ao sistema — 25/10
+- [ ] Consultora (dark, celular e computador): trocar a imagem de fundo do site pelo mesmo carbono premium do sistema operacional

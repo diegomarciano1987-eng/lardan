@@ -1,6 +1,6 @@
 # Roadmap
 ## Fotos home e Seja Lardan — 25/10
-- [ ] Corrigir a sobreposição de vidro que encobriu a mulher na home, mantendo textos e fundo; conferir na página.
+- [x] Retirada a sobreposição larga de vidro sobre cabelo, brinco e pescoço na home; fotos carregadas em 1590×889, 1280×1800 e 390×844, capturas conferidas, sem erros de execução e build OK. Textos, animação e Seja Lardan inalterados; não publicado.
 - [x] Mulher da segunda seção substituída pela foto real enviada; fundo reconstruído somente na silhueta antiga, vidro exterior/textos/animação preservados, bordas da foto suavizadas e margem direita.
 - [x] Foto inicial de Seja Lardan substituída por CM_74, mantendo texto e moldura existente; versões anteriores preservadas.
 - [x] Fotos carregadas e capturas conferidas em 1590×889, 1280×1800 e 390×844, sem erros de execução; 49 testes SEO aprovados e build OK; não publicado.

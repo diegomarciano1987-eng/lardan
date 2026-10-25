@@ -6,6 +6,7 @@ import { GUIA_WHATSAPP } from "./guia-whatsapp";
 import { GUIA_PERGUNTAS_REVENDA } from "./guia-perguntas-revenda";
 import { GUIA_CUIDADOS } from "./guia-cuidados";
 import { GUIA_SEMIJOIA_BIJUTERIA } from "./guia-semijoia-folheado-bijuteria";
+import { GUIA_COMPARATIVO_SEMIJOIAS } from "./guia-comparativo-semijoias";
 
 export * from "./tipos";
 export * from "./fontes";
@@ -26,6 +27,7 @@ export const GUIAS: Guia[] = [
   GUIA_PERGUNTAS_REVENDA,
   GUIA_CUIDADOS,
   GUIA_SEMIJOIA_BIJUTERIA,
+  GUIA_COMPARATIVO_SEMIJOIAS,
 ];
 
 export {

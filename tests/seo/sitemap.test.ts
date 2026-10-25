@@ -4,6 +4,12 @@ import { listPublicCategories, listPublicProducts } from "../../src/lib/storefro
 import { contarArquivosProdutos, urlsPaginas, slugsProdutos, xmlUrlset } from "../../src/lib/sitemap";
 
 describe("Honest sitemap", () => {
+  it("discovers the new guide without removing the existing article", async () => {
+    vi.mocked(listPublicCategories).mockResolvedValueOnce([]);
+    const urls = await urlsPaginas();
+    expect(urls).toContainEqual({ loc: "/guia/semijoia-folheado-ou-bijuteria", lastmod: "2026-10-25" });
+    expect(urls).toContainEqual({ loc: "/semijoia-folheado-ou-bijuteria", lastmod: "2026-10-05" });
+  });
   it("never invents lastmod for undated pages", () => {
     expect(xmlUrlset([{ loc: "/" }])).not.toContain("<lastmod>");
   });

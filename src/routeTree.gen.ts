@@ -51,6 +51,7 @@ import { Route as AuthenticatedConsultoraManualRouteImport } from './routes/_aut
 import { Route as AuthenticatedRepresentanteRouteImport } from './routes/_authenticated/representante'
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as DCodigoRouteImport } from './routes/d.$codigo'
+import { Route as GuiaSemijoiaFolheadoOuBijuteriaRouteImport } from './routes/guia.semijoia-folheado-ou-bijuteria'
 import { Route as IndicacaoCodigoRouteImport } from './routes/indicacao.$codigo'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
@@ -348,6 +349,12 @@ const DCodigoRoute = DCodigoRouteImport.update({
   path: '/d/$codigo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuiaSemijoiaFolheadoOuBijuteriaRoute =
+  GuiaSemijoiaFolheadoOuBijuteriaRouteImport.update({
+    id: '/guia/semijoia-folheado-ou-bijuteria',
+    path: '/guia/semijoia-folheado-ou-bijuteria',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const IndicacaoCodigoRoute = IndicacaoCodigoRouteImport.update({
   id: '/indicacao/$codigo',
   path: '/indicacao/$codigo',
@@ -853,6 +860,7 @@ export interface FileRoutesByFullPath {
   '/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
+  '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
@@ -975,6 +983,7 @@ export interface FileRoutesByTo {
   '/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
+  '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
@@ -1099,6 +1108,7 @@ export interface FileRoutesById {
   '/_authenticated/representante': typeof AuthenticatedRepresentanteRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
+  '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
@@ -1224,6 +1234,7 @@ export interface FileRouteTypes {
     | '/representante'
     | '/convite/$token'
     | '/d/$codigo'
+    | '/guia/semijoia-folheado-ou-bijuteria'
     | '/indicacao/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
@@ -1346,6 +1357,7 @@ export interface FileRouteTypes {
     | '/representante'
     | '/convite/$token'
     | '/d/$codigo'
+    | '/guia/semijoia-folheado-ou-bijuteria'
     | '/indicacao/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
@@ -1469,6 +1481,7 @@ export interface FileRouteTypes {
     | '/_authenticated/representante'
     | '/convite/$token'
     | '/d/$codigo'
+    | '/guia/semijoia-folheado-ou-bijuteria'
     | '/indicacao/$codigo'
     | '/produto/$slug'
     | '/semijoias/$categoria'
@@ -1590,6 +1603,7 @@ export interface RootRouteChildren {
   WebinarRegistrationRoute: typeof WebinarRegistrationRoute
   ConviteTokenRoute: typeof ConviteTokenRoute
   DCodigoRoute: typeof DCodigoRoute
+  GuiaSemijoiaFolheadoOuBijuteriaRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   IndicacaoCodigoRoute: typeof IndicacaoCodigoRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
@@ -1902,6 +1916,13 @@ declare module '@tanstack/react-router' {
       path: '/d/$codigo'
       fullPath: '/d/$codigo'
       preLoaderRoute: typeof DCodigoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guia/semijoia-folheado-ou-bijuteria': {
+      id: '/guia/semijoia-folheado-ou-bijuteria'
+      path: '/guia/semijoia-folheado-ou-bijuteria'
+      fullPath: '/guia/semijoia-folheado-ou-bijuteria'
+      preLoaderRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/indicacao/$codigo': {
@@ -2715,6 +2736,7 @@ const rootRouteChildren: RootRouteChildren = {
   WebinarRegistrationRoute: WebinarRegistrationRoute,
   ConviteTokenRoute: ConviteTokenRoute,
   DCodigoRoute: DCodigoRoute,
+  GuiaSemijoiaFolheadoOuBijuteriaRoute: GuiaSemijoiaFolheadoOuBijuteriaRoute,
   IndicacaoCodigoRoute: IndicacaoCodigoRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,

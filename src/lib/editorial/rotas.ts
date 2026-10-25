@@ -7,6 +7,7 @@ export const CAMINHOS_EDITORIAIS = [
   "/perguntas-sobre-revenda-de-semijoias",
   "/como-cuidar-de-semijoias",
   "/semijoia-folheado-ou-bijuteria",
+  "/guia/semijoia-folheado-ou-bijuteria",
 ] as const;
 
 export type CaminhoEditorial = (typeof CAMINHOS_EDITORIAIS)[number];

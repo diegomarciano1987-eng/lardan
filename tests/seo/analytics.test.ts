@@ -8,7 +8,7 @@ describe("Public Analytics isolation", () => {
     expect(isPublicAnalyticsPath(path)).toBe(false);
   });
 
-  it.each(["/", "/seja-lardan", "/semijoias/aneis", "/produto/brinco", "/ana-consultora", "/indicacao/abcd", "/contato", "/carrinho"])("keeps the public page %s eligible", async (path) => {
+  it.each(["/", "/seja-lardan", "/guia/semijoia-folheado-ou-bijuteria", "/semijoias/aneis", "/produto/brinco", "/ana-consultora", "/indicacao/abcd", "/contato", "/carrinho"])("keeps the public page %s eligible", async (path) => {
     const { isPublicAnalyticsPath } = await import("../../src/lib/analytics");
     expect(isPublicAnalyticsPath(path)).toBe(true);
   });

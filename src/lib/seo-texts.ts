@@ -1,7 +1,7 @@
 /** SEO-only edits: never used to render visible headings or body content. */
 const OVERRIDES: Record<string, { title?: string; description?: string }> = {
   "/seja-lardan": {
-    title: "Seja Consultora Lardan | Venda Semijoias com Suporte",
+    title: "Seja revendedora Lardan Semijoias: como funciona",
     description: "Seja Consultora Lardan: conheça as semijoias, o CRM, as ferramentas de vendas, o treinamento e o suporte para desenvolver seu negócio.",
   },
   "/renda-extra-com-vendas": { title: "Renda Extra com Vendas: Como Começar | Lardan" },

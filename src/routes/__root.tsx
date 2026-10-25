@@ -9,14 +9,14 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SITE_URL } from "@/lib/seo";
-import { initAnalytics, trackPageView } from "@/lib/analytics";
+import { setAnalyticsRoute, trackPageView } from "@/lib/analytics";
 
 function NotFoundComponent() {
   return (
@@ -152,18 +152,14 @@ function RootComponent() {
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
-  // Google Analytics: carrega uma vez e registra cada troca de página.
+  // Disable automatic GA events before navigation exposes an ERP URL.
   useEffect(() => {
-    void initAnalytics();
-  }, []);
-  const primeiraRenderizacao = useRef(true);
+    return router.subscribe("onBeforeNavigate", ({ toLocation }) => {
+      setAnalyticsRoute(toLocation.pathname);
+    });
+  }, [router]);
   useEffect(() => {
-    // A primeira página já é contada pelo gtag('config'); só as trocas internas.
-    if (primeiraRenderizacao.current) {
-      primeiraRenderizacao.current = false;
-      return;
-    }
-    trackPageView(location.pathname);
+    void trackPageView(location.pathname);
   }, [location.pathname]);
 
   return (

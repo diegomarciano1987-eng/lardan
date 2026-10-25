@@ -1,0 +1,293 @@
+/* Cinematic glass for private shells only. Public tokens remain untouched. */
+.operational-glass,
+body.operational-glass-active {
+  --background: oklch(0.19 0.009 320);
+  --foreground: oklch(0.97 0.008 65);
+  --card: oklch(0.23 0.010 320 / 0.68);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.25 0.010 320 / 0.97);
+  --popover-foreground: var(--foreground);
+  --muted: oklch(0.65 0.014 320 / 0.13);
+  --muted-foreground: oklch(0.86 0.012 65);
+  --primary: oklch(0.83 0.070 25);
+  --primary-foreground: var(--foreground);
+  --secondary: var(--muted);
+  --secondary-foreground: var(--foreground);
+  --accent: oklch(0.72 0.025 25 / 0.20);
+  --accent-foreground: var(--foreground);
+  --acao: var(--primary);
+  --acao-foreground: var(--foreground);
+  --border: oklch(0.94 0.018 65 / 0.26);
+  --input: var(--border);
+  --ring: var(--primary);
+  --destructive: oklch(0.80 0.12 25);
+  --destructive-foreground: var(--foreground);
+  --color-ink: oklch(0.17 0.009 320);
+  --color-graphite: oklch(0.22 0.010 320);
+  --color-warm-ivory: var(--foreground);
+  --color-surface: var(--card);
+  --color-surface-muted: var(--muted);
+  --color-line: var(--border);
+  --color-line-soft: oklch(0.94 0.018 65 / 0.16);
+  --color-ledger-text: var(--foreground);
+  --color-ledger-muted: var(--muted-foreground);
+  --color-bronze: oklch(0.82 0.064 50);
+  --color-champagne: oklch(0.86 0.067 72);
+  --color-champagne-soft: oklch(0.68 0.07 55 / 0.22);
+  --color-success: oklch(0.82 0.12 160);
+  --color-danger: var(--destructive);
+  --color-warning: oklch(0.88 0.12 85);
+  --color-info: oklch(0.82 0.085 235);
+  --chart-1: var(--primary);
+  --chart-2: var(--color-success);
+  --chart-3: var(--color-champagne);
+  --chart-4: var(--color-info);
+  --chart-5: var(--color-danger);
+  --op-reflection: oklch(0.99 0.006 65 / 0.12);
+  --op-edge: oklch(0.99 0.006 65 / 0.48);
+  --op-shadow-color: oklch(0.10 0.006 320 / 0.70);
+  --op-control: oklch(0.23 0.012 320 / 0.78);
+  --op-action: oklch(0.29 0.040 25 / 0.92);
+  --op-action-tint: oklch(0.72 0.068 25 / 0.26);
+  --op-action-edge: oklch(0.86 0.06 25 / 0.76);
+  --op-veil: oklch(0.16 0.009 320 / 0.72);
+  --op-veil-end: oklch(0.18 0.009 320 / 0.56);
+  --op-reflection-gradient: linear-gradient(130deg, var(--op-reflection), transparent 45%, var(--op-reflection) 140%);
+  --op-action-gradient: linear-gradient(115deg, var(--op-reflection), transparent 36%, var(--op-action-tint)), linear-gradient(180deg, var(--op-action-tint), transparent 58%), var(--op-action);
+  --op-panel-shadow: inset 0 1px 0 var(--op-edge), inset 1px 0 0 var(--op-reflection), inset 0 -1px 0 var(--op-reflection), 0 22px 46px -30px var(--op-shadow-color);
+  --op-control-shadow: inset 0 1px 0 var(--op-edge), inset 0 -1px 0 var(--op-reflection), 0 10px 22px -16px var(--op-shadow-color);
+  --op-asaas-glass: linear-gradient(125deg, var(--op-reflection), transparent 48%), color-mix(in oklab, var(--color-asaas) 80%, var(--color-ink));
+  color-scheme: dark;
+}
+.operational-glass {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  color: var(--foreground);
+  background: var(--background);
+}
+.operational-glass-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  z-index: -2;
+}
+.operational-glass::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: linear-gradient(120deg, var(--op-veil), var(--op-veil-end));
+}
+.operational-glass > :is(.admin-scope, .representante-shell, .pdv-shell) {
+  background: transparent;
+}
+body.operational-glass-active { background: var(--background); color: var(--foreground); }
+:is(.operational-glass, body.operational-glass-active) :is(h1,h2,h3,h4) {
+  color: var(--foreground);
+  letter-spacing: 0;
+}
+:is(.operational-glass, body.operational-glass-active) :is(.ledger-panel, .bg-card, .bg-surface) {
+  background: var(--op-reflection-gradient), var(--card);
+  border-color: var(--border);
+  box-shadow: var(--op-panel-shadow);
+  backdrop-filter: blur(22px) saturate(140%);
+}
+.operational-glass .ledger-panel { border-radius: 14px; }
+/* Readable interior rows should not become nested floating cards. */
+.operational-glass .ledger-panel :is(.bg-card, .bg-surface) { box-shadow: none; backdrop-filter: none; }
+:is(.operational-glass, body.operational-glass-active) :is(.bg-background, .bg-warm-ivory, .bg-cream-2, .bg-cream, .bg-ivory) {
+  background-color: var(--op-control);
+}
+.operational-glass > :is(.admin-scope, .representante-shell, .pdv-shell) { background: transparent; }
+.operational-glass .admin-deck {
+  background: var(--op-reflection-gradient), var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--op-panel-shadow);
+  backdrop-filter: blur(28px) saturate(140%);
+}
+.operational-glass .admin-scope > header {
+  background: var(--op-reflection-gradient), var(--op-control);
+  backdrop-filter: blur(28px) saturate(140%);
+  box-shadow: inset 0 -1px 0 var(--op-reflection);
+}
+.operational-glass .admin-scope > header > a:first-child { background: var(--op-reflection-gradient), var(--color-ink); }
+/* Floating rails retain their existing positions, destinations and density. */
+.operational-glass :is([aria-label="Atalhos rápidos"], [data-bottom-dock]) > div {
+  background: var(--op-reflection-gradient), var(--card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(28px) saturate(145%);
+  box-shadow: var(--op-panel-shadow);
+}
+.operational-glass [aria-label="Atalhos rápidos"] a { color: var(--muted-foreground); }
+.operational-glass [aria-label="Atalhos rápidos"] a[aria-current="page"] { color: var(--color-champagne); }
+.operational-glass :is([data-bottom-dock], [aria-label="Áreas do Financeiro"]) :is(a,button).bg-champagne-soft {
+  background: var(--op-reflection-gradient), var(--accent);
+  color: var(--color-champagne);
+  box-shadow: var(--op-control-shadow);
+}
+.operational-glass [data-bottom-dock] ul { scrollbar-width: none; }
+.operational-glass [data-bottom-dock] ul::-webkit-scrollbar { display: none; }
+/* Crystal controls. Asaas retains its own brand blue, destructive retains red. */
+:is(.operational-glass, body.operational-glass-active) :is(.admin-btn, button.border, a.border, [role="combobox"]) {
+  background: var(--op-reflection-gradient), var(--op-control);
+  color: var(--foreground);
+  border-color: var(--border);
+  box-shadow: var(--op-control-shadow);
+}
+:is(.operational-glass, body.operational-glass-active) :is(.admin-btn-primary, .btn-app-principal, button.bg-primary, a.bg-primary, button.bg-acao) {
+  background: var(--op-action-gradient);
+  color: var(--foreground);
+  border: 1px solid var(--op-action-edge);
+  box-shadow: var(--op-control-shadow);
+  backdrop-filter: blur(18px) saturate(150%);
+  text-shadow: 0 1px 3px var(--op-shadow-color);
+}
+:is(.operational-glass, body.operational-glass-active) :is(button.bg-asaas, a.bg-asaas) {
+  background: var(--op-asaas-glass);
+  color: var(--color-asaas-foreground);
+  border-color: color-mix(in oklab, var(--color-info) 70%, var(--color-asaas));
+  box-shadow: var(--op-control-shadow);
+}
+:is(.operational-glass, body.operational-glass-active) .text-asaas:not(.bg-asaas) { color: var(--color-info); }
+:is(.operational-glass, body.operational-glass-active) :is(button.bg-destructive, .bg-danger) {
+  background: var(--op-reflection-gradient), color-mix(in oklab, var(--destructive) 32%, var(--color-ink));
+  color: var(--foreground);
+  border-color: var(--destructive);
+}
+:is(.operational-glass, body.operational-glass-active) :is(input:not([type="checkbox"]):not([type="radio"]), textarea, .admin-input) {
+  background: var(--op-control);
+  color: var(--foreground);
+  border-color: var(--border);
+  box-shadow: inset 0 1px 0 var(--op-reflection);
+}
+:is(.operational-glass, body.operational-glass-active) :is(input,textarea)::placeholder { color: var(--muted-foreground); opacity: 1; }
+:is(.operational-glass, body.operational-glass-active) :is(button,a,input,textarea,[role="combobox"]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+:is(.operational-glass, body.operational-glass-active) :is(button,a)[aria-disabled="true"],
+:is(.operational-glass, body.operational-glass-active) button:disabled { opacity: 0.55; }
+/* Portals and manual sheets share the private theme without tinting public dialogs. */
+body.operational-glass-active :is([data-radix-popper-content-wrapper] > *, [role="dialog"]:not(.fixed.inset-0), [role="alertdialog"]) {
+  background: var(--op-reflection-gradient), var(--popover);
+  color: var(--foreground);
+  border-color: var(--border);
+  box-shadow: var(--op-panel-shadow);
+  backdrop-filter: blur(24px) saturate(140%);
+}
+body.operational-glass-active [role="dialog"].fixed.inset-0 > div {
+  background: var(--op-reflection-gradient), var(--popover);
+  color: var(--foreground);
+}
+/* Dense finance tables have a stable opaque backing beneath sticky labels. */
+.operational-glass table { color: var(--foreground); }
+.operational-glass thead { color: var(--muted-foreground); }
+.operational-glass thead.sticky { background: var(--popover); }
+.operational-glass tbody tr:hover { background-color: var(--muted); }
+.operational-glass :is(.text-ink, .text-graphite, .text-rose-deep) { color: var(--foreground); }
+.operational-glass :is(.text-emerald-700, .text-green-700, .text-emerald-600, .text-green-600) { color: var(--color-success); }
+.operational-glass :is(.text-red-700, .text-red-600, .text-rose-700) { color: var(--color-danger); }
+.operational-glass :is(.text-amber-700, .text-amber-600, .text-yellow-700) { color: var(--color-warning); }
+.operational-glass :is(.text-blue-700, .text-blue-600, .text-sky-700) { color: var(--color-info); }
+.operational-glass :is(.text-muted-foreground, .text-ledger-muted) { opacity: 1; }
+/* Charts: preserve data, legends, dashes and hue families; improve luminous readability. */
+.operational-glass .recharts-cartesian-axis-tick text,
+.operational-glass .recharts-pie-label-text { fill: var(--muted-foreground); font-weight: 500; }
+.operational-glass .recharts-cartesian-grid line { stroke: var(--border); stroke-opacity: 0.65; }
+.operational-glass .recharts-default-tooltip {
+  background: var(--popover) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px;
+  box-shadow: var(--op-panel-shadow);
+  backdrop-filter: blur(20px);
+}
+.operational-glass .recharts-tooltip-label { color: var(--foreground); }
+.operational-glass .recharts-legend-item-text { color: var(--muted-foreground) !important; }
+.operational-glass .recharts-tooltip-cursor { fill: var(--muted); stroke: var(--border); }
+.operational-glass :is(.recharts-line-curve,.recharts-area-curve) { filter: drop-shadow(0 2px 3px var(--op-shadow-color)); }
+/* Representative navigation, same buttons and order. */
+.operational-glass .representante-shell > aside {
+  position: sticky;
+  top: 16px;
+  height: calc(100dvh - 32px);
+  margin: 16px 0 16px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.operational-glass .representante-shell > aside > img { filter: brightness(0) invert(1); }
+.operational-glass .representante-shell > aside button {
+  color: var(--muted-foreground);
+  border: 1px solid transparent;
+}
+.operational-glass .representante-shell > aside button[aria-current="page"] {
+  color: var(--primary);
+  background: var(--op-reflection-gradient), var(--accent);
+  border-color: var(--border);
+  box-shadow: var(--op-control-shadow);
+}
+.operational-glass .pdv-shell > header {
+  background: var(--op-reflection-gradient), var(--card);
+  border-color: var(--border);
+  backdrop-filter: blur(24px) saturate(140%);
+}
+.operational-glass .pdv-shell :is(section.border, aside.border, form.border) {
+  background: var(--op-reflection-gradient), var(--card);
+  box-shadow: var(--op-panel-shadow);
+  backdrop-filter: blur(20px) saturate(135%);
+}
+body.operational-glass-active,
+html:has(body.operational-glass-active),
+body.operational-glass-active * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--op-action-edge) transparent;
+}
+@media (hover: hover) {
+  :is(.operational-glass, body.operational-glass-active) :is(.admin-btn,button.border,a.border):hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--op-reflection-gradient), var(--accent);
+  }
+  :is(.operational-glass, body.operational-glass-active) :is(.admin-btn-primary,button.bg-primary,a.bg-primary):hover:not(:disabled) { filter: brightness(1.12); }
+}
+@media (max-width: 767px) {
+  .operational-glass .representante-shell > nav {
+    left: 12px;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    border: 1px solid var(--border);
+    border-radius: 20px;
+  }
+}
+@media (prefers-contrast: more) {
+  .operational-glass, body.operational-glass-active {
+    --card: var(--background);
+    --muted-foreground: var(--foreground);
+    --op-reflection: transparent;
+    --border: var(--foreground);
+    --op-control: var(--background);
+  }
+}
+@supports not (backdrop-filter: blur(18px)) {
+  .operational-glass, body.operational-glass-active { --card: var(--background); --op-control: var(--background); }
+}
+@media print {
+  .operational-glass-backdrop, .operational-glass::before { display: none; }
+  .operational-glass, body.operational-glass-active {
+    --foreground: oklch(0.20 0 0);
+    --background: oklch(1 0 0);
+    --card: var(--background);
+    --muted-foreground: var(--foreground);
+    --color-ledger-text: var(--foreground);
+    --color-ledger-muted: var(--foreground);
+    --op-control: var(--background);
+    --op-reflection: transparent;
+    color-scheme: light;
+  }
+  .operational-glass :is(.ledger-panel,.bg-card,.bg-surface) { box-shadow: none; backdrop-filter: none; }
+}

@@ -15,11 +15,29 @@ describe("Honest sitemap", () => {
     }
     expect(xmlUrlset(urls.filter((url) => url.loc.startsWith("/semijoias/")))).not.toContain("<lastmod>");
   });
-  it("discovers the new guide without removing the existing article", async () => {
+  it("lists only the consolidated guide, not its permanent redirect", async () => {
     vi.mocked(listPublicCategories).mockResolvedValueOnce([]);
     const urls = await urlsPaginas();
     expect(urls).toContainEqual({ loc: "/guia/semijoia-folheado-ou-bijuteria", lastmod: "2026-10-25" });
-    expect(urls).toContainEqual({ loc: "/semijoia-folheado-ou-bijuteria", lastmod: "2026-10-05" });
+    expect(urls.some((url) => url.loc === "/semijoia-folheado-ou-bijuteria")).toBe(false);
+  });
+  it("omits product files from the index when there are no public products", async () => {
+    vi.mocked(listPublicProducts).mockResolvedValueOnce({ rows: [], total: 0 });
+    expect(await contarArquivosProdutos()).toBe(0);
+  });
+  it.each([[1, 1], [5000, 1], [5001, 2]])("counts files for %i public products as %i", async (total, expected) => {
+    vi.mocked(listPublicProducts).mockResolvedValueOnce({ rows: [], total });
+    expect(await contarArquivosProdutos()).toBe(expected);
+  });
+  it("reads all published product URLs through pagination", async () => {
+    const first = Array.from({ length: 500 }, (_, index) => ({ slug: `peca-${index}` }));
+    vi.mocked(listPublicProducts)
+      .mockResolvedValueOnce({ rows: first as Awaited<ReturnType<typeof listPublicProducts>>["rows"], total: 501 })
+      .mockResolvedValueOnce({ rows: [{ slug: "ultima-peca" }] as Awaited<ReturnType<typeof listPublicProducts>>["rows"], total: 501 });
+    const slugs = await slugsProdutos();
+    expect(slugs).toHaveLength(501);
+    expect(slugs[500]).toBe("ultima-peca");
+    expect(listPublicProducts).toHaveBeenLastCalledWith({ pagina: 1, porPagina: 500 });
   });
   it("never invents lastmod for undated pages", () => {
     expect(xmlUrlset([{ loc: "/" }])).not.toContain("<lastmod>");

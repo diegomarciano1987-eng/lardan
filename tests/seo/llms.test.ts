@@ -3,6 +3,10 @@ import { llmsTxt } from "../../src/lib/public-text";
 import { formatLlmsLinks } from "../../src/lib/llms-format";
 
 describe("llms.txt public document rules", () => {
+  it("cites only the consolidated comparison guide", () => {
+    expect(llmsTxt()).toContain("https://www.lardan.com.br/guia/semijoia-folheado-ou-bijuteria");
+    expect(llmsTxt()).not.toContain("https://www.lardan.com.br/semijoia-folheado-ou-bijuteria");
+  });
   it("stays below 30000 characters", () => {
     expect(llmsTxt().length).toBeLessThan(30000);
   });

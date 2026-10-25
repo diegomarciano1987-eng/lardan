@@ -639,7 +639,7 @@ Guia: semijoia, folheado ou bijuteria
 
 URL oficial:
 
-${u("/semijoia-folheado-ou-bijuteria")}
+${u("/guia/semijoia-folheado-ou-bijuteria")}
 
 Tema principal:
 diferença entre joia, semijoia, folheado e bijuteria; como avaliar material de base, banho, acabamento e garantia antes de comprar. Não existe norma oficial que defina cada termo pela espessura do banho; o guia orienta a perguntar ao fabricante.
@@ -1151,8 +1151,8 @@ ${SITE_URL}
 - Quanto tempo preciso dedicar às vendas? → [Perguntas sobre revenda](${u("/perguntas-sobre-revenda-de-semijoias")}): Dedicação e regularidade.
 - A revenda é indicada para quem precisa de renda garantida? → [Perguntas sobre revenda](${u("/perguntas-sobre-revenda-de-semijoias")}): Resultados sem garantia de renda.
 - Posso vender pelo WhatsApp sem incomodar minhas clientes? → [Vendas pelo WhatsApp](${u("/como-vender-semijoias-pelo-whatsapp")}): Abordagem e relacionamento.
-- Qual a diferença entre joia, semijoia, folheado e bijuteria? → [Semijoia, folheado ou bijuteria](${u("/semijoia-folheado-ou-bijuteria")}): Materiais e terminologia.
-- Como avaliar material, banho e acabamento antes de comprar? → [Semijoia, folheado ou bijuteria](${u("/semijoia-folheado-ou-bijuteria")}): Critérios de qualidade.
+- Qual a diferença entre joia, semijoia, folheado e bijuteria? → [Semijoia, folheado ou bijuteria](${u("/guia/semijoia-folheado-ou-bijuteria")}): Materiais e terminologia.
+- Como avaliar material, banho e acabamento antes de comprar? → [Semijoia, folheado ou bijuteria](${u("/guia/semijoia-folheado-ou-bijuteria")}): Critérios de qualidade.
 - Como limpar e guardar semijoias? → [Como cuidar de semijoias](${u("/como-cuidar-de-semijoias")}): Limpeza e armazenamento.
 - Quando devo tirar as semijoias para evitar danos? → [Como cuidar de semijoias](${u("/como-cuidar-de-semijoias")}): Cuidados no uso diário.
 - A garantia cobre desgaste por uso inadequado? → [Como cuidar de semijoias](${u("/como-cuidar-de-semijoias")}): Cobertura e limites da garantia.

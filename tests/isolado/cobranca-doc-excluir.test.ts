@@ -36,10 +36,10 @@ test("sem motivo não exclui", async () => {
 });
 
 test("exclusão válida remove registro, devolve caminho e grava histórico e auditoria", async () => {
-  const r = await rpc<{ storage_path: string; party_id: string }[]>(master, "cob_judicial_doc_excluir", { _id: docId, _motivo: "anexado na ficha errada" });
+  const r = await rpc<{ storage_path: string; party_id: string }>(master, "cob_judicial_doc_excluir", { _id: docId, _motivo: "anexado na ficha errada" });
   expect(r.erro).toBeNull();
-  expect(r.dados?.[0]?.storage_path).toBe(`judicial/${party}/teste-doc-errado.pdf`);
-  expect(r.dados?.[0]?.party_id).toBe(party);
+  expect(r.dados?.storage_path).toBe(`judicial/${party}/teste-doc-errado.pdf`);
+  expect(r.dados?.party_id).toBe(party);
 
   const resto = await adm.unsafe("select count(*)::int n from cob_judicial_docs where id=$1", [docId]);
   expect(Number(resto[0].n)).toBe(0);

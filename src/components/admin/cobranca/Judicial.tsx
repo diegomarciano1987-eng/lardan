@@ -173,7 +173,10 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
             {(docs.data ?? []).map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                 <span><b className="text-ledger-text">{d.titulo}</b> <span className="text-xs text-ledger-muted">· {TIPOS_DOC_JUDICIAL.find((t) => t[0] === d.tipo)?.[1]} · {dataBR(d.created_at)}</span></span>
-                <button onClick={() => ver(d.id)} className="h-9 rounded-lg border border-line px-4 text-xs font-semibold">Abrir</button>
+                <span className="flex gap-2">
+                  <button onClick={() => ver(d.id)} className="h-9 rounded-lg border border-line px-4 text-xs font-semibold">Abrir</button>
+                  <button data-testid={`jud-doc-excluir-${d.id}`} onClick={() => void remover(d.id, d.titulo)} className="h-9 rounded-lg border border-danger/50 px-4 text-xs font-semibold text-danger hover:bg-danger/10">Excluir</button>
+                </span>
               </li>))}
           </ul>
         )}

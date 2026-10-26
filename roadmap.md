@@ -24,3 +24,9 @@
 
 ## Excluir documento judicial anexado por engano — 26/10
 - [x] Botão Excluir na ficha de cobrança (aba Judicial): confirmação + motivo obrigatório, apaga o arquivo do cofre, grava histórico na ficha e auditoria (quem removeu, qual documento, motivo). Migração 0157 (cob_judicial_doc_excluir), teste isolado cobranca-doc-excluir (4 testes), prova real na ficha da Silvia Helena: "ACORDO REGIANE assinado.pdf" removido por Diego via tela. Falta publicar
+
+## Mapa de Inteligência da Rede (26/10/2026)
+- [x] 14. Todas as consultoras no mapa da cidade (ativa verde e maior, inativa cinza), sem coordenada = centro da cidade tracejado
+- [x] 15. Localização por rua (geo-2) + botão "Localizar ruas da cidade" + agendamento a cada minuto (vale após publicar)
+- [x] 16. Contagem por município única por IBGE (Londrina estava dividida em "Londrina"/"LONDRINA")
+- [ ] 17. Restante da rede refinado por rua aos poucos pelo agendamento (depende de publicar)

@@ -1,6 +1,5 @@
 import { Biblioteca } from "@/components/consultora/Biblioteca";
 import { AcertoApp } from "@/components/consultora/AcertoApp";
-import { MeuFinanceiro } from "@/components/consultora/MeuFinanceiro";
 import { Indicacoes } from "@/components/consultora/Indicacoes";
 import { PedidosConsultora } from "@/components/consultora/PedidosConsultora";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -41,7 +40,7 @@ import { FotosDivergencia } from "@/components/consultora/FotosDivergencia";
 import { iconeCategoria } from "@/lib/consultora-combinado";
 const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "biblioteca", "financeiro", "mais", "novo"];
+const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "biblioteca", "mais", "novo"];
 const str = (v: unknown) => (typeof v === "string" && v.length > 0 && v.length < 200 ? v : undefined);
 
 export const Route = createFileRoute("/_authenticated/consultora")({
@@ -541,7 +540,7 @@ function AreaConsultoraLiberada() {
   const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
   const aba = nav.aba ?? "inicio";
-  const ajuda = aba === "indicacoes" || aba === "biblioteca" ? "inicio" : aba === "historico" || aba === "financeiro" ? "maleta" : aba === "novo" ? "pedidos" : aba;
+  const ajuda = aba === "indicacoes" || aba === "biblioteca" ? "inicio" : aba === "historico" ? "maleta" : aba === "novo" ? "pedidos" : aba;
 
   const seletorMaleta = abertas.length > 1 && (
     <div role="radiogroup" aria-label="Maleta em uso" className="mb-5 grid gap-2">
@@ -570,8 +569,7 @@ function AreaConsultoraLiberada() {
       {aba === "maleta" && (<><Topo titulo="Minha maleta" ajuda="maleta" />{seletorMaleta}<div className="max-w-3xl"><MinhaMaleta cycleId={atual} /></div></>)}
       {aba === "historico" && (<><Topo titulo="Entregas da maleta" ajuda="maleta" voltar={() => ir({ aba: "mais" })} />{seletorMaleta}<div className="max-w-3xl"><Historico cycleId={atual} /></div></>)}
       {aba === "vitrine" && (<><Topo titulo="Minha vitrine" ajuda="vitrine" voltar={() => ir({ aba: "mais" })} /><Estudio /></>)}
-      {aba === "indicacoes" && (<><Topo titulo="Minhas indicadas" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Indicacoes /></>)}
-      {aba === "financeiro" && (<><Topo titulo="Meu financeiro" ajuda="maleta" voltar={() => ir({ aba: "mais" })} /><MeuFinanceiro verMaleta={() => ir({ aba: "maleta" })} /></>)}
+      {aba === "indicacoes" && (<><Topo titulo="Indicações" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Indicacoes /></>)}
       {aba === "biblioteca" && (<><Topo titulo="Biblioteca LARDAN" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Biblioteca /></>)}
       {aba === "mais" && <Mais ir={ir} />}
     </CascaConsultora>
@@ -579,10 +577,9 @@ function AreaConsultoraLiberada() {
 }
 
 const PASSOS = [
-  { t: "Bem-vinda à sua área", d: "Aqui você cuida das suas clientes, dos seus pedidos, da sua maleta, do seu acerto e da sua vitrine, tudo pelo celular." },
-  { t: "Menu embaixo da tela", d: "Início, Minhas clientes, Pedidos, Maleta e Mais. Em “Mais” ficam Meu financeiro, a sua vitrine, as entregas e as suas indicadas." },
-  { t: "Nova venda", d: "No Início, toque em “Nova venda”: escolha a cliente, as peças e confira antes de confirmar. Cliente nova? Toque em “Nova cliente”." },
-  { t: "Acerto pelo app", d: "Antes da data do acerto, abra Maleta, marque o que vendeu, feche a pré-baixa e pague o Pix com o valor exato." },
+  { t: "Bem-vinda à sua área", d: "Aqui você cuida das suas clientes, dos seus pedidos, da sua maleta e da sua vitrine, tudo pelo celular." },
+  { t: "Menu embaixo da tela", d: "Início, Clientes, Pedidos, Maleta e Mais. Em “Mais” ficam a sua vitrine e as entregas." },
+  { t: "Nova venda", d: "No Início, toque em “Nova venda”: escolha a cliente, as peças e confira antes de confirmar." },
   { t: "Dúvidas?", d: "Toque em “Ajuda” no alto da tela. Ao fechar, você volta para onde estava. Este passeio pode ser revisto na Central de Ajuda." },
 ];
 
@@ -591,14 +588,14 @@ function Passeio() {
   const [aberto, setAberto] = React.useState(false);
   const [i, setI] = React.useState(0);
   React.useEffect(() => {
-    try { if (!localStorage.getItem("lardan-passeio-consultora-v3")) setAberto(true); } catch { /* sem armazenamento */ }
+    try { if (!localStorage.getItem("lardan-passeio-consultora-v2")) setAberto(true); } catch { /* sem armazenamento */ }
     const reabrir = () => { setI(0); setAberto(true); };
     window.addEventListener("lardan:passeio", reabrir);
     return () => window.removeEventListener("lardan:passeio", reabrir);
   }, []);
   const fechar = () => {
     setAberto(false); setI(0);
-    try { localStorage.setItem("lardan-passeio-consultora-v3", "1"); } catch { /* ok */ }
+    try { localStorage.setItem("lardan-passeio-consultora-v2", "1"); } catch { /* ok */ }
   };
   const p = PASSOS[i]!;
   return (

@@ -8771,6 +8771,270 @@ export type Database = {
           },
         ]
       }
+      kit_pre_baixa_itens: {
+        Row: {
+          etiqueta_atualizada: boolean
+          pre_baixa_id: string
+          preco_cents: number
+          qtd_app: number
+          qtd_enviada: number
+          qtd_faltando: number
+          qtd_lida: number | null
+          qtd_vendida: number
+          qtd_voltou_vendida: number
+          variant_id: string
+        }
+        Insert: {
+          etiqueta_atualizada?: boolean
+          pre_baixa_id: string
+          preco_cents: number
+          qtd_app?: number
+          qtd_enviada: number
+          qtd_faltando?: number
+          qtd_lida?: number | null
+          qtd_vendida?: number
+          qtd_voltou_vendida?: number
+          variant_id: string
+        }
+        Update: {
+          etiqueta_atualizada?: boolean
+          pre_baixa_id?: string
+          preco_cents?: number
+          qtd_app?: number
+          qtd_enviada?: number
+          qtd_faltando?: number
+          qtd_lida?: number | null
+          qtd_vendida?: number
+          qtd_voltou_vendida?: number
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_pre_baixa_itens_pre_baixa_id_fkey"
+            columns: ["pre_baixa_id"]
+            isOneToOne: false
+            referencedRelation: "kit_pre_baixas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixa_itens_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kit_pre_baixa_liberacoes: {
+        Row: {
+          ator: string
+          consultora_party_id: string
+          criado_em: string
+          id: string
+          motivo: string
+          usada_em: string | null
+          usada_no_ciclo: string | null
+        }
+        Insert: {
+          ator: string
+          consultora_party_id: string
+          criado_em?: string
+          id?: string
+          motivo: string
+          usada_em?: string | null
+          usada_no_ciclo?: string | null
+        }
+        Update: {
+          ator?: string
+          consultora_party_id?: string
+          criado_em?: string
+          id?: string
+          motivo?: string
+          usada_em?: string | null
+          usada_no_ciclo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_pre_baixa_liberacoes_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixa_liberacoes_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixa_liberacoes_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      kit_pre_baixas: {
+        Row: {
+          base_faixa_cents: number
+          comissao_cents: number
+          comissao_pct: number
+          conferida_em: string | null
+          conferida_por: string | null
+          consultora_party_id: string
+          created_at: string
+          cycle_id: string
+          diferenca_cents: number | null
+          encerrada_em: string | null
+          fechada_em: string | null
+          fechada_por: string | null
+          id: string
+          installment_id: string | null
+          pendencia_motivo: string | null
+          pendencia_resolvida_em: string | null
+          pendencia_title_id: string | null
+          prazo: string | null
+          remessa_id: string | null
+          status: string
+          title_id: string | null
+          total_vendido_cents: number
+          updated_at: string
+          valor_final_cents: number | null
+          valor_pagar_cents: number
+          vendido_final_cents: number | null
+        }
+        Insert: {
+          base_faixa_cents?: number
+          comissao_cents?: number
+          comissao_pct?: number
+          conferida_em?: string | null
+          conferida_por?: string | null
+          consultora_party_id: string
+          created_at?: string
+          cycle_id: string
+          diferenca_cents?: number | null
+          encerrada_em?: string | null
+          fechada_em?: string | null
+          fechada_por?: string | null
+          id?: string
+          installment_id?: string | null
+          pendencia_motivo?: string | null
+          pendencia_resolvida_em?: string | null
+          pendencia_title_id?: string | null
+          prazo?: string | null
+          remessa_id?: string | null
+          status?: string
+          title_id?: string | null
+          total_vendido_cents?: number
+          updated_at?: string
+          valor_final_cents?: number | null
+          valor_pagar_cents?: number
+          vendido_final_cents?: number | null
+        }
+        Update: {
+          base_faixa_cents?: number
+          comissao_cents?: number
+          comissao_pct?: number
+          conferida_em?: string | null
+          conferida_por?: string | null
+          consultora_party_id?: string
+          created_at?: string
+          cycle_id?: string
+          diferenca_cents?: number | null
+          encerrada_em?: string | null
+          fechada_em?: string | null
+          fechada_por?: string | null
+          id?: string
+          installment_id?: string | null
+          pendencia_motivo?: string | null
+          pendencia_resolvida_em?: string | null
+          pendencia_title_id?: string | null
+          prazo?: string | null
+          remessa_id?: string | null
+          status?: string
+          title_id?: string | null
+          total_vendido_cents?: number
+          updated_at?: string
+          valor_final_cents?: number | null
+          valor_pagar_cents?: number
+          vendido_final_cents?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_pre_baixas_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixas_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixas_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixas_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: true
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixas_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: true
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixas_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixas_pendencia_title_id_fkey"
+            columns: ["pendencia_title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixas_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixas_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixas_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kit_signature_requests: {
         Row: {
           acceptance_id: string | null
@@ -12155,6 +12419,69 @@ export type Database = {
           },
         ]
       }
+      pedido_config: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string | null
+          endereco_linha: string
+          exigir_pre_baixa: boolean
+          garantia_exclusoes: string
+          garantia_texto: string
+          garantia_titulo: string
+          id: boolean
+          montagem_texto: string
+          pagamento_texto: string
+          pedidos_email: string
+          pedidos_telefone: string
+          pix_chave: string
+          pix_favorecido: string
+          pix_tipo: string
+          prazo_correio_dias: number
+          preco_virada_em: string | null
+          rodape_texto: string
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          endereco_linha?: string
+          exigir_pre_baixa?: boolean
+          garantia_exclusoes?: string
+          garantia_texto?: string
+          garantia_titulo?: string
+          id?: boolean
+          montagem_texto?: string
+          pagamento_texto?: string
+          pedidos_email?: string
+          pedidos_telefone?: string
+          pix_chave?: string
+          pix_favorecido?: string
+          pix_tipo?: string
+          prazo_correio_dias?: number
+          preco_virada_em?: string | null
+          rodape_texto?: string
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          endereco_linha?: string
+          exigir_pre_baixa?: boolean
+          garantia_exclusoes?: string
+          garantia_texto?: string
+          garantia_titulo?: string
+          id?: boolean
+          montagem_texto?: string
+          pagamento_texto?: string
+          pedidos_email?: string
+          pedidos_telefone?: string
+          pix_chave?: string
+          pix_favorecido?: string
+          pix_tipo?: string
+          prazo_correio_dias?: number
+          preco_virada_em?: string | null
+          rodape_texto?: string
+        }
+        Relationships: []
+      }
       plating_types: {
         Row: {
           code: string
@@ -12187,6 +12514,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      preco_reajustes: {
+        Row: {
+          antes_cents: number
+          ator: string | null
+          criado_em: string
+          depois_cents: number
+          desfeito_em: string | null
+          id: number
+          lote: string
+          onde: string
+          variant_id: string
+        }
+        Insert: {
+          antes_cents: number
+          ator?: string | null
+          criado_em?: string
+          depois_cents: number
+          desfeito_em?: string | null
+          id?: number
+          lote: string
+          onde: string
+          variant_id: string
+        }
+        Update: {
+          antes_cents?: number
+          ator?: string | null
+          criado_em?: string
+          depois_cents?: number
+          desfeito_em?: string | null
+          id?: number
+          lote?: string
+          onde?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preco_reajustes_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pricing_policies: {
         Row: {
@@ -13177,6 +13548,7 @@ export type Database = {
           praca_id: string
           representante_party_id: string | null
           status: string
+          tipo_envio: string
           updated_at: string
         }
         Insert: {
@@ -13191,6 +13563,7 @@ export type Database = {
           praca_id: string
           representante_party_id?: string | null
           status?: string
+          tipo_envio?: string
           updated_at?: string
         }
         Update: {
@@ -13205,6 +13578,7 @@ export type Database = {
           praca_id?: string
           representante_party_id?: string | null
           status?: string
+          tipo_envio?: string
           updated_at?: string
         }
         Relationships: [
@@ -17922,6 +18296,10 @@ export type Database = {
       kit_entrada_detalhe: { Args: { _entrada: string }; Returns: Json }
       kit_entrada_exigir: { Args: never; Returns: string }
       kit_entradas_listar: { Args: { _limit?: number }; Returns: Json }
+      kit_exige_pre_baixa_checar: {
+        Args: { _consultora: string; _cycle: string; _remessa: string }
+        Returns: undefined
+      }
       kit_expedir: { Args: { _cycle: string; _payload?: Json }; Returns: Json }
       kit_historico: { Args: { _cycle: string }; Returns: Json }
       kit_idem_hash: {
@@ -17966,6 +18344,12 @@ export type Database = {
           _transfer: string
         }
         Returns: string
+      }
+      kit_pedido_dados: { Args: { _cycle: string }; Returns: Json }
+      kit_preco: { Args: { _cycle: string; _variant: string }; Returns: number }
+      kit_preco_da_consultora: {
+        Args: { _party: string; _variant: string }
+        Returns: number
       }
       kit_pular_acerto: {
         Args: { _cycle: string; _motivo: string; _nova?: string }
@@ -18609,6 +18993,12 @@ export type Database = {
         Args: { _dias: number; _token_hash: string }
         Returns: Json
       }
+      pedido_config_ler: { Args: never; Returns: Json }
+      pedido_config_salvar: { Args: { _dados: Json }; Returns: Json }
+      pedido_grupo_peca: {
+        Args: { _categoria: string; _nome: string; _sku: string }
+        Returns: string
+      }
       phone_canon: { Args: { v: string }; Returns: string }
       praca_alternar: {
         Args: { _ativo: boolean; _id: string }
@@ -18647,6 +19037,76 @@ export type Database = {
           nome: string
         }[]
       }
+      pre_baixa_abrir: { Args: { _cycle: string }; Returns: string }
+      pre_baixa_asaas_preparar: {
+        Args: { _actor: string; _payload: Json }
+        Returns: Json
+      }
+      pre_baixa_calculo: { Args: { _pb: string }; Returns: Json }
+      pre_baixa_conferir: {
+        Args: { _aplicar?: boolean; _cycle: string; _leituras: Json }
+        Returns: Json
+      }
+      pre_baixa_etiqueta_atualizada: {
+        Args: { _cycle: string; _variants: string[] }
+        Returns: number
+      }
+      pre_baixa_exigir_definir: { Args: { _ligar: boolean }; Returns: boolean }
+      pre_baixa_faixa: { Args: { _vendido: number }; Returns: number }
+      pre_baixa_fechar: { Args: { _cycle: string }; Returns: Json }
+      pre_baixa_indicadores: {
+        Args: { _ate?: string; _de?: string }
+        Returns: Json
+      }
+      pre_baixa_ler: { Args: { _cycle: string }; Returns: Json }
+      pre_baixa_liberar_kit: {
+        Args: { _consultora: string; _motivo: string }
+        Returns: string
+      }
+      pre_baixa_pago: {
+        Args: { _pb: Database["public"]["Tables"]["kit_pre_baixas"]["Row"] }
+        Returns: boolean
+      }
+      pre_baixa_painel: { Args: { _situacao?: string }; Returns: Json }
+      pre_baixa_pendencia_resolver: {
+        Args: { _cycle: string; _motivo: string }
+        Returns: undefined
+      }
+      pre_baixa_pode: {
+        Args: { _cycle: string; _escrever?: boolean }
+        Returns: boolean
+      }
+      pre_baixa_qtd_app: {
+        Args: { _cycle: string; _variant: string }
+        Returns: number
+      }
+      pre_baixa_situacao: {
+        Args: { _pb: Database["public"]["Tables"]["kit_pre_baixas"]["Row"] }
+        Returns: string
+      }
+      pre_baixa_vender: {
+        Args: { _cycle: string; _qtd: number; _variant: string }
+        Returns: Json
+      }
+      preco_reajuste_aplicar: { Args: { _confirmacao: string }; Returns: Json }
+      preco_reajuste_desfazer: { Args: { _lote: string }; Returns: Json }
+      preco_reajuste_previa: {
+        Args: never
+        Returns: {
+          antes_cents: number
+          categoria: string
+          depois_cents: number
+          diferenca_cents: number
+          pecas_estoque: number
+          pecas_na_rua: number
+          produto: string
+          sku: string
+          variant_id: string
+          variante: string
+        }[]
+      }
+      preco_reajuste_resumo: { Args: never; Returns: Json }
+      preco_regra_lardan: { Args: { _cents: number }; Returns: number }
       product_banho_salvar: {
         Args: {
           _alterar_valor?: boolean
@@ -18836,6 +19296,7 @@ export type Database = {
         }
         Returns: Json
       }
+      remessa_envio_ler: { Args: { _remessa: string }; Returns: Json }
       remessa_maleta_excluir: {
         Args: { _cycle: string; _motivo: string }
         Returns: Json
@@ -18865,6 +19326,10 @@ export type Database = {
           _pecas_cliente_nova: number
         }
         Returns: undefined
+      }
+      remessa_tipo_envio_definir: {
+        Args: { _remessa: string; _tipo: string }
+        Returns: Json
       }
       remessas_buscar: {
         Args: {

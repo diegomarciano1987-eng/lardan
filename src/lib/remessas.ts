@@ -98,3 +98,10 @@ export const buscarRemessas = (f: FiltrosRemessa) =>
     _ate: f.ate ?? null,
     _campo_data: f.campoData ?? "emissao",
   });
+
+// ------------------------------------------------- 0157: tipo de envio (pessoal | correio)
+export type TipoEnvio = "pessoal" | "correio";
+export const lerEnvioRemessa = (id: string) =>
+  rpc<{ tipo_envio: TipoEnvio; prazo_correio_dias: number; postar_ate: string | null } | null>("remessa_envio_ler", { _remessa: id });
+export const definirEnvioRemessa = (id: string, tipo: TipoEnvio) =>
+  rpc<{ tipo_envio: TipoEnvio; repetido: boolean }>("remessa_tipo_envio_definir", { _remessa: id, _tipo: tipo });

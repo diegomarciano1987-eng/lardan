@@ -99,8 +99,16 @@ describe("montagem pelo histórico", () => {
   test("metas por tipo somam o total, que vem da média das 3 últimas maletas", async () => {
     const r = await rpc<Resultado>(estoque, "montagem_metas_ciclo", { _cycle: cicloA });
     expect(r.erro).toBeNull();
+    // 0155: total sugerido = média das peças VENDIDAS nas 3 últimas maletas × 1,3 (18 × 1,3 = 23,4 → 24)
     expect(r.dados).toMatchObject({ vinculada: true, modo_sugerido: "historico", confianca: "alta",
-      total_pecas: 60, total_origem: "historico", maletas_fechadas: 3 });
+      total_pecas: 24, total_origem: "historico", maletas_fechadas: 3 });
+    expect(soma(r.dados.metas_historico!)).toBe(24);
+    expect(r.dados.ultimas_maletas.map((m) => m.remessa)).toEqual([REM + 3, REM + 2, REM + 1]);
+  });
+
+  test("com 60 peças, a distribuição puxa para o que ela vende", async () => {
+    const r = await rpc<Resultado>(estoque, "montagem_metas_ciclo", { _cycle: cicloA, _total: 60 });
+    expect(r.erro).toBeNull();
     expect(soma(r.dados.metas_historico!)).toBe(60);
     // puxa para anel (ela gira 60% em anel; a praça, bem menos)
     expect(r.dados.metas_historico!.anel).toBeGreaterThan(r.dados.metas_historico!.brinco);

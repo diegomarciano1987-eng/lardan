@@ -4,6 +4,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, UserRound } from "lucide-react";
 import { abrirMaletaRepresentante, mensagem } from "@/lib/maletas-perdidas";
+import { EnvioRemessa } from "@/components/admin/maletas/EnvioRemessa";
+import { useAdminRoles } from "@/components/admin/AdminShell";
+import { liberarKitSemPreBaixa } from "@/lib/pre-baixa";
 import { toast } from "sonner";
 import { BackButton, EmptyState, ErrorState, Panel, Skeleton, StatusBadge } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
@@ -52,6 +55,9 @@ function RemessaPage() {
   const qc = useQueryClient();
   const [consultora, setConsultora] = React.useState("");
   const [busca, setBusca] = React.useState("");
+  const master = useAdminRoles().includes("master" as never);
+  const [semPreBaixa, setSemPreBaixa] = React.useState<string | null>(null);
+  const [motivoLib, setMotivoLib] = React.useState("");
 
   const remessa = useQuery({
     queryKey: ["remessas", "lista", "todas"],
@@ -78,6 +84,16 @@ function RemessaPage() {
       qc.invalidateQueries({ queryKey: ["remessas"] });
       navigate({ to: "/admin/maletas/$id", params: { id: res.cycle_id } });
     },
+    onError: (e) => {
+      const t = traduzir(e);
+      // 0158: maleta anterior sem pré-baixa fechada — o Master pode liberar com motivo
+      if (/pré-baixa/i.test(t)) setSemPreBaixa(t);
+      toast.error(t);
+    },
+  });
+  const liberar = useMutation({
+    mutationFn: () => liberarKitSemPreBaixa(consultora, motivoLib),
+    onSuccess: () => { toast.success("Liberado uma vez. Abrindo a maleta…"); setSemPreBaixa(null); setMotivoLib(""); abrir.mutate(); },
     onError: (e) => toast.error(traduzir(e)),
   });
 
@@ -110,6 +126,7 @@ function RemessaPage() {
             Emissão {dataBR(r.data_emissao)} · Acerto {dataBR(r.data_acerto)}
             {r.representante ? ` · Representante ${r.representante}` : " · Entrega direta"}
           </p>
+          <div className="mt-2"><EnvioRemessa remessaId={r.id} podeAlterar={podeMontar && r.status !== "fechada" && r.status !== "cancelada"} /></div>
         </div>
         <StatusBadge tone={s.tom}>{s.rotulo}</StatusBadge>
         <EtiquetasImprimir origens={(maletas.data ?? []).map((m) => ({ cycleId: m.cycle_id }))} />
@@ -137,6 +154,13 @@ function RemessaPage() {
             <button type="button" className="admin-btn admin-btn-primary" disabled={abrir.isPending} onClick={() => abrir.mutate()}>
               <Plus aria-hidden className="size-4" /> {abrir.isPending ? "Abrindo…" : "Abrir maleta"}
             </button>
+            {semPreBaixa && master && (
+              <div className="flex w-full flex-wrap items-center gap-2 rounded-xl border border-warning/50 bg-warning/5 p-3 text-sm">
+                <span className="w-full text-ledger-muted">{semPreBaixa}</span>
+                <input className="admin-input flex-1" placeholder="Motivo para liberar sem pré-baixa (fica na auditoria)" value={motivoLib} onChange={(e) => setMotivoLib(e.target.value)} />
+                <button type="button" className="admin-btn" disabled={liberar.isPending || motivoLib.trim().length < 5} onClick={() => liberar.mutate()}>Liberar e abrir</button>
+              </div>
+            )}
             {r.representante && (
               <button type="button" className="admin-btn" disabled={abrirRep.isPending} onClick={() => abrirRep.mutate()}
                 title="A maleta sai sem consultora para o representante; ele passa para uma consultora ou candidata da carteira dele.">

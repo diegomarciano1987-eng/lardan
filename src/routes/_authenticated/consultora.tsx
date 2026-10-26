@@ -1,4 +1,5 @@
 import { Biblioteca } from "@/components/consultora/Biblioteca";
+import { AcertoApp } from "@/components/consultora/AcertoApp";
 import { Indicacoes } from "@/components/consultora/Indicacoes";
 import { PedidosConsultora } from "@/components/consultora/PedidosConsultora";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -195,6 +196,8 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
           Valor de venda das peças enviadas para você. Não é o valor do acerto.
         </p>
       </Cartao>
+
+      {["operacao", "acerto", "encerrada"].includes(d.ciclo.status) && <AcertoApp cycleId={cycleId} podeComecar={d.ciclo.status !== "encerrada"} />}
 
       {aguardandoRecebimento && (
         <Cartao className="border-warning">

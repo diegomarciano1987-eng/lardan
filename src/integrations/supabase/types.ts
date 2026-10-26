@@ -8897,6 +8897,7 @@ export type Database = {
           pendencia_resolvida_em: string | null
           pendencia_title_id: string | null
           prazo: string | null
+          recebido_lardan_cents: number
           remessa_id: string | null
           status: string
           title_id: string | null
@@ -8925,6 +8926,7 @@ export type Database = {
           pendencia_resolvida_em?: string | null
           pendencia_title_id?: string | null
           prazo?: string | null
+          recebido_lardan_cents?: number
           remessa_id?: string | null
           status?: string
           title_id?: string | null
@@ -8953,6 +8955,7 @@ export type Database = {
           pendencia_resolvida_em?: string | null
           pendencia_title_id?: string | null
           prazo?: string | null
+          recebido_lardan_cents?: number
           remessa_id?: string | null
           status?: string
           title_id?: string | null
@@ -9403,6 +9406,7 @@ export type Database = {
           full_name: string
           gclid: string | null
           id: string
+          indicado_por_texto: string | null
           ip: unknown
           landing_page: string | null
           language: string | null
@@ -9475,6 +9479,7 @@ export type Database = {
           full_name: string
           gclid?: string | null
           id?: string
+          indicado_por_texto?: string | null
           ip?: unknown
           landing_page?: string | null
           language?: string | null
@@ -9547,6 +9552,7 @@ export type Database = {
           full_name?: string
           gclid?: string | null
           id?: string
+          indicado_por_texto?: string | null
           ip?: unknown
           landing_page?: string | null
           language?: string | null
@@ -10684,6 +10690,106 @@ export type Database = {
             referencedColumns: ["party_id"]
           },
         ]
+      }
+      lider_config: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string | null
+          comissao_ativa: boolean
+          comissao_pct: number
+          id: boolean
+          indicadas_ativas_min: number
+          venda_ciclo_min_cents: number
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          comissao_ativa?: boolean
+          comissao_pct?: number
+          id?: boolean
+          indicadas_ativas_min?: number
+          venda_ciclo_min_cents?: number
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          comissao_ativa?: boolean
+          comissao_pct?: number
+          id?: boolean
+          indicadas_ativas_min?: number
+          venda_ciclo_min_cents?: number
+        }
+        Relationships: []
+      }
+      lideres: {
+        Row: {
+          decidido_em: string | null
+          decidido_por: string | null
+          motivo: string | null
+          party_id: string
+          solicitado_em: string
+          status: string
+        }
+        Insert: {
+          decidido_em?: string | null
+          decidido_por?: string | null
+          motivo?: string | null
+          party_id: string
+          solicitado_em?: string
+          status: string
+        }
+        Update: {
+          decidido_em?: string | null
+          decidido_por?: string | null
+          motivo?: string | null
+          party_id?: string
+          solicitado_em?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lideres_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lideres_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lideres_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: true
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      liga_niveis: {
+        Row: {
+          ciclos_min: number
+          nome: string
+          ordem: number
+          venda_min_cents: number
+        }
+        Insert: {
+          ciclos_min: number
+          nome: string
+          ordem: number
+          venda_min_cents: number
+        }
+        Update: {
+          ciclos_min?: number
+          nome?: string
+          ordem?: number
+          venda_min_cents?: number
+        }
+        Relationships: []
       }
       locations: {
         Row: {
@@ -17375,6 +17481,14 @@ export type Database = {
       consultora_clientes_resumo: { Args: never; Returns: Json }
       consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }
       consultora_comissao_tabela: { Args: never; Returns: Json }
+      consultora_debito_asaas_preparar: {
+        Args: { _actor: string; _payload: Json }
+        Returns: Json
+      }
+      consultora_debito_cobranca: {
+        Args: { _installment: string }
+        Returns: Json
+      }
       consultora_financeiro_smalldata: {
         Args: { _party: string }
         Returns: Json
@@ -17401,7 +17515,13 @@ export type Database = {
         }
         Returns: Json
       }
+      consultora_madrinha_definir: {
+        Args: { _madrinha: string; _party: string }
+        Returns: undefined
+      }
+      consultora_madrinha_ler: { Args: { _party: string }; Returns: Json }
       consultora_maletas: { Args: { _party: string }; Returns: Json }
+      consultora_meu_financeiro: { Args: never; Returns: Json }
       consultora_meu_historico: { Args: never; Returns: Json }
       consultora_pagamento_lembrete: {
         Args: { _order: string; _venc: string }
@@ -17418,6 +17538,10 @@ export type Database = {
       }
       consultora_pecas_buscar: {
         Args: { _banho?: string; _busca?: string; _categoria?: string }
+        Returns: Json
+      }
+      consultora_pedido_pago_dinheiro: {
+        Args: { _order: string }
         Returns: Json
       }
       consultora_pos_venda_abrir: {
@@ -17438,6 +17562,7 @@ export type Database = {
         Returns: undefined
       }
       consultora_pos_venda_prazo: { Args: { _order: string }; Returns: Json }
+      consultora_vendido_ciclo: { Args: { _cycle: string }; Returns: Json }
       consultoras_vinculo_smalldata: {
         Args: { _aplicar?: boolean }
         Returns: Json
@@ -18201,6 +18326,10 @@ export type Database = {
       indicacao_aprovadas: { Args: { _sponsor: string }; Returns: number }
       indicacao_painel_admin: { Args: never; Returns: Json }
       indicacao_publica: { Args: { _code: string }; Returns: Json }
+      indicada_situacao: {
+        Args: { _lead: Database["public"]["Tables"]["leads"]["Row"] }
+        Returns: string
+      }
       integration_health: {
         Args: never
         Returns: {
@@ -18620,6 +18749,25 @@ export type Database = {
         Returns: Database["public"]["Enums"]["party_status"]
       }
       legado_vincular: { Args: { _gravar_codigos?: boolean }; Returns: Json }
+      lider_admin: { Args: never; Returns: Json }
+      lider_config_salvar: {
+        Args: {
+          _comissao_ativa: boolean
+          _comissao_pct: number
+          _indicadas: number
+          _venda_cents: number
+        }
+        Returns: undefined
+      }
+      lider_decidir: {
+        Args: { _motivo?: string; _party: string; _status: string }
+        Returns: undefined
+      }
+      lider_indicadas_ativas: { Args: { _party: string }; Returns: number }
+      lider_solicitar: { Args: never; Returns: string }
+      liga_ciclos: { Args: { _min: number; _party: string }; Returns: number }
+      liga_niveis_ler: { Args: never; Returns: Json }
+      liga_niveis_salvar: { Args: { _niveis: Json }; Returns: undefined }
       limpeza_homolog_total: { Args: { _executar?: boolean }; Returns: Json }
       list_parties: {
         Args: {
@@ -18660,6 +18808,9 @@ export type Database = {
       master_exists: { Args: never; Returns: boolean }
       media_publica_ok: { Args: { _media: string }; Returns: boolean }
       meu_acesso_colab: { Args: never; Returns: boolean }
+      meu_caminho_lider: { Args: never; Returns: Json }
+      minha_equipe: { Args: never; Returns: Json }
+      minha_liga: { Args: never; Returns: Json }
       minhas_indicacoes: { Args: never; Returns: Json }
       montagem_item_operar: {
         Args: {
@@ -19080,6 +19231,7 @@ export type Database = {
         Args: { _cycle: string; _variant: string }
         Returns: number
       }
+      pre_baixa_recebido_lardan: { Args: { _cycle: string }; Returns: number }
       pre_baixa_situacao: {
         Args: { _pb: Database["public"]["Tables"]["kit_pre_baixas"]["Row"] }
         Returns: string

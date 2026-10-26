@@ -4,6 +4,7 @@ import { Copy, MessageCircle, Share2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, traduzir } from "@/lib/maletas";
+import { CaminhoLider, MinhaEquipe } from "@/components/consultora/Lider";
 
 type Dados = {
   codigo: string | null;
@@ -12,7 +13,7 @@ type Dados = {
   faixa: { titulo: string; percentual: number } | null;
   proxima: { titulo: string; percentual: number; faltam: number } | null;
   faixas: { min: number; percentual: number; titulo: string }[];
-  indicadas: { nome: string; cidade: string; uf: string; em: string; situacao: "aprovada" | "em_analise" | "nao_seguiu" }[];
+  indicadas: { nome: string; cidade: string; uf: string; em: string; situacao: keyof typeof SIT }[];
   comissoes: {
     id: string; em: string; indicada: string; venda_cents: number; pecas: number; percentual: number; faixa: string;
     comissao_cents: number; status: string; itens: { produto: string; qtd: number; preco_cents: number; total_cents: number }[];
@@ -20,7 +21,10 @@ type Dados = {
 };
 
 const SIT = {
+  candidata: { r: "Candidata", c: "bg-muted text-muted-foreground" },
   aprovada: { r: "Aprovada", c: "bg-primary/10 text-primary" },
+  primeira_maleta: { r: "1ª maleta", c: "bg-primary/15 text-primary" },
+  ativa: { r: "Ativa", c: "bg-success/15 text-success" },
   em_analise: { r: "Em análise", c: "bg-muted text-muted-foreground" },
   nao_seguiu: { r: "Não seguiu", c: "bg-muted text-muted-foreground" },
 } as const;
@@ -70,13 +74,16 @@ export function Indicacoes() {
       {d.proxima && <p className="text-[0.98rem] text-muted-foreground">{d.proxima.faltam === 1 ? "Falta" : "Faltam"} <strong className="text-foreground">{d.proxima.faltam}</strong> {d.proxima.faltam === 1 ? "aprovada" : "aprovadas"} para virar <strong className="text-foreground">{d.proxima.titulo}</strong> ({Number(d.proxima.percentual)}%).</p>}
       <p className="text-sm text-muted-foreground">Regras: {d.faixas.map((f) => `${f.min}+ aprovadas = ${Number(f.percentual)}% (${f.titulo})`).join(" · ")}. A comissão é calculada sobre as peças realmente vendidas, quando a maleta da indicada é encerrada.</p>
 
+      <CaminhoLider />
+      <MinhaEquipe />
+
       <section>
         <h2 className="mb-3 flex items-center gap-2 text-[1.15rem] font-semibold"><Users className="size-5 text-primary" aria-hidden /> Minhas indicadas</h2>
         {d.indicadas.length === 0 ? <p className="rounded-2xl border border-dashed border-border p-5 text-base text-muted-foreground">Ninguém se candidatou pelo seu link ainda.</p> : (
           <ul className="space-y-2">{d.indicadas.map((i, n) => (
             <li key={n} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4">
               <span className="min-w-0"><span className="block text-[1.05rem] font-semibold">{i.nome}</span><span className="block text-sm text-muted-foreground">{i.cidade}/{i.uf} · {new Date(i.em).toLocaleDateString("pt-BR")}</span></span>
-              <span className={`rounded-full px-3 py-1 text-sm font-semibold ${SIT[i.situacao].c}`}>{SIT[i.situacao].r}</span>
+              <span className={`rounded-full px-3 py-1 text-sm font-semibold ${(SIT[i.situacao] ?? SIT.em_analise).c}`}>{(SIT[i.situacao] ?? SIT.em_analise).r}</span>
             </li>))}</ul>
         )}
       </section>

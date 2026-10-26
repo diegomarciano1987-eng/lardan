@@ -140,6 +140,8 @@ export function CidadeConsultoras({
     return [...m.entries()].sort((a, b) => b[1].ativas - a[1].ativas || b[1].total - a[1].total).slice(0, 12);
   }, [todas]);
 
+  const maiorBairro = Math.max(1, ...bairros.map(([, v]) => v.total));
+
   /** Toda consultora vira um ponto: sem posição própria fica no centro da cidade, tracejada. */
   const { pontos, porId } = useMemo(() => {
     const base: (Consultora & { lat: number; lng: number; onde: Onde })[] = [];
@@ -370,7 +372,7 @@ export function CidadeConsultoras({
                     <div className="mt-1 h-1.5 rounded-full bg-surface-muted">
                       <div
                         className="mapa-legenda-ativa h-full rounded-full"
-                        style={{ width: `${(v.total / (bairros[0]?.[1].total || 1)) * 100}%` }}
+                        style={{ width: `${(v.total / maiorBairro) * 100}%` }}
                       />
                     </div>
                   </button>

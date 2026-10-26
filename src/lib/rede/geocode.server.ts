@@ -276,8 +276,8 @@ export async function processarLote(
       status = digitos.length === 8 ? "cep_nao_localizado" : "endereco_incompleto";
       falhas += 1;
     }
-    patch.geo_status = status;
-    await db.from("party_addresses").update(patch).eq("id", linha.id);
+    patch["geo_status"] = status;
+    await db.from("party_addresses").update(patch as never).eq("id", linha.id);
 
     processados += 1;
     checkpoint = linha.id;

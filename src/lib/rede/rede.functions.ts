@@ -24,7 +24,12 @@ export const obterMalha = createServerFn({ method: "POST" })
 export const localizarEnderecos = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
-    z.object({ limite: z.number().int().min(1).max(200).default(40) }).parse(data),
+    z
+      .object({
+        limite: z.number().int().min(1).max(200).default(20),
+        ibge: z.string().regex(/^\d{7}$/).optional(),
+      })
+      .parse(data),
   )
   .handler(async ({ data, context }) => {
     // A checagem precisa correr como o próprio usuário: has_capability exige auth.uid().
@@ -34,7 +39,7 @@ export const localizarEnderecos = createServerFn({ method: "POST" })
     });
     if (!pode) throw new Error("Sem permissão para processar localizações.");
     const { processarLote } = await import("./geocode.server");
-    return processarLote(context.userId ?? null, data.limite);
+    return processarLote(context.userId ?? null, data.limite, { ibge: data.ibge ?? null, orcamentoMs: 25_000 });
   });
 
 export const situacaoDaLocalizacao = createServerFn({ method: "POST" })

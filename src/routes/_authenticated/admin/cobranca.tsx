@@ -6,6 +6,7 @@ import { z } from "zod";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { LembretesGaveta } from "@/components/admin/cobranca/LembretesGaveta";
 import { MaletasPerdidas } from "@/components/admin/cobranca/MaletasPerdidas";
+import { ReativacoesPendentes } from "@/components/admin/cobranca/ReativacoesPendentes";
 import { carteira, kpisCobranca, moverEtapa, cobConfig, salvarConfig, type CobConfig, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
 
 const busca = z.object({
@@ -98,6 +99,7 @@ function Cobranca() {
         </div></div>
       </header>
       <LembretesGaveta />
+      <ReativacoesPendentes />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
         <Kpi id="" rotulo="Saldo vencido" valor={brl(kpi.vencido)} />

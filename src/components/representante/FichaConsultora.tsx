@@ -2,16 +2,29 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { MapPin, MessageCircle, Phone } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { brl, dataBR, repAssumir, repFicha, repReativar } from "@/lib/representante";
-import { CobrarParcela } from "@/components/representante/AcoesRepresentante";
+import * as React from "react";
+import { brl, dataBR, foneBR, repAssumir, repFicha, repReativarPedir } from "@/lib/representante";
+import { CobrarParcela, ContatoCobranca } from "@/components/representante/AcoesRepresentante";
 
 /** Tela da consultora dentro da área do representante: cadastro, débitos e cobrança. */
 export function FichaConsultora({ party, rep, onClose }: { party: string | null; rep: string; onClose: () => void }) {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["rep", rep, "ficha", party], queryFn: () => repFicha(party!, rep), enabled: !!party });
+  const [motivo, setMotivo] = React.useState("");
   const reativar = useMutation({
-    mutationFn: async () => { await repAssumir(party!, rep); return repReativar(party!); },
-    onSuccess: () => { toast.success("Consultora reativada em todo o sistema."); void qc.invalidateQueries({ queryKey: ["rep"] }); },
+    mutationFn: async () => { await repAssumir(party!, rep); return repReativarPedir(party!, motivo); },
+    onSuccess: (r) => {
+      const msg = {
+        reativada: "Consultora reativada (sem dívida em aberto).",
+        pedido_enviado: `Ela tem ${brl(r.divida_cents ?? 0)} em aberto: o pedido de reativação foi para aprovação da Lardan.`,
+        ja_pedido: "O pedido de reativação já está com a Lardan.",
+        bloqueada: "Consultora bloqueada/desligada: só o financeiro da Lardan pode reativar.",
+        ja_ativa: "Ela já está ativa.",
+      }[r.resultado];
+      if (r.resultado === "reativada") toast.success(msg); else toast.info(msg);
+      setMotivo("");
+      void qc.invalidateQueries({ queryKey: ["rep"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const f = q.data;
@@ -41,14 +54,25 @@ export function FichaConsultora({ party, rep, onClose }: { party: string | null;
             {(f.maletas ?? []).length > 0 && (
               <p className="rounded-xl border border-border px-4 py-3 text-sm"><span className="font-semibold">Maleta com ela:</span> {f.maletas.map((m) => `${m.status} desde ${dataBR(m.desde.slice(0, 10))}`).join(" · ")}</p>
             )}
-            <CobrarParcela antes={antes} avulsa={{ party_id: f.id, display_name: f.nome }} rep={rep} whatsapp={whats} rotulo="Nova cobrança — digitar valor (Pix, cartão 3x, boleto, cheque)" />
+            <div className="flex flex-wrap items-center gap-2">
+              <ContatoCobranca c={{ party_id: f.id, display_name: f.nome }} parcelas={f.parcelas} rotulo="Registrar contato / promessa" />
+              <p className="text-xs text-muted-foreground">Para cobrar, toque em "Cobrar" na parcela (até o saldo dela).</p>
+            </div>
             {(f.status === "bloqueado" || f.status === "desligado") && (
               <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 Consultora {f.status}: só o financeiro da Lardan pode reativar.
               </p>
             )}
             {f.status !== "ativo" && f.status !== "bloqueado" && f.status !== "desligado" && (
-              <button type="button" disabled={reativar.isPending} onClick={() => reativar.mutate()} className="w-full rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary">Reativar consultora</button>
+              <div className="space-y-2 rounded-2xl border border-border p-4">
+                <p className="text-sm">{f.aberto_cents > 0
+                  ? `Ela tem ${brl(f.aberto_cents)} em aberto: a reativação vai para aprovação da Lardan.`
+                  : "Sem dívida em aberto: a reativação é na hora."}</p>
+                {f.aberto_cents > 0 && <input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Por que reativar? (ex.: fez acordo e pagou a 1ª)" className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none" />}
+                <button type="button" disabled={reativar.isPending} onClick={() => reativar.mutate()} className="w-full rounded-xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary">
+                  {f.aberto_cents > 0 ? "Pedir reativação à Lardan" : "Reativar consultora"}
+                </button>
+              </div>
             )}
 
             <section className="space-y-2 rounded-2xl border border-border p-4">
@@ -58,7 +82,7 @@ export function FichaConsultora({ party, rep, onClose }: { party: string | null;
               {f.contatos.map((c, i) => (
                 <p key={i} className="flex items-center gap-2 text-sm">
                   {c.kind === "whatsapp" ? <MessageCircle className="size-4" /> : <Phone className="size-4" />}
-                  {c.kind === "whatsapp" ? <a className="underline" target="_blank" rel="noreferrer" href={`https://wa.me/55${c.value.replace(/\D/g, "").replace(/^55/, "")}`}>{c.value}</a> : c.value}
+                  {c.kind === "whatsapp" ? <a className="underline" target="_blank" rel="noreferrer" href={`https://wa.me/55${c.value.replace(/\D/g, "").replace(/^55/, "")}`}>{foneBR(c.value)}</a> : c.kind === "email" ? c.value : foneBR(c.value)}
                 </p>
               ))}
               {e ? (

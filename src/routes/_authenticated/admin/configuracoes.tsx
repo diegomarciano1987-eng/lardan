@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PARAMETROS_PADRAO, type ParametrosRemessa } from "@/lib/remessa";
 import { ConfigPedido, PrecoNovo } from "@/components/admin/config/PedidoEPreco";
 import { LiderELiga } from "@/components/admin/config/LiderELiga";
+import { TelefonesRepetidos } from "@/components/admin/config/TelefonesRepetidos";
 
 export const Route = createFileRoute("/_authenticated/admin/configuracoes")({
   component: Configuracoes,
@@ -40,6 +41,7 @@ function Configuracoes() {
       <PrecoNovo master={roles.includes("master" as never)} />
       <ConfigPedido master={roles.includes("master" as never)} />
       <LiderELiga master={roles.includes("master" as never)} />
+      <TelefonesRepetidos master={roles.includes("master" as never)} />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {itens.map((m) => (
           <Panel key={m.slug} flush>

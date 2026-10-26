@@ -174,3 +174,19 @@ export const encaminharJudicial = (party: string, d: Record<string, string>) => 
 export const salvarAcordoJudicial = (party: string, d: Record<string, unknown>) => call<string>("cob_judicial_acordo_salvar", { _party: party, _d: d });
 export const statusAcordoJudicial = (id: string, status: "cumprido" | "descumprido" | "cancelado", motivo: string) => call<void>("cob_judicial_acordo_status", { _id: id, _status: status, _motivo: motivo });
 export const TIPOS_DOC_JUDICIAL: [string, string][] = [["termo_assinado", "Termo/acordo assinado"], ["peticao", "Petição"], ["certidao", "Certidão / protocolo"], ["sentenca", "Sentença / homologação"], ["comprovante", "Comprovante"], ["outro", "Outro"]];
+
+/** 0161: toda NF lançada contra a consultora e todo fechamento de maleta (SmallData + Lardan). Somente leitura. */
+export interface NotaConsultora {
+  origem: "smalldata" | "lardan"; id: string; data: string | null; numero: string | null; serie: string | null;
+  tipo: string; natureza: string | null; cfop: string | null; operacao: string | null; situacao: string | null;
+  valor_cents: number; pecas: number | null; remessa: number | null; maleta: string | null; chave: string | null; simulada: boolean;
+}
+export interface FechamentoConsultora {
+  origem: "smalldata" | "lardan"; id: string; remessa: number | null; maleta: string; tipo: string; enviada: string | null; fechamento: string | null;
+  situacao: string; pecas_enviadas: number | null; pecas_devolvidas: number | null; pecas_vendidas: number | null; pecas_defeito: number | null;
+  valor_enviado_cents: number | null; valor_devolvido_cents: number | null; vendido_cents: number | null; acerto_divergente: boolean | null; sem_cobranca: boolean | null;
+  cobranca: { data: string | null; venda_bruta_cents: number | null; venda_liquida_cents: number | null; comissao_cents?: number | null; pago_cents?: number | null; fiado_novo_cents?: number | null; origem?: string } | null;
+  notas: Record<string, string>;
+}
+export const notasEFechamentos = (party: string) =>
+  call<{ notas: NotaConsultora[]; fechamentos: FechamentoConsultora[] }>("consultora_notas_e_fechamentos", { _party: party });

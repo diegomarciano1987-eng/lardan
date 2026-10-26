@@ -17902,6 +17902,10 @@ export type Database = {
       consultora_maletas: { Args: { _party: string }; Returns: Json }
       consultora_meu_financeiro: { Args: never; Returns: Json }
       consultora_meu_historico: { Args: never; Returns: Json }
+      consultora_notas_e_fechamentos: {
+        Args: { _party: string }
+        Returns: Json
+      }
       consultora_pagamento_lembrete: {
         Args: { _order: string; _venc: string }
         Returns: Json

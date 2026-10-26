@@ -149,7 +149,7 @@ export function PrecoNovo({ master }: { master: boolean }) {
                 <th className="px-3 py-2 text-right">Novo</th><th className="px-3 py-2 text-right">Diferença</th><th className="px-3 py-2 text-right">Na rua</th></tr></thead>
               <tbody>{lista.data.slice(0, 500).map((l) => (
                 <tr key={l.variant_id} className="border-t border-line-soft">
-                  <td className="px-3 py-1.5">{l.sku ?? "—"}</td><td className="px-3 py-1.5">{l.produto}{l.variante ? ` · ${l.variante}` : ""}</td>
+                  <td className="px-3 py-1.5">{l.sku ?? "—"}</td><td className="px-3 py-1.5">{l.produto}{l.variante && l.variante !== l.produto ? ` · ${l.variante}` : ""}</td>
                   <td className="px-3 py-1.5 text-right tabular-nums">{brl(l.antes_cents)}</td><td className="px-3 py-1.5 text-right tabular-nums">{brl(l.depois_cents)}</td>
                   <td className="px-3 py-1.5 text-right tabular-nums">{l.diferenca_cents ? `+ ${brl(l.diferenca_cents)}` : "—"}</td>
                   <td className="px-3 py-1.5 text-right tabular-nums">{l.pecas_na_rua || "—"}</td>

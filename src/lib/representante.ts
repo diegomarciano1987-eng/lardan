@@ -105,9 +105,11 @@ export const repDinheiroReceber = (installment: string, valorCents: number, chav
 export const repRecibos = (rep: string, dias = 30) => chamar<{ total_cents: number; itens: Recibo[] }>("rep_recibos_lista", { _rep: rep, _dias: dias });
 
 export type MaletaCarteira = {
-  cycle_id: string; maleta: string; remessa: number | null; party_id: string; consultora: string; status: string;
+  /** id estável da linha; fonte "smalldata" = maleta antiga na rua (sem cycle_id, sem acerto em campo) */
+  id: string; fonte: "lardan" | "smalldata";
+  cycle_id: string | null; maleta: string; remessa: number | null; party_id: string; consultora: string; status: string;
   acerto: string | null; dias: number | null; vencida: boolean; pecas: number; valor_cents: number;
-  pre_baixa: "sem_pre_baixa" | "aberta" | "aguardando_pagamento" | "aguardando_conferencia" | "encerrada" | "pendencia" | "cancelada";
+  pre_baixa: "sem_pre_baixa" | "aberta" | "aguardando_pagamento" | "aguardando_conferencia" | "encerrada" | "pendencia" | "cancelada" | "smalldata";
   origem: string | null; installment_id: string | null; saldo_cents: number | null; valor_pagar_cents: number | null;
 };
 export const repMaletasCarteira = (rep: string) => chamar<MaletaCarteira[]>("rep_maletas_carteira", { _rep: rep });

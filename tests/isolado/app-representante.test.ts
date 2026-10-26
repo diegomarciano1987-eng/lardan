@@ -282,3 +282,18 @@ describe("ajuste da revisão (0163)", () => {
     await adm.begin(async (tx) => { await tx.unsafe(`set local session_replication_role = replica`); await tx.unsafe(`delete from public.asaas_charges where external_id=$1`, [`pay_${marca}`]); });
   });
 });
+
+describe("maletas do SmallData na carteira (0163)", () => {
+  test("maleta do SmallData na rua aparece na lista do representante, com alerta de vencida", async () => {
+    const cod = 700000 + Math.floor(Math.random() * 90000), rem = 80000 + Math.floor(Math.random() * 9000);
+    await adm.unsafe(`insert into public.party_codigos_legados (party_id, sistema, codigo) values ($1,'cliente',$2)`, [consB.partyId, String(cod)]);
+    await adm.unsafe(`insert into public.legado_remessas (numero, emissao, vencimento, status) values ($1, now()::date - 40, now()::date - 3, 'aberta') on conflict (numero) do nothing`, [rem]);
+    await adm.unsafe(`insert into public.legado_maletas (remessa, codcli, kit, emissao, pecas_enviadas, valor_enviado_cents) values ($1,$2,1, now()::date - 40, 30, 300000)`, [rem, cod]);
+    const m = await rpc<{ fonte: string; remessa: number; vencida: boolean; pre_baixa: string; consultora: string }[]>(rep, "rep_maletas_carteira", { _rep: rep.partyId });
+    expect(m.erro).toBeNull();
+    expect(m.dados.find((x) => x.fonte === "smalldata" && x.remessa === rem)).toMatchObject({ vencida: true, pre_baixa: "smalldata" });
+    expect((await rpc<unknown[]>(rep2, "rep_maletas_carteira", { _rep: rep2.partyId })).dados.some((x) => (x as { remessa: number }).remessa === rem)).toBe(false);
+    await adm.unsafe(`delete from public.legado_maletas where remessa=$1`, [rem]);
+    await adm.unsafe(`delete from public.legado_remessas where numero=$1`, [rem]);
+  });
+});

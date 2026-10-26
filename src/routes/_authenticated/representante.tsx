@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BarChart3, Briefcase, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, MessageCircle, Search, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Briefcase, CalendarDays, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, Search, Sparkles, Users } from "lucide-react";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
@@ -9,17 +9,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { AberturaApp, InstalarApp } from "@/components/consultora/InstalarApp";
 import { PainelRepresentante } from "@/components/representante/PainelRepresentante";
-import { brl, dataBR, repBuscaTodas, repCobrancas, repConsultoras, repResumo } from "@/lib/representante";
-import { Captacao, CobrarParcela } from "@/components/representante/AcoesRepresentante";
+import { brl, dataBR, repCobrancasLista, repConsultoras, repResumo, type FaixaCobranca } from "@/lib/representante";
+import { Captacao, CobrarParcela, ContatoCobranca } from "@/components/representante/AcoesRepresentante";
+import { AgendaVisitas, MaletasCarteira } from "@/components/representante/CampoRepresentante";
 import { FichaConsultora } from "@/components/representante/FichaConsultora";
 import { MaletasRepresentante } from "@/components/representante/MaletasRepresentante";
 import { OperationalGlass } from "@/components/premium/OperationalGlass";
 
-type Aba = "cobranca" | "consultoras" | "maletas" | "captacao" | "painel";
+type Aba = "cobranca" | "consultoras" | "maletas" | "agenda" | "captacao" | "painel";
 const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = [
   { id: "cobranca", rotulo: "Acerto e cobrança", curto: "Cobrança", icone: HandCoins },
   { id: "consultoras", rotulo: "Consultoras", curto: "Consultoras", icone: Users },
-  { id: "maletas", rotulo: "Maletas", curto: "Maletas", icone: Briefcase },
+  { id: "maletas", rotulo: "Maletas e acerto", curto: "Maletas", icone: Briefcase },
+  { id: "agenda", rotulo: "Agenda de visitas", curto: "Agenda", icone: CalendarDays },
   { id: "captacao", rotulo: "Captação", curto: "Captação", icone: Sparkles },
   { id: "painel", rotulo: "Painel", curto: "Painel", icone: BarChart3 },
 ];
@@ -114,11 +116,11 @@ function AreaRepresentante() {
         )}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
         {ABAS.map((a) => (
           <button key={a.id} type="button" onClick={() => ir(a.id)} aria-current={aba === a.id ? "page" : undefined}
-            className={`flex min-w-0 flex-col items-center gap-1 py-3.5 text-[0.78rem] leading-tight ${aba === a.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
-            <a.icone className="size-6" aria-hidden /> <span className="max-w-full truncate px-0.5">{a.curto}</span>
+            className={`flex min-w-0 flex-col items-center gap-1 py-3 text-[0.72rem] leading-tight ${aba === a.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+            <a.icone className="size-5" aria-hidden /> <span className="max-w-full truncate px-0.5">{a.curto}</span>
           </button>
         ))}
       </nav>
@@ -157,7 +159,8 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
         </div>
         {aba === "cobranca" && <Cobrancas rep={rep} espelho={espelho} />}
         {aba === "consultoras" && <Consultoras rep={rep} espelho={espelho} />}
-        {aba === "maletas" && <MaletasRepresentante rep={rep} />}
+        {aba === "maletas" && <div className="space-y-6"><MaletasCarteira rep={rep} /><MaletasRepresentante rep={rep} /></div>}
+        {aba === "agenda" && <AgendaVisitas rep={rep} />}
         {aba === "captacao" && <Captacao rep={rep} espelho={espelho} />}
         {aba === "painel" && <PainelRepresentante rep={rep} />}
       </main>
@@ -213,30 +216,56 @@ function useDebounce(v: string) {
   return d;
 }
 
+const FAIXAS: [FaixaCobranca, string][] = [
+  ["vencidas", "Vencidas"], ["1_30", "1–30 dias"], ["31_60", "31–60"], ["61_90", "61–90"], ["90_mais", "+90"], ["hoje", "Hoje"], ["a_vencer", "A vencer"], ["todas", "Todas"],
+];
+const ROT_CONTATO: Record<string, string> = { ligacao: "ligação", whatsapp_aberto: "WhatsApp", negociacao: "negociação", anotacao: "anotação" };
+
 function Cobrancas({ rep }: { rep: string; espelho: boolean }) {
-  const [filtro, setFiltro] = React.useState("vencidas");
+  const [faixa, setFaixa] = React.useState<FaixaCobranca>("vencidas");
+  const [ordem, setOrdem] = React.useState<"recentes" | "maior">("recentes");
   const [pagina, setPagina] = React.useState(1);
   const [texto, setTexto] = React.useState("");
   const busca = useDebounce(texto);
   const [ficha, setFicha] = React.useState<string | null>(null);
   React.useEffect(() => setPagina(1), [busca]);
-  const q = useQuery({ queryKey: ["rep", rep, "cob", filtro, pagina, busca], queryFn: () => repCobrancas(rep, filtro, pagina, busca), placeholderData: keepPreviousData });
+  const q = useQuery({ queryKey: ["rep", rep, "cob", faixa, ordem, pagina, busca], queryFn: () => repCobrancasLista(rep, faixa, ordem, pagina, busca), placeholderData: keepPreviousData });
+  const n = q.data?.faixas;
   return (
     <section className="space-y-4 rounded-2xl border border-border bg-card p-5 md:p-6">
-      <h2 className="text-lg font-semibold">Cobranças da carteira</h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold">Cobranças da carteira</h2>
+        <div className="flex rounded-full border border-border p-0.5 text-xs">
+          {([["recentes", "Mais recentes"], ["maior", "Maior dívida"]] as const).map(([v, l]) => (
+            <button key={v} type="button" onClick={() => { setOrdem(v); setPagina(1); }} className={`rounded-full px-3 py-1.5 ${ordem === v ? "bg-primary font-semibold text-primary-foreground" : "text-muted-foreground"}`}>{l}</button>
+          ))}
+        </div>
+      </div>
       <Busca valor={texto} set={setTexto} ph="Buscar consultora por nome (sem acento), código ou título" />
-      <Chips op={[["vencidas", "Vencidas"], ["hoje", "Hoje"], ["a_vencer", "A vencer"], ["todas", "Todas"]]} valor={filtro} set={(v) => { setFiltro(v); setPagina(1); }} />
+      <Chips op={FAIXAS.map(([v, l]) => [v, n ? `${l} · ${n[v] ?? 0}` : l])} valor={faixa} set={(v) => { setFaixa(v as FaixaCobranca); setPagina(1); }} />
       {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
       {q.data && q.data.itens.length === 0 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Nenhuma parcela neste filtro.</p>}
+      {q.data && q.data.itens.length > 0 && <p className="text-xs text-muted-foreground">{q.data.total} parcela(s) · {brl(q.data.total_cents)}</p>}
       <ul className="divide-y divide-border">
         {q.data?.itens.map((c) => (
-          <li key={c.installment_id} className="flex items-center justify-between gap-3 py-3">
-            <button type="button" onClick={() => setFicha(c.party_id)} className="min-w-0 text-left">
+          <li key={c.installment_id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+            <button type="button" onClick={() => setFicha(c.party_id)} className="min-w-0 flex-1 text-left">
               <p className="truncate font-medium underline-offset-2 hover:underline">{c.display_name}</p>
-              <p className="text-xs text-muted-foreground">{c.code} · título {c.numero ?? "—"} · vence {dataBR(c.vencimento)}</p>
+              <p className="text-xs text-muted-foreground">
+                {c.code} · título {c.numero ?? "—"} · vence {dataBR(c.vencimento)}
+                {c.atraso > 0 && <span className="font-semibold text-destructive"> · {c.atraso} dia(s) de atraso</span>}
+                {c.divida_cents > c.saldo_cents && <> · dívida total {brl(c.divida_cents)}</>}
+              </p>
+              {(c.promessa || c.ultimo_contato) && (
+                <p className="text-xs text-muted-foreground">
+                  {c.promessa ? <span className="font-medium text-primary">Promessa {brl(c.promessa.valor_cents)} p/ {dataBR(c.promessa.data)}</span>
+                    : c.ultimo_contato ? `Último contato: ${ROT_CONTATO[c.ultimo_contato.tipo] ?? c.ultimo_contato.tipo} em ${new Date(c.ultimo_contato.em).toLocaleDateString("pt-BR")}` : null}
+                </p>
+              )}
             </button>
-            <div className="flex shrink-0 items-center gap-3">
+            <div className="flex shrink-0 items-center gap-2">
               <span className="font-semibold tabular-nums">{brl(c.saldo_cents)}</span>
+              <ContatoCobranca c={c} parcelas={[c]} />
               <CobrarParcela c={c} rep={rep} />
             </div>
           </li>
@@ -255,39 +284,14 @@ function Consultoras({ rep }: { rep: string; espelho: boolean }) {
   const [pagina, setPagina] = React.useState(1);
   const [ficha, setFicha] = React.useState<string | null>(null);
   React.useEffect(() => setPagina(1), [busca]);
-  const [onde, setOnde] = React.useState<"minhas" | "sistema">("minhas");
-  const q = useQuery({ queryKey: ["rep", rep, "cons", busca, filtro, pagina], queryFn: () => repConsultoras(rep, busca, filtro, pagina), placeholderData: keepPreviousData, enabled: onde === "minhas" });
-  const g = useQuery({ queryKey: ["rep", rep, "todas", busca, pagina], queryFn: () => repBuscaTodas(rep, busca, pagina), placeholderData: keepPreviousData, enabled: onde === "sistema" && busca.trim().length >= 2 });
+  const q = useQuery({ queryKey: ["rep", rep, "cons", busca, filtro, pagina], queryFn: () => repConsultoras(rep, busca, filtro, pagina), placeholderData: keepPreviousData });
   return (
     <section className="space-y-4 rounded-2xl border border-border bg-card p-5 md:p-6">
-      <h2 className="text-lg font-semibold">Consultoras</h2>
-      <Chips op={[["minhas", "Minha carteira"], ["sistema", "Buscar em todas do sistema"]]} valor={onde} set={(v) => { setOnde(v as "minhas" | "sistema"); setPagina(1); }} />
-      <Busca valor={texto} set={setTexto} ph={onde === "sistema" ? "Nome ou código de qualquer consultora (inclusive inativas)" : "Buscar por nome (sem acento) ou código"} />
-      {onde === "sistema" ? (
-        <>
-          {busca.trim().length < 2 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Digite ao menos 2 letras. Encontrou? Abra a ficha e cobre com o valor que quiser: ela passa para a sua carteira e é reativada.</p>}
-          {g.error && <p className="text-sm text-destructive">{(g.error as Error).message}</p>}
-          {g.data && busca.trim().length >= 2 && g.data.itens.length === 0 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Nenhuma consultora com esse nome no sistema.</p>}
-          <ul className="divide-y divide-border">
-            {g.data?.itens.map((c) => (
-              <li key={c.id}>
-                <button type="button" disabled={!c.pode_assumir && !c.na_carteira} onClick={() => setFicha(c.id)} className="flex w-full items-center justify-between gap-3 py-3 text-left hover:bg-muted/40 disabled:opacity-60">
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{c.display_name}</p>
-                    <p className="text-xs text-muted-foreground">{c.code} · {c.cidade ?? "sem cidade"} · {c.status === "ativo" ? "ativa" : c.status === "bloqueado" ? "bloqueada" : c.status === "desligado" ? "desligada" : "inativa"} · {c.na_carteira ? "na sua carteira" : c.rep_nome ? `carteira de ${c.rep_nome}` : "sem representante"}{c.maletas > 0 ? ` · ${c.maletas} maleta(s) com ela` : ""}</p>
-                    {!c.pode_assumir && !c.na_carteira && <p className="text-xs text-destructive">{c.status === "bloqueado" || c.status === "desligado" ? `Consultora ${c.status === "bloqueado" ? "bloqueada" : "desligada"} — fale com a Lardan.` : "Ativa com outro representante — fale com a Lardan."}</p>}
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">{c.aberto_cents > 0 && <p className="font-semibold tabular-nums">{brl(c.aberto_cents)}</p>}<ChevronRight className="size-4 text-muted-foreground" /></div>
-                </button>
-              </li>
-            ))}
-          </ul>
-          {g.data && busca.trim().length >= 2 && <Paginas pagina={pagina} total={g.data.total} set={setPagina} />}
-        </>
-      ) : (<>
+      <h2 className="text-lg font-semibold">Consultoras da sua carteira</h2>
+      <Busca valor={texto} set={setTexto} ph="Buscar por nome (sem acento) ou código" />
       <Chips op={[["todas", "Todas"], ["ativas", "Ativas"], ["inativas", "Inativas"], ["devedoras", "Com débito"]]} valor={filtro} set={(v) => { setFiltro(v); setPagina(1); }} />
       {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
-      {q.data && q.data.itens.length === 0 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Nenhuma consultora encontrada.</p>}
+      {q.data && q.data.itens.length === 0 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Nenhuma consultora encontrada na sua carteira. Consultora de outra carteira: fale com a Lardan.</p>}
       <ul className="divide-y divide-border">
         {q.data?.itens.map((c) => (
           <li key={c.id}>
@@ -310,7 +314,6 @@ function Consultoras({ rep }: { rep: string; espelho: boolean }) {
         ))}
       </ul>
       {q.data && <Paginas pagina={pagina} total={q.data.total} set={setPagina} />}
-      </>)}
       <FichaConsultora party={ficha} rep={rep} onClose={() => setFicha(null)} />
     </section>
   );

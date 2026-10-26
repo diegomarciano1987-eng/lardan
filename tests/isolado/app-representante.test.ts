@@ -267,3 +267,18 @@ describe("11. telefones repetidos", () => {
     expect((await um<{ n: number }>(`select count(*)::int n from public.contact_points where party_id=$1`, [consB.partyId])).n).toBe(3);
   });
 });
+
+describe("ajuste da revisão (0163)", () => {
+  test("dinheiro em parcela com link do Asaas aberto: recibo sai, com aviso e tarefa para cancelar o link", async () => {
+    await adm.begin(async (tx) => {
+      await tx.unsafe(`set local session_replication_role = replica`);
+      await tx.unsafe(`insert into public.asaas_charges (account_id, external_id, installment_id, external_status, value_cents) values (gen_random_uuid(), $1, $2, 'PENDING', 10000)`, [`pay_${marca}`, p40]);
+    });
+    const r = await rpc<{ numero: number; aviso_asaas?: boolean }>(rep, "rep_dinheiro_receber", { _installment: p40, _valor_cents: 1000, _chave: chave(), _obs: null });
+    expect(r.erro).toBeNull();
+    expect(r.dados.aviso_asaas).toBe(true);
+    const t = await um<{ n: number }>(`select count(*)::int n from public.cob_tarefas where party_id=$1 and titulo like 'Cancelar o link do Asaas%' and $2 = any(installment_ids)`, [cons.partyId, p40]);
+    expect(t.n).toBe(1);
+    await adm.begin(async (tx) => { await tx.unsafe(`set local session_replication_role = replica`); await tx.unsafe(`delete from public.asaas_charges where external_id=$1`, [`pay_${marca}`]); });
+  });
+});

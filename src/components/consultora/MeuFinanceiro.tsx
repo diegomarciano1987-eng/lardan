@@ -44,7 +44,7 @@ export function MeuFinanceiro({ verMaleta }: { verMaleta: () => void }) {
           <>
             <div className="mt-2 flex items-end justify-between gap-3">
               <div><p className="text-sm text-muted-foreground">Data</p><p className="text-2xl font-semibold">{dataBR(d.proximo_acerto.data)}</p></div>
-              <div className="text-right"><p className="text-sm text-muted-foreground">Valor</p><p className="text-2xl font-semibold">{d.proximo_acerto.valor_cents != null ? brl(d.proximo_acerto.valor_cents) : "faça a pré-baixa"}</p></div>
+              <div className="text-right"><p className="text-sm text-muted-foreground">{(d.proximo_acerto.valor_cents ?? 0) < 0 ? "A Lardan te deve" : "Valor"}</p><p className="text-2xl font-semibold">{d.proximo_acerto.valor_cents != null ? brl(Math.abs(d.proximo_acerto.valor_cents)) : "faça a pré-baixa"}</p></div>
             </div>
             <p className="mt-2 text-[0.95rem] text-muted-foreground">Maleta {d.proximo_acerto.maleta} · {d.proximo_acerto.situacao === "sem_pre_baixa" ? "pré-baixa ainda não começou" : ROTULO_SITUACAO[d.proximo_acerto.situacao as SituacaoPreBaixa]}</p>
             <button type="button" className="admin-btn mt-3 min-h-12 w-full justify-center text-base" onClick={verMaleta}>Abrir a maleta e fazer o acerto</button>

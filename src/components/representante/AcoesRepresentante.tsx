@@ -79,7 +79,12 @@ export function CobrarParcela({ c, rep, whatsapp, rotulo, antes }: { c: RepCobra
       await antes?.();
       return repDinheiroReceber(c.installment_id, valorCents, chave, obs);
     },
-    onSuccess: (r) => { setRecibo(r); toast.success(r.repetido ? "Este recebimento já estava lançado." : `Recibo nº ${r.numero} lançado. A parcela já baixou.`); recarregar(); },
+    onSuccess: (r) => {
+      setRecibo(r);
+      toast.success(r.repetido ? "Este recebimento já estava lançado." : `Recibo nº ${r.numero} lançado. A parcela já baixou.`);
+      if (r.aviso_asaas) toast.warning("Esta parcela tinha um link de pagamento aberto. Avise a cliente para não pagar o link: a Lardan vai cancelá-lo.", { duration: 10000 });
+      recarregar();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const cheque = useMutation({
@@ -168,6 +173,7 @@ export function CobrarParcela({ c, rep, whatsapp, rotulo, antes }: { c: RepCobra
               <p className="text-xs uppercase tracking-wider text-muted-foreground">Recibo nº {recibo.numero}</p>
               <p className="text-2xl font-semibold tabular-nums">{brl(recibo.valor_cents)}</p>
               <p className="text-sm text-muted-foreground">Saldo que fica em aberto: {brl(recibo.saldo_restante_cents)}</p>
+              {recibo.aviso_asaas && <p className="rounded-xl bg-warning/10 px-3 py-2 text-xs">Esta parcela tinha um link de pagamento aberto. Avise a cliente para não pagar o link: a Lardan vai cancelá-lo.</p>}
               <div className="flex flex-wrap justify-center gap-2">
                 <button type="button" className="admin-btn" onClick={() => imprimirRecibo(recibo)}><Printer className="size-4" /> Imprimir recibo</button>
                 <a className="admin-btn" target="_blank" rel="noreferrer" href={wa(whatsapp, textoReciboWhatsApp(recibo))}><MessageCircle className="size-4" /> Enviar no WhatsApp</a>
@@ -342,7 +348,7 @@ export function Captacao({ rep }: { rep: string; espelho?: boolean }) {
   const livres = d.etapas.filter((e) => !e.sistema);
   const link = d.codigo ? `https://www.lardan.com.br/seja-lardan?rep=${d.codigo}` : null;
   const STATUS: Record<string, string> = { novo: "Aguardando Lardan", em_analise: "Em análise na Lardan", qualificado: "Qualificada", aprovado: "Aprovada pela Lardan", recusado: "Não aprovada" };
-  const ORIGEM: Record<string, string> = { link: "pelo seu link", manual: "cadastrada por você", encaminhada: "enviada pela Lardan" };
+  const ORIGEM: Record<string, string> = { link: "pelo seu link", manual: "cadastrada por você", encaminhada: "enviada pela Lardan", madrinha: "indicada por uma consultora sua" };
 
   return (
     <div className="space-y-5">

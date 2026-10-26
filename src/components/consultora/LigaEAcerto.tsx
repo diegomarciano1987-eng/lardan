@@ -51,7 +51,7 @@ export function CartaoAcerto({ d, ir }: { d: Inicio; ir: (aba: "maleta" | "finan
       </div>
       <div className="mt-2 flex items-end justify-between gap-3">
         <div><p className="text-sm text-muted-foreground">Data do acerto</p><p className="text-2xl font-semibold tabular-nums">{a.data ? a.data.split("-").reverse().join("/") : "—"}</p></div>
-        <div className="text-right"><p className="text-sm text-muted-foreground">Valor a acertar</p><p className="text-2xl font-semibold tabular-nums">{a.valor_cents != null ? brl(a.valor_cents) : "—"}</p></div>
+        <div className="text-right"><p className="text-sm text-muted-foreground">{a.valor_cents != null && a.valor_cents < 0 ? "A Lardan te deve" : "Valor a acertar"}</p><p className="text-2xl font-semibold tabular-nums">{a.valor_cents != null ? brl(Math.abs(a.valor_cents)) : "—"}</p></div>
       </div>
       <div className="mt-3 flex justify-between text-[0.95rem]"><span>Vendeu {a.pecas_vendidas} de {a.pecas_total} peças</span><span>{pct}%</span></div>
       <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} /></div>

@@ -63,6 +63,7 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
   }
 
   const c = d.calculo;
+  const recebido = Number(c.recebido_lardan_cents ?? 0);
   const lista = d.itens.filter((i) => !busca.trim() || `${i.produto} ${i.variante ?? ""} ${i.sku ?? ""}`.toLowerCase().includes(busca.trim().toLowerCase()));
   const editavel = d.status === "aberta";
 
@@ -78,7 +79,10 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[["Vendido", brl(c.vendido_cents)], [`Sua comissão (${Number(c.comissao_pct)}%)`, brl(c.comissao_cents)], ["Valor a pagar", brl(c.valor_pagar_cents)], ["Peças", `${vendidas}/${total}`]].map(([t, v]) => (
+        {[["Vendido", brl(c.vendido_cents)], [`Sua comissão (${Number(c.comissao_pct)}%)`, brl(c.comissao_cents)],
+          ...(recebido > 0 ? [["Clientes já pagaram à Lardan", brl(recebido)]] : []),
+          c.valor_pagar_cents < 0 ? ["A Lardan te deve", brl(-c.valor_pagar_cents)] : ["Valor a pagar", brl(c.valor_pagar_cents)],
+          ["Peças", `${vendidas}/${total}`]].map(([t, v]) => (
           <div key={t} className="rounded-2xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">{t}</p><p className="mt-0.5 text-lg font-semibold tabular-nums">{v}</p></div>
         ))}
       </div>
@@ -117,7 +121,8 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
             <button type="button" className="btn-app-principal w-full" onClick={() => setConfirmar(true)}>Fechar a pré-baixa</button>
           ) : (
             <div className="space-y-3 rounded-2xl border border-warning/50 bg-warning/5 p-4">
-              <p className="text-[0.98rem]">Você vendeu <strong>{vendidas}</strong> peças ({brl(c.vendido_cents)}). Fica com <strong>{brl(c.comissao_cents)}</strong> de comissão e paga <strong>{brl(c.valor_pagar_cents)}</strong> à Lardan.</p>
+              <p className="text-[0.98rem]">Você vendeu <strong>{vendidas}</strong> peças ({brl(c.vendido_cents)}). Fica com <strong>{brl(c.comissao_cents)}</strong> de comissão{recebido > 0 ? <>, as clientes já pagaram <strong>{brl(recebido)}</strong> direto à Lardan</> : null}
+                {c.valor_pagar_cents > 0 ? <> e paga <strong>{brl(c.valor_pagar_cents)}</strong> à Lardan.</> : c.valor_pagar_cents < 0 ? <>: a Lardan fica te devendo <strong>{brl(-c.valor_pagar_cents)}</strong>.</> : <>: não há nada a pagar.</>}</p>
               <p className="text-sm text-muted-foreground">Depois de fechar não dá para mudar. As peças que não vendeu voltam na maleta: a Lardan confere pelo código.</p>
               <div className="flex gap-2">
                 <button type="button" className="h-12 flex-1 rounded-full border border-border" onClick={() => setConfirmar(false)}>Voltar</button>

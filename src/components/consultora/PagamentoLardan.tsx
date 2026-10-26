@@ -147,7 +147,7 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
       </div>
       {forma === "dinheiro" && (
         <div className="space-y-3">
-          <p className="text-[0.98rem] text-muted-foreground">O pedido fica pago e concluído. Como o dinheiro ficou com você, ele entra no valor do seu acerto (menos a sua comissão).</p>
+          <p className="text-[0.98rem] text-muted-foreground">O pedido fica pago. Como o dinheiro ficou com você, ele entra no valor do seu acerto (menos a sua comissão).</p>
           <button type="button" className="btn-app-principal w-full" disabled={dinheiro.isPending} onClick={() => dinheiro.mutate()}>
             {dinheiro.isPending ? "Registrando…" : `Confirmar: recebi ${brl(total)} em dinheiro`}
           </button>

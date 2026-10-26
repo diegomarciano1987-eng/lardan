@@ -18,6 +18,7 @@ import { SejaHistoria } from "@/components/site/seja/SejaHistoria";
 import { SejaGuias } from "@/components/site/seja/SejaGuias";
 import { CinematicTitle } from "@/components/site/seja/CinematicTitle";
 import { DepoimentoBrigida } from "@/components/site/seja/DepoimentoBrigida";
+import { DepoimentoDenise } from "@/components/site/seja/DepoimentoDenise";
 import { DepoimentoGrazi } from "@/components/site/seja/DepoimentoGrazi";
 import { AvaliacoesGoogle } from "@/components/site/AvaliacoesGoogle";
 import { FAQ } from "@/lib/seja-lardan-conteudo";
@@ -72,6 +73,7 @@ function SejaLardanPage() {
   return (
     <SiteLayout>
       <SejaHero />
+      <DepoimentoDenise />
       <DepoimentoGrazi />
       <DepoimentoBrigida />
       <SejaEmocional />

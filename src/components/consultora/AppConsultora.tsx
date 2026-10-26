@@ -21,10 +21,8 @@ import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, BookOpen, BriefcaseBusiness, FileText, CalendarClock, CalendarDays, Check, ChevronDown, ChevronRight, ChevronUp, CircleHelp, Home, LogOut, Menu, MessageCircle,
-  GraduationCap, PackageCheck, Phone, Plus, Search, ShoppingBag, Store, UserPlus, Users, Wallet,
+  PackageCheck, Phone, Plus, Search, ShoppingBag, Store, UserPlus, Users,
 } from "lucide-react";
-import { CartaoAcerto, CartaoLiga } from "@/components/consultora/LigaEAcerto";
-import { CartaoIndique } from "@/components/consultora/Lider";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DateField } from "@/components/premium/DateField";
@@ -39,7 +37,7 @@ import {
   meuParty, obterCliente, ETAPAS, historicoEtapas, linkInstagram, moverEtapa, pausarPessoa, rotuloEtapa, type Etapa, buscarPecas, registrarAtendimento, salvarCliente, type Atendimento, type Cliente, type Peca,
 } from "@/lib/consultora";
 
-export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "biblioteca" | "financeiro" | "mais" | "novo";
+export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "biblioteca" | "mais" | "novo";
 export type Nav = { aba: AbaApp; id?: string | undefined; modo?: "nova" | "editar" | undefined; q?: string | undefined };
 export type Ir = (n: Nav) => void;
 
@@ -55,14 +53,13 @@ const PRINCIPAIS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
   { aba: "maleta", rotulo: "Maleta", icone: BriefcaseBusiness },
 ];
 const EXTRAS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
-  { aba: "financeiro", rotulo: "Meu financeiro", icone: Wallet },
   { aba: "vitrine", rotulo: "Minha vitrine", icone: Store },
   { aba: "historico", rotulo: "Entregas da maleta", icone: PackageCheck },
   { aba: "indicacoes", rotulo: "Indicações", icone: UserPlus },
   { aba: "biblioteca", rotulo: "Biblioteca LARDAN", icone: BookOpen },
 ];
 
-const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : a === "vitrine" || a === "historico" || a === "indicacoes" || a === "biblioteca" || a === "financeiro" ? "mais" : a);
+const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : a === "vitrine" || a === "historico" || a === "indicacoes" || a === "biblioteca" ? "mais" : a);
 
 export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir; ajuda: string; children: React.ReactNode }) {
   const { user } = useRouteContext({ from: "/_authenticated" });
@@ -245,32 +242,13 @@ export function Inicio({ ir }: { ir: Ir }) {
   const d = q.data;
   const primeiroNome = d?.nome?.trim().split(/\s+/)[0];
 
-  const pendencias: { texto: string; acao: string; ir?: Nav; href?: string; tom?: "alerta" | "aviso" | "ok" }[] = [];
+  const pendencias: { texto: string; acao: string; ir: Nav }[] = [];
   if (d) {
-    const a = d.acerto;
-    if (a && a.situacao === "sem_pre_baixa" && a.data) {
-      const faltam = Math.round((new Date(a.data + "T12:00:00").getTime() - Date.now()) / 86400000);
-      if (faltam <= 7) pendencias.push({ texto: faltam < 0 ? "O acerto da maleta já passou. Faça a pré-baixa no app." : `Faltam ${Math.max(faltam, 0)} dias para o acerto. Faça a pré-baixa no app.`, acao: "Fazer", ir: { aba: "maleta" }, tom: "alerta" });
-    }
-    if (a && a.situacao === "aberta") pendencias.push({ texto: "Sua pré-baixa está aberta. Feche e pague o Pix do acerto.", acao: "Continuar", ir: { aba: "maleta" }, tom: "alerta" });
-    if (a && a.situacao === "aguardando_pagamento") pendencias.push({ texto: "Pré-baixa fechada: falta pagar o Pix do acerto.", acao: "Pagar", ir: { aba: "maleta" }, tom: "alerta" });
-    if (d.debitos_vencidos_cents > 0) pendencias.push({ texto: `Você tem ${brl(d.debitos_vencidos_cents)} em débito vencido.`, acao: "Pagar", ir: { aba: "financeiro" }, tom: "alerta" });
     if (d.maletas_receber) pendencias.push({ texto: d.maletas_receber === 1 ? "Uma maleta está a caminho. Confirme quando chegar." : `${d.maletas_receber} maletas estão a caminho.`, acao: "Ver maleta", ir: { aba: "maleta" } });
-    if (d.maletas_conferir) pendencias.push({ texto: "Sua maleta chegou e precisa ser conferida.", acao: "Conferir maleta", ir: { aba: "maleta" }, tom: "alerta" });
-    if (d.pedidos_novos) pendencias.push({ texto: d.pedidos_novos === 1 ? "Uma cliente aguarda atendimento." : `${d.pedidos_novos} clientes aguardam atendimento.`, acao: "Atender", ir: { aba: "pedidos" }, tom: "alerta" });
-    for (const o of d.pedidos_em_atendimento ?? []) pendencias.push({
-      texto: `Pedido de ${o.cliente || "cliente"} parado há ${o.dias} ${o.dias === 1 ? "dia" : "dias"} · ${brl(o.total_cents)} · ${o.status === "aguardando_pagamento" ? "aguardando pagamento" : "combine o pagamento"}`,
-      acao: "Resolver", ir: { aba: "pedidos" }, tom: o.dias >= 3 ? "alerta" : "aviso" });
-    // nunca "tudo em dia" com pedido aberto
-    if (d.pedidos_abertos > (d.pedidos_novos ?? 0) + (d.pedidos_em_atendimento?.length ?? 0))
-      pendencias.push({ texto: `${d.pedidos_abertos} pedido(s) em aberto.`, acao: "Ver pedidos", ir: { aba: "pedidos" } });
+    if (d.maletas_conferir) pendencias.push({ texto: "Sua maleta chegou e precisa ser conferida.", acao: "Conferir maleta", ir: { aba: "maleta" } });
+    if (d.pedidos_novos) pendencias.push({ texto: d.pedidos_novos === 1 ? "Uma cliente aguarda atendimento." : `${d.pedidos_novos} clientes aguardam atendimento.`, acao: "Atender", ir: { aba: "pedidos" } });
     if (d.retornos_atrasados) pendencias.push({ texto: d.retornos_atrasados === 1 ? "Um retorno a cliente está atrasado." : `${d.retornos_atrasados} retornos a clientes estão atrasados.`, acao: "Ver clientes", ir: { aba: "clientes" } });
     if (d.retornos_hoje) pendencias.push({ texto: d.retornos_hoje === 1 ? "Você combinou de falar com uma cliente hoje." : `Você combinou de falar com ${d.retornos_hoje} clientes hoje.`, acao: "Ver clientes", ir: { aba: "clientes" } });
-    for (const b of d.aniversarios ?? []) {
-      const w = linkWhats(b.telefone ?? "", `Oi, ${b.nome}! Feliz aniversário! Separei algumas peças LARDAN que são a sua cara. Quer ver?`);
-      pendencias.push({ texto: `Aniversário da cliente ${b.nome} ${b.quando}. Mande uma mensagem pronta.`, acao: "WhatsApp", ...(w ? { href: w } : { ir: { aba: "clientes", id: b.id } as Nav }), tom: "ok" });
-    }
-    if (d.recompra) pendencias.push({ texto: d.recompra === 1 ? "Uma cliente que já comprou está há mais de 45 dias sem pedido." : `${d.recompra} clientes que já compraram estão há mais de 45 dias sem pedido.`, acao: "Chamar", ir: { aba: "clientes" } });
   }
 
   return (
@@ -284,10 +262,11 @@ export function Inicio({ ir }: { ir: Ir }) {
       </header>
       <LembretesPagamento ir={ir} />
 
-      {/* 0159: Liga → ganhos → acerto → Nova venda → O que fazer agora → indicação → resumo */}
-      <CartaoLiga />
+
+      <CartaoNovidades />
+
       <GanhosConsultora />
-      {d && <CartaoAcerto d={d} ir={(aba) => ir({ aba })} />}
+      <CartaoMeuHistorico />
 
       <section className="consultora-inicio-acoes grid gap-3 lg:grid-cols-[1.2fr_1fr]">
         <button type="button" onClick={() => ir({ aba: "novo" })}
@@ -300,8 +279,8 @@ export function Inicio({ ir }: { ir: Ir }) {
         </button>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { r: "Nova cliente", i: UserPlus, n: { aba: "clientes", modo: "nova" } as Nav },
-            { r: "Academy", i: GraduationCap, n: { aba: "biblioteca" } as Nav },
+            { r: "Nova interessada", i: UserPlus, n: { aba: "clientes", modo: "nova" } as Nav },
+            { r: "Meus pedidos", i: ShoppingBag, n: { aba: "pedidos" } as Nav },
             { r: "Minha vitrine", i: Store, n: { aba: "vitrine" } as Nav },
           ].map((a) => (
             <button key={a.r} type="button" onClick={() => ir(a.n)}
@@ -323,30 +302,17 @@ export function Inicio({ ir }: { ir: Ir }) {
           </div>
         )}
         <ul className="space-y-3">
-          {pendencias.map((p) => {
-            const corpo = (
-              <>
-                <span className={`size-2.5 shrink-0 rounded-full ${p.tom === "alerta" ? "bg-destructive" : p.tom === "ok" ? "bg-success" : "bg-warning"}`} aria-hidden />
+          {pendencias.map((p) => (
+            <li key={p.texto}>
+              <button type="button" onClick={() => ir(p.ir)} className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-5 text-left active:bg-muted">
+                <CalendarClock className="size-6 shrink-0 text-primary" aria-hidden />
                 <span className="min-w-0 flex-1 text-[1.05rem]">{p.texto}</span>
-                <span className="shrink-0 rounded-xl bg-muted px-3 py-2 text-[0.95rem] font-semibold">{p.acao}</span>
-              </>
-            );
-            return (
-              <li key={p.texto}>
-                {p.href ? (
-                  <a href={p.href} target="_blank" rel="noreferrer" className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-5 text-left active:bg-muted">{corpo}</a>
-                ) : (
-                  <button type="button" onClick={() => p.ir && ir(p.ir)} className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-5 text-left active:bg-muted">{corpo}</button>
-                )}
-              </li>
-            );
-          })}
+                <span className="shrink-0 text-[0.95rem] font-semibold text-primary">{p.acao}</span>
+              </button>
+            </li>
+          ))}
         </ul>
       </section>
-
-      <CartaoIndique abrir={() => ir({ aba: "indicacoes" })} />
-      <CartaoNovidades />
-      <CartaoMeuHistorico />
 
       {d && (
         <section aria-labelledby="mes" className="consultora-resumo">
@@ -405,15 +371,15 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
           </span>
         </label>
         <button type="button" className="btn-app-principal" onClick={() => ir({ aba: "clientes", modo: "nova" })}>
-          <UserPlus className="size-5" aria-hidden /> Nova cliente
+          <UserPlus className="size-5" aria-hidden /> Nova interessada
         </button>
       </div>
 
       {!busca && q.data && <LembretesClientes clientes={q.data} abrir={(id) => ir({ aba: "clientes", id })} />}
-      {q.isLoading && <Estado tipo="carregando" texto="Carregando suas clientes…" />}
-      {q.isError && <Estado tipo="erro" texto="Não foi possível carregar suas clientes." acao={<button className="admin-btn" onClick={() => q.refetch()}>Tentar de novo</button>} />}
+      {q.isLoading && <Estado tipo="carregando" texto="Carregando sua jornada…" />}
+      {q.isError && <Estado tipo="erro" texto="Não foi possível carregar sua jornada." acao={<button className="admin-btn" onClick={() => q.refetch()}>Tentar de novo</button>} />}
       {q.data && q.data.length === 0 && (
-        <Estado tipo="vazio" texto="Nenhuma cliente ainda. Cadastre a primeira: nome e telefone são obrigatórios, não precisa ter comprado." />
+        <Estado tipo="vazio" texto="Ninguém na sua jornada ainda. Cadastre a primeira interessada: nome e telefone são obrigatórios, não precisa ter comprado." />
       )}
       {q.data && q.data.length > 0 && lista.length === 0 && <Estado tipo="vazio" texto={`Ninguém encontrado para “${busca}”.`} />}
 
@@ -499,7 +465,7 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
     mutationFn: async () => salvarCliente({ ...f, nome: f.nome ?? "" } as Cliente, await meuParty()),
     onSuccess: (novo) => {
       qc.invalidateQueries({ queryKey: ["consultora"] });
-      toast.success(id ? "Dados atualizados." : "Cliente incluída em Minhas clientes.");
+      toast.success(id ? "Dados atualizados." : "Pessoa incluída na Jornada.");
       if (depois) depois(novo); else ir({ aba: "clientes", id: novo });
     },
     onError: (e) => toast.error("Não salvou. Seus dados continuam aqui. " + traduzir(e)),
@@ -521,7 +487,7 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
 
   return (
     <div>
-      <Topo titulo={id ? "Editar dados" : "Nova cliente"} ajuda="clientes" voltar={() => ir(id ? { aba: "clientes", id } : { aba: "clientes" })} />
+      <Topo titulo={id ? "Editar dados" : "Nova interessada"} ajuda="clientes" voltar={() => ir(id ? { aba: "clientes", id } : { aba: "clientes" })} />
       <form onSubmit={enviar} noValidate className="max-w-2xl space-y-5">
         <Campo rotulo="Nome" obrigatorio erro={erros["nome"]}>
           <input className="admin-input min-h-14 text-[1.05rem]" autoComplete="off" autoCapitalize="words" {...campo("nome")} />
@@ -553,7 +519,7 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
         </Campo>
         <div className="sticky bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-10 -mx-4 bg-background/95 px-4 py-3 lg:bottom-0">
           <button type="submit" className="btn-app-principal w-full" disabled={salvar.isPending} aria-busy={salvar.isPending}>
-            {salvar.isPending ? "Salvando…" : id ? "Salvar alterações" : "Salvar cliente"}
+            {salvar.isPending ? "Salvando…" : id ? "Salvar alterações" : "Salvar na Jornada"}
           </button>
         </div>
       </form>
@@ -677,10 +643,10 @@ function EtapaPessoa({ cl }: { cl: Cliente }) {
   const [pausando, setPausando] = React.useState(false);
   const ok = () => { qc.invalidateQueries({ queryKey: ["consultora"] }); };
   const mover = useMutation({ mutationFn: (e: Etapa) => moverEtapa(cl.id, e), onSuccess: () => { ok(); toast.success("Etapa atualizada."); }, onError: (e) => toast.error(traduzir(e)) });
-  const pausar = useMutation({ mutationFn: (m: string | null) => pausarPessoa(cl.id, m), onSuccess: (_d, m) => { ok(); setPausando(false); setMotivo(""); toast.success(m ? "Pausada. Fica guardada em Pausadas/Encerradas." : "Reativada em Minhas clientes."); }, onError: (e) => toast.error(traduzir(e)) });
+  const pausar = useMutation({ mutationFn: (m: string | null) => pausarPessoa(cl.id, m), onSuccess: (_d, m) => { ok(); setPausando(false); setMotivo(""); toast.success(m ? "Pausada. Fica guardada em Pausadas/Encerradas." : "Reativada na Jornada."); }, onError: (e) => toast.error(traduzir(e)) });
   return (
     <section className="rounded-2xl border border-border bg-card p-5">
-      <h2 className="text-lg font-semibold">Etapa da cliente</h2>
+      <h2 className="text-lg font-semibold">Etapa na Jornada</h2>
       {cl.encerrada ? (
         <>
           <p className="mt-1 text-[1.05rem]">Pausada. Motivo: {cl.encerrada_motivo}</p>
@@ -719,7 +685,7 @@ function EtapaPessoa({ cl }: { cl: Cliente }) {
       )}
       {h.data && h.data.length > 0 && (
         <details className="mt-4">
-          <summary className="min-h-12 cursor-pointer py-2 text-base font-semibold">Histórico da cliente ({h.data.length})</summary>
+          <summary className="min-h-12 cursor-pointer py-2 text-base font-semibold">Histórico da Jornada ({h.data.length})</summary>
           <ol className="mt-2 space-y-1.5">
             {h.data.map((ev) => (
               <li key={ev.id} className="text-[0.98rem]">

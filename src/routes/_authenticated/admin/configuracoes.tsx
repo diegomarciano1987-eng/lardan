@@ -12,7 +12,6 @@ import { mensagemDeErro } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { PARAMETROS_PADRAO, type ParametrosRemessa } from "@/lib/remessa";
 import { ConfigPedido, PrecoNovo } from "@/components/admin/config/PedidoEPreco";
-import { LiderELiga } from "@/components/admin/config/LiderELiga";
 
 export const Route = createFileRoute("/_authenticated/admin/configuracoes")({
   component: Configuracoes,
@@ -39,7 +38,6 @@ function Configuracoes() {
       <ParametrosRemessaPanel />
       <PrecoNovo master={roles.includes("master" as never)} />
       <ConfigPedido master={roles.includes("master" as never)} />
-      <LiderELiga master={roles.includes("master" as never)} />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {itens.map((m) => (
           <Panel key={m.slug} flush>

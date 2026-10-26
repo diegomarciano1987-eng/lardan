@@ -43,38 +43,3 @@ export const preBaixaFecharPix = createServerFn({ method: "POST" })
     }
     return { valor_cents: Number(r.valor_pagar_cents), copia, qr, url: cc.invoice_url ?? null };
   });
-
-/**
- * 0159 — 2ª via de um débito da própria consultora (Pix e boleto pelo Asaas, em nome da Lardan).
- * O banco confere que o débito é dela; a baixa vem só pelo aviso do Asaas.
- */
-export const consultoraSegundaVia = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { installment: string }) => {
-    if (!d?.installment || !/^[0-9a-f-]{36}$/.test(d.installment)) throw new Error("Débito inválido.");
-    return { installment: d.installment };
-  })
-  .handler(async ({ data, context }) => {
-    const { data: t, error } = await (context.supabase as any).rpc("consultora_debito_cobranca", { _installment: data.installment });
-    if (error) throw new Error(error.message);
-    const r = t as { installment_id: string; actor: string; vencimento: string };
-    const { solicitarCobranca } = await import("./asaas/operacoes");
-    const { bancoExecutor } = await import("./asaas/servidor.server");
-    const { envDoServidor } = await import("./asaas/configuracao.server");
-    const executor = await bancoExecutor();
-    const usuario = { rpc: <T,>(_f: string, a: Record<string, unknown>) => rpcAdmin<T>("consultora_debito_asaas_preparar", { _actor: r.actor, _payload: a["_payload"] }) };
-    const c = await solicitarCobranca(usuario as never, executor, r.actor, { installmentId: r.installment_id, billingType: "UNDEFINED", dueDate: r.vencimento }, { env: envDoServidor() });
-    if ((c as { state: string }).state === "indisponivel") throw new Error((c as { aviso?: string }).aviso || "Cobrança indisponível no momento. Tente de novo.");
-    const cc = c as { invoice_url?: string | null; external_id?: string | null; simulado?: boolean };
-    let copia: string | null = null; let qr: string | null = null;
-    if (cc.external_id && !cc.simulado) {
-      try {
-        const { resolverPorParcela } = await import("./asaas/servidor.server");
-        const { transporteDaResolucao } = await import("./asaas/configuracao.server");
-        const tr = (await transporteDaResolucao(await resolverPorParcela(r.installment_id, r.actor))) as unknown as { pixQrCode?: (id: string) => Promise<{ payload: string | null; encodedImage: string | null }> };
-        const px = await tr.pixQrCode?.(cc.external_id);
-        copia = px?.payload ?? null; qr = px?.encodedImage ? `data:image/png;base64,${px.encodedImage}` : null;
-      } catch (e) { console.error("pix 2ª via", (e as Error).message); }
-    }
-    return { url: cc.invoice_url ?? null, copia, qr };
-  });

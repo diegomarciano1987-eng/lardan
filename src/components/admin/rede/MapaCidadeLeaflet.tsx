@@ -1,65 +1,58 @@
 /**
- * Mapa real da cidade (ruas, bairros, zoom) com OpenStreetMap/CARTO via Leaflet.
- * Um ponto por CEP; clicar seleciona o CEP e o painel lateral mostra as consultoras.
- * Módulo só do navegador: carregar com React.lazy dentro de <ClientOnly>.
+ * Mapa real da cidade (ruas, bairros, zoom) com OpenStreetMap via Leaflet.
+ * Uma bolinha por consultora: ativa verde e maior (sempre por cima), inativa cinza e menor,
+ * borda tracejada quando a posição é aproximada. Módulo só do navegador: React.lazy + <ClientOnly>.
  */
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-export interface GrupoCep {
-  chave: string;
+export interface PontoMapa {
+  id: string;
   lat: number;
   lng: number;
-  cep: string | null;
-  total: number;
-  ativas: number;
+  ativa: boolean;
   aproximado: boolean;
+  dica: string; // HTML já escapado
 }
 
-function icone(g: GrupoCep, selecionado: boolean): L.DivIcon {
-  const t = selecionado ? 38 : g.total > 9 ? 32 : g.total > 1 ? 27 : 20;
-  const fundo = g.ativas > 0 ? "var(--rose)" : "color-mix(in oklab, var(--foreground) 78%, transparent)";
-  const borda = selecionado ? "3px solid var(--bronze)" : g.aproximado ? "2px dashed var(--background)" : "2px solid var(--background)";
-  return L.divIcon({
-    className: "",
-    html: `<div style="width:${t}px;height:${t}px;border-radius:9999px;background:${fundo};color:var(--background);
-      font:600 11px/1 system-ui;display:flex;align-items:center;justify-content:center;border:${borda};
-      box-shadow:0 3px 10px color-mix(in oklab, var(--foreground) 35%, transparent);opacity:${g.aproximado ? 0.8 : 1}">${g.total > 1 ? g.total : ""}</div>`,
-    iconSize: [t, t],
-    iconAnchor: [t / 2, t / 2],
-  });
+export interface Voo {
+  lat: number;
+  lng: number;
+  zoom: number;
+  seq: number;
 }
 
 export default function MapaCidadeLeaflet({
-  grupos,
+  pontos,
   contorno,
   selecionado,
   onSelecionar,
+  voo,
 }: {
-  grupos: GrupoCep[];
+  pontos: PontoMapa[];
   contorno: GeoJSON.GeoJsonObject | null;
   selecionado: string | null;
-  onSelecionar: (chave: string) => void;
+  onSelecionar: (id: string) => void;
+  voo: Voo | null;
 }) {
   const divRef = useRef<HTMLDivElement | null>(null);
   const mapaRef = useRef<L.Map | null>(null);
   const camadaRef = useRef<L.LayerGroup | null>(null);
   const contornoRef = useRef<L.GeoJSON | null>(null);
-  const ultimosGruposRef = useRef<GrupoCep[] | null>(null);
+  const enquadradoRef = useRef(false);
   const cbRef = useRef(onSelecionar);
   cbRef.current = onSelecionar;
 
   useEffect(() => {
     if (!divRef.current || mapaRef.current) return;
     const mapa = L.map(divRef.current, { scrollWheelZoom: true, zoomControl: true }).setView([-23.31, -51.16], 12);
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "© OpenStreetMap",
-    }).addTo(mapa);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(mapa);
+    mapa.createPane("inativas").style.zIndex = "410";
+    mapa.createPane("ativas").style.zIndex = "420";
+    mapa.createPane("selecao").style.zIndex = "430";
     camadaRef.current = L.layerGroup().addTo(mapa);
     mapaRef.current = mapa;
-    ultimosGruposRef.current = null;
     const t = setTimeout(() => mapa.invalidateSize(), 250);
     const ro = new ResizeObserver(() => mapa.invalidateSize());
     ro.observe(divRef.current);
@@ -78,6 +71,9 @@ export default function MapaCidadeLeaflet({
     contornoRef.current = L.geoJSON(contorno, {
       style: { className: "contorno-cidade", weight: 2, fill: false, dashArray: "6 4", interactive: false },
     }).addTo(mapa);
+    if (!enquadradoRef.current) {
+      mapa.fitBounds(contornoRef.current.getBounds().pad(0.02));
+    }
   }, [contorno]);
 
   useEffect(() => {
@@ -85,36 +81,31 @@ export default function MapaCidadeLeaflet({
     const camada = camadaRef.current;
     if (!mapa || !camada) return;
     camada.clearLayers();
-    for (const g of grupos) {
-      const m = L.marker([g.lat, g.lng], {
-        icon: icone(g, g.chave === selecionado),
-        zIndexOffset: g.chave === selecionado ? 1000 : g.total,
-        title: g.cep ? `CEP ${g.cep}` : "Sem CEP",
-      }).bindTooltip(
-        `<strong>${g.cep ? `CEP ${g.cep}` : "Local"}</strong><br/>${g.total} consultora(s)${g.aproximado ? "<br/><em>posição aproximada</em>" : ""}`,
-        { direction: "top", offset: [0, -8] },
-      );
-      m.on("click", () => cbRef.current(g.chave));
+    for (const p of pontos) {
+      const sel = p.id === selecionado;
+      const classe = [p.ativa ? "mapa-pt-ativa" : "mapa-pt-inativa", p.aproximado ? "mapa-pt-aprox" : "", sel ? "mapa-pt-sel" : ""].join(" ");
+      const m = L.circleMarker([p.lat, p.lng], {
+        radius: sel ? 12 : p.ativa ? 9 : 5,
+        className: classe,
+        pane: sel ? "selecao" : p.ativa ? "ativas" : "inativas",
+        bubblingMouseEvents: false,
+      }).bindTooltip(p.dica, { direction: "top", offset: [0, -6] });
+      m.on("click", () => cbRef.current(p.id));
       camada.addLayer(m);
     }
-    if (grupos.length > 0 && ultimosGruposRef.current !== grupos) {
-      ultimosGruposRef.current = grupos;
-      const precisos = grupos.filter((g) => !g.aproximado);
-      const base = precisos.length >= 3 ? precisos : grupos;
-      const enquadrar = () => {
-        mapa.invalidateSize();
-        const b = L.latLngBounds(base.map((g) => [g.lat, g.lng] as [number, number])).pad(0.12);
-        mapa.fitBounds(b, { maxZoom: 13 });
-      };
-      enquadrar();
-      setTimeout(enquadrar, 300);
+    if (!enquadradoRef.current && pontos.length > 0) {
+      const precisos = pontos.filter((p) => !p.aproximado);
+      const base = precisos.length >= 3 ? precisos : pontos;
+      const b = L.latLngBounds(base.map((p) => [p.lat, p.lng] as [number, number])).pad(0.08);
+      enquadradoRef.current = true;
+      mapa.invalidateSize();
+      mapa.fitBounds(b, { maxZoom: 14 });
     }
-  }, [grupos, selecionado]);
+  }, [pontos, selecionado]);
 
   useEffect(() => {
-    const g = grupos.find((x) => x.chave === selecionado);
-    if (g && mapaRef.current) mapaRef.current.panTo([g.lat, g.lng], { animate: true });
-  }, [selecionado]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (voo && mapaRef.current) mapaRef.current.flyTo([voo.lat, voo.lng], voo.zoom, { duration: 0.8 });
+  }, [voo]);
 
   return <div ref={divRef} className="h-[640px] w-full overflow-hidden rounded-[12px] border border-line" />;
 }

@@ -70,6 +70,11 @@ export function LiderELiga({ master }: { master: boolean }) {
 
         <section className="space-y-2">
           <p className="font-semibold text-ledger-text">Níveis da Liga (ciclos nos últimos 12 meses com venda acima do mínimo)</p>
+          {lista.length > 0 && (
+            <div className="grid gap-2 text-xs text-ledger-muted md:grid-cols-[1fr_8rem_10rem_auto]">
+              <span>Nome do nível</span><span>Maletas no ano</span><span>Venda mínima por maleta (R$)</span><span />
+            </div>
+          )}
           {lista.map((n, i) => (
             <div key={i} className="grid gap-2 md:grid-cols-[1fr_8rem_10rem_auto]">
               <input className="admin-input" disabled={!master} value={n.nome} onChange={(e) => setLista(lista.map((x, j) => (j === i ? { ...x, nome: e.target.value } : x)))} />

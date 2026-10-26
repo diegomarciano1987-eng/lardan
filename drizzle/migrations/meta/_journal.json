@@ -1149,6 +1149,13 @@
       "when": 1793028759342,
       "tag": "0163_ajustes_revisao_apps",
       "breakpoints": true
+    },
+    {
+      "idx": 164,
+      "version": "7",
+      "when": 1793029766383,
+      "tag": "0164_cockpit_producao_e_maletas_smalldata",
+      "breakpoints": true
     }
   ]
 }

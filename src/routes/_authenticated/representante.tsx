@@ -19,7 +19,7 @@ import { OperationalGlass } from "@/components/premium/OperationalGlass";
 type Aba = "cobranca" | "consultoras" | "maletas" | "agenda" | "captacao" | "painel";
 const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = [
   { id: "cobranca", rotulo: "Acerto e cobrança", curto: "Cobrança", icone: HandCoins },
-  { id: "consultoras", rotulo: "Consultoras", curto: "Consultoras", icone: Users },
+  { id: "consultoras", rotulo: "Consultoras", curto: "Carteira", icone: Users },
   { id: "maletas", rotulo: "Maletas e acerto", curto: "Maletas", icone: Briefcase },
   { id: "agenda", rotulo: "Agenda de visitas", curto: "Agenda", icone: CalendarDays },
   { id: "captacao", rotulo: "Captação", curto: "Captação", icone: Sparkles },

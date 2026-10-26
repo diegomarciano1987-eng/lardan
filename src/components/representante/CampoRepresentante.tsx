@@ -22,6 +22,7 @@ import { CobrarParcela } from "@/components/representante/AcoesRepresentante";
 const SIT: Record<MaletaCarteira["pre_baixa"], string> = {
   sem_pre_baixa: "Acerto não começou", aberta: "Acerto em lançamento", aguardando_pagamento: "Acerto fechado · falta pagar",
   aguardando_conferencia: "Pago · maleta volta para conferência", encerrada: "Acerto encerrado", pendencia: "Acerto com pendência", cancelada: "Cancelado",
+  smalldata: "Maleta do SmallData · acerto pelo SmallData",
 };
 
 export function MaletasCarteira({ rep }: { rep: string }) {
@@ -40,7 +41,7 @@ export function MaletasCarteira({ rep }: { rep: string }) {
       {!q.isLoading && lista.length === 0 && <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Nenhuma maleta com as consultoras da sua carteira agora.</p>}
       <ul className="divide-y divide-border">
         {lista.map((m) => (
-          <li key={m.cycle_id} className={`flex flex-wrap items-center justify-between gap-3 py-3 ${m.vencida && m.pre_baixa !== "encerrada" ? "rounded-xl bg-destructive/5 px-3" : ""}`}>
+          <li key={m.id} className={`flex flex-wrap items-center justify-between gap-3 py-3 ${m.vencida && m.pre_baixa !== "encerrada" ? "rounded-xl bg-destructive/5 px-3" : ""}`}>
             <div className="min-w-0">
               <p className="truncate font-medium">{m.consultora}</p>
               <p className="text-xs text-muted-foreground">Maleta {m.maleta}{m.remessa ? ` · remessa ${m.remessa}` : ""} · {m.pecas} peças · {brl(m.valor_cents)}</p>
@@ -54,7 +55,7 @@ export function MaletasCarteira({ rep }: { rep: string }) {
                 <CobrarParcela rep={rep} rotulo={`Cobrar ${brl(m.saldo_cents ?? 0)}`}
                   c={{ installment_id: m.installment_id, numero: `acerto ${m.maleta}`, vencimento: m.acerto ?? new Date().toISOString().slice(0, 10), saldo_cents: m.saldo_cents ?? 0, party_id: m.party_id, display_name: m.consultora, code: "" }} />
               )}
-              {(m.pre_baixa === "sem_pre_baixa" || m.pre_baixa === "aberta") && (
+              {m.fonte === "lardan" && (m.pre_baixa === "sem_pre_baixa" || m.pre_baixa === "aberta") && (
                 <button type="button" onClick={() => setAcerto(m)} className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"><ScanBarcode className="size-3.5" /> Acerto em campo</button>
               )}
             </div>
@@ -68,7 +69,7 @@ export function MaletasCarteira({ rep }: { rep: string }) {
 
 function AcertoCampo({ rep, maleta, onClose }: { rep: string; maleta: MaletaCarteira | null; onClose: () => void }) {
   const qc = useQueryClient();
-  const cycle = maleta?.cycle_id ?? "";
+  const cycle = maleta?.cycle_id ?? "";  // só maleta Lardan abre o acerto em campo
   const pb = useQuery({ queryKey: ["rep", "campo", cycle], queryFn: async () => { await abrirPreBaixa(cycle); return lerPreBaixa(cycle); }, enabled: !!maleta });
   const [lidas, setLidas] = React.useState<Record<string, number>>({});
   const [codigo, setCodigo] = React.useState("");

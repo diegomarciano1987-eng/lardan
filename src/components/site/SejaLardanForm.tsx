@@ -221,6 +221,7 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
             source: modo === "indicacao" ? "indicacao/link" : "site/seja-lardan",
             privacy_version: PRIVACY_VERSION,
             marketing_consent: marketingConsent,
+            quem_indicou: madrinha ? undefined : texto("quem_indicou"),
           }) as never,
           tracking: capturarTracking(),
         },
@@ -285,6 +286,15 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
           Você chegou pelo convite de <strong>{madrinha}</strong>, Consultora Lardan.
         </p>
       )}
+      <div>
+        <Label htmlFor="quem_indicou">Quem te indicou?</Label>
+        {madrinha ? (
+          <input id="quem_indicou" readOnly value={madrinha} className={field} />
+        ) : (
+          <input id="quem_indicou" name="quem_indicou" maxLength={120} placeholder="Nome ou código da consultora (opcional)" className={field} />
+        )}
+        {madrinha && <p className="mt-1 text-xs text-muted-foreground">Preenchido pelo link de convite.</p>}
+      </div>
       <fieldset className="space-y-4">
         <legend className="brand-eyebrow mb-4">Dados de contato</legend>
         <div className="grid gap-4 sm:grid-cols-2">

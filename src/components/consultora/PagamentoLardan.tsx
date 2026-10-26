@@ -2,13 +2,13 @@ import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Copy, CreditCard, Clock, MessageCircle, QrCode, Check, CalendarClock } from "lucide-react";
+import { Banknote, Copy, CreditCard, Clock, MessageCircle, QrCode, Check, CalendarClock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { consultoraCobrancaGerar } from "@/lib/consultora-pagamento.functions";
 import { DateField } from "@/components/premium/DateField";
 import { linkWhats } from "@/lib/consultora";
 
-type Forma = "pix" | "cartao" | "depois";
+type Forma = "pix" | "cartao" | "depois" | "dinheiro";
 const brl = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const mascaraCpf = (v: string) => {
   const d = v.replace(/\D/g, "").slice(0, 11);
@@ -22,6 +22,7 @@ const dataBR = (s: string) => new Date(s + "T12:00:00").toLocaleDateString("pt-B
 const OPCOES: { id: Forma; titulo: string; dica: string; icone: typeof QrCode }[] = [
   { id: "pix", titulo: "Pix agora", dica: "QR code e copia e cola da Lardan", icone: QrCode },
   { id: "cartao", titulo: "Cartão de crédito", dica: "Link seguro para a cliente pagar", icone: CreditCard },
+  { id: "dinheiro", titulo: "Cliente pagou em dinheiro", dica: "Você recebeu na mão: o valor entra no seu acerto", icone: Banknote },
   { id: "depois", titulo: "Receber depois", dica: "Fica nos seus pedidos e a Lardan te lembra no dia", icone: Clock },
 ];
 
@@ -33,6 +34,7 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
   const [venc, setVenc] = React.useState(somarDias(hoje(), 7));
   const [res, setRes] = React.useState<Awaited<ReturnType<typeof consultoraCobrancaGerar>> | null>(null);
   const [lembrete, setLembrete] = React.useState<string | null>(null);
+  const [pagoDinheiro, setPagoDinheiro] = React.useState(false);
 
   const situacao = useQuery({
     queryKey: ["consultora-pagamento", pedido],
@@ -48,6 +50,14 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
   const m = useMutation({
     mutationFn: () => gerar({ data: { pedido, forma: forma as "pix" | "cartao", cpf, vencimento: null } }),
     onSuccess: (r) => { setRes(r); void qc.invalidateQueries({ queryKey: ["consultora"] }); },
+    onError: (e) => toast.error((e as Error).message),
+  });
+  const dinheiro = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("consultora_pedido_pago_dinheiro" as never, { _order: pedido } as never);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => { toast.success("Venda registrada como paga em dinheiro."); setPagoDinheiro(true); void qc.invalidateQueries({ queryKey: ["consultora"] }); },
     onError: (e) => toast.error((e as Error).message),
   });
   const lem = useMutation({
@@ -74,6 +84,16 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
         <span className="mx-auto mb-3 grid size-14 place-items-center rounded-full bg-primary/10 text-primary"><CalendarClock className="size-7" aria-hidden /></span>
         <p className="text-lg font-semibold">Combinado para {dataBR(lembrete)}</p>
         <p className="mt-1 text-[0.98rem] text-muted-foreground">O pedido fica em Pedidos. Um dia antes e no dia, a Lardan te avisa na tela inicial.</p>
+      </div>
+    );
+  }
+
+  if (pagoDinheiro) {
+    return (
+      <div className="rounded-3xl border border-primary/40 bg-card p-6 text-center">
+        <span className="mx-auto mb-3 grid size-14 place-items-center rounded-full bg-acao text-acao-foreground"><Banknote className="size-7" aria-hidden /></span>
+        <p className="text-lg font-semibold">Venda paga em dinheiro</p>
+        <p className="mt-1 text-[0.98rem] text-muted-foreground">{brl(total)} entra no acerto da sua maleta (você fica com a comissão e paga o restante à Lardan).</p>
       </div>
     );
   }
@@ -125,6 +145,14 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
           </button>
         ))}
       </div>
+      {forma === "dinheiro" && (
+        <div className="space-y-3">
+          <p className="text-[0.98rem] text-muted-foreground">O pedido fica pago e concluído. Como o dinheiro ficou com você, ele entra no valor do seu acerto (menos a sua comissão).</p>
+          <button type="button" className="btn-app-principal w-full" disabled={dinheiro.isPending} onClick={() => dinheiro.mutate()}>
+            {dinheiro.isPending ? "Registrando…" : `Confirmar: recebi ${brl(total)} em dinheiro`}
+          </button>
+        </div>
+      )}
       {forma === "depois" && (
         <div className="space-y-3">
           <div>

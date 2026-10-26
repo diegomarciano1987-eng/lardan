@@ -38,6 +38,8 @@ const Entrada = z.object({
     source: texto(120),
     privacy_version: z.string().trim().min(1).max(60),
     marketing_consent: z.boolean().optional(),
+    // 0159: "Quem te indicou?" (texto livre; pelo link de indicação já vem preenchido)
+    quem_indicou: texto(120),
   }),
   tracking: z
     .object({

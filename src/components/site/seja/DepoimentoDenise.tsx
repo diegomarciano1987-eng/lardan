@@ -13,21 +13,8 @@ export function DepoimentoDenise() {
       aria-labelledby="depoimento-denise-titulo"
       className="border-t border-border bg-secondary/40"
     >
-      <div className="mx-auto max-w-3xl px-6 py-20 text-center md:py-28">
-        <p className="brand-eyebrow mb-4">Depoimento real</p>
-        <CinematicTitle
-          id="depoimento-denise-titulo"
-          className="text-3xl leading-tight text-foreground md:text-5xl"
-        >
-          Independência financeira construída com semijoias.
-        </CinematicTitle>
-        <div className="rose-rule mx-auto mt-8 w-20" />
-        <p className="mx-auto mt-8 max-w-xl font-display text-[clamp(1.25rem,2.3vw,1.75rem)] leading-[1.42] text-foreground">
-          A Denise conta, no vídeo, como as semijoias da Lardan abriram o caminho para a
-          independência financeira dela.
-        </p>
-
-        <div className="relative mx-auto mt-12 w-full max-w-[24rem]">
+      <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 md:grid-cols-[minmax(18rem,0.8fr)_minmax(22rem,1fr)] md:gap-20 md:py-28">
+        <div className="relative mx-auto w-full max-w-[24rem]">
           <div aria-hidden="true" className="absolute -inset-3 border border-rose/25" />
           <video
             ref={videoRef}
@@ -57,21 +44,36 @@ export function DepoimentoDenise() {
           ) : null}
         </div>
 
-        <div className="mt-10">
-          <p className="font-display text-2xl text-foreground">Denise Carina</p>
-          <p className="mt-2 text-xs font-medium uppercase tracking-[0.18em] text-rose-deep">
-            Consultora Lardan
+        <div className="md:py-8">
+          <p className="brand-eyebrow mb-4">Depoimento real</p>
+          <CinematicTitle
+            id="depoimento-denise-titulo"
+            className="text-3xl leading-tight text-foreground md:text-5xl"
+          >
+            Independência financeira construída com semijoias.
+          </CinematicTitle>
+          <div className="rose-rule mt-8 w-20" />
+          <p className="mt-8 max-w-xl font-display text-[clamp(1.25rem,2.3vw,1.75rem)] leading-[1.42] text-foreground">
+            A Denise conta, no vídeo, como as semijoias da Lardan abriram o caminho para a
+            independência financeira dela.
           </p>
-          <p className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <MapPin aria-hidden="true" className="size-4 text-rose" />
-            Ponta Grossa — PR
-          </p>
-        </div>
 
-        <a href="#candidatura" className="btn-premium mt-10 inline-flex items-center gap-2">
-          <Play aria-hidden="true" className="size-4" />
-          Quero começar minha história
-        </a>
+          <div className="mt-10 border-l-2 border-rose pl-5">
+            <p className="font-display text-2xl text-foreground">Denise Carina</p>
+            <p className="mt-2 text-xs font-medium uppercase tracking-[0.18em] text-rose-deep">
+              Consultora Lardan
+            </p>
+            <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin aria-hidden="true" className="size-4 text-rose" />
+              Ponta Grossa — PR
+            </p>
+          </div>
+
+          <a href="#candidatura" className="btn-premium mt-10 inline-flex items-center gap-2">
+            <Play aria-hidden="true" className="size-4" />
+            Quero começar minha história
+          </a>
+        </div>
       </div>
     </section>
   );

@@ -4293,6 +4293,36 @@ export type Database = {
           },
         ]
       }
+      contact_points_duplicados_log: {
+        Row: {
+          contato: Json
+          desfeito_em: string | null
+          id: number
+          lote: string
+          mantido_id: string
+          removido_em: string
+          removido_por: string
+        }
+        Insert: {
+          contato: Json
+          desfeito_em?: string | null
+          id?: number
+          lote: string
+          mantido_id: string
+          removido_em?: string
+          removido_por: string
+        }
+        Update: {
+          contato?: Json
+          desfeito_em?: string | null
+          id?: number
+          lote?: string
+          mantido_id?: string
+          removido_em?: string
+          removido_por?: string
+        }
+        Relationships: []
+      }
       contact_requests: {
         Row: {
           contact_channel: string
@@ -8777,6 +8807,7 @@ export type Database = {
           pre_baixa_id: string
           preco_cents: number
           qtd_app: number
+          qtd_devolvida_campo: number | null
           qtd_enviada: number
           qtd_faltando: number
           qtd_lida: number | null
@@ -8789,6 +8820,7 @@ export type Database = {
           pre_baixa_id: string
           preco_cents: number
           qtd_app?: number
+          qtd_devolvida_campo?: number | null
           qtd_enviada: number
           qtd_faltando?: number
           qtd_lida?: number | null
@@ -8801,6 +8833,7 @@ export type Database = {
           pre_baixa_id?: string
           preco_cents?: number
           qtd_app?: number
+          qtd_devolvida_campo?: number | null
           qtd_enviada?: number
           qtd_faltando?: number
           qtd_lida?: number | null
@@ -8880,6 +8913,8 @@ export type Database = {
       kit_pre_baixas: {
         Row: {
           base_faixa_cents: number
+          campo_em: string | null
+          campo_por: string | null
           comissao_cents: number
           comissao_pct: number
           conferida_em: string | null
@@ -8893,6 +8928,7 @@ export type Database = {
           fechada_por: string | null
           id: string
           installment_id: string | null
+          origem: string
           pendencia_motivo: string | null
           pendencia_resolvida_em: string | null
           pendencia_title_id: string | null
@@ -8909,6 +8945,8 @@ export type Database = {
         }
         Insert: {
           base_faixa_cents?: number
+          campo_em?: string | null
+          campo_por?: string | null
           comissao_cents?: number
           comissao_pct?: number
           conferida_em?: string | null
@@ -8922,6 +8960,7 @@ export type Database = {
           fechada_por?: string | null
           id?: string
           installment_id?: string | null
+          origem?: string
           pendencia_motivo?: string | null
           pendencia_resolvida_em?: string | null
           pendencia_title_id?: string | null
@@ -8938,6 +8977,8 @@ export type Database = {
         }
         Update: {
           base_faixa_cents?: number
+          campo_em?: string | null
+          campo_por?: string | null
           comissao_cents?: number
           comissao_pct?: number
           conferida_em?: string | null
@@ -8951,6 +8992,7 @@ export type Database = {
           fechada_por?: string | null
           id?: string
           installment_id?: string | null
+          origem?: string
           pendencia_motivo?: string | null
           pendencia_resolvida_em?: string | null
           pendencia_title_id?: string | null
@@ -13732,6 +13774,51 @@ export type Database = {
           },
         ]
       }
+      rep_cobrancas_parciais: {
+        Row: {
+          chave: string
+          created_at: string
+          criado_por: string
+          id: string
+          installment_origem: string
+          installment_parcial: string
+          valor_cents: number
+        }
+        Insert: {
+          chave: string
+          created_at?: string
+          criado_por: string
+          id?: string
+          installment_origem: string
+          installment_parcial: string
+          valor_cents: number
+        }
+        Update: {
+          chave?: string
+          created_at?: string
+          criado_por?: string
+          id?: string
+          installment_origem?: string
+          installment_parcial?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_cobrancas_parciais_installment_origem_fkey"
+            columns: ["installment_origem"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_cobrancas_parciais_installment_parcial_fkey"
+            columns: ["installment_parcial"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rep_crm_cards: {
         Row: {
           etapa_id: string | null
@@ -13799,6 +13886,7 @@ export type Database = {
           nome: string
           ordem: number
           rep_party_id: string
+          sistema: string | null
         }
         Insert: {
           created_at?: string
@@ -13806,6 +13894,7 @@ export type Database = {
           nome: string
           ordem?: number
           rep_party_id: string
+          sistema?: string | null
         }
         Update: {
           created_at?: string
@@ -13813,6 +13902,7 @@ export type Database = {
           nome?: string
           ordem?: number
           rep_party_id?: string
+          sistema?: string | null
         }
         Relationships: [
           {
@@ -13831,6 +13921,295 @@ export type Database = {
           },
           {
             foreignKeyName: "rep_crm_etapas_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      rep_reativacao_pedidos: {
+        Row: {
+          created_at: string
+          decidido_em: string | null
+          decidido_por: string | null
+          decisao_motivo: string | null
+          divida_cents: number
+          id: string
+          motivo: string | null
+          party_id: string
+          pedido_por: string
+          rep_party_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          decidido_em?: string | null
+          decidido_por?: string | null
+          decisao_motivo?: string | null
+          divida_cents?: number
+          id?: string
+          motivo?: string | null
+          party_id: string
+          pedido_por: string
+          rep_party_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          decidido_em?: string | null
+          decidido_por?: string | null
+          decisao_motivo?: string | null
+          divida_cents?: number
+          id?: string
+          motivo?: string | null
+          party_id?: string
+          pedido_por?: string
+          rep_party_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_reativacao_pedidos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_reativacao_pedidos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_reativacao_pedidos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "rep_reativacao_pedidos_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_reativacao_pedidos_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_reativacao_pedidos_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      rep_recibos: {
+        Row: {
+          chave: string
+          created_at: string
+          financial_account_id: string
+          id: string
+          installment_id: string
+          numero: number
+          observacao: string | null
+          party_id: string
+          recebido_por: string
+          referente: string | null
+          rep_party_id: string
+          settlement_id: string
+          valor_cents: number
+        }
+        Insert: {
+          chave: string
+          created_at?: string
+          financial_account_id: string
+          id?: string
+          installment_id: string
+          numero?: number
+          observacao?: string | null
+          party_id: string
+          recebido_por: string
+          referente?: string | null
+          rep_party_id: string
+          settlement_id: string
+          valor_cents: number
+        }
+        Update: {
+          chave?: string
+          created_at?: string
+          financial_account_id?: string
+          id?: string
+          installment_id?: string
+          numero?: number
+          observacao?: string | null
+          party_id?: string
+          recebido_por?: string
+          referente?: string | null
+          rep_party_id?: string
+          settlement_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_recibos_financial_account_id_fkey"
+            columns: ["financial_account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_recibos_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_recibos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_recibos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_recibos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "rep_recibos_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_recibos_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_recibos_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "rep_recibos_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rep_visitas: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          lead_id: string | null
+          motivo: string
+          party_id: string | null
+          quando: string
+          registrada_em: string | null
+          rep_party_id: string
+          resultado: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          lead_id?: string | null
+          motivo: string
+          party_id?: string | null
+          quando: string
+          registrada_em?: string | null
+          rep_party_id: string
+          resultado?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          lead_id?: string | null
+          motivo?: string
+          party_id?: string | null
+          quando?: string
+          registrada_em?: string | null
+          rep_party_id?: string
+          resultado?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_visitas_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_visitas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_visitas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_visitas_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "rep_visitas_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_visitas_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_visitas_rep_party_id_fkey"
             columns: ["rep_party_id"]
             isOneToOne: false
             referencedRelation: "v_network_consultants"
@@ -17571,6 +17950,23 @@ export type Database = {
         Args: { _lote: string }
         Returns: Json
       }
+      contatos_duplicados_aplicar: {
+        Args: { _confirmacao: string }
+        Returns: Json
+      }
+      contatos_duplicados_desfazer: { Args: { _lote: string }; Returns: number }
+      contatos_duplicados_previa: {
+        Args: never
+        Returns: {
+          manter_id: string
+          manter_tipo: string
+          nome: string
+          numero: string
+          party_id: string
+          remover_ids: string[]
+          remover_qtd: number
+        }[]
+      }
       convert_lead_to_consultant: {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string
@@ -18942,6 +19338,7 @@ export type Database = {
         Args: { _aplicar?: boolean }
         Returns: Json
       }
+      party_divida_aberta: { Args: { _party: string }; Returns: number }
       party_doc_reveal: { Args: { _id: string }; Returns: string }
       party_duplicados: { Args: never; Returns: Json }
       party_e_unificadas: { Args: { _p: string }; Returns: string[] }
@@ -19527,11 +19924,40 @@ export type Database = {
           valor_cents: number
         }[]
       }
+      rep_acerto_campo_devolucao: {
+        Args: { _cycle: string; _leituras: Json }
+        Returns: Json
+      }
+      rep_agenda: {
+        Args: { _ate?: string; _de?: string; _rep: string }
+        Returns: Json
+      }
       rep_asaas_preparar: {
         Args: { _actor: string; _payload: Json; _rep_user: string }
         Returns: Json
       }
       rep_cheque_registrar: { Args: { _payload: Json }; Returns: string }
+      rep_cob_historico: { Args: { _party: string }; Returns: Json }
+      rep_cob_promessa: {
+        Args: {
+          _data: string
+          _obs?: string
+          _parcelas: string[]
+          _party: string
+          _valor: number
+        }
+        Returns: string
+      }
+      rep_cob_registrar: {
+        Args: {
+          _obs: string
+          _parcelas?: string[]
+          _party: string
+          _resultado: string
+          _tipo: string
+        }
+        Returns: string
+      }
       rep_cobranca_avulsa: {
         Args: {
           _chave: string
@@ -19540,6 +19966,20 @@ export type Database = {
           _valor_cents: number
         }
         Returns: string
+      }
+      rep_cobranca_parcial: {
+        Args: { _chave: string; _installment: string; _valor_cents: number }
+        Returns: string
+      }
+      rep_cobrancas_lista: {
+        Args: {
+          _busca?: string
+          _faixa?: string
+          _ordem?: string
+          _pagina?: number
+          _rep: string
+        }
+        Returns: Json
       }
       rep_consultora_assumir: {
         Args: { _party: string; _rep: string }
@@ -19551,7 +19991,16 @@ export type Database = {
         Returns: Json
       }
       rep_consultora_reativar: { Args: { _party: string }; Returns: boolean }
+      rep_consultora_reativar_pedir: {
+        Args: { _motivo?: string; _party: string }
+        Returns: Json
+      }
+      rep_conta_retido: { Args: { _empresa: string }; Returns: string }
       rep_crm: { Args: { _rep: string }; Returns: Json }
+      rep_crm_coluna_sistema: {
+        Args: { _l: Database["public"]["Tables"]["leads"]["Row"] }
+        Returns: string
+      }
       rep_crm_etapa_nova: {
         Args: { _nome: string; _rep: string }
         Returns: string
@@ -19576,6 +20025,16 @@ export type Database = {
         Args: { _etapa: string; _lead: string; _nota?: string }
         Returns: undefined
       }
+      rep_dinheiro_receber: {
+        Args: {
+          _chave: string
+          _installment: string
+          _obs?: string
+          _valor_cents: number
+        }
+        Returns: Json
+      }
+      rep_dono_da_consultora: { Args: { _party: string }; Returns: string }
       rep_eu: { Args: never; Returns: string }
       rep_lead_encaminhar: {
         Args: { _lead: string; _rep: string }
@@ -19594,6 +20053,7 @@ export type Database = {
         }
         Returns: Json
       }
+      rep_maletas_carteira: { Args: { _rep: string }; Returns: Json }
       rep_parcela_cobravel: { Args: { _inst: string }; Returns: Json }
       rep_parcela_dono: { Args: { _inst: string }; Returns: string }
       rep_pode_assumir: {
@@ -19645,9 +20105,26 @@ export type Database = {
         Returns: Json
       }
       rep_publico: { Args: { _code: string }; Returns: Json }
+      rep_reativacao_decidir: {
+        Args: { _aprovar: boolean; _id: string; _motivo?: string }
+        Returns: undefined
+      }
+      rep_reativacoes_pendentes: { Args: never; Returns: Json }
+      rep_reativar_checado: {
+        Args: { _actor: string; _motivo: string; _party: string }
+        Returns: boolean
+      }
       rep_reativar_interno: {
         Args: { _actor: string; _motivo: string; _party: string }
         Returns: boolean
+      }
+      rep_recibo_json: {
+        Args: { _r: Database["public"]["Tables"]["rep_recibos"]["Row"] }
+        Returns: Json
+      }
+      rep_recibos_lista: {
+        Args: { _dias?: number; _rep: string }
+        Returns: Json
       }
       rep_representantes_lista: { Args: never; Returns: Json }
       rep_titulos_gerados: {
@@ -19656,6 +20133,20 @@ export type Database = {
           rep_party_id: string
           title_id: string
         }[]
+      }
+      rep_visita_agendar: {
+        Args: {
+          _lead: string
+          _motivo: string
+          _party: string
+          _quando: string
+          _rep: string
+        }
+        Returns: string
+      }
+      rep_visita_registrar: {
+        Args: { _id: string; _resultado: string; _status: string }
+        Returns: undefined
       }
       resync_all_public_prices: { Args: never; Returns: number }
       revoke_role: {

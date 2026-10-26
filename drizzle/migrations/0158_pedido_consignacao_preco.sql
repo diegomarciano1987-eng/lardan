@@ -1,6 +1,19 @@
 -- 0157 — novo pedido de consignação + regra de preço nova + preço congelado na remessa.
 -- Não apaga nada, não remove coluna e pode rodar duas vezes.
+--
+-- 1. pedido_config: dados fixos da folha (endereço, contato de pedidos, Pix, garantia, montagem) e o
+--    prazo do correio — editável só pelo Master.
+-- 2. remessas.tipo_envio ('pessoal' | 'correio'): "Postar a maleta até" só aparece no correio
+--    (data do acerto − prazo do correio).
+-- 3. kit_pedido_dados(ciclo): tudo que a folha imprime, com o preço GRAVADO de cada item.
+-- 4. kit_preco(ciclo, variante): preço gravado na maleta. App, vitrine, pedido da cliente e maleta
+--    perdida passam a usar ele (antes usavam o preço do catálogo do dia).
+-- 5. preco_regra_lardan + preco_reajuste_previa/aplicar/desfazer: nova regra (sempre para cima;
+--    até R$ 99,99 termina em ,90; de R$ 100 em diante termina em 4,90 ou 9,90). Só aplica com o
+--    Master e depois da aprovação do relatório; maleta já montada/na rua não muda.
+-- 6. Faixas de comissão: se a tabela estiver vazia, recebe as faixas da folha (20/25/30/35/40%).
 
+-- ───────────────────────── 1. configuração da folha ─────────────────────────
 CREATE TABLE IF NOT EXISTS public.pedido_config (
   id boolean PRIMARY KEY DEFAULT true CHECK (id),
   endereco_linha text NOT NULL DEFAULT 'Av. dos Estudantes, 1277 · Ibiporã-PR · lardan.com.br · (43) 9 9159-0321',
@@ -68,6 +81,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.pedido_config_salvar(jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.pedido_config_salvar(jsonb) TO authenticated, service_role;
 
+-- ───────────────────────── 2. tipo de envio da remessa ─────────────────────────
 ALTER TABLE public.remessas ADD COLUMN IF NOT EXISTS tipo_envio text NOT NULL DEFAULT 'pessoal';
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'remessas_tipo_envio_chk') THEN
@@ -93,6 +107,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.remessa_tipo_envio_definir(uuid, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.remessa_tipo_envio_definir(uuid, text) TO authenticated, service_role;
 
+-- ───────────────────────── 4. preço gravado na maleta ─────────────────────────
 CREATE OR REPLACE FUNCTION public.kit_preco(_cycle uuid, _variant uuid) RETURNS integer
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
   SELECT coalesce(
@@ -104,6 +119,7 @@ $$;
 REVOKE ALL ON FUNCTION public.kit_preco(uuid, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.kit_preco(uuid, uuid) TO authenticated, service_role;
 
+-- preço da peça na vitrine da consultora: o da maleta ativa mais recente que tem a peça
 CREATE OR REPLACE FUNCTION public.kit_preco_da_consultora(_party uuid, _variant uuid) RETURNS integer
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
   SELECT coalesce(
@@ -134,6 +150,7 @@ BEGIN
   END LOOP;
 END $patch$;
 
+-- ───────────────────────── 3. dados da folha do pedido ─────────────────────────
 CREATE OR REPLACE FUNCTION public.pedido_grupo_peca(_categoria text, _sku text, _nome text) RETURNS text
 LANGUAGE sql IMMUTABLE SET search_path = public AS $$
   WITH n AS (SELECT upper(translate(coalesce(_categoria, ''), 'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ',
@@ -173,6 +190,7 @@ BEGIN
      AND x.consultora_party_id = kc.consultora_party_id AND x.status <> 'cancelada' AND x.created_at <= kc.created_at;
   codigo := CASE WHEN pa.code ~ '^[0-9]{1,5}$' THEN lpad(pa.code, 5, '0') ELSE pa.code END;
 
+  -- quem montou: quem mais bipou nesta maleta; senão quem criou a composição
   SELECT p.full_name INTO montador FROM montagem_operacoes o JOIN profiles p ON p.id = o.actor_user_id
    WHERE o.cycle_id = _cycle GROUP BY p.full_name ORDER BY sum(abs(o.delta)) DESC, max(o.created_at) DESC LIMIT 1;
   IF montador IS NULL THEN
@@ -226,6 +244,9 @@ END $$;
 REVOKE ALL ON FUNCTION public.kit_pedido_dados(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.kit_pedido_dados(uuid) TO authenticated, service_role;
 
+-- ───────────────────────── 5. regra de preço nova ─────────────────────────
+-- Até R$ 99,99: ARRED.PARA.CIMA(P + 0,10; 0) − 0,10  → termina em ,90
+-- R$ 100 ou mais: ARRED.PARA.CIMA((P + 0,10)/5; 0) × 5 − 0,10 → termina em 4,90 ou 9,90
 CREATE OR REPLACE FUNCTION public.preco_regra_lardan(_cents integer) RETURNS integer
 LANGUAGE sql IMMUTABLE SET search_path = public AS $$
   SELECT CASE
@@ -250,13 +271,14 @@ ALTER TABLE public.preco_reajustes ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.preco_reajustes FROM PUBLIC, anon, authenticated;
 GRANT ALL ON public.preco_reajustes TO service_role;
 
+-- relatório antigo × novo (só leitura): uma linha por variante ativa com preço
 CREATE OR REPLACE FUNCTION public.preco_reajuste_previa() RETURNS TABLE (
   variant_id uuid, sku text, produto text, variante text, categoria text,
   antes_cents integer, depois_cents integer, diferenca_cents integer, pecas_na_rua integer, pecas_estoque integer)
 LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public AS $$
 BEGIN
   IF auth.uid() IS NULL OR NOT (public.has_role(auth.uid(), 'master') OR public.has_role(auth.uid(), 'diretoria')
-                               OR public.has_capability(auth.uid(), 'catalog.manage')) THEN
+                                OR public.has_capability(auth.uid(), 'catalog.manage')) THEN
     RAISE EXCEPTION 'Sem permissão para ver o reajuste de preço.' USING errcode = '42501';
   END IF;
   RETURN QUERY
@@ -264,7 +286,7 @@ BEGIN
          public.kit_reference_price(v.id), public.preco_regra_lardan(public.kit_reference_price(v.id)),
          public.preco_regra_lardan(public.kit_reference_price(v.id)) - public.kit_reference_price(v.id),
          coalesce((SELECT sum(greatest(b.qty_allocated - b.qty_sold - b.qty_returned - b.qty_lost, 0))::int FROM kit_balances b JOIN kit_cycles c ON c.id = b.cycle_id
-                   WHERE b.variant_id = v.id AND c.status IN ('expedida', 'transito', 'recebida', 'operacao', 'acerto')), 0),
+                    WHERE b.variant_id = v.id AND c.status IN ('expedida', 'transito', 'recebida', 'operacao', 'acerto')), 0),
          coalesce((SELECT sum(s.quantity)::int FROM stock_balances s WHERE s.variant_id = v.id), 0)
     FROM product_variants v JOIN products pr ON pr.id = v.product_id
     LEFT JOIN categories cat ON cat.id = pr.category_id
@@ -288,6 +310,8 @@ $$;
 REVOKE ALL ON FUNCTION public.preco_reajuste_resumo() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.preco_reajuste_resumo() TO authenticated, service_role;
 
+-- aplicar: só o Master, digitando a confirmação. Maleta já expedida (na rua) não muda — acerta pelo preço gravado.
+-- Maleta ainda em montagem (composição não congelada) passa a usar o preço novo.
 CREATE OR REPLACE FUNCTION public.preco_reajuste_aplicar(_confirmacao text) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE uid uuid := auth.uid(); v_lote text; n_lista int; n_var int; n_kit int := 0; c record;
@@ -316,6 +340,7 @@ BEGIN
   UPDATE product_variants v SET price_cents = r.depois_cents
     FROM preco_reajustes r WHERE r.lote = v_lote AND r.onde = 'variante' AND r.variant_id = v.id;
 
+  -- maletas ainda em montagem (composição aberta): passam ao preço novo
   FOR c IN SELECT DISTINCT kc.id FROM kit_cycles kc JOIN kit_compositions co ON co.cycle_id = kc.id
             WHERE kc.status IN ('rascunho', 'montagem') AND co.frozen_at IS NULL LOOP
     UPDATE kit_composition_items i SET unit_reference_cents = public.kit_reference_price(i.variant_id)
@@ -335,6 +360,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.preco_reajuste_aplicar(text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.preco_reajuste_aplicar(text) TO authenticated, service_role;
 
+-- desfazer: volta só onde o preço ainda é o que o lote gravou
 CREATE OR REPLACE FUNCTION public.preco_reajuste_desfazer(_lote text) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE uid uuid := auth.uid(); n_lista int; n_var int;
@@ -358,11 +384,13 @@ END $$;
 REVOKE ALL ON FUNCTION public.preco_reajuste_desfazer(text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.preco_reajuste_desfazer(text) TO authenticated, service_role;
 
+-- ───────────────────────── 6. faixas de comissão da folha ─────────────────────────
 INSERT INTO public.consultora_comissao_faixas (min_vendido_cents, percentual, titulo)
 SELECT x.min, x.pct, x.titulo FROM (VALUES (0, 20.00, '20%'), (20000, 25.00, '25%'), (50000, 30.00, '30%'),
                                           (65000, 35.00, '35%'), (120000, 40.00, '40%')) x(min, pct, titulo)
  WHERE NOT EXISTS (SELECT 1 FROM public.consultora_comissao_faixas);
 
+-- leitura do tipo de envio (tela da remessa)
 CREATE OR REPLACE FUNCTION public.remessa_envio_ler(_remessa uuid) RETURNS jsonb
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
   SELECT jsonb_build_object('tipo_envio', r.tipo_envio, 'prazo_correio_dias', c.prazo_correio_dias,

@@ -15,6 +15,8 @@ import { CartaoMeuHistorico } from "@/components/consultora/CartaoMeuHistorico";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link, useRouteContext } from "@tanstack/react-router";
 import { mostrarPilotoGlass } from "@/lib/consultora-glass";
+import { useTemaConsultora } from "@/lib/consultora-tema";
+import { TemaClaroEscuro } from "@/components/consultora/TemaClaroEscuro";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -94,11 +96,13 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
       window.clearTimeout(t);
     };
   }, [pilotoGlass, medirRolagemMenu]);
+  const temaClaro = useTemaConsultora() === "light";
   React.useEffect(() => {
     if (!pilotoGlass) return;
     document.body.classList.add("consultora-glass-active");
-    return () => document.body.classList.remove("consultora-glass-active");
-  }, [pilotoGlass]);
+    document.body.classList.toggle("consultora-glass-light-active", temaClaro);
+    return () => document.body.classList.remove("consultora-glass-active", "consultora-glass-light-active");
+  }, [pilotoGlass, temaClaro]);
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/equipe"; };
   const abrir = (aba: AbaApp) => {
     setMenuAberto(false);
@@ -106,7 +110,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
   };
   return (
     <CentralAvisosProvider>
-    <div className={`area-consultora ${pilotoGlass ? "consultora-glass-pilot" : ""} ${grande ? "letra-grande" : ""} min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex`}>
+    <div className={`area-consultora ${pilotoGlass ? "consultora-glass-pilot" : ""} ${pilotoGlass && temaClaro ? "consultora-glass-light" : ""} ${grande ? "letra-grande" : ""} min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex`}>
       <AberturaApp />
       {/* Menu lateral no computador */}
       <aside className="consultora-sidebar sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex">
@@ -963,6 +967,8 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
 /* ------------------------------------------------------------------ mais */
 
 export function Mais({ ir }: { ir: Ir }) {
+  const { user } = useRouteContext({ from: "/_authenticated" });
+  const pilotoMais = mostrarPilotoGlass(user.id, "mais");
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/equipe"; };
   const itens = [
     { r: "Minha vitrine", d: "Foto, capa, peças e link para compartilhar", i: Store, n: { aba: "vitrine" } as Nav },
@@ -976,6 +982,7 @@ export function Mais({ ir }: { ir: Ir }) {
       <ul className="space-y-3">
         <li><InstalarApp /></li>
         <li><LetraGrande /></li>
+        {pilotoMais && <li><TemaClaroEscuro /></li>}
         {itens.map((x) => (
           <li key={x.r}>
             <button type="button" onClick={() => ir(x.n)} className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-5 text-left active:bg-muted">

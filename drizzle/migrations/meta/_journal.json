@@ -1107,6 +1107,13 @@
       "when": 1793021716573,
       "tag": "0157_cob_judicial_doc_excluir",
       "breakpoints": true
+    },
+    {
+      "idx": 158,
+      "version": "7",
+      "when": 1793024579701,
+      "tag": "0158_pedido_consignacao_preco",
+      "breakpoints": true
     }
   ]
 }

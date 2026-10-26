@@ -12155,6 +12155,66 @@ export type Database = {
           },
         ]
       }
+      pedido_config: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string | null
+          endereco_linha: string
+          garantia_exclusoes: string
+          garantia_texto: string
+          garantia_titulo: string
+          id: boolean
+          montagem_texto: string
+          pagamento_texto: string
+          pedidos_email: string
+          pedidos_telefone: string
+          pix_chave: string
+          pix_favorecido: string
+          pix_tipo: string
+          prazo_correio_dias: number
+          preco_virada_em: string | null
+          rodape_texto: string
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          endereco_linha?: string
+          garantia_exclusoes?: string
+          garantia_texto?: string
+          garantia_titulo?: string
+          id?: boolean
+          montagem_texto?: string
+          pagamento_texto?: string
+          pedidos_email?: string
+          pedidos_telefone?: string
+          pix_chave?: string
+          pix_favorecido?: string
+          pix_tipo?: string
+          prazo_correio_dias?: number
+          preco_virada_em?: string | null
+          rodape_texto?: string
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          endereco_linha?: string
+          garantia_exclusoes?: string
+          garantia_texto?: string
+          garantia_titulo?: string
+          id?: boolean
+          montagem_texto?: string
+          pagamento_texto?: string
+          pedidos_email?: string
+          pedidos_telefone?: string
+          pix_chave?: string
+          pix_favorecido?: string
+          pix_tipo?: string
+          prazo_correio_dias?: number
+          preco_virada_em?: string | null
+          rodape_texto?: string
+        }
+        Relationships: []
+      }
       plating_types: {
         Row: {
           code: string
@@ -12187,6 +12247,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      preco_reajustes: {
+        Row: {
+          antes_cents: number
+          ator: string | null
+          criado_em: string
+          depois_cents: number
+          desfeito_em: string | null
+          id: number
+          lote: string
+          onde: string
+          variant_id: string
+        }
+        Insert: {
+          antes_cents: number
+          ator?: string | null
+          criado_em?: string
+          depois_cents: number
+          desfeito_em?: string | null
+          id?: number
+          lote: string
+          onde: string
+          variant_id: string
+        }
+        Update: {
+          antes_cents?: number
+          ator?: string | null
+          criado_em?: string
+          depois_cents?: number
+          desfeito_em?: string | null
+          id?: number
+          lote?: string
+          onde?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preco_reajustes_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pricing_policies: {
         Row: {
@@ -13177,6 +13281,7 @@ export type Database = {
           praca_id: string
           representante_party_id: string | null
           status: string
+          tipo_envio: string
           updated_at: string
         }
         Insert: {
@@ -13191,6 +13296,7 @@ export type Database = {
           praca_id: string
           representante_party_id?: string | null
           status?: string
+          tipo_envio?: string
           updated_at?: string
         }
         Update: {
@@ -13205,6 +13311,7 @@ export type Database = {
           praca_id?: string
           representante_party_id?: string | null
           status?: string
+          tipo_envio?: string
           updated_at?: string
         }
         Relationships: [
@@ -17967,6 +18074,12 @@ export type Database = {
         }
         Returns: string
       }
+      kit_pedido_dados: { Args: { _cycle: string }; Returns: Json }
+      kit_preco: { Args: { _cycle: string; _variant: string }; Returns: number }
+      kit_preco_da_consultora: {
+        Args: { _party: string; _variant: string }
+        Returns: number
+      }
       kit_pular_acerto: {
         Args: { _cycle: string; _motivo: string; _nova?: string }
         Returns: Json
@@ -18609,6 +18722,12 @@ export type Database = {
         Args: { _dias: number; _token_hash: string }
         Returns: Json
       }
+      pedido_config_ler: { Args: never; Returns: Json }
+      pedido_config_salvar: { Args: { _dados: Json }; Returns: Json }
+      pedido_grupo_peca: {
+        Args: { _categoria: string; _nome: string; _sku: string }
+        Returns: string
+      }
       phone_canon: { Args: { v: string }; Returns: string }
       praca_alternar: {
         Args: { _ativo: boolean; _id: string }
@@ -18647,6 +18766,25 @@ export type Database = {
           nome: string
         }[]
       }
+      preco_reajuste_aplicar: { Args: { _confirmacao: string }; Returns: Json }
+      preco_reajuste_desfazer: { Args: { _lote: string }; Returns: Json }
+      preco_reajuste_previa: {
+        Args: never
+        Returns: {
+          antes_cents: number
+          categoria: string
+          depois_cents: number
+          diferenca_cents: number
+          pecas_estoque: number
+          pecas_na_rua: number
+          produto: string
+          sku: string
+          variant_id: string
+          variante: string
+        }[]
+      }
+      preco_reajuste_resumo: { Args: never; Returns: Json }
+      preco_regra_lardan: { Args: { _cents: number }; Returns: number }
       product_banho_salvar: {
         Args: {
           _alterar_valor?: boolean
@@ -18836,6 +18974,7 @@ export type Database = {
         }
         Returns: Json
       }
+      remessa_envio_ler: { Args: { _remessa: string }; Returns: Json }
       remessa_maleta_excluir: {
         Args: { _cycle: string; _motivo: string }
         Returns: Json
@@ -18865,6 +19004,10 @@ export type Database = {
           _pecas_cliente_nova: number
         }
         Returns: undefined
+      }
+      remessa_tipo_envio_definir: {
+        Args: { _remessa: string; _tipo: string }
+        Returns: Json
       }
       remessas_buscar: {
         Args: {

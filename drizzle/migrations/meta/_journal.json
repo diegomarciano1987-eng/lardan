@@ -1114,6 +1114,13 @@
       "when": 1793024579701,
       "tag": "0158_pedido_consignacao_preco",
       "breakpoints": true
+    },
+    {
+      "idx": 159,
+      "version": "7",
+      "when": 1793024738199,
+      "tag": "0159_pre_baixa_acerto_app",
+      "breakpoints": true
     }
   ]
 }

@@ -61,6 +61,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
   const [editProc, setEditProc] = React.useState(false);
   const enviar = useServerFn(enviarDocJudicial);
   const abrir = useServerFn(abrirDocJudicial);
+  const excluir = useServerFn(excluirDocJudicial);
   const [docTipo, setDocTipo] = React.useState("termo_assinado");
   const [docTitulo, setDocTitulo] = React.useState("");
   const [enviando, setEnviando] = React.useState(false);
@@ -114,6 +115,13 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
     } catch (e) { toast.error(e instanceof Error ? e.message : "Não enviou."); } finally { setEnviando(false); if (arq.current) arq.current.value = ""; }
   };
   const ver = async (id: string) => { try { const r = await abrir({ data: { id } }); window.open(r.url, "_blank", "noopener"); } catch (e) { toast.error(e instanceof Error ? e.message : "Falhou."); } };
+  const remover = async (id: string, titulo: string) => {
+    const motivo = prompt(`Excluir o documento "${titulo}"?\n\nInforme o motivo (fica registrado no histórico da ficha):`);
+    if (!motivo || motivo.trim().length < 3) { if (motivo !== null) toast.error("Informe o motivo da exclusão."); return; }
+    if (!confirm(`Confirma excluir "${titulo}"? O arquivo será apagado e a remoção ficará registrada.`)) return;
+    try { await excluir({ data: { id, motivo: motivo.trim() } }); toast.success("Documento excluído."); qc.invalidateQueries({ queryKey: ["cob"] }); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Não excluiu."); }
+  };
   const salvar = async () => {
     if (dif !== 0) { toast.error(`As parcelas precisam fechar o total. Diferença: ${brl(dif)}.`); return; }
     setSalv(true);

@@ -94,11 +94,13 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
       window.clearTimeout(t);
     };
   }, [pilotoGlass, medirRolagemMenu]);
+  const temaClaro = useTemaConsultora() === "light";
   React.useEffect(() => {
     if (!pilotoGlass) return;
     document.body.classList.add("consultora-glass-active");
-    return () => document.body.classList.remove("consultora-glass-active");
-  }, [pilotoGlass]);
+    document.body.classList.toggle("consultora-glass-light-active", temaClaro);
+    return () => document.body.classList.remove("consultora-glass-active", "consultora-glass-light-active");
+  }, [pilotoGlass, temaClaro]);
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/equipe"; };
   const abrir = (aba: AbaApp) => {
     setMenuAberto(false);
@@ -106,7 +108,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
   };
   return (
     <CentralAvisosProvider>
-    <div className={`area-consultora ${pilotoGlass ? "consultora-glass-pilot" : ""} ${grande ? "letra-grande" : ""} min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex`}>
+    <div className={`area-consultora ${pilotoGlass ? "consultora-glass-pilot" : ""} ${pilotoGlass && temaClaro ? "consultora-glass-light" : ""} ${grande ? "letra-grande" : ""} min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex`}>
       <AberturaApp />
       {/* Menu lateral no computador */}
       <aside className="consultora-sidebar sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex">
@@ -976,6 +978,7 @@ export function Mais({ ir }: { ir: Ir }) {
       <ul className="space-y-3">
         <li><InstalarApp /></li>
         <li><LetraGrande /></li>
+        {pilotoMais && <li><TemaClaroEscuro /></li>}
         {itens.map((x) => (
           <li key={x.r}>
             <button type="button" onClick={() => ir(x.n)} className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-5 text-left active:bg-muted">

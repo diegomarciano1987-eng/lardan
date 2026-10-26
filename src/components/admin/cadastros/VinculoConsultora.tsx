@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MadrinhaConsultora } from "@/components/admin/cadastros/MadrinhaConsultora";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -100,6 +101,7 @@ export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; po
               : "Representante sem praça no histórico; escolha na lista."}
           </span>
         </label>
+        <MadrinhaConsultora partyId={partyId} podeEditar={podeEditar} />
         {podeEditar && (
           <div className="flex gap-2 md:col-span-2">
             <button type="button" className="admin-btn-primary" disabled={salvando} onClick={salvar}>

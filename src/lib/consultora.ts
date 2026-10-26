@@ -74,6 +74,13 @@ export type Inicio = {
   maletas_receber: number;
   maletas_conferir: number;
   pecas_disponiveis: number;
+  // 0159
+  pedidos_em_atendimento: { id: string; cliente: string; total_cents: number; dias: number; status: string }[];
+  acerto: { cycle_id: string; data: string | null; situacao: string; pecas_total: number; pecas_vendidas: number; valor_cents: number | null } | null;
+  debitos_vencidos_cents: number;
+  debitos_abertos_cents: number;
+  aniversarios: { id: string; nome: string; telefone: string | null; quando: "hoje" | "amanhã" }[];
+  recompra: number;
 };
 
 const t = (n: string) => supabase.from(n as never);

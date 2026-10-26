@@ -92,20 +92,22 @@ describe("pagamentos da cliente", () => {
     await adm.unsafe(`insert into public.financial_allocations (settlement_id, installment_id, valor_cents) values ($1,$2,10000)`, [s.id, t.dados.installment_id]);
     const p = await um<{ pg: string; st: string; ev: number }>(`select payment_status::text pg, status::text st,
       (select count(*)::int from public.sales_order_events e where e.order_id=o.id and e.kind='pagamento.recebido_lardan') ev from public.sales_orders o where id=$1`, [pedidoPix]);
-    expect(p).toEqual({ pg: "pago", st: "concluido", ev: 1 });
+    // baixa no pagamento, mas o pedido NÃO é concluído (conclusão exige o registro da venda — regra de order_set_status)
+    expect(p).toEqual({ pg: "pago", st: "em_atendimento", ev: 1 });
   });
 
-  test("cliente pagou em dinheiro: pedido pago e concluído; pedido com cobrança Lardan não aceita", async () => {
+  test("cliente pagou em dinheiro: pedido pago (sem concluir); pedido com cobrança Lardan não aceita", async () => {
     const o = await rpc<{ order_id: string }>(cons, "consultant_order_create", { _client: cliente, _itens: [{ cycle_id: ciclo, variant_id: vB, quantidade: 1 }], _idempotency_key: `ac-o2-${marca}` });
     expect(o.erro).toBeNull();
     pedidoDinheiro = o.dados.order_id;
     expect((await rpc(intrusa, "consultora_pedido_pago_dinheiro", { _order: pedidoDinheiro })).erro).toContain("não encontrado");
+    await adm.unsafe(`update public.sales_orders set status='aguardando_pagamento' where id=$1`, [pedidoDinheiro]);
     const r = await rpc<{ repetido: boolean }>(cons, "consultora_pedido_pago_dinheiro", { _order: pedidoDinheiro });
     expect(r.erro).toBeNull();
     expect(r.dados).toEqual({ repetido: false });
     expect((await rpc<{ repetido: boolean }>(cons, "consultora_pedido_pago_dinheiro", { _order: pedidoDinheiro })).dados).toEqual({ repetido: true });
     const p = await um<{ pg: string; st: string; m: string }>(`select payment_status::text pg, status::text st, pay_method m from public.sales_orders where id=$1`, [pedidoDinheiro]);
-    expect(p).toEqual({ pg: "pago", st: "concluido", m: "dinheiro" });
+    expect(p).toEqual({ pg: "pago", st: "em_atendimento", m: "dinheiro" });
     expect((await rpc(cons, "consultora_pedido_pago_dinheiro", { _order: pedidoPix })).erro).toContain("já tem uma cobrança da Lardan");
   });
 
@@ -129,6 +131,8 @@ describe("Início e Meu financeiro", () => {
     expect(h.dados.acerto.data).toBeTruthy();
     expect(h.dados.aniversarios).toContainEqual(expect.objectContaining({ nome: "Bia", quando: "hoje" }));
     expect(Array.isArray(h.dados.pedidos_em_atendimento)).toBe(true);
+    // o pedido em dinheiro está em atendimento, mas já pago: não aparece como pendência de pagamento
+    expect(JSON.stringify(h.dados.pedidos_em_atendimento)).not.toContain(pedidoDinheiro);
   });
 
   test("Meu financeiro: próximo acerto, débito do acerto fechado, 2ª via só do que é dela", async () => {
@@ -230,5 +234,37 @@ describe("Liga Lardan", () => {
     const l2 = await rpc<{ nivel: string; proximo: string; faltam: number }>(cons, "minha_liga", {});
     expect(l2.dados).toMatchObject({ nivel: "Iniciante", proximo: "Estrela", faltam: 1 });
     expect((await rpc<unknown[]>(cons, "liga_niveis_ler", {})).dados).toHaveLength(2);
+  });
+});
+
+describe("ajustes da revisão (0163)", () => {
+  test("cliente que paga à Lardan depois do fechamento vira crédito na conferência (nunca pagamento em dobro)", async () => {
+    const o = await rpc<{ order_id: string }>(cons, "consultant_order_create", { _client: cliente, _itens: [{ cycle_id: ciclo, variant_id: vB, quantidade: 1 }], _idempotency_key: `ac-o3-${marca}` });
+    expect(o.erro).toBeNull();
+    const t = await rpc<{ installment_id: string }>(cons, "consultora_pagamento_titulo", { _order: o.dados.order_id, _forma: "pix", _doc: novoCpf(), _venc: null });
+    const s = await um<{ id: string }>(`insert into public.financial_settlements (direction, financial_account_id, valor_cents, idempotency_key) values ('receivable',$1,5000,$2) returning id`, [fin, `ac-s3-${marca}`]);
+    await adm.unsafe(`insert into public.financial_allocations (settlement_id, installment_id, valor_cents) values ($1,$2,5000)`, [s.id, t.dados.installment_id]);
+    // voltaram 3 A e nenhum B: vendeu 1 A + 2 B = 200,00 → 25% = 50,00; clientes pagaram 150,00 à Lardan → 0,00; ela já devia 20,00 → crédito de 20,00
+    const c = await rpc<{ status: string; diferenca_cents: number; recebido_depois_cents: number }>(master, "pre_baixa_conferir", { _cycle: ciclo, _leituras: [{ variant_id: vA, qtd: 3 }], _aplicar: true });
+    expect(c.erro).toBeNull();
+    expect(c.dados).toMatchObject({ status: "pendencia", diferenca_cents: -2000, recebido_depois_cents: 5000 });
+    const m = await um<{ m: string }>(`select pendencia_motivo m from public.kit_pre_baixas where cycle_id=$1`, [ciclo]);
+    expect(m.m).toContain("depois do fechamento");
+    expect(m.m).toContain("Crédito a devolver à consultora: R$ 20,00");
+  });
+
+  test("acerto que fecha com valor ≤ 0 não fica preso em 'aguardando pagamento'", async () => {
+    const cli = (await ler<{ id: string }>(indicada, `insert into public.consultant_clients (consultora_party_id, nome, telefone) values ($1,'Cli Ind','43911114444') returning id`, [indicada.partyId])).linhas[0]!.id;
+    const cicloInd = (await um<{ id: string }>(`select id from public.kit_cycles where consultora_party_id=$1 order by created_at desc limit 1`, [indicada.partyId])).id;
+    const o = await rpc<{ order_id: string }>(indicada, "consultant_order_create", { _client: cli, _itens: [{ cycle_id: cicloInd, variant_id: vC, quantidade: 1 }], _idempotency_key: `ac-o4-${marca}` });
+    expect(o.erro).toBeNull();
+    const t = await rpc<{ installment_id: string }>(indicada, "consultora_pagamento_titulo", { _order: o.dados.order_id, _forma: "pix", _doc: novoCpf(), _venc: null });
+    const s = await um<{ id: string }>(`insert into public.financial_settlements (direction, financial_account_id, valor_cents, idempotency_key) values ('receivable',$1,3000,$2) returning id`, [fin, `ac-s4-${marca}`]);
+    await adm.unsafe(`insert into public.financial_allocations (settlement_id, installment_id, valor_cents) values ($1,$2,3000)`, [s.id, t.dados.installment_id]);
+    const f = await rpc<{ valor_pagar_cents: number; installment_id: string | null }>(indicada, "pre_baixa_fechar", { _cycle: cicloInd });
+    expect(f.erro).toBeNull();
+    expect(Number(f.dados.valor_pagar_cents)).toBe(-600);   // a Lardan deve a comissão a ela
+    expect(f.dados.installment_id).toBeNull();
+    expect((await rpc<{ situacao: string }>(indicada, "pre_baixa_ler", { _cycle: cicloInd })).dados.situacao).toBe("aguardando_conferencia");
   });
 });

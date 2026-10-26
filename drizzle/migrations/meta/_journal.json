@@ -1142,6 +1142,13 @@
       "when": 1793027048128,
       "tag": "0162_cockpit_notas_fechamentos",
       "breakpoints": true
+    },
+    {
+      "idx": 163,
+      "version": "7",
+      "when": 1793028759342,
+      "tag": "0163_ajustes_revisao_apps",
+      "breakpoints": true
     }
   ]
 }

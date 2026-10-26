@@ -97,6 +97,8 @@ export const repCobrancaParcial = (installment: string, valorCents: number, chav
 export type Recibo = {
   numero: number; em: string; valor_cents: number; referente: string | null; consultora: string; code: string | null; doc_masked: string | null;
   representante: string; saldo_restante_cents: number; observacao: string | null; repetido?: boolean;
+  /** a parcela tinha link do Asaas aberto: a cobrança da Lardan recebe uma tarefa para cancelar o link */
+  aviso_asaas?: boolean;
 };
 export const repDinheiroReceber = (installment: string, valorCents: number, chave: string, obs: string) =>
   chamar<Recibo>("rep_dinheiro_receber", { _installment: installment, _valor_cents: valorCents, _chave: chave, _obs: obs || null });

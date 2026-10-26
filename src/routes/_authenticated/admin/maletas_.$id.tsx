@@ -5,6 +5,7 @@ import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AcoesMaletaRua } from "@/components/admin/maletas/AcoesMaletaRua";
+import { ConferenciaPreBaixa } from "@/components/admin/maletas/ConferenciaPreBaixa";
 import { CheckCircle2, ClipboardCheck, FileText, Printer, ScanBarcode, Send, Truck } from "lucide-react";
 import { AjustesMaleta } from "@/components/admin/maletas/AjustesMaleta";
 import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
@@ -338,6 +339,9 @@ function MaletaFicha() {
         </div>
 
         <div className="min-w-0 space-y-6">
+          {["operacao", "acerto", "encerrada"].includes(d.ciclo.status) && (
+            <ConferenciaPreBaixa cycleId={id} podeConferir={podeMontar} />
+          )}
           {(podeMontar || caps.includes("collection.operate") || caps.includes("finance.receivable.manage")) && (
             <AcoesMaletaRua cycleId={id} status={d.ciclo.status} temConsultora={!!d.ciclo.consultora_party_id} />
           )}

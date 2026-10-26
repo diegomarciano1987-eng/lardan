@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, traduzir, type ItemComposicao } from "@/lib/maletas";
 import { valorPorExtenso } from "@/lib/remessa";
+import { documentoPedido, type PedidoDados } from "@/lib/pedido-consignacao";
+import diamante from "@/assets/lardan-diamante.png.asset.json";
 
 interface DocConsultora {
   nome: string;
@@ -70,14 +72,40 @@ function abrirImpressao(titulo: string, corpo: string) {
   window.setTimeout(() => { w.focus(); w.print(); }, 150);
 }
 
-/** Romaneio da maleta (mesmo documento do "Pedido — Remessa Kit"), para o botão Romaneio da ficha. */
-export async function imprimirRomaneio(cycleId: string, composicao: ItemComposicao[], codigoMaleta: string, dataAcerto: string | null) {
-  if (!composicao.length) { toast.error("A maleta ainda não tem peças para o romaneio."); return; }
+/** Imprime um documento HTML completo (com fontes e imagens) num quadro invisível, esperando as fontes carregarem. */
+function imprimirDocumento(html: string) {
+  const frame = document.createElement("iframe");
+  frame.setAttribute("aria-hidden", "true");
+  frame.style.cssText = "position:fixed;right:0;bottom:0;width:210mm;height:297mm;border:0;opacity:0;pointer-events:none";
+  document.body.appendChild(frame);
+  const d = frame.contentDocument, w = frame.contentWindow;
+  if (!d || !w) { frame.remove(); toast.error("Não foi possível preparar a impressão."); return; }
+  d.open(); d.write(html); d.close();
+  w.addEventListener("afterprint", () => window.setTimeout(() => frame.remove(), 1000), { once: true });
+  const imagens = Array.from(d.images).map((img) => (img.complete ? Promise.resolve() : new Promise<void>((ok) => { img.onload = img.onerror = () => ok(); })));
+  const limite = new Promise<void>((ok) => window.setTimeout(ok, 2500));
+  void Promise.race([Promise.all([d.fonts?.ready ?? Promise.resolve(), ...imagens]), limite]).then(() => { w.focus(); w.print(); });
+}
+
+/** Pedido de consignação (modelo 26/10/2026): dados e preços gravados vêm do banco (kit_pedido_dados). */
+export async function imprimirPedidoConsignacao(cycleId: string) {
   try {
-    const [doc, user] = await Promise.all([docConsultora(cycleId), supabase.auth.getUser()]);
+    const [{ data, error }, user] = await Promise.all([
+      supabase.rpc("kit_pedido_dados" as never, { _cycle: cycleId } as never),
+      supabase.auth.getUser(),
+    ]);
+    if (error) throw error;
+    const dados = data as unknown as PedidoDados;
+    if (!dados.itens.length) { toast.error("A maleta ainda não tem peças para o pedido."); return; }
     const operador = String(user.data.user?.user_metadata?.["full_name"] ?? user.data.user?.email ?? "—");
-    abrirImpressao(`Romaneio — ${codigoMaleta}`, htmlPedido(doc, composicao, codigoMaleta, dataAcerto, operador));
+    imprimirDocumento(documentoPedido(dados, { logoUrl: new URL(diamante.url, window.location.origin).href, operador, impressoEm: new Date() }));
   } catch (e) { toast.error(traduzir(e)); }
+}
+
+/** Romaneio da maleta = o pedido de consignação (botão Romaneio da ficha). */
+export async function imprimirRomaneio(cycleId: string, composicao: ItemComposicao[], _codigoMaleta: string, _dataAcerto: string | null) {
+  if (!composicao.length) { toast.error("A maleta ainda não tem peças para o romaneio."); return; }
+  await imprimirPedidoConsignacao(cycleId);
 }
 
 const CREDOR = "TSM COMÉRCIO DE SEMIJOIAS LTDA";
@@ -105,51 +133,6 @@ function htmlPromissoria(doc: DocConsultora, valorCents: number, codigoMaleta: s
     <p class="r">IBIPORÃ/PR, ${dataPorExtenso(hoje)}</p>
     <div class="assinatura">Assinatura: ${doc.nome}</div>
   </div>`;
-}
-
-function htmlPedido(doc: DocConsultora, composicao: ItemComposicao[], codigoMaleta: string, dataAcerto: string | null, operador: string) {
-  const linhas = [...composicao]
-    .sort((a, b) => (a.sku ?? "").localeCompare(b.sku ?? ""))
-    .map(
-      (c) => `<tr>
-        <td>${c.sku ?? "—"}</td>
-        <td>${c.produto}${c.variante ? ` ${c.variante}` : ""}</td>
-        <td class="r">${brl(c.valor_unitario)}</td>
-        <td class="c">${c.quantidade}</td>
-      </tr>`,
-    )
-    .join("");
-  const totalPecas = composicao.reduce((s, c) => s + c.quantidade, 0);
-  const agora = new Date();
-  return `
-  <h1>REMESSA KIT</h1>
-  <h2>Maleta ${codigoMaleta}</h2>
-  <div class="caixa">
-    <p><strong>REMESSA:</strong> ${doc.remessa_numero ?? "—"} &nbsp; <strong>PRAÇA:</strong> ${doc.praca ?? "—"} &nbsp; <strong>EMISSÃO:</strong> ${dataCurta(doc.remessa_emissao ?? null)}</p>
-    <p><strong>CLIENTE:</strong> ${doc.nome} &nbsp; <strong>VENDEDOR/REPRESENTANTE:</strong> ${doc.representante ?? "—"}</p>
-    <p><strong>DATA DE ACERTO:</strong> ${dataCurta(doc.vencimento ?? dataAcerto)}</p>
-    <p class="mutismo">SERÃO EFETUADAS DUAS TENTATIVAS DE CONTATO PARA ENCOMENDAS NA SEMANA ANTERIOR AO ACERTO,
-    não havendo resposta será feita a montagem baseada no seu histórico de vendas, levando em consideração:
-    tipos de produto e faturamento.</p>
-    <p><strong>FORMAS DE PAGAMENTO:</strong> Dinheiro (moeda nacional), cartão de crédito e débito.
-    Cheque somente mediante consulta.</p>
-    <p><strong>GARANTIAS:</strong> Nos responsabilizamos por qualquer defeito de fabricação, no prazo de 24 meses,
-    porém ficará anulada caso sejam constatadas irregularidades por mau uso: riscos nas peças por atrito;
-    contato com cosméticos ou produtos químicos em geral; peças e correntes arrebentadas ou amassadas;
-    peças em prata pura ou aço inox.</p>
-  </div>
-  <div class="caixa">
-    <p><strong>Vendedor(a):</strong> ${doc.nome}</p>
-    <p><strong>Endereço:</strong> ${doc.endereco ?? "—"}${doc.bairro ? ` — Bairro: ${doc.bairro}` : ""}</p>
-    <p><strong>Cidade:</strong> ${doc.cidade ?? "—"} &nbsp; <strong>Cel/WhatsApp:</strong> ${doc.whatsapp ?? "—"}</p>
-    <p class="mutismo"><strong>CONFIRA SEU KIT COM O ROMANEIO NO ATO DA ENTREGA. NÃO ACEITAMOS RECLAMAÇÕES POSTERIORES. OBRIGADO.</strong></p>
-  </div>
-  <table>
-    <thead><tr><th>CÓDIGO</th><th>DESCRIÇÃO</th><th class="r">PREÇO SUGERIDO R$</th><th class="c">QTDE</th></tr></thead>
-    <tbody>${linhas}</tbody>
-  </table>
-  <p class="valor" style="margin-top:10px">QTDE. PÇS ${totalPecas}</p>
-  <p class="mutismo">Impresso em: ${agora.toLocaleDateString("pt-BR")} ${agora.toLocaleTimeString("pt-BR")} · Usuário logado: ${operador}</p>`;
 }
 
 /**
@@ -221,17 +204,15 @@ export function DocumentosMaleta({
 
           <div className="ledger-panel flex flex-col gap-3 p-6">
             <FileText aria-hidden className="size-8 text-ledger-text" />
-            <p className="font-display text-lg font-bold text-ledger-text">Pedido (remessa kit)</p>
+            <p className="font-display text-lg font-bold text-ledger-text">Pedido de consignação</p>
             <p className="flex-1 text-sm text-ledger-muted">
-              Romaneio com código, descrição, preço sugerido e quantidade de cada peça.
+              Folha A4 com o valor do kit, quanto ele pode render para a consultora e as peças por tipo, com o preço gravado na remessa.
             </p>
             <button
               type="button"
               className="admin-btn admin-btn-primary justify-center"
-              disabled={!doc.data || composicao.length === 0}
-              onClick={() =>
-                doc.data && abrirImpressao("Pedido — Remessa Kit", htmlPedido(doc.data, composicao, codigoMaleta, dataAcerto, operador))
-              }
+              disabled={composicao.length === 0}
+              onClick={() => void imprimirPedidoConsignacao(cycleId)}
             >
               <Printer aria-hidden className="size-4" /> Imprimir pedido
             </button>

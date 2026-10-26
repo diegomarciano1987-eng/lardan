@@ -16,7 +16,8 @@ import { brl, traduzir } from "@/lib/maletas";
 import { remessasHistorico } from "@/lib/historico-jflex";
 import { RemessasHistorico } from "@/components/admin/historico/RemessasHistorico";
 import { MaletasNaRua } from "@/components/admin/maletas/MaletasNaRua";
-import { STATUS_REMESSA, buscarRemessas, criarRemessa, dataBR, isoDia, type RemessaCard } from "@/lib/remessas";
+import { AcertosPainel } from "@/components/admin/maletas/AcertosPainel";
+import { STATUS_REMESSA, buscarRemessas, criarRemessa, dataBR, definirEnvioRemessa, isoDia, type RemessaCard, type TipoEnvio } from "@/lib/remessas";
 
 export const Route = createFileRoute("/_authenticated/admin/maletas")({
   component: RemessasPage,
@@ -77,6 +78,7 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
   const [representante, setRepresentante] = React.useState("");
   const [buscaR, setBuscaR] = React.useState("");
   const [deposito, setDeposito] = React.useState("");
+  const [envio, setEnvio] = React.useState<TipoEnvio>("pessoal");
   React.useEffect(() => { if (escopo.data?.colaboradora) setRepresentante(escopo.data.representante ?? ""); }, [escopo.data]);
 
   const pracas = useQuery({ queryKey: ["remessas", "pracas"], queryFn: buscarPracas, enabled: aberto });
@@ -89,9 +91,9 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
   }, [depositos.data, deposito]);
 
   const criar = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!praca) throw new Error("Escolha a praça da remessa.");
-      return criarRemessa({
+      const r = await criarRemessa({
         praca,
         numero: numero.trim() ? Number(numero) : null,
         data_emissao: isoDia(emissao),
@@ -99,6 +101,8 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
         representante: representante || null,
         deposito: deposito || null,
       });
+      if (envio === "correio") await definirEnvioRemessa(r.id, "correio");
+      return r;
     },
     onSuccess: (r) => {
       toast.success(`Remessa nº ${r.numero} aberta.`);
@@ -127,6 +131,11 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
           <span className="ledger-eyebrow">Número da remessa</span>
           <input className="admin-input" inputMode="numeric" value={numero}
             onChange={(e) => setNumero(e.target.value.replace(/\D/g, ""))} placeholder="Automático: próximo número livre (nunca repete o SmallData)" />
+        </label>
+        <label className="grid gap-1.5 text-sm">
+          <span className="ledger-eyebrow">Como a maleta vai</span>
+          <SmartSelect value={envio} onChange={(v) => setEnvio((v || "pessoal") as TipoEnvio)}
+            options={[{ value: "pessoal", label: "Pessoalmente (representante ou retirada)" }, { value: "correio", label: "Pelo correio" }]} />
         </label>
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Data de emissão</span>
@@ -267,6 +276,7 @@ function RemessasPage() {
         </button>
       </nav>
 
+      {escopo.isSuccess && !colab && <AcertosPainel />}
       {escopo.isSuccess && !colab && <MaletasNaRua />}
 
       {fonte === "jflex" ? (

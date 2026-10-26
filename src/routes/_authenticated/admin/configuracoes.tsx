@@ -11,6 +11,7 @@ import { lerMarkupGlobal, salvarMarkupGlobal } from "@/lib/produto";
 import { mensagemDeErro } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { PARAMETROS_PADRAO, type ParametrosRemessa } from "@/lib/remessa";
+import { ConfigPedido, PrecoNovo } from "@/components/admin/config/PedidoEPreco";
 
 export const Route = createFileRoute("/_authenticated/admin/configuracoes")({
   component: Configuracoes,
@@ -35,6 +36,8 @@ function Configuracoes() {
       />
       <MargemPadrao />
       <ParametrosRemessaPanel />
+      <PrecoNovo master={roles.includes("master" as never)} />
+      <ConfigPedido master={roles.includes("master" as never)} />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {itens.map((m) => (
           <Panel key={m.slug} flush>

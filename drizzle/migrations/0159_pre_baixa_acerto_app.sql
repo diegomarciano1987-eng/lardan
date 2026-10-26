@@ -1,4 +1,17 @@
--- 0158 — acerto pelo app (pré-baixa). Não apaga nada, não remove coluna e pode rodar duas vezes.
+-- 0158 — acerto pelo app (pré-baixa).
+-- Não apaga nada, não remove coluna e pode rodar duas vezes.
+--
+-- 1) A consultora lança as vendas peça a peça; vendas pagas pelo app (pedido pago ou concluído) entram sozinhas.
+-- 2) Fecha a PRÉ-BAIXA até a data do acerto: total vendido (preço gravado na remessa), comissão pela faixa
+--    (sobre o total da remessa — kits da mesma remessa somam) e valor a pagar = vendido − comissão.
+--    Nasce o título a receber da consultora (origem pre_baixa) e o Pix com o valor exato.
+-- 3) Pix pago → "aguardando conferência".
+-- 4) Maleta chega: conferência pela leitura do código; esperado devolvido = enviado − vendido declarado.
+--    Peça faltando = cobrada como vendida pelo preço da remessa; peça declarada vendida que voltou = estorna.
+--    Bateu → encerra o acerto (peças voltam ao estoque pelo retorno oficial; vendidas ficam como vendidas;
+--    maleta encerrada; comissão liberada). Divergência → pendência (título da diferença ou crédito a devolver).
+-- 5) Sem pré-baixa fechada não sai kit novo para a consultora (o Master pode liberar uma vez, com motivo).
+-- 6) Indicadores no admin: % de acertos sem divergência, tempo médio pré-baixa→encerramento, % no prazo.
 
 CREATE TABLE IF NOT EXISTS public.kit_pre_baixas (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -65,6 +78,8 @@ BEGIN
   END LOOP;
 END $$;
 
+-- ───────────────────────── leitura ─────────────────────────
+-- quem pode ver/mexer: a dona da maleta (consultora logada) ou a equipe de maletas
 CREATE OR REPLACE FUNCTION public.pre_baixa_pode(_cycle uuid, _escrever boolean DEFAULT false) RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
   SELECT auth.uid() IS NOT NULL AND (
@@ -75,6 +90,7 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
 $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_pode(uuid, boolean) FROM PUBLIC, anon, authenticated;
 
+-- peças vendidas pelo app que já entram sozinhas (pedido pago ou concluído)
 CREATE OR REPLACE FUNCTION public.pre_baixa_qtd_app(_cycle uuid, _variant uuid) RETURNS integer
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
   SELECT coalesce(sum(i.quantity), 0)::int FROM sales_order_items i JOIN sales_orders o ON o.id = i.order_id
@@ -83,6 +99,7 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
 $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_qtd_app(uuid, uuid) FROM PUBLIC, anon, authenticated;
 
+-- faixa: vale sobre o total vendido da REMESSA (todos os kits da consultora na mesma remessa)
 CREATE OR REPLACE FUNCTION public.pre_baixa_faixa(_vendido bigint) RETURNS numeric
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
   SELECT coalesce((SELECT percentual FROM consultora_comissao_faixas WHERE min_vendido_cents <= coalesce(_vendido, 0)
@@ -108,6 +125,7 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
 $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_situacao(public.kit_pre_baixas) FROM PUBLIC, anon, authenticated;
 
+-- abre (ou devolve) a pré-baixa da maleta, com as peças aceitas e as vendas do app já marcadas
 CREATE OR REPLACE FUNCTION public.pre_baixa_abrir(_cycle uuid) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE c kit_cycles; v uuid; r remessas;
@@ -117,6 +135,7 @@ BEGIN
   IF c.consultora_party_id IS NULL THEN RAISE EXCEPTION 'Maleta sem consultora.'; END IF;
   SELECT id INTO v FROM kit_pre_baixas WHERE cycle_id = _cycle;
   IF v IS NOT NULL THEN
+    -- enquanto aberta, as vendas pagas pelo app entram sozinhas
     UPDATE kit_pre_baixa_itens i SET qtd_app = least(public.pre_baixa_qtd_app(_cycle, i.variant_id), i.qtd_enviada),
            qtd_vendida = greatest(i.qtd_vendida, least(public.pre_baixa_qtd_app(_cycle, i.variant_id), i.qtd_enviada))
       FROM kit_pre_baixas p WHERE p.id = v AND p.status = 'aberta' AND i.pre_baixa_id = v;
@@ -128,7 +147,7 @@ BEGIN
   SELECT * INTO r FROM remessas WHERE id = c.remessa_id;
   INSERT INTO kit_pre_baixas (cycle_id, consultora_party_id, remessa_id, prazo)
   VALUES (_cycle, c.consultora_party_id, c.remessa_id,
-          coalesce((c.due_at AT TIME ZONE 'America/Sao_Paulo')::date, r.data_acerto))
+          coalesce((c.due_at AT TIME ZONE 'America/Sao_Paulo')::date, r.data_acerto))   -- due_at já reflete "pular acerto"
   RETURNING id INTO v;
   INSERT INTO kit_pre_baixa_itens (pre_baixa_id, variant_id, qtd_enviada, qtd_app, qtd_vendida, preco_cents)
   SELECT v, b.variant_id, b.qty_accepted,
@@ -149,6 +168,7 @@ DECLARE p kit_pre_baixas; vendido bigint; outros bigint; base bigint; pct numeri
 BEGIN
   SELECT * INTO p FROM kit_pre_baixas WHERE id = _pb;
   SELECT coalesce(sum(qtd_vendida::bigint * preco_cents), 0) INTO vendido FROM kit_pre_baixa_itens WHERE pre_baixa_id = _pb;
+  -- outros kits da mesma consultora na mesma remessa entram na faixa
   SELECT coalesce(sum(coalesce(o.vendido_final_cents, o.total_vendido_cents)), 0) INTO outros
     FROM kit_pre_baixas o WHERE o.remessa_id = p.remessa_id AND p.remessa_id IS NOT NULL
      AND o.consultora_party_id = p.consultora_party_id AND o.id <> p.id AND o.status IN ('fechada', 'encerrada', 'pendencia');
@@ -191,6 +211,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_ler(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.pre_baixa_ler(uuid) TO authenticated, service_role;
 
+-- a consultora marca quantas vendeu de cada peça (nunca menos do que já foi pago pelo app)
 CREATE OR REPLACE FUNCTION public.pre_baixa_vender(_cycle uuid, _variant uuid, _qtd integer) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v uuid; it kit_pre_baixa_itens;
@@ -212,6 +233,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_vender(uuid, uuid, integer) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.pre_baixa_vender(uuid, uuid, integer) TO authenticated, service_role;
 
+-- fecha: grava o cálculo, gera o título a receber da consultora e devolve a parcela para o Pix
 CREATE OR REPLACE FUNCTION public.pre_baixa_fechar(_cycle uuid) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE uid uuid := auth.uid(); v uuid; p kit_pre_baixas; calc jsonb; cfg consultora_cobranca_config; tid uuid; inst uuid;
@@ -257,6 +279,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_fechar(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.pre_baixa_fechar(uuid) TO authenticated, service_role;
 
+-- assinatura técnica do Pix da pré-baixa (servidor): a parcela tem de ser de uma pré-baixa fechada
 CREATE OR REPLACE FUNCTION public.pre_baixa_asaas_preparar(_actor uuid, _payload jsonb) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
@@ -270,6 +293,8 @@ END $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_asaas_preparar(uuid, jsonb) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.pre_baixa_asaas_preparar(uuid, jsonb) TO service_role;
 
+-- ───────────────────────── conferência e encerramento ─────────────────────────
+-- _leituras: [{variant_id, qtd}] já somadas pela tela de leitura do código. _aplicar=false só mostra o resultado.
 CREATE OR REPLACE FUNCTION public.pre_baixa_conferir(_cycle uuid, _leituras jsonb, _aplicar boolean DEFAULT false) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE uid uuid := auth.uid(); p kit_pre_baixas; c kit_cycles; it record; vend_final bigint := 0; outros bigint; base bigint; pct numeric; com bigint;
@@ -291,6 +316,7 @@ BEGIN
       FROM kit_pre_baixa_itens i WHERE i.pre_baixa_id = p.id
   LOOP
     IF it.lida > it.qtd_enviada THEN RAISE EXCEPTION 'Foram lidas mais peças (%) do que as enviadas (%) de %.', it.lida, it.qtd_enviada, it.variant_id; END IF;
+    -- esperado devolvido = enviado − vendido declarado
     faltam := faltam + greatest(it.qtd_enviada - it.qtd_vendida - it.lida, 0);
     voltaram := voltaram + greatest(it.lida - (it.qtd_enviada - it.qtd_vendida), 0);
     vend_final := vend_final + (it.qtd_enviada - it.lida)::bigint * it.preco_cents;
@@ -313,9 +339,11 @@ BEGIN
     'pre_baixa_paga', public.pre_baixa_pago(p), 'itens', itens);
   IF NOT coalesce(_aplicar, false) THEN RETURN ret || jsonb_build_object('aplicado', false); END IF;
 
+  -- grava as leituras
   UPDATE kit_pre_baixa_itens i SET qtd_lida = (x->>'lida')::int, qtd_faltando = (x->>'faltando')::int, qtd_voltou_vendida = (x->>'voltou_vendida')::int
     FROM jsonb_array_elements(itens) x WHERE i.pre_baixa_id = p.id AND i.variant_id = (x->>'variant_id')::uuid;
 
+  -- peças lidas voltam ao estoque pelo retorno oficial (declaração + conferência no depósito)
   IF (SELECT coalesce(sum((x->>'lida')::int), 0) FROM jsonb_array_elements(itens) x) > 0 THEN
     mov := (public.kit_retorno(_cycle, jsonb_build_object('idempotency_key', 'pre-baixa-retorno:' || p.id, 'note', 'Conferência do acerto (pré-baixa)',
             'itens', (SELECT jsonb_agg(jsonb_build_object('variant_id', x->>'variant_id', 'quantity', (x->>'lida')::int, 'destino', 'retorno'))
@@ -324,6 +352,7 @@ BEGIN
       INTO conf FROM kit_movement_items mi WHERE mi.movement_id = mov;
     PERFORM public.kit_retorno_confirmar(mov, jsonb_build_object('itens', conf));
   END IF;
+  -- o que não voltou fica como vendido
   UPDATE kit_balances b SET qty_sold = (x->>'enviada')::int - (x->>'lida')::int, updated_at = now()
     FROM jsonb_array_elements(itens) x WHERE b.cycle_id = _cycle AND b.variant_id = (x->>'variant_id')::uuid;
 
@@ -358,6 +387,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_conferir(uuid, jsonb, boolean) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.pre_baixa_conferir(uuid, jsonb, boolean) TO authenticated, service_role;
 
+-- pendência resolvida (crédito devolvido / diferença negociada): só equipe de cobrança ou maletas, com motivo
 CREATE OR REPLACE FUNCTION public.pre_baixa_pendencia_resolver(_cycle uuid, _motivo text) RETURNS void
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE p kit_pre_baixas;
@@ -374,6 +404,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_pendencia_resolver(uuid, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.pre_baixa_pendencia_resolver(uuid, text) TO authenticated, service_role;
 
+-- etiqueta nova impressa na conferência (preço gravado ≠ preço atual)
 CREATE OR REPLACE FUNCTION public.pre_baixa_etiqueta_atualizada(_cycle uuid, _variants uuid[]) RETURNS integer
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE n int;
@@ -387,6 +418,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_etiqueta_atualizada(uuid, uuid[]) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.pre_baixa_etiqueta_atualizada(uuid, uuid[]) TO authenticated, service_role;
 
+-- ───────────────────────── sem pré-baixa, sem kit novo ─────────────────────────
 CREATE OR REPLACE FUNCTION public.pre_baixa_liberar_kit(_consultora uuid, _motivo text) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v uuid;
@@ -406,6 +438,7 @@ CREATE OR REPLACE FUNCTION public.kit_exige_pre_baixa_checar(_consultora uuid, _
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE pendente text; lib uuid;
 BEGIN
+  -- maleta anterior dela (aceita) sem pré-baixa fechada; kits da MESMA remessa não contam
   SELECT k.code INTO pendente FROM kit_cycles c JOIN kits k ON k.id = c.kit_id
    WHERE c.consultora_party_id = _consultora AND c.id <> _cycle
      AND c.status IN ('recebida', 'operacao', 'acerto')
@@ -423,10 +456,12 @@ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION public.kit_exige_pre_baixa_checar(uuid, uuid, uuid) FROM PUBLIC, anon, authenticated;
 
+-- a regra vale para kits criados a partir de agora; ligada pelo interruptor abaixo (Master liga quando o app estiver publicado)
 ALTER TABLE public.pedido_config ADD COLUMN IF NOT EXISTS exigir_pre_baixa boolean NOT NULL DEFAULT false;
 CREATE OR REPLACE FUNCTION public.kit_exige_pre_baixa_gatilho() RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
+  -- a remessa entra no ciclo logo depois da criação (remessa_abrir_maleta): checa quando ela é gravada
   IF NEW.consultora_party_id IS NULL OR NEW.remessa_id IS NULL THEN RETURN NEW; END IF;
   IF TG_OP = 'UPDATE' AND OLD.remessa_id IS NOT DISTINCT FROM NEW.remessa_id AND OLD.consultora_party_id IS NOT DISTINCT FROM NEW.consultora_party_id THEN RETURN NEW; END IF;
   IF NOT coalesce((SELECT exigir_pre_baixa FROM pedido_config), false) THEN RETURN NEW; END IF;
@@ -450,6 +485,7 @@ END $$;
 REVOKE ALL ON FUNCTION public.pre_baixa_exigir_definir(boolean) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.pre_baixa_exigir_definir(boolean) TO authenticated, service_role;
 
+-- ───────────────────────── painel e indicadores ─────────────────────────
 CREATE OR REPLACE FUNCTION public.pre_baixa_painel(_situacao text DEFAULT NULL) RETURNS jsonb
 LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public AS $$
 BEGIN
@@ -486,7 +522,7 @@ BEGIN
                               / nullif(count(*) FILTER (WHERE fechada_em IS NOT NULL OR prazo < ate), 0), 1))
       FROM kit_pre_baixas WHERE (coalesce(fechada_em, created_at) AT TIME ZONE 'America/Sao_Paulo')::date BETWEEN de AND ate),
     'por_consultora', coalesce((SELECT jsonb_agg(jsonb_build_object('consultora', pa.display_name, 'acertos', s.n, 'sem_divergencia_pct', s.ok,
-                                  'no_prazo_pct', s.prazo, 'horas_media', s.horas) ORDER BY s.n DESC)
+                                   'no_prazo_pct', s.prazo, 'horas_media', s.horas) ORDER BY s.n DESC)
       FROM (SELECT consultora_party_id, count(*) FILTER (WHERE conferida_em IS NOT NULL) n,
                    round(100.0 * count(*) FILTER (WHERE conferida_em IS NOT NULL AND coalesce(diferenca_cents, 0) = 0) / nullif(count(*) FILTER (WHERE conferida_em IS NOT NULL), 0), 1) ok,
                    round(100.0 * count(*) FILTER (WHERE fechada_em IS NOT NULL AND (prazo IS NULL OR (fechada_em AT TIME ZONE 'America/Sao_Paulo')::date <= prazo)) / nullif(count(*), 0), 1) prazo,

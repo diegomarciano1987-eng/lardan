@@ -15,6 +15,8 @@ import { CartaoMeuHistorico } from "@/components/consultora/CartaoMeuHistorico";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link, useRouteContext } from "@tanstack/react-router";
 import { mostrarPilotoGlass } from "@/lib/consultora-glass";
+import { useTemaConsultora } from "@/lib/consultora-tema";
+import { TemaClaroEscuro } from "@/components/consultora/TemaClaroEscuro";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -965,6 +967,8 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
 /* ------------------------------------------------------------------ mais */
 
 export function Mais({ ir }: { ir: Ir }) {
+  const { user } = useRouteContext({ from: "/_authenticated" });
+  const pilotoMais = mostrarPilotoGlass(user.id, "mais");
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/equipe"; };
   const itens = [
     { r: "Minha vitrine", d: "Foto, capa, peças e link para compartilhar", i: Store, n: { aba: "vitrine" } as Nav },

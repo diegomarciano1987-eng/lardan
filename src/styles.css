@@ -1827,3 +1827,67 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
     opacity: 0.8;
   }
 }
+
+/* Modo claro do app da consultora (porcelana/champanhe). Dark segue padrão e intocado. */
+.consultora-glass-pilot.consultora-glass-light,
+body.consultora-glass-active.consultora-glass-light-active {
+  --background: oklch(0.955 0.008 70);
+  --foreground: oklch(0.22 0.014 30);
+  --card: oklch(1 0.004 70 / 0.72);
+  --card-foreground: var(--foreground);
+  --muted: oklch(0.90 0.012 60 / 0.65);
+  --muted-foreground: oklch(0.42 0.016 40);
+  --primary: oklch(0.47 0.085 22);
+  --primary-foreground: oklch(0.99 0.004 70);
+  --acao: oklch(0.47 0.085 22);
+  --acao-foreground: oklch(0.99 0.004 70);
+  --border: oklch(0.55 0.03 40 / 0.22);
+  --input: oklch(0.55 0.03 40 / 0.30);
+  --popover: oklch(0.99 0.004 70 / 0.97);
+  --secondary: oklch(0.92 0.012 60 / 0.7);
+  --accent: oklch(0.47 0.085 22 / 0.12);
+  --destructive: oklch(0.52 0.19 25);
+  --glass-surface: oklch(1 0.004 70 / 0.62);
+  --glass-highlight: oklch(1 0 0 / 0.95);
+  --glass-reflection: oklch(1 0 0 / 0.55);
+  --glass-reflection-end: oklch(1 0 0 / 0.08);
+  --glass-shade: oklch(0.35 0.03 30 / 0.22);
+  --glass-overlay: oklch(1 0 0 / 0.5);
+  --glass-overlay-end: oklch(1 0 0 / 0.3);
+  --glass-scroll-thumb: oklch(0.47 0.085 22 / 0.4);
+  --glass-scroll-hover: oklch(0.47 0.085 22 / 0.7);
+  --glass-mobile-surface: oklch(0.99 0.004 70 / 0.82);
+  --shadow-app: 0 8px 22px -14px oklch(0.47 0.085 22 / 0.55);
+  --glass-action-base: oklch(0.47 0.085 22);
+  --glass-action-tint: oklch(0.47 0.085 22 / 0.12);
+  --glass-action-clear: oklch(1 0 0 / 0.18);
+  --glass-action-edge: oklch(0.40 0.08 22);
+  --glass-action-hover: oklch(0.41 0.085 22);
+  --glass-control-base: oklch(1 0.004 70 / 0.78);
+  --glass-home-surface: oklch(1 0.004 70 / 0.78);
+  --glass-home-reflection: oklch(1 0 0 / 0.6);
+  --glass-home-edge: oklch(0.55 0.03 40 / 0.24);
+  --glass-home-hover: oklch(0.98 0.008 60 / 0.92);
+  --glass-home-shadow: 0 14px 30px -20px var(--glass-shade), inset 0 1px 0 var(--glass-highlight);
+  --glass-home-text-shadow: none;
+  color-scheme: light;
+}
+.consultora-glass-pilot.consultora-glass-light::before {
+  background: linear-gradient(160deg, oklch(0.975 0.008 70), oklch(0.94 0.012 40) 55%, oklch(0.925 0.01 320));
+}
+.consultora-glass-pilot.consultora-glass-light .consultora-resumo {
+  --resumo-clientes: oklch(0.47 0.085 22);
+  --resumo-abertos: oklch(0.50 0.11 65);
+  --resumo-mes: oklch(0.46 0.09 240);
+  --resumo-pecas: oklch(0.45 0.08 160);
+}
+.consultora-glass-pilot.consultora-glass-light > aside > img,
+.consultora-glass-pilot.consultora-glass-light .consultora-mobile-header img[alt="LARDAN"],
+body.consultora-glass-light-active :is([role="dialog"], [role="alertdialog"]) img[alt="LARDAN"] { filter: none; opacity: 1; }
+:is(.consultora-glass-pilot.consultora-glass-light, body.consultora-glass-light-active) :is(.btn-app-principal, .admin-btn-primary, button.bg-acao, button.bg-primary) {
+  color: var(--primary-foreground);
+  text-shadow: none;
+}
+:is(.consultora-glass-pilot.consultora-glass-light, body.consultora-glass-light-active) :is(.btn-app-principal, .admin-btn-primary, button.bg-acao, button.bg-primary) svg { color: var(--primary-foreground); }
+.consultora-glass-pilot.consultora-glass-light .consultora-inicio-acoes > button > span:first-child { color: var(--primary); background: oklch(0.99 0.004 70 / 0.9); }
+.consultora-glass-pilot.consultora-glass-light .consultora-menu-indicador { box-shadow: inset 0 1px 0 var(--glass-reflection), 0 8px 20px var(--glass-shade); }

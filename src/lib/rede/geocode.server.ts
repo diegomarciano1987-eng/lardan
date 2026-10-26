@@ -286,7 +286,9 @@ export async function processarLote(
     }
   }
 
-  const { data: restantes } = await db.rpc("geo_fila_restantes", opcoes.ibge ? { _ibge: opcoes.ibge } : {});
+  const rest = await db.rpc("geo_fila_restantes", opcoes.ibge ? { _ibge: opcoes.ibge } : {});
+  if (rest.error) console.error("[geo] restantes", rest.error.message);
+  const restantes = rest.error ? -1 : rest.data;
 
   await db
     .from("geocode_batches")

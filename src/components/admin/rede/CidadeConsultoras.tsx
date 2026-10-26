@@ -189,12 +189,13 @@ export function CidadeConsultoras({
           continue;
         }
         feitos += r.processados;
-        setProgresso({ feitos, restantes: r.restantes });
+        setProgresso({ feitos, restantes: Math.max(0, r.restantes) });
         void pessoas.refetch();
-        if (r.restantes === 0 || r.processados === 0) break;
+        if (r.processados === 0) break;
       }
       toast.success(`${formatInt(feitos)} endereço(s) de ${nome} conferidos no mapa.`);
-    } catch {
+    } catch (e) {
+      console.error("[mapa] localizar", e);
       toast.error("Não foi possível localizar os endereços agora. Tente de novo em alguns minutos.");
     } finally {
       setProgresso(null);

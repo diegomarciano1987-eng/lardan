@@ -1170,6 +1170,13 @@
       "when": 1793046652899,
       "tag": "0166_rede_municipios_um_por_ibge",
       "breakpoints": true
+    },
+    {
+      "idx": 167,
+      "version": "7",
+      "when": 1793046686866,
+      "tag": "0167_rede_cobertura_um_por_ibge",
+      "breakpoints": true
     }
   ]
 }

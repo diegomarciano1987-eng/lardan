@@ -1773,6 +1773,21 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
 
 .contorno-cidade { stroke: var(--bronze); }
 
+/* ---------- Mapa da cidade: uma bolinha por consultora ---------- */
+:root {
+  --mapa-ativa: oklch(0.66 0.17 152);
+  --mapa-ativa-borda: oklch(0.99 0 0);
+  --mapa-inativa: oklch(0.55 0.015 260);
+  --mapa-inativa-borda: oklch(0.97 0 0);
+  --mapa-selecao: oklch(0.62 0.13 60);
+}
+.leaflet-container path.mapa-pt-ativa { fill: var(--mapa-ativa); stroke: var(--mapa-ativa-borda); fill-opacity: 0.95; stroke-width: 2.5; }
+.leaflet-container path.mapa-pt-inativa { fill: var(--mapa-inativa); stroke: var(--mapa-inativa-borda); fill-opacity: 0.8; stroke-width: 1.2; }
+.leaflet-container path.mapa-pt-aprox { stroke-dasharray: 3 2; fill-opacity: 0.55; }
+.leaflet-container path.mapa-pt-sel { stroke: var(--mapa-selecao); stroke-width: 4; }
+.mapa-legenda-ativa { background: var(--mapa-ativa); }
+.mapa-legenda-inativa { background: var(--mapa-inativa); }
+
 /* ---------- Vitrine da consultora: paletas e fontes aprovadas ---------- */
 :root {
   --vitrine-og-fundo: oklch(0.2 0.012 50);

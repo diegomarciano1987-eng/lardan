@@ -18549,6 +18549,25 @@ export type Database = {
       fiscal_prontidao: { Args: never; Returns: Json }
       fiscal_roteiro_observado: { Args: never; Returns: Json }
       gen_protocol: { Args: { prefix: string }; Returns: string }
+      geo_fila_proxima: {
+        Args: { _ibge?: string; _limite?: number }
+        Returns: {
+          ativa: boolean
+          city: string
+          district: string
+          geo_hash: string
+          geo_precision: string
+          geo_status: string
+          ibge_city_code: string
+          id: string
+          latitude: number
+          longitude: number
+          postal_code: string
+          street: string
+          uf: string
+        }[]
+      }
+      geo_fila_restantes: { Args: { _ibge?: string }; Returns: number }
       get_party_full: { Args: { _id: string }; Returns: Json }
       grant_role: {
         Args: {
@@ -19259,6 +19278,24 @@ export type Database = {
           nome: string
           party_id: string
           precisao: string
+          status: string
+        }[]
+      }
+      network_geo_municipio_consultoras_v2: {
+        Args: { _ibge: string }
+        Returns: {
+          bairro: string
+          cep: string
+          codigo: string
+          geo_fonte: string
+          geo_status: string
+          lat: number
+          lng: number
+          nome: string
+          numero: string
+          party_id: string
+          precisao: string
+          rua: string
           status: string
         }[]
       }

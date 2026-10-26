@@ -122,6 +122,7 @@ import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/a
 import { Route as ApiPublicClicksignWebhookRouteImport } from './routes/api/public/clicksign/webhook'
 import { Route as ApiPublicFocusWebhookRouteImport } from './routes/api/public/focus/webhook'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
+import { Route as ApiPublicRedeLocalizarRouteImport } from './routes/api/public/rede/localizar'
 import { Route as ApiPublicVitrineImgSplatRouteImport } from './routes/api/public/vitrine-img.$'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -759,6 +760,11 @@ const ApiPublicMidiaIdRoute = ApiPublicMidiaIdRouteImport.update({
   path: '/api/public/midia/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRedeLocalizarRoute = ApiPublicRedeLocalizarRouteImport.update({
+  id: '/api/public/rede/localizar',
+  path: '/api/public/rede/localizar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicVitrineImgSplatRoute =
   ApiPublicVitrineImgSplatRouteImport.update({
     id: '/api/public/vitrine-img/$',
@@ -929,6 +935,7 @@ export interface FileRoutesByFullPath {
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
+  '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1051,6 +1058,7 @@ export interface FileRoutesByTo {
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
+  '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1177,6 +1185,7 @@ export interface FileRoutesById {
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
+  '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1303,6 +1312,7 @@ export interface FileRouteTypes {
     | '/api/public/clicksign/webhook'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
+    | '/api/public/rede/localizar'
     | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1425,6 +1435,7 @@ export interface FileRouteTypes {
     | '/api/public/clicksign/webhook'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
+    | '/api/public/rede/localizar'
     | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1550,6 +1561,7 @@ export interface FileRouteTypes {
     | '/api/public/clicksign/webhook'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
+    | '/api/public/rede/localizar'
     | '/api/public/vitrine-img/$'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1616,6 +1628,7 @@ export interface RootRouteChildren {
   ApiPublicClicksignWebhookRoute: typeof ApiPublicClicksignWebhookRoute
   ApiPublicFocusWebhookRoute: typeof ApiPublicFocusWebhookRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
+  ApiPublicRedeLocalizarRoute: typeof ApiPublicRedeLocalizarRoute
   ApiPublicVitrineImgSplatRoute: typeof ApiPublicVitrineImgSplatRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -2415,6 +2428,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMidiaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/rede/localizar': {
+      id: '/api/public/rede/localizar'
+      path: '/api/public/rede/localizar'
+      fullPath: '/api/public/rede/localizar'
+      preLoaderRoute: typeof ApiPublicRedeLocalizarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/vitrine-img/$': {
       id: '/api/public/vitrine-img/$'
       path: '/api/public/vitrine-img/$'
@@ -2749,6 +2769,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicClicksignWebhookRoute: ApiPublicClicksignWebhookRoute,
   ApiPublicFocusWebhookRoute: ApiPublicFocusWebhookRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,
+  ApiPublicRedeLocalizarRoute: ApiPublicRedeLocalizarRoute,
   ApiPublicVitrineImgSplatRoute: ApiPublicVitrineImgSplatRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

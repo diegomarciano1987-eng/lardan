@@ -56,10 +56,10 @@ function centroDaMalha(m: unknown): { lat: number; lng: number } | null {
       } else v.forEach(visitar);
     } else if (v && typeof v === "object") {
       const o = v as Record<string, unknown>;
-      if ("coordinates" in o) visitar(o.coordinates);
-      if ("geometry" in o) visitar(o.geometry);
-      if ("features" in o) visitar(o.features);
-      if ("geometries" in o) visitar(o.geometries);
+      if ("coordinates" in o) visitar(o["coordinates"]);
+      if ("geometry" in o) visitar(o["geometry"]);
+      if ("features" in o) visitar(o["features"]);
+      if ("geometries" in o) visitar(o["geometries"]);
     }
   };
   visitar(m);

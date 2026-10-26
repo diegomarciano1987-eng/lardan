@@ -177,7 +177,7 @@ export async function processarLote(
     };
   }
 
-  const fila = await db.rpc("geo_fila_proxima", { _limite: limite, _ibge: opcoes.ibge ?? undefined });
+  const fila = await db.rpc("geo_fila_proxima", opcoes.ibge ? { _limite: limite, _ibge: opcoes.ibge } : { _limite: limite });
   if (fila.error) throw fila.error;
   const linhas = fila.data ?? [];
 
@@ -286,7 +286,7 @@ export async function processarLote(
     }
   }
 
-  const { data: restantes } = await db.rpc("geo_fila_restantes", { _ibge: opcoes.ibge ?? undefined });
+  const { data: restantes } = await db.rpc("geo_fila_restantes", opcoes.ibge ? { _ibge: opcoes.ibge } : {});
 
   await db
     .from("geocode_batches")

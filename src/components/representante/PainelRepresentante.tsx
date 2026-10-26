@@ -7,9 +7,9 @@ import { DateRangeField } from "@/components/premium/DateRangeField";
 import { FichaConsultora } from "@/components/representante/FichaConsultora";
 import { supabase } from "@/integrations/supabase/client";
 import { brl } from "@/lib/representante";
-import type { GrupoCep } from "@/components/admin/rede/MapaCidadeLeaflet";
+import type { GrupoCep } from "@/components/admin/rede/MapaGruposLeaflet";
 
-const MapaCidadeLeaflet = React.lazy(() => import("@/components/admin/rede/MapaCidadeLeaflet"));
+const MapaCidadeLeaflet = React.lazy(() => import("@/components/admin/rede/MapaGruposLeaflet"));
 
 type Linha = { nome: string; code: string; valor: number; pecas: number; maletas: number };
 type Ranking = { consultoras: number; valor_cents: number; pecas: number; top_valor: Linha[]; pior_valor: Linha[]; top_pecas: Linha[]; pior_pecas: Linha[] };

@@ -51,7 +51,7 @@ export function resultadoNaCidade(r: ResultadoNominatim, cidade: string): { lat:
   if ((r.place_rank ?? 0) < 26) return null;
   const alvo = semAcento(cidade);
   const a = r.address ?? {};
-  const nomes = [a.city, a.town, a.village, a.municipality, a.city_district, a.county].filter(Boolean).map((x) => semAcento(x!));
+  const nomes = ["city", "town", "village", "municipality", "city_district", "county"].map((k) => a[k]).filter(Boolean).map((x) => semAcento(x!));
   return nomes.includes(alvo) ? { lat, lng } : null;
 }
 
@@ -77,7 +77,10 @@ export function espalhar<T extends { lat: number; lng: number }>(lista: T[]): (T
   const saida: (T & { latV: number; lngV: number })[] = [];
   for (const ps of grupos.values()) {
     ps.forEach((p, i) => {
-      if (i === 0) return saida.push({ ...p, latV: p.lat, lngV: p.lng });
+      if (i === 0) {
+        saida.push({ ...p, latV: p.lat, lngV: p.lng });
+        return;
+      }
       const ang = i * 2.399963; // ângulo áureo
       const raio = 0.00016 * Math.sqrt(i);
       saida.push({ ...p, latV: p.lat + raio * Math.sin(ang), lngV: p.lng + (raio * Math.cos(ang)) / Math.cos((p.lat * Math.PI) / 180) });

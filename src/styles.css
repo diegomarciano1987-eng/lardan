@@ -1860,7 +1860,7 @@ body.consultora-glass-active.consultora-glass-light-active {
   --shadow-app: 0 8px 22px -14px oklch(0.47 0.085 22 / 0.55);
   --glass-action-base: oklch(0.47 0.085 22);
   --glass-action-tint: oklch(0.47 0.085 22 / 0.12);
-  --glass-action-clear: oklch(1 0 0 / 0.18);
+  --glass-action-clear: oklch(1 0 0 / 0.08);
   --glass-action-edge: oklch(0.40 0.08 22);
   --glass-action-hover: oklch(0.41 0.085 22);
   --glass-control-base: oklch(1 0.004 70 / 0.78);

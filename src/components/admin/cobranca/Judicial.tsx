@@ -6,7 +6,7 @@ import { Gavel, FileText, Upload, Scale, Landmark } from "lucide-react";
 import { DateField } from "@/components/premium/DateField";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { brl, dataBR, hojeSP, judicial, judicialDocs, acordosJudiciais, encaminharJudicial, salvarAcordoJudicial, statusAcordoJudicial, TIPOS_DOC_JUDICIAL, type Parcela } from "@/lib/cobranca";
-import { enviarDocJudicial, abrirDocJudicial } from "@/lib/cobranca.functions";
+import { enviarDocJudicial, abrirDocJudicial, excluirDocJudicial } from "@/lib/cobranca.functions";
 import { montarPlano, addMeses } from "@/lib/cobranca-acordo";
 import { AcordoAsaas } from "./AcordoAsaas";
 import { AlvaraJudicial } from "./AlvaraJudicial";
@@ -61,6 +61,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
   const [editProc, setEditProc] = React.useState(false);
   const enviar = useServerFn(enviarDocJudicial);
   const abrir = useServerFn(abrirDocJudicial);
+  const excluir = useServerFn(excluirDocJudicial);
   const [docTipo, setDocTipo] = React.useState("termo_assinado");
   const [docTitulo, setDocTitulo] = React.useState("");
   const [enviando, setEnviando] = React.useState(false);
@@ -114,6 +115,13 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
     } catch (e) { toast.error(e instanceof Error ? e.message : "Não enviou."); } finally { setEnviando(false); if (arq.current) arq.current.value = ""; }
   };
   const ver = async (id: string) => { try { const r = await abrir({ data: { id } }); window.open(r.url, "_blank", "noopener"); } catch (e) { toast.error(e instanceof Error ? e.message : "Falhou."); } };
+  const remover = async (id: string, titulo: string) => {
+    const motivo = prompt(`Excluir o documento "${titulo}"?\n\nInforme o motivo (fica registrado no histórico da ficha):`);
+    if (!motivo || motivo.trim().length < 3) { if (motivo !== null) toast.error("Informe o motivo da exclusão."); return; }
+    if (!confirm(`Confirma excluir "${titulo}"? O arquivo será apagado e a remoção ficará registrada.`)) return;
+    try { await excluir({ data: { id, motivo: motivo.trim() } }); toast.success("Documento excluído."); qc.invalidateQueries({ queryKey: ["cob"] }); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Não excluiu."); }
+  };
   const salvar = async () => {
     if (dif !== 0) { toast.error(`As parcelas precisam fechar o total. Diferença: ${brl(dif)}.`); return; }
     setSalv(true);
@@ -165,7 +173,10 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
             {(docs.data ?? []).map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                 <span><b className="text-ledger-text">{d.titulo}</b> <span className="text-xs text-ledger-muted">· {TIPOS_DOC_JUDICIAL.find((t) => t[0] === d.tipo)?.[1]} · {dataBR(d.created_at)}</span></span>
-                <button onClick={() => ver(d.id)} className="h-9 rounded-lg border border-line px-4 text-xs font-semibold">Abrir</button>
+                <span className="flex gap-2">
+                  <button onClick={() => ver(d.id)} className="h-9 rounded-lg border border-line px-4 text-xs font-semibold">Abrir</button>
+                  <button data-testid={`jud-doc-excluir-${d.id}`} onClick={() => void remover(d.id, d.titulo)} className="h-9 rounded-lg border border-danger/50 px-4 text-xs font-semibold text-danger hover:bg-danger/10">Excluir</button>
+                </span>
               </li>))}
           </ul>
         )}

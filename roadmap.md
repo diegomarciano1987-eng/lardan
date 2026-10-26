@@ -21,3 +21,6 @@
 
 ## Fundo da consultora igual ao sistema — 25/10
 - [x] Consultora (dark, celular e computador): imagem do site removida; fundo carbono premium idêntico ao do sistema (provado em 390x844 e 1440x1000 como Diego Silva)
+
+## Excluir documento judicial anexado por engano — 26/10
+- [x] Botão Excluir na ficha de cobrança (aba Judicial): confirmação + motivo obrigatório, apaga o arquivo do cofre, grava histórico na ficha e auditoria (quem removeu, qual documento, motivo). Migração 0157 (cob_judicial_doc_excluir), teste isolado cobranca-doc-excluir (4 testes), prova real na ficha da Silvia Helena: "ACORDO REGIANE assinado.pdf" removido por Diego via tela. Falta publicar

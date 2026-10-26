@@ -16785,6 +16785,13 @@ export type Database = {
         Args: { _acordo: string; _settlement: string }
         Returns: undefined
       }
+      cob_judicial_doc_excluir: {
+        Args: { _id: string; _motivo: string }
+        Returns: {
+          party_id: string
+          storage_path: string
+        }[]
+      }
       cob_judicial_doc_registrar: { Args: { _d: Json }; Returns: string }
       cob_judicial_encaminhar: {
         Args: { _d: Json; _party: string }

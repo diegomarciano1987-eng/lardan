@@ -1100,6 +1100,13 @@
       "when": 1792962050856,
       "tag": "0156_conciliacao_refazer_apos_estorno",
       "breakpoints": true
+    },
+    {
+      "idx": 157,
+      "version": "7",
+      "when": 1793021716573,
+      "tag": "0157_cob_judicial_doc_excluir",
+      "breakpoints": true
     }
   ]
 }

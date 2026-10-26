@@ -6,7 +6,7 @@ import { Gavel, FileText, Upload, Scale, Landmark } from "lucide-react";
 import { DateField } from "@/components/premium/DateField";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { brl, dataBR, hojeSP, judicial, judicialDocs, acordosJudiciais, encaminharJudicial, salvarAcordoJudicial, statusAcordoJudicial, TIPOS_DOC_JUDICIAL, type Parcela } from "@/lib/cobranca";
-import { enviarDocJudicial, abrirDocJudicial } from "@/lib/cobranca.functions";
+import { enviarDocJudicial, abrirDocJudicial, excluirDocJudicial } from "@/lib/cobranca.functions";
 import { montarPlano, addMeses } from "@/lib/cobranca-acordo";
 import { AcordoAsaas } from "./AcordoAsaas";
 import { AlvaraJudicial } from "./AlvaraJudicial";

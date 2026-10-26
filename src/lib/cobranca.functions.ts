@@ -90,3 +90,24 @@ export const abrirDocJudicial = createServerFn({ method: "POST" })
     if (s.error) throw new Error(s.error.message);
     return { url: s.data.signedUrl };
   });
+
+/** Exclui documento judicial anexado por engano: RPC oficial grava histórico + auditoria; aqui removemos o arquivo do cofre. */
+export const excluirDocJudicial = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; motivo: string }) => {
+    if (!/^[0-9a-f-]{36}$/i.test(d?.id ?? "")) throw new Error("Documento inválido.");
+    if ((d?.motivo ?? "").trim().length < 3) throw new Error("Informe o motivo da exclusão.");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    await exigirCobranca(c);
+    const { data: rows, error } = await c.supabase.rpc("cob_judicial_doc_excluir", { _id: data.id, _motivo: data.motivo.trim() });
+    if (error) throw new Error(error.message);
+    const row = (rows as { storage_path: string }[] | null)?.[0];
+    if (!row?.storage_path) throw new Error("Documento não encontrado.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const rm = await supabaseAdmin.storage.from(BUCKET).remove([row.storage_path]);
+    if (rm.error) console.error("Falha ao remover arquivo do cofre:", row.storage_path, rm.error.message);
+    return { ok: true };
+  });

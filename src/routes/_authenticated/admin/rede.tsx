@@ -318,7 +318,7 @@ function RedePage() {
       )}
 
       {aba === "mapa" && uf && ibge ? (
-        <CidadeConsultoras key={ibge} ibge={ibge} uf={uf} nome={titulo} onVoltar={() => setIbge(null)} />
+        <CidadeConsultoras key={ibge} ibge={ibge} uf={uf} nome={titulo} podeGerir={podeGerir} onVoltar={() => setIbge(null)} />
       ) : aba === "mapa" ? (
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <Panel title={uf ? `Mapa — ${titulo}` : "Mapa do Brasil"}>

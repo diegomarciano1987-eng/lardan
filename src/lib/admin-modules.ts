@@ -100,15 +100,6 @@ export const ADMIN_MODULES: AdminModule[] = [
     spec: "Ficha completa do produto, variantes com SKU único, preço público autorizado item a item, galeria com texto alternativo e fluxo rascunho/publicar. Nada é excluído: tudo vira arquivo.",
   },
   {
-    slug: "avisos",
-    path: "/admin/avisos",
-    label: "Central de Avisos",
-    description: "Novidades, avisos e promoções para as consultoras, com aviso crítico e lista de quem confirmou ciência.",
-    icon: Megaphone,
-    roles: CONTENT,
-    state: "ativo",
-  },
-  {
     slug: "biblioteca",
     path: "/admin/biblioteca",
     label: "Biblioteca LARDAN",

@@ -298,6 +298,15 @@ export const ADMIN_MODULES: AdminModule[] = [
 /** Módulos internos alcançáveis fora do menu inferior. */
 export const ADMIN_SUBMODULES: AdminModule[] = [
   {
+    slug: "avisos",
+    path: "/admin/avisos",
+    label: "Central de Avisos",
+    description: "Novidades, avisos e promoções para as consultoras, com aviso crítico e lista de quem confirmou ciência.",
+    icon: Megaphone,
+    roles: CONTENT,
+    state: "ativo",
+  },
+  {
     slug: "candidaturas-site",
     path: "/admin/candidaturas",
     label: "Candidaturas do Site",

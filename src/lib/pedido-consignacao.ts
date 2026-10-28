@@ -35,7 +35,7 @@ export interface PedidoDados {
   representante: { nome: string | null; praca: string | null; telefone: string | null } | null;
   montado_por: string | null;
   faixas: FaixaPedido[];
-  itens: { variant_id: string; sku: string | null; descricao: string; preco_cents: number; quantidade: number; grupo: GrupoPeca }[];
+  itens: { variant_id: string; sku: string | null; referencia: string | null; descricao: string; preco_cents: number; quantidade: number; grupo: GrupoPeca }[];
 }
 
 // ---------------------------------------------------------------- formatação

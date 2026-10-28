@@ -111,7 +111,9 @@ type Linha = { tipo: "grupo"; rotulo: string; subtotal: number; qtd: number; con
   | { tipo: "item"; sku: string; descricao: string; preco: number; qtd: number };
 
 /** Alturas em mm (iguais às do CSS abaixo). */
-const ALT = { item: 5.2, grupo: 7.4, pag1: 150.5, pagN: 252, fim: 68 }; // medidos no navegador (altura útil até o rodapé)
+// Medidos no Chromium (A4, margens 12 mm): linha 5,0 mm; grupo 7,5 mm; tabela começa a 137,4 mm na pág. 1 e a 28 mm nas demais;
+// cabeçalho da tabela 7 mm; rodapé a 284,3 mm (deixamos 3 mm de respiro); fechamento (total + garantia + Pix) 68 mm.
+const ALT = { item: 5.0, grupo: 7.5, pag1: 133.5, pagN: 245, fim: 70 };
 
 export function montarLinhas(itens: PedidoDados["itens"]) {
   const out: { grupo: GrupoPeca; rotulo: string; itens: PedidoDados["itens"]; subtotal: number; qtd: number }[] = [];
@@ -139,7 +141,19 @@ export function paginar(grupos: ReturnType<typeof montarLinhas>): Linha[][] {
       livre -= ALT.item;
     }
   }
-  if (livre < ALT.fim) paginas.push([]);
+  if (livre < ALT.fim) {
+    // O fechamento não cabe: em vez de uma folha só com o rodapé, leva as últimas peças junto (nunca página quase vazia).
+    const ant = paginas.at(-1)!;
+    const mover: Linha[] = [];
+    while (mover.length < 8 && ant.length > 1 && ant.at(-1)!.tipo === "item") mover.unshift(ant.pop()!);
+    if (ant.at(-1)?.tipo === "grupo" && mover.length) mover.unshift(ant.pop()!);
+    if (mover.length && mover[0]!.tipo === "item") {
+      let g: Linha | undefined;
+      for (const l of [...ant].reverse()) if (l.tipo === "grupo") { g = l; break; }
+      if (g && g.tipo === "grupo") mover.unshift({ tipo: "grupo", rotulo: g.continua ? g.rotulo : `${g.rotulo} (continuação)`, subtotal: 0, qtd: 0, continua: true });
+    }
+    paginas.push(mover);
+  }
   return paginas;
 }
 
@@ -194,7 +208,7 @@ table{width:186mm;table-layout:fixed;border-collapse:collapse;margin-top:6mm}
 .pg+.pg table,.cab2+table{margin-top:4mm}
 th{font-size:6.6pt;letter-spacing:.16em;white-space:nowrap;text-transform:uppercase;color:#7A5642;font-weight:500;text-align:left;padding:0 2mm 1.6mm;border-bottom:.45mm solid #2B201C;height:7mm;vertical-align:bottom}
 th.r,td.r{text-align:right}th.q,td.q{text-align:center}
-td{font-size:8pt;height:5.4mm;line-height:5.2mm;padding:0 2mm;border-bottom:.2mm solid #EFE4DA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td{font-size:7.8pt;height:5mm;line-height:4.8mm;padding:0 2mm;border-bottom:.2mm solid #EFE4DA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 td.t{font-weight:600}
 tr.g td{background:#F6EFE8;height:7.4mm;line-height:7.2mm;font-size:7.6pt;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#7A5642;border-bottom:.3mm solid #E2D1C3}
 tr.g td.r,tr.g td.q{font-size:8pt;letter-spacing:.06em}

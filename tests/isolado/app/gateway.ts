@@ -15,7 +15,8 @@ export const SEGREDO_LOCAL = "lardan-isolado-segredo-local-nao-e-credencial-0001
 const PORTA = Number(process.env["GATEWAY_PORT"] ?? 54321);
 const REST = process.env["POSTGREST_URL"] ?? "http://127.0.0.1:54330";
 const SENHA_DEMO = "iso-demo"; // só vale para contas marcadas como sintéticas
-const db = new SQL(process.env["LARDAN_ISO_URL"] ?? "postgresql://postgres@127.0.0.1:55432/lardan_iso?sslmode=disable", { max: 3 });
+const dbUrl = process.env["LARDAN_ISO_URL"] ?? "postgresql://postgres@127.0.0.1:55432/lardan_iso?sslmode=disable";
+const db = new SQL(dbUrl, { max: 3, database: new URL(dbUrl).pathname.slice(1) || "lardan_iso" });
 
 const b64 = (s: Buffer | string) => Buffer.from(s).toString("base64url");
 export function assinar(payload: Record<string, unknown>) {

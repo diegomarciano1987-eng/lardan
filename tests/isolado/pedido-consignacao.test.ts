@@ -130,6 +130,8 @@ describe("remessa, preço gravado e folha", () => {
     expect(d.dados.montado_por).toContain(`ped-mont-${marca}`);
     expect(d.dados.representante?.telefone).toContain("43988887777");
     expect(d.dados.itens.map((i) => [i.grupo, i.preco_cents, i.quantidade]).sort()).toEqual([["aneis", 10500, 2], ["brincos", 4500, 3]]);
+    expect(d.dados.itens.filter((i) => i.grupo === "aneis").map((i) => i.referencia)).toEqual([`AN-REF-${marca}`]);
+    expect(d.dados.itens.filter((i) => i.grupo === "brincos").map((i) => i.referencia)).toEqual([`BR-REF-${marca}`, `BR-REF-${marca}`]);
     expect((await rpc(cons, "kit_pedido_dados", { _cycle: cicloRua })).ok).toBe(false);
   });
 

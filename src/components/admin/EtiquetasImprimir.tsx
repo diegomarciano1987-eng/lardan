@@ -1,3 +1,4 @@
+import { lerCalibracaoGlobal } from "@/lib/etiquetas-calibracao";
 import { imprimirPdf, pdfEtiquetas } from "@/lib/etiquetas-pdf";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +23,7 @@ export async function enviarParaImpressora(items: EtiquetaItem[]) {
   for (const i of validos) {
     try { barrasEtiqueta(i.barcode ?? ""); } catch (e) { throw new Error(`${i.nome}: ${e instanceof Error ? e.message : "código inválido."}`); }
   }
-  imprimirPdf(await pdfEtiquetas(validos, lerCalibracao()));
+  imprimirPdf(await pdfEtiquetas(validos, await lerCalibracaoGlobal()));
   return validos.reduce((s, i) => s + i.quantidade, 0);
 }
 

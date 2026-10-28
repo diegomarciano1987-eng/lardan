@@ -6,6 +6,7 @@ import {
   AMOSTRA_CALIBRACAO, CONFIG_ETIQUETA, ETIQUETA, LIMITES_CALIBRACAO, completarConfig, documentoTeste,
   lerCalibracao, salvarCalibracao, textoEtiqueta, validarCalibracao, type EtiquetaConfig,
 } from "@/lib/etiquetas";
+import { lerCalibracaoGlobal, salvarCalibracaoGlobal } from "@/lib/etiquetas-calibracao";
 import { imprimirPdf, pdfTeste } from "@/lib/etiquetas-pdf";
 
 type Campo = keyof typeof LIMITES_CALIBRACAO;
@@ -24,7 +25,7 @@ const arred = (n: number) => Math.round(n * 10) / 10;
 export function CalibracaoArgox() {
   const [cfg, setCfg] = useState<Required<EtiquetaConfig>>(completarConfig(null));
   const [salvo, setSalvo] = useState<Required<EtiquetaConfig>>(completarConfig(null));
-  useEffect(() => { const c = lerCalibracao(); setCfg(c); setSalvo(c); }, []);
+  useEffect(() => { const c = lerCalibracao(); setCfg(c); setSalvo(c); void lerCalibracaoGlobal().then((g) => { setCfg(g); setSalvo(g); }); }, []);
   const erro = validarCalibracao(cfg);
   const alterado = JSON.stringify(cfg) !== JSON.stringify(salvo);
   const previa = useMemo(() => { try { return documentoTeste("amostra", cfg); } catch { return null; } }, [cfg]);
@@ -36,8 +37,8 @@ export function CalibracaoArgox() {
     try { imprimirPdf(await pdfTeste(modo, cfg, modo === "amostra" ? 3 : 1)); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir o teste."); }
   };
-  const salvar = () => {
-    try { salvarCalibracao(cfg); setSalvo(cfg); toast.success("Calibração salva neste computador. As próximas etiquetas já saem assim."); }
+  const salvar = async () => {
+    try { await salvarCalibracaoGlobal(cfg); setSalvo(cfg); toast.success("Calibração salva para todas as colaboradoras. As próximas etiquetas já saem assim."); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar."); }
   };
   // Escala de tela: 1 mm = 4 px na prévia.

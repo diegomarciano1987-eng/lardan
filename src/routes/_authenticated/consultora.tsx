@@ -6,7 +6,7 @@ import { PedidosConsultora } from "@/components/consultora/PedidosConsultora";
 import { FotoPeca } from "@/components/FotoPeca";
 import * as React from "react";
 import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BriefcaseBusiness, PackageCheck, ShoppingBag, Store } from "lucide-react";
 import { toast } from "sonner";
@@ -92,6 +92,7 @@ function Cartao({ children, className = "" }: { children: React.ReactNode; class
 
 /* ---------------- maleta ---------------- */
 function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null; obrigatoria?: boolean }) {
+  const { user } = useRouteContext({ from: "/_authenticated" });
   const qc = useQueryClient();
   const [divergencias, setDivergencias] = React.useState<Record<string, number>>({});
   const [tipos, setTipos] = React.useState<Record<string, TipoDivergencia>>({});
@@ -104,7 +105,7 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
   const catDe = React.useMemo(() => Object.fromEntries((opcoes.data ?? []).filter((p) => p.cycle_id === cycleId && p.categoria).map((p) => [p.variant_id, p.categoria as string])), [opcoes.data, cycleId]);
 
   const ficha = useQuery({
-    queryKey: ["consultora", "maleta", cycleId],
+    queryKey: ["consultora", "maleta", cycleId, user.id],
     queryFn: () => { if (!cycleId) throw new Error("Maleta não selecionada."); return conferenciaMaleta(cycleId); },
     enabled: !!cycleId,
   });
@@ -537,6 +538,7 @@ function AreaConsultora() {
 }
 
 function AreaConsultoraLiberada() {
+  const { user } = useRouteContext({ from: "/_authenticated" });
   const nav = Route.useSearch() as Nav;
   const navigate = Route.useNavigate();
   const ir: Ir = (n) => {
@@ -545,7 +547,7 @@ function AreaConsultoraLiberada() {
     if (!(n.aba === nav.aba && n.q !== nav.q)) window.scrollTo({ top: 0 });
   };
   const [escolhida, setEscolhida] = React.useState<string | null>(null);
-  const pendentes = useQuery({ queryKey: ["consultora", "aceites-pendentes"], queryFn: pendenciasAceite, refetchInterval: 15000, retry: false });
+  const pendentes = useQuery({ queryKey: ["consultora", "aceites-pendentes", user.id], queryFn: pendenciasAceite, refetchInterval: 15000, retry: false });
   const bloqueada = !pendentes.data || pendentes.isError || pendentes.data.length > 0;
   const maletas = useQuery({ queryKey: ["consultora", "maletas"], queryFn: () => listarMaletas() });
   const abertas = (maletas.data ?? []).filter((m) => ["operacao", "recebida", "transito", "expedida", "acerto"].includes(m.situacao)).sort((a, b) => {

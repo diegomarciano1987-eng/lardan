@@ -6,7 +6,7 @@ import {
   AMOSTRA_CALIBRACAO, CONFIG_ETIQUETA, ETIQUETA, LIMITES_CALIBRACAO, completarConfig, documentoTeste,
   lerCalibracao, salvarCalibracao, textoEtiqueta, validarCalibracao, type EtiquetaConfig,
 } from "@/lib/etiquetas";
-import { imprimirHtml } from "@/lib/imprimir-html";
+import { imprimirPdf, pdfTeste } from "@/lib/etiquetas-pdf";
 
 type Campo = keyof typeof LIMITES_CALIBRACAO;
 const CAMPOS: { key: Campo; titulo: string; dica: string; passo: number; un: string }[] = [
@@ -32,8 +32,8 @@ export function CalibracaoArgox() {
     const [min, max] = LIMITES_CALIBRACAO[k];
     setCfg((c) => ({ ...c, [k]: arred(Math.min(max, Math.max(min, v))) }));
   };
-  const testar = (modo: "amostra" | "regua") => {
-    try { imprimirHtml(documentoTeste(modo, cfg, modo === "amostra" ? 3 : 1)); }
+  const testar = async (modo: "amostra" | "regua") => {
+    try { imprimirPdf(await pdfTeste(modo, cfg, modo === "amostra" ? 3 : 1)); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir o teste."); }
   };
   const salvar = () => {

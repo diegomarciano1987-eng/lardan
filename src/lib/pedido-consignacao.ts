@@ -137,7 +137,7 @@ export function paginar(grupos: ReturnType<typeof montarLinhas>): Linha[][] {
       const precisa = (primeira ? ALT.grupo : 0) + ALT.item;
       if (livre < precisa) { nova(); if (!primeira) { paginas.at(-1)!.push({ tipo: "grupo", rotulo: `${g.rotulo} (continuação)`, subtotal: 0, qtd: 0, continua: true }); livre -= ALT.grupo; } }
       if (primeira) { paginas.at(-1)!.push({ tipo: "grupo", rotulo: g.rotulo, subtotal: g.subtotal, qtd: g.qtd, continua: false }); livre -= ALT.grupo; primeira = false; }
-      paginas.at(-1)!.push({ tipo: "item", sku: it.sku ?? "—", referencia: it.referencia || it.sku || "—", descricao: it.descricao, preco: it.preco_cents, qtd: it.quantidade });
+      paginas.at(-1)!.push({ tipo: "item", sku: it.sku ?? "—", referencia: it.referencia?.trim() && !/^0+$/.test(it.referencia.trim()) ? it.referencia.trim() : "Sem referência", descricao: it.descricao, preco: it.preco_cents, qtd: it.quantidade });
       livre -= ALT.item;
     }
   }
@@ -171,8 +171,9 @@ body{font-family:'Jost',Arial,sans-serif;color:#2B201C;-webkit-print-color-adjus
 .serif{font-family:'Cormorant Garamond',Georgia,serif}
 .eyebrow{font-size:6.6pt;letter-spacing:.28em;text-transform:uppercase;color:#7A5642;font-weight:500}
 .cab{display:flex;justify-content:space-between;align-items:flex-start;height:23mm;border-bottom:.35mm solid #C49A7C}
-.marca{display:flex;align-items:center;gap:5mm}
-.marca img{width:14mm;height:auto}
+.marca{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.marca .assinatura-marca{display:flex;align-items:center;gap:3mm;min-height:12mm}
+.marca img{width:14mm;height:10mm;object-fit:contain;display:block}
 .marca .nome{font-family:'Cormorant Garamond',Georgia,serif;font-size:27pt;letter-spacing:.32em;line-height:1;color:#2B201C}
 .marca .end{font-size:7.6pt;color:#7A5642;margin-top:2.6mm;letter-spacing:.01em}
 .dir{display:flex;gap:4mm;align-items:flex-start}
@@ -243,7 +244,7 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
   const kit = num(d.remessa.kit, 3);
   const cliente = d.cliente_codigo ?? "—";
   const impresso = `${opcoes.impressoEm.toLocaleDateString("pt-BR")} ${opcoes.impressoEm.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
-  const marca = (pequena = false) => `<div class="marca"><img src="${esc(opcoes.logoUrl)}" alt=""><div><div class="nome">LARDAN</div>${pequena ? "" : `<div class="end">${esc(d.empresa.endereco_linha)}</div>`}</div></div>`;
+  const marca = (pequena = false) => `<div class="marca"><div class="assinatura-marca"><img src="${esc(opcoes.logoUrl)}" alt="Diamante LARDAN"><div class="nome">LARDAN</div></div>${pequena ? "" : `<div class="end">${esc(d.empresa.endereco_linha)}</div>`}</div>`;
   const rodape = (i: number) => `<div class="rod"><span>${esc(d.empresa.rodape_texto)}</span><span>Impresso em ${esc(impresso)} · ${esc(opcoes.operador)} · Página ${i + 1} de ${paginas.length}</span></div>`;
   const linhas = (ls: Linha[]) => ls.map((l) => l.tipo === "grupo"
     ? `<tr class="g"><td colspan="3">${esc(l.rotulo)}${l.continua ? "" : ` · ${l.qtd} ${l.qtd === 1 ? "peça" : "peças"}`}</td><td class="q">${l.continua ? "" : l.qtd}</td><td class="r">${l.continua ? "" : esc(brl(l.subtotal))}</td></tr>`

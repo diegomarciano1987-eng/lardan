@@ -1,5 +1,10 @@
 # Roadmap
 
+## Plano solicitado — aceite e personalização do romaneio (28/10/2026)
+- [x] Preparar plano com aceite bloqueante e assinatura preservada, teste do clique e persistência em ambiente isolado.
+- [x] Incluir correção da referência exata da etiqueta, diagnóstico do salvamento do Daniel e telefone por colaboradora.
+- [x] Incluir provas PDF real × cadastro para representante, consultora, remessa, peças e demais campos personalizados.
+
 ## Impressão de Remessas e Pix — 28/10/2026
 - [x] Expor configurações de impressoras A4/etiquetas por estação em Remessas, com confirmação de destino e limites honestos do navegador.
 - [x] Textos personalizados em Configurações e Remessas → Configurar impressora → Textos e Pix; permissão Master preservada.

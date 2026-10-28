@@ -24,7 +24,7 @@ import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, BookOpen, BriefcaseBusiness, FileText, CalendarClock, CalendarDays, Check, ChevronDown, ChevronRight, ChevronUp, CircleHelp, Home, LogOut, Menu, MessageCircle,
-  GraduationCap, PackageCheck, Phone, Plus, Search, ShoppingBag, Store, UserPlus, Users, Wallet,
+  GraduationCap, LayoutGrid, Medal, Route as IconeJornada, Gift, PackageCheck, Phone, Plus, Search, ShoppingBag, Store, UserPlus, Users, Wallet,
 } from "lucide-react";
 import { CartaoAcerto, CartaoLiga } from "@/components/consultora/LigaEAcerto";
 import { CartaoIndique } from "@/components/consultora/Lider";
@@ -42,7 +42,7 @@ import {
   meuParty, obterCliente, ETAPAS, historicoEtapas, linkInstagram, moverEtapa, pausarPessoa, rotuloEtapa, type Etapa, buscarPecas, registrarAtendimento, salvarCliente, type Atendimento, type Cliente, type Peca,
 } from "@/lib/consultora";
 
-export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "biblioteca" | "financeiro" | "mais" | "novo";
+export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "biblioteca" | "financeiro" | "mais" | "novo" | "jornada" | "liga";
 export type Nav = { aba: AbaApp; id?: string | undefined; modo?: "nova" | "editar" | undefined; q?: string | undefined };
 export type Ir = (n: Nav) => void;
 
@@ -246,6 +246,17 @@ function Estado({ tipo, texto, acao }: { tipo: "carregando" | "erro" | "vazio"; 
 
 /* ------------------------------------------------------------------ início */
 
+const BOTOES_INICIO: { r: string; i: typeof Plus; n: Nav }[] = [
+  { r: "Minha vitrine", i: Store, n: { aba: "vitrine" } },
+  { r: "Minha maleta", i: BriefcaseBusiness, n: { aba: "maleta" } },
+  { r: "Minhas clientes", i: Users, n: { aba: "clientes" } },
+  { r: "Jornada", i: IconeJornada, n: { aba: "jornada" } },
+  { r: "Meu financeiro", i: Wallet, n: { aba: "financeiro" } },
+  { r: "Indicações", i: Gift, n: { aba: "indicacoes" } },
+  { r: "Liga Lardan", i: Medal, n: { aba: "liga" } },
+  { r: "Mais", i: LayoutGrid, n: { aba: "mais" } },
+];
+
 export function Inicio({ ir }: { ir: Ir }) {
   const q = useQuery({ queryKey: ["consultora", "inicio"], queryFn: carregarInicio });
   const hora = new Date().getHours();
@@ -292,7 +303,24 @@ export function Inicio({ ir }: { ir: Ir }) {
       </header>
       <LembretesPagamento ir={ir} />
 
-      {/* 0159: Liga → ganhos → acerto → Nova venda → O que fazer agora → indicação → resumo */}
+      {/* Celular: 9 botões grandes estilo app de banco (Nova venda ocupa dois lugares) */}
+      <nav aria-label="Atalhos principais" className="consultora-nove grid grid-cols-2 gap-3 lg:hidden">
+        <button type="button" onClick={() => ir({ aba: "novo" })}
+          className="col-span-2 flex min-h-24 items-center gap-4 rounded-3xl bg-acao px-6 py-5 text-left text-acao-foreground shadow-[var(--shadow-app)] active:scale-[0.99]">
+          <span className="grid size-14 shrink-0 place-items-center rounded-full bg-acao-foreground/15"><Plus className="size-7" aria-hidden /></span>
+          <span className="text-2xl font-semibold">Nova venda</span>
+        </button>
+        {BOTOES_INICIO.map((b) => (
+          <button key={b.r} type="button" onClick={() => ir(b.n)}
+            className="consultora-nove-botao flex min-h-28 flex-col items-start justify-between gap-3 rounded-3xl border border-border bg-card p-4 text-left active:scale-[0.98]">
+            <span className="grid size-12 place-items-center rounded-2xl bg-primary/12"><b.i className="size-6 text-primary" aria-hidden /></span>
+            <span className="text-[1.1rem] font-semibold leading-tight">{b.r}</span>
+          </button>
+        ))}
+      </nav>
+
+      {/* 0159: Liga → ganhos → acerto → Nova venda → O que fazer agora → indicação → resumo (computador) */}
+      <div className="hidden space-y-7 lg:block">
       <CartaoLiga />
       <GanhosConsultora />
       {d && <CartaoAcerto d={d} ir={(aba) => ir({ aba })} />}
@@ -319,6 +347,7 @@ export function Inicio({ ir }: { ir: Ir }) {
           ))}
         </div>
       </section>
+      </div>
 
       <section className="consultora-inicio-pendencias" aria-labelledby="pend">
         <h2 id="pend" className="mb-3 text-xl font-semibold">O que fazer agora</h2>
@@ -352,12 +381,14 @@ export function Inicio({ ir }: { ir: Ir }) {
         </ul>
       </section>
 
+      <div className="hidden space-y-7 lg:block">
       <CartaoIndique abrir={() => ir({ aba: "indicacoes" })} />
       <CartaoNovidades />
       <CartaoMeuHistorico />
+      </div>
 
       {d && (
-        <section aria-labelledby="mes" className="consultora-resumo">
+        <section aria-labelledby="mes" className="consultora-resumo hidden lg:block">
           <h2 id="mes" className="mb-4 font-sans text-xl font-semibold">Seu resumo</h2>
           <dl className="grid grid-cols-2 gap-3 xl:grid-cols-4 lg:gap-4">
             {[
@@ -387,7 +418,7 @@ export function Inicio({ ir }: { ir: Ir }) {
 
 const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
+export function Clientes({ nav, ir, jornada }: { nav: Nav; ir: Ir; jornada?: boolean }) {
   const busca = nav.q ?? "";
   const q = useQuery({ queryKey: ["consultora", "clientes", busca], queryFn: () => listarClientes(busca) });
   const resumos = useQuery({ queryKey: ["consultora", "clientes-resumo"], queryFn: async () => { const { data, error } = await supabase.rpc("consultora_clientes_resumo"); if (error) throw error; return data as unknown as { client_id: string; pedidos_abertos: number }[]; } });
@@ -401,14 +432,14 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
 
   return (
     <div>
-      <Topo titulo="Minhas clientes" ajuda="clientes" />
+      <Topo titulo={jornada ? "Jornada das clientes" : "Minhas clientes"} ajuda="clientes" />
       <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_auto]">
         <label className="block">
           <span className="sr-only">Buscar pessoa</span>
           <span className="relative block">
             <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <input type="search" value={busca} placeholder="Buscar por nome, telefone ou Instagram" enterKeyHint="search"
-              onChange={(e) => ir({ aba: "clientes", q: e.target.value || undefined })}
+              onChange={(e) => ir({ aba: jornada ? "jornada" : "clientes", q: e.target.value || undefined })}
               className="admin-input min-h-14 rounded-2xl pl-12 text-[1.05rem]" />
           </span>
         </label>
@@ -417,7 +448,7 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
         </button>
       </div>
 
-      {!busca && q.data && <LembretesClientes clientes={q.data} abrir={(id) => ir({ aba: "clientes", id })} />}
+      {jornada && !busca && q.data && <LembretesClientes clientes={q.data} abrir={(id) => ir({ aba: "clientes", id })} />}
       {q.isLoading && <Estado tipo="carregando" texto="Carregando suas clientes…" />}
       {q.isError && <Estado tipo="erro" texto="Não foi possível carregar suas clientes." acao={<button className="admin-btn" onClick={() => q.refetch()}>Tentar de novo</button>} />}
       {q.data && q.data.length === 0 && (
@@ -425,7 +456,14 @@ export function Clientes({ nav, ir }: { nav: Nav; ir: Ir }) {
       )}
       {q.data && q.data.length > 0 && lista.length === 0 && <Estado tipo="vazio" texto={`Ninguém encontrado para “${busca}”.`} />}
 
-      {q.data && q.data.length > 0 && (
+      {!jornada && lista.length > 0 && (
+        <ul className="space-y-2" aria-label="Lista de clientes">
+          {[...lista].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")).map((c) => (
+            <li key={c.id} className="min-w-0"><CartaoPessoa c={c} pedidos={resumos.data?.find((r) => r.client_id === c.id)?.pedidos_abertos} onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>
+          ))}
+        </ul>
+      )}
+      {jornada && q.data && q.data.length > 0 && (
         <>
           {/* Celular e tablet: seções recolhíveis, sem colunas lado a lado */}
           <div className="space-y-3 xl:hidden">

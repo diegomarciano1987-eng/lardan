@@ -12567,6 +12567,35 @@ export type Database = {
           },
         ]
       }
+      pedido_colaboradora_telefones: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string
+          telefone: string
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por: string
+          telefone: string
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string
+          telefone?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedido_colaboradora_telefones_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pedido_config: {
         Row: {
           atualizado_em: string
@@ -17880,6 +17909,8 @@ export type Database = {
           variante: string
         }[]
       }
+      consultora_aceite_dados: { Args: { _cycle: string }; Returns: Json }
+      consultora_aceites_pendentes: { Args: never; Returns: Json }
       consultora_acesso_situacao: { Args: { _party: string }; Returns: Json }
       consultora_asaas_preparar: {
         Args: { _actor: string; _payload: Json }
@@ -19612,6 +19643,15 @@ export type Database = {
         Args: { _dias: number; _token_hash: string }
         Returns: Json
       }
+      peca_referencia_etiqueta: {
+        Args: { _produto: string; _variante: string }
+        Returns: string
+      }
+      pedido_colaboradora_telefone_salvar: {
+        Args: { _telefone: string; _user: string }
+        Returns: Json
+      }
+      pedido_colaboradoras_ler: { Args: never; Returns: Json }
       pedido_config_ler: { Args: never; Returns: Json }
       pedido_config_salvar: { Args: { _dados: Json }; Returns: Json }
       pedido_grupo_peca: {

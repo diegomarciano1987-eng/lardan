@@ -108,7 +108,7 @@ export function textoFaixas(faixas: FaixaPedido[]) {
 
 // ---------------------------------------------------------------- paginação
 type Linha = { tipo: "grupo"; rotulo: string; subtotal: number; qtd: number; continua: boolean }
-  | { tipo: "item"; sku: string; descricao: string; preco: number; qtd: number };
+  | { tipo: "item"; sku: string; referencia: string; descricao: string; preco: number; qtd: number };
 
 /** Alturas em mm (iguais às do CSS abaixo). */
 // Medidos no Chromium (A4, margens 12 mm): linha 5,0 mm; grupo 7,5 mm; tabela começa a 140,5 mm na pág. 1 e a 28 mm nas demais;

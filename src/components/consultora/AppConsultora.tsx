@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { AvisoProximaMaleta } from "./AvisoProximaMaleta";
 import { ComprasCliente } from "@/components/consultora/ComprasCliente";
 import { MensagensProntas } from "@/components/consultora/MensagensProntas";
 import { ListaPosVenda } from "@/components/consultora/PosVenda";
@@ -163,6 +164,7 @@ export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }:
         </header>
         {bloqueada && <div className="flex justify-end gap-3 px-4 pt-3 lg:hidden"><BotaoAjuda tela="maleta" /><Button variant="outline" onClick={() => void sair()}><LogOut className="size-4" />Sair</Button></div>}
         <main className="mx-auto w-full max-w-5xl px-4 pt-5 pb-[calc(7.75rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-7 lg:pb-12">
+          <AvisoProximaMaleta />
           {children}
         </main>
       </div>

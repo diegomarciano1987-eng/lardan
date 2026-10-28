@@ -13,4 +13,13 @@ describe("Pix do pedido — permissões e auditoria", () => {
     const p = await adm.unsafe(`select has_function_privilege('authenticated','public.pedido_pix_asaas_gravar(uuid,uuid,text,text,text)','execute') a, has_function_privilege('service_role','public.pedido_pix_asaas_gravar(uuid,uuid,text,text,text)','execute') s`);
     expect(p[0]?.a).toBe(false); expect(p[0]?.s).toBe(true);
   });
+  test("executor rejeita ator não Master e registra auditoria no vínculo", async () => {
+    const cons = await criarConta({ nome: "pix-audit-consultora", papeis: ["consultora"], comParty: true });
+    const master = await criarConta({ nome: "pix-audit-master", papeis: ["master"], comParty: true });
+    const conta = crypto.randomUUID();
+    await expect(adm.unsafe(`select public.pedido_pix_asaas_gravar($1,$2,'qr-iso','chave-iso','000201iso')`, [cons.uid, conta])).rejects.toThrow("Só o Master");
+    await adm.unsafe(`select public.pedido_pix_asaas_gravar($1,$2,'qr-iso','chave-iso','000201iso')`, [master.uid, conta]);
+    const rows = await adm.unsafe(`select actor_id,payload->>'qr_id' qr from public.audit_logs where action='pedido.pix_asaas_atualizado' and actor_id=$1`, [master.uid]);
+    expect(rows).toHaveLength(1); expect(rows[0]?.qr).toBe("qr-iso");
+  });
 });

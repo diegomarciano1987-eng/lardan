@@ -15,9 +15,9 @@ function lerConfig(): EtiquetaConfig {
 
 /**
  * Envio direto: a etiqueta é montada num quadro invisível da própria página e
- * vai para a impressora padrão da estação. Nenhuma janela, aba, PDF ou prévia
- * é aberta pelo LARDAN. Com o Chrome da estação em modo de impressão direta
- * (--kiosk-printing) e a Argox como padrão, sai sem nenhuma pergunta.
+ * confirma a impressora indicada pela estação antes do diálogo do navegador.
+ * Nenhuma aba ou PDF extra é aberto pelo LARDAN. A escolha física permanece
+ * no navegador; impressão silenciosa não é segura com dois destinos.
  */
 export async function enviarParaImpressora(items: EtiquetaItem[]) {
   const validos = items.filter((i) => i.quantidade > 0);
@@ -99,7 +99,7 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
     <Button variant="outline" onClick={() => setOpen(true)}><Printer aria-hidden />{label}</Button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="admin-scope z-[150] max-h-[85vh] max-w-2xl overflow-y-auto text-ledger-text">
-        <DialogHeader><DialogTitle>Imprimir etiqueta</DialogTitle><DialogDescription>Bipe o código de barras ou digite referência ou nome. Cada clique manda 1 etiqueta direto para a impressora.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>Imprimir etiqueta</DialogTitle><DialogDescription>Bipe o código de barras ou digite referência ou nome. Cada clique prepara 1 etiqueta e confirma a impressora.</DialogDescription></DialogHeader>
         <label className="relative block">
           <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
           <input autoFocus className="admin-input w-full pl-9" placeholder="Código de barras, referência ou nome" aria-label="Buscar peça para etiqueta" value={termo} onChange={(e) => setTermo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void enter(); } }} />
@@ -121,7 +121,7 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
 /**
  * Botão de impressão usado em ficha, estoque, maleta, remessa e montagem.
  * Um clique manda direto para a impressora: 1 por peça, ou a quantidade da
- * maleta/remessa quando a origem traz quantidade. Sem diálogo, sem prévia.
+ * maleta/remessa quando a origem traz quantidade. Confirma o destino antes do diálogo do navegador.
  */
 export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = false }: { origens: EtiquetaOrigem[]; label?: string; compact?: boolean; onOpenChange?: (open: boolean) => void }) {
   const [enviando, setEnviando] = useState(false);

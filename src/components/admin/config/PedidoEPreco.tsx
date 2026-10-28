@@ -12,6 +12,11 @@ import { Panel } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { traduzir } from "@/lib/maletas";
 import { exigirPreBaixa } from "@/lib/pre-baixa";
+import { useServerFn } from "@tanstack/react-start";
+import { vincularPixPedidoAsaas } from "@/lib/pedido-pix.functions";
+import { validarPixGlobal, type PixPedido } from "@/lib/pix-pedido";
+import { Button } from "@/components/ui/button";
+import QRCode from "qrcode";
 
 async function rpc<T>(fn: string, args: Record<string, unknown> = {}): Promise<T> {
   const { data, error } = await supabase.rpc(fn as never, args as never);
@@ -39,6 +44,16 @@ const CAMPOS: { k: string; rotulo: string; longo?: boolean; numero?: boolean }[]
 
 export function ConfigPedido({ master }: { master: boolean }) {
   const qc = useQueryClient();
+  const vincular = useServerFn(vincularPixPedidoAsaas);
+  const pix = useQuery({ queryKey: ["pedido-pix-asaas"], queryFn: () => rpc<PixPedido | null>("pedido_pix_asaas_ler"), retry: false });
+  const [qrImage, setQrImage] = React.useState("");
+  React.useEffect(() => {
+    let ativo = true;
+    setQrImage("");
+    if (pix.data) QRCode.toDataURL(pix.data.payload, { width: 300, margin: 4, errorCorrectionLevel: "M" }).then((url) => { if (ativo) setQrImage(url); }).catch(() => { if (ativo) toast.error("Não foi possível desenhar o QR Pix."); });
+    return () => { ativo = false; };
+  }, [pix.data]);
+  const ligarPix = useMutation({ mutationFn: () => vincular(), onSuccess: () => { void qc.invalidateQueries({ queryKey: ["pedido-pix-asaas"] }); toast.success("Pix oficial vinculado ao pedido, sem valor fixo."); }, onError: (e) => toast.error(traduzir(e)) });
   const q = useQuery({ queryKey: ["pedido-config"], queryFn: () => rpc<Config>("pedido_config_ler") });
   const [form, setForm] = React.useState<Config>({});
   React.useEffect(() => { if (q.data) setForm(q.data); }, [q.data]);
@@ -52,9 +67,19 @@ export function ConfigPedido({ master }: { master: boolean }) {
     onSuccess: () => { toast.success("Dados do pedido salvos. Valem na próxima impressão."); void qc.invalidateQueries({ queryKey: ["pedido-config"] }); },
     onError: (e) => toast.error(traduzir(e)),
   });
-  if (!q.data) return null;
+  if (q.isError) return <p role="alert" className="text-destructive">{traduzir(q.error)}</p>;
+  if (!q.data) return <p className="text-ledger-muted">Carregando dados do pedido…</p>;
   return (
     <Panel title="Pedido de consignação — dados da folha">
+      <div className="mb-6 space-y-3 border-b border-line-soft pb-5">
+        <p className="font-semibold text-asaas">Pix global Asaas LARDAN</p>
+        {pix.isError ? <p role="alert" className="text-sm text-destructive">{traduzir(pix.error)}</p> : pix.data ? <div className="flex flex-wrap items-center gap-4">
+          {qrImage && <img src={qrImage} alt="QR Pix oficial da conta LARDAN no Asaas" className="size-28" />}
+          <div className="min-w-0 flex-1 text-sm"><p className="font-semibold">{validarPixGlobal(pix.data.payload, pix.data.chave).favorecido}</p><p className="break-all">Chave aleatória: {pix.data.chave}</p><p className="text-ledger-muted">Sem valor fixo · múltiplos pagamentos · vinculado em {new Date(pix.data.atualizado_em).toLocaleString("pt-BR")}</p></div>
+        </div> : <p className="text-sm text-ledger-muted">Pix oficial ainda não vinculado ao pedido.</p>}
+        {master && !pix.data && <Button className="bg-asaas text-asaas-foreground hover:bg-asaas/90" disabled={ligarPix.isPending || pix.isPending} onClick={() => ligarPix.mutate()}>{ligarPix.isPending ? "Consultando Asaas…" : "Vincular Pix Asaas ao pedido"}</Button>}
+        <p className="text-xs text-ledger-muted">O QR usa a chave oficial do Asaas. Os campos manuais abaixo são preservados; o QR oficial prevalece na impressão. Recebimentos precisam ser conferidos na conciliação: pagar o QR não baixa dívidas automaticamente pelo nome.</p>
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         {CAMPOS.map((c) => (
           <label key={c.k} className={`grid gap-1.5 text-sm ${c.longo ? "md:col-span-2" : ""}`}>

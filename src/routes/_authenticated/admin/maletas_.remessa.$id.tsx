@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, UserRound } from "lucide-react";
 import { abrirMaletaRepresentante, mensagem } from "@/lib/maletas-perdidas";
 import { EnvioRemessa } from "@/components/admin/maletas/EnvioRemessa";
+import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import { liberarKitSemPreBaixa } from "@/lib/pre-baixa";
 import { toast } from "sonner";
@@ -129,6 +130,7 @@ function RemessaPage() {
           <div className="mt-2"><EnvioRemessa remessaId={r.id} podeAlterar={podeMontar && r.status !== "fechada" && r.status !== "cancelada"} /></div>
         </div>
         <StatusBadge tone={s.tom}>{s.rotulo}</StatusBadge>
+        <ConfigurarImpressora />
         <EtiquetasImprimir origens={(maletas.data ?? []).map((m) => ({ cycleId: m.cycle_id }))} />
       </div>
 

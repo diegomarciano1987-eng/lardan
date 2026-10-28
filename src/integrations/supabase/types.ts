@@ -12630,6 +12630,36 @@ export type Database = {
         }
         Relationships: []
       }
+      pedido_pix_asaas: {
+        Row: {
+          account_id: string
+          atualizado_em: string
+          atualizado_por: string
+          chave: string
+          id: boolean
+          payload: string
+          qr_id: string
+        }
+        Insert: {
+          account_id: string
+          atualizado_em?: string
+          atualizado_por: string
+          chave: string
+          id?: boolean
+          payload: string
+          qr_id: string
+        }
+        Update: {
+          account_id?: string
+          atualizado_em?: string
+          atualizado_por?: string
+          chave?: string
+          id?: boolean
+          payload?: string
+          qr_id?: string
+        }
+        Relationships: []
+      }
       plating_types: {
         Row: {
           code: string
@@ -19588,6 +19618,17 @@ export type Database = {
         Args: { _categoria: string; _nome: string; _sku: string }
         Returns: string
       }
+      pedido_pix_asaas_gravar: {
+        Args: {
+          _account: string
+          _actor: string
+          _chave: string
+          _payload: string
+          _qr: string
+        }
+        Returns: undefined
+      }
+      pedido_pix_asaas_ler: { Args: never; Returns: Json }
       phone_canon: { Args: { v: string }; Returns: string }
       praca_alternar: {
         Args: { _ativo: boolean; _id: string }

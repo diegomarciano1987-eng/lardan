@@ -293,6 +293,20 @@ export class TransporteHttpAsaas implements TransporteAsaas {
   }
 
   /** Pix copia-e-cola e QR oficial da cobrança. */
+  async chavePixGlobal(): Promise<string> {
+    const c = await this.enviar<Json>("GET", "/pix/addressKeys", { query: { limit: 100, offset: 0 } });
+    const chaves = (Array.isArray(c?.["data"]) ? c["data"] as Json[] : []).filter((x) => x["status"] === "ACTIVE");
+    if (c?.["hasMore"] || chaves.length !== 1 || typeof chaves[0]?.["key"] !== "string") throw new Error("A conta deve ter uma única chave Pix ativa; confira no Asaas antes de vincular.");
+    return chaves[0]["key"] as string;
+  }
+
+  async criarPixGlobal(chave: string): Promise<{ id: string; payload: string }> {
+    const c = await this.enviar<Json>("POST", "/pix/qrCodes/static", { corpo: { addressKey: chave, format: "ALL", allowsMultiplePayments: true, externalReference: "lardan:pedido:pix-global" } });
+    if (typeof c?.["id"] !== "string" || typeof c["payload"] !== "string") throw new Error("Asaas não retornou o QR Pix oficial.");
+    return { id: c["id"], payload: c["payload"] };
+  }
+
+  /** Pix copia-e-cola e QR oficial da cobrança. */
   async pixQrCode(id: string) {
     const c = await this.enviar<Json>("GET", `/payments/${encodeURIComponent(id)}/pixQrCode`, {}, true);
     const o = (c ?? {}) as Record<string, unknown>;

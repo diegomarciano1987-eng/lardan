@@ -1177,6 +1177,13 @@
       "when": 1793046686866,
       "tag": "0167_rede_cobertura_um_por_ibge",
       "breakpoints": true
+    },
+    {
+      "idx": 168,
+      "version": "7",
+      "when": 1793217109909,
+      "tag": "0168_pedido_pix_global_asaas",
+      "breakpoints": true
     }
   ]
 }

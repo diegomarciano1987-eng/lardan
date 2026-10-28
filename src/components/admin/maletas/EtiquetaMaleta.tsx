@@ -3,7 +3,8 @@ import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { detalheMaleta } from "@/lib/maletas";
-import { CONFIG_ETIQUETA, documentoEtiquetas, svgEtiqueta } from "@/lib/etiquetas";
+import { svgEtiqueta } from "@/lib/etiquetas";
+import { enviarParaImpressora } from "@/components/admin/EtiquetasImprimir";
 
 export function EtiquetaMaleta({ cycleId, preview = false }: { cycleId: string; preview?: boolean }) {
   const [error, setError] = useState("");
@@ -13,16 +14,11 @@ export function EtiquetaMaleta({ cycleId, preview = false }: { cycleId: string; 
   let svg = "";
   let invalid = "";
   if (code) { try { svg = svgEtiqueta(code); } catch (e) { invalid = e instanceof Error ? e.message : "Código inválido"; } }
-  function imprimir() {
+  async function imprimir() {
     if (!code) return;
     try {
-      let config = CONFIG_ETIQUETA;
-      try { const saved = JSON.parse(localStorage.getItem("lardan.etiquetas.argox.alca-direita.v2") ?? "null"); if (saved) config = { ...config, ...saved }; } catch { /* Defaults */ }
-      const html = documentoEtiquetas([{ id: cycleId, nome: `Maleta ${code}`, referencia: code, barcode: code, quantidade: 1 }], config);
-      const w = window.open("", "_blank", "width=900,height=650");
-      if (!w) throw new Error("Permita pop-ups para abrir a impressão.");
-      w.document.write(html); w.document.close(); w.focus(); w.setTimeout(() => w.print(), 250);
-      setNotice("Janela aberta; impressão física não confirmada."); setError("");
+      const n = await enviarParaImpressora([{ id: cycleId, nome: `Maleta ${code}`, referencia: code, barcode: code, quantidade: 1 }]);
+      if (n) setNotice("Impressão preparada; saída física não confirmada."); setError("");
     } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível imprimir."); }
   }
   return <div className="space-y-2 text-ledger-text">

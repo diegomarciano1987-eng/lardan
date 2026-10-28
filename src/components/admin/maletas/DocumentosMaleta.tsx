@@ -9,6 +9,9 @@ import { brl, traduzir, type ItemComposicao } from "@/lib/maletas";
 import { valorPorExtenso } from "@/lib/remessa";
 import { documentoPedido, type PedidoDados } from "@/lib/pedido-consignacao";
 import diamante from "@/assets/lardan-diamante.png.asset.json";
+import { confirmarImpressora } from "@/components/admin/ConfirmarImpressora";
+import { validarPixGlobal, type PixPedido } from "@/lib/pix-pedido";
+import QRCode from "qrcode";
 
 interface DocConsultora {
   nome: string;
@@ -43,7 +46,8 @@ function dataCurta(iso: string | null | undefined) {
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("pt-BR");
 }
 
-function abrirImpressao(titulo: string, corpo: string) {
+async function abrirImpressao(titulo: string, corpo: string) {
+  if (!await confirmarImpressora("a4")) return;
   // Quadro invisível na própria página: nenhuma janela ou aba extra, vai direto para a impressão.
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
@@ -54,6 +58,7 @@ function abrirImpressao(titulo: string, corpo: string) {
   d.open();
   d.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${titulo}</title>
 <style>
+  @page{size:A4 portrait;margin:12mm}
   body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:32px;font-size:13px}
   h1{font-size:18px;text-align:center;letter-spacing:.12em;margin:0 0 4px}
   h2{font-size:13px;text-align:center;margin:0 0 16px;font-weight:400}
@@ -65,7 +70,7 @@ function abrirImpressao(titulo: string, corpo: string) {
   .assinatura{margin-top:56px;border-top:1px solid #111;width:70%;margin-left:auto;margin-right:auto;text-align:center;padding-top:4px}
   .valor{font-size:16px;font-weight:700}
   .mutismo{font-size:11px;color:#333}
-  @media print{body{margin:10mm}}
+  @media print{body{margin:0}}
 </style></head><body>${corpo}</body></html>`);
   d.close();
   w.addEventListener("afterprint", () => window.setTimeout(() => frame.remove(), 1000), { once: true });
@@ -73,7 +78,8 @@ function abrirImpressao(titulo: string, corpo: string) {
 }
 
 /** Imprime um documento HTML completo (com fontes e imagens) num quadro invisível, esperando as fontes carregarem. */
-function imprimirDocumento(html: string) {
+async function imprimirDocumento(html: string) {
+  if (!await confirmarImpressora("a4")) return;
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
   frame.style.cssText = "position:fixed;right:0;bottom:0;width:210mm;height:297mm;border:0;opacity:0;pointer-events:none";
@@ -90,15 +96,24 @@ function imprimirDocumento(html: string) {
 /** Pedido de consignação (modelo 26/10/2026): dados e preços gravados vêm do banco (kit_pedido_dados). */
 export async function imprimirPedidoConsignacao(cycleId: string) {
   try {
-    const [{ data, error }, user] = await Promise.all([
+    const [{ data, error }, user, pix] = await Promise.all([
       supabase.rpc("kit_pedido_dados" as never, { _cycle: cycleId } as never),
       supabase.auth.getUser(),
+      supabase.rpc("pedido_pix_asaas_ler"),
     ]);
     if (error) throw error;
+    if (pix.error) throw pix.error;
     const dados = data as unknown as PedidoDados;
     if (!dados.itens.length) { toast.error("A maleta ainda não tem peças para o pedido."); return; }
     const operador = String(user.data.user?.user_metadata?.["full_name"] ?? user.data.user?.email ?? "—");
-    imprimirDocumento(documentoPedido(dados, { logoUrl: new URL(diamante.url, window.location.origin).href, operador, impressoEm: new Date() }));
+    const oficial = pix.data as unknown as PixPedido | null;
+    let pixQrUrl: string | undefined;
+    if (oficial) {
+      const info = validarPixGlobal(oficial.payload, oficial.chave);
+      pixQrUrl = await QRCode.toDataURL(oficial.payload, { width: 480, margin: 4, errorCorrectionLevel: "M" });
+      dados.empresa.pix_tipo = "Chave aleatória Asaas"; dados.empresa.pix_chave = oficial.chave; dados.empresa.pix_favorecido = info.favorecido;
+    } else toast.warning("Pix oficial ainda não vinculado. Configure em Remessas → Configurar impressora → Textos e Pix.");
+    await imprimirDocumento(documentoPedido(dados, { logoUrl: new URL(diamante.url, window.location.origin).href, operador, impressoEm: new Date(), ...(pixQrUrl ? { pixQrUrl } : {}) }));
   } catch (e) { toast.error(traduzir(e)); }
 }
 

@@ -1,5 +1,11 @@
 # Roadmap
 
+## Impressão de Remessas e Pix — 28/10/2026
+- [x] Expor configurações de impressoras A4/etiquetas por estação em Remessas, com confirmação de destino e limites honestos do navegador.
+- [x] Textos personalizados em Configurações e Remessas → Configurar impressora → Textos e Pix; permissão Master preservada.
+- [x] Pix global oficial Asaas vinculado via ação autenticada; QR sem valor fixo no pedido/romaneio, sem baixa automática.
+- [x] Preferências persistidas e impressão real da Iris pelo botão Romaneio; 70 itens em 3 folhas, QR das folhas 1 e 3 decodificados. Testes isolados e unitários OK. Impressoras físicas dependem de teste da estação; telas dependem de publicar.
+
 ## Conciliação Asaas/bancos — correções (relatório Diego 25/10/2026)
 - [ ] 1. Baixa parcial Maria Celina (R$ 299,22, fatura 935298558, título 2026-024776 parc. 2 R$ 656,22). DIAGNÓSTICO: não foi automático — estorno manual do Daniel Maciel em 21/10 02:31 ("feita por engano; vincular ao título correto"). Alocação original estava correta (357,00 + 299,22 = 656,22). Baixa SmallData de R$ 357,00 (13/10) não existe em nenhuma tabela importada — falta importar pagamentos.csv. PENDENTE: confirmar com Diego antes de refazer a alocação (conflita com estorno deliberado do Daniel)
 - [ ] 2. Sincronização Asaas: cron de COBRANÇAS rodou todos os dias 21–25/10 (09:00, concluída). O que parou foi o EXTRATO: imports em 20/10 e depois só 25/10 manual. Causa: sync-matinal não cobre extrato. FIX: incluir extrato no sync matinal

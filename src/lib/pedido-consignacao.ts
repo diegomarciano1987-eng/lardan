@@ -113,7 +113,7 @@ type Linha = { tipo: "grupo"; rotulo: string; subtotal: number; qtd: number; con
 /** Alturas em mm (iguais às do CSS abaixo). */
 // Medidos no Chromium (A4, margens 12 mm): linha 5,0 mm; grupo 7,5 mm; tabela começa a 140,5 mm na pág. 1 e a 28 mm nas demais;
 // cabeçalho da tabela 7 mm; rodapé a 284,3 mm (deixamos 3 mm de respiro); fechamento (total + garantia + Pix) 68 mm.
-const ALT = { item: 5.0, grupo: 7.5, pag1: 130.5, pagN: 243, fim: 70 };
+const ALT = { item: 5.0, grupo: 7.5, pag1: 125.5, pagN: 243, fim: 70 };
 
 export function montarLinhas(itens: PedidoDados["itens"]) {
   const out: { grupo: GrupoPeca; rotulo: string; itens: PedidoDados["itens"]; subtotal: number; qtd: number }[] = [];
@@ -180,10 +180,10 @@ body{font-family:'Jost',Arial,sans-serif;color:#2B201C;-webkit-print-color-adjus
 .dir .rem{font-family:'Cormorant Garamond',Georgia,serif;font-size:20pt;line-height:1.15;margin-top:1.6mm}
 .dir .kit{font-size:8.4pt;margin-top:.6mm}
 .qr{width:17mm;height:17mm;border:.3mm dashed #C49A7C;border-radius:2mm;display:flex;align-items:center;justify-content:center;text-align:center;font-size:5.6pt;color:#7A5642;line-height:1.3;padding:1mm}
-.cartoes{display:grid;grid-template-columns:1.42fr 1fr .95fr;gap:3mm;margin-top:4mm;height:23mm}
-.cartao{border:.3mm solid #E7D8CB;border-radius:2.4mm;padding:3.2mm 3.4mm 2mm;overflow:hidden}
+.cartoes{display:grid;grid-template-columns:1.42fr 1fr .95fr;gap:3mm;margin-top:4mm;min-height:27mm}
+.cartao{border:.3mm solid #E7D8CB;border-radius:2.4mm;padding:3.2mm 3.4mm 2mm;min-width:0}
 .cartao .t{font-size:10.2pt;font-weight:600;margin:1.8mm 0 1.2mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cartao .l{font-size:8pt;line-height:1.55}
+.cartao .l{font-size:8pt;line-height:1.55;overflow-wrap:anywhere}
 .faixa{display:flex;margin-top:3.4mm;border:.35mm solid #2B201C;border-radius:2.4mm;overflow:hidden;min-height:19mm}
 .faixa>div{padding:3.4mm 3.6mm 2mm;border-right:.3mm solid #E7D8CB}
 .faixa>div:last-child{border-right:0}
@@ -226,12 +226,13 @@ tr.g td.r,tr.g td.q{font-size:8pt;letter-spacing:.06em}
 .box h4{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:14pt;margin:0 0 2mm}
 .box p{font-size:7.3pt;line-height:1.55;margin:0 0 1.8mm;color:#4A3A33}
 .pix{background:#F6EFE8;border-radius:2.4mm;padding:3mm 3.6mm;display:flex;gap:3.4mm;align-items:center;margin-top:3mm}
-.pix .qr{width:16mm;height:16mm;flex-shrink:0}
-.pix p{font-size:7.3pt;line-height:1.6;margin:0}
+.pix .qr{width:24mm;height:24mm;flex-shrink:0;padding:0;border:0;background:#fff;border-radius:0}
+.pix .qr img{width:100%;height:100%;display:block}
+.pix p{font-size:7.3pt;line-height:1.6;margin:0;overflow-wrap:anywhere;min-width:0}
 .rod{position:absolute;left:12mm;right:12mm;bottom:7mm;gap:4mm;display:flex;justify-content:space-between;border-top:.2mm solid #C49A7C;padding-top:2mm;font-size:6.8pt;color:#7A5642}
 `;
 
-export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date }) {
+export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date; pixQrUrl?: string }) {
   const grupos = montarLinhas(d.itens);
   const paginas = paginar(grupos);
   const total = d.itens.reduce((s, i) => s + i.preco_cents * i.quantidade, 0);
@@ -256,7 +257,7 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
   <div class="cab">${marca()}
     <div class="dir"><div class="txt"><div class="eyebrow">Pedido de consignação</div>
       <div class="rem">Remessa ${esc(remessa)}</div><div class="kit">Kit ${esc(kit)} · Cliente ${esc(cliente)}</div></div>
-      <div class="qr">[QR do pedido no app]</div></div>
+      ${opcoes.pixQrUrl ? `<div class="qr" style="padding:0;border:0;background:#fff"><img src="${esc(opcoes.pixQrUrl)}" alt="QR Pix LARDAN" style="width:100%;height:100%"></div>` : ""}</div>
   </div>
   <div class="cartoes">
     <div class="cartao"><div class="eyebrow">Consultora</div><div class="t">${esc(d.consultora.nome)}</div>
@@ -287,13 +288,13 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
   <div class="blocos">
     <div class="box"><h4>${esc(d.empresa.garantia_titulo)}</h4><p>${rico(d.empresa.garantia_texto)}</p><p>${rico(d.empresa.garantia_exclusoes)}</p></div>
     <div><div class="box"><h4>Montagem do próximo kit</h4><p>${rico(d.empresa.montagem_texto)}</p></div>
-      <div class="pix"><div class="qr">[QR Pix]</div><p><strong>Pagamento:</strong> ${rico(d.empresa.pagamento_texto)}<br>Pix (${esc(d.empresa.pix_tipo)}) <strong>${esc(d.empresa.pix_chave)}</strong><br>${esc(d.empresa.pix_favorecido)}</p></div></div>
+      <div class="pix">${opcoes.pixQrUrl ? `<div class="qr"><img src="${esc(opcoes.pixQrUrl)}" alt="QR Pix oficial LARDAN Asaas"></div>` : ""}<p><strong>Pagamento:</strong> ${rico(d.empresa.pagamento_texto)}<br>${opcoes.pixQrUrl ? `Pix (${esc(d.empresa.pix_tipo)}) <strong>${esc(d.empresa.pix_chave)}</strong><br>${esc(d.empresa.pix_favorecido)}` : "Pix oficial indisponível — consulte a LARDAN."}</p></div></div>
   </div>`;
 
   return paginas.map((ls, i) => `<section class="pg">${i === 0 ? pagina1 : cab2}${tabela(ls)}${i === paginas.length - 1 ? final : ""}${rodape(i)}</section>`).join("");
 }
 
-export function documentoPedido(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date }) {
+export function documentoPedido(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date; pixQrUrl?: string }) {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Pedido de consignação — Remessa ${esc(num(d.remessa.numero, 5))}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">

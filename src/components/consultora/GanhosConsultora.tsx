@@ -4,12 +4,9 @@ import { CalendarClock, Percent, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { brl } from "@/lib/maletas";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-type Ganhos = {
-  maleta: boolean; configurado: boolean; vendido_cents?: number; pecas_vendidas?: number; pecas_total?: number;
-  acerto?: string | null; hoje?: string; faixa?: { titulo: string; percentual: number } | null; comissao_cents?: number;
-  repasse_cents?: number | null; proxima?: { titulo: string; percentual: number; falta_cents: number; min_cents: number } | null;
-};
+import { Button } from "@/components/ui/button";
+import { ganhosQuery } from "@/lib/consultora-queries";
+import { progressoMaleta } from "@/lib/consultora-progresso";
 type Linha = { min_cents: number; percentual: number; titulo: string };
 
 const dias = (de: string, ate: string) => Math.round((new Date(ate + "T12:00:00").getTime() - new Date(de + "T12:00:00").getTime()) / 86400000);
@@ -42,18 +39,38 @@ export function TabelaComissao({ aberta, fechar }: { aberta: boolean; fechar: ()
 }
 
 /** Card "Quanto eu ganho" + barra de meta + contagem do acerto (estimativa; acerto oficial é do financeiro). */
-export function GanhosConsultora() {
+export function GanhosConsultora({ compacto = false }: { compacto?: boolean }) {
   const [tabela, setTabela] = React.useState(false);
-  const q = useQuery({ queryKey: ["consultora", "ganhos"], queryFn: async () => {
-    const { data, error } = await supabase.rpc("consultora_ganhos" as never); if (error) throw error; return data as unknown as Ganhos;
-  } });
+  const q = useQuery(ganhosQuery());
   const g = q.data;
+  if (q.isPending) return <div role="status" className="py-3 text-base text-muted-foreground">Carregando vendas da maleta…</div>;
+  if (q.isError) return <div role="alert" className="py-3 text-base">Não foi possível atualizar suas vendas. <Button variant="outline" onClick={() => void q.refetch()}>Tentar novamente</Button></div>;
   if (!g || !g.maleta) return null;
   const vendido = g.vendido_cents ?? 0;
   const alvo = g.proxima?.min_cents ?? null;
   const progresso = alvo ? Math.min(100, Math.round((vendido / alvo) * 100)) : 100;
   const pctPecas = g.pecas_total ? Math.round(((g.pecas_vendidas ?? 0) / g.pecas_total) * 100) : 0;
   const faltam = g.acerto && g.hoje ? dias(g.hoje, g.acerto) : null;
+  const status = progressoMaleta(vendido, g.valor_maleta_cents ?? 0);
+
+  if (compacto) return (
+    <section aria-label="Progresso de vendas da maleta" className="consultora-vendas-status rounded-lg border border-border bg-card p-4 sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="flex items-center gap-2 text-base font-semibold"><Wallet className="size-5 text-primary" aria-hidden />{(g.kits ?? 1) > 1 ? "Vendas da remessa" : "Vendas da maleta"}</h2>
+        <Button variant="ghost" className="h-10 px-2 text-base" onClick={() => setTabela(true)}><Percent className="size-4" />Comissão</Button>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <div><p className="text-base text-muted-foreground">Vendido e pago</p><p className="mt-1 text-xl font-semibold tabular-nums sm:text-2xl">{brl(vendido)}</p></div>
+        <div className="text-right"><p className="text-base text-muted-foreground">Comissão estimada</p><p className="mt-1 text-xl font-semibold tabular-nums sm:text-2xl">{g.configurado ? brl(g.comissao_cents ?? 0) : "Sem dados"}</p></div>
+      </div>
+      <div className="consultora-vendas-trilho relative mt-4 h-3 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Valor vendido da remessa" aria-valuemin={0} aria-valuemax={status.total} aria-valuenow={Math.min(status.vendido, status.total)} aria-valuetext={`${brl(vendido)} vendidos de ${brl(status.total)}`}>
+        <div className="consultora-vendas-preenchimento h-full rounded-full" style={{ width: `${status.percentual}%` }} />
+      </div>
+      <div className="mt-2 flex justify-between gap-3 text-base tabular-nums"><span>{brl(0)}</span><span className="text-right">{brl(status.total)}</span></div>
+      <p className="mt-3 text-base text-muted-foreground">{g.faixa ? <>Faixa atual: <strong className="text-foreground">{Number(g.faixa.percentual).toLocaleString("pt-BR")}%</strong></> : "Comissão ainda sem faixa"}{g.proxima ? <> · Faltam {brl(g.proxima.falta_cents)} para {Number(g.proxima.percentual).toLocaleString("pt-BR")}%</> : ""}</p>
+      <TabelaComissao aberta={tabela} fechar={() => setTabela(false)} />
+    </section>
+  );
 
   return (
     <section aria-labelledby="ganhos" className="rounded-3xl border border-border bg-card p-5 sm:p-6">

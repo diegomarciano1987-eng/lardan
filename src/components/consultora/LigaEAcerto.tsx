@@ -2,20 +2,39 @@
  * 0159 — cartões do Início: Liga Lardan (nível e quanto falta) e Acerto da maleta (data, valor, vendeu X de Y).
  */
 import { useQuery } from "@tanstack/react-query";
-import { Check, Star } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Check, Star, ChevronDown, ChevronUp } from "lucide-react";
+import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { ligaQuery } from "@/lib/consultora-queries";
 import { brl } from "@/lib/maletas";
 import type { Inicio } from "@/lib/consultora";
 
-type Liga = { nivel: string | null; proximo: string | null; ciclos: number | null; ciclos_min: number | null; faltam: number; venda_min_cents: number | null };
-
-export function CartaoLiga() {
-  const q = useQuery({ queryKey: ["consultora", "liga"], retry: false, queryFn: async () => {
-    const { data, error } = await supabase.rpc("minha_liga" as never); if (error) throw error; return data as unknown as Liga;
-  } });
+export function CartaoLiga({ compacto = false }: { compacto?: boolean }) {
+  const q = useQuery(ligaQuery());
+  const [expandida, setExpandida] = React.useState(false);
+  const detalhesId = React.useId();
+  React.useEffect(() => {
+    try { setExpandida(sessionStorage.getItem("lardan-liga-expandida") === "1"); } catch { /* optional preference */ }
+  }, []);
   const l = q.data;
   if (!l?.nivel) return null;
   const pct = l.ciclos_min ? Math.min(100, Math.round(((l.ciclos ?? 0) / l.ciclos_min) * 100)) : 100;
+  if (compacto) return (
+    <section aria-label="Liga LARDAN" className="consultora-liga-compacta rounded-lg border border-border bg-card px-4 py-2">
+      <div className="flex min-h-11 items-center gap-3">
+        <Star className="size-5 shrink-0 text-primary" aria-hidden />
+        <div className="min-w-0 flex-1"><p className="text-base font-semibold leading-snug">Liga LARDAN <span className="text-muted-foreground">· {l.nivel}</span></p></div>
+        <Button variant="ghost" size="icon" className="size-11 shrink-0" aria-label={expandida ? "Recolher Liga LARDAN" : "Expandir Liga LARDAN"} aria-expanded={expandida} aria-controls={detalhesId} onClick={() => {
+          setExpandida(!expandida);
+          try { sessionStorage.setItem("lardan-liga-expandida", expandida ? "0" : "1"); } catch { /* optional preference */ }
+        }}>{expandida ? <ChevronUp /> : <ChevronDown />}</Button>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Progresso da Liga" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}><div className="h-full bg-primary" style={{ width: `${pct}%` }} /></div>
+      {expandida && <div id={detalhesId} className="border-t border-border pt-3 mt-3 text-base leading-relaxed">
+        {l.proximo ? <><p className="font-semibold">Próximo nível: {l.proximo}</p><p className="mt-1 text-muted-foreground">{l.faltam > 0 ? `Faltam ${l.faltam} ciclos com venda acima de ${brl(l.venda_min_cents ?? 0)}.` : "Você já cumpre o próximo nível: ele aparece no próximo acerto."}</p></> : <p className="font-semibold">Nível {l.nivel}</p>}
+      </div>}
+    </section>
+  );
   return (
     <section className="rounded-3xl border border-border bg-card p-5">
       <div className="flex items-center justify-between">

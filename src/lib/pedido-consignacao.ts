@@ -137,7 +137,7 @@ export function paginar(grupos: ReturnType<typeof montarLinhas>): Linha[][] {
       const precisa = (primeira ? ALT.grupo : 0) + ALT.item;
       if (livre < precisa) { nova(); if (!primeira) { paginas.at(-1)!.push({ tipo: "grupo", rotulo: `${g.rotulo} (continuação)`, subtotal: 0, qtd: 0, continua: true }); livre -= ALT.grupo; } }
       if (primeira) { paginas.at(-1)!.push({ tipo: "grupo", rotulo: g.rotulo, subtotal: g.subtotal, qtd: g.qtd, continua: false }); livre -= ALT.grupo; primeira = false; }
-      paginas.at(-1)!.push({ tipo: "item", sku: it.sku ?? "—", descricao: it.descricao, preco: it.preco_cents, qtd: it.quantidade });
+      paginas.at(-1)!.push({ tipo: "item", sku: it.sku ?? "—", referencia: it.referencia || it.sku || "—", descricao: it.descricao, preco: it.preco_cents, qtd: it.quantidade });
       livre -= ALT.item;
     }
   }

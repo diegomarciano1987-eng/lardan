@@ -117,7 +117,7 @@ export function ConfigPedido({ master }: { master: boolean }) {
 
 type Linha = { variant_id: string; sku: string | null; produto: string; variante: string | null; categoria: string | null;
   antes_cents: number; depois_cents: number; diferenca_cents: number; pecas_na_rua: number; pecas_estoque: number };
-type Resumo = { variantes: number; mudam: number; antes_cents: number; depois_cents: number; maior_aumento_cents: number;
+type Resumo = { variantes: number; mudam: number; antes_cents: number; depois_cents: number; maior_aumento_cents: number; maior_reducao_cents?: number;
   media_aumento_pct: number | null; virada_em: string | null; ultimo_lote: string | null };
 
 const csv = (linhas: Linha[]) => {
@@ -160,14 +160,14 @@ export function PrecoNovo({ master }: { master: boolean }) {
     URL.revokeObjectURL(url);
   };
   return (
-    <Panel title="Preço novo (sempre para cima: ,90 até R$ 99,99 · 4,90 ou 9,90 a partir de R$ 100)">
+    <Panel title="Preço novo (sempre para baixo, degraus de R$ 5: 80,00–84,99 → 79,90 · 85,00–89,99 → 84,90)">
       <div className="space-y-4 text-sm">
         {r && (
           <div className="grid gap-3 md:grid-cols-4">
             <div className="rounded-xl border border-line-soft p-3"><p className="ledger-eyebrow">Variantes com preço</p><p className="text-xl font-semibold">{r.variantes}</p></div>
             <div className="rounded-xl border border-line-soft p-3"><p className="ledger-eyebrow">Mudam de preço</p><p className="text-xl font-semibold">{r.mudam}</p></div>
             <div className="rounded-xl border border-line-soft p-3"><p className="ledger-eyebrow">Soma antes → depois</p><p className="text-base font-semibold">{brl(r.antes_cents)} → {brl(r.depois_cents)}</p></div>
-            <div className="rounded-xl border border-line-soft p-3"><p className="ledger-eyebrow">Aumento médio / maior</p><p className="text-base font-semibold">{r.media_aumento_pct ?? 0}% · {brl(r.maior_aumento_cents)}</p></div>
+            <div className="rounded-xl border border-line-soft p-3"><p className="ledger-eyebrow">Redução média / maior</p><p className="text-base font-semibold">{Math.abs(r.media_aumento_pct ?? 0)}% · {brl(r.maior_reducao_cents ?? 0)}</p></div>
           </div>
         )}
         <p className="text-ledger-muted">

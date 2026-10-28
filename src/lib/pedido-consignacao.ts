@@ -184,7 +184,7 @@ body{font-family:'Jost',Arial,sans-serif;color:#2B201C;-webkit-print-color-adjus
 .cartao{border:.3mm solid #E7D8CB;border-radius:2.4mm;padding:3.2mm 3.4mm 2mm;overflow:hidden}
 .cartao .t{font-size:10.2pt;font-weight:600;margin:1.8mm 0 1.2mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cartao .l{font-size:8pt;line-height:1.55}
-.faixa{display:flex;margin-top:3.4mm;border:.35mm solid #2B201C;border-radius:2.4mm;overflow:hidden;height:19mm}
+.faixa{display:flex;margin-top:3.4mm;border:.35mm solid #2B201C;border-radius:2.4mm;overflow:hidden;min-height:19mm}
 .faixa>div{padding:3.4mm 3.6mm 2mm;border-right:.3mm solid #E7D8CB}
 .faixa>div:last-child{border-right:0}
 .faixa .total{background:#2B201C;color:#fff;flex:1.62}

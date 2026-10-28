@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { DetalheMaleta } from "@/lib/maletas";
 
 export type PendenciaAceite = { cycle_id: string; codigo: string; situacao: string; remessa: number | null };
-export type ConferenciaMaleta = DetalheMaleta & {
+export type ConferenciaMaleta = Omit<DetalheMaleta, "composicao"> & {
   remessa_numero: number | null;
   composicao: (DetalheMaleta["composicao"][number] & { referencia: string | null; categoria: string | null })[];
 };

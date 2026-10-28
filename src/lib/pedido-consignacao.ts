@@ -173,7 +173,7 @@ body{font-family:'Jost',Arial,sans-serif;color:#2B201C;-webkit-print-color-adjus
 .eyebrow{font-size:6.6pt;letter-spacing:.28em;text-transform:uppercase;color:#7A5642;font-weight:500}
 .cab{display:flex;justify-content:space-between;align-items:flex-start;height:23mm;border-bottom:.35mm solid #C49A7C}
 .marca{display:flex;flex-direction:column;align-items:flex-start;gap:0}
-.marca .assinatura-marca{display:flex;align-items:center;gap:3mm;min-height:12mm}
+.marca .linha-marca{display:flex;align-items:center;gap:3mm;min-height:12mm}
 .marca img{width:14mm;height:10mm;object-fit:contain;display:block}
 .marca .nome{font-family:'Cormorant Garamond',Georgia,serif;font-size:27pt;letter-spacing:.32em;line-height:1;color:#2B201C}
 .marca .end{font-size:7.6pt;color:#7A5642;margin-top:2.6mm;letter-spacing:.01em}
@@ -249,7 +249,7 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
   const kit = num(d.remessa.kit, 3);
   const cliente = d.cliente_codigo ?? "—";
   const impresso = `${opcoes.impressoEm.toLocaleDateString("pt-BR")} ${opcoes.impressoEm.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
-  const marca = (pequena = false) => `<div class="marca"><div class="assinatura-marca"><img src="${esc(opcoes.logoUrl)}" alt="Diamante LARDAN"><div class="nome">LARDAN</div></div>${pequena ? "" : `<div class="end">${esc(d.empresa.endereco_linha)}</div>`}</div>`;
+  const marca = (pequena = false) => `<div class="marca"><div class="linha-marca"><img src="${esc(opcoes.logoUrl)}" alt="Diamante LARDAN"><div class="nome">LARDAN</div></div>${pequena ? "" : `<div class="end">${esc(d.empresa.endereco_linha)}</div>`}</div>`;
   const rodape = (i: number) => `<div class="rod"><span>${esc(d.empresa.rodape_texto)}</span><span>Impresso em ${esc(impresso)} · ${esc(opcoes.operador)} · Página ${i + 1} de ${paginas.length}</span></div>`;
   const linhas = (ls: Linha[]) => ls.map((l) => l.tipo === "grupo"
     ? `<tr class="g"><td colspan="3">${esc(l.rotulo)}${l.continua ? "" : ` · ${l.qtd} ${l.qtd === 1 ? "peça" : "peças"}`}</td><td class="q">${l.continua ? "" : l.qtd}</td><td class="r">${l.continua ? "" : esc(brl(l.subtotal))}</td></tr>`

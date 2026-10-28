@@ -145,8 +145,11 @@ export function paginar(grupos: ReturnType<typeof montarLinhas>): Linha[][] {
     // O fechamento não cabe: em vez de uma folha só com o rodapé, leva as últimas peças junto (nunca página quase vazia).
     const ant = paginas.at(-1)!;
     const mover: Linha[] = [];
-    while (mover.length < 8 && ant.length > 1 && ant.at(-1)!.tipo === "item") mover.unshift(ant.pop()!);
-    if (ant.at(-1)?.tipo === "grupo" && mover.length) mover.unshift(ant.pop()!);
+    while (mover.filter((l) => l.tipo === "item").length < 8 && ant.length > 2) {
+      const l = ant.pop()!;
+      mover.unshift(l);
+      if (l.tipo === "grupo" && ant.at(-1)?.tipo === "grupo") mover.unshift(ant.pop()!);
+    }
     if (mover.length && mover[0]!.tipo === "item") {
       let g: Linha | undefined;
       for (const l of [...ant].reverse()) if (l.tipo === "grupo") { g = l; break; }

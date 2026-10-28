@@ -59,12 +59,17 @@ export function ConfigPedido({ master }: { master: boolean }) {
   const q = useQuery({ queryKey: ["pedido-config"], queryFn: () => rpc<Config>("pedido_config_ler") });
   const [form, setForm] = React.useState<Config>({});
   const [editado, setEditado] = React.useState(false);
-  React.useEffect(() => { if (q.data && !editado) setForm(q.data); }, [q.data, editado]);
+  const [minimoTexto, setMinimoTexto] = React.useState("");
+  React.useEffect(() => { if (q.data && !editado) { setForm(q.data); setMinimoTexto(q.data["proxima_maleta_minimo_cents"] == null ? "" : (Number(q.data["proxima_maleta_minimo_cents"]) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })); } }, [q.data, editado]);
   const alterar = (k: string, v: string) => { setEditado(true); setForm((f) => ({ ...f, [k]: v })); };
   const salvar = useMutation({
     mutationFn: () => {
       const mudou: Config = {};
-      for (const c of CAMPOS) if (String(form[c.k] ?? "") !== String(q.data?.[c.k] ?? "")) mudou[c.k] = c.numero ? (c.k === "proxima_maleta_minimo_cents" && String(form[c.k] ?? "") === "" ? null : Number(form[c.k])) : form[c.k] ?? "";
+      for (const c of CAMPOS) {
+        const valor = c.k === "proxima_maleta_minimo_cents" ? (minimoTexto.trim() ? Math.round(Number(minimoTexto.replace(/\./g, "").replace(",", ".")) * 100) : null) : form[c.k];
+        if (c.k === "proxima_maleta_minimo_cents" && valor != null && (!Number.isFinite(Number(valor)) || Number(valor) <= 0)) throw new Error("Informe uma venda mínima válida em reais.");
+        if (String(valor ?? "") !== String(q.data?.[c.k] ?? "")) mudou[c.k] = c.numero ? (valor == null ? null : Number(valor)) : valor ?? "";
+      }
       if (!Object.keys(mudou).length) throw new Error("Nada mudou.");
       return rpc<Config>("pedido_config_salvar", { _dados: mudou });
     },
@@ -90,8 +95,8 @@ export function ConfigPedido({ master }: { master: boolean }) {
             <span className="ledger-eyebrow">{c.rotulo}</span>
             {c.longo
               ? <textarea className="admin-input min-h-20" disabled={!master || salvar.isPending} value={String(form[c.k] ?? "")} onChange={(e) => alterar(c.k, e.target.value)} />
-              : <input className="admin-input" disabled={!master || salvar.isPending} inputMode={c.numero ? "decimal" : undefined} value={c.k === "proxima_maleta_minimo_cents" ? (form[c.k] == null ? "" : (Number(form[c.k]) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })) : String(form[c.k] ?? "")}
-                  onChange={(e) => alterar(c.k, c.k === "proxima_maleta_minimo_cents" ? (e.target.value.replace(/\D/g, "") || "") : c.numero ? e.target.value.replace(/\D/g, "") : e.target.value)} />}
+              : <input className="admin-input" disabled={!master || salvar.isPending} inputMode={c.numero ? "decimal" : undefined} value={c.k === "proxima_maleta_minimo_cents" ? minimoTexto : String(form[c.k] ?? "")}
+                  onChange={(e) => { if (c.k === "proxima_maleta_minimo_cents") { setEditado(true); setMinimoTexto(e.target.value.replace(/[^\d.,]/g, "")); } else alterar(c.k, c.numero ? e.target.value.replace(/\D/g, "") : e.target.value); }} />}
           </label>
         ))}
       </div>

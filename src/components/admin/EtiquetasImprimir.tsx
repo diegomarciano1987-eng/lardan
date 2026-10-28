@@ -3,15 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Printer, Search, Loader2, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { CONFIG_ETIQUETA, barrasEtiqueta, documentoEtiquetas, textoEtiqueta, type EtiquetaConfig, type EtiquetaItem } from "@/lib/etiquetas";
+import { barrasEtiqueta, documentoEtiquetas, lerCalibracao, textoEtiqueta, type EtiquetaItem } from "@/lib/etiquetas";
+import { CalibracaoArgox } from "@/components/admin/CalibracaoArgox";
 import { buscarEtiquetas, lerItensEtiquetas, type EtiquetaBusca, type EtiquetaOrigem } from "@/lib/etiquetas-dados";
 import { toast } from "sonner";
-import { confirmarImpressora } from "@/components/admin/ConfirmarImpressora";
-
-const CONFIG_KEY = "lardan.etiquetas.argox.alca-direita.v2";
-function lerConfig(): EtiquetaConfig {
-  try { const stored = JSON.parse(localStorage.getItem(CONFIG_KEY) ?? "null"); return stored ? { ...CONFIG_ETIQUETA, ...stored } : CONFIG_ETIQUETA; } catch { return CONFIG_ETIQUETA; }
-}
 
 /**
  * Envio direto: a etiqueta é montada num quadro invisível da própria página e
@@ -25,7 +20,12 @@ export async function enviarParaImpressora(items: EtiquetaItem[]) {
   for (const i of validos) {
     try { barrasEtiqueta(i.barcode ?? ""); } catch (e) { throw new Error(`${i.nome}: ${e instanceof Error ? e.message : "código inválido."}`); }
   }
-  if (!await confirmarImpressora("etiquetas")) return 0;
+  imprimirHtml(documentoEtiquetas(validos, lerCalibracao()));
+  return validos.reduce((s, i) => s + i.quantidade, 0);
+}
+
+/** Quadro invisível: sem aba, sem PDF e sem janela intermediária do LARDAN. */
+export function imprimirHtml(html: string) {
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
   frame.tabIndex = -1;
@@ -34,11 +34,10 @@ export async function enviarParaImpressora(items: EtiquetaItem[]) {
   const doc = frame.contentDocument;
   const win = frame.contentWindow;
   if (!doc || !win) { frame.remove(); throw new Error("Não foi possível preparar a impressão."); }
-  doc.open(); doc.write(documentoEtiquetas(validos, lerConfig())); doc.close();
+  doc.open(); doc.write(html); doc.close();
   const limpar = () => window.setTimeout(() => frame.remove(), 1000);
   win.addEventListener("afterprint", limpar, { once: true });
   window.setTimeout(() => { try { win.focus(); win.print(); } finally { window.setTimeout(() => frame.isConnected && frame.remove(), 60_000); } }, 150);
-  return validos.reduce((s, i) => s + i.quantidade, 0);
 }
 
 async function imprimirOrigens(origens: EtiquetaOrigem[], umaCada: boolean) {
@@ -54,21 +53,14 @@ export function EtiquetaDireta({ origens, label = "Imprimir etiqueta" }: { orige
   return <Button variant="outline" size="icon" title={origens.length ? label : "Sem dados de peças para imprimir"} aria-label={label} disabled={!origens.length} onClick={(e) => { e.stopPropagation(); void imprimirOrigens(origens, true); }}><Printer aria-hidden /></Button>;
 }
 
-/** Ajustes de calibração desta estação (margens e espaço entre linhas). */
 function AjustesEstacao() {
   const [open, setOpen] = useState(false);
-  const [config, setConfig] = useState<EtiquetaConfig>(CONFIG_ETIQUETA);
-  useEffect(() => { if (open) setConfig(lerConfig()); }, [open]);
   return <>
-    <Button variant="ghost" size="sm" onClick={() => setOpen(true)}><Settings2 aria-hidden />Ajustes desta estação</Button>
+    <Button variant="ghost" size="sm" onClick={() => setOpen(true)}><Settings2 aria-hidden />Calibrar e testar Argox</Button>
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="admin-scope z-[160] max-w-md text-ledger-text">
-        <DialogHeader><DialogTitle>Ajustes da Argox desta estação</DialogTitle><DialogDescription>Base 95 × 12 mm · 1 coluna · alça à direita. Vale só para este computador.</DialogDescription></DialogHeader>
-        <div className="grid grid-cols-2 gap-4">
-          {([["entreLinhas", "Espaço entre linhas (mm)"], ["margemEsquerda", "Margem esquerda (mm)"], ["margemSuperior", "Margem superior (mm)"]] as const).map(([key, title]) => <label key={key} className="grid gap-2 text-xs">{title}<input className="admin-input" type="number" min={0} max={10} step={0.1} value={config[key]} onChange={(e) => setConfig((c) => ({ ...c, [key]: Number(e.target.value) }))} /></label>)}
-        </div>
-        <p className="text-xs text-ledger-muted">Impressoras A4 e Argox: configure em Remessas → Configurar impressora. Confirme o destino na janela do navegador.</p>
-        <div className="flex justify-end"><Button onClick={() => { localStorage.setItem(CONFIG_KEY, JSON.stringify(config)); toast.success("Ajustes salvos nesta estação."); setOpen(false); }}>Salvar</Button></div>
+      <DialogContent className="admin-scope z-[160] max-h-[90vh] max-w-3xl overflow-y-auto text-ledger-text">
+        <DialogHeader><DialogTitle>Calibrar e testar a Argox</DialogTitle><DialogDescription>Vale só para este computador.</DialogDescription></DialogHeader>
+        <CalibracaoArgox />
       </DialogContent>
     </Dialog>
   </>;
@@ -99,7 +91,7 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
     <Button variant="outline" onClick={() => setOpen(true)}><Printer aria-hidden />{label}</Button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="admin-scope z-[150] max-h-[85vh] max-w-2xl overflow-y-auto text-ledger-text">
-        <DialogHeader><DialogTitle>Imprimir etiqueta</DialogTitle><DialogDescription>Bipe o código de barras ou digite referência ou nome. Cada clique prepara 1 etiqueta e confirma a impressora.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>Imprimir etiqueta</DialogTitle><DialogDescription>Bipe o código de barras ou digite referência ou nome. Cada clique abre a impressão de 1 etiqueta.</DialogDescription></DialogHeader>
         <label className="relative block">
           <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
           <input autoFocus className="admin-input w-full pl-9" placeholder="Código de barras, referência ou nome" aria-label="Buscar peça para etiqueta" value={termo} onChange={(e) => setTermo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void enter(); } }} />

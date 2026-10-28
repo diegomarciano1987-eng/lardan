@@ -47,7 +47,7 @@ export function EstacaoArgoxPainel() {
         <p className="font-semibold">Linguagem da Argox</p>
         <p className="text-xs text-ledger-muted">Se a amostra sair em branco ou com letras estranhas, troque e teste de novo.</p>
         <div className="mt-2 flex gap-2" role="radiogroup" aria-label="Linguagem">
-          {([["pplb", "PPLB (padrão)"], ["pplz", "PPLZ"]] as const).map(([v, r]) => <Button key={v} size="sm" role="radio" aria-checked={est.linguagem === v} variant={est.linguagem === v ? "default" : "outline"} onClick={() => mudar({ ...est, linguagem: v })}>{r}</Button>)}
+          {([["pplb", "PPLB (padrão)"], ["ppla", "PPLA"], ["pplz", "PPLZ"]] as const).map(([v, r]) => <Button key={v} size="sm" role="radio" aria-checked={est.linguagem === v} variant={est.linguagem === v ? "default" : "outline"} onClick={() => mudar({ ...est, linguagem: v })}>{r}</Button>)}
         </div>
       </div>
     </div>}

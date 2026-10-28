@@ -8,7 +8,7 @@ import {
  * A impressora recebe o tamanho exato da etiqueta: sem papel do Windows, sem tela do navegador, sem girar.
  * PPLB = linguagem EPL; PPLZ = linguagem ZPL. As duas existem nas Argox de mesa.
  */
-export type LinguagemArgox = "pplb" | "pplz";
+export type LinguagemArgox = "pplb" | "pplz" | "ppla";
 const D = 8; // 203 DPI = 8 pontos por mm na Argox
 const pt = (mm: number) => Math.round(mm * D);
 const limpo = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/["\\^~]/g, " ").toUpperCase();
@@ -41,6 +41,22 @@ function etiqueta(item: EtiquetaItem, copias: number, cfg: Required<EtiquetaConf
       `^FO${m.x},${m.yRef}^A0N,${m.hRef},${Math.round(m.hRef * 0.7)}^FD${ref}^FS`,
       `^PQ${copias}`, "^XZ", "",
     ].join("\n");
+  }
+  if (ling === "ppla") {
+    // PPLA (Datamax): STX + comandos, unidade métrica 0,1 mm, linha medida a partir da base da etiqueta
+    const S = "\x02", d = (n: number, w: number) => String(Math.max(0, Math.round(n))).padStart(w, "0");
+    const col = d((cfg.margemEsquerda + 0.6) * 10, 4);
+    const altMm = ETIQUETA.altura - cfg.margemSuperior;
+    const hBarMm = cfg.alturaBarras;
+    const yNome = (altMm - 2.6) * 10, yBar = (altMm - 3.2 - hBarMm) * 10, yRef = Math.max(0, yBar - 26);
+    const n = Math.max(1, Math.min(9, m.modulo));
+    return [
+      `${S}m`, `${S}L`, "D11", "H12",
+      `1211000${d(yNome, 4)}${col}${nome}`,
+      `1E${n}${n}${d(hBarMm * 10, 3)}${d(yBar, 4)}${col}${codigo}`,
+      `1211000${d(yRef, 4)}${col}${ref}`,
+      `Q${d(copias, 4)}`, "E", "",
+    ].join("\r\n");
   }
   // PPLB / EPL: fonte 1 = 8×12 pontos, fonte 2 = 10×16, fonte 3 = 12×20
   // posições próprias: fonte 1 tem 12 pontos de altura; tudo cabe nos 96 pontos (12 mm)

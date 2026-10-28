@@ -13,7 +13,7 @@ export const QZ_DOWNLOAD = "https://qz.io/download/";
 export function lerEstacao(): EstacaoArgox {
   try {
     const v = JSON.parse(localStorage.getItem(ESTACAO_KEY) ?? "null") as Partial<EstacaoArgox> | null;
-    return { impressora: v?.impressora ?? null, linguagem: v?.linguagem === "pplz" ? "pplz" : "pplb" };
+    return { impressora: v?.impressora ?? null, linguagem: v?.linguagem === "pplz" || v?.linguagem === "ppla" ? v.linguagem : (/ppla/i.test(v?.impressora ?? "") ? "ppla" : "pplb") };
   } catch { return { impressora: null, linguagem: "pplb" }; }
 }
 export function salvarEstacao(e: EstacaoArgox) { localStorage.setItem(ESTACAO_KEY, JSON.stringify(e)); }

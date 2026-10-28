@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   AMOSTRA_CALIBRACAO, CONFIG_ETIQUETA, ETIQUETA, LIMITES_CALIBRACAO, completarConfig, documentoTeste,
-  lerCalibracao, salvarCalibracao, textoEtiqueta, validarCalibracao, type EtiquetaConfig,
+  lerCalibracao, textoEtiqueta, validarCalibracao, type EtiquetaConfig,
 } from "@/lib/etiquetas";
 import { lerCalibracaoGlobal, salvarCalibracaoGlobal } from "@/lib/etiquetas-calibracao";
 import { imprimirPdf, pdfTeste } from "@/lib/etiquetas-pdf";

@@ -30,13 +30,13 @@ export interface EtiquetaConfig {
 export const ETIQUETA = { largura: 95, suporte: 100, areaImpressao: 30, altura: 12, pistas: 1, intervalo: 3, dpi: 203 } as const;
 export const CONFIG_ETIQUETA: EtiquetaConfig = {
   entreLinhas: 3, margemEsquerda: 0, margemSuperior: 0,
-  areaLargura: 30, alturaBarras: 4.6, fonteNome: 5, fonteReferencia: 8.5,
+  areaLargura: 30, alturaBarras: 6.6, fonteNome: 5, fonteReferencia: 8.5,
 };
 export const LIMITES_CALIBRACAO = {
   entreLinhas: [0, 10], margemEsquerda: [0, 5], margemSuperior: [0, 10],
   areaLargura: [20, 60], alturaBarras: [2.5, 8], fonteNome: [3, 9], fonteReferencia: [5, 12],
 } as const;
-export const CALIBRACAO_KEY = "lardan.etiquetas.argox.alca-direita.v2";
+export const CALIBRACAO_KEY = "lardan.etiquetas.argox.alca-direita.v3";
 export function completarConfig(c: Partial<EtiquetaConfig> | null | undefined): Required<EtiquetaConfig> {
   const base = CONFIG_ETIQUETA as Required<EtiquetaConfig>;
   const out = { ...base } as Required<EtiquetaConfig>;

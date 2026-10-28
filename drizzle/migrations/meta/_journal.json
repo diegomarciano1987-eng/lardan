@@ -1212,6 +1212,13 @@
       "when": 1793222457647,
       "tag": "0172_preco_regra_para_baixo",
       "breakpoints": true
+    },
+    {
+      "idx": 173,
+      "version": "7",
+      "when": 1793223047241,
+      "tag": "0173_etiqueta_calibracao_global",
+      "breakpoints": true
     }
   ]
 }

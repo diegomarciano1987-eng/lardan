@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { AvisoProximaMaleta } from "./AvisoProximaMaleta";
 import { ComprasCliente } from "@/components/consultora/ComprasCliente";
 import { MensagensProntas } from "@/components/consultora/MensagensProntas";
 import { ListaPosVenda } from "@/components/consultora/PosVenda";
@@ -66,7 +67,7 @@ const EXTRAS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
 
 const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : a === "vitrine" || a === "historico" || a === "indicacoes" || a === "biblioteca" || a === "financeiro" ? "mais" : a);
 
-export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir; ajuda: string; children: React.ReactNode }) {
+export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }: { nav: Nav; ir: Ir; ajuda: string; children: React.ReactNode; bloqueada?: boolean }) {
   const { user } = useRouteContext({ from: "/_authenticated" });
   const pilotoGlass = mostrarPilotoGlass(user.id, nav.aba);
   const ativo = grupoDe(nav.aba);
@@ -105,6 +106,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
   }, [pilotoGlass, temaClaro]);
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/equipe"; };
   const abrir = (aba: AbaApp) => {
+    if (bloqueada) return;
     setMenuAberto(false);
     ir({ aba });
   };
@@ -116,7 +118,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
       <aside className="consultora-sidebar sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex">
         <img src={nomeLardan.url} alt="LARDAN" className="mb-6 h-auto w-32 object-contain object-left" />
         <AvatarConsultora />
-        <button type="button" onClick={() => ir({ aba: "novo" })} className="btn-app-principal mb-5 w-full">
+        <button type="button" disabled={bloqueada} onClick={() => ir({ aba: "novo" })} className="btn-app-principal mb-5 w-full">
           <Plus className="size-5" aria-hidden /> Nova venda
         </button>
         <div className="relative mt-1 min-h-0 flex-1">
@@ -124,7 +126,7 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
           {[...PRINCIPAIS, ...EXTRAS].map((i) => {
             const on = nav.aba === i.aba || (i.aba === "pedidos" && nav.aba === "novo");
             return (
-              <button key={i.aba} type="button" aria-current={on ? "page" : undefined} onClick={() => ir({ aba: i.aba })}
+              <button key={i.aba} type="button" aria-current={on ? "page" : undefined} disabled={bloqueada} onClick={() => ir({ aba: i.aba })}
                 className={`flex min-h-12 items-center gap-3 rounded-xl px-4 text-left text-[1.05rem] ${on ? "bg-primary/10 font-semibold text-foreground" : "text-foreground hover:bg-muted"}`}>
                 <i.icone className="size-5" aria-hidden /> {i.rotulo}
               </button>
@@ -155,17 +157,19 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
           <AvatarConsultora tamanho="pequeno" />
           <img src={nomeLardan.url} alt="LARDAN" className="h-auto w-24 min-w-0 object-contain object-left sm:w-28" />
           <BotaoNovidades />
-          <Button type="button" variant="outline" size="icon" onClick={() => setMenuAberto(true)} aria-label="Abrir menu" aria-expanded={menuAberto}
+          <Button type="button" variant="outline" size="icon" disabled={bloqueada} onClick={() => setMenuAberto(true)} aria-label="Abrir menu" aria-expanded={menuAberto}
             className="grid size-12 shrink-0 place-items-center rounded-xl border border-border bg-background text-acao transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
             <Menu className="size-6" aria-hidden />
           </Button>
         </header>
+        {bloqueada && <div className="flex justify-end gap-3 px-4 pt-3 lg:hidden"><BotaoAjuda tela="maleta" /><Button variant="outline" onClick={() => void sair()}><LogOut className="size-4" />Sair</Button></div>}
         <main className="mx-auto w-full max-w-5xl px-4 pt-5 pb-[calc(7.75rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-7 lg:pb-12">
+          <AvisoProximaMaleta />
           {children}
         </main>
       </div>
 
-      <Sheet open={menuAberto} onOpenChange={setMenuAberto}>
+      <Sheet open={!bloqueada && menuAberto} onOpenChange={setMenuAberto}>
         <SheetContent side="right" className="consultora-mobile-sheet flex w-[min(88vw,23rem)] flex-col overflow-y-auto overscroll-contain border-l border-border bg-card px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-6">
           <SheetHeader className="mb-5 pr-12 text-left">
             <img src={nomeLardan.url} alt="LARDAN" className="mb-4 h-auto w-28 object-contain object-left" />
@@ -198,11 +202,11 @@ export function CascaConsultora({ nav, ir, ajuda, children }: { nav: Nav; ir: Ir
       </Sheet>
 
       {/* Navegação inferior no celular */}
-      {nav.aba !== "novo" && <nav aria-label="Menu" className="consultora-mobile-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card/95 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+      {!bloqueada && nav.aba !== "novo" && <nav aria-label="Menu" className="consultora-mobile-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card/95 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
         {[...PRINCIPAIS, { aba: "mais" as AbaApp, rotulo: "Mais", icone: Menu }].map((i) => {
           const on = ativo === i.aba;
           return (
-            <button key={i.aba} type="button" aria-current={on ? "page" : undefined} onClick={() => ir({ aba: i.aba })}
+            <button key={i.aba} type="button" aria-current={on ? "page" : undefined} disabled={bloqueada} onClick={() => ir({ aba: i.aba })}
               className={`flex min-h-[4.375rem] flex-col items-center justify-center gap-0.5 rounded-xl text-[1rem] leading-tight ${on ? "font-semibold text-acao" : "text-foreground"}`}>
               <span className={`grid h-10 w-[3.75rem] place-items-center rounded-full ${on ? "bg-primary/12" : ""}`}><i.icone className="size-[1.875rem]" aria-hidden /></span>
               {i.rotulo}

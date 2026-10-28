@@ -1,6 +1,10 @@
 # Roadmap
 
 ## Plano solicitado — aceite e personalização do romaneio (28/10/2026)
+- [ ] Entregar provas por pedido e texto comercial completo para Daniel, com limitações explícitas.
+- [ ] Aviso de venda mínima no topo de todas as abas da consultora e no cabeçalho do PDF; texto/valor editáveis pelo Daniel em Textos e Pix, sem inventar valor inicial.
+- [ ] Incluir diamante LARDAN sem fundo na mesma linha da logo e verificar alinhamento no PDF.
+- [ ] Implementar e validar referência, telefone por colaboradora, salvamento e aceite obrigatório conforme plano aprovado.
 - [x] Preparar plano com aceite bloqueante e assinatura preservada, teste do clique e persistência em ambiente isolado.
 - [x] Incluir correção da referência exata da etiqueta, diagnóstico do salvamento do Daniel e telefone por colaboradora.
 - [x] Incluir provas PDF real × cadastro para representante, consultora, remessa, peças e demais campos personalizados.

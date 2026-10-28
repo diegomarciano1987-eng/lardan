@@ -40,6 +40,8 @@ const CAMPOS: { k: string; rotulo: string; longo?: boolean; numero?: boolean }[]
   { k: "garantia_exclusoes", rotulo: "Garantia — o que não cobre (use **negrito**)", longo: true },
   { k: "montagem_texto", rotulo: "Montagem do próximo kit", longo: true },
   { k: "rodape_texto", rotulo: "Rodapé" },
+  { k: "proxima_maleta_texto", rotulo: "Aviso — vendas para receber a próxima maleta", longo: true },
+  { k: "proxima_maleta_minimo_cents", rotulo: "Venda mínima informada (R$)", numero: true },
 ];
 
 export function ConfigPedido({ master }: { master: boolean }) {
@@ -56,15 +58,17 @@ export function ConfigPedido({ master }: { master: boolean }) {
   const ligarPix = useMutation({ mutationFn: () => vincular(), onSuccess: () => { void qc.invalidateQueries({ queryKey: ["pedido-pix-asaas"] }); toast.success("Pix oficial vinculado ao pedido, sem valor fixo."); }, onError: (e) => toast.error(traduzir(e)) });
   const q = useQuery({ queryKey: ["pedido-config"], queryFn: () => rpc<Config>("pedido_config_ler") });
   const [form, setForm] = React.useState<Config>({});
-  React.useEffect(() => { if (q.data) setForm(q.data); }, [q.data]);
+  const [editado, setEditado] = React.useState(false);
+  React.useEffect(() => { if (q.data && !editado) setForm(q.data); }, [q.data, editado]);
+  const alterar = (k: string, v: string) => { setEditado(true); setForm((f) => ({ ...f, [k]: v })); };
   const salvar = useMutation({
     mutationFn: () => {
       const mudou: Config = {};
-      for (const c of CAMPOS) if (String(form[c.k] ?? "") !== String(q.data?.[c.k] ?? "")) mudou[c.k] = c.numero ? Number(form[c.k]) : form[c.k] ?? "";
+      for (const c of CAMPOS) if (String(form[c.k] ?? "") !== String(q.data?.[c.k] ?? "")) mudou[c.k] = c.numero ? (c.k === "proxima_maleta_minimo_cents" && String(form[c.k] ?? "") === "" ? null : Number(form[c.k])) : form[c.k] ?? "";
       if (!Object.keys(mudou).length) throw new Error("Nada mudou.");
       return rpc<Config>("pedido_config_salvar", { _dados: mudou });
     },
-    onSuccess: () => { toast.success("Dados do pedido salvos. Valem na próxima impressão."); void qc.invalidateQueries({ queryKey: ["pedido-config"] }); },
+    onSuccess: (dados) => { setForm(dados); setEditado(false); qc.setQueryData(["pedido-config"], dados); toast.success("Dados do pedido salvos. Valem na próxima impressão."); void qc.invalidateQueries({ queryKey: ["consultora", "aviso-proxima-maleta"] }); },
     onError: (e) => toast.error(traduzir(e)),
   });
   if (q.isError) return <p role="alert" className="text-destructive">{traduzir(q.error)}</p>;
@@ -85,17 +89,17 @@ export function ConfigPedido({ master }: { master: boolean }) {
           <label key={c.k} className={`grid gap-1.5 text-sm ${c.longo ? "md:col-span-2" : ""}`}>
             <span className="ledger-eyebrow">{c.rotulo}</span>
             {c.longo
-              ? <textarea className="admin-input min-h-20" disabled={!master} value={String(form[c.k] ?? "")} onChange={(e) => setForm({ ...form, [c.k]: e.target.value })} />
-              : <input className="admin-input" disabled={!master} inputMode={c.numero ? "numeric" : undefined} value={String(form[c.k] ?? "")}
-                  onChange={(e) => setForm({ ...form, [c.k]: c.numero ? e.target.value.replace(/\D/g, "") : e.target.value })} />}
+              ? <textarea className="admin-input min-h-20" disabled={!master || salvar.isPending} value={String(form[c.k] ?? "")} onChange={(e) => alterar(c.k, e.target.value)} />
+              : <input className="admin-input" disabled={!master || salvar.isPending} inputMode={c.numero ? "decimal" : undefined} value={c.k === "proxima_maleta_minimo_cents" ? (form[c.k] == null ? "" : (Number(form[c.k]) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })) : String(form[c.k] ?? "")}
+                  onChange={(e) => alterar(c.k, c.k === "proxima_maleta_minimo_cents" ? (e.target.value.replace(/\D/g, "") || "") : c.numero ? e.target.value.replace(/\D/g, "") : e.target.value)} />}
           </label>
         ))}
       </div>
       <RegraPreBaixa master={master} ligada={Boolean(q.data["exigir_pre_baixa"])} />
       {master ? (
-        <button type="button" className="admin-btn admin-btn-primary mt-4" disabled={salvar.isPending} onClick={() => salvar.mutate()}>
+        <Button className="mt-4" disabled={salvar.isPending || !editado} onClick={() => salvar.mutate()}>
           <Save aria-hidden className="size-4" /> Salvar dados do pedido
-        </button>
+        </Button>
       ) : <p className="mt-4 text-sm text-ledger-muted">Só o Master altera estes dados.</p>}
     </Panel>
   );

@@ -72,12 +72,12 @@ describe("folha do pedido (função pura)", () => {
     expect(pessoal).toContain("Valor unit. R$");
     expect(pessoal).toContain("Anéis · 2 peças");
     expect(pessoal).toContain(">219,80</td>"); // total da linha = 2 × 109,90
-    // primeira coluna é a REFERÊNCIA, não o código de barras; sem referência, o código entra como reserva
+    // Sem referência real, nunca substituir por código de barras.
     expect(pessoal).toContain("<th>Referência</th>");
     expect(pessoal).toContain("AN-REF-01");
     expect(pessoal).not.toContain("A1</td>");
     expect(htmlPedidoConsignacao({ ...d("pessoal"), itens: [{ variant_id: "b", sku: "BC-9", referencia: null, descricao: "BR DOU", preco_cents: 1000, quantidade: 1, grupo: "brincos" as never }] },
-      { logoUrl: "x", operador: "op", impressoEm: new Date() })).toContain(">BC-9</td>");
+      { logoUrl: "x", operador: "op", impressoEm: new Date() })).not.toContain(">BC-9</td>");
   });
 });
 

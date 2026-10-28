@@ -53,7 +53,8 @@ function etiqueta(item: EtiquetaItem, copias: number, cfg: Required<EtiquetaConf
     return [
       `${S}m`, `${S}L`, "D11", "H12",
       `1211000${d(yNome, 4)}${col}${nome}`,
-      `1E${n}${n}${d(hBarMm * 10, 3)}${d(yBar, 4)}${col}${codigo}`,
+      // "e" minúsculo = Code 128 SEM texto legível embaixo (o "E" maiúsculo repetia referência e preço)
+      `1e${n}${n}${d(hBarMm * 10, 3)}${d(yBar, 4)}${col}${codigo}`,
       `1211000${d(yRef, 4)}${col}${ref}`,
       `Q${d(copias, 4)}`, "E", "",
     ].join("\r\n");

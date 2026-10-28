@@ -48,6 +48,11 @@ export function ConfigPedido({ master }: { master: boolean }) {
   const qc = useQueryClient();
   const vincular = useServerFn(vincularPixPedidoAsaas);
   const pix = useQuery({ queryKey: ["pedido-pix-asaas"], queryFn: () => rpc<PixPedido | null>("pedido_pix_asaas_ler"), retry: false });
+  const pixValidado = React.useMemo(() => {
+    if (!pix.data) return null;
+    try { return { info: validarPixGlobal(pix.data.payload, pix.data.chave), erro: null }; }
+    catch (e) { return { info: null, erro: traduzir(e) }; }
+  }, [pix.data]);
   const [qrImage, setQrImage] = React.useState("");
   React.useEffect(() => {
     let ativo = true;
@@ -82,9 +87,9 @@ export function ConfigPedido({ master }: { master: boolean }) {
     <Panel title="Pedido de consignação — dados da folha">
       <div className="mb-6 space-y-3 border-b border-line-soft pb-5">
         <p className="font-semibold text-asaas">Pix global Asaas LARDAN</p>
-        {pix.isError ? <p role="alert" className="text-sm text-destructive">{traduzir(pix.error)}</p> : pix.data ? <div className="flex flex-wrap items-center gap-4">
+        {pix.isError || pixValidado?.erro ? <p role="alert" className="text-sm text-destructive">{pixValidado?.erro || traduzir(pix.error)}</p> : pix.data ? <div className="flex flex-wrap items-center gap-4">
           {qrImage && <img src={qrImage} alt="QR Pix oficial da conta LARDAN no Asaas" className="size-28" />}
-          <div className="min-w-0 flex-1 text-sm"><p className="font-semibold">{validarPixGlobal(pix.data.payload, pix.data.chave).favorecido}</p><p className="break-all">Chave aleatória: {pix.data.chave}</p><p className="text-ledger-muted">Sem valor fixo · múltiplos pagamentos · vinculado em {new Date(pix.data.atualizado_em).toLocaleString("pt-BR")}</p></div>
+          <div className="min-w-0 flex-1 text-sm"><p className="font-semibold">{pixValidado?.info?.favorecido}</p><p className="break-all">Chave aleatória: {pix.data.chave}</p><p className="text-ledger-muted">Sem valor fixo · múltiplos pagamentos · vinculado em {new Date(pix.data.atualizado_em).toLocaleString("pt-BR")}</p></div>
         </div> : <p className="text-sm text-ledger-muted">Pix oficial ainda não vinculado ao pedido.</p>}
         {master && !pix.data && <Button className="bg-asaas text-asaas-foreground hover:bg-asaas/90" disabled={ligarPix.isPending || pix.isPending} onClick={() => ligarPix.mutate()}>{ligarPix.isPending ? "Consultando Asaas…" : "Vincular Pix Asaas ao pedido"}</Button>}
         <p className="text-xs text-ledger-muted">O QR usa a chave oficial do Asaas. Os campos manuais abaixo são preservados; o QR oficial prevalece na impressão. Recebimentos precisam ser conferidos na conciliação: pagar o QR não baixa dívidas automaticamente pelo nome.</p>

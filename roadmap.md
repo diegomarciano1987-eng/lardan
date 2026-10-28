@@ -45,3 +45,7 @@
 - [x] 15. Localização por rua (geo-2) + botão "Localizar ruas da cidade" + agendamento a cada minuto (vale após publicar)
 - [x] 16. Contagem por município única por IBGE (Londrina estava dividida em "Londrina"/"LONDRINA")
 - [ ] 17. Restante da rede refinado por rua aos poucos pelo agendamento (depende de publicar)
+
+## Preço para baixo + 9 botões (28/10/2026)
+- [x] Regra de preço para baixo (degraus R$ 5 → x4,90/x9,90); simulação: 16.919 de 17.314 variantes baixam, 0 sobem. Aplicação real aguarda Daniel/Master em Configurações → Pedido e preço
+- [x] App da consultora no celular: 9 botões grandes; Minhas clientes = lista; Jornada e Liga separadas

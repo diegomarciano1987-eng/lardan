@@ -1,5 +1,10 @@
 # Roadmap
 
+## App da consultora — velocidade e topo compacto (28/10/2026)
+- [ ] Corrigir navegação/cache sem remover o aceite obrigatório ou assinatura.
+- [ ] Liga compacta e colapsável abaixo do cabeçalho; progresso financeiro real e comissão oficial.
+- [ ] Testes de regras e cliques autenticados no celular/desktop, com limites de desempenho explícitos.
+
 ## Plano solicitado — aceite e personalização do romaneio (28/10/2026)
 - [x] Entregar provas por pedido e texto comercial completo para Daniel, com limitações explícitas (Files: provas-aceite-romaneio).
 - [x] Aviso de venda mínima no topo de todas as abas da consultora e no cabeçalho do PDF; texto/valor editáveis pelo Daniel em Textos e Pix, sem inventar valor inicial. 850 reais apenas na base isolada.

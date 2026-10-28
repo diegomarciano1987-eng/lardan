@@ -113,7 +113,7 @@ export async function imprimirPedidoConsignacao(cycleId: string) {
       pixQrUrl = await QRCode.toDataURL(oficial.payload, { width: 480, margin: 4, errorCorrectionLevel: "M" });
       dados.empresa.pix_tipo = "Chave aleatória Asaas"; dados.empresa.pix_chave = oficial.chave; dados.empresa.pix_favorecido = info.favorecido;
     } else toast.warning("Pix oficial ainda não vinculado. Configure em Remessas → Configurar impressora → Textos e Pix.");
-    await imprimirDocumento(documentoPedido(dados, { logoUrl: new URL(diamante.url, window.location.origin).href, operador, impressoEm: new Date(), pixQrUrl }));
+    await imprimirDocumento(documentoPedido(dados, { logoUrl: new URL(diamante.url, window.location.origin).href, operador, impressoEm: new Date(), ...(pixQrUrl ? { pixQrUrl } : {}) }));
   } catch (e) { toast.error(traduzir(e)); }
 }
 

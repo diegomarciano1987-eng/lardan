@@ -12615,6 +12615,8 @@ export type Database = {
           pix_tipo: string
           prazo_correio_dias: number
           preco_virada_em: string | null
+          proxima_maleta_minimo_cents: number | null
+          proxima_maleta_texto: string
           rodape_texto: string
         }
         Insert: {
@@ -12635,6 +12637,8 @@ export type Database = {
           pix_tipo?: string
           prazo_correio_dias?: number
           preco_virada_em?: string | null
+          proxima_maleta_minimo_cents?: number | null
+          proxima_maleta_texto?: string
           rodape_texto?: string
         }
         Update: {
@@ -12655,6 +12659,8 @@ export type Database = {
           pix_tipo?: string
           prazo_correio_dias?: number
           preco_virada_em?: string | null
+          proxima_maleta_minimo_cents?: number | null
+          proxima_maleta_texto?: string
           rodape_texto?: string
         }
         Relationships: []
@@ -17917,6 +17923,7 @@ export type Database = {
         Returns: Json
       }
       consultora_ativar: { Args: { _party: string }; Returns: Json }
+      consultora_aviso_proxima_maleta: { Args: never; Returns: Json }
       consultora_cliente_compras: { Args: { _cliente: string }; Returns: Json }
       consultora_clientes_resumo: { Args: never; Returns: Json }
       consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }

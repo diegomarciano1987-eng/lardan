@@ -1198,6 +1198,13 @@
       "when": 1793219299550,
       "tag": "0170_pedido_referencia_telefone_aceite",
       "breakpoints": true
+    },
+    {
+      "idx": 171,
+      "version": "7",
+      "when": 1793219420903,
+      "tag": "0171_pedido_aviso_minimo",
+      "breakpoints": true
     }
   ]
 }

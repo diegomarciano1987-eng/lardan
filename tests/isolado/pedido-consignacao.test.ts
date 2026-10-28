@@ -35,13 +35,17 @@ describe("folha do pedido (função pura)", () => {
     expect(fone("abc")).toBe("abc");
   });
 
-  test("agrupa por tipo com subtotal e pagina: 55 peças cabem em 2 páginas; 120 em 3+; última página tem o total", () => {
+  test("agrupa por tipo com subtotal e pagina: 40 peças em 2 páginas; última página nunca só com o fechamento; 120 em 3+", () => {
     const it = (i: number, grupo: string, preco = 9990) => ({ variant_id: `v${i}`, sku: `S${i}`, descricao: `PECA ${String(i).padStart(3, "0")}`, preco_cents: preco, quantidade: 1, grupo: grupo as never });
     const itens55 = [...Array.from({ length: 4 }, (_, i) => it(i, "aneis")), ...Array.from({ length: 35 }, (_, i) => it(100 + i, "brincos")),
       ...Array.from({ length: 9 }, (_, i) => it(200 + i, "colares")), ...Array.from({ length: 6 }, (_, i) => it(300 + i, "pulseiras")), it(400, "piercing")];
     const g = montarLinhas(itens55);
     expect(g.map((x) => [x.rotulo, x.qtd])).toEqual([["Anéis", 4], ["Brincos", 35], ["Colares e conjuntos", 9], ["Pulseiras", 6], ["Piercing", 1]]);
-    expect(paginar(g)).toHaveLength(2);
+    const p55 = paginar(g);
+    // romaneio A4 (28/10/2026): a folha final nunca sai só com o fechamento — leva peças junto
+    expect(p55.at(-1)!.filter((l) => l.tipo === "item").length).toBeGreaterThanOrEqual(5);
+    expect(p55.flat().filter((l) => l.tipo === "item")).toHaveLength(55);
+    expect(paginar(montarLinhas(itens55.slice(0, 40)))).toHaveLength(2);
     const p120 = paginar(montarLinhas(Array.from({ length: 120 }, (_, i) => it(i, "brincos"))));
     expect(p120.length).toBeGreaterThanOrEqual(3);
     expect(p120[1]![0]).toMatchObject({ tipo: "grupo", continua: true });
@@ -65,6 +69,9 @@ describe("folha do pedido (função pura)", () => {
     expect(pessoal.toLowerCase()).not.toContain("assinatura");
     expect(pessoal.toLowerCase()).not.toContain("devolv");
     expect(pessoal).toContain("R$ 219,80");
+    expect(pessoal).toContain("Valor unit. R$");
+    expect(pessoal).toContain("Anéis · 2 peças");
+    expect(pessoal).toContain(">219,80</td>"); // total da linha = 2 × 109,90
   });
 });
 

@@ -9,7 +9,7 @@ import {
  * PPLB = linguagem EPL; PPLZ = linguagem ZPL. As duas existem nas Argox de mesa.
  */
 export type LinguagemArgox = "pplb" | "pplz";
-const D = ETIQUETA.dpi / 25.4; // pontos por mm
+const D = 8; // 203 DPI = 8 pontos por mm na Argox
 const pt = (mm: number) => Math.round(mm * D);
 const limpo = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/["\\^~]/g, " ").toUpperCase();
 

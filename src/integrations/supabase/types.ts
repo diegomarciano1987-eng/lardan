@@ -12601,6 +12601,7 @@ export type Database = {
           atualizado_em: string
           atualizado_por: string | null
           endereco_linha: string
+          etiqueta_calibracao: Json | null
           exigir_pre_baixa: boolean
           garantia_exclusoes: string
           garantia_texto: string
@@ -12623,6 +12624,7 @@ export type Database = {
           atualizado_em?: string
           atualizado_por?: string | null
           endereco_linha?: string
+          etiqueta_calibracao?: Json | null
           exigir_pre_baixa?: boolean
           garantia_exclusoes?: string
           garantia_texto?: string
@@ -12645,6 +12647,7 @@ export type Database = {
           atualizado_em?: string
           atualizado_por?: string | null
           endereco_linha?: string
+          etiqueta_calibracao?: Json | null
           exigir_pre_baixa?: boolean
           garantia_exclusoes?: string
           garantia_texto?: string
@@ -18174,6 +18177,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      etiqueta_calibracao_ler: { Args: never; Returns: Json }
+      etiqueta_calibracao_salvar: { Args: { _cfg: Json }; Returns: Json }
       expire_reservations_internal: {
         Args: { _location?: string; _variant?: string }
         Returns: number

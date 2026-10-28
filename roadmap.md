@@ -54,3 +54,4 @@
 - [x] Salvar Textos e Pix / calibração Argox / regra pré-baixa (erro "UPDATE requires a WHERE clause") — migrações 0174/0175
 - [ ] Preço para baixo não aplicado (aplicação falhava pelo mesmo erro) — aplicar
 - [ ] QZ Tray pede autorização a cada etiqueta — imprimir direto
+- [ ] Etiqueta PPLA imprime referência e preço 2x — sair uma vez

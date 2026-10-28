@@ -50,8 +50,9 @@ export async function listarImpressoras(): Promise<string[]> {
 }
 
 async function escolherImpressora(est: EstacaoArgox): Promise<string> {
+  // Impressora já escolhida neste computador: imprime direto, sem pedir a lista ao QZ (cada pedido gera uma autorização).
+  if (est.impressora) return est.impressora;
   const lista = await listarImpressoras();
-  if (est.impressora && lista.includes(est.impressora)) return est.impressora;
   const argox = lista.filter((n) => /argox/i.test(n));
   if (argox.length === 1) { salvarEstacao({ ...est, impressora: argox[0]! }); return argox[0]!; }
   throw new Error(argox.length ? "Há mais de uma Argox neste computador. Escolha qual em Calibrar Argox." : "Nenhuma Argox encontrada neste computador. Escolha a impressora em Calibrar Argox.");

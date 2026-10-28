@@ -684,7 +684,13 @@ export function MontagemLeitor({
             <div className="ledger-panel p-6 text-center">
               <p className="ledger-eyebrow">Peças na maleta</p>
               <p className="font-display text-8xl font-bold tabular-nums text-ledger-text">{total}</p>
-              <p className="text-sm text-ledger-muted">{nesta} bipada(s) agora</p>
+              {nesta > 0 && total > nesta ? (
+                <p className="text-sm text-ledger-muted">{nesta} nesta sessão + {total - nesta} anteriores</p>
+              ) : nesta > 0 ? (
+                <p className="text-sm text-ledger-muted">{nesta} bipada(s) nesta sessão</p>
+              ) : (
+                <p className="text-sm text-ledger-muted">Total acumulado da maleta, incluindo sessões anteriores</p>
+              )}
             </div>
             <div className="ledger-panel p-6 text-center">
               <p className="ledger-eyebrow">Valor total da maleta</p>

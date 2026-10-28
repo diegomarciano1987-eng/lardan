@@ -1226,6 +1226,13 @@
       "when": 1793225916979,
       "tag": "0174_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 175,
+      "version": "7",
+      "when": 1793226283135,
+      "tag": "0175_update_singleton_where_true",
+      "breakpoints": true
     }
   ]
 }

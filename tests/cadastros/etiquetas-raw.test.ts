@@ -8,8 +8,8 @@ describe("comandos Argox etiqueta de joia", () => {
     expect(c).toContain("q800"); expect(c).toContain("Q96,24"); expect(c).not.toContain("Q440");
     expect(c).toContain('"LBRP0295-005499"'); expect(c).toContain("P3");
   });
-  it("barras de 6,6 mm = 53 pontos", () => {
-    expect(comandosTeste(CONFIG_ETIQUETA, "pplb", 1)).toMatch(/^B\d+,\d+,0,1,1,1,53,N,"LBRP0295-005499"$/m);
+  it("barras de 4,6 mm = 37 pontos", () => {
+    expect(comandosTeste(CONFIG_ETIQUETA, "pplb", 1)).toMatch(/^B\d+,\d+,0,1,1,1,37,N,"LBRP0295-005499"$/m);
   });
   it("PPLZ com mesmas medidas", () => {
     const c = comandosTeste(CONFIG_ETIQUETA, "pplz", 2);

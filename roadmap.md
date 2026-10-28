@@ -49,3 +49,9 @@
 ## Preço para baixo + 9 botões (28/10/2026)
 - [x] Regra de preço para baixo (degraus R$ 5 → x4,90/x9,90); simulação: 16.919 de 17.314 variantes baixam, 0 sobem. Aplicação real aguarda Daniel/Master em Configurações → Pedido e preço
 - [x] App da consultora no celular: 9 botões grandes; Minhas clientes = lista; Jornada e Liga separadas
+
+## 28/10 noite
+- [x] Salvar Textos e Pix / calibração Argox / regra pré-baixa (erro "UPDATE requires a WHERE clause") — migrações 0174/0175
+- [x] Preço para baixo aplicado: 16.919 variantes, lote preco-20261028-192646-9fd2, 0 subiram; 2 maletas em montagem recalculadas. Botão Aplicar/Desfazer pela tela estoura tempo (fazer por aqui)
+- [x] QZ: não pede mais a lista de impressoras a cada etiqueta; instrução override.crt visível (depende de copiar o arquivo em cada PC)
+- [x] Etiqueta PPLA: barras sem texto embaixo, referência/preço uma vez (teste)

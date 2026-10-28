@@ -50,6 +50,16 @@ export function EstacaoArgoxPainel() {
           {([["pplb", "PPLB (padrão)"], ["ppla", "PPLA"], ["pplz", "PPLZ"]] as const).map(([v, r]) => <Button key={v} size="sm" role="radio" aria-checked={est.linguagem === v} variant={est.linguagem === v ? "default" : "outline"} onClick={() => mudar({ ...est, linguagem: v })}>{r}</Button>)}
         </div>
       </div>
+      <div className="rounded-lg border border-line-soft p-3" data-testid="qz-sem-aviso">
+        <p className="font-semibold">Parar o aviso "Action Required" do QZ Tray</p>
+        <p className="text-xs text-ledger-muted">O QZ Tray só deixa de perguntar quando este computador confia no certificado LARDAN. Faça uma vez por computador:</p>
+        <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs text-ledger-muted">
+          <li>Baixe o certificado abaixo (o arquivo já vem com o nome <b>override.crt</b>).</li>
+          <li>Copie-o para a pasta <b>C:\Program Files\QZ Tray</b>.</li>
+          <li>Feche o QZ Tray (ícone perto do relógio → Exit) e abra de novo.</li>
+        </ol>
+        <Button asChild size="sm" variant="outline" className="mt-2"><a href="/qz/lardan-qz.crt" download="override.crt"><Download />Baixar certificado LARDAN</a></Button>
+      </div>
     </div>}
   </section>;
 }

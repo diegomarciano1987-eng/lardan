@@ -226,12 +226,13 @@ tr.g td.r,tr.g td.q{font-size:8pt;letter-spacing:.06em}
 .box h4{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:14pt;margin:0 0 2mm}
 .box p{font-size:7.3pt;line-height:1.55;margin:0 0 1.8mm;color:#4A3A33}
 .pix{background:#F6EFE8;border-radius:2.4mm;padding:3mm 3.6mm;display:flex;gap:3.4mm;align-items:center;margin-top:3mm}
-.pix .qr{width:16mm;height:16mm;flex-shrink:0}
-.pix p{font-size:7.3pt;line-height:1.6;margin:0}
+.pix .qr{width:24mm;height:24mm;flex-shrink:0;padding:0;border:0;background:#fff;border-radius:0}
+.pix .qr img{width:100%;height:100%;display:block}
+.pix p{font-size:7.3pt;line-height:1.6;margin:0;overflow-wrap:anywhere;min-width:0}
 .rod{position:absolute;left:12mm;right:12mm;bottom:7mm;gap:4mm;display:flex;justify-content:space-between;border-top:.2mm solid #C49A7C;padding-top:2mm;font-size:6.8pt;color:#7A5642}
 `;
 
-export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date }) {
+export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date; pixQrUrl?: string }) {
   const grupos = montarLinhas(d.itens);
   const paginas = paginar(grupos);
   const total = d.itens.reduce((s, i) => s + i.preco_cents * i.quantidade, 0);
@@ -287,13 +288,13 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
   <div class="blocos">
     <div class="box"><h4>${esc(d.empresa.garantia_titulo)}</h4><p>${rico(d.empresa.garantia_texto)}</p><p>${rico(d.empresa.garantia_exclusoes)}</p></div>
     <div><div class="box"><h4>Montagem do próximo kit</h4><p>${rico(d.empresa.montagem_texto)}</p></div>
-      <div class="pix"><div class="qr">[QR Pix]</div><p><strong>Pagamento:</strong> ${rico(d.empresa.pagamento_texto)}<br>Pix (${esc(d.empresa.pix_tipo)}) <strong>${esc(d.empresa.pix_chave)}</strong><br>${esc(d.empresa.pix_favorecido)}</p></div></div>
+      <div class="pix">${opcoes.pixQrUrl ? `<div class="qr"><img src="${esc(opcoes.pixQrUrl)}" alt="QR Pix oficial LARDAN Asaas"></div>` : ""}<p><strong>Pagamento:</strong> ${rico(d.empresa.pagamento_texto)}<br>${opcoes.pixQrUrl ? `Pix (${esc(d.empresa.pix_tipo)}) <strong>${esc(d.empresa.pix_chave)}</strong><br>${esc(d.empresa.pix_favorecido)}` : "Pix oficial indisponível — consulte a LARDAN."}</p></div></div>
   </div>`;
 
   return paginas.map((ls, i) => `<section class="pg">${i === 0 ? pagina1 : cab2}${tabela(ls)}${i === paginas.length - 1 ? final : ""}${rodape(i)}</section>`).join("");
 }
 
-export function documentoPedido(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date }) {
+export function documentoPedido(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date; pixQrUrl?: string }) {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Pedido de consignação — Remessa ${esc(num(d.remessa.numero, 5))}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">

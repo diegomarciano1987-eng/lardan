@@ -20,6 +20,11 @@ export const Route = createFileRoute("/_authenticated/admin/configuracoes")({
   head: () => ({
     meta: [
       { title: "Configurações — Administração LARDAN" },
+      { name: "description", content: "Configurações autorizadas dos pedidos, integrações e parâmetros LARDAN." },
+      { property: "og:title", content: "Configurações — Administração LARDAN" },
+      { property: "og:description", content: "Configurações autorizadas dos pedidos, integrações e parâmetros LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

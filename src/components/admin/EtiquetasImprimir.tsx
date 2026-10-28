@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { CONFIG_ETIQUETA, barrasEtiqueta, documentoEtiquetas, textoEtiqueta, type EtiquetaConfig, type EtiquetaItem } from "@/lib/etiquetas";
 import { buscarEtiquetas, lerItensEtiquetas, type EtiquetaBusca, type EtiquetaOrigem } from "@/lib/etiquetas-dados";
 import { toast } from "sonner";
+import { confirmarImpressora } from "@/components/admin/ConfirmarImpressora";
 
 const CONFIG_KEY = "lardan.etiquetas.argox.alca-direita.v2";
 function lerConfig(): EtiquetaConfig {
@@ -18,12 +19,13 @@ function lerConfig(): EtiquetaConfig {
  * é aberta pelo LARDAN. Com o Chrome da estação em modo de impressão direta
  * (--kiosk-printing) e a Argox como padrão, sai sem nenhuma pergunta.
  */
-export function enviarParaImpressora(items: EtiquetaItem[]) {
+export async function enviarParaImpressora(items: EtiquetaItem[]) {
   const validos = items.filter((i) => i.quantidade > 0);
   if (!validos.length) throw new Error("Sem dados de peças para imprimir.");
   for (const i of validos) {
     try { barrasEtiqueta(i.barcode ?? ""); } catch (e) { throw new Error(`${i.nome}: ${e instanceof Error ? e.message : "código inválido."}`); }
   }
+  if (!await confirmarImpressora("etiquetas")) return 0;
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
   frame.tabIndex = -1;
@@ -42,8 +44,8 @@ export function enviarParaImpressora(items: EtiquetaItem[]) {
 async function imprimirOrigens(origens: EtiquetaOrigem[], umaCada: boolean) {
   try {
     const items = (await lerItensEtiquetas(origens)).map((i) => (umaCada ? { ...i, quantidade: 1 } : i));
-    const n = enviarParaImpressora(items);
-    toast.success(n === 1 ? "1 etiqueta enviada para a impressora." : `${n} etiquetas enviadas para a impressora.`);
+    const n = await enviarParaImpressora(items);
+    if (n) toast.success(n === 1 ? "Impressão de 1 etiqueta preparada." : `Impressão de ${n} etiquetas preparada.`);
   } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir a etiqueta."); }
 }
 
@@ -65,7 +67,7 @@ function AjustesEstacao() {
         <div className="grid grid-cols-2 gap-4">
           {([["entreLinhas", "Espaço entre linhas (mm)"], ["margemEsquerda", "Margem esquerda (mm)"], ["margemSuperior", "Margem superior (mm)"]] as const).map(([key, title]) => <label key={key} className="grid gap-2 text-xs">{title}<input className="admin-input" type="number" min={0} max={10} step={0.1} value={config[key]} onChange={(e) => setConfig((c) => ({ ...c, [key]: Number(e.target.value) }))} /></label>)}
         </div>
-        <p className="text-xs text-ledger-muted">Para sair sem nenhuma pergunta: Argox como impressora padrão e o Chrome da estação aberto com impressão direta (--kiosk-printing).</p>
+        <p className="text-xs text-ledger-muted">Impressoras A4 e Argox: configure em Remessas → Configurar impressora. Confirme o destino na janela do navegador.</p>
         <div className="flex justify-end"><Button onClick={() => { localStorage.setItem(CONFIG_KEY, JSON.stringify(config)); toast.success("Ajustes salvos nesta estação."); setOpen(false); }}>Salvar</Button></div>
       </DialogContent>
     </Dialog>
@@ -79,8 +81,8 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
   const [debounced, setDebounced] = useState("");
   useEffect(() => { const t = setTimeout(() => setDebounced(termo.trim()), 250); return () => clearTimeout(t); }, [termo]);
   const q = useQuery({ queryKey: ["etiquetas", "busca", debounced], queryFn: () => buscarEtiquetas(debounced), enabled: open && debounced.length >= 2 });
-  function imprimir(r: EtiquetaBusca) {
-    try { enviarParaImpressora([{ id: r.variantId, nome: r.nome, barcode: r.barcode, referencia: r.referencia, precoCents: r.precoCents, quantidade: 1 }]); toast.success(`Etiqueta enviada: ${r.nome}`); setTermo(""); }
+  async function imprimir(r: EtiquetaBusca) {
+    try { const n = await enviarParaImpressora([{ id: r.variantId, nome: r.nome, barcode: r.barcode, referencia: r.referencia, precoCents: r.precoCents, quantidade: 1 }]); if (n) { toast.success(`Impressão preparada: ${r.nome}`); setTermo(""); } }
     catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir."); }
   }
   async function enter() {

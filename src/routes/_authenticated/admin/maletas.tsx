@@ -16,6 +16,7 @@ import { brl, traduzir } from "@/lib/maletas";
 import { remessasHistorico } from "@/lib/historico-jflex";
 import { RemessasHistorico } from "@/components/admin/historico/RemessasHistorico";
 import { MaletasNaRua } from "@/components/admin/maletas/MaletasNaRua";
+import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
 import { AcertosPainel } from "@/components/admin/maletas/AcertosPainel";
 import { STATUS_REMESSA, buscarRemessas, criarRemessa, dataBR, definirEnvioRemessa, isoDia, type RemessaCard, type TipoEnvio } from "@/lib/remessas";
 
@@ -252,6 +253,7 @@ function RemessasPage() {
         description="Cada remessa tem seu número e sua praça. As maletas das consultoras são abertas dentro da remessa."
         actions={
           <div className="flex flex-wrap gap-2">
+            <ConfigurarImpressora />
             {caps.includes("stock.operate") && (
               <Link to="/admin/maletas/entrada" className="admin-btn">
                 <ScanLine aria-hidden className="size-4" /> Entrada de maleta

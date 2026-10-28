@@ -38,6 +38,8 @@ import {
 } from "@/lib/maletas";
 import { buscarPecas } from "@/lib/consultora";
 import { FotosDivergencia } from "@/components/consultora/FotosDivergencia";
+import { conferenciaMaleta, pendenciasAceite } from "@/lib/aceite-maleta";
+import { Button } from "@/components/ui/button";
 import { iconeCategoria } from "@/lib/consultora-combinado";
 const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -89,7 +91,7 @@ function Cartao({ children, className = "" }: { children: React.ReactNode; class
 }
 
 /* ---------------- maleta ---------------- */
-function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
+function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null; obrigatoria?: boolean }) {
   const qc = useQueryClient();
   const [divergencias, setDivergencias] = React.useState<Record<string, number>>({});
   const [tipos, setTipos] = React.useState<Record<string, TipoDivergencia>>({});
@@ -103,28 +105,32 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
 
   const ficha = useQuery({
     queryKey: ["consultora", "maleta", cycleId],
-    queryFn: () => detalheMaleta(cycleId!),
+    queryFn: () => { if (!cycleId) throw new Error("Maleta não selecionada."); return conferenciaMaleta(cycleId); },
     enabled: !!cycleId,
   });
   const termo = useSituacaoTermo(cycleId);
   const exigeTermo = !!termo.data && termo.data.modo !== "desligado";
-  const termoAtivo = termo.data?.termos.find((t) => t.estado === "enviado" || t.estado === "assinado");
+  const termoAtivo = termo.data?.termos.find((t) => ["preparado", "enviado", "assinado"].includes(t.estado));
   const assinar = useServerFn(iniciarAssinatura);
-  const recarregar = () => {
-    qc.invalidateQueries({ queryKey: ["consultora"] });
-    qc.invalidateQueries({ queryKey: ["termo-maleta"] });
+  const recarregar = async () => {
+    await Promise.all([qc.invalidateQueries({ queryKey: ["consultora"] }), qc.invalidateQueries({ queryKey: ["termo-maleta"] })]);
   };
+  React.useEffect(() => {
+    if (termo.data?.termos.some((t) => t.estado === "finalizado")) void qc.invalidateQueries({ queryKey: ["consultora"] });
+  }, [termo.data, qc]);
 
   const confirmar = useMutation({
     mutationFn: (transfer: string) => confirmarEntrega(transfer),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Recebimento confirmado.");
-      recarregar();
+      await recarregar();
     },
     onError: (e) => toast.error(traduzir(e)),
   });
   const aceite = useMutation({
     mutationFn: () => {
+      if (!cycleId || !ficha.data || !termo.data) throw new Error("Aguarde a conferência e a verificação do termo.");
+      if (ficha.data.ciclo.status !== "recebida") throw new Error("Confirme primeiro o recebimento físico da maleta.");
       const itens = (ficha.data?.composicao ?? []).map((c) => {
         const div = Math.min(Math.max(divergencias[c.variant_id] ?? 0, 0), c.quantidade);
         const tipo = tipos[c.variant_id] ?? "faltante";
@@ -143,17 +149,17 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         };
       });
       if (exigeTermo) {
-        return assinar({ data: { cycleId: cycleId!, itens, chave } }).then((r) => {
+        return assinar({ data: { cycleId, itens, chave } }).then((r) => {
           if (!r.ok) throw new Error(r.faltando?.length ? `${r.erro} Falta: ${r.faltando.join(", ")}.` : r.erro);
           return { termo: true, canal: r.canal } as { termo: boolean; canal?: string; repetida?: boolean };
         });
       }
-      return aceitar(cycleId!, itens, chave).then((r) => ({ termo: false, repetida: r.repetida }) as { termo: boolean; canal?: string; repetida?: boolean });
+      return aceitar(cycleId, itens, chave).then((r) => ({ termo: false, repetida: r.repetida }) as { termo: boolean; canal?: string; repetida?: boolean });
     },
-    onSuccess: (r) => {
+    onSuccess: async (r) => {
       if (r.termo) toast.success(`Termo gerado. Enviamos o link de assinatura para o seu ${r.canal === "whatsapp" ? "WhatsApp" : "e-mail"}.`);
       else toast.success(r.repetida ? "Aceite já registrado." : "Aceite registrado. Suas peças já estão liberadas.");
-      recarregar();
+      await recarregar();
     },
     onError: (e) => toast.error(traduzir(e)),
   });
@@ -176,12 +182,13 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
   if (ficha.isLoading) return <Cartao>Carregando sua maleta…</Cartao>;
   if (ficha.isError) return <Cartao>{traduzir(ficha.error)}</Cartao>;
 
-  const d = ficha.data!;
+  const d = ficha.data;
+  if (!d) return <Cartao>Não foi possível carregar a conferência.</Cartao>;
   const s = SITUACAO_MALETA[d.ciclo.status];
   const aguardandoRecebimento = d.entregas.find(
     (t) => t.situacao === "transito" && t.para_party_id === d.ciclo.consultora_party_id,
   );
-  const precisaAceitar = d.ciclo.status === "transito" || d.ciclo.status === "recebida";
+  const precisaAceitar = ["expedida", "transito", "recebida"].includes(d.ciclo.status);
 
   return (
     <div className="space-y-4">
@@ -189,6 +196,7 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         <p className="text-xs uppercase tracking-widest text-ledger-muted">
           Maleta {d.maleta.codigo} · ciclo {d.ciclo.cycle_no}
         </p>
+        {d.remessa_numero != null && <p className="mt-2 text-base font-semibold">Remessa {String(d.remessa_numero).padStart(5, "0")}</p>}
         <p className="mt-1 text-2xl font-semibold">{d.ciclo.status === "operacao" ? "Está com você" : s?.rotulo ?? d.ciclo.status}</p>
         <p className="mt-1 text-sm text-ledger-muted">
           {d.ciclo.quantity_total} peças · valor de venda {brl(Number(d.ciclo.reference_total_cents ?? 0))}
@@ -205,13 +213,13 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
           <p className="font-semibold">Sua maleta chegou?</p>
           <p className="mt-1 text-sm text-ledger-muted">Confirme o recebimento para depois conferir peça por peça.</p>
           <DetalheEntrega t={aguardandoRecebimento} />
-          <button
-            type="button"
-            className="admin-btn admin-btn-primary mt-3 w-full"
+          <Button
+            className="mt-3 min-h-12 w-full"
+            disabled={confirmar.isPending}
             onClick={() => confirmar.mutate(aguardandoRecebimento.id)}
           >
             Confirmar recebimento
-          </button>
+          </Button>
         </Cartao>
       )}
 
@@ -234,7 +242,7 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         </Cartao>
       )}
 
-      {precisaAceitar && !termoAtivo && (
+      {precisaAceitar && (
         <Cartao>
           <p className="font-semibold">Conferência</p>
           <p className="mt-1 text-sm text-ledger-muted">
@@ -242,20 +250,23 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
             é registrado como recebido em ordem.
           </p>
           <div className="mt-4 space-y-4">
-            {d.composicao.map((c) => {
+            {d.composicao.map((c, index) => {
               const div = Math.min(Math.max(divergencias[c.variant_id] ?? 0, 0), c.quantidade);
               return (
                 <div key={c.variant_id} className="space-y-2 border-b border-line-soft pb-3 last:border-0">
+                  {(index === 0 || d.composicao[index - 1]?.categoria !== c.categoria) && <h3 className="py-2 text-lg font-semibold text-foreground">{c.categoria || "Peças"}</h3>}
                   <div className="flex items-center gap-3">
                     <FotoPeca mediaId={c.media_id} variantId={c.variant_id} className="size-14 rounded-xl" />
                     <div className="min-w-0 flex-1">
                       <p className="text-base font-semibold leading-snug">{c.produto}</p>
+                      <p className="text-base font-semibold text-foreground">Referência: {c.referencia || "Sem referência"}</p>
                       <p className="text-[0.95rem] text-ledger-muted">
                         {c.variante ?? "Sem variação"} · enviadas {c.quantidade} · aceitas {c.quantidade - div}
                       </p>
+                      <p className="text-base text-foreground">{brl(c.valor_unitario)} / unidade · Total {brl(c.valor_unitario * c.quantidade)}</p>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                  {!termoAtivo && <div className="flex flex-wrap items-center justify-between gap-3">
                     <span className="text-[0.95rem]">Unidades com problema</span>
                     <div className="flex items-center gap-2" role="group" aria-label={`Unidades com problema de ${c.produto}`}>
                       <button type="button" className="admin-btn size-12 justify-center p-0 text-xl" aria-label="Diminuir"
@@ -266,8 +277,8 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
                         disabled={div >= c.quantidade}
                         onClick={() => setDivergencias((v) => ({ ...v, [c.variant_id]: Math.min(c.quantidade, div + 1) }))}>+</button>
                     </div>
-                  </div>
-                  {div > 0 && (
+                  </div>}
+                  {div > 0 && !termoAtivo && (
                     <div className="grid gap-2">
                       <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={`Tipo da divergência de ${c.produto}`}>
                         {([["faltante", "Não veio na maleta"], ["defeito", "Veio com defeito"]] as const).map(([v, r]) => {
@@ -298,14 +309,15 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
               );
             })}
           </div>
-          <button
-            type="button"
-            className="admin-btn admin-btn-primary mt-4 w-full"
-            disabled={aceite.isPending}
+          {!termoAtivo && <Button
+            className="mt-4 min-h-14 w-full whitespace-normal text-base"
+            disabled={aceite.isPending || confirmar.isPending || d.ciclo.status !== "recebida" || !termo.data || termo.isError}
             onClick={() => aceite.mutate()}
           >
-            {aceite.isPending ? "Registrando…" : exigeTermo ? "Gerar termo e assinar" : "Aceitar maleta"}
-          </button>
+            {aceite.isPending ? "Registrando…" : exigeTermo ? "Conferi as peças — gerar termo e assinar" : Object.values(divergencias).some((n) => n > 0) ? "Confirmar conferência com divergência" : "Conferi e recebi todas as peças"}
+          </Button>}
+          {termo.isError && <p role="alert" className="mt-3 text-destructive">{traduzir(termo.error)} <Button variant="outline" onClick={() => void termo.refetch()}>Tentar novamente</Button></p>}
+          {d.ciclo.status !== "recebida" && <p className="mt-3 text-base text-ledger-muted">A conferência só pode ser confirmada depois de registrar o recebimento físico.</p>}
           {exigeTermo && (
             <p className="mt-2 text-sm text-ledger-muted">
               Revise as informações acima. O termo será gerado exatamente com esta conferência.
@@ -314,7 +326,7 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         </Cartao>
       )}
 
-      {d.saldos.length > 0 && (() => {
+      {!obrigatoria && d.saldos.length > 0 && (() => {
         const termo = semAcento(buscaPeca.trim());
         const lista = d.saldos.filter((b) => (!catPeca || catDe[b.variant_id] === catPeca) && (!soDisp || b.disponivel > 0)
           && (!termo || semAcento(`${b.produto} ${b.variante ?? ""}`).includes(termo)));
@@ -359,7 +371,7 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         );
       })()}
 
-      <Movimentacoes
+      {!obrigatoria && <Movimentacoes
         cycleId={cycleId}
         nomes={Object.fromEntries([
           ...d.composicao.map((c) => [c.variant_id, `${c.produto}${c.variante ? ` · ${c.variante}` : ""}`] as const),
@@ -367,7 +379,7 @@ function MinhaMaleta({ cycleId }: { cycleId: string | null }) {
         ])}
         podeGerir={false}
         podeAcrescentar={false}
-      />
+      />}
     </div>
   );
 }
@@ -533,6 +545,8 @@ function AreaConsultoraLiberada() {
     if (!(n.aba === nav.aba && n.q !== nav.q)) window.scrollTo({ top: 0 });
   };
   const [escolhida, setEscolhida] = React.useState<string | null>(null);
+  const pendentes = useQuery({ queryKey: ["consultora", "aceites-pendentes"], queryFn: pendenciasAceite, refetchInterval: 15000, retry: false });
+  const bloqueada = !pendentes.data || pendentes.isError || pendentes.data.length > 0;
   const maletas = useQuery({ queryKey: ["consultora", "maletas"], queryFn: () => listarMaletas() });
   const abertas = (maletas.data ?? []).filter((m) => ["operacao", "recebida", "transito", "expedida", "acerto"].includes(m.situacao)).sort((a, b) => {
     const prioridade = ["operacao", "recebida", "transito", "expedida", "acerto"];
@@ -560,7 +574,12 @@ function AreaConsultoraLiberada() {
   );
 
   return (
-    <CascaConsultora nav={{ ...nav, aba }} ir={ir} ajuda={ajuda}>
+    <CascaConsultora nav={{ ...nav, aba }} ir={bloqueada ? () => {} : ir} ajuda={ajuda} bloqueada={bloqueada}>
+      {bloqueada ? <><Topo titulo="Aceite de maleta" ajuda="maleta" />
+        {pendentes.isError ? <Cartao><p role="alert">{traduzir(pendentes.error)}</p><Button className="mt-4" onClick={() => void pendentes.refetch()}>Tentar novamente</Button></Cartao>
+          : !pendentes.data ? <Cartao><p role="status">Verificando recebimento das suas maletas…</p></Cartao>
+          : <div className="space-y-8">{pendentes.data.map((m) => <MinhaMaleta key={m.cycle_id} cycleId={m.cycle_id} obrigatoria />)}</div>}
+      </> : <>
       <Passeio />
       {aba === "inicio" && <Inicio ir={ir} />}
       {aba === "clientes" && (nav.modo ? <FormCliente id={nav.modo === "editar" ? nav.id : undefined} ir={ir} />
@@ -574,6 +593,7 @@ function AreaConsultoraLiberada() {
       {aba === "financeiro" && (<><Topo titulo="Meu financeiro" ajuda="maleta" voltar={() => ir({ aba: "mais" })} /><MeuFinanceiro verMaleta={() => ir({ aba: "maleta" })} /></>)}
       {aba === "biblioteca" && (<><Topo titulo="Biblioteca LARDAN" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Biblioteca /></>)}
       {aba === "mais" && <Mais ir={ir} />}
+      </>}
     </CascaConsultora>
   );
 }

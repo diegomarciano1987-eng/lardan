@@ -6,6 +6,9 @@ import {
   AMOSTRA_CALIBRACAO, CONFIG_ETIQUETA, ETIQUETA, LIMITES_CALIBRACAO, completarConfig, documentoTeste,
   lerCalibracao, textoEtiqueta, validarCalibracao, type EtiquetaConfig,
 } from "@/lib/etiquetas";
+import { EstacaoArgoxPainel } from "@/components/admin/EstacaoArgox";
+import { imprimirDireto, lerEstacao } from "@/lib/argox-direta";
+import { comandosTeste } from "@/lib/etiquetas-raw";
 import { lerCalibracaoGlobal, salvarCalibracaoGlobal } from "@/lib/etiquetas-calibracao";
 import { imprimirPdf, pdfTeste } from "@/lib/etiquetas-pdf";
 
@@ -34,7 +37,10 @@ export function CalibracaoArgox() {
     setCfg((c) => ({ ...c, [k]: arred(Math.min(max, Math.max(min, v))) }));
   };
   const testar = async (modo: "amostra" | "regua") => {
-    try { imprimirPdf(await pdfTeste(modo, cfg, modo === "amostra" ? 3 : 1)); }
+    try {
+      if (modo === "amostra") { const n = await imprimirDireto(comandosTeste(cfg, lerEstacao().linguagem, 3)); toast.success(`3 amostras enviadas direto para ${n}.`); }
+      else imprimirPdf(await pdfTeste("regua", cfg, 1));
+    }
     catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir o teste."); }
   };
   const salvar = async () => {
@@ -45,15 +51,14 @@ export function CalibracaoArgox() {
   const esc = 4; const altura = ETIQUETA.altura + cfg.entreLinhas;
 
   return <div className="grid gap-5" data-testid="calibracao-argox">
+    <EstacaoArgoxPainel />
     <section className="rounded-xl border border-line p-4">
-      <p className="text-sm font-semibold">Como calibrar</p>
+      <p className="text-sm font-semibold">Como calibrar (vale para todas as colaboradoras)</p>
       <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-ledger-muted">
-        <li>Clique em <b>Imprimir régua</b> e meça na fita onde a moldura caiu.</li>
-        <li>Ajuste os números abaixo; a prévia muda na hora.</li>
-        <li>Clique em <b>Imprimir 3 amostras</b>, confira e bipe o código.</li>
-        <li>Ficou certo? <b>Salvar calibração</b>.</li>
+        <li>Clique em <b>Imprimir 3 amostras</b>: saem direto na Argox, no tamanho da etiqueta de joia, sem abrir tela.</li>
+        <li>Saiu deslocado? Ajuste os números abaixo; a prévia muda na hora.</li>
+        <li>Bipe o código. Ficou certo? <b>Salvar calibração</b>.</li>
       </ol>
-      <p className="mt-3 text-xs text-ledger-muted">Na janela de impressão: escolha a Argox, <b>Margens: Nenhuma</b>, <b>Escala: 100%</b> e desmarque <b>Cabeçalhos e rodapés</b> (em “Mais definições”). É isso que tira data, endereço e textos estranhos da etiqueta.</p>
     </section>
 
     <section className="rounded-xl border border-line p-4">
@@ -91,7 +96,7 @@ export function CalibracaoArgox() {
     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4">
       <Button variant="ghost" onClick={() => setCfg(completarConfig(CONFIG_ETIQUETA))}><RotateCcw />Voltar ao padrão</Button>
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" disabled={!!erro} onClick={() => testar("regua")}><Ruler />Imprimir régua</Button>
+        <Button variant="outline" disabled={!!erro} onClick={() => testar("regua")}><Ruler />Régua pelo navegador</Button>
         <Button variant="outline" disabled={!!erro} onClick={() => testar("amostra")}><Printer />Imprimir 3 amostras</Button>
         <Button disabled={!!erro || !alterado} onClick={salvar}><Save />{alterado ? "Salvar calibração" : "Calibração salva"}</Button>
       </div>

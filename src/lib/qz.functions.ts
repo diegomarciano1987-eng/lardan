@@ -9,7 +9,7 @@ export const assinarQz = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    const b64 = process.env.QZ_PRIVATE_KEY;
+    const b64 = process.env["QZ_PRIVATE_KEY"];
     if (!b64) throw new Error("Impressão direta não configurada.");
     const der = Uint8Array.from(atob(b64.replace(/\s+/g, "")), (c) => c.charCodeAt(0));
     const key = await crypto.subtle.importKey("pkcs8", der, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-512" }, false, ["sign"]);

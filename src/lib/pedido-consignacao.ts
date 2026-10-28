@@ -35,7 +35,7 @@ export interface PedidoDados {
   representante: { nome: string | null; praca: string | null; telefone: string | null } | null;
   montado_por: string | null;
   faixas: FaixaPedido[];
-  itens: { variant_id: string; sku: string | null; descricao: string; preco_cents: number; quantidade: number; grupo: GrupoPeca }[];
+  itens: { variant_id: string; sku: string | null; referencia: string | null; descricao: string; preco_cents: number; quantidade: number; grupo: GrupoPeca }[];
 }
 
 // ---------------------------------------------------------------- formatação
@@ -108,7 +108,7 @@ export function textoFaixas(faixas: FaixaPedido[]) {
 
 // ---------------------------------------------------------------- paginação
 type Linha = { tipo: "grupo"; rotulo: string; subtotal: number; qtd: number; continua: boolean }
-  | { tipo: "item"; sku: string; descricao: string; preco: number; qtd: number };
+  | { tipo: "item"; sku: string; referencia: string; descricao: string; preco: number; qtd: number };
 
 /** Alturas em mm (iguais às do CSS abaixo). */
 // Medidos no Chromium (A4, margens 12 mm): linha 5,0 mm; grupo 7,5 mm; tabela começa a 140,5 mm na pág. 1 e a 28 mm nas demais;
@@ -137,7 +137,7 @@ export function paginar(grupos: ReturnType<typeof montarLinhas>): Linha[][] {
       const precisa = (primeira ? ALT.grupo : 0) + ALT.item;
       if (livre < precisa) { nova(); if (!primeira) { paginas.at(-1)!.push({ tipo: "grupo", rotulo: `${g.rotulo} (continuação)`, subtotal: 0, qtd: 0, continua: true }); livre -= ALT.grupo; } }
       if (primeira) { paginas.at(-1)!.push({ tipo: "grupo", rotulo: g.rotulo, subtotal: g.subtotal, qtd: g.qtd, continua: false }); livre -= ALT.grupo; primeira = false; }
-      paginas.at(-1)!.push({ tipo: "item", sku: it.sku ?? "—", descricao: it.descricao, preco: it.preco_cents, qtd: it.quantidade });
+      paginas.at(-1)!.push({ tipo: "item", sku: it.sku ?? "—", referencia: it.referencia || it.sku || "—", descricao: it.descricao, preco: it.preco_cents, qtd: it.quantidade });
       livre -= ALT.item;
     }
   }
@@ -247,9 +247,9 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
   const rodape = (i: number) => `<div class="rod"><span>${esc(d.empresa.rodape_texto)}</span><span>Impresso em ${esc(impresso)} · ${esc(opcoes.operador)} · Página ${i + 1} de ${paginas.length}</span></div>`;
   const linhas = (ls: Linha[]) => ls.map((l) => l.tipo === "grupo"
     ? `<tr class="g"><td colspan="3">${esc(l.rotulo)}${l.continua ? "" : ` · ${l.qtd} ${l.qtd === 1 ? "peça" : "peças"}`}</td><td class="q">${l.continua ? "" : l.qtd}</td><td class="r">${l.continua ? "" : esc(brl(l.subtotal))}</td></tr>`
-    : `<tr><td class="cod">${esc(l.sku)}</td><td>${esc(l.descricao)}</td><td class="r">${esc(reais(l.preco))}</td><td class="q">${l.qtd}</td><td class="r t">${esc(reais(l.preco * l.qtd))}</td></tr>`).join("");
+    : `<tr><td class="cod">${esc(l.referencia)}</td><td>${esc(l.descricao)}</td><td class="r">${esc(reais(l.preco))}</td><td class="q">${l.qtd}</td><td class="r t">${esc(reais(l.preco * l.qtd))}</td></tr>`).join("");
   const tabela = (ls: Linha[]) => ls.length
-    ? `<table><colgroup><col style="width:24mm"><col><col style="width:24mm"><col style="width:14mm"><col style="width:26mm"></colgroup><thead><tr><th>Código</th><th>Descrição</th><th class="r">Valor unit. R$</th><th class="q">Qtd</th><th class="r">Total R$</th></tr></thead><tbody>${linhas(ls)}</tbody></table>`
+    ? `<table><colgroup><col style="width:24mm"><col><col style="width:24mm"><col style="width:14mm"><col style="width:26mm"></colgroup><thead><tr><th>Referência</th><th>Descrição</th><th class="r">Valor unit. R$</th><th class="q">Qtd</th><th class="r">Total R$</th></tr></thead><tbody>${linhas(ls)}</tbody></table>`
     : "";
   const rep = d.representante;
 

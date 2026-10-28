@@ -36,7 +36,7 @@ describe("folha do pedido (função pura)", () => {
   });
 
   test("agrupa por tipo com subtotal e pagina: 40 peças em 2 páginas; última página nunca só com o fechamento; 120 em 3+", () => {
-    const it = (i: number, grupo: string, preco = 9990) => ({ variant_id: `v${i}`, sku: `S${i}`, descricao: `PECA ${String(i).padStart(3, "0")}`, preco_cents: preco, quantidade: 1, grupo: grupo as never });
+    const it = (i: number, grupo: string, preco = 9990) => ({ variant_id: `v${i}`, sku: `S${i}`, referencia: `REF-${String(i).padStart(3, "0")}`, descricao: `PECA ${String(i).padStart(3, "0")}`, preco_cents: preco, quantidade: 1, grupo: grupo as never });
     const itens55 = [...Array.from({ length: 4 }, (_, i) => it(i, "aneis")), ...Array.from({ length: 35 }, (_, i) => it(100 + i, "brincos")),
       ...Array.from({ length: 9 }, (_, i) => it(200 + i, "colares")), ...Array.from({ length: 6 }, (_, i) => it(300 + i, "pulseiras")), it(400, "piercing")];
     const g = montarLinhas(itens55);
@@ -57,7 +57,7 @@ describe("folha do pedido (função pura)", () => {
         garantia_titulo: "G", garantia_texto: "**só vale com registro no app Lardan**", garantia_exclusoes: "n", montagem_texto: "m", rodape_texto: "r", prazo_correio_dias: 7 },
       remessa: { numero: 878, kit: 1, tipo_envio: tipo, data_acerto: "2026-10-26", postar_ate: tipo === "correio" ? "2026-10-19" : null },
       maleta: "M", cliente_codigo: "01884", consultora: { nome: "Ana <b>", endereco: null, cidade: null, whatsapp: null },
-      representante: null, montado_por: "Saylla", faixas: FAIXAS, itens: [{ variant_id: "a", sku: "A1", descricao: "AN DOU", preco_cents: 10990, quantidade: 2, grupo: "aneis" }],
+      representante: null, montado_por: "Saylla", faixas: FAIXAS, itens: [{ variant_id: "a", sku: "A1", referencia: "AN-REF-01", descricao: "AN DOU", preco_cents: 10990, quantidade: 2, grupo: "aneis" }],
     });
     const correio = htmlPedidoConsignacao(d("correio"), { logoUrl: "x", operador: "op", impressoEm: new Date() });
     const pessoal = htmlPedidoConsignacao(d("pessoal"), { logoUrl: "x", operador: "op", impressoEm: new Date() });
@@ -72,6 +72,12 @@ describe("folha do pedido (função pura)", () => {
     expect(pessoal).toContain("Valor unit. R$");
     expect(pessoal).toContain("Anéis · 2 peças");
     expect(pessoal).toContain(">219,80</td>"); // total da linha = 2 × 109,90
+    // primeira coluna é a REFERÊNCIA, não o código de barras; sem referência, o código entra como reserva
+    expect(pessoal).toContain("<th>Referência</th>");
+    expect(pessoal).toContain("AN-REF-01");
+    expect(pessoal).not.toContain("A1</td>");
+    expect(htmlPedidoConsignacao({ ...d("pessoal"), itens: [{ variant_id: "b", sku: "BC-9", referencia: null, descricao: "BR DOU", preco_cents: 1000, quantidade: 1, grupo: "brincos" as never }] },
+      { logoUrl: "x", operador: "op", impressoEm: new Date() })).toContain(">BC-9</td>");
   });
 });
 
@@ -90,6 +96,8 @@ beforeAll(async () => {
   vBrinco = await criarVariante(`ped-brinco-${marca}`, 4500); // novo: 4590
   await adm.unsafe(`update public.products set name = 'AN DOU TESTE ' || $2 where id = (select product_id from public.product_variants where id=$1)`, [vAnel, marca]);
   await adm.unsafe(`update public.products set name = 'BR DOU TESTE ' || $2 where id = (select product_id from public.product_variants where id=$1)`, [vBrinco, marca]);
+  await adm.unsafe(`update public.product_variants set reference_code = 'AN-REF-' || $2 where id = $1`, [vAnel, marca]);
+  await adm.unsafe(`update public.product_variants set reference_code = 'BR-REF-' || $2 where id = $1`, [vBrinco, marca]);
   await porEstoque(vAnel, deposito, 20);
   await porEstoque(vBrinco, deposito, 20);
 });
@@ -128,6 +136,7 @@ describe("remessa, preço gravado e folha", () => {
     expect(d.dados.montado_por).toContain(`ped-mont-${marca}`);
     expect(d.dados.representante?.telefone).toContain("43988887777");
     expect(d.dados.itens.map((i) => [i.grupo, i.preco_cents, i.quantidade]).sort()).toEqual([["aneis", 10500, 2], ["brincos", 4500, 3]]);
+    expect(d.dados.itens.every((i) => i.referencia === (i.grupo === "aneis" ? `AN-REF-${marca}` : `BR-REF-${marca}`))).toBe(true);
     expect((await rpc(cons, "kit_pedido_dados", { _cycle: cicloRua })).ok).toBe(false);
   });
 

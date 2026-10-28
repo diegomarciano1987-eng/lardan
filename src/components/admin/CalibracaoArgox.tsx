@@ -6,7 +6,7 @@ import {
   AMOSTRA_CALIBRACAO, CONFIG_ETIQUETA, ETIQUETA, LIMITES_CALIBRACAO, completarConfig, documentoTeste,
   lerCalibracao, salvarCalibracao, textoEtiqueta, validarCalibracao, type EtiquetaConfig,
 } from "@/lib/etiquetas";
-import { imprimirHtml } from "@/components/admin/EtiquetasImprimir";
+import { imprimirHtml } from "@/lib/imprimir-html";
 
 type Campo = keyof typeof LIMITES_CALIBRACAO;
 const CAMPOS: { key: Campo; titulo: string; dica: string; passo: number; un: string }[] = [

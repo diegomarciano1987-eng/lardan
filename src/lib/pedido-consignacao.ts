@@ -149,7 +149,7 @@ export const CSS_PEDIDO = `
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:#fff}
 body{font-family:'Jost',Arial,sans-serif;color:#2B201C;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.pg{width:210mm;height:297mm;padding:9mm 10mm 0;position:relative;overflow:hidden;page-break-after:always;break-after:page}
+.pg{width:210mm;height:297mm;padding:10mm 12mm 0;position:relative;overflow:hidden;page-break-after:always;break-after:page}
 .pg:last-child{page-break-after:auto;break-after:auto}
 .serif{font-family:'Cormorant Garamond',Georgia,serif}
 .eyebrow{font-size:6.6pt;letter-spacing:.28em;text-transform:uppercase;color:#7A5642;font-weight:500}
@@ -177,10 +177,10 @@ body{font-family:'Jost',Arial,sans-serif;color:#2B201C;-webkit-print-color-adjus
 .faixa .acerto{flex:1.18}.faixa .acerto .v{font-size:17pt;font-weight:600;color:#7A5642;margin-top:1mm}
 .faixa .postar{flex:1.46;background:#F6EFE8}.faixa .postar .v{font-size:17pt;font-weight:600;margin-top:1mm}
 .faixa .postar .obs{font-size:6pt;color:#7A5642;margin-top:.4mm}
-.ganho{display:flex;margin-top:3.4mm;border:.3mm solid #E7D8CB;border-radius:2.4mm;overflow:hidden;height:40mm}
-.ganho .esq{background:#7A5642;color:#fff;width:70mm;padding:6.4mm 5mm 4mm}
+.ganho{display:flex;align-items:stretch;margin-top:3.4mm;border:.3mm solid #E7D8CB;border-radius:2.4mm;overflow:hidden}
+.ganho .esq{background:#7A5642;color:#fff;width:62mm;flex-shrink:0;padding:5mm 4.6mm 4mm}
 .ganho .esq .eyebrow{color:#F1E3D7;letter-spacing:.22em;white-space:nowrap}
-.ganho .esq .v{font-family:'Cormorant Garamond',Georgia,serif;font-size:34pt;line-height:1;margin:3mm 0 2.6mm;white-space:nowrap}
+.ganho .esq .v{font-family:'Cormorant Garamond',Georgia,serif;font-size:30pt;line-height:1;margin:3mm 0 2.6mm;white-space:nowrap}
 .ganho .esq .s{font-size:7.9pt;line-height:1.5}
 .ganho .dirg{flex:1;background:#F6EFE8;padding:3.4mm 4mm}
 .ganho h3{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:15pt;margin:0 0 2mm}
@@ -189,28 +189,29 @@ body{font-family:'Jost',Arial,sans-serif;color:#2B201C;-webkit-print-color-adjus
 .ganho .card.d{background:#2B201C;color:#fff;border-color:#2B201C}
 .ganho .card .a{font-size:7pt}.ganho .card .b{font-size:13pt;font-weight:600;margin:1mm 0 .6mm}.ganho .card .c{font-size:6.6pt;color:#7A5642}
 .ganho .card.d .c{color:#E9D9CC}
-.ganho .regra{font-size:6.4pt;line-height:1.5;color:#4A3A33;margin-top:2mm}
-table{width:100%;border-collapse:collapse;margin-top:2.5mm}
-th{font-size:6.8pt;letter-spacing:.24em;text-transform:uppercase;color:#7A5642;font-weight:500;text-align:left;padding:0 3mm 1.6mm;border-bottom:.45mm solid #2B201C;height:7mm;vertical-align:bottom}
-th.r,td.r{text-align:right}th.q,td.q{text-align:center;width:13mm}
-td{font-size:8pt;height:5.2mm;padding:0 3mm;border-bottom:.2mm solid #EFE4DA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-td.cod{width:30mm}td.r{width:28mm}
-tr.g td{background:#F6EFE8;height:7.4mm;font-size:7.6pt;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#7A5642;border-bottom:.3mm solid #E2D1C3}
+.ganho .regra{font-size:6.6pt;line-height:1.5;color:#4A3A33;margin-top:2.4mm;white-space:normal}
+table{width:186mm;table-layout:fixed;border-collapse:collapse;margin-top:6mm}
+.pg+.pg table,.cab2+table{margin-top:4mm}
+th{font-size:6.6pt;letter-spacing:.16em;white-space:nowrap;text-transform:uppercase;color:#7A5642;font-weight:500;text-align:left;padding:0 2mm 1.6mm;border-bottom:.45mm solid #2B201C;height:7mm;vertical-align:bottom}
+th.r,td.r{text-align:right}th.q,td.q{text-align:center}
+td{font-size:8pt;height:5.4mm;line-height:5.2mm;padding:0 2mm;border-bottom:.2mm solid #EFE4DA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td.t{font-weight:600}
+tr.g td{background:#F6EFE8;height:7.4mm;line-height:7.2mm;font-size:7.6pt;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#7A5642;border-bottom:.3mm solid #E2D1C3}
 tr.g td.r,tr.g td.q{font-size:8pt;letter-spacing:.06em}
 .cab2{display:flex;justify-content:space-between;align-items:center;height:14mm;padding-bottom:1mm;border-bottom:.35mm solid #C49A7C}
 .cab2 .marca img{width:9mm}.cab2 .marca .nome{font-size:15pt}
 .cab2 .info{font-size:8pt}
-.fimtab{display:flex;justify-content:space-between;align-items:center;background:#2B201C;color:#fff;padding:0 3mm 0 3.5mm;height:9mm;font-weight:600;font-size:9.5pt}
-.fimtab .v{display:flex;gap:9mm;font-size:10pt}
-.fimtab .v span:last-child{width:8mm;text-align:center}
-.blocos{display:grid;grid-template-columns:1.32fr 1fr;gap:4mm;margin-top:4mm}
+.fimtab{width:186mm;display:flex;justify-content:space-between;align-items:center;background:#2B201C;color:#fff;padding:0 2mm 0 3mm;height:9mm;font-weight:600;font-size:9.5pt}
+.fimtab .v{display:flex;font-size:10pt}
+.fimtab .v .q{width:14mm;text-align:center}.fimtab .v .r{width:26mm;text-align:right}
+.blocos{display:grid;grid-template-columns:1.32fr 1fr;gap:4mm;margin-top:5mm}
 .box{border:.3mm solid #E7D8CB;border-radius:2.4mm;padding:3.8mm 4mm 2.4mm}
 .box h4{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:14pt;margin:0 0 2mm}
 .box p{font-size:7.3pt;line-height:1.55;margin:0 0 1.8mm;color:#4A3A33}
 .pix{background:#F6EFE8;border-radius:2.4mm;padding:3mm 3.6mm;display:flex;gap:3.4mm;align-items:center;margin-top:3mm}
 .pix .qr{width:16mm;height:16mm;flex-shrink:0}
 .pix p{font-size:7.3pt;line-height:1.6;margin:0}
-.rod{position:absolute;left:10mm;right:10mm;bottom:6mm;display:flex;justify-content:space-between;border-top:.2mm solid #C49A7C;padding-top:2mm;font-size:6.8pt;color:#7A5642}
+.rod{position:absolute;left:12mm;right:12mm;bottom:7mm;gap:4mm;display:flex;justify-content:space-between;border-top:.2mm solid #C49A7C;padding-top:2mm;font-size:6.8pt;color:#7A5642}
 `;
 
 export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date }) {
@@ -227,10 +228,10 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
   const marca = (pequena = false) => `<div class="marca"><img src="${esc(opcoes.logoUrl)}" alt=""><div><div class="nome">LARDAN</div>${pequena ? "" : `<div class="end">${esc(d.empresa.endereco_linha)}</div>`}</div></div>`;
   const rodape = (i: number) => `<div class="rod"><span>${esc(d.empresa.rodape_texto)}</span><span>Impresso em ${esc(impresso)} · ${esc(opcoes.operador)} · Página ${i + 1} de ${paginas.length}</span></div>`;
   const linhas = (ls: Linha[]) => ls.map((l) => l.tipo === "grupo"
-    ? `<tr class="g"><td colspan="2">${esc(l.rotulo)}</td><td class="r">${l.continua ? "" : esc(brl(l.subtotal))}</td><td class="q">${l.continua ? "" : l.qtd}</td></tr>`
-    : `<tr><td class="cod">${esc(l.sku)}</td><td>${esc(l.descricao)}</td><td class="r">${esc(reais(l.preco))}</td><td class="q">${l.qtd}</td></tr>`).join("");
+    ? `<tr class="g"><td colspan="3">${esc(l.rotulo)}${l.continua ? "" : ` · ${l.qtd} ${l.qtd === 1 ? "peça" : "peças"}`}</td><td class="q">${l.continua ? "" : l.qtd}</td><td class="r">${l.continua ? "" : esc(brl(l.subtotal))}</td></tr>`
+    : `<tr><td class="cod">${esc(l.sku)}</td><td>${esc(l.descricao)}</td><td class="r">${esc(reais(l.preco))}</td><td class="q">${l.qtd}</td><td class="r t">${esc(reais(l.preco * l.qtd))}</td></tr>`).join("");
   const tabela = (ls: Linha[]) => ls.length
-    ? `<table><thead><tr><th>Código</th><th>Descrição</th><th class="r">Preço R$</th><th class="q">Qtd</th></tr></thead><tbody>${linhas(ls)}</tbody></table>`
+    ? `<table><colgroup><col style="width:24mm"><col><col style="width:24mm"><col style="width:14mm"><col style="width:26mm"></colgroup><thead><tr><th>Código</th><th>Descrição</th><th class="r">Valor unit. R$</th><th class="q">Qtd</th><th class="r">Total R$</th></tr></thead><tbody>${linhas(ls)}</tbody></table>`
     : "";
   const rep = d.representante;
 
@@ -265,7 +266,7 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
   const cab2 = `<div class="cab2">${marca(true)}<div class="info">Remessa <strong>${esc(remessa)}</strong> · Kit ${esc(kit)} · Cliente ${esc(cliente)} · ${esc(nomeCurto(d.consultora.nome))} · Acerto <strong style="color:#7A5642">${esc(dataBr(d.remessa.data_acerto))}</strong></div></div>`;
 
   const final = `
-  <div class="fimtab" style="margin-top:${paginas.at(-1)!.length ? "0" : "3.6mm"}"><span>TOTAL DO KIT</span><span class="v"><span>${esc(brl(total))}</span><span>${pecas}</span></span></div>
+  <div class="fimtab" style="margin-top:${paginas.at(-1)!.length ? "0" : "3.6mm"}"><span>TOTAL DO KIT</span><span class="v"><span class="q">${pecas}</span><span class="r">${esc(brl(total))}</span></span></div>
   <div class="blocos">
     <div class="box"><h4>${esc(d.empresa.garantia_titulo)}</h4><p>${rico(d.empresa.garantia_texto)}</p><p>${rico(d.empresa.garantia_exclusoes)}</p></div>
     <div><div class="box"><h4>Montagem do próximo kit</h4><p>${rico(d.empresa.montagem_texto)}</p></div>

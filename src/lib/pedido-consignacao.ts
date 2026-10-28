@@ -111,9 +111,9 @@ type Linha = { tipo: "grupo"; rotulo: string; subtotal: number; qtd: number; con
   | { tipo: "item"; sku: string; descricao: string; preco: number; qtd: number };
 
 /** Alturas em mm (iguais às do CSS abaixo). */
-// Medidos no Chromium (A4, margens 12 mm): linha 5,0 mm; grupo 7,5 mm; tabela começa a 137,4 mm na pág. 1 e a 28 mm nas demais;
+// Medidos no Chromium (A4, margens 12 mm): linha 5,0 mm; grupo 7,5 mm; tabela começa a 140,5 mm na pág. 1 e a 28 mm nas demais;
 // cabeçalho da tabela 7 mm; rodapé a 284,3 mm (deixamos 3 mm de respiro); fechamento (total + garantia + Pix) 68 mm.
-const ALT = { item: 5.0, grupo: 7.5, pag1: 133.5, pagN: 245, fim: 70 };
+const ALT = { item: 5.0, grupo: 7.5, pag1: 130.5, pagN: 245, fim: 70 };
 
 export function montarLinhas(itens: PedidoDados["itens"]) {
   const out: { grupo: GrupoPeca; rotulo: string; itens: PedidoDados["itens"]; subtotal: number; qtd: number }[] = [];

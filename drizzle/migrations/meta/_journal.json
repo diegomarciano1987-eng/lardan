@@ -1205,6 +1205,13 @@
       "when": 1793219420903,
       "tag": "0171_pedido_aviso_minimo",
       "breakpoints": true
+    },
+    {
+      "idx": 172,
+      "version": "7",
+      "when": 1793222457647,
+      "tag": "0172_preco_regra_para_baixo",
+      "breakpoints": true
     }
   ]
 }

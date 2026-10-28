@@ -40,10 +40,11 @@ import { buscarPecas } from "@/lib/consultora";
 import { FotosDivergencia } from "@/components/consultora/FotosDivergencia";
 import { conferenciaMaleta, pendenciasAceite } from "@/lib/aceite-maleta";
 import { Button } from "@/components/ui/button";
+import { CartaoLiga } from "@/components/consultora/LigaEAcerto";
 import { iconeCategoria } from "@/lib/consultora-combinado";
 const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "biblioteca", "financeiro", "mais", "novo"];
+const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "biblioteca", "financeiro", "mais", "novo", "jornada", "liga"];
 const str = (v: unknown) => (typeof v === "string" && v.length > 0 && v.length < 200 ? v : undefined);
 
 export const Route = createFileRoute("/_authenticated/consultora")({
@@ -557,7 +558,7 @@ function AreaConsultoraLiberada() {
   const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
   const aba = nav.aba ?? "inicio";
-  const ajuda = aba === "indicacoes" || aba === "biblioteca" ? "inicio" : aba === "historico" || aba === "financeiro" ? "maleta" : aba === "novo" ? "pedidos" : aba;
+  const ajuda = aba === "indicacoes" || aba === "biblioteca" ? "inicio" : aba === "historico" || aba === "financeiro" ? "maleta" : aba === "novo" ? "pedidos" : aba === "jornada" ? "clientes" : aba === "liga" ? "inicio" : aba;
 
   const seletorMaleta = abertas.length > 1 && (
     <div role="radiogroup" aria-label="Maleta em uso" className="mb-5 grid gap-2">
@@ -594,6 +595,8 @@ function AreaConsultoraLiberada() {
       {aba === "indicacoes" && (<><Topo titulo="Minhas indicadas" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Indicacoes /></>)}
       {aba === "financeiro" && (<><Topo titulo="Meu financeiro" ajuda="maleta" voltar={() => ir({ aba: "mais" })} /><MeuFinanceiro verMaleta={() => ir({ aba: "maleta" })} /></>)}
       {aba === "biblioteca" && (<><Topo titulo="Biblioteca LARDAN" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Biblioteca /></>)}
+      {aba === "jornada" && <Clientes nav={nav} ir={ir} jornada />}
+      {aba === "liga" && (<><Topo titulo="Liga Lardan" ajuda="inicio" voltar={() => ir({ aba: "inicio" })} /><div className="max-w-3xl"><CartaoLiga /></div></>)}
       {aba === "mais" && <Mais ir={ir} />}
       </>}
     </CascaConsultora>

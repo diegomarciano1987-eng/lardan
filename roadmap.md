@@ -1,6 +1,8 @@
 # Roadmap
 
 ## Plano solicitado — aceite e personalização do romaneio (28/10/2026)
+- [ ] Incluir diamante LARDAN sem fundo na mesma linha da logo e verificar alinhamento no PDF.
+- [ ] Implementar e validar referência, telefone por colaboradora, salvamento e aceite obrigatório conforme plano aprovado.
 - [x] Preparar plano com aceite bloqueante e assinatura preservada, teste do clique e persistência em ambiente isolado.
 - [x] Incluir correção da referência exata da etiqueta, diagnóstico do salvamento do Daniel e telefone por colaboradora.
 - [x] Incluir provas PDF real × cadastro para representante, consultora, remessa, peças e demais campos personalizados.

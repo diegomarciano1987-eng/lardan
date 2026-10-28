@@ -11,4 +11,11 @@ describe("Etiquetas Argox", () => {
   it("bloqueia códigos ausentes, largos e quantidades fracionadas", () => { expect(() => comporEtiquetas([{ ...item, barcode: null }])).toThrow(); expect(() => barrasEtiqueta("ABCDEFGHIJKLMNOPQRSTUVWXYZ")).toThrow(); expect(() => comporEtiquetas([{ ...item, quantidade: 1.5 }])).toThrow(); });
   it("linha inferior = referência-preço em centavos com 6 dígitos", () => { expect(textoEtiqueta("LBRP0295", 5499)).toBe("LBRP0295-005499"); expect(textoEtiqueta("LBRP0586", 5400)).toBe("LBRP0586-005400"); expect(textoEtiqueta("LGR0321", 12380)).toBe("LGR0321-012380"); expect(textoEtiqueta("REF", null)).toBe("REF"); });
   it("escapa conteúdo do cadastro na folha de impressão", () => { expect(documentoEtiquetas([{ ...item, nome: "<script>" }], CONFIG_ETIQUETA)).toContain("&lt;SCRIPT&gt;"); });
+});import { documentoTeste, validarCalibracao, completarConfig } from "../../src/lib/etiquetas";
+describe("Calibração Argox", () => {
+  it("aplica deslocamentos e tamanhos na folha", () => { const h = documentoEtiquetas([{ ...item, quantidade: 1 }], { ...CONFIG_ETIQUETA, margemEsquerda: 2.5, margemSuperior: 1, areaLargura: 32, alturaBarras: 5 }); expect(h).toContain("padding-left:2.5mm"); expect(h).toContain("padding-top:1mm"); expect(h).toContain("width:32mm"); expect(h).toContain("height:5mm"); });
+  it("folha sem margens e sem título para não imprimir cabeçalho", () => { const h = documentoTeste("amostra", CONFIG_ETIQUETA); expect(h).toContain("@page{size:100mm 15mm;margin:0}"); expect(h).not.toContain("LARDAN</title>"); });
+  it("amostra imprime o modelo SISPR fixo, até 5 cópias", () => { const h = documentoTeste("amostra", CONFIG_ETIQUETA, 9); expect(h.match(/<section>/g)).toHaveLength(5); expect(h).toContain("BR PR CIRCULO CRUZ"); expect(h).toContain(">LBRP0295-005499</div>"); });
+  it("régua mostra a moldura e os valores calibrados", () => { const h = documentoTeste("regua", { ...CONFIG_ETIQUETA, margemEsquerda: 1.5 }); expect(h).toContain("X 1.5"); expect(h.match(/<i /g)).toHaveLength(31); });
+  it("bloqueia calibração fora dos limites", () => { expect(validarCalibracao({ ...CONFIG_ETIQUETA, areaLargura: 70 })).not.toBeNull(); expect(validarCalibracao({ ...CONFIG_ETIQUETA, alturaBarras: 10 })).not.toBeNull(); expect(validarCalibracao(completarConfig(null))).toBeNull(); });
 });

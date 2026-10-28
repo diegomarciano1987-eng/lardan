@@ -41,13 +41,13 @@ export function EstacaoArgoxPainel() {
     </div> : lista && <div className="mt-3 grid gap-3 text-sm">
       <p className="flex items-center gap-2 text-ledger-muted"><CheckCircle2 className="size-4 text-success" />Programa conectado. Escolha a Argox deste computador:</p>
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Impressora de etiquetas">
-        {lista.map((n) => <Button key={n} size="sm" role="radio" aria-checked={est.impressora === n} variant={est.impressora === n ? "default" : "outline"} onClick={() => mudar({ ...est, impressora: n })}><Printer />{n}</Button>)}
+        {lista.map((n) => <Button key={n} size="sm" role="radio" aria-checked={est.impressora === n} variant={est.impressora === n ? "default" : "outline"} onClick={() => mudar({ ...est, impressora: n, linguagem: /ppla/i.test(n) ? "ppla" : est.linguagem })}><Printer />{n}</Button>)}
       </div>
       <div>
         <p className="font-semibold">Linguagem da Argox</p>
         <p className="text-xs text-ledger-muted">Se a amostra sair em branco ou com letras estranhas, troque e teste de novo.</p>
         <div className="mt-2 flex gap-2" role="radiogroup" aria-label="Linguagem">
-          {([["pplb", "PPLB (padrão)"], ["pplz", "PPLZ"]] as const).map(([v, r]) => <Button key={v} size="sm" role="radio" aria-checked={est.linguagem === v} variant={est.linguagem === v ? "default" : "outline"} onClick={() => mudar({ ...est, linguagem: v })}>{r}</Button>)}
+          {([["pplb", "PPLB (padrão)"], ["ppla", "PPLA"], ["pplz", "PPLZ"]] as const).map(([v, r]) => <Button key={v} size="sm" role="radio" aria-checked={est.linguagem === v} variant={est.linguagem === v ? "default" : "outline"} onClick={() => mudar({ ...est, linguagem: v })}>{r}</Button>)}
         </div>
       </div>
     </div>}

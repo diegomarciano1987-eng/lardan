@@ -12,6 +12,7 @@ import { AbrirPosVenda } from "@/components/consultora/PosVenda";
 import { brl, detalhePedido, listarPedidos, mudarSituacaoPedido, SITUACAO_PEDIDO, traduzir, type PedidoResumo } from "@/lib/maletas";
 import { linkWhats } from "@/lib/consultora";
 import { idadePedido, mensagemPedido, tomIdade } from "@/lib/consultora-regras";
+import { pedidosQuery } from "@/lib/consultora-queries";
 
 const GRUPOS = ["Atendendo", "Aguardando pagamento", "Pagos", "Cancelados"] as const;
 function grupo(p: PedidoResumo) {
@@ -21,7 +22,7 @@ function grupo(p: PedidoResumo) {
 }
 export function PedidosConsultora() {
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: ["consultora", "pedidos"], queryFn: () => listarPedidos() });
+  const q = useQuery(pedidosQuery());
   const [aba, setAba] = React.useState<typeof GRUPOS[number]>("Atendendo");
   const [cancelar, setCancelar] = React.useState<PedidoResumo | null>(null);
   const [aberto, setAberto] = React.useState<PedidoResumo | null>(null);

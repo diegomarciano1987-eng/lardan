@@ -30,7 +30,7 @@ function Telefone({ linha, master }: { linha: Linha; master: boolean }) {
   </section>;
 }
 export function TelefonesColaboradoras({ master }: { master: boolean }) {
-  const q = useQuery({ queryKey: ["pedido-colaboradoras"], queryFn: () => rpc<Linha[]>("pedido_colaboradoras_ler"), retry: false });
+  const q = useQuery({ queryKey: ["pedido-colaboradoras"], queryFn: () => rpc<Linha[]>("pedido_colaboradoras_ler"), retry: false, staleTime: 0 });
   if (q.isError) return <p role="alert" className="text-destructive">{traduzir(q.error)}</p>;
   if (!q.data) return <p role="status">Carregando colaboradoras…</p>;
   return <div className="px-1"><h2 className="text-xl font-semibold text-ledger-text">Telefone de pedidos por colaboradora</h2>{q.data.length ? q.data.map((l) => <Telefone key={`${l.user_id}:${l.telefone ?? ""}`} linha={l} master={master} />) : <p className="py-6 text-ledger-muted">Sem colaboradoras cadastradas.</p>}</div>;

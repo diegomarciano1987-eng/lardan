@@ -5,6 +5,7 @@ import { referenciaEtiqueta } from "../../src/lib/aceite-maleta";
 let master: Conta, cons: Conta, outra: Conta, montadora: Conta;
 let ciclo = "", variante = "", transferencia = "";
 const marca = Date.now().toString(36);
+const referencia = `000${Date.now()}`;
 beforeAll(async () => {
   master = await criarConta({ nome: `aceite-master-${marca}`, papeis: ["master"] });
   cons = await criarConta({ nome: `aceite-cons-${marca}`, papeis: ["consultora"], comParty: true });
@@ -12,7 +13,7 @@ beforeAll(async () => {
   montadora = await criarConta({ nome: `aceite-mont-${marca}`, papeis: ["montagem"], comParty: true });
   const dep = await criarDeposito(`aceite-${marca}`);
   variante = await criarVariante(`aceite-${marca}`, 10990);
-  await adm.unsafe("update public.products set reference_code='000543' where id=(select product_id from public.product_variants where id=$1)", [variante]);
+  await adm.unsafe("update public.products set reference_code=$2 where id=(select product_id from public.product_variants where id=$1)", [variante, referencia]);
   await porEstoque(variante, dep, 10);
   const c = await rpc<{ cycle_id: string }>(master, "kit_cycle_create", { _payload: { origin_location_id: dep, consultora_party_id: cons.partyId } });
   expect(c.erro).toBeNull(); ciclo = c.dados.cycle_id;
@@ -30,7 +31,7 @@ describe("referência e telefone por login", () => {
     expect(referenciaEtiqueta("VAR-1", "000543")).toBe("VAR-1");
     expect(referenciaEtiqueta(null, null)).toBeNull();
     const d = await rpc<{ itens: { referencia: string }[] }>(master, "kit_pedido_dados", { _cycle: ciclo });
-    expect(d.erro).toBeNull(); expect(d.dados.itens[0]?.referencia).toBe("000543");
+    expect(d.erro).toBeNull(); expect(d.dados.itens[0]?.referencia).toBe(referencia);
   });
   test("telefone acompanha conta autenticada sem mudar padrão nem representante", async () => {
     expect((await rpc(montadora, "pedido_colaboradora_telefone_salvar", { _user: master.uid, _telefone: "43999991111" })).ok).toBe(false);
@@ -59,7 +60,7 @@ describe("aceite obrigatório oficial", () => {
     expect((await rpc<{ cycle_id: string }[]>(outra, "consultora_aceites_pendentes")).dados.some((x) => x.cycle_id === ciclo)).toBe(false);
     expect((await rpc(outra, "consultora_aceite_dados", { _cycle: ciclo })).ok).toBe(false);
     const d = await rpc<{ composicao: { referencia: string; quantidade: number; valor_unitario: number }[] }>(cons, "consultora_aceite_dados", { _cycle: ciclo });
-    expect(d.erro).toBeNull(); expect(d.dados.composicao[0]).toMatchObject({ referencia: "000543", quantidade: 3, valor_unitario: 10990 });
+    expect(d.erro).toBeNull(); expect(d.dados.composicao[0]).toMatchObject({ referencia, quantidade: 3, valor_unitario: 10990 });
     expect((await rpc(cons, "kit_aceitar", { _cycle: ciclo, _itens: [{ variant_id: variante, qty_accepted: 3, qty_divergent: 0 }], _idempotency_key: `novo-${marca}` })).ok).toBe(false);
   });
   test("entrega + aceite remove pendência, persiste e repetição não duplica", async () => {

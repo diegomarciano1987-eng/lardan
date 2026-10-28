@@ -27,6 +27,7 @@ export interface PedidoDados {
     endereco_linha: string; pedidos_telefone: string; pedidos_email: string; pagamento_texto: string;
     pix_tipo: string; pix_chave: string; pix_favorecido: string; garantia_titulo: string; garantia_texto: string;
     garantia_exclusoes: string; montagem_texto: string; rodape_texto: string; prazo_correio_dias: number;
+    proxima_maleta_texto?: string; proxima_maleta_minimo_cents?: number | null;
   };
   remessa: { numero: number | null; kit: number; tipo_envio: "pessoal" | "correio"; data_acerto: string | null; postar_ate: string | null };
   maleta: string | null;
@@ -127,10 +128,10 @@ export function montarLinhas(itens: PedidoDados["itens"]) {
   return out;
 }
 
-export function paginar(grupos: ReturnType<typeof montarLinhas>): Linha[][] {
+export function paginar(grupos: ReturnType<typeof montarLinhas>, aviso = false): Linha[][] {
   const paginas: Linha[][] = [[]];
-  let livre = ALT.pag1;
-  const nova = () => { paginas.push([]); livre = ALT.pagN; };
+  let livre = ALT.pag1 - (aviso ? 15 : 0);
+  const nova = () => { paginas.push([]); livre = ALT.pagN - (aviso ? 15 : 0); };
   for (const g of grupos) {
     let primeira = true;
     for (const it of g.itens) {
@@ -176,6 +177,8 @@ body{font-family:'Jost',Arial,sans-serif;color:#2B201C;-webkit-print-color-adjus
 .marca img{width:14mm;height:10mm;object-fit:contain;display:block}
 .marca .nome{font-family:'Cormorant Garamond',Georgia,serif;font-size:27pt;letter-spacing:.32em;line-height:1;color:#2B201C}
 .marca .end{font-size:7.6pt;color:#7A5642;margin-top:2.6mm;letter-spacing:.01em}
+.aviso-proxima{display:flex;align-items:center;justify-content:space-between;gap:4mm;margin-top:2mm;padding:2mm 3mm;border:.3mm solid #C49A7C;min-height:10mm;font-size:8pt;line-height:1.3}
+.aviso-proxima strong{font-size:16pt;white-space:nowrap}
 .dir{display:flex;gap:4mm;align-items:flex-start}
 .dir .txt{text-align:right}
 .dir .rem{font-family:'Cormorant Garamond',Georgia,serif;font-size:20pt;line-height:1.15;margin-top:1.6mm}
@@ -235,7 +238,9 @@ tr.g td.r,tr.g td.q{font-size:8pt;letter-spacing:.06em}
 
 export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date; pixQrUrl?: string }) {
   const grupos = montarLinhas(d.itens);
-  const paginas = paginar(grupos);
+  const temAviso = !!d.empresa.proxima_maleta_texto?.trim() && Number(d.empresa.proxima_maleta_minimo_cents) > 0;
+  const paginas = paginar(grupos, temAviso);
+  const aviso = temAviso ? `<div class="aviso-proxima"><span>${esc(d.empresa.proxima_maleta_texto)}</span><strong>${esc(brl(Number(d.empresa.proxima_maleta_minimo_cents)))}</strong></div>` : "";
   const total = d.itens.reduce((s, i) => s + i.preco_cents * i.quantidade, 0);
   const pecas = d.itens.reduce((s, i) => s + i.quantidade, 0);
   const max = ganho(total, d.faixas);
@@ -259,7 +264,7 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
     <div class="dir"><div class="txt"><div class="eyebrow">Pedido de consignação</div>
       <div class="rem">Remessa ${esc(remessa)}</div><div class="kit">Kit ${esc(kit)} · Cliente ${esc(cliente)}</div></div>
       ${opcoes.pixQrUrl ? `<div class="qr" style="padding:0;border:0;background:#fff"><img src="${esc(opcoes.pixQrUrl)}" alt="QR Pix LARDAN" style="width:100%;height:100%"></div>` : ""}</div>
-  </div>
+  </div>${aviso}
   <div class="cartoes">
     <div class="cartao"><div class="eyebrow">Consultora</div><div class="t">${esc(d.consultora.nome)}</div>
       <div class="l">${esc(d.consultora.endereco ?? "Endereço não cadastrado")}<br>${esc(d.consultora.cidade ?? "")}${d.consultora.whatsapp ? ` · WhatsApp ${esc(fone(d.consultora.whatsapp))}` : ""}</div></div>
@@ -282,7 +287,7 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
       <div class="regra">Sua comissão sobe conforme o total vendido no ciclo e vale sobre <strong>tudo</strong>: ${textoFaixas(d.faixas)}</div></div>
   </div>`;
 
-  const cab2 = `<div class="cab2">${marca(true)}<div class="info">Remessa <strong>${esc(remessa)}</strong> · Kit ${esc(kit)} · Cliente ${esc(cliente)} · ${esc(nomeCurto(d.consultora.nome))} · Acerto <strong style="color:#7A5642">${esc(dataBr(d.remessa.data_acerto))}</strong></div></div>`;
+  const cab2 = `<div class="cab2">${marca(true)}<div class="info">Remessa <strong>${esc(remessa)}</strong> · Kit ${esc(kit)} · Cliente ${esc(cliente)} · ${esc(nomeCurto(d.consultora.nome))} · Acerto <strong style="color:#7A5642">${esc(dataBr(d.remessa.data_acerto))}</strong></div></div>${aviso}`;
 
   const final = `
   <div class="fimtab" style="margin-top:${paginas.at(-1)!.length ? "0" : "3.6mm"}"><span>TOTAL DO KIT</span><span class="v"><span class="q">${pecas}</span><span class="r">${esc(brl(total))}</span></span></div>

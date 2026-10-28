@@ -49,3 +49,8 @@
 ## Preço para baixo + 9 botões (28/10/2026)
 - [x] Regra de preço para baixo (degraus R$ 5 → x4,90/x9,90); simulação: 16.919 de 17.314 variantes baixam, 0 sobem. Aplicação real aguarda Daniel/Master em Configurações → Pedido e preço
 - [x] App da consultora no celular: 9 botões grandes; Minhas clientes = lista; Jornada e Liga separadas
+
+## 28/10 noite
+- [x] Salvar Textos e Pix / calibração Argox / regra pré-baixa (erro "UPDATE requires a WHERE clause") — migrações 0174/0175
+- [ ] Preço para baixo não aplicado (aplicação falhava pelo mesmo erro) — aplicar
+- [ ] QZ Tray pede autorização a cada etiqueta — imprimir direto

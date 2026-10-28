@@ -30,7 +30,7 @@ function medidas(cfg: Required<EtiquetaConfig>, codigo: string) {
 function etiqueta(item: EtiquetaItem, copias: number, cfg: Required<EtiquetaConfig>, ling: LinguagemArgox): string {
   const codigo = item.barcode ?? "";
   const m = medidas(cfg, codigo);
-  const nome = limpo(item.nome).slice(0, m.maxCar);
+  const nome = limpo(item.nome).slice(0, ling === "pplb" ? Math.floor(pt(cfg.areaLargura - 1.2) / 10) : m.maxCar);
   const ref = limpo(textoEtiqueta(item.referencia || item.barcode, item.precoCents));
   const larg = pt(ETIQUETA.suporte), alt = pt(ETIQUETA.altura), gap = pt(cfg.entreLinhas);
   if (ling === "pplz") {
@@ -43,12 +43,14 @@ function etiqueta(item: EtiquetaItem, copias: number, cfg: Required<EtiquetaConf
     ].join("\n");
   }
   // PPLB / EPL: fonte 1 = 8×12 pontos, fonte 2 = 10×16, fonte 3 = 12×20
-  const fRef = m.hRef >= 20 && ref.length * 14 <= pt(cfg.areaLargura) ? 3 : 2;
+  // posições próprias: fonte 1 tem 12 pontos de altura; tudo cabe nos 96 pontos (12 mm)
+  const yBar = m.y + 14, yRef = yBar + m.hBar + 2;
+  const fRef = yRef + 20 <= alt && ref.length * 14 <= pt(cfg.areaLargura) ? 3 : 2;
   return [
     "", "N", `q${larg}`, `Q${alt},${gap}`, "ZT", "S2", "D10",
     `A${m.x},${m.y},0,1,1,1,N,"${nome}"`,
-    `B${m.x},${m.yBar},0,1,${m.modulo},${m.modulo},${m.hBar},N,"${codigo}"`,
-    `A${m.x},${m.yRef},0,${fRef},1,1,N,"${ref}"`,
+    `B${m.x},${yBar},0,1,${m.modulo},${m.modulo},${m.hBar},N,"${codigo}"`,
+    `A${m.x},${yRef},0,${fRef},1,1,N,"${ref}"`,
     `P${copias}`, "",
   ].join("\n");
 }

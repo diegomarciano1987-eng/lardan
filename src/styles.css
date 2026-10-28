@@ -1907,3 +1907,18 @@ body.consultora-glass-light-active :is([role="dialog"], [role="alertdialog"]) im
 .consultora-glass-pilot.consultora-glass-light .consultora-inicio-acoes > button > span:first-child { color: var(--primary); background: oklch(0.99 0.004 70 / 0.9); }
 .consultora-glass-pilot.consultora-glass-light .consultora-menu-indicador { box-shadow: inset 0 1px 0 var(--glass-reflection), 0 8px 20px var(--glass-shade); }
 .consultora-glass-pilot.consultora-glass-light .consultora-inicio-acoes > button > span:first-child svg { color: var(--primary); }
+
+/* Consultant touch feedback and monetary progress: scoped away from public pages. */
+.area-consultora :is(button, a) { touch-action: manipulation; }
+.area-consultora button:active:not(:disabled) { filter: brightness(1.08); }
+.consultora-vendas-preenchimento {
+  background: linear-gradient(90deg, var(--primary), var(--color-champagne));
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  transition: width 450ms ease-out;
+}
+.consultora-glass-light .consultora-vendas-preenchimento {
+  background: linear-gradient(90deg, var(--primary), var(--acao));
+}
+@media (prefers-reduced-motion: reduce) {
+  .consultora-vendas-preenchimento { transition: none; }
+}

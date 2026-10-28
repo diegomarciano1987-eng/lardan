@@ -42,6 +42,8 @@ import { conferenciaMaleta, pendenciasAceite } from "@/lib/aceite-maleta";
 import { Button } from "@/components/ui/button";
 import { CartaoLiga } from "@/components/consultora/LigaEAcerto";
 import { iconeCategoria } from "@/lib/consultora-combinado";
+import { clientesQuery, ganhosQuery, pedidosQuery } from "@/lib/consultora-queries";
+import { estadoAceite } from "@/lib/consultora-progresso";
 const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "biblioteca", "financeiro", "mais", "novo", "jornada", "liga"];
@@ -541,23 +543,36 @@ function AreaConsultora() {
 function AreaConsultoraLiberada() {
   const { user } = useRouteContext({ from: "/_authenticated" });
   const nav = Route.useSearch() as Nav;
+  const [navImediata, setNavImediata] = React.useState<Nav>(nav);
+  React.useEffect(() => { setNavImediata(nav); }, [nav]);
+  const qc = useQueryClient();
   const navigate = Route.useNavigate();
   const ir: Ir = (n) => {
+    setNavImediata(n);
     const busca = n.q !== undefined || n.aba === nav.aba;
-    navigate({ search: { aba: n.aba, id: n.id, modo: n.modo, q: n.q }, replace: busca && n.aba === nav.aba && !n.id && !nav.id && !n.modo });
+    void navigate({ search: { aba: n.aba, id: n.id, modo: n.modo, q: n.q }, replace: busca && n.aba === nav.aba && !n.id && !nav.id && !n.modo }).catch(() => { setNavImediata(nav); toast.error("Não foi possível abrir esta tela. Tente novamente."); });
     if (!(n.aba === nav.aba && n.q !== nav.q)) window.scrollTo({ top: 0 });
   };
   const [escolhida, setEscolhida] = React.useState<string | null>(null);
-  const pendentes = useQuery({ queryKey: ["consultora", "aceites-pendentes", user.id], queryFn: pendenciasAceite, refetchInterval: 15000, retry: false });
-  const bloqueada = !pendentes.data || pendentes.isError || pendentes.data.length > 0;
-  const maletas = useQuery({ queryKey: ["consultora", "maletas"], queryFn: () => listarMaletas() });
+  const pendentes = useQuery({ queryKey: ["consultora", "aceites-pendentes", user.id], queryFn: pendenciasAceite, staleTime: 15_000, refetchInterval: 15000, retry: false });
+  const bloqueada = estadoAceite(pendentes.data) !== "liberada";
+  React.useEffect(() => {
+    if (bloqueada) return;
+    const timer = window.setTimeout(() => {
+      void qc.prefetchQuery(clientesQuery());
+      void qc.prefetchQuery(pedidosQuery());
+      void qc.prefetchQuery(ganhosQuery());
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [bloqueada, qc]);
+  const maletas = useQuery({ queryKey: ["consultora", "maletas"], queryFn: () => listarMaletas(), staleTime: 60_000 });
   const abertas = (maletas.data ?? []).filter((m) => ["operacao", "recebida", "transito", "expedida", "acerto"].includes(m.situacao)).sort((a, b) => {
     const prioridade = ["operacao", "recebida", "transito", "expedida", "acerto"];
     return prioridade.indexOf(a.situacao) - prioridade.indexOf(b.situacao);
   });
   const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
-  const aba = nav.aba ?? "inicio";
+  const aba = navImediata.aba ?? "inicio";
   const ajuda = aba === "indicacoes" || aba === "biblioteca" ? "inicio" : aba === "historico" || aba === "financeiro" ? "maleta" : aba === "novo" ? "pedidos" : aba === "jornada" ? "clientes" : aba === "liga" ? "inicio" : aba;
 
   const seletorMaleta = abertas.length > 1 && (
@@ -577,7 +592,8 @@ function AreaConsultoraLiberada() {
   );
 
   return (
-    <CascaConsultora nav={{ ...nav, aba }} ir={bloqueada ? () => {} : ir} ajuda={ajuda} bloqueada={bloqueada}>
+    <CascaConsultora nav={{ ...navImediata, aba }} ir={bloqueada ? () => {} : ir} ajuda={ajuda} bloqueada={bloqueada}>
+      {!bloqueada && pendentes.isError && <p role="status" className="mb-4 text-base text-muted-foreground">Não foi possível atualizar a conferência agora. <Button variant="outline" onClick={() => void pendentes.refetch()}>Atualizar</Button></p>}
       {bloqueada ? <><Topo titulo="Aceite de maleta" ajuda="maleta" />
         {pendentes.isError ? <Cartao><p role="alert">{traduzir(pendentes.error)}</p><Button className="mt-4" onClick={() => void pendentes.refetch()}>Tentar novamente</Button></Cartao>
           : !pendentes.data ? <Cartao><p role="status">Verificando recebimento das suas maletas…</p></Cartao>
@@ -585,9 +601,9 @@ function AreaConsultoraLiberada() {
       </> : <>
       <Passeio />
       {aba === "inicio" && <Inicio ir={ir} />}
-      {aba === "clientes" && (nav.modo ? <FormCliente id={nav.modo === "editar" ? nav.id : undefined} ir={ir} />
-        : nav.id ? <FichaCliente id={nav.id} nav={nav} ir={ir} /> : <Clientes nav={nav} ir={ir} />)}
-      {aba === "novo" && <NovoPedido clienteInicial={nav.id} ir={ir} />}
+      {aba === "clientes" && (navImediata.modo ? <FormCliente id={navImediata.modo === "editar" ? navImediata.id : undefined} ir={ir} />
+        : navImediata.id ? <FichaCliente id={navImediata.id} nav={navImediata} ir={ir} /> : <Clientes nav={navImediata} ir={ir} />)}
+      {aba === "novo" && <NovoPedido clienteInicial={navImediata.id} ir={ir} />}
       {aba === "pedidos" && (<><Topo titulo="Pedidos" ajuda="pedidos"><button type="button" className="btn-app-principal hidden sm:inline-flex" onClick={() => ir({ aba: "novo" })}>Nova venda</button></Topo><PedidosConsultora /></>)}
       {aba === "maleta" && (<><Topo titulo="Minha maleta" ajuda="maleta" />{seletorMaleta}<div className="max-w-3xl"><MinhaMaleta cycleId={atual} /></div></>)}
       {aba === "historico" && (<><Topo titulo="Entregas da maleta" ajuda="maleta" voltar={() => ir({ aba: "mais" })} />{seletorMaleta}<div className="max-w-3xl"><Historico cycleId={atual} /></div></>)}
@@ -595,7 +611,7 @@ function AreaConsultoraLiberada() {
       {aba === "indicacoes" && (<><Topo titulo="Minhas indicadas" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Indicacoes /></>)}
       {aba === "financeiro" && (<><Topo titulo="Meu financeiro" ajuda="maleta" voltar={() => ir({ aba: "mais" })} /><MeuFinanceiro verMaleta={() => ir({ aba: "maleta" })} /></>)}
       {aba === "biblioteca" && (<><Topo titulo="Biblioteca LARDAN" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Biblioteca /></>)}
-      {aba === "jornada" && <Clientes nav={nav} ir={ir} jornada />}
+      {aba === "jornada" && <Clientes nav={navImediata} ir={ir} jornada />}
       {aba === "liga" && (<><Topo titulo="Liga Lardan" ajuda="inicio" voltar={() => ir({ aba: "inicio" })} /><div className="max-w-3xl"><CartaoLiga /></div></>)}
       {aba === "mais" && <Mais ir={ir} />}
       </>}

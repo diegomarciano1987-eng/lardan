@@ -18,6 +18,7 @@ import { Link, useRouteContext } from "@tanstack/react-router";
 import { mostrarPilotoGlass } from "@/lib/consultora-glass";
 import { useTemaConsultora } from "@/lib/consultora-tema";
 import { TemaClaroEscuro } from "@/components/consultora/TemaClaroEscuro";
+import { inicioQuery, clientesQuery } from "@/lib/consultora-queries";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -58,6 +59,8 @@ const PRINCIPAIS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
   { aba: "maleta", rotulo: "Maleta", icone: BriefcaseBusiness },
 ];
 const EXTRAS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
+  { aba: "jornada", rotulo: "Jornada", icone: IconeJornada },
+  { aba: "liga", rotulo: "Liga LARDAN", icone: Medal },
   { aba: "financeiro", rotulo: "Meu financeiro", icone: Wallet },
   { aba: "vitrine", rotulo: "Minha vitrine", icone: Store },
   { aba: "historico", rotulo: "Entregas da maleta", icone: PackageCheck },
@@ -65,7 +68,7 @@ const EXTRAS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
   { aba: "biblioteca", rotulo: "Biblioteca LARDAN", icone: BookOpen },
 ];
 
-const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : a === "vitrine" || a === "historico" || a === "indicacoes" || a === "biblioteca" || a === "financeiro" ? "mais" : a);
+const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : EXTRAS.some((i) => i.aba === a) ? "mais" : a);
 
 export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }: { nav: Nav; ir: Ir; ajuda: string; children: React.ReactNode; bloqueada?: boolean }) {
   const { user } = useRouteContext({ from: "/_authenticated" });
@@ -258,7 +261,7 @@ const BOTOES_INICIO: { r: string; i: typeof Plus; n: Nav }[] = [
 ];
 
 export function Inicio({ ir }: { ir: Ir }) {
-  const q = useQuery({ queryKey: ["consultora", "inicio"], queryFn: carregarInicio });
+  const q = useQuery(inicioQuery());
   const hora = new Date().getHours();
   const saudacao = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
   const d = q.data;
@@ -301,6 +304,10 @@ export function Inicio({ ir }: { ir: Ir }) {
         </div>
         <span className="lg:hidden"><BotaoAjuda tela="inicio" /></span>
       </header>
+      <div className="space-y-3">
+        <CartaoLiga compacto />
+        <GanhosConsultora compacto />
+      </div>
       <LembretesPagamento ir={ir} />
 
       {/* Celular: 9 botões grandes estilo app de banco (Nova venda ocupa dois lugares) */}
@@ -321,8 +328,6 @@ export function Inicio({ ir }: { ir: Ir }) {
 
       {/* 0159: Liga → ganhos → acerto → Nova venda → O que fazer agora → indicação → resumo (computador) */}
       <div className="hidden space-y-7 lg:block">
-      <CartaoLiga />
-      <GanhosConsultora />
       {d && <CartaoAcerto d={d} ir={(aba) => ir({ aba })} />}
 
       <section className="consultora-inicio-acoes grid gap-3 lg:grid-cols-[1.2fr_1fr]">
@@ -420,8 +425,14 @@ const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, 
 
 export function Clientes({ nav, ir, jornada }: { nav: Nav; ir: Ir; jornada?: boolean }) {
   const busca = nav.q ?? "";
-  const q = useQuery({ queryKey: ["consultora", "clientes", busca], queryFn: () => listarClientes(busca) });
-  const resumos = useQuery({ queryKey: ["consultora", "clientes-resumo"], queryFn: async () => { const { data, error } = await supabase.rpc("consultora_clientes_resumo"); if (error) throw error; return data as unknown as { client_id: string; pedidos_abertos: number }[]; } });
+  const [termoBusca, setTermoBusca] = React.useState(busca);
+  React.useEffect(() => {
+    const timer = window.setTimeout(() => setTermoBusca(busca), 250);
+    return () => window.clearTimeout(timer);
+  }, [busca]);
+  const q = useQuery(clientesQuery(termoBusca));
+  const resumos = useQuery({ queryKey: ["consultora", "clientes-resumo"], staleTime: 60_000, queryFn: async () => { const { data, error } = await supabase.rpc("consultora_clientes_resumo"); if (error) throw error; return data as unknown as { client_id: string; pedidos_abertos: number }[]; } });
+  const pedidosPorCliente = React.useMemo(() => new Map((resumos.data ?? []).map((r) => [r.client_id, r.pedidos_abertos])), [resumos.data]);
   const lista = q.data ?? [];
   const ativas = lista.filter((c) => !c.encerrada);
   const pausadas = lista.filter((c) => c.encerrada);
@@ -459,7 +470,7 @@ export function Clientes({ nav, ir, jornada }: { nav: Nav; ir: Ir; jornada?: boo
       {!jornada && lista.length > 0 && (
         <ul className="space-y-2" aria-label="Lista de clientes">
           {[...lista].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")).map((c) => (
-            <li key={c.id} className="min-w-0"><CartaoPessoa c={c} pedidos={resumos.data?.find((r) => r.client_id === c.id)?.pedidos_abertos} onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>
+            <li key={c.id} className="min-w-0"><CartaoPessoa c={c} pedidos={pedidosPorCliente.get(c.id)} onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>
           ))}
         </ul>
       )}
@@ -482,7 +493,7 @@ export function Clientes({ nav, ir, jornada }: { nav: Nav; ir: Ir; jornada?: boo
                   {on && (
                     <ul className="space-y-2 px-3 pb-3">
                       {g.itens.length === 0 && <li className="px-2 py-3 text-[1rem] text-muted-foreground">Ninguém nesta etapa.</li>}
-              {g.itens.map((c) => <li key={c.id} className="min-w-0"><CartaoPessoa c={c} pedidos={resumos.data?.find((r) => r.client_id === c.id)?.pedidos_abertos} onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}
+              {g.itens.map((c) => <li key={c.id} className="min-w-0"><CartaoPessoa c={c} pedidos={pedidosPorCliente.get(c.id)} onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}
                     </ul>
                   )}
                 </section>
@@ -497,7 +508,7 @@ export function Clientes({ nav, ir, jornada }: { nav: Nav; ir: Ir; jornada?: boo
                   <span className="truncate">{g.rotulo}</span><span className="rounded-full bg-card px-2.5 text-base text-primary">{g.itens.length}</span>
                 </h2>
                 <ul className="space-y-2">
-                  {g.itens.map((c) => <li key={c.id}><CartaoPessoa c={c} pedidos={resumos.data?.find((r) => r.client_id === c.id)?.pedidos_abertos} compacto onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}
+                  {g.itens.map((c) => <li key={c.id}><CartaoPessoa c={c} pedidos={pedidosPorCliente.get(c.id)} compacto onAbrir={() => ir({ aba: "clientes", id: c.id, q: nav.q })} /></li>)}
                   {g.itens.length === 0 && <li className="px-1 text-[0.98rem] text-muted-foreground">Ninguém aqui.</li>}
                 </ul>
               </section>
@@ -1013,6 +1024,9 @@ export function Mais({ ir }: { ir: Ir }) {
   const pilotoMais = mostrarPilotoGlass(user.id, "mais");
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/equipe"; };
   const itens = [
+    { r: "Meu financeiro", d: "Pagamentos e acertos", i: Wallet, n: { aba: "financeiro" } as Nav },
+    { r: "Jornada", d: "Jornada das clientes", i: IconeJornada, n: { aba: "jornada" } as Nav },
+    { r: "Liga LARDAN", d: "Seu nível e próximo passo", i: Medal, n: { aba: "liga" } as Nav },
     { r: "Minha vitrine", d: "Foto, capa, peças e link para compartilhar", i: Store, n: { aba: "vitrine" } as Nav },
     { r: "Entregas da maleta", d: "Histórico de envios e recebimentos", i: PackageCheck, n: { aba: "historico" } as Nav },
     { r: "Indicações", d: "Seu link, suas indicadas e comissões", i: UserPlus, n: { aba: "indicacoes" } as Nav },

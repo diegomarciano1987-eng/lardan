@@ -253,7 +253,7 @@ function RemessasPage() {
         description="Cada remessa tem seu número e sua praça. As maletas das consultoras são abertas dentro da remessa."
         actions={
           <div className="flex flex-wrap gap-2">
-            <ConfigurarImpressora />
+            {escopo.isSuccess && !colab && <ConfigurarImpressora />}
             {caps.includes("stock.operate") && (
               <Link to="/admin/maletas/entrada" className="admin-btn">
                 <ScanLine aria-hidden className="size-4" /> Entrada de maleta

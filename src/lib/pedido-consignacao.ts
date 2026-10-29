@@ -6,7 +6,7 @@
  *  - Última: TOTAL DO KIT + Garantia + Montagem do próximo kit + Pagamento/Pix.
  *  - Itens agrupados por tipo com subtotal; sem assinatura e sem colunas vendeu/devolveu.
  *  - "Postar a maleta até" só quando a remessa é pelo correio.
- *  - 0180: card "Meta mínima" (consultora nova/parada) ou "Objetivo de venda" (3 meses + média + 15%) logo abaixo do
+ *  - 0180/0183: card "Meta mínima" (sem histórico) ou "Objetivo de venda" (3 melhores meses de sempre + 15%) logo abaixo do
  *    bloco de ganho, só na página 1. A faixa antiga do topo (texto da próxima maleta + mínimo) saiu: o card substitui.
  */
 
@@ -269,7 +269,7 @@ const MESES_CURTOS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "S
 /** "2026-08" → "Ago/26" */
 export const mesCurto = (ym: string) => `${MESES_CURTOS[Number(ym.slice(5, 7)) - 1] ?? ""}/${ym.slice(2, 4)}`;
 
-/** Card do objetivo (0180): consultora nova/parada → Meta mínima; com histórico → 3 meses + Objetivo de venda. */
+/** Card do objetivo (0180/0183): sem histórico → Meta mínima; com histórico → os 3 melhores meses (ou os que tiver) + Objetivo de venda. */
 export function cardObjetivo(o: ObjetivoPedido | null | undefined, textoMeta?: string) {
   if (!o || !Number(o.objetivo_cents)) return "";
   const alvo = Number(o.objetivo_cents);
@@ -285,7 +285,7 @@ export function cardObjetivo(o: ObjetivoPedido | null | undefined, textoMeta?: s
     : `<div class="mes vazio"><div class="eyebrow">${esc(mesCurto(m.mes))}</div><div class="n">sem acerto</div><div class="c">fora da média</div></div>`).join("");
   const conta = o.piso
     ? "objetivo mínimo LARDAN"
-    : `média de ${o.meses_com_acerto} ${o.meses_com_acerto === 1 ? "mês" : "meses"} + 15%`;
+    : o.meses_com_acerto === 1 ? "seu melhor mês + 15%" : `média dos seus ${o.meses_com_acerto} melhores meses + 15%`;
   const pct = o.percentual_objetivo ? ` · faixa de ${Number(o.percentual_objetivo).toLocaleString("pt-BR")}%` : "";
   return `<div class="objetivo"><div class="meses">${meses}</div>`
     + `<div class="alvo"><div class="eyebrow">Objetivo de venda</div><div class="v">${esc(brl(alvo))}</div>`

@@ -1,6 +1,7 @@
 /**
  * 0180 — Histórico de vendas e Objetivo de venda (regras aprovadas em 29/10/2026).
- * Banco ISOLADO, dados sintéticos. Referência fixa 10/11/2026 → meses usados: ago, set e out/2026.
+ * Banco ISOLADO, dados sintéticos. Referência fixa 10/11/2026 → entram os meses fechados até outubro/2026.
+ * 0183: objetivo = 3 melhores meses de sempre (ou os que tiver) + 15%.
  * Faixas da bancada: 0 → 20% · 200 → 25% · 500 → 30% · 650 → 35% · 1.200 → 40%.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
@@ -45,25 +46,35 @@ afterAll(async () => {
   await adm.unsafe(`delete from public.legado_acertos_consultora where codcli > $1 and codcli <= $2`, [base, base + 100]);
 });
 
-describe("objetivo de venda", () => {
-  test("3 meses: média + 15% (900, 700, 800 → R$ 920,00) com a comissão de 35%", async () => {
+describe("objetivo de venda (0183: 3 melhores meses de sempre + 15%)", () => {
+  test("3 melhores meses de todo o histórico: 1.320, 1.230 e 1.140 → média 1.230 + 15% = R$ 1.414,50 → R$ 1.420,00 (40%)", async () => {
     const c = await consultora("tres");
-    await acerto(c.cod, base * 10 + 1, "2026-08-12", 900, 270);
-    await acerto(c.cod, base * 10 + 2, "2026-09-12", 700, 210);
-    await acerto(c.cod, base * 10 + 3, "2026-10-12", 800, 240);
-    await acerto(c.cod, base * 10 + 4, "2026-07-12", 5000, 2000); // fora da janela
+    await acerto(c.cod, base * 10 + 1, "2025-12-12", 1320, 396);
+    await acerto(c.cod, base * 10 + 2, "2026-02-12", 1230, 369);
+    await acerto(c.cod, base * 10 + 3, "2026-03-12", 1140, 342);
+    await acerto(c.cod, base * 10 + 4, "2026-08-12", 900, 270);
+    await acerto(c.cod, base * 10 + 5, "2026-10-12", 800, 240);
+    await acerto(c.cod, base * 10 + 6, "2026-11-05", 5000, 2000);   // mês da referência ainda aberto: não entra
     const o = await calc(c.partyId!);
-    expect(o).toMatchObject({ tipo: "objetivo", meses_com_acerto: 3, media_cents: 80000, objetivo_cents: 92000, piso: false, comissao_objetivo_cents: 32200 });
-    expect(o.meses.map((m) => [m.mes, m.vendido_cents, m.comissao_cents])).toEqual([["2026-08", 90000, 27000], ["2026-09", 70000, 21000], ["2026-10", 80000, 24000]]);
+    expect(o).toMatchObject({ tipo: "objetivo", meses_com_acerto: 3, media_cents: 123000, objetivo_cents: 142000, piso: false, comissao_objetivo_cents: 56800 });
+    expect(o.meses.map((m) => [m.mes, m.vendido_cents, m.comissao_cents])).toEqual([["2025-12", 132000, 39600], ["2026-02", 123000, 36900], ["2026-03", 114000, 34200]]);
   });
 
-  test("2 meses com acerto: média de 2 (1.000 e 600 → R$ 920,00); mês sem acerto aparece vazio", async () => {
+  test("menos de 3 meses: usa os que tiver (1.000 e 600 → R$ 920,00)", async () => {
     const c = await consultora("dois");
     await acerto(c.cod, base * 10 + 11, "2026-08-03", 1000, 300);
     await acerto(c.cod, base * 10 + 12, "2026-10-28", 600, 180);
     const o = await calc(c.partyId!);
     expect(o).toMatchObject({ tipo: "objetivo", meses_com_acerto: 2, objetivo_cents: 92000 });
-    expect(o.meses[1]).toMatchObject({ mes: "2026-09", acerto: false, vendido_cents: null });
+    expect(o.meses.map((m) => m.mes)).toEqual(["2026-08", "2026-10"]);
+  });
+
+  test("vários acertos no mesmo mês somam como um mês (400 + 500 = 900; com 700 → média 800 → R$ 920,00)", async () => {
+    const c = await consultora("mesmo-mes");
+    await acerto(c.cod, base * 10 + 15, "2026-09-02", 400, 100);
+    await acerto(c.cod, base * 10 + 16, "2026-09-25", 500, 150);
+    await acerto(c.cod, base * 10 + 17, "2026-06-10", 700, 210);
+    expect(await calc(c.partyId!)).toMatchObject({ meses_com_acerto: 2, media_cents: 80000, objetivo_cents: 92000 });
   });
 
   test("1 mês de R$ 500 → R$ 575 → R$ 580 → piso de R$ 650,00", async () => {
@@ -78,20 +89,20 @@ describe("objetivo de venda", () => {
     expect((await calc(c.partyId!)).objetivo_cents).toBe(90000);
   });
 
-  test("acerto com venda zero conta na média como R$ 0 (900 e 0 → 450 → piso)", async () => {
+  test("acerto com venda zero conta como R$ 0 quando está entre os meses usados (900 e 0 → 450 → piso)", async () => {
     const c = await consultora("zero");
     await acerto(c.cod, base * 10 + 41, "2026-08-20", 900, 270);
     await acerto(c.cod, base * 10 + 42, "2026-09-20", 0, 0);
     expect(await calc(c.partyId!)).toMatchObject({ meses_com_acerto: 2, media_cents: 45000, objetivo_cents: 65000, piso: true });
   });
 
-  test("nova ou parada: só a meta mínima; maleta perdida não é venda", async () => {
+  test("sem nenhum acerto: só a meta mínima; parada com histórico usa os melhores meses; perdida não é venda", async () => {
     const nova = await consultora("nova");
     expect(await calc(nova.partyId!)).toMatchObject({ tipo: "meta", objetivo_cents: 65000, meses_com_acerto: 0 });
     const parada = await consultora("parada");
-    await acerto(parada.cod, base * 10 + 51, "2026-05-10", 2000, 800);
+    await acerto(parada.cod, base * 10 + 51, "2025-05-10", 2000, 800);
     await acerto(parada.cod, base * 10 + 52, "2026-09-10", 400, null, "perdida");
-    expect(await calc(parada.partyId!)).toMatchObject({ tipo: "meta", objetivo_cents: 65000 });
+    expect(await calc(parada.partyId!)).toMatchObject({ tipo: "objetivo", meses_com_acerto: 1, objetivo_cents: 230000 });
   });
 
   test("comissão: a recebida quando existe; sem cobrança, estimada pelas faixas de hoje", async () => {
@@ -136,7 +147,7 @@ describe("Lardan + sistema antigo, gravado na maleta e no PDF", () => {
 
   test("a mesma remessa nos dois sistemas conta uma vez (vale a Lardan)", async () => {
     const o = await calc(cons.partyId!);
-    expect(o.meses.map((m) => m.vendido_cents)).toEqual([null, 60000, 100000]);
+    expect(o.meses.map((m) => m.vendido_cents)).toEqual([60000, 100000]);
     expect(o).toMatchObject({ meses_com_acerto: 2, objetivo_cents: 92000 });
   });
 
@@ -189,7 +200,7 @@ describe("card do objetivo no PDF do pedido", () => {
       meses: [{ mes: "2026-07", acerto: true, vendido_cents: 100000, comissao_cents: 30000, estimada: false },
               { mes: "2026-08", acerto: false, vendido_cents: null, comissao_cents: null, estimada: false },
               { mes: "2026-09", acerto: true, vendido_cents: 60000, comissao_cents: 15000, estimada: true }] });
-    for (const t of ["Jul/26", "R$ 1.000,00", "sem acerto", "(estimada)", "Objetivo de venda", "R$ 920,00", "R$ 322,00", "média de 2 meses + 15%"]) expect(vet).toContain(t);
+    for (const t of ["Jul/26", "R$ 1.000,00", "sem acerto", "(estimada)", "Objetivo de venda", "R$ 920,00", "R$ 322,00", "média dos seus 2 melhores meses + 15%"]) expect(vet).toContain(t);
     expect(cardObjetivo(null)).toBe("");
     expect(cardObjetivo({ tipo: "meta", objetivo_cents: null, piso: true, meses_com_acerto: 0, comissao_objetivo_cents: null, meses: [] })).toBe("");
   });

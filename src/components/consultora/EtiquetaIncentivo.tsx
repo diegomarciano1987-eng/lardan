@@ -177,7 +177,7 @@ export function PainelIncentivo({ d, aberto, fechar, ir }: { d: ComMaleta; abert
 
             {o && o.tipo === "objetivo" && o.meses.length > 0 && (
               <section className="rounded-3xl border border-border bg-card p-5">
-                <h3 className="text-[1.05rem] font-semibold">Seus últimos 3 meses</h3>
+                <h3 className="text-[1.05rem] font-semibold">{o.meses.length === 1 ? "Seu melhor mês" : `Seus ${o.meses.length} melhores meses`}</h3>
                 <ul className="mt-3 grid grid-cols-3 gap-2">
                   {o.meses.slice(-3).map((m) => (
                     <li key={m.mes} className="rounded-2xl bg-muted/50 px-3 py-3">

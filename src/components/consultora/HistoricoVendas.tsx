@@ -67,7 +67,7 @@ export function CartaoObjetivo({ o, daMaleta }: { o: Objetivo; daMaleta: boolean
           <p className="border-t border-border px-5 py-3 text-[0.95rem] text-muted-foreground">
             {o.piso
               ? "Objetivo mínimo LARDAN."
-              : `Média de ${o.meses_com_acerto} ${o.meses_com_acerto === 1 ? "mês" : "meses"} com acerto + 15%, arredondada para cima.`}
+              : o.meses_com_acerto === 1 ? "Seu melhor mês + 15%, arredondado para cima." : `Média dos seus ${o.meses_com_acerto} melhores meses + 15%, arredondada para cima.`}
             {daMaleta ? " Fica fixo até o acerto desta maleta." : ""}
           </p>
         </>

@@ -9,6 +9,7 @@ test("TSM: CNPJ/IE/endereço exatos, emissão desligada, regra preservada e ende
   const c = await adm.reserve();
   try {
     await c.unsafe("begin");
+    await c.unsafe(`update public.consultora_cobranca_config set business_entity_id=null where id`);
     await c.unsafe(`update public.business_entities set tax_id=null where regexp_replace(coalesce(tax_id,''),'\\D','','g')='43319208000180'`);
     const [p] = await c.unsafe(`insert into public.parties(kind,display_name,doc) values ('organizacao','ISO TSM','43319208000180') returning id`);
     if (!p) throw new Error("Pessoa não criada");
@@ -33,6 +34,7 @@ test("TSM: duas identidades não unificadas são recusadas sem gravar emissor", 
   const c = await adm.reserve();
   try {
     await c.unsafe("begin");
+    await c.unsafe(`update public.consultora_cobranca_config set business_entity_id=null where id`);
     await c.unsafe(`update public.business_entities set tax_id=null where regexp_replace(coalesce(tax_id,''),'\\D','','g')='43319208000180'`);
     await c.unsafe(`insert into public.parties(kind,display_name,doc) values ('organizacao','ISO A','43319208000180'),('organizacao','ISO B','43319208000180')`);
     await c.unsafe("savepoint cadastro");
@@ -49,6 +51,7 @@ test("TSM: cadastro oficialmente unificado é ignorado sem apagar seu CNPJ hist�
   const c = await adm.reserve();
   try {
     await c.unsafe("begin");
+    await c.unsafe(`update public.consultora_cobranca_config set business_entity_id=null where id`);
     await c.unsafe(`update public.business_entities set tax_id=null where regexp_replace(coalesce(tax_id,''),'\\D','','g')='43319208000180'`);
     const rows = await c.unsafe(`insert into public.parties(kind,display_name,doc) values ('organizacao','ISO LARDAN','43319208000180'),('organizacao','ISO TSM antiga','43319208000180') returning id`);
     const [can, dup] = rows;

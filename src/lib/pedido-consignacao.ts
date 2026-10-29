@@ -6,6 +6,8 @@
  *  - Última: TOTAL DO KIT + Garantia + Montagem do próximo kit + Pagamento/Pix.
  *  - Itens agrupados por tipo com subtotal; sem assinatura e sem colunas vendeu/devolveu.
  *  - "Postar a maleta até" só quando a remessa é pelo correio.
+ *  - 0180: card "Meta mínima" (consultora nova/parada) ou "Objetivo de venda" (3 meses + média + 15%) logo abaixo do
+ *    bloco de ganho, só na página 1. A faixa antiga do topo (texto da próxima maleta + mínimo) saiu: o card substitui.
  */
 
 export type GrupoPeca = "aneis" | "brincos" | "colares" | "pulseiras" | "tornozeleiras" | "piercing" | "outros";
@@ -22,6 +24,19 @@ export const GRUPOS: { id: GrupoPeca; rotulo: string }[] = [
 
 export interface FaixaPedido { min_cents: number; percentual: number }
 
+/** Objetivo gravado na maleta (consultora_objetivo_calc, 0180). */
+export interface ObjetivoPedido {
+  tipo: "meta" | "objetivo";
+  objetivo_cents: number | null;
+  minimo_cents?: number | null;
+  media_cents?: number;
+  piso: boolean;
+  meses_com_acerto: number;
+  comissao_objetivo_cents: number | null;
+  percentual_objetivo?: number;
+  meses: { mes: string; acerto: boolean; vendido_cents: number | null; comissao_cents: number | null; estimada: boolean }[];
+}
+
 export interface PedidoDados {
   empresa: {
     endereco_linha: string; pedidos_telefone: string; pedidos_email: string; pagamento_texto: string;
@@ -37,6 +52,7 @@ export interface PedidoDados {
   montado_por: string | null;
   faixas: FaixaPedido[];
   itens: { variant_id: string; sku: string | null; referencia: string | null; descricao: string; preco_cents: number; quantidade: number; grupo: GrupoPeca }[];
+  objetivo?: ObjetivoPedido | null;
 }
 
 // ---------------------------------------------------------------- formatação
@@ -114,7 +130,7 @@ type Linha = { tipo: "grupo"; rotulo: string; subtotal: number; qtd: number; con
 /** Alturas em mm (iguais às do CSS abaixo). */
 // Medidos no Chromium (A4, margens 12 mm): linha 5,0 mm; grupo 7,5 mm; tabela começa a 140,5 mm na pág. 1 e a 28 mm nas demais;
 // cabeçalho da tabela 7 mm; rodapé a 284,3 mm (deixamos 3 mm de respiro); fechamento (total + garantia + Pix) 68 mm.
-const ALT = { item: 5.0, grupo: 7.5, pag1: 125.5, pagN: 243, fim: 70 };
+const ALT = { item: 5.0, grupo: 7.5, pag1: 125.5, pagN: 243, fim: 70, objetivo: 28.4 };
 
 export function montarLinhas(itens: PedidoDados["itens"]) {
   const out: { grupo: GrupoPeca; rotulo: string; itens: PedidoDados["itens"]; subtotal: number; qtd: number }[] = [];
@@ -128,9 +144,9 @@ export function montarLinhas(itens: PedidoDados["itens"]) {
   return out;
 }
 
-export function paginar(grupos: ReturnType<typeof montarLinhas>, aviso = false, fimExtra = 0): Linha[][] {
+export function paginar(grupos: ReturnType<typeof montarLinhas>, aviso = false, fimExtra = 0, objetivo = false): Linha[][] {
   const paginas: Linha[][] = [[]];
-  let livre = ALT.pag1 - (aviso ? 15 : 0);
+  let livre = ALT.pag1 - (aviso ? 15 : 0) - (objetivo ? ALT.objetivo : 0);
   const nova = () => { paginas.push([]); livre = ALT.pagN - (aviso ? 15 : 0); };
   for (const g of grupos) {
     let primeira = true;
@@ -177,8 +193,6 @@ body{font-family:'Jost',Arial,sans-serif;color:#2B201C;-webkit-print-color-adjus
 .marca img{width:14mm;height:10mm;object-fit:contain;display:block}
 .marca .nome{font-family:'Cormorant Garamond',Georgia,serif;font-size:27pt;letter-spacing:.32em;line-height:1;color:#2B201C}
 .marca .end{font-size:7.6pt;color:#7A5642;margin-top:2.6mm;letter-spacing:.01em}
-.aviso-proxima{display:flex;align-items:center;justify-content:space-between;gap:4mm;margin-top:2mm;padding:2mm 3mm;border:.3mm solid #C49A7C;min-height:10mm;font-size:8pt;line-height:1.3}
-.aviso-proxima strong{font-size:16pt;white-space:nowrap}
 .dir{display:flex;gap:4mm;align-items:flex-start}
 .dir .txt{text-align:right}
 .dir .rem{font-family:'Cormorant Garamond',Georgia,serif;font-size:20pt;line-height:1.15;margin-top:1.6mm}
@@ -211,6 +225,21 @@ body{font-family:'Jost',Arial,sans-serif;color:#2B201C;-webkit-print-color-adjus
 .ganho .card .a{font-size:7pt}.ganho .card .b{font-size:13pt;font-weight:600;margin:1mm 0 .6mm}.ganho .card .c{font-size:6.6pt;color:#7A5642}
 .ganho .card.d .c{color:#E9D9CC}
 .ganho .regra{font-size:6.6pt;line-height:1.5;color:#4A3A33;margin-top:2.4mm;white-space:normal}
+.objetivo{display:flex;align-items:stretch;margin-top:3.4mm;height:25mm;border:.3mm solid #E7D8CB;border-radius:2.4mm;overflow:hidden}
+.objetivo .meses{flex:1;display:grid;grid-template-columns:repeat(3,1fr);background:#F6EFE8}
+.objetivo .mes{padding:3mm 3.4mm 2mm;border-right:.3mm solid #E7D8CB;min-width:0}
+.objetivo .mes .n{font-size:12pt;font-weight:600;margin:1.2mm 0 .4mm;white-space:nowrap}
+.objetivo .mes .c{font-size:7.2pt;line-height:1.35;color:#7A5642}
+.objetivo .mes.vazio .n{color:#B9A89B;font-weight:500;font-size:10pt}
+.objetivo .alvo{width:66mm;flex-shrink:0;background:#2B201C;color:#fff;padding:3mm 4.2mm 2mm}
+.objetivo .alvo .eyebrow{color:#E9D9CC}
+.objetivo .alvo .v{font-family:'Cormorant Garamond',Georgia,serif;font-size:24pt;line-height:1;margin:1.4mm 0 1.4mm;white-space:nowrap}
+.objetivo .alvo .s{font-size:7.2pt;line-height:1.4;color:#F1E3D7}
+.objetivo .alvo .s strong{color:#fff}
+.objetivo .meta-txt{flex:1;background:#F6EFE8;padding:3.6mm 4.4mm;display:flex;flex-direction:column;justify-content:center}
+.objetivo .meta-txt h3{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:15pt;margin:0 0 1.4mm}
+.objetivo .meta-txt p{font-size:7.6pt;line-height:1.45;margin:0;color:#4A3A33}
+.objetivo .nota{font-size:6.2pt;color:#7A5642;margin-top:.8mm}
 table{width:186mm;table-layout:fixed;border-collapse:collapse;margin-top:6mm}
 .pg+.pg table,.cab2+table{margin-top:4mm}
 th{font-size:6.6pt;letter-spacing:.16em;white-space:nowrap;text-transform:uppercase;color:#7A5642;font-weight:500;text-align:left;padding:0 2mm 1.6mm;border-bottom:.45mm solid #2B201C;height:7mm;vertical-align:bottom}
@@ -236,13 +265,40 @@ tr.g td.r,tr.g td.q{font-size:8pt;letter-spacing:.06em}
 .rod{position:absolute;left:12mm;right:12mm;bottom:7mm;gap:4mm;display:flex;justify-content:space-between;border-top:.2mm solid #C49A7C;padding-top:2mm;font-size:6.8pt;color:#7A5642}
 `;
 
+const MESES_CURTOS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+/** "2026-08" → "Ago/26" */
+export const mesCurto = (ym: string) => `${MESES_CURTOS[Number(ym.slice(5, 7)) - 1] ?? ""}/${ym.slice(2, 4)}`;
+
+/** Card do objetivo (0180): consultora nova/parada → Meta mínima; com histórico → 3 meses + Objetivo de venda. */
+export function cardObjetivo(o: ObjetivoPedido | null | undefined, textoMeta?: string) {
+  if (!o || !Number(o.objetivo_cents)) return "";
+  const alvo = Number(o.objetivo_cents);
+  if (o.tipo === "meta") {
+    const txt = textoMeta?.trim() || "Para receber a próxima maleta, a venda mínima deste ciclo é esta.";
+    return `<div class="objetivo"><div class="meta-txt"><h3>Meta mínima para a próxima maleta</h3><p>${rico(txt)}</p></div>`
+      + `<div class="alvo"><div class="eyebrow">Meta mínima</div><div class="v">${esc(brl(alvo))}</div>`
+      + `<div class="s">${o.comissao_objetivo_cents ? `Vendendo isso, você ganha <strong>${esc(brl(Number(o.comissao_objetivo_cents)))}</strong>` : "venda mínima do ciclo"}</div></div></div>`;
+  }
+  const meses = o.meses.slice(-3).map((m) => m.acerto
+    ? `<div class="mes"><div class="eyebrow">${esc(mesCurto(m.mes))}</div><div class="n">${esc(brl(Number(m.vendido_cents)))}</div>`
+      + `<div class="c">comissão ${esc(brl(Number(m.comissao_cents)))}${m.estimada ? " (estimada)" : ""}</div></div>`
+    : `<div class="mes vazio"><div class="eyebrow">${esc(mesCurto(m.mes))}</div><div class="n">sem acerto</div><div class="c">fora da média</div></div>`).join("");
+  const conta = o.piso
+    ? "objetivo mínimo LARDAN"
+    : `média de ${o.meses_com_acerto} ${o.meses_com_acerto === 1 ? "mês" : "meses"} + 15%`;
+  const pct = o.percentual_objetivo ? ` · faixa de ${Number(o.percentual_objetivo).toLocaleString("pt-BR")}%` : "";
+  return `<div class="objetivo"><div class="meses">${meses}</div>`
+    + `<div class="alvo"><div class="eyebrow">Objetivo de venda</div><div class="v">${esc(brl(alvo))}</div>`
+    + `<div class="s">Cumprindo, você ganha <strong>${esc(brl(Number(o.comissao_objetivo_cents ?? 0)))}</strong> de comissão</div>`
+    + `<div class="nota" style="color:#E9D9CC">${esc(conta + pct)}</div></div></div>`;
+}
+
 export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date; pixQrUrl?: string }) {
   const grupos = montarLinhas(d.itens);
-  const temAviso = !!d.empresa.proxima_maleta_texto?.trim() && Number(d.empresa.proxima_maleta_minimo_cents) > 0;
   const envioGarantia = d.empresa.envio_garantia_texto?.trim() ?? "";
+  const objetivo = cardObjetivo(d.objetivo, d.empresa.proxima_maleta_texto);
   // Bloco 'Envio da peça para garantia' ocupa ~6 mm + ~4,2 mm por linha de ~150 caracteres.
-  const paginas = paginar(grupos, temAviso, envioGarantia ? 8 + Math.ceil(envioGarantia.length / 150) * 4.2 : 0);
-  const aviso = temAviso ? `<div class="aviso-proxima"><span>${esc(d.empresa.proxima_maleta_texto)}</span><strong>${esc(brl(Number(d.empresa.proxima_maleta_minimo_cents)))}</strong></div>` : "";
+  const paginas = paginar(grupos, false, envioGarantia ? 8 + Math.ceil(envioGarantia.length / 150) * 4.2 : 0, !!objetivo);
   const total = d.itens.reduce((s, i) => s + i.preco_cents * i.quantidade, 0);
   const pecas = d.itens.reduce((s, i) => s + i.quantidade, 0);
   const max = ganho(total, d.faixas);
@@ -266,7 +322,7 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
     <div class="dir"><div class="txt"><div class="eyebrow">Pedido de consignação</div>
       <div class="rem">Remessa ${esc(remessa)}</div><div class="kit">Kit ${esc(kit)} · Cliente ${esc(cliente)}</div></div>
       ${opcoes.pixQrUrl ? `<div class="qr" style="padding:0;border:0;background:#fff"><img src="${esc(opcoes.pixQrUrl)}" alt="QR Pix LARDAN" style="width:100%;height:100%"></div>` : ""}</div>
-  </div>${aviso}
+  </div>
   <div class="cartoes">
     <div class="cartao"><div class="eyebrow">Consultora</div><div class="t">${esc(d.consultora.nome)}</div>
       <div class="l">${esc(d.consultora.endereco ?? "Endereço não cadastrado")}<br>${esc(d.consultora.cidade ?? "")}${d.consultora.whatsapp ? ` · WhatsApp ${esc(fone(d.consultora.whatsapp))}` : ""}</div></div>
@@ -287,9 +343,9 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
     <div class="dirg"><h3>Cada venda aumenta o seu ganho</h3>
       <div class="cards">${cartoesGanho(total, d.faixas).map((c) => `<div class="card${c.destaque ? " d" : ""}"><div class="a">${esc(c.titulo)}</div><div class="b">${esc(brl(c.cents))}</div><div class="c">no seu bolso · ${c.pct.toLocaleString("pt-BR")}%</div></div>`).join("")}</div>
       <div class="regra">Sua comissão sobe conforme o total vendido no ciclo e vale sobre <strong>tudo</strong>: ${textoFaixas(d.faixas)}</div></div>
-  </div>`;
+  </div>${objetivo}`;
 
-  const cab2 = `<div class="cab2">${marca(true)}<div class="info">Remessa <strong>${esc(remessa)}</strong> · Kit ${esc(kit)} · Cliente ${esc(cliente)} · ${esc(nomeCurto(d.consultora.nome))} · Acerto <strong style="color:#7A5642">${esc(dataBr(d.remessa.data_acerto))}</strong></div></div>${aviso}`;
+  const cab2 = `<div class="cab2">${marca(true)}<div class="info">Remessa <strong>${esc(remessa)}</strong> · Kit ${esc(kit)} · Cliente ${esc(cliente)} · ${esc(nomeCurto(d.consultora.nome))} · Acerto <strong style="color:#7A5642">${esc(dataBr(d.remessa.data_acerto))}</strong></div></div>`;
 
   const final = `
   <div class="fimtab" style="margin-top:${paginas.at(-1)!.length ? "0" : "3.6mm"}"><span>TOTAL DO KIT</span><span class="v"><span class="q">${pecas}</span><span class="r">${esc(brl(total))}</span></span></div>

@@ -1905,7 +1905,6 @@ body.consultora-glass-light-active :is([role="dialog"], [role="alertdialog"]) im
 }
 :is(.consultora-glass-pilot.consultora-glass-light, body.consultora-glass-light-active) :is(.btn-app-principal, .admin-btn-primary, button.bg-acao, button.bg-primary) svg { color: var(--primary-foreground); }
 .consultora-glass-pilot.consultora-glass-light .consultora-inicio-acoes > button > span:first-child { color: var(--primary); background: oklch(0.99 0.004 70 / 0.9); }
-.consultora-glass-pilot.consultora-glass-light .consultora-menu-indicador { box-shadow: inset 0 1px 0 var(--glass-reflection), 0 8px 20px var(--glass-shade); }
 .consultora-glass-pilot.consultora-glass-light .consultora-inicio-acoes > button > span:first-child svg { color: var(--primary); }
 
 /* Consultant touch feedback and monetary progress: scoped away from public pages. */

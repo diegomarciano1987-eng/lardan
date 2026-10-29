@@ -8509,6 +8509,9 @@ export type Database = {
           id: string
           kit_id: string
           notes: string | null
+          objetivo_cents: number | null
+          objetivo_em: string | null
+          objetivo_memoria: Json | null
           origin_location_id: string | null
           quantity_total: number
           received_at: string | null
@@ -8536,6 +8539,9 @@ export type Database = {
           id?: string
           kit_id: string
           notes?: string | null
+          objetivo_cents?: number | null
+          objetivo_em?: string | null
+          objetivo_memoria?: Json | null
           origin_location_id?: string | null
           quantity_total?: number
           received_at?: string | null
@@ -8563,6 +8569,9 @@ export type Database = {
           id?: string
           kit_id?: string
           notes?: string | null
+          objetivo_cents?: number | null
+          objetivo_em?: string | null
+          objetivo_memoria?: Json | null
           origin_location_id?: string | null
           quantity_total?: number
           received_at?: string | null
@@ -18250,6 +18259,7 @@ export type Database = {
       colab_rep: { Args: never; Returns: string }
       colab_restrita: { Args: never; Returns: boolean }
       comissao_faixas_leitura: { Args: never; Returns: Json }
+      comissao_pelas_faixas: { Args: { _vendido_cents: number }; Returns: Json }
       confirm_stock_reservation: {
         Args: {
           _idempotency_key?: string
@@ -18289,6 +18299,19 @@ export type Database = {
       }
       consultora_aceite_dados: { Args: { _cycle: string }; Returns: Json }
       consultora_aceites_pendentes: { Args: never; Returns: Json }
+      consultora_acertos_vendas: {
+        Args: { _party: string }
+        Returns: {
+          comissao_cents: number
+          data: string
+          estimada: boolean
+          kits: number
+          origem: string
+          pecas_vendidas: number
+          remessa: number
+          vendido_cents: number
+        }[]
+      }
       consultora_acesso_situacao: { Args: { _party: string }; Returns: Json }
       consultora_asaas_preparar: {
         Args: { _actor: string; _payload: Json }
@@ -18313,6 +18336,11 @@ export type Database = {
         Returns: Json
       }
       consultora_ganhos: { Args: never; Returns: Json }
+      consultora_historico_vendas: { Args: never; Returns: Json }
+      consultora_historico_vendas_equipe: {
+        Args: { _party: string }
+        Returns: Json
+      }
       consultora_lembretes_vencimento: {
         Args: never
         Returns: {
@@ -18344,6 +18372,10 @@ export type Database = {
       consultora_meu_historico: { Args: never; Returns: Json }
       consultora_notas_e_fechamentos: {
         Args: { _party: string }
+        Returns: Json
+      }
+      consultora_objetivo_calc: {
+        Args: { _party: string; _ref: string }
         Returns: Json
       }
       consultora_pagamento_lembrete: {
@@ -19041,6 +19073,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      historico_vendas_de: { Args: { _party: string }; Returns: Json }
       homolog_purge_v2: {
         Args: {
           _ator: string
@@ -19256,6 +19289,7 @@ export type Database = {
       kit_consultora_info: { Args: { _cycle: string }; Returns: Json }
       kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
+      kit_cycle_objetivo: { Args: { _cycle: string }; Returns: Json }
       kit_depositos_operacao: {
         Args: never
         Returns: {

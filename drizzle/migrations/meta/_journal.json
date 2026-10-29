@@ -1268,6 +1268,13 @@
       "when": 1793291711879,
       "tag": "0180_demo_maleta_videos",
       "breakpoints": true
+    },
+    {
+      "idx": 181,
+      "version": "7",
+      "when": 1793293365673,
+      "tag": "0181_historico_vendas_objetivo",
+      "breakpoints": true
     }
   ]
 }

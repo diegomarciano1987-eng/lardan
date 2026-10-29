@@ -13,10 +13,11 @@ const FAIXAS = [{ min_cents: 0, percentual: 20 }, { min_cents: 20000, percentual
 let master: Conta, montadora: Conta, cons: Conta, rep: Conta;
 let deposito = "", praca = "", remessa = "", cicloRua = "", cicloMontagem = "", vAnel = "", vBrinco = "";
 
-describe("regra de preço (sempre para cima)", () => {
-  test("até R$ 99,99 termina em ,90; de R$ 100 em diante termina em 4,90 ou 9,90", async () => {
-    const casos: [number, number][] = [[4500, 4590], [4590, 4590], [9990, 9990], [1, 90], [10000, 10490], [10490, 10490],
-      [10491, 10990], [11200, 11490], [14990, 14990], [15000, 15490], [32990, 32990], [33000, 33490]];
+describe("regra de preço (sempre para baixo)", () => {
+  test("degraus de R$ 5 terminados em 4,90/9,90; abaixo de R$ 5 não altera", async () => {
+    const casos: [number, number][] = [[4500, 4490], [4590, 4490], [9990, 9990], [1, 1], [10000, 9990], [10490, 10490],
+      [10491, 9990], [11200, 10990], [14990, 14990], [15000, 14990], [32990, 32990], [33000, 32990],
+      [8000, 7990], [8499, 7990], [8500, 8490], [8999, 8490], [9000, 8990], [9499, 8990]];
     for (const [p, esperado] of casos)
       expect((await um<{ n: number }>(`select public.preco_regra_lardan($1)::int n`, [p])).n).toBe(esperado);
   });
@@ -92,8 +93,8 @@ beforeAll(async () => {
   praca = (await ler<{ id: string }>(master, `select (public.praca_criar($1)).id`, [`Praça Pedido ${marca}`])).linhas[0]!.id;
   await adm.unsafe(`insert into public.consultant_profiles (party_id, representative_party_id, praca_id) values ($1,$2,$3)
                     on conflict (party_id) do update set praca_id = excluded.praca_id, representative_party_id = excluded.representative_party_id`, [cons.partyId, rep.partyId, praca]);
-  vAnel = await criarVariante(`ped-anel-${marca}`, 10500);   // novo: 10990
-  vBrinco = await criarVariante(`ped-brinco-${marca}`, 4500); // novo: 4590
+  vAnel = await criarVariante(`ped-anel-${marca}`, 10500);   // novo: 10490
+  vBrinco = await criarVariante(`ped-brinco-${marca}`, 4500); // novo: 4490
   await adm.unsafe(`update public.products set name = 'AN DOU TESTE ' || $2 where id = (select product_id from public.product_variants where id=$1)`, [vAnel, marca]);
   await adm.unsafe(`update public.products set name = 'BR DOU TESTE ' || $2 where id = (select product_id from public.product_variants where id=$1)`, [vBrinco, marca]);
   await adm.unsafe(`update public.product_variants set reference_code = 'AN-REF-' || $2 where id = $1`, [vAnel, marca]);
@@ -151,7 +152,7 @@ describe("remessa, preço gravado e folha", () => {
       `select * from public.preco_reajuste_previa() where variant_id = any($1::uuid[])`, [`{${vAnel},${vBrinco}}`]);
     expect(linhas.erro).toBeNull();
     const anel = linhas.linhas.find((l) => l.variant_id === vAnel)!;
-    expect([anel.antes_cents, anel.depois_cents, anel.pecas_na_rua]).toEqual([10500, 10990, 2]);
+    expect([anel.antes_cents, anel.depois_cents, anel.pecas_na_rua]).toEqual([10500, 10490, 2]);
     expect((await ler(cons, `select * from public.preco_reajuste_previa() limit 1`)).ok).toBe(false);
 
     expect((await rpc(montadora, "preco_reajuste_aplicar", { _confirmacao: "APLICAR NOVO PRECO" })).ok).toBe(false);
@@ -159,13 +160,13 @@ describe("remessa, preço gravado e folha", () => {
     const ap = await rpc<{ lote: string; variantes: number; maletas_em_montagem: number }>(master, "preco_reajuste_aplicar", { _confirmacao: "APLICAR NOVO PRECO" });
     expect(ap.erro).toBeNull();
     try {
-      expect((await um<{ p: number }>(`select price_cents p from public.product_variants where id=$1`, [vAnel])).p).toBe(10990);
+      expect((await um<{ p: number }>(`select price_cents p from public.product_variants where id=$1`, [vAnel])).p).toBe(10490);
       // na rua: preço gravado
       expect((await um<{ p: number }>(`select public.kit_preco($1,$2) p`, [cicloRua, vAnel])).p).toBe(10500);
       const folha = await rpc<PedidoDados>(master, "kit_pedido_dados", { _cycle: cicloRua });
       expect(folha.dados.itens.find((i) => i.grupo === "aneis")!.preco_cents).toBe(10500);
       // em montagem: preço novo
-      expect((await um<{ p: number }>(`select public.kit_preco($1,$2) p`, [cicloMontagem, vAnel])).p).toBe(10990);
+      expect((await um<{ p: number }>(`select public.kit_preco($1,$2) p`, [cicloMontagem, vAnel])).p).toBe(10490);
       // app da consultora: vitrine e pedido da cliente pelo preço gravado
       const t = (await um<{ id: string }>(`select id from public.kit_transfers where cycle_id=$1 order by seq limit 1`, [cicloRua])).id;
       expect((await rpc(cons, "kit_transfer_confirm", { _transfer: t, _payload: {} })).erro).toBeNull();

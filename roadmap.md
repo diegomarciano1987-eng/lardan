@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Pacote fiscal 0165 — emissor TSM (29/10/2026)
-- [ ] Aplicar cadastro fiscal e ajustes de testes do pacote, sem ativar emissão real. Bloqueio: duas pessoas com CNPJ 43.319.208/0001-80; o próprio pacote exige resolver a duplicidade antes de executar. Não unificar automaticamente.
-- [ ] Comprovar prontidão do emissor, Focus em homologação, emissão desligada e testes isolados depois de resolver a identidade duplicada.
+- [x] Cadastro fiscal aplicado via ferramenta de dados (não DDL); duplicidade unificada após autorização, LC-003419 → LC-007417, auditoria 554e2c5c-245b-4531-a99e-3b0e185400b7. SQL adaptado somente para ignorar IDs oficialmente unificados; endereço antigo e vínculos preservados.
+- [x] Emissor definido, CNPJ/IE/endereço/IBGE = true; Focus/homologacao/false conferidos no banco, RPC autenticada e tela /admin/integracoes. 514 testes isolados passaram; 3 cenários fiscais novos; testes de preço antigos alinhados à regra para baixo já aprovada. Build OK. Não ativa nem comprova emissão completa: prontidão ainda informa pendências da cadeia/acerto e cadastros.
 
 ## App da consultora — velocidade e topo compacto (28/10/2026)
 - [x] Navegação com resposta imediata, cache compartilhado 60s, pré-carregamento seletivo, busca 250ms; aceite inicial preservado e erro de atualização não apaga resultado anterior.

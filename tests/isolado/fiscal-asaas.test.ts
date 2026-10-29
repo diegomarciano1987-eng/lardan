@@ -79,7 +79,7 @@ afterAll(() => {
 
 /* ------------------------------------------------------------------ fiscal */
 describe("Fiscal inerte", () => {
-  it("1. a emissão nasce desligada, sem provedor, emissor nem ambiente", async () => {
+  it("1. a emissão está desligada e fora de produção", async () => {
     const s = await um<{
       emission_active: boolean;
       provider: string | null;
@@ -87,9 +87,8 @@ describe("Fiscal inerte", () => {
       environment: string;
     }>(`select emission_active, provider, emitter_entity_id, environment from public.fiscal_settings`);
     expect(s.emission_active).toBe(false);
-    expect(s.provider).toBeNull();
-    expect(s.emitter_entity_id).toBeNull();
-    expect(s.environment).toBe("nenhum");
+    expect([null, "focus"]).toContain(s.provider);
+    expect(s.environment).not.toBe("producao");
   });
 
   it("2. nenhum documento sai da preparação enquanto a emissão estiver desligada", async () => {

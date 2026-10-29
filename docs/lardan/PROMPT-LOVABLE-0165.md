@@ -33,6 +33,10 @@ Em produção eu já gravei, pelo painel do Master:
 
 A migração não desfaz nada disso.
 
+### Aplicação neste projeto — 29/10/2026
+Este pacote contém apenas mudanças de dados: aplicado pela ferramenta de dados e arquivado em `db/aplicados/0165_emissor_fiscal_tsm.sql`, sem criar/renumerar migração 0165 (já ocupada).
+A conferência encontrou duas organizações com o mesmo CNPJ. Diego autorizou a unificação oficial de LC-003419 em LC-007417, preservando vínculos e documentos históricos. O único ajuste no SQL exclui da seleção da identidade as duplicadas registradas em `party_unificacoes`, sem apagar seu CNPJ.
+
 ## 2. Testes
 
 - Três testes antigos davam como certo que o fiscal estava "sem provedor": `fiscal-asaas`, `fiscal-cadeia` e `prontidao-fiscal`. Agora conferem que a **emissão está desligada e fora de produção**.

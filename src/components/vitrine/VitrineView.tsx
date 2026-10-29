@@ -1,11 +1,11 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
-import { Clock, Facebook, Instagram, MapPin, MessageCircle, Music2, Share2, ShoppingBag } from "lucide-react";
+import { Check, Clock, Gem, Instagram, MessageCircle, Share2, ShieldCheck, ShoppingBag, User } from "lucide-react";
 import { toast } from "sonner";
 import { brl, imagem, type VitrineItem } from "@/lib/maletas";
-import logoLardan from "@/assets/lardan-logo-institucional.webp.asset.json";
-import { CAPAS, designPadrao, whatsappLink, type DesignVitrine } from "@/lib/vitrine-design";
+
+import { designPadrao, whatsappLink, type DesignVitrine } from "@/lib/vitrine-design";
 
 type Item = VitrineItem & { midias?: string[]; ilustracao?: string | null };
 
@@ -54,78 +54,11 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
     window.open(`${zap}?text=${encodeURIComponent(texto)}`, "_blank", "noopener,noreferrer");
   };
 
-  // capa
-  const oficial = CAPAS.find((c) => c.id === d.imagens.capa?.preset);
-  const capaD = oficial?.desktop ?? img(d.imagens.capa?.path);
-  const capaM = oficial?.mobile ?? img(d.imagens.capa?.path_m ?? d.imagens.capa?.path);
-  const fD = d.imagens.capa?.foco_desktop ?? { x: 50, y: 50 };
-  const fM = d.imagens.capa?.foco_mobile ?? { x: 50, y: 50 };
+  // capa padrão LARDAN: fixa; só foto, nome, frase, horário e contatos vêm da consultora
   const retrato = img(d.imagens.avatar?.path);
   const retrato2x = img(d.imagens.avatar?.path2x);
   const iniciais = nomePublico.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 
-  const Capa = ({ alto }: { alto: string }) => (
-    <div className={`relative w-full overflow-hidden ${alto}`} aria-hidden>
-      {capaD || capaM ? (
-        <>
-          <img src={capaM ?? capaD ?? undefined} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover @3xl:hidden" style={{ objectPosition: `${fM.x}% ${fM.y}%` }} />
-          <img src={capaD ?? capaM ?? undefined} alt="" aria-hidden="true" className="absolute inset-0 hidden size-full object-cover @3xl:block" style={{ objectPosition: `${fD.x}% ${fD.y}%` }} />
-        </>
-      ) : (
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,var(--v-surface),var(--v-bg)_60%),linear-gradient(135deg,var(--v-line),var(--v-bg))]">
-          <div className="absolute inset-x-0 bottom-6 text-center text-[0.65rem] uppercase tracking-[0.5em] text-[var(--v-muted)]">Lardan</div>
-        </div>
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-[var(--v-bg)]/50 to-transparent" />
-    </div>
-  );
-
-  const Retrato = ({ tam }: { tam: string }) => (
-    <div className={`${tam} shrink-0 overflow-hidden rounded-full border-4 border-[var(--v-bg)] bg-[var(--v-surface)] shadow-lg ring-1 ring-[var(--v-line)]`}>
-      {retrato ? (
-        <img src={retrato} srcSet={retrato2x ? `${retrato} 1x, ${retrato2x} 2x` : undefined} alt={`Foto de ${nomePublico}`} className="size-full object-cover" />
-      ) : (
-        <div className="v-titulo grid size-full place-items-center text-3xl text-[var(--v-accent)]">{iniciais || "L"}</div>
-      )}
-    </div>
-  );
-
-  const Info = ({ alinhar }: { alinhar: "centro" | "esquerda" }) => (
-    <div className={alinhar === "centro" ? "text-center" : "text-left"}>
-      <p className="text-[0.65rem] uppercase tracking-[0.35em] text-[var(--v-accent)]">Consultora Lardan</p>
-      <h1 className={`v-titulo mt-2 break-words leading-tight ${a.tema === "editorial" ? "text-4xl @3xl:text-6xl" : "text-3xl @3xl:text-5xl"}`}>{nomePublico}</h1>
-      {d.perfil.frase && <p className="mt-2 text-[var(--v-muted)]">{d.perfil.frase}</p>}
-      {d.perfil.bio && <p className={`mt-4 max-w-xl whitespace-pre-line text-sm leading-relaxed ${alinhar === "centro" ? "mx-auto" : ""}`}>{d.perfil.bio}</p>}
-      <ul className={`mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--v-muted)] ${alinhar === "centro" ? "justify-center" : ""}`}>
-        {(d.perfil.cidade || d.perfil.regiao) && (
-          <li className="flex items-center gap-1"><MapPin aria-hidden className="size-3.5" />{[d.perfil.cidade, d.perfil.regiao].filter(Boolean).join(" · ")}</li>
-        )}
-        {d.perfil.horarios && <li className="flex items-center gap-1"><Clock aria-hidden className="size-3.5" />{d.perfil.horarios}</li>}
-      </ul>
-      <div className={`mt-5 flex flex-wrap gap-2 ${alinhar === "centro" ? "justify-center" : ""}`}>
-        {zap && (
-          <a href={previa ? undefined : zap} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[var(--v-accent)] px-5 py-2.5 text-sm text-[var(--v-accent-ink)]">
-            <MessageCircle aria-hidden className="size-4" /> Falar com {primeiroNome}
-          </a>
-        )}
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 rounded-full border border-[var(--v-line)] px-4 py-2.5 text-sm"
-          onClick={() => {
-            if (previa) return;
-            const url = urlCompartilhar ?? window.location.href;
-            if (navigator.share) void navigator.share({ title: nomePublico, url }).catch(() => undefined);
-            else { void navigator.clipboard.writeText(url); toast.success("Endereço copiado."); }
-          }}
-        >
-          <Share2 aria-hidden className="size-4" /> Compartilhar
-        </button>
-        {d.contato.instagram && <Social href={`https://instagram.com/${d.contato.instagram}`} rotulo="Instagram" previa={previa}><Instagram className="size-4" /></Social>}
-        {d.contato.facebook && <Social href={`https://facebook.com/${d.contato.facebook}`} rotulo="Facebook" previa={previa}><Facebook className="size-4" /></Social>}
-        {d.contato.tiktok && <Social href={`https://tiktok.com/@${d.contato.tiktok}`} rotulo="TikTok" previa={previa}><Music2 className="size-4" /></Social>}
-      </div>
-    </div>
-  );
 
   const cartao = a.cartao === "suave" ? "rounded-2xl bg-[var(--v-surface)] p-2 shadow-sm" : a.cartao === "moldura" ? "border border-[var(--v-line)] p-2" : "";
   const grade = a.grade === "lista" ? "grid grid-cols-1 gap-3" : a.grade === "2" ? "grid grid-cols-2 gap-4 @3xl:gap-6" : "grid grid-cols-2 gap-4 @3xl:grid-cols-3 @3xl:gap-6";
@@ -236,34 +169,17 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
 
   return (
     <div className={`vitrine-raiz @container vp-${a.paleta} vf-${a.fonte} ${previa ? "min-h-full" : "min-h-screen"}`}>
-      <div className="flex justify-center bg-[var(--v-bg)] py-3">
-        <img src={logoLardan.url} alt="Lardan" className="h-6 w-auto @3xl:h-7" />
-      </div>
-      {a.tema === "classica" && (
-        <header>
-          <Capa alto="h-44 @3xl:h-72" />
-          <div className="relative z-10 mx-auto -mt-14 max-w-4xl px-5 @3xl:-mt-20">
-            <div className="flex justify-center"><Retrato tam="size-28 @3xl:size-36" /></div>
-            <div className="mt-4"><Info alinhar="centro" /></div>
-          </div>
-        </header>
-      )}
-      {a.tema === "editorial" && (
-        <header className="@3xl:grid @3xl:grid-cols-[1.15fr_1fr] @3xl:items-center">
-          <Capa alto="h-72 @3xl:h-[34rem]" />
-          <div className="px-5 py-8 @3xl:px-12">
-            <Retrato tam="size-20 @3xl:size-24" />
-            <div className="mt-5"><Info alinhar="esquerda" /></div>
-          </div>
-        </header>
-      )}
-      {a.tema === "minimalista" && (
-        <header className="mx-auto max-w-2xl px-5 pt-14 @3xl:pt-24">
-          <div className="flex justify-center"><Retrato tam="size-24" /></div>
-          <div className="mt-6"><Info alinhar="centro" /></div>
-          {(capaD || capaM) && <div className="mt-10 overflow-hidden rounded-sm"><Capa alto="h-40 @3xl:h-56" /></div>}
-        </header>
-      )}
+      <CapaPadrao
+        nome={nomePublico} primeiroNome={primeiroNome} frase={d.perfil.frase} horarios={d.perfil.horarios}
+        retrato={retrato} retrato2x={retrato2x} iniciais={iniciais || "L"} zap={zap} previa={previa}
+        instagram={d.contato.instagram ? `https://instagram.com/${d.contato.instagram}` : null}
+        onCompartilhar={() => {
+          if (previa) return;
+          const url = urlCompartilhar ?? window.location.href;
+          if (navigator.share) void navigator.share({ title: nomePublico, url }).catch(() => undefined);
+          else { void navigator.clipboard.writeText(url); toast.success("Endereço copiado."); }
+        }}
+      />
 
       <main className={`mx-auto px-5 pb-36 ${a.tema === "minimalista" ? "max-w-3xl" : "max-w-5xl"}`}>{secoes}</main>
 
@@ -282,14 +198,61 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   );
 }
 
-function Social({ href, rotulo, previa, children }: { href: string; rotulo: string; previa: boolean; children: React.ReactNode }) {
-  return (
-    <a href={previa ? undefined : href} target="_blank" rel="noreferrer" aria-label={rotulo} className="grid size-10 place-items-center rounded-full border border-[var(--v-line)]">
-      {children}
-    </a>
-  );
-}
 
 function Vazio({ texto }: { texto: string }) {
   return <p className="mt-10 rounded-xl border border-dashed border-[var(--v-line)] p-5 text-center text-xs text-[var(--v-muted)]">{texto}</p>;
+}
+
+const DIAMANTE = "M1630.77 2206.02 L3234.59 571.13 L2745.19 39.33 C2689.54 0.00 2680.73 8.47 2611.25 6.59 L623.91 0.00 C529.40 3.58 518.74 14.66 456.27 77.71 L0.00 569.57 L1630.77 2206.02 Z M3088.46 508.52 L1055.74 524.95 L628.81 80.37 L2673.13 80.37 L3088.46 508.52 Z M1632.59 2095.46 L96.18 573.14 L540.26 111.16 L2081.74 1635.60 L1632.59 2095.46 Z M1147.10 590.34 L2091.57 590.34 L1619.35 1082.59 L1147.10 590.34 Z M1672.92 1130.71 L2184.21 590.34 L3130.64 590.34 L2126.41 1605.41 L1672.92 1130.71 Z";
+
+/** Capa oficial LARDAN — igual para todas as vitrines; nada aqui é configurável pela consultora. */
+function CapaPadrao(p: {
+  nome: string; primeiroNome: string; frase?: string | null; horarios?: string | null;
+  retrato: string | null; retrato2x: string | null; iniciais: string;
+  zap: string | null; instagram: string | null; previa: boolean; onCompartilhar: () => void;
+}) {
+  return (
+    <header className="capa-lardan">
+      <div className="cl-faixa">
+        <svg className="cl-marca" viewBox="0 0 3234.59 2206.02" aria-hidden="true"><path fillRule="evenodd" fill="currentColor" d={DIAMANTE} /></svg>
+        <div className="relative flex h-full flex-col items-center pt-10 @3xl:pt-11">
+          <p className="cl-serif cl-logo" aria-label="Lardan">LARDAN</p>
+          <p className="cl-semi mt-4 uppercase">Semijoias</p>
+          <p className="cl-oficial mt-7 flex items-center gap-3 uppercase"><span className="cl-traco" aria-hidden />Vitrine oficial<span className="cl-traco" aria-hidden /></p>
+        </div>
+      </div>
+      <div className="mx-auto flex max-w-2xl flex-col items-center px-6 pb-2 text-center">
+        <div className="cl-foto">
+          <div className="cl-foto-in">
+            {p.retrato ? (
+              <img src={p.retrato} srcSet={p.retrato2x ? `${p.retrato} 1x, ${p.retrato2x} 2x` : undefined} alt={`Foto de ${p.nome}`} width={152} height={152} className="size-full object-cover" />
+            ) : (
+              <span className="cl-serif grid size-full place-items-center text-4xl text-[var(--c-caramelo)]">{p.iniciais}</span>
+            )}
+          </div>
+          <span className="cl-selo" title="Consultora verificada"><Check aria-hidden className="size-4" strokeWidth={3} /><span className="sr-only">Consultora verificada</span></span>
+        </div>
+        <p className="cl-rotulo mt-6">Consultora oficial Lardan</p>
+        <h1 className="cl-serif cl-nome mt-2 break-words">{p.nome}</h1>
+        {p.frase && <p className="cl-frase mt-3 max-w-md">{p.frase}</p>}
+        {p.horarios && <p className="cl-pilula mt-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5"><Clock aria-hidden className="size-4" />{p.horarios}</p>}
+        <div className="mt-6 w-full space-y-3 @3xl:flex @3xl:items-center @3xl:justify-center @3xl:gap-3 @3xl:space-y-0">
+          {p.zap && (
+            <a href={p.previa ? undefined : p.zap} target="_blank" rel="noreferrer" className="cl-zap flex w-full items-center justify-center gap-2.5 rounded-full px-6 @3xl:w-auto">
+              <MessageCircle aria-hidden className="size-5" /> Falar com {p.primeiroNome} no WhatsApp
+            </a>
+          )}
+          <div className={`grid gap-3 ${p.instagram ? "grid-cols-2" : "grid-cols-1"} @3xl:flex`}>
+            <button type="button" onClick={p.onCompartilhar} className="cl-sec inline-flex items-center justify-center gap-2 rounded-full px-6"><Share2 aria-hidden className="size-4" /> Compartilhar</button>
+            {p.instagram && <a href={p.previa ? undefined : p.instagram} target="_blank" rel="noreferrer" className="cl-sec inline-flex items-center justify-center gap-2 rounded-full px-6"><Instagram aria-hidden className="size-4" /> Instagram</a>}
+          </div>
+        </div>
+        <ul className="cl-confianca mt-7 grid w-full grid-cols-3 gap-2 py-4 text-[12px] leading-snug @3xl:text-[13px]">
+          <li className="flex flex-col items-center gap-1.5"><ShieldCheck aria-hidden className="size-5" strokeWidth={1.5} />Garantia<br />Lardan</li>
+          <li className="flex flex-col items-center gap-1.5"><Gem aria-hidden className="size-5" strokeWidth={1.5} />Peças com<br />banho de qualidade</li>
+          <li className="flex flex-col items-center gap-1.5"><User aria-hidden className="size-5" strokeWidth={1.5} />Atendimento<br />pessoal</li>
+        </ul>
+      </div>
+    </header>
+  );
 }

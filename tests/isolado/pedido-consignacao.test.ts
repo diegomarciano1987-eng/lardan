@@ -79,6 +79,12 @@ describe("folha do pedido (função pura)", () => {
     expect(pessoal).not.toContain("A1</td>");
     expect(htmlPedidoConsignacao({ ...d("pessoal"), itens: [{ variant_id: "b", sku: "BC-9", referencia: null, descricao: "BR DOU", preco_cents: 1000, quantidade: 1, grupo: "brincos" as never }] },
       { logoUrl: "x", operador: "op", impressoEm: new Date() })).not.toContain(">BC-9</td>");
+    // 'Envio da peça para garantia' só aparece quando o Daniel preenche o texto.
+    expect(pessoal).not.toContain("Envio da peça para garantia");
+    const comEnvio = htmlPedidoConsignacao({ ...d("pessoal"), empresa: { ...d("pessoal").empresa, envio_garantia_texto: "Envie pelo **correio**" } },
+      { logoUrl: "x", operador: "op", impressoEm: new Date() });
+    expect(comEnvio).toContain("Envio da peça para garantia");
+    expect(comEnvio).toContain("Envie pelo <strong>correio</strong>");
   });
 });
 

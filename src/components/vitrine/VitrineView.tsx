@@ -236,34 +236,17 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
 
   return (
     <div className={`vitrine-raiz @container vp-${a.paleta} vf-${a.fonte} ${previa ? "min-h-full" : "min-h-screen"}`}>
-      <div className="flex justify-center bg-[var(--v-bg)] py-3">
-        <img src={logoLardan.url} alt="Lardan" className="h-6 w-auto @3xl:h-7" />
-      </div>
-      {a.tema === "classica" && (
-        <header>
-          <Capa alto="h-44 @3xl:h-72" />
-          <div className="relative z-10 mx-auto -mt-14 max-w-4xl px-5 @3xl:-mt-20">
-            <div className="flex justify-center"><Retrato tam="size-28 @3xl:size-36" /></div>
-            <div className="mt-4"><Info alinhar="centro" /></div>
-          </div>
-        </header>
-      )}
-      {a.tema === "editorial" && (
-        <header className="@3xl:grid @3xl:grid-cols-[1.15fr_1fr] @3xl:items-center">
-          <Capa alto="h-72 @3xl:h-[34rem]" />
-          <div className="px-5 py-8 @3xl:px-12">
-            <Retrato tam="size-20 @3xl:size-24" />
-            <div className="mt-5"><Info alinhar="esquerda" /></div>
-          </div>
-        </header>
-      )}
-      {a.tema === "minimalista" && (
-        <header className="mx-auto max-w-2xl px-5 pt-14 @3xl:pt-24">
-          <div className="flex justify-center"><Retrato tam="size-24" /></div>
-          <div className="mt-6"><Info alinhar="centro" /></div>
-          {(capaD || capaM) && <div className="mt-10 overflow-hidden rounded-sm"><Capa alto="h-40 @3xl:h-56" /></div>}
-        </header>
-      )}
+      <CapaPadrao
+        nome={nomePublico} primeiroNome={primeiroNome} frase={d.perfil.frase} horarios={d.perfil.horarios}
+        retrato={retrato} retrato2x={retrato2x} iniciais={iniciais || "L"} zap={zap} previa={previa}
+        instagram={d.contato.instagram ? `https://instagram.com/${d.contato.instagram}` : null}
+        onCompartilhar={() => {
+          if (previa) return;
+          const url = urlCompartilhar ?? window.location.href;
+          if (navigator.share) void navigator.share({ title: nomePublico, url }).catch(() => undefined);
+          else { void navigator.clipboard.writeText(url); toast.success("Endereço copiado."); }
+        }}
+      />
 
       <main className={`mx-auto px-5 pb-36 ${a.tema === "minimalista" ? "max-w-3xl" : "max-w-5xl"}`}>{secoes}</main>
 

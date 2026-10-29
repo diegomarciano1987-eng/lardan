@@ -1803,6 +1803,39 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
 .vf-delicada { --v-titulo: "Cormorant Garamond", var(--font-display); --v-corpo: var(--font-sans); }
 .vitrine-raiz { background: var(--v-bg); color: var(--v-ink); font-family: var(--v-corpo); }
 .vitrine-raiz .v-titulo { font-family: var(--v-titulo); }
+/* Capa padrão LARDAN — fixa para todas as vitrines (especificação oficial). */
+.capa-lardan {
+  --c-espresso: #2A1F1B; --c-rose: #C49A7C; --c-champ: #EAD7C6; --c-semi: #C9A98F; --c-caramelo: #7A5642;
+  --c-fundo: #FCFAF6; --c-texto: #2B201C; --c-frase: #4A3B35; --c-rotulo: #8A644E; --c-pilula: #F2E8DF;
+  --c-pilula-t: #5C4A42; --c-nude: #EADBCF; --c-borda: #D9C6B6; --c-btn2: #3A2D28; --c-linha: #E6D8CC;
+  background: var(--c-fundo); color: var(--c-texto); font-family: "Jost", system-ui, sans-serif;
+}
+.capa-lardan .cl-serif { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; }
+.capa-lardan .cl-faixa { position: relative; overflow: hidden; height: 280px; background: var(--c-espresso); border-bottom: 1px solid color-mix(in srgb, var(--c-rose) 60%, transparent); }
+.capa-lardan .cl-marca { position: absolute; left: calc(50% - 15px); top: 40px; width: 300px; height: 205px; color: var(--c-rose); opacity: .18; }
+.capa-lardan .cl-logo { color: var(--c-champ); letter-spacing: 12px; font-size: 3.4rem; line-height: 1; padding-left: 12px; }
+.capa-lardan .cl-semi { color: var(--c-semi); letter-spacing: 7px; font-size: 11px; padding-left: 7px; }
+.capa-lardan .cl-oficial { color: var(--c-champ); letter-spacing: 4px; font-size: 11.5px; }
+.capa-lardan .cl-traco { width: 28px; height: 1px; background: var(--c-rose); }
+.capa-lardan .cl-foto { width: 132px; height: 132px; margin-top: -66px; border-radius: 9999px; border: 3px solid var(--c-rose); padding: 0; box-shadow: inset 0 0 0 5px var(--c-fundo); background: var(--c-nude); position: relative; }
+.capa-lardan .cl-foto-in { position: absolute; inset: 5px; border-radius: 9999px; overflow: hidden; background: var(--c-nude); }
+.capa-lardan .cl-selo { position: absolute; right: 2px; bottom: 6px; width: 34px; height: 34px; border-radius: 9999px; background: var(--c-caramelo); color: #fff; border: 3px solid var(--c-fundo); display: grid; place-items: center; }
+.capa-lardan .cl-rotulo { color: var(--c-rotulo); letter-spacing: 4px; font-size: 11.5px; text-transform: uppercase; }
+.capa-lardan .cl-nome { font-size: 38px; line-height: 1.1; color: var(--c-texto); }
+.capa-lardan .cl-frase { color: var(--c-frase); font-weight: 300; font-size: 15.5px; }
+.capa-lardan .cl-pilula { background: var(--c-pilula); color: var(--c-pilula-t); font-size: 12px; }
+.capa-lardan .cl-zap { background: var(--c-caramelo); color: #fff; font-weight: 500; font-size: 15px; height: 52px; }
+.capa-lardan .cl-sec { background: #fff; border: 1px solid var(--c-borda); color: var(--c-btn2); font-size: 15px; height: 46px; }
+.capa-lardan .cl-confianca { border-top: 1px solid var(--c-linha); border-bottom: 1px solid var(--c-linha); color: var(--c-frase); }
+.capa-lardan .cl-confianca svg { color: var(--c-rotulo); }
+@container (min-width: 48rem) {
+  .capa-lardan .cl-faixa { height: 300px; }
+  .capa-lardan .cl-marca { left: auto; right: -156px; width: 520px; height: 355px; }
+  .capa-lardan .cl-logo { letter-spacing: 18px; font-size: 4rem; padding-left: 18px; }
+  .capa-lardan .cl-foto { width: 152px; height: 152px; margin-top: -76px; }
+  .capa-lardan .cl-nome { font-size: 48px; }
+  .capa-lardan .cl-zap { height: 50px; }
+}
 
 /* Abertura do app instalado da consultora */
 .abertura-app { background: radial-gradient(circle at 50% 45%, oklch(0.3 0.02 40), oklch(0.17 0.01 40) 70%); transition: opacity .6s ease; }

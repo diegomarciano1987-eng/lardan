@@ -41,8 +41,8 @@ const CAMPOS: { k: string; rotulo: string; longo?: boolean; numero?: boolean }[]
   { k: "envio_garantia_texto", rotulo: "Envio da peça para garantia (use **negrito**)", longo: true },
   { k: "montagem_texto", rotulo: "Montagem do próximo kit", longo: true },
   { k: "rodape_texto", rotulo: "Rodapé" },
-  { k: "proxima_maleta_texto", rotulo: "Aviso — vendas para receber a próxima maleta", longo: true },
-  { k: "proxima_maleta_minimo_cents", rotulo: "Venda mínima informada (R$)", numero: true },
+  { k: "proxima_maleta_texto", rotulo: "Texto da Meta mínima (card da consultora nova no pedido)", longo: true },
+  { k: "proxima_maleta_minimo_cents", rotulo: "Meta mínima (R$) — também é o piso do Objetivo de venda", numero: true },
 ];
 
 export function ConfigPedido({ master }: { master: boolean }) {

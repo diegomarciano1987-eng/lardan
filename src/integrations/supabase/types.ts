@@ -4560,6 +4560,372 @@ export type Database = {
           },
         ]
       }
+      familia_categorias: {
+        Row: {
+          cor: string
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cor?: string
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          tipo: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          cor?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      familia_contas: {
+        Row: {
+          ativa: boolean
+          cor: string
+          created_at: string
+          id: string
+          instituicao: string | null
+          nome: string
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativa?: boolean
+          cor?: string
+          created_at?: string
+          id?: string
+          instituicao?: string | null
+          nome: string
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          ativa?: boolean
+          cor?: string
+          created_at?: string
+          id?: string
+          instituicao?: string | null
+          nome?: string
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      familia_despesas_fixas: {
+        Row: {
+          categoria_id: string | null
+          conta_id: string | null
+          created_at: string
+          dia_vencimento: number
+          encerrada_em: string | null
+          forma_pagamento: string
+          id: string
+          mes_inicio: string
+          nome: string
+          observacoes: string | null
+          parcelado: boolean
+          parcelas_total: number | null
+          projeto_id: string | null
+          recorrencia: string
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          categoria_id?: string | null
+          conta_id?: string | null
+          created_at?: string
+          dia_vencimento: number
+          encerrada_em?: string | null
+          forma_pagamento?: string
+          id?: string
+          mes_inicio: string
+          nome: string
+          observacoes?: string | null
+          parcelado?: boolean
+          parcelas_total?: number | null
+          projeto_id?: string | null
+          recorrencia?: string
+          updated_at?: string
+          user_id?: string
+          valor: number
+        }
+        Update: {
+          categoria_id?: string | null
+          conta_id?: string | null
+          created_at?: string
+          dia_vencimento?: number
+          encerrada_em?: string | null
+          forma_pagamento?: string
+          id?: string
+          mes_inicio?: string
+          nome?: string
+          observacoes?: string | null
+          parcelado?: boolean
+          parcelas_total?: number | null
+          projeto_id?: string | null
+          recorrencia?: string
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "familia_despesas_fixas_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "familia_categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "familia_despesas_fixas_conta_id_fkey"
+            columns: ["conta_id"]
+            isOneToOne: false
+            referencedRelation: "familia_contas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "familia_despesas_fixas_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "familia_projetos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      familia_despesas_variaveis: {
+        Row: {
+          categoria_id: string | null
+          conta_id: string | null
+          created_at: string
+          data: string
+          data_pagamento: string | null
+          descricao: string
+          forma_pagamento: string
+          grupo_id: string | null
+          id: string
+          observacoes: string | null
+          ocorrencia_numero: number | null
+          ocorrencias_total: number | null
+          projeto_id: string | null
+          recorrente: boolean
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          categoria_id?: string | null
+          conta_id?: string | null
+          created_at?: string
+          data: string
+          data_pagamento?: string | null
+          descricao: string
+          forma_pagamento?: string
+          grupo_id?: string | null
+          id?: string
+          observacoes?: string | null
+          ocorrencia_numero?: number | null
+          ocorrencias_total?: number | null
+          projeto_id?: string | null
+          recorrente?: boolean
+          updated_at?: string
+          user_id?: string
+          valor: number
+        }
+        Update: {
+          categoria_id?: string | null
+          conta_id?: string | null
+          created_at?: string
+          data?: string
+          data_pagamento?: string | null
+          descricao?: string
+          forma_pagamento?: string
+          grupo_id?: string | null
+          id?: string
+          observacoes?: string | null
+          ocorrencia_numero?: number | null
+          ocorrencias_total?: number | null
+          projeto_id?: string | null
+          recorrente?: boolean
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "familia_despesas_variaveis_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "familia_categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "familia_despesas_variaveis_conta_id_fkey"
+            columns: ["conta_id"]
+            isOneToOne: false
+            referencedRelation: "familia_contas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "familia_despesas_variaveis_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "familia_projetos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      familia_fixas_ocorrencias: {
+        Row: {
+          competencia: string
+          created_at: string
+          data_pagamento: string | null
+          fixa_id: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+          valor_pago: number | null
+        }
+        Insert: {
+          competencia: string
+          created_at?: string
+          data_pagamento?: string | null
+          fixa_id: string
+          id?: string
+          status: string
+          updated_at?: string
+          user_id?: string
+          valor_pago?: number | null
+        }
+        Update: {
+          competencia?: string
+          created_at?: string
+          data_pagamento?: string | null
+          fixa_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valor_pago?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "familia_fixas_ocorrencias_fixa_id_fkey"
+            columns: ["fixa_id"]
+            isOneToOne: false
+            referencedRelation: "familia_despesas_fixas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      familia_projetos: {
+        Row: {
+          ativo: boolean
+          cor: string
+          created_at: string
+          id: string
+          nome: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          id?: string
+          nome: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      familia_receitas: {
+        Row: {
+          categoria_id: string | null
+          created_at: string
+          data: string
+          fonte: string
+          forma_pagamento: string
+          grupo_id: string | null
+          id: string
+          observacoes: string | null
+          ocorrencia_numero: number | null
+          ocorrencias_total: number | null
+          recorrente: boolean
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          categoria_id?: string | null
+          created_at?: string
+          data: string
+          fonte: string
+          forma_pagamento?: string
+          grupo_id?: string | null
+          id?: string
+          observacoes?: string | null
+          ocorrencia_numero?: number | null
+          ocorrencias_total?: number | null
+          recorrente?: boolean
+          updated_at?: string
+          user_id?: string
+          valor: number
+        }
+        Update: {
+          categoria_id?: string | null
+          created_at?: string
+          data?: string
+          fonte?: string
+          forma_pagamento?: string
+          grupo_id?: string | null
+          id?: string
+          observacoes?: string | null
+          ocorrencia_numero?: number | null
+          ocorrencias_total?: number | null
+          recorrente?: boolean
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "familia_receitas_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "familia_categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fin_caixa_fatias: {
         Row: {
           created_at: string
@@ -18187,6 +18553,11 @@ export type Database = {
         Returns: number
       }
       expire_stock_reservations: { Args: never; Returns: number }
+      familia_garantir_categorias_padrao: { Args: never; Returns: number }
+      familia_reajustar_fixa: {
+        Args: { _a_partir: string; _id: string; _novo_valor: number }
+        Returns: string
+      }
       fin_account_auditoria: { Args: { _account: string }; Returns: Json }
       fin_account_cockpit: {
         Args: {

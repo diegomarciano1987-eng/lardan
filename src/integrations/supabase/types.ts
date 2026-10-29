@@ -12601,6 +12601,7 @@ export type Database = {
           atualizado_em: string
           atualizado_por: string | null
           endereco_linha: string
+          envio_garantia_texto: string
           etiqueta_calibracao: Json | null
           exigir_pre_baixa: boolean
           garantia_exclusoes: string
@@ -12624,6 +12625,7 @@ export type Database = {
           atualizado_em?: string
           atualizado_por?: string | null
           endereco_linha?: string
+          envio_garantia_texto?: string
           etiqueta_calibracao?: Json | null
           exigir_pre_baixa?: boolean
           garantia_exclusoes?: string
@@ -12647,6 +12649,7 @@ export type Database = {
           atualizado_em?: string
           atualizado_por?: string | null
           endereco_linha?: string
+          envio_garantia_texto?: string
           etiqueta_calibracao?: Json | null
           exigir_pre_baixa?: boolean
           garantia_exclusoes?: string

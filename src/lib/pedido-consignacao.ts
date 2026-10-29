@@ -27,7 +27,7 @@ export interface PedidoDados {
     endereco_linha: string; pedidos_telefone: string; pedidos_email: string; pagamento_texto: string;
     pix_tipo: string; pix_chave: string; pix_favorecido: string; garantia_titulo: string; garantia_texto: string;
     garantia_exclusoes: string; montagem_texto: string; rodape_texto: string; prazo_correio_dias: number;
-    proxima_maleta_texto?: string; proxima_maleta_minimo_cents?: number | null;
+    proxima_maleta_texto?: string; envio_garantia_texto?: string; proxima_maleta_minimo_cents?: number | null;
   };
   remessa: { numero: number | null; kit: number; tipo_envio: "pessoal" | "correio"; data_acerto: string | null; postar_ate: string | null };
   maleta: string | null;
@@ -128,7 +128,7 @@ export function montarLinhas(itens: PedidoDados["itens"]) {
   return out;
 }
 
-export function paginar(grupos: ReturnType<typeof montarLinhas>, aviso = false): Linha[][] {
+export function paginar(grupos: ReturnType<typeof montarLinhas>, aviso = false, fimExtra = 0): Linha[][] {
   const paginas: Linha[][] = [[]];
   let livre = ALT.pag1 - (aviso ? 15 : 0);
   const nova = () => { paginas.push([]); livre = ALT.pagN - (aviso ? 15 : 0); };
@@ -142,7 +142,7 @@ export function paginar(grupos: ReturnType<typeof montarLinhas>, aviso = false):
       livre -= ALT.item;
     }
   }
-  if (livre < ALT.fim) {
+  if (livre < ALT.fim + fimExtra) {
     // O fechamento não cabe: em vez de uma folha só com o rodapé, leva as últimas peças junto (nunca página quase vazia).
     const ant = paginas.at(-1)!;
     const mover: Linha[] = [];
@@ -239,7 +239,9 @@ tr.g td.r,tr.g td.q{font-size:8pt;letter-spacing:.06em}
 export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string; operador: string; impressoEm: Date; pixQrUrl?: string }) {
   const grupos = montarLinhas(d.itens);
   const temAviso = !!d.empresa.proxima_maleta_texto?.trim() && Number(d.empresa.proxima_maleta_minimo_cents) > 0;
-  const paginas = paginar(grupos, temAviso);
+  const envioGarantia = d.empresa.envio_garantia_texto?.trim() ?? "";
+  // Bloco 'Envio da peça para garantia' ocupa ~6 mm + ~4,2 mm por linha de ~150 caracteres.
+  const paginas = paginar(grupos, temAviso, envioGarantia ? 8 + Math.ceil(envioGarantia.length / 150) * 4.2 : 0);
   const aviso = temAviso ? `<div class="aviso-proxima"><span>${esc(d.empresa.proxima_maleta_texto)}</span><strong>${esc(brl(Number(d.empresa.proxima_maleta_minimo_cents)))}</strong></div>` : "";
   const total = d.itens.reduce((s, i) => s + i.preco_cents * i.quantidade, 0);
   const pecas = d.itens.reduce((s, i) => s + i.quantidade, 0);
@@ -295,7 +297,8 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
     <div class="box"><h4>${esc(d.empresa.garantia_titulo)}</h4><p>${rico(d.empresa.garantia_texto)}</p><p>${rico(d.empresa.garantia_exclusoes)}</p></div>
     <div><div class="box"><h4>Montagem do próximo kit</h4><p>${rico(d.empresa.montagem_texto)}</p></div>
       <div class="pix">${opcoes.pixQrUrl ? `<div class="qr"><img src="${esc(opcoes.pixQrUrl)}" alt="QR Pix oficial LARDAN Asaas"></div>` : ""}<p><strong>Pagamento:</strong> ${rico(d.empresa.pagamento_texto)}<br>${opcoes.pixQrUrl ? `Pix (${esc(d.empresa.pix_tipo)}) <strong>${esc(d.empresa.pix_chave)}</strong><br>${esc(d.empresa.pix_favorecido)}` : "Pix oficial indisponível — consulte a LARDAN."}</p></div></div>
-  </div>`;
+  </div>
+  ${envioGarantia ? `<div class="box" style="margin-top:2.5mm"><h4>Envio da peça para garantia</h4><p>${rico(envioGarantia)}</p></div>` : ""}`;
 
   return paginas.map((ls, i) => `<section class="pg">${i === 0 ? pagina1 : cab2}${tabela(ls)}${i === paginas.length - 1 ? final : ""}${rodape(i)}</section>`).join("");
 }

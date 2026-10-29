@@ -38,6 +38,7 @@ const CAMPOS: { k: string; rotulo: string; longo?: boolean; numero?: boolean }[]
   { k: "garantia_titulo", rotulo: "Título da garantia" },
   { k: "garantia_texto", rotulo: "Garantia — o que cobre (use **negrito**)", longo: true },
   { k: "garantia_exclusoes", rotulo: "Garantia — o que não cobre (use **negrito**)", longo: true },
+  { k: "envio_garantia_texto", rotulo: "Envio da peça para garantia (use **negrito**)", longo: true },
   { k: "montagem_texto", rotulo: "Montagem do próximo kit", longo: true },
   { k: "rodape_texto", rotulo: "Rodapé" },
   { k: "proxima_maleta_texto", rotulo: "Aviso — vendas para receber a próxima maleta", longo: true },

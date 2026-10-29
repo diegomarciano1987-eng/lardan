@@ -149,7 +149,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
                   {([["Peça", false], ["No corpo", true]] as const).map(([rot, val]) => (
                     <button key={rot} type="button" aria-pressed={verCorpo === val}
                       onClick={() => setNoCorpo((s) => ({ ...s, [i.variant_id]: val }))}
-                      className={`min-h-7 whitespace-nowrap rounded-full px-2.5 ${verCorpo === val ? "bg-[var(--v-accent)] text-[var(--v-accent-ink)]" : "text-[var(--v-ink)]"}`}>
+                      className={`min-h-7 whitespace-nowrap rounded-full px-2.5 ${verCorpo === val ? "bg-[var(--v-ink)] text-[var(--v-bg)]" : "text-[var(--v-ink)]"}`}>
                       {rot}
                     </button>
                   ))}

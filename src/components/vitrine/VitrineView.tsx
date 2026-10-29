@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
-import { Check, Clock, Gem, Instagram, MessageCircle, Share2, ShieldCheck, ShoppingBag, User } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Clock, Maximize2, X, Gem, Instagram, MessageCircle, Share2, ShieldCheck, ShoppingBag, User } from "lucide-react";
 import { toast } from "sonner";
 import { brl, imagem, type VitrineItem } from "@/lib/maletas";
 
@@ -30,6 +30,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   const [sacola, setSacola] = React.useState<Record<string, number>>({});
   const [categoria, setCategoria] = React.useState("todas");
   const [noCorpo, setNoCorpo] = React.useState<Record<string, boolean>>({});
+  const [ampliar, setAmpliar] = React.useState<{ item: Item; corpo: boolean } | null>(null);
 
   const visiveis = itens.filter((i) => !o.ocultas.includes(i.variant_id));
   const porId = new Map(visiveis.map((i) => [i.variant_id, i]));
@@ -63,6 +64,12 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   const cartao = a.cartao === "suave" ? "rounded-2xl bg-[var(--v-surface)] p-2 shadow-sm" : a.cartao === "moldura" ? "border border-[var(--v-line)] p-2" : "";
   const grade = a.grade === "lista" ? "grid grid-cols-1 gap-3" : a.grade === "2" ? "grid grid-cols-2 gap-4 @3xl:gap-6" : "grid grid-cols-2 gap-4 @3xl:grid-cols-3 @3xl:gap-6";
 
+  const corpoDe = (i: Item) => {
+    const principal = foto(i);
+    const midias = i.midias ?? [];
+    return midias.length > 1 ? (midias.find((m) => m !== (principal ? principal.split("/").pop() : "")) ?? null) : null;
+  };
+
   const Grade = ({ lista }: { lista: Item[] }) => (
     <ul className={grade}>
       {lista.map((i) => {
@@ -76,7 +83,12 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
         return (
           <li id={`peca-${i.variant_id}`} key={i.variant_id} className={`${cartao} ${a.grade === "lista" ? "flex gap-3" : "flex flex-col"}`}>
             <div className={`relative overflow-hidden bg-[var(--v-line)] ${a.cartao === "suave" ? "rounded-xl" : ""} ${a.grade === "lista" ? "size-24 shrink-0" : a.tema === "editorial" ? "aspect-[3/4]" : "aspect-square"}`}>
-              {src && <img src={src} alt={verCorpo ? `${i.produto} no corpo` : i.produto} loading="lazy" width={800} height={800} className="size-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
+              {src && (
+                <button type="button" aria-label={`Ver ${i.produto} maior`} className="group block size-full cursor-zoom-in" onClick={() => setAmpliar({ item: i, corpo: verCorpo })}>
+                  <img src={src} alt={verCorpo ? `${i.produto} no corpo` : i.produto} loading="lazy" width={800} height={800} className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                  {a.grade !== "lista" && <span aria-hidden className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-[var(--v-bg)]/85 text-[var(--v-ink)] shadow-sm backdrop-blur"><Maximize2 className="size-3.5" /></span>}
+                </button>
+              )}
               {corpoId && a.grade !== "lista" && (
                 <div role="group" aria-label="Escolher foto" className="absolute bottom-2 left-1/2 flex -translate-x-1/2 whitespace-nowrap rounded-full bg-[var(--v-bg)]/90 p-0.5 text-[0.68rem] font-semibold shadow-sm backdrop-blur">
                   {([["Peça", false], ["No corpo", true]] as const).map(([rot, val]) => (
@@ -183,6 +195,16 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
 
       <main className={`mx-auto px-5 pb-36 ${a.tema === "minimalista" ? "max-w-3xl" : "max-w-5xl"}`}>{secoes}</main>
 
+      {ampliar && (
+        <Ampliada
+          item={ampliar.item} corpo={ampliar.corpo}
+          peca={foto(ampliar.item) ?? ampliar.item.ilustracao ?? null}
+          noCorpoSrc={corpoDe(ampliar.item) ? imagem(corpoDe(ampliar.item)) : null}
+          onCorpo={(c) => { setAmpliar((x) => x && { ...x, corpo: c }); setNoCorpo((s) => ({ ...s, [ampliar.item.variant_id]: c })); }}
+          onFechar={() => setAmpliar(null)}
+          zap={zap} previa={previa}
+        />
+      )}
       {pecas > 0 && (
         <section className={`${previa ? "sticky" : "fixed inset-x-0"} bottom-0 border-t border-[var(--v-line)] bg-[var(--v-bg)]/95 p-4 backdrop-blur`}>
           <div className="mx-auto w-full max-w-3xl space-y-3">
@@ -254,5 +276,97 @@ function CapaPadrao(p: {
         </ul>
       </div>
     </header>
+  );
+}
+
+/** Foto ampliada da vitrine: quase tela cheia, sem distorcer (object-contain), troca Peça/No corpo e zoom por toque. */
+function Ampliada({ item, corpo, peca, noCorpoSrc, onCorpo, onFechar, zap, previa }: {
+  item: Item; corpo: boolean; peca: string | null; noCorpoSrc: string | null;
+  onCorpo: (c: boolean) => void; onFechar: () => void; zap: string | null; previa: boolean;
+}) {
+  const verCorpo = corpo && !!noCorpoSrc;
+  const src = verCorpo ? noCorpoSrc : peca;
+  const [zoom, setZoom] = React.useState<{ x: number; y: number } | null>(null);
+  const toque = React.useRef<number | null>(null);
+  const fecharRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    const antes = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    fecharRef.current?.focus();
+    const tecla = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onFechar();
+      if (noCorpoSrc && (e.key === "ArrowRight" || e.key === "ArrowLeft")) onCorpo(!verCorpo);
+    };
+    window.addEventListener("keydown", tecla);
+    return () => { document.body.style.overflow = antes; window.removeEventListener("keydown", tecla); };
+  }, [onFechar, onCorpo, verCorpo, noCorpoSrc]);
+  React.useEffect(() => setZoom(null), [src]);
+
+  const alternarZoom = (e: React.MouseEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setZoom((z) => (z ? null : { x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 }));
+  };
+  const detalhe = [item.variante, item.tamanho, item.cor].filter(Boolean).join(" · ");
+  const msg = `Olá! Quero esta peça: ${item.produto}${item.variante ? ` (${item.variante})` : ""}, ${brl(item.preco_cents)}. Você confirma a disponibilidade?`;
+
+  return (
+    <div role="dialog" aria-modal="true" aria-label={`${item.produto} ampliada`} className="vitrine-zoom fixed inset-0 z-[80] flex flex-col"
+      onTouchStart={(e) => { toque.current = e.touches[0]?.clientX ?? null; }}
+      onTouchEnd={(e) => {
+        const x0 = toque.current; toque.current = null;
+        const x1 = e.changedTouches[0]?.clientX;
+        if (zoom || x0 == null || x1 == null || !noCorpoSrc) return;
+        if (Math.abs(x1 - x0) > 50) onCorpo(!verCorpo);
+      }}>
+      <button type="button" aria-label="Fechar" tabIndex={-1} className="absolute inset-0 cursor-default" onClick={onFechar} />
+      <div className="relative z-10 flex items-center justify-between px-4 pt-[max(env(safe-area-inset-top),0.75rem)] pb-2">
+        <p className="vz-rotulo text-[0.65rem] uppercase tracking-[0.35em]">Lardan · Vitrine oficial</p>
+        <button ref={fecharRef} type="button" onClick={onFechar} aria-label="Fechar foto ampliada" className="vz-btn grid size-11 place-items-center rounded-full"><X className="size-5" /></button>
+      </div>
+
+      <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-3 @container">
+        {noCorpoSrc && (
+          <button type="button" aria-label={verCorpo ? "Ver foto da peça" : "Ver no corpo"} onClick={() => onCorpo(!verCorpo)} className="vz-btn absolute left-3 top-1/2 z-20 hidden size-12 -translate-y-1/2 place-items-center rounded-full sm:grid">
+            <ChevronLeft className="size-5" />
+          </button>
+        )}
+        <div className={`vz-quadro relative aspect-square w-[min(94vw,76dvh,1000px)] overflow-hidden rounded-[1.75rem] ${zoom ? "cursor-zoom-out" : "cursor-zoom-in"}`} onClick={alternarZoom}>
+          {src ? (
+            <img key={src} src={src} alt={verCorpo ? `${item.produto} no corpo` : item.produto} draggable={false}
+              className="vz-img size-full select-none object-contain transition-transform duration-300 ease-out"
+              style={zoom ? { transform: "scale(2.2)", transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined} />
+          ) : <div className="grid size-full place-items-center text-sm">Sem foto</div>}
+          <span className="vz-dica pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[0.65rem]">{zoom ? "Toque para afastar" : "Toque para aproximar"}</span>
+        </div>
+        {noCorpoSrc && (
+          <button type="button" aria-label={verCorpo ? "Ver foto da peça" : "Ver no corpo"} onClick={() => onCorpo(!verCorpo)} className="vz-btn absolute right-3 top-1/2 z-20 hidden size-12 -translate-y-1/2 place-items-center rounded-full sm:grid">
+            <ChevronRight className="size-5" />
+          </button>
+        )}
+      </div>
+
+      <div className="relative z-10 mx-auto w-full max-w-xl px-4 pt-3 pb-[max(env(safe-area-inset-bottom),1rem)]">
+        {noCorpoSrc && (
+          <div role="group" aria-label="Escolher foto" className="vz-seg mx-auto mb-3 flex w-fit rounded-full p-1 text-sm font-medium">
+            {([["Peça", false], ["No corpo", true]] as const).map(([rot, val]) => (
+              <button key={rot} type="button" aria-pressed={verCorpo === val} onClick={() => onCorpo(val)}
+                className={`min-h-10 rounded-full px-5 ${verCorpo === val ? "vz-seg-on" : ""}`}>{rot}</button>
+            ))}
+          </div>
+        )}
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="vz-nome truncate text-xl leading-tight">{item.produto}</p>
+            <p className="vz-sub truncate text-xs">{detalhe || "Peça única"} · <strong className="vz-preco">{brl(item.preco_cents)}</strong></p>
+          </div>
+          {zap && (
+            <a href={previa ? undefined : `${zap}${zap.includes("?") ? "&" : "?"}text=${encodeURIComponent(msg)}`} target="_blank" rel="noreferrer" className="vz-zap inline-flex h-12 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-medium">
+              <MessageCircle className="size-4" /> Quero esta
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

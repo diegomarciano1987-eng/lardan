@@ -1955,3 +1955,21 @@ body.consultora-glass-light-active :is([role="dialog"], [role="alertdialog"]) im
 @media (prefers-reduced-motion: reduce) {
   .consultora-vendas-preenchimento { transition: none; }
 }
+/* Foto ampliada da vitrine (lightbox) — paleta oficial da capa LARDAN. */
+.vitrine-zoom { background: color-mix(in srgb, #2A1F1B 92%, transparent); backdrop-filter: blur(18px) saturate(1.1); color: #F5EBE1; font-family: "Jost", system-ui, sans-serif; animation: vz-entra .22s ease-out; }
+.vitrine-zoom .vz-rotulo { color: #C9A98F; }
+.vitrine-zoom .vz-btn { background: rgb(255 255 255 / .1); border: 1px solid rgb(234 215 198 / .28); color: #F5EBE1; backdrop-filter: blur(10px); }
+.vitrine-zoom .vz-btn:hover { background: rgb(255 255 255 / .18); }
+.vitrine-zoom .vz-quadro { background: #F7EFE8; box-shadow: 0 30px 80px -20px rgb(0 0 0 / .6), 0 0 0 1px rgb(196 154 124 / .45); }
+.vitrine-zoom .vz-img { animation: vz-foto .28s ease-out; }
+.vitrine-zoom .vz-dica { background: rgb(42 31 27 / .7); color: #F5EBE1; }
+.vitrine-zoom .vz-seg { background: rgb(255 255 255 / .1); border: 1px solid rgb(234 215 198 / .28); }
+.vitrine-zoom .vz-seg button { color: #EAD7C6; }
+.vitrine-zoom .vz-seg .vz-seg-on { background: #FCFAF6; color: #2B201C; }
+.vitrine-zoom .vz-nome { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; color: #FCFAF6; }
+.vitrine-zoom .vz-sub { color: #D9C6B6; }
+.vitrine-zoom .vz-preco { color: #FCFAF6; font-weight: 600; }
+.vitrine-zoom .vz-zap { background: #7A5642; color: #fff; }
+@keyframes vz-entra { from { opacity: 0 } to { opacity: 1 } }
+@keyframes vz-foto { from { opacity: 0; transform: scale(.97) } to { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { .vitrine-zoom, .vitrine-zoom .vz-img { animation: none; } }

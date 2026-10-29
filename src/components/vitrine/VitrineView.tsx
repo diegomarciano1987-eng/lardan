@@ -54,78 +54,11 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
     window.open(`${zap}?text=${encodeURIComponent(texto)}`, "_blank", "noopener,noreferrer");
   };
 
-  // capa
-  const oficial = CAPAS.find((c) => c.id === d.imagens.capa?.preset);
-  const capaD = oficial?.desktop ?? img(d.imagens.capa?.path);
-  const capaM = oficial?.mobile ?? img(d.imagens.capa?.path_m ?? d.imagens.capa?.path);
-  const fD = d.imagens.capa?.foco_desktop ?? { x: 50, y: 50 };
-  const fM = d.imagens.capa?.foco_mobile ?? { x: 50, y: 50 };
+  // capa padrão LARDAN: fixa; só foto, nome, frase, horário e contatos vêm da consultora
   const retrato = img(d.imagens.avatar?.path);
   const retrato2x = img(d.imagens.avatar?.path2x);
   const iniciais = nomePublico.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 
-  const Capa = ({ alto }: { alto: string }) => (
-    <div className={`relative w-full overflow-hidden ${alto}`} aria-hidden>
-      {capaD || capaM ? (
-        <>
-          <img src={capaM ?? capaD ?? undefined} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover @3xl:hidden" style={{ objectPosition: `${fM.x}% ${fM.y}%` }} />
-          <img src={capaD ?? capaM ?? undefined} alt="" aria-hidden="true" className="absolute inset-0 hidden size-full object-cover @3xl:block" style={{ objectPosition: `${fD.x}% ${fD.y}%` }} />
-        </>
-      ) : (
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,var(--v-surface),var(--v-bg)_60%),linear-gradient(135deg,var(--v-line),var(--v-bg))]">
-          <div className="absolute inset-x-0 bottom-6 text-center text-[0.65rem] uppercase tracking-[0.5em] text-[var(--v-muted)]">Lardan</div>
-        </div>
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-[var(--v-bg)]/50 to-transparent" />
-    </div>
-  );
-
-  const Retrato = ({ tam }: { tam: string }) => (
-    <div className={`${tam} shrink-0 overflow-hidden rounded-full border-4 border-[var(--v-bg)] bg-[var(--v-surface)] shadow-lg ring-1 ring-[var(--v-line)]`}>
-      {retrato ? (
-        <img src={retrato} srcSet={retrato2x ? `${retrato} 1x, ${retrato2x} 2x` : undefined} alt={`Foto de ${nomePublico}`} className="size-full object-cover" />
-      ) : (
-        <div className="v-titulo grid size-full place-items-center text-3xl text-[var(--v-accent)]">{iniciais || "L"}</div>
-      )}
-    </div>
-  );
-
-  const Info = ({ alinhar }: { alinhar: "centro" | "esquerda" }) => (
-    <div className={alinhar === "centro" ? "text-center" : "text-left"}>
-      <p className="text-[0.65rem] uppercase tracking-[0.35em] text-[var(--v-accent)]">Consultora Lardan</p>
-      <h1 className={`v-titulo mt-2 break-words leading-tight ${a.tema === "editorial" ? "text-4xl @3xl:text-6xl" : "text-3xl @3xl:text-5xl"}`}>{nomePublico}</h1>
-      {d.perfil.frase && <p className="mt-2 text-[var(--v-muted)]">{d.perfil.frase}</p>}
-      {d.perfil.bio && <p className={`mt-4 max-w-xl whitespace-pre-line text-sm leading-relaxed ${alinhar === "centro" ? "mx-auto" : ""}`}>{d.perfil.bio}</p>}
-      <ul className={`mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--v-muted)] ${alinhar === "centro" ? "justify-center" : ""}`}>
-        {(d.perfil.cidade || d.perfil.regiao) && (
-          <li className="flex items-center gap-1"><MapPin aria-hidden className="size-3.5" />{[d.perfil.cidade, d.perfil.regiao].filter(Boolean).join(" · ")}</li>
-        )}
-        {d.perfil.horarios && <li className="flex items-center gap-1"><Clock aria-hidden className="size-3.5" />{d.perfil.horarios}</li>}
-      </ul>
-      <div className={`mt-5 flex flex-wrap gap-2 ${alinhar === "centro" ? "justify-center" : ""}`}>
-        {zap && (
-          <a href={previa ? undefined : zap} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[var(--v-accent)] px-5 py-2.5 text-sm text-[var(--v-accent-ink)]">
-            <MessageCircle aria-hidden className="size-4" /> Falar com {primeiroNome}
-          </a>
-        )}
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 rounded-full border border-[var(--v-line)] px-4 py-2.5 text-sm"
-          onClick={() => {
-            if (previa) return;
-            const url = urlCompartilhar ?? window.location.href;
-            if (navigator.share) void navigator.share({ title: nomePublico, url }).catch(() => undefined);
-            else { void navigator.clipboard.writeText(url); toast.success("Endereço copiado."); }
-          }}
-        >
-          <Share2 aria-hidden className="size-4" /> Compartilhar
-        </button>
-        {d.contato.instagram && <Social href={`https://instagram.com/${d.contato.instagram}`} rotulo="Instagram" previa={previa}><Instagram className="size-4" /></Social>}
-        {d.contato.facebook && <Social href={`https://facebook.com/${d.contato.facebook}`} rotulo="Facebook" previa={previa}><Facebook className="size-4" /></Social>}
-        {d.contato.tiktok && <Social href={`https://tiktok.com/@${d.contato.tiktok}`} rotulo="TikTok" previa={previa}><Music2 className="size-4" /></Social>}
-      </div>
-    </div>
-  );
 
   const cartao = a.cartao === "suave" ? "rounded-2xl bg-[var(--v-surface)] p-2 shadow-sm" : a.cartao === "moldura" ? "border border-[var(--v-line)] p-2" : "";
   const grade = a.grade === "lista" ? "grid grid-cols-1 gap-3" : a.grade === "2" ? "grid grid-cols-2 gap-4 @3xl:gap-6" : "grid grid-cols-2 gap-4 @3xl:grid-cols-3 @3xl:gap-6";

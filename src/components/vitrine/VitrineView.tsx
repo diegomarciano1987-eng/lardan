@@ -145,11 +145,11 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
             <div className={`relative overflow-hidden bg-[var(--v-line)] ${a.cartao === "suave" ? "rounded-xl" : ""} ${a.grade === "lista" ? "size-24 shrink-0" : a.tema === "editorial" ? "aspect-[3/4]" : "aspect-square"}`}>
               {src && <img src={src} alt={verCorpo ? `${i.produto} no corpo` : i.produto} loading="lazy" width={800} height={800} className="size-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
               {corpoId && a.grade !== "lista" && (
-                <div role="group" aria-label="Escolher foto" className="absolute bottom-2 left-1/2 flex -translate-x-1/2 rounded-full bg-[var(--v-bg)]/90 p-0.5 text-[0.7rem] font-medium shadow-sm backdrop-blur">
+                <div role="group" aria-label="Escolher foto" className="absolute bottom-2 left-1/2 flex -translate-x-1/2 whitespace-nowrap rounded-full bg-[var(--v-bg)]/90 p-0.5 text-[0.68rem] font-semibold shadow-sm backdrop-blur">
                   {([["Peça", false], ["No corpo", true]] as const).map(([rot, val]) => (
                     <button key={rot} type="button" aria-pressed={verCorpo === val}
                       onClick={() => setNoCorpo((s) => ({ ...s, [i.variant_id]: val }))}
-                      className={`min-h-8 rounded-full px-3 ${verCorpo === val ? "bg-[var(--v-text,currentColor)] text-[var(--v-bg)]" : "text-[var(--v-muted)]"}`}>
+                      className={`min-h-7 whitespace-nowrap rounded-full px-2.5 ${verCorpo === val ? "bg-[var(--v-accent)] text-[var(--v-accent-ink)]" : "text-[var(--v-ink)]"}`}>
                       {rot}
                     </button>
                   ))}

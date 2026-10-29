@@ -15,7 +15,7 @@ const SELO: Record<SugestaoMontagem["confianca"], { tone: "success" | "warning" 
 };
 
 export function SugestaoMontagem({ partyId }: { partyId: string }) {
-  const [total, setTotal] = React.useState<number | null>(null);
+  const [texto, setTexto] = React.useState<string | null>(null);
 
   const padrao = useQuery({
     // Média vendida nas 3 últimas maletas dela + 30%; sem histórico, 35.
@@ -28,7 +28,11 @@ export function SugestaoMontagem({ partyId }: { partyId: string }) {
     staleTime: 1000 * 60 * 5,
   });
 
-  const totalUsado = total ?? padrao.data ?? null;
+  // Campo vazio enquanto digita não volta ao padrão; a sugestão usa o último valor válido.
+  const digitado = texto != null && texto !== "" ? Number(texto) : null;
+  const [ultimo, setUltimo] = React.useState<number | null>(null);
+  React.useEffect(() => { if (digitado) setUltimo(digitado); }, [digitado]);
+  const totalUsado = digitado || (texto != null ? ultimo : null) || padrao.data || null;
   const q = useQuery({
     queryKey: ["historico-jflex", "montagem", partyId, totalUsado],
     queryFn: () => sugestaoMontagem(partyId, totalUsado!),
@@ -46,11 +50,9 @@ export function SugestaoMontagem({ partyId }: { partyId: string }) {
           <input
             className="admin-input w-32"
             inputMode="numeric"
-            value={totalUsado ?? ""}
-            onChange={(e) => {
-              const v = e.target.value.replace(/\D/g, "");
-              setTotal(v ? Number(v) : null);
-            }}
+            value={texto ?? (padrao.data != null ? String(padrao.data) : "")}
+            onChange={(e) => setTexto(e.target.value.replace(/\D/g, "").slice(0, 4))}
+            onFocus={(e) => e.currentTarget.select()}
           />
         </label>
         {d && <StatusBadge tone={SELO[d.confianca].tone}>{SELO[d.confianca].texto}</StatusBadge>}

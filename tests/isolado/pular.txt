@@ -13,3 +13,4 @@
 # Cópia da estrutura já aplicada por supabase/migrations/20261005130000_clicksign_termo_maleta.sql
 # (mesmo conteúdo registrado de novo pela ferramenta de banco; reaplicar falharia por política duplicada).
 0026_clicksign_termo_maleta_estrutura.sql
+0180_demo_maleta_videos.sql

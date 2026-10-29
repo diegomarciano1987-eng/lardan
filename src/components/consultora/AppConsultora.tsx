@@ -24,7 +24,7 @@ import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeft, BookOpen, BriefcaseBusiness, FileText, CalendarClock, CalendarDays, Check, ChevronDown, ChevronRight, ChevronUp, CircleHelp, Home, LogOut, Menu, MessageCircle,
+  ArrowLeft, BookOpen, BriefcaseBusiness, FileText, CalendarClock, CalendarDays, Check, ChevronRight, CircleHelp, Home, LogOut, Menu, MessageCircle,
   GraduationCap, LayoutGrid, Medal, Route as IconeJornada, Gift, PackageCheck, Phone, Plus, Search, PiggyBank, ChartColumnBig, ShoppingBag, Store, UserPlus, Users, Wallet,
 } from "lucide-react";
 import { CartaoAcerto, CartaoLiga } from "@/components/consultora/LigaEAcerto";
@@ -78,30 +78,6 @@ export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }:
   const ativo = grupoDe(nav.aba);
   const grande = useLetraGrande();
   const [menuAberto, setMenuAberto] = React.useState(false);
-  const menuRef = React.useRef<HTMLElement | null>(null);
-  const [rolagemMenu, setRolagemMenu] = React.useState<"baixo" | "cima" | null>(null);
-  const medirRolagemMenu = React.useCallback(() => {
-    const el = menuRef.current;
-    if (!el) { setRolagemMenu(null); return; }
-    const resto = el.scrollHeight - el.scrollTop - el.clientHeight;
-    if (resto > 24) setRolagemMenu("baixo");
-    else if (el.scrollTop > 24) setRolagemMenu("cima");
-    else setRolagemMenu(null);
-  }, []);
-  React.useEffect(() => {
-    if (!pilotoGlass) { setRolagemMenu(null); return; }
-    medirRolagemMenu();
-    const el = menuRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", medirRolagemMenu, { passive: true });
-    window.addEventListener("resize", medirRolagemMenu);
-    const t = window.setTimeout(medirRolagemMenu, 500);
-    return () => {
-      el.removeEventListener("scroll", medirRolagemMenu);
-      window.removeEventListener("resize", medirRolagemMenu);
-      window.clearTimeout(t);
-    };
-  }, [pilotoGlass, medirRolagemMenu]);
   const temaClaro = useTemaConsultora() === "light";
   React.useEffect(() => {
     if (!pilotoGlass) return;
@@ -120,14 +96,13 @@ export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }:
     <div className={`area-consultora ${pilotoGlass ? "consultora-glass-pilot" : ""} ${pilotoGlass && temaClaro ? "consultora-glass-light" : ""} ${grande ? "letra-grande" : ""} min-h-dvh bg-background pt-[env(safe-area-inset-top)] text-foreground lg:flex`}>
       <AberturaApp />
       {/* Menu lateral no computador */}
-      <aside className="consultora-sidebar sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-border bg-card px-5 py-6 lg:flex">
+      <aside className="consultora-sidebar sticky top-0 hidden h-dvh w-72 shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-border bg-card px-5 py-6 lg:flex">
         <img src={nomeLardan.url} alt="LARDAN" className="mb-6 h-auto w-32 object-contain object-left" />
         <AvatarConsultora />
         <button type="button" disabled={bloqueada} onClick={() => ir({ aba: "novo" })} className="btn-app-principal mb-5 w-full">
           <Plus className="size-5" aria-hidden /> Nova venda
         </button>
-        <div className="relative mt-1 min-h-0 flex-1">
-          <nav ref={menuRef} aria-label="Menu" className="flex h-full flex-col gap-1 overflow-y-auto overscroll-contain pb-[2.9rem]">
+        <nav aria-label="Menu" className="mt-1 flex flex-col gap-1 pb-2">
           {[...PRINCIPAIS, ...EXTRAS].map((i) => {
             const on = nav.aba === i.aba || (i.aba === "pedidos" && nav.aba === "novo");
             return (
@@ -137,20 +112,8 @@ export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }:
               </button>
             );
           })}
-          </nav>
-          {rolagemMenu && (
-            <button type="button" onClick={() => {
-              const el = menuRef.current;
-              if (!el) return;
-              el.scrollBy({ top: rolagemMenu === "baixo" ? 240 : -el.scrollHeight, behavior: "smooth" });
-            }}
-              aria-label={rolagemMenu === "baixo" ? "Ver mais itens do menu" : "Voltar ao topo do menu"}
-              className="consultora-menu-indicador">
-              {rolagemMenu === "baixo" ? <ChevronDown className="size-5" aria-hidden /> : <ChevronUp className="size-5" aria-hidden />}
-            </button>
-          )}
-        </div>
-        <div className="flex flex-col gap-2 pt-5">
+        </nav>
+        <div className="mt-auto flex flex-col gap-2 pt-5">
           <BotaoNovidades />
           <BotaoAjuda tela={ajuda} className="w-full justify-start" />
           <button type="button" onClick={sair} className="admin-btn min-h-12 w-full text-base"><LogOut className="size-5" aria-hidden /> Sair</button>

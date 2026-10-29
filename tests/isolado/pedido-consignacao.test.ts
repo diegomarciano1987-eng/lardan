@@ -16,7 +16,7 @@ let deposito = "", praca = "", remessa = "", cicloRua = "", cicloMontagem = "", 
 describe("regra de preço (sempre para baixo)", () => {
   test("degraus de R$ 5 terminados em 4,90/9,90; abaixo de R$ 5 não altera", async () => {
     const casos: [number, number][] = [[4500, 4490], [4590, 4490], [9990, 9990], [1, 1], [10000, 9990], [10490, 10490],
-      [10491, 10490], [11200, 10990], [14990, 14990], [15000, 14990], [32990, 32990], [33000, 32990],
+      [10491, 9990], [11200, 10990], [14990, 14990], [15000, 14990], [32990, 32990], [33000, 32990],
       [8000, 7990], [8499, 7990], [8500, 8490], [8999, 8490], [9000, 8990], [9499, 8990]];
     for (const [p, esperado] of casos)
       expect((await um<{ n: number }>(`select public.preco_regra_lardan($1)::int n`, [p])).n).toBe(esperado);

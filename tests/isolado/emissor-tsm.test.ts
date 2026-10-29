@@ -9,6 +9,7 @@ test("TSM: CNPJ/IE/endereço exatos, emissão desligada, regra preservada e ende
   const c = await adm.reserve();
   try {
     await c.unsafe("begin");
+    await c.unsafe(`update public.business_entities set tax_id=null where regexp_replace(coalesce(tax_id,''),'\\D','','g')='43319208000180'`);
     const [p] = await c.unsafe(`insert into public.parties(kind,display_name,doc) values ('organizacao','ISO TSM','43319208000180') returning id`);
     if (!p) throw new Error("Pessoa não criada");
     await c.unsafe(`insert into public.party_addresses(party_id,street,street_number,city,uf,postal_code,is_primary) values ($1,'Avenida dos Estudantes','1277','Ibiporã','PR','86200000',true)`, [p.id]);
@@ -32,6 +33,7 @@ test("TSM: duas identidades não unificadas são recusadas sem gravar emissor", 
   const c = await adm.reserve();
   try {
     await c.unsafe("begin");
+    await c.unsafe(`update public.business_entities set tax_id=null where regexp_replace(coalesce(tax_id,''),'\\D','','g')='43319208000180'`);
     await c.unsafe(`insert into public.parties(kind,display_name,doc) values ('organizacao','ISO A','43319208000180'),('organizacao','ISO B','43319208000180')`);
     await c.unsafe("savepoint cadastro");
     let mensagem = "";
@@ -47,6 +49,7 @@ test("TSM: cadastro oficialmente unificado é ignorado sem apagar seu CNPJ hist�
   const c = await adm.reserve();
   try {
     await c.unsafe("begin");
+    await c.unsafe(`update public.business_entities set tax_id=null where regexp_replace(coalesce(tax_id,''),'\\D','','g')='43319208000180'`);
     const rows = await c.unsafe(`insert into public.parties(kind,display_name,doc) values ('organizacao','ISO LARDAN','43319208000180'),('organizacao','ISO TSM antiga','43319208000180') returning id`);
     const [can, dup] = rows;
     if (!can || !dup) throw new Error("Pessoas não criadas");

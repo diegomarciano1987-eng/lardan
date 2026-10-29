@@ -1,9 +1,9 @@
 # Roadmap
 
 ## App da consultora — velocidade e topo compacto (28/10/2026)
-- [ ] Corrigir navegação/cache sem remover o aceite obrigatório ou assinatura.
-- [ ] Liga compacta e colapsável abaixo do cabeçalho; progresso financeiro real e comissão oficial.
-- [ ] Testes de regras e cliques autenticados no celular/desktop, com limites de desempenho explícitos.
+- [x] Navegação com resposta imediata, cache compartilhado 60s, pré-carregamento seletivo, busca 250ms; aceite inicial preservado e erro de atualização não apaga resultado anterior.
+- [x] Liga compacta e colapsável no topo do Início; barra monetária e comissão do consultora_ganhos, sem inventar faixas ou ganhos garantidos.
+- [x] 23 testes unitários + 19 isolados; 24 cliques medidos 66–136ms, 15 toques seguidos e erro de atualização 503; 375×667, 412×915 e desktop. Diego Silva não tem maleta operacional: barra verificada em cópia isolada (R$150/R$500, comissão R$30), não em venda real. Sem teste de carga de mil usuárias; falta publicar.
 
 ## Plano solicitado — aceite e personalização do romaneio (28/10/2026)
 - [x] Entregar provas por pedido e texto comercial completo para Daniel, com limitações explícitas (Files: provas-aceite-romaneio).

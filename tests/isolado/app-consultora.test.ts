@@ -159,6 +159,16 @@ describe("Início e Meu financeiro", () => {
     const g = await um<{ v: number; p: number }>(`select (public.consultora_vendido_ciclo($1)->>'vendido_cents')::int v, (public.consultora_vendido_ciclo($1)->>'pecas')::int p`, [ciclo]);
     expect(g).toEqual({ v: 15000, p: 2 });
   });
+
+  test("barra de vendas usa valor e comissão oficiais da remessa", async () => {
+    const g = await rpc<{ valor_maleta_cents: number; kits: number; vendido_cents: number; comissao_cents: number; faixa: { percentual: number } }>(cons, "consultora_ganhos", {});
+    expect(g.erro).toBeNull();
+    expect(Number(g.dados.valor_maleta_cents)).toBe(50000);
+    expect(g.dados.kits).toBe(1);
+    expect(Number(g.dados.vendido_cents)).toBe(15000);
+    expect(Number(g.dados.comissao_cents)).toBe(3000);
+    expect(Number(g.dados.comissao_cents)).toBe(Math.round(Number(g.dados.vendido_cents) * Number(g.dados.faixa.percentual) / 100));
+  });
 });
 
 describe("indicação", () => {

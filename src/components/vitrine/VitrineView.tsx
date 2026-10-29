@@ -29,6 +29,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   const zap = whatsappLink(d.contato.whatsapp);
   const [sacola, setSacola] = React.useState<Record<string, number>>({});
   const [categoria, setCategoria] = React.useState("todas");
+  const [noCorpo, setNoCorpo] = React.useState<Record<string, boolean>>({});
 
   const visiveis = itens.filter((i) => !o.ocultas.includes(i.variant_id));
   const porId = new Map(visiveis.map((i) => [i.variant_id, i]));
@@ -133,12 +134,27 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
     <ul className={grade}>
       {lista.map((i) => {
         const q = sacola[i.variant_id] ?? 0;
-        const real = foto(i);
+        const principal = foto(i);
+        const midias = i.midias ?? [];
+        const corpoId = midias.length > 1 ? (midias.find((m) => m !== (principal ? principal.split("/").pop() : "")) ?? null) : null;
+        const verCorpo = !!corpoId && !!noCorpo[i.variant_id];
+        const real = verCorpo ? imagem(corpoId) : principal;
         const src = real ?? i.ilustracao ?? null;
         return (
           <li id={`peca-${i.variant_id}`} key={i.variant_id} className={`${cartao} ${a.grade === "lista" ? "flex gap-3" : "flex flex-col"}`}>
             <div className={`relative overflow-hidden bg-[var(--v-line)] ${a.cartao === "suave" ? "rounded-xl" : ""} ${a.grade === "lista" ? "size-24 shrink-0" : a.tema === "editorial" ? "aspect-[3/4]" : "aspect-square"}`}>
-              {src && <img src={src} alt={i.produto} loading="lazy" width={800} height={800} className="size-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
+              {src && <img src={src} alt={verCorpo ? `${i.produto} no corpo` : i.produto} loading="lazy" width={800} height={800} className="size-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
+              {corpoId && a.grade !== "lista" && (
+                <div role="group" aria-label="Escolher foto" className="absolute bottom-2 left-1/2 flex -translate-x-1/2 rounded-full bg-[var(--v-bg)]/90 p-0.5 text-[0.7rem] font-medium shadow-sm backdrop-blur">
+                  {([["Peça", false], ["No corpo", true]] as const).map(([rot, val]) => (
+                    <button key={rot} type="button" aria-pressed={verCorpo === val}
+                      onClick={() => setNoCorpo((s) => ({ ...s, [i.variant_id]: val }))}
+                      className={`min-h-8 rounded-full px-3 ${verCorpo === val ? "bg-[var(--v-text,currentColor)] text-[var(--v-bg)]" : "text-[var(--v-muted)]"}`}>
+                      {rot}
+                    </button>
+                  ))}
+                </div>
+              )}
               {!real && i.ilustracao && (
                 <span className="absolute bottom-1.5 left-1.5 rounded-full bg-[var(--v-bg)]/85 px-2 py-0.5 text-[0.6rem] font-medium tracking-wide text-[var(--v-muted)]">
                   Imagem ilustrativa

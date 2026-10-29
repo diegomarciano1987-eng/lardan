@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { AvisoProximaMaleta } from "./AvisoProximaMaleta";
+import { BarraIncentivo } from "./EtiquetaIncentivo";
 import { ComprasCliente } from "@/components/consultora/ComprasCliente";
 import { MensagensProntas } from "@/components/consultora/MensagensProntas";
 import { ListaPosVenda } from "@/components/consultora/PosVenda";
@@ -11,7 +11,6 @@ import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
 import { FORMAS_COMBINADAS, iconeCategoria, salvarCombinado, type FormaCombinada } from "@/lib/consultora-combinado";
 import { LembretesClientes } from "@/components/consultora/LembretesClientes";
 import { CombinaComEla } from "@/components/consultora/CombinaComEla";
-import { GanhosConsultora } from "@/components/consultora/GanhosConsultora";
 import { CartaoMeuHistorico } from "@/components/consultora/CartaoMeuHistorico";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link, useRouteContext } from "@tanstack/react-router";
@@ -132,7 +131,7 @@ export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }:
         </header>
         {bloqueada && <div className="flex justify-end gap-3 px-4 pt-3 lg:hidden"><BotaoAjuda tela="maleta" /><Button variant="outline" onClick={() => void sair()}><LogOut className="size-4" />Sair</Button></div>}
         <main className="mx-auto w-full max-w-5xl px-4 pt-5 pb-[calc(7.75rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-7 lg:pb-12">
-          <AvisoProximaMaleta />
+          {!bloqueada && <BarraIncentivo ir={ir} />}
           {children}
         </main>
       </div>
@@ -271,7 +270,6 @@ export function Inicio({ ir }: { ir: Ir }) {
       </header>
       <div className="space-y-3">
         <CartaoLiga compacto />
-        <GanhosConsultora compacto />
       </div>
       <LembretesPagamento ir={ir} />
 

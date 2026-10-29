@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { BackButton, EmptyState, ErrorState, Panel, Skeleton, StatusBadge } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { useCapabilities } from "@/lib/capabilities";
+import { useColabEscopo } from "@/lib/colab-escopo";
 import { SITUACAO_MALETA, brl, traduzir } from "@/lib/maletas";
 import {
   STATUS_REMESSA,
@@ -51,6 +52,7 @@ function Card({ rotulo, valor }: { rotulo: string; valor: React.ReactNode }) {
 function RemessaPage() {
   const { id } = Route.useParams();
   const caps = useCapabilities();
+  const escopo = useColabEscopo();
   const podeMontar = caps.includes("kit.manage");
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -130,7 +132,7 @@ function RemessaPage() {
           <div className="mt-2"><EnvioRemessa remessaId={r.id} podeAlterar={podeMontar && r.status !== "fechada" && r.status !== "cancelada"} /></div>
         </div>
         <StatusBadge tone={s.tom}>{s.rotulo}</StatusBadge>
-        <ConfigurarImpressora />
+        {escopo.isSuccess && !escopo.data?.colaboradora && <ConfigurarImpressora />}
         <EtiquetasImprimir origens={(maletas.data ?? []).map((m) => ({ cycleId: m.cycle_id }))} />
       </div>
 

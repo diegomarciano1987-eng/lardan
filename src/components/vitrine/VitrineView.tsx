@@ -63,6 +63,12 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   const cartao = a.cartao === "suave" ? "rounded-2xl bg-[var(--v-surface)] p-2 shadow-sm" : a.cartao === "moldura" ? "border border-[var(--v-line)] p-2" : "";
   const grade = a.grade === "lista" ? "grid grid-cols-1 gap-3" : a.grade === "2" ? "grid grid-cols-2 gap-4 @3xl:gap-6" : "grid grid-cols-2 gap-4 @3xl:grid-cols-3 @3xl:gap-6";
 
+  const corpoDe = (i: Item) => {
+    const principal = foto(i);
+    const midias = i.midias ?? [];
+    return midias.length > 1 ? (midias.find((m) => m !== (principal ? principal.split("/").pop() : "")) ?? null) : null;
+  };
+
   const Grade = ({ lista }: { lista: Item[] }) => (
     <ul className={grade}>
       {lista.map((i) => {
@@ -76,7 +82,12 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
         return (
           <li id={`peca-${i.variant_id}`} key={i.variant_id} className={`${cartao} ${a.grade === "lista" ? "flex gap-3" : "flex flex-col"}`}>
             <div className={`relative overflow-hidden bg-[var(--v-line)] ${a.cartao === "suave" ? "rounded-xl" : ""} ${a.grade === "lista" ? "size-24 shrink-0" : a.tema === "editorial" ? "aspect-[3/4]" : "aspect-square"}`}>
-              {src && <img src={src} alt={verCorpo ? `${i.produto} no corpo` : i.produto} loading="lazy" width={800} height={800} className="size-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
+              {src && (
+                <button type="button" aria-label={`Ver ${i.produto} maior`} className="group block size-full cursor-zoom-in" onClick={() => setAmpliar({ item: i, corpo: verCorpo })}>
+                  <img src={src} alt={verCorpo ? `${i.produto} no corpo` : i.produto} loading="lazy" width={800} height={800} className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                  {a.grade !== "lista" && <span aria-hidden className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-[var(--v-bg)]/85 text-[var(--v-ink)] shadow-sm backdrop-blur"><Maximize2 className="size-3.5" /></span>}
+                </button>
+              )}
               {corpoId && a.grade !== "lista" && (
                 <div role="group" aria-label="Escolher foto" className="absolute bottom-2 left-1/2 flex -translate-x-1/2 whitespace-nowrap rounded-full bg-[var(--v-bg)]/90 p-0.5 text-[0.68rem] font-semibold shadow-sm backdrop-blur">
                   {([["Peça", false], ["No corpo", true]] as const).map(([rot, val]) => (

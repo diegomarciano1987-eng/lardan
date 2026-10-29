@@ -1,5 +1,9 @@
 # Roadmap
 
+## Pacote fiscal 0165 — emissor TSM (29/10/2026)
+- [ ] Aplicar cadastro fiscal e ajustes de testes do pacote, sem ativar emissão real. Bloqueio: duas pessoas com CNPJ 43.319.208/0001-80; o próprio pacote exige resolver a duplicidade antes de executar. Não unificar automaticamente.
+- [ ] Comprovar prontidão do emissor, Focus em homologação, emissão desligada e testes isolados depois de resolver a identidade duplicada.
+
 ## App da consultora — velocidade e topo compacto (28/10/2026)
 - [x] Navegação com resposta imediata, cache compartilhado 60s, pré-carregamento seletivo, busca 250ms; aceite inicial preservado e erro de atualização não apaga resultado anterior.
 - [x] Liga compacta e colapsável no topo do Início; barra monetária e comissão do consultora_ganhos, sem inventar faixas ou ganhos garantidos.

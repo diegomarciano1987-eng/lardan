@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BarChart3, Briefcase, CalendarDays, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, Search, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Briefcase, CalendarDays, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, PiggyBank, Search, Sparkles, Users } from "lucide-react";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
@@ -15,8 +15,9 @@ import { AgendaVisitas, MaletasCarteira } from "@/components/representante/Campo
 import { FichaConsultora } from "@/components/representante/FichaConsultora";
 import { MaletasRepresentante } from "@/components/representante/MaletasRepresentante";
 import { OperationalGlass } from "@/components/premium/OperationalGlass";
+import { FamiliaTrancada, FinanceiroFamilia } from "@/components/familia/FinanceiroFamilia";
 
-type Aba = "cobranca" | "consultoras" | "maletas" | "agenda" | "captacao" | "painel";
+type Aba = "cobranca" | "consultoras" | "maletas" | "agenda" | "captacao" | "painel" | "familia";
 const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = [
   { id: "cobranca", rotulo: "Acerto e cobrança", curto: "Cobrança", icone: HandCoins },
   { id: "consultoras", rotulo: "Consultoras", curto: "Carteira", icone: Users },
@@ -24,6 +25,7 @@ const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = 
   { id: "agenda", rotulo: "Agenda de visitas", curto: "Agenda", icone: CalendarDays },
   { id: "captacao", rotulo: "Captação", curto: "Captação", icone: Sparkles },
   { id: "painel", rotulo: "Painel", curto: "Painel", icone: BarChart3 },
+  { id: "familia", rotulo: "Financeiro da família", curto: "Família", icone: PiggyBank },
 ];
 const ESPELHO: AppRole[] = ["master", "diretoria", "financeiro", "cobranca"] as AppRole[];
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -116,7 +118,7 @@ function AreaRepresentante() {
         )}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
         {ABAS.map((a) => (
           <button key={a.id} type="button" onClick={() => ir(a.id)} aria-current={aba === a.id ? "page" : undefined}
             className={`flex min-w-0 flex-col items-center gap-1 py-3 text-[0.72rem] leading-tight ${aba === a.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
@@ -151,18 +153,25 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
       <main className="flex-1 space-y-6 px-5 py-6 md:px-10">
         {!espelho && <div className="md:hidden"><InstalarApp /></div>}
         {resumo.error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{(resumo.error as Error).message}</p>}
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {aba !== "familia" && <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Kpi rotulo="Vencido" valor={s ? brl(s.vencido_cents) : "—"} destaque />
           <Kpi rotulo="Vence hoje" valor={s ? brl(s.hoje_cents) : "—"} />
           <Kpi rotulo="Em aberto" valor={s ? brl(s.aberto_cents) : "—"} sub={s ? `${s.parcelas} parcelas · ${s.devedoras} devedoras` : ""} />
           <Kpi rotulo="Consultoras" valor={s ? String(s.consultoras) : "—"} sub={s ? `${s.ativas} ativas · ${s.maletas_campo} maletas em campo` : ""} />
-        </div>
+        </div>}
         {aba === "cobranca" && <Cobrancas rep={rep} espelho={espelho} />}
         {aba === "consultoras" && <Consultoras rep={rep} espelho={espelho} />}
         {aba === "maletas" && <div className="space-y-6"><MaletasCarteira rep={rep} /><MaletasRepresentante rep={rep} /></div>}
         {aba === "agenda" && <AgendaVisitas rep={rep} />}
         {aba === "captacao" && <Captacao rep={rep} espelho={espelho} />}
         {aba === "painel" && <PainelRepresentante rep={rep} />}
+        {/* Família: dado pessoal do login. No espelho (Master/Daniel) fica trancada e nada é consultado. */}
+        {aba === "familia" && (espelho ? <FamiliaTrancada /> : (
+          <section className="space-y-4">
+            <h2 className="font-display text-2xl">Financeiro da família</h2>
+            <FinanceiroFamilia />
+          </section>
+        ))}
       </main>
     </>
   );

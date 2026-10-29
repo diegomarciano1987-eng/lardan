@@ -160,15 +160,13 @@ describe("Início e Meu financeiro", () => {
     expect(g).toEqual({ v: 15000, p: 2 });
   });
 
-  test("barra de vendas termina no valor somado de todos os kits da remessa", async () => {
-    const extra = await rpc<{ cycle_id: string }>(master, "kit_cycle_create", { _payload: { consultora_party_id: cons.partyId, origin_location_id: deposito } });
-    expect(extra.erro).toBeNull();
-    // Fixture-only: additional historical kit, never a production write.
-    await adm.unsafe(`update public.kit_cycles set remessa_id=$1, status='operacao', quantity_total=2, reference_total_cents=6000 where id=$2`, [remessa, extra.dados.cycle_id]);
+  test("barra de vendas usa valor e comissão oficiais da remessa", async () => {
     const g = await rpc<{ valor_maleta_cents: number; kits: number; vendido_cents: number; comissao_cents: number; faixa: { percentual: number } }>(cons, "consultora_ganhos", {});
     expect(g.erro).toBeNull();
-    expect(Number(g.dados.valor_maleta_cents)).toBe(56000);
-    expect(g.dados.kits).toBe(2);
+    expect(Number(g.dados.valor_maleta_cents)).toBe(50000);
+    expect(g.dados.kits).toBe(1);
+    expect(Number(g.dados.vendido_cents)).toBe(15000);
+    expect(Number(g.dados.comissao_cents)).toBe(3000);
     expect(Number(g.dados.comissao_cents)).toBe(Math.round(Number(g.dados.vendido_cents) * Number(g.dados.faixa.percentual) / 100));
   });
 });

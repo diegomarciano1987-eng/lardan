@@ -18341,6 +18341,7 @@ export type Database = {
         Args: { _party: string }
         Returns: Json
       }
+      consultora_incentivo: { Args: never; Returns: Json }
       consultora_lembretes_vencimento: {
         Args: never
         Returns: {

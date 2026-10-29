@@ -1939,3 +1939,41 @@ body.consultora-glass-light-active :is([role="dialog"], [role="alertdialog"]) im
 @keyframes vz-entra { from { opacity: 0 } to { opacity: 1 } }
 @keyframes vz-foto { from { opacity: 0; transform: scale(.97) } to { opacity: 1 } }
 @media (prefers-reduced-motion: reduce) { .vitrine-zoom, .vitrine-zoom .vz-img { animation: none; } }
+
+/* 0182 — Etiqueta premium "Você pode ganhar" (topo do app da consultora) e painel de incentivo. */
+.etiqueta-ganho {
+  position: relative; overflow: hidden; flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  min-height: 3.25rem; padding: 0.45rem 0.85rem 0.45rem 0.8rem; border-radius: 9999px;
+  color: #fff; background: linear-gradient(135deg, #1f6b4a 0%, #2e8b5f 55%, #3aa673 100%);
+  box-shadow: 0 6px 18px -8px rgb(31 107 74 / 0.75), inset 0 1px 0 rgb(255 255 255 / 0.28), inset 0 0 0 1px rgb(255 255 255 / 0.12);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.etiqueta-ganho:active { transform: scale(0.98); }
+.etiqueta-ganho:focus-visible { outline: 3px solid #7FE0AE; outline-offset: 2px; }
+.etiqueta-ganho::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.32) 50%, transparent 65%);
+  transform: translateX(-120%); animation: etiqueta-brilho 5.5s ease-in-out 1.2s infinite;
+}
+@keyframes etiqueta-brilho { 0%, 70% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+.incentivo-preenchimento {
+  background: linear-gradient(90deg, #1f6b4a, #3aa673);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25);
+  transition: width 900ms cubic-bezier(.2,.8,.2,1);
+}
+.incentivo-festa { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 60; }
+.incentivo-festa span {
+  position: absolute; top: -12px; width: 10px; height: 16px; border-radius: 3px;
+  animation: incentivo-confete 2.4s cubic-bezier(.2,.7,.4,1) forwards;
+}
+.incentivo-festa span:nth-child(odd) { background: #7FE0AE; } .incentivo-festa span:nth-child(even) { background: #C49A7C; }
+.incentivo-festa span:nth-child(1) { left: 8%; } .incentivo-festa span:nth-child(2) { left: 20%; animation-delay: .15s; }
+.incentivo-festa span:nth-child(3) { left: 33%; animation-delay: .05s; } .incentivo-festa span:nth-child(4) { left: 46%; animation-delay: .25s; }
+.incentivo-festa span:nth-child(5) { left: 58%; animation-delay: .1s; } .incentivo-festa span:nth-child(6) { left: 70%; animation-delay: .3s; }
+.incentivo-festa span:nth-child(7) { left: 82%; animation-delay: .2s; } .incentivo-festa span:nth-child(8) { left: 92%; animation-delay: .35s; }
+@keyframes incentivo-confete { to { transform: translateY(105vh) rotate(540deg); opacity: 0.2; } }
+@media (prefers-reduced-motion: reduce) {
+  .etiqueta-ganho::after, .incentivo-festa { display: none; }
+  .etiqueta-ganho, .incentivo-preenchimento { transition: none; }
+}

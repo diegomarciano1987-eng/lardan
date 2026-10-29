@@ -198,13 +198,6 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   );
 }
 
-function Social({ href, rotulo, previa, children }: { href: string; rotulo: string; previa: boolean; children: React.ReactNode }) {
-  return (
-    <a href={previa ? undefined : href} target="_blank" rel="noreferrer" aria-label={rotulo} className="grid size-10 place-items-center rounded-full border border-[var(--v-line)]">
-      {children}
-    </a>
-  );
-}
 
 function Vazio({ texto }: { texto: string }) {
   return <p className="mt-10 rounded-xl border border-dashed border-[var(--v-line)] p-5 text-center text-xs text-[var(--v-muted)]">{texto}</p>;

@@ -25,7 +25,7 @@ import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, BookOpen, BriefcaseBusiness, FileText, CalendarClock, CalendarDays, Check, ChevronDown, ChevronRight, ChevronUp, CircleHelp, Home, LogOut, Menu, MessageCircle,
-  GraduationCap, LayoutGrid, Medal, Route as IconeJornada, Gift, PackageCheck, Phone, Plus, Search, ShoppingBag, Store, UserPlus, Users, Wallet,
+  GraduationCap, LayoutGrid, Medal, Route as IconeJornada, Gift, PackageCheck, Phone, Plus, Search, PiggyBank, ShoppingBag, Store, UserPlus, Users, Wallet,
 } from "lucide-react";
 import { CartaoAcerto, CartaoLiga } from "@/components/consultora/LigaEAcerto";
 import { CartaoIndique } from "@/components/consultora/Lider";
@@ -43,7 +43,7 @@ import {
   meuParty, obterCliente, ETAPAS, historicoEtapas, linkInstagram, moverEtapa, pausarPessoa, rotuloEtapa, type Etapa, buscarPecas, registrarAtendimento, salvarCliente, type Atendimento, type Cliente, type Peca,
 } from "@/lib/consultora";
 
-export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "biblioteca" | "financeiro" | "mais" | "novo" | "jornada" | "liga";
+export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "biblioteca" | "financeiro" | "familia" | "mais" | "novo" | "jornada" | "liga";
 export type Nav = { aba: AbaApp; id?: string | undefined; modo?: "nova" | "editar" | undefined; q?: string | undefined };
 export type Ir = (n: Nav) => void;
 
@@ -62,6 +62,7 @@ const EXTRAS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
   { aba: "jornada", rotulo: "Jornada", icone: IconeJornada },
   { aba: "liga", rotulo: "Liga LARDAN", icone: Medal },
   { aba: "financeiro", rotulo: "Meu financeiro", icone: Wallet },
+  { aba: "familia", rotulo: "Financeiro da família", icone: PiggyBank },
   { aba: "vitrine", rotulo: "Minha vitrine", icone: Store },
   { aba: "historico", rotulo: "Entregas da maleta", icone: PackageCheck },
   { aba: "indicacoes", rotulo: "Indicações", icone: UserPlus },
@@ -1025,6 +1026,7 @@ export function Mais({ ir }: { ir: Ir }) {
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/equipe"; };
   const itens = [
     { r: "Meu financeiro", d: "Pagamentos e acertos", i: Wallet, n: { aba: "financeiro" } as Nav },
+    { r: "Financeiro da família", d: "Contas da casa, só você vê", i: PiggyBank, n: { aba: "familia" } as Nav },
     { r: "Jornada", d: "Jornada das clientes", i: IconeJornada, n: { aba: "jornada" } as Nav },
     { r: "Liga LARDAN", d: "Seu nível e próximo passo", i: Medal, n: { aba: "liga" } as Nav },
     { r: "Minha vitrine", d: "Foto, capa, peças e link para compartilhar", i: Store, n: { aba: "vitrine" } as Nav },

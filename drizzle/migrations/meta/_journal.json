@@ -1254,6 +1254,13 @@
       "when": 1793287179706,
       "tag": "0178_pedido_envio_garantia",
       "breakpoints": true
+    },
+    {
+      "idx": 179,
+      "version": "7",
+      "when": 1793287681492,
+      "tag": "0179_financeiro_familia",
+      "breakpoints": true
     }
   ]
 }

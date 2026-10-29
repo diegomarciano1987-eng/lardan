@@ -331,7 +331,7 @@ function Ampliada({ item, corpo, peca, noCorpoSrc, onCorpo, onFechar, zap, previ
             <ChevronLeft className="size-5" />
           </button>
         )}
-        <div className={`vz-quadro relative h-full max-h-[min(78dvh,1100px)] w-full max-w-[min(94vw,1100px)] overflow-hidden rounded-[1.75rem] ${zoom ? "cursor-zoom-out" : "cursor-zoom-in"}`} onClick={alternarZoom}>
+        <div className={`vz-quadro relative aspect-square w-[min(94vw,76dvh,1000px)] overflow-hidden rounded-[1.75rem] ${zoom ? "cursor-zoom-out" : "cursor-zoom-in"}`} onClick={alternarZoom}>
           {src ? (
             <img key={src} src={src} alt={verCorpo ? `${item.produto} no corpo` : item.produto} draggable={false}
               className="vz-img size-full select-none object-contain transition-transform duration-300 ease-out"

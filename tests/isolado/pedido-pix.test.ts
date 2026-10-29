@@ -17,7 +17,10 @@ describe("Pix do pedido — permissões e auditoria", () => {
     const cons = await criarConta({ nome: "pix-audit-consultora", papeis: ["consultora"], comParty: true });
     const master = await criarConta({ nome: "pix-audit-master", papeis: ["master"], comParty: true });
     const conta = crypto.randomUUID();
-    await expect(adm.unsafe(`select public.pedido_pix_asaas_gravar($1,$2,'qr-iso','chave-iso','000201iso')`, [cons.uid, conta])).rejects.toThrow("Só o Master");
+    // a consulta do Bun só executa quando aguardada: capturar o erro com try/catch (expect().rejects travava a suíte)
+    let erro = "";
+    try { await adm.unsafe(`select public.pedido_pix_asaas_gravar($1,$2,'qr-iso','chave-iso','000201iso')`, [cons.uid, conta]); } catch (e) { erro = String(e); }
+    expect(erro).toContain("Só o Master");
     await adm.unsafe(`select public.pedido_pix_asaas_gravar($1,$2,'qr-iso','chave-iso','000201iso')`, [master.uid, conta]);
     const rows = await adm.unsafe(`select actor_id,payload->>'qr_id' qr from public.audit_logs where action='pedido.pix_asaas_atualizado' and actor_id=$1`, [master.uid]);
     expect(rows).toHaveLength(1); expect(rows[0]?.qr).toBe("qr-iso");

@@ -1240,6 +1240,13 @@
       "when": 1793286644051,
       "tag": "0176_preco_reajuste_inclui_produtos",
       "breakpoints": true
+    },
+    {
+      "idx": 177,
+      "version": "7",
+      "when": 1793286919833,
+      "tag": "0177_liga_niveis_delete_com_where",
+      "breakpoints": true
     }
   ]
 }

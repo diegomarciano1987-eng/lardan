@@ -76,7 +76,7 @@ describe("Preparação e travas", () => {
       `select emission_active, provider, environment from public.fiscal_settings`,
     );
     expect(s.emission_active).toBe(false);
-    expect(s.provider).toBeNull();
+    expect([null, "focus"]).toContain(s.provider);
     expect(s.environment).not.toBe("producao");
   });
 

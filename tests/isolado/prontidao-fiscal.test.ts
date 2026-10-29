@@ -215,6 +215,8 @@ describe("5. interruptor fiscal", () => {
   });
 
   test("ninguém além do Master mexe; ligar exige provedor, emissor e ambiente; tudo auditado", async () => {
+    // O beforeAll preserva a configuração original; afterAll a restaura.
+    await adm.unsafe(`update public.fiscal_settings set emission_active=false, provider=null, environment='nenhum', emitter_entity_id=null where id`);
     const antes = (await um<{ n: number }>(`select count(*)::int n from public.audit_logs where action='fiscal.configuracao_alterada'`)).n;
     const fin = await ler(financeiro, `update public.fiscal_settings set emission_active=true where id returning id`);
     expect(fin.linhas.length).toBe(0); // sem permissão de escrita: nada muda

@@ -21,7 +21,7 @@ import { abrirImagem, gerarImagemCompartilhar, gerarTamanhos, originalLimpo } fr
 type Painel = "perfil" | "foto" | "aparencia" | "organizacao" | "contato" | "compartilhar";
 const PAINEIS: { id: Painel; nome: string; icone: typeof User }[] = [
   { id: "perfil", nome: "Meu perfil", icone: User },
-  { id: "foto", nome: "Foto e capa", icone: Camera },
+  { id: "foto", nome: "Sua foto", icone: Camera },
   { id: "aparencia", nome: "Aparência", icone: Palette },
   { id: "organizacao", nome: "Organização", icone: LayoutGrid },
   { id: "contato", nome: "Contato", icone: MessageCircle },
@@ -323,19 +323,6 @@ function PainelAparencia({ d, muda }: { d: DesignVitrine; muda: Muda }) {
   return (
     <div className="space-y-6">
       <div>
-        <p className="mb-2 text-xs uppercase tracking-widest text-ledger-muted">Tema</p>
-        <div className="grid gap-2 sm:grid-cols-3">
-          {TEMAS.map((t) => (
-            <button key={t.id} type="button" onClick={() => set("tema", t.id)} aria-pressed={a.tema === t.id}
-              className={`rounded-xl border p-2 text-left text-xs ${a.tema === t.id ? "border-primary ring-2 ring-primary/30" : "border-line-soft hover:bg-muted"}`}>
-              <MiniTema tema={t.id} paleta={a.paleta} />
-              <span className="mt-1.5 block font-medium">{t.nome}</span>
-              <span className="block text-[0.68rem] text-ledger-muted">{t.texto}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      <div>
         <p className="mb-2 text-xs uppercase tracking-widest text-ledger-muted">Cores</p>
         <Escolha itens={PALETAS} valor={a.paleta} onEscolher={(v) => set("paleta", v)} render={(id) => (
           <div className={`vp-${id} flex h-8 overflow-hidden rounded-md border border-line-soft`}>
@@ -408,10 +395,6 @@ function PainelFoto({ d, muda, party, img, onLinks }: { d: DesignVitrine; muda: 
   };
 
   const retrato = img(d.imagens.avatar?.path);
-  const capa = d.imagens.capa;
-  const oficial = CAPAS.find((c) => c.id === capa?.preset);
-  const capaSrc = focoFormato === "desktop" ? (oficial?.desktop ?? img(capa?.path)) : (oficial?.mobile ?? img(capa?.path_m ?? capa?.path));
-  const foco = (focoFormato === "desktop" ? capa?.foco_desktop : capa?.foco_mobile) ?? { x: 50, y: 50 };
 
   return (
     <div className="space-y-6">
@@ -433,48 +416,11 @@ function PainelFoto({ d, muda, party, img, onLinks }: { d: DesignVitrine; muda: 
         <input ref={galeria} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { void abrir("avatar", e.target.files?.[0]); e.target.value = ""; }} />
       </section>
 
-      <section>
-        <p className="mb-3 text-xs uppercase tracking-widest text-ledger-muted">Capa</p>
-        <div className="grid grid-cols-3 gap-2">
-          {CAPAS.map((c) => (
-            <button key={c.id} type="button" aria-pressed={capa?.preset === c.id} onClick={() => muda((x) => { x.imagens.capa = { preset: c.id }; return x; })}
-              className={`overflow-hidden rounded-lg border text-[0.68rem] ${capa?.preset === c.id ? "border-primary ring-2 ring-primary/30" : "border-line-soft"}`}>
-              <img src={c.desktop} alt="" className="h-14 w-full object-cover" loading="lazy" />
-              <span className="block py-1">{c.nome}</span>
-            </button>
-          ))}
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button type="button" className="admin-btn" onClick={() => capaInput.current?.click()}><ImageIcon className="size-4" /> Usar minha própria capa</button>
-          {capa && <button type="button" className="admin-btn" onClick={() => muda((x) => { delete x.imagens.capa; return x; })}>Sem capa</button>}
-        </div>
-        <input ref={capaInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { void abrir("capa", e.target.files?.[0]); e.target.value = ""; }} />
-
-        {capa && capaSrc && (
-          <div className="mt-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-ledger-muted">Toque no ponto mais importante da imagem</p>
-              <div className="flex rounded-full border border-line-soft p-0.5 text-[0.68rem]">
-                <button type="button" onClick={() => setFocoFormato("desktop")} className={`rounded-full px-2 py-0.5 ${focoFormato === "desktop" ? "bg-muted" : ""}`}>Computador</button>
-                <button type="button" onClick={() => setFocoFormato("mobile")} className={`rounded-full px-2 py-0.5 ${focoFormato === "mobile" ? "bg-muted" : ""}`}>Celular</button>
-              </div>
-            </div>
-            <div className="relative cursor-crosshair overflow-hidden rounded-lg" onClick={(e) => {
-              const b = e.currentTarget.getBoundingClientRect();
-              const f = { x: Math.round(((e.clientX - b.left) / b.width) * 100), y: Math.round(((e.clientY - b.top) / b.height) * 100) };
-              muda((x) => { if (x.imagens.capa) { if (focoFormato === "desktop") x.imagens.capa.foco_desktop = f; else x.imagens.capa.foco_mobile = f; } return x; });
-            }}>
-              <img src={capaSrc} alt="" className="w-full" />
-              <span className="absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-background shadow" style={{ left: `${foco.x}%`, top: `${foco.y}%` }} />
-            </div>
-            <div className="grid grid-cols-[2fr_1fr] gap-2">
-              <figure><img src={oficial?.desktop ?? img(capa.path) ?? ""} alt="" className="h-16 w-full rounded object-cover" style={{ objectPosition: `${capa.foco_desktop?.x ?? 50}% ${capa.foco_desktop?.y ?? 50}%` }} /><figcaption className="text-[0.65rem] text-ledger-muted">Corte no computador</figcaption></figure>
-              <figure><img src={oficial?.mobile ?? img(capa.path_m ?? capa.path) ?? ""} alt="" className="h-16 w-full rounded object-cover" style={{ objectPosition: `${capa.foco_mobile?.x ?? 50}% ${capa.foco_mobile?.y ?? 50}%` }} /><figcaption className="text-[0.65rem] text-ledger-muted">Corte no celular</figcaption></figure>
-            </div>
-            <p className="text-[0.7rem] text-ledger-muted">Evite capas com textos escritos: seu nome e contato já aparecem na página, sempre legíveis.</p>
-          </div>
-        )}
+      <section className="rounded-xl border border-line-soft p-4">
+        <p className="mb-1 text-xs uppercase tracking-widest text-ledger-muted">Capa</p>
+        <p className="text-sm">A capa é a oficial LARDAN, igual para todas as consultoras. Sua foto, nome, frase, horário e contatos aparecem nela automaticamente.</p>
       </section>
+
 
       <Dialog open={!!editando} onOpenChange={(o) => { if (!o && !preparando) setEditando(null); }}>
         <DialogContent className="max-w-md">

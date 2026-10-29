@@ -161,7 +161,10 @@ describe("Início e Meu financeiro", () => {
   });
 
   test("barra de vendas termina no valor somado de todos os kits da remessa", async () => {
-    await maletaAceita(cons, remessa, [[vC, 2]]);
+    const extra = await rpc<{ cycle_id: string }>(master, "kit_cycle_create", { _payload: { consultora_party_id: cons.partyId, origin_location_id: deposito } });
+    expect(extra.erro).toBeNull();
+    // Fixture-only: additional historical kit, never a production write.
+    await adm.unsafe(`update public.kit_cycles set remessa_id=$1, status='operacao', quantity_total=2, reference_total_cents=6000 where id=$2`, [remessa, extra.dados.cycle_id]);
     const g = await rpc<{ valor_maleta_cents: number; kits: number; vendido_cents: number; comissao_cents: number; faixa: { percentual: number } }>(cons, "consultora_ganhos", {});
     expect(g.erro).toBeNull();
     expect(Number(g.dados.valor_maleta_cents)).toBe(56000);

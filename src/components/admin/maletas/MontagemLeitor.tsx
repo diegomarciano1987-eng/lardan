@@ -724,11 +724,35 @@ export function MontagemLeitor({
             <div className="ledger-panel p-5">
               <EtiquetaMaleta cycleId={cycleId} />
               <p className="ledger-eyebrow mb-2">Composição</p>
+              {lista.length > 0 && (
+                <div className="relative mb-2">
+                  <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
+                  <input ref={campoBusca} type="search" value={buscaPeca} aria-label="Buscar peça na composição"
+                    placeholder="Achar peça: bipe, nome ou referência"
+                    className="admin-input h-10 w-full pl-9 pr-9"
+                    onChange={(e) => setBuscaPeca(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") { setBuscaPeca(""); campo.current?.focus(); }
+                      if (e.key === "Enter") e.preventDefault();
+                    }} />
+                  {buscaPeca && (
+                    <button type="button" aria-label="Limpar busca" className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ledger-muted hover:bg-surface-muted"
+                      onClick={() => { setBuscaPeca(""); campo.current?.focus(); }}>
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
+              {buscaPeca && (
+                <p className="mb-1 text-xs text-ledger-muted">{listaFiltrada.length} de {lista.length} peça(s) · Esc volta para a bipagem</p>
+              )}
               {lista.length === 0 ? (
                 <p className="text-sm text-ledger-muted">Sem dados.</p>
+              ) : listaFiltrada.length === 0 ? (
+                <p className="text-sm text-ledger-muted">Nenhuma peça desta maleta com “{buscaPeca}”.</p>
               ) : (
                 <ul className="max-h-[50vh] space-y-1 overflow-auto text-sm">
-                  {lista.map(([id, p]) => (
+                  {listaFiltrada.map(([id, p]) => (
                     <li key={id} className="flex items-center justify-between gap-2">
                       <FotoPeca variantId={id} alt={p.nome} size="xs" />
                       <span className="flex-1 truncate">{p.nome}</span>

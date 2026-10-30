@@ -1317,6 +1317,13 @@
       "when": 1793375718040,
       "tag": "0187_colab_views_pracas_robusto",
       "breakpoints": true
+    },
+    {
+      "idx": 188,
+      "version": "7",
+      "when": 1793386466578,
+      "tag": "0188_colab_carteira_por_nome",
+      "breakpoints": true
     }
   ]
 }

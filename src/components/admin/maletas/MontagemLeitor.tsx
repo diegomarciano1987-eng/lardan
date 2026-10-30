@@ -329,13 +329,37 @@ export function MontagemLeitor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Busca na composição (bip, nome, SKU ou referência) para achar a peça e tirar com o "−" sem rolar a lista.
+  const campoBusca = React.useRef<HTMLInputElement>(null);
+  const [buscaPeca, setBuscaPeca] = React.useState("");
+  const idsItens = Object.keys(itens).sort().join(",");
+  const codigosPecas = useQuery({
+    queryKey: ["montagem", "codigos", idsItens],
+    enabled: idsItens.length > 0,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const ids = idsItens.split(",");
+      const m: Record<string, string> = {};
+      for (let i = 0; i < ids.length; i += 150) {
+        const { data, error } = await supabase.from("product_variants")
+          .select("id, barcode, sku, reference_code, products(reference_code, internal_code, legacy_code)")
+          .in("id", ids.slice(i, i + 150));
+        if (error) throw error;
+        for (const v of (data ?? []) as unknown as { id: string; barcode: string | null; sku: string | null; reference_code: string | null; products: { reference_code: string | null; internal_code: string | null; legacy_code: string | null } | null }[])
+          m[v.id] = [v.barcode, v.sku, v.reference_code, v.products?.reference_code, v.products?.internal_code, v.products?.legacy_code].filter(Boolean).join(" ");
+      }
+      return m;
+    },
+  });
+
   React.useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     campo.current?.focus();
     const t = window.setInterval(() => {
       const a = document.activeElement;
-      if (!impressaoAberta.current && a !== campo.current && !(a instanceof HTMLButtonElement)) campo.current?.focus();
+      // A busca da composição é a única exceção: enquanto ela estiver em uso, o foco fica nela.
+      if (!impressaoAberta.current && a !== campo.current && a !== campoBusca.current && !(a instanceof HTMLButtonElement)) campo.current?.focus();
     }, 400);
     return () => {
       window.clearInterval(t);

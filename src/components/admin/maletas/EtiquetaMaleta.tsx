@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { detalheMaleta } from "@/lib/maletas";
 import { svgEtiqueta } from "@/lib/etiquetas";
-import { enviarParaImpressora } from "@/components/admin/EtiquetasImprimir";
+import { imprimirDireto, lerEstacao } from "@/lib/argox-direta";
+import { comandosEtiquetaMaleta } from "@/lib/etiqueta-maleta-raw";
 
 export function EtiquetaMaleta({ cycleId, preview = false }: { cycleId: string; preview?: boolean }) {
   const [error, setError] = useState("");
@@ -17,13 +18,13 @@ export function EtiquetaMaleta({ cycleId, preview = false }: { cycleId: string; 
   async function imprimir() {
     if (!code) return;
     try {
-      const n = await enviarParaImpressora([{ id: cycleId, nome: `Maleta ${code}`, referencia: code, barcode: code, quantidade: 1 }]);
-      if (n) setNotice("Impressão preparada; saída física não confirmada."); setError("");
+      await imprimirDireto(comandosEtiquetaMaleta(code, lerEstacao().linguagem));
+      setNotice("Impressão preparada; saída física não confirmada."); setError("");
     } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível imprimir."); }
   }
   return <div className="space-y-2 text-ledger-text">
     {preview && svg && <div className="rounded-md border border-line bg-surface p-4"><div className="flex justify-center" dangerouslySetInnerHTML={{ __html: svg }} /><p className="mt-2 text-center text-sm font-semibold">{code}</p></div>}
-    <Button variant="outline" disabled={!code || !!invalid} onClick={imprimir}><Printer />Etiqueta da maleta</Button>
+    <Button variant="outline" disabled={!code || !!invalid} onClick={imprimir}><Printer />Etiqueta da maleta (48×28 mm)</Button>
     {ficha.isPending && <p className="text-xs text-ledger-muted">Carregando código…</p>}
     {ficha.isError && <p role="alert" className="text-xs text-destructive">Não foi possível ler a identificação. <Button variant="link" onClick={() => void ficha.refetch()}>Tentar novamente</Button></p>}
     {(error || invalid) && <p role="alert" className="text-xs text-destructive">{error || invalid}</p>}

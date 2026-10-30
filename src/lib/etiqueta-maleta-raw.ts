@@ -37,11 +37,11 @@ export function comandosEtiquetaMaleta(codigo: string, ling: LinguagemArgox, cop
   const bits = barrasEtiqueta(codigo); // valida o código
   const larg = pt(ETIQUETA_MALETA.largura), alt = pt(ETIQUETA_MALETA.altura), gap = pt(ETIQUETA_MALETA.gap);
   const margem = pt(2);
-  const modulo = Math.max(1, Math.min(2, Math.floor((larg - 2 * margem) / (bits.length + 20))));
+  const modulo = Math.max(1, Math.min(4, Math.floor((larg - 2 * margem) / (bits.length + 20))));
   const larguraBarras = (bits.length + 20) * modulo;
   const xBar = Math.max(margem, Math.round((larg - larguraBarras) / 2));
   const L = linhasEtiquetaMaleta(dados);
-  const y1 = pt(1), y2 = pt(3.6), y3 = pt(6.2), yBar = pt(9), hBar = pt(8), yBig = pt(18.2);
+  const y1 = pt(1), y2 = pt(3.6), y3 = pt(6.2), yBar = pt(8.6), hBar = pt(12.4), yBig = pt(21.4);
   const n = Math.max(1, Math.trunc(copias));
   if (ling === "pplz") {
     return [

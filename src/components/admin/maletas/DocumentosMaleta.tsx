@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FileText, Printer, ScrollText, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { brl, traduzir, type ItemComposicao } from "@/lib/maletas";
+import { brl, detalheMaleta, traduzir, type ItemComposicao } from "@/lib/maletas";
 import { valorPorExtenso } from "@/lib/remessa";
 import { documentoPedido, type PedidoDados } from "@/lib/pedido-consignacao";
 import diamante from "@/assets/lardan-diamante.png.asset.json";
@@ -148,6 +148,16 @@ function htmlPromissoria(doc: DocConsultora, valorCents: number, codigoMaleta: s
     <p class="r">IBIPORÃ/PR, ${dataPorExtenso(hoje)}</p>
     <div class="assinatura">Assinatura: ${doc.nome}</div>
   </div>`;
+}
+
+/** Promissória direto da lista da remessa: valor = soma das peças gravadas na maleta (mesma conta da ficha). */
+export async function imprimirPromissoriaMaleta(cycleId: string) {
+  try {
+    const [det, doc] = await Promise.all([detalheMaleta(cycleId), docConsultora(cycleId)]);
+    const valor = det.composicao.reduce((s, c) => s + c.quantidade * c.valor_unitario, 0);
+    if (!det.composicao.length) { toast.error("A maleta ainda não tem peças para a promissória."); return; }
+    await abrirImpressao("Nota Promissória", htmlPromissoria(doc, valor, det.maleta.codigo));
+  } catch (e) { toast.error(traduzir(e)); }
 }
 
 /**

@@ -4,7 +4,8 @@ import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { EtiquetaMaleta } from "./EtiquetaMaleta";
 import { BotaoTelaCheia } from "@/components/admin/TelaCheia";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Sparkles, X } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Search, Sparkles, X } from "lucide-react";
+import { filtrarComposicao } from "@/lib/busca-composicao";
 import { supabase } from "@/integrations/supabase/client";
 import { metasMontagem, type MetasMontagem } from "@/lib/historico-jflex";
 import { brl, operarMontagem, traduzir, type ItemComposicao } from "@/lib/maletas";
@@ -487,6 +488,7 @@ export function MontagemLeitor({
   }
 
   const lista = Object.entries(itens).sort((a, b) => a[1].nome.localeCompare(b[1].nome));
+  const listaFiltrada = filtrarComposicao(lista, buscaPeca, codigosPecas.data);
   const total = lista.reduce((s, [, v]) => s + v.qtd, 0);
   const valorTotal = lista.reduce((s, [, v]) => s + v.qtd * v.preco, 0);
   const ultima = leituras[0];

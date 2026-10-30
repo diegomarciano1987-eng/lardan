@@ -2,7 +2,7 @@ import * as React from "react";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Lock, Plus, Receipt, ScrollText, UserRound } from "lucide-react";
+import { FileText, Lock, Plus, Receipt, ScrollText, Tag, UserRound } from "lucide-react";
 import { imprimirPedidoConsignacao, imprimirPromissoriaMaleta } from "@/components/admin/maletas/DocumentosMaleta";
 import { imprimirEtiquetaMaleta } from "@/components/admin/maletas/EtiquetaMaleta";
 import { abrirMaletaRepresentante, mensagem } from "@/lib/maletas-perdidas";

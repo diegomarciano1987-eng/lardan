@@ -41,7 +41,7 @@ export function comandosEtiquetaMaleta(codigo: string, ling: LinguagemArgox, cop
   const larguraBarras = (bits.length + 20) * modulo;
   const xBar = Math.max(margem, Math.round((larg - larguraBarras) / 2));
   const L = linhasEtiquetaMaleta(dados);
-  const y1 = pt(1), y2 = pt(3.6), y3 = pt(6.2), yBar = pt(8.6), hBar = pt(12.4), yBig = pt(21.4);
+  const y1 = pt(1), y2 = pt(3.6), y3 = pt(6.2), yBar = pt(9.4), hBar = pt(8.6), yBig = pt(20.2);
   const n = Math.max(1, Math.trunc(copias));
   if (ling === "pplz") {
     return [
@@ -50,8 +50,8 @@ export function comandosEtiquetaMaleta(codigo: string, ling: LinguagemArgox, cop
       `^FO${margem},${y2}^A0N,20,18^FD${L.l2}^FS`,
       `^FO${margem},${y3}^A0N,20,18^FD${L.l3}^FS`,
       `^FO${xBar},${yBar}^BY${modulo}^BCN,${hBar},N,N,N^FD${codigo}^FS`,
-      `^FO${margem},${yBig}^A0N,64,52^FD${L.remessa}^FS`,
-      `^FO0,${yBig}^FB${larg - margem},1,0,R^A0N,64,52^FD${L.maleta}^FS`,
+      `^FO${margem},${yBig}^A0N,44,36^FD${L.remessa}^FS`,
+      `^FO0,${yBig}^FB${larg - margem},1,0,R^A0N,44,36^FD${L.maleta}^FS`,
       `^PQ${n}`, "^XZ", "",
     ].join("\n");
   }
@@ -67,21 +67,21 @@ export function comandosEtiquetaMaleta(codigo: string, ling: LinguagemArgox, cop
       `1211000${base(y2, 2.2)}${col}${L.l2}`,
       `1211000${base(y3, 2.2)}${col}${L.l3}`,
       `1e${m}${m}${d(hBar, 3)}${base(yBar, 8)}${colBar}${codigo}`,
-      `1422000${base(yBig, 8)}${col}${L.remessa}`,
-      `1422000${base(yBig, 8)}${colDir}${L.maleta}`,
+      `1322000${base(yBig, 5.5)}${col}${L.remessa}`,
+      `1322000${base(yBig, 5.5)}${colDir}${L.maleta}`,
       `Q${d(n, 4)}`, "E", "",
     ].join("\r\n");
   }
   // PPLB / EPL — fonte 2 = 10×16 pontos; fonte 4 = 14×24 (×2 = 28×48)
-  const xDir = Math.max(margem, larg - margem - L.maleta.length * 28);
+  const xDir = Math.max(margem, larg - margem - L.maleta.length * 24);
   return [
     "", "N", `q${larg}`, `Q${alt},${gap}`, "ZT", "S2", "D10",
     `A${margem},${y1},0,2,1,1,N,"${L.l1}"`,
     `A${margem},${y2},0,2,1,1,N,"${L.l2}"`,
     `A${margem},${y3},0,2,1,1,N,"${L.l3}"`,
     `B${xBar},${yBar},0,1,${modulo},${modulo},${hBar},N,"${codigo}"`,
-    `A${margem},${yBig},0,4,2,2,N,"${L.remessa}"`,
-    `A${xDir},${yBig},0,4,2,2,N,"${L.maleta}"`,
+    `A${margem},${yBig},0,3,2,2,N,"${L.remessa}"`,
+    `A${xDir},${yBig},0,3,2,2,N,"${L.maleta}"`,
     `P${n}`, "",
   ].join("\n");
 }

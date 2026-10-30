@@ -30,11 +30,20 @@ export function EtiquetaMaleta({ cycleId, preview = false }: { cycleId: string; 
     } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível imprimir."); }
   }
   return <div className="space-y-2 text-ledger-text">
-    {preview && svg && <div className="max-w-xs rounded-md border border-line bg-surface p-4 font-mono text-xs uppercase leading-tight"><p>{L.l1 || "—"}</p><p>{L.l2 || "—"}</p><p>{L.l3 || "—"}</p><div className="my-1 flex justify-center [&_svg]:h-[8.5mm] [&_svg]:w-[44mm]" dangerouslySetInnerHTML={{ __html: svg }} /><div className="flex justify-between text-xl font-bold"><span>{L.remessa}</span><span>{L.maleta}</span></div></div>}
+    {preview && svg && <div className="max-w-xs rounded-md border border-line bg-surface p-4 font-mono text-xs uppercase leading-tight"><p className="text-sm font-bold">{L.l1 || "—"}</p><p>{L.l2 || "—"}</p><p>{L.l3 || "—"}</p><div className="my-1 flex justify-center [&_svg]:h-[8.5mm] [&_svg]:w-[44mm]" dangerouslySetInnerHTML={{ __html: svg }} /><div className="flex justify-between text-sm font-bold"><span>{L.remessa}</span><span>{L.maleta}</span></div></div>}
     <Button variant="outline" disabled={!code || !!invalid || dados.isPending} onClick={imprimir}><Printer />Etiqueta da maleta (48×28 mm)</Button>
     {ficha.isPending && <p className="text-xs text-ledger-muted">Carregando código…</p>}
     {ficha.isError && <p role="alert" className="text-xs text-destructive">Não foi possível ler a identificação. <Button variant="link" onClick={() => void ficha.refetch()}>Tentar novamente</Button></p>}
     {(error || invalid) && <p role="alert" className="text-xs text-destructive">{error || invalid}</p>}
     {notice && <p role="status" className="text-xs text-ledger-muted">{notice}</p>}
   </div>;
+}
+/** Atalho da lista da remessa: imprime a etiqueta 48×28 sem abrir a maleta. */
+export async function imprimirEtiquetaMaleta(cycleId: string) {
+  const [det, r] = await Promise.all([
+    detalheMaleta(cycleId),
+    supabase.rpc("kit_etiqueta_maleta_dados" as never, { _cycle: cycleId } as never),
+  ]);
+  if (r.error) throw r.error;
+  await imprimirDireto(comandosEtiquetaMaleta(det.maleta.codigo, lerEstacao().linguagem, 1, (r.data ?? {}) as DadosEtiquetaMaleta));
 }

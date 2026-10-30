@@ -134,9 +134,9 @@ function htmlPromissoria(doc: DocConsultora, valorCents: number, codigoMaleta: s
   return `
   <h1>NOTA PROMISSÓRIA</h1>
   <h2>Referente à maleta ${codigoMaleta}</h2>
-  <div class="caixa">
+  <div class="caixa" style="position:relative">
+    <p class="r" style="margin:0 0 10px;font-size:20px;font-weight:700">VENCIMENTO: ${venc.toLocaleDateString("pt-BR")}</p>
     <p class="valor r">${brl(valorCents)} &nbsp;·&nbsp; ${extenso}</p>
-    <p>Vencimento em <strong>${venc.toLocaleDateString("pt-BR")}</strong></p>
     <p>Em <strong>${dataPorExtenso(venc)}</strong> pagarei por esta única via de NOTA PROMISSÓRIA a
     <strong>${CREDOR}</strong> inscrita no CNPJ/MF sob nº <strong>${CNPJ}</strong>, ou a sua ordem,
     a quantia de <strong>(${extenso})</strong> em moeda corrente deste país.</p>
@@ -144,7 +144,7 @@ function htmlPromissoria(doc: DocConsultora, valorCents: number, codigoMaleta: s
     <p style="margin-top:18px">Emitente (DEVEDOR): <strong>${doc.nome}</strong></p>
     <p>Endereço: ${doc.endereco ?? "________________________"}${doc.bairro ? ` - ${doc.bairro}` : ""}</p>
     <p>Cidade/UF: ${doc.cidade ?? "__________"} &nbsp; CEP: ${doc.cep ?? "________"}</p>
-    <p>R.G: ${doc.rg ?? "__________"} &nbsp; CPF/MF: ${doc.doc ?? "__________"}</p>
+    <p>CPF/MF: ${doc.doc ?? "__________"}</p>
     <p class="r">IBIPORÃ/PR, ${dataPorExtenso(hoje)}</p>
     <div class="assinatura">Assinatura: ${doc.nome}</div>
   </div>`;

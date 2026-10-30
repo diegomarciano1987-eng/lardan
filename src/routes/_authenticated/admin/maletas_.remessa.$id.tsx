@@ -2,8 +2,9 @@ import * as React from "react";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Lock, Plus, Receipt, ScrollText, UserRound } from "lucide-react";
+import { FileText, Lock, Plus, Receipt, ScrollText, Tag, UserRound } from "lucide-react";
 import { imprimirPedidoConsignacao, imprimirPromissoriaMaleta } from "@/components/admin/maletas/DocumentosMaleta";
+import { imprimirEtiquetaMaleta } from "@/components/admin/maletas/EtiquetaMaleta";
 import { abrirMaletaRepresentante, mensagem } from "@/lib/maletas-perdidas";
 import { EnvioRemessa } from "@/components/admin/maletas/EnvioRemessa";
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
@@ -142,12 +143,14 @@ function RemessaPage() {
 
   // 0184: documentos direto da lista
   const [imprimindo, setImprimindo] = React.useState<string | null>(null);
-  async function imprimir(cycleId: string, tipo: "pedido" | "promissoria") {
+  async function imprimir(cycleId: string, tipo: "pedido" | "promissoria" | "etiqueta") {
     setImprimindo(`${cycleId}:${tipo}`);
     try {
-      if (tipo === "pedido") await imprimirPedidoConsignacao(cycleId);
+      if (tipo === "etiqueta") { await imprimirEtiquetaMaleta(cycleId); toast.success("Etiqueta enviada para a Argox."); }
+      else if (tipo === "pedido") await imprimirPedidoConsignacao(cycleId);
       else await imprimirPromissoriaMaleta(cycleId);
-    } finally { setImprimindo(null); }
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir."); }
+    finally { setImprimindo(null); }
   }
 
   // 0184: finalizar / reabrir
@@ -264,6 +267,10 @@ function RemessaPage() {
                 <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={semPecas || !m.consultora_party_id || imprimindo !== null}
                   onClick={() => void imprimir(m.cycle_id, "promissoria")}>
                   <ScrollText aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:promissoria` ? "Preparando…" : "Promissória"}
+                </button>
+                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={imprimindo !== null}
+                  onClick={() => void imprimir(m.cycle_id, "etiqueta")}>
+                  <Tag aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:etiqueta` ? "Preparando…" : "Etiqueta"}
                 </button>
                 <button type="button" className="admin-btn h-9 px-3 text-xs" disabled title="A emissão da nota fiscal ainda está em homologação; o botão fica aqui e será liberado quando a emissão real for ligada.">
                   <Receipt aria-hidden className="size-3.5" /> Nota fiscal (em breve)

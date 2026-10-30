@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { traduzirErroSenha } from "@/lib/senha-forte";
 
 const ERRO_LOGIN =
   "Não foi possível entrar. Confira o código e a senha. Depois de 5 tentativas erradas o acesso fica travado por 15 minutos.";
@@ -140,7 +141,7 @@ export const colabAcessoSalvar = createServerFn({ method: "POST" })
       const { data: novo, error } = await sb.auth.admin.createUser({
         email, password: data.senha, email_confirm: true, user_metadata: { full_name: nome },
       });
-      if (error || !novo.user) throw new Error("Não foi possível criar o acesso: " + (error?.message ?? "erro"));
+      if (error || !novo.user) throw new Error("Não foi possível criar o acesso: " + traduzirErroSenha(error?.message ?? "erro"));
       userId = novo.user.id;
       criado = true;
       const { error: pe } = await sb.from("profiles").upsert({
@@ -152,7 +153,7 @@ export const colabAcessoSalvar = createServerFn({ method: "POST" })
       }
     } else if (data.senha) {
       const { error } = await sb.auth.admin.updateUserById(userId, { password: data.senha });
-      if (error) throw new Error("Não foi possível trocar a senha: " + error.message);
+      if (error) throw new Error("Não foi possível trocar a senha: " + traduzirErroSenha(error.message));
     }
 
     const { error: re } = await sb.rpc("colab_acesso_registrar" as never, {

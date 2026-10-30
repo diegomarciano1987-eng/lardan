@@ -29,7 +29,7 @@ export const STATUS_REMESSA: Record<string, { rotulo: string; tom: "neutral" | "
   montagem: { rotulo: "Em montagem", tom: "warning" },
   na_rua: { rotulo: "Na rua", tom: "neutral" },
   acerto: { rotulo: "Em acerto", tom: "warning" },
-  fechada: { rotulo: "Fechada", tom: "success" },
+  fechada: { rotulo: "Finalizada", tom: "success" },
   cancelada: { rotulo: "Cancelada", tom: "danger" },
 };
 
@@ -105,3 +105,20 @@ export const lerEnvioRemessa = (id: string) =>
   rpc<{ tipo_envio: TipoEnvio; prazo_correio_dias: number; postar_ate: string | null } | null>("remessa_envio_ler", { _remessa: id });
 export const definirEnvioRemessa = (id: string, tipo: TipoEnvio) =>
   rpc<{ tipo_envio: TipoEnvio; repetido: boolean }>("remessa_tipo_envio_definir", { _remessa: id, _tipo: tipo });
+
+/** 0184: finalizar (tranca) a remessa — exige digitar o número; reabrir só Master com motivo. */
+export const finalizarRemessa = (id: string, numero: number) =>
+  rpc<{ numero: number; maletas?: number; repetida: boolean }>("remessa_finalizar", { _remessa: id, _confirmacao: numero });
+export const reabrirRemessa = (id: string, motivo: string) =>
+  rpc<{ numero: number; status: string }>("remessa_reabrir", { _remessa: id, _motivo: motivo });
+
+/** 0184: consultoras ainda sem praça (do representante da remessa) para trazer à praça da remessa. */
+export const consultorasSemPraca = async (remessa: string, termo: string) => {
+  if (termo.trim().length < 2) return [];
+  const l = await rpc<{ party_id: string; display_name: string; representante: string | null }[]>("remessa_consultoras_sem_praca", {
+    _remessa: remessa, _search: termo.trim(),
+  });
+  return l.map((p) => ({ value: p.party_id, label: p.display_name, hint: p.representante ? `Rep. ${p.representante} · sem praça` : "Sem praça" }));
+};
+export const vincularConsultoraRemessa = (remessa: string, consultora: string) =>
+  rpc<{ repetida: boolean }>("remessa_vincular_consultora", { _remessa: remessa, _consultora: consultora });

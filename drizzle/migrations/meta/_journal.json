@@ -1296,6 +1296,13 @@
       "when": 1793373949929,
       "tag": "0184_remessa_finalizar_preco_fallback",
       "breakpoints": true
+    },
+    {
+      "idx": 185,
+      "version": "7",
+      "when": 1793375068101,
+      "tag": "0185_kit_etiqueta_maleta_dados",
+      "breakpoints": true
     }
   ]
 }

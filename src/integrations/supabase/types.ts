@@ -19326,6 +19326,7 @@ export type Database = {
       kit_entrada_detalhe: { Args: { _entrada: string }; Returns: Json }
       kit_entrada_exigir: { Args: never; Returns: string }
       kit_entradas_listar: { Args: { _limit?: number }; Returns: Json }
+      kit_etiqueta_maleta_dados: { Args: { _cycle: string }; Returns: Json }
       kit_exige_pre_baixa_checar: {
         Args: { _consultora: string; _cycle: string; _remessa: string }
         Returns: undefined

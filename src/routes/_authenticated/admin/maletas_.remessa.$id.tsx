@@ -2,7 +2,8 @@ import * as React from "react";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, UserRound } from "lucide-react";
+import { FileText, Lock, Plus, Receipt, ScrollText, UserRound } from "lucide-react";
+import { imprimirPedidoConsignacao, imprimirPromissoriaMaleta } from "@/components/admin/maletas/DocumentosMaleta";
 import { abrirMaletaRepresentante, mensagem } from "@/lib/maletas-perdidas";
 import { EnvioRemessa } from "@/components/admin/maletas/EnvioRemessa";
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
@@ -18,9 +19,13 @@ import {
   STATUS_REMESSA,
   abrirMaletaNaRemessa,
   consultorasDaPraca,
+  consultorasSemPraca,
   dataBR,
+  finalizarRemessa,
   listarRemessas,
   maletasDaRemessa,
+  reabrirRemessa,
+  vincularConsultoraRemessa,
 } from "@/lib/remessas";
 
 export const Route = createFileRoute("/_authenticated/admin/maletas_/remessa/$id")({
@@ -112,6 +117,52 @@ function RemessaPage() {
   });
   const comConsultora = (maletas.data ?? []).filter((m) => m.consultora_party_id).length;
   const comRepresentante = (maletas.data ?? []).length - comConsultora;
+  const emMontagem = (maletas.data ?? []).filter((m) => m.status === "montagem" || m.status === "rascunho").length;
+
+  // 0184: consultora sem praça → praça da remessa
+  const [semPraca, setSemPraca] = React.useState("");
+  const [buscaSemPraca, setBuscaSemPraca] = React.useState("");
+  const semPracaOpcoes = useQuery({
+    queryKey: ["remessas", "sem-praca", id, buscaSemPraca],
+    queryFn: () => consultorasSemPraca(id, buscaSemPraca),
+    enabled: podeMontar && buscaSemPraca.trim().length >= 2,
+  });
+  const vincular = useMutation({
+    mutationFn: async () => {
+      await vincularConsultoraRemessa(id, semPraca);
+      return abrirMaletaNaRemessa(id, semPraca);
+    },
+    onSuccess: (res) => {
+      toast.success("Consultora trazida para a praça e maleta aberta.");
+      qc.invalidateQueries({ queryKey: ["remessas"] });
+      navigate({ to: "/admin/maletas/$id", params: { id: res.cycle_id } });
+    },
+    onError: (e) => { qc.invalidateQueries({ queryKey: ["remessas"] }); toast.error(traduzir(e)); },
+  });
+
+  // 0184: documentos direto da lista
+  const [imprimindo, setImprimindo] = React.useState<string | null>(null);
+  async function imprimir(cycleId: string, tipo: "pedido" | "promissoria") {
+    setImprimindo(`${cycleId}:${tipo}`);
+    try {
+      if (tipo === "pedido") await imprimirPedidoConsignacao(cycleId);
+      else await imprimirPromissoriaMaleta(cycleId);
+    } finally { setImprimindo(null); }
+  }
+
+  // 0184: finalizar / reabrir
+  const [confirmaNumero, setConfirmaNumero] = React.useState("");
+  const [motivoReabrir, setMotivoReabrir] = React.useState("");
+  const finalizar = useMutation({
+    mutationFn: () => finalizarRemessa(id, Number(confirmaNumero)),
+    onSuccess: (res) => { toast.success(`Remessa ${res.numero} finalizada.`); setConfirmaNumero(""); qc.invalidateQueries({ queryKey: ["remessas"] }); },
+    onError: (e) => toast.error(traduzir(e)),
+  });
+  const reabrir = useMutation({
+    mutationFn: () => reabrirRemessa(id, motivoReabrir),
+    onSuccess: (res) => { toast.success(`Remessa ${res.numero} reaberta.`); setMotivoReabrir(""); qc.invalidateQueries({ queryKey: ["remessas"] }); },
+    onError: (e) => toast.error(traduzir(e)),
+  });
 
   if (remessa.isLoading) return <Skeleton className="h-40" />;
   if (remessa.isError) return <ErrorState message={traduzir(remessa.error)} onRetry={() => void remessa.refetch()} />;
@@ -175,6 +226,23 @@ function RemessaPage() {
         </Panel>
       )}
 
+      {podeMontar && r.status !== "fechada" && r.status !== "cancelada" && (
+        <Panel title="Consultora não aparece na lista?">
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="grid min-w-80 flex-1 gap-1.5 text-sm">
+              <span className="ledger-eyebrow">Consultoras ativas ainda sem praça{r.representante ? ` (sem representante ou de ${r.representante})` : ""}</span>
+              <SmartSelect value={semPraca} onChange={setSemPraca} options={semPracaOpcoes.data ?? []} onSearch={setBuscaSemPraca}
+                loading={semPracaOpcoes.isFetching} searchPlaceholder="Digite nome ou CPF (2 letras ou mais)" placeholder="Buscar consultora sem praça"
+                emptyLabel={buscaSemPraca.trim().length < 2 ? "Digite ao menos 2 letras" : "Nenhuma consultora sem praça com esse nome"} />
+              <span className="text-xs text-ledger-muted">Ela passa para a praça {r.praca} (fica registrado quem fez). Quem já tem outra praça não muda por aqui.</span>
+            </label>
+            <button type="button" className="admin-btn admin-btn-primary" disabled={!semPraca || vincular.isPending} onClick={() => vincular.mutate()}>
+              <Plus aria-hidden className="size-4" /> {vincular.isPending ? "Vinculando…" : "Trazer para a praça e abrir maleta"}
+            </button>
+          </div>
+        </Panel>
+      )}
+
       <Panel title="Maletas da remessa" flush>
         {maletas.isLoading && <div className="p-6"><Skeleton className="h-14" /></div>}
         {maletas.data?.length === 0 && (
@@ -182,19 +250,65 @@ function RemessaPage() {
         )}
         {maletas.data?.map((m) => {
           const st = SITUACAO_MALETA[m.status] ?? { rotulo: m.status, tom: "neutro" as const };
+          const semPecas = !m.pecas;
           return (
-            <Link key={m.cycle_id} to="/admin/maletas/$id" params={{ id: m.cycle_id }}
-              className="flex flex-wrap items-center justify-between gap-4 border-b border-line-soft px-6 py-4 transition hover:bg-surface-muted">
-              <p className="font-semibold text-ledger-text">{m.consultora ?? `Com o representante${r.representante ? ` ${r.representante}` : ""} · sem consultora`}</p>
+            <div key={m.cycle_id} className="flex flex-wrap items-center justify-between gap-4 border-b border-line-soft px-6 py-4 transition hover:bg-surface-muted">
+              <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} className="min-w-56 flex-1 font-semibold text-ledger-text hover:underline">
+                {m.consultora ?? `Com o representante${r.representante ? ` ${r.representante}` : ""} · sem consultora`}
+              </Link>
+              <div className="flex flex-wrap items-center gap-2" aria-label={`Documentos de ${m.consultora ?? "maleta"}`}>
+                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={semPecas || imprimindo !== null}
+                  onClick={() => void imprimir(m.cycle_id, "pedido")}>
+                  <FileText aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:pedido` ? "Preparando…" : "Pedido"}
+                </button>
+                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={semPecas || !m.consultora_party_id || imprimindo !== null}
+                  onClick={() => void imprimir(m.cycle_id, "promissoria")}>
+                  <ScrollText aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:promissoria` ? "Preparando…" : "Promissória"}
+                </button>
+                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled title="A emissão da nota fiscal ainda está em homologação; o botão fica aqui e será liberado quando a emissão real for ligada.">
+                  <Receipt aria-hidden className="size-3.5" /> Nota fiscal (em breve)
+                </button>
+              </div>
               <div className="flex items-center gap-6 text-sm">
                 <span className="tabular-nums text-ledger-muted">{m.pecas} peças</span>
                 <span className="tabular-nums font-semibold text-ledger-text">{brl(Number(m.valor_cents ?? 0))}</span>
                 <StatusBadge tone={TOM[st.tom]}>{st.rotulo}</StatusBadge>
               </div>
-            </Link>
+            </div>
           );
         })}
       </Panel>
+
+      {podeMontar && r.status !== "cancelada" && (
+        <Panel title={r.status === "fechada" ? "Remessa finalizada" : "Finalizar remessa"}>
+          {r.status === "fechada" ? (
+            <div className="space-y-3 text-sm">
+              <p className="text-ledger-muted">Remessa {r.numero} está finalizada: não abre novas maletas nem muda o envio. As maletas seguem normalmente (expedição, acerto).</p>
+              {master && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <input className="admin-input flex-1" placeholder="Motivo para reabrir (fica na auditoria)" value={motivoReabrir} onChange={(e) => setMotivoReabrir(e.target.value)} />
+                  <button type="button" className="admin-btn" disabled={reabrir.isPending || motivoReabrir.trim().length < 5} onClick={() => reabrir.mutate()}>Reabrir remessa</button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3 text-sm">
+              <p className="text-ledger-muted">
+                Quando todas as maletas estiverem conferidas, finalize: a remessa {r.numero} fica fechada de vez, sem novas maletas.
+                {emMontagem > 0 && <strong className="text-ledger-text"> Ainda há {emMontagem} maleta(s) em montagem.</strong>}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <input className="admin-input w-56" inputMode="numeric" placeholder={`Digite ${r.numero} para confirmar`} value={confirmaNumero}
+                  onChange={(e) => setConfirmaNumero(e.target.value.replace(/\D/g, ""))} aria-label="Número da remessa para confirmar" />
+                <button type="button" className="admin-btn admin-btn-primary" disabled={finalizar.isPending || emMontagem > 0 || Number(confirmaNumero) !== r.numero}
+                  onClick={() => finalizar.mutate()}>
+                  <Lock aria-hidden className="size-4" /> {finalizar.isPending ? "Finalizando…" : "Finalizar remessa"}
+                </button>
+              </div>
+            </div>
+          )}
+        </Panel>
+      )}
     </div>
   );
 }

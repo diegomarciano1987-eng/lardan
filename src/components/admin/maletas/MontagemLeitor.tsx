@@ -4,7 +4,8 @@ import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { EtiquetaMaleta } from "./EtiquetaMaleta";
 import { BotaoTelaCheia } from "@/components/admin/TelaCheia";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Sparkles, X } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Search, Sparkles, X } from "lucide-react";
+import { filtrarComposicao } from "@/lib/busca-composicao";
 import { supabase } from "@/integrations/supabase/client";
 import { metasMontagem, type MetasMontagem } from "@/lib/historico-jflex";
 import { brl, operarMontagem, traduzir, type ItemComposicao } from "@/lib/maletas";
@@ -329,13 +330,37 @@ export function MontagemLeitor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Busca na composição (bip, nome, SKU ou referência) para achar a peça e tirar com o "−" sem rolar a lista.
+  const campoBusca = React.useRef<HTMLInputElement>(null);
+  const [buscaPeca, setBuscaPeca] = React.useState("");
+  const idsItens = Object.keys(itens).sort().join(",");
+  const codigosPecas = useQuery({
+    queryKey: ["montagem", "codigos", idsItens],
+    enabled: idsItens.length > 0,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const ids = idsItens.split(",");
+      const m: Record<string, string> = {};
+      for (let i = 0; i < ids.length; i += 150) {
+        const { data, error } = await supabase.from("product_variants")
+          .select("id, barcode, sku, reference_code, products(reference_code, internal_code, legacy_code)")
+          .in("id", ids.slice(i, i + 150));
+        if (error) throw error;
+        for (const v of (data ?? []) as unknown as { id: string; barcode: string | null; sku: string | null; reference_code: string | null; products: { reference_code: string | null; internal_code: string | null; legacy_code: string | null } | null }[])
+          m[v.id] = [v.barcode, v.sku, v.reference_code, v.products?.reference_code, v.products?.internal_code, v.products?.legacy_code].filter(Boolean).join(" ");
+      }
+      return m;
+    },
+  });
+
   React.useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     campo.current?.focus();
     const t = window.setInterval(() => {
       const a = document.activeElement;
-      if (!impressaoAberta.current && a !== campo.current && !(a instanceof HTMLButtonElement)) campo.current?.focus();
+      // A busca da composição é a única exceção: enquanto ela estiver em uso, o foco fica nela.
+      if (!impressaoAberta.current && a !== campo.current && a !== campoBusca.current && !(a instanceof HTMLButtonElement)) campo.current?.focus();
     }, 400);
     return () => {
       window.clearInterval(t);
@@ -463,6 +488,7 @@ export function MontagemLeitor({
   }
 
   const lista = Object.entries(itens).sort((a, b) => a[1].nome.localeCompare(b[1].nome));
+  const listaFiltrada = filtrarComposicao(lista, buscaPeca, codigosPecas.data);
   const total = lista.reduce((s, [, v]) => s + v.qtd, 0);
   const valorTotal = lista.reduce((s, [, v]) => s + v.qtd * v.preco, 0);
   const ultima = leituras[0];
@@ -700,11 +726,35 @@ export function MontagemLeitor({
             <div className="ledger-panel p-5">
               <EtiquetaMaleta cycleId={cycleId} />
               <p className="ledger-eyebrow mb-2">Composição</p>
+              {lista.length > 0 && (
+                <div className="relative mb-2">
+                  <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
+                  <input ref={campoBusca} type="search" value={buscaPeca} aria-label="Buscar peça na composição"
+                    placeholder="Achar peça: bipe, nome ou referência"
+                    className="admin-input h-10 w-full pl-9 pr-9"
+                    onChange={(e) => setBuscaPeca(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") { setBuscaPeca(""); campo.current?.focus(); }
+                      if (e.key === "Enter") e.preventDefault();
+                    }} />
+                  {buscaPeca && (
+                    <button type="button" aria-label="Limpar busca" className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ledger-muted hover:bg-surface-muted"
+                      onClick={() => { setBuscaPeca(""); campo.current?.focus(); }}>
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
+              {buscaPeca && (
+                <p className="mb-1 text-xs text-ledger-muted">{listaFiltrada.length} de {lista.length} peça(s) · Esc volta para a bipagem</p>
+              )}
               {lista.length === 0 ? (
                 <p className="text-sm text-ledger-muted">Sem dados.</p>
+              ) : listaFiltrada.length === 0 ? (
+                <p className="text-sm text-ledger-muted">Nenhuma peça desta maleta com “{buscaPeca}”.</p>
               ) : (
                 <ul className="max-h-[50vh] space-y-1 overflow-auto text-sm">
-                  {lista.map(([id, p]) => (
+                  {listaFiltrada.map(([id, p]) => (
                     <li key={id} className="flex items-center justify-between gap-2">
                       <FotoPeca variantId={id} alt={p.nome} size="xs" />
                       <span className="flex-1 truncate">{p.nome}</span>

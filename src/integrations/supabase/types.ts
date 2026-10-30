@@ -20376,6 +20376,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      remessa_consultoras_sem_praca: {
+        Args: { _remessa: string; _search?: string }
+        Returns: {
+          display_name: string
+          party_id: string
+          representante: string
+        }[]
+      }
       remessa_criar: {
         Args: {
           _data_acerto?: string
@@ -20389,6 +20397,10 @@ export type Database = {
         Returns: Json
       }
       remessa_envio_ler: { Args: { _remessa: string }; Returns: Json }
+      remessa_finalizar: {
+        Args: { _confirmacao: number; _remessa: string }
+        Returns: Json
+      }
       remessa_maleta_excluir: {
         Args: { _cycle: string; _motivo: string }
         Returns: Json
@@ -20419,8 +20431,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      remessa_reabrir: {
+        Args: { _motivo: string; _remessa: string }
+        Returns: Json
+      }
       remessa_tipo_envio_definir: {
         Args: { _remessa: string; _tipo: string }
+        Returns: Json
+      }
+      remessa_vincular_consultora: {
+        Args: { _consultora: string; _remessa: string }
         Returns: Json
       }
       remessas_buscar: {

@@ -51,8 +51,9 @@ export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; po
     else if (r.sugestao) setPraca(r.sugestao);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pracasRep.data]);
-  const opcoesPraca = pracasRep.data?.opcoes.length ? pracasRep.data.opcoes : q.data?.pracas ?? [];
-  const pracaUnica = pracasRep.data?.opcoes.length === 1;
+  const [todasPracas, setTodasPracas] = useState(false);
+  const opcoesPraca = !todasPracas && pracasRep.data?.opcoes.length ? pracasRep.data.opcoes : q.data?.pracas ?? [];
+  const pracaUnica = !todasPracas && pracasRep.data?.opcoes.length === 1;
   useEffect(() => {
     if (q.data) { setRep(q.data.rep); setPraca(q.data.praca); }
   }, [q.data]);
@@ -79,7 +80,7 @@ export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; po
       <div className="grid gap-4 p-5 md:grid-cols-2">
         <label className="space-y-1.5 text-sm font-medium">
           <span className="ledger-eyebrow">Representante responsável</span>
-          <SmartSelect options={q.data?.reps ?? []} value={rep} onChange={(v) => { setRep(v); setPraca(""); }} disabled={!podeEditar}
+          <SmartSelect options={q.data?.reps ?? []} value={rep} onChange={(v) => { setRep(v); setPraca(""); setTodasPracas(false); }} disabled={!podeEditar}
             placeholder="Sem representante" emptyLabel="Nenhum representante ativo" />
         </label>
         <label className="space-y-1.5 text-sm font-medium">
@@ -98,8 +99,15 @@ export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; po
               : pracasRep.isLoading ? "Buscando as praças do representante…"
               : pracaUnica ? "Preenchida pelo histórico do representante."
               : pracasRep.data?.opcoes.length ? `Este representante atende ${pracasRep.data.opcoes.length} praças${pracasRep.data.sugestao ? "; já marquei a do histórico da consultora" : ""}.`
+              : pracasRep.isError ? "Não consegui ler as praças do representante; mostrando todas as praças ativas."
               : "Representante sem praça no histórico; escolha na lista."}
           </span>
+          {rep && podeEditar && !pracasRep.isLoading && (pracasRep.data?.opcoes.length ?? 0) > 0 && (
+            <button type="button" className="block text-xs font-semibold text-ledger-text underline-offset-2 hover:underline"
+              onClick={() => setTodasPracas((v) => !v)}>
+              {todasPracas ? "Mostrar só as praças do representante" : "A praça não está aqui? Mostrar todas as praças ativas"}
+            </button>
+          )}
         </label>
         <MadrinhaConsultora partyId={partyId} podeEditar={podeEditar} />
         {podeEditar && (

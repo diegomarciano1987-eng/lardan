@@ -1289,6 +1289,13 @@
       "when": 1793295830078,
       "tag": "0183_objetivo_tres_maiores_meses",
       "breakpoints": true
+    },
+    {
+      "idx": 184,
+      "version": "7",
+      "when": 1793373949929,
+      "tag": "0184_remessa_finalizar_preco_fallback",
+      "breakpoints": true
     }
   ]
 }

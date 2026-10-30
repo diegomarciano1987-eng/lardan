@@ -5,6 +5,7 @@ import { KeyRound, ShieldCheck, Wand2 } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Switch } from "@/components/ui/switch";
 import { colabAcessoAtivo, colabAcessoLer, colabAcessoSalvar, colabModulosSalvar } from "@/lib/colab-acesso.functions";
+import { gerarSenhaForte } from "@/lib/senha-forte";
 import { COLAB_MODULOS, PACOTE_MONTAGEM, capsDeEscolha, escolhaDeCaps, type Escolha } from "@/lib/colab-modulos";
 
 const inputCls =
@@ -103,6 +104,11 @@ export function AcessoColaboradora({ partyId }: { partyId: string }) {
               {d.acesso ? "Nova senha (deixe vazio para manter)" : "Senha"}
               <PasswordInput className={inputCls + " mt-1"} autoComplete="new-password" value={senha}
                 onChange={(e) => setSenha(e.target.value)} />
+              <button type="button" className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-ledger-text underline-offset-2 hover:underline"
+                onClick={() => { const s = gerarSenhaForte(); setSenha(s); void navigator.clipboard?.writeText(s).catch(() => undefined); toast.success(`Senha gerada: ${s}`, { description: "Anote e passe para ela. Já copiei." }); }}>
+                <Wand2 className="h-3.5 w-3.5" /> Gerar senha forte
+              </button>
+              {senha && <span className="mt-1 block text-xs text-ledger-muted">Senhas fáceis (123456, nome+ano) são recusadas pela proteção de senhas vazadas.</span>}
             </label>
           )}
         </div>

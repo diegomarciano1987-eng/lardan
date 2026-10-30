@@ -20664,6 +20664,7 @@ export type Database = {
         Returns: Json
       }
       rep_portal_resumo: { Args: { _rep: string }; Returns: Json }
+      rep_praca_ids: { Args: { _rep: string }; Returns: string[] }
       rep_pracas_vinculo: {
         Args: { _consultora?: string; _rep: string }
         Returns: Json

@@ -18236,6 +18236,7 @@ export type Database = {
       }
       colab_legacy_cli_ok: { Args: { _cod: number }; Returns: boolean }
       colab_legacy_rem_ok: { Args: { _numero: number }; Returns: boolean }
+      colab_legacy_rep_codigos: { Args: never; Returns: number[] }
       colab_legacy_rep_ok: { Args: { _codigo: number }; Returns: boolean }
       colab_login_ok: { Args: { _user: string }; Returns: undefined }
       colab_login_reservar: { Args: { _codigo: string }; Returns: string }

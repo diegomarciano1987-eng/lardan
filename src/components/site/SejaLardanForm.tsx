@@ -8,6 +8,7 @@ import { capturarTracking, registrarIndicacao } from "@/lib/crm/tracking";
 import { supabase } from "@/integrations/supabase/client";
 import { enviarCandidatura } from "@/lib/crm/candidaturas.functions";
 import { SmartSelect } from "@/components/premium/SmartSelect";
+import { CandidaturaRecebidaDialog } from "@/components/site/CandidaturaRecebidaDialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { consultarCepPublico, listarMunicipiosPublico } from "@/lib/br/lookup.functions";
@@ -93,6 +94,11 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);
+  const [popupAberto, setPopupAberto] = useState(false);
+  function fecharPopup() {
+    setPopupAberto(false);
+    setTimeout(() => document.getElementById("candidatura-confirmacao")?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
+  }
   const [foiReenvio, setFoiReenvio] = useState(false);
   const [semNumero, setSemNumero] = useState(false);
   const [uf, setUf] = useState("");
@@ -239,6 +245,7 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
       }
       setFoiReenvio(resposta.reenvio);
       setProtocolo(resposta.protocolo);
+      setPopupAberto(true);
     } catch {
       setErro("Não foi possível confirmar o registro. Seus dados continuam preenchidos; tente enviar novamente.");
     } finally {
@@ -248,7 +255,8 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
 
   if (protocolo && modo === "indicacao") {
     return (
-      <div role="status" className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 text-center">
+      <div id="candidatura-confirmacao" role="status" className="mx-auto max-w-2xl scroll-mt-24 rounded-xl border border-border bg-card p-8 text-center">
+        <CandidaturaRecebidaDialog open={popupAberto} protocolo={protocolo} reenvio={foiReenvio} onClose={fecharPopup} />
         <p className="brand-eyebrow mb-3">Candidatura recebida</p>
         <h2 className="text-3xl text-foreground">Estamos avaliando a sua candidatura</h2>
         <p className="mt-4 text-base leading-relaxed text-muted-foreground">Retornaremos em breve.</p>
@@ -266,14 +274,17 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
     return (
       <div
         role="status"
-        className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 text-center"
+        id="candidatura-confirmacao"
+        className="mx-auto max-w-2xl scroll-mt-24 rounded-xl border border-border bg-card p-8 text-center"
       >
+        <CandidaturaRecebidaDialog open={popupAberto} protocolo={protocolo} reenvio={foiReenvio} onClose={fecharPopup} />
+
         <p className="brand-eyebrow mb-3">{foiReenvio ? "Candidatura atualizada" : "Candidatura registrada"}</p>
         <h2 className="text-3xl text-foreground">Recebemos os seus dados</h2>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
           O seu protocolo é <strong className="text-foreground">{protocolo}</strong>. Guarde este
-          número. A equipe Lardan analisa cada candidatura; não há promessa de aprovação, prazo ou
-          renda.
+          número. A equipe Lardan analisa cada candidatura e responde em no máximo 3 dias; não há
+          promessa de aprovação ou renda.
         </p>
       </div>
     );

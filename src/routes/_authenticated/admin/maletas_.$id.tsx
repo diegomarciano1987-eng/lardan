@@ -28,9 +28,7 @@ import { TermosMaleta } from "@/components/maletas/TermoAssinatura";
 import { useCapabilities } from "@/lib/capabilities";
 import {
   SITUACAO_MALETA,
-  aceitar,
   brl,
-  chaveIdempotencia,
   conferir,
   confirmarEntrega,
   definirItem,
@@ -73,8 +71,6 @@ function MaletaFicha() {
   const [rota, setRota] = React.useState<"direta" | "representante">("direta");
   const [transporte, setTransporte] = React.useState("");
   const [rastreio, setRastreio] = React.useState("");
-  const [divergencias, setDivergencias] = React.useState<Record<string, number>>({});
-  const [chave] = React.useState(chaveIdempotencia);
   const [leitor, setLeitor] = React.useState(false);
   const [conferindo, setConferindo] = React.useState(false);
   const [confirmando, setConfirmando] = React.useState(false);
@@ -131,25 +127,6 @@ function MaletaFicha() {
     mutationFn: () => liberarParaConsultora(id),
     onSuccess: (r) => {
       toast.success(r.repetida ? "Esta maleta já estava com a consultora." : "Maleta liberada: já está com a consultora.");
-      recarregar();
-    },
-    onError: (e) => toast.error(traduzir(e)),
-  });
-  const aceitarM = useMutation({
-    mutationFn: () => {
-      const itens = (ficha.data?.composicao ?? []).map((c) => {
-        const div = divergencias[c.variant_id] ?? 0;
-        return {
-          variant_id: c.variant_id,
-          qty_accepted: Math.max(c.quantidade - div, 0),
-          qty_divergent: div,
-          motivo: div > 0 ? "Divergência registrada na conferência" : "",
-        };
-      });
-      return aceitar(id, itens, chave);
-    },
-    onSuccess: (r) => {
-      toast.success(r.repetida ? "Este aceite já havia sido registrado." : "Aceite registrado.");
       recarregar();
     },
     onError: (e) => toast.error(traduzir(e)),

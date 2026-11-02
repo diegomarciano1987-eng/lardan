@@ -18419,6 +18419,7 @@ export type Database = {
         Returns: undefined
       }
       consultora_pos_venda_prazo: { Args: { _order: string }; Returns: Json }
+      consultora_rep_pela_praca: { Args: { _praca: string }; Returns: string }
       consultora_vendido_ciclo: { Args: { _cycle: string }; Returns: Json }
       consultoras_vinculo_smalldata: {
         Args: { _aplicar?: boolean }
@@ -20321,6 +20322,18 @@ export type Database = {
         Returns: Json
       }
       purge_integration_data: { Args: never; Returns: Json }
+      rede_auditoria_sem_representante: {
+        Args: never
+        Returns: {
+          nome: string
+          party_id: string
+          praca_codigo: number
+          praca_nome: string
+          reps_na_praca: Json
+          sugestao_nome: string
+          sugestao_rep: string
+        }[]
+      }
       register_stock_movement: {
         Args: {
           _from_location_id?: string

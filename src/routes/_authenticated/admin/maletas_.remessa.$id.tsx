@@ -2,7 +2,7 @@ import * as React from "react";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Lock, Plus, Receipt, ScrollText, Tag, UserRound } from "lucide-react";
+import { CheckCircle2, FileText, Lock, Plus, Receipt, ScrollText, Tag, UserRound } from "lucide-react";
 import { imprimirPedidoConsignacao, imprimirPromissoriaMaleta } from "@/components/admin/maletas/DocumentosMaleta";
 import { imprimirEtiquetaMaleta } from "@/components/admin/maletas/EtiquetaMaleta";
 import { abrirMaletaRepresentante, mensagem } from "@/lib/maletas-perdidas";
@@ -15,7 +15,7 @@ import { BackButton, EmptyState, ErrorState, Panel, Skeleton, StatusBadge } from
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { useCapabilities } from "@/lib/capabilities";
 import { useColabEscopo } from "@/lib/colab-escopo";
-import { SITUACAO_MALETA, brl, traduzir } from "@/lib/maletas";
+import { SITUACAO_MALETA, brl, liberarParaConsultora, traduzir } from "@/lib/maletas";
 import {
   STATUS_REMESSA,
   abrirMaletaNaRemessa,
@@ -103,6 +103,16 @@ function RemessaPage() {
   const liberar = useMutation({
     mutationFn: () => liberarKitSemPreBaixa(consultora, motivoLib),
     onSuccess: () => { toast.success("Liberado uma vez. Abrindo a maleta…"); setSemPreBaixa(null); setMotivoLib(""); abrir.mutate(); },
+    onError: (e) => toast.error(traduzir(e)),
+  });
+
+  const liberarMaleta = useMutation({
+    mutationFn: (cycleId: string) => liberarParaConsultora(cycleId),
+    onSuccess: (r) => {
+      toast.success(r.repetida ? "Esta maleta já estava com a consultora." : "Maleta liberada: já está com a consultora.");
+      qc.invalidateQueries({ queryKey: ["remessas"] });
+      qc.invalidateQueries({ queryKey: ["maletas"] });
+    },
     onError: (e) => toast.error(traduzir(e)),
   });
 
@@ -275,6 +285,12 @@ function RemessaPage() {
                 <button type="button" className="admin-btn h-9 px-3 text-xs" disabled title="A emissão da nota fiscal ainda está em homologação; o botão fica aqui e será liberado quando a emissão real for ligada.">
                   <Receipt aria-hidden className="size-3.5" /> Nota fiscal (em breve)
                 </button>
+                {podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito", "recebida"].includes(m.status) && (
+                  <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || liberarMaleta.isPending}
+                    onClick={() => liberarMaleta.mutate(m.cycle_id)}>
+                    <CheckCircle2 aria-hidden className="size-3.5" /> {liberarMaleta.isPending && liberarMaleta.variables === m.cycle_id ? "Liberando…" : "Liberar maleta"}
+                  </button>
+                )}
               </div>
               <div className="flex items-center gap-6 text-sm">
                 <span className="tabular-nums text-ledger-muted">{m.pecas} peças</span>

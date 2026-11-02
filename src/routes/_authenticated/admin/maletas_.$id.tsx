@@ -29,6 +29,7 @@ import { useCapabilities } from "@/lib/capabilities";
 import {
   SITUACAO_MALETA,
   brl,
+  liberarParaConsultora,
   conferir,
   confirmarEntrega,
   definirItem,

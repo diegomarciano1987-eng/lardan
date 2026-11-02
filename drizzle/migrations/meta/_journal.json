@@ -1338,6 +1338,13 @@
       "when": 1793629658431,
       "tag": "0190_kit_liberar_consultora",
       "breakpoints": true
+    },
+    {
+      "idx": 191,
+      "version": "7",
+      "when": 1793629713803,
+      "tag": "0191_kit_liberar_consultora_fix",
+      "breakpoints": true
     }
   ]
 }

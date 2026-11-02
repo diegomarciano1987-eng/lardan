@@ -119,6 +119,7 @@ import { Route as AuthenticatedAdminMaletasEntradaRouteImport } from './routes/_
 import { Route as AuthenticatedFinanceiroSimulacaoIdRouteImport } from './routes/_authenticated/financeiro/simulacao.$id'
 import { Route as ApiPublicAsaasSyncMatinalRouteImport } from './routes/api/public/asaas/sync-matinal'
 import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
+import { Route as ApiPublicCentralLeadsEnviarRouteImport } from './routes/api/public/central-leads/enviar'
 import { Route as ApiPublicClicksignWebhookRouteImport } from './routes/api/public/clicksign/webhook'
 import { Route as ApiPublicFocusWebhookRouteImport } from './routes/api/public/focus/webhook'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
@@ -744,6 +745,12 @@ const ApiPublicAsaasWebhookRoute = ApiPublicAsaasWebhookRouteImport.update({
   path: '/api/public/asaas/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCentralLeadsEnviarRoute =
+  ApiPublicCentralLeadsEnviarRouteImport.update({
+    id: '/api/public/central-leads/enviar',
+    path: '/api/public/central-leads/enviar',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicClicksignWebhookRoute =
   ApiPublicClicksignWebhookRouteImport.update({
     id: '/api/public/clicksign/webhook',
@@ -932,6 +939,7 @@ export interface FileRoutesByFullPath {
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
+  '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
@@ -1055,6 +1063,7 @@ export interface FileRoutesByTo {
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
+  '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
@@ -1182,6 +1191,7 @@ export interface FileRoutesById {
   '/_authenticated/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
+  '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
@@ -1309,6 +1319,7 @@ export interface FileRouteTypes {
     | '/financeiro/simulacao/$id'
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
+    | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
@@ -1432,6 +1443,7 @@ export interface FileRouteTypes {
     | '/financeiro/simulacao/$id'
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
+    | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
@@ -1558,6 +1570,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financeiro/simulacao/$id'
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
+    | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
@@ -1625,6 +1638,7 @@ export interface RootRouteChildren {
   ApiPublicIndexnowRoute: typeof ApiPublicIndexnowRoute
   ApiPublicAsaasSyncMatinalRoute: typeof ApiPublicAsaasSyncMatinalRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
+  ApiPublicCentralLeadsEnviarRoute: typeof ApiPublicCentralLeadsEnviarRoute
   ApiPublicClicksignWebhookRoute: typeof ApiPublicClicksignWebhookRoute
   ApiPublicFocusWebhookRoute: typeof ApiPublicFocusWebhookRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
@@ -2407,6 +2421,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAsaasWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/central-leads/enviar': {
+      id: '/api/public/central-leads/enviar'
+      path: '/api/public/central-leads/enviar'
+      fullPath: '/api/public/central-leads/enviar'
+      preLoaderRoute: typeof ApiPublicCentralLeadsEnviarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/clicksign/webhook': {
       id: '/api/public/clicksign/webhook'
       path: '/api/public/clicksign/webhook'
@@ -2766,6 +2787,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicIndexnowRoute: ApiPublicIndexnowRoute,
   ApiPublicAsaasSyncMatinalRoute: ApiPublicAsaasSyncMatinalRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
+  ApiPublicCentralLeadsEnviarRoute: ApiPublicCentralLeadsEnviarRoute,
   ApiPublicClicksignWebhookRoute: ApiPublicClicksignWebhookRoute,
   ApiPublicFocusWebhookRoute: ApiPublicFocusWebhookRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,

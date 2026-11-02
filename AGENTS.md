@@ -52,3 +52,4 @@
 - Data-only fiscal issuer packages use the data execution tool and retain their SQL under db/aplicados; issuer identity lookup excludes officially merged duplicate IDs, not historical documents. Why: preserve migration history and merge traceability.
 - Demo/video data is tagged products.tags 'demo-video' (draft products, DEMO-xx codes, kit 'Maleta DEMO vídeos', photos in media/demo-video) and never touches stock or finance; remove it by that tag. Why: keep fictitious recording data isolated and reversible.
 - Consultant rep comes from praça only if one active rep serves it (consultora_rep_pela_praca + trigger); shared praças stay manual (rede_auditoria_sem_representante). Why: no guessing.
+- Central de Leads: leads INSERT trigger queues frozen payload in service-only central_leads_fila; cron /api/public/central-leads/enviar sends creation only; 401 pauses. Why: CRM save independent; Central is permanent archive.

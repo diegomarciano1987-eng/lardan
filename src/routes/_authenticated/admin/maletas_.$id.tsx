@@ -127,6 +127,14 @@ function MaletaFicha() {
     },
     onError: (e) => toast.error(traduzir(e)),
   });
+  const liberarM = useMutation({
+    mutationFn: () => liberarParaConsultora(id),
+    onSuccess: (r) => {
+      toast.success(r.repetida ? "Esta maleta já estava com a consultora." : "Maleta liberada: já está com a consultora.");
+      recarregar();
+    },
+    onError: (e) => toast.error(traduzir(e)),
+  });
   const aceitarM = useMutation({
     mutationFn: () => {
       const itens = (ficha.data?.composicao ?? []).map((c) => {
@@ -501,36 +509,20 @@ function MaletaFicha() {
             )}
           </Panel>
 
-          {podeMontar && (d.ciclo.status === "transito" || d.ciclo.status === "recebida") && (
-            <Panel title="Aceite assistido">
-              <p className="text-xs text-ledger-muted">
-                Informe quantas unidades de cada peça estão divergentes. O restante é aceito.
+          {podeMontar && d.ciclo.consultora_party_id &&
+            ["conferida", "expedida", "transito", "recebida"].includes(d.ciclo.status) && (
+            <Panel title="Liberar para a consultora">
+              <p className="text-sm text-ledger-muted">
+                Já conferida e impressa? Um clique entrega a maleta à consultora com todas as peças.
+                Fica registrado o seu login, a data e a hora.
               </p>
-              <div className="mt-3 space-y-2">
-                {d.composicao.map((c) => (
-                  <div key={c.variant_id} className="flex items-center gap-3">
-                    <span className="min-w-0 flex-1 truncate text-sm">{c.produto}</span>
-                    <input
-                      type="number"
-                      min={0}
-                      max={c.quantidade}
-                      className="admin-input w-20"
-                      value={divergencias[c.variant_id] ?? 0}
-                      onChange={(e) =>
-                        setDivergencias((v) => ({ ...v, [c.variant_id]: Math.max(0, Number(e.target.value)) }))
-                      }
-                    />
-                    <span className="text-xs text-ledger-muted">de {c.quantidade}</span>
-                  </div>
-                ))}
-              </div>
               <button
                 type="button"
                 className="admin-btn admin-btn-primary mt-4 w-full"
-                disabled={aceitarM.isPending}
-                onClick={() => aceitarM.mutate()}
+                disabled={liberarM.isPending}
+                onClick={() => liberarM.mutate()}
               >
-                Registrar aceite
+                <CheckCircle2 aria-hidden className="size-4" /> {liberarM.isPending ? "Liberando…" : "Liberar maleta para a consultora"}
               </button>
             </Panel>
           )}

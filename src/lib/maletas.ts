@@ -469,3 +469,7 @@ export const imagem = (mediaId: string | null | undefined) =>
 
 export const chaveIdempotencia = () =>
   (globalThis.crypto?.randomUUID?.() ?? `k-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+
+/** Liberação em 1 clique pela equipe: expede (se preciso), confirma entregas e registra aceite integral, auditado. */
+export const liberarParaConsultora = (cycleId: string) =>
+  rpc<{ situacao: string; repetida?: boolean; passos?: string[] }>("kit_liberar_consultora", { _cycle: cycleId });

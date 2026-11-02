@@ -1324,6 +1324,13 @@
       "when": 1793386466578,
       "tag": "0188_colab_carteira_por_nome",
       "breakpoints": true
+    },
+    {
+      "idx": 189,
+      "version": "7",
+      "when": 1793627604973,
+      "tag": "0189_consultora_rep_pela_praca",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, MessageCircle, Phone, Ban, UserPen, Gavel, LayoutDashboard, Calculator, Wallet, ListOrdered, History, Handshake, CalendarClock, IdCard, BellRing, Archive, Package } from "lucide-react";
 import { MaletasDaConsultora } from "@/components/admin/maletas/MaletasDaConsultora";
+import { AcessoPortalBotao } from "@/components/admin/acessos/AcessoPortalBotao";
 import { LembretesGaveta } from "@/components/admin/cobranca/LembretesGaveta";
 import { ligarAvisosCliente } from "@/lib/asaas/avisos.functions";
 import { SimuladorAcordo } from "@/components/admin/cobranca/SimuladorAcordo";
@@ -134,6 +135,7 @@ function Cockpit() {
         {([["negociacao", "Registrar negociação"], ["promessa", "Registrar promessa"], ["desconto_solicitado", "Solicitar desconto"], ["retorno", "Agendar retorno"], ["negativacao_encaminhada", "Encaminhar negativação"]] as const).map(([k, r]) => (
           <button key={k} onClick={() => setAcao(k)} className="h-10 rounded-lg border border-border px-4 text-sm">{r}</button>
         ))}
+        <AcessoPortalBotao partyId={id} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-4 text-sm font-semibold" />
         {!ehJudicial && <button onClick={() => setEncaminhar(true)} className="inline-flex h-10 items-center gap-2 rounded-lg bg-bronze px-4 text-sm font-semibold text-primary-foreground"><Gavel className="h-4 w-4" />Encaminhar para judicial</button>}
       </div>
 

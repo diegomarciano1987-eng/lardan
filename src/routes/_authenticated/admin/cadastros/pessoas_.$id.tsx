@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
+import { AcessoPortalBotao } from "@/components/admin/acessos/AcessoPortalBotao";
 import { AcessoColaboradora } from "@/components/admin/acessos/AcessoColaboradora";
 import { VendedoraInternaForm } from "@/components/admin/cadastros/VendedoraInternaForm";
 import { VinculoConsultora } from "@/components/admin/cadastros/VinculoConsultora";
@@ -243,6 +244,7 @@ function FichaPessoa() {
         actions={
           <>
             {sujo && <StatusBadge tone="warning">Alterações não salvas</StatusBadge>}
+            {!colab && d.papeis.some((p) => p.role === "consultora") && <AcessoPortalBotao partyId={id} />}
             {d.papeis.some((p) => p.role === "representante" && p.status === "ativo") && (
               <Link to="/representante" search={{ rep: id }} className="admin-btn">
                 Ver sistema de {nome.split(" ")[0]?.charAt(0)}{nome.split(" ")[0]?.slice(1).toLowerCase()}

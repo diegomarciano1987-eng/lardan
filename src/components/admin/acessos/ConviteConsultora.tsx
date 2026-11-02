@@ -99,7 +99,9 @@ export function ConviteConsultora({ leadId, partyId, auto = false }: { leadId?: 
 
   const c = a?.convite;
   const nomeCurto = s.nome.split(" ")[0];
-  const msg = `Olá, ${nomeCurto}! Sua candidatura foi aprovada e você já pode entrar no Portal da Consultora Lardan. Crie sua senha por este link (vale 48 horas): ${link}`;
+  const msg = leadId
+    ? `Olá, ${nomeCurto}! Sua candidatura foi aprovada e você já pode entrar no Portal da Consultora Lardan. Crie sua senha por este link (vale 48 horas): ${link}`
+    : `Olá, ${nomeCurto}! Seu acesso ao Portal da Consultora Lardan está pronto. Lá você acompanha suas maletas, vendas e acertos pelo celular ou computador. Crie sua senha por este link (vale 48 horas, uso único): ${link}`;
   const zap = fone(s.whatsapp ?? a?.whatsapp ?? null);
 
   return (

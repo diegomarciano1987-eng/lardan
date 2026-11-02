@@ -1331,6 +1331,13 @@
       "when": 1793627604973,
       "tag": "0189_consultora_rep_pela_praca",
       "breakpoints": true
+    },
+    {
+      "idx": 190,
+      "version": "7",
+      "when": 1793629658431,
+      "tag": "0190_kit_liberar_consultora",
+      "breakpoints": true
     }
   ]
 }

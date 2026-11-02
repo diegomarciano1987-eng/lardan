@@ -19356,6 +19356,7 @@ export type Database = {
         Args: { _cycle: string; _qty: number; _variant: string }
         Returns: Json
       }
+      kit_liberar_consultora: { Args: { _cycle: string }; Returns: Json }
       kit_location_ensure: { Args: { _kit_id: string }; Returns: string }
       kit_maleta_perdida: {
         Args: { _cycle: string; _data?: string; _motivo: string }

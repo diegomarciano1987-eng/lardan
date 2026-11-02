@@ -2238,6 +2238,75 @@ export type Database = {
           },
         ]
       }
+      central_leads_estado: {
+        Row: {
+          atualizado_em: string
+          id: boolean
+          pausado_conexao: boolean
+          pausado_motivo: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          id?: boolean
+          pausado_conexao?: boolean
+          pausado_motivo?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          id?: boolean
+          pausado_conexao?: boolean
+          pausado_motivo?: string | null
+        }
+        Relationships: []
+      }
+      central_leads_fila: {
+        Row: {
+          criado_em: string
+          duplicado: boolean | null
+          enviado_em: string | null
+          evento_id: string
+          id: number
+          lead_id: string
+          ocorrido_em: string
+          payload: Json
+          proxima_em: string
+          status: string
+          tentativas: number
+          ultimo_erro: string | null
+          ultimo_status_http: number | null
+        }
+        Insert: {
+          criado_em?: string
+          duplicado?: boolean | null
+          enviado_em?: string | null
+          evento_id: string
+          id?: number
+          lead_id: string
+          ocorrido_em: string
+          payload: Json
+          proxima_em?: string
+          status?: string
+          tentativas?: number
+          ultimo_erro?: string | null
+          ultimo_status_http?: number | null
+        }
+        Update: {
+          criado_em?: string
+          duplicado?: boolean | null
+          enviado_em?: string | null
+          evento_id?: string
+          id?: number
+          lead_id?: string
+          ocorrido_em?: string
+          payload?: Json
+          proxima_em?: string
+          status?: string
+          tentativas?: number
+          ultimo_erro?: string | null
+          ultimo_status_http?: number | null
+        }
+        Relationships: []
+      }
       chart_of_accounts: {
         Row: {
           aceita_lancamento: boolean
@@ -17967,6 +18036,10 @@ export type Database = {
       }
       catalog_street_value: { Args: never; Returns: Json }
       categoria_por_nome: { Args: { _nome: string }; Returns: string }
+      central_leads_payload: {
+        Args: { l: Database["public"]["Tables"]["leads"]["Row"] }
+        Returns: Json
+      }
       claim_master_role: { Args: never; Returns: boolean }
       clicksign_modo_definir: {
         Args: { _autenticacao?: string; _modo: string }

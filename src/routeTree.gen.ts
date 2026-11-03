@@ -53,6 +53,7 @@ import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as DCodigoRouteImport } from './routes/d.$codigo'
 import { Route as GuiaSemijoiaFolheadoOuBijuteriaRouteImport } from './routes/guia.semijoia-folheado-ou-bijuteria'
 import { Route as IndicacaoCodigoRouteImport } from './routes/indicacao.$codigo'
+import { Route as PedidoTokenRouteImport } from './routes/pedido.$token'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
 import { Route as SemijoiasCategoriaRouteImport } from './routes/semijoias.$categoria'
@@ -361,6 +362,11 @@ const GuiaSemijoiaFolheadoOuBijuteriaRoute =
 const IndicacaoCodigoRoute = IndicacaoCodigoRouteImport.update({
   id: '/indicacao/$codigo',
   path: '/indicacao/$codigo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PedidoTokenRoute = PedidoTokenRouteImport.update({
+  id: '/pedido/$token',
+  path: '/pedido/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProdutoSlugRoute = ProdutoSlugRouteImport.update({
@@ -882,6 +888,7 @@ export interface FileRoutesByFullPath {
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
+  '/pedido/$token': typeof PedidoTokenRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -1008,6 +1015,7 @@ export interface FileRoutesByTo {
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
+  '/pedido/$token': typeof PedidoTokenRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -1136,6 +1144,7 @@ export interface FileRoutesById {
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
+  '/pedido/$token': typeof PedidoTokenRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -1265,6 +1274,7 @@ export interface FileRouteTypes {
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
     | '/indicacao/$codigo'
+    | '/pedido/$token'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -1391,6 +1401,7 @@ export interface FileRouteTypes {
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
     | '/indicacao/$codigo'
+    | '/pedido/$token'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -1518,6 +1529,7 @@ export interface FileRouteTypes {
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
     | '/indicacao/$codigo'
+    | '/pedido/$token'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -1643,6 +1655,7 @@ export interface RootRouteChildren {
   DCodigoRoute: typeof DCodigoRoute
   GuiaSemijoiaFolheadoOuBijuteriaRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   IndicacaoCodigoRoute: typeof IndicacaoCodigoRoute
+  PedidoTokenRoute: typeof PedidoTokenRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
   SitemapProductsPaginaRoute: typeof SitemapProductsPaginaRoute
@@ -1971,6 +1984,13 @@ declare module '@tanstack/react-router' {
       path: '/indicacao/$codigo'
       fullPath: '/indicacao/$codigo'
       preLoaderRoute: typeof IndicacaoCodigoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedido/$token': {
+      id: '/pedido/$token'
+      path: '/pedido/$token'
+      fullPath: '/pedido/$token'
+      preLoaderRoute: typeof PedidoTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/produto/$slug': {
@@ -2800,6 +2820,7 @@ const rootRouteChildren: RootRouteChildren = {
   DCodigoRoute: DCodigoRoute,
   GuiaSemijoiaFolheadoOuBijuteriaRoute: GuiaSemijoiaFolheadoOuBijuteriaRoute,
   IndicacaoCodigoRoute: IndicacaoCodigoRoute,
+  PedidoTokenRoute: PedidoTokenRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,
   SitemapProductsPaginaRoute: SitemapProductsPaginaRoute,

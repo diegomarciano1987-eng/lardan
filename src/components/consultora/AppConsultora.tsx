@@ -985,10 +985,8 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
           </div>
           {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} />}
           {cl && linkWhats(cl.telefone) && (
-            <a className="btn-app-principal w-full" target="_blank" rel="noreferrer"
-              href={linkWhats(cl.telefone, `Olá, ${cl.nome.split(" ")[0]}! Anotei seu pedido ${resultado.codigo}:\n${escolhidas.map((p) => `• ${qtd[k(p)]}x ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents * (qtd[k(p)] ?? 0))}`).join("\n")}\nTotal: ${brl(resultado.total_cents)}${combinadoTexto ? `\nPagamento combinado: ${combinadoTexto}` : ""}\nGarantia de dois anos seguindo o manual: ${MANUAL_CUIDADOS_URL}`) ?? undefined}>
-              <MessageCircle className="size-5" aria-hidden /> Enviar resumo pelo WhatsApp
-            </a>
+            <ResumoWhats orderId={resultado.order_id} telefone={cl.telefone} cliente={cl.nome} codigo={resultado.codigo} total={resultado.total_cents} combinado={combinadoTexto}
+              itensLocais={escolhidas.map((p) => ({ nome: p.produto, variante: p.variante, quantidade: qtd[k(p)] ?? 0, unitario_cents: p.preco_cents, referencia: null }))} />
           )}
           <Link to="/consultora-garantia/$id" params={{ id: resultado.order_id }} target="_blank" className="btn-app-principal w-full"><FileText className="size-5" aria-hidden /> Comprovante e certificado de garantia</Link>
           <button type="button" className="admin-btn min-h-13 w-full justify-center text-base" onClick={() => ir({ aba: "pedidos" })}>Ver meus pedidos</button>

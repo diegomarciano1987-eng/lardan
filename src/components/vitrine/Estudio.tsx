@@ -56,6 +56,12 @@ export function Estudio() {
       }
       setD(base);
       setRev(q.data.revisao);
+      // Endereço automático com nome e sobrenome (sem repetir); ela pode trocar depois.
+      if (!base.slug && (c?.nome || base.perfil.nome)) {
+        void sugerirEndereco(c?.nome || base.perfil.nome).then((slug) => {
+          if (slug) { pendente.current = true; setD((x) => (x && !x.slug ? { ...structuredClone(x), slug } : x)); }
+        });
+      }
       revRef.current = q.data.revisao;
     }
   }, [q.data, d]);
@@ -109,6 +115,12 @@ export function Estudio() {
     setOcupado(true);
     try {
       const r = await estudioPublicar(revRef.current);
+      const zap = (d?.contato.whatsapp ?? "").replace(/\D/g, "");
+      const zapCadastro = (dados.cadastro?.whatsapp ?? "").replace(/\D/g, "");
+      if (zap.length >= 10 && zap !== zapCadastro) {
+        // Número novo vira contato adicional no cockpit; o principal do cadastro não muda.
+        void supabase.rpc("vitrine_whatsapp_registrar" as never, { _numero: zap } as never);
+      }
       toast.success(r.repetido ? "Nada mudou desde a última publicação." : "Vitrine publicada! Clientes já veem a nova versão.");
       await recarregar();
     } catch (e) { toast.error(traduzir(e)); } finally { setOcupado(false); }
@@ -179,6 +191,7 @@ export function Estudio() {
             {estado === "falhou" && <><CloudOff className="size-3" /> Não salvou. Verifique sua internet — tentaremos de novo na próxima alteração.</>}
             {estado === "conflito" && <>Sua vitrine foi alterada em outra aba. <button type="button" className="underline" onClick={() => void recarregar()}>Carregar a versão mais nova</button></>}
           </p>
+          {dados.no_ar && dados.slug && <BotoesCompartilhar url={`${origem}/${dados.slug}`} nome={d.perfil.nome} />}
           <p className="mt-0.5 text-xs text-ledger-muted">
             {dados.no_ar && dados.slug ? <>No ar em <a className="underline" href={`/${dados.slug}`} target="_blank" rel="noreferrer">{origem.replace(/^https?:\/\//, "")}/{dados.slug}</a></> : "Sua vitrine ainda não está no ar."}
           </p>
@@ -273,7 +286,7 @@ function PainelContato({ d, muda }: { d: DesignVitrine; muda: Muda }) {
   return (
     <div className="space-y-4">
       <Publico />
-      <Campo rotulo="WhatsApp com DDD" dica="Obrigatório para publicar. É por ele que as clientes enviam o interesse.">
+      <Campo rotulo="WhatsApp que recebe os pedidos da vitrine" dica="Mudou de número? Troque aqui e publique: todos os botões de WhatsApp da vitrine passam a usar este número. A Lardan recebe ele como contato adicional; seu cadastro não muda.">
         <input className="admin-input" inputMode="tel" value={c.whatsapp} placeholder="43 99999-9999" onChange={(e) => set("whatsapp", e.target.value.replace(/[^0-9 ()+-]/g, ""))} />
       </Campo>
       <Campo rotulo="Horários de atendimento" limite={LIMITES.horarios} valor={d.perfil.horarios}>
@@ -668,5 +681,43 @@ function SituacaoEndereco({ slug }: { slug: string }) {
     <p id="slug-situacao" role="status" className={`mt-1.5 text-xs font-semibold ${!info ? "text-ledger-muted" : info.ok ? "text-success" : "text-danger"}`}>
       {info ? `${info.ok ? "✓" : "✕"} ${info.t}` : "Conferindo…"}
     </p>
+  );
+}
+
+/** Gera "nome-sobrenome" sem acento; se já tiver dona, tenta -2, -3… */
+async function sugerirEndereco(nome: string): Promise<string | null> {
+  const partes = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter((x) => x.length > 1);
+  if (!partes.length) return null;
+  const base = (partes.length > 1 ? `${partes[0]}-${partes[partes.length - 1]}` : partes[0]!).slice(0, 36);
+  for (let i = 1; i <= 20; i++) {
+    const slug = i === 1 ? base : `${base}-${i}`;
+    const { data } = await supabase.rpc("vitrine_endereco_disponivel" as never, { _slug: slug } as never);
+    const m = (data as { motivo?: string } | null)?.motivo;
+    if (m === "livre" || m === "seu") return slug;
+    if (m !== "em_uso" && m !== "reservado") return null;
+  }
+  return null;
+}
+
+/** Compartilhar fácil: abre a lista do celular (WhatsApp, Instagram…) ou copia o link. */
+function BotoesCompartilhar({ url, nome }: { url: string; nome: string }) {
+  const [copiado, setCopiado] = React.useState(false);
+  const texto = `Conheça minha vitrine de semijoias LARDAN${nome ? `, com ${nome}` : ""}:`;
+  const copiar = async () => {
+    try { await navigator.clipboard.writeText(url); } catch { window.prompt("Copie o link:", url); }
+    setCopiado(true); toast.success("Link copiado! Já pode colar no WhatsApp ou no Instagram.");
+    setTimeout(() => setCopiado(false), 2500);
+  };
+  const compartilhar = async () => {
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try { await navigator.share({ title: "Minha vitrine LARDAN", text: texto, url }); return; } catch (e) { if ((e as Error)?.name === "AbortError") return; }
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(`${texto} ${url}`)}`, "_blank", "noopener");
+  };
+  return (
+    <div className="mt-3 grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
+      <button type="button" onClick={() => void compartilhar()} className="admin-btn admin-btn-primary min-h-12 text-base"><Share2 className="size-5" /> Compartilhar vitrine</button>
+      <button type="button" onClick={() => void copiar()} className="admin-btn min-h-12 text-base">{copiado ? <Check className="size-5" /> : <Copy className="size-5" />} {copiado ? "Link copiado!" : "Copiar link da vitrine"}</button>
+    </div>
   );
 }

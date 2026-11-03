@@ -35,6 +35,7 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
   const [res, setRes] = React.useState<Awaited<ReturnType<typeof consultoraCobrancaGerar>> | null>(null);
   const [lembrete, setLembrete] = React.useState<string | null>(null);
   const [pagoDinheiro, setPagoDinheiro] = React.useState(false);
+  const [erroCobranca, setErroCobranca] = React.useState<string | null>(null);
 
   const situacao = useQuery({
     queryKey: ["consultora-pagamento", pedido],
@@ -49,8 +50,9 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
 
   const m = useMutation({
     mutationFn: () => gerar({ data: { pedido, forma: forma as "pix" | "cartao", cpf, vencimento: null } }),
+    onMutate: () => setErroCobranca(null),
     onSuccess: (r) => { setRes(r); void qc.invalidateQueries({ queryKey: ["consultora"] }); },
-    onError: (e) => toast.error((e as Error).message),
+    onError: (e) => { const msg = (e as Error).message; setErroCobranca(msg); toast.error(msg); },
   });
   const dinheiro = useMutation({
     mutationFn: async () => {
@@ -174,6 +176,13 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
           <button type="button" className="btn-app-principal w-full" disabled={cpf.length !== 11 || m.isPending} onClick={() => m.mutate()}>
             {m.isPending ? "Gerando…" : `Gerar cobrança de ${brl(total)}`}
           </button>
+          {erroCobranca && (
+            <div role="alert" className="space-y-2 rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-[0.98rem]">
+              <p className="font-semibold">Não deu para gerar a cobrança</p>
+              <p>{erroCobranca}</p>
+              <p className="text-muted-foreground">A venda não se perde: corrija e tente de novo, ou escolha “Cliente pagou em dinheiro” ou “Receber depois”.</p>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -548,8 +548,13 @@ function FichaPessoa() {
                     <span className="w-24 text-xs font-semibold tracking-[0.08em] text-bronze uppercase">
                       {c.kind}
                     </span>
-                    <span className="num flex-1 text-sm font-medium text-ledger-text">
-                      {c.value}
+                    <span className="flex-1">
+                      <span className="num block text-sm font-medium text-ledger-text">{c.value}</span>
+                      {(c.label || !c.is_primary) && (
+                        <span className="block text-xs text-ledger-muted">
+                          {c.label ?? "Contato adicional"}
+                        </span>
+                      )}
                     </span>
                     {podeEditar && (
                       <button

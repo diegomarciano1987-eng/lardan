@@ -109,7 +109,7 @@ function RemessaPage() {
   const liberarMaleta = useMutation({
     mutationFn: (cycleId: string) => liberarParaConsultora(cycleId),
     onSuccess: (r) => {
-      toast.success(r.repetida ? "Esta maleta já estava com a consultora." : "Maleta liberada: já está com a consultora.");
+      toast.success(r.repetida ? "Esta maleta já foi entregue à consultora." : "Entrega confirmada. Agora a consultora confere e aceita a maleta no app dela.");
       qc.invalidateQueries({ queryKey: ["remessas"] });
       qc.invalidateQueries({ queryKey: ["maletas"] });
     },
@@ -285,11 +285,14 @@ function RemessaPage() {
                 <button type="button" className="admin-btn h-9 px-3 text-xs" disabled title="A emissão da nota fiscal ainda está em homologação; o botão fica aqui e será liberado quando a emissão real for ligada.">
                   <Receipt aria-hidden className="size-3.5" /> Nota fiscal (em breve)
                 </button>
-                {podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito", "recebida"].includes(m.status) && (
+                {podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (
                   <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || liberarMaleta.isPending}
                     onClick={() => liberarMaleta.mutate(m.cycle_id)}>
-                    <CheckCircle2 aria-hidden className="size-3.5" /> {liberarMaleta.isPending && liberarMaleta.variables === m.cycle_id ? "Liberando…" : "Liberar maleta"}
+                    <CheckCircle2 aria-hidden className="size-3.5" /> {liberarMaleta.isPending && liberarMaleta.variables === m.cycle_id ? "Confirmando…" : "Confirmar entrega"}
                   </button>
+                )}
+                {m.status === "recebida" && (
+                  <span className="inline-flex h-9 items-center rounded-full bg-muted px-3 text-xs text-ledger-muted">Aguardando aceite da consultora</span>
                 )}
               </div>
               <div className="flex items-center gap-6 text-sm">

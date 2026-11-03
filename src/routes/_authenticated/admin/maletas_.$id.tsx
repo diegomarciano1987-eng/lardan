@@ -127,7 +127,7 @@ function MaletaFicha() {
   const liberarM = useMutation({
     mutationFn: () => liberarParaConsultora(id),
     onSuccess: (r) => {
-      toast.success(r.repetida ? "Esta maleta já estava com a consultora." : "Maleta liberada: já está com a consultora.");
+      toast.success(r.repetida ? "Esta maleta já foi entregue à consultora." : "Entrega confirmada. Agora a consultora confere e aceita a maleta no app dela.");
       recarregar();
     },
     onError: (e) => toast.error(traduzir(e)),
@@ -489,19 +489,27 @@ function MaletaFicha() {
 
           {podeMontar && d.ciclo.consultora_party_id &&
             ["conferida", "expedida", "transito", "recebida"].includes(d.ciclo.status) && (
-            <Panel title="Liberar para a consultora">
-              <p className="text-sm text-ledger-muted">
-                Já conferida e impressa? Um clique entrega a maleta à consultora com todas as peças.
-                Fica registrado o seu login, a data e a hora.
-              </p>
-              <button
-                type="button"
-                className="admin-btn admin-btn-primary mt-4 w-full"
-                disabled={liberarM.isPending}
-                onClick={() => liberarM.mutate()}
-              >
-                <CheckCircle2 aria-hidden className="size-4" /> {liberarM.isPending ? "Liberando…" : "Liberar maleta para a consultora"}
-              </button>
+            <Panel title="Entregar para a consultora">
+              {d.ciclo.status === "recebida" ? (
+                <p className="text-sm text-ledger-muted">
+                  Entregue. Aguardando a consultora conferir e aceitar a maleta no app dela.
+                </p>
+              ) : (
+                <>
+                  <p className="text-sm text-ledger-muted">
+                    Já conferida e impressa? Um clique confirma a entrega. Depois, a consultora confere e aceita no app dela.
+                    Fica registrado o seu login, a data e a hora.
+                  </p>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-primary mt-4 w-full"
+                    disabled={liberarM.isPending}
+                    onClick={() => liberarM.mutate()}
+                  >
+                    <CheckCircle2 aria-hidden className="size-4" /> {liberarM.isPending ? "Confirmando…" : "Confirmar entrega à consultora"}
+                  </button>
+                </>
+              )}
             </Panel>
           )}
         </div>

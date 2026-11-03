@@ -1352,6 +1352,41 @@
       "when": 1793631140392,
       "tag": "0192_central_leads_fila",
       "breakpoints": true
+    },
+    {
+      "idx": 193,
+      "version": "7",
+      "when": 1793712633025,
+      "tag": "0193_kit_liberar_sem_aceite",
+      "breakpoints": true
+    },
+    {
+      "idx": 194,
+      "version": "7",
+      "when": 1793712864421,
+      "tag": "0194_vitrine_whatsapp_contato_adicional",
+      "breakpoints": true
+    },
+    {
+      "idx": 195,
+      "version": "7",
+      "when": 1793712898380,
+      "tag": "0195_vitrine_whatsapp_auditoria_fix",
+      "breakpoints": true
+    },
+    {
+      "idx": 196,
+      "version": "7",
+      "when": 1793713100565,
+      "tag": "0196_consultora_cobranca_cpf_cliente_relaxado",
+      "breakpoints": true
+    },
+    {
+      "idx": 197,
+      "version": "7",
+      "when": 1793713177650,
+      "tag": "0197_consultora_cobranca_cpf_consultora_recusada",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BarChart3, Briefcase, CalendarDays, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, PiggyBank, Search, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Briefcase, CalendarDays, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, PiggyBank, Search, Send, Sparkles, Users } from "lucide-react";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
@@ -12,12 +12,13 @@ import { PainelRepresentante } from "@/components/representante/PainelRepresenta
 import { brl, dataBR, repCobrancasLista, repConsultoras, repResumo, type FaixaCobranca } from "@/lib/representante";
 import { Captacao, CobrarParcela, ContatoCobranca } from "@/components/representante/AcoesRepresentante";
 import { AgendaVisitas, MaletasCarteira } from "@/components/representante/CampoRepresentante";
+import { EnviarConvites } from "@/components/representante/EnviarConvites";
 import { FichaConsultora } from "@/components/representante/FichaConsultora";
 import { MaletasRepresentante } from "@/components/representante/MaletasRepresentante";
 import { OperationalGlass } from "@/components/premium/OperationalGlass";
 import { FamiliaTrancada, FinanceiroFamilia } from "@/components/familia/FinanceiroFamilia";
 
-type Aba = "cobranca" | "consultoras" | "maletas" | "agenda" | "captacao" | "painel" | "familia";
+type Aba = "cobranca" | "consultoras" | "maletas" | "agenda" | "captacao" | "painel" | "familia" | "convites";
 const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = [
   { id: "cobranca", rotulo: "Acerto e cobrança", curto: "Cobrança", icone: HandCoins },
   { id: "consultoras", rotulo: "Consultoras", curto: "Carteira", icone: Users },
@@ -26,6 +27,7 @@ const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = 
   { id: "captacao", rotulo: "Captação", curto: "Captação", icone: Sparkles },
   { id: "painel", rotulo: "Painel", curto: "Painel", icone: BarChart3 },
   { id: "familia", rotulo: "Financeiro da família", curto: "Família", icone: PiggyBank },
+  { id: "convites", rotulo: "Enviar convite", curto: "Convite", icone: Send },
 ];
 const ESPELHO: AppRole[] = ["master", "diretoria", "financeiro", "cobranca"] as AppRole[];
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -153,7 +155,7 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
       <main className="flex-1 space-y-6 px-5 py-6 md:px-10">
         {!espelho && <div className="md:hidden"><InstalarApp /></div>}
         {resumo.error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{(resumo.error as Error).message}</p>}
-        {aba !== "familia" && <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {aba !== "familia" && aba !== "convites" && <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Kpi rotulo="Vencido" valor={s ? brl(s.vencido_cents) : "—"} destaque />
           <Kpi rotulo="Vence hoje" valor={s ? brl(s.hoje_cents) : "—"} />
           <Kpi rotulo="Em aberto" valor={s ? brl(s.aberto_cents) : "—"} sub={s ? `${s.parcelas} parcelas · ${s.devedoras} devedoras` : ""} />
@@ -165,6 +167,7 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
         {aba === "agenda" && <AgendaVisitas rep={rep} />}
         {aba === "captacao" && <Captacao rep={rep} espelho={espelho} />}
         {aba === "painel" && <PainelRepresentante rep={rep} />}
+        {aba === "convites" && <EnviarConvites rep={rep} />}
         {/* Família: dado pessoal do login. No espelho (Master/Daniel) fica trancada e nada é consultado. */}
         {aba === "familia" && (espelho ? <FamiliaTrancada /> : (
           <section className="space-y-4">

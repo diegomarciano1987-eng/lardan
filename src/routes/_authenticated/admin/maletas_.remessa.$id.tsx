@@ -109,7 +109,7 @@ function RemessaPage() {
   const liberarMaleta = useMutation({
     mutationFn: (cycleId: string) => liberarParaConsultora(cycleId),
     onSuccess: (r) => {
-      toast.success(r.repetida ? "Esta maleta já estava com a consultora." : "Maleta liberada: já está com a consultora.");
+      toast.success(r.repetida ? "Esta maleta já foi entregue à consultora." : "Entrega confirmada. Agora a consultora confere e aceita a maleta no app dela.");
       qc.invalidateQueries({ queryKey: ["remessas"] });
       qc.invalidateQueries({ queryKey: ["maletas"] });
     },

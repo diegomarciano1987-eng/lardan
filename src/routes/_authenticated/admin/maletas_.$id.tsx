@@ -127,7 +127,7 @@ function MaletaFicha() {
   const liberarM = useMutation({
     mutationFn: () => liberarParaConsultora(id),
     onSuccess: (r) => {
-      toast.success(r.repetida ? "Esta maleta já estava com a consultora." : "Maleta liberada: já está com a consultora.");
+      toast.success(r.repetida ? "Esta maleta já foi entregue à consultora." : "Entrega confirmada. Agora a consultora confere e aceita a maleta no app dela.");
       recarregar();
     },
     onError: (e) => toast.error(traduzir(e)),

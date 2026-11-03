@@ -44,6 +44,7 @@ export function EnviarConvites({ rep }: { rep: string }) {
       {q.isLoading && <p className="text-sm text-muted-foreground">Carregando…</p>}
       {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
       {q.data && q.data.itens.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma consultora encontrada na sua carteira.</p>}
+      {q.data && q.data.total > q.data.itens.length && <p className="text-xs text-muted-foreground">Mostrando as {q.data.itens.length} primeiras (ativas e sem acesso antes). Use a busca para achar as outras.</p>}
       <ul className="divide-y divide-border">
         {q.data?.itens.map((i) => {
           const s = SITUACAO(i);

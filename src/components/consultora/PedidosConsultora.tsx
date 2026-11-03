@@ -47,9 +47,14 @@ function useLinksPedidos(ids: string[]) {
   return new Map(ids.map((id, n) => [id, qs[n]?.data ? linkPedidoPublico(qs[n].data as string) : null]));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, mudar, cancelar, aberto, detalhe }: any) {
-  const links = useLinksPedidos((visiveis as PedidoResumo[]).filter((p) => p.status !== "cancelado").map((p) => p.id));
+function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, mudar, cancelar, aberto, detalhe }: {
+  lista: PedidoResumo[]; visiveis: PedidoResumo[]; aba: typeof GRUPOS[number]; setAba: (g: typeof GRUPOS[number]) => void;
+  setCancelar: (p: PedidoResumo | null) => void; setAberto: (p: PedidoResumo | null) => void;
+  mudar: { isPending: boolean; mutate: (v: { id: string; status: string }) => void };
+  cancelar: PedidoResumo | null; aberto: PedidoResumo | null;
+  detalhe: { isLoading: boolean; isError: boolean; error: unknown; data: Awaited<ReturnType<typeof detalhePedido>> | null | undefined };
+}) {
+  const links = useLinksPedidos(visiveis.filter((p) => p.status !== "cancelado").map((p) => p.id));
   return <div className="space-y-7">
     <div role="tablist" aria-label="Situação dos pedidos" className="grid grid-cols-2 gap-3 lg:grid-cols-4">{GRUPOS.map((g) => {
       const itens = lista.filter((p) => grupo(p) === g);

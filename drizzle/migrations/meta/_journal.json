@@ -1380,6 +1380,13 @@
       "when": 1793713100565,
       "tag": "0196_consultora_cobranca_cpf_cliente_relaxado",
       "breakpoints": true
+    },
+    {
+      "idx": 197,
+      "version": "7",
+      "when": 1793713177650,
+      "tag": "0197_consultora_cobranca_cpf_consultora_recusada",
+      "breakpoints": true
     }
   ]
 }

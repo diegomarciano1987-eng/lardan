@@ -25,7 +25,7 @@ describe("máscara do WhatsApp no Estúdio", () => {
   });
 
   it("DDD inexistente e fixo em campo de celular dão recado claro", () => {
-    expect(normalizarWhatsapp("99999999999").erro).toBe("DDD inexistente no Brasil.");
+    expect(normalizarWhatsapp("10999999999").erro).toBe("DDD inexistente no Brasil.");
     expect(normalizarWhatsapp("43333333333").erro).toBe("WhatsApp precisa ser celular: o número começa com 9.");
   });
 

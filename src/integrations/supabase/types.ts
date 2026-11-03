@@ -4040,6 +4040,108 @@ export type Database = {
           },
         ]
       }
+      consultora_acerto_ajustes: {
+        Row: {
+          abatido_cents: number
+          compensado_cents: number
+          consultora_party_id: string
+          created_at: string
+          cycle_id: string
+          id: string
+          motivo: string
+          order_id: string
+          pre_baixa_id: string
+          tipo: string
+          title_id: string | null
+          valor_cents: number
+        }
+        Insert: {
+          abatido_cents?: number
+          compensado_cents?: number
+          consultora_party_id: string
+          created_at?: string
+          cycle_id: string
+          id?: string
+          motivo: string
+          order_id: string
+          pre_baixa_id: string
+          tipo: string
+          title_id?: string | null
+          valor_cents: number
+        }
+        Update: {
+          abatido_cents?: number
+          compensado_cents?: number
+          consultora_party_id?: string
+          created_at?: string
+          cycle_id?: string
+          id?: string
+          motivo?: string
+          order_id?: string
+          pre_baixa_id?: string
+          tipo?: string
+          title_id?: string | null
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultora_acerto_ajustes_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_acerto_ajustes_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_acerto_ajustes_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "consultora_acerto_ajustes_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_acerto_ajustes_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_acerto_ajustes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_acerto_ajustes_pre_baixa_id_fkey"
+            columns: ["pre_baixa_id"]
+            isOneToOne: false
+            referencedRelation: "kit_pre_baixas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_acerto_ajustes_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultora_cobranca_config: {
         Row: {
           ator_user_id: string
@@ -17607,6 +17709,14 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      acerto_ajuste_conciliar: {
+        Args: { _aplicar?: boolean; _order: string }
+        Returns: Json
+      }
+      acerto_ajustes_reprocessar: {
+        Args: { _aplicar?: boolean }
+        Returns: Json
+      }
       address_geo_fingerprint: {
         Args: {
           _city: string
@@ -19494,6 +19604,7 @@ export type Database = {
         Args: { _cycle: string; _payload?: Json }
         Returns: Json
       }
+      kit_ve_rede: { Args: never; Returns: boolean }
       legado_acertos_distribuir: { Args: { _chaves: Json }; Returns: number }
       legado_bi_alertas: {
         Args: { _limite?: number; _praca?: number; _representante?: number }
@@ -20215,6 +20326,10 @@ export type Database = {
         Returns: Json
       }
       pre_baixa_calculo: { Args: { _pb: string }; Returns: Json }
+      pre_baixa_comissao_final: {
+        Args: { _p: Database["public"]["Tables"]["kit_pre_baixas"]["Row"] }
+        Returns: number
+      }
       pre_baixa_conferir: {
         Args: { _aplicar?: boolean; _cycle: string; _leituras: Json }
         Returns: Json

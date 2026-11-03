@@ -82,6 +82,13 @@ function ConvitePage() {
           options: { emailRedirectTo: `${window.location.origin}/convite/${token}` },
         });
         if (error) throw error;
+        // 0199: e-mail que já tem conta — o Supabase não dá erro nem manda e-mail (proteção contra enumeração),
+        // e a consultora ficava esperando uma confirmação que nunca chega.
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          setModo("entrar");
+          setAviso("Este e-mail já tem conta na Lardan. Entre com a senha que você já usa. Se não lembra, toque em “Esqueci minha senha”.");
+          return;
+        }
         if (!data.session) {
           setAviso("Enviamos um e-mail de confirmação. Abra-o neste aparelho e toque no link para concluir o aceite.");
           return;

@@ -160,9 +160,12 @@ describe("3. CPF na cobrança da consultora", () => {
     const cli = (await um<{ id: string }>(
       `insert into public.parties (kind, display_name, legal_name, doc, doc_digits, status) values ('pessoa','Ana Souza','Ana Souza',$1,$1,'ativo') returning id`, [doc])).id;
     await adm.unsafe(`insert into public.party_roles (party_id, role) values ($1,'candidata')`, [cli]);
-    const r = await rpc(consultora, "consultora_pagamento_titulo", { _order: pedido, _forma: "pix", _doc: doc, _venc: null });
+    const novo = (await um<{ id: string }>(
+      `insert into public.sales_orders (consultora_party_id, customer_name, subtotal_cents, status) values ($1,'Ana Paula',9490,'em_atendimento') returning id`,
+      [await partyDe(consultora)])).id;
+    const r = await rpc(consultora, "consultora_pagamento_titulo", { _order: novo, _forma: "pix", _doc: doc, _venc: null });
     expect(r.erro).toBeNull();
-    const o = await um<{ p: string }>(`select pay_party_id p from public.sales_orders where id=$1`, [pedido]);
+    const o = await um<{ p: string }>(`select pay_party_id p from public.sales_orders where id=$1`, [novo]);
     expect(o.p).toBe(cli);
   });
 

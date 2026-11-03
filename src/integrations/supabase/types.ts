@@ -19494,6 +19494,7 @@ export type Database = {
         Args: { _cycle: string; _payload?: Json }
         Returns: Json
       }
+      kit_ve_rede: { Args: never; Returns: boolean }
       legado_acertos_distribuir: { Args: { _chaves: Json }; Returns: number }
       legado_bi_alertas: {
         Args: { _limite?: number; _praca?: number; _representante?: number }

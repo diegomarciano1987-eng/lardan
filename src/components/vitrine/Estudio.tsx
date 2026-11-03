@@ -7,6 +7,7 @@ import {
   Laptop, Loader2, Palette, Plus, Share2, Smartphone, Sparkles, Star, Store, Trash2, User, LayoutGrid, MessageCircle, Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { formatarTelefone, normalizarWhatsapp } from "@/lib/br/canonico";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { VitrineView } from "@/components/vitrine/VitrineView";
 import { RecorteFoto } from "@/components/vitrine/RecorteFoto";
@@ -283,11 +284,24 @@ function PainelContato({ d, muda }: { d: DesignVitrine; muda: Muda }) {
   const c = d.contato;
   const set = (k: keyof DesignVitrine["contato"], v: string) => muda((x) => { x.contato[k] = v; return x; });
   const msg = d.perfil.mensagem;
+  const zap = normalizarWhatsapp(c.whatsapp);
+  const recadoZap = c.whatsapp.trim() && zap.estado !== "valido" ? zap.erro : null;
   return (
     <div className="space-y-4">
       <Publico />
       <Campo rotulo="WhatsApp que recebe os pedidos da vitrine" dica="Mudou de número? Troque aqui e publique: todos os botões de WhatsApp da vitrine passam a usar este número. A Lardan recebe ele como contato adicional; seu cadastro não muda.">
-        <input className="admin-input" inputMode="tel" value={c.whatsapp} placeholder="43 99999-9999" onChange={(e) => set("whatsapp", e.target.value.replace(/[^0-9 ()+-]/g, ""))} />
+        <input
+          className="admin-input"
+          inputMode="tel"
+          maxLength={15}
+          value={c.whatsapp}
+          placeholder="(43) 99999-9999"
+          onChange={(e) => set("whatsapp", formatarTelefone(e.target.value))}
+          aria-invalid={recadoZap ? "true" : undefined}
+        />
+        {recadoZap ? (
+          <p className="mt-1 text-xs text-ledger-muted" role="note">{recadoZap}</p>
+        ) : null}
       </Campo>
       <Campo rotulo="Horários de atendimento" limite={LIMITES.horarios} valor={d.perfil.horarios}>
         <input className="admin-input" value={d.perfil.horarios} placeholder="Ex.: seg. a sáb., das 9h às 19h" onChange={(e) => muda((x) => { x.perfil.horarios = e.target.value.slice(0, LIMITES.horarios); return x; })} />

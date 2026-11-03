@@ -14,7 +14,7 @@ beforeAll(async () => {
   rep2 = await criarConta({ nome: `rc-rep2-${marca}`, papeis: ["representante"], comParty: true });
   minha = await criarConta({ nome: `rc-minha-${marca}`, papeis: ["consultora"], comParty: true });
   outra = await criarConta({ nome: `rc-outra-${marca}`, papeis: ["consultora"], comParty: true });
-  semConta = ((await adm.unsafe(`insert into public.parties (display_name, kind) values ($1,'pf') returning id`, [`rc-nova-${marca}`])) as { id: string }[])[0]!.id;
+  semConta = ((await adm.unsafe(`insert into public.parties (display_name, kind) values ($1,'pessoa') returning id`, [`rc-nova-${marca}`])) as { id: string }[])[0]!.id;
   for (const [p, r] of [[minha.partyId!, rep], [semConta, rep], [outra.partyId!, rep2]] as [string, Conta][]) {
     await adm.unsafe(`insert into public.party_roles (party_id, role, status) values ($1,'consultora','ativo') on conflict (party_id, role) do update set status='ativo'`, [p]);
     await adm.unsafe(`insert into public.consultant_profiles (party_id, representative_party_id) values ($1,$2)

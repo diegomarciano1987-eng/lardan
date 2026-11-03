@@ -207,8 +207,13 @@ describe("3. consultora recebe; cockpit e representante enxergam", () => {
       await tx.unsafe(`update public.profiles set party_id=$2 where id=$1`, [consultoraLogin.uid, ana]);
     });
     consultoraLogin = { ...consultoraLogin, partyId: ana };
-    const t = (await um<{ id: string }>(`select id from public.kit_transfers where cycle_id=$1 order by seq limit 1`, [ciclo])).id;
-    expect((await rpc(consultoraLogin, "kit_transfer_confirm", { _transfer: t, _payload: {} })).erro).toBeNull();
+    // 0193: a equipe confirma a entrega em 1 clique, mas NUNCA aceita no lugar dela.
+    const lib = await rpc<{ situacao: string; aguarda_aceite: boolean }>(colab, "kit_liberar_consultora", { _cycle: ciclo });
+    expect(lib.erro).toBeNull();
+    expect(lib.dados.situacao).toBe("recebida");
+    expect((await um<{ n: number }>(`select count(*)::int n from public.kit_acceptances where cycle_id=$1`, [ciclo])).n).toBe(0);
+    expect((await um<{ s: string }>(`select status::text s from public.kit_cycles where id=$1`, [ciclo])).s).toBe("recebida");
+    expect((await rpc<{ repetida: boolean }>(colab, "kit_liberar_consultora", { _cycle: ciclo })).dados.repetida).toBe(true);
     const ace = await rpc(consultoraLogin, "kit_aceitar", {
       _cycle: ciclo, _idempotency_key: `1a-${base}-aceite`,
       _itens: [{ variant_id: vBracelete, qty_accepted: 6, qty_divergent: 0 }, { variant_id: vBrinco, qty_accepted: 20, qty_divergent: 0 }],

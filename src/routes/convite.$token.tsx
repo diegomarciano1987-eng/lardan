@@ -170,7 +170,7 @@ function ConvitePage() {
           </>
         )}
         {aviso && <p className="mt-4 rounded-xl bg-muted p-4 text-sm text-foreground">{aviso}</p>}
-        {erro && <p className="mt-4 rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{erro}</p>}
+        {erro && !(session && /outro e-mail|divergen/i.test(erro)) && <p className="mt-4 rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{erro}</p>}
       </div>
     </main>
   );

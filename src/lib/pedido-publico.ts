@@ -17,8 +17,29 @@ export type PedidoPublico = {
   itens: ItemPublico[];
 };
 
+export const SITE_PUBLICO = "https://www.lardan.com.br";
+
+/** Endereço completo (com https://) para mandar no WhatsApp. Fora do site oficial usa o domínio oficial. */
+export function urlPublica(caminho: string, origem?: string) {
+  if (/^https?:\/\//i.test(caminho)) return caminho;
+  const o = origem ?? (typeof window !== "undefined" ? window.location.origin : "");
+  const base = /^https:\/\/([a-z0-9-]+\.)*lardan\.com\.br$/i.test(o) ? o : SITE_PUBLICO;
+  return `${base}${caminho.startsWith("/") ? "" : "/"}${caminho}`;
+}
+
+/** Foto pública de uma peça, já com endereço completo. */
+export const fotoPecaUrl = (mediaId: string | null | undefined, origem?: string) =>
+  mediaId ? urlPublica(`/api/public/midia/${mediaId}`, origem) : null;
+
+export const linkPedidoPublico = (token: string, origem?: string) => urlPublica(`/pedido/${token}`, origem);
+
 export const fotoPedido = (token: string, media: string | null | undefined) =>
   media ? `/api/public/pedido-foto/${token}/${media}` : null;
+
+/** Linha de uma peça com referência (quando houver). */
+export function linhaPeca(i: { quantidade: number; nome: string; variante?: string | null; referencia?: string | null; valor_cents: number }) {
+  return `• ${i.quantidade}x ${i.nome}${i.variante ? ` (${i.variante})` : ""}${i.referencia ? ` · Ref. ${i.referencia}` : ""} — ${brl(i.valor_cents)}`;
+}
 
 /** Resumo que a consultora manda à cliente: peça, variante, referência, valor e o link da página com as fotos. */
 export function mensagemResumoPedido(a: {
@@ -30,8 +51,7 @@ export function mensagemResumoPedido(a: {
   link?: string | null;
   manual: string;
 }) {
-  const linhas = a.itens.map((i) =>
-    `• ${i.quantidade}x ${i.nome}${i.variante ? ` (${i.variante})` : ""}${i.referencia ? ` · Ref. ${i.referencia}` : ""} — ${brl(i.unitario_cents * i.quantidade)}`);
+  const linhas = a.itens.map((i) => linhaPeca({ ...i, valor_cents: i.unitario_cents * i.quantidade }));
   return [
     `Olá, ${a.cliente.trim().split(/\s+/)[0]}! Anotei seu pedido ${a.codigo}:`,
     ...linhas,

@@ -172,8 +172,12 @@ export const convidarConsultora = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       party = pid as unknown as string;
     } else {
-      const { error } = await sb.rpc("consultora_ativar" as never, { _party: party } as never);
-      if (error) throw new Error(error.message);
+      // Já ativa (ex.: representante convidando a própria carteira): não precisa reativar.
+      const { data: pre } = await sb.rpc("consultora_acesso_situacao" as never, { _party: party } as never);
+      if (!(pre as { consultora_ativa?: boolean } | null)?.consultora_ativa) {
+        const { error } = await sb.rpc("consultora_ativar" as never, { _party: party } as never);
+        if (error) throw new Error(error.message);
+      }
     }
     const { data: sit, error: e1 } = await sb.rpc("consultora_acesso_situacao" as never, { _party: party } as never);
     if (e1) throw new Error(e1.message);

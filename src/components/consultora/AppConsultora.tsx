@@ -1060,7 +1060,7 @@ function ResumoWhats(a: { orderId: string; telefone: string; cliente: string; co
   });
   const link = q.data ? `${window.location.origin}/pedido/${q.data.token}` : null;
   const texto = mensagemResumoPedido({
-    cliente: a.cliente, codigo: a.codigo, total_cents: a.total, combinado: a.combinado, manual: MANUAL_CUIDADOS_URL, link,
+    cliente: a.cliente, codigo: a.codigo, total_cents: a.total, combinado: a.combinado ?? null, manual: MANUAL_CUIDADOS_URL, link,
     itens: q.data?.pedido?.itens ?? a.itensLocais,
   });
   return (

@@ -1,3 +1,4 @@
+import { marcarAppConsultora } from "@/components/vitrine/VoltarAoApp";
 import { Biblioteca } from "@/components/consultora/Biblioteca";
 import { AcertoApp } from "@/components/consultora/AcertoApp";
 import { MeuFinanceiro } from "@/components/consultora/MeuFinanceiro";
@@ -544,6 +545,7 @@ function AreaConsultora() {
 
 function AreaConsultoraLiberada() {
   const { user } = useRouteContext({ from: "/_authenticated" });
+  React.useEffect(() => { marcarAppConsultora(); }, []);
   const nav = Route.useSearch() as Nav;
   const [navImediata, setNavImediata] = React.useState<Nav>(nav);
   React.useEffect(() => { setNavImediata(nav); }, [nav]);

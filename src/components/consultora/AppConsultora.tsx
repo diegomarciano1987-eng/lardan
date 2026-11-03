@@ -538,7 +538,12 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
     const ig = (f.instagram ?? "").trim().toLowerCase().replace(/^(https?:\/\/)?(www\.|m\.)?instagram\.com\//, "").replace(/^@/, "").replace(/[/?#].*$/, "");
     if (ig && !/^[a-z0-9._]{1,30}$/.test(ig)) er["instagram"] = "Confira o Instagram: use @usuario ou o link do perfil.";
     if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) er["email"] = "Confira o e-mail, por exemplo maria@gmail.com.";
+    const nasc = f.aniversario ?? "";
+    if (!nasc) er["aniversario"] = "Escolha o dia, o mês e o ano de nascimento da cliente.";
+    else if (nasc > hojeISO()) er["aniversario"] = "A data de nascimento não pode ser no futuro.";
     setErros(er);
+    const faltam = avisoFaltando(er);
+    if (faltam) toast.error(faltam, { duration: 7000 });
     if (Object.keys(er).length === 0 && !salvar.isPending) salvar.mutate();
   };
   const campo = (k: keyof Cliente) => ({ value: (f[k] as string) ?? "", onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value }) });
@@ -563,7 +568,7 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
         <Campo rotulo="E-mail" dica="Opcional." erro={erros["email"]}>
           <input className="admin-input min-h-14 text-[1.05rem]" type="email" inputMode="email" autoComplete="off" {...campo("email")} />
         </Campo>
-        <Campo rotulo="Aniversário" dica="Opcional. Ajuda a lembrar de uma mensagem especial.">
+        <Campo rotulo="Data de nascimento" obrigatorio dica="Ajuda a lembrar do aniversário dela com uma mensagem especial." erro={erros["aniversario"]}>
           <DateField value={deIso(f.aniversario ?? null)} onChange={(d) => setF({ ...f, aniversario: iso(d) })} fromYear={1930} toYear={new Date().getFullYear()} shortcuts={false} />
         </Campo>
         <Campo rotulo="Do que ela gosta" dica="Ex.: brincos pequenos, prata, presente para a filha.">
@@ -583,6 +588,16 @@ export function FormCliente({ id, ir, depois }: { id?: string | undefined; ir: I
       </form>
     </div>
   );
+}
+
+const ROTULOS_CLIENTE: Record<string, string> = { nome: "o nome", telefone: "o telefone / WhatsApp", aniversario: "a data de nascimento", instagram: "o Instagram", email: "o e-mail" };
+
+/** Recado amigável dizendo o que falta preencher corretamente. */
+export function avisoFaltando(er: Record<string, string>): string | null {
+  const itens = Object.keys(er).map((k) => ROTULOS_CLIENTE[k] ?? k);
+  if (!itens.length) return null;
+  const lista = itens.length === 1 ? itens[0] : `${itens.slice(0, -1).join(", ")} e ${itens[itens.length - 1]}`;
+  return `Quase lá! Ainda não salvou: falta preencher corretamente ${lista}.`;
 }
 
 function Campo({ rotulo, dica, erro, obrigatorio, children }: { rotulo: string; dica?: string; erro?: string | undefined; obrigatorio?: boolean; children: React.ReactNode }) {

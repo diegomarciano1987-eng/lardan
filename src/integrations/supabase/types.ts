@@ -288,6 +288,71 @@ export type Database = {
           },
         ]
       }
+      asaas_baixas_outra_forma: {
+        Row: {
+          actor_id: string
+          cancel_erro: string | null
+          cancel_status: string
+          cancel_tentativas: number
+          charge_id: string
+          comprovante_path: string | null
+          created_at: string
+          data: string
+          financial_account_id: string
+          forma: string
+          id: string
+          installment_id: string
+          observacao: string | null
+          settlement_id: string | null
+          updated_at: string
+          valor_cents: number
+        }
+        Insert: {
+          actor_id: string
+          cancel_erro?: string | null
+          cancel_status?: string
+          cancel_tentativas?: number
+          charge_id: string
+          comprovante_path?: string | null
+          created_at?: string
+          data: string
+          financial_account_id: string
+          forma: string
+          id?: string
+          installment_id: string
+          observacao?: string | null
+          settlement_id?: string | null
+          updated_at?: string
+          valor_cents: number
+        }
+        Update: {
+          actor_id?: string
+          cancel_erro?: string | null
+          cancel_status?: string
+          cancel_tentativas?: number
+          charge_id?: string
+          comprovante_path?: string | null
+          created_at?: string
+          data?: string
+          financial_account_id?: string
+          forma?: string
+          id?: string
+          installment_id?: string
+          observacao?: string | null
+          settlement_id?: string | null
+          updated_at?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_baixas_outra_forma_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: true
+            referencedRelation: "asaas_charges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_charge_changes: {
         Row: {
           actor_user_id: string | null
@@ -18095,6 +18160,22 @@ export type Database = {
         Returns: Json
       }
       asaas_origin_key: { Args: { _account: string }; Returns: string }
+      asaas_outra_forma_cancelamento: {
+        Args: { _erro: string; _id: string; _ok: boolean }
+        Returns: undefined
+      }
+      asaas_pago_outra_forma: {
+        Args: {
+          _charge: string
+          _comprovante: string
+          _conta: string
+          _data: string
+          _forma: string
+          _obs: string
+          _valor: number
+        }
+        Returns: Json
+      }
       asaas_receber_contas: { Args: never; Returns: Json }
       asaas_receber_fila: { Args: { _filtros?: Json }; Returns: Json }
       asaas_receber_ocorrencias: { Args: { _filtros?: Json }; Returns: Json }
@@ -18181,6 +18262,18 @@ export type Database = {
       cob_acordo_cobrancas_preparar: {
         Args: { _forma: string; _incluir_entrada?: boolean; _sim: string }
         Returns: Json
+      }
+      cob_acordo_vencido_encerrar: {
+        Args: { _canceladas: string[]; _falhas: string[]; _sim: string }
+        Returns: Json
+      }
+      cob_acordo_vencidos_listar: {
+        Args: never
+        Returns: {
+          charge_id: string
+          external_id: string
+          simulacao_id: string
+        }[]
       }
       cob_cadastro_ler: { Args: { _party: string }; Returns: Json }
       cob_cadastro_salvar: {

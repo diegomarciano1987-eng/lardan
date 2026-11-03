@@ -3,7 +3,7 @@
 ## Pacote 0199 — auditoria do app da consultora (03/11/2026)
 - [x] Pacote 0199–0201 revisado aplicado em 03/11 (gravado como 0200/0201/0202): segurança, acerto×cobrança, cockpit. Prévia de reprocessamento: 0 ajustes. Não publicado.
 - [x] Revisar pacote contra 0198 e executar na bancada isolada: 582 testes passaram, sem usar a base real.
-- [ ] Aplicação bloqueada: maleta_total_sugerido não limita histórico à carteira da colaboradora; ajustes alteram valores já conferidos, não têm recuperação idempotente de falhas e não atualizam dívida oficial existente. Aguardar autorização para corrigir o pacote em vez de aplicar byte-exato.
+- [x] (resolvido no pacote 0199–0201) Aplicação bloqueada: maleta_total_sugerido não limita histórico à carteira da colaboradora; ajustes alteram valores já conferidos, não têm recuperação idempotente de falhas e não atualizam dívida oficial existente. Aguardar autorização para corrigir o pacote em vez de aplicar byte-exato.
 - [x] Alterações provisórias removidas da aplicação; banco compartilhado intacto, sem publicação. Os 582 testes não comprovam segurança dos cenários ausentes.
 - [ ] Configurações hospedadas de confirmação de e-mail, senhas vazadas e limite de envio não verificadas; leitura desses valores não disponível nas ferramentas consultadas.
 

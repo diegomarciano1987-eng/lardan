@@ -20,6 +20,7 @@ import { TemaClaroEscuro } from "@/components/consultora/TemaClaroEscuro";
 import { inicioQuery, clientesQuery } from "@/lib/consultora-queries";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { FotoPeca } from "@/components/FotoPeca";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -78,6 +79,9 @@ export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }:
   const grande = useLetraGrande();
   const [menuAberto, setMenuAberto] = React.useState(false);
   const temaClaro = useTemaConsultora() === "light";
+  // Barra inferior vai direto para o <body>: nenhum container (overflow/blur/transform) pode deslocá-la no iPhone.
+  const [montado, setMontado] = React.useState(false);
+  React.useEffect(() => setMontado(true), []);
   React.useEffect(() => {
     if (!pilotoGlass) return;
     document.body.classList.add("consultora-glass-active");
@@ -169,7 +173,7 @@ export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }:
       </Sheet>
 
       {/* Navegação inferior no celular */}
-      {!bloqueada && nav.aba !== "novo" && <nav aria-label="Menu" className="consultora-mobile-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card/95 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+      {montado && !bloqueada && nav.aba !== "novo" && createPortal(<div className={`area-consultora consultora-dock-raiz ${pilotoGlass ? "consultora-glass-pilot" : ""} ${pilotoGlass && temaClaro ? "consultora-glass-light" : ""} ${grande ? "letra-grande" : ""}`}><nav aria-label="Menu" className="consultora-mobile-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card/95 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
         {[...PRINCIPAIS, { aba: "mais" as AbaApp, rotulo: "Mais", icone: Menu }].map((i) => {
           const on = ativo === i.aba;
           return (
@@ -180,7 +184,7 @@ export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }:
             </button>
           );
         })}
-      </nav>}
+      </nav></div>, document.body)}
     </div>
     </CentralAvisosProvider>
   );

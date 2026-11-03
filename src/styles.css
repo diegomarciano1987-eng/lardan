@@ -1977,3 +1977,8 @@ body.consultora-glass-light-active :is([role="dialog"], [role="alertdialog"]) im
   .etiqueta-ganho::after, .incentivo-festa { display: none; }
   .etiqueta-ganho, .incentivo-preenchimento { transition: none; }
 }
+
+/* Raiz do dock da consultora (portal no body): sem altura, sem fundo, nunca recorta a barra fixa. */
+.area-consultora.consultora-dock-raiz { overflow: visible; min-height: 0; height: 0; background: transparent; }
+.consultora-mobile-nav { position: fixed; bottom: 0; transform: translateZ(0); }
+.consultora-glass-pilot .consultora-mobile-nav { bottom: max(12px, env(safe-area-inset-bottom)); }

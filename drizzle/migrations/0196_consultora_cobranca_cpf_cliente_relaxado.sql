@@ -29,9 +29,9 @@ BEGIN
   END IF;
   SELECT id, display_name INTO party, nome_cad FROM parties WHERE doc_digits=d AND is_active ORDER BY created_at LIMIT 1;
   IF party IS NOT NULL THEN
-    -- 0196: recusa só CPF de equipe/empresa; cliente que também é consultora, candidata ou tem login pode comprar.
-    IF EXISTS (SELECT 1 FROM party_roles pr WHERE pr.party_id=party AND pr.ended_at IS NULL AND pr.role::text IN ('colaborador','representante','vendedora_interna','fornecedor','transportadora','prestador','custodiante','entidade_grupo','loja')) THEN
-      RAISE EXCEPTION 'Este CPF é de alguém da equipe Lardan e não pode receber cobrança de venda. Confira o CPF da cliente.';
+    -- 0196: recusa só CPF de equipe/empresa; candidata, cliente ou pessoa com login de cliente pode comprar; consultora segue recusada.
+    IF EXISTS (SELECT 1 FROM party_roles pr WHERE pr.party_id=party AND pr.ended_at IS NULL AND pr.role::text IN ('consultora','revendedora','colaborador','representante','vendedora_interna','fornecedor','transportadora','prestador','custodiante','entidade_grupo','loja')) THEN
+      RAISE EXCEPTION 'Este CPF é de uma consultora ou de alguém da equipe Lardan e não pode ser usado nesta venda. Confira o CPF da cliente.';
     END IF;
     IF public.fin_unaccent_lower(split_part(btrim(coalesce(nome_cad,'')),' ',1))
        <> public.fin_unaccent_lower(split_part(btrim(coalesce(o.customer_name,'')),' ',1)) THEN

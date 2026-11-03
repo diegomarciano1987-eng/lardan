@@ -152,7 +152,7 @@ describe("3. CPF na cobrança da consultora", () => {
     await adm.unsafe(`insert into public.party_roles (party_id, role) values ($1,'cliente')`, [cli]);
     const r = await rpc(consultora, "consultora_pagamento_titulo", { _order: pedido, _forma: "pix", _doc: doc, _venc: null });
     expect(r.ok).toBe(false);
-    expect(r.erro).toContain("outro nome");
+    expect(r.erro).toContain("cadastrado em nome de");
   });
 
   test("o próprio CPF da consultora é recusado", async () => {

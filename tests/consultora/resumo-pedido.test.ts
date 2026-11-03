@@ -20,3 +20,15 @@ describe("resumo do pedido para a cliente", () => {
     expect(fotoPedido("t", null)).toBeNull();
   });
 });
+
+import { mensagemResumoPedido as msgUnica } from "@/lib/pedido-publico";
+import { test as t2, expect as e2 } from "vitest";
+t2("mensagem única leva comprovante, garantia e troca", () => {
+  const m = msgUnica({ cliente: "Ana", codigo: "PED-1", total_cents: 1000, manual: "https://m", link: "https://www.lardan.com.br/pedido/x",
+    itens: [{ nome: "Anel", variante: null, quantidade: 1, unitario_cents: 1000, referencia: "LAN1" }], garantiaAte: "03/11/2028", trocaAte: "18/12/2026" });
+  e2(m).toContain("Comprovante e garantia LARDAN · Pedido PED-1");
+  e2(m).toContain("Ref. LAN1");
+  e2(m).toContain("válida até 03/11/2028");
+  e2(m).toContain("Troca até 18/12/2026");
+  e2(m).toContain("https://www.lardan.com.br/pedido/x");
+});

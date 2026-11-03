@@ -10,7 +10,7 @@ const OVERRIDES: Record<string, { title?: string; description?: string }> = {
   "/como-vender-semijoias-pelo-whatsapp": { title: "Como vender semijoias pelo WhatsApp: passo a passo" },
   "/privacidade": { description: "Saiba como a Lardan trata dados de contato e candidatura a consultora, para quais finalidades e como exercer seus direitos previstos na LGPD." },
   "/perguntas-sobre-revenda-de-semijoias": { title: "Revenda de semijoias: dúvidas frequentes", description: "Tire dúvidas sobre revenda de semijoias: consignado ou atacado, maleta, acerto, garantia, MEI, WhatsApp e como ser Consultora Lardan." },
-  "/colecoes": { description: "Coleções de semijoias Lardan: acompanhe esta página para conhecer a curadoria editorial e os produtos reais quando forem publicados pela equipe." },
+  "/colecoes": { description: "Conheça as linhas de semijoias Lardan em banho de ouro: anéis, brincos, colares e pulseiras, com acesso direto às peças publicadas." },
   "/cuidados": { description: "Cuidados com suas semijoias LARDAN: consulte o manual de uso, limpeza e armazenamento e as orientações para a garantia de dois anos." },
   "/ajuda": { description: "Central de Ajuda Lardan: consulte orientações para aceitar seu convite, entrar no sistema e recuperar o acesso à conta com uma nova senha." },
   "/equipe": { description: "Acesso da equipe Lardan: entre na área da operação, das consultoras ou dos representantes usando seu login autorizado para o sistema." },

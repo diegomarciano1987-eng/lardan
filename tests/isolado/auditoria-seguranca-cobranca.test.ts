@@ -155,6 +155,17 @@ describe("3. CPF na cobrança da consultora", () => {
     expect(r.erro).toContain("cadastrado em nome de");
   });
 
+  test("0197: CPF de candidata (Seja Lardan) pode comprar e gera a cobrança", async () => {
+    const doc = cpf(base9());
+    const cli = (await um<{ id: string }>(
+      `insert into public.parties (kind, display_name, legal_name, doc, doc_digits, status) values ('pessoa','Ana Souza','Ana Souza',$1,$1,'ativo') returning id`, [doc])).id;
+    await adm.unsafe(`insert into public.party_roles (party_id, role) values ($1,'candidata')`, [cli]);
+    const r = await rpc(consultora, "consultora_pagamento_titulo", { _order: pedido, _forma: "pix", _doc: doc, _venc: null });
+    expect(r.erro).toBeNull();
+    const o = await um<{ p: string }>(`select pay_party_id p from public.sales_orders where id=$1`, [pedido]);
+    expect(o.p).toBe(cli);
+  });
+
   test("o próprio CPF da consultora é recusado", async () => {
     const doc = cpf(base9());
     await adm.unsafe(`update public.parties set doc=$2, doc_digits=$2 where id=$1`, [await partyDe(consultora), doc]);

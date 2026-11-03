@@ -121,13 +121,20 @@ function ConvitePage() {
                 <p className="text-sm text-muted-foreground">
                   Conectada como <strong className="text-foreground">{session.user.email}</strong>.
                 </p>
+                {/outro e-mail|divergen/i.test(erro) && (
+                  <div role="alert" className="space-y-2 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-foreground">
+                    <p className="font-semibold">O e-mail não confere com o convite.</p>
+                    <p>O convite foi feito para <strong>{info.email_mascarado}</strong>, mas você entrou com <strong>{session.user.email}</strong>.</p>
+                    <p>Se o seu e-mail certo é <strong>{session.user.email}</strong>, peça para quem te convidou corrigir o e-mail no cadastro e mandar um <strong>link novo</strong>. Senão, toque em sair e entre com o e-mail do convite.</p>
+                  </div>
+                )}
                 <button type="button" disabled={ocupado} onClick={() => void concluir()}
                   className="w-full rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-50">
                   {ocupado ? "Aceitando…" : "Aceitar convite"}
                 </button>
                 <button type="button" onClick={() => void supabase.auth.signOut()}
                   className="w-full text-sm text-muted-foreground underline">
-                  Não sou eu — sair
+                  Sair e entrar com outro e-mail
                 </button>
               </div>
             ) : (

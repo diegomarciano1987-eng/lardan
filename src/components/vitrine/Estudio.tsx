@@ -293,7 +293,6 @@ function PainelContato({ d, muda }: { d: DesignVitrine; muda: Muda }) {
         <input
           className="admin-input"
           inputMode="tel"
-          maxLength={15}
           value={c.whatsapp}
           placeholder="(43) 99999-9999"
           onChange={(e) => set("whatsapp", formatarTelefone(e.target.value))}

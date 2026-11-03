@@ -51,14 +51,20 @@ export function mensagemResumoPedido(a: {
   combinado?: string | null;
   link?: string | null;
   manual: string;
+  /** Datas já formatadas (dd/mm/aaaa) para o comprovante completo. */
+  garantiaAte?: string | null;
+  trocaAte?: string | null;
 }) {
   const linhas = a.itens.map((i) => linhaPeca({ ...i, valor_cents: i.unitario_cents * i.quantidade }));
+  const completo = !!(a.garantiaAte || a.trocaAte);
   return [
+    ...(completo ? [`Comprovante e garantia LARDAN · Pedido ${a.codigo}`, ""] : []),
     `Olá, ${a.cliente.trim().split(/\s+/)[0]}! Anotei seu pedido ${a.codigo}:`,
     ...linhas,
     `Total: ${brl(a.total_cents)}`,
     ...(a.combinado ? [`Pagamento combinado: ${a.combinado}`] : []),
-    ...(a.link ? [`Veja as fotos das suas peças: ${a.link}`] : []),
-    `Garantia de dois anos seguindo o manual: ${a.manual}`,
+    ...(a.link ? [`Fotos, comprovante e certificado de garantia: ${a.link}`] : []),
+    ...(a.garantiaAte ? [`Garantia de dois anos, válida até ${a.garantiaAte}, seguindo o manual: ${a.manual}`] : [`Garantia de dois anos seguindo o manual: ${a.manual}`]),
+    ...(a.trocaAte ? [`Troca até ${a.trocaAte}.`] : []),
   ].join("\n");
 }

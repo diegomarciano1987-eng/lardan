@@ -7,7 +7,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { LeitorEtiqueta } from "@/components/consultora/LeitorEtiqueta";
 import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
 import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande";
-import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
+import { MANUAL_CUIDADOS_URL, TROCA_DIAS, fimGarantia } from "@/lib/consultora-regras";
 import { linkPedidoPublico, mensagemResumoPedido, type PedidoPublico } from "@/lib/pedido-publico";
 import { FORMAS_COMBINADAS, iconeCategoria, salvarCombinado, type FormaCombinada } from "@/lib/consultora-combinado";
 import { LembretesClientes } from "@/components/consultora/LembretesClientes";
@@ -989,7 +989,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
             <ResumoWhats orderId={resultado.order_id} telefone={cl.telefone} cliente={cl.nome} codigo={resultado.codigo} total={resultado.total_cents} combinado={combinadoTexto}
               itensLocais={escolhidas.map((p) => ({ nome: p.produto, variante: p.variante, quantidade: qtd[k(p)] ?? 0, unitario_cents: p.preco_cents, referencia: null }))} />
           )}
-          <Link to="/consultora-garantia/$id" params={{ id: resultado.order_id }} target="_blank" className="btn-app-principal w-full"><FileText className="size-5" aria-hidden /> Comprovante e certificado de garantia</Link>
+          <Link to="/consultora-garantia/$id" params={{ id: resultado.order_id }} target="_blank" className="flex items-center justify-center gap-2 py-2 text-[1rem] text-muted-foreground underline underline-offset-4"><FileText className="size-4" aria-hidden /> Imprimir em folha A4</Link>
           <button type="button" className="admin-btn min-h-13 w-full justify-center text-base" onClick={() => ir({ aba: "pedidos" })}>Ver meus pedidos</button>
           <button type="button" className="admin-btn min-h-13 w-full justify-center text-base" onClick={() => ir({ aba: "inicio" })}>Voltar ao início</button>
         </div>
@@ -1059,15 +1059,19 @@ function ResumoWhats(a: { orderId: string; telefone: string; cliente: string; co
     staleTime: Infinity,
   });
   const link = q.data ? linkPedidoPublico(q.data.token) : null;
+  const compra = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(q.data?.pedido?.criado_em ? new Date(q.data.pedido.criado_em) : new Date());
+  const brData = (iso: string) => new Date(iso.slice(0, 10) + "T12:00:00").toLocaleDateString("pt-BR");
+  const troca = new Date(compra + "T12:00:00Z"); troca.setUTCDate(troca.getUTCDate() + TROCA_DIAS);
   const texto = mensagemResumoPedido({
     cliente: a.cliente, codigo: a.codigo, total_cents: a.total, combinado: a.combinado ?? null, manual: MANUAL_CUIDADOS_URL, link,
     itens: q.data?.pedido?.itens ?? a.itensLocais,
+    garantiaAte: brData(fimGarantia(compra)), trocaAte: brData(troca.toISOString()),
   });
   return (
     <a className="btn-app-principal w-full" target="_blank" rel="noreferrer" aria-disabled={q.isLoading}
       onClick={(e) => { if (q.isLoading) e.preventDefault(); }}
       href={linkWhats(a.telefone, texto) ?? undefined}>
-      <MessageCircle className="size-5" aria-hidden /> {q.isLoading ? "Preparando fotos…" : "Enviar resumo com fotos pelo WhatsApp"}
+      <MessageCircle className="size-5" aria-hidden /> {q.isLoading ? "Preparando fotos…" : "Enviar comprovante e garantia pelo WhatsApp"}
     </a>
   );
 }

@@ -9,7 +9,7 @@ describe("resumo do pedido para a cliente", () => {
   });
   it("leva o link da página com fotos", () => {
     const t = mensagemResumoPedido({ ...base, itens: [], link: "https://www.lardan.com.br/pedido/abc" });
-    expect(t).toContain("Veja as fotos das suas peças: https://www.lardan.com.br/pedido/abc");
+    expect(t).toContain("Fotos, comprovante e certificado de garantia: https://www.lardan.com.br/pedido/abc");
   });
   it("sem referência não escreve Ref.", () => {
     const t = mensagemResumoPedido({ ...base, itens: [{ nome: "Brinco", variante: null, quantidade: 2, unitario_cents: 1490, referencia: null }] });
@@ -19,4 +19,16 @@ describe("resumo do pedido para a cliente", () => {
     expect(fotoPedido("t", "m")).toBe("/api/public/pedido-foto/t/m");
     expect(fotoPedido("t", null)).toBeNull();
   });
+});
+
+import { mensagemResumoPedido as msgUnica } from "@/lib/pedido-publico";
+import { test as t2, expect as e2 } from "vitest";
+t2("mensagem única leva comprovante, garantia e troca", () => {
+  const m = msgUnica({ cliente: "Ana", codigo: "PED-1", total_cents: 1000, manual: "https://m", link: "https://www.lardan.com.br/pedido/x",
+    itens: [{ nome: "Anel", variante: null, quantidade: 1, unitario_cents: 1000, referencia: "LAN1" }], garantiaAte: "03/11/2028", trocaAte: "18/12/2026" });
+  e2(m).toContain("Comprovante e garantia LARDAN · Pedido PED-1");
+  e2(m).toContain("Ref. LAN1");
+  e2(m).toContain("válida até 03/11/2028");
+  e2(m).toContain("Troca até 18/12/2026");
+  e2(m).toContain("https://www.lardan.com.br/pedido/x");
 });

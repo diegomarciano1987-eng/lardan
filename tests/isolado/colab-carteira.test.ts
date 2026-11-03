@@ -63,4 +63,10 @@ test("Sem vínculo não retorna Consultoras nem libera rede", async () => {
   expect(empty.linhas).toEqual([]);
   expect((await rpc(colab, "network_scope")).erro).not.toBeNull();
   await adm.unsafe("update consultant_profiles set representative_party_id=$2 where party_id=$1", [colab.partyId, rep.partyId]);
+});test("0199: sugestão de montagem (maleta_total_sugerido) só para consultora da carteira", async () => {
+  const fora = await ler<{ r: unknown }>(colab, "select public.maleta_total_sugerido($1) r", [outside.partyId]);
+  expect(fora.erro).toBeNull();
+  expect(fora.linhas[0]!.r).toBeNull();
+  const dentro = await ler<{ r: unknown }>(colab, "select public.maleta_total_sugerido($1) r", [inside.partyId]);
+  expect(dentro.linhas[0]!.r).not.toBeNull();
 });

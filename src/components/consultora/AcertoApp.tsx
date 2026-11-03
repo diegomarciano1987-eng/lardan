@@ -64,6 +64,7 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
 
   const c = d.calculo;
   const recebido = Number(c.recebido_lardan_cents ?? 0);
+  const aguardando = Number(c.aguardando_lardan_cents ?? 0);
   const lista = d.itens.filter((i) => !busca.trim() || `${i.produto} ${i.variante ?? ""} ${i.sku ?? ""}`.toLowerCase().includes(busca.trim().toLowerCase()));
   const editavel = d.status === "aberta";
 
@@ -87,6 +88,11 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
         ))}
       </div>
       {editavel && <ProximaFaixa d={d} />}
+      {editavel && aguardando > 0 && (
+        <p className="rounded-2xl border border-border bg-muted/40 p-4 text-[0.98rem]">
+          Você tem <strong>{brl(aguardando)}</strong> em cobranças que as clientes ainda não pagaram à Lardan. Se pagarem antes da conferência, o valor sai do seu acerto. Se pagarem depois, vira crédito seu automaticamente — aparece em Meu financeiro.
+        </p>
+      )}
 
       {editavel && (
         <>

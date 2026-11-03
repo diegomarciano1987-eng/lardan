@@ -1387,6 +1387,13 @@
       "when": 1793713177650,
       "tag": "0197_consultora_cobranca_cpf_consultora_recusada",
       "breakpoints": true
+    },
+    {
+      "idx": 198,
+      "version": "7",
+      "when": 1793714093172,
+      "tag": "0198_rep_enviar_convite_carteira",
+      "breakpoints": true
     }
   ]
 }

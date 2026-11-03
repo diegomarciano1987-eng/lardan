@@ -185,30 +185,17 @@ export const convidarConsultora = createServerFn({ method: "POST" })
     if (s.conta_email) return { ok: false as const, erro: `Esta consultora já tem acesso (${s.conta_email}).` };
 
     const pendente = s.convite && ["pendente", "falha_envio", "expirado"].includes(s.convite.status) ? s.convite : null;
-    // 0199: com 5 envios o reenvio é recusado; antes a tela travava num erro. Agora revoga e cria um convite novo.
-    let reenviar = Boolean(pendente && pendente.email === data.email);
-    if (pendente && reenviar) {
+    if (pendente && pendente.email !== data.email) {
+      await sb.rpc("access_invite_revoke" as never, { _id: pendente.id } as never);
+    } else if (pendente) {
       const { token, hash } = await novoToken();
       const { error } = await sb.rpc("access_invite_resend" as never, { _id: pendente.id, _token_hash: hash } as never);
-      if (error && /Aguarde um minuto/i.test(error.message)) {
-        return { ok: false as const, erro: "Um link acabou de ser enviado. Aguarde um minuto para gerar outro." };
-      }
-      if (error && /Limite de reenvios/i.test(error.message)) {
-        reenviar = false;
-      } else if (error) {
-        throw new Error(error.message);
-      } else {
-        const { data: inv } = await sb.from("access_invites" as never).select("envios").eq("id", pendente.id).maybeSingle();
-        const link = `${origemSegura(data.origem)}/convite/${token}`;
-        const env = await enviar(data.email, s.nome, link, `convite-${pendente.id}-${((inv as { envios?: number } | null)?.envios ?? 0) + 1}`);
-        await sb.rpc("access_invite_envio" as never, { _id: pendente.id, _ok: env.ok, _erro: env.erro } as never);
-        return { ok: true as const, party_id: party, link, enviado: env.ok, erro: env.erro, reenvio: true };
-      }
-    }
-    if (pendente && !reenviar) {
-      // e-mail trocado ou limite de reenvios: o convite antigo deixa de valer antes de criar o novo
-      const { error } = await sb.rpc("access_invite_revoke" as never, { _id: pendente.id } as never);
-      if (error && !/Convite já/i.test(error.message)) throw new Error(error.message);
+      if (error) throw new Error(error.message);
+      const { data: inv } = await sb.from("access_invites" as never).select("envios").eq("id", pendente.id).maybeSingle();
+      const link = `${origemSegura(data.origem)}/convite/${token}`;
+      const env = await enviar(data.email, s.nome, link, `convite-${pendente.id}-${((inv as { envios?: number } | null)?.envios ?? 0) + 1}`);
+      await sb.rpc("access_invite_envio" as never, { _id: pendente.id, _ok: env.ok, _erro: env.erro } as never);
+      return { ok: true as const, party_id: party, link, enviado: env.ok, erro: env.erro, reenvio: true };
     }
 
     const { token, hash } = await novoToken();

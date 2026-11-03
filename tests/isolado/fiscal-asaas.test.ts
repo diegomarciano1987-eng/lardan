@@ -194,13 +194,13 @@ describe("Fiscal inerte", () => {
     )) as { proname: string }[];
     expect(rotinas.map((r) => r.proname)).toEqual([]);
 
-    // validar o formato de um endereço não é chamar ninguém: as menções a "https://" no banco são a recusa de
-    // endereço de fatura inválido e o link de volta para a candidatura no texto enviado à Central de Leads (0192).
+    // validar o formato de um endereço não é chamar ninguém: a única menção a
+    // "https://" no banco é a recusa de endereço de fatura inválido.
     const mencoes = (await adm.unsafe(
       `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
         where n.nspname = 'public' and p.prosrc ilike '%https://%'`,
     )) as { proname: string }[];
-    expect(mencoes.map((r) => r.proname).sort()).toEqual(["asaas_fatura_url_valida", "central_leads_payload"]);
+    expect(mencoes.map((r) => r.proname).sort()).toEqual(["asaas_fatura_url_valida"]);
   });
 });
 

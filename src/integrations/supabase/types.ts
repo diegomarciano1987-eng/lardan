@@ -17595,6 +17595,10 @@ export type Database = {
         Returns: boolean
       }
       access_pode_ver_convites: { Args: { _uid: string }; Returns: boolean }
+      access_rep_da_carteira: {
+        Args: { _party: string; _uid: string }
+        Returns: boolean
+      }
       access_roles_replace_admin: {
         Args: {
           _actor_id: string
@@ -20648,6 +20652,10 @@ export type Database = {
         Returns: Json
       }
       rep_conta_retido: { Args: { _empresa: string }; Returns: string }
+      rep_convites_lista: {
+        Args: { _busca?: string; _rep: string }
+        Returns: Json
+      }
       rep_crm: { Args: { _rep: string }; Returns: Json }
       rep_crm_coluna_sistema: {
         Args: { _l: Database["public"]["Tables"]["leads"]["Row"] }

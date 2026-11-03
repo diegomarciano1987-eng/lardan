@@ -9,7 +9,7 @@ describe("resumo do pedido para a cliente", () => {
   });
   it("leva o link da página com fotos", () => {
     const t = mensagemResumoPedido({ ...base, itens: [], link: "https://www.lardan.com.br/pedido/abc" });
-    expect(t).toContain("Veja as fotos das suas peças: https://www.lardan.com.br/pedido/abc");
+    expect(t).toContain("Fotos, comprovante e certificado de garantia: https://www.lardan.com.br/pedido/abc");
   });
   it("sem referência não escreve Ref.", () => {
     const t = mensagemResumoPedido({ ...base, itens: [{ nome: "Brinco", variante: null, quantidade: 2, unitario_cents: 1490, referencia: null }] });

@@ -282,7 +282,7 @@ function CapaPadrao(p: {
           </div>
         </div>
         <ul className="cl-confianca mt-7 grid w-full grid-cols-3 gap-2 py-4 text-[12px] leading-snug @3xl:text-[13px]">
-          <li className="flex flex-col items-center gap-1.5"><ShieldCheck aria-hidden className="size-5" strokeWidth={1.5} />Garantia<br />Lardan</li>
+          <li className="flex flex-col items-center gap-1.5"><ShieldCheck aria-hidden className="size-5" strokeWidth={1.5} />Garantia de 2 anos<br />Lardan</li>
           <li className="flex flex-col items-center gap-1.5"><Gem aria-hidden className="size-5" strokeWidth={1.5} />Peças com<br />banho de qualidade</li>
           <li className="flex flex-col items-center gap-1.5"><User aria-hidden className="size-5" strokeWidth={1.5} />Atendimento<br />pessoal</li>
         </ul>

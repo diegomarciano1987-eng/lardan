@@ -1,5 +1,11 @@
 # Roadmap
 
+## Pacote 0199 — auditoria do app da consultora (03/11/2026)
+- [x] Revisar pacote contra 0198 e executar na bancada isolada: 582 testes passaram, sem usar a base real.
+- [ ] Aplicação bloqueada: maleta_total_sugerido não limita histórico à carteira da colaboradora; ajustes alteram valores já conferidos, não têm recuperação idempotente de falhas e não atualizam dívida oficial existente. Aguardar autorização para corrigir o pacote em vez de aplicar byte-exato.
+- [x] Alterações provisórias removidas da aplicação; banco compartilhado intacto, sem publicação. Os 582 testes não comprovam segurança dos cenários ausentes.
+- [ ] Configurações hospedadas de confirmação de e-mail, senhas vazadas e limite de envio não verificadas; leitura desses valores não disponível nas ferramentas consultadas.
+
 ## Pacote fiscal 0165 — emissor TSM (29/10/2026)
 - [x] Cadastro fiscal aplicado via ferramenta de dados (não DDL); duplicidade unificada após autorização, LC-003419 → LC-007417, auditoria 554e2c5c-245b-4531-a99e-3b0e185400b7. SQL adaptado somente para ignorar IDs oficialmente unificados; endereço antigo e vínculos preservados.
 - [x] Emissor definido, CNPJ/IE/endereço/IBGE = true; Focus/homologacao/false conferidos no banco, RPC autenticada e tela /admin/integracoes. 514 testes isolados passaram; 3 cenários fiscais novos; testes de preço antigos alinhados à regra para baixo já aprovada. Build OK. Não ativa nem comprova emissão completa: prontidão ainda informa pendências da cadeia/acerto e cadastros.

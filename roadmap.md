@@ -70,3 +70,10 @@
 - [x] Preço para baixo aplicado: 16.919 variantes, lote preco-20261028-192646-9fd2, 0 subiram; 2 maletas em montagem recalculadas. Botão Aplicar/Desfazer pela tela estoura tempo (fazer por aqui)
 - [x] QZ: não pede mais a lista de impressoras a cada etiqueta; instrução override.crt visível (depende de copiar o arquivo em cada PC)
 - [x] Etiqueta PPLA: barras sem texto embaixo, referência/preço uma vez (teste)
+
+## Financeiro Asaas (nov/2026)
+- [ ] A: destravar fila Asaas (617 avisos parados; 62 pagas sem título R$ 12.879,94; 5 sincronizações presas)
+- [ ] B: "valor parecido" só sugere; relatório de fiados antigos já quitados em acertos
+- [ ] B2: Pix sem identificação → nome+CPF do pagador, único ou manual
+- [ ] C: acordo Larissa: parcelas no Asaas, aguardando 1º pagamento, prazo venc.+5d, cancela no Asaas e avisa Larissa
+- [ ] D: "Pago por outra forma" no Contas a Receber (Pix ↔ link Asaas), valida acordo

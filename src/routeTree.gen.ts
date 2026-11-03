@@ -53,6 +53,7 @@ import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as DCodigoRouteImport } from './routes/d.$codigo'
 import { Route as GuiaSemijoiaFolheadoOuBijuteriaRouteImport } from './routes/guia.semijoia-folheado-ou-bijuteria'
 import { Route as IndicacaoCodigoRouteImport } from './routes/indicacao.$codigo'
+import { Route as PedidoTokenRouteImport } from './routes/pedido.$token'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
 import { Route as SemijoiasCategoriaRouteImport } from './routes/semijoias.$categoria'
@@ -134,6 +135,7 @@ import { Route as AuthenticatedAdminCadastrosProdutosIdRouteImport } from './rou
 import { Route as AuthenticatedAdminCadastrosProdutosNovoRouteImport } from './routes/_authenticated/admin/cadastros/produtos_.novo'
 import { Route as AuthenticatedAdminFinanceiroContasIdRouteImport } from './routes/_authenticated/admin/financeiro/contas_.$id'
 import { Route as AuthenticatedAdminMaletasRemessaIdRouteImport } from './routes/_authenticated/admin/maletas_.remessa.$id'
+import { Route as ApiPublicPedidoFotoTokenMediaRouteImport } from './routes/api/public/pedido-foto.$token.$media'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -360,6 +362,11 @@ const GuiaSemijoiaFolheadoOuBijuteriaRoute =
 const IndicacaoCodigoRoute = IndicacaoCodigoRouteImport.update({
   id: '/indicacao/$codigo',
   path: '/indicacao/$codigo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PedidoTokenRoute = PedidoTokenRouteImport.update({
+  id: '/pedido/$token',
+  path: '/pedido/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProdutoSlugRoute = ProdutoSlugRouteImport.update({
@@ -830,6 +837,12 @@ const AuthenticatedAdminMaletasRemessaIdRoute =
     path: '/maletas/remessa/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const ApiPublicPedidoFotoTokenMediaRoute =
+  ApiPublicPedidoFotoTokenMediaRouteImport.update({
+    id: '/api/public/pedido-foto/$token/$media',
+    path: '/api/public/pedido-foto/$token/$media',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -875,6 +888,7 @@ export interface FileRoutesByFullPath {
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
+  '/pedido/$token': typeof PedidoTokenRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -956,6 +970,7 @@ export interface FileRoutesByFullPath {
   '/admin/cadastros/produtos/novo': typeof AuthenticatedAdminCadastrosProdutosNovoRoute
   '/admin/financeiro/contas/$id': typeof AuthenticatedAdminFinanceiroContasIdRoute
   '/admin/maletas/remessa/$id': typeof AuthenticatedAdminMaletasRemessaIdRoute
+  '/api/public/pedido-foto/$token/$media': typeof ApiPublicPedidoFotoTokenMediaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1000,6 +1015,7 @@ export interface FileRoutesByTo {
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
+  '/pedido/$token': typeof PedidoTokenRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -1080,6 +1096,7 @@ export interface FileRoutesByTo {
   '/admin/cadastros/produtos/novo': typeof AuthenticatedAdminCadastrosProdutosNovoRoute
   '/admin/financeiro/contas/$id': typeof AuthenticatedAdminFinanceiroContasIdRoute
   '/admin/maletas/remessa/$id': typeof AuthenticatedAdminMaletasRemessaIdRoute
+  '/api/public/pedido-foto/$token/$media': typeof ApiPublicPedidoFotoTokenMediaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1127,6 +1144,7 @@ export interface FileRoutesById {
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
+  '/pedido/$token': typeof PedidoTokenRoute
   '/produto/$slug': typeof ProdutoSlugRoute
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
@@ -1208,6 +1226,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cadastros/produtos_/novo': typeof AuthenticatedAdminCadastrosProdutosNovoRoute
   '/_authenticated/admin/financeiro/contas_/$id': typeof AuthenticatedAdminFinanceiroContasIdRoute
   '/_authenticated/admin/maletas_/remessa/$id': typeof AuthenticatedAdminMaletasRemessaIdRoute
+  '/api/public/pedido-foto/$token/$media': typeof ApiPublicPedidoFotoTokenMediaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1255,6 +1274,7 @@ export interface FileRouteTypes {
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
     | '/indicacao/$codigo'
+    | '/pedido/$token'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -1336,6 +1356,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos/novo'
     | '/admin/financeiro/contas/$id'
     | '/admin/maletas/remessa/$id'
+    | '/api/public/pedido-foto/$token/$media'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1380,6 +1401,7 @@ export interface FileRouteTypes {
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
     | '/indicacao/$codigo'
+    | '/pedido/$token'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -1460,6 +1482,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos/novo'
     | '/admin/financeiro/contas/$id'
     | '/admin/maletas/remessa/$id'
+    | '/api/public/pedido-foto/$token/$media'
   id:
     | '__root__'
     | '/'
@@ -1506,6 +1529,7 @@ export interface FileRouteTypes {
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
     | '/indicacao/$codigo'
+    | '/pedido/$token'
     | '/produto/$slug'
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
@@ -1587,6 +1611,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cadastros/produtos_/novo'
     | '/_authenticated/admin/financeiro/contas_/$id'
     | '/_authenticated/admin/maletas_/remessa/$id'
+    | '/api/public/pedido-foto/$token/$media'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1630,6 +1655,7 @@ export interface RootRouteChildren {
   DCodigoRoute: typeof DCodigoRoute
   GuiaSemijoiaFolheadoOuBijuteriaRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   IndicacaoCodigoRoute: typeof IndicacaoCodigoRoute
+  PedidoTokenRoute: typeof PedidoTokenRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
   SemijoiasCategoriaRoute: typeof SemijoiasCategoriaRoute
   SitemapProductsPaginaRoute: typeof SitemapProductsPaginaRoute
@@ -1647,6 +1673,7 @@ export interface RootRouteChildren {
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  ApiPublicPedidoFotoTokenMediaRoute: typeof ApiPublicPedidoFotoTokenMediaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1957,6 +1984,13 @@ declare module '@tanstack/react-router' {
       path: '/indicacao/$codigo'
       fullPath: '/indicacao/$codigo'
       preLoaderRoute: typeof IndicacaoCodigoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedido/$token': {
+      id: '/pedido/$token'
+      path: '/pedido/$token'
+      fullPath: '/pedido/$token'
+      preLoaderRoute: typeof PedidoTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/produto/$slug': {
@@ -2526,6 +2560,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMaletasRemessaIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/api/public/pedido-foto/$token/$media': {
+      id: '/api/public/pedido-foto/$token/$media'
+      path: '/api/public/pedido-foto/$token/$media'
+      fullPath: '/api/public/pedido-foto/$token/$media'
+      preLoaderRoute: typeof ApiPublicPedidoFotoTokenMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -2779,6 +2820,7 @@ const rootRouteChildren: RootRouteChildren = {
   DCodigoRoute: DCodigoRoute,
   GuiaSemijoiaFolheadoOuBijuteriaRoute: GuiaSemijoiaFolheadoOuBijuteriaRoute,
   IndicacaoCodigoRoute: IndicacaoCodigoRoute,
+  PedidoTokenRoute: PedidoTokenRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,
   SemijoiasCategoriaRoute: SemijoiasCategoriaRoute,
   SitemapProductsPaginaRoute: SitemapProductsPaginaRoute,
@@ -2796,6 +2838,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  ApiPublicPedidoFotoTokenMediaRoute: ApiPublicPedidoFotoTokenMediaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -15059,6 +15059,7 @@ export type Database = {
           pay_title_id: string | null
           pay_url: string | null
           payment_status: Database["public"]["Enums"]["sales_payment_status"]
+          public_token: string
           reserve_expires_at: string | null
           status: Database["public"]["Enums"]["sales_order_status"]
           subtotal_cents: number
@@ -15096,6 +15097,7 @@ export type Database = {
           pay_title_id?: string | null
           pay_url?: string | null
           payment_status?: Database["public"]["Enums"]["sales_payment_status"]
+          public_token?: string
           reserve_expires_at?: string | null
           status?: Database["public"]["Enums"]["sales_order_status"]
           subtotal_cents?: number
@@ -15133,6 +15135,7 @@ export type Database = {
           pay_title_id?: string | null
           pay_url?: string | null
           payment_status?: Database["public"]["Enums"]["sales_payment_status"]
+          public_token?: string
           reserve_expires_at?: string | null
           status?: Database["public"]["Enums"]["sales_order_status"]
           subtotal_cents?: number
@@ -20360,6 +20363,10 @@ export type Database = {
       pedido_colaboradoras_ler: { Args: never; Returns: Json }
       pedido_config_ler: { Args: never; Returns: Json }
       pedido_config_salvar: { Args: { _dados: Json }; Returns: Json }
+      pedido_foto_ok: {
+        Args: { _media: string; _token: string }
+        Returns: boolean
+      }
       pedido_grupo_peca: {
         Args: { _categoria: string; _nome: string; _sku: string }
         Returns: string
@@ -20375,6 +20382,8 @@ export type Database = {
         Returns: undefined
       }
       pedido_pix_asaas_ler: { Args: never; Returns: Json }
+      pedido_publico: { Args: { _token: string }; Returns: Json }
+      pedido_token: { Args: { _order: string }; Returns: string }
       phone_canon: { Args: { v: string }; Returns: string }
       praca_alternar: {
         Args: { _ativo: boolean; _id: string }

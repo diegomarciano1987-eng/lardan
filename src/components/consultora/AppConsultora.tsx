@@ -8,6 +8,7 @@ import { LeitorEtiqueta } from "@/components/consultora/LeitorEtiqueta";
 import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
 import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
+import { mensagemResumoPedido, type PedidoPublico } from "@/lib/pedido-publico";
 import { FORMAS_COMBINADAS, iconeCategoria, salvarCombinado, type FormaCombinada } from "@/lib/consultora-combinado";
 import { LembretesClientes } from "@/components/consultora/LembretesClientes";
 import { CombinaComEla } from "@/components/consultora/CombinaComEla";
@@ -985,10 +986,8 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
           </div>
           {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} />}
           {cl && linkWhats(cl.telefone) && (
-            <a className="btn-app-principal w-full" target="_blank" rel="noreferrer"
-              href={linkWhats(cl.telefone, `Olá, ${cl.nome.split(" ")[0]}! Anotei seu pedido ${resultado.codigo}:\n${escolhidas.map((p) => `• ${qtd[k(p)]}x ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents * (qtd[k(p)] ?? 0))}`).join("\n")}\nTotal: ${brl(resultado.total_cents)}${combinadoTexto ? `\nPagamento combinado: ${combinadoTexto}` : ""}\nGarantia de dois anos seguindo o manual: ${MANUAL_CUIDADOS_URL}`) ?? undefined}>
-              <MessageCircle className="size-5" aria-hidden /> Enviar resumo pelo WhatsApp
-            </a>
+            <ResumoWhats orderId={resultado.order_id} telefone={cl.telefone} cliente={cl.nome} codigo={resultado.codigo} total={resultado.total_cents} combinado={combinadoTexto}
+              itensLocais={escolhidas.map((p) => ({ nome: p.produto, variante: p.variante, quantidade: qtd[k(p)] ?? 0, unitario_cents: p.preco_cents, referencia: null }))} />
           )}
           <Link to="/consultora-garantia/$id" params={{ id: resultado.order_id }} target="_blank" className="btn-app-principal w-full"><FileText className="size-5" aria-hidden /> Comprovante e certificado de garantia</Link>
           <button type="button" className="admin-btn min-h-13 w-full justify-center text-base" onClick={() => ir({ aba: "pedidos" })}>Ver meus pedidos</button>
@@ -1042,5 +1041,33 @@ export function Mais({ ir }: { ir: Ir }) {
       <MensagensProntas />
       <ListaPosVenda />
     </div>
+  );
+}
+
+/** Resumo do pedido para a cliente: referência de cada peça + link da página com as fotos (pedido_publico). */
+function ResumoWhats(a: { orderId: string; telefone: string; cliente: string; codigo: string; total: number; combinado: string | null | undefined;
+  itensLocais: { nome: string; variante: string | null; quantidade: number; unitario_cents: number; referencia: null }[] }) {
+  const q = useQuery({
+    queryKey: ["consultora", "pedido-publico", a.orderId],
+    queryFn: async () => {
+      const { data: token, error } = await supabase.rpc("pedido_token", { _order: a.orderId });
+      if (error || !token) throw error ?? new Error("sem link");
+      const { data, error: e2 } = await supabase.rpc("pedido_publico", { _token: token });
+      if (e2) throw e2;
+      return { token: token as string, pedido: data as unknown as PedidoPublico | null };
+    },
+    staleTime: Infinity,
+  });
+  const link = q.data ? `${window.location.origin}/pedido/${q.data.token}` : null;
+  const texto = mensagemResumoPedido({
+    cliente: a.cliente, codigo: a.codigo, total_cents: a.total, combinado: a.combinado ?? null, manual: MANUAL_CUIDADOS_URL, link,
+    itens: q.data?.pedido?.itens ?? a.itensLocais,
+  });
+  return (
+    <a className="btn-app-principal w-full" target="_blank" rel="noreferrer" aria-disabled={q.isLoading}
+      onClick={(e) => { if (q.isLoading) e.preventDefault(); }}
+      href={linkWhats(a.telefone, texto) ?? undefined}>
+      <MessageCircle className="size-5" aria-hidden /> {q.isLoading ? "Preparando fotos…" : "Enviar resumo com fotos pelo WhatsApp"}
+    </a>
   );
 }

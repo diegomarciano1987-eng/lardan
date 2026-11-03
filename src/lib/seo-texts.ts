@@ -6,7 +6,7 @@ const OVERRIDES: Record<string, { title?: string; description?: string }> = {
   },
   "/renda-extra-com-vendas": { title: "Renda Extra com Vendas: Como Começar | Lardan" },
   "/como-comecar-a-vender-semijoias": { title: "Como Começar a Vender Semijoias do Zero | Lardan" },
-  "/semijoias-consignadas-para-revenda": { title: "Semijoias consignadas para revenda: como funciona" },
+  "/semijoias-consignadas-para-revenda": { title: "Semijoias consignadas para revenda: como funciona", description: "Semijoias consignadas: veja como funcionam maleta, acerto, peças não vendidas, perdas e garantia, e as 12 perguntas a fazer antes de aceitar." },
   "/como-vender-semijoias-pelo-whatsapp": { title: "Como vender semijoias pelo WhatsApp: passo a passo" },
   "/privacidade": { description: "Saiba como a Lardan trata dados de contato e candidatura a consultora, para quais finalidades e como exercer seus direitos previstos na LGPD." },
   "/perguntas-sobre-revenda-de-semijoias": { title: "Revenda de semijoias: dúvidas frequentes", description: "Tire dúvidas sobre revenda de semijoias: consignado ou atacado, maleta, acerto, garantia, MEI, WhatsApp e como ser Consultora Lardan." },

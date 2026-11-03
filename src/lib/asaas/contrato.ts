@@ -175,6 +175,9 @@ export interface TransporteAsaas {
   /** endereço da fatura, como o provedor devolve */
   obterLinkFatura(chargeId: string): Promise<string>;
 
+  /** cancela a cobrança no provedor (opcional: o simulador pode não ter) */
+  cancelarCobranca?(chargeExternalId: string): Promise<void>;
+
   /** fila local de eventos (no futuro, entregues pelo webhook) */
   receberEventos(): Promise<EventoExterno[]>;
 }

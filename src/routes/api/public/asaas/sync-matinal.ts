@@ -24,7 +24,13 @@ export const Route = createFileRoute("/api/public/asaas/sync-matinal")({
         try {
           const { executarSyncAsaas } = await import("@/lib/asaas/espelho.server");
           const r = await executarSyncAsaas({ actor, de: modo === "completo" ? "2020-01-01" : inicio, ate: hoje, ignorarIntervalo: true, modo });
-          return Response.json({ ok: true, ...r });
+          // Acordos sem 1º pagamento até venc. + 5 dias: cancela no Asaas e avisa quem fez o acordo.
+          let acordos: unknown;
+          try {
+            const { encerrarAcordosVencidos } = await import("@/lib/asaas/cancelar.server");
+            acordos = await encerrarAcordosVencidos(actor);
+          } catch (e) { acordos = { erro: (e as Error).message }; }
+          return Response.json({ ok: true, ...r, acordos_vencidos: acordos });
         } catch (e) {
           return Response.json({ ok: false, erro: (e as Error).message }, { status: 500 });
         }

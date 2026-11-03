@@ -163,7 +163,7 @@ export class TransporteHttpAsaas implements TransporteAsaas {
   }
 
   /** Monta a requisição sem enviá-la (usado também pelos testes). */
-  montar(metodo: "GET" | "POST", caminho: string, o: { query?: Record<string, string | number | null | undefined>; corpo?: Json } = {}) {
+  montar(metodo: "GET" | "POST" | "DELETE", caminho: string, o: { query?: Record<string, string | number | null | undefined>; corpo?: Json } = {}) {
     const url = new URL(BASE[this.ambiente] + caminho);
     for (const [k, v] of Object.entries(o.query ?? {})) if (v !== null && v !== undefined && v !== "") url.searchParams.set(k, String(v));
     const headers: Record<string, string> = {
@@ -179,7 +179,7 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     return { url: url.toString(), init };
   }
 
-  private async enviar<T>(metodo: "GET" | "POST", caminho: string, o: Parameters<TransporteHttpAsaas["montar"]>[2] = {}, aceitar404 = false): Promise<T | null> {
+  private async enviar<T>(metodo: "GET" | "POST" | "DELETE", caminho: string, o: Parameters<TransporteHttpAsaas["montar"]>[2] = {}, aceitar404 = false): Promise<T | null> {
     if (!this.chave) throw new FalhaAntesDoEnvio("Credencial do servidor ausente.");
     const { url, init } = this.montar(metodo, caminho, o);
     let r: Response;
@@ -350,6 +350,11 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     if (!c) throw new RecusadoPeloProvedor("Cobrança inexistente no provedor.", 404, ["not_found"]);
     if (!c.invoiceUrl) throw new ConsultaIndisponivel("Provedor não devolveu o endereço da fatura.");
     return c.invoiceUrl;
+  }
+
+  /** Cancela (remove) a cobrança no Asaas. 404 = já não existe: tratado como cancelada. */
+  async cancelarCobranca(id: string): Promise<void> {
+    await this.enviar<Json>("DELETE", `/payments/${encodeURIComponent(id)}`, {}, true);
   }
 
   async receberEventos(): Promise<EventoExterno[]> {

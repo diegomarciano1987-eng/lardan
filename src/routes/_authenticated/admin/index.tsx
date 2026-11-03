@@ -134,6 +134,7 @@ function VisaoGeralAdministrativa() {
 
   const counts = useQuery({
     queryKey: ["admin-counts", podeConteudo, podeLeads],
+    staleTime: 5 * 60_000,
     enabled: podeConteudo || podeLeads,
     queryFn: async () => {
       const count = async (table: "leads" | "contact_requests" | "products" | "pages") => {

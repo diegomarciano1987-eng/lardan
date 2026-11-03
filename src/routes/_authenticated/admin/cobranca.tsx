@@ -34,7 +34,7 @@ function Cobranca() {
   const s = Route.useSearch();
   const nav = useNavigate({ from: "/admin/cobranca" });
   const set = (p: Partial<z.infer<typeof busca>>) => nav({ search: (o) => ({ ...o, p: 1, ...p }), replace: true });
-  const q = useQuery({ queryKey: ["cob", "carteira"], queryFn: carteira });
+  const q = useQuery({ queryKey: ["cob", "carteira"], queryFn: carteira, staleTime: 60_000 });
   const qk = useQuery({ queryKey: ["cob", "kpis"], queryFn: kpisCobranca });
   const qc = useQueryClient();
   const hoje = hojeSP();

@@ -111,6 +111,7 @@ function UsuariosPage() {
     Promise.all([
       queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
       queryClient.invalidateQueries({ queryKey: ["my-roles"] }),
+      queryClient.invalidateQueries({ queryKey: ["my-capabilities"] }),
     ]);
 
   const saveRoles = useMutation({

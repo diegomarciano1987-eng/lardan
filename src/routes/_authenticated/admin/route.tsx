@@ -19,8 +19,8 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminLayout() {
   const { user } = Route.useRouteContext();
-  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles });
-  const capsQ = useQuery({ queryKey: ["my-capabilities"], queryFn: fetchMyCapabilities });
+  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
+  const capsQ = useQuery({ queryKey: ["my-capabilities"], queryFn: fetchMyCapabilities, staleTime: 10 * 60_000 });
   const colabQ = useQuery({ queryKey: ["sou-colab"], queryFn: fetchSouColab });
   const { pathname } = useLocation();
   if (isLoading || capsQ.isLoading || colabQ.isLoading) return null;

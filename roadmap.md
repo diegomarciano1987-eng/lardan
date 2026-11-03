@@ -1,5 +1,11 @@
 # Roadmap
 
+## Pacote 0199 — auditoria do app da consultora (03/11/2026)
+- [ ] Revisar segurança e valores do pacote contra a versão 0198, sem operações reais de teste.
+- [ ] Aplicar convites, cobranças, ajustes de acerto e proteção de carteira após validação isolada.
+- [ ] Rodar suíte isolada, confirmar estrutura aplicada e verificar telas autenticadas; não publicar.
+- [ ] Conferir configurações hospedadas de confirmação de e-mail, senhas vazadas e limites de envio, sem alterar valores desconhecidos.
+
 ## Pacote fiscal 0165 — emissor TSM (29/10/2026)
 - [x] Cadastro fiscal aplicado via ferramenta de dados (não DDL); duplicidade unificada após autorização, LC-003419 → LC-007417, auditoria 554e2c5c-245b-4531-a99e-3b0e185400b7. SQL adaptado somente para ignorar IDs oficialmente unificados; endereço antigo e vínculos preservados.
 - [x] Emissor definido, CNPJ/IE/endereço/IBGE = true; Focus/homologacao/false conferidos no banco, RPC autenticada e tela /admin/integracoes. 514 testes isolados passaram; 3 cenários fiscais novos; testes de preço antigos alinhados à regra para baixo já aprovada. Build OK. Não ativa nem comprova emissão completa: prontidão ainda informa pendências da cadeia/acerto e cadastros.

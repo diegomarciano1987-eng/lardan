@@ -3,6 +3,7 @@ import { MessageCircle } from "lucide-react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { brl } from "@/lib/maletas";
 import { buscarPecas, linkWhats, type Cliente } from "@/lib/consultora";
+import { fotoPecaUrl } from "@/lib/pedido-publico";
 
 const norm = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 const raiz = (w: string) => w.replace(/(oes|aes|es|s)$/, "");
@@ -14,7 +15,7 @@ export function CombinaComEla({ cl }: { cl: Cliente }) {
   if (!palavras.length || !pecas.data?.length) return null;
   const achadas = pecas.data.filter((p) => p.disponivel > 0 && palavras.some((w) => norm(`${p.produto} ${p.categoria ?? ""} ${p.banho ?? ""} ${p.variante ?? ""}`).includes(w))).slice(0, 6);
   if (!achadas.length) return null;
-  const texto = `Oi, ${cl.nome.split(" ")[0]}! Separei peças que combinam com você:\n${achadas.map((p) => `• ${p.produto} — ${brl(p.preco_cents)}`).join("\n")}\nQuer ver?`;
+  const texto = `Oi, ${cl.nome.split(" ")[0]}! Separei peças que combinam com você:\n${achadas.map((p) => `• ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents)}${p.media_id ? `\n  Foto: ${fotoPecaUrl(p.media_id)}` : ""}`).join("\n")}\nQuer ver?`;
   const w = linkWhats(cl.telefone, texto);
   return (
     <section className="rounded-2xl border border-border bg-card p-5">

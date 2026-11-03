@@ -2,6 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { vitrinePublica, type VitrineItem } from "@/lib/maletas";
 import { VitrineView } from "@/components/vitrine/VitrineView";
+import { urlPublica } from "@/lib/pedido-publico";
 import { arquivoPublico, type DesignVitrine } from "@/lib/vitrine-design";
 import { seoTexts } from "@/lib/seo-texts";
 
@@ -59,6 +60,7 @@ function VitrineConsultora() {
       nome={v.nome}
       itens={v.itens as VitrineItem[]}
       img={arquivoPublico}
+      urlCompartilhar={urlPublica(`/${v.slug ?? slug}`)}
     />
   );
 }

@@ -174,6 +174,7 @@ export interface VitrineItem {
   tamanho: string | null;
   cor: string | null;
   categoria: string | null;
+  referencia?: string | null;
   disponivel: number;
   preco_cents: number;
   media_id: string | null;

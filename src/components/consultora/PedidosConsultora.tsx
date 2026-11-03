@@ -1,7 +1,9 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { linkPedidoPublico } from "@/lib/pedido-publico";
 import { MoreHorizontal, MessageCircle, ShoppingBag, ArrowRight, Clock3, CheckCircle2, CalendarDays, XCircle, Package, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -32,6 +34,27 @@ export function PedidosConsultora() {
   if (q.isError) return <p role="alert">{traduzir(q.error)}</p>;
   const lista = q.data ?? [];
   const visiveis = lista.filter((p) => grupo(p) === aba);
+  return <ListaPedidos {...{ lista, visiveis, aba, setAba, setCancelar, setAberto, mudar, cancelar, aberto, detalhe }} />;
+}
+
+/** Link secreto da página com fotos e referências de cada pedido visível (pedido_token). */
+function useLinksPedidos(ids: string[]) {
+  const qs = useQueries({ queries: ids.map((id) => ({
+    queryKey: ["consultora", "pedido-token", id],
+    queryFn: async () => { const { data, error } = await supabase.rpc("pedido_token", { _order: id }); if (error) throw error; return (data as string | null) ?? null; },
+    staleTime: Infinity,
+  })) });
+  return new Map(ids.map((id, n) => [id, qs[n]?.data ? linkPedidoPublico(qs[n].data as string) : null]));
+}
+
+function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, mudar, cancelar, aberto, detalhe }: {
+  lista: PedidoResumo[]; visiveis: PedidoResumo[]; aba: typeof GRUPOS[number]; setAba: (g: typeof GRUPOS[number]) => void;
+  setCancelar: (p: PedidoResumo | null) => void; setAberto: (p: PedidoResumo | null) => void;
+  mudar: { isPending: boolean; mutate: (v: { id: string; status: string }) => void };
+  cancelar: PedidoResumo | null; aberto: PedidoResumo | null;
+  detalhe: { isLoading: boolean; isError: boolean; error: unknown; data: Awaited<ReturnType<typeof detalhePedido>> | null | undefined };
+}) {
+  const links = useLinksPedidos(visiveis.filter((p) => p.status !== "cancelado").map((p) => p.id));
   return <div className="space-y-7">
     <div role="tablist" aria-label="Situação dos pedidos" className="grid grid-cols-2 gap-3 lg:grid-cols-4">{GRUPOS.map((g) => {
       const itens = lista.filter((p) => grupo(p) === g);
@@ -43,7 +66,8 @@ export function PedidosConsultora() {
     <ul id="pedidos-lista" role="tabpanel" aria-labelledby={`pedidos-tab-${GRUPOS.indexOf(aba)}`} className="grid items-stretch gap-4 xl:grid-cols-2">{visiveis.map((p) => {
       const dias = idadePedido(p.created_at); const tom = tomIdade(dias);
       const cor = tom === "success" ? "bg-success/15 text-success" : tom === "warning" ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive";
-      const whats = p.customer_phone ? linkWhats(p.customer_phone, mensagemPedido(p)) : null;
+      const fotos = links.get(p.id);
+      const whats = p.customer_phone ? linkWhats(p.customer_phone, `${mensagemPedido(p)}${fotos ? `\nVeja as fotos e referências das suas peças: ${fotos}` : ""}`) : null;
       return <li key={p.id} className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card">
         <div className="flex-1 p-5 sm:p-6">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3"><div className="flex min-w-0 items-start gap-3"><span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-xl font-semibold text-secondary-foreground">{p.customer_name.trim().slice(0, 1).toUpperCase()}</span><div className="min-w-0"><h3 className="break-words text-xl font-semibold leading-snug">{p.customer_name}</h3><span className="mt-1 block text-base text-muted-foreground">{p.code}</span></div></div>

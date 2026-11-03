@@ -8,7 +8,7 @@ import { LeitorEtiqueta } from "@/components/consultora/LeitorEtiqueta";
 import { FotoAmpliavel } from "@/components/consultora/FotoAmpliavel";
 import { LetraGrande, useLetraGrande } from "@/components/consultora/LetraGrande";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
-import { mensagemResumoPedido, type PedidoPublico } from "@/lib/pedido-publico";
+import { linkPedidoPublico, mensagemResumoPedido, type PedidoPublico } from "@/lib/pedido-publico";
 import { FORMAS_COMBINADAS, iconeCategoria, salvarCombinado, type FormaCombinada } from "@/lib/consultora-combinado";
 import { LembretesClientes } from "@/components/consultora/LembretesClientes";
 import { CombinaComEla } from "@/components/consultora/CombinaComEla";
@@ -1058,7 +1058,7 @@ function ResumoWhats(a: { orderId: string; telefone: string; cliente: string; co
     },
     staleTime: Infinity,
   });
-  const link = q.data ? `${window.location.origin}/pedido/${q.data.token}` : null;
+  const link = q.data ? linkPedidoPublico(q.data.token) : null;
   const texto = mensagemResumoPedido({
     cliente: a.cliente, codigo: a.codigo, total_cents: a.total, combinado: a.combinado ?? null, manual: MANUAL_CUIDADOS_URL, link,
     itens: q.data?.pedido?.itens ?? a.itensLocais,

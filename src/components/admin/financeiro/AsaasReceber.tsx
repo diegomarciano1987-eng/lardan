@@ -37,6 +37,7 @@ import {
 import { estadoContasAsaas, gerarLinkCobranca, obterLinkDaCobranca, recuperarIntencao } from "@/lib/asaas/cobranca.functions";
 import { demoEvento, demoPerderResposta } from "@/lib/asaas/demo.functions";
 import { AsaasImportacao } from "./AsaasImportacao";
+import { PagoOutraForma } from "./PagoOutraForma";
 
 type Resultado = { state?: string; reaproveitada?: boolean; fase?: string | null; erro?: string | null; chamadas_criar?: number; aviso?: string; next_attempt_at?: string | null };
 
@@ -153,6 +154,7 @@ function DetalheParcela({ conta, linha, demo, onFechar }: { conta: ContaAsaas; l
       </div>
       {!op.cobrar && <p className="mt-3 text-sm text-warning" data-testid="motivo-indisponivel">Operações desta conta indisponíveis: {conta.motivo}</p>}
       {estado === "conciliacao" && <p className="mt-3 text-sm text-danger">Em conciliação: nenhuma nova cobrança pode ser gerada para esta parcela até a revisão.</p>}
+      {linha.cobranca && <PagoOutraForma chargeId={linha.cobranca.id} saldoCents={linha.saldo_cents} status={linha.cobranca.status} />}
       <AvisosPermanentes />
       {ultimo && <p className="mt-3 text-sm font-medium" data-testid="ultimo-resultado">{ultimo}</p>}
 

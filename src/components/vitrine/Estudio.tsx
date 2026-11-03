@@ -79,7 +79,7 @@ export function Estudio() {
         pendente.current = false;
         setEstado("salvo");
       } catch (e) {
-        setEstado((e as { code?: string })?.code === "40001" ? "conflito" : "falhou");
+        setEstado((e as { code?: string })?.code === "P0409" || (e as { code?: string })?.code === "40001" ? "conflito" : "falhou");
       }
     }, 900);
     return () => clearTimeout(t);

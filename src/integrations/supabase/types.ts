@@ -21047,6 +21047,7 @@ export type Database = {
         }[]
       }
       vitrine_endereco_disponivel: { Args: { _slug: string }; Returns: Json }
+      vitrine_whatsapp_registrar: { Args: { _numero: string }; Returns: Json }
     }
     Enums: {
       app_role:

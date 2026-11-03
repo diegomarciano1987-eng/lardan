@@ -5,6 +5,7 @@ import { Check, ChevronLeft, ChevronRight, Clock, Maximize2, X, Gem, Instagram, 
 import { toast } from "sonner";
 import { VoltarAoApp } from "./VoltarAoApp";
 import { brl, imagem, type VitrineItem } from "@/lib/maletas";
+import { linhaPeca, urlPublica } from "@/lib/pedido-publico";
 
 import { designPadrao, whatsappLink, type DesignVitrine } from "@/lib/vitrine-design";
 
@@ -121,8 +122,8 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
               <p className="mt-1 text-sm font-semibold">{brl(i.preco_cents)}</p>
               <a href={MANUAL_CUIDADOS_URL} target="_blank" rel="noreferrer" className="mt-2 block text-sm underline underline-offset-4">Garantia de dois anos e cuidados</a>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Button asChild variant="outline" className="h-auto min-h-12 whitespace-normal"><a href={zap ? `${zap}${zap.includes("?") ? "&" : "?"}text=${encodeURIComponent(`Olá! Quero esta peça: ${i.produto}${i.variante ? ` (${i.variante})` : ""}, ${brl(i.preco_cents)}. Você confirma a disponibilidade?`)}` : undefined} aria-disabled={!zap} target="_blank" rel="noreferrer"><MessageCircle /> Quero esta</a></Button>
-                <Button asChild variant="outline" className="h-auto min-h-12 whitespace-normal"><a href={`https://wa.me/?text=${encodeURIComponent(`${i.produto}${i.variante ? ` · ${i.variante}` : ""}\n${brl(i.preco_cents)}${real ? `\nFoto: ${real}` : ""}\n${urlCompartilhar ? `${urlCompartilhar.split("#")[0]}#peca-${i.variant_id}` : ""}`)}`} target="_blank" rel="noreferrer"><Share2 /> Enviar esta peça</a></Button>
+                <Button asChild variant="outline" className="h-auto min-h-12 whitespace-normal"><a href={zap ? `${zap}${zap.includes("?") ? "&" : "?"}text=${encodeURIComponent(`${textoPeca(i, real, "Olá! Quero esta peça:")}\nVocê confirma a disponibilidade?`)}` : undefined} aria-disabled={!zap} target="_blank" rel="noreferrer"><MessageCircle /> Quero esta</a></Button>
+                <Button asChild variant="outline" className="h-auto min-h-12 whitespace-normal"><a href={`https://wa.me/?text=${encodeURIComponent(textoPeca(i, real, ""))}`} target="_blank" rel="noreferrer"><Share2 /> Enviar esta peça</a></Button>
               </div>
               <div className="mt-2 flex items-center gap-2">
                 <button type="button" aria-label="Tirar uma" className="size-8 rounded-full border border-[var(--v-line)]" onClick={() => setSacola((s) => ({ ...s, [i.variant_id]: Math.max(q - 1, 0) }))}>−</button>

@@ -33,9 +33,9 @@ export function AdminShell({
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const rolesQuery = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles });
+  const rolesQuery = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
   const roles = rolesQuery.data ?? [];
-  const capsQuery = useQuery({ queryKey: ["my-capabilities"], queryFn: fetchMyCapabilities });
+  const capsQuery = useQuery({ queryKey: ["my-capabilities"], queryFn: fetchMyCapabilities, staleTime: 10 * 60_000 });
   const caps = capsQuery.data ?? [];
   const [palette, setPalette] = useState(false);
   const [mac, setMac] = useState(false);

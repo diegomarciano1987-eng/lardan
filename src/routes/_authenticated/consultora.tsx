@@ -536,7 +536,7 @@ function Historico({ cycleId }: { cycleId: string | null }) {
 }
 
 function AreaConsultora() {
-  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles });
+  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
   if (isLoading) return null;
   if (!portaLiberada("consultora", roles ?? [])) return <AcessoNaoLiberado />;
   return <AreaConsultoraLiberada />;

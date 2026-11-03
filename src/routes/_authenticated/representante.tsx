@@ -67,7 +67,7 @@ async function minhaFicha(): Promise<string | null> {
 }
 
 function AreaRepresentante() {
-  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles });
+  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
   const minha = useQuery({ queryKey: ["representante", "minha-ficha"], queryFn: minhaFicha });
   const { aba = "cobranca", rep: repEspelho } = Route.useSearch();
   const navigate = useNavigate({ from: "/representante" });

@@ -1443,6 +1443,13 @@
       "when": 1793737303725,
       "tag": "0205_vitrine_itens_referencia",
       "breakpoints": true
+    },
+    {
+      "idx": 206,
+      "version": "7",
+      "when": 1793749424912,
+      "tag": "0206_consultora_saldo_livre_pedidos",
+      "breakpoints": true
     }
   ]
 }

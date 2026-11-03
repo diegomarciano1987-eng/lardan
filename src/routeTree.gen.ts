@@ -134,6 +134,7 @@ import { Route as AuthenticatedAdminCadastrosProdutosIdRouteImport } from './rou
 import { Route as AuthenticatedAdminCadastrosProdutosNovoRouteImport } from './routes/_authenticated/admin/cadastros/produtos_.novo'
 import { Route as AuthenticatedAdminFinanceiroContasIdRouteImport } from './routes/_authenticated/admin/financeiro/contas_.$id'
 import { Route as AuthenticatedAdminMaletasRemessaIdRouteImport } from './routes/_authenticated/admin/maletas_.remessa.$id'
+import { Route as ApiPublicPedidoFotoTokenMediaRouteImport } from './routes/api/public/pedido-foto.$token.$media'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -830,6 +831,12 @@ const AuthenticatedAdminMaletasRemessaIdRoute =
     path: '/maletas/remessa/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const ApiPublicPedidoFotoTokenMediaRoute =
+  ApiPublicPedidoFotoTokenMediaRouteImport.update({
+    id: '/api/public/pedido-foto/$token/$media',
+    path: '/api/public/pedido-foto/$token/$media',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -956,6 +963,7 @@ export interface FileRoutesByFullPath {
   '/admin/cadastros/produtos/novo': typeof AuthenticatedAdminCadastrosProdutosNovoRoute
   '/admin/financeiro/contas/$id': typeof AuthenticatedAdminFinanceiroContasIdRoute
   '/admin/maletas/remessa/$id': typeof AuthenticatedAdminMaletasRemessaIdRoute
+  '/api/public/pedido-foto/$token/$media': typeof ApiPublicPedidoFotoTokenMediaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1080,6 +1088,7 @@ export interface FileRoutesByTo {
   '/admin/cadastros/produtos/novo': typeof AuthenticatedAdminCadastrosProdutosNovoRoute
   '/admin/financeiro/contas/$id': typeof AuthenticatedAdminFinanceiroContasIdRoute
   '/admin/maletas/remessa/$id': typeof AuthenticatedAdminMaletasRemessaIdRoute
+  '/api/public/pedido-foto/$token/$media': typeof ApiPublicPedidoFotoTokenMediaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1208,6 +1217,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cadastros/produtos_/novo': typeof AuthenticatedAdminCadastrosProdutosNovoRoute
   '/_authenticated/admin/financeiro/contas_/$id': typeof AuthenticatedAdminFinanceiroContasIdRoute
   '/_authenticated/admin/maletas_/remessa/$id': typeof AuthenticatedAdminMaletasRemessaIdRoute
+  '/api/public/pedido-foto/$token/$media': typeof ApiPublicPedidoFotoTokenMediaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1336,6 +1346,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos/novo'
     | '/admin/financeiro/contas/$id'
     | '/admin/maletas/remessa/$id'
+    | '/api/public/pedido-foto/$token/$media'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1460,6 +1471,7 @@ export interface FileRouteTypes {
     | '/admin/cadastros/produtos/novo'
     | '/admin/financeiro/contas/$id'
     | '/admin/maletas/remessa/$id'
+    | '/api/public/pedido-foto/$token/$media'
   id:
     | '__root__'
     | '/'
@@ -1587,6 +1599,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cadastros/produtos_/novo'
     | '/_authenticated/admin/financeiro/contas_/$id'
     | '/_authenticated/admin/maletas_/remessa/$id'
+    | '/api/public/pedido-foto/$token/$media'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1647,6 +1660,7 @@ export interface RootRouteChildren {
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  ApiPublicPedidoFotoTokenMediaRoute: typeof ApiPublicPedidoFotoTokenMediaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2526,6 +2540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMaletasRemessaIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/api/public/pedido-foto/$token/$media': {
+      id: '/api/public/pedido-foto/$token/$media'
+      path: '/api/public/pedido-foto/$token/$media'
+      fullPath: '/api/public/pedido-foto/$token/$media'
+      preLoaderRoute: typeof ApiPublicPedidoFotoTokenMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -2796,6 +2817,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  ApiPublicPedidoFotoTokenMediaRoute: ApiPublicPedidoFotoTokenMediaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

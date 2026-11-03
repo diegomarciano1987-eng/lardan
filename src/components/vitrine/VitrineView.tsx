@@ -52,7 +52,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
         const det = [i.variante, i.tamanho, i.cor].filter(Boolean).join(" · ");
         const f = foto(i);
         const qtd = sacola[i.variant_id] ?? 0;
-        return `${linhaPeca({ quantidade: qtd, nome: i.produto, variante: det || null, referencia: i.referencia, valor_cents: i.preco_cents * qtd })}${f ? `\n  Foto: ${urlPublica(f)}` : ""}`;
+        return `${linhaPeca({ quantidade: qtd, nome: i.produto, variante: det || null, referencia: i.referencia ?? null, valor_cents: i.preco_cents * qtd })}${f ? `\n  Foto: ${urlPublica(f)}` : ""}`;
       });
     const abertura = d.perfil.mensagem || `Olá, ${primeiroNome}! Vi sua vitrine Lardan e tenho interesse:`;
     const texto = `${abertura}\n${linhas.join("\n")}\nTotal: ${brl(total)}\n\nAinda está disponível?\n${urlPublica((urlCompartilhar ?? window.location.href).split("#")[0] ?? "")}`;

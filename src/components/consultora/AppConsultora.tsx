@@ -430,7 +430,7 @@ export function Clientes({ nav, ir, jornada }: { nav: Nav; ir: Ir; jornada?: boo
       {q.isLoading && <Estado tipo="carregando" texto="Carregando suas clientes…" />}
       {q.isError && <Estado tipo="erro" texto="Não foi possível carregar suas clientes." acao={<button className="admin-btn" onClick={() => q.refetch()}>Tentar de novo</button>} />}
       {q.data && q.data.length === 0 && (
-        <Estado tipo="vazio" texto="Nenhuma cliente ainda. Cadastre a primeira: nome e telefone são obrigatórios, não precisa ter comprado." />
+        <Estado tipo="vazio" texto="Nenhuma cliente ainda. Cadastre a primeira: nome, telefone e data de nascimento são obrigatórios, não precisa ter comprado." />
       )}
       {q.data && q.data.length > 0 && lista.length === 0 && <Estado tipo="vazio" texto={`Ninguém encontrado para “${busca}”.`} />}
 

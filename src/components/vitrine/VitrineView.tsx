@@ -51,10 +51,11 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
       .map((i) => {
         const det = [i.variante, i.tamanho, i.cor].filter(Boolean).join(" · ");
         const f = foto(i);
-        return `${linhaPeca({ quantidade: sacola[i.variant_id], nome: i.produto, variante: det || null, referencia: i.referencia, valor_cents: i.preco_cents * sacola[i.variant_id] })}${f ? `\n  Foto: ${urlPublica(f)}` : ""}`;
+        const qtd = sacola[i.variant_id] ?? 0;
+        return `${linhaPeca({ quantidade: qtd, nome: i.produto, variante: det || null, referencia: i.referencia, valor_cents: i.preco_cents * qtd })}${f ? `\n  Foto: ${urlPublica(f)}` : ""}`;
       });
     const abertura = d.perfil.mensagem || `Olá, ${primeiroNome}! Vi sua vitrine Lardan e tenho interesse:`;
-    const texto = `${abertura}\n${linhas.join("\n")}\nTotal: ${brl(total)}\n\nAinda está disponível?\n${urlPublica((urlCompartilhar ?? window.location.href).split("#")[0])}`;
+    const texto = `${abertura}\n${linhas.join("\n")}\nTotal: ${brl(total)}\n\nAinda está disponível?\n${urlPublica((urlCompartilhar ?? window.location.href).split("#")[0] ?? "")}`;
     window.open(`${zap}?text=${encodeURIComponent(texto)}`, "_blank", "noopener,noreferrer");
   };
   const textoPeca = (i: Item, real: string | null, abertura: string) => [
@@ -62,7 +63,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
     `${i.produto}${i.variante ? ` · ${i.variante}` : ""}${i.referencia ? ` · Ref. ${i.referencia}` : ""}`,
     brl(i.preco_cents),
     ...(real ? [`Foto: ${urlPublica(real)}`] : []),
-    ...(urlCompartilhar ? [`${urlPublica(urlCompartilhar.split("#")[0])}#peca-${i.variant_id}`] : []),
+    ...(urlCompartilhar ? [`${urlPublica(urlCompartilhar.split("#")[0] ?? "")}#peca-${i.variant_id}`] : []),
   ].filter(Boolean).join("\n");
 
   // capa padrão LARDAN: fixa; só foto, nome, frase, horário e contatos vêm da consultora

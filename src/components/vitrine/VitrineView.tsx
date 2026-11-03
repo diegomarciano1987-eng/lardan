@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
 import { Check, ChevronLeft, ChevronRight, Clock, Maximize2, X, Gem, Instagram, MessageCircle, Share2, ShieldCheck, ShoppingBag, User } from "lucide-react";
 import { toast } from "sonner";
+import { VoltarAoApp } from "./VoltarAoApp";
 import { brl, imagem, type VitrineItem } from "@/lib/maletas";
 
 import { designPadrao, whatsappLink, type DesignVitrine } from "@/lib/vitrine-design";
@@ -181,6 +182,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
 
   return (
     <div className={`vitrine-raiz @container vp-${a.paleta} vf-${a.fonte} ${previa ? "min-h-full" : "min-h-screen"}`}>
+      {!previa && <VoltarAoApp />}
       <CapaPadrao
         nome={nomePublico} primeiroNome={primeiroNome} frase={d.perfil.frase} horarios={d.perfil.horarios}
         retrato={retrato} retrato2x={retrato2x} iniciais={iniciais || "L"} zap={zap} previa={previa}

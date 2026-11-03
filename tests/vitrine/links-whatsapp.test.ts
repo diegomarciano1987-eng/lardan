@@ -16,3 +16,10 @@ describe("links mandados no WhatsApp", () => {
       .toMatch(/^• 1x Anel Aparador Cravejado \(Dourado\) · Ref\. LANA0028 — R\$\s54,90$/);
   });
 });
+
+describe("endereço completo vindo da prévia", () => {
+  it("troca o domínio da prévia pelo oficial e mantém o domínio oficial", () => {
+    expect(urlPublica("http://localhost:8080/ana-ribeiro")).toBe("https://www.lardan.com.br/ana-ribeiro");
+    expect(urlPublica("https://lardan.com.br/ana-ribeiro")).toBe("https://lardan.com.br/ana-ribeiro");
+  });
+});

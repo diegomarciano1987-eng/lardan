@@ -21,7 +21,8 @@ export const SITE_PUBLICO = "https://www.lardan.com.br";
 
 /** Endereço completo (com https://) para mandar no WhatsApp. Fora do site oficial usa o domínio oficial. */
 export function urlPublica(caminho: string, origem?: string) {
-  if (/^https?:\/\//i.test(caminho)) return caminho;
+  const abs = /^(https?:\/\/[^/]+)(.*)$/i.exec(caminho);
+  if (abs) return urlPublica(abs[2] || "/", abs[1]);
   const o = origem ?? (typeof window !== "undefined" ? window.location.origin : "");
   const base = /^https:\/\/([a-z0-9-]+\.)*lardan\.com\.br$/i.test(o) ? o : SITE_PUBLICO;
   return `${base}${caminho.startsWith("/") ? "" : "/"}${caminho}`;

@@ -18238,6 +18238,7 @@ export type Database = {
         Args: { l: Database["public"]["Tables"]["leads"]["Row"] }
         Returns: Json
       }
+      cidade_norm: { Args: { _t: string }; Returns: string }
       claim_master_role: { Args: never; Returns: boolean }
       clicksign_modo_definir: {
         Args: { _autenticacao?: string; _modo: string }
@@ -20411,6 +20412,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      praca_pela_cidade: {
+        Args: { _cidade: string; _uf: string }
+        Returns: string
       }
       pracas_resumo: {
         Args: never

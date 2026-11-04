@@ -1450,6 +1450,13 @@
       "when": 1793749424912,
       "tag": "0206_consultora_saldo_livre_pedidos",
       "breakpoints": true
+    },
+    {
+      "idx": 207,
+      "version": "7",
+      "when": 1793820041466,
+      "tag": "0207_praca_pelo_endereco",
+      "breakpoints": true
     }
   ]
 }

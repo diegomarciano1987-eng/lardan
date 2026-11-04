@@ -205,9 +205,18 @@ export async function processarLote(
 
   for (const linha of linhas) {
     if (Date.now() - inicio > orcamento) break;
-    const cidade = (linha.city ?? "").trim();
+    let cidade = (linha.city ?? "").trim();
     const uf = (linha.uf ?? "").trim().toUpperCase();
     const digitos = (linha.postal_code ?? "").replace(/\D/g, "");
+    // Endereço sem cidade: aprende a cidade pelo CEP (cep_cidades completa o endereço e a praça).
+    if (!cidade && digitos.length === 8) {
+      const j = (await obterJson(`https://brasilapi.com.br/api/cep/v1/${digitos}`)) as { city?: string; state?: string } | null | "falha";
+      await espera(PAUSA_BRASILAPI_MS);
+      if (j && j !== "falha" && j.city && j.state && (!uf || j.state.toUpperCase() === uf)) {
+        await db.from("cep_cidades").upsert({ cep: digitos, cidade: j.city, uf: j.state.toUpperCase() } as never);
+        cidade = j.city;
+      }
+    }
     const rua = normalizarRua(linha.street);
     let provedorFora = false;
 

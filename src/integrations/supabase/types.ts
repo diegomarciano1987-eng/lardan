@@ -2372,6 +2372,30 @@ export type Database = {
         }
         Relationships: []
       }
+      cep_cidades: {
+        Row: {
+          atualizado_em: string
+          cep: string
+          cidade: string
+          fonte: string
+          uf: string
+        }
+        Insert: {
+          atualizado_em?: string
+          cep: string
+          cidade: string
+          fonte?: string
+          uf: string
+        }
+        Update: {
+          atualizado_em?: string
+          cep?: string
+          cidade?: string
+          fonte?: string
+          uf?: string
+        }
+        Relationships: []
+      }
       chart_of_accounts: {
         Row: {
           aceita_lancamento: boolean

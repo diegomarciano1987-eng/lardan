@@ -1709,6 +1709,13 @@
       "when": 1793921170003,
       "tag": "0243_qualidade_referencia_digitada_liga_peca",
       "breakpoints": true
+    },
+    {
+      "idx": 244,
+      "version": "7",
+      "when": 1793922916836,
+      "tag": "0244_correios_daniel_email_revenda",
+      "breakpoints": true
     }
   ]
 }

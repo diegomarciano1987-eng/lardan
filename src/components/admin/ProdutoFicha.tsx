@@ -174,10 +174,11 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       raw_material: p.raw_material ?? "",
       raw_weight_grams: p.raw_weight_grams == null ? "" : String(p.raw_weight_grams),
       raw_supplier_id: p.raw_supplier_id ?? "",
-      raw_piece_cost: "",
+      // Custos podem ter chegado antes da ficha: nunca zerar o que já foi lido.
+      raw_piece_cost: centavosParaTexto(custos.data?.produto?.raw_piece_cost_cents ?? null),
       banho_tipo: p.banho_tipo ?? "",
       banho_camada: p.banho_camada == null ? "" : String(p.banho_camada),
-      banho_valor: "",
+      banho_valor: centavosParaTexto(custos.data?.produto?.banho_valor_grama_cents ?? null),
       measurements: p.measurements ?? "",
       short_description: p.short_description ?? "",
       description: p.description ?? "",
@@ -186,12 +187,14 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       seo_title: p.seo_title ?? "",
       seo_description: p.seo_description ?? "",
       preco: centavosParaTexto(p.price_cents),
-      custo: "",
-      markup: "",
+      custo: centavosParaTexto(custos.data?.produto?.cost_price_cents ?? null),
+      markup:
+        custos.data?.produto?.markup_percent == null ? "" : String(custos.data.produto.markup_percent),
       price_is_public: p.price_is_public,
       is_featured: p.is_featured,
     });
     setSujo(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p]);
 
   // Custos vigentes entram no formulário só quando o perfil pode vê-los.

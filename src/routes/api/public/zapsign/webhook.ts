@@ -23,7 +23,11 @@ export const Route = createFileRoute("/api/public/zapsign/webhook")({
         const bruto = await request.text();
         if (bruto.length > TAMANHO_MAXIMO) return new Response("Payload grande demais.", { status: 413 });
         let corpo: Record<string, unknown>;
-        try { corpo = JSON.parse(bruto) as Record<string, unknown>; } catch { return new Response("Payload inválido.", { status: 400 }); }
+        try {
+          const valor: unknown = JSON.parse(bruto);
+          if (!valor || typeof valor !== "object" || Array.isArray(valor)) throw new Error("Payload inválido.");
+          corpo = valor as Record<string, unknown>;
+        } catch { return new Response("Payload inválido.", { status: 400 }); }
         const token = String(corpo["token"] ?? (corpo["doc"] as { token?: string } | undefined)?.token ?? "");
         if (!/^[0-9a-f-]{36}$/i.test(token)) return new Response("ok", { status: 200 });
 

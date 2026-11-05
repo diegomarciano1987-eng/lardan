@@ -38,8 +38,7 @@ async function chamar<T>(metodo: "GET" | "POST", caminho: string, corpo?: unknow
     try { dados = texto ? JSON.parse(texto) : null; } catch { dados = { detail: texto.slice(0, 300) }; }
     if (r.status === 401 || r.status === 403) throw new ErroZapsign("A ZapSign recusou o token (confira ZAPSIGN_API_TOKEN e o ambiente).", r.status);
     if (r.status >= 400) {
-      const d = dados as { detail?: string; message?: string } | null;
-      throw new ErroZapsign(`ZapSign respondeu ${r.status}: ${d?.detail ?? d?.message ?? JSON.stringify(dados).slice(0, 200)}`, r.status);
+      throw new ErroZapsign(`A ZapSign recusou a consulta (${r.status}).`, r.status);
     }
     return dados as T;
   } catch (e) {

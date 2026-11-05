@@ -3,13 +3,15 @@
  * — contrato e promissória enviados pelo sistema, termo da maleta (Clicksign)
  * e documentos criados direto no painel da ZapSign (acordos, termos).
  */
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { FileSignature } from "lucide-react";
 import { Panel, Skeleton, StatusBadge, type StatusTone } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { documentoAssinadoLink } from "@/lib/zapsign/zapsign.functions";
+import { Button } from "@/components/ui/button";
 
 interface Doc {
   fonte: "zapsign" | "clicksign"; id: string; tipo: string; origem: string; titulo: string;
@@ -26,6 +28,8 @@ const brl = (c: number | null) => (c == null ? "" : (c / 100).toLocaleString("pt
 
 export function DocumentosAssinados({ partyId }: { partyId: string }) {
   const linkFn = useServerFn(documentoAssinadoLink);
+  const qc = useQueryClient();
+  const [abrindo, setAbrindo] = useState<string | null>(null);
   const q = useQuery({
     queryKey: ["documentos-assinados", partyId],
     queryFn: async () => {
@@ -35,10 +39,18 @@ export function DocumentosAssinados({ partyId }: { partyId: string }) {
     },
   });
   const abrir = async (d: Doc) => {
+    const janela = window.open("about:blank", "_blank");
+    if (janela) janela.opener = null;
+    setAbrindo(d.id);
     try {
       const r = await linkFn({ data: { fonte: d.fonte, id: d.id } });
-      if (r.url) window.open(r.url, "_blank", "noopener,noreferrer"); else toast.error("Arquivo ainda não disponível.");
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Falha."); }
+      if (r.url) {
+        if (janela) janela.location.replace(r.url);
+        else window.open(r.url, "_blank", "noopener,noreferrer");
+        void qc.invalidateQueries({ queryKey: ["documentos-assinados", partyId] });
+      } else { janela?.close(); toast.error("Arquivo ainda não disponível."); }
+    } catch (e) { janela?.close(); toast.error(e instanceof Error ? e.message : "Falha."); }
+    finally { setAbrindo(null); }
   };
   const docs = q.data ?? [];
   const assinados = docs.filter((d) => d.status === "assinado").length;
@@ -61,7 +73,7 @@ export function DocumentosAssinados({ partyId }: { partyId: string }) {
             </div>
             <div className="flex items-center gap-2">
               <StatusBadge tone={STATUS[d.status].tom}>{STATUS[d.status].rotulo}</StatusBadge>
-              <button type="button" className="admin-btn h-9 px-3 text-xs" onClick={() => void abrir(d)}>{d.status === "assinado" ? "Abrir assinado" : "Abrir"}</button>
+              {d.status === "assinado" ? <Button variant="outline" size="sm" disabled={abrindo !== null} onClick={() => void abrir(d)}>{abrindo === d.id ? "Abrindo…" : "Abrir assinado"}</Button> : d.sign_url ? <Button variant="outline" size="sm" asChild><a href={d.sign_url} target="_blank" rel="noopener noreferrer">Abrir</a></Button> : null}
             </div>
           </li>
         ))}

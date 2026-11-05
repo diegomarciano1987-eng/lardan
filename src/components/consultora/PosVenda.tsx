@@ -41,7 +41,7 @@ function FormularioTroca({ pedido, onFim }: { pedido?: string; onFim: () => void
     mutationFn: async () => {
       const paths = await enviarFotosTroca(fotos, chave);
       const { data, error } = await supabase.rpc("qualidade_troca_abrir", {
-        _variant: (variantPedido ?? peca?.id) as string, _referencia: refManual, _tamanho: "", _tipo: tipo, _motivo: motivo, _observacao: obs, _fotos: paths, _chave: chave,
+        _variant: (variantPedido ?? peca?.id ?? null) as unknown as string, _referencia: refManual, _tamanho: "", _tipo: tipo, _motivo: motivo, _observacao: obs, _fotos: paths, _chave: chave,
       });
       if (error) throw error;
       return data as unknown as { protocolo: string };

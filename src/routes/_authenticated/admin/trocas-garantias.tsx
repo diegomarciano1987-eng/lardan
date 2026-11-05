@@ -348,7 +348,7 @@ function NovaTroca({ aberto, onClose, onCriada }: { aberto: boolean; onClose: ()
       if (!consultora) throw new Error("Escolha a consultora.");
       const paths = await enviarFotosTroca(fotos, chave);
       const { data, error } = await supabase.rpc("qualidade_troca_lancar", {
-        _party: consultora.id, _variant: peca?.id ?? undefined, _referencia: peca ? undefined : refManual, _nome: undefined, _tamanho: undefined, _valor_cents: undefined,
+        _party: consultora.id, _variant: peca?.id ?? null, _referencia: peca ? null : refManual, _nome: null, _tamanho: null, _valor_cents: null,
         _tipo: tipo, _motivo: motivo, _observacao: obs, _fotos: paths, _chave: chave,
       } as never);
       if (error) throw error;

@@ -57,7 +57,8 @@ export interface DocZapsign { token: string; status: string; name: string; exter
 export function criarDocumento(corpo: {
   name: string; markdown_text: string; external_id: string;
   signers: { name: string; phone_country?: string; phone_number?: string; email?: string; cpf?: string; auth_mode: string;
-             send_automatic_whatsapp: boolean; send_automatic_email: boolean; lock_name: boolean; lock_phone: boolean; external_id: string; custom_message?: string }[];
+             send_automatic_whatsapp: boolean; send_automatic_email: boolean; lock_name: boolean; lock_phone: boolean; external_id: string; custom_message?: string;
+             require_selfie_photo?: boolean; require_document_photo?: boolean; lock_email?: boolean }[];
   brand_name?: string; lang: "pt-br";
 }) {
   return chamar<DocZapsign>("POST", "/docs/", corpo);

@@ -10,6 +10,7 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { iniciarNumerosCabem } from "@/lib/numeros-cabem";
 import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
@@ -158,6 +159,8 @@ function RootComponent() {
       setAnalyticsRoute(toLocation.pathname);
     });
   }, [router]);
+  // Números grandes nunca vazam dos cards (reduz a fonte até caber).
+  useEffect(() => iniciarNumerosCabem(), []);
   useEffect(() => {
     void trackPageView(location.pathname);
   }, [location.pathname]);

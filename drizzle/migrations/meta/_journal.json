@@ -1695,6 +1695,13 @@
       "when": 1793919625368,
       "tag": "0241_correios_maleta_envio",
       "breakpoints": true
+    },
+    {
+      "idx": 242,
+      "version": "7",
+      "when": 1793920815948,
+      "tag": "0242_cob_judicial_planilha_importar_auditoria",
+      "breakpoints": true
     }
   ]
 }

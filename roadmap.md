@@ -1,5 +1,10 @@
 # Roadmap
 
+## Pacote 0228 — documentos assinados (05/11/2026)
+- [ ] Aplicar armazenamento privado e aba de documentos, preservando carteira e segredos existentes.
+- [ ] Validar permissões e cópias em banco isolado; conferir cadastro e importação autenticados.
+- [ ] Publicar após validação e registrar provas e limitações.
+
 ## Pacote 0213 — compra por peça e forma combinada (05/11/2026)
 - [x] Arquivos aplicados e venda_forma confirmada no banco compartilhado; nenhuma venda existente alterada. Botões novos usam Button e ações da foto se acomodam no celular.
 - [x] 18 testes isolados e 9 de WhatsApp aprovados; compra por peça/foto conferida na vitrine Larissa (1280×1800 e 390×844), cartão selecionável, sem transbordamento; Central aberta como Diego, sem erros de execução. Provas: docs/provas-0213.md. Não gerada cobrança real.

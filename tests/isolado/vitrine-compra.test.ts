@@ -145,3 +145,18 @@ describe("compra na vitrine", () => {
     expect(ainda.map((x) => x.order_id)).toEqual([lista[0]!.order_id]);         // tenta de novo na próxima volta
   });
 });
+
+describe("0213 — forma combinada na Nova venda", () => {
+  test("pedido com Pix combinado aparece como Pix combinado em Vendidos e na Central (não como 'sem forma')", async () => {
+    const clienteCombinado = (await ler<{ id: string }>(cons, `insert into public.consultant_clients (consultora_party_id, nome, telefone) values ($1,'Bia Combinado','43988887777') returning id`, [cons.partyId])).linhas[0];
+    if (!clienteCombinado) throw new Error('Cliente de teste não foi criado');
+    const cli = clienteCombinado.id;
+    const o = await rpc<{ order_id: string }>(cons, "consultant_order_create", { _client: cli, _itens: [{ cycle_id: ciclo, variant_id: vB, quantidade: 1 }], _idempotency_key: `comb-${marca}-1` });
+    expect(o.erro).toBeNull();
+    expect((await rpc(cons, "consultant_order_combinado_set", { _order: o.dados.order_id, _forma: "pix", _parcelas: null, _vencimento: null })).erro).toBeNull();
+    const v = await rpc<{ vendas: { order_id: string; forma: string }[] }>(cons, "consultora_vendidos", { _de: null, _ate: null });
+    expect(v.dados.vendas.find((x) => x.order_id === o.dados.order_id)?.forma).toBe("pix_combinado");
+    const c = await rpc<{ formas: { forma: string }[] }>(master, "central_vendas", { _de: null, _ate: null });
+    expect(c.dados.formas.some((f) => f.forma === "pix_combinado")).toBe(true);
+  });
+});

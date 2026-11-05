@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ErrorState, Panel, Skeleton, formatBRLFromCents, formatInt } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
 
-type Forma = "pix" | "cartao" | "boleto" | "dinheiro" | "receber_depois" | "marcada_feita" | "sem_forma";
+type Forma = "pix" | "cartao" | "boleto" | "pix_combinado" | "cartao_combinado" | "dinheiro" | "receber_depois" | "marcada_feita" | "sem_forma";
 interface Central {
   de: string; ate: string;
   resumo: { vendas: number; valor_cents: number; pecas: number; consultoras: number; pago_lardan_cents: number; a_receber_cents: number;
@@ -24,7 +24,8 @@ interface Central {
 }
 
 const FORMA: Record<Forma, string> = {
-  pix: "Pix (Lardan)", cartao: "Cartão (Lardan)", boleto: "Boleto/link (Lardan)", dinheiro: "Dinheiro",
+  pix: "Pix pela Lardan", cartao: "Cartão pela Lardan", boleto: "Boleto/link pela Lardan",
+  pix_combinado: "Pix combinado (direto com a consultora)", cartao_combinado: "Cartão combinado (maquininha dela)", dinheiro: "Dinheiro",
   receber_depois: "Receber depois (fiado)", marcada_feita: "Marcada como feita", sem_forma: "Sem forma definida",
 };
 const CORES = ["var(--color-rose)", "var(--color-asaas)", "var(--color-bronze)", "var(--color-success)", "var(--color-champagne)", "var(--color-rose-deep)", "var(--color-ledger-muted)"];

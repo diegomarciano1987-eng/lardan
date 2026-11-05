@@ -38,6 +38,13 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   const [ampliar, setAmpliar] = React.useState<{ item: Item; corpo: boolean } | null>(null);
   const [comprando, setComprando] = React.useState(false);
   const podeComprar = !!slug && !previa;
+  /** "Comprar" na peça: garante a peça na sacola e abre o pagamento (Pix ou cartão). */
+  const comprarPeca = (i: Item) => {
+    if (!podeComprar || i.disponivel < 1) return;
+    setSacola((s) => ({ ...s, [i.variant_id]: Math.max(s[i.variant_id] ?? 0, 1) }));
+    setAmpliar(null);
+    setComprando(true);
+  };
 
   const visiveis = itens.filter((i) => !o.ocultas.includes(i.variant_id));
   const porId = new Map(visiveis.map((i) => [i.variant_id, i]));
@@ -127,6 +134,11 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
               <p className="text-xs text-[var(--v-muted)]">{[i.variante, i.tamanho, i.cor].filter(Boolean).join(" · ") || "Peça única"}</p>
               <p className="mt-1 text-sm font-semibold">{brl(i.preco_cents)}</p>
               <a href={MANUAL_CUIDADOS_URL} target="_blank" rel="noreferrer" className="mt-2 block text-sm underline underline-offset-4">Garantia de dois anos e cuidados</a>
+              {podeComprar && (
+                <Button type="button" onClick={() => comprarPeca(i)} className="mt-3 flex h-auto min-h-12 w-full items-center justify-center gap-2 whitespace-normal rounded-lg bg-[var(--v-accent)] px-4 py-3 text-sm font-semibold text-[var(--v-accent-ink)] hover:bg-[var(--v-accent)]">
+                  <ShoppingBag aria-hidden className="size-4" /> Comprar · {brl(i.preco_cents)}
+                </Button>
+              )}
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button asChild variant="outline" className="h-auto min-h-12 whitespace-normal"><a href={zap ? `${zap}${zap.includes("?") ? "&" : "?"}text=${encodeURIComponent(`${textoPeca(i, real, "Olá! Quero esta peça:")}\nVocê confirma a disponibilidade?`)}` : undefined} aria-disabled={!zap} target="_blank" rel="noreferrer"><MessageCircle /> Quero esta</a></Button>
                 <Button asChild variant="outline" className="h-auto min-h-12 whitespace-normal"><a href={`https://wa.me/?text=${encodeURIComponent(textoPeca(i, real, ""))}`} target="_blank" rel="noreferrer"><Share2 /> Enviar esta peça</a></Button>
@@ -220,6 +232,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
           onCorpo={(c) => { setAmpliar((x) => x && { ...x, corpo: c }); setNoCorpo((s) => ({ ...s, [ampliar.item.variant_id]: c })); }}
           onFechar={() => setAmpliar(null)}
           zap={zap} previa={previa}
+          onComprar={podeComprar ? () => comprarPeca(ampliar.item) : undefined}
         />
       )}
       {comprando && slug && (
@@ -315,9 +328,9 @@ function CapaPadrao(p: {
 }
 
 /** Foto ampliada da vitrine: quase tela cheia, sem distorcer (object-contain), troca Peça/No corpo e zoom por toque. */
-function Ampliada({ item, corpo, peca, noCorpoSrc, onCorpo, onFechar, zap, previa }: {
+function Ampliada({ item, corpo, peca, noCorpoSrc, onCorpo, onFechar, zap, previa, onComprar }: {
   item: Item; corpo: boolean; peca: string | null; noCorpoSrc: string | null;
-  onCorpo: (c: boolean) => void; onFechar: () => void; zap: string | null; previa: boolean;
+  onCorpo: (c: boolean) => void; onFechar: () => void; zap: string | null; previa: boolean; onComprar?: (() => void) | undefined;
 }) {
   const verCorpo = corpo && !!noCorpoSrc;
   const src = verCorpo ? noCorpoSrc : peca;
@@ -390,11 +403,16 @@ function Ampliada({ item, corpo, peca, noCorpoSrc, onCorpo, onFechar, zap, previ
             ))}
           </div>
         )}
-        <div className="flex items-center gap-3">
-          <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="min-w-0 basis-full sm:basis-auto sm:flex-1">
             <p className="vz-nome truncate text-xl leading-tight">{item.produto}</p>
             <p className="vz-sub truncate text-xs">{detalhe || "Peça única"} · <strong className="vz-preco">{brl(item.preco_cents)}</strong></p>
           </div>
+          {onComprar && (
+            <Button type="button" onClick={onComprar} className="vz-zap inline-flex h-12 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-semibold">
+              <ShoppingBag className="size-4" aria-hidden /> Comprar
+            </Button>
+          )}
           {zap && (
             <a href={previa ? undefined : `${zap}${zap.includes("?") ? "&" : "?"}text=${encodeURIComponent(msg)}`} target="_blank" rel="noreferrer" className="vz-zap inline-flex h-12 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-medium">
               <MessageCircle className="size-4" /> Quero esta

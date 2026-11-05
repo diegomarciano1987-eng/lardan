@@ -9,7 +9,7 @@ import { Banknote, CalendarClock, CheckCircle2, CreditCard, FileText, LoaderCirc
 import { supabase } from "@/integrations/supabase/client";
 import { brl, traduzir } from "@/lib/maletas";
 
-type Forma = "pix" | "cartao" | "boleto" | "dinheiro" | "receber_depois" | "marcada_feita" | "sem_forma";
+type Forma = "pix" | "cartao" | "boleto" | "pix_combinado" | "cartao_combinado" | "dinheiro" | "receber_depois" | "marcada_feita" | "sem_forma";
 interface Dados {
   de: string; ate: string;
   resumo: { vendas: number; valor_cents: number; pecas: number; pago_lardan_cents: number; dinheiro_cents: number; a_receber_cents: number; vitrine_cents: number };
@@ -19,9 +19,11 @@ interface Dados {
 }
 
 export const FORMA_VENDA: Record<Forma, { rotulo: string; icone: typeof QrCode }> = {
-  pix: { rotulo: "Pix (Lardan)", icone: QrCode },
-  cartao: { rotulo: "Cartão (Lardan)", icone: CreditCard },
-  boleto: { rotulo: "Boleto/link (Lardan)", icone: FileText },
+  pix: { rotulo: "Pix pela Lardan", icone: QrCode },
+  cartao: { rotulo: "Cartão pela Lardan", icone: CreditCard },
+  boleto: { rotulo: "Boleto/link pela Lardan", icone: FileText },
+  pix_combinado: { rotulo: "Pix combinado com a cliente", icone: QrCode },
+  cartao_combinado: { rotulo: "Cartão combinado com a cliente", icone: CreditCard },
   dinheiro: { rotulo: "Dinheiro", icone: Banknote },
   receber_depois: { rotulo: "Receber depois (fiado)", icone: CalendarClock },
   marcada_feita: { rotulo: "Marcada como feita", icone: CheckCircle2 },

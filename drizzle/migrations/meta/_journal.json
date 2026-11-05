@@ -1471,6 +1471,13 @@
       "when": 1793879578643,
       "tag": "0209_codigo_barras_curto",
       "breakpoints": true
+    },
+    {
+      "idx": 210,
+      "version": "7",
+      "when": 1793894042189,
+      "tag": "0210_referencia_automatica_produto",
+      "breakpoints": true
     }
   ]
 }

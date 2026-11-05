@@ -23,6 +23,7 @@ import {
   centavosParaTexto,
   mensagemDeErro,
 } from "@/lib/catalog";
+import { SmartSelect } from "@/components/premium/SmartSelect";
 import { ProdutoFicha } from "@/components/admin/ProdutoFicha";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import {
@@ -62,6 +63,7 @@ function ProdutoDetalhe() {
 
   const [variante, setVariante] = useState<VarianteRow | null>(null);
   const [varianteAberta, setVarianteAberta] = useState(false);
+  const [novaInicial, setNovaInicial] = useState<RecordValues>({ is_active: true });
   const fileRef = useRef<HTMLInputElement>(null);
 
   const produto = useQuery({
@@ -121,7 +123,7 @@ function ProdutoDetalhe() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("product_media")
-        .select("id, position, media:media_assets(id, alt, url, storage_path)")
+        .select("id, position, variant_id, media:media_assets(id, alt, url, storage_path)")
         .eq("product_id", id)
         .order("position");
       if (error) throw error;
@@ -184,6 +186,41 @@ function ProdutoDetalhe() {
 
 
 
+  /** Nova variante já nasce com referência (produto + A/B/C), preço, NCM e custo do produto-base. */
+  const abrirNovaVariante = async () => {
+    let ref = "";
+    const { data } = await supabase.rpc("variante_referencia_sugerir", { _product_id: id });
+    if (data) ref = String(data);
+    const pd = produto.data;
+    const custoBase = custosVigentes.data?.produto.cost_price_cents ?? null;
+    setNovaInicial({
+      is_active: true,
+      reference_code: ref,
+      ncm: pd?.ncm ?? "71171900",
+      preco: pd?.price_cents == null ? "" : centavosParaTexto(pd.price_cents),
+      raw_supplier_id: pd?.raw_supplier_id ?? "",
+      custo_bruto: centavosParaTexto(custosVigentes.data?.produto.raw_piece_cost_cents ?? null),
+      custo_final: centavosParaTexto(custoBase),
+    });
+    setVariante(null);
+    setVarianteAberta(true);
+  };
+
+  const vincularFoto = useMutation({
+    mutationFn: async ({ vinculoId, variantId }: { vinculoId: string; variantId: string }) => {
+      const { error } = await supabase
+        .from("product_media")
+        .update({ variant_id: variantId || null })
+        .eq("id", vinculoId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Foto vinculada.");
+      void qc.invalidateQueries({ queryKey: ["produto-imagens", id] });
+    },
+    onError: (e) => toast.error(mensagemDeErro(e)),
+  });
+
   /** Grava a variante pela operação canônica: SKU/nome automáticos e unicidade no banco. */
   const salvarVariante = useMutation({
     mutationFn: async (v: RecordValues) => {
@@ -206,7 +243,8 @@ function ProdutoDetalhe() {
       const row = await salvarVarianteRpc(variante?.id ?? null, {
         product_id: id,
         label: String(v["label"] ?? "").trim(),
-        sku: String(v["sku"] ?? "").trim(),
+        // SKU deixou de ser usado na tela: mantém o já gravado (ou o banco gera escondido).
+        sku: variante?.sku ?? "",
         barcode: String(v["barcode"] ?? "").trim(),
         reference_code: String(v["reference_code"] ?? "").trim(),
         ncm: String(v["ncm"] ?? "").replace(/\D/g, ""),
@@ -340,10 +378,7 @@ function ProdutoDetalhe() {
               <button
                 type="button"
                 className="admin-btn border-champagne"
-                onClick={() => {
-                  setVariante(null);
-                  setVarianteAberta(true);
-                }}
+                onClick={() => void abrirNovaVariante()}
               >
                 <Plus aria-hidden className="size-4" /> Nova variante
               </button>
@@ -361,10 +396,10 @@ function ProdutoDetalhe() {
                 <table className="w-full text-sm">
                   <thead className="text-left text-ledger-muted">
                     <tr>
+                      <th className="py-2 pr-4 font-normal">Foto</th>
                       <th className="py-2 pr-4 font-normal">Variante</th>
-                      <th className="py-2 pr-4 font-normal">SKU</th>
-                      <th className="py-2 pr-4 font-normal">Código de barras</th>
                       <th className="py-2 pr-4 font-normal">Referência</th>
+                      <th className="py-2 pr-4 font-normal">Código de barras</th>
                       <th className="py-2 pr-4 font-normal">NCM</th>
                       <th className="py-2 pr-4 text-right font-normal">Preço</th>
                       {podeVerCustos ? (
@@ -387,15 +422,25 @@ function ProdutoDetalhe() {
                             setVarianteAberta(true);
                           }}
                         >
+                          <td className="py-2 pr-4">
+                            {(() => {
+                              const foto = (imagens.data ?? []).find((m) => m.variant_id === v.id);
+                              const path = (foto?.media as { storage_path: string | null } | null)?.storage_path ?? null;
+                              return path ? (
+                                <MiniFoto path={path} alt={v.label} />
+                              ) : (
+                                <span className="text-xs text-warning">Sem foto</span>
+                              );
+                            })()}
+                          </td>
                           <td className="py-2 pr-4 text-ledger-text">
                             <span className="inline-flex items-center gap-2">
                               {v.is_default ? <Star aria-hidden className="size-3.5 text-bronze" /> : null}
                               {v.label}
                             </span>
                           </td>
-                          <td className="num py-2 pr-4">{v.sku ?? "—"}</td>
-                          <td className="num py-2 pr-4">{v.barcode ?? "—"}</td>
-                          <td className="num py-2 pr-4">{v.reference_code ?? "—"}</td>
+                          <td className="num py-2 pr-4 font-semibold text-ledger-text">{v.reference_code ?? "—"}</td>
+                          <td className="num py-2 pr-4 font-semibold text-ledger-text">{v.barcode ?? "—"}</td>
                           <td className="num py-2 pr-4">{v.ncm ?? "—"}</td>
                           <td className="num py-2 pr-4 text-right">
                             {v.price_cents == null ? "—" : formatBRLFromCents(v.price_cents)}
@@ -452,8 +497,8 @@ function ProdutoDetalhe() {
                 {(imagens.data ?? []).map((m, i) => {
                   const media = m.media as { id: string; alt: string; storage_path: string | null } | null;
                   return (
+                    <div key={m.id} className="space-y-1">
                     <ImagemCard
-                      key={m.id}
                       path={media?.storage_path ?? null}
                       alt={media?.alt ?? "Imagem do produto"}
                       principal={i === 0}
@@ -466,6 +511,22 @@ function ProdutoDetalhe() {
                       onAlt={(alt) => media && salvarAlt.mutate({ mediaId: media.id, alt })}
                       somente={!podeEditar}
                     />
+                    {(variantes.data?.length ?? 0) > 0 ? (
+                      <SmartSelect
+                        value={m.variant_id ?? ""}
+                        onChange={(val) => vincularFoto.mutate({ vinculoId: m.id, variantId: val })}
+                        disabled={!podeEditar}
+                        placeholder="Foto de qual variante?"
+                        options={[
+                          { value: "", label: "Todas as variantes" },
+                          ...(variantes.data ?? []).map((vv) => ({
+                            value: vv.id,
+                            label: `${vv.reference_code ?? ""} ${vv.label}`.trim(),
+                          })),
+                        ]}
+                      />
+                    ) : null}
+                    </div>
                   );
                 })}
               </div>
@@ -509,7 +570,7 @@ function ProdutoDetalhe() {
         open={varianteAberta}
         onOpenChange={setVarianteAberta}
         title={variante ? `Editar variante — ${variante.label}` : "Nova variante"}
-        description="SKU e código de barras são únicos quando informados."
+        description="Referência e código de barras são únicos e saem automáticos. Depois de salvar, vincule a foto desta variante em Imagens."
         initial={
           variante
             ? {
@@ -537,7 +598,7 @@ function ProdutoDetalhe() {
                 custo_verniz: centavosParaTexto(custoDaVariante(variante.id)?.varnish_cost_cents ?? null),
                 custo_final: centavosParaTexto(custoDaVariante(variante.id)?.finished_piece_cost_cents ?? null),
               }
-            : { is_active: true }
+            : novaInicial
         }
         fields={[
           {
@@ -555,12 +616,11 @@ function ProdutoDetalhe() {
             full: true,
             help: "Deixe vazio para o sistema montar: produto + banho + tamanho.",
           },
-          { name: "sku", label: "SKU", type: "text", help: "Vazio = gerado a partir do código interno." },
           {
             name: "barcode",
             label: "Código de barras",
             type: "text",
-            help: "Vazio = o sistema gera um EAN-13 novo. Já tem etiqueta? Digite ou leia com o leitor — zeros à esquerda preservados.",
+            help: "Vazio = o sistema gera o código de barras automático (5 dígitos) ao salvar. Já tem etiqueta? Leia com o leitor.",
             action: {
               label: "Consultar código de barras",
               run: async (valor) => {
@@ -578,13 +638,13 @@ function ProdutoDetalhe() {
             name: "reference_code",
             label: "Código de referência (etiqueta)",
             type: "text",
-            help: "Vazio = usa a referência do produto.",
+            help: "Automático: referência do produto + letra (A, B, C…).",
           },
           {
             name: "ncm",
             label: "Classificação fiscal (NCM)",
             type: "text",
-            help: "8 dígitos. Vazio = usa o NCM do produto.",
+            help: "Vem do produto (71171900).",
           },
           { name: "legacy_code", label: "Código legado", type: "text" },
           { name: "color", label: "Cor comercial", type: "text" },
@@ -593,13 +653,6 @@ function ProdutoDetalhe() {
           { name: "position", label: "Ordem", type: "number" },
           { name: "is_default", label: "Variante padrão", type: "switch" },
           { name: "is_active", label: "Ativa", type: "switch" },
-          {
-            name: "sku_justificativa",
-            label: "Justificativa para mudar o SKU",
-            type: "text",
-            full: true,
-            help: "Obrigatória quando a variante já tem movimentação de estoque.",
-          },
           ...(podeVerCustos
             ? ([
                 {
@@ -785,5 +838,23 @@ function ImagemCard({
         )}
       </figcaption>
     </figure>
+  );
+}
+
+function MiniFoto({ path, alt }: { path: string; alt: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    void signedMediaUrl(path).then((u) => {
+      if (vivo) setUrl(u);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [path]);
+  return url ? (
+    <img src={url} alt={alt} className="size-10 rounded object-cover" />
+  ) : (
+    <span className="block size-10 animate-pulse rounded bg-surface-muted" />
   );
 }

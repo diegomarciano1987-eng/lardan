@@ -13543,6 +13543,7 @@ export type Database = {
           media_id: string
           position: number
           product_id: string
+          variant_id: string | null
         }
         Insert: {
           created_at?: string
@@ -13550,6 +13551,7 @@ export type Database = {
           media_id: string
           position?: number
           product_id: string
+          variant_id?: string | null
         }
         Update: {
           created_at?: string
@@ -13557,6 +13559,7 @@ export type Database = {
           media_id?: string
           position?: number
           product_id?: string
+          variant_id?: string | null
         }
         Relationships: [
           {
@@ -13571,6 +13574,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_media_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
             referencedColumns: ["id"]
           },
         ]
@@ -20559,6 +20569,14 @@ export type Database = {
         Args: { _aplicar?: boolean; _corrigir_divergentes?: boolean }
         Returns: Json
       }
+      produto_ref_prefixo: {
+        Args: { _banho: string; _category_id: string }
+        Returns: string
+      }
+      produto_referencia_sugerir: {
+        Args: { _banho: string; _category_id: string; _product_id?: string }
+        Returns: string
+      }
       public_catalog_browse: {
         Args: {
           _category_slug?: string
@@ -21293,6 +21311,10 @@ export type Database = {
       }
       variant_ean_next: { Args: never; Returns: string }
       variant_save: { Args: { _id: string; _payload: Json }; Returns: Json }
+      variante_referencia_sugerir: {
+        Args: { _product_id: string }
+        Returns: string
+      }
       variantes_tipo_peca: {
         Args: { _variants: string[] }
         Returns: {

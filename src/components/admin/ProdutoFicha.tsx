@@ -45,7 +45,7 @@ const VAZIO: Form = {
   legacy_code: "",
   barcode: "",
   reference_code: "",
-  ncm: "",
+  ncm: "71171900",
   category_id: "",
   subcategory_id: "",
   collection_id: "",
@@ -174,10 +174,11 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       raw_material: p.raw_material ?? "",
       raw_weight_grams: p.raw_weight_grams == null ? "" : String(p.raw_weight_grams),
       raw_supplier_id: p.raw_supplier_id ?? "",
-      raw_piece_cost: "",
+      // Custos podem ter chegado antes da ficha: nunca zerar o que já foi lido.
+      raw_piece_cost: centavosParaTexto(custos.data?.produto?.raw_piece_cost_cents ?? null),
       banho_tipo: p.banho_tipo ?? "",
       banho_camada: p.banho_camada == null ? "" : String(p.banho_camada),
-      banho_valor: "",
+      banho_valor: centavosParaTexto(custos.data?.produto?.banho_valor_grama_cents ?? null),
       measurements: p.measurements ?? "",
       short_description: p.short_description ?? "",
       description: p.description ?? "",
@@ -186,12 +187,14 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       seo_title: p.seo_title ?? "",
       seo_description: p.seo_description ?? "",
       preco: centavosParaTexto(p.price_cents),
-      custo: "",
-      markup: "",
+      custo: centavosParaTexto(custos.data?.produto?.cost_price_cents ?? null),
+      markup:
+        custos.data?.produto?.markup_percent == null ? "" : String(custos.data.produto.markup_percent),
       price_is_public: p.price_is_public,
       is_featured: p.is_featured,
     });
     setSujo(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p]);
 
   // Custos vigentes entram no formulário só quando o perfil pode vê-los.
@@ -262,6 +265,40 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
   const custoPelaFormula = formulaVale && custoCalculado != null;
   const camadas = camadasDoBanho(String(form["banho_tipo"] || ""));
 
+  // Nunca enviar custo vazio antes de a consulta de custos responder: apagaria o valor salvo.
+  const custosProntos = podeVerCustos && (!id || custos.isSuccess);
+
+  // Referência automática: categoria + banho definem o prefixo (ex.: LBRP) e a numeração continua.
+  const refManual = useRef(false);
+  const gerarReferencia = useCallback(async () => {
+    const cat = String(form["category_id"] || "");
+    const banho = String(form["banho_tipo"] || "");
+    if (!cat || !banho) {
+      toast.error("Escolha a categoria e o banho primeiro.");
+      return;
+    }
+    const { data, error } = await supabase.rpc("produto_referencia_sugerir", {
+      _category_id: cat,
+      _banho: banho,
+      ...(id ? { _product_id: id } : {}),
+    });
+    if (error) {
+      toast.error(mensagemDeErro(error));
+      return;
+    }
+    if (!data) {
+      toast.error("Esta categoria ainda não tem sigla de referência.");
+      return;
+    }
+    refManual.current = false;
+    set("reference_code", String(data));
+  }, [form, id, set]);
+  useEffect(() => {
+    if (id || refManual.current || !form["category_id"] || !form["banho_tipo"]) return;
+    void gerarReferencia();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, form["category_id"], form["banho_tipo"]]);
+
   const payload = () => ({
     name: String(form["name"] ?? "").trim(),
     slug: String(form["slug"] ?? "").trim(),
@@ -275,7 +312,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     raw_material: String(form["raw_material"] ?? "").trim(),
     raw_weight_grams: String(form["raw_weight_grams"] ?? "").replace(",", "."),
     raw_supplier_id: String(form["raw_supplier_id"] ?? ""),
-    ...(podeVerCustos
+    ...(custosProntos
       ? { raw_piece_cost_cents: parseCentavos(String(form["raw_piece_cost"] ?? "")) ?? "" }
       : {}),
     measurements: String(form["measurements"] ?? "").trim(),
@@ -286,7 +323,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     seo_title: String(form["seo_title"] ?? "").trim(),
     seo_description: String(form["seo_description"] ?? "").trim(),
     price_cents: parseCentavos(String(form["preco"] ?? "")) ?? "",
-    ...(podeVerCustos
+    ...(custosProntos
       ? {
           // calculado pelo banho: o banco faz a conta (products_custo_pelo_banho)
           cost_price_cents: custoPelaFormula ? "" : (parseCentavos(String(form["custo"] ?? "")) ?? ""),
@@ -526,9 +563,34 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       <div className="grid gap-6 xl:grid-cols-2">
         <Panel title="Identificação">
           <div className="grid gap-4 sm:grid-cols-2">
+            <p className="sm:col-span-2 text-sm text-ledger-muted">
+              Ordem: <strong className="text-ledger-text">1. Categoria</strong> →{" "}
+              <strong className="text-ledger-text">2. Banho</strong> →{" "}
+              <strong className="text-ledger-text">3. Nome</strong>. A referência e o NCM saem sozinhos.
+            </p>
+            <Selecao
+              label="1. Categoria"
+              valor={String(form["category_id"] || "")}
+              onChange={(v) => {
+                set("category_id", v);
+                set("subcategory_id", "");
+              }}
+              disabled={somente}
+              opcoes={raiz.map((c) => ({ value: c.id, label: c.name }))}
+            />
+            <Selecao
+              label="2. Banho / cor"
+              valor={String(form["banho_tipo"] || "")}
+              onChange={(v) => {
+                set("banho_tipo", v);
+                if (!camadasDoBanho(v).includes(Number(form["banho_camada"]))) set("banho_camada", "");
+              }}
+              disabled={somente}
+              opcoes={BANHOS.map((b) => ({ value: b.value, label: b.label }))}
+            />
             <Campo
               full
-              label="Nome comercial do produto-base"
+              label="3. Nome comercial do produto-base"
               valor={form["name"]}
               onChange={(v) => set("name", v)}
               disabled={somente}
@@ -550,39 +612,39 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
             <Campo
               label="Código de referência (etiqueta)"
               valor={form["reference_code"]}
-              onChange={(v) => set("reference_code", v)}
+              onChange={(v) => {
+                refManual.current = true;
+                set("reference_code", v.toUpperCase());
+              }}
               disabled={somente}
-              ajuda="É o código impresso na etiqueta. Não pode se repetir em outro produto."
+              ajuda="Automático: L + categoria (BR, AN, PU, TN, BC, GR…) + banho (D dourado, P prata, R ródio, A aço) + número. As variantes recebem A, B, C."
             />
+            {!somente ? (
+              <div className="flex items-end">
+                <button type="button" className="admin-btn" onClick={() => void gerarReferencia()}>
+                  Gerar referência automática
+                </button>
+              </div>
+            ) : null}
             <Campo
               label="Código de barras"
               valor={form["barcode"]}
               onChange={(v) => set("barcode", v)}
               disabled={somente}
-              ajuda="Digite ou leia com o leitor. Zeros à esquerda são preservados. Com uma única variante, vale também para ela."
+              ajuda="Cada variante recebe o seu código de barras automático (5 dígitos) ao ser salva — veja na tabela de variantes."
             />
             <Campo
               label="Classificação fiscal (NCM)"
               valor={form["ncm"]}
               onChange={(v) => set("ncm", v.replace(/\D/g, "").slice(0, 8))}
               disabled={somente}
-              ajuda="8 dígitos, usado na nota fiscal. Exemplo de bijuteria/semijoia: 71171900."
+              ajuda="Preenchido automaticamente com 71171900 (semijoias). Só altere se o contador pedir."
             />
           </div>
         </Panel>
 
         <Panel title="Categoria e coleção">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Selecao
-              label="Categoria"
-              valor={String(form["category_id"] || "")}
-              onChange={(v) => {
-                set("category_id", v);
-                set("subcategory_id", "");
-              }}
-              disabled={somente}
-              opcoes={raiz.map((c) => ({ value: c.id, label: c.name }))}
-            />
             <Selecao
               label="Subcategoria"
               valor={String(form["subcategory_id"] || "")}
@@ -637,16 +699,6 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
                 disabled={somente}
               />
             ) : null}
-            <Selecao
-              label="Tipo do banho"
-              valor={String(form["banho_tipo"] || "")}
-              onChange={(v) => {
-                set("banho_tipo", v);
-                if (!camadasDoBanho(v).includes(Number(form["banho_camada"]))) set("banho_camada", "");
-              }}
-              disabled={somente}
-              opcoes={BANHOS.map((b) => ({ value: b.value, label: b.label }))}
-            />
             <Selecao
               label="Camada do banho"
               valor={camadas.length ? String(form["banho_camada"] || "") : ""}

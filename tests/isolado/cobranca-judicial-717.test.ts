@@ -26,10 +26,10 @@ async function servico<T>(sql: string, p: unknown[] = []): Promise<T> {
 beforeAll(async () => {
   const a = await um<{ id: string }>(`select id from chart_of_accounts where codigo='3.1.1'`);
   conta311 = a?.id ?? (await um<{ id: string }>(
-    `insert into chart_of_accounts(codigo,nome) values ('3.1.1','Revenda de Mercadorias Produção Própria') returning id`))!.id;
+    `insert into chart_of_accounts(codigo,nome,natureza) values ('3.1.1','Revenda de Mercadorias Produção Própria',(enum_range(null::fin_account_nature))[1]) returning id`))!.id;
   const b = await um<{ id: string }>(`select id from chart_of_accounts where codigo='7.1.7'`);
   conta717 = b?.id ?? (await um<{ id: string }>(
-    `insert into chart_of_accounts(codigo,nome) values ('7.1.7','Recebimento judicial') returning id`))!.id;
+    `insert into chart_of_accounts(codigo,nome,natureza) values ('7.1.7','Recebimento judicial',(enum_range(null::fin_account_nature))[1]) returning id`))!.id;
   party = (await um<{ id: string }>(
     `insert into parties(display_name, legal_name) values ($1,$1) returning id`, [`Devedora ${marca}`]))!.id;
   await adm.unsafe(`insert into cob_judicial(party_id, processo) values ($1, '0005731-06.2025.8.16.0090')

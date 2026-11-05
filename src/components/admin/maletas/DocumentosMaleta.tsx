@@ -251,12 +251,13 @@ export function DocumentosMaleta({
             <Receipt aria-hidden className="size-8 text-ledger-text" />
             <p className="font-display text-lg font-bold text-ledger-text">Nota fiscal consignada</p>
             <p className="flex-1 text-sm text-ledger-muted">
-              NF-e de remessa consignada com as peças conferidas desta maleta. Por enquanto sai como
-              nota de <strong className="text-ledger-text">teste (homologação)</strong>, sem valor fiscal.
+              NF-e de remessa consignada com as peças conferidas desta maleta.{" "}
+              {notas.producao ? <strong className="text-ledger-text">Nota real, com valor fiscal.</strong>
+                : <>Por enquanto sai como nota de <strong className="text-ledger-text">teste (homologação)</strong>, sem valor fiscal.</>}
             </p>
             {/* Esta tela abre logo depois da conferência gravada; o servidor confere de novo a situação. */}
             <NotaFiscalMaleta cycleId={cycleId} status="conferida" nota={notas.porMaleta.get(cycleId)} podeEmitir={master}
-              temConsultora semPecas={composicao.length === 0} grande />
+              temConsultora semPecas={composicao.length === 0} grande producao={notas.producao} />
           </div>
         </div>
       </div>

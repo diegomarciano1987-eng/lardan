@@ -10,6 +10,17 @@ Resumo: **não é só ligar o token da Focus.** Desde a 0118 a conversa com a Fo
 
 - **0214 (05/11/2026):** botão "Nota fiscal (teste)" na maleta conferida (tela da remessa e documentos da montagem). Emite a NF-e de remessa de TESTE com a consultora e as peças conferidas, ao preço gravado na maleta. Tem uma nota viva por maleta. Continua só em homologação.
 
+## Resposta do escritório contábil (recebida em 05/11/2026)
+
+- Credenciamento do novo emissor (Focus / ACRAS, CNPJ 07.504.505/0001-32) **feito na Receita do PR**. Falta pedir ao suporte da Focus o aceite da autorização de uso junto à SEFAZ (erro 974).
+- Roteiro confirmado: remessa 5917/6917, devolução 1918/2918 (entrada emitida pela TSM, ligada à remessa), venda 5114/6114, perda 5927/6949. Resposta: "procedimento correto".
+- Também confirmados: Simples, CSOSN 102, PIS/COFINS 07, origem 0, NCM 71171900; consultora PF não contribuinte e consumidora final; a TSM emite a devolução.
+- Venda: **basta citar a remessa nas informações complementares**, que é o que o código já faz (sem referência formal).
+- Consultoras fora do PR (51): mesmo procedimento.
+- Série: **3**. Na Focus, a produção já está na série 3, com próximo número 1.
+- Cópia dos XMLs para o escritório: **fiscal2@on4.com.br**.
+- **Sem resposta ainda:** fundamento por escrito da base de 1/3 do varejo (percentual, fundamento, responsável), confirmação dos dados do emissor e necessidades para o SPED.
+
 ## Falta (em ordem)
 
 1. **Promover os pacotes 01, 02, 04, 06 e 11** a migrações oficiais (rodada própria, com autorização). Sem isso não existe documento fiscal nem acerto na produção.

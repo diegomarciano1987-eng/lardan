@@ -153,3 +153,10 @@ export async function registrarAviso(ambiente: AmbienteNfe, cnpj: string) {
   if (r.http >= 400) throw new ErroFocus(r.dados?.mensagem ?? `Focus respondeu ${r.http} ao cadastrar o aviso.`, r.http, r.dados);
   return { criado: true, id: r.dados?.id ?? null };
 }
+
+/** Pede à Focus que mande o XML e o DANFE da nota por e-mail (ex.: cópia ao escritório contábil). */
+export async function enviarEmailNfe(ambiente: AmbienteNfe, ref: string, emails: string[]) {
+  const r = await chamar<{ mensagem?: string }>(ambiente, "POST", `/nfe/${encodeURIComponent(ref)}/email`, { emails });
+  if (r.http >= 400) throw new ErroFocus(r.dados?.mensagem ?? `Focus respondeu ${r.http} ao enviar o e-mail.`, r.http, r.dados);
+  return true;
+}

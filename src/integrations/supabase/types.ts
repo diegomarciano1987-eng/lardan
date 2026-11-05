@@ -7521,6 +7521,57 @@ export type Database = {
           },
         ]
       }
+      fiscal_fila: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          cycle_id: string
+          erro: string | null
+          etapa: string
+          id: number
+          proxima_em: string
+          status: string
+          tentativas: number
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          cycle_id: string
+          erro?: string | null
+          etapa: string
+          id?: number
+          proxima_em?: string
+          status?: string
+          tentativas?: number
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          cycle_id?: string
+          erro?: string | null
+          etapa?: string
+          id?: number
+          proxima_em?: string
+          status?: string
+          tentativas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_fila_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_fila_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fiscal_focus_envios: {
         Row: {
           ambiente: string
@@ -7532,8 +7583,11 @@ export type Database = {
           created_at: string
           criado_por: string | null
           cycle_id: string | null
+          email_enviado_em: string | null
+          email_tentativas: number
           erros: Json | null
           id: string
+          itens_variantes: string[] | null
           mensagem_sefaz: string | null
           numero: string | null
           operacao: string
@@ -7558,8 +7612,11 @@ export type Database = {
           created_at?: string
           criado_por?: string | null
           cycle_id?: string | null
+          email_enviado_em?: string | null
+          email_tentativas?: number
           erros?: Json | null
           id?: string
+          itens_variantes?: string[] | null
           mensagem_sefaz?: string | null
           numero?: string | null
           operacao: string
@@ -7584,8 +7641,11 @@ export type Database = {
           created_at?: string
           criado_por?: string | null
           cycle_id?: string | null
+          email_enviado_em?: string | null
+          email_tentativas?: number
           erros?: Json | null
           id?: string
+          itens_variantes?: string[] | null
           mensagem_sefaz?: string | null
           numero?: string | null
           operacao?: string
@@ -7767,32 +7827,47 @@ export type Database = {
       }
       fiscal_settings: {
         Row: {
+          email_copia_xml: string | null
           emission_active: boolean
           emitter_entity_id: string | null
           environment: string
           id: boolean
           note: string | null
+          producao_automatico: boolean
+          producao_piloto_cycle_id: string | null
+          producao_todas: boolean
           provider: string | null
+          serie_producao: string
           updated_at: string
           updated_by: string | null
         }
         Insert: {
+          email_copia_xml?: string | null
           emission_active?: boolean
           emitter_entity_id?: string | null
           environment?: string
           id?: boolean
           note?: string | null
+          producao_automatico?: boolean
+          producao_piloto_cycle_id?: string | null
+          producao_todas?: boolean
           provider?: string | null
+          serie_producao?: string
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
+          email_copia_xml?: string | null
           emission_active?: boolean
           emitter_entity_id?: string | null
           environment?: string
           id?: boolean
           note?: string | null
+          producao_automatico?: boolean
+          producao_piloto_cycle_id?: string | null
+          producao_todas?: boolean
           provider?: string | null
+          serie_producao?: string
           updated_at?: string
           updated_by?: string | null
         }
@@ -7802,6 +7877,20 @@ export type Database = {
             columns: ["emitter_entity_id"]
             isOneToOne: false
             referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_settings_producao_piloto_cycle_id_fkey"
+            columns: ["producao_piloto_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_settings_producao_piloto_cycle_id_fkey"
+            columns: ["producao_piloto_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
             referencedColumns: ["id"]
           },
         ]
@@ -19374,12 +19463,41 @@ export type Database = {
           status: Database["public"]["Enums"]["party_status"]
         }[]
       }
+      fiscal_fila_proximos: { Args: { _limite?: number }; Returns: Json }
+      fiscal_fila_resultado: {
+        Args: { _erro: string; _id: number; _ok: boolean }
+        Returns: undefined
+      }
+      fiscal_focus_acerto_dados: { Args: { _cycle: string }; Returns: Json }
+      fiscal_focus_ambiente: { Args: { _cycle: string }; Returns: string }
       fiscal_focus_dados: {
         Args: { _itens: Json; _party: string }
         Returns: Json
       }
+      fiscal_focus_eh_servidor: { Args: never; Returns: boolean }
+      fiscal_focus_email_marcar: {
+        Args: { _email: string; _ok: boolean; _ref: string }
+        Returns: undefined
+      }
+      fiscal_focus_email_pendentes: {
+        Args: { _limite?: number }
+        Returns: Json
+      }
       fiscal_focus_emitente: { Args: never; Returns: Json }
       fiscal_focus_envio: { Args: { _ref: string }; Returns: Json }
+      fiscal_focus_envio_acerto_registrar: {
+        Args: {
+          _ambiente: string
+          _ator: string
+          _cycle: string
+          _operacao: string
+          _party: string
+          _payload: Json
+          _ref: string
+          _ref_origem: string
+        }
+        Returns: Json
+      }
       fiscal_focus_envio_maleta_registrar: {
         Args: {
           _ambiente: string
@@ -19389,6 +19507,7 @@ export type Database = {
           _party: string
           _payload: Json
           _ref: string
+          _variantes?: string[]
         }
         Returns: Json
       }
@@ -19409,6 +19528,7 @@ export type Database = {
       fiscal_focus_maleta_dados: { Args: { _cycle: string }; Returns: Json }
       fiscal_focus_notas_maletas: { Args: { _cycles: string[] }; Returns: Json }
       fiscal_focus_pode: { Args: { _acao?: string }; Returns: boolean }
+      fiscal_focus_producao_ativa: { Args: never; Returns: boolean }
       fiscal_focus_retorno: {
         Args: {
           _dedupe?: string
@@ -19418,6 +19538,20 @@ export type Database = {
         }
         Returns: Json
       }
+      fiscal_peca_codigo: { Args: { _variant: string }; Returns: string }
+      fiscal_peca_descricao: { Args: { _variant: string }; Returns: string }
+      fiscal_producao_definir: {
+        Args: {
+          _automatico: boolean
+          _confirmacao?: string
+          _email: string
+          _ligar: boolean
+          _piloto_kit: string
+          _todas: boolean
+        }
+        Returns: Json
+      }
+      fiscal_producao_estado: { Args: never; Returns: Json }
       fiscal_prontidao: { Args: never; Returns: Json }
       fiscal_roteiro_observado: { Args: never; Returns: Json }
       gen_protocol: { Args: { prefix: string }; Returns: string }

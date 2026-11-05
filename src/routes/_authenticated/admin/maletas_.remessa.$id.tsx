@@ -285,7 +285,7 @@ function RemessaPage() {
                   <Tag aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:etiqueta` ? "Preparando…" : "Etiqueta"}
                 </button>
                 <NotaFiscalMaleta cycleId={m.cycle_id} status={m.status} nota={notas.porMaleta.get(m.cycle_id)} podeEmitir={master}
-                  temConsultora={!!m.consultora_party_id} semPecas={semPecas} />
+                  temConsultora={!!m.consultora_party_id} semPecas={semPecas} producao={notas.producao} />
                 {podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (
                   <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || liberarMaleta.isPending}
                     onClick={() => liberarMaleta.mutate(m.cycle_id)}>

@@ -7521,6 +7521,57 @@ export type Database = {
           },
         ]
       }
+      fiscal_fila: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          cycle_id: string
+          erro: string | null
+          etapa: string
+          id: number
+          proxima_em: string
+          status: string
+          tentativas: number
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          cycle_id: string
+          erro?: string | null
+          etapa: string
+          id?: number
+          proxima_em?: string
+          status?: string
+          tentativas?: number
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          cycle_id?: string
+          erro?: string | null
+          etapa?: string
+          id?: number
+          proxima_em?: string
+          status?: string
+          tentativas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_fila_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_fila_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fiscal_focus_envios: {
         Row: {
           ambiente: string
@@ -19412,6 +19463,11 @@ export type Database = {
           status: Database["public"]["Enums"]["party_status"]
         }[]
       }
+      fiscal_fila_proximos: { Args: { _limite?: number }; Returns: Json }
+      fiscal_fila_resultado: {
+        Args: { _erro: string; _id: number; _ok: boolean }
+        Returns: undefined
+      }
       fiscal_focus_acerto_dados: { Args: { _cycle: string }; Returns: Json }
       fiscal_focus_ambiente: { Args: { _cycle: string }; Returns: string }
       fiscal_focus_dados: {
@@ -19419,6 +19475,14 @@ export type Database = {
         Returns: Json
       }
       fiscal_focus_eh_servidor: { Args: never; Returns: boolean }
+      fiscal_focus_email_marcar: {
+        Args: { _email: string; _ok: boolean; _ref: string }
+        Returns: undefined
+      }
+      fiscal_focus_email_pendentes: {
+        Args: { _limite?: number }
+        Returns: Json
+      }
       fiscal_focus_emitente: { Args: never; Returns: Json }
       fiscal_focus_envio: { Args: { _ref: string }; Returns: Json }
       fiscal_focus_envio_acerto_registrar: {

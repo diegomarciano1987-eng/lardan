@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowDownLeft, ArrowUpRight, Brain, Check, ChevronRight, FilePlus2, Link2, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Brain, Check, ChevronRight, FilePlus2, Link2, Scale, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { fetchClassificacoes } from "@/lib/financeiro";
 import { centrosMesa, contrapartesMesa, ehMicrotarifa, microtarifasConciliar, microtarifasPrevia, faltaConciliar, novoLancamentoConciliar, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
@@ -414,7 +414,9 @@ function Bancada({
   const partyOpcoes = React.useMemo(() => {
     const lista = (contrapartes.data ?? []).map((c) => ({ value: c.id, label: c.nome, hint: papeisTexto(c.papeis) || c.code }));
     const p = palpite.data;
-    if (party && !lista.some((o) => o.value === party) && p?.party_id === party) {
+    if (party && !lista.some((o) => o.value === party) && p?.judicial?.party_id === party) {
+      lista.unshift({ value: party, label: p.judicial.party_nome ?? "Devedora do processo", hint: "processo judicial" });
+    } else if (party && !lista.some((o) => o.value === party) && p?.party_id === party) {
       lista.unshift({ value: party, label: p.party_nome ?? "Contraparte sugerida", hint: "sugerida" });
     }
     return lista;

@@ -50,7 +50,7 @@ interface DadosAcerto {
   operacoes: Record<OperacaoAcerto, { itens: (ItemBanco & { numero_item_origem: number })[]; nota_viva: { ref: string; status: string; numero: string | null } | null }>;
   sem_nota: { codigo: string; quantidade: number }[];
 }
-export interface Resultado { ref: string; status: string; mensagem: string | null; erros?: unknown }
+export interface Resultado { ref: string; status: string; mensagem: string | null; erros?: { codigo?: string; campo?: string; mensagem?: string }[] | null }
 
 const prefixo = (amb: AmbienteNfe) => (amb === "producao" ? "lardan-mal" : "lardan-hom-mal");
 

@@ -201,7 +201,7 @@ export const focusProducaoEstado = createServerFn({ method: "GET" })
     const c = context as unknown as Ctx;
     await exigir(c, "ver");
     const { avaliarConfigFocus } = await import("./api.server");
-    const estado = await rpcUsuario<Record<string, unknown>>(c, "fiscal_producao_estado");
+    const estado = await rpcUsuario<Record<string, any>>(c, "fiscal_producao_estado");
     const cfg = avaliarConfigFocus("producao");
     return { ...estado, tokenProducao: cfg.pronto, faltando: cfg.faltando, podeEmitir: await rpcUsuario<boolean>(c, "fiscal_focus_pode", { _acao: "emitir" }) };
   });
@@ -221,7 +221,7 @@ export const focusProducaoDefinir = createServerFn({ method: "POST" })
       const cfg = avaliarConfigFocus("producao");
       if (!cfg.pronto) throw new Error(`Produção da Focus não configurada no Lovable: falta ${cfg.faltando.join(", ")}.`);
     }
-    return rpcUsuario<Record<string, unknown>>(c, "fiscal_producao_definir", {
+    return rpcUsuario<Record<string, any>>(c, "fiscal_producao_definir", {
       _ligar: data.ligar, _piloto_kit: data.pilotoKit, _todas: data.todas, _automatico: data.automatico,
       _email: data.email, _confirmacao: data.confirmacao ?? null,
     });

@@ -88,3 +88,10 @@
 - [x] Migração 0214 aplicada (cycle_id/composicao_versao, uma nota viva por maleta, só homologação); fiscal_settings conferido: focus/homologacao/emissão desligada. Código copiado byte-exato; build OK.
 - [x] 5 testes isolados passaram no banco novo (452 migrações). Prova de tela: remessa 925 como Master, 21 maletas conferidas com botão "Nota fiscal (teste)" ativo. Emissão real na Focus não testada (homologação).
 - [ ] Publicação aguarda aprovação de Diego (junto da 0213); regras do banco já valem, botões dependem de publicar.
+
+## Pacote 0228 — Correios, etapa 1
+- [x] Inspecionar pacote e aplicar conexão/diagnóstico Master sem postagem, cobrança ou migração.
+- [x] Configuração do pacote salva sem substituir o código de acesso existente; ambiente homologação conforme o pacote.
+- [x] 7 testes locais passaram, compilação OK; painel aberto como Diego e clique real em Testar conexão confirmado. Provas: docs/provas-correios-0228.md.
+- [ ] Conexão aceita pelo contrato: Correios retornou 401 na autenticação; preço, prazo e rastreio ainda não verificados, dependem de credencial/ambiente aceitos.
+- [ ] Publicação depende de autorização de Diego.

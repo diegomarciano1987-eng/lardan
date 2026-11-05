@@ -1548,6 +1548,13 @@
       "when": 1793904475451,
       "tag": "0220_nfe_producao_c",
       "breakpoints": true
+    },
+    {
+      "idx": 221,
+      "version": "7",
+      "when": 1793904521298,
+      "tag": "0221_nfe_producao_d",
+      "breakpoints": true
     }
   ]
 }

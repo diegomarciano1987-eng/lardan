@@ -89,7 +89,7 @@ function Qualidade() {
         <Kpi rotulo="Paradas +30 dias" valor={n("abertas_mais_30d")} alerta={n("abertas_mais_30d") > 0} />
         <Kpi rotulo="Consultoras pendentes" valor={n("consultoras_pendentes")} />
         <Kpi rotulo="Finalizadas 30 dias" valor={n("resolvidas_30d")} />
-        <Kpi rotulo="Tempo médio" valor={r.dias_medios_resolucao == null ? "—" : `${String(r.dias_medios_resolucao).replace(".", ",")} dias`} dica="Abertura até finalização, últimos 180 dias" />
+        <Kpi rotulo="Tempo médio" valor={r["dias_medios_resolucao"] == null ? "—" : `${String(r["dias_medios_resolucao"]).replace(".", ",")} dias`} dica="Abertura até finalização, últimos 180 dias" />
       </div>
 
       <Panel flush>
@@ -199,7 +199,7 @@ function Detalhe({ t, gerir }: { t: Troca; gerir: boolean }) {
   const invalidar = () => { void qc.invalidateQueries({ queryKey: ["qualidade"] }); };
   const mover = useMutation({
     mutationFn: async () => {
-      const dados: Record<string, string> = {};
+      const dados: { solucao?: string; rep_variant_id?: string } = {};
       if (solucao) dados.solucao = solucao;
       if (rep) dados.rep_variant_id = rep.id;
       const { error } = await supabase.rpc("qualidade_troca_mover", { _id: t.id, _status: destino, _texto: parecer, _dados: dados });
@@ -366,7 +366,7 @@ function NovaTroca({ aberto, onClose, onCriada }: { aberto: boolean; onClose: ()
           <div><p className="mb-1 text-sm font-semibold">Consultora</p>
             <SmartSelect value={consultora?.id ?? ""} onChange={(v) => setConsultora(consultoras.find((c) => c.id === v) ?? consultora)} onSearch={setTermoC} loading={buscandoC} searchThreshold={0}
               placeholder="Código, nome ou CPF da consultora" searchPlaceholder="Código, nome ou CPF" emptyLabel={termoC.trim().length < 2 ? "Digite ao menos 2 caracteres." : "Nenhuma consultora encontrada."}
-              options={[...(consultora && !consultoras.some((c) => c.id === consultora.id) ? [consultora] : []), ...consultoras].map((c) => ({ value: c.id, label: `[Cód. ${c.codigo ?? "—"}] ${c.nome}`, hint: c.cpf ?? undefined }))} /></div>
+              options={[...(consultora && !consultoras.some((c) => c.id === consultora.id) ? [consultora] : []), ...consultoras].map((c) => ({ value: c.id, label: `[Cód. ${c.codigo ?? "—"}] ${c.nome}`, ...(c.cpf ? { hint: c.cpf } : {}) }))} /></div>
           <div><p className="mb-1 text-sm font-semibold">Peça devolvida</p><PecaTrocaPicker value={peca} onChange={setPeca} />
             {!peca && <input className="admin-input mt-2 h-11 w-full" value={refManual} onChange={(e) => setRefManual(e.target.value.toUpperCase())} placeholder="Ou digite a referência da etiqueta (ex.: LANP0342)" />}</div>
           <div className="flex gap-2">{(["troca", "garantia"] as const).map((x) => <button key={x} type="button" onClick={() => setTipo(x)} className={cn("rounded-full border px-4 py-1.5 text-sm font-semibold", tipo === x ? "border-bronze bg-bronze text-primary-foreground" : "border-line")}>{x === "troca" ? "Troca" : "Garantia"}</button>)}</div>

@@ -98,7 +98,7 @@ export function ProcessosJudiciais() {
         <input value={termo} onChange={(e) => setTermo(e.target.value)} placeholder="Buscar por nome, CPF, nº do processo, cidade, praça, responsável, fase ou anotação" className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm" />
         {q.isLoading ? <p className="text-sm text-muted-foreground">Carregando…</p> : lista.length === 0 ? <p className="text-sm text-muted-foreground">Sem dados.</p> : (
           <div className="overflow-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[1400px] text-sm">
               <thead className="text-left text-xs text-muted-foreground"><tr><th className="p-2">ID</th><th className="p-2">Executada</th><th className="p-2">Nº do processo</th><th className="p-2">Situação</th><th className="p-2 text-right">Causa</th><th className="p-2 text-right">Bloqueado</th><th className="p-2">Fase</th><th className="p-2">Citação / endereço</th><th className="p-2">Próxima ação</th><th className="p-2">Tipo</th><th className="p-2">Responsável</th><th className="p-2">Atualizado</th><th /></tr></thead>
               <tbody>{lista.slice(0, 300).map((p) => (
                 <tr key={p.id} className="border-t border-border align-top">
@@ -108,10 +108,10 @@ export function ProcessosJudiciais() {
                   <td className="p-2 text-xs">{p.status}</td>
                   <td className="whitespace-nowrap p-2 text-right tabular-nums">{p.valor_causa_cents != null ? brl(Number(p.valor_causa_cents)) : "—"}</td>
                   <td className="whitespace-nowrap p-2 text-right tabular-nums">{p.valor_bloqueado_cents != null ? brl(Number(p.valor_bloqueado_cents)) : "—"}</td>
-                  <td className="max-w-[12rem] p-2 text-xs">{p.fase}</td>
-                  <td className="max-w-[12rem] p-2 text-xs">{p.status_citacao}</td>
-                  <td className="max-w-[14rem] p-2 text-xs">{p.proxima_acao}</td>
-                  <td className="max-w-[12rem] p-2 text-xs">{p.tipo}</td>
+                  <td className="max-w-[12rem] p-2 text-xs"><p className="line-clamp-3" title={p.fase ?? ""}>{p.fase}</p></td>
+                  <td className="max-w-[12rem] p-2 text-xs"><p className="line-clamp-3" title={p.status_citacao ?? ""}>{p.status_citacao}</p></td>
+                  <td className="max-w-[14rem] p-2 text-xs"><p className="line-clamp-3" title={p.proxima_acao ?? ""}>{p.proxima_acao}</p></td>
+                  <td className="max-w-[12rem] p-2 text-xs"><p className="line-clamp-3" title={p.tipo ?? ""}>{p.tipo}</p></td>
                   <td className="p-2 text-xs">{p.responsavel}</td>
                   <td className="p-2 text-xs">{p.ultima_atualizacao ? dataBR(p.ultima_atualizacao) : "—"}</td>
                   <td className="p-2">{p.link_pasta && <a href={p.link_pasta} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-xs text-primary">Pasta<ExternalLink className="size-3" /></a>}</td>

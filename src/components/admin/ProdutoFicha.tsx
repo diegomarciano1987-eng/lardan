@@ -105,11 +105,11 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     queryFn: async () => {
       const { data, error } = await supabase
         .from("product_variants")
-        .select("id, name, barcode, reference_code")
+        .select("id, label, barcode, reference_code")
         .eq("product_id", id!)
         .order("reference_code");
       if (error) throw error;
-      return (data ?? []) as { id: string; name: string | null; barcode: string | null; reference_code: string | null }[];
+      return (data ?? []) as { id: string; label: string | null; barcode: string | null; reference_code: string | null }[];
     },
   });
 
@@ -650,7 +650,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
                       <span
                         key={v.id}
                         className="inline-flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-1.5"
-                        title={v.name ?? undefined}
+                        title={v.label ?? undefined}
                       >
                         <span className="font-mono text-base font-semibold tracking-wider">{v.barcode}</span>
                         {v.reference_code ? (

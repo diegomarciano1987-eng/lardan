@@ -58,6 +58,9 @@ beforeAll(async () => {
   consultora = await criarConta({ nome: `fin-conf-cons-${marca()}`, papeis: ["consultora"], comParty: true });
   plano = (await um<{ id: string }>(`insert into public.chart_of_accounts (codigo, nome, natureza) values ($1,$1,'receita') returning id`, [`ISO-R-${marca()}`])).id;
   emp = (await um<{ id: string }>(`insert into public.business_entities (legal_name, trade_name) values ($1,$1) returning id`, [`ISO Emp ${marca()}`])).id;
+  // garante a 3.1.1 no plano de contas da bancada (o teste da mesa Asaas depende dela)
+  if (!(await um<{ id: string }>(`select id from chart_of_accounts where codigo='3.1.1'`)))
+    await um<{ id: string }>(`insert into chart_of_accounts(codigo,nome,natureza) values ('3.1.1','Revenda de Mercadorias Produção Própria',(enum_range(null::fin_account_nature))[1]) returning id`);
 });
 
 describe("1. conferência do saldo da conta Asaas", () => {
@@ -144,5 +147,18 @@ describe("4. mesa Asaas", () => {
     await c.extrato(DIA, 28393, "entrada", 28393, outro, "conciliada");
     const depois = await rpc<{ itens: { external_id: string }[] }>(master, "asaas_mesa_pendentes", { _busca: outro, _offset: 0 });
     expect(depois.dados.itens).toEqual([]);
+  });
+});
+
+describe("5. mesa Asaas — título novo (0244)", () => {
+  test("título criado pela mesa (conciliação Asaas) nasce na 3.1.1 Revenda de Mercadorias", async () => {
+    const pessoa = await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status) values ('pessoa',$1,$1,'ativo') returning id`, [`ISO 311 ${marca()}`]);
+    const r = await rpc<string>(master, "fin_title_create", { _payload: {
+      direction: "receivable", party_id: pessoa.id, descricao: "Recebimento Asaas ISO", valor_cents: 4774, emissao: DIA, competencia: DIA,
+      business_entity_id: emp, status: "ativo", origem: "conciliacao", sistema_origem: "asaas", id_externo: `asaas:pay_r${marca()}`,
+      parcelas: [{ vencimento: DIA, valor_cents: 4774 }] } });
+    expect(r.erro).toBeNull();
+    const t = await um<{ codigo: string }>(`select ca.codigo from public.financial_titles t join public.chart_of_accounts ca on ca.id = t.chart_account_id where t.id = $1`, [r.dados]);
+    expect(t.codigo).toBe("3.1.1");
   });
 });

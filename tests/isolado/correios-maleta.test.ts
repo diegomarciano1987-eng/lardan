@@ -12,7 +12,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { adm, criarConta, criarVariante, rpc, type Conta } from "./base";
 import { corpoPrePostagem, SERVICO, type EnderecoCorreios } from "../../src/lib/correios/api.server";
 
-let master: Conta, montagem: Conta, consultora: Conta;
+let master: Conta, montagem: Conta, consultora: Conta, diretoria: Conta;
 let n = 0;
 const marca = () => `${Date.now().toString(36)}${++n}`;
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
@@ -57,6 +57,7 @@ beforeAll(async () => {
   master = await criarConta({ nome: `cor-master-${marca()}`, papeis: ["master"], comParty: true });
   montagem = await criarConta({ nome: `cor-mont-${marca()}`, papeis: ["montagem"], comParty: true });
   consultora = await criarConta({ nome: `cor-cons-${marca()}`, papeis: ["consultora"], comParty: true });
+  diretoria = await criarConta({ nome: `cor-dir-${marca()}`, papeis: ["diretoria"], comParty: true });
   const p = await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status, doc) values ('organizacao','Lardan ISO','Lardan ISO','ativo','43319208000180') returning id`);
   await endereco(p.id);
   emissor = (await um<{ id: string }>(`insert into public.business_entities (legal_name, trade_name, party_id) values ('Lardan ISO','Lardan ISO',$1) returning id`, [p.id])).id;
@@ -81,19 +82,25 @@ describe("1 a 3. ida", () => {
     expect((await rpc(montagem, "correios_maleta_dados", { _cycle: (await maleta("montagem")).ciclo, _direcao: "ida" })).erro).toContain("conferida");
   });
 
-  test("débito vencido bloqueia; só o Master libera, com motivo", async () => {
+  test("débito vencido bloqueia; só Daniel (diretoria) ou Master libera, com motivo", async () => {
     const m = await maleta("conferida");
     const t = await rpc<string>(master, "fin_title_create", { _payload: { direction: "receivable", party_id: m.party, descricao: "ISO débito",
       valor_cents: 18125, emissao: "2026-09-01", competencia: "2026-09-01", business_entity_id: emissor, chart_account_id: plano,
       parcelas: [{ vencimento: "2026-09-10", valor_cents: 18125 }] } });
     expect(t.erro).toBeNull();
     expect((await abrir(m.ciclo, "ida", master.uid)).erro).toContain("débito vencido");
-    expect((await abrir(m.ciclo, "ida", montagem.uid, "acordo")).erro).toContain("Só o Master");
+    expect((await abrir(m.ciclo, "ida", montagem.uid, "acordo")).erro).toContain("Só o Daniel (diretoria) ou o Master");
     const ok = await abrir(m.ciclo, "ida", master.uid, "Acordo assinado em 05/11");
     expect(ok.erro).toBeNull();
     const e = await um<{ debito_cents: string; debito_liberado_motivo: string }>(`select debito_cents, debito_liberado_motivo from public.correios_envios where id = $1`, [ok.dados]);
     expect(Number(e.debito_cents)).toBe(18125);
     expect(e.debito_liberado_motivo).toBe("Acordo assinado em 05/11");
+    // a diretoria (Daniel) também libera
+    const m2 = await maleta("conferida");
+    await rpc(master, "fin_title_create", { _payload: { direction: "receivable", party_id: m2.party, descricao: "ISO débito 2",
+      valor_cents: 5000, emissao: "2026-09-01", competencia: "2026-09-01", business_entity_id: emissor, chart_account_id: plano,
+      parcelas: [{ vencimento: "2026-09-10", valor_cents: 5000 }] } });
+    expect((await abrir(m2.ciclo, "ida", diretoria.uid, "Daniel autorizou")).erro).toBeNull();
   });
 
   test("um envio vivo por maleta; erro libera nova tentativa", async () => {
@@ -139,6 +146,12 @@ describe("5. volta", () => {
     expect(d.erro).toBeNull();
     expect(d.dados.remetente.cep).toBe("15520011");            // na reversa, quem posta é a consultora
     expect(d.dados.destinatario.doc).toBe("43319208000180");
+    // consultora sem e-mail: a reversa usa o e-mail da Lardan (Daniel, 05/11)
+    const semEmail = await maleta("encerrada");
+    await adm.unsafe(`delete from public.contact_points where party_id = $1 and kind = 'email'`, [semEmail.party]);
+    const se = await rpc<{ remetente: { email: string }; pendencias: string[] }>(montagem, "correios_maleta_dados", { _cycle: semEmail.ciclo, _direcao: "volta" });
+    expect(se.dados.remetente.email).toBe("lardansemijoias@gmail.com");
+    expect(se.dados.pendencias).toEqual([]);
     const a = await abrir(m.ciclo, "volta", montagem.uid);
     expect(a.erro).toBeNull();
     await resultado(a.dados!, true, `AC${String(Math.floor(Math.random() * 1e9)).padStart(9, "0")}BR`);

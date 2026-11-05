@@ -72,7 +72,7 @@ export const consultorasDaPraca = async (praca: string, termo: string) => {
     _praca: praca,
     _search: termo.trim() || null,
   });
-  return linhas.map((p) => ({ value: p.party_id, label: rotuloConsultora(p), hint: p.cpf ? `CPF ${p.cpf}` : undefined }));
+  return linhas.map((p) => ({ value: p.party_id, label: rotuloConsultora(p), ...(p.cpf ? { hint: `CPF ${p.cpf}` } : {}) }));
 };
 
 export const dataBR = (d: string | null) => (d ? d.slice(0, 10).split("-").reverse().join("/") : "—");

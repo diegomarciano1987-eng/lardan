@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { expandirPorVariante, somarEstoque } from "./produtos-lista";
+import { expandirPorVariante, somarEstoque } from "@/lib/produtos-lista";
 
 const v = (id: string, product_id: string, extra: Partial<{ is_active: boolean; price_cents: number | null }> = {}) => ({
   id, product_id, label: id, barcode: `B${id}`, reference_code: `R${id}`, price_cents: null, is_active: true, ...extra,
@@ -14,7 +14,7 @@ describe("lista de produtos por variante", () => {
   it("produto sem variante ativa continua aparecendo", () => {
     const linhas = expandirPorVariante([{ id: "p", price_cents: 100 }], [v("x", "p", { is_active: false })]);
     expect(linhas).toHaveLength(1);
-    expect(linhas[0].variantId).toBeNull();
+    expect(linhas[0]?.variantId).toBeNull();
   });
   it("preço da variante prevalece; sem preço herda do produto", () => {
     const linhas = expandirPorVariante([{ id: "p", price_cents: 4990 }], [v("a", "p", { price_cents: 5490 }), v("b", "p")]);

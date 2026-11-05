@@ -11,8 +11,15 @@ type Previa = { lote: string | null; linhas: number; com_pessoa: number; sem_pes
 
 const DIAS_PROTOCOLO = 5;
 
-export function ProcessosJudiciais({ master }: { master: boolean }) {
+export function ProcessosJudiciais() {
   const qc = useQueryClient();
+  const qm = useQuery({ queryKey: ["eu-master"], queryFn: async () => {
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return false;
+    const { data } = await supabase.rpc("has_role", { _user_id: u.user.id, _role: "master" });
+    return !!data;
+  } });
+  const master = !!qm.data;
   const [linhas, setLinhas] = React.useState<LinhaJuridico[] | null>(null);
   const [previa, setPrevia] = React.useState<Previa | null>(null);
   const [ocupado, setOcupado] = React.useState(false);

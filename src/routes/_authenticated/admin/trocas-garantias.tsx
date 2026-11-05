@@ -121,7 +121,7 @@ function Qualidade() {
             {lista.data && itens.length === 0 && <div className="px-6"><EmptyState title="Sem trocas aqui" description={busca ? "Nada encontrado para essa busca." : "Nenhuma troca nesta situação."} /></div>}
             {itens.length > 0 && (
               <table className="w-full table-fixed text-sm">
-                <colgroup><col className="w-[8.5rem]" /><col className="w-[34%]" /><col /><col className="w-[6.5rem]" /><col className="w-[8.5rem]" /></colgroup>
+                <colgroup><col className="w-[8.5rem]" /><col className="w-[28%]" /><col /><col className="w-[6.5rem]" /><col className="w-[8.5rem]" /></colgroup>
                 <thead className="sticky top-0 bg-cream-2 text-left text-[0.7rem] uppercase tracking-[0.12em] text-ledger-muted">
                   <tr><th className="px-6 py-3">Protocolo</th><th className="px-3 py-3">Consultora</th><th className="px-3 py-3">Peça</th><th className="px-3 py-3">Aberta</th><th className="px-4 py-3 text-right">Situação</th></tr>
                 </thead>

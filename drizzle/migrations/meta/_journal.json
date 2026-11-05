@@ -1653,6 +1653,13 @@
       "when": 1793916334406,
       "tag": "0235_cob_historica_fatura_unica",
       "breakpoints": true
+    },
+    {
+      "idx": 236,
+      "version": "7",
+      "when": 1793916438058,
+      "tag": "0236_cob_historica_busca_servidor",
+      "breakpoints": true
     }
   ]
 }

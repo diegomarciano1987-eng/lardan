@@ -18869,6 +18869,10 @@ export type Database = {
         Returns: Json
       }
       cob_fiado_smalldata_desfazer: { Args: { _lote: string }; Returns: Json }
+      cob_historica_buscar: {
+        Args: { _corte?: string; _termo: string }
+        Returns: string[]
+      }
       cob_historica_consolidar: {
         Args: {
           _aplicar?: boolean

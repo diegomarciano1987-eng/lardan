@@ -55,3 +55,4 @@
 - Central de Leads: leads INSERT trigger queues frozen payload in service-only central_leads_fila; cron /api/public/central-leads/enviar sends creation only; 401 pauses. Why: CRM save independent; Central is permanent archive.
 - Barcodes 5-digit seq (never EAN-13); barcode/ref unique incl. product×variant (codigo_unico_guarda). Why: Argox, scans.
 - Signed-document rules: src/lib/zapsign/AGENTS.md. Why: privacy.
+- Trocas e garantias (0237): qualidade_trocas + qualidade_trocas_eventos is the single two-way quality channel (app_consultora, admin_manual, legado_smalldata by legado_id); writes only via qualidade_troca_* RPCs gated by quality.view/manage (Master can grant to collaborators); interno events hidden from consultora; never moves stock or money; consultora_pos_venda is deprecated. Why: maleta pieces have no digital order and Qualidade answers in the consultant app.

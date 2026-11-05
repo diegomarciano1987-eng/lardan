@@ -1480,6 +1480,7 @@ export type Database = {
           representante_party_id: string | null
           sign_url: string | null
           signer_token: string | null
+          simulacao_id: string | null
           status: string
           texto_hash: string
           tipo: string
@@ -1506,6 +1507,7 @@ export type Database = {
           representante_party_id?: string | null
           sign_url?: string | null
           signer_token?: string | null
+          simulacao_id?: string | null
           status?: string
           texto_hash: string
           tipo: string
@@ -1532,6 +1534,7 @@ export type Database = {
           representante_party_id?: string | null
           sign_url?: string | null
           signer_token?: string | null
+          simulacao_id?: string | null
           status?: string
           texto_hash?: string
           tipo?: string
@@ -1594,6 +1597,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "assinaturas_digitais_simulacao_id_fkey"
+            columns: ["simulacao_id"]
+            isOneToOne: false
+            referencedRelation: "cob_simulacoes"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -18845,6 +18855,7 @@ export type Database = {
         Args: { _carencia: number; _juros: number; _multa: number }
         Returns: undefined
       }
+      cob_confissao_dados: { Args: { _simulacao: string }; Returns: Json }
       cob_devedor: { Args: { _party: string }; Returns: Json }
       cob_fiado_importar: {
         Args: { _linhas: Json; _lote: string }

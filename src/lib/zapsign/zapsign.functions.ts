@@ -124,7 +124,7 @@ export const zapsignArquivo = createServerFn({ method: "POST" })
 /** Modelos (Master edita). */
 export const zapsignModeloSalvar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { tipo: "contrato" | "promissoria"; titulo: string; texto: string; revisado: boolean }) => d)
+  .inputValidator((d: { tipo: "contrato" | "promissoria" | "confissao"; titulo: string; texto: string; revisado: boolean }) => d)
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
     await rpcUsuario(c, "assinatura_modelo_salvar", { _tipo: data.tipo, _titulo: data.titulo, _texto: data.texto, _revisado: data.revisado });
@@ -182,4 +182,51 @@ export const zapsignSincronizar = createServerFn({ method: "POST" })
     if (!master) throw new Error("Só o Master importa os documentos da ZapSign.");
     const { sincronizarPagina } = await import("./documentos.server");
     return sincronizarPagina(data.pagina);
+  });
+
+interface DadosConfissao extends Dados { party_id: string; pendente: { id: string; sign_url: string | null } | null }
+
+/** Termo de confissão de dívida de um acordo: token por WhatsApp (ou e-mail) + selfie + foto do documento. */
+export const zapsignConfissao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { simulacaoId: string; reenviar?: boolean }) => {
+    if (!UUID.test(d?.simulacaoId ?? "")) throw new Error("Acordo inválido.");
+    return { simulacaoId: d.simulacaoId, reenviar: !!d.reenviar };
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    const dados = await rpcUsuario<DadosConfissao>(c, "cob_confissao_dados", { _simulacao: data.simulacaoId });
+    if (dados.pendente && !data.reenviar) return { id: dados.pendente.id, signUrl: dados.pendente.sign_url, jaExistia: true, whatsapp: false };
+    if (dados.pendencias.length) throw new Error(`Complete o cadastro antes do termo: ${dados.pendencias.join(", ")}.`);
+    const { preencherModelo, valoresDosCampos, telefoneZapsign } = await import("./modelo");
+    const { configZapsign, criarDocumento } = await import("./api.server");
+    const { createHash } = await import("node:crypto");
+    const cfg = configZapsign();
+    if (!cfg.pronto) throw new Error("Assinatura digital não configurada.");
+    const campos = dados.campos as unknown as Record<string, unknown>;
+    const valores = { ...valoresDosCampos(dados.campos), plano: String(campos["plano"] ?? ""), dividas: String(campos["dividas"] ?? "") };
+    const titulo = preencherModelo(dados.modelo.titulo, valores).replace(/\\/g, "").slice(0, 250);
+    const texto = dados.modelo.texto.replace(/\{\{\s*(plano|dividas)\s*\}\}/g, (_m, k: string) => valores[k as "plano"] || "________________");
+    const final = preencherModelo(texto, valores);
+    const fone = telefoneZapsign(dados.signer.whatsapp);
+    const doc = await criarDocumento({
+      name: titulo, markdown_text: final, external_id: `lardan-confissao-${data.simulacaoId.slice(0, 8)}-${Date.now().toString(36)}`, lang: "pt-br", brand_name: "LARDAN Semijoias",
+      signers: [{
+        name: dados.signer.nome, ...(fone ?? {}), ...(dados.signer.email ? { email: dados.signer.email } : {}),
+        ...(dados.signer.cpf ? { cpf: dados.signer.cpf } : {}),
+        auth_mode: fone ? "assinaturaTela-tokenWhatsapp" : "assinaturaTela-tokenEmail",
+        require_selfie_photo: true, require_document_photo: true,
+        send_automatic_whatsapp: !!fone, send_automatic_email: !fone && !!dados.signer.email,
+        lock_name: true, lock_phone: !!fone, lock_email: !!dados.signer.email, external_id: dados.party_id,
+        custom_message: "Olá! Segue o termo do seu acordo com a LARDAN para você assinar. Tenha seu documento em mãos: vamos pedir um código, uma selfie e a foto do documento.",
+      }],
+    });
+    const signer = doc.signers?.[0];
+    const reg = await rpcServidor<{ id: string }>("assinatura_registrar", { _d: {
+      ambiente: cfg.ambiente, tipo: "confissao", party_id: dados.party_id, cycle_id: "", rep: "", simulacao_id: data.simulacaoId,
+      doc_token: doc.token, signer_token: signer?.token ?? null, sign_url: signer?.sign_url ?? null, status: "pendente",
+      titulo, texto_hash: createHash("sha256").update(final).digest("hex"), valor_cents: dados.campos.valor_cents ?? "",
+      whatsapp: !!fone, ator: c.userId, substitui: dados.pendente?.id ?? "",
+    } });
+    return { id: reg.id, signUrl: signer?.sign_url ?? null, jaExistia: false, whatsapp: !!fone };
   });

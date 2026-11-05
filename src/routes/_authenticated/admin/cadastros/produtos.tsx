@@ -46,6 +46,7 @@ interface ProdutoLinha {
   category_id: string | null;
   collection_id: string | null;
   banho_tipo: string | null;
+  reference_code: string | null;
 }
 
 /** Uma linha da lista = uma variante vendável (ou o produto, se ainda não tem variante). */
@@ -129,8 +130,8 @@ function ProdutosPage() {
     queryFn: () =>
       listPaged<ProdutoLinha>({
         table: "products",
-        select: "id, slug, name, legacy_code, status, price_cents, price_is_public, category_id, collection_id, banho_tipo",
-        searchColumns: ["name", "slug", "legacy_code", "material", "short_description"],
+        select: "id, slug, name, legacy_code, status, price_cents, price_is_public, category_id, collection_id, banho_tipo, reference_code",
+        searchColumns: ["name", "slug", "legacy_code", "reference_code", "material", "short_description"],
         search: idExato ? "" : busca,
         page: idExato ? 0 : pagina,
         pageSize: PAGE_SIZE,
@@ -250,7 +251,7 @@ function ProdutosPage() {
       header: "Referência · Barras",
       render: (r) => (
         <div className="num leading-tight">
-          <div>{r.referencia ?? r.legacy_code ?? "—"}</div>
+          <div>{r.referencia ?? r.reference_code ?? r.legacy_code ?? "—"}</div>
           <div className={`text-xs ${r.barcode ? "text-ledger-muted" : "text-destructive"}`}>
             {r.barcode ?? (r.variantId ? "sem código de barras" : "")}
           </div>

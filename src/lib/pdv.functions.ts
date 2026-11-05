@@ -3,7 +3,7 @@
  * guarda só o hash do token (cookie httpOnly). Toda regra (preço, desconto,
  * estoque, comissão, caixa) é revalidada no banco por rotinas exclusivas do servidor.
  */
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 import { getCookie, setCookie, deleteCookie, getRequestHeader } from "@tanstack/react-start/server";
 
 const COOKIE = "lardan_pdv";
@@ -21,11 +21,11 @@ async function rpc<T = any>(f: string, a: object): Promise<T> {
   if (error) throw new Error(error.message.includes("PDV_SESSAO_INVALIDA") ? "PDV_SESSAO_INVALIDA" : error.message);
   return data as T;
 }
-async function token() {
+const token = createServerOnlyFn(async () => {
   const t = getCookie(COOKIE);
   if (!t) throw new Error("PDV_SESSAO_INVALIDA");
   return sha256(t);
-}
+});
 const str = (v: unknown, max = 200) => (typeof v === "string" ? v.slice(0, max) : "");
 const num = (v: unknown) => { const n = Math.round(Number(v)); if (!Number.isFinite(n)) throw new Error("Valor inválido."); return n; };
 

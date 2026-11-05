@@ -1639,6 +1639,13 @@
       "when": 1793914885863,
       "tag": "0233_cob_confissao_valores_br",
       "breakpoints": true
+    },
+    {
+      "idx": 234,
+      "version": "7",
+      "when": 1793915196637,
+      "tag": "0234_cob_judicial_717_e_revenda_311",
+      "breakpoints": true
     }
   ]
 }

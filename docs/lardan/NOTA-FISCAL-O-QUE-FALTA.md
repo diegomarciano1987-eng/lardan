@@ -8,6 +8,8 @@ Resumo: **não é só ligar o token da Focus.** Desde a 0118 a conversa com a Fo
 - Bancada isolada (db/pendentes 01, 02, 04, 06, 11): documentos fiscais imutáveis, referências entre notas, tentativas, eventos, fila (`fiscal_outbox`), `fiscal_doc_preparar/validar/enfileirar`, retorno do provedor só pelo servidor, autorização exigindo chave válida do emissor, cancelamento, acerto (`kit_acertos`) e preços versionados.
 - Roteiro fiscal observado nas 73.969 notas do SmallData (`fiscal_roteiro_referencia`): remessa 5917/6917, devolução como entrada 1918/2918 com referência, venda 5114/6114, perda 5927 (SP 6949), CSOSN 102, PIS/COFINS 07, NCM 71171900, valor = 1/3 do varejo.
 
+- **0214 (05/11/2026):** botão "Nota fiscal (teste)" na maleta conferida (tela da remessa e documentos da montagem). Emite a NF-e de remessa de TESTE com a consultora e as peças conferidas, ao preço gravado na maleta. Tem uma nota viva por maleta. Continua só em homologação.
+
 ## Falta (em ordem)
 
 1. **Promover os pacotes 01, 02, 04, 06 e 11** a migrações oficiais (rodada própria, com autorização). Sem isso não existe documento fiscal nem acerto na produção.

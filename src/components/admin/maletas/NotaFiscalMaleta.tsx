@@ -1,0 +1,146 @@
+/**
+ * Botão "Nota fiscal" da maleta: NF-e de remessa consignada montada com a
+ * consultora e as peças conferidas da maleta (0214).
+ * Nesta versão SÓ HOMOLOGAÇÃO (nota de teste, sem valor fiscal). Emitir: só Master.
+ */
+import * as React from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { Receipt, RefreshCw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { focusArquivos, focusConsultar, focusEmitirRemessaMaleta } from "@/lib/focus/focus.functions";
+
+export interface NotaMaleta {
+  cycle_id: string;
+  ref: string;
+  ambiente: string;
+  status: string;
+  status_sefaz: string | null;
+  mensagem_sefaz: string | null;
+  erros: { mensagem?: string; campo?: string }[] | null;
+  numero: string | null;
+  serie: string | null;
+  tem_danfe: boolean;
+  desatualizada: boolean;
+  created_at: string;
+}
+
+/** Situações em que a maleta já foi montada e conferida (e ainda não voltou para acerto). */
+export const MALETA_APTA_NOTA = ["conferida", "expedida", "transito", "recebida", "operacao"];
+const VIVA = ["pendente", "processando_autorizacao", "autorizado"];
+const msgErro = (e: unknown) => (e instanceof Error ? e.message : "Falha.");
+
+/** Última nota de remessa de cada maleta (lista vazia para quem não vê o fiscal). */
+export function useNotasMaletas(cycleIds: string[]) {
+  const consultar = useServerFn(focusConsultar);
+  const qc = useQueryClient();
+  const chave = [...cycleIds].sort().join(",");
+  const q = useQuery({
+    queryKey: ["focus", "notas-maletas", chave],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("fiscal_focus_notas_maletas" as never, { _cycles: cycleIds } as never);
+      if (error) throw error;
+      return (data ?? []) as unknown as NotaMaleta[];
+    },
+    enabled: cycleIds.length > 0,
+    staleTime: 15_000,
+  });
+  // Sem aviso (webhook) a tela pergunta à Focus pelas notas que ainda estão na SEFAZ.
+  const pendentes = (q.data ?? []).filter((n) => n.status === "processando_autorizacao" || n.status === "pendente").map((n) => n.ref).join(",");
+  React.useEffect(() => {
+    if (!pendentes) return;
+    const t = setInterval(() => {
+      void Promise.allSettled(pendentes.split(",").map((ref) => consultar({ data: { ref } }))).then(() =>
+        qc.invalidateQueries({ queryKey: ["focus", "notas-maletas"] }));
+    }, 6000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendentes]);
+  const porMaleta = React.useMemo(() => new Map((q.data ?? []).map((n) => [n.cycle_id, n])), [q.data]);
+  return { porMaleta, carregando: q.isLoading };
+}
+
+export function NotaFiscalMaleta({
+  cycleId,
+  status,
+  nota,
+  podeEmitir,
+  temConsultora,
+  semPecas,
+  grande = false,
+}: {
+  cycleId: string;
+  status: string;
+  nota: NotaMaleta | undefined;
+  podeEmitir: boolean;
+  temConsultora: boolean;
+  semPecas: boolean;
+  grande?: boolean;
+}) {
+  const qc = useQueryClient();
+  const emitirFn = useServerFn(focusEmitirRemessaMaleta);
+  const arquivos = useServerFn(focusArquivos);
+  const tam = grande ? "justify-center" : "h-9 px-3 text-xs";
+  const icone = grande ? "size-4" : "size-3.5";
+
+  const emitir = useMutation({
+    mutationFn: () => emitirFn({ data: { cycleId } }),
+    onSuccess: (r) => {
+      if (r.status === "autorizado") toast.success("Nota de teste autorizada pela SEFAZ.");
+      else if (r.status === "processando_autorizacao") toast.message("Nota enviada; a SEFAZ está processando.");
+      else toast.error(r.mensagem ?? r.erros?.[0]?.mensagem ?? "A SEFAZ recusou a nota.");
+    },
+    onError: (e) => toast.error(msgErro(e)),
+    onSettled: () => void qc.invalidateQueries({ queryKey: ["focus", "notas-maletas"] }),
+  });
+  const abrirDanfe = async () => {
+    try {
+      const a = await arquivos({ data: { ref: nota!.ref } });
+      if (a.danfe) window.open(a.danfe, "_blank", "noopener,noreferrer");
+      else toast.error("DANFE ainda não disponível.");
+    } catch (e) {
+      toast.error(msgErro(e));
+    }
+  };
+
+  if (nota && nota.status === "autorizado") {
+    return (
+      <span className="inline-flex flex-wrap items-center gap-2">
+        <button type="button" className={`admin-btn ${tam}`} onClick={() => void abrirDanfe()} disabled={!nota.tem_danfe}
+          title="Nota de TESTE (homologação), sem valor fiscal.">
+          <Receipt aria-hidden className={icone} /> DANFE teste{nota.numero ? ` nº ${nota.numero}` : ""}
+        </button>
+        {nota.desatualizada && <span className="text-xs text-warning">As peças mudaram depois da nota.</span>}
+      </span>
+    );
+  }
+  if (nota && VIVA.includes(nota.status)) {
+    return (
+      <button type="button" className={`admin-btn ${tam}`} disabled>
+        <RefreshCw aria-hidden className={`${icone} animate-spin`} /> Nota na SEFAZ…
+      </button>
+    );
+  }
+
+  const apta = MALETA_APTA_NOTA.includes(status);
+  const motivo = !podeEmitir ? "Só o Master emite a nota de teste."
+    : !temConsultora ? "Defina a consultora da maleta."
+    : semPecas ? "Maleta sem peças."
+    : !apta ? "A nota libera quando a maleta estiver montada e conferida."
+    : "Emite a NF-e de remessa consignada de TESTE (homologação, sem valor fiscal) com as peças conferidas.";
+  const recusa = nota && !VIVA.includes(nota.status) && nota.status !== "cancelado"
+    ? (nota.mensagem_sefaz ?? nota.erros?.[0]?.mensagem ?? "A nota anterior não foi autorizada.") : null;
+
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <button type="button" className={`admin-btn ${grande ? "admin-btn-primary " : ""}${tam}`} title={motivo}
+        disabled={!podeEmitir || !temConsultora || semPecas || !apta || emitir.isPending}
+        onClick={() => emitir.mutate()}>
+        <Receipt aria-hidden className={icone} />
+        {emitir.isPending ? "Enviando…" : recusa ? "Emitir nota de novo (teste)" : "Nota fiscal (teste)"}
+      </button>
+      {recusa && <span className="max-w-72 text-xs text-destructive" title={recusa}>Recusada: {recusa}</span>}
+    </span>
+  );
+}

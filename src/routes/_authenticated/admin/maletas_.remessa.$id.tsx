@@ -2,11 +2,12 @@ import * as React from "react";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, FileText, Lock, Plus, Receipt, ScrollText, Tag, UserRound } from "lucide-react";
+import { CheckCircle2, FileText, Lock, Plus, ScrollText, Tag, UserRound } from "lucide-react";
 import { imprimirPedidoConsignacao, imprimirPromissoriaMaleta } from "@/components/admin/maletas/DocumentosMaleta";
 import { imprimirEtiquetaMaleta } from "@/components/admin/maletas/EtiquetaMaleta";
 import { abrirMaletaRepresentante, mensagem } from "@/lib/maletas-perdidas";
 import { EnvioRemessa } from "@/components/admin/maletas/EnvioRemessa";
+import { NotaFiscalMaleta, useNotasMaletas } from "@/components/admin/maletas/NotaFiscalMaleta";
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import { liberarKitSemPreBaixa } from "@/lib/pre-baixa";
@@ -74,6 +75,7 @@ function RemessaPage() {
     select: (l) => l.find((r) => r.id === id) ?? null,
   });
   const maletas = useQuery({ queryKey: ["remessas", "maletas", id], queryFn: () => maletasDaRemessa(id) });
+  const notas = useNotasMaletas((maletas.data ?? []).map((m) => m.cycle_id));
   const r = remessa.data;
   const consultoras = useQuery({
     queryKey: ["remessas", "consultoras", r?.praca_id, busca],
@@ -282,9 +284,8 @@ function RemessaPage() {
                   onClick={() => void imprimir(m.cycle_id, "etiqueta")}>
                   <Tag aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:etiqueta` ? "Preparando…" : "Etiqueta"}
                 </button>
-                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled title="A emissão da nota fiscal ainda está em homologação; o botão fica aqui e será liberado quando a emissão real for ligada.">
-                  <Receipt aria-hidden className="size-3.5" /> Nota fiscal (em breve)
-                </button>
+                <NotaFiscalMaleta cycleId={m.cycle_id} status={m.status} nota={notas.porMaleta.get(m.cycle_id)} podeEmitir={master}
+                  temConsultora={!!m.consultora_party_id} semPecas={semPecas} />
                 {podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (
                   <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || liberarMaleta.isPending}
                     onClick={() => liberarMaleta.mutate(m.cycle_id)}>

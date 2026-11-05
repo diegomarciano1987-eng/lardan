@@ -2,7 +2,9 @@ import * as React from "react";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { EtiquetaMaleta } from "./EtiquetaMaleta";
 import { useQuery } from "@tanstack/react-query";
-import { FileText, Printer, ScrollText, X } from "lucide-react";
+import { FileText, Printer, Receipt, ScrollText, X } from "lucide-react";
+import { useAdminRoles } from "@/components/admin/AdminShell";
+import { NotaFiscalMaleta, useNotasMaletas } from "./NotaFiscalMaleta";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, detalheMaleta, traduzir, type ItemComposicao } from "@/lib/maletas";
@@ -183,6 +185,8 @@ export function DocumentosMaleta({
 }) {
   const doc = useQuery({ queryKey: ["maletas", "doc", cycleId], queryFn: () => docConsultora(cycleId) });
   const valorTotal = composicao.reduce((s, c) => s + c.quantidade * c.valor_unitario, 0);
+  const master = useAdminRoles().includes("master" as never);
+  const notas = useNotasMaletas([cycleId]);
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Documentos da remessa" className="fixed inset-0 z-[100] overflow-auto bg-background">
@@ -243,16 +247,16 @@ export function DocumentosMaleta({
             </button>
           </div>
 
-          <div className="ledger-panel flex flex-col gap-3 border-dashed p-6 opacity-80">
-            <FileText aria-hidden className="size-8 text-ledger-muted" />
+          <div className="ledger-panel flex flex-col gap-3 p-6">
+            <Receipt aria-hidden className="size-8 text-ledger-text" />
             <p className="font-display text-lg font-bold text-ledger-text">Nota fiscal consignada</p>
             <p className="flex-1 text-sm text-ledger-muted">
-              Em implantação. Este é o lugar reservado para gerar a NF-e de remessa consignada desta
-              maleta, já ligada a este ciclo.
+              NF-e de remessa consignada com as peças conferidas desta maleta. Por enquanto sai como
+              nota de <strong className="text-ledger-text">teste (homologação)</strong>, sem valor fiscal.
             </p>
-            <button type="button" className="admin-btn justify-center" disabled>
-              Em breve
-            </button>
+            {/* Esta tela abre logo depois da conferência gravada; o servidor confere de novo a situação. */}
+            <NotaFiscalMaleta cycleId={cycleId} status="conferida" nota={notas.porMaleta.get(cycleId)} podeEmitir={master}
+              temConsultora semPecas={composicao.length === 0} grande />
           </div>
         </div>
       </div>

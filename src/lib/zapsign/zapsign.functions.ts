@@ -114,5 +114,6 @@ export const zapsignModeloSalvar = createServerFn({ method: "POST" })
   .inputValidator((d: { tipo: "contrato" | "promissoria"; titulo: string; texto: string; revisado: boolean }) => d)
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    return rpcUsuario(c, "assinatura_modelo_salvar", { _tipo: data.tipo, _titulo: data.titulo, _texto: data.texto, _revisado: data.revisado });
+    await rpcUsuario(c, "assinatura_modelo_salvar", { _tipo: data.tipo, _titulo: data.titulo, _texto: data.texto, _revisado: data.revisado });
+    return { tipo: data.tipo };
   });

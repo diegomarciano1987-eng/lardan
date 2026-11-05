@@ -13202,6 +13202,38 @@ export type Database = {
           },
         ]
       }
+      pedido_cobranca_cancelamentos: {
+        Row: {
+          erro: string | null
+          order_id: string
+          situacao: string
+          tentativas: number
+          updated_at: string
+        }
+        Insert: {
+          erro?: string | null
+          order_id: string
+          situacao: string
+          tentativas?: number
+          updated_at?: string
+        }
+        Update: {
+          erro?: string | null
+          order_id?: string
+          situacao?: string
+          tentativas?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedido_cobranca_cancelamentos_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "sales_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pedido_colaboradora_telefones: {
         Row: {
           atualizado_em: string
@@ -18272,6 +18304,7 @@ export type Database = {
         Args: { l: Database["public"]["Tables"]["leads"]["Row"] }
         Returns: Json
       }
+      central_vendas: { Args: { _ate?: string; _de?: string }; Returns: Json }
       cidade_norm: { Args: { _t: string }; Returns: string }
       claim_master_role: { Args: never; Returns: boolean }
       clicksign_modo_definir: {
@@ -18715,6 +18748,7 @@ export type Database = {
         Args: { _banho?: string; _busca?: string; _categoria?: string }
         Returns: Json
       }
+      consultora_pedido_entregue: { Args: { _order: string }; Returns: Json }
       consultora_pedido_pago_dinheiro: {
         Args: { _order: string }
         Returns: Json
@@ -18739,6 +18773,10 @@ export type Database = {
       consultora_pos_venda_prazo: { Args: { _order: string }; Returns: Json }
       consultora_rep_pela_praca: { Args: { _praca: string }; Returns: string }
       consultora_vendido_ciclo: { Args: { _cycle: string }; Returns: Json }
+      consultora_vendidos: {
+        Args: { _ate?: string; _de?: string }
+        Returns: Json
+      }
       consultoras_vinculo_smalldata: {
         Args: { _aplicar?: boolean }
         Returns: Json
@@ -20391,6 +20429,10 @@ export type Database = {
         Args: { _produto: string; _variante: string }
         Returns: string
       }
+      pedido_cobranca_cancelada: {
+        Args: { _erro: string; _ok: boolean; _order: string }
+        Returns: Json
+      }
       pedido_colaboradora_telefone_salvar: {
         Args: { _telefone: string; _user: string }
         Returns: Json
@@ -20419,6 +20461,20 @@ export type Database = {
       pedido_pix_asaas_ler: { Args: never; Returns: Json }
       pedido_publico: { Args: { _token: string }; Returns: Json }
       pedido_token: { Args: { _order: string }; Returns: string }
+      pedidos_abertos_qtd: {
+        Args: { _cycle: string; _exceto?: string; _variant: string }
+        Returns: number
+      }
+      pedidos_cobranca_para_cancelar: {
+        Args: never
+        Returns: {
+          acao: string
+          charge_id: string
+          codigo: string
+          external_id: string
+          order_id: string
+        }[]
+      }
       phone_canon: { Args: { v: string }; Returns: string }
       praca_alternar: {
         Args: { _ativo: boolean; _id: string }
@@ -21322,7 +21378,22 @@ export type Database = {
           variant_id: string
         }[]
       }
+      venda_forma: {
+        Args: { _o: Database["public"]["Tables"]["sales_orders"]["Row"] }
+        Returns: string
+      }
+      vitrine_comprar: {
+        Args: {
+          _chave: string
+          _cliente: Json
+          _forma: string
+          _itens: Json
+          _slug: string
+        }
+        Returns: Json
+      }
       vitrine_endereco_disponivel: { Args: { _slug: string }; Returns: Json }
+      vitrine_pagamento_situacao: { Args: { _token: string }; Returns: Json }
       vitrine_whatsapp_registrar: { Args: { _numero: string }; Returns: Json }
     }
     Enums: {

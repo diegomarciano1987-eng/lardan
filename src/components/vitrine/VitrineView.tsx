@@ -4,6 +4,7 @@ import { MANUAL_CUIDADOS_URL } from "@/lib/consultora-regras";
 import { Check, ChevronLeft, ChevronRight, Clock, Maximize2, X, Gem, Instagram, MessageCircle, Share2, ShieldCheck, ShoppingBag, User } from "lucide-react";
 import { toast } from "sonner";
 import { VoltarAoApp } from "./VoltarAoApp";
+import { CompraVitrine } from "./CompraVitrine";
 import { brl, imagem, type VitrineItem } from "@/lib/maletas";
 import { linhaPeca, urlPublica } from "@/lib/pedido-publico";
 
@@ -19,10 +20,12 @@ export interface VitrineViewProps {
   img: (path?: string | null) => string | null;
   previa?: boolean;
   urlCompartilhar?: string;
+  /** 0211: endereço da vitrine publicada; com ele a vitrine vende (Pix/cartão Lardan) */
+  slug?: string;
 }
 
 /** Página da vitrine: a mesma peça é usada na página pública e na prévia do estúdio. */
-export function VitrineView({ design, nome, itens, img, previa = false, urlCompartilhar }: VitrineViewProps) {
+export function VitrineView({ design, nome, itens, img, previa = false, urlCompartilhar, slug }: VitrineViewProps) {
   const d = designPadrao(design ?? undefined);
   const a = d.aparencia;
   const o = d.organizacao;
@@ -33,6 +36,8 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   const [categoria, setCategoria] = React.useState("todas");
   const [noCorpo, setNoCorpo] = React.useState<Record<string, boolean>>({});
   const [ampliar, setAmpliar] = React.useState<{ item: Item; corpo: boolean } | null>(null);
+  const [comprando, setComprando] = React.useState(false);
+  const podeComprar = !!slug && !previa;
 
   const visiveis = itens.filter((i) => !o.ocultas.includes(i.variant_id));
   const porId = new Map(visiveis.map((i) => [i.variant_id, i]));
@@ -217,14 +222,32 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
           zap={zap} previa={previa}
         />
       )}
+      {comprando && slug && (
+        <CompraVitrine
+          slug={slug} total={total} primeiroNome={primeiroNome} zap={zap}
+          linhas={visiveis.filter((i) => sacola[i.variant_id]).map((i) => ({ variant_id: i.variant_id, produto: i.produto,
+            detalhe: [i.variante, i.tamanho, i.cor].filter(Boolean).join(" · ") || null, quantidade: sacola[i.variant_id] ?? 0, preco_cents: i.preco_cents }))}
+          onFechar={() => setComprando(false)}
+          onPago={() => setSacola({})}
+        />
+      )}
       {pecas > 0 && (
         <section className={`${previa ? "sticky" : "fixed inset-x-0"} bottom-0 border-t border-[var(--v-line)] bg-[var(--v-bg)]/95 p-4 backdrop-blur`}>
           <div className="mx-auto w-full max-w-3xl space-y-3">
             <p className="text-sm"><ShoppingBag aria-hidden className="mr-1 inline size-4" />{pecas} peça(s) · <strong>{brl(total)}</strong></p>
-            <button type="button" disabled={!zap} onClick={enviar} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--v-accent)] px-4 py-3 text-sm text-[var(--v-accent-ink)] disabled:opacity-50">
-              <MessageCircle aria-hidden className="size-4" /> Enviar interesse para {primeiroNome}
+            {podeComprar && (
+              <button type="button" onClick={() => setComprando(true)} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--v-accent)] px-4 py-3 text-sm font-semibold text-[var(--v-accent-ink)]">
+                <ShoppingBag aria-hidden className="size-4" /> Comprar agora · Pix ou cartão
+              </button>
+            )}
+            <button type="button" disabled={!zap} onClick={enviar} className={podeComprar
+              ? "flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--v-line)] px-4 py-3 text-sm disabled:opacity-50"
+              : "flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--v-accent)] px-4 py-3 text-sm text-[var(--v-accent-ink)] disabled:opacity-50"}>
+              <MessageCircle aria-hidden className="size-4" /> {podeComprar ? `Tirar dúvida com ${primeiroNome} no WhatsApp` : `Enviar interesse para ${primeiroNome}`}
             </button>
-            <p className="text-[0.7rem] text-[var(--v-muted)]">Sua seleção fica só neste aparelho e não reserva peças. A disponibilidade é confirmada no atendimento.</p>
+            <p className="text-[0.7rem] text-[var(--v-muted)]">{podeComprar
+              ? `Pagou, a peça é sua: ${primeiroNome} recebe o aviso e combina a entrega com você.`
+              : "Sua seleção fica só neste aparelho e não reserva peças. A disponibilidade é confirmada no atendimento."}</p>
           </div>
         </section>
       )}

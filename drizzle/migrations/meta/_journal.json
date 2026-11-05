@@ -1478,6 +1478,13 @@
       "when": 1793894042189,
       "tag": "0210_referencia_automatica_produto",
       "breakpoints": true
+    },
+    {
+      "idx": 211,
+      "version": "7",
+      "when": 1793896320704,
+      "tag": "0211_vitrine_compra_vendidos_central",
+      "breakpoints": true
     }
   ]
 }

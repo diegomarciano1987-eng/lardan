@@ -20,7 +20,6 @@ type Rpc = (f: string, a: object) => Promise<{ data: unknown; error: { message: 
 const rpc = supabase.rpc as unknown as Rpc;
 type Item = { party_id: string; nome: string; saldo_cents: number; parcelas: number; ok: boolean; motivo: string | null; simulacao_id: string | null };
 type Consolidacao = { lote: string | null; aplicado: boolean; criadas: number; total_cents: number; itens: Item[] };
-const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 export function CobrancaHistorica() {
   const qc = useQueryClient();
@@ -34,6 +33,18 @@ export function CobrancaHistorica() {
     },
   });
   const [busca, setBusca] = React.useState("");
+  const [buscaLenta, setBuscaLenta] = React.useState("");
+  React.useEffect(() => { const t = setTimeout(() => setBuscaLenta(busca.trim()), 350); return () => clearTimeout(t); }, [busca]);
+  // Busca no servidor: nome em partes, código atual/antigo e CPF (consultora_termo_casa).
+  const qb = useQuery({
+    queryKey: ["cob", "historica-busca", buscaLenta],
+    enabled: buscaLenta.length > 0,
+    queryFn: async () => {
+      const { data, error } = await rpc("cob_historica_buscar", { _termo: buscaLenta });
+      if (error) throw new Error(error.message);
+      return new Set((data ?? []) as string[]);
+    },
+  });
   const [filtro, setFiltro] = React.useState<"aptas" | "todas" | "bloqueadas" | "faturadas">("aptas");
   const [sel, setSel] = React.useState<string[]>([]);
   const [venc, setVenc] = React.useState<Date | undefined>(() => { const d = new Date(); d.setDate(d.getDate() + 7); return d; });
@@ -47,9 +58,8 @@ export function CobrancaHistorica() {
     if (filtro === "aptas" && s.tipo !== "apta") return false;
     if (filtro === "bloqueadas" && (s.tipo === "apta" || s.tipo === "faturada")) return false;
     if (filtro === "faturadas" && s.tipo !== "faturada") return false;
-    if (!busca.trim()) return true;
-    const t = semAcento(busca.trim());
-    return semAcento(d.nome ?? "").includes(t) || (d.codigo ?? "").toLowerCase().includes(t);
+    if (!buscaLenta) return true;
+    return qb.data ? qb.data.has(d.party_id) : true;
   });
   const aptas = todos.filter((d) => situacaoHistorica(d).tipo === "apta");
   const soma = (l: DevedorHistorico[]) => l.reduce((a, d) => a + Number(d.saldo_cents), 0);
@@ -125,7 +135,7 @@ export function CobrancaHistorica() {
           <label className="relative min-w-72 flex-1">
             <span className="sr-only">Buscar</span>
             <Search aria-hidden className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-            <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome ou código"
+            <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome, código ou CPF"
               className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm" />
           </label>
           <div className="flex rounded-md border border-border p-0.5" role="tablist" aria-label="Filtro">
@@ -179,7 +189,8 @@ export function CobrancaHistorica() {
             <tbody>
               {q.isLoading && <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">Carregando…</td></tr>}
               {q.error && <tr><td colSpan={6} className="px-3 py-8 text-center text-destructive">{(q.error as Error).message}</td></tr>}
-              {!q.isLoading && !lista.length && <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">Sem dados.</td></tr>}
+              {buscaLenta && qb.isFetching && <tr><td colSpan={6} className="px-3 py-3 text-center text-xs text-muted-foreground">Buscando…</td></tr>}
+              {!q.isLoading && !qb.isFetching && !lista.length && <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">{buscaLenta ? `Nada encontrado para “${buscaLenta}”.` : "Sem dados."}</td></tr>}
               {lista.slice(0, 300).map((d) => {
                 const s = situacaoHistorica(d);
                 const apta = s.tipo === "apta";

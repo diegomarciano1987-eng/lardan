@@ -44,7 +44,7 @@ import {
   meuParty, obterCliente, ETAPAS, historicoEtapas, linkInstagram, moverEtapa, pausarPessoa, rotuloEtapa, type Etapa, buscarPecas, registrarAtendimento, salvarCliente, type Atendimento, type Cliente, type Peca,
 } from "@/lib/consultora";
 
-export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "biblioteca" | "financeiro" | "vendas" | "familia" | "mais" | "novo" | "jornada" | "liga";
+export type AbaApp = "inicio" | "clientes" | "pedidos" | "maleta" | "vitrine" | "historico" | "indicacoes" | "biblioteca" | "financeiro" | "vendas" | "vendidos" | "familia" | "mais" | "novo" | "jornada" | "liga";
 export type Nav = { aba: AbaApp; id?: string | undefined; modo?: "nova" | "editar" | undefined; q?: string | undefined };
 export type Ir = (n: Nav) => void;
 
@@ -63,6 +63,7 @@ const EXTRAS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
   { aba: "jornada", rotulo: "Jornada", icone: IconeJornada },
   { aba: "liga", rotulo: "Liga LARDAN", icone: Medal },
   { aba: "financeiro", rotulo: "Meu financeiro", icone: Wallet },
+  { aba: "vendidos", rotulo: "Vendidos", icone: ShoppingBag },
   { aba: "vendas", rotulo: "Histórico de vendas", icone: ChartColumnBig },
   { aba: "familia", rotulo: "Financeiro da família", icone: PiggyBank },
   { aba: "vitrine", rotulo: "Minha vitrine", icone: Store },
@@ -1006,6 +1007,7 @@ export function Mais({ ir }: { ir: Ir }) {
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/equipe"; };
   const itens = [
     { r: "Meu financeiro", d: "Pagamentos e acertos", i: Wallet, n: { aba: "financeiro" } as Nav },
+    { r: "Vendidos", d: "Todas as suas vendas, o total e como cada cliente pagou", i: ShoppingBag, n: { aba: "vendidos" } as Nav },
     { r: "Histórico de vendas", d: "Quanto você vendeu e ganhou, mês a mês", i: ChartColumnBig, n: { aba: "vendas" } as Nav },
     { r: "Financeiro da família", d: "Contas da casa, só você vê", i: PiggyBank, n: { aba: "familia" } as Nav },
     { r: "Jornada", d: "Jornada das clientes", i: IconeJornada, n: { aba: "jornada" } as Nav },

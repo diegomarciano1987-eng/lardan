@@ -275,6 +275,8 @@ describe("7. prontidão fiscal", () => {
     const completa = await nova(cpf(), true);
     await nova(cpf(), false);
     const variante = await criarVariante("pf-ncm");
+    // 0210 dá NCM padrão a produto novo; o cenário precisa de uma peça antiga sem NCM
+    await adm.unsafe(`update public.products set ncm = null where id = (select product_id from public.product_variants where id = $1)`, [variante]);
     const kit = (await um<{ id: string }>(`insert into public.kits (label) values ($1) returning id`, [`ISO PF ${marca()}`])).id;
     const ciclo = (await um<{ id: string }>(`insert into public.kit_cycles (kit_id, cycle_no, consultora_party_id) values ($1,1,$2) returning id`, [kit, completa])).id;
     await adm.unsafe(`update public.kit_cycles set status='operacao' where id=$1`, [ciclo]);

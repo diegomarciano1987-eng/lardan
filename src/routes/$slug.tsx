@@ -61,6 +61,7 @@ function VitrineConsultora() {
       itens={v.itens as VitrineItem[]}
       img={arquivoPublico}
       urlCompartilhar={urlPublica(`/${v.slug ?? slug}`)}
+      slug={v.slug ?? slug}
     />
   );
 }

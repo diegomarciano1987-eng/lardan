@@ -29,12 +29,17 @@ export function PedidosConsultora() {
   const [cancelar, setCancelar] = React.useState<PedidoResumo | null>(null);
   const [aberto, setAberto] = React.useState<PedidoResumo | null>(null);
   const detalhe = useQuery({ queryKey: ["consultora", "pedido", aberto?.id], queryFn: () => aberto ? detalhePedido(aberto.id) : Promise.resolve(null), enabled: !!aberto });
+  const entregar = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.rpc("consultora_pedido_entregue" as never, { _order: id } as never); if (error) throw error; },
+    onSuccess: () => { toast.success("Pedido marcado como entregue."); void qc.invalidateQueries({ queryKey: ["consultora"] }); },
+    onError: (e) => toast.error(traduzir(e)),
+  });
   const mudar = useMutation({ mutationFn: (v: { id: string; status: string }) => mudarSituacaoPedido(v.id, v.status), onSuccess: () => { setCancelar(null); toast.success("Pedido atualizado."); void qc.invalidateQueries({ queryKey: ["consultora"] }); }, onError: (e) => toast.error(traduzir(e)) });
   if (q.isLoading) return <div role="status" className="flex items-center gap-3 py-12 text-muted-foreground"><LoaderCircle className="size-5 animate-spin" /> Carregando pedidos…</div>;
   if (q.isError) return <p role="alert">{traduzir(q.error)}</p>;
   const lista = q.data ?? [];
   const visiveis = lista.filter((p) => grupo(p) === aba);
-  return <ListaPedidos {...{ lista, visiveis, aba, setAba, setCancelar, setAberto, mudar, cancelar, aberto, detalhe }} />;
+  return <ListaPedidos {...{ lista, visiveis, aba, setAba, setCancelar, setAberto, mudar, entregar, cancelar, aberto, detalhe }} />;
 }
 
 /** Link secreto da página com fotos e referências de cada pedido visível (pedido_token). */
@@ -47,10 +52,11 @@ function useLinksPedidos(ids: string[]) {
   return new Map(ids.map((id, n) => [id, qs[n]?.data ? linkPedidoPublico(qs[n].data as string) : null]));
 }
 
-function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, mudar, cancelar, aberto, detalhe }: {
+function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, mudar, entregar, cancelar, aberto, detalhe }: {
   lista: PedidoResumo[]; visiveis: PedidoResumo[]; aba: typeof GRUPOS[number]; setAba: (g: typeof GRUPOS[number]) => void;
   setCancelar: (p: PedidoResumo | null) => void; setAberto: (p: PedidoResumo | null) => void;
   mudar: { isPending: boolean; mutate: (v: { id: string; status: string }) => void };
+  entregar: { isPending: boolean; mutate: (id: string) => void };
   cancelar: PedidoResumo | null; aberto: PedidoResumo | null;
   detalhe: { isLoading: boolean; isError: boolean; error: unknown; data: Awaited<ReturnType<typeof detalhePedido>> | null | undefined };
 }) {
@@ -73,7 +79,7 @@ function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, mu
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3"><div className="flex min-w-0 items-start gap-3"><span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-secondary text-xl font-semibold text-secondary-foreground">{p.customer_name.trim().slice(0, 1).toUpperCase()}</span><div className="min-w-0"><h3 className="break-words text-xl font-semibold leading-snug">{p.customer_name}</h3><span className="mt-1 block text-base text-muted-foreground">{p.code}</span></div></div>
           {!["concluido", "cancelado"].includes(p.status) && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="size-12 shrink-0" title="Mais ações" aria-label={`Mais ações do pedido ${p.code}`}><MoreHorizontal /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem className="min-h-12 text-lg text-destructive" onSelect={() => setCancelar(p)}><XCircle aria-hidden />Cancelar pedido</DropdownMenuItem></DropdownMenuContent></DropdownMenu>}
         </div>
-        <div className="mt-5 flex flex-wrap items-center gap-2"><span className="rounded bg-secondary px-3 py-1.5 text-base font-medium text-secondary-foreground">{p.payment_status === "pago" ? "Pago" : SITUACAO_PEDIDO[p.status]?.rotulo ?? p.status}</span>{!["Pagos", "Cancelados"].includes(grupo(p)) && <span className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-base font-medium ${cor}`}><Clock3 aria-hidden className="size-4" />Há {dias} {dias === 1 ? "dia" : "dias"}</span>}</div>
+        <div className="mt-5 flex flex-wrap items-center gap-2"><span className="rounded bg-secondary px-3 py-1.5 text-base font-medium text-secondary-foreground">{p.payment_status === "pago" ? "Pago" : SITUACAO_PEDIDO[p.status]?.rotulo ?? p.status}</span>{!["Pagos", "Cancelados"].includes(grupo(p)) && <span className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-base font-medium ${cor}`}><Clock3 aria-hidden className="size-4" />Há {dias} {dias === 1 ? "dia" : "dias"}</span>}{p.channel === "vitrine" && <span className="rounded bg-primary/15 px-3 py-1.5 text-base font-medium text-primary">Vendido pela vitrine</span>}{p.delivery_status === "entregue" && <span className="rounded bg-success/15 px-3 py-1.5 text-base font-medium text-success">Entregue</span>}</div>
         <div className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3"><div className="min-w-0"><span className="text-base text-muted-foreground">Valor do pedido</span><strong className="mt-1 block break-all text-3xl font-semibold tabular-nums">{brl(Number(p.subtotal_cents))}</strong></div><span className="inline-flex items-center gap-2 pb-1 text-base text-muted-foreground"><Package aria-hidden className="size-4" />{p.items_count} {Number(p.items_count) === 1 ? "peça" : "peças"}</span></div>
         <span className="mt-4 flex items-center gap-2 text-base text-muted-foreground"><CalendarDays aria-hidden className="size-4" />{new Date(p.created_at).toLocaleDateString("pt-BR")}</span>
         </div>
@@ -82,6 +88,7 @@ function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, mu
           {p.status === "em_atendimento" && <Button className="h-auto min-h-12 justify-between px-4 py-3" disabled={mudar.isPending} onClick={() => mudar.mutate({ id: p.id, status: "aguardando_pagamento" })}>Combinar pagamento<ArrowRight aria-hidden /></Button>}
           <div className={`grid gap-2 ${whats ? "sm:grid-cols-[minmax(0,1fr)_auto]" : "grid-cols-1"}`}><Button variant="outline" className="h-auto min-h-12 min-w-0 whitespace-normal px-3 py-3 shadow-none" onClick={() => setAberto(p)}><ShoppingBag aria-hidden />Ver peças e pagamento</Button><Button asChild variant="outline" className="h-auto min-h-12 min-w-0 whitespace-normal px-3 py-3 shadow-none"><Link to="/consultora-garantia/$id" params={{ id: p.id }} target="_blank"><FileText aria-hidden />Comprovante e garantia</Link></Button>
           {whats && <Button asChild variant="ghost" className="h-auto min-h-12 px-3 py-3"><a href={whats} target="_blank" rel="noreferrer"><MessageCircle aria-hidden />WhatsApp</a></Button>}</div>
+          {p.payment_status === "pago" && p.status !== "cancelado" && p.delivery_status !== "entregue" && <Button className="h-auto min-h-12 justify-between px-4 py-3" disabled={entregar.isPending} onClick={() => entregar.mutate(p.id)}>{p.channel === "vitrine" ? "Pago pela vitrine · marcar como entregue" : "Marcar como entregue"}<CheckCircle2 aria-hidden /></Button>}
           {p.payment_status === "pago" && p.status !== "cancelado" && <AbrirPosVenda pedido={p.id} />}
         </div>
       </li>;

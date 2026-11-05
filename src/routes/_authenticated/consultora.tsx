@@ -47,9 +47,10 @@ import { clientesQuery, ganhosQuery, pedidosQuery } from "@/lib/consultora-queri
 import { estadoAceite } from "@/lib/consultora-progresso";
 import { FinanceiroFamilia } from "@/components/familia/FinanceiroFamilia";
 import { HistoricoVendas } from "@/components/consultora/HistoricoVendas";
+import { Vendidos } from "@/components/consultora/Vendidos";
 const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "biblioteca", "financeiro", "vendas", "familia", "mais", "novo", "jornada", "liga"];
+const ABAS_VALIDAS: AbaApp[] = ["inicio", "clientes", "pedidos", "maleta", "vitrine", "historico", "indicacoes", "biblioteca", "financeiro", "vendas", "vendidos", "familia", "mais", "novo", "jornada", "liga"];
 const str = (v: unknown) => (typeof v === "string" && v.length > 0 && v.length < 200 ? v : undefined);
 
 export const Route = createFileRoute("/_authenticated/consultora")({
@@ -577,7 +578,7 @@ function AreaConsultoraLiberada() {
   const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
   const aba = navImediata.aba ?? "inicio";
-  const ajuda = aba === "indicacoes" || aba === "biblioteca" || aba === "familia" ? "inicio" : aba === "historico" || aba === "financeiro" || aba === "vendas" ? "maleta" : aba === "novo" ? "pedidos" : aba === "jornada" ? "clientes" : aba === "liga" ? "inicio" : aba;
+  const ajuda = aba === "indicacoes" || aba === "biblioteca" || aba === "familia" ? "inicio" : aba === "historico" || aba === "financeiro" || aba === "vendas" || aba === "vendidos" ? "maleta" : aba === "novo" ? "pedidos" : aba === "jornada" ? "clientes" : aba === "liga" ? "inicio" : aba;
 
   const seletorMaleta = abertas.length > 1 && (
     <div role="radiogroup" aria-label="Maleta em uso" className="mb-5 grid gap-2">
@@ -615,6 +616,7 @@ function AreaConsultoraLiberada() {
       {aba === "indicacoes" && (<><Topo titulo="Minhas indicadas" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Indicacoes /></>)}
       {aba === "financeiro" && (<><Topo titulo="Meu financeiro" ajuda="maleta" voltar={() => ir({ aba: "mais" })} /><MeuFinanceiro verMaleta={() => ir({ aba: "maleta" })} /></>)}
       {aba === "vendas" && (<><Topo titulo="Histórico de vendas" ajuda="maleta" voltar={() => ir({ aba: "mais" })} /><HistoricoVendas /></>)}
+      {aba === "vendidos" && (<><Topo titulo="Vendidos" ajuda="pedidos" voltar={() => ir({ aba: "mais" })} /><Vendidos /></>)}
       {aba === "familia" && (<><Topo titulo="Financeiro da família" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><div className="max-w-5xl"><FinanceiroFamilia /></div></>)}
       {aba === "biblioteca" && (<><Topo titulo="Biblioteca LARDAN" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Biblioteca /></>)}
       {aba === "jornada" && <Clientes nav={navImediata} ir={ir} jornada />}

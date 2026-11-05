@@ -111,7 +111,8 @@ describe("proteções adicionais", () => {
   });
   test("cópia não aceita caminho de outra pessoa", async () => {
     const t = tok(); await avulso(t, exigir(cons.partyId), "signed");
-    expect((await servico(`select public.assinatura_arquivo_salvar($1,$2,'hash')::text r`, [t, `${outra.partyId}/${t}.pdf`])).ok).toBe(false);
+    try { expect((await servico(`select public.assinatura_arquivo_salvar($1,$2,'hash')::text r`, [t, `${outra.partyId}/${t}.pdf`])).ok).toBe(false); }
+    finally { await adm.unsafe(`delete from public.assinaturas_digitais where doc_token=$1`, [t]); }
   });
 });
 

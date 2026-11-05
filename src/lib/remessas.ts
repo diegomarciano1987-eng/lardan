@@ -67,11 +67,12 @@ export const abrirMaletaNaRemessa = (remessa: string, consultora: string) =>
   rpc<{ cycle_id: string; repetida?: boolean }>("remessa_abrir_maleta", { _remessa: remessa, _consultora: consultora });
 
 export const consultorasDaPraca = async (praca: string, termo: string) => {
-  const linhas = await rpc<{ party_id: string; display_name: string }[]>("praca_consultoras", {
+  // 0224: busca por nome (por partes), código atual/antigo/legado ou CPF.
+  const linhas = await rpc<{ party_id: string; display_name: string; code: string | null; cpf: string | null }[]>("praca_consultoras_busca", {
     _praca: praca,
     _search: termo.trim() || null,
   });
-  return linhas.map((p) => ({ value: p.party_id, label: p.display_name }));
+  return linhas.map((p) => ({ value: p.party_id, label: rotuloConsultora(p), ...(p.cpf ? { hint: `CPF ${p.cpf}` } : {}) }));
 };
 
 export const dataBR = (d: string | null) => (d ? d.slice(0, 10).split("-").reverse().join("/") : "—");
@@ -115,10 +116,14 @@ export const reabrirRemessa = (id: string, motivo: string) =>
 /** 0184: consultoras ainda sem praça (do representante da remessa) para trazer à praça da remessa. */
 export const consultorasSemPraca = async (remessa: string, termo: string) => {
   if (termo.trim().length < 2) return [];
-  const l = await rpc<{ party_id: string; display_name: string; representante: string | null }[]>("remessa_consultoras_sem_praca", {
+  const l = await rpc<{ party_id: string; display_name: string; representante: string | null; code: string | null; cpf: string | null }[]>("remessa_consultoras_sem_praca_busca", {
     _remessa: remessa, _search: termo.trim(),
   });
-  return l.map((p) => ({ value: p.party_id, label: p.display_name, hint: p.representante ? `Rep. ${p.representante} · sem praça` : "Sem praça" }));
+  return l.map((p) => ({ value: p.party_id, label: rotuloConsultora(p), hint: [p.cpf ? `CPF ${p.cpf}` : null, p.representante ? `Rep. ${p.representante} · sem praça` : "Sem praça"].filter(Boolean).join(" · ") }));
 };
 export const vincularConsultoraRemessa = (remessa: string, consultora: string) =>
   rpc<{ repetida: boolean }>("remessa_vincular_consultora", { _remessa: remessa, _consultora: consultora });
+
+/** Rótulo padrão de consultora nos seletores: "[Cód. 1234] Nome". */
+export const rotuloConsultora = (p: { display_name: string; code: string | null }) =>
+  p.code ? `[Cód. ${p.code}] ${p.display_name}` : p.display_name;

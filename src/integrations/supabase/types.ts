@@ -18881,6 +18881,16 @@ export type Database = {
       }
       consultora_pos_venda_prazo: { Args: { _order: string }; Returns: Json }
       consultora_rep_pela_praca: { Args: { _praca: string }; Returns: string }
+      consultora_termo_casa: {
+        Args: {
+          _code: string
+          _doc: string
+          _nome: string
+          _party: string
+          _termo: string
+        }
+        Returns: boolean
+      }
       consultora_vendido_ciclo: { Args: { _cycle: string }; Returns: Json }
       consultora_vendidos: {
         Args: { _ate?: string; _de?: string }
@@ -18916,6 +18926,7 @@ export type Database = {
         Returns: string
       }
       cpf_is_valid: { Args: { d: string }; Returns: boolean }
+      cpf_mascarado: { Args: { _doc: string }; Returns: string }
       create_stock_reservation: {
         Args: {
           _expires_at: string
@@ -20655,6 +20666,15 @@ export type Database = {
           party_id: string
         }[]
       }
+      praca_consultoras_busca: {
+        Args: { _praca: string; _search: string }
+        Returns: {
+          code: string
+          cpf: string
+          display_name: string
+          party_id: string
+        }[]
+      }
       praca_criar: {
         Args: { _nome: string }
         Returns: {
@@ -20960,6 +20980,16 @@ export type Database = {
       remessa_consultoras_sem_praca: {
         Args: { _remessa: string; _search?: string }
         Returns: {
+          display_name: string
+          party_id: string
+          representante: string
+        }[]
+      }
+      remessa_consultoras_sem_praca_busca: {
+        Args: { _remessa: string; _search: string }
+        Returns: {
+          code: string
+          cpf: string
           display_name: string
           party_id: string
           representante: string

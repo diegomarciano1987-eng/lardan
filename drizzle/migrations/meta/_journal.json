@@ -1569,6 +1569,13 @@
       "when": 1793904689842,
       "tag": "0223_nfe_producao_f",
       "breakpoints": true
+    },
+    {
+      "idx": 224,
+      "version": "7",
+      "when": 1793906178487,
+      "tag": "0224_busca_consultora_codigo_cpf",
+      "breakpoints": true
     }
   ]
 }

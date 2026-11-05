@@ -12,6 +12,7 @@
  * Fail-closed: sem credencial, nada é enviado e nada é simulado.
  */
 export type AmbienteCorreios = "homologacao" | "producao";
+export type JsonCorreios = null | boolean | number | string | JsonCorreios[] | { [key: string]: JsonCorreios };
 
 export function configCorreios() {
   const ambiente: AmbienteCorreios = process.env["CORREIOS_AMBIENTE"] === "producao" ? "producao" : "homologacao";
@@ -35,12 +36,13 @@ export class ErroCorreios extends Error {
 }
 
 // token em memória do servidor (a API limita a 3 pedidos de token por segundo)
-let cache: { token: string; expira: number; ambiente: string } | null = null;
+let cache: { token: string; expira: number; identidade: string } | null = null;
 
 export async function token(): Promise<{ token: string; expiraEm: string | null; resposta: unknown }> {
   const c = configCorreios();
   if (!c.pronto) throw new ErroCorreios(`Correios não configurado: falta ${c.faltando.join(", ")}.`);
-  if (cache && cache.ambiente === c.ambiente && cache.expira - Date.now() > 5 * 60_000) return { token: cache.token, expiraEm: new Date(cache.expira).toISOString(), resposta: null };
+  const identidade = JSON.stringify([c.ambiente, c.usuario, c.codigo, c.cartao, c.contrato, c.dr]);
+  if (cache && cache.identidade === identidade && cache.expira - Date.now() > 5 * 60_000) return { token: cache.token, expiraEm: new Date(cache.expira).toISOString(), resposta: null };
   const r = await fetch(`${c.base}/token/v1/autentica/cartaopostagem`, {
     signal: AbortSignal.timeout(15000),
     method: "POST",
@@ -50,19 +52,19 @@ export async function token(): Promise<{ token: string; expiraEm: string | null;
   const dados = await lerJson(r);
   if (!r.ok) throw new ErroCorreios(`Autenticação recusada pelos Correios (${r.status}). Confira as credenciais e o contrato.`, r.status);
   const d = dados as { token?: string; expiraEm?: string };
-  if (!d.token) throw new ErroCorreios("A resposta do token veio sem token.", r.status);
-  cache = { token: d.token, expira: d.expiraEm ? Date.parse(d.expiraEm) : Date.now() + 50 * 60_000, ambiente: c.ambiente };
+  if (!d?.token) throw new ErroCorreios("A resposta do token veio sem token.", r.status);
+  cache = { token: d.token, expira: d.expiraEm ? Date.parse(d.expiraEm) : Date.now() + 50 * 60_000, identidade };
   // devolve a resposta sem o token (para mostrar contrato/cartão/DR na tela)
   const semToken = { expiraEm: d.expiraEm ?? null };
   return { token: d.token, expiraEm: d.expiraEm ?? null, resposta: semToken };
 }
 
-async function lerJson(r: Response): Promise<unknown> {
+async function lerJson(r: Response): Promise<JsonCorreios> {
   const t = await r.text();
   try { return t ? JSON.parse(t) : null; } catch { return { texto: t.slice(0, 500) }; }
 }
 /** Chamada autenticada; devolve status e corpo sem lançar (o diagnóstico mostra tudo). */
-export async function chamar(metodo: "GET" | "POST", caminho: string, corpo?: unknown): Promise<{ http: number; dados: unknown }> {
+export async function chamar(metodo: "GET" | "POST", caminho: string, corpo?: unknown): Promise<{ http: number; dados: JsonCorreios }> {
   const c = configCorreios();
   const { token: t } = await token();
   const ctrl = new AbortController();

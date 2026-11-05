@@ -60,7 +60,7 @@ export function CorreiosDiagnostico({ master }: { master: boolean }) {
             <input className="admin-input w-48" value={objeto} onChange={(e) => setObjeto(e.target.value)} placeholder="AB123456789BR" /></label>
           <Button type="button" variant="outline" disabled={rastro.isPending} onClick={() => rastro.mutate()}>Rastrear</Button>
         </div>
-        {rastro.data && <pre className="max-h-72 overflow-auto rounded-md bg-surface-muted p-3 text-xs">{json(rastro.data)}</pre>}
+        {rastro.data != null && <pre className="max-h-72 overflow-auto rounded-md bg-surface-muted p-3 text-xs">{json(rastro.data)}</pre>}
       </div>
     </Panel>
   );

@@ -44,18 +44,18 @@ export const correiosDiagnostico = createServerFn({ method: "POST" })
       codigo: String(s["codigo"] ?? s["codigoServico"] ?? s["coServico"] ?? ""),
       descricao: String(s["descricao"] ?? s["descricaoServico"] ?? s["nome"] ?? ""),
     })).filter((s) => s.codigo);
-    r["servicos"] = { http: sv.http, total: servicos.length, lista: servicos, bruto: servicos.length ? undefined : sv.dados };
+    r["servicos"] = { http: sv.http, total: servicos.length, lista: servicos };
 
     // PAC: os do contrato com "PAC" no nome + os pedidos na tela (padrões conhecidos 03298 PAC contrato, 03301 PAC reverso)
     const pac = servicos.filter((s) => /PAC/i.test(s.descricao)).map((s) => s.codigo);
-    const testar = [...new Set([...data.codigos, ...pac, ...(pac.length ? [] : ["03298", "03301"])])].slice(0, 6);
+    const testar = [...new Set([...data.codigos, ...pac])].slice(0, 6);
     const precos: Record<string, unknown> = {};
     for (const cod of testar) {
       const [p, z] = await Promise.all([api.preco(cod, data.cepDestino), api.prazo(cod, data.cepDestino)]);
       precos[cod] = { descricao: servicos.find((s) => s.codigo === cod)?.descricao ?? null, preco: p, prazo: z };
     }
     r["testes"] = precos;
-    const ok = sv.http >= 200 && sv.http < 300 && Object.values(precos).every((v) => {
+    const ok = testar.length > 0 && sv.http >= 200 && sv.http < 300 && Object.values(precos).every((v) => {
       const t = v as { preco: { http: number }; prazo: { http: number } };
       return t.preco.http >= 200 && t.preco.http < 300 && t.prazo.http >= 200 && t.prazo.http < 300;
     });

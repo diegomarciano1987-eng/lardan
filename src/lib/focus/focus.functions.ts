@@ -163,19 +163,9 @@ export const focusEmitirTeste = createServerFn({ method: "POST" })
     }
   });
 
-interface DadosMaleta {
-  destinatario: import("./nfe").DestinatarioNfe & { party_id: string };
-  itens: DadosBanco["itens"];
-  pendencias: string[];
-  composicao_versao: number;
-  remessa: { numero: number | null; kit: number | null };
-  nota_viva: { ref: string; status: string } | null;
-}
-
 /**
- * NF-e de remessa consignada da MALETA conferida (homologação).
- * Consultora e peças vêm da maleta (composição conferida, preço gravado nela);
- * o banco trava a maleta e recusa segunda nota viva.
+ * NF-e de remessa da MALETA conferida. Ambiente pelo banco: homologação até o
+ * Master ligar a produção; depois produção (maleta piloto ou todas).
  */
 export const focusEmitirRemessaMaleta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -186,38 +176,78 @@ export const focusEmitirRemessaMaleta = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
     await exigir(c, "emitir");
-    const { montarNfe, novaReferencia } = await import("./nfe");
-    const { emitirNfe, ErroFocus } = await import("./api.server");
-    const em = await emitente(c);
+    const { emitirRemessaCiclo, rpcCom } = await import("./emissao.server");
+    return emitirRemessaCiclo(rpcCom(c.supabase), data.cycleId, c.userId);
+  });
 
-    const dados = await rpcUsuario<DadosMaleta>(c, "fiscal_focus_maleta_dados", { _cycle: data.cycleId });
-    if (dados.nota_viva) throw new Error("Esta maleta já tem nota de remessa. Consulte a nota em vez de emitir outra.");
-    if (dados.pendencias.length) throw new Error(`Cadastro incompleto: ${dados.pendencias.join("; ")}.`);
+/** Notas do ACERTO da maleta encerrada: devolução, venda e perda ligadas à remessa autorizada. */
+export const focusEmitirAcertoMaleta = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { cycleId: string }) => {
+    if (!d?.cycleId || !/^[0-9a-f-]{36}$/i.test(d.cycleId)) throw new Error("Maleta inválida.");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    await exigir(c, "emitir");
+    const { emitirAcertoCiclo, rpcCom } = await import("./emissao.server");
+    return emitirAcertoCiclo(rpcCom(c.supabase), data.cycleId, c.userId);
+  });
 
-    const nfe = montarNfe({
-      operacao: "remessa",
-      ambiente: AMBIENTE,
-      cnpjEmitente: em.cnpj,
-      ufEmitente: em.uf,
-      destinatario: dados.destinatario,
-      itens: dados.itens.map((i) => ({ codigo: i.codigo, descricao: i.descricao, ncm: i.ncm, quantidade: i.quantidade, preco_varejo_cents: i.preco_varejo_cents })),
-      remessa: { numero: dados.remessa.numero ?? "-", kit: dados.remessa.kit ?? 1 },
-      origem: null,
-    });
-    const ref = novaReferencia("lardan-hom-mal", "remessa");
-    await rpcServidor("fiscal_focus_envio_maleta_registrar", {
-      _ref: ref, _ambiente: AMBIENTE, _cycle: data.cycleId, _party: dados.destinatario.party_id,
-      _composicao_versao: dados.composicao_versao, _payload: nfe, _ator: c.userId,
-    });
-    try {
-      const r = await emitirNfe(AMBIENTE, ref, nfe);
-      const salvo = await rpcServidor<{ status: string }>("fiscal_focus_retorno", { _ref: ref, _fonte: "envio", _resposta: r.dados ?? {} });
-      return { ref, status: salvo.status, mensagem: r.dados?.mensagem_sefaz ?? r.dados?.mensagem ?? null, erros: r.dados?.erros ?? null };
-    } catch (e) {
-      const msg = e instanceof ErroFocus ? e.message : "Falha ao enviar à Focus.";
-      await rpcServidor("fiscal_focus_retorno", { _ref: ref, _fonte: "envio", _resposta: { status: "erro_envio", mensagem: msg } });
-      throw new Error(msg);
+/** Painel da emissão real (sem segredos): estado no banco + se o token de produção está no Lovable. */
+export const focusProducaoEstado = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const c = context as unknown as Ctx;
+    await exigir(c, "ver");
+    const { avaliarConfigFocus } = await import("./api.server");
+    const estado = await rpcUsuario<Record<string, unknown>>(c, "fiscal_producao_estado");
+    const cfg = avaliarConfigFocus("producao");
+    return { ...estado, tokenProducao: cfg.pronto, faltando: cfg.faltando, podeEmitir: await rpcUsuario<boolean>(c, "fiscal_focus_pode", { _acao: "emitir" }) };
+  });
+
+/** Master liga/desliga a produção e define piloto, liberação geral, automático e e-mail de cópia. */
+export const focusProducaoDefinir = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ligar: boolean; pilotoKit: string | null; todas: boolean; automatico: boolean; email: string | null; confirmacao?: string | null }) => {
+    if (typeof d?.ligar !== "boolean") throw new Error("Pedido inválido.");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    await exigir(c, "emitir");
+    if (data.ligar) {
+      const { avaliarConfigFocus } = await import("./api.server");
+      const cfg = avaliarConfigFocus("producao");
+      if (!cfg.pronto) throw new Error(`Produção da Focus não configurada no Lovable: falta ${cfg.faltando.join(", ")}.`);
     }
+    return rpcUsuario<Record<string, unknown>>(c, "fiscal_producao_definir", {
+      _ligar: data.ligar, _piloto_kit: data.pilotoKit, _todas: data.todas, _automatico: data.automatico,
+      _email: data.email, _confirmacao: data.confirmacao ?? null,
+    });
+  });
+
+/** Manda o XML e o DANFE de uma nota (teste ou real) para o e-mail do escritório. Só Master. */
+export const focusEnviarEscritorio = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ref: string; email?: string | null }) => {
+    if (!d?.ref || !/^[A-Za-z0-9_-]{6,60}$/.test(d.ref)) throw new Error("Referência inválida.");
+    if (d.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) throw new Error("E-mail inválido.");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    await exigir(c, "emitir");
+    const { enviarEmailNfe } = await import("./api.server");
+    const env = await rpcServidor<EnvioBanco | null>("fiscal_focus_envio", { _ref: data.ref });
+    if (!env) throw new Error("Nota não encontrada.");
+    if (!["autorizado", "cancelado"].includes(env.status)) throw new Error("Só nota autorizada ou cancelada pode ser enviada.");
+    const estado = await rpcUsuario<{ email_copia?: string | null }>(c, "fiscal_producao_estado");
+    const email = data.email || estado.email_copia;
+    if (!email) throw new Error("Defina o e-mail do escritório no painel da emissão real.");
+    await enviarEmailNfe(env.ambiente, data.ref, [email]);
+    if (env.ambiente === "producao") await rpcServidor("fiscal_focus_email_marcar", { _ref: data.ref, _ok: true, _email: email });
+    return { email };
   });
 
 /** Consulta a Focus e atualiza a nota. */
@@ -296,5 +326,9 @@ export const focusRegistrarAviso = createServerFn({ method: "POST" })
     await exigir(c, "emitir");
     const { registrarAviso } = await import("./api.server");
     const em = await emitente(c);
-    return registrarAviso(AMBIENTE, em.cnpj);
+    const { avaliarConfigFocus } = await import("./api.server");
+    const hom = await registrarAviso(AMBIENTE, em.cnpj);
+    // produção (0216): o aviso também precisa existir no ambiente real
+    const prod = avaliarConfigFocus("producao").pronto ? await registrarAviso("producao", em.cnpj) : null;
+    return { ...hom, producao: prod };
   });

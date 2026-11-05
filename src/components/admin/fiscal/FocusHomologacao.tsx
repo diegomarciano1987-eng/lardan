@@ -17,6 +17,7 @@ import {
   focusCancelar,
   focusConsultar,
   focusEmitirTeste,
+  focusEnviarEscritorio,
   focusEstado,
   focusRegistrarAviso,
 } from "@/lib/focus/focus.functions";
@@ -301,6 +302,19 @@ export function FocusHomologacao() {
   const consultar = useServerFn(focusConsultar);
   const arquivos = useServerFn(focusArquivos);
   const registrar = useServerFn(focusRegistrarAviso);
+  const enviarEscritorio = useServerFn(focusEnviarEscritorio);
+  const [enviando, setEnviando] = React.useState<string | null>(null);
+  const mandarEscritorio = async (ref: string) => {
+    setEnviando(ref);
+    try {
+      const r = await enviarEscritorio({ data: { ref } });
+      toast.success(`XML e DANFE enviados para ${r.email}.`);
+    } catch (e) {
+      toast.error(msgErro(e));
+    } finally {
+      setEnviando(null);
+    }
+  };
 
   const estado = useQuery({ queryKey: ["focus", "estado"], queryFn: () => estadoFn(), retry: false });
   const envios = useQuery({
@@ -394,6 +408,7 @@ export function FocusHomologacao() {
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="font-semibold text-ledger-text">
                         {OPERACAO[e.operacao]} {e.numero ? `nº ${e.numero} série ${e.serie ?? "—"}` : ""} · {e.consultora ?? "—"}
+                        {e.ambiente === "producao" && <span className="ml-2 rounded-full bg-success/15 px-2 py-0.5 text-xs text-success">NOTA REAL</span>}
                       </p>
                       <StatusBadge tone={st.tom}>{st.rotulo}</StatusBadge>
                     </div>
@@ -417,6 +432,12 @@ export function FocusHomologacao() {
                           <button type="button" className="admin-btn" onClick={() => void abrir(e.ref, "danfe")}><FileText aria-hidden className="size-4" /> DANFE</button>
                           <button type="button" className="admin-btn" onClick={() => void abrir(e.ref, "xml")}><FileText aria-hidden className="size-4" /> XML</button>
                         </>
+                      )}
+                      {s.podeEmitir && (e.status === "autorizado" || e.status === "cancelado") && (
+                        <button type="button" className="admin-btn" disabled={enviando !== null} onClick={() => void mandarEscritorio(e.ref)}
+                          title="Pede à Focus que mande o XML e o DANFE desta nota para o e-mail do escritório.">
+                          <FileText aria-hidden className="size-4" /> {enviando === e.ref ? "Enviando…" : "Enviar ao escritório"}
+                        </button>
                       )}
                     </div>
                     <AcoesRemessa envio={e} aoEmitir={recarregar} podeEmitir={s.podeEmitir} />

@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { reprocessarAssinados, situacaoClicksign } from "@/lib/clicksign.functions";
 import { FiscalProntidao } from "@/components/admin/FiscalProntidao";
 import { FocusHomologacao } from "@/components/admin/fiscal/FocusHomologacao";
+import { ProducaoFiscal } from "@/components/admin/fiscal/ProducaoFiscal";
 import { can, useCapabilities } from "@/lib/capabilities";
 
 export const Route = createFileRoute("/_authenticated/admin/integracoes")({
@@ -58,6 +59,7 @@ function Integracoes() {
   return (
     <div className="space-y-6">
       {can(caps, "finance.view") && <FiscalProntidao />}
+      {can(caps, "finance.view") && <ProducaoFiscal />}
       {can(caps, "finance.view") && <FocusHomologacao />}
       <Panel title="Clicksign — termo de recebimento da maleta">
         {!s ? (

@@ -117,7 +117,7 @@ describe("3. registro e uma nota viva", () => {
   test("só servidor, só homologação, consultora/peças conferem, segunda nota viva recusada", async () => {
     expect((await rpc(master, "fiscal_focus_envio_maleta_registrar", { _ref: REF, _ambiente: "homologacao", _cycle: ciclo,
       _party: cons.partyId, _composicao_versao: 1, _payload: {}, _ator: master.uid })).ok).toBe(false);
-    expect((await registrar(`${REF}-p`, 1, "producao")).erro).toContain("homologação");
+    expect((await registrar(`${REF}-p`, 1, "producao")).erro).toContain("diferente do configurado"); // 0216: produção só quando o Master liga
     expect((await registrar(`${REF}-v`, 2)).erro).toContain("peças da maleta mudaram");
     expect((await registrar(`${REF}-c`, 1, "homologacao", master.partyId)).erro).toContain("consultora da maleta mudou");
     expect((await registrar(REF, 1)).erro).toBeNull();

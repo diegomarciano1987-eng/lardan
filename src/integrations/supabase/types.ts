@@ -19540,6 +19540,18 @@ export type Database = {
       }
       fiscal_peca_codigo: { Args: { _variant: string }; Returns: string }
       fiscal_peca_descricao: { Args: { _variant: string }; Returns: string }
+      fiscal_producao_definir: {
+        Args: {
+          _automatico: boolean
+          _confirmacao?: string
+          _email: string
+          _ligar: boolean
+          _piloto_kit: string
+          _todas: boolean
+        }
+        Returns: Json
+      }
+      fiscal_producao_estado: { Args: never; Returns: Json }
       fiscal_prontidao: { Args: never; Returns: Json }
       fiscal_roteiro_observado: { Args: never; Returns: Json }
       gen_protocol: { Args: { prefix: string }; Returns: string }

@@ -7,6 +7,7 @@ import { brl, dataBR, hojeSP, cobConfig, simulacoes, salvarSimulacao, statusSimu
 import { abrirComprovante } from "@/lib/cobranca.functions";
 import { calcularEncargos, montarPlano, addMeses } from "@/lib/cobranca-acordo";
 import { ComprovanteDialog } from "./ComprovanteDialog";
+import { TermoConfissao } from "./TermoConfissao";
 import { AcordoAsaas } from "./AcordoAsaas";
 
 const iso = (d?: Date) => (d ? d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }) : "");
@@ -147,6 +148,7 @@ export function SimuladorAcordo({ partyId, parcelas }: { partyId: string; parcel
               </span>
             </div>
             {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <AcordoAsaas simId={s.id} temEntrada={Number(s.entrada_cents) > 0} />}
+            {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <TermoConfissao simId={s.id} />}
             {s.plano.length > 0 && <p className="text-xs text-ledger-muted">{s.plano.map((p) => `${p.numero}ª ${dataBR(p.data)} ${brl(p.valor_cents)}`).join(" · ")}</p>}
             {(comps.data ?? []).filter((c) => c.simulacao_id === s.id).map((c) => (
               <p key={c.id} className="text-xs">Comprovante {brl(Number(c.valor_cents))} em {dataBR(c.data_pagamento)}{c.banco && ` (${c.banco})`} · {c.status === "aguardando_baixa" ? "aguarda baixa no financeiro" : c.status} · <button className="underline" onClick={() => verComp(c.id)}>ver arquivo</button></p>

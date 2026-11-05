@@ -3598,6 +3598,7 @@ export type Database = {
           juros_mes_pct: number
           multa_pct: number
           observacao: string | null
+          origem: string
           parcelas: number
           party_id: string
           plano: Json
@@ -3625,6 +3626,7 @@ export type Database = {
           juros_mes_pct: number
           multa_pct: number
           observacao?: string | null
+          origem?: string
           parcelas?: number
           party_id: string
           plano?: Json
@@ -3652,6 +3654,7 @@ export type Database = {
           juros_mes_pct?: number
           multa_pct?: number
           observacao?: string | null
+          origem?: string
           parcelas?: number
           party_id?: string
           plano?: Json
@@ -18866,6 +18869,20 @@ export type Database = {
         Returns: Json
       }
       cob_fiado_smalldata_desfazer: { Args: { _lote: string }; Returns: Json }
+      cob_historica_buscar: {
+        Args: { _corte?: string; _termo: string }
+        Returns: string[]
+      }
+      cob_historica_consolidar: {
+        Args: {
+          _aplicar?: boolean
+          _corte?: string
+          _parties: string[]
+          _vencimento: string
+        }
+        Returns: Json
+      }
+      cob_historica_lista: { Args: { _corte?: string }; Returns: Json }
       cob_judicial_acordo_salvar: {
         Args: { _d: Json; _party: string }
         Returns: string

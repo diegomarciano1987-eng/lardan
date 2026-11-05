@@ -100,3 +100,10 @@
 - [x] 7 testes locais passaram, compilação OK; painel aberto como Diego e clique real em Testar conexão confirmado. Provas: docs/provas-correios-0228.md.
 - [ ] Conexão aceita pelo contrato: Correios retornou 401 na autenticação; preço, prazo e rastreio ainda não verificados, dependem de credencial/ambiente aceitos.
 - [ ] Publicação depende de autorização de Diego.
+
+## Cobrança — plano 3° a 8° (por etapas)
+- [x] Etapa A: importar planilha do jurídico (prévia + aplicar Master, aba Processos, alerta 5 dias sem protocolo)
+- [ ] Etapa B: Kanban novo (régua Asaas, negociação, acordo, atrasado com 1 prorrogação, judicial) + KPIs por período
+- [ ] Etapa C: acordo + termo de confissão ZapSign com autenticação avançada
+- [ ] Etapa D: baixa Asaas de faturas → DRE 3.1.1; sugestão 7.1.7 judicial sem baixa automática
+- [ ] Etapa E: cobrança histórica até 2025 consolidada + fatura única em lote

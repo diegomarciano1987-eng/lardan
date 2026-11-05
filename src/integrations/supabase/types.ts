@@ -3334,6 +3334,106 @@ export type Database = {
           },
         ]
       }
+      cob_judicial_processos: {
+        Row: {
+          cidade: string | null
+          cpf: string | null
+          created_at: string
+          fase: string | null
+          id: string
+          importado_por: string | null
+          link_pasta: string | null
+          lote: string
+          nome: string | null
+          numero_processo: string | null
+          origem_chave: string
+          party_id: string | null
+          planilha_id: number | null
+          praca: string | null
+          proxima_acao: string | null
+          responsavel: string | null
+          status: string | null
+          status_citacao: string | null
+          tipo: string | null
+          ultima_atualizacao: string | null
+          updated_at: string
+          valor_bloqueado_cents: number | null
+          valor_causa_cents: number | null
+        }
+        Insert: {
+          cidade?: string | null
+          cpf?: string | null
+          created_at?: string
+          fase?: string | null
+          id?: string
+          importado_por?: string | null
+          link_pasta?: string | null
+          lote: string
+          nome?: string | null
+          numero_processo?: string | null
+          origem_chave: string
+          party_id?: string | null
+          planilha_id?: number | null
+          praca?: string | null
+          proxima_acao?: string | null
+          responsavel?: string | null
+          status?: string | null
+          status_citacao?: string | null
+          tipo?: string | null
+          ultima_atualizacao?: string | null
+          updated_at?: string
+          valor_bloqueado_cents?: number | null
+          valor_causa_cents?: number | null
+        }
+        Update: {
+          cidade?: string | null
+          cpf?: string | null
+          created_at?: string
+          fase?: string | null
+          id?: string
+          importado_por?: string | null
+          link_pasta?: string | null
+          lote?: string
+          nome?: string | null
+          numero_processo?: string | null
+          origem_chave?: string
+          party_id?: string | null
+          planilha_id?: number | null
+          praca?: string | null
+          proxima_acao?: string | null
+          responsavel?: string | null
+          status?: string | null
+          status_citacao?: string | null
+          tipo?: string | null
+          ultima_atualizacao?: string | null
+          updated_at?: string
+          valor_bloqueado_cents?: number | null
+          valor_causa_cents?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cob_judicial_processos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_judicial_processos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cob_judicial_processos_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       cob_pracas: {
         Row: {
           ativo: boolean
@@ -18769,6 +18869,10 @@ export type Database = {
       cob_judicial_estorno_desconto: {
         Args: { _estorno: string; _original: string }
         Returns: undefined
+      }
+      cob_judicial_planilha_importar: {
+        Args: { _aplicar: boolean; _linhas: Json }
+        Returns: Json
       }
       cob_kpis: { Args: never; Returns: Json }
       cob_lembretes: {

@@ -107,4 +107,4 @@
 - [x] Etapa C: termo de confissão ZapSign por acordo (código WhatsApp + selfie + documento); modelo é minuta aguardando revisão do jurídico
 - [x] Etapa D: faturas de venda nascem na 3.1.1; TED judicial sugere 7.1.7 + devedora pelo nº do processo, sem baixa automática (0234, 7 testes isolados)
 - [ ] Conferir com Diego: 3 títulos do PDV sem classificação (R$ 699,50) e 3 cobranças Asaas pagas sem baixa automática
-- [ ] Etapa E: cobrança histórica até 2025 consolidada + fatura única em lote
+- [x] Etapa E: aba Histórica até 2025 (0235/0236): fatura única = acordo de 1 parcela sem juros/desconto, prévia, lote até 200, envio pelo disparo oficial; Judicial/acordo/Asaas aberto ficam de fora; Régua Asaas esconde quem só deve até 2025. 7 testes isolados + 6 unitários; prévia real sem gravar.

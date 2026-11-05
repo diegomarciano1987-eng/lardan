@@ -12,8 +12,8 @@ import { breadcrumbLd, canonical, jsonLdScript, organizationLd, pageMeta, webPag
  * Qualquer mudança de texto aprovada pela marca exige nova versão em
  * src/lib/privacy.ts e nova data de publicação abaixo.
  */
-const PUBLICADO_EM = "2026-10-05";
-const PUBLICADO_EXTENSO = "5 de outubro de 2026";
+export const PUBLICADO_EM = "2026-10-05";
+export const PUBLICADO_EXTENSO = "5 de outubro de 2026";
 
 const TITULO = "Aviso de Privacidade | Lardan Semijoias";
 const DESCRICAO =

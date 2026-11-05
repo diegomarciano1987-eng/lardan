@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Pacote 0228 — documentos assinados (05/11/2026)
-- [ ] Aplicar armazenamento privado e aba de documentos, preservando carteira e segredos existentes.
-- [ ] Validar permissões e cópias em banco isolado; conferir cadastro e importação autenticados.
-- [ ] Publicar após validação e registrar provas e limitações.
+- [x] Aba e armazenamento privado aplicados; carteira preservada, segredos e produção mantidos.
+- [x] 16 testes isolados + 5 transporte passaram; 209 documentos conferidos, 87 vinculados/63 cópias; PDF real HTTP 200 aberto. Provas: docs/provas-documentos-assinados-0228.md.
+- [ ] Publicação solicitada após validação; confirmação depende do serviço de publicação. 122 documentos sem correspondência aguardam conferência humana em Integrações.
 
 ## Pacote 0213 — compra por peça e forma combinada (05/11/2026)
 - [x] Arquivos aplicados e venda_forma confirmada no banco compartilhado; nenhuma venda existente alterada. Botões novos usam Button e ações da foto se acomodam no celular.

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FotoPeca } from "@/components/FotoPeca";
-import { EtiquetaDireta, EtiquetasBusca } from "@/components/admin/EtiquetasImprimir";
+import { EtiquetaComQuantidade, EtiquetasBusca } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -207,7 +207,7 @@ function ProdutosPage() {
       key: "etiquetas",
       header: "Etiquetas",
       render: (r) => (
-        <EtiquetaDireta
+        <EtiquetaComQuantidade
           label={`Imprimir etiqueta de ${r.name}${r.variante ? ` · ${r.variante}` : ""}`}
           origens={[r.variantId ? { variantId: r.variantId } : { productId: r.id }]}
         />

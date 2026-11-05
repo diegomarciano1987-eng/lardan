@@ -14525,6 +14525,230 @@ export type Database = {
         }
         Relationships: []
       }
+      qualidade_trocas: {
+        Row: {
+          aberto_em: string
+          aberto_por: string | null
+          aberto_por_nome: string | null
+          consultora_codigo: string | null
+          consultora_nome: string | null
+          consultora_party_id: string
+          created_at: string
+          dev_nome: string | null
+          dev_produto_legado: number | null
+          dev_referencia: string | null
+          dev_tamanho: string | null
+          dev_valor_cents: number | null
+          dev_variant_id: string | null
+          diferenca_cents: number | null
+          finalizado_em: string | null
+          finalizado_por: string | null
+          finalizado_por_nome: string | null
+          fotos: Json
+          id: string
+          idempotency_key: string | null
+          importado_em: string | null
+          importado_por_nome: string | null
+          legado_id: number | null
+          motivo: string | null
+          novidade_consultora: boolean
+          novidade_lardan: boolean
+          observacao: string | null
+          origem: string
+          parecer: string | null
+          praca_codigo: number | null
+          praca_nome: string | null
+          protocolo: number
+          rep_nome: string | null
+          rep_produto_legado: number | null
+          rep_referencia: string | null
+          rep_tamanho: string | null
+          rep_valor_cents: number | null
+          rep_variant_id: string | null
+          solucao: string | null
+          status: string
+          tipo: string
+          transmissao_em: string | null
+          transmissao_por_nome: string | null
+          updated_at: string
+        }
+        Insert: {
+          aberto_em?: string
+          aberto_por?: string | null
+          aberto_por_nome?: string | null
+          consultora_codigo?: string | null
+          consultora_nome?: string | null
+          consultora_party_id: string
+          created_at?: string
+          dev_nome?: string | null
+          dev_produto_legado?: number | null
+          dev_referencia?: string | null
+          dev_tamanho?: string | null
+          dev_valor_cents?: number | null
+          dev_variant_id?: string | null
+          diferenca_cents?: number | null
+          finalizado_em?: string | null
+          finalizado_por?: string | null
+          finalizado_por_nome?: string | null
+          fotos?: Json
+          id?: string
+          idempotency_key?: string | null
+          importado_em?: string | null
+          importado_por_nome?: string | null
+          legado_id?: number | null
+          motivo?: string | null
+          novidade_consultora?: boolean
+          novidade_lardan?: boolean
+          observacao?: string | null
+          origem: string
+          parecer?: string | null
+          praca_codigo?: number | null
+          praca_nome?: string | null
+          protocolo?: never
+          rep_nome?: string | null
+          rep_produto_legado?: number | null
+          rep_referencia?: string | null
+          rep_tamanho?: string | null
+          rep_valor_cents?: number | null
+          rep_variant_id?: string | null
+          solucao?: string | null
+          status?: string
+          tipo?: string
+          transmissao_em?: string | null
+          transmissao_por_nome?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aberto_em?: string
+          aberto_por?: string | null
+          aberto_por_nome?: string | null
+          consultora_codigo?: string | null
+          consultora_nome?: string | null
+          consultora_party_id?: string
+          created_at?: string
+          dev_nome?: string | null
+          dev_produto_legado?: number | null
+          dev_referencia?: string | null
+          dev_tamanho?: string | null
+          dev_valor_cents?: number | null
+          dev_variant_id?: string | null
+          diferenca_cents?: number | null
+          finalizado_em?: string | null
+          finalizado_por?: string | null
+          finalizado_por_nome?: string | null
+          fotos?: Json
+          id?: string
+          idempotency_key?: string | null
+          importado_em?: string | null
+          importado_por_nome?: string | null
+          legado_id?: number | null
+          motivo?: string | null
+          novidade_consultora?: boolean
+          novidade_lardan?: boolean
+          observacao?: string | null
+          origem?: string
+          parecer?: string | null
+          praca_codigo?: number | null
+          praca_nome?: string | null
+          protocolo?: never
+          rep_nome?: string | null
+          rep_produto_legado?: number | null
+          rep_referencia?: string | null
+          rep_tamanho?: string | null
+          rep_valor_cents?: number | null
+          rep_variant_id?: string | null
+          solucao?: string | null
+          status?: string
+          tipo?: string
+          transmissao_em?: string | null
+          transmissao_por_nome?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualidade_trocas_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualidade_trocas_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualidade_trocas_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "qualidade_trocas_dev_variant_id_fkey"
+            columns: ["dev_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualidade_trocas_rep_variant_id_fkey"
+            columns: ["rep_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qualidade_trocas_eventos: {
+        Row: {
+          actor_id: string | null
+          autor: string
+          autor_nome: string | null
+          created_at: string
+          fotos: Json
+          id: string
+          interno: boolean
+          status: string | null
+          texto: string | null
+          troca_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          autor: string
+          autor_nome?: string | null
+          created_at?: string
+          fotos?: Json
+          id?: string
+          interno?: boolean
+          status?: string | null
+          texto?: string | null
+          troca_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          autor?: string
+          autor_nome?: string | null
+          created_at?: string
+          fotos?: Json
+          id?: string
+          interno?: boolean
+          status?: string | null
+          texto?: string | null
+          troca_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualidade_trocas_eventos_troca_id_fkey"
+            columns: ["troca_id"]
+            isOneToOne: false
+            referencedRelation: "qualidade_trocas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ranking_programs: {
         Row: {
           aprovado_em: string | null
@@ -21281,6 +21505,74 @@ export type Database = {
         Returns: Json
       }
       purge_integration_data: { Args: never; Returns: Json }
+      qualidade_ator_nome: { Args: never; Returns: string }
+      qualidade_fotos_validas: { Args: { _fotos: Json }; Returns: boolean }
+      qualidade_peca: { Args: { _variant: string }; Returns: Json }
+      qualidade_troca_abrir: {
+        Args: {
+          _chave: string
+          _fotos: Json
+          _motivo: string
+          _observacao: string
+          _referencia: string
+          _tamanho: string
+          _tipo: string
+          _variant: string
+        }
+        Returns: Json
+      }
+      qualidade_troca_buscar: {
+        Args: {
+          _limite?: number
+          _offset?: number
+          _status: string
+          _termo: string
+        }
+        Returns: Json
+      }
+      qualidade_troca_criar: {
+        Args: {
+          _chave: string
+          _fotos: Json
+          _motivo: string
+          _nome: string
+          _observacao: string
+          _origem: string
+          _party: string
+          _referencia: string
+          _tamanho: string
+          _tipo: string
+          _valor_cents: number
+          _variant: string
+        }
+        Returns: Json
+      }
+      qualidade_troca_lancar: {
+        Args: {
+          _chave: string
+          _fotos: Json
+          _motivo: string
+          _nome: string
+          _observacao: string
+          _party: string
+          _referencia: string
+          _tamanho: string
+          _tipo: string
+          _valor_cents: number
+          _variant: string
+        }
+        Returns: Json
+      }
+      qualidade_troca_marcar_lida: { Args: { _id: string }; Returns: undefined }
+      qualidade_troca_mensagem: {
+        Args: { _fotos: Json; _id: string; _interno?: boolean; _texto: string }
+        Returns: undefined
+      }
+      qualidade_troca_mover: {
+        Args: { _dados?: Json; _id: string; _status: string; _texto: string }
+        Returns: undefined
+      }
+      qualidade_troca_resumo: { Args: never; Returns: Json }
       rede_auditoria_sem_representante: {
         Args: never
         Returns: {

@@ -16,7 +16,9 @@ import { validarPixGlobal, type PixPedido } from "@/lib/pix-pedido";
 import QRCode from "qrcode";
 
 interface DocConsultora {
-  nome: string;
+  /** null na maleta de abertura (com o representante) */
+  nome: string | null;
+  abertura?: boolean;
   doc: string | null;
   rg: string | null;
   praca: string | null;
@@ -143,12 +145,12 @@ function htmlPromissoria(doc: DocConsultora, valorCents: number, codigoMaleta: s
     <strong>${CREDOR}</strong> inscrita no CNPJ/MF sob nº <strong>${CNPJ}</strong>, ou a sua ordem,
     a quantia de <strong>(${extenso})</strong> em moeda corrente deste país.</p>
     <p>Pagável em <strong>${PRACA_PAGAMENTO}</strong>.</p>
-    <p style="margin-top:18px">Emitente (DEVEDOR): <strong>${doc.nome}</strong></p>
+    <p style="margin-top:18px">Emitente (DEVEDOR): <strong>${doc.nome ?? "________________________________________"}</strong></p>
     <p>Endereço: ${doc.endereco ?? "________________________"}${doc.bairro ? ` - ${doc.bairro}` : ""}</p>
     <p>Cidade/UF: ${doc.cidade ?? "__________"} &nbsp; CEP: ${doc.cep ?? "________"}</p>
-    <p>CPF/MF: ${doc.doc ?? "__________"}</p>
+    <p>CPF/MF: ${doc.doc ?? "____________________"}${doc.abertura ? " &nbsp; RG: ____________________ &nbsp; WhatsApp: ____________________" : ""}</p>
     <p class="r">IBIPORÃ/PR, ${dataPorExtenso(hoje)}</p>
-    <div class="assinatura">Assinatura: ${doc.nome}</div>
+    <div class="assinatura">Assinatura: ${doc.nome ?? ""}</div>
   </div>`;
 }
 

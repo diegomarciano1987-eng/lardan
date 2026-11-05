@@ -151,7 +151,9 @@ describe("4. situação para a tela", () => {
     const l2 = await rpc<{ desatualizada: boolean }[]>(master, "fiscal_focus_notas_maletas", { _cycles: [ciclo] });
     expect(l2.dados[0]!.desatualizada).toBe(true);
 
-    const semVer = await rpc<unknown[]>(montagem, "fiscal_focus_notas_maletas", { _cycles: [ciclo] });
+    // 0224: a montagem passa a ver a nota da maleta (para imprimir o DANFE); quem não é da equipe continua sem ver
+    expect((await rpc<unknown[]>(montagem, "fiscal_focus_notas_maletas", { _cycles: [ciclo] })).dados).toHaveLength(1);
+    const semVer = await rpc<unknown[]>(cons, "fiscal_focus_notas_maletas", { _cycles: [ciclo] });
     expect(semVer.erro).toBeNull();
     expect(semVer.dados).toEqual([]);
   });

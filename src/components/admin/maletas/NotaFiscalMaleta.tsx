@@ -9,7 +9,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Receipt, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { focusArquivos, focusConsultar, focusEmitirAcertoMaleta, focusEmitirRemessaMaleta } from "@/lib/focus/focus.functions";
+import { focusConsultar, focusEmitirAcertoMaleta, focusEmitirRemessaMaleta } from "@/lib/focus/focus.functions";
+import { imprimirDanfe } from "@/components/admin/fiscal/imprimirDanfe";
 
 export interface NotaMaleta {
   cycle_id: string;
@@ -102,7 +103,6 @@ export function NotaFiscalMaleta({
   const sufixo = producao ? "" : " (teste)";
   const qc = useQueryClient();
   const emitirFn = useServerFn(focusEmitirRemessaMaleta);
-  const arquivos = useServerFn(focusArquivos);
   const tam = grande ? "justify-center" : "h-9 px-3 text-xs";
   const icone = grande ? "size-4" : "size-3.5";
 
@@ -129,15 +129,8 @@ export function NotaFiscalMaleta({
     onError: (e) => toast.error(msgErro(e)),
     onSettled: () => void qc.invalidateQueries({ queryKey: ["focus", "notas-maletas"] }),
   });
-  const abrirDanfe = async (ref = nota!.ref) => {
-    try {
-      const a = await arquivos({ data: { ref } });
-      if (a.danfe) window.open(a.danfe, "_blank", "noopener,noreferrer");
-      else toast.error("DANFE ainda não disponível.");
-    } catch (e) {
-      toast.error(msgErro(e));
-    }
-  };
+  // DANFE enxuto (0224): gerado do XML autorizado, uma linha por peça
+  const abrirDanfe = (ref = nota!.ref) => imprimirDanfe(ref);
 
   if (nota && nota.status === "autorizado") {
     return (
@@ -179,7 +172,7 @@ export function NotaFiscalMaleta({
 
   const apta = MALETA_APTA_NOTA.includes(status);
   const motivo = !podeEmitir ? "Só o Master emite a nota de teste."
-    : !temConsultora ? "Defina a consultora da maleta."
+    : !temConsultora ? "Maleta de abertura: a nota sai quando o representante vincular a consultora."
     : semPecas ? "Maleta sem peças."
     : !apta ? "A nota libera quando a maleta estiver montada e conferida."
     : producao ? "Emite a NF-e REAL de remessa consignada com as peças conferidas."

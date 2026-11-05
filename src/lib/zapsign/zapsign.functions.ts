@@ -1,0 +1,119 @@
+/**
+ * Assinatura digital (ZapSign) chamada pela tela: contrato da consultora e
+ * promissória da maleta. O usuário só pede; o banco confere quem pode
+ * (equipe ou o representante da consultora), o servidor monta o texto pelo
+ * modelo, cria o documento na ZapSign (link enviado por WhatsApp à consultora)
+ * e registra pelo executor interno.
+ */
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+type Rpc = (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+type Ctx = { supabase: { rpc: Rpc }; userId: string };
+const UUID = /^[0-9a-f-]{36}$/i;
+
+async function rpcUsuario<T>(c: Ctx, fn: string, args: Record<string, unknown> = {}): Promise<T> {
+  const { data, error } = await c.supabase.rpc(fn, args);
+  if (error) throw new Error(error.message);
+  return data as T;
+}
+async function rpcServidor<T>(fn: string, args: Record<string, unknown> = {}): Promise<T> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await (supabaseAdmin.rpc as unknown as Rpc)(fn, args);
+  if (error) throw new Error(error.message);
+  return data as T;
+}
+
+interface Dados {
+  modelo: { titulo: string; texto: string; revisado: boolean };
+  pendencias: string[];
+  signer: { nome: string; cpf: string | null; whatsapp: string | null; email: string | null };
+  campos: import("./modelo").CamposAssinatura;
+}
+
+export const zapsignEstado = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { configZapsign } = await import("./api.server");
+    const c = configZapsign();
+    return { pronto: c.pronto, ambiente: c.ambiente, avisoPronto: c.avisoPronto, faltando: c.faltando };
+  });
+
+/** Envia contrato (tipo "contrato") ou promissória da maleta (tipo "promissoria") para a consultora assinar. */
+export const zapsignEnviar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { tipo: "contrato" | "promissoria"; partyId: string; cycleId?: string | null; rep?: string | null; reenviar?: boolean }) => {
+    if (d?.tipo !== "contrato" && d?.tipo !== "promissoria") throw new Error("Tipo inválido.");
+    if (!UUID.test(d.partyId ?? "")) throw new Error("Consultora inválida.");
+    if (d.tipo === "promissoria" && !UUID.test(d.cycleId ?? "")) throw new Error("Escolha a maleta.");
+    if (d.rep && !UUID.test(d.rep)) throw new Error("Representante inválido.");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    const dados = await rpcUsuario<Dados>(c, "assinatura_dados", { _tipo: data.tipo, _party: data.partyId, _cycle: data.cycleId ?? null, _rep: data.rep ?? null });
+    const pendente = await rpcServidor<{ id: string; sign_url: string | null } | null>("assinatura_pendente",
+      { _tipo: data.tipo, _party: data.partyId, _cycle: data.cycleId ?? null });
+    if (pendente && !data.reenviar) {
+      return { id: pendente.id, signUrl: pendente.sign_url, jaExistia: true, whatsapp: false };
+    }
+    if (dados.pendencias.length) throw new Error(`Complete o cadastro da consultora: ${dados.pendencias.join(", ")}.`);
+
+    const { preencherModelo, valoresDosCampos, telefoneZapsign } = await import("./modelo");
+    const { configZapsign, criarDocumento } = await import("./api.server");
+    const { createHash } = await import("node:crypto");
+    const cfg = configZapsign();
+    const valores = valoresDosCampos(dados.campos);
+    const titulo = preencherModelo(dados.modelo.titulo, valores).replace(/\\/g, "").slice(0, 250);
+    const texto = preencherModelo(dados.modelo.texto, valores);
+    const fone = telefoneZapsign(dados.signer.whatsapp);
+    const externo = `lardan-${data.tipo}-${data.partyId.slice(0, 8)}-${Date.now().toString(36)}`;
+
+    const doc = await criarDocumento({
+      name: titulo, markdown_text: texto, external_id: externo, lang: "pt-br", brand_name: "LARDAN Semijoias",
+      signers: [{
+        name: dados.signer.nome, ...(fone ?? {}), ...(dados.signer.email ? { email: dados.signer.email } : {}),
+        ...(dados.signer.cpf ? { cpf: dados.signer.cpf } : {}),
+        auth_mode: "assinaturaTela", send_automatic_whatsapp: !!fone, send_automatic_email: !fone && !!dados.signer.email,
+        lock_name: true, lock_phone: !!fone, external_id: data.partyId,
+        custom_message: data.tipo === "contrato" ? "Olá! Segue o contrato de consignação da LARDAN para você assinar." : "Olá! Segue a nota promissória da sua maleta LARDAN para você assinar.",
+      }],
+    });
+    const signer = doc.signers?.[0];
+    const reg = await rpcServidor<{ id: string }>("assinatura_registrar", { _d: {
+      ambiente: cfg.ambiente, tipo: data.tipo, party_id: data.partyId, cycle_id: data.cycleId ?? "", rep: data.rep ?? "",
+      doc_token: doc.token, signer_token: signer?.token ?? null, sign_url: signer?.sign_url ?? null, status: "pendente",
+      titulo, texto_hash: createHash("sha256").update(texto).digest("hex"), valor_cents: dados.campos.valor_cents ?? "",
+      whatsapp: !!fone, ator: c.userId, substitui: pendente?.id ?? "",
+    } });
+    return { id: reg.id, signUrl: signer?.sign_url ?? null, jaExistia: false, whatsapp: !!fone };
+  });
+
+/** Link novo do PDF assinado (o da ZapSign expira em 60 minutos). */
+export const zapsignArquivo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; rep?: string | null }) => {
+    if (!UUID.test(d?.id ?? "")) throw new Error("Documento inválido.");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    const x = await rpcServidor<{ party_id: string; doc_token: string | null } | null>("assinatura_ler", { _id: data.id });
+    if (!x?.doc_token) throw new Error("Documento não encontrado.");
+    const pode = await rpcUsuario<boolean>(c, "assinatura_pode", { _party: x.party_id, _rep: data.rep ?? null });
+    if (!pode) throw new Error("Sem permissão.");
+    const { detalharDocumento } = await import("./api.server");
+    const d = await detalharDocumento(x.doc_token);
+    await rpcServidor("assinatura_retorno", { _doc_token: x.doc_token, _status: d.status, _assinado_em: d.signers?.[0]?.signed_at ?? null });
+    return { url: d.signed_file ?? d.original_file ?? null, status: d.status };
+  });
+
+/** Modelos (Master edita). */
+export const zapsignModeloSalvar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { tipo: "contrato" | "promissoria"; titulo: string; texto: string; revisado: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    await rpcUsuario(c, "assinatura_modelo_salvar", { _tipo: data.tipo, _titulo: data.titulo, _texto: data.texto, _revisado: data.revisado });
+    return { tipo: data.tipo };
+  });

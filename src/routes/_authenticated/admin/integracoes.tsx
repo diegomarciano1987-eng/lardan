@@ -9,6 +9,8 @@ import { reprocessarAssinados, situacaoClicksign } from "@/lib/clicksign.functio
 import { FiscalProntidao } from "@/components/admin/FiscalProntidao";
 import { FocusHomologacao } from "@/components/admin/fiscal/FocusHomologacao";
 import { ProducaoFiscal } from "@/components/admin/fiscal/ProducaoFiscal";
+import { AssinaturaConfig } from "@/components/admin/assinatura/AssinaturaConfig";
+import { useAdminRoles } from "@/components/admin/AdminShell";
 import { can, useCapabilities } from "@/lib/capabilities";
 
 export const Route = createFileRoute("/_authenticated/admin/integracoes")({
@@ -34,6 +36,7 @@ const MODOS = [
 
 function Integracoes() {
   const caps = useCapabilities();
+  const souMaster = useAdminRoles().includes("master" as never);
   const qc = useQueryClient();
   const ler = useServerFn(situacaoClicksign);
   const reproc = useServerFn(reprocessarAssinados);
@@ -60,6 +63,7 @@ function Integracoes() {
     <div className="space-y-6">
       {can(caps, "finance.view") && <FiscalProntidao />}
       {can(caps, "finance.view") && <ProducaoFiscal />}
+      <AssinaturaConfig master={souMaster} />
       {can(caps, "finance.view") && <FocusHomologacao />}
       <Panel title="Clicksign — termo de recebimento da maleta">
         {!s ? (

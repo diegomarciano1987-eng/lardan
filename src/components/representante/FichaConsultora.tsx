@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import * as React from "react";
 import { brl, dataBR, foneBR, repAssumir, repFicha, repReativarPedir } from "@/lib/representante";
 import { CobrarParcela, ContatoCobranca } from "@/components/representante/AcoesRepresentante";
+import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
 
 /** Tela da consultora dentro da área do representante: cadastro, débitos e cobrança. */
 export function FichaConsultora({ party, rep, onClose }: { party: string | null; rep: string; onClose: () => void }) {
@@ -74,6 +75,8 @@ export function FichaConsultora({ party, rep, onClose }: { party: string | null;
                 </button>
               </div>
             )}
+
+            {f.na_carteira && <AssinaturaDigital party={f.id} rep={rep} />}
 
             <section className="space-y-2 rounded-2xl border border-border p-4">
               <h3 className="text-sm font-semibold">Contato e endereço</h3>

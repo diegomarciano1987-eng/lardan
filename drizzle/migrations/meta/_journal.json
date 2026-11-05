@@ -1583,6 +1583,13 @@
       "when": 1793906515510,
       "tag": "0225_variante_sempre_nasce_com_codigo",
       "breakpoints": true
+    },
+    {
+      "idx": 226,
+      "version": "7",
+      "when": 1793907470445,
+      "tag": "0226_abertura_danfe_zapsign",
+      "breakpoints": true
     }
   ]
 }

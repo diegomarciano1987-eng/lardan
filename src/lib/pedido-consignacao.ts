@@ -47,7 +47,9 @@ export interface PedidoDados {
   remessa: { numero: number | null; kit: number; tipo_envio: "pessoal" | "correio"; data_acerto: string | null; postar_ate: string | null };
   maleta: string | null;
   cliente_codigo: string | null;
-  consultora: { nome: string; endereco: string | null; cidade: string | null; whatsapp: string | null };
+  consultora: { nome: string | null; endereco: string | null; cidade: string | null; whatsapp: string | null };
+  /** maleta de abertura: com o representante, consultora preenchida à mão */
+  abertura?: boolean;
   representante: { nome: string | null; praca: string | null; telefone: string | null } | null;
   montado_por: string | null;
   faixas: FaixaPedido[];
@@ -305,7 +307,8 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
   const correio = d.remessa.tipo_envio === "correio";
   const remessa = num(d.remessa.numero, 5);
   const kit = num(d.remessa.kit, 3);
-  const cliente = d.cliente_codigo ?? "—";
+  const abertura = !!d.abertura || !d.consultora.nome;
+  const cliente = d.cliente_codigo ?? (abertura ? "______" : "—");
   const impresso = `${opcoes.impressoEm.toLocaleDateString("pt-BR")} ${opcoes.impressoEm.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
   const marca = (pequena = false) => `<div class="marca"><div class="linha-marca"><img src="${esc(opcoes.logoUrl)}" alt="Diamante LARDAN"><div class="nome">LARDAN</div></div>${pequena ? "" : `<div class="end">${esc(d.empresa.endereco_linha)}</div>`}</div>`;
   const rodape = (i: number) => `<div class="rod"><span>${esc(d.empresa.rodape_texto)}</span><span>Impresso em ${esc(impresso)} · ${esc(opcoes.operador)} · Página ${i + 1} de ${paginas.length}</span></div>`;
@@ -324,8 +327,11 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
       ${opcoes.pixQrUrl ? `<div class="qr" style="padding:0;border:0;background:#fff"><img src="${esc(opcoes.pixQrUrl)}" alt="QR Pix LARDAN" style="width:100%;height:100%"></div>` : ""}</div>
   </div>
   <div class="cartoes">
-    <div class="cartao"><div class="eyebrow">Consultora</div><div class="t">${esc(d.consultora.nome)}</div>
-      <div class="l">${esc(d.consultora.endereco ?? "Endereço não cadastrado")}<br>${esc(d.consultora.cidade ?? "")}${d.consultora.whatsapp ? ` · WhatsApp ${esc(fone(d.consultora.whatsapp))}` : ""}</div></div>
+    ${abertura
+      ? `<div class="cartao"><div class="eyebrow">Consultora · abertura</div><div class="t">Nome: ____________________</div>
+      <div class="l">CPF: ________________ · WhatsApp: ______________<br>Endereço: ______________________ Cidade: ____________</div></div>`
+      : `<div class="cartao"><div class="eyebrow">Consultora</div><div class="t">${esc(d.consultora.nome)}</div>
+      <div class="l">${esc(d.consultora.endereco ?? "Endereço não cadastrado")}<br>${esc(d.consultora.cidade ?? "")}${d.consultora.whatsapp ? ` · WhatsApp ${esc(fone(d.consultora.whatsapp))}` : ""}</div></div>`}
     <div class="cartao"><div class="eyebrow">Representante</div><div class="t">${esc(rep?.nome ?? "—")}</div>
       <div class="l">${rep?.praca ? `Praça ${esc(rep.praca)}` : "&nbsp;"}<br>${esc(fone(rep?.telefone))}</div></div>
     <div class="cartao"><div class="eyebrow">Montado por</div><div class="t">${esc(d.montado_por ?? "—")}</div>
@@ -345,7 +351,7 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
       <div class="regra">Sua comissão sobe conforme o total vendido no ciclo e vale sobre <strong>tudo</strong>: ${textoFaixas(d.faixas)}</div></div>
   </div>${objetivo}`;
 
-  const cab2 = `<div class="cab2">${marca(true)}<div class="info">Remessa <strong>${esc(remessa)}</strong> · Kit ${esc(kit)} · Cliente ${esc(cliente)} · ${esc(nomeCurto(d.consultora.nome))} · Acerto <strong style="color:#7A5642">${esc(dataBr(d.remessa.data_acerto))}</strong></div></div>`;
+  const cab2 = `<div class="cab2">${marca(true)}<div class="info">Remessa <strong>${esc(remessa)}</strong> · Kit ${esc(kit)} · Cliente ${esc(cliente)} · ${esc(abertura ? "Abertura" : nomeCurto(d.consultora.nome ?? ""))} · Acerto <strong style="color:#7A5642">${esc(dataBr(d.remessa.data_acerto))}</strong></div></div>`;
 
   const final = `
   <div class="fimtab" style="margin-top:${paginas.at(-1)!.length ? "0" : "3.6mm"}"><span>TOTAL DO KIT</span><span class="v"><span class="q">${pecas}</span><span class="r">${esc(brl(total))}</span></span></div>

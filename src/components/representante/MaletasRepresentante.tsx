@@ -18,7 +18,7 @@ import {
   type Destinataria,
 } from "@/lib/maletas-perdidas";
 
-export function MaletasRepresentante({ rep }: { rep: string }) {
+export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepasse?: (r: { partyId: string; nome: string; nova: boolean }) => void }) {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["rep", rep, "maletas"], queryFn: () => maletasDoRepresentante(rep) });
   const recarregar = () => void qc.invalidateQueries({ queryKey: ["rep", rep, "maletas"] });
@@ -64,7 +64,7 @@ export function MaletasRepresentante({ rep }: { rep: string }) {
         <section className="space-y-2">
           <h3 className="text-sm font-semibold">Com você, sem consultora ({d.sem_consultora.length})</h3>
           {d.sem_consultora.map((m) => (
-            <Repasse key={m.cycle_id} rep={rep} maleta={m} onFeito={recarregar} />
+            <Repasse key={m.cycle_id} rep={rep} maleta={m} onFeito={(r) => { recarregar(); if (r) onRepasse?.(r); }} />
           ))}
         </section>
       )}
@@ -86,7 +86,7 @@ export function MaletasRepresentante({ rep }: { rep: string }) {
 function Repasse({ rep, maleta, onFeito }: {
   rep: string;
   maleta: { cycle_id: string; maleta: string; remessa: number | null; praca: string | null; pecas: number; valor_cents: number; acerto: string | null };
-  onFeito: () => void;
+  onFeito: (r?: { partyId: string; nome: string; nova: boolean }) => void;
 }) {
   const [busca, setBusca] = React.useState("");
   const [escolhida, setEscolhida] = React.useState<Destinataria | null>(null);
@@ -99,7 +99,7 @@ function Repasse({ rep, maleta, onFeito }: {
     mutationFn: () => repassarMaleta(rep, maleta.cycle_id, escolhida!),
     onSuccess: (r) => {
       toast.success(r.nova_consultora ? "Maleta enviada. A candidata agora é sua consultora." : "Maleta enviada para a consultora.");
-      onFeito();
+      onFeito({ partyId: r.consultora_party_id, nome: escolhida?.nome ?? "", nova: r.nova_consultora });
     },
     onError: (e) => toast.error(mensagem(e)),
   });

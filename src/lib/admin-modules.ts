@@ -215,7 +215,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     roles: ["master", "diretoria", "cobranca", "financeiro"],
     state: "ativo",
   },
-  { slug: "trocas-garantias", path: "/admin/trocas-garantias", label: "Trocas e garantias", description: "Solicitações de pós-venda e análise com histórico.", icon: ShieldCheck, roles: ["master", "qualidade"], state: "ativo" },
+  { slug: "trocas-garantias", path: "/admin/trocas-garantias", label: "Trocas e garantias", description: "Solicitações de pós-venda e análise com histórico.", icon: ShieldCheck, roles: ["master", "qualidade"], capability: "quality.view", state: "ativo" },
   {
     slug: "qualidade",
     label: "Qualidade",

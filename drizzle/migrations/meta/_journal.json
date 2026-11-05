@@ -1660,6 +1660,20 @@
       "when": 1793916438058,
       "tag": "0236_cob_historica_busca_servidor",
       "breakpoints": true
+    },
+    {
+      "idx": 237,
+      "version": "7",
+      "when": 1793918369845,
+      "tag": "0237_qualidade_trocas_canal",
+      "breakpoints": true
+    },
+    {
+      "idx": 238,
+      "version": "7",
+      "when": 1793918528347,
+      "tag": "0238_qualidade_buscas_pecas_consultoras",
+      "breakpoints": true
     }
   ]
 }

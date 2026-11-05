@@ -52,6 +52,8 @@ export type Capability =
   | "finance.audit.view"
   | "finance.settings.manage"
   | "collection.view"
+  | "quality.view"
+  | "quality.manage"
   | "collection.operate"
   | "collection.negotiate"
   | "collection.discount.approve"

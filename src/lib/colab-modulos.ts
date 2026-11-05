@@ -15,6 +15,7 @@ export const COLAB_MODULOS: ColabModulo[] = [
   { id: "candidaturas", nome: "Candidaturas do Site", texto: "Funil das candidatas a consultora.", ver: ["candidaturas.view", "leads.view"], alterar: ["candidaturas.edit", "candidaturas.move", "candidaturas.notes", "candidaturas.followups", "candidaturas.tags", "candidaturas.assign"] },
   { id: "site", nome: "Site e vitrine", texto: "Curadoria e publicação do catálogo no site.", ver: ["showcase.view"], alterar: ["site.manage", "showcase.publish", "catalog.publish", "product.publish"] },
   { id: "rede", nome: "Inteligência da Rede", texto: "Mapa da rede (números agregados).", ver: ["network.aggregate.view"], alterar: [] },
+  { id: "qualidade", nome: "Trocas e garantias", texto: "Setor de Qualidade: trocas das consultoras e devolutiva.", ver: ["quality.view"], alterar: ["quality.manage"] },
   { id: "auditoria", nome: "Auditoria e configurações", texto: "Ver o registro de alterações.", ver: ["audit.view"], alterar: [] },
 ];
 

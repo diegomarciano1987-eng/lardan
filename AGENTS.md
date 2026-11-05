@@ -53,4 +53,4 @@
 - Demo/video data is tagged products.tags 'demo-video' (draft products, DEMO-xx codes, kit 'Maleta DEMO vídeos', photos in media/demo-video) and never touches stock or finance; remove it by that tag. Why: keep fictitious recording data isolated and reversible.
 - Consultant rep comes from praça only if one active rep serves it (consultora_rep_pela_praca + trigger); shared praças stay manual (rede_auditoria_sem_representante). Why: no guessing.
 - Central de Leads: leads INSERT trigger queues frozen payload in service-only central_leads_fila; cron /api/public/central-leads/enviar sends creation only; 401 pauses. Why: CRM save independent; Central is permanent archive.
-- New variant barcodes come from variant_ean_next as 5-digit sequential codes (variant_codigo_curto_seq), never EAN-13. Why: 13-digit codes are unreadable on the 95x12 mm Argox label.
+- Variant barcodes: variant_ean_next, 5-digit sequential, never EAN-13. Why: Argox label readability.

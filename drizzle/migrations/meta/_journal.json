@@ -1625,6 +1625,13 @@
       "when": 1793914431438,
       "tag": "0231_cob_kanban_acordos_kpis",
       "breakpoints": true
+    },
+    {
+      "idx": 232,
+      "version": "7",
+      "when": 1793914762453,
+      "tag": "0232_cob_confissao_divida_zapsign",
+      "breakpoints": true
     }
   ]
 }

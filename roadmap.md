@@ -91,6 +91,7 @@
 
 ## Pacote 0228 — Correios, etapa 1
 - [x] Inspecionar pacote e aplicar conexão/diagnóstico Master sem postagem, cobrança ou migração.
-- [ ] Configurar credenciais do contrato e verificar consultas reais pela tela.
-- [ ] Executar testes locais e conferir painel autenticado.
+- [x] Configuração do pacote salva sem substituir o código de acesso existente; ambiente homologação conforme o pacote.
+- [x] 7 testes locais passaram, compilação OK; painel aberto como Diego e clique real em Testar conexão confirmado. Provas: docs/provas-correios-0228.md.
+- [ ] Conexão aceita pelo contrato: Correios retornou 401 na autenticação; preço, prazo e rastreio ainda não verificados, dependem de credencial/ambiente aceitos.
 - [ ] Publicação depende de autorização de Diego.

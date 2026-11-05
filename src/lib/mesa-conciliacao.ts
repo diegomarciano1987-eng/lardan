@@ -36,6 +36,14 @@ export type Palpite = {
   cost_center_id?: string | null;
   chart_account_id?: string | null;
   payment_method_id?: string | null;
+  /** Recebimento judicial (alvará/TED de recurso judicial): sugere 7.1.7; nunca concilia sozinho. */
+  judicial?: {
+    chart_account_id: string | null;
+    party_id: string | null;
+    party_nome: string | null;
+    processo: string | null;
+    motivo: "numero_processo" | "palavra_judicial";
+  } | null;
 };
 
 export type ContraparteMesa = { id: string; nome: string; code: string; papeis: string[] };

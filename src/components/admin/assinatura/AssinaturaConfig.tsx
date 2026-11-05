@@ -9,7 +9,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Panel, Skeleton, StatusBadge } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
-import { zapsignEstado, zapsignModeloSalvar } from "@/lib/zapsign/zapsign.functions";
+import { zapsignEstado, zapsignModeloSalvar, zapsignSincronizar } from "@/lib/zapsign/zapsign.functions";
+import { Button } from "@/components/ui/button";
 
 interface Modelo { tipo: "contrato" | "promissoria"; titulo: string; texto: string; revisado: boolean; atualizado_em: string }
 const CAMPOS = "{{nome}} {{cpf}} {{codigo}} {{endereco}} {{bairro}} {{cidade}} {{cep}} {{whatsapp}} {{representante}} {{praca}} {{maleta}} {{remessa}} {{valor}} {{valor_extenso}} {{vencimento}} {{vencimento_extenso}} {{hoje}} {{hoje_extenso}}";
@@ -42,6 +43,7 @@ export function AssinaturaConfig({ master }: { master: boolean }) {
             <p className="mt-1 break-all font-mono text-xs">{url}</p>
             <p className="mt-1 text-xs text-ledger-muted">Troque SEU_ZAPSIGN_WEBHOOK_SECRET pelo valor do segredo ZAPSIGN_WEBHOOK_SECRET. Sem o aviso, a situação atualiza quando alguém abre o documento assinado.</p>
           </div>
+          {master && <Sincronizar />}
           {(modelos.data ?? []).map((m) => <EditorModelo key={m.tipo} m={m} master={master} />)}
           <p className="text-xs text-ledger-muted">Campos disponíveis: {CAMPOS}</p>
         </div>
@@ -72,8 +74,47 @@ function EditorModelo({ m, master }: { m: Modelo; master: boolean }) {
       {master && (
         <div className="flex flex-wrap items-center gap-4">
           <label className="flex items-center gap-2"><input type="checkbox" checked={revisado} onChange={(e) => setRevisado(e.target.checked)} /> Texto revisado pelo jurídico</label>
-          <button type="button" className="admin-btn admin-btn-primary" disabled={salvar.isPending} onClick={() => salvar.mutate()}>Salvar</button>
+          <Button disabled={salvar.isPending} onClick={() => salvar.mutate()}>Salvar</Button>
         </div>
+      )}
+    </div>
+  );
+}
+
+/** Importa para os cadastros os documentos que já existem na ZapSign (inclusive os criados no painel), página a página. */
+function Sincronizar() {
+  const fn = useServerFn(zapsignSincronizar);
+  const qc = useQueryClient();
+  const [prog, setProg] = React.useState<{ lidos: number; total: number; importados: number; atualizados: number; erros: number; sem: { titulo: string; assinante?: string }[] } | null>(null);
+  const m = useMutation({
+    mutationFn: async () => {
+      const acc = { lidos: 0, total: 0, importados: 0, atualizados: 0, erros: 0, sem: [] as { titulo: string; assinante?: string }[] };
+      let pagina: number | null = 1;
+      while (pagina) {
+        const r = await fn({ data: { pagina } });
+        acc.lidos += r.lidos; acc.total = r.total; acc.importados += r.importados; acc.atualizados += r.atualizados; acc.erros += r.erros; acc.sem.push(...r.sem_cadastro);
+        setProg({ ...acc });
+        pagina = r.proxima;
+      }
+      return acc;
+    },
+    onSuccess: (r) => {
+      void qc.invalidateQueries({ queryKey: ["documentos-assinados"] });
+      const resumo = `ZapSign: ${r.lidos} lidos · ${r.importados} ligados a cadastros · ${r.atualizados} atualizados · ${r.sem.length} sem cadastro · ${r.erros} falhas.`;
+      if (r.erros) toast.warning(resumo); else toast.success(resumo);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Falha."),
+  });
+  return (
+    <div className="space-y-2 rounded-xl border border-line-soft p-3">
+      <p className="font-semibold text-ledger-text">Documentos já existentes na ZapSign</p>
+      <p className="text-xs text-ledger-muted">Liga cada documento ao cadastro de quem assinou (CPF, telefone ou e-mail) e guarda a cópia do PDF assinado. Os novos chegam sozinhos pelo aviso.</p>
+      <Button variant="outline" disabled={m.isPending} onClick={() => m.mutate()}>{m.isPending ? `Importando… ${prog ? `${prog.lidos}/${prog.total}` : ""}` : "Importar documentos da ZapSign"}</Button>
+      {prog && <p className="text-xs text-ledger-muted">{prog.lidos} lidos · {prog.importados} vinculados · {prog.atualizados} atualizados · {prog.erros} falhas</p>}
+      {prog && prog.sem.length > 0 && (
+        <details className="text-xs"><summary>{prog.sem.length} documento(s) sem cadastro correspondente</summary>
+          <ul className="mt-1 list-disc pl-5">{prog.sem.map((x, i) => <li key={i}>{x.titulo}{x.assinante ? ` — ${x.assinante}` : ""}</li>)}</ul>
+        </details>
       )}
     </div>
   );

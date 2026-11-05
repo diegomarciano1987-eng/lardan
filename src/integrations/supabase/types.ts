@@ -1462,7 +1462,10 @@ export type Database = {
       assinaturas_digitais: {
         Row: {
           ambiente: string
+          arquivo_path: string | null
+          arquivo_sha256: string | null
           assinado_em: string | null
+          assinante_nome: string | null
           atualizado_em: string
           criado_em: string
           criado_por: string | null
@@ -1471,6 +1474,7 @@ export type Database = {
           enviado_whatsapp: boolean
           erro: string | null
           id: string
+          origem: string
           party_id: string
           provedor: string
           representante_party_id: string | null
@@ -1484,7 +1488,10 @@ export type Database = {
         }
         Insert: {
           ambiente: string
+          arquivo_path?: string | null
+          arquivo_sha256?: string | null
           assinado_em?: string | null
+          assinante_nome?: string | null
           atualizado_em?: string
           criado_em?: string
           criado_por?: string | null
@@ -1493,6 +1500,7 @@ export type Database = {
           enviado_whatsapp?: boolean
           erro?: string | null
           id?: string
+          origem?: string
           party_id: string
           provedor?: string
           representante_party_id?: string | null
@@ -1506,7 +1514,10 @@ export type Database = {
         }
         Update: {
           ambiente?: string
+          arquivo_path?: string | null
+          arquivo_sha256?: string | null
           assinado_em?: string | null
+          assinante_nome?: string | null
           atualizado_em?: string
           criado_em?: string
           criado_por?: string | null
@@ -1515,6 +1526,7 @@ export type Database = {
           enviado_whatsapp?: boolean
           erro?: string | null
           id?: string
+          origem?: string
           party_id?: string
           provedor?: string
           representante_party_id?: string | null
@@ -18521,11 +18533,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      assinatura_arquivo_salvar: {
+        Args: { _doc_token: string; _path: string; _sha: string }
+        Returns: undefined
+      }
+      assinatura_avulsa_registrar: { Args: { _d: Json }; Returns: Json }
       assinatura_dados: {
         Args: { _cycle: string; _party: string; _rep: string; _tipo: string }
         Returns: Json
       }
       assinatura_ler: { Args: { _id: string }; Returns: Json }
+      assinatura_ler_por_token: { Args: { _doc_token: string }; Returns: Json }
       assinatura_modelo_salvar: {
         Args: {
           _revisado: boolean
@@ -18553,6 +18571,7 @@ export type Database = {
         Args: { _party: string; _rep: string }
         Returns: Json
       }
+      assinaturas_sem_copia: { Args: { _limite?: number }; Returns: Json }
       aviso_registrar: {
         Args: { _ciente?: boolean; _dispositivo?: string; _id: string }
         Returns: string
@@ -19219,6 +19238,11 @@ export type Database = {
       crm_whatsapp_click: { Args: { _lead: string }; Returns: Json }
       doc_canon: { Args: { v: string }; Returns: string }
       doc_is_valid: { Args: { v: string }; Returns: boolean }
+      documentos_assinados_da_pessoa: {
+        Args: { _party: string }
+        Returns: Json
+      }
+      documentos_pode_ver: { Args: { _party: string }; Returns: boolean }
       e_vendedora_interna: { Args: { _user: string }; Returns: boolean }
       ean13_check_digit: { Args: { _body12: string }; Returns: string }
       ensure_profile: {
@@ -20592,6 +20616,10 @@ export type Database = {
       party_doc_reveal: { Args: { _id: string }; Returns: string }
       party_duplicados: { Args: never; Returns: Json }
       party_e_unificadas: { Args: { _p: string }; Returns: string[] }
+      party_por_assinante: {
+        Args: { _cpf: string; _email: string; _fone: string }
+        Returns: string
+      }
       party_unificar: {
         Args: {
           _canonica: string

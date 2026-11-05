@@ -98,13 +98,26 @@ export const zapsignArquivo = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    const x = await rpcServidor<{ party_id: string; doc_token: string | null } | null>("assinatura_ler", { _id: data.id });
+    const x = await rpcServidor<{ party_id: string; doc_token: string | null; arquivo_path: string | null } | null>("assinatura_ler", { _id: data.id });
     if (!x?.doc_token) throw new Error("Documento não encontrado.");
     const pode = await rpcUsuario<boolean>(c, "assinatura_pode", { _party: x.party_id, _rep: data.rep ?? null });
     if (!pode) throw new Error("Sem permissão.");
+    if (x.arquivo_path) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const s = await supabaseAdmin.storage.from("assinaturas").createSignedUrl(x.arquivo_path, 300);
+      if (s.error) throw new Error("Arquivo indisponível.");
+      return { url: s.data.signedUrl, status: "signed" };
+    }
+    const { importarDocumento } = await import("./documentos.server");
+    await importarDocumento(x.doc_token).catch(() => null);
+    const y = await rpcServidor<{ arquivo_path: string | null } | null>("assinatura_ler", { _id: data.id });
+    if (y?.arquivo_path) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const s = await supabaseAdmin.storage.from("assinaturas").createSignedUrl(y.arquivo_path, 300);
+      if (!s.error) return { url: s.data.signedUrl, status: "signed" };
+    }
     const { detalharDocumento } = await import("./api.server");
     const d = await detalharDocumento(x.doc_token);
-    await rpcServidor("assinatura_retorno", { _doc_token: x.doc_token, _status: d.status, _assinado_em: d.signers?.[0]?.signed_at ?? null });
     return { url: d.signed_file ?? d.original_file ?? null, status: d.status };
   });
 
@@ -116,4 +129,57 @@ export const zapsignModeloSalvar = createServerFn({ method: "POST" })
     const c = context as unknown as Ctx;
     await rpcUsuario(c, "assinatura_modelo_salvar", { _tipo: data.tipo, _titulo: data.titulo, _texto: data.texto, _revisado: data.revisado });
     return { tipo: data.tipo };
+  });
+
+/** Link (5 min) do documento assinado para a aba "Documentos assinados" do cadastro (0228). */
+export const documentoAssinadoLink = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { fonte: "zapsign" | "clicksign"; id: string }) => {
+    if ((d?.fonte !== "zapsign" && d?.fonte !== "clicksign") || !UUID.test(d.id ?? "")) throw new Error("Documento inválido.");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.fonte === "clicksign") {
+      const { data: r } = await supabaseAdmin.from("kit_signature_requests").select("consultora_party_id, signed_path").eq("id", data.id).maybeSingle();
+      if (!r) throw new Error("Documento não encontrado.");
+      if (!(await rpcUsuario<boolean>(c, "documentos_pode_ver", { _party: r.consultora_party_id }))) throw new Error("Sem permissão.");
+      const caminho = r.signed_path;
+      if (!caminho) throw new Error("Arquivo indisponível.");
+      const s = await supabaseAdmin.storage.from("termos-maleta").createSignedUrl(caminho, 300);
+      if (s.error) throw new Error("Arquivo indisponível.");
+      return { url: s.data.signedUrl };
+    }
+    const x = await rpcServidor<{ party_id: string; doc_token: string | null; arquivo_path: string | null } | null>("assinatura_ler", { _id: data.id });
+    if (!x) throw new Error("Documento não encontrado.");
+    if (!(await rpcUsuario<boolean>(c, "documentos_pode_ver", { _party: x.party_id }))) throw new Error("Sem permissão.");
+    let caminho = x.arquivo_path;
+    if (!caminho && x.doc_token) {
+      const { guardarCopia } = await import("./documentos.server");
+      caminho = await guardarCopia(x.doc_token, x.party_id).catch(() => null);
+    }
+    if (caminho) {
+      const s = await supabaseAdmin.storage.from("assinaturas").createSignedUrl(caminho, 300);
+      if (!s.error) return { url: s.data.signedUrl };
+    }
+    if (!x.doc_token) throw new Error("Arquivo indisponível.");
+    const { detalharDocumento } = await import("./api.server");
+    const d = await detalharDocumento(x.doc_token);
+    return { url: d.signed_file ?? null };
+  });
+
+/** Master: importa para os cadastros tudo que já existe na conta da ZapSign (inclusive o criado no painel). */
+export const zapsignSincronizar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { pagina: number }) => {
+    if (!Number.isInteger(d?.pagina) || d.pagina < 1) throw new Error("Página inválida.");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    const master = await rpcUsuario<boolean>(c, "fiscal_focus_pode", { _acao: "emitir" });
+    if (!master) throw new Error("Só o Master importa os documentos da ZapSign.");
+    const { sincronizarPagina } = await import("./documentos.server");
+    return sincronizarPagina(data.pagina);
   });

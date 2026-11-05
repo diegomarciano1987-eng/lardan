@@ -20,6 +20,7 @@ import {
 } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
+import { DocumentosAssinados } from "@/components/admin/cadastros/DocumentosAssinados";
 import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import { AcessoPortalBotao } from "@/components/admin/acessos/AcessoPortalBotao";
@@ -299,6 +300,7 @@ function FichaPessoa() {
           <TabsTrigger value="comercial">Dados comerciais</TabsTrigger>
           <TabsTrigger value="financeiro">Financeiro / PIX</TabsTrigger>
           {podeVerFin && <TabsTrigger value="debitos">Débitos, fiado e comissões</TabsTrigger>}
+          <TabsTrigger value="documentos">Documentos assinados</TabsTrigger>
           <TabsTrigger value="vinculos">Vínculos</TabsTrigger>
           <TabsTrigger value="operacao">Estoque e maletas</TabsTrigger>
           {!colab && <TabsTrigger value="acesso">Acesso</TabsTrigger>}
@@ -654,6 +656,10 @@ function FichaPessoa() {
             <CockpitFinanceiroConsultora partyId={id} />
           </TabsContent>
         )}
+
+        <TabsContent value="documentos" className="mt-4">
+          <DocumentosAssinados partyId={id} />
+        </TabsContent>
 
         {/* VÍNCULOS */}
         <TabsContent value="vinculos" className="mt-4">

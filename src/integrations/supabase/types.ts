@@ -19702,6 +19702,7 @@ export type Database = {
           value_cents: number
         }[]
       }
+      fin_asaas_conferencia: { Args: { _conta?: string }; Returns: Json }
       fin_asaas_extrato_autoconciliar: {
         Args: { _payment: string }
         Returns: Json

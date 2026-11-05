@@ -279,8 +279,14 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
       _banho: banho,
       ...(id ? { _product_id: id } : {}),
     });
-    if (error) return toast.error(mensagemDeErro(error));
-    if (!data) return toast.error("Esta categoria ainda não tem sigla de referência.");
+    if (error) {
+      toast.error(mensagemDeErro(error));
+      return;
+    }
+    if (!data) {
+      toast.error("Esta categoria ainda não tem sigla de referência.");
+      return;
+    }
     refManual.current = false;
     set("reference_code", String(data));
   }, [form, id, set]);

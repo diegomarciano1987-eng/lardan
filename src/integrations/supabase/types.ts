@@ -19622,6 +19622,7 @@ export type Database = {
         }
         Returns: Json
       }
+      fin_judicial_por_historico: { Args: { _h: string }; Returns: Json }
       fin_liquidacoes_list: {
         Args: {
           _ate: string

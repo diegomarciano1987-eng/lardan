@@ -105,5 +105,6 @@
 - [x] Etapa A: importar planilha do jurídico (prévia + aplicar Master, aba Processos, alerta 5 dias sem protocolo)
 - [x] Etapa B: Kanban novo + KPIs por período (prorrogação única registrada; envio ao Judicial manual após 5 dias)
 - [x] Etapa C: termo de confissão ZapSign por acordo (código WhatsApp + selfie + documento); modelo é minuta aguardando revisão do jurídico
-- [ ] Etapa D: baixa Asaas de faturas → DRE 3.1.1; sugestão 7.1.7 judicial sem baixa automática
+- [x] Etapa D: faturas de venda nascem na 3.1.1; TED judicial sugere 7.1.7 + devedora pelo nº do processo, sem baixa automática (0234, 7 testes isolados)
+- [ ] Conferir com Diego: 3 títulos do PDV sem classificação (R$ 699,50) e 3 cobranças Asaas pagas sem baixa automática
 - [ ] Etapa E: cobrança histórica até 2025 consolidada + fatura única em lote

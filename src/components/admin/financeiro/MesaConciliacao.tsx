@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowDownLeft, ArrowUpRight, Brain, Check, ChevronRight, FilePlus2, Link2, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Brain, Check, ChevronRight, FilePlus2, Link2, Scale, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { fetchClassificacoes } from "@/lib/financeiro";
 import { centrosMesa, contrapartesMesa, ehMicrotarifa, microtarifasConciliar, microtarifasPrevia, faltaConciliar, novoLancamentoConciliar, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
@@ -392,7 +392,17 @@ function Bancada({
   // Aprendizado: preenche com o que foi usado nas vezes anteriores, sem sobrescrever escolha.
   React.useEffect(() => {
     const p = palpite.data;
-    if (modo !== "novo" || !p || palpiteAplicado || !p.vezes) return;
+    if (modo !== "novo" || !p || palpiteAplicado) return;
+    if (p.judicial) {
+      // Recebimento judicial: 7.1.7 e a devedora do processo têm prioridade sobre o aprendido.
+      setPalpiteAplicado(true);
+      setPlano((v) => v || p.judicial?.chart_account_id || "");
+      setParty((v) => v || p.judicial?.party_id || p.party_id || "");
+      setCentro((v) => v || p.cost_center_id || "");
+      setForma((v) => v || p.payment_method_id || "");
+      return;
+    }
+    if (!p.vezes) return;
     setPalpiteAplicado(true);
     setCentro((v) => v || p.cost_center_id || "");
     setPlano((v) => v || p.chart_account_id || "");
@@ -404,7 +414,9 @@ function Bancada({
   const partyOpcoes = React.useMemo(() => {
     const lista = (contrapartes.data ?? []).map((c) => ({ value: c.id, label: c.nome, hint: papeisTexto(c.papeis) || c.code }));
     const p = palpite.data;
-    if (party && !lista.some((o) => o.value === party) && p?.party_id === party) {
+    if (party && !lista.some((o) => o.value === party) && p?.judicial?.party_id === party) {
+      lista.unshift({ value: party, label: p.judicial.party_nome ?? "Devedora do processo", hint: "processo judicial" });
+    } else if (party && !lista.some((o) => o.value === party) && p?.party_id === party) {
       lista.unshift({ value: party, label: p.party_nome ?? "Contraparte sugerida", hint: "sugerida" });
     }
     return lista;
@@ -573,7 +585,20 @@ function Bancada({
           ))}
         </div>
 
-        {modo === "novo" && pal && pal.vezes > 0 && (
+        {pal?.judicial && (
+          <div role="note" className="mt-4 flex items-start gap-3 rounded-[14px] border border-destructive/40 bg-destructive/5 p-3 text-sm">
+            <Scale aria-hidden className="mt-0.5 size-5 shrink-0 text-destructive" />
+            <p className="text-ledger-text">
+              <strong>Recebimento judicial.</strong> Sugestão: conta 7.1.7 Recebimento judicial
+              {pal.judicial.party_nome
+                ? `, devedora ${pal.judicial.party_nome} (processo ${pal.judicial.processo})`
+                : ". Nenhum processo cadastrado bate com este lançamento; escolha a devedora"}
+              . Esta conciliação nunca é feita sozinha: confira e confirme.
+            </p>
+          </div>
+        )}
+
+        {modo === "novo" && pal && pal.vezes > 0 && !pal.judicial && (
           <div className="mt-4 flex items-start gap-3 rounded-[14px] border border-champagne/60 bg-cream-2 p-3 text-sm">
             <Brain aria-hidden className="mt-0.5 size-5 shrink-0 text-bronze" />
             <p className="text-ledger-text">

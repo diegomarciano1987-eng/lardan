@@ -13,6 +13,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { can, useCapabilities } from "@/lib/capabilities";
 import { lerCustos, rotuloBanho } from "@/lib/produto";
 import { useColabEscopo } from "@/lib/colab-escopo";
+import { expandirPorVariante, somarEstoque, type LinhaSaldo } from "@/lib/produtos-lista";
 import {
   listPaged,
   centavosParaTexto,
@@ -45,6 +46,27 @@ interface ProdutoLinha {
   category_id: string | null;
   collection_id: string | null;
   banho_tipo: string | null;
+}
+
+/** Uma linha da lista = uma variante vendável (ou o produto, se ainda não tem variante). */
+interface LinhaLista extends ProdutoLinha {
+  chave: string;
+  variantId: string | null;
+  variante: string | null;
+  barcode: string | null;
+  referencia: string | null;
+  precoLinha: number | null;
+  totalVariantes: number;
+}
+
+interface VarianteLista {
+  id: string;
+  product_id: string;
+  label: string;
+  barcode: string | null;
+  reference_code: string | null;
+  price_cents: number | null;
+  is_active: boolean;
 }
 
 const PAGE_SIZE = 20;
@@ -142,14 +164,99 @@ function ProdutosPage() {
     },
   });
 
+  // Variantes dos produtos da página: cada variante vira uma linha própria.
+  const variantes = useQuery({
+    queryKey: ["products-variantes-lista", idsPagina],
+    enabled: idsPagina.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("product_variants")
+        .select("id, product_id, label, barcode, reference_code, price_cents, is_active")
+        .in("product_id", idsPagina)
+        .order("position")
+        .order("created_at");
+      if (error) throw error;
+      return (data ?? []) as VarianteLista[];
+    },
+  });
+
+  // Quantidade em estoque (depósito/loja, fora de maletas), só para quem vê estoque.
+  const podeVerEstoque = can(caps, "stock.view");
+  const idsVariantes = (variantes.data ?? []).map((v) => v.id);
+  const estoque = useQuery({
+    queryKey: ["products-estoque-lista", idsVariantes],
+    enabled: podeVerEstoque && idsVariantes.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stock_balances")
+        .select("variant_id, quantity, reserved, locations!inner(kind)")
+        .in("variant_id", idsVariantes);
+      if (error) throw error;
+      return somarEstoque((data ?? []) as unknown as LinhaSaldo[]);
+    },
+  });
+
+  const linhas: LinhaLista[] = expandirPorVariante(query.data?.rows ?? [], variantes.data ?? []);
+
   const nomeCategoria = (id: string | null) =>
     categorias.data?.find((c) => c.id === id)?.name ?? "—";
 
-  const columns: Column<ProdutoLinha>[] = [
-    { key: "etiquetas", header: "Etiquetas", render: (r) => <EtiquetaDireta label={`Imprimir etiqueta de ${r.name}`} origens={[{ productId: r.id }]} /> },
-    { key: "foto", header: "Foto", render: (r) => <FotoPeca productId={r.id} alt={r.name} /> },
-    { key: "name", header: "Produto", render: (r) => r.name },
-    { key: "legacy_code", header: "Código", render: (r) => <span className="num">{r.legacy_code ?? "—"}</span> },
+  const columns: Column<LinhaLista>[] = [
+    {
+      key: "etiquetas",
+      header: "Etiquetas",
+      render: (r) => (
+        <EtiquetaDireta
+          label={`Imprimir etiqueta de ${r.name}${r.variante ? ` · ${r.variante}` : ""}`}
+          origens={[r.variantId ? { variantId: r.variantId } : { productId: r.id }]}
+        />
+      ),
+    },
+    {
+      key: "quantidade",
+      header: "Quantidade",
+      className: "text-right",
+      render: (r) => {
+        if (!podeVerEstoque) return <span className="text-ledger-muted">—</span>;
+        if (!r.variantId) return <span className="num text-ledger-muted">0</span>;
+        if (estoque.isLoading) return <span className="text-ledger-muted">…</span>;
+        const s = estoque.data?.get(r.variantId);
+        const disp = s?.disponivel ?? 0;
+        return (
+          <span
+            className={`num font-semibold ${disp < 0 ? "text-destructive" : disp === 0 ? "text-ledger-muted" : ""}`}
+            title={s ? `Em estoque: ${s.quantidade} · reservadas: ${s.reservado} · em maletas: ${s.maletas}` : "Sem saldo em estoque"}
+          >
+            {disp}
+          </span>
+        );
+      },
+    },
+    { key: "foto", header: "Foto", render: (r) => <FotoPeca productId={r.id} variantId={r.variantId} alt={r.name} /> },
+    {
+      key: "name",
+      header: "Produto",
+      render: (r) => (
+        <div className="min-w-0">
+          <div>{r.name}</div>
+          {r.totalVariantes > 1 || (r.variante && r.variante !== "Padrão") ? (
+            <div className="text-xs text-ledger-muted">Variante: {r.variante}</div>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      key: "legacy_code",
+      header: "Referência · Barras",
+      render: (r) => (
+        <div className="num leading-tight">
+          <div>{r.referencia ?? r.legacy_code ?? "—"}</div>
+          <div className={`text-xs ${r.barcode ? "text-ledger-muted" : "text-destructive"}`}>
+            {r.barcode ?? (r.variantId ? "sem código de barras" : "")}
+          </div>
+        </div>
+      ),
+    },
     { key: "categoria", header: "Categoria", render: (r) => nomeCategoria(r.category_id) },
     { key: "banho", header: "Banho", render: (r) => rotuloBanho(r.banho_tipo) ?? "—" },
     {
@@ -157,11 +264,11 @@ function ProdutosPage() {
       header: "Preço",
       className: "text-right",
       render: (r) =>
-        r.price_cents == null ? (
+        r.precoLinha == null ? (
           "—"
         ) : (
           <span className="num">
-            {centavosParaTexto(r.price_cents)}
+            {centavosParaTexto(r.precoLinha)}
             {r.price_is_public ? "" : " (interno)"}
           </span>
         ),
@@ -172,7 +279,7 @@ function ProdutosPage() {
             key: "custo",
             header: "Custo",
             className: "text-right",
-            render: (r: ProdutoLinha) => {
+            render: (r: LinhaLista) => {
               const custo = custos.data?.get(r.id);
               return custo == null ? (
                 "—"
@@ -180,7 +287,7 @@ function ProdutosPage() {
                 <span className="num">{centavosParaTexto(custo)}</span>
               );
             },
-          } satisfies Column<ProdutoLinha>,
+          } satisfies Column<LinhaLista>,
         ]
       : []),
     {
@@ -242,10 +349,10 @@ function ProdutosPage() {
       {aba === "corrigir" && escopo.isSuccess && !colab && <ProdutosPendencias key={pendenciaTipo} tipoInicial={pendenciaTipo} />}
 
       {aba === "lista" && (
-      <DataTable<ProdutoLinha>
+      <DataTable<LinhaLista>
         columns={columns}
-        rows={query.data?.rows ?? []}
-        rowKey={(r) => r.id}
+        rows={linhas}
+        rowKey={(r) => r.chave}
         total={query.data?.total ?? 0}
         page={pagina}
         pageSize={PAGE_SIZE}

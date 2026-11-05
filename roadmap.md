@@ -98,7 +98,7 @@
 - [x] Inspecionar pacote e aplicar conexão/diagnóstico Master sem postagem, cobrança ou migração.
 - [x] Configuração do pacote salva sem substituir o código de acesso existente; ambiente homologação conforme o pacote.
 - [x] 7 testes locais passaram, compilação OK; painel aberto como Diego e clique real em Testar conexão confirmado. Provas: docs/provas-correios-0228.md.
-- [ ] Conexão aceita pelo contrato: Correios retornou 401 na autenticação; preço, prazo e rastreio ainda não verificados, dependem de credencial/ambiente aceitos.
+- [x] Produção (05/11): conexão aceita, 100 serviços do contrato, PAC 03298 e PAC reverso 03301 R$ 25,94 em 7 dias (caixa padrão). Serviço 03310 recusa preço (400); rastreio não testado.
 - [ ] Publicação depende de autorização de Diego.
 
 ## Cobrança — plano 3° a 8° (por etapas)

@@ -1492,6 +1492,13 @@
       "when": 1793896434618,
       "tag": "0212_codigos_unicos_entre_produtos",
       "breakpoints": true
+    },
+    {
+      "idx": 213,
+      "version": "7",
+      "when": 1793898064777,
+      "tag": "0213_venda_forma_combinado",
+      "breakpoints": true
     }
   ]
 }

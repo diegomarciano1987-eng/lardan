@@ -1464,6 +1464,13 @@
       "when": 1793820121204,
       "tag": "0208_cep_cidades",
       "breakpoints": true
+    },
+    {
+      "idx": 209,
+      "version": "7",
+      "when": 1793879578643,
+      "tag": "0209_codigo_barras_curto",
+      "breakpoints": true
     }
   ]
 }

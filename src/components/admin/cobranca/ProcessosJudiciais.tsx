@@ -54,7 +54,7 @@ export function ProcessosJudiciais() {
   };
 
   const hoje = Date.now();
-  const lista = (q.data ?? []).filter((p) => !termo || termo.toLowerCase().split(/\s+/).every((t) => [p.nome, p.cpf, p.numero_processo, p.cidade, p.fase, p.praca, p.responsavel, p.status_citacao, p.proxima_acao, p.tipo, p.planilha_id].some((x) => x?.toLowerCase().includes(t))));
+  const lista = (q.data ?? []).filter((p) => !termo || termo.toLowerCase().split(/\s+/).every((t) => [p.nome, p.cpf, p.numero_processo, p.cidade, p.fase, p.praca, p.responsavel, p.status_citacao, p.proxima_acao, p.tipo, p.planilha_id].some((x) => String(x ?? "").toLowerCase().includes(t))));
   const pendentes = (q.data ?? []).filter((p) => /pendente/i.test(p.status ?? ""));
   const atrasoProtocolo = pendentes.filter((p) => hoje - new Date(p.created_at).getTime() > DIAS_PROTOCOLO * 86400000);
   const ativos = (q.data ?? []).filter((p) => !/extint/i.test(p.status ?? ""));

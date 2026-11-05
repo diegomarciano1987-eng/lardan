@@ -10,18 +10,18 @@ const MIN = 0.55;
 function ajustar(el: HTMLElement) {
   const txt = el.textContent ?? "";
   if (txt.length > 28 || !/\d/.test(txt) || !NUMERO.test(txt)) {
-    if (el.dataset.ncBase) { el.style.fontSize = ""; el.style.whiteSpace = ""; delete el.dataset.ncBase; }
+    if (el.dataset["ncBase"]) { el.style.fontSize = ""; el.style.whiteSpace = ""; delete el.dataset["ncBase"]; }
     return;
   }
-  if (el.dataset.ncBase) el.style.fontSize = "";
+  if (el.dataset["ncBase"]) el.style.fontSize = "";
   const base = parseFloat(getComputedStyle(el).fontSize);
   if (!base || base < 15) return; // só números de destaque
   const largura = el.clientWidth;
   if (!largura) return;
   el.style.whiteSpace = "nowrap";
-  if (el.scrollWidth <= largura + 1) { el.style.whiteSpace = ""; if (el.dataset.ncBase) delete el.dataset.ncBase; return; }
+  if (el.scrollWidth <= largura + 1) { el.style.whiteSpace = ""; if (el.dataset["ncBase"]) delete el.dataset["ncBase"]; return; }
   const fator = Math.max(MIN, (largura / el.scrollWidth) * 0.97);
-  el.dataset.ncBase = String(base);
+  el.dataset["ncBase"] = String(base);
   el.style.fontSize = `${(base * fator).toFixed(2)}px`;
 }
 

@@ -172,7 +172,8 @@ function FluxoCaixa() {
           </div>
           <p className="mt-3 text-xs font-medium text-ledger-muted">
             O realizado vem exclusivamente dos movimentos das contas; o previsto, do saldo ainda em
-            aberto das parcelas. O saldo de abertura fica separado das entradas e saídas do período.
+            aberto das parcelas e das cobranças do Asaas ainda sem título (como na Visão geral). As
+            saídas realizadas incluem tarifas, por isso podem passar um pouco do "Pago no período". O saldo de abertura fica separado das entradas e saídas do período.
             Transferências entre contas não inflam o consolidado. Ao filtrar por centro de custo ou
             entidade, movimentos sem classificação suficiente aparecem à parte, e não somem.
           </p>

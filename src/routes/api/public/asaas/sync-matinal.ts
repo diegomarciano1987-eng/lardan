@@ -30,7 +30,13 @@ export const Route = createFileRoute("/api/public/asaas/sync-matinal")({
             const { encerrarAcordosVencidos } = await import("@/lib/asaas/cancelar.server");
             acordos = await encerrarAcordosVencidos(actor);
           } catch (e) { acordos = { erro: (e as Error).message }; }
-          return Response.json({ ok: true, ...r, acordos_vencidos: acordos });
+          // Correios: rastreio das maletas em trânsito (30 dias contam da entrega) e voltas.
+          let correios: unknown;
+          try {
+            const { atualizarRastros } = await import("@/lib/correios/correios.functions");
+            correios = await atualizarRastros();
+          } catch (e) { correios = { erro: (e as Error).message }; }
+          return Response.json({ ok: true, ...r, acordos_vencidos: acordos, correios });
         } catch (e) {
           return Response.json({ ok: false, erro: (e as Error).message }, { status: 500 });
         }

@@ -2696,6 +2696,9 @@ export type Database = {
           party_id: string
           pausa_ate: string | null
           pausa_motivo: string | null
+          prorrogacao_em: string | null
+          prorrogacao_motivo: string | null
+          prorrogacao_por: string | null
           responsavel_id: string | null
           suspensa: boolean
           suspensa_em: string | null
@@ -2709,6 +2712,9 @@ export type Database = {
           party_id: string
           pausa_ate?: string | null
           pausa_motivo?: string | null
+          prorrogacao_em?: string | null
+          prorrogacao_motivo?: string | null
+          prorrogacao_por?: string | null
           responsavel_id?: string | null
           suspensa?: boolean
           suspensa_em?: string | null
@@ -2722,6 +2728,9 @@ export type Database = {
           party_id?: string
           pausa_ate?: string | null
           pausa_motivo?: string | null
+          prorrogacao_em?: string | null
+          prorrogacao_motivo?: string | null
+          prorrogacao_por?: string | null
           responsavel_id?: string | null
           suspensa?: boolean
           suspensa_em?: string | null
@@ -18747,6 +18756,10 @@ export type Database = {
         Args: { _forma: string; _incluir_entrada?: boolean; _sim: string }
         Returns: Json
       }
+      cob_acordo_prorrogar: {
+        Args: { _motivo: string; _party: string }
+        Returns: undefined
+      }
       cob_acordo_vencido_encerrar: {
         Args: { _canceladas: string[]; _falhas: string[]; _sim: string }
         Returns: Json
@@ -18757,6 +18770,17 @@ export type Database = {
           charge_id: string
           external_id: string
           simulacao_id: string
+        }[]
+      }
+      cob_acordos_situacao: {
+        Args: never
+        Returns: {
+          dias_atraso: number
+          pago_cents: number
+          party_id: string
+          prorrogado: boolean
+          simulacao_id: string
+          total_cents: number
         }[]
       }
       cob_cadastro_ler: { Args: { _party: string }; Returns: Json }
@@ -18875,6 +18899,7 @@ export type Database = {
         Returns: Json
       }
       cob_kpis: { Args: never; Returns: Json }
+      cob_kpis_periodo: { Args: { _ate: string; _de: string }; Returns: Json }
       cob_lembretes: {
         Args: never
         Returns: {

@@ -1702,6 +1702,13 @@
       "when": 1793920815948,
       "tag": "0242_cob_judicial_planilha_importar_auditoria",
       "breakpoints": true
+    },
+    {
+      "idx": 243,
+      "version": "7",
+      "when": 1793921170003,
+      "tag": "0243_qualidade_referencia_digitada_liga_peca",
+      "breakpoints": true
     }
   ]
 }

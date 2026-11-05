@@ -31,7 +31,7 @@ beforeAll(async () => {
   conta717 = b?.id ?? (await um<{ id: string }>(
     `insert into chart_of_accounts(codigo,nome,natureza) values ('7.1.7','Recebimento judicial',(enum_range(null::fin_account_nature))[1]) returning id`))!.id;
   party = (await um<{ id: string }>(
-    `insert into parties(display_name, legal_name) values ($1,$1) returning id`, [`Devedora ${marca}`]))!.id;
+    `insert into parties(kind, display_name, legal_name) values ('pessoa',$1,$1) returning id`, [`Devedora ${marca}`]))!.id;
   await adm.unsafe(`insert into cob_judicial(party_id, processo) values ($1, '0005731-06.2025.8.16.0090')
                     on conflict (party_id) do update set processo = excluded.processo`, [party]);
 });
@@ -39,18 +39,18 @@ afterAll(async () => { await adm.unsafe(`delete from cob_judicial where party_id
 
 describe("3.1.1 padrão das faturas de venda", () => {
   test("consultora sem classificação nasce na 3.1.1", async () => {
-    const t = await um<{ c: string }>(`insert into financial_titles(direction, descricao, emissao, competencia, valor_cents, origem)
-      values ('receivable','teste ${marca}', current_date, current_date, 100, 'consultora') returning chart_account_id c`);
+    const t = await um<{ c: string }>(`insert into financial_titles(party_id, direction, descricao, emissao, competencia, valor_cents, origem)
+      values ($1,'receivable','teste ${marca}', current_date, current_date, 100, 'consultora') returning chart_account_id c`, [party]);
     expect(t!.c).toBe(conta311);
   });
   test("classificação escolhida é respeitada", async () => {
-    const t = await um<{ c: string }>(`insert into financial_titles(direction, descricao, emissao, competencia, valor_cents, origem, chart_account_id)
-      values ('receivable','teste2 ${marca}', current_date, current_date, 100, 'pdv', $1) returning chart_account_id c`, [conta717]);
+    const t = await um<{ c: string }>(`insert into financial_titles(party_id, direction, descricao, emissao, competencia, valor_cents, origem, chart_account_id)
+      values ($2,'receivable','teste2 ${marca}', current_date, current_date, 100, 'pdv', $1) returning chart_account_id c`, [conta717, party]);
     expect(t!.c).toBe(conta717);
   });
   test("outra origem não é tocada", async () => {
-    const t = await um<{ c: string | null }>(`insert into financial_titles(direction, descricao, emissao, competencia, valor_cents, origem)
-      values ('receivable','teste3 ${marca}', current_date, current_date, 100, 'importacao') returning chart_account_id c`);
+    const t = await um<{ c: string | null }>(`insert into financial_titles(party_id, direction, descricao, emissao, competencia, valor_cents, origem)
+      values ($1,'receivable','teste3 ${marca}', current_date, current_date, 100, 'importacao') returning chart_account_id c`, [party]);
     expect(t!.c).toBeNull();
   });
 });

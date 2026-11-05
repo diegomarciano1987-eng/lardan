@@ -83,3 +83,8 @@
 - [ ] B2: Pix sem identificação → nome+CPF do pagador, único ou manual
 - [ ] C: acordo Larissa: parcelas no Asaas, aguardando 1º pagamento, prazo venc.+5d, cancela no Asaas e avisa Larissa
 - [ ] D: "Pago por outra forma" no Contas a Receber (Pix ↔ link Asaas), valida acordo
+
+## Pacote 0214 — nota fiscal de teste na maleta conferida (05/11/2026)
+- [x] Migração 0214 aplicada (cycle_id/composicao_versao, uma nota viva por maleta, só homologação); fiscal_settings conferido: focus/homologacao/emissão desligada. Código copiado byte-exato; build OK.
+- [x] 5 testes isolados passaram no banco novo (452 migrações). Prova de tela: remessa 925 como Master, 21 maletas conferidas com botão "Nota fiscal (teste)" ativo. Emissão real na Focus não testada (homologação).
+- [ ] Publicação aguarda aprovação de Diego (junto da 0213); regras do banco já valem, botões dependem de publicar.

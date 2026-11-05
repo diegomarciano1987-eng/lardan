@@ -7528,8 +7528,10 @@ export type Database = {
           caminho_xml: string | null
           caminho_xml_cancelamento: string | null
           chave_nfe: string | null
+          composicao_versao: number | null
           created_at: string
           criado_por: string | null
+          cycle_id: string | null
           erros: Json | null
           id: string
           mensagem_sefaz: string | null
@@ -7552,8 +7554,10 @@ export type Database = {
           caminho_xml?: string | null
           caminho_xml_cancelamento?: string | null
           chave_nfe?: string | null
+          composicao_versao?: number | null
           created_at?: string
           criado_por?: string | null
+          cycle_id?: string | null
           erros?: Json | null
           id?: string
           mensagem_sefaz?: string | null
@@ -7576,8 +7580,10 @@ export type Database = {
           caminho_xml?: string | null
           caminho_xml_cancelamento?: string | null
           chave_nfe?: string | null
+          composicao_versao?: number | null
           created_at?: string
           criado_por?: string | null
+          cycle_id?: string | null
           erros?: Json | null
           id?: string
           mensagem_sefaz?: string | null
@@ -7595,6 +7601,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fiscal_focus_envios_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_focus_envios_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fiscal_focus_envios_party_id_fkey"
             columns: ["party_id"]
@@ -19360,6 +19380,18 @@ export type Database = {
       }
       fiscal_focus_emitente: { Args: never; Returns: Json }
       fiscal_focus_envio: { Args: { _ref: string }; Returns: Json }
+      fiscal_focus_envio_maleta_registrar: {
+        Args: {
+          _ambiente: string
+          _ator: string
+          _composicao_versao: number
+          _cycle: string
+          _party: string
+          _payload: Json
+          _ref: string
+        }
+        Returns: Json
+      }
       fiscal_focus_envio_registrar: {
         Args: {
           _ambiente: string
@@ -19374,6 +19406,8 @@ export type Database = {
       }
       fiscal_focus_envios_lista: { Args: { _limite?: number }; Returns: Json }
       fiscal_focus_exigir_servidor: { Args: never; Returns: undefined }
+      fiscal_focus_maleta_dados: { Args: { _cycle: string }; Returns: Json }
+      fiscal_focus_notas_maletas: { Args: { _cycles: string[] }; Returns: Json }
       fiscal_focus_pode: { Args: { _acao?: string }; Returns: boolean }
       fiscal_focus_retorno: {
         Args: {

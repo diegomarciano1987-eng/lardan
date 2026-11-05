@@ -163,6 +163,63 @@ export const focusEmitirTeste = createServerFn({ method: "POST" })
     }
   });
 
+interface DadosMaleta {
+  destinatario: import("./nfe").DestinatarioNfe & { party_id: string };
+  itens: DadosBanco["itens"];
+  pendencias: string[];
+  composicao_versao: number;
+  remessa: { numero: number | null; kit: number | null };
+  nota_viva: { ref: string; status: string } | null;
+}
+
+/**
+ * NF-e de remessa consignada da MALETA conferida (homologação).
+ * Consultora e peças vêm da maleta (composição conferida, preço gravado nela);
+ * o banco trava a maleta e recusa segunda nota viva.
+ */
+export const focusEmitirRemessaMaleta = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { cycleId: string }) => {
+    if (!d?.cycleId || !/^[0-9a-f-]{36}$/i.test(d.cycleId)) throw new Error("Maleta inválida.");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    await exigir(c, "emitir");
+    const { montarNfe, novaReferencia } = await import("./nfe");
+    const { emitirNfe, ErroFocus } = await import("./api.server");
+    const em = await emitente(c);
+
+    const dados = await rpcUsuario<DadosMaleta>(c, "fiscal_focus_maleta_dados", { _cycle: data.cycleId });
+    if (dados.nota_viva) throw new Error("Esta maleta já tem nota de remessa. Consulte a nota em vez de emitir outra.");
+    if (dados.pendencias.length) throw new Error(`Cadastro incompleto: ${dados.pendencias.join("; ")}.`);
+
+    const nfe = montarNfe({
+      operacao: "remessa",
+      ambiente: AMBIENTE,
+      cnpjEmitente: em.cnpj,
+      ufEmitente: em.uf,
+      destinatario: dados.destinatario,
+      itens: dados.itens.map((i) => ({ codigo: i.codigo, descricao: i.descricao, ncm: i.ncm, quantidade: i.quantidade, preco_varejo_cents: i.preco_varejo_cents })),
+      remessa: { numero: dados.remessa.numero ?? "-", kit: dados.remessa.kit ?? 1 },
+      origem: null,
+    });
+    const ref = novaReferencia("lardan-hom-mal", "remessa");
+    await rpcServidor("fiscal_focus_envio_maleta_registrar", {
+      _ref: ref, _ambiente: AMBIENTE, _cycle: data.cycleId, _party: dados.destinatario.party_id,
+      _composicao_versao: dados.composicao_versao, _payload: nfe, _ator: c.userId,
+    });
+    try {
+      const r = await emitirNfe(AMBIENTE, ref, nfe);
+      const salvo = await rpcServidor<{ status: string }>("fiscal_focus_retorno", { _ref: ref, _fonte: "envio", _resposta: r.dados ?? {} });
+      return { ref, status: salvo.status, mensagem: r.dados?.mensagem_sefaz ?? r.dados?.mensagem ?? null, erros: r.dados?.erros ?? null };
+    } catch (e) {
+      const msg = e instanceof ErroFocus ? e.message : "Falha ao enviar à Focus.";
+      await rpcServidor("fiscal_focus_retorno", { _ref: ref, _fonte: "envio", _resposta: { status: "erro_envio", mensagem: msg } });
+      throw new Error(msg);
+    }
+  });
+
 /** Consulta a Focus e atualiza a nota. */
 export const focusConsultar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -177,7 +234,15 @@ export const focusConsultar = createServerFn({ method: "POST" })
     const env = await rpcServidor<EnvioBanco | null>("fiscal_focus_envio", { _ref: data.ref });
     if (!env) throw new Error("Nota não encontrada.");
     const r = await consultarNfe(env.ambiente, data.ref);
-    if (r.http === 404) return { ref: data.ref, status: env.status, mensagem: "A Focus ainda não tem esta referência." };
+    if (r.http === 404) {
+      // registrada aqui mas nunca chegou à Focus (queda no meio do envio): depois de 15 min libera nova emissão
+      if (env.status === "pendente" && Date.now() - new Date(env.created_at).getTime() > 15 * 60_000) {
+        const salvo = await rpcServidor<{ status: string }>("fiscal_focus_retorno", { _ref: data.ref, _fonte: "consulta",
+          _resposta: { status: "erro_envio", mensagem: "A nota não chegou à Focus; pode emitir de novo." } });
+        return { ref: data.ref, status: salvo.status, mensagem: "A nota não chegou à Focus; pode emitir de novo." };
+      }
+      return { ref: data.ref, status: env.status, mensagem: "A Focus ainda não tem esta referência." };
+    }
     const salvo = await rpcServidor<{ status: string }>("fiscal_focus_retorno", { _ref: data.ref, _fonte: "consulta", _resposta: r.dados ?? {} });
     return { ref: data.ref, status: salvo.status, mensagem: r.dados?.mensagem_sefaz ?? null };
   });

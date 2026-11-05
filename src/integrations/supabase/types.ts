@@ -7534,6 +7534,7 @@ export type Database = {
           cycle_id: string | null
           erros: Json | null
           id: string
+          itens_variantes: string[] | null
           mensagem_sefaz: string | null
           numero: string | null
           operacao: string
@@ -7560,6 +7561,7 @@ export type Database = {
           cycle_id?: string | null
           erros?: Json | null
           id?: string
+          itens_variantes?: string[] | null
           mensagem_sefaz?: string | null
           numero?: string | null
           operacao: string
@@ -7586,6 +7588,7 @@ export type Database = {
           cycle_id?: string | null
           erros?: Json | null
           id?: string
+          itens_variantes?: string[] | null
           mensagem_sefaz?: string | null
           numero?: string | null
           operacao?: string
@@ -19374,12 +19377,26 @@ export type Database = {
           status: Database["public"]["Enums"]["party_status"]
         }[]
       }
+      fiscal_focus_acerto_dados: { Args: { _cycle: string }; Returns: Json }
       fiscal_focus_dados: {
         Args: { _itens: Json; _party: string }
         Returns: Json
       }
       fiscal_focus_emitente: { Args: never; Returns: Json }
       fiscal_focus_envio: { Args: { _ref: string }; Returns: Json }
+      fiscal_focus_envio_acerto_registrar: {
+        Args: {
+          _ambiente: string
+          _ator: string
+          _cycle: string
+          _operacao: string
+          _party: string
+          _payload: Json
+          _ref: string
+          _ref_origem: string
+        }
+        Returns: Json
+      }
       fiscal_focus_envio_maleta_registrar: {
         Args: {
           _ambiente: string
@@ -19389,6 +19406,7 @@ export type Database = {
           _party: string
           _payload: Json
           _ref: string
+          _variantes?: string[]
         }
         Returns: Json
       }

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { LembretesGaveta } from "@/components/admin/cobranca/LembretesGaveta";
 import { MaletasPerdidas } from "@/components/admin/cobranca/MaletasPerdidas";
+import { KanbanCobranca, KpisCobranca } from "@/components/admin/cobranca/KanbanCobranca";
 import { ProcessosJudiciais } from "@/components/admin/cobranca/ProcessosJudiciais";
 import { ReativacoesPendentes } from "@/components/admin/cobranca/ReativacoesPendentes";
 import { carteira, kpisCobranca, moverEtapa, cobConfig, salvarConfig, type CobConfig, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
@@ -102,14 +103,7 @@ function Cobranca() {
       <LembretesGaveta />
       <ReativacoesPendentes />
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
-        <Kpi id="" rotulo="Saldo vencido" valor={brl(kpi.vencido)} />
-        <Kpi id="" rotulo="Devedoras" valor={String(kpi.devedores)} />
-        <Kpi id="hoje" rotulo="Ações de hoje" valor={String(kpi.hoje)} />
-        <Kpi id="atrasadas" rotulo="Ações atrasadas" valor={String(kpi.atrasadas)} />
-        <Kpi id="vencendo" rotulo="Promessas vencendo" valor={String(kpi.vencendo)} />
-        <Kpi id="descumpridas" rotulo="Promessas descumpridas" valor={String(kpi.descumpridas)} destaque={kpi.descumpridas > 0} />
-      </div>
+      <KpisCobranca filtro={s.f} onFiltro={(f) => set({ f })} />
 
       {s.v !== "bi" && s.v !== "perdidas" && s.v !== "processos" && (
         <div className="flex flex-wrap gap-2">
@@ -129,7 +123,7 @@ function Cobranca() {
         : q.error ? <p className="text-sm text-destructive">{(q.error as Error).message}</p>
         : lista.length === 0 && s.v !== "bi" ? <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">Sem dados para estes filtros.</p>
         : s.v === "lista" ? <Lista lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
-        : s.v === "kanban" ? <Kanban lista={lista} onMover={mover} />
+        : s.v === "kanban" ? <KanbanCobranca lista={lista} onMover={mover} />
         : s.v === "agenda" ? <Agenda lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
         : <BI todos={todos} />}
     </div>

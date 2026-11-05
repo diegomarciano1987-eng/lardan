@@ -44,6 +44,8 @@ export interface ItemNfe {
   ncm: string;
   quantidade: number;
   preco_varejo_cents: number;
+  /** devolução: número do item desta peça na NF de remessa de origem (SEFAZ exige a referência por item, regra 321/VC02-14) */
+  numero_item_origem?: number | null;
 }
 export interface OrigemNfe {
   /** chave de 44 dígitos da NF de remessa (devolução, venda, perda) */
@@ -124,9 +126,13 @@ export function montarNfe(e: EntradaNfe): Record<string, unknown> {
   const interna = ufDest === e.ufEmitente.toUpperCase();
   const cfop = interna ? r.cfopInterno : r.cfopFora;
 
+  // Devolução: a SEFAZ exige o documento de origem em CADA item (DFeReferenciado: chave + nº do item na remessa).
+  // Com a referência por item, a nota não leva também a referência no cabeçalho (rejeição 1010).
+  const refPorItem = r.referenciaObrigatoria && !!e.origem && e.itens.every((i) => Number(i.numero_item_origem) > 0);
   const items = e.itens.map((i, n) => {
     const unit = valorFiscalUnitario(i.preco_varejo_cents);
     const bruto = dinheiro(unit * i.quantidade);
+    const ref = refPorItem ? { chave_acesso_dfe_referenciado: so(e.origem!.chave), numero_item_dfe_referenciado: Number(i.numero_item_origem) } : {};
     return {
       numero_item: n + 1,
       codigo_produto: ate(i.codigo, 60),
@@ -145,6 +151,7 @@ export function montarNfe(e: EntradaNfe): Record<string, unknown> {
       icms_situacao_tributaria: "102",
       pis_situacao_tributaria: "07",
       cofins_situacao_tributaria: "07",
+      ...ref,
     };
   });
   const total = dinheiro(items.reduce((s, i) => s + i.valor_bruto, 0));
@@ -182,7 +189,7 @@ export function montarNfe(e: EntradaNfe): Record<string, unknown> {
   if (d.telefone && so(d.telefone).length >= 10) nfe["telefone_destinatario"] = so(d.telefone);
   if (d.email?.includes("@")) nfe["email_destinatario"] = d.email.trim();
   if (texto) nfe["informacoes_adicionais_contribuinte"] = texto;
-  if (r.referenciaObrigatoria && e.origem) nfe["notas_referenciadas"] = [{ chave_nfe: so(e.origem.chave) }];
+  if (r.referenciaObrigatoria && e.origem && !refPorItem) nfe["notas_referenciadas"] = [{ chave_nfe: so(e.origem.chave) }];
   return nfe;
 }
 

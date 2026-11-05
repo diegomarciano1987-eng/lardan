@@ -66,7 +66,7 @@ function EditorModelo({ m, master }: { m: Modelo; master: boolean }) {
   return (
     <div className="space-y-2 rounded-xl border border-line-soft p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="font-semibold text-ledger-text">{m.tipo === "contrato" ? "Contrato de consignação" : m.tipo === "confissao" ? "Termo de confissão de dívida (acordos da cobrança) — campos extras: {{'{{'}}dividas}} e {{'{{'}}plano}}" : "Nota promissória"}</p>
+        <p className="font-semibold text-ledger-text">{m.tipo === "contrato" ? "Contrato de consignação" : m.tipo === "confissao" ? "Termo de confissão de dívida (acordos da cobrança) — campos extras: {{dividas}} e {{plano}}" : "Nota promissória"}</p>
         <StatusBadge tone={m.revisado ? "success" : "warning"}>{m.revisado ? "Revisado" : "Rascunho — revisar com o jurídico"}</StatusBadge>
       </div>
       <input className="admin-input w-full" value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={!master} />

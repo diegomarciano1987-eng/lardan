@@ -124,7 +124,7 @@ export const zapsignArquivo = createServerFn({ method: "POST" })
 /** Modelos (Master edita). */
 export const zapsignModeloSalvar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { tipo: "contrato" | "promissoria"; titulo: string; texto: string; revisado: boolean }) => d)
+  .inputValidator((d: { tipo: "contrato" | "promissoria" | "confissao"; titulo: string; texto: string; revisado: boolean }) => d)
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
     await rpcUsuario(c, "assinatura_modelo_salvar", { _tipo: data.tipo, _titulo: data.titulo, _texto: data.texto, _revisado: data.revisado });

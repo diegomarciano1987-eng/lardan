@@ -48,11 +48,13 @@ export function lerPlanilhaJuridico(buf: ArrayBuffer): LinhaJuridico[] {
     const t = (k: keyof LinhaJuridico) => String(g(k) ?? "").trim();
     if (!t("id") && !t("nome")) continue;
     const cel = idx.link >= 0 ? ws[XLSX.utils.encode_cell({ r, c: idx.link })] : undefined;
+    const dig = t("numero").replace(/\D/g, "");
+    const numero = dig.length === 20 ? `${dig.slice(0, 7)}-${dig.slice(7, 9)}.${dig.slice(9, 13)}.${dig[13]}.${dig.slice(14, 16)}.${dig.slice(16)}` : t("numero");
     out.push({
-      id: t("id"), nome: t("nome"), cpf: t("cpf").replace(/\D/g, ""), status: t("status"),
+      id: t("id") || `L${r + 1}`, nome: t("nome"), cpf: t("cpf").replace(/\D/g, ""), status: t("status"),
       valor_causa_cents: centavos(g("valor_causa_cents")), valor_bloqueado_cents: centavos(g("valor_bloqueado_cents")),
       fase: t("fase"), cidade: t("cidade"), praca: t("praca"), responsavel: t("responsavel"), status_citacao: t("status_citacao"),
-      proxima_acao: t("proxima_acao"), tipo: t("tipo"), numero: t("numero"), link: (cel?.l?.Target as string | undefined) ?? (/^https:\/\//.test(t("link")) ? t("link") : ""),
+      proxima_acao: t("proxima_acao"), tipo: t("tipo"), numero, link: (cel?.l?.Target as string | undefined) ?? (/^https:\/\//.test(t("link")) ? t("link") : ""),
       ultima_atualizacao: dataIso(g("ultima_atualizacao")),
     });
   }

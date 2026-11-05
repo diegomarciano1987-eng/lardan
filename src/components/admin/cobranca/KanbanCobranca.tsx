@@ -9,6 +9,7 @@ import { DateRangeField } from "@/components/premium/DateRangeField";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, dataBR, type Devedor, type Etapa } from "@/lib/cobranca";
 import { colunaDoDevedor, type AcordoSit, type Coluna } from "@/lib/cobranca-kanban";
+import { soHistorica, type DevedorHistorico } from "@/lib/cobranca-historica";
 
 const rpc = (fn: string, args?: Record<string, unknown>) =>
   (supabase.rpc as unknown as (f: string, a?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>)(fn, args);
@@ -27,6 +28,9 @@ export function KanbanCobranca({ lista, onMover }: { lista: Devedor[]; onMover: 
   const qc = useQueryClient();
   const qa = useQuery(acordosQuery);
   const sit = React.useMemo(() => new Map((qa.data ?? []).map((a) => [a.party_id, a])), [qa.data]);
+  // Quem só tem dívida até 2025 sai da Régua Asaas: é tratado na aba Cobrança histórica.
+  const qh = useQuery({ queryKey: ["cob", "historica"], queryFn: async () => { const { data, error } = await rpc("cob_historica_lista"); if (error) throw new Error(error.message); return (data ?? []) as DevedorHistorico[]; } });
+  const historicas = React.useMemo(() => new Set((qh.data ?? []).filter(soHistorica).map((d) => d.party_id)), [qh.data]);
   const [arr, setArr] = React.useState<Devedor | null>(null);
   const [sobre, setSobre] = React.useState<Coluna | null>(null);
   const [prorrogar, setProrrogar] = React.useState<Devedor | null>(null);
@@ -44,7 +48,9 @@ export function KanbanCobranca({ lista, onMover }: { lista: Devedor[]; onMover: 
     <>
       <div className="grid grid-cols-5 gap-3">
         {COLS.map((c) => {
-          const col = lista.filter((d) => colunaDoDevedor(d, sit.get(d.party_id)) === c.id);
+          const todas = lista.filter((d) => colunaDoDevedor(d, sit.get(d.party_id)) === c.id);
+          const col = c.id === "regua" ? todas.filter((d) => !historicas.has(d.party_id)) : todas;
+          const foraHist = todas.length - col.length;
           return (
             <section key={c.id} data-coluna={c.id}
               onDragOver={(ev) => { if (c.destino) { ev.preventDefault(); setSobre(c.id); } }} onDragLeave={() => setSobre(null)}
@@ -58,6 +64,11 @@ export function KanbanCobranca({ lista, onMover }: { lista: Devedor[]; onMover: 
                 </div>
                 <p className="mt-0.5 font-mono text-xs text-muted-foreground tabular-nums">{brl(col.reduce((a, d) => a + Number(d.vencido_cents), 0))} vencido</p>
                 <p className="mt-1 text-[0.6875rem] text-muted-foreground">{c.ajuda}</p>
+                {c.id === "regua" && foraHist > 0 && (
+                  <Link to="/admin/cobranca" search={(o) => ({ ...o, v: "historica" as const })} className="mt-1 block text-[0.6875rem] text-asaas underline" data-fora-historica={foraHist}>
+                    {foraHist} só com dívida até 2025 estão em Histórica
+                  </Link>
+                )}
                 {c.id === "regua" && (
                   <div className="mt-2 flex gap-1 text-[0.625rem]">
                     {([["1–3 dias", 1, 3], ["4–7 dias", 4, 7], ["8+ dias", 8, 1e9]] as const).map(([r, a, b]) => (

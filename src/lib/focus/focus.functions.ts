@@ -39,7 +39,7 @@ async function emitente(c: Ctx): Promise<Emitente> {
 
 interface DadosBanco {
   destinatario: import("./nfe").DestinatarioNfe & { party_id: string };
-  itens: { variant_id: string; codigo: string; descricao: string; ncm: string; quantidade: number; preco_varejo_cents: number }[];
+  itens: { variant_id: string; codigo: string; descricao: string; ncm: string; quantidade: number; preco_varejo_cents: number; numero_item_origem?: number | null }[];
   pendencias: string[];
 }
 interface EnvioBanco {
@@ -51,7 +51,7 @@ interface EnvioBanco {
   numero: string | null;
   created_at: string;
   ambiente: "homologacao" | "producao";
-  payload: { items?: { codigo_produto: string; descricao: string; codigo_ncm: string; quantidade_comercial: number; valor_unitario_comercial: number }[] };
+  payload: { items?: { numero_item?: number; codigo_produto: string; descricao: string; codigo_ncm: string; quantidade_comercial: number; valor_unitario_comercial: number }[] };
   caminho_danfe: string | null;
   caminho_xml: string | null;
   caminho_xml_cancelamento: string | null;
@@ -121,12 +121,13 @@ export const focusEmitirTeste = createServerFn({ method: "POST" })
       if (dados.pendencias.length) throw new Error(`Cadastro incompleto: ${dados.pendencias.join("; ")}.`);
       const q = data.quantidades ?? {};
       itens = (rem.payload.items ?? [])
-        .map((i) => {
+        .map((i, n) => {
           const max = Number(i.quantidade_comercial);
           const pedida = q[i.codigo_produto] === undefined ? max : Math.trunc(Number(q[i.codigo_produto]));
           if (pedida > max) throw new Error(`Quantidade de ${i.codigo_produto} maior que a da remessa.`);
           return { variant_id: "", codigo: i.codigo_produto, descricao: i.descricao, ncm: i.codigo_ncm, quantidade: pedida,
-                   preco_varejo_cents: Math.round(Number(i.valor_unitario_comercial) * 100) * 3 };
+                   preco_varejo_cents: Math.round(Number(i.valor_unitario_comercial) * 100) * 3,
+                   numero_item_origem: Number(i.numero_item) || n + 1 };
         })
         .filter((i) => i.quantidade > 0);
       if (!itens.length) throw new Error("Escolha ao menos uma peça.");
@@ -141,7 +142,8 @@ export const focusEmitirTeste = createServerFn({ method: "POST" })
       cnpjEmitente: em.cnpj,
       ufEmitente: em.uf,
       destinatario,
-      itens: itens.map((i) => ({ codigo: i.codigo, descricao: i.descricao, ncm: i.ncm, quantidade: i.quantidade, preco_varejo_cents: i.preco_varejo_cents })),
+      itens: itens.map((i) => ({ codigo: i.codigo, descricao: i.descricao, ncm: i.ncm, quantidade: i.quantidade, preco_varejo_cents: i.preco_varejo_cents,
+        numero_item_origem: i.numero_item_origem ?? null })),
       remessa: { numero: "TESTE", kit: 1 },
       origem,
     });

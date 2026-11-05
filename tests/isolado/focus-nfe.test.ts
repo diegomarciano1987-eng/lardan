@@ -57,6 +57,13 @@ describe("1. roteiro", () => {
     expect(String(n["informacoes_adicionais_contribuinte"])).toContain("ATRAVES DA NF N. 12345, DE 01.10.2026");
   });
 
+  test("devolução com o nº do item da remessa: referência por item (DFeReferenciado) e não no cabeçalho", () => {
+    const n = montarNfe({ ...base, operacao: "devolucao", origem: { chave: CHAVE, numero: 12345, data: "2026-10-01" },
+      itens: [{ ...base.itens[1]!, numero_item_origem: 2 }] });
+    expect(n["notas_referenciadas"]).toBeUndefined();
+    expect((n["items"] as Record<string, unknown>[])[0]).toMatchObject({ numero_item: 1, chave_acesso_dfe_referenciado: CHAVE, numero_item_dfe_referenciado: 2 });
+  });
+
   test("venda (simples faturamento) e perda fora do PR", () => {
     const v = montarNfe({ ...base, operacao: "venda", origem: { chave: CHAVE, numero: 7, data: "2026-10-01" } });
     expect((v["items"] as { cfop: string }[])[0]!.cfop).toBe("5114");

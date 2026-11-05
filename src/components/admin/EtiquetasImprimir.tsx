@@ -28,9 +28,9 @@ export async function enviarParaImpressora(items: EtiquetaItem[]) {
   return validos.reduce((s, i) => s + i.quantidade, 0);
 }
 
-async function imprimirOrigens(origens: EtiquetaOrigem[], umaCada: boolean) {
+async function imprimirOrigens(origens: EtiquetaOrigem[], umaCada: boolean, copias = 1) {
   try {
-    const items = (await lerItensEtiquetas(origens)).map((i) => (umaCada ? { ...i, quantidade: 1 } : i));
+    const items = (await lerItensEtiquetas(origens)).map((i) => (umaCada ? { ...i, quantidade: copias } : i));
     const n = await enviarParaImpressora(items);
     if (n) toast.success(n === 1 ? "Impressão de 1 etiqueta preparada." : `Impressão de ${n} etiquetas preparada.`);
   } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir a etiqueta."); }
@@ -39,6 +39,28 @@ async function imprimirOrigens(origens: EtiquetaOrigem[], umaCada: boolean) {
 /** Botão de 1 clique: 1 etiqueta (uma por variante ativa) direto para a impressora. */
 export function EtiquetaDireta({ origens, label = "Imprimir etiqueta" }: { origens: EtiquetaOrigem[]; label?: string }) {
   return <Button variant="outline" size="icon" title={origens.length ? label : "Sem dados de peças para imprimir"} aria-label={label} disabled={!origens.length} onClick={(e) => { e.stopPropagation(); void imprimirOrigens(origens, true); }}><Printer aria-hidden /></Button>;
+}
+
+/** Campo de cópias + impressora: sai N etiquetas da mesma peça, uma atrás da outra. */
+export function EtiquetaComQuantidade({ origens, label = "Imprimir etiqueta" }: { origens: EtiquetaOrigem[]; label?: string }) {
+  const [qtd, setQtd] = useState("1");
+  const n = Math.min(500, Math.max(1, Math.floor(Number(qtd)) || 1));
+  return (
+    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+      <input
+        type="text"
+        inputMode="numeric"
+        aria-label={`Quantidade de etiquetas — ${label}`}
+        title="Quantas etiquetas imprimir"
+        value={qtd}
+        onChange={(e) => setQtd(e.target.value.replace(/\D/g, "").slice(0, 3))}
+        onBlur={() => setQtd(String(n))}
+        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void imprimirOrigens(origens, true, n); } }}
+        className="admin-input num h-9 w-14 text-center"
+      />
+      <Button variant="outline" size="icon" title={origens.length ? `${label} (${n})` : "Sem dados de peças para imprimir"} aria-label={`${label} (${n})`} disabled={!origens.length} onClick={() => void imprimirOrigens(origens, true, n)}><Printer aria-hidden /></Button>
+    </div>
+  );
 }
 
 function AjustesEstacao() {

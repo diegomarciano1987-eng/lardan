@@ -7532,6 +7532,8 @@ export type Database = {
           created_at: string
           criado_por: string | null
           cycle_id: string | null
+          email_enviado_em: string | null
+          email_tentativas: number
           erros: Json | null
           id: string
           itens_variantes: string[] | null
@@ -7559,6 +7561,8 @@ export type Database = {
           created_at?: string
           criado_por?: string | null
           cycle_id?: string | null
+          email_enviado_em?: string | null
+          email_tentativas?: number
           erros?: Json | null
           id?: string
           itens_variantes?: string[] | null
@@ -7586,6 +7590,8 @@ export type Database = {
           created_at?: string
           criado_por?: string | null
           cycle_id?: string | null
+          email_enviado_em?: string | null
+          email_tentativas?: number
           erros?: Json | null
           id?: string
           itens_variantes?: string[] | null
@@ -7770,32 +7776,47 @@ export type Database = {
       }
       fiscal_settings: {
         Row: {
+          email_copia_xml: string | null
           emission_active: boolean
           emitter_entity_id: string | null
           environment: string
           id: boolean
           note: string | null
+          producao_automatico: boolean
+          producao_piloto_cycle_id: string | null
+          producao_todas: boolean
           provider: string | null
+          serie_producao: string
           updated_at: string
           updated_by: string | null
         }
         Insert: {
+          email_copia_xml?: string | null
           emission_active?: boolean
           emitter_entity_id?: string | null
           environment?: string
           id?: boolean
           note?: string | null
+          producao_automatico?: boolean
+          producao_piloto_cycle_id?: string | null
+          producao_todas?: boolean
           provider?: string | null
+          serie_producao?: string
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
+          email_copia_xml?: string | null
           emission_active?: boolean
           emitter_entity_id?: string | null
           environment?: string
           id?: boolean
           note?: string | null
+          producao_automatico?: boolean
+          producao_piloto_cycle_id?: string | null
+          producao_todas?: boolean
           provider?: string | null
+          serie_producao?: string
           updated_at?: string
           updated_by?: string | null
         }
@@ -7805,6 +7826,20 @@ export type Database = {
             columns: ["emitter_entity_id"]
             isOneToOne: false
             referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_settings_producao_piloto_cycle_id_fkey"
+            columns: ["producao_piloto_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_settings_producao_piloto_cycle_id_fkey"
+            columns: ["producao_piloto_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
             referencedColumns: ["id"]
           },
         ]
@@ -19378,10 +19413,12 @@ export type Database = {
         }[]
       }
       fiscal_focus_acerto_dados: { Args: { _cycle: string }; Returns: Json }
+      fiscal_focus_ambiente: { Args: { _cycle: string }; Returns: string }
       fiscal_focus_dados: {
         Args: { _itens: Json; _party: string }
         Returns: Json
       }
+      fiscal_focus_eh_servidor: { Args: never; Returns: boolean }
       fiscal_focus_emitente: { Args: never; Returns: Json }
       fiscal_focus_envio: { Args: { _ref: string }; Returns: Json }
       fiscal_focus_envio_acerto_registrar: {
@@ -19427,6 +19464,7 @@ export type Database = {
       fiscal_focus_maleta_dados: { Args: { _cycle: string }; Returns: Json }
       fiscal_focus_notas_maletas: { Args: { _cycles: string[] }; Returns: Json }
       fiscal_focus_pode: { Args: { _acao?: string }; Returns: boolean }
+      fiscal_focus_producao_ativa: { Args: never; Returns: boolean }
       fiscal_focus_retorno: {
         Args: {
           _dedupe?: string
@@ -19436,6 +19474,8 @@ export type Database = {
         }
         Returns: Json
       }
+      fiscal_peca_codigo: { Args: { _variant: string }; Returns: string }
+      fiscal_peca_descricao: { Args: { _variant: string }; Returns: string }
       fiscal_prontidao: { Args: never; Returns: Json }
       fiscal_roteiro_observado: { Args: never; Returns: Json }
       gen_protocol: { Args: { prefix: string }; Returns: string }

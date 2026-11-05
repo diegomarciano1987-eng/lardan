@@ -3,10 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 export type Etapa = "novo_atraso" | "em_contato" | "em_negociacao" | "promessa" | "acompanhamento";
 /** Cada etapa tem um tom fixo (topo da coluna e faixa do card). */
 export const ETAPAS: { id: Etapa; rotulo: string; tom: string; faixa: string; fundo: string }[] = [
-  { id: "novo_atraso", rotulo: "Novo atraso", tom: "text-danger", faixa: "bg-danger", fundo: "bg-danger/5" },
-  { id: "em_contato", rotulo: "Em contato", tom: "text-info", faixa: "bg-info", fundo: "bg-info/5" },
-  { id: "em_negociacao", rotulo: "Acordo", tom: "text-warning", faixa: "bg-warning", fundo: "bg-warning/5" },
-  { id: "promessa", rotulo: "Promessa de pagamento", tom: "text-success", faixa: "bg-success", fundo: "bg-success/5" },
+  { id: "novo_atraso", rotulo: "Régua Asaas", tom: "text-danger", faixa: "bg-danger", fundo: "bg-danger/5" },
+  { id: "em_contato", rotulo: "Em negociação", tom: "text-info", faixa: "bg-info", fundo: "bg-info/5" },
+  { id: "em_negociacao", rotulo: "Acordo em andamento", tom: "text-warning", faixa: "bg-warning", fundo: "bg-warning/5" },
+  { id: "promessa", rotulo: "Promessa (antiga)", tom: "text-success", faixa: "bg-success", fundo: "bg-success/5" },
   { id: "acompanhamento", rotulo: "Judicial", tom: "text-bronze", faixa: "bg-bronze", fundo: "bg-bronze/5" },
 ];
 export const rotuloEtapa = (e: string) => ETAPAS.find((x) => x.id === e)?.rotulo ?? e;

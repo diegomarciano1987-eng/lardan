@@ -15,7 +15,8 @@ export type AmbienteCorreios = "homologacao" | "producao";
 export type JsonCorreios = null | boolean | number | string | JsonCorreios[] | { [key: string]: JsonCorreios };
 
 export function configCorreios() {
-  const ambiente: AmbienteCorreios = process.env["CORREIOS_AMBIENTE"] === "producao" ? "producao" : "homologacao";
+  // trim/minúsculas: um espaço sobrando no segredo não pode jogar o sistema para homologação
+  const ambiente: AmbienteCorreios = (process.env["CORREIOS_AMBIENTE"] ?? "").trim().toLowerCase() === "producao" ? "producao" : "homologacao";
   const c = {
     ambiente,
     base: ambiente === "producao" ? "https://api.correios.com.br" : "https://apihom.correios.com.br",
@@ -63,8 +64,17 @@ async function lerJson(r: Response): Promise<JsonCorreios> {
   const t = await r.text();
   try { return t ? JSON.parse(t) : null; } catch { return { texto: t.slice(0, 500) }; }
 }
+/** Mensagem que os Correios devolvem no erro (campo msgs), sem dados pessoais nem token. */
+function mensagemCorreios(d: JsonCorreios): string | null {
+  if (!d || typeof d !== "object" || Array.isArray(d)) return null;
+  const m = (d as Record<string, JsonCorreios>)["msgs"];
+  if (Array.isArray(m) && m.length) return m.map(String).join(" ").slice(0, 400);
+  const x = (d as Record<string, JsonCorreios>)["mensagem"] ?? (d as Record<string, JsonCorreios>)["message"];
+  return typeof x === "string" ? x.slice(0, 400) : null;
+}
+
 /** Chamada autenticada; devolve status e corpo sem lançar (o diagnóstico mostra tudo). */
-export async function chamar(metodo: "GET" | "POST", caminho: string, corpo?: unknown): Promise<{ http: number; dados: JsonCorreios }> {
+export async function chamar(metodo: "GET" | "POST" | "DELETE", caminho: string, corpo?: unknown): Promise<{ http: number; dados: JsonCorreios }> {
   const c = configCorreios();
   const { token: t } = await token();
   const ctrl = new AbortController();
@@ -77,7 +87,9 @@ export async function chamar(metodo: "GET" | "POST", caminho: string, corpo?: un
       signal: ctrl.signal,
     });
     const dados = await lerJson(r);
-    return { http: r.status, dados: r.ok ? dados : { erro: `Consulta recusada pelos Correios (${r.status}).` } };
+    if (r.ok) return { http: r.status, dados };
+    const msg = mensagemCorreios(dados);
+    return { http: r.status, dados: { erro: `Recusado pelos Correios (${r.status})${msg ? `: ${msg}` : "."}` } };
   } catch (e) {
     throw new ErroCorreios((e as Error).name === "AbortError" ? "Os Correios não responderam em 30 segundos." : "Falha de rede ao falar com os Correios.");
   } finally {
@@ -112,4 +124,90 @@ export function prazo(codigoServico: string, cepDestino: string) {
 
 export function rastro(codigoObjeto: string) {
   return chamar("GET", `/srorastro/v1/objetos/${encodeURIComponent(codigoObjeto.trim().toUpperCase())}?resultado=T`);
+}
+
+/** Serviços usados na maleta (confirmados no contrato em 05/11/2026). */
+export const SERVICO = { PAC_IDA: "03298", PAC_REVERSO: "03301", VALOR_DECLARADO_PAC: "064" } as const;
+
+export interface EnderecoCorreios {
+  nome: string; doc: string | null; email: string | null; ddd: string | null; celular: string | null; telefone: string | null;
+  cep: string; logradouro: string; numero: string; complemento: string | null; bairro: string; cidade: string; uf: string;
+}
+const corta = (v: string | null | undefined, n: number) => (v ?? "").normalize("NFC").trim().slice(0, n);
+function pessoa(e: EnderecoCorreios, papel: "remetente" | "destinatario") {
+  const end = {
+    cep: e.cep, logradouro: corta(e.logradouro, 50), numero: corta(e.numero || "S/N", 6), complemento: corta(e.complemento, 30) || undefined,
+    bairro: corta(e.bairro, 30), cidade: corta(e.cidade, 30), uf: corta(e.uf, 2).toUpperCase(),
+  };
+  return {
+    nome: corta(e.nome, 50), ...(e.doc ? { cpfCnpj: e.doc } : {}), ...(e.email ? { email: corta(e.email, 255) } : {}),
+    ...(e.ddd && e.celular ? { dddCelular: e.ddd, celular: e.celular } : {}),
+    ...(e.ddd && e.telefone ? { dddTelefone: e.ddd, telefone: e.telefone } : {}),
+    endereco: papel === "destinatario" ? { ...end, regiao: end.uf } : end,
+  };
+}
+const dataBR = (d: Date) => d.toISOString().slice(0, 10);
+
+/** Monta o corpo da pré-postagem (ida = PAC; volta = PAC reverso com logística reversa). */
+export function corpoPrePostagem(o: {
+  direcao: "ida" | "volta"; remetente: EnderecoCorreios; destinatario: EnderecoCorreios;
+  valorDeclaradoCents: number; referencia: string; validadeReversaDias?: number;
+}) {
+  const valor = Math.max(o.valorDeclaradoCents, 0) / 100;
+  const hoje = new Date(Date.now() - 3 * 3600_000);
+  const validade = new Date(hoje.getTime() + (o.validadeReversaDias ?? 7) * 86_400_000);
+  return {
+    remetente: pessoa(o.remetente, "remetente"),
+    destinatario: pessoa(o.destinatario, "destinatario"),
+    codigoServico: o.direcao === "ida" ? SERVICO.PAC_IDA : SERVICO.PAC_REVERSO,
+    pesoInformado: String(CAIXA_PADRAO.pesoGramas),
+    codigoFormatoObjetoInformado: CAIXA_PADRAO.formato,
+    alturaInformada: String(CAIXA_PADRAO.altura), larguraInformada: String(CAIXA_PADRAO.largura), comprimentoInformado: String(CAIXA_PADRAO.comprimento),
+    cienteObjetoNaoProibido: "1",
+    modalidadePagamento: "2",                                  // a faturar no contrato
+    observacao: corta(o.referencia, 50),
+    pedidoExternoOrigem: corta(o.referencia, 25),
+    itensDeclaracaoConteudo: [{ conteudo: "Semijoias (bijuterias) em consignação", quantidade: "1", valor: valor.toFixed(2) }],
+    ...(valor > 0 ? { listaServicoAdicional: [{ codigoServicoAdicional: SERVICO.VALOR_DECLARADO_PAC, valorDeclarado: valor.toFixed(2) }] } : {}),
+    ...(o.direcao === "volta" ? { logisticaReversa: "S", dataValidadeLogReversa: dataBR(validade) } : {}),
+  };
+}
+
+export function criarPrePostagem(corpo: unknown) {
+  return chamar("POST", "/prepostagem/v1/prepostagens", corpo);
+}
+export function cancelarPrePostagem(codigoObjeto: string) {
+  return chamar("DELETE", `/prepostagem/v1/prepostagens/objeto/${encodeURIComponent(codigoObjeto)}`);
+}
+
+/** Rótulo em PDF: pede de forma assíncrona e busca o arquivo (tenta por até ~20 s). */
+export async function rotuloPdf(idPrePostagem: string): Promise<Uint8Array> {
+  const c = configCorreios();
+  const pedido = await chamar("POST", "/prepostagem/v1/prepostagens/rotulo/assincrono/pdf", {
+    idsPrePostagem: [idPrePostagem], numeroCartaoPostagem: c.cartao, tipoRotulo: "P", formatoRotulo: "ET", imprimeRemetente: "S", layoutImpressao: "PADRAO",
+  });
+  const recibo = (pedido.dados as Record<string, JsonCorreios> | null)?.["idRecibo"];
+  if (pedido.http >= 300 || typeof recibo !== "string") {
+    throw new ErroCorreios(String((pedido.dados as Record<string, JsonCorreios> | null)?.["erro"] ?? "Os Correios não aceitaram o pedido de etiqueta."), pedido.http);
+  }
+  for (let i = 0; i < 8; i++) {
+    await new Promise((r) => setTimeout(r, 2500));
+    const d = await chamar("GET", `/prepostagem/v1/prepostagens/rotulo/download/assincrono/${encodeURIComponent(recibo)}`);
+    const o = d.dados as Record<string, JsonCorreios> | null;
+    const b64 = o?.["dados"] ?? o?.["arquivo"] ?? o?.["pdf"];
+    if (d.http < 300 && typeof b64 === "string" && b64.length > 100) return Uint8Array.from(Buffer.from(b64, "base64"));
+  }
+  throw new ErroCorreios("A etiqueta ainda está sendo gerada pelos Correios. Tente baixar de novo em 1 minuto.");
+}
+
+/** Eventos do rastreio, no formato que o banco entende (codigo, tipo, dtHrCriado, descricao). */
+export async function eventosRastro(codigoObjeto: string) {
+  const r = await rastro(codigoObjeto);
+  const objetos = ((r.dados as Record<string, JsonCorreios> | null)?.["objetos"] ?? []) as Record<string, JsonCorreios>[];
+  const ev = ((objetos[0]?.["eventos"] ?? []) as Record<string, JsonCorreios>[]).map((e) => ({
+    codigo: String(e["codigo"] ?? ""), tipo: String(e["tipo"] ?? ""), dtHrCriado: String(e["dtHrCriado"] ?? ""),
+    descricao: String(e["descricao"] ?? ""),
+    unidade: (() => { const u = e["unidade"] as Record<string, JsonCorreios> | undefined; const end = u?.["endereco"] as Record<string, JsonCorreios> | undefined; return end ? `${end["cidade"] ?? ""}/${end["uf"] ?? ""}` : null; })(),
+  }));
+  return { http: r.http, eventos: ev };
 }

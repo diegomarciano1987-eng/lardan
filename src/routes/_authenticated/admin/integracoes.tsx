@@ -11,6 +11,7 @@ import { FocusHomologacao } from "@/components/admin/fiscal/FocusHomologacao";
 import { ProducaoFiscal } from "@/components/admin/fiscal/ProducaoFiscal";
 import { AssinaturaConfig } from "@/components/admin/assinatura/AssinaturaConfig";
 import { CorreiosDiagnostico } from "@/components/admin/correios/CorreiosDiagnostico";
+import { CorreiosPainel } from "@/components/admin/correios/CorreiosPainel";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import { can, useCapabilities } from "@/lib/capabilities";
 
@@ -65,6 +66,7 @@ function Integracoes() {
       {can(caps, "finance.view") && <FiscalProntidao />}
       {can(caps, "finance.view") && <ProducaoFiscal />}
       <AssinaturaConfig master={souMaster} />
+      <CorreiosPainel />
       <CorreiosDiagnostico master={souMaster} />
       {can(caps, "finance.view") && <FocusHomologacao />}
       <Panel title="Clicksign — termo de recebimento da maleta">

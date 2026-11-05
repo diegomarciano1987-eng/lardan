@@ -1,5 +1,10 @@
 # Roadmap
 
+## Pacote 0213 — compra por peça e forma combinada (05/11/2026)
+- [ ] Aplicar os arquivos revisados e a classificação somente de leitura, sem alterar vendas existentes.
+- [ ] Testar compra pela peça/foto e formas de pagamento; registrar provas e limitações sem usar dados fictícios na base real.
+- [ ] Publicar somente após aprovação de Diego.
+
 ## Pacote 0199 — auditoria do app da consultora (03/11/2026)
 - [x] Pacote 0199–0201 revisado aplicado em 03/11 (gravado como 0200/0201/0202): segurança, acerto×cobrança, cockpit. Prévia de reprocessamento: 0 ajustes. Não publicado.
 - [x] Revisar pacote contra 0198 e executar na bancada isolada: 582 testes passaram, sem usar a base real.

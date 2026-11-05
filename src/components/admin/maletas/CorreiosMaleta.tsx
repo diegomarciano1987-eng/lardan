@@ -171,7 +171,7 @@ export function CorreiosMaleta({ cycleId, status }: { cycleId: string; status: s
                 {temDebito && (
                   <div className="space-y-2 rounded-lg border border-destructive/40 p-3">
                     <p className="text-destructive">Consultora com débito vencido de <strong>{brl(p.debito_vencido_cents)}</strong>. A maleta não sai pelo correio.</p>
-                    <label className="grid gap-1"><span className="ledger-eyebrow">Liberar mesmo assim (só Master) — motivo</span>
+                    <label className="grid gap-1"><span className="ledger-eyebrow">Liberar mesmo assim (Daniel ou Master) — motivo</span>
                       <input className="admin-input" value={liberar} onChange={(e) => setLiberar(e.target.value)} placeholder="Ex.: acordo assinado em 05/11" /></label>
                   </div>
                 )}

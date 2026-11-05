@@ -146,3 +146,16 @@ describe("4. mesa Asaas", () => {
     expect(depois.dados.itens).toEqual([]);
   });
 });
+
+describe("5. mesa Asaas — título novo (0244)", () => {
+  test("título criado pela mesa (conciliação Asaas) nasce na 3.1.1 Revenda de Mercadorias", async () => {
+    const pessoa = await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status) values ('pessoa',$1,$1,'ativo') returning id`, [`ISO 311 ${marca()}`]);
+    const r = await rpc<string>(master, "fin_title_create", { _payload: {
+      direction: "receivable", party_id: pessoa.id, descricao: "Recebimento Asaas ISO", valor_cents: 4774, emissao: DIA, competencia: DIA,
+      business_entity_id: emp, status: "ativo", origem: "conciliacao", sistema_origem: "asaas", id_externo: `asaas:pay_r${marca()}`,
+      parcelas: [{ vencimento: DIA, valor_cents: 4774 }] } });
+    expect(r.erro).toBeNull();
+    const t = await um<{ codigo: string }>(`select ca.codigo from public.financial_titles t join public.chart_of_accounts ca on ca.id = t.chart_account_id where t.id = $1`, [r.dados]);
+    expect(t.codigo).toBe("3.1.1");
+  });
+});

@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { zapsignEstado, zapsignModeloSalvar, zapsignSincronizar } from "@/lib/zapsign/zapsign.functions";
 import { Button } from "@/components/ui/button";
 
-interface Modelo { tipo: "contrato" | "promissoria"; titulo: string; texto: string; revisado: boolean; atualizado_em: string }
+interface Modelo { tipo: "contrato" | "promissoria" | "confissao"; titulo: string; texto: string; revisado: boolean; atualizado_em: string }
 const CAMPOS = "{{nome}} {{cpf}} {{codigo}} {{endereco}} {{bairro}} {{cidade}} {{cep}} {{whatsapp}} {{representante}} {{praca}} {{maleta}} {{remessa}} {{valor}} {{valor_extenso}} {{vencimento}} {{vencimento_extenso}} {{hoje}} {{hoje_extenso}}";
 
 export function AssinaturaConfig({ master }: { master: boolean }) {
@@ -66,7 +66,7 @@ function EditorModelo({ m, master }: { m: Modelo; master: boolean }) {
   return (
     <div className="space-y-2 rounded-xl border border-line-soft p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="font-semibold text-ledger-text">{m.tipo === "contrato" ? "Contrato de consignação" : "Nota promissória"}</p>
+        <p className="font-semibold text-ledger-text">{m.tipo === "contrato" ? "Contrato de consignação" : m.tipo === "confissao" ? "Termo de confissão de dívida (acordos da cobrança) — campos extras: {{'{{'}}dividas}} e {{'{{'}}plano}}" : "Nota promissória"}</p>
         <StatusBadge tone={m.revisado ? "success" : "warning"}>{m.revisado ? "Revisado" : "Rascunho — revisar com o jurídico"}</StatusBadge>
       </div>
       <input className="admin-input w-full" value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={!master} />

@@ -99,6 +99,20 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
     },
   });
 
+  const codigosBarras = useQuery({
+    queryKey: ["produto-codigos-barras", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("product_variants")
+        .select("id, label, barcode, reference_code")
+        .eq("product_id", id!)
+        .order("reference_code");
+      if (error) throw error;
+      return (data ?? []) as { id: string; label: string | null; barcode: string | null; reference_code: string | null }[];
+    },
+  });
+
   const categorias = useQuery({
     queryKey: ["opcoes-categorias-raiz"],
     queryFn: async () => {
@@ -626,13 +640,36 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
                 </button>
               </div>
             ) : null}
-            <Campo
-              label="Código de barras"
-              valor={form["barcode"]}
-              onChange={(v) => set("barcode", v)}
-              disabled={somente}
-              ajuda="Cada variante recebe o seu código de barras automático (5 dígitos) ao ser salva — veja na tabela de variantes."
-            />
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">Código de barras</span>
+              {id && (codigosBarras.data ?? []).some((v) => v.barcode) ? (
+                <div className="flex flex-wrap gap-2">
+                  {(codigosBarras.data ?? [])
+                    .filter((v) => v.barcode)
+                    .map((v) => (
+                      <span
+                        key={v.id}
+                        className="inline-flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-1.5"
+                        title={v.label ?? undefined}
+                      >
+                        <span className="font-mono text-base font-semibold tracking-wider">{v.barcode}</span>
+                        {v.reference_code ? (
+                          <span className="text-xs text-muted-foreground">{v.reference_code}</span>
+                        ) : null}
+                      </span>
+                    ))}
+                </div>
+              ) : (
+                <span className="rounded-md border border-dashed border-border px-3 py-1.5 text-sm text-muted-foreground">
+                  {id && codigosBarras.isLoading
+                    ? "Carregando…"
+                    : "Gerado automaticamente (5 dígitos) quando a variante é salva."}
+                </span>
+              )}
+              <span className="text-xs text-muted-foreground">
+                Número que a etiqueta imprime e o leitor bipa — um por variante.
+              </span>
+            </div>
             <Campo
               label="Classificação fiscal (NCM)"
               valor={form["ncm"]}

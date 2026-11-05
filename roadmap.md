@@ -88,3 +88,9 @@
 - [x] Migração 0214 aplicada (cycle_id/composicao_versao, uma nota viva por maleta, só homologação); fiscal_settings conferido: focus/homologacao/emissão desligada. Código copiado byte-exato; build OK.
 - [x] 5 testes isolados passaram no banco novo (452 migrações). Prova de tela: remessa 925 como Master, 21 maletas conferidas com botão "Nota fiscal (teste)" ativo. Emissão real na Focus não testada (homologação).
 - [ ] Publicação aguarda aprovação de Diego (junto da 0213); regras do banco já valem, botões dependem de publicar.
+
+## Pacote 0228 — Correios, etapa 1
+- [x] Inspecionar pacote e aplicar conexão/diagnóstico Master sem postagem, cobrança ou migração.
+- [ ] Configurar credenciais do contrato e verificar consultas reais pela tela.
+- [ ] Executar testes locais e conferir painel autenticado.
+- [ ] Publicação depende de autorização de Diego.

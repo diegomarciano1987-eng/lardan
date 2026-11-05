@@ -114,15 +114,16 @@ function Qualidade() {
           </label>
         </div>
         {busca && <p className="px-6 pt-3 text-sm text-ledger-muted">Buscando “{busca}” em todas as situações · {lista.data?.total ?? "…"} resultado(s)</p>}
-        <div className="grid min-h-[34rem] xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="grid min-h-[34rem] xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
           <div className="min-w-0 border-line-soft xl:border-r">
             {lista.isLoading && <p className="px-6 py-8 text-ledger-muted">Carregando trocas…</p>}
             {lista.isError && <div className="px-6"><ErrorState message={traduzir(lista.error)} onRetry={() => void lista.refetch()} /></div>}
             {lista.data && itens.length === 0 && <div className="px-6"><EmptyState title="Sem trocas aqui" description={busca ? "Nada encontrado para essa busca." : "Nenhuma troca nesta situação."} /></div>}
             {itens.length > 0 && (
-              <table className="w-full text-sm">
+              <table className="w-full table-fixed text-sm">
+                <colgroup><col className="w-[8.5rem]" /><col className="w-[34%]" /><col /><col className="w-[6.5rem]" /><col className="w-[8.5rem]" /></colgroup>
                 <thead className="sticky top-0 bg-cream-2 text-left text-[0.7rem] uppercase tracking-[0.12em] text-ledger-muted">
-                  <tr><th className="px-6 py-3">Protocolo</th><th className="px-3 py-3">Consultora</th><th className="px-3 py-3">Peça</th><th className="px-3 py-3">Aberta</th><th className="px-6 py-3 text-right">Situação</th></tr>
+                  <tr><th className="px-6 py-3">Protocolo</th><th className="px-3 py-3">Consultora</th><th className="px-3 py-3">Peça</th><th className="px-3 py-3">Aberta</th><th className="px-4 py-3 text-right">Situação</th></tr>
                 </thead>
                 <tbody>
                   {itens.map((t) => (
@@ -134,12 +135,12 @@ function Qualidade() {
                           {t.novidade_lardan && <span className="size-2 rounded-full bg-danger" title="Novidade da consultora" aria-label="Novidade da consultora" />}
                           {protocoloTroca(t.protocolo)}
                         </span>
-                        <span className="mt-0.5 flex items-center gap-1 text-xs text-ledger-muted"><Origem o={t.origem} />{t.legado_id ? `nº ${t.legado_id}` : ""}</span>
+                        <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-ledger-muted"><Origem o={t.origem} />{t.legado_id ? <span className="whitespace-nowrap">nº {t.legado_id}</span> : null}</span>
                       </td>
-                      <td className="px-3 py-3"><span className="font-medium">[Cód. {t.consultora_codigo ?? "—"}] {t.consultora_nome}</span><span className="block text-xs text-ledger-muted">{t.praca_nome ?? "Praça não informada"}</span></td>
-                      <td className="px-3 py-3"><span className="font-medium">{t.dev_referencia ?? "—"}</span><span className="block max-w-[18rem] truncate text-xs text-ledger-muted">{t.dev_nome}</span></td>
+                      <td className="px-3 py-3"><span className="line-clamp-2 font-medium">[Cód. {t.consultora_codigo ?? "—"}] {t.consultora_nome}</span><span className="block truncate text-xs text-ledger-muted">{t.praca_nome ?? "Praça não informada"}</span></td>
+                      <td className="px-3 py-3"><span className="font-medium">{t.dev_referencia ?? "—"}</span><span className="line-clamp-2 text-xs text-ledger-muted">{t.dev_nome}</span></td>
                       <td className="px-3 py-3 tabular-nums">{dataHora(t.aberto_em).split(" ")[0]}<span className="block text-xs text-ledger-muted">{["resolvida", "recusada"].includes(t.status) ? `em ${diasDesde(t.aberto_em, t.finalizado_em)} dias` : `há ${diasDesde(t.aberto_em)} dias`}</span></td>
-                      <td className="px-6 py-3 text-right"><StatusBadge tone={TOM[t.status]}>{STATUS_TROCA[t.status]}</StatusBadge></td>
+                      <td className="px-4 py-3 text-right"><StatusBadge tone={TOM[t.status]}>{STATUS_TROCA[t.status]}</StatusBadge></td>
                     </tr>
                   ))}
                 </tbody>

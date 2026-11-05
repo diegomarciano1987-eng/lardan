@@ -50,8 +50,10 @@ async function chamar<T>(metodo: "GET" | "POST", caminho: string, corpo?: unknow
   }
 }
 
-export interface SignerZapsign { token: string; sign_url: string; status: string; name: string; signed_at: string | null }
-export interface DocZapsign { token: string; status: string; name: string; external_id?: string | null; signed_file: string | null; original_file?: string | null; signers: SignerZapsign[] }
+export interface SignerZapsign { token: string; sign_url: string; status: string; name: string; signed_at: string | null;
+  email?: string | null; phone_country?: string | null; phone_number?: string | null; cpf?: string | null }
+export interface DocZapsign { token: string; status: string; name: string; external_id?: string | null; signed_file: string | null; original_file?: string | null;
+  created_at?: string | null; signers: SignerZapsign[] }
 
 export function criarDocumento(corpo: {
   name: string; markdown_text: string; external_id: string;
@@ -64,4 +66,10 @@ export function criarDocumento(corpo: {
 
 export function detalharDocumento(docToken: string) {
   return chamar<DocZapsign>("GET", `/docs/${encodeURIComponent(docToken)}/`);
+}
+
+/** Lista de documentos da conta (inclui os criados direto no painel). Paginada. */
+export function listarDocumentos(pagina: number) {
+  return chamar<{ count: number; next: string | null; results: { token: string; name: string; status: string; created_at?: string }[] }>(
+    "GET", `/docs/?page=${Math.max(1, Math.trunc(pagina))}`);
 }

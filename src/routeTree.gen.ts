@@ -122,6 +122,7 @@ import { Route as ApiPublicAsaasSyncMatinalRouteImport } from './routes/api/publ
 import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
 import { Route as ApiPublicCentralLeadsEnviarRouteImport } from './routes/api/public/central-leads/enviar'
 import { Route as ApiPublicClicksignWebhookRouteImport } from './routes/api/public/clicksign/webhook'
+import { Route as ApiPublicFiscalProcessarRouteImport } from './routes/api/public/fiscal/processar'
 import { Route as ApiPublicFocusWebhookRouteImport } from './routes/api/public/focus/webhook'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
 import { Route as ApiPublicRedeLocalizarRouteImport } from './routes/api/public/rede/localizar'
@@ -765,6 +766,12 @@ const ApiPublicClicksignWebhookRoute =
     path: '/api/public/clicksign/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicFiscalProcessarRoute =
+  ApiPublicFiscalProcessarRouteImport.update({
+    id: '/api/public/fiscal/processar',
+    path: '/api/public/fiscal/processar',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicFocusWebhookRoute = ApiPublicFocusWebhookRouteImport.update({
   id: '/api/public/focus/webhook',
   path: '/api/public/focus/webhook',
@@ -961,6 +968,7 @@ export interface FileRoutesByFullPath {
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
+  '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
@@ -1088,6 +1096,7 @@ export interface FileRoutesByTo {
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
+  '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
@@ -1219,6 +1228,7 @@ export interface FileRoutesById {
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
+  '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
@@ -1350,6 +1360,7 @@ export interface FileRouteTypes {
     | '/api/public/asaas/webhook'
     | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
+    | '/api/public/fiscal/processar'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
     | '/api/public/rede/localizar'
@@ -1477,6 +1488,7 @@ export interface FileRouteTypes {
     | '/api/public/asaas/webhook'
     | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
+    | '/api/public/fiscal/processar'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
     | '/api/public/rede/localizar'
@@ -1607,6 +1619,7 @@ export interface FileRouteTypes {
     | '/api/public/asaas/webhook'
     | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
+    | '/api/public/fiscal/processar'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
     | '/api/public/rede/localizar'
@@ -1678,6 +1691,7 @@ export interface RootRouteChildren {
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
   ApiPublicCentralLeadsEnviarRoute: typeof ApiPublicCentralLeadsEnviarRoute
   ApiPublicClicksignWebhookRoute: typeof ApiPublicClicksignWebhookRoute
+  ApiPublicFiscalProcessarRoute: typeof ApiPublicFiscalProcessarRoute
   ApiPublicFocusWebhookRoute: typeof ApiPublicFocusWebhookRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
   ApiPublicRedeLocalizarRoute: typeof ApiPublicRedeLocalizarRoute
@@ -2482,6 +2496,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicClicksignWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/fiscal/processar': {
+      id: '/api/public/fiscal/processar'
+      path: '/api/public/fiscal/processar'
+      fullPath: '/api/public/fiscal/processar'
+      preLoaderRoute: typeof ApiPublicFiscalProcessarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/focus/webhook': {
       id: '/api/public/focus/webhook'
       path: '/api/public/focus/webhook'
@@ -2851,6 +2872,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
   ApiPublicCentralLeadsEnviarRoute: ApiPublicCentralLeadsEnviarRoute,
   ApiPublicClicksignWebhookRoute: ApiPublicClicksignWebhookRoute,
+  ApiPublicFiscalProcessarRoute: ApiPublicFiscalProcessarRoute,
   ApiPublicFocusWebhookRoute: ApiPublicFocusWebhookRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,
   ApiPublicRedeLocalizarRoute: ApiPublicRedeLocalizarRoute,

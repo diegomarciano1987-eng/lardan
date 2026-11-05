@@ -292,7 +292,7 @@ function RemessasPage() {
             <span className="relative">
               <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
               <input className="admin-input w-full pl-9" value={texto} onChange={(e) => setTexto(e.target.value)}
-                placeholder="Nº da remessa, praça, representante ou consultora" />
+                placeholder="Nº da remessa, praça, representante, consultora (código, nome ou CPF)" />
             </span>
           </label>
           <label className="grid gap-1.5 text-sm lg:col-span-4">

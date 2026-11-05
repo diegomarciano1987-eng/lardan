@@ -216,7 +216,7 @@ function RemessaPage() {
             <label className="grid min-w-80 flex-1 gap-1.5 text-sm">
               <span className="ledger-eyebrow">Consultora da praça {r.praca}</span>
               <SmartSelect value={consultora} onChange={setConsultora} options={opcoes} onSearch={setBusca}
-                loading={consultoras.isFetching} searchPlaceholder="Buscar por nome ou CPF" placeholder="Escolher consultora" />
+                loading={consultoras.isFetching} searchPlaceholder="Buscar por código, nome ou CPF" placeholder="Escolher consultora" />
               <span className="text-xs text-ledger-muted">
                 {consultoras.data ? `${consultoras.data.length} consultora(s) encontradas nesta praça` : "Carregando consultoras…"}
               </span>
@@ -247,8 +247,8 @@ function RemessaPage() {
             <label className="grid min-w-80 flex-1 gap-1.5 text-sm">
               <span className="ledger-eyebrow">Consultoras ativas ainda sem praça{r.representante ? ` (sem representante ou de ${r.representante})` : ""}</span>
               <SmartSelect value={semPraca} onChange={setSemPraca} options={semPracaOpcoes.data ?? []} onSearch={setBuscaSemPraca}
-                loading={semPracaOpcoes.isFetching} searchPlaceholder="Digite nome ou CPF (2 letras ou mais)" placeholder="Buscar consultora sem praça"
-                emptyLabel={buscaSemPraca.trim().length < 2 ? "Digite ao menos 2 letras" : "Nenhuma consultora sem praça com esse nome"} />
+                loading={semPracaOpcoes.isFetching} searchPlaceholder="Digite código, nome ou CPF" placeholder="Buscar consultora sem praça"
+                emptyLabel={buscaSemPraca.trim().length < 2 ? "Digite ao menos 2 letras" : "Nenhuma consultora sem praça com esse código, nome ou CPF"} />
               <span className="text-xs text-ledger-muted">Ela passa para a praça {r.praca} (fica registrado quem fez). Quem já tem outra praça não muda por aqui.</span>
             </label>
             <button type="button" className="admin-btn admin-btn-primary" disabled={!semPraca || vincular.isPending} onClick={() => vincular.mutate()}>

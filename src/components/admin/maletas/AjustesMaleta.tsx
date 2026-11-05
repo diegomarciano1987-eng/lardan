@@ -82,7 +82,7 @@ export function AjustesMaleta({ cycleId, consultoraId, representante }: { cycleI
           <div className="space-y-2">
             <span className="text-sm font-semibold text-ledger-text">Trocar consultora</span>
             <SmartSelect value={nova} onChange={setNova} options={opcoes} onSearch={setBusca} loading={consultoras.isFetching}
-              searchPlaceholder="Buscar por nome ou CPF" placeholder="Escolher outra consultora da praça" />
+              searchPlaceholder="Buscar por código, nome ou CPF" placeholder="Escolher outra consultora da praça" />
             <button type="button" className="admin-btn admin-btn-primary w-full justify-center" disabled={!nova || ocupado} onClick={() => trocar.mutate(nova ?? null)}>
               <UsersRound aria-hidden className="size-4" /> Trocar consultora
             </button>

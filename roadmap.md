@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Pacote 0213 — compra por peça e forma combinada (05/11/2026)
-- [ ] Aplicar os arquivos revisados e a classificação somente de leitura, sem alterar vendas existentes.
-- [ ] Testar compra pela peça/foto e formas de pagamento; registrar provas e limitações sem usar dados fictícios na base real.
-- [ ] Publicar somente após aprovação de Diego.
+- [x] Arquivos aplicados e venda_forma confirmada no banco compartilhado; nenhuma venda existente alterada. Botões novos usam Button e ações da foto se acomodam no celular.
+- [x] 18 testes isolados e 9 de WhatsApp aprovados; compra por peça/foto conferida na vitrine Larissa (1280×1800 e 390×844), cartão selecionável, sem transbordamento; Central aberta como Diego, sem erros de execução. Provas: docs/provas-0213.md. Não gerada cobrança real.
+- [ ] Publicação aguarda aprovação de Diego; classificação de leitura já vale no banco compartilhado, botões dependem de publicar.
 
 ## Pacote 0199 — auditoria do app da consultora (03/11/2026)
 - [x] Pacote 0199–0201 revisado aplicado em 03/11 (gravado como 0200/0201/0202): segurança, acerto×cobrança, cockpit. Prévia de reprocessamento: 0 ajustes. Não publicado.

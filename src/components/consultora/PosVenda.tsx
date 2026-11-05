@@ -55,7 +55,7 @@ function FormularioTroca({ pedido, onFim }: { pedido?: string; onFim: () => void
   return (
     <div className="space-y-5 text-[1.02rem]">
       <div><p className="mb-2 font-semibold">1. Qual peça?</p>
-        {pedido ? <SmartSelect value={itemPedido} onChange={setItemPedido} placeholder={ped.isLoading ? "Carregando peças…" : "Escolha a peça do pedido"} options={(ped.data?.itens ?? []).map((i) => ({ value: i.id, label: `${i.quantity}× ${i.product_name}${i.variante ? ` · ${i.variante}` : ""}` }))} />
+        {pedido ? <SmartSelect value={itemPedido} onChange={setItemPedido} placeholder={ped.isLoading ? "Carregando peças…" : "Escolha a peça do pedido"} options={(ped.data?.itens ?? []).map((i) => ({ value: i.id, label: `${i.quantity}× ${i.product_name}` }))} />
           : <><PecaTrocaPicker value={peca} onChange={setPeca} placeholder="Busque pela referência da etiqueta ou nome" />
             {!peca && <input className="admin-input mt-2 min-h-12 w-full" value={refManual} onChange={(e) => setRefManual(e.target.value.toUpperCase())} placeholder="Ou digite a referência (ex.: LANP0342)" aria-label="Referência da etiqueta" />}</>}
       </div>

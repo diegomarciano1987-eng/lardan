@@ -1432,6 +1432,159 @@ export type Database = {
           },
         ]
       }
+      assinatura_modelos: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string | null
+          revisado: boolean
+          texto: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          revisado?: boolean
+          texto: string
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          revisado?: boolean
+          texto?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
+      assinaturas_digitais: {
+        Row: {
+          ambiente: string
+          assinado_em: string | null
+          atualizado_em: string
+          criado_em: string
+          criado_por: string | null
+          cycle_id: string | null
+          doc_token: string | null
+          enviado_whatsapp: boolean
+          erro: string | null
+          id: string
+          party_id: string
+          provedor: string
+          representante_party_id: string | null
+          sign_url: string | null
+          signer_token: string | null
+          status: string
+          texto_hash: string
+          tipo: string
+          titulo: string
+          valor_cents: number | null
+        }
+        Insert: {
+          ambiente: string
+          assinado_em?: string | null
+          atualizado_em?: string
+          criado_em?: string
+          criado_por?: string | null
+          cycle_id?: string | null
+          doc_token?: string | null
+          enviado_whatsapp?: boolean
+          erro?: string | null
+          id?: string
+          party_id: string
+          provedor?: string
+          representante_party_id?: string | null
+          sign_url?: string | null
+          signer_token?: string | null
+          status?: string
+          texto_hash: string
+          tipo: string
+          titulo: string
+          valor_cents?: number | null
+        }
+        Update: {
+          ambiente?: string
+          assinado_em?: string | null
+          atualizado_em?: string
+          criado_em?: string
+          criado_por?: string | null
+          cycle_id?: string | null
+          doc_token?: string | null
+          enviado_whatsapp?: boolean
+          erro?: string | null
+          id?: string
+          party_id?: string
+          provedor?: string
+          representante_party_id?: string | null
+          sign_url?: string | null
+          signer_token?: string | null
+          status?: string
+          texto_hash?: string
+          tipo?: string
+          titulo?: string
+          valor_cents?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assinaturas_digitais_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assinaturas_digitais_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assinaturas_digitais_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assinaturas_digitais_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assinaturas_digitais_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "assinaturas_digitais_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assinaturas_digitais_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assinaturas_digitais_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -18368,6 +18521,38 @@ export type Database = {
         }
         Returns: undefined
       }
+      assinatura_dados: {
+        Args: { _cycle: string; _party: string; _rep: string; _tipo: string }
+        Returns: Json
+      }
+      assinatura_ler: { Args: { _id: string }; Returns: Json }
+      assinatura_modelo_salvar: {
+        Args: {
+          _revisado: boolean
+          _texto: string
+          _tipo: string
+          _titulo: string
+        }
+        Returns: Json
+      }
+      assinatura_modelos_ler: { Args: never; Returns: Json }
+      assinatura_pendente: {
+        Args: { _cycle: string; _party: string; _tipo: string }
+        Returns: Json
+      }
+      assinatura_pode: {
+        Args: { _party: string; _rep: string }
+        Returns: boolean
+      }
+      assinatura_registrar: { Args: { _d: Json }; Returns: Json }
+      assinatura_retorno: {
+        Args: { _assinado_em: string; _doc_token: string; _status: string }
+        Returns: Json
+      }
+      assinaturas_da_consultora: {
+        Args: { _party: string; _rep: string }
+        Returns: Json
+      }
       aviso_registrar: {
         Args: { _ciente?: boolean; _dispositivo?: string; _id: string }
         Returns: string
@@ -19539,6 +19724,7 @@ export type Database = {
       fiscal_focus_maleta_dados: { Args: { _cycle: string }; Returns: Json }
       fiscal_focus_notas_maletas: { Args: { _cycles: string[] }; Returns: Json }
       fiscal_focus_pode: { Args: { _acao?: string }; Returns: boolean }
+      fiscal_focus_pode_danfe: { Args: { _ref: string }; Returns: boolean }
       fiscal_focus_producao_ativa: { Args: never; Returns: boolean }
       fiscal_focus_retorno: {
         Args: {

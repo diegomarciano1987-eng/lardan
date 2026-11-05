@@ -104,6 +104,6 @@
 ## Cobrança — plano 3° a 8° (por etapas)
 - [x] Etapa A: importar planilha do jurídico (prévia + aplicar Master, aba Processos, alerta 5 dias sem protocolo)
 - [x] Etapa B: Kanban novo + KPIs por período (prorrogação única registrada; envio ao Judicial manual após 5 dias)
-- [ ] Etapa C: acordo + termo de confissão ZapSign com autenticação avançada
+- [x] Etapa C: termo de confissão ZapSign por acordo (código WhatsApp + selfie + documento); modelo é minuta aguardando revisão do jurídico
 - [ ] Etapa D: baixa Asaas de faturas → DRE 3.1.1; sugestão 7.1.7 judicial sem baixa automática
 - [ ] Etapa E: cobrança histórica até 2025 consolidada + fatura única em lote

@@ -17,7 +17,7 @@ import { dispararLoteAsaas, type ResultadoItem } from "@/lib/cobranca-asaas.func
 import { situacaoHistorica, type DevedorHistorico } from "@/lib/cobranca-historica";
 
 type Rpc = (f: string, a: object) => Promise<{ data: unknown; error: { message: string } | null }>;
-const rpc = supabase.rpc as unknown as Rpc;
+const rpc: Rpc = (f, a) => (supabase.rpc as unknown as Rpc).call(supabase, f, a);
 type Item = { party_id: string; nome: string; saldo_cents: number; parcelas: number; ok: boolean; motivo: string | null; simulacao_id: string | null };
 type Consolidacao = { lote: string | null; aplicado: boolean; criadas: number; total_cents: number; itens: Item[] };
 

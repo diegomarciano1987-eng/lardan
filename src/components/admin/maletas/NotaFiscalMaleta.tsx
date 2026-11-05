@@ -83,7 +83,7 @@ export function useNotasMaletas(cycleIds: string[]) {
 export function NotaFiscalMaleta({
   cycleId,
   status,
-  nota,
+  nota: notaRecebida,
   podeEmitir,
   temConsultora,
   semPecas,
@@ -101,6 +101,9 @@ export function NotaFiscalMaleta({
   producao?: boolean;
 }) {
   const sufixo = producao ? "" : " (teste)";
+  // Emissão real ligada: nota de TESTE (homologação) não conta como nota da maleta (0225).
+  const testeAntigo = producao && notaRecebida?.ambiente === "homologacao" ? notaRecebida : undefined;
+  const nota = testeAntigo ? undefined : notaRecebida;
   const qc = useQueryClient();
   const emitirFn = useServerFn(focusEmitirRemessaMaleta);
   const tam = grande ? "justify-center" : "h-9 px-3 text-xs";
@@ -189,6 +192,7 @@ export function NotaFiscalMaleta({
         {emitir.isPending ? "Enviando…" : recusa ? `Emitir nota de novo${sufixo}` : `Nota fiscal${sufixo}`}
       </button>
       {recusa && <span className="max-w-72 text-xs text-destructive" title={recusa}>Recusada: {recusa}</span>}
+      {testeAntigo && <span className="text-xs text-ledger-muted">Já teve nota de teste{testeAntigo.numero ? ` nº ${testeAntigo.numero}` : ""} (sem valor fiscal).</span>}
     </span>
   );
 }

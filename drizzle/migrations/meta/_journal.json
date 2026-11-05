@@ -1688,6 +1688,13 @@
       "when": 1793919540711,
       "tag": "0240_financeiro_conferencia_asaas",
       "breakpoints": true
+    },
+    {
+      "idx": 241,
+      "version": "7",
+      "when": 1793919625368,
+      "tag": "0241_correios_maleta_envio",
+      "breakpoints": true
     }
   ]
 }

@@ -4924,6 +4924,111 @@ export type Database = {
         }
         Relationships: []
       }
+      correios_envios: {
+        Row: {
+          ambiente: string
+          codigo_enviado_em: string | null
+          codigo_objeto: string | null
+          created_at: string
+          criado_por: string | null
+          cycle_id: string
+          debito_cents: number | null
+          debito_liberado_motivo: string | null
+          direcao: string
+          entregue_em: string | null
+          erro: string | null
+          eventos: Json
+          frete_cents: number | null
+          id: string
+          limite_postagem: string | null
+          payload: Json
+          postado_em: string | null
+          prazo_dias: number | null
+          prepostagem_id: string | null
+          previsto_entrega: string | null
+          rastreado_em: string | null
+          resposta: Json | null
+          rotulo_path: string | null
+          servico: string
+          status: string
+          updated_at: string
+          valor_declarado_cents: number
+        }
+        Insert: {
+          ambiente: string
+          codigo_enviado_em?: string | null
+          codigo_objeto?: string | null
+          created_at?: string
+          criado_por?: string | null
+          cycle_id: string
+          debito_cents?: number | null
+          debito_liberado_motivo?: string | null
+          direcao: string
+          entregue_em?: string | null
+          erro?: string | null
+          eventos?: Json
+          frete_cents?: number | null
+          id?: string
+          limite_postagem?: string | null
+          payload?: Json
+          postado_em?: string | null
+          prazo_dias?: number | null
+          prepostagem_id?: string | null
+          previsto_entrega?: string | null
+          rastreado_em?: string | null
+          resposta?: Json | null
+          rotulo_path?: string | null
+          servico: string
+          status?: string
+          updated_at?: string
+          valor_declarado_cents?: number
+        }
+        Update: {
+          ambiente?: string
+          codigo_enviado_em?: string | null
+          codigo_objeto?: string | null
+          created_at?: string
+          criado_por?: string | null
+          cycle_id?: string
+          debito_cents?: number | null
+          debito_liberado_motivo?: string | null
+          direcao?: string
+          entregue_em?: string | null
+          erro?: string | null
+          eventos?: Json
+          frete_cents?: number | null
+          id?: string
+          limite_postagem?: string | null
+          payload?: Json
+          postado_em?: string | null
+          prazo_dias?: number | null
+          prepostagem_id?: string | null
+          previsto_entrega?: string | null
+          rastreado_em?: string | null
+          resposta?: Json | null
+          rotulo_path?: string | null
+          servico?: string
+          status?: string
+          updated_at?: string
+          valor_declarado_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "correios_envios_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "correios_envios_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cost_centers: {
         Row: {
           business_entity_id: string | null
@@ -19511,6 +19616,92 @@ export type Database = {
         Args: { _lead_id: string; _party_id?: string }
         Returns: string
       }
+      correios_debito_vencido: { Args: { _party: string }; Returns: number }
+      correios_eh_servidor: { Args: never; Returns: boolean }
+      correios_endereco: { Args: { _party: string }; Returns: Json }
+      correios_envio_abrir: {
+        Args: {
+          _ambiente: string
+          _ator: string
+          _cycle: string
+          _direcao: string
+          _liberar_debito?: string
+          _payload: Json
+          _servico: string
+          _valor_cents: number
+        }
+        Returns: string
+      }
+      correios_envio_cancelar: {
+        Args: { _ator: string; _id: string; _motivo: string }
+        Returns: undefined
+      }
+      correios_envio_rastro: {
+        Args: { _eventos: Json; _id: string }
+        Returns: Json
+      }
+      correios_envio_resultado: {
+        Args: {
+          _codigo: string
+          _erro: string
+          _frete_cents: number
+          _id: string
+          _ok: boolean
+          _prazo: number
+          _prepostagem: string
+          _resposta: Json
+        }
+        Returns: Json
+      }
+      correios_envio_rotulo: {
+        Args: { _id: string; _path: string }
+        Returns: undefined
+      }
+      correios_maleta_dados: {
+        Args: { _cycle: string; _direcao: string }
+        Returns: Json
+      }
+      correios_painel: { Args: { _cycle?: string }; Returns: Json }
+      correios_para_rastrear: {
+        Args: { _limite?: number }
+        Returns: {
+          ambiente: string
+          codigo_enviado_em: string | null
+          codigo_objeto: string | null
+          created_at: string
+          criado_por: string | null
+          cycle_id: string
+          debito_cents: number | null
+          debito_liberado_motivo: string | null
+          direcao: string
+          entregue_em: string | null
+          erro: string | null
+          eventos: Json
+          frete_cents: number | null
+          id: string
+          limite_postagem: string | null
+          payload: Json
+          postado_em: string | null
+          prazo_dias: number | null
+          prepostagem_id: string | null
+          previsto_entrega: string | null
+          rastreado_em: string | null
+          resposta: Json | null
+          rotulo_path: string | null
+          servico: string
+          status: string
+          updated_at: string
+          valor_declarado_cents: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "correios_envios"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      correios_pode: { Args: never; Returns: boolean }
+      correios_volta_codigo_enviado: { Args: { _id: string }; Returns: Json }
       cpf_is_valid: { Args: { d: string }; Returns: boolean }
       cpf_mascarado: { Args: { _doc: string }; Returns: string }
       create_stock_reservation: {

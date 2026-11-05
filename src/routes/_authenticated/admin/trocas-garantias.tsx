@@ -131,7 +131,7 @@ function Qualidade() {
                       aria-selected={t.id === selecionada}
                       className={cn("cursor-pointer border-t border-line-soft align-top transition hover:bg-muted/50 focus-visible:bg-muted/60 focus-visible:outline-none", t.id === selecionada && "bg-champagne/15")}>
                       <td className="px-6 py-3">
-                        <span className="flex items-center gap-2 font-semibold tabular-nums">
+                        <span className="flex items-center gap-1.5 whitespace-nowrap font-semibold tabular-nums">
                           {t.novidade_lardan && <span className="size-2 rounded-full bg-danger" title="Novidade da consultora" aria-label="Novidade da consultora" />}
                           {protocoloTroca(t.protocolo)}
                         </span>
@@ -154,7 +154,7 @@ function Qualidade() {
             )}
           </div>
           <div className="min-w-0">
-            {atual ? <Detalhe key={atual.id} t={atual} gerir={gerir} /> : <div className="px-6"><EmptyState title="Escolha uma troca" description="Clique numa linha para ver a peça, as fotos, a conversa com a consultora e dar a devolutiva." /></div>}
+            {atual ? <Detalhe key={atual.id} t={atual} gerir={gerir} onMovido={(st) => { if (!busca) setAba(st); }} /> : <div className="px-6"><EmptyState title="Escolha uma troca" description="Clique numa linha para ver a peça, as fotos, a conversa com a consultora e dar a devolutiva." /></div>}
           </div>
         </div>
       </Panel>
@@ -185,7 +185,7 @@ function Fotos({ paths }: { paths: string[] }) {
   return <div className="mt-2 grid grid-cols-3 gap-2">{q.data?.map((u) => <a key={u} href={u} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg border border-line"><img src={u} alt="Foto enviada na troca" className="aspect-square w-full object-cover" /></a>)}</div>;
 }
 
-function Detalhe({ t, gerir }: { t: Troca; gerir: boolean }) {
+function Detalhe({ t, gerir, onMovido }: { t: Troca; gerir: boolean; onMovido: (s: StatusTroca) => void }) {
   const qc = useQueryClient();
   const ev = useQuery({ queryKey: ["qualidade", "eventos", t.id], queryFn: () => eventosTroca(t.id) });
   React.useEffect(() => {
@@ -206,7 +206,7 @@ function Detalhe({ t, gerir }: { t: Troca; gerir: boolean }) {
       const { error } = await supabase.rpc("qualidade_troca_mover", { _id: t.id, _status: destino, _texto: parecer, _dados: dados });
       if (error) throw error;
     },
-    onSuccess: () => { toast.success(`${protocoloTroca(t.protocolo)}: ${STATUS_TROCA[destino]}. A consultora já vê no app.`); setParecer(""); invalidar(); },
+    onSuccess: () => { toast.success(`${protocoloTroca(t.protocolo)}: ${STATUS_TROCA[destino]}. A consultora já vê no app.`); setParecer(""); onMovido(destino); invalidar(); },
     onError: (e) => toast.error(traduzir(e)),
   });
   const difPrevista = solucao === "troca" && rep ? diferencaTroca(t.dev_valor_cents, rep.valor_cents) : solucao === "mesma_peca" || solucao === "conserto" ? 0 : t.diferenca_cents;

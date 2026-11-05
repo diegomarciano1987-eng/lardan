@@ -332,3 +332,28 @@ export const focusRegistrarAviso = createServerFn({ method: "POST" })
     const prod = avaliarConfigFocus("producao").pronto ? await registrarAviso("producao", em.cnpj) : null;
     return { ...hom, producao: prod };
   });
+
+/**
+ * XML autorizado da nota para o DANFE enxuto (0224): uma linha por peça.
+ * Pode: quem vê o fiscal ou quem gerencia maletas (nota ligada a uma maleta).
+ */
+export const focusDanfeXml = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ref: string }) => {
+    if (!d?.ref || !/^[A-Za-z0-9_-]{6,60}$/.test(d.ref)) throw new Error("Referência inválida.");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    if (!(await rpcUsuario<boolean>(c, "fiscal_focus_pode_danfe", { _ref: data.ref }))) throw new Error("Sem permissão para esta nota.");
+    const { urlArquivo } = await import("./api.server");
+    const env = await rpcServidor<EnvioBanco | null>("fiscal_focus_envio", { _ref: data.ref });
+    if (!env) throw new Error("Nota não encontrada.");
+    const url = urlArquivo(env.ambiente, env.caminho_xml);
+    if (!url) throw new Error("O XML desta nota ainda não está disponível. Consulte a nota.");
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`Não foi possível baixar o XML (${r.status}).`);
+    const xml = await r.text();
+    if (!/<infNFe/.test(xml)) throw new Error("O arquivo baixado não é uma NF-e.");
+    return { xml, cancelada: env.status === "cancelado" };
+  });

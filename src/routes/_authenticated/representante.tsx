@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BarChart3, Briefcase, CalendarDays, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, PiggyBank, Search, Send, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Briefcase, CalendarDays, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, PackageOpen, PiggyBank, Search, Send, Sparkles, Users } from "lucide-react";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
@@ -15,10 +15,11 @@ import { AgendaVisitas, MaletasCarteira } from "@/components/representante/Campo
 import { EnviarConvites } from "@/components/representante/EnviarConvites";
 import { FichaConsultora } from "@/components/representante/FichaConsultora";
 import { MaletasRepresentante } from "@/components/representante/MaletasRepresentante";
+import { AberturaConsultora } from "@/components/representante/AberturaConsultora";
 import { OperationalGlass } from "@/components/premium/OperationalGlass";
 import { FamiliaTrancada, FinanceiroFamilia } from "@/components/familia/FinanceiroFamilia";
 
-type Aba = "cobranca" | "consultoras" | "maletas" | "agenda" | "captacao" | "painel" | "familia" | "convites";
+type Aba = "cobranca" | "consultoras" | "maletas" | "agenda" | "captacao" | "painel" | "familia" | "convites" | "abertura";
 const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = [
   { id: "cobranca", rotulo: "Acerto e cobrança", curto: "Cobrança", icone: HandCoins },
   { id: "consultoras", rotulo: "Consultoras", curto: "Carteira", icone: Users },
@@ -28,7 +29,10 @@ const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = 
   { id: "painel", rotulo: "Painel", curto: "Painel", icone: BarChart3 },
   { id: "familia", rotulo: "Financeiro da família", curto: "Família", icone: PiggyBank },
   { id: "convites", rotulo: "Enviar convite", curto: "Convite", icone: Send },
+  { id: "abertura", rotulo: "Abertura de consultora", curto: "Abertura", icone: PackageOpen },
 ];
+/** No celular o representante vê só o trabalho de rua (pedido do Diego, 05/11/2026). */
+const ABAS_CELULAR: Aba[] = ["captacao", "agenda", "convites", "abertura"];
 const ESPELHO: AppRole[] = ["master", "diretoria", "financeiro", "cobranca"] as AppRole[];
 const UUID = /^[0-9a-f-]{36}$/i;
 
@@ -69,7 +73,8 @@ async function minhaFicha(): Promise<string | null> {
 function AreaRepresentante() {
   const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
   const minha = useQuery({ queryKey: ["representante", "minha-ficha"], queryFn: minhaFicha });
-  const { aba = "cobranca", rep: repEspelho } = Route.useSearch();
+  const celular = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
+  const { aba = celular ? "captacao" : "cobranca", rep: repEspelho } = Route.useSearch();
   const navigate = useNavigate({ from: "/representante" });
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/acesso"; };
 
@@ -120,8 +125,8 @@ function AreaRepresentante() {
         )}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-8 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
-        {ABAS.map((a) => (
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
+        {ABAS.filter((a) => ABAS_CELULAR.includes(a.id)).map((a) => (
           <button key={a.id} type="button" onClick={() => ir(a.id)} aria-current={aba === a.id ? "page" : undefined}
             className={`flex min-w-0 flex-col items-center gap-1 py-3 text-[0.72rem] leading-tight ${aba === a.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
             <a.icone className="size-5" aria-hidden /> <span className="max-w-full truncate px-0.5">{a.curto}</span>
@@ -155,7 +160,7 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
       <main className="flex-1 space-y-6 px-5 py-6 md:px-10">
         {!espelho && <div className="md:hidden"><InstalarApp /></div>}
         {resumo.error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{(resumo.error as Error).message}</p>}
-        {aba !== "familia" && aba !== "convites" && <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {aba !== "familia" && aba !== "convites" && aba !== "abertura" && <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Kpi rotulo="Vencido" valor={s ? brl(s.vencido_cents) : "—"} destaque />
           <Kpi rotulo="Vence hoje" valor={s ? brl(s.hoje_cents) : "—"} />
           <Kpi rotulo="Em aberto" valor={s ? brl(s.aberto_cents) : "—"} sub={s ? `${s.parcelas} parcelas · ${s.devedoras} devedoras` : ""} />
@@ -168,6 +173,7 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
         {aba === "captacao" && <Captacao rep={rep} espelho={espelho} />}
         {aba === "painel" && <PainelRepresentante rep={rep} />}
         {aba === "convites" && <EnviarConvites rep={rep} />}
+        {aba === "abertura" && <AberturaConsultora rep={rep} />}
         {/* Família: dado pessoal do login. No espelho (Master/Daniel) fica trancada e nada é consultado. */}
         {aba === "familia" && (espelho ? <FamiliaTrancada /> : (
           <section className="space-y-4">

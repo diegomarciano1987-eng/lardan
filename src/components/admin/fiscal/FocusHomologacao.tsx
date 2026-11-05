@@ -22,6 +22,7 @@ import {
   focusRegistrarAviso,
 } from "@/lib/focus/focus.functions";
 import { valorFiscalUnitario, type OperacaoNfe } from "@/lib/focus/nfe";
+import { imprimirDanfe } from "./imprimirDanfe";
 
 interface Envio {
   ref: string;
@@ -429,7 +430,8 @@ export function FocusHomologacao() {
                       </button>
                       {e.tem_danfe && (
                         <>
-                          <button type="button" className="admin-btn" onClick={() => void abrir(e.ref, "danfe")}><FileText aria-hidden className="size-4" /> DANFE</button>
+                          <button type="button" className="admin-btn" onClick={() => void imprimirDanfe(e.ref)} title="DANFE enxuto: uma linha por peça"><FileText aria-hidden className="size-4" /> DANFE</button>
+                          <button type="button" className="admin-btn" onClick={() => void abrir(e.ref, "danfe")} title="DANFE no layout da Focus"><FileText aria-hidden className="size-4" /> PDF Focus</button>
                           <button type="button" className="admin-btn" onClick={() => void abrir(e.ref, "xml")}><FileText aria-hidden className="size-4" /> XML</button>
                         </>
                       )}

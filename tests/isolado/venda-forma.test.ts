@@ -20,7 +20,7 @@ for (const [nome, pedido, esperado] of casos) {
   test(`0213 — ${nome}`, async () => {
     const linhas = await adm.unsafe(
       "select public.venda_forma(jsonb_populate_record(null::public.sales_orders, $1::jsonb)) as forma",
-      [JSON.stringify(pedido)],
+      [pedido],
     );
     expect(linhas[0]?.forma).toBe(esperado);
   });

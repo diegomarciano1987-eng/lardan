@@ -7,7 +7,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { Panel } from "@/components/admin/ui";
 
 /** Vínculo da consultora: representante responsável e praça (consultant_profiles). */
-export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; podeEditar: boolean }) {
+export function VinculoConsultora({ partyId, podeEditar, colaboradora = false }: { partyId: string; podeEditar: boolean; colaboradora?: boolean }) {
   const qc = useQueryClient();
   const q = useQuery({
     queryKey: ["vinculo-consultora", partyId],
@@ -61,7 +61,8 @@ export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; po
   async function salvar() {
     setSalvando(true);
     const { error } = await supabase.from("consultant_profiles").upsert(
-      { party_id: partyId, representative_party_id: rep || null, praca_id: praca || null },
+      colaboradora ? { party_id: partyId, representative_party_id: rep || null }
+        : { party_id: partyId, representative_party_id: rep || null, praca_id: praca || null },
       { onConflict: "party_id" },
     );
     setSalvando(false);
@@ -69,20 +70,23 @@ export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; po
       toast.error("Não foi possível salvar o vínculo.", { description: error.message });
       return;
     }
-    toast.success("Vínculo da consultora salvo.");
+    toast.success(colaboradora ? "Representante da colaboradora salvo." : "Vínculo da consultora salvo.");
     await qc.invalidateQueries({ queryKey: ["vinculo-consultora", partyId] });
     await qc.invalidateQueries({ queryKey: ["party", partyId] });
     await qc.invalidateQueries({ queryKey: ["historico-jflex", "consultora", partyId] });
   }
 
   return (
-    <Panel title="Vínculo da consultora" flush className="mb-4">
+    <Panel title={colaboradora ? "Vínculo da colaboradora" : "Vínculo da consultora"} flush className="mb-4">
       <div className="grid gap-4 p-5 md:grid-cols-2">
         <label className="space-y-1.5 text-sm font-medium">
-          <span className="ledger-eyebrow">Representante responsável</span>
+          <span className="ledger-eyebrow">{colaboradora ? "Representante vinculado" : "Representante responsável"}</span>
           <SmartSelect options={q.data?.reps ?? []} value={rep} onChange={(v) => { setRep(v); setPraca(""); setTodasPracas(false); }} disabled={!podeEditar}
             placeholder="Sem representante" emptyLabel="Nenhum representante ativo" />
         </label>
+        {colaboradora ? (
+          <p className="self-end text-xs text-ledger-muted">A colaboradora vê só as consultoras, maletas e remessas deste representante.</p>
+        ) : <>
         <label className="space-y-1.5 text-sm font-medium">
           <span className="ledger-eyebrow">Praça</span>
           {pracaUnica ? (
@@ -110,12 +114,13 @@ export function VinculoConsultora({ partyId, podeEditar }: { partyId: string; po
           )}
         </label>
         <MadrinhaConsultora partyId={partyId} podeEditar={podeEditar} />
+        </>}
         {podeEditar && (
           <div className="flex gap-2 md:col-span-2">
             <button type="button" className="admin-btn-primary" disabled={salvando} onClick={salvar}>
               {salvando ? "Salvando…" : "Salvar vínculo"}
             </button>
-            {(rep || praca) && (
+            {(rep || (!colaboradora && praca)) && (
               <button type="button" className="admin-btn-secondary" onClick={() => { setRep(""); setPraca(""); }}>
                 Limpar
               </button>

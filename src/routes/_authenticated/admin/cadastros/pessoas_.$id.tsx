@@ -660,6 +660,9 @@ function FichaPessoa() {
           {d.papeis.some((p) => p.role === "consultora") && (
             <VinculoConsultora partyId={id} podeEditar={podeEditar} />
           )}
+          {d.papeis.some((p) => p.role === "colaborador") && !d.papeis.some((p) => p.role === "consultora") && (
+            <VinculoConsultora partyId={id} podeEditar={podeEditar} colaboradora />
+          )}
           <Panel title="Onde este cadastro é usado" flush>
             <div className="p-5">
               {d.vinculos.length === 0 ? (

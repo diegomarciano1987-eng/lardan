@@ -21506,6 +21506,11 @@ export type Database = {
       }
       purge_integration_data: { Args: never; Returns: Json }
       qualidade_ator_nome: { Args: never; Returns: string }
+      qualidade_buscar_consultora: { Args: { _termo: string }; Returns: Json }
+      qualidade_buscar_peca: {
+        Args: { _limite?: number; _termo: string }
+        Returns: Json
+      }
       qualidade_fotos_validas: { Args: { _fotos: Json }; Returns: boolean }
       qualidade_peca: { Args: { _variant: string }; Returns: Json }
       qualidade_troca_abrir: {

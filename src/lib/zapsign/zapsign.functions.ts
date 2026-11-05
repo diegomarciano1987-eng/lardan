@@ -204,7 +204,7 @@ export const zapsignConfissao = createServerFn({ method: "POST" })
     const cfg = configZapsign();
     if (!cfg.pronto) throw new Error("Assinatura digital não configurada.");
     const campos = dados.campos as unknown as Record<string, unknown>;
-    const valores = { ...valoresDosCampos(dados.campos), plano: String(campos.plano ?? ""), dividas: String(campos.dividas ?? "") };
+    const valores = { ...valoresDosCampos(dados.campos), plano: String(campos["plano"] ?? ""), dividas: String(campos["dividas"] ?? "") };
     const titulo = preencherModelo(dados.modelo.titulo, valores).replace(/\\/g, "").slice(0, 250);
     const texto = dados.modelo.texto.replace(/\{\{\s*(plano|dividas)\s*\}\}/g, (_m, k: string) => valores[k as "plano"] || "________________");
     const final = preencherModelo(texto, valores);

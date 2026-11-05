@@ -1,7 +1,7 @@
 DO $$
-DECLARE v_cep text := x2786300000x27;
+DECLARE v_cep text := '86300000';
 BEGIN
-  IF v_cep ~ x27^[0-9]{8}$x27 THEN
-    RAISE NOTICE x27okx27;
+  IF v_cep ~ '^[0-9]{8}$' THEN
+    RAISE NOTICE 'ok';
   END IF;
 END $$;

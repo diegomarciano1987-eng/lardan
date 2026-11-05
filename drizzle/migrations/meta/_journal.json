@@ -1499,6 +1499,13 @@
       "when": 1793898064777,
       "tag": "0213_venda_forma_combinado",
       "breakpoints": true
+    },
+    {
+      "idx": 214,
+      "version": "7",
+      "when": 1793899920213,
+      "tag": "0214_nfe_remessa_maleta",
+      "breakpoints": true
     }
   ]
 }

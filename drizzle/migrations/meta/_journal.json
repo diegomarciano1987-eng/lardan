@@ -1821,6 +1821,13 @@
       "when": 1794000534292,
       "tag": "0259_etiqueta_maleta_abertura",
       "breakpoints": true
+    },
+    {
+      "idx": 260,
+      "version": "7",
+      "when": 1794001341021,
+      "tag": "0260_transferencia_smalldata_representante_por_cpf",
+      "breakpoints": true
     }
   ]
 }

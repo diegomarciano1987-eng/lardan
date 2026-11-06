@@ -106,6 +106,14 @@ export const repassarMaleta = (rep: string, cycleId: string, d: Destinataria) =>
     _lead: d.tipo === "candidata" ? d.id : null,
   });
 
+/** 0254: representante entregou em mãos → a consultora confirma "recebi" e faz o aceite no app dela. */
+export const entregarEmMaos = (cycleId: string) =>
+  rpc<{ transfer_id?: string; repetida?: boolean }>("kit_transfer_forward", { _cycle: cycleId, _payload: { note: "Entregue em mãos pelo representante" } });
+export const expedirRemessaRepresentante = (remessaId: string) =>
+  rpc<{ maletas: number }>("remessa_expedir_representante", { _remessa: remessaId });
+export const devolverCustodiaRepresentante = (cycleId: string, motivo: string) =>
+  rpc<{ situacao: string }>("kit_devolver_custodia_representante", { _cycle: cycleId, _motivo: motivo });
+
 export const receberMaleta = (transferId: string) =>
   rpc<{ situacao: string }>("kit_transfer_confirm", { _transfer: transferId, _payload: {} });
 

@@ -5,7 +5,11 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { adm, criarConta, criarDeposito, ler, porEstoque, rpc, rpcServico, saldo, type Conta } from "./base";
 
-const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
+const um = async <T>(sql: string, p: unknown[] = []) => {
+  const row = ((await adm.unsafe(sql, p)) as T[])[0];
+  if (!row) throw new Error("Missing isolated test row");
+  return row;
+};
 const sufixo = Math.floor(Math.random() * 90000);
 const LEG = 800000 + sufixo; // remessa do SmallData
 const LEG_OUTRO = 700000 + sufixo; // remessa de outro representante
@@ -29,6 +33,12 @@ async function variante(nome: string, codigo: number, preco: number) {
   return v.id;
 }
 
+function cpf(base9: string) {
+  const d = base9.split("").map(Number);
+  for (const n of [9, 10]) { const soma = d.slice(0, n).reduce((a, x, i) => a + x * (n + 1 - i), 0); const r = (soma * 10) % 11; d.push(r === 10 ? 0 : r); }
+  return d.join("");
+}
+
 beforeAll(async () => {
   master = await criarConta({ nome: `lt-master-${sufixo}`, papeis: ["master"], comParty: true });
   cons = await criarConta({ nome: `lt-cons-${sufixo}`, papeis: ["consultora"], comParty: true });
@@ -40,12 +50,18 @@ beforeAll(async () => {
   vAnel = await variante(`AN TESTE ${sufixo}`, ANEL, 4000);
   await porEstoque(vA, deposito, 10);
   await porEstoque(vB, deposito, 1); // falta 1
-  await adm.unsafe(`insert into legado_representantes(codigo,nome,party_id,vinculo) values($1,'Rep teste',$2,'manual'),($3,'Rep 2',$4,'manual')`,
-    [REP_COD, rep.partyId, REP_COD + 1, rep2.partyId]);
-  const praca = (await ler<{ id: string }>(master, `select (public.praca_criar($1)).id`, [`LT ${sufixo}`])).linhas[0]!.id;
+  // como no banco real: o código do representante está ligado a OUTRA pessoa (quem opera a rota); vale o CPF do SmallData
+  const cpf1 = cpf(`3${String(sufixo).padStart(5, "0")}417`), cpf2 = cpf(`5${String(sufixo).padStart(5, "0")}239`);
+  await adm.unsafe(`update parties set doc=$2 where id=$1`, [rep.partyId, cpf1]);
+  await adm.unsafe(`update parties set doc=$2 where id=$1`, [rep2.partyId, cpf2]);
+  await adm.unsafe(`insert into legado_representantes(codigo,nome,cpf,party_id,vinculo) values($1,'Rep teste',$2,$3,'manual'),($4,'Rep 2',$5,$6,'manual')`,
+    [REP_COD, cpf1, cons.partyId, REP_COD + 1, cpf2, rep2.partyId]);
+  const pracaRow = (await ler<{ id: string }>(master, `select (public.praca_criar($1)).id`, [`LT ${sufixo}`])).linhas[0];
+  if (!pracaRow) throw new Error("Praça não criada na bancada isolada");
+  const praca = pracaRow.id;
   const r = await rpc<{ id: string }>(master, "remessa_criar", { _praca: praca, _numero: DEST, _representante: rep.partyId, _deposito: deposito,
     _data_acerto: new Date(Date.now() + 40 * 864e5).toISOString().slice(0, 10) });
-  if (!r.ok) throw new Error(r.erro!);
+  if (!r.ok) throw new Error(r.erro ?? "Remessa não criada");
   remessa = r.dados.id;
   await adm.unsafe(`insert into legado_transferencia_remessas(legado_remessa,representante,praca,emissao,remessa_destino) values
     ($1,$2,14,'2026-10-30',$3),($4,$5,14,'2026-10-30',$3)`, [LEG, REP_COD, DEST, LEG_OUTRO, REP_COD + 1]);
@@ -78,10 +94,12 @@ describe("prévia", () => {
     expect((await um<{ n: number }>(`select count(*)::int n from kit_cycles where remessa_id=$1`, [remessa])).n).toBe(0);
   });
 
-  test("remessa de outro representante é recusada", async () => {
+  test("remessa de outro representante é recusada (pelo CPF do SmallData)", async () => {
     const p = await rpc<Previa>(master, "legado_transferencia_previa", { _legado: LEG_OUTRO });
     expect(p.dados.pode_aplicar).toBe(false);
-    expect(p.dados.problemas.join(" ")).toContain("outro representante");
+    expect(p.dados.problemas.join(" ")).toContain("CPF diferente");
+    // a ligação do código não foi tocada
+    expect((await um<{ p: string }>(`select party_id::text p from legado_representantes where codigo=$1`, [REP_COD])).p).toBe(cons.partyId);
     expect((await rpc(master, "legado_transferencia_aplicar", { _legado: LEG_OUTRO, _aceitar_falta: true })).erro).toContain("Não dá para aplicar");
   });
 
@@ -111,7 +129,7 @@ describe("aplicar e desfazer", () => {
         (select sum(i.quantity)::int from kit_composition_items i join kit_compositions kc on kc.id=i.composition_id where kc.cycle_id=c.id) pecas
       from kit_cycles c join kits k on k.id=c.kit_id where c.remessa_id=$1 order by c.abertura_numero`, [remessa])) as { s: string; rep: string; cons: string | null; n: number; label: string; pecas: number }[];
     expect(c.map((x) => [x.s, x.rep, x.cons, x.n, x.pecas])).toEqual([["conferida", rep.partyId, null, 1, 3], ["conferida", rep.partyId, null, 2, 3]]);
-    expect(c[0]!.label).toBe(`ABERTURA 1 · Remessa ${DEST}`);
+    expect(c[0]?.label).toBe(`ABERTURA 1 · Remessa ${DEST}`);
     const aro = await um<{ size: string; barcode: string }>(`select size, barcode from product_variants where product_id=(select product_id from product_variants where id=$1) and barcode=$2`, [vAnel, `${ANEL}17`]);
     expect(aro).toEqual({ size: "17", barcode: `${ANEL}17` });
     expect(await saldo(vA, deposito)).toBe(10); // conferir só reserva; a saída é na expedição

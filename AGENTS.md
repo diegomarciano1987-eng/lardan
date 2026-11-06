@@ -54,3 +54,4 @@
 - Central de Leads: leads INSERT trigger queues frozen payload in service-only central_leads_fila; cron /api/public/central-leads/enviar sends creation only; 401 pauses. Why: CRM save independent; Central is permanent archive.
 - Barcodes 5-digit seq (never EAN-13); barcode/ref unique incl. product×variant (codigo_unico_guarda). Why: Argox, scans.
 - Signed-document rules: src/lib/zapsign/AGENTS.md. Why: privacy.
+- SmallData remessa transfer preview verifies the legacy representative CPF against the destination representative document, without rewriting legacy party links; apply consumes the same preview. Why: validate identity without changing portfolio scope.

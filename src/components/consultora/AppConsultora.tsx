@@ -276,6 +276,16 @@ export function Inicio({ ir }: { ir: Ir }) {
       </header>
       <div className="space-y-3">
         <CartaoLiga compacto />
+        {/* 0246 (Diego, 05/11): "Vendidos" logo abaixo da Liga, na cara */}
+        <button type="button" onClick={() => ir({ aba: "vendidos" })}
+          className="flex min-h-16 w-full items-center gap-4 rounded-2xl border border-border bg-card px-5 py-3 text-left shadow-[var(--shadow-app)] active:scale-[0.99]">
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/10 text-primary"><ShoppingBag className="size-6" aria-hidden /></span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-lg font-semibold leading-tight">Vendidos</span>
+            <span className="block text-sm text-muted-foreground">Tudo o que você vendeu e como cada cliente pagou</span>
+          </span>
+          <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+        </button>
       </div>
       <LembretesPagamento ir={ir} />
 

@@ -223,3 +223,62 @@ export const convidarConsultora = createServerFn({ method: "POST" })
     await sb.rpc("access_invite_envio" as never, { _id: res.id, _ok: env.ok, _erro: env.erro } as never);
     return { ok: true as const, party_id: party, link, enviado: env.ok, erro: env.erro, reenvio: false };
   });
+
+/**
+ * 0245 — Convite só com senha: a consultora abre o link, digita a senha duas vezes e pronto.
+ * O servidor lê o e-mail do convite e cria a conta já com o e-mail confirmado (o link chegou
+ * no e-mail dela, então o e-mail está provado). Conta que já foi usada não tem a senha trocada
+ * aqui: a pessoa entra com a senha que já usa (ou "Esqueci minha senha").
+ */
+export const criarSenhaConvite = createServerFn({ method: "POST" })
+  .inputValidator((i: { token: string; senha: string }) => {
+    if (!/^[0-9a-f]{64}$/.test(i?.token ?? "")) throw new Error("Convite inválido.");
+    if (typeof i.senha !== "string" || i.senha.length < 8 || i.senha.length > 72) throw new Error("A senha precisa ter de 8 a 72 caracteres.");
+    return { token: i.token, senha: i.senha };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { traduzirErroSenha } = await import("@/lib/senha-forte");
+    const hash = await hashToken(data.token);
+    const { data: c, error } = await supabaseAdmin.rpc("access_invite_conta" as never, { _token_hash: hash } as never);
+    if (error) throw new Error("Não foi possível consultar o convite.");
+    const conta = c as unknown as { situacao: string; email?: string; user_id?: string | null; ja_entrou?: boolean; papeis_conta?: string[] };
+    if (conta.situacao !== "valido" || !conta.email) return { ok: false as const, situacao: conta.situacao };
+    if (conta.user_id) {
+      // conta antiga já usada, ou que também é da equipe: entra com a senha que já tem
+      const soConsultora = (conta.papeis_conta ?? []).every((p) => p === "consultora");
+      if (conta.ja_entrou || !soConsultora) return { ok: false as const, situacao: "conta_existente", email: conta.email };
+      const { error: e2 } = await supabaseAdmin.auth.admin.updateUserById(conta.user_id, { password: data.senha, email_confirm: true });
+      if (e2) throw new Error(traduzirErroSenha(e2.message));
+    } else {
+      const { error: e3 } = await supabaseAdmin.auth.admin.createUser({ email: conta.email, password: data.senha, email_confirm: true });
+      if (e3) throw new Error(traduzirErroSenha(e3.message));
+    }
+    await supabaseAdmin.from("audit_logs").insert({
+      actor_id: null, action: "access.invite.senha_criada", entity: "access_invites", entity_id: hash.slice(0, 16),
+      payload: { conta_nova: !conta.user_id },
+    } as never);
+    return { ok: true as const, situacao: "valido", email: conta.email };
+  });
+
+/** 0245 — O Daniel (diretoria) ou o Master define uma senha nova para uma consultora (a atual não é legível). */
+export const consultoraDefinirSenha = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { partyId: string; senha: string }) => {
+    if (!/^[0-9a-f-]{36}$/.test(i?.partyId ?? "")) throw new Error("Cadastro inválido.");
+    if (typeof i.senha !== "string" || i.senha.length < 8 || i.senha.length > 72) throw new Error("A senha precisa ter de 8 a 72 caracteres.");
+    return i;
+  })
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { traduzirErroSenha } = await import("@/lib/senha-forte");
+    const { data: ok, error } = await supabaseAdmin.rpc("consultora_acesso_pode_definir" as never, { _ator: context.userId, _party: data.partyId } as never);
+    if (error) throw new Error(error.message);
+    const userId = (ok as unknown as { user_id: string }).user_id;
+    const { error: e2 } = await supabaseAdmin.auth.admin.updateUserById(userId, { password: data.senha, email_confirm: true });
+    if (e2) throw new Error(traduzirErroSenha(e2.message));
+    await supabaseAdmin.from("audit_logs").insert({
+      actor_id: context.userId, action: "consultora.senha.definir", entity: "parties", entity_id: data.partyId, payload: { user_id: userId },
+    } as never);
+    return { ok: true };
+  });

@@ -56,11 +56,17 @@ export type RepCrm = {
   codigo: string | null;
   /** sistema: coluna que acompanha a Lardan (aprovada / primeira_maleta / nao_aprovada) — não aceita arrastar. */
   etapas: { id: string; nome: string; sistema: "aprovada" | "primeira_maleta" | "nao_aprovada" | null }[];
-  cards: { lead_id: string; protocolo: string; nome: string; whatsapp: string; cidade: string; status_lardan: string; origem: string | null; criado: string; etapa_id: string; nota: string | null; travado: boolean }[];
+  cards: {
+    lead_id: string; protocolo: string; nome: string; whatsapp: string; cidade: string; status_lardan: string; origem: string | null; criado: string;
+    etapa_id: string; nota: string | null; travado: boolean;
+    /** 0245: coluna do sistema, cadastro já criado pela Lardan, CPF informado na candidatura e quando o rep mexeu no card */
+    sistema?: "aprovada" | "primeira_maleta" | "nao_aprovada" | null; party_id?: string | null; tem_cpf?: boolean; movido_em?: string | null;
+  }[];
 };
 export const repCrm = (rep: string) => chamar<RepCrm>("rep_crm", { _rep: rep });
 export const repCrmMover = (lead: string, etapa: string, nota?: string | null) => chamar<null>("rep_crm_mover", { _lead: lead, _etapa: etapa, _nota: nota ?? null });
 export const repEtapaSalvar = (id: string | null, nome: string, ordem: number | null) => chamar<string>("rep_crm_etapa_salvar", { _id: id, _nome: nome, _ordem: ordem });
+export const repCpfDefinir = (rep: string, party: string, cpf: string | null) => chamar<{ ok: boolean; ja_tinha: boolean; fonte?: string }>("rep_consultora_cpf_definir", { _rep: rep, _party: party, _cpf: cpf });
 export const repCheque = (payload: Record<string, unknown>) => chamar<string>("rep_cheque_registrar", { _payload: payload });
 export const repReativar = (party: string) => chamar<boolean>("rep_consultora_reativar", { _party: party });
 
@@ -136,3 +142,29 @@ export function foneBR(v: string | null | undefined) {
   if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
   return v ?? "";
 }
+
+// ───────────── 0246 — acertos, remessas e checklist do representante ─────────────
+export type RepAcertoAFazer = {
+  cycle_id: string | null; fonte: "lardan" | "smalldata"; maleta: string; remessa: number | null; party_id: string | null; consultora: string;
+  acerto: string | null; dias: number | null; vencida: boolean; pecas: number; valor_cents: number; pre_baixa: string;
+  info_acerto: string | null; info_por: string | null; whatsapp: string | null;
+};
+export type RepRemessa = {
+  id: string; numero: number; status: string; data_emissao: string; data_acerto: string | null; praca: string; em_meu_nome: boolean;
+  maletas: number; valor_cents: number; informacoes: number; acertos_feitos: number;
+};
+export type RepAcertos = {
+  de: string; ate: string; hoje: string; a_fazer: RepAcertoAFazer[]; a_fazer_qtd: number; atrasados_qtd: number;
+  feitos: { cycle_id: string; consultora: string; maleta: string; data: string; situacao: string; vendido_cents: number; pagar_cents: number }[];
+  feitos_qtd: number; venda_bruta_cents: number; remessas: RepRemessa[];
+};
+export type RepRemessaInfo = {
+  numero: number; data_emissao: string; data_acerto: string | null; praca: string | null;
+  itens: { party_id: string; nome: string; codigo: string | null; maleta: string | null; tem_maleta: boolean; acerto: string | null; whatsapp: string | null;
+    sem_maleta_motivo: string | null; info_acerto: string | null; atualizado_por_nome: string | null; feito_em: string | null }[];
+};
+export const repAcertos = (rep: string, de: string, ate: string) => chamar<RepAcertos>("rep_acertos", { _rep: rep, _de: de, _ate: ate });
+export const repRemessas = (rep: string, de: string, ate: string) => chamar<RepRemessa[]>("rep_remessas", { _rep: rep, _de: de, _ate: ate });
+export const repRemessaInformacoes = (rep: string, remessa: string) => chamar<RepRemessaInfo>("rep_remessa_informacoes", { _rep: rep, _remessa: remessa });
+export const repAcertoMarcar = (rep: string, remessa: string, party: string, feito: boolean) =>
+  chamar<{ feito: boolean; feitos: number; total: number }>("rep_acerto_marcar", { _rep: rep, _remessa: remessa, _party: party, _feito: feito });

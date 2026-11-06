@@ -8,6 +8,7 @@
 import * as React from "react";
 import { MaletasRepresentante } from "@/components/representante/MaletasRepresentante";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
+import { DocumentosNovasConsultoras } from "@/components/representante/CaptacaoInteligente";
 
 export function AberturaConsultora({ rep }: { rep: string }) {
   const [vinculadas, setVinculadas] = React.useState<{ partyId: string; nome: string; nova: boolean }[]>([]);
@@ -29,6 +30,9 @@ export function AberturaConsultora({ rep }: { rep: string }) {
       ))}
 
       <MaletasRepresentante rep={rep} onRepasse={(r) => setVinculadas((l) => [r, ...l.filter((x) => x.partyId !== r.partyId)])} />
+
+      {/* 0245: contrato e promissória ficam sempre aqui, não só logo depois de vincular a maleta */}
+      <DocumentosNovasConsultoras rep={rep} />
     </div>
   );
 }

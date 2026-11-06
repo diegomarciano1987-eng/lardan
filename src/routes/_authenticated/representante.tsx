@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BarChart3, Briefcase, CalendarDays, ChevronLeft, ChevronRight, Eye, HandCoins, LogOut, PackageOpen, PiggyBank, Search, Send, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, Briefcase, CalendarDays, ChevronLeft, ChevronRight, ClipboardCheck, Eye, HandCoins, ListChecks, LogOut, PackageOpen, PiggyBank, Search, Send, Sparkles, Users } from "lucide-react";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
@@ -10,7 +10,9 @@ import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { AberturaApp, InstalarApp } from "@/components/consultora/InstalarApp";
 import { PainelRepresentante } from "@/components/representante/PainelRepresentante";
 import { brl, dataBR, repCobrancasLista, repConsultoras, repResumo, type FaixaCobranca } from "@/lib/representante";
-import { Captacao, CobrarParcela, ContatoCobranca } from "@/components/representante/AcoesRepresentante";
+import { CobrarParcela, ContatoCobranca } from "@/components/representante/AcoesRepresentante";
+import { CaptacaoInteligente } from "@/components/representante/CaptacaoInteligente";
+import { AcertosRepresentante, InformacoesRemessaRep } from "@/components/representante/AcertosRepresentante";
 import { AgendaVisitas, MaletasCarteira } from "@/components/representante/CampoRepresentante";
 import { EnviarConvites } from "@/components/representante/EnviarConvites";
 import { FichaConsultora } from "@/components/representante/FichaConsultora";
@@ -19,8 +21,10 @@ import { AberturaConsultora } from "@/components/representante/AberturaConsultor
 import { OperationalGlass } from "@/components/premium/OperationalGlass";
 import { FamiliaTrancada, FinanceiroFamilia } from "@/components/familia/FinanceiroFamilia";
 
-type Aba = "cobranca" | "consultoras" | "maletas" | "agenda" | "captacao" | "painel" | "familia" | "convites" | "abertura";
+type Aba = "cobranca" | "consultoras" | "maletas" | "agenda" | "captacao" | "painel" | "familia" | "convites" | "abertura" | "acertos" | "remessas";
 const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = [
+  { id: "acertos", rotulo: "Acertos", curto: "Acertos", icone: ClipboardCheck },
+  { id: "remessas", rotulo: "Informações da remessa", curto: "Remessas", icone: ListChecks },
   { id: "cobranca", rotulo: "Acerto e cobrança", curto: "Cobrança", icone: HandCoins },
   { id: "consultoras", rotulo: "Consultoras", curto: "Carteira", icone: Users },
   { id: "maletas", rotulo: "Maletas e acerto", curto: "Maletas", icone: Briefcase },
@@ -31,8 +35,10 @@ const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = 
   { id: "convites", rotulo: "Enviar convite", curto: "Convite", icone: Send },
   { id: "abertura", rotulo: "Abertura de consultora", curto: "Abertura", icone: PackageOpen },
 ];
-/** No celular o representante vê só o trabalho de rua (pedido do Diego, 05/11/2026). */
-const ABAS_CELULAR: Aba[] = ["captacao", "agenda", "convites", "abertura"];
+/** No celular o representante vê só o trabalho de rua (pedido do Diego, 05/11/2026). 0245: Agenda e
+ *  Abertura ficam dentro de Captação; na base só Captação e Convite. */
+const ABAS_CELULAR: Aba[] = ["captacao", "acertos", "remessas", "convites"];
+const GRUPO_CAPTACAO: Aba[] = ["captacao", "agenda", "abertura"];
 const ESPELHO: AppRole[] = ["master", "diretoria", "financeiro", "cobranca"] as AppRole[];
 const UUID = /^[0-9a-f-]{36}$/i;
 
@@ -121,24 +127,27 @@ function AreaRepresentante() {
             <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">Seu login ainda não está ligado à sua ficha de representante. Peça ao Daniel para vincular.</p>
           </main>
         ) : (
-          <Painel rep={rep} aba={aba} espelho={espelho} onSair={sair} />
+          <Painel rep={rep} aba={aba} espelho={espelho} onSair={sair} ir={ir} />
         )}
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
-        {ABAS.filter((a) => ABAS_CELULAR.includes(a.id)).map((a) => (
-          <button key={a.id} type="button" onClick={() => ir(a.id)} aria-current={aba === a.id ? "page" : undefined}
-            className={`flex min-w-0 flex-col items-center gap-1 py-3 text-[0.72rem] leading-tight ${aba === a.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+        {ABAS_CELULAR.map((id) => ABAS.find((x) => x.id === id)!).map((a) => {
+          const ativa = aba === a.id || (a.id === "captacao" && GRUPO_CAPTACAO.includes(aba));
+          return (
+          <button key={a.id} type="button" onClick={() => ir(a.id)} aria-current={ativa ? "page" : undefined}
+            className={`flex min-w-0 flex-col items-center gap-1 py-3 text-[0.78rem] leading-tight ${ativa ? "font-semibold text-primary" : "text-muted-foreground"}`}>
             <a.icone className="size-5" aria-hidden /> <span className="max-w-full truncate px-0.5">{a.curto}</span>
           </button>
-        ))}
+          );
+        })}
       </nav>
     </div>
     </OperationalGlass>
   );
 }
 
-function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho: boolean; onSair: () => Promise<void> }) {
+function Painel({ rep, aba, espelho, onSair, ir }: { rep: string; aba: Aba; espelho: boolean; onSair: () => Promise<void>; ir: (id: Aba) => void }) {
   const resumo = useQuery({ queryKey: ["rep", rep, "resumo"], queryFn: () => repResumo(rep) });
   const nome = resumo.data?.nome ?? "";
   const primeiro = nome.split(" ")[0] ?? "";
@@ -160,7 +169,8 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
       <main className="flex-1 space-y-6 px-5 py-6 md:px-10">
         {!espelho && <div className="md:hidden"><InstalarApp /></div>}
         {resumo.error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{(resumo.error as Error).message}</p>}
-        {aba !== "familia" && aba !== "convites" && aba !== "abertura" && <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {/* 0245: no celular a tela fica limpa — os 4 números só aparecem no computador e fora da captação */}
+        {aba !== "familia" && aba !== "convites" && aba !== "acertos" && aba !== "remessas" && !GRUPO_CAPTACAO.includes(aba) && <div className="hidden gap-3 md:grid md:grid-cols-2 lg:grid-cols-4">
           <Kpi rotulo="Vencido" valor={s ? brl(s.vencido_cents) : "—"} destaque />
           <Kpi rotulo="Vence hoje" valor={s ? brl(s.hoje_cents) : "—"} />
           <Kpi rotulo="Em aberto" valor={s ? brl(s.aberto_cents) : "—"} sub={s ? `${s.parcelas} parcelas · ${s.devedoras} devedoras` : ""} />
@@ -169,8 +179,18 @@ function Painel({ rep, aba, espelho, onSair }: { rep: string; aba: Aba; espelho:
         {aba === "cobranca" && <Cobrancas rep={rep} espelho={espelho} />}
         {aba === "consultoras" && <Consultoras rep={rep} espelho={espelho} />}
         {aba === "maletas" && <div className="space-y-6"><MaletasCarteira rep={rep} /><MaletasRepresentante rep={rep} /></div>}
+        {GRUPO_CAPTACAO.includes(aba) && (
+          <div className="grid grid-cols-3 gap-1 rounded-full bg-muted p-1 text-sm" role="tablist" aria-label="Captação">
+            {([["captacao", "Candidatas"], ["agenda", "Agenda"], ["abertura", "Abertura"]] as [Aba, string][]).map(([id, rot]) => (
+              <button key={id} type="button" role="tab" aria-selected={aba === id} onClick={() => ir(id)}
+                className={`rounded-full py-2.5 ${aba === id ? "bg-card font-semibold text-foreground shadow-sm" : "text-muted-foreground"}`}>{rot}</button>
+            ))}
+          </div>
+        )}
+        {aba === "acertos" && <AcertosRepresentante rep={rep} />}
+        {aba === "remessas" && <InformacoesRemessaRep rep={rep} />}
         {aba === "agenda" && <AgendaVisitas rep={rep} />}
-        {aba === "captacao" && <Captacao rep={rep} espelho={espelho} />}
+        {aba === "captacao" && <CaptacaoInteligente rep={rep} onAbertura={() => ir("abertura")} />}
         {aba === "painel" && <PainelRepresentante rep={rep} />}
         {aba === "convites" && <EnviarConvites rep={rep} />}
         {aba === "abertura" && <AberturaConsultora rep={rep} />}

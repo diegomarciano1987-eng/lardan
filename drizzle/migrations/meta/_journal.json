@@ -1744,6 +1744,13 @@
       "when": 1793971222937,
       "tag": "0248_abertura_numerada_rota_devolucao_perfil",
       "breakpoints": true
+    },
+    {
+      "idx": 249,
+      "version": "7",
+      "when": 1793971326931,
+      "tag": "0249_rep_lead_atendimento_cpf_fix",
+      "breakpoints": true
     }
   ]
 }

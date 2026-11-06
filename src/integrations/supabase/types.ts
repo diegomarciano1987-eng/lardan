@@ -20902,6 +20902,10 @@ export type Database = {
         }[]
       }
       kit_detail: { Args: { _cycle: string }; Returns: Json }
+      kit_devolver_custodia_representante: {
+        Args: { _cycle: string; _motivo: string }
+        Returns: Json
+      }
       kit_divergencia_foto_registrar: {
         Args: { _cycle: string; _path: string; _variant: string }
         Returns: Json
@@ -22190,6 +22194,10 @@ export type Database = {
         Returns: Json
       }
       remessa_envio_ler: { Args: { _remessa: string }; Returns: Json }
+      remessa_expedir_representante: {
+        Args: { _remessa: string }
+        Returns: Json
+      }
       remessa_finalizar: {
         Args: { _confirmacao: number; _remessa: string }
         Returns: Json

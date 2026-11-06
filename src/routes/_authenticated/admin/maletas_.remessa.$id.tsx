@@ -68,6 +68,7 @@ function RemessaPage() {
   const [consultora, setConsultora] = React.useState("");
   const [busca, setBusca] = React.useState("");
   const master = useAdminRoles().includes("master" as never);
+  const podeNotaMaleta = master || podeMontar;
   const [semPreBaixa, setSemPreBaixa] = React.useState<string | null>(null);
   const [motivoLib, setMotivoLib] = React.useState("");
 
@@ -291,7 +292,7 @@ function RemessaPage() {
                   onClick={() => void imprimir(m.cycle_id, "etiqueta")}>
                   <Tag aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:etiqueta` ? "Preparando…" : "Etiqueta"}
                 </button>
-                <NotaFiscalMaleta cycleId={m.cycle_id} status={m.status} nota={notas.porMaleta.get(m.cycle_id)} podeEmitir={master}
+                <NotaFiscalMaleta cycleId={m.cycle_id} status={m.status} nota={notas.porMaleta.get(m.cycle_id)} podeEmitir={podeNotaMaleta}
                   temConsultora={!!m.consultora_party_id} semPecas={semPecas} producao={notas.producao} />
                 {peloCorreio && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (
                   <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} hash="correios"

@@ -27,6 +27,11 @@ async function exigir(c: Ctx, acao: "ver" | "emitir") {
   const ok = await rpcUsuario<boolean>(c, "fiscal_focus_pode", { _acao: acao });
   if (!ok) throw new Error(acao === "ver" ? "Sem permissão." : "Só o Master emite notas de teste.");
 }
+/** NF-e da maleta (remessa/acerto): Master ou equipe de montagem (kit.manage). */
+async function exigirMaleta(c: Ctx) {
+  const ok = await rpcUsuario<boolean>(c, "fiscal_focus_pode_maleta");
+  if (!ok) throw new Error("Sem permissão para emitir a nota da maleta.");
+}
 
 interface Emitente { cnpj: string; uf: string }
 async function emitente(c: Ctx): Promise<Emitente> {
@@ -175,9 +180,10 @@ export const focusEmitirRemessaMaleta = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    await exigir(c, "emitir");
-    const { emitirRemessaCiclo, rpcCom } = await import("./emissao.server");
-    return emitirRemessaCiclo(rpcCom(c.supabase), data.cycleId, c.userId);
+    await exigirMaleta(c);
+    // Permissão conferida com a sessão do usuário; dados e registro pelo executor interno, com o usuário como autor.
+    const { emitirRemessaCiclo, rpcServidor: rpcSrv } = await import("./emissao.server");
+    return emitirRemessaCiclo(rpcSrv, data.cycleId, c.userId);
   });
 
 /** Notas do ACERTO da maleta encerrada: devolução, venda e perda ligadas à remessa autorizada. */
@@ -189,9 +195,9 @@ export const focusEmitirAcertoMaleta = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    await exigir(c, "emitir");
-    const { emitirAcertoCiclo, rpcCom } = await import("./emissao.server");
-    return emitirAcertoCiclo(rpcCom(c.supabase), data.cycleId, c.userId);
+    await exigirMaleta(c);
+    const { emitirAcertoCiclo, rpcServidor: rpcSrv } = await import("./emissao.server");
+    return emitirAcertoCiclo(rpcSrv, data.cycleId, c.userId);
   });
 
 /** Painel da emissão real (sem segredos): estado no banco + se o token de produção está no Lovable. */
@@ -259,7 +265,7 @@ export const focusConsultar = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    await exigir(c, "ver");
+    if (!(await rpcUsuario<boolean>(c, "fiscal_focus_pode_danfe", { _ref: data.ref }))) await exigir(c, "ver");
     const { consultarNfe } = await import("./api.server");
     const env = await rpcServidor<EnvioBanco | null>("fiscal_focus_envio", { _ref: data.ref });
     if (!env) throw new Error("Nota não encontrada.");

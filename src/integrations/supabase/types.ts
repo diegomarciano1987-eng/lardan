@@ -20518,6 +20518,7 @@ export type Database = {
       fiscal_focus_notas_maletas: { Args: { _cycles: string[] }; Returns: Json }
       fiscal_focus_pode: { Args: { _acao?: string }; Returns: boolean }
       fiscal_focus_pode_danfe: { Args: { _ref: string }; Returns: boolean }
+      fiscal_focus_pode_maleta: { Args: never; Returns: boolean }
       fiscal_focus_producao_ativa: { Args: never; Returns: boolean }
       fiscal_focus_retorno: {
         Args: {

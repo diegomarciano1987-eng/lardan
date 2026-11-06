@@ -1,3 +1,4 @@
+import { useCapabilities } from "@/lib/capabilities";
 import * as React from "react";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { EtiquetaMaleta } from "./EtiquetaMaleta";
@@ -188,6 +189,8 @@ export function DocumentosMaleta({
   const doc = useQuery({ queryKey: ["maletas", "doc", cycleId], queryFn: () => docConsultora(cycleId) });
   const valorTotal = composicao.reduce((s, c) => s + c.quantidade * c.valor_unitario, 0);
   const master = useAdminRoles().includes("master" as never);
+  const capsNota = useCapabilities();
+  const podeNotaMaleta = master || capsNota.includes("kit.manage");
   const notas = useNotasMaletas([cycleId]);
 
   return (
@@ -258,7 +261,7 @@ export function DocumentosMaleta({
                 : <>Por enquanto sai como nota de <strong className="text-ledger-text">teste (homologação)</strong>, sem valor fiscal.</>}
             </p>
             {/* Esta tela abre logo depois da conferência gravada; o servidor confere de novo a situação. */}
-            <NotaFiscalMaleta cycleId={cycleId} status="conferida" nota={notas.porMaleta.get(cycleId)} podeEmitir={master}
+            <NotaFiscalMaleta cycleId={cycleId} status="conferida" nota={notas.porMaleta.get(cycleId)} podeEmitir={podeNotaMaleta}
               temConsultora semPecas={composicao.length === 0} grande producao={notas.producao} />
           </div>
         </div>

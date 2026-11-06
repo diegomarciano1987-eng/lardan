@@ -40,7 +40,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   const podeComprar = !!slug && !previa;
   /** "Comprar" na peça: garante a peça na sacola e abre o pagamento (Pix ou cartão). */
   const comprarPeca = (i: Item) => {
-    if (!podeComprar || i.disponivel < 1) return;
+    if (!podeComprar || i.em_breve || i.disponivel < 1) return;
     setSacola((s) => ({ ...s, [i.variant_id]: Math.max(s[i.variant_id] ?? 0, 1) }));
     setAmpliar(null);
     setComprando(true);
@@ -134,7 +134,10 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
               <p className="text-xs text-[var(--v-muted)]">{[i.variante, i.tamanho, i.cor].filter(Boolean).join(" · ") || "Peça única"}</p>
               <p className="mt-1 text-sm font-semibold">{brl(i.preco_cents)}</p>
               <a href={MANUAL_CUIDADOS_URL} target="_blank" rel="noreferrer" className="mt-2 block text-sm underline underline-offset-4">Garantia de dois anos e cuidados</a>
-              {podeComprar && (
+              {i.em_breve && (
+                <p className="mt-3 rounded-lg border border-[var(--v-line)] px-3 py-2 text-center text-sm font-medium">Chegando · disponível para compra em breve</p>
+              )}
+              {podeComprar && !i.em_breve && (
                 <Button type="button" onClick={() => comprarPeca(i)} className="mt-3 flex h-auto min-h-12 w-full items-center justify-center gap-2 whitespace-normal rounded-lg bg-[var(--v-accent)] px-4 py-3 text-sm font-semibold text-[var(--v-accent-ink)] hover:bg-[var(--v-accent)]">
                   <ShoppingBag aria-hidden className="size-4" /> Comprar · {brl(i.preco_cents)}
                 </Button>
@@ -143,11 +146,11 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
                 <Button asChild variant="outline" className="h-auto min-h-12 whitespace-normal"><a href={zap ? `${zap}${zap.includes("?") ? "&" : "?"}text=${encodeURIComponent(`${textoPeca(i, real, "Olá! Quero esta peça:")}\nVocê confirma a disponibilidade?`)}` : undefined} aria-disabled={!zap} target="_blank" rel="noreferrer"><MessageCircle /> Quero esta</a></Button>
                 <Button asChild variant="outline" className="h-auto min-h-12 whitespace-normal"><a href={`https://wa.me/?text=${encodeURIComponent(textoPeca(i, real, ""))}`} target="_blank" rel="noreferrer"><Share2 /> Enviar esta peça</a></Button>
               </div>
-              <div className="mt-2 flex items-center gap-2">
+              {!i.em_breve && <div className="mt-2 flex items-center gap-2">
                 <button type="button" aria-label="Tirar uma" className="size-8 rounded-full border border-[var(--v-line)]" onClick={() => setSacola((s) => ({ ...s, [i.variant_id]: Math.max(q - 1, 0) }))}>−</button>
                 <span className="w-6 text-center text-sm tabular-nums">{q}</span>
                 <button type="button" aria-label="Adicionar uma" className="size-8 rounded-full border border-[var(--v-line)]" onClick={() => setSacola((s) => ({ ...s, [i.variant_id]: Math.min(q + 1, i.disponivel) }))}>+</button>
-              </div>
+              </div>}
             </div>
           </li>
         );

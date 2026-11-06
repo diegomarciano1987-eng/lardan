@@ -11,6 +11,7 @@ import {
   brl,
   dataBr,
   destinatariasDoRepresentante,
+  entregarEmMaos,
   maletasDoRepresentante,
   mensagem,
   receberMaleta,
@@ -30,11 +31,26 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
     },
     onError: (e) => toast.error(mensagem(e)),
   });
+  const receberTodas = useMutation({
+    mutationFn: async (ids: string[]) => {
+      let ok = 0;
+      for (const id of ids) { await receberMaleta(id); ok += 1; }
+      return ok;
+    },
+    onSuccess: (n) => { toast.success(`${n} maletas confirmadas com você.`); recarregar(); },
+    onError: (e) => { toast.error(mensagem(e)); recarregar(); },
+  });
+  const entregar = useMutation({
+    mutationFn: (cycle: string) => entregarEmMaos(cycle),
+    onSuccess: () => { toast.success("Entrega registrada. Agora a consultora confirma que recebeu e confere as peças no app dela."); recarregar(); },
+    onError: (e) => toast.error(mensagem(e)),
+  });
 
   if (q.isLoading) return <p className="text-sm text-muted-foreground">Carregando maletas…</p>;
   if (q.error) return <p className="text-sm text-destructive">{mensagem(q.error)}</p>;
   const d = q.data!;
-  const vazio = d.a_receber.length + d.sem_consultora.length + d.a_caminho.length === 0;
+  const paraEntregar = d.para_entregar ?? [];
+  const vazio = d.a_receber.length + d.sem_consultora.length + d.a_caminho.length + paraEntregar.length === 0;
 
   return (
     <div className="space-y-6">
@@ -45,16 +61,52 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
       )}
 
       {d.a_receber.length > 0 && (
-        <section className="space-y-2">
-          <h3 className="text-sm font-semibold">A caminho de você</h3>
+        <section className="space-y-3">
+          <div className="rounded-xl border border-primary/40 bg-primary/5 p-4">
+            <h3 className="text-base font-semibold">A empresa enviou {d.a_receber.length} {d.a_receber.length === 1 ? "maleta" : "maletas"} para você</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Confira se estão todas no carro e confirme. Depois disso elas ficam com você até entregar em mãos a cada consultora.</p>
+            {d.a_receber.length > 1 && (
+              <button className="mt-3 h-12 w-full rounded-lg bg-primary px-4 text-base font-semibold text-primary-foreground disabled:opacity-50"
+                disabled={receberTodas.isPending || receber.isPending}
+                onClick={() => receberTodas.mutate(d.a_receber.map((m) => m.transfer_id))}>
+                {receberTodas.isPending ? "Confirmando…" : `Recebi todas as ${d.a_receber.length} maletas`}
+              </button>
+            )}
+          </div>
           {d.a_receber.map((m) => (
             <div key={m.transfer_id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
               <div>
-                <p className="font-medium">Maleta {m.maleta}{m.remessa ? ` · remessa ${m.remessa}` : ""}</p>
-                <p className="text-xs text-muted-foreground">{m.pecas} peças · {brl(m.valor_cents)}{m.consultora ? ` · para ${m.consultora}` : " · sem consultora"}</p>
+                <p className="font-medium">{m.consultora ?? (m.abertura_numero ? `Abertura ${m.abertura_numero}` : "Sem consultora (abertura)")}{m.consultora_codigo ? <span className="text-muted-foreground"> · cód. {m.consultora_codigo}</span> : null}</p>
+                <p className="text-xs text-muted-foreground">Maleta {m.maleta}{m.remessa ? ` · remessa ${m.remessa}` : ""} · {m.pecas} peças · {brl(m.valor_cents)}</p>
               </div>
               <button className="h-10 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
                 disabled={receber.isPending} onClick={() => receber.mutate(m.transfer_id)}>Confirmar que recebi</button>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {paraEntregar.length > 0 && (
+        <section className="space-y-2">
+          <h3 className="text-base font-semibold">Para entregar em mãos ({paraEntregar.length})</h3>
+          <p className="text-sm text-muted-foreground">As peças já aparecem na vitrine de cada consultora para ela divulgar. Ela só vende depois que você entregar e ela confirmar que recebeu no app dela.</p>
+          {paraEntregar.map((m) => (
+            <div key={m.cycle_id} className="space-y-3 rounded-xl border border-border bg-card p-4">
+              <div>
+                <p className="font-medium">{m.consultora}{m.consultora_codigo ? <span className="text-muted-foreground"> · cód. {m.consultora_codigo}</span> : null}</p>
+                <p className="text-xs text-muted-foreground">{[m.cidade, `Maleta ${m.maleta}`, m.remessa ? `remessa ${m.remessa}` : null, `${m.pecas} peças`, brl(m.valor_cents)].filter(Boolean).join(" · ")}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {m.telefone && (
+                  <a className="inline-flex h-11 items-center rounded-lg border border-border px-4 text-sm font-medium"
+                    href={`https://wa.me/55${m.telefone.replace(/\D/g, "").replace(/^55(?=\d{10,11}$)/, "")}`} target="_blank" rel="noreferrer">WhatsApp</a>
+                )}
+                <button className="h-11 flex-1 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                  disabled={entregar.isPending}
+                  onClick={() => { if (window.confirm(`Confirmar que entregou a maleta em mãos para ${m.consultora}?`)) entregar.mutate(m.cycle_id); }}>
+                  {entregar.isPending && entregar.variables === m.cycle_id ? "Registrando…" : "Entreguei em mãos"}
+                </button>
+              </div>
             </div>
           ))}
         </section>

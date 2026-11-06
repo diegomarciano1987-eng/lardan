@@ -176,6 +176,8 @@ export interface VitrineItem {
   categoria: string | null;
   referencia?: string | null;
   disponivel: number;
+  /** 0254: maleta ainda com o representante / a caminho — só divulgação, compra depois do "recebi". */
+  em_breve?: boolean;
   preco_cents: number;
   media_id: string | null;
 }

@@ -1779,6 +1779,34 @@
       "when": 1793992479200,
       "tag": "0253_rg_opcional_abertura_rua",
       "breakpoints": true
+    },
+    {
+      "idx": 254,
+      "version": "7",
+      "when": 1793999612609,
+      "tag": "0254_custodia_representante_vitrine_divulgacao",
+      "breakpoints": true
+    },
+    {
+      "idx": 255,
+      "version": "7",
+      "when": 1793999639076,
+      "tag": "0255_remessa_expedir_representante_audit_fix",
+      "breakpoints": true
+    },
+    {
+      "idx": 256,
+      "version": "7",
+      "when": 1793999701709,
+      "tag": "0256_media_publica_maleta_a_caminho",
+      "breakpoints": true
+    },
+    {
+      "idx": 257,
+      "version": "7",
+      "when": 1793999912883,
+      "tag": "0257_vitrine_divulgacao_antes_do_aceite",
+      "breakpoints": true
     }
   ]
 }

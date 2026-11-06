@@ -196,7 +196,9 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
   const aguardandoRecebimento = d.entregas.find(
     (t) => t.situacao === "transito" && t.para_party_id === d.ciclo.consultora_party_id,
   );
-  const precisaAceitar = ["expedida", "transito", "recebida"].includes(d.ciclo.status);
+  // 0254: maleta com o representante (ainda não entregue em mãos): só divulgação, sem conferência nem venda
+  const comRepresentante = ["expedida", "transito"].includes(d.ciclo.status) && !aguardandoRecebimento;
+  const precisaAceitar = !comRepresentante && ["expedida", "transito", "recebida"].includes(d.ciclo.status);
 
   return (
     <div className="space-y-4">
@@ -215,6 +217,16 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
       </Cartao>
 
       {["operacao", "acerto", "encerrada"].includes(d.ciclo.status) && <AcertoApp cycleId={cycleId} podeComecar={d.ciclo.status !== "encerrada"} />}
+
+      {comRepresentante && (
+        <Cartao className="border-primary">
+          <p className="font-semibold">Sua maleta está a caminho com o representante</p>
+          <p className="mt-1 text-sm text-ledger-muted">
+            As peças já aparecem na sua vitrine para você divulgar. Para vender, espere o representante entregar a maleta em mãos;
+            depois você confirma aqui que recebeu e confere as peças.
+          </p>
+        </Cartao>
+      )}
 
       {aguardandoRecebimento && (
         <Cartao className="border-warning">

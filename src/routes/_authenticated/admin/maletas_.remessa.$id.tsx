@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, FileText, Lock, Plus, ScrollText, Tag, UserRound } from "lucide-react";
 import { imprimirPedidoConsignacao, imprimirPromissoriaMaleta } from "@/components/admin/maletas/DocumentosMaleta";
 import { imprimirEtiquetaMaleta } from "@/components/admin/maletas/EtiquetaMaleta";
-import { abrirMaletaRepresentante, mensagem } from "@/lib/maletas-perdidas";
+import { abrirMaletaRepresentante, devolverCustodiaRepresentante, expedirRemessaRepresentante, mensagem } from "@/lib/maletas-perdidas";
 import { EnvioRemessa } from "@/components/admin/maletas/EnvioRemessa";
 import { NotaFiscalMaleta, useNotasMaletas } from "@/components/admin/maletas/NotaFiscalMaleta";
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
@@ -17,7 +17,7 @@ import { BackButton, EmptyState, ErrorState, Panel, Skeleton, StatusBadge } from
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { useCapabilities } from "@/lib/capabilities";
 import { useColabEscopo } from "@/lib/colab-escopo";
-import { SITUACAO_MALETA, brl, liberarParaConsultora, traduzir } from "@/lib/maletas";
+import { SITUACAO_MALETA, brl, expedir, liberarParaConsultora, traduzir } from "@/lib/maletas";
 import {
   STATUS_REMESSA,
   abrirMaletaNaRemessa,
@@ -175,6 +175,24 @@ function RemessaPage() {
   const envio = useQuery({ queryKey: ["remessas", "envio", id], queryFn: () => lerEnvioRemessa(id) });
   const peloCorreio = envio.data?.tipo_envio === "correio";
   const pendInfo = semAnotacao(infos.data);
+  // 0254: remessa com representante (não Correios): fábrica → representante → consultora
+  const comRep = !!r?.representante && !peloCorreio && envio.isSuccess;
+  const conferidasRep = (maletas.data ?? []).filter((m) => m.status === "conferida").length;
+  const recarregarRem = () => { qc.invalidateQueries({ queryKey: ["remessas"] }); qc.invalidateQueries({ queryKey: ["maletas"] }); };
+  const paraRep = useMutation({
+    mutationFn: async (ciclos: string[] | null) => {
+      if (!ciclos) return (await expedirRemessaRepresentante(id)).maletas;
+      for (const c of ciclos) await expedir(c, { rota: "representante" });
+      return ciclos.length;
+    },
+    onSuccess: (n) => { toast.success(`${n} ${n === 1 ? "maleta entregue" : "maletas entregues"} ao representante. Ele confirma no app dele.`); recarregarRem(); },
+    onError: (e) => { toast.error(traduzir(e)); recarregarRem(); },
+  });
+  const devolver = useMutation({
+    mutationFn: (v: { cycle: string; motivo: string }) => devolverCustodiaRepresentante(v.cycle, v.motivo),
+    onSuccess: () => { toast.success("Maleta voltou para a custódia do representante."); recarregarRem(); },
+    onError: (e) => toast.error(traduzir(e)),
+  });
   const [motivoReabrir, setMotivoReabrir] = React.useState("");
   const finalizar = useMutation({
     mutationFn: () => finalizarRemessa(id, Number(confirmaNumero)),
@@ -266,6 +284,20 @@ function RemessaPage() {
         </Panel>
       )}
 
+      {comRep && podeMontar && conferidasRep > 0 && (
+        <Panel title={`Entregar ao representante ${r.representante}`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="max-w-2xl text-sm text-ledger-muted">
+              {conferidasRep} {conferidasRep === 1 ? "maleta conferida pronta" : "maletas conferidas prontas"}. Elas passam para a custódia do representante: ele confirma no app que recebeu, entrega em mãos a cada consultora e ela confirma o recebimento e faz o aceite. As peças já aparecem na vitrine dela para divulgar; vender, só depois do recebimento.
+            </p>
+            <button type="button" className="admin-btn admin-btn-primary" disabled={paraRep.isPending}
+              onClick={() => { if (window.confirm(`Entregar ${conferidasRep} maletas ao representante ${r.representante}?`)) paraRep.mutate(null); }}>
+              <UserRound aria-hidden className="size-4" /> {paraRep.isPending ? "Entregando…" : `Entregar as ${conferidasRep} ao representante`}
+            </button>
+          </div>
+        </Panel>
+      )}
+
       <Panel title="Maletas da remessa" flush>
         {maletas.isLoading && <div className="p-6"><Skeleton className="h-14" /></div>}
         {maletas.data?.length === 0 && (
@@ -301,7 +333,23 @@ function RemessaPage() {
                     {m.status === "conferida" ? "Enviar pelos Correios" : "Rastreio Correios"}
                   </Link>
                 )}
-                {podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (!peloCorreio || master) && (
+                {comRep && m.status === "conferida" && podeMontar && (
+                  <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || paraRep.isPending}
+                    onClick={() => paraRep.mutate([m.cycle_id])}>
+                    <UserRound aria-hidden className="size-3.5" /> Entregar ao representante
+                  </button>
+                )}
+                {comRep && m.status === "transito" && (
+                  <span className="inline-flex h-9 items-center rounded-full bg-muted px-3 text-xs text-ledger-muted">Com o representante · entrega em mãos</span>
+                )}
+                {comRep && m.status === "recebida" && podeMontar && (
+                  <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={devolver.isPending}
+                    title="Use quando a maleta foi marcada como entregue à consultora por engano e ainda está com o representante."
+                    onClick={() => { const mot = window.prompt("Motivo para voltar a maleta para o representante (fica registrado):", "Entregue direto por engano; está com o representante"); if (mot && mot.trim().length >= 5) devolver.mutate({ cycle: m.cycle_id, motivo: mot }); }}>
+                    Voltar para o representante
+                  </button>
+                )}
+                {!comRep && podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (!peloCorreio || master) && (
                   <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || liberarMaleta.isPending}
                     onClick={() => liberarMaleta.mutate(m.cycle_id)}>
                     <CheckCircle2 aria-hidden className="size-3.5" /> {liberarMaleta.isPending && liberarMaleta.variables === m.cycle_id ? "Confirmando…" : "Confirmar entrega"}

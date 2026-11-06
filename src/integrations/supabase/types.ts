@@ -15123,6 +15123,95 @@ export type Database = {
         }
         Relationships: []
       }
+      remessa_informacoes: {
+        Row: {
+          atualizado_por: string | null
+          atualizado_por_nome: string | null
+          consultora_party_id: string
+          created_at: string
+          cycle_id: string | null
+          id: string
+          info_acerto: string | null
+          remessa_id: string
+          sem_maleta_motivo: string | null
+          updated_at: string
+        }
+        Insert: {
+          atualizado_por?: string | null
+          atualizado_por_nome?: string | null
+          consultora_party_id: string
+          created_at?: string
+          cycle_id?: string | null
+          id?: string
+          info_acerto?: string | null
+          remessa_id: string
+          sem_maleta_motivo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          atualizado_por?: string | null
+          atualizado_por_nome?: string | null
+          consultora_party_id?: string
+          created_at?: string
+          cycle_id?: string | null
+          id?: string
+          info_acerto?: string | null
+          remessa_id?: string
+          sem_maleta_motivo?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remessa_informacoes_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessa_informacoes_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessa_informacoes_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "remessa_informacoes_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessa_informacoes_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessa_informacoes_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remessa_informacoes_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "remessas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       remessa_parametros: {
         Row: {
           id: boolean
@@ -15241,6 +15330,87 @@ export type Database = {
           {
             foreignKeyName: "remessas_representante_party_id_fkey"
             columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      rep_acerto_checklist: {
+        Row: {
+          consultora_party_id: string
+          feito_em: string
+          feito_por: string | null
+          remessa_id: string
+          rep_party_id: string
+        }
+        Insert: {
+          consultora_party_id: string
+          feito_em?: string
+          feito_por?: string | null
+          remessa_id: string
+          rep_party_id: string
+        }
+        Update: {
+          consultora_party_id?: string
+          feito_em?: string
+          feito_por?: string | null
+          remessa_id?: string
+          rep_party_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_acerto_checklist_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_acerto_checklist_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_acerto_checklist_consultora_party_id_fkey"
+            columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "rep_acerto_checklist_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_acerto_checklist_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_acerto_checklist_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_acerto_checklist_rep_party_id_fkey"
+            columns: ["rep_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_acerto_checklist_rep_party_id_fkey"
+            columns: ["rep_party_id"]
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
@@ -20622,6 +20792,11 @@ export type Database = {
       kit_cycle_create: { Args: { _payload: Json }; Returns: Json }
       kit_cycle_in_scope: { Args: { _cycle_id: string }; Returns: boolean }
       kit_cycle_objetivo: { Args: { _cycle: string }; Returns: Json }
+      kit_data_acerto: {
+        Args: { _c: Database["public"]["Tables"]["kit_cycles"]["Row"] }
+        Returns: string
+      }
+      kit_debito_vencido: { Args: { _party: string }; Returns: number }
       kit_depositos_operacao: {
         Args: never
         Returns: {
@@ -21883,6 +22058,16 @@ export type Database = {
         Args: { _confirmacao: number; _remessa: string }
         Returns: Json
       }
+      remessa_informacao_salvar: {
+        Args: {
+          _info: string
+          _motivo: string
+          _party: string
+          _remessa: string
+        }
+        Returns: Json
+      }
+      remessa_informacoes_lista: { Args: { _remessa: string }; Returns: Json }
       remessa_maleta_excluir: {
         Args: { _cycle: string; _motivo: string }
         Returns: Json
@@ -21971,6 +22156,19 @@ export type Database = {
       }
       rep_acerto_campo_devolucao: {
         Args: { _cycle: string; _leituras: Json }
+        Returns: Json
+      }
+      rep_acerto_marcar: {
+        Args: {
+          _feito: boolean
+          _party: string
+          _remessa: string
+          _rep: string
+        }
+        Returns: Json
+      }
+      rep_acertos: {
+        Args: { _ate: string; _de: string; _rep: string }
         Returns: Json
       }
       rep_agenda: {
@@ -22178,6 +22376,14 @@ export type Database = {
       }
       rep_recibos_lista: {
         Args: { _dias?: number; _rep: string }
+        Returns: Json
+      }
+      rep_remessa_informacoes: {
+        Args: { _remessa: string; _rep: string }
+        Returns: Json
+      }
+      rep_remessas: {
+        Args: { _ate: string; _de: string; _rep: string }
         Returns: Json
       }
       rep_representantes_lista: { Args: never; Returns: Json }

@@ -68,10 +68,10 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await adm.unsafe(`update public.fiscal_settings set emitter_entity_id = $1`, [emissorAntes]);
-  // limpa a empresa ISO com o CNPJ da TSM para não atrapalhar a suíte do emissor fiscal
-  await adm.unsafe(`delete from public.business_entities where id = $1`, [emissor]);
-  await adm.unsafe(`delete from public.party_addresses where party_id = $1`, [emissorParty]);
-  await adm.unsafe(`delete from public.parties where id = $1`, [emissorParty]);
+  // tira o CNPJ da TSM da empresa ISO para não atrapalhar a suíte do emissor fiscal
+  // (não dá para apagar: os títulos financeiros dos testes apontam para ela)
+  await adm.unsafe(`update public.business_entities set tax_id = null where id = $1`, [emissor]);
+  await adm.unsafe(`update public.parties set doc = null where id = $1`, [emissorParty]);
 });
 
 describe("1 a 3. ida", () => {

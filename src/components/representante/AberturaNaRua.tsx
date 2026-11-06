@@ -142,7 +142,7 @@ function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; 
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background" role="dialog" aria-label="Nova candidata">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background" role="dialog" aria-label="Nova candidata" data-tela-cheia="">
       <header className="border-b border-border px-5 pb-3 pt-4">
         <div className="flex items-center justify-between">
           <button type="button" aria-label="Voltar" disabled={passo === 0 || passo >= 2} onClick={() => setPasso((p) => p - 1)}

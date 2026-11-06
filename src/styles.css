@@ -1984,3 +1984,9 @@ body.consultora-glass-light-active :is([role="dialog"], [role="alertdialog"]) im
 .consultora-glass-pilot .consultora-mobile-nav { bottom: max(12px, env(safe-area-inset-bottom)); }
 .area-consultora.consultora-dock-raiz::before,
 .area-consultora.consultora-dock-raiz::after { content: none !important; display: none !important; }
+
+/* 0251: telas cheias (abertura na rua) nunca deixam a página de trás aparecer. */
+[role="dialog"][data-tela-cheia] {
+  background: var(--background) !important;
+  backdrop-filter: none !important;
+}

@@ -13,6 +13,7 @@ test("exceção 924/925 exige Master autorizado, nome único ativo, CPF ausente 
     return rows[0]?.ok;
   };
   await adm.unsafe("update parties set status='ativo',doc=null where id=$1", [rep.partyId]);
+  await adm.unsafe("insert into party_roles(party_id,role) values($1,'representante')", [rep.partyId]);
   expect(await check()).toBe(false);
   const rows = await adm.unsafe(`insert into audit_logs(actor_id,action,entity,entity_id,payload)
     select $1,'legado_transferencia_identidade_autorizada','remessas',$2,

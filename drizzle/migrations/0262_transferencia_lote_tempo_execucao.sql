@@ -1,0 +1,1 @@
+ALTER FUNCTION public.legado_transferencia_previa(integer,uuid) SET statement_timeout TO '120s'; ALTER FUNCTION public.legado_transferencia_aplicar(integer,boolean,boolean,uuid) SET statement_timeout TO '120s';

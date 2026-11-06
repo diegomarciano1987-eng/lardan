@@ -16,7 +16,7 @@ let master: Conta, montagem: Conta, consultora: Conta, diretoria: Conta;
 let n = 0;
 const marca = () => `${Date.now().toString(36)}${++n}`;
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
-let emissorAntes: string | null = null, emissor: string, plano: string;
+let emissorAntes: string | null = null, emissor: string, emissorParty: string, plano: string;
 
 async function servico<T>(sql: string, p: unknown[] = []): Promise<{ dados: T | null; erro: string | null }> {
   const c = await adm.reserve();

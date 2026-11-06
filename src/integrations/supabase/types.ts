@@ -18522,6 +18522,7 @@ export type Database = {
         Returns: undefined
       }
       access_invite_accept: { Args: { _token_hash: string }; Returns: Json }
+      access_invite_conta: { Args: { _token_hash: string }; Returns: Json }
       access_invite_create: {
         Args: {
           _email: string
@@ -19463,6 +19464,10 @@ export type Database = {
           vendido_cents: number
         }[]
       }
+      consultora_acesso_pode_definir: {
+        Args: { _ator: string; _party: string }
+        Returns: Json
+      }
       consultora_acesso_situacao: { Args: { _party: string }; Returns: Json }
       consultora_asaas_preparar: {
         Args: { _actor: string; _payload: Json }
@@ -19585,6 +19590,10 @@ export type Database = {
       consultora_vendido_ciclo: { Args: { _cycle: string }; Returns: Json }
       consultora_vendidos: {
         Args: { _ate?: string; _de?: string }
+        Returns: Json
+      }
+      consultoras_acessos: {
+        Args: { _busca?: string; _offset?: number }
         Returns: Json
       }
       consultoras_vinculo_smalldata: {
@@ -22020,6 +22029,10 @@ export type Database = {
       rep_consultora_assumir: {
         Args: { _party: string; _rep: string }
         Returns: boolean
+      }
+      rep_consultora_cpf_definir: {
+        Args: { _cpf?: string; _party: string; _rep: string }
+        Returns: Json
       }
       rep_consultora_ficha: { Args: { _party: string }; Returns: Json }
       rep_consultora_ficha_rep: {

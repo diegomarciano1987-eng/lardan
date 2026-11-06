@@ -81,10 +81,25 @@ export function AberturaNaRua({ rep }: { rep: string }) {
   );
 }
 
-function Fluxo({ rep, onFechar }: { rep: string; onFechar: () => void }) {
+/** Candidata que já está na lista: mesmo fluxo, com nome, WhatsApp e cidade já preenchidos. */
+export function AberturaDaCandidata({ rep, card }: { rep: string; card: { nome: string; whatsapp: string | null; cidade: string | null } }) {
+  const [aberto, setAberto] = React.useState(false);
+  const [cid, uf] = (card.cidade ?? "").split("/").map((x) => x.trim());
+  const inicial = { ...VAZIO, nome: card.nome, whatsapp: mFone(card.whatsapp ?? ""), cidade: cid ?? "", uf: (uf ?? "").slice(0, 2).toUpperCase() };
+  return (
+    <>
+      <button type="button" onClick={() => setAberto(true)} className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-primary/40 bg-primary/5 text-sm font-semibold text-primary">
+        <PackageOpen className="size-4" /> Fazer abertura
+      </button>
+      {aberto && <Fluxo rep={rep} inicial={inicial} onFechar={() => setAberto(false)} />}
+    </>
+  );
+}
+
+function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; inicial?: Dados }) {
   const qc = useQueryClient();
   const [passo, setPasso] = React.useState(0);
-  const [f, setF] = React.useState<Dados>(VAZIO);
+  const [f, setF] = React.useState<Dados>(inicial ?? VAZIO);
   const [perfil, setPerfil] = React.useState<Record<string, number>>({});
   const [feito, setFeito] = React.useState<{ lead_id: string; party_id: string; perfil: string } | null>(null);
   const [maleta, setMaleta] = React.useState<{ cycle_id: string; nome: string } | null>(null);

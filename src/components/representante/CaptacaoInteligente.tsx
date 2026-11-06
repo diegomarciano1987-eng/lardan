@@ -12,10 +12,10 @@ import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronDown, Copy, MessageCircle, PackageOpen, Phone, Plus, Sparkles } from "lucide-react";
-import { AtendimentoPresencial, DevolverLead } from "@/components/representante/AtendimentoPresencial";
+import { DevolverLead } from "@/components/representante/AtendimentoPresencial";
 import { repCpfDefinir, repCrm, repCrmMover, repEtapaNova, type RepCrm } from "@/lib/representante";
 import { wa } from "@/components/representante/AcoesRepresentante";
-import { AberturaNaRua } from "@/components/representante/AberturaNaRua";
+import { AberturaDaCandidata, AberturaNaRua } from "@/components/representante/AberturaNaRua";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
 
 type Card = RepCrm["cards"][number];
@@ -117,7 +117,7 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
               {c.nota && <p className="mt-2 text-xs">{c.nota}</p>}
               {p !== "fora" && p !== "maleta" && (
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <AtendimentoPresencial rep={rep} card={c} onFeito={recarregar} />
+                  <AberturaDaCandidata rep={rep} card={c} />
                   <DevolverLead rep={rep} card={c} onFeito={recarregar} />
                 </div>
               )}

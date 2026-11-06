@@ -1751,6 +1751,13 @@
       "when": 1793971326931,
       "tag": "0249_rep_lead_atendimento_cpf_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 250,
+      "version": "7",
+      "when": 1793982745200,
+      "tag": "0250_fiscal_nota_maleta_equipe_montagem",
+      "breakpoints": true
     }
   ]
 }

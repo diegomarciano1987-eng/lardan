@@ -1828,6 +1828,13 @@
       "when": 1794001341021,
       "tag": "0260_transferencia_smalldata_representante_por_cpf",
       "breakpoints": true
+    },
+    {
+      "idx": 261,
+      "version": "7",
+      "when": 1794001896114,
+      "tag": "0261_transferencia_identidade_autorizada_pontual",
+      "breakpoints": true
     }
   ]
 }

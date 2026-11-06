@@ -1772,6 +1772,13 @@
       "when": 1793988220434,
       "tag": "0252_abertura_rua_ibge",
       "breakpoints": true
+    },
+    {
+      "idx": 253,
+      "version": "7",
+      "when": 1793992479200,
+      "tag": "0253_rg_opcional_abertura_rua",
+      "breakpoints": true
     }
   ]
 }

@@ -46,6 +46,10 @@ export function cpfValido(v: string) {
   return dig(9) === Number(d[9]) && dig(10) === Number(d[10]);
 }
 
+function Rot({ t, children }: { t: string; children: React.ReactNode }) {
+  return <label className="block"><span className="mb-1.5 block text-[0.78rem] font-medium text-muted-foreground">{t}</span>{children}</label>;
+}
+
 const VAZIO = { nome: "", cpf: "", nascimento: "", rg: "", rg_orgao: "", estado_civil: "", whatsapp: "", email: "", cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", uf: "", ibge: "" };
 type Dados = typeof VAZIO;
 
@@ -57,7 +61,6 @@ export function faltando(f: Dados): string[] {
   const iso = dataIso(f.nascimento);
   if (!iso) out.push("data de nascimento");
   else { const a = new Date(); a.setFullYear(a.getFullYear() - 18); if (new Date(iso) > a) out.push("ter 18 anos ou mais"); }
-  if (f.rg.trim().length < 4) out.push("RG");
   if (!f.estado_civil) out.push("estado civil");
   if (so(f.whatsapp, 11).length !== 11) out.push("WhatsApp");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.trim())) out.push("e-mail");
@@ -137,9 +140,6 @@ function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; 
   const ok1 = falta.length === 0;
   const ok2 = Object.keys(perfil).length === PERGUNTAS.length;
   const campo = "h-12 w-full rounded-xl border border-border bg-background px-3.5 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20";
-  const Rot = ({ t, children }: { t: string; children: React.ReactNode }) => (
-    <label className="block"><span className="mb-1.5 block text-[0.78rem] font-medium text-muted-foreground">{t}</span>{children}</label>
-  );
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background" role="dialog" aria-label="Nova candidata" data-tela-cheia="">
@@ -165,13 +165,13 @@ function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; 
           {passo === 0 && (
             <>
               <Bloco titulo="Quem é ela">
-                <Rot t="Nome completo"><input className={campo} autoFocus autoComplete="off" value={f.nome} onChange={set("nome")} /></Rot>
+                <Rot t="Nome completo"><input className={campo} autoComplete="off" value={f.nome} onChange={set("nome")} /></Rot>
                 <div className="grid grid-cols-2 gap-3">
                   <Rot t="CPF"><input className={campo} inputMode="numeric" placeholder="000.000.000-00" value={f.cpf} onChange={set("cpf", mCpf)} /></Rot>
                   <Rot t="Nascimento"><input className={campo} inputMode="numeric" placeholder="dd/mm/aaaa" value={f.nascimento} onChange={set("nascimento", mData)} /></Rot>
                 </div>
                 <div className="grid grid-cols-[1fr_7rem] gap-3">
-                  <Rot t="RG"><input className={campo} value={f.rg} onChange={set("rg")} /></Rot>
+                  <Rot t="RG (opcional)"><input className={campo} value={f.rg} onChange={set("rg")} /></Rot>
                   <Rot t="Órgão"><input className={campo} placeholder="SSP/SP" value={f.rg_orgao} onChange={set("rg_orgao", (v) => v.toUpperCase())} /></Rot>
                 </div>
                 <div>

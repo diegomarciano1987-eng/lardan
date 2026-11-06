@@ -1814,6 +1814,13 @@
       "when": 1794000411559,
       "tag": "0258_smalldata_remessas_924_925_para_cloud",
       "breakpoints": true
+    },
+    {
+      "idx": 259,
+      "version": "7",
+      "when": 1794000534292,
+      "tag": "0259_etiqueta_maleta_abertura",
+      "breakpoints": true
     }
   ]
 }

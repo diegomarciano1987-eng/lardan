@@ -37,7 +37,8 @@ const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = 
 ];
 /** No celular o representante vê só o trabalho de rua (pedido do Diego, 05/11/2026). 0245: Agenda e
  *  Abertura ficam dentro de Captação; na base só Captação e Convite. */
-const ABAS_CELULAR: Aba[] = ["captacao", "acertos", "remessas", "convites"];
+// 0254: "Maletas" no celular — receber a remessa e entregar em mãos a cada consultora
+const ABAS_CELULAR: Aba[] = ["captacao", "maletas", "acertos", "remessas", "convites"];
 const GRUPO_CAPTACAO: Aba[] = ["captacao", "agenda", "abertura"];
 const ESPELHO: AppRole[] = ["master", "diretoria", "financeiro", "cobranca"] as AppRole[];
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -131,7 +132,7 @@ function AreaRepresentante() {
         )}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
         {ABAS_CELULAR.map((id) => ABAS.find((x) => x.id === id)!).map((a) => {
           const ativa = aba === a.id || (a.id === "captacao" && GRUPO_CAPTACAO.includes(aba));
           return (

@@ -157,7 +157,7 @@ export function NotaFiscalMaleta({
         ))}
         {status === "encerrada" && (
           <button type="button" className={`admin-btn ${tam}`} disabled={!podeEmitir || emitirAcerto.isPending}
-            title={podeEmitir ? "Emite as notas de TESTE de devolução, venda e perda do acerto que ainda faltam." : "Só o Master emite a nota de teste."}
+            title={podeEmitir ? "Emite as notas de TESTE de devolução, venda e perda do acerto que ainda faltam." : "Sem permissão para emitir a nota da maleta."}
             onClick={() => emitirAcerto.mutate()}>
             <Receipt aria-hidden className={icone} /> {emitirAcerto.isPending ? "Enviando…" : `Notas do acerto${nota.ambiente === "producao" ? "" : " (teste)"}`}
           </button>
@@ -174,7 +174,7 @@ export function NotaFiscalMaleta({
   }
 
   const apta = MALETA_APTA_NOTA.includes(status);
-  const motivo = !podeEmitir ? "Só o Master emite a nota de teste."
+  const motivo = !podeEmitir ? "Sem permissão para emitir a nota da maleta."
     : !temConsultora ? "Maleta de abertura: a nota sai quando o representante vincular a consultora."
     : semPecas ? "Maleta sem peças."
     : !apta ? "A nota libera quando a maleta estiver montada e conferida."

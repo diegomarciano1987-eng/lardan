@@ -4927,6 +4927,9 @@ export type Database = {
       correios_envios: {
         Row: {
           ambiente: string
+          auto_entregue_em: string | null
+          auto_erro: string | null
+          auto_expedida_em: string | null
           codigo_enviado_em: string | null
           codigo_objeto: string | null
           created_at: string
@@ -4956,6 +4959,9 @@ export type Database = {
         }
         Insert: {
           ambiente: string
+          auto_entregue_em?: string | null
+          auto_erro?: string | null
+          auto_expedida_em?: string | null
           codigo_enviado_em?: string | null
           codigo_objeto?: string | null
           created_at?: string
@@ -4985,6 +4991,9 @@ export type Database = {
         }
         Update: {
           ambiente?: string
+          auto_entregue_em?: string | null
+          auto_erro?: string | null
+          auto_expedida_em?: string | null
           codigo_enviado_em?: string | null
           codigo_objeto?: string | null
           created_at?: string
@@ -19845,6 +19854,9 @@ export type Database = {
         Args: { _limite?: number }
         Returns: {
           ambiente: string
+          auto_entregue_em: string | null
+          auto_erro: string | null
+          auto_expedida_em: string | null
           codigo_enviado_em: string | null
           codigo_objeto: string | null
           created_at: string

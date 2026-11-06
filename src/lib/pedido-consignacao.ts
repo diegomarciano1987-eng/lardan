@@ -50,6 +50,7 @@ export interface PedidoDados {
   consultora: { nome: string | null; endereco: string | null; cidade: string | null; whatsapp: string | null };
   /** maleta de abertura: com o representante, consultora preenchida à mão */
   abertura?: boolean;
+  abertura_numero?: number | null;
   representante: { nome: string | null; praca: string | null; telefone: string | null } | null;
   montado_por: string | null;
   faixas: FaixaPedido[];
@@ -328,7 +329,7 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
   </div>
   <div class="cartoes">
     ${abertura
-      ? `<div class="cartao"><div class="eyebrow">Consultora · abertura</div><div class="t">Nome: ____________________</div>
+      ? `<div class="cartao"><div class="eyebrow">${d.abertura_numero ? `MALETA DE ABERTURA ${d.abertura_numero}` : "Consultora · abertura"}</div><div class="t">Nome: ____________________</div>
       <div class="l">CPF: ________________ · WhatsApp: ______________<br>Endereço: ______________________ Cidade: ____________</div></div>`
       : `<div class="cartao"><div class="eyebrow">Consultora</div><div class="t">${esc(d.consultora.nome)}</div>
       <div class="l">${esc(d.consultora.endereco ?? "Endereço não cadastrado")}<br>${esc(d.consultora.cidade ?? "")}${d.consultora.whatsapp ? ` · WhatsApp ${esc(fone(d.consultora.whatsapp))}` : ""}</div></div>`}
@@ -351,7 +352,7 @@ export function htmlPedidoConsignacao(d: PedidoDados, opcoes: { logoUrl: string;
       <div class="regra">Sua comissão sobe conforme o total vendido no ciclo e vale sobre <strong>tudo</strong>: ${textoFaixas(d.faixas)}</div></div>
   </div>${objetivo}`;
 
-  const cab2 = `<div class="cab2">${marca(true)}<div class="info">Remessa <strong>${esc(remessa)}</strong> · Kit ${esc(kit)} · Cliente ${esc(cliente)} · ${esc(abertura ? "Abertura" : nomeCurto(d.consultora.nome ?? ""))} · Acerto <strong style="color:#7A5642">${esc(dataBr(d.remessa.data_acerto))}</strong></div></div>`;
+  const cab2 = `<div class="cab2">${marca(true)}<div class="info">Remessa <strong>${esc(remessa)}</strong> · Kit ${esc(kit)} · Cliente ${esc(cliente)} · ${esc(abertura ? (d.abertura_numero ? `ABERTURA ${d.abertura_numero}` : "Abertura") : nomeCurto(d.consultora.nome ?? ""))} · Acerto <strong style="color:#7A5642">${esc(dataBr(d.remessa.data_acerto))}</strong></div></div>`;
 
   const final = `
   <div class="fimtab" style="margin-top:${paginas.at(-1)!.length ? "0" : "3.6mm"}"><span>TOTAL DO KIT</span><span class="v"><span class="q">${pecas}</span><span class="r">${esc(brl(total))}</span></span></div>

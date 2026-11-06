@@ -1807,6 +1807,13 @@
       "when": 1793999912883,
       "tag": "0257_vitrine_divulgacao_antes_do_aceite",
       "breakpoints": true
+    },
+    {
+      "idx": 258,
+      "version": "7",
+      "when": 1794000411559,
+      "tag": "0258_smalldata_remessas_924_925_para_cloud",
+      "breakpoints": true
     }
   ]
 }

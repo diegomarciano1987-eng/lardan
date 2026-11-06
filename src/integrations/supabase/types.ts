@@ -11881,6 +11881,155 @@ export type Database = {
           },
         ]
       }
+      legado_transferencia_maletas: {
+        Row: {
+          codcli: number
+          cycle_id: string | null
+          feito_em: string | null
+          feito_por: string | null
+          kit: number
+          legado_remessa: number
+          pecas_legado: number
+          remessa_id: string | null
+          situacao: string
+          valor_legado_cents: number
+        }
+        Insert: {
+          codcli: number
+          cycle_id?: string | null
+          feito_em?: string | null
+          feito_por?: string | null
+          kit: number
+          legado_remessa: number
+          pecas_legado?: number
+          remessa_id?: string | null
+          situacao?: string
+          valor_legado_cents?: number
+        }
+        Update: {
+          codcli?: number
+          cycle_id?: string | null
+          feito_em?: string | null
+          feito_por?: string | null
+          kit?: number
+          legado_remessa?: number
+          pecas_legado?: number
+          remessa_id?: string | null
+          situacao?: string
+          valor_legado_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legado_transferencia_maletas_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_transferencia_maletas_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_transferencia_maletas_legado_remessa_fkey"
+            columns: ["legado_remessa"]
+            isOneToOne: false
+            referencedRelation: "legado_transferencia_remessas"
+            referencedColumns: ["legado_remessa"]
+          },
+          {
+            foreignKeyName: "legado_transferencia_maletas_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legado_transferencia_maletas_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "remessas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legado_transferencia_pecas: {
+        Row: {
+          codcli: number
+          conferida: number
+          kit: number
+          legado_remessa: number
+          nome: string | null
+          produto: number
+          quantidade: number
+          referencia: string | null
+          tamanho: string
+        }
+        Insert: {
+          codcli: number
+          conferida?: number
+          kit: number
+          legado_remessa: number
+          nome?: string | null
+          produto: number
+          quantidade: number
+          referencia?: string | null
+          tamanho?: string
+        }
+        Update: {
+          codcli?: number
+          conferida?: number
+          kit?: number
+          legado_remessa?: number
+          nome?: string | null
+          produto?: number
+          quantidade?: number
+          referencia?: string | null
+          tamanho?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legado_transferencia_pecas_legado_remessa_codcli_kit_fkey"
+            columns: ["legado_remessa", "codcli", "kit"]
+            isOneToOne: false
+            referencedRelation: "legado_transferencia_maletas"
+            referencedColumns: ["legado_remessa", "codcli", "kit"]
+          },
+        ]
+      }
+      legado_transferencia_remessas: {
+        Row: {
+          criado_em: string
+          emissao: string | null
+          legado_remessa: number
+          praca: number | null
+          remessa_destino: number
+          representante: number
+          vencimento: string | null
+        }
+        Insert: {
+          criado_em?: string
+          emissao?: string | null
+          legado_remessa: number
+          praca?: number | null
+          remessa_destino: number
+          representante: number
+          vencimento?: string | null
+        }
+        Update: {
+          criado_em?: string
+          emissao?: string | null
+          legado_remessa?: number
+          praca?: number | null
+          remessa_destino?: number
+          representante?: number
+          vencimento?: string | null
+        }
+        Relationships: []
+      }
       lider_config: {
         Row: {
           atualizado_em: string
@@ -21257,6 +21406,39 @@ export type Database = {
       legado_status_esperado: {
         Args: { _codcli: number }
         Returns: Database["public"]["Enums"]["party_status"]
+      }
+      legado_transferencia_aplicar: {
+        Args: {
+          _aceitar_falta?: boolean
+          _actor?: string
+          _expedir?: boolean
+          _legado: number
+        }
+        Returns: Json
+      }
+      legado_transferencia_ator: { Args: { _actor: string }; Returns: string }
+      legado_transferencia_desfazer: {
+        Args: { _actor?: string; _legado: number; _motivo: string }
+        Returns: Json
+      }
+      legado_transferencia_previa: {
+        Args: { _actor?: string; _legado: number }
+        Returns: Json
+      }
+      legado_transferencia_resolver: {
+        Args: { _criar: boolean; _legado: number }
+        Returns: {
+          codcli: number
+          codigo: string
+          kit: number
+          nome: string
+          preco_cents: number
+          produto: number
+          quantidade: number
+          situacao: string
+          tamanho: string
+          variant_id: string
+        }[]
       }
       legado_vincular: { Args: { _gravar_codigos?: boolean }; Returns: Json }
       lider_admin: { Args: never; Returns: Json }

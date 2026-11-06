@@ -27,7 +27,8 @@ test('quantidade esperada divergente não cancela nem devolve parcialmente',asyn
   const errado=plano.map((p,i)=>i===6?{...p,pieces:9}:p);
   expect((await executar(errado)).ok).toBe(false);
   expect(await saldo(variante,origem)).toBe(10);
-  const rows=await adm.unsafe("select count(*)::int n from public.kit_cycles where status='cancelada'");
+  // só os 7 ciclos deste teste: outras baterias também cancelam maletas no mesmo banco
+  const rows=await adm.unsafe("select count(*)::int n from public.kit_cycles where status='cancelada' and id = any($1::uuid[])",[plano.map((p)=>p.cycle_id)]);
   expect(rows[0]?.n).toBe(0);
 });
 test('prévia das sete não altera o estoque',async()=>{

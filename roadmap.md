@@ -1,5 +1,10 @@
 # Roadmap
 
+## 0254 — maletas das remessas 924/925 do SmallData para o Cloud (06/11/2026)
+- [x] Extração JFLEX de 06/11: remessa 924 (rep. 3009, praça 14) e 925 (rep. 3010, praça 42), 10 maletas de abertura cada (cliente interno LARDAN), 35 peças por maleta, todas conferidas na saída. 924 → remessa 926 do Cloud; 925 → remessa 925.
+- [x] Prévia, aplicar (motor oficial: abertura com o representante → itens → conferir; expedir só se pedido) e desfazer; 9 testes isolados.
+- [ ] Rodar a prévia no banco real, mostrar ao Diego e aplicar só com aprovação.
+
 ## 0251 — abertura na rua, contrato Danilo, trocas pelos Correios (06/11/2026)
 - [x] Fluxo único da nova candidata (dados → perfil → maleta → assinaturas), sem aprovação interna; prova com desfazer automático e telas.
 - [x] Contrato: {{email}}, {{rg}}, {{estado_civil}}, {{data_nascimento}} do cadastro; 2 testes.

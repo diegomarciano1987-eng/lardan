@@ -1,5 +1,11 @@
 # Roadmap
 
+## Pacote 0263 — auditoria e integridade (06/11/2026)
+- [ ] Revisar e aplicar guardas de consultora e liberação oficial de reservas; executar testes isolados.
+- [ ] Rodar auditoria real e somente prévia de reservas presas; entregar todos os códigos, quantidades, exemplos e erros.
+- [ ] Conferir agendamentos/últimas execuções, privacidade de arquivos, autenticação e ambiente fiscal sem mudar configurações.
+- [ ] Publicação e correções de dados aguardam autorização explícita de Diego; não executar neste pacote.
+
 ## Pacote 0259-2 — prévia por CPF das remessas SmallData (06/11/2026)
 - [x] Substituir somente a prévia (0260), preservando os vínculos 3009/3010; 9 testes isolados passaram, 43 asserções.
 - [x] Repetir prévia real de 924/925 como Diego: ambas bloqueadas por CPF ausente no cadastro Cloud de Marcelo/Guilherme; 10 maletas/350 peças em cada, nenhuma peça sem cadastro, zero transferidas. Não aplicar nem publicar.

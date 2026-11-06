@@ -179,7 +179,7 @@ function Painel({ rep, aba, espelho, onSair, ir }: { rep: string; aba: Aba; espe
         </div>}
         {aba === "cobranca" && <Cobrancas rep={rep} espelho={espelho} />}
         {aba === "consultoras" && <Consultoras rep={rep} espelho={espelho} />}
-        {aba === "maletas" && <div className="space-y-6"><MaletasCarteira rep={rep} /><MaletasRepresentante rep={rep} /></div>}
+        {aba === "maletas" && <div className="space-y-6"><MaletasRepresentante rep={rep} /><MaletasCarteira rep={rep} /></div>}
         {GRUPO_CAPTACAO.includes(aba) && (
           <div className="grid grid-cols-3 gap-1 rounded-full bg-muted p-1 text-sm" role="tablist" aria-label="Captação">
             {([["captacao", "Candidatas"], ["agenda", "Agenda"], ["abertura", "Abertura"]] as [Aba, string][]).map(([id, rot]) => (

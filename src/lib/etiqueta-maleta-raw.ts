@@ -19,6 +19,8 @@ export interface DadosEtiquetaMaleta {
   representante?: string | null;
   remessa_numero?: number | null;
   maleta_numero?: number | null;
+  /** Maleta de abertura sem consultora (custódia do representante). */
+  abertura_numero?: number | null;
 }
 
 const LIGA = new Set(["DE", "DA", "DO", "DAS", "DOS", "E"]);
@@ -33,9 +35,12 @@ export function abreviarNome(nome: string) {
 export function linhasEtiquetaMaleta(d: DadosEtiquetaMaleta) {
   const cod = d.cliente_codigo ? limpo(d.cliente_codigo).replace(/^LC-0*/, "") : "";
   const nome = limpo(d.cliente_nome ?? "");
+  const abertura = d.abertura_numero != null && !nome;
   return {
-    l1: (cod && nome ? `${cod} - ${nome}` : nome || cod).slice(0, 26),
-    l2: limpo(d.cidade ?? "").slice(0, 36),
+    l1: abertura
+      ? `ABERTURA ${d.abertura_numero}${d.remessa_numero != null ? ` REM ${d.remessa_numero}` : ""}`.slice(0, 26)
+      : (cod && nome ? `${cod} - ${nome}` : nome || cod).slice(0, 26),
+    l2: abertura ? "SEM CONSULTORA" : limpo(d.cidade ?? "").slice(0, 36),
     l3: abreviarNome(d.representante ?? "").slice(0, 36),
     remessa: d.remessa_numero != null ? String(d.remessa_numero) : "",
     maleta: d.maleta_numero != null ? String(d.maleta_numero) : "",

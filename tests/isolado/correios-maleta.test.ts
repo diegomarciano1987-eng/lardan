@@ -59,6 +59,7 @@ beforeAll(async () => {
   consultora = await criarConta({ nome: `cor-cons-${marca()}`, papeis: ["consultora"], comParty: true });
   diretoria = await criarConta({ nome: `cor-dir-${marca()}`, papeis: ["diretoria"], comParty: true });
   const p = await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status, doc) values ('organizacao','Lardan ISO','Lardan ISO','ativo','43319208000180') returning id`);
+  emissorParty = p.id;
   await endereco(p.id);
   emissor = (await um<{ id: string }>(`insert into public.business_entities (legal_name, trade_name, party_id) values ('Lardan ISO','Lardan ISO',$1) returning id`, [p.id])).id;
   emissorAntes = (await um<{ e: string | null }>(`select emitter_entity_id::text e from public.fiscal_settings limit 1`))?.e ?? null;
@@ -67,6 +68,10 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await adm.unsafe(`update public.fiscal_settings set emitter_entity_id = $1`, [emissorAntes]);
+  // limpa a empresa ISO com o CNPJ da TSM para não atrapalhar a suíte do emissor fiscal
+  await adm.unsafe(`delete from public.business_entities where id = $1`, [emissor]);
+  await adm.unsafe(`delete from public.party_addresses where party_id = $1`, [emissorParty]);
+  await adm.unsafe(`delete from public.parties where id = $1`, [emissorParty]);
 });
 
 describe("1 a 3. ida", () => {

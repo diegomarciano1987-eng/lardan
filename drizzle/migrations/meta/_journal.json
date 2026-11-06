@@ -1800,6 +1800,13 @@
       "when": 1793999701709,
       "tag": "0256_media_publica_maleta_a_caminho",
       "breakpoints": true
+    },
+    {
+      "idx": 257,
+      "version": "7",
+      "when": 1793999912883,
+      "tag": "0257_vitrine_divulgacao_antes_do_aceite",
+      "breakpoints": true
     }
   ]
 }

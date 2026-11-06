@@ -9,6 +9,8 @@ export interface CamposAssinatura {
   nome: string; cpf: string; codigo?: string | null; endereco: string; bairro: string; cidade: string; cep: string; whatsapp: string;
   representante: string; praca: string; maleta: string; remessa: string;
   valor_cents?: number | null; vencimento?: string | null;
+  /** 0251 (contrato do Dr. Danilo): vêm do cadastro da pessoa. */
+  email?: string | null; rg?: string | null; estado_civil?: string | null; data_nascimento?: string | null;
 }
 
 const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
@@ -27,6 +29,8 @@ export function valoresDosCampos(c: CamposAssinatura, hoje = new Date()): Record
     whatsapp: c.whatsapp, representante: c.representante, praca: c.praca, maleta: c.maleta, remessa: c.remessa,
     hoje: dataBr(new Date(hoje.getTime() - 3 * 3600_000).toISOString()), hoje_extenso: dataExtenso(hoje),
   };
+  v["email"] = c.email ?? ""; v["rg"] = c.rg ?? ""; v["estado_civil"] = c.estado_civil ?? "";
+  if (c.data_nascimento) { v["data_nascimento"] = dataBr(c.data_nascimento); v["data_nascimento_extenso"] = dataExtenso(c.data_nascimento); }
   if (c.valor_cents != null) { v["valor"] = brl(c.valor_cents); v["valor_extenso"] = valorPorExtenso(c.valor_cents); }
   if (c.vencimento) { v["vencimento"] = dataBr(c.vencimento); v["vencimento_extenso"] = dataExtenso(c.vencimento); }
   return v;

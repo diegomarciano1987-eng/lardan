@@ -59,6 +59,7 @@ import { Route as SemijoiasIndexRouteImport } from './routes/semijoias.index'
 import { Route as SemijoiasCategoriaRouteImport } from './routes/semijoias.$categoria'
 import { Route as SitemapProductsPaginaRouteImport } from './routes/sitemap-products.$pagina'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminAcessosConsultorasRouteImport } from './routes/_authenticated/admin/acessos-consultoras'
 import { Route as AuthenticatedAdminAjudaRouteImport } from './routes/_authenticated/admin/ajuda'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminAvisosRouteImport } from './routes/_authenticated/admin/avisos'
@@ -397,6 +398,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminAcessosConsultorasRoute =
+  AuthenticatedAdminAcessosConsultorasRouteImport.update({
+    id: '/acessos-consultoras',
+    path: '/acessos-consultoras',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminAjudaRoute = AuthenticatedAdminAjudaRouteImport.update({
   id: '/ajuda',
   path: '/ajuda',
@@ -913,6 +920,7 @@ export interface FileRoutesByFullPath {
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
   '/semijoias/': typeof SemijoiasIndexRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
+  '/admin/acessos-consultoras': typeof AuthenticatedAdminAcessosConsultorasRoute
   '/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/avisos': typeof AuthenticatedAdminAvisosRoute
@@ -1042,6 +1050,7 @@ export interface FileRoutesByTo {
   '/semijoias/$categoria': typeof SemijoiasCategoriaRoute
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
   '/semijoias': typeof SemijoiasIndexRoute
+  '/admin/acessos-consultoras': typeof AuthenticatedAdminAcessosConsultorasRoute
   '/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/avisos': typeof AuthenticatedAdminAvisosRoute
@@ -1175,6 +1184,7 @@ export interface FileRoutesById {
   '/sitemap-products/$pagina': typeof SitemapProductsPaginaRoute
   '/semijoias/': typeof SemijoiasIndexRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
+  '/_authenticated/admin/acessos-consultoras': typeof AuthenticatedAdminAcessosConsultorasRoute
   '/_authenticated/admin/ajuda': typeof AuthenticatedAdminAjudaRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/avisos': typeof AuthenticatedAdminAvisosRoute
@@ -1308,6 +1318,7 @@ export interface FileRouteTypes {
     | '/sitemap-products/$pagina'
     | '/semijoias/'
     | '/admin/financeiro'
+    | '/admin/acessos-consultoras'
     | '/admin/ajuda'
     | '/admin/auditoria'
     | '/admin/avisos'
@@ -1437,6 +1448,7 @@ export interface FileRouteTypes {
     | '/semijoias/$categoria'
     | '/sitemap-products/$pagina'
     | '/semijoias'
+    | '/admin/acessos-consultoras'
     | '/admin/ajuda'
     | '/admin/auditoria'
     | '/admin/avisos'
@@ -1569,6 +1581,7 @@ export interface FileRouteTypes {
     | '/sitemap-products/$pagina'
     | '/semijoias/'
     | '/_authenticated/admin/financeiro'
+    | '/_authenticated/admin/acessos-consultoras'
     | '/_authenticated/admin/ajuda'
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/avisos'
@@ -2066,6 +2079,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/acessos-consultoras': {
+      id: '/_authenticated/admin/acessos-consultoras'
+      path: '/acessos-consultoras'
+      fullPath: '/admin/acessos-consultoras'
+      preLoaderRoute: typeof AuthenticatedAdminAcessosConsultorasRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/ajuda': {
@@ -2703,6 +2723,7 @@ const AuthenticatedAdminFinanceiroRouteRouteWithChildren =
 
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminFinanceiroRouteRoute: typeof AuthenticatedAdminFinanceiroRouteRouteWithChildren
+  AuthenticatedAdminAcessosConsultorasRoute: typeof AuthenticatedAdminAcessosConsultorasRoute
   AuthenticatedAdminAjudaRoute: typeof AuthenticatedAdminAjudaRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminAvisosRoute: typeof AuthenticatedAdminAvisosRoute
@@ -2750,6 +2771,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
   {
     AuthenticatedAdminFinanceiroRouteRoute:
       AuthenticatedAdminFinanceiroRouteRouteWithChildren,
+    AuthenticatedAdminAcessosConsultorasRoute:
+      AuthenticatedAdminAcessosConsultorasRoute,
     AuthenticatedAdminAjudaRoute: AuthenticatedAdminAjudaRoute,
     AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
     AuthenticatedAdminAvisosRoute: AuthenticatedAdminAvisosRoute,

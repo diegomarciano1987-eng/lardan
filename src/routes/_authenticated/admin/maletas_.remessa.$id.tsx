@@ -68,7 +68,7 @@ function RemessaPage() {
   const [consultora, setConsultora] = React.useState("");
   const [busca, setBusca] = React.useState("");
   const master = useAdminRoles().includes("master" as never);
-  const podeNotaMaleta = master || useCapabilities().includes("kit.manage");
+  const podeNotaMaleta = master || podeMontar;
   const [semPreBaixa, setSemPreBaixa] = React.useState<string | null>(null);
   const [motivoLib, setMotivoLib] = React.useState("");
 

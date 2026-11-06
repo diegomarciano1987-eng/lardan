@@ -189,7 +189,8 @@ export function DocumentosMaleta({
   const doc = useQuery({ queryKey: ["maletas", "doc", cycleId], queryFn: () => docConsultora(cycleId) });
   const valorTotal = composicao.reduce((s, c) => s + c.quantidade * c.valor_unitario, 0);
   const master = useAdminRoles().includes("master" as never);
-  const podeNotaMaleta = master || useCapabilities().includes("kit.manage");
+  const capsNota = useCapabilities();
+  const podeNotaMaleta = master || capsNota.includes("kit.manage");
   const notas = useNotasMaletas([cycleId]);
 
   return (

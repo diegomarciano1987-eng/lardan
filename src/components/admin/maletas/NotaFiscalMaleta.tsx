@@ -1,7 +1,7 @@
 /**
  * Botão "Nota fiscal" da maleta: NF-e de remessa consignada montada com a
  * consultora e as peças conferidas da maleta (0214).
- * Nesta versão SÓ HOMOLOGAÇÃO (nota de teste, sem valor fiscal). Emitir: só Master.
+ * Nesta versão SÓ HOMOLOGAÇÃO (nota de teste, sem valor fiscal). Emitir: Master ou equipe de montagem (kit.manage).
  */
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

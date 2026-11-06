@@ -1737,6 +1737,20 @@
       "when": 1793924643238,
       "tag": "0247_correios_envio_entrega_automaticos",
       "breakpoints": true
+    },
+    {
+      "idx": 248,
+      "version": "7",
+      "when": 1793971222937,
+      "tag": "0248_abertura_numerada_rota_devolucao_perfil",
+      "breakpoints": true
+    },
+    {
+      "idx": 249,
+      "version": "7",
+      "when": 1793971326931,
+      "tag": "0249_rep_lead_atendimento_cpf_fix",
+      "breakpoints": true
     }
   ]
 }

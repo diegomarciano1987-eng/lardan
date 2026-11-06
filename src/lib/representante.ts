@@ -168,3 +168,8 @@ export const repRemessas = (rep: string, de: string, ate: string) => chamar<RepR
 export const repRemessaInformacoes = (rep: string, remessa: string) => chamar<RepRemessaInfo>("rep_remessa_informacoes", { _rep: rep, _remessa: remessa });
 export const repAcertoMarcar = (rep: string, remessa: string, party: string, feito: boolean) =>
   chamar<{ feito: boolean; feitos: number; total: number }>("rep_acerto_marcar", { _rep: rep, _remessa: remessa, _party: party, _feito: feito });
+
+export const repLeadDevolver = (rep: string, lead: string, motivo: string, obs?: string) =>
+  chamar<null>("rep_lead_devolver", { _rep: rep, _lead: lead, _motivo: motivo, _obs: obs || null });
+export const repLeadAtendimento = (rep: string, lead: string, dados: Record<string, string>, perfil: Record<string, number>) =>
+  chamar<{ perfil: string | null; pontos: number }>("rep_lead_atendimento", { _rep: rep, _lead: lead, _dados: dados, _perfil: perfil });

@@ -12,6 +12,7 @@ import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronDown, Copy, MessageCircle, PackageOpen, Phone, Plus, Sparkles } from "lucide-react";
+import { AtendimentoPresencial, DevolverLead } from "@/components/representante/AtendimentoPresencial";
 import { repCpfDefinir, repCrm, repCrmMover, repEtapaNova, type RepCrm } from "@/lib/representante";
 import { NovaCandidata, wa } from "@/components/representante/AcoesRepresentante";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
@@ -23,7 +24,7 @@ const FILTROS: { id: "agora" | Passo | "todas"; rotulo: string }[] = [
   { id: "maleta", rotulo: "Com maleta" }, { id: "fora", rotulo: "Não aprovadas" }, { id: "todas", rotulo: "Todas" },
 ];
 const ORIGEM: Record<string, string> = {
-  encaminhada: "O Daniel passou para você (site)", link: "Veio pelo seu link", manual: "Você cadastrou", madrinha: "Indicação de consultora",
+  encaminhada: "O Daniel passou para você (site)", rota: "Site · cidade da sua rota", link: "Veio pelo seu link", manual: "Você cadastrou", madrinha: "Indicação de consultora",
 };
 const STATUS: Record<string, string> = {
   novo: "Aguardando a Lardan", em_analise: "Em análise na Lardan", qualificado: "Qualificada", aprovado: "Aprovada pela Lardan", recusado: "Não aprovada",
@@ -33,7 +34,7 @@ const primeiro = (n: string) => { const p = (n.split(" ")[0] ?? "").toLowerCase(
 
 function roteiro(c: Card) {
   const n = primeiro(c.nome);
-  if (c.origem === "encaminhada" || !c.origem)
+  if (c.origem === "encaminhada" || c.origem === "rota" || !c.origem)
     return `Olá, ${n}! Tudo bem? Sou representante da Lardan Semijoias na sua região. Recebi o seu cadastro para ser consultora Lardan. Podemos conversar hoje para eu te explicar como funciona a maleta?`;
   return `Olá, ${n}! Aqui é da Lardan Semijoias. Vamos dar o próximo passo da sua entrada como consultora? Quando posso te ligar?`;
 }
@@ -113,6 +114,12 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
                 {semContato >= 2 && <span className="rounded-full bg-destructive/10 px-2 py-0.5 font-semibold text-destructive">Sem contato há {semContato} dias</span>}
               </div>
               {c.nota && <p className="mt-2 text-xs">{c.nota}</p>}
+              {p !== "fora" && p !== "maleta" && (
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <AtendimentoPresencial rep={rep} card={c} onFeito={recarregar} />
+                  <DevolverLead rep={rep} card={c} onFeito={recarregar} />
+                </div>
+              )}
 
               <div className="mt-3 space-y-2">
                 {p === "chamar" && (

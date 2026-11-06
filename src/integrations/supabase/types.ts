@@ -9265,6 +9265,7 @@ export type Database = {
       }
       kit_cycles: {
         Row: {
+          abertura_numero: number | null
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -9295,6 +9296,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          abertura_numero?: number | null
           cancel_reason?: string | null
           cancelled_at?: string | null
           closed_at?: string | null
@@ -9325,6 +9327,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          abertura_numero?: number | null
           cancel_reason?: string | null
           cancelled_at?: string | null
           closed_at?: string | null
@@ -22299,6 +22302,14 @@ export type Database = {
       }
       rep_dono_da_consultora: { Args: { _party: string }; Returns: string }
       rep_eu: { Args: never; Returns: string }
+      rep_lead_atendimento: {
+        Args: { _dados: Json; _lead: string; _perfil: Json; _rep: string }
+        Returns: Json
+      }
+      rep_lead_devolver: {
+        Args: { _lead: string; _motivo: string; _obs?: string; _rep: string }
+        Returns: undefined
+      }
       rep_lead_encaminhar: {
         Args: { _lead: string; _rep: string }
         Returns: undefined

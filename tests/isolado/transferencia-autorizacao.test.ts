@@ -5,10 +5,10 @@ test("exceção 924/925 exige Master autorizado, nome único ativo, CPF ausente 
   const master = await criarConta({ nome: `aut-transf-${Date.now()}`, papeis: ["master"], comParty: true });
   const rep = await criarConta({ nome: `rep-aut-${Date.now()}`, papeis: ["representante"], comParty: true });
   const rem = crypto.randomUUID();
-  const check = async (legado = 924) => {
+  const check = async (legado = 924, remessa = rem) => {
     const rows = await adm.begin(async (tx) => {
       await tx.unsafe("select set_config('lardan.test_uid',$1,true)", [master.uid]);
-      return tx.unsafe("select public.legado_transferencia_identidade_autorizada($1,$2,$3) ok", [legado, rem, rep.partyId]);
+      return tx.unsafe("select public.legado_transferencia_identidade_autorizada($1,$2,$3) ok", [legado, remessa, rep.partyId]);
     });
     return rows[0]?.ok;
   };
@@ -24,11 +24,13 @@ test("exceção 924/925 exige Master autorizado, nome único ativo, CPF ausente 
   expect(await check()).toBe(true);
   expect(await check(925)).toBe(false);
   expect(await check(926)).toBe(false);
-  await adm.unsafe("update audit_logs set created_at=now()-interval '2 days' where id=$1", [id]);
-  expect(await check()).toBe(false);
-  await adm.unsafe("update audit_logs set created_at=now(),actor_id=$2 where id=$1", [id, rep.uid]);
-  expect(await check()).toBe(false);
-  await adm.unsafe("update audit_logs set actor_id=$2 where id=$1", [id, master.uid]);
+  const expired = crypto.randomUUID(), otherActor = crypto.randomUUID();
+  await adm.unsafe(`insert into audit_logs(actor_id,action,entity,entity_id,payload,created_at)
+    select actor_id,action,entity,$2,payload,now()-interval '2 days' from audit_logs where id=$1`, [id, expired]);
+  expect(await check(924, expired)).toBe(false);
+  await adm.unsafe(`insert into audit_logs(actor_id,action,entity,entity_id,payload)
+    select $3,action,entity,$2,payload from audit_logs where id=$1`, [id, otherActor, rep.uid]);
+  expect(await check(924, otherActor)).toBe(false);
   await adm.unsafe("update parties set status='inativo' where id=$1", [rep.partyId]);
   expect(await check()).toBe(false);
 });

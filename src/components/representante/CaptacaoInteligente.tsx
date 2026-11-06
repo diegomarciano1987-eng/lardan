@@ -34,7 +34,7 @@ const primeiro = (n: string) => { const p = (n.split(" ")[0] ?? "").toLowerCase(
 
 function roteiro(c: Card) {
   const n = primeiro(c.nome);
-  if (c.origem === "encaminhada" || !c.origem)
+  if (c.origem === "encaminhada" || c.origem === "rota" || !c.origem)
     return `Olá, ${n}! Tudo bem? Sou representante da Lardan Semijoias na sua região. Recebi o seu cadastro para ser consultora Lardan. Podemos conversar hoje para eu te explicar como funciona a maleta?`;
   return `Olá, ${n}! Aqui é da Lardan Semijoias. Vamos dar o próximo passo da sua entrada como consultora? Quando posso te ligar?`;
 }

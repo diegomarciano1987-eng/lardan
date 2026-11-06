@@ -1786,6 +1786,13 @@
       "when": 1793999612609,
       "tag": "0254_custodia_representante_vitrine_divulgacao",
       "breakpoints": true
+    },
+    {
+      "idx": 255,
+      "version": "7",
+      "when": 1793999639076,
+      "tag": "0255_remessa_expedir_representante_audit_fix",
+      "breakpoints": true
     }
   ]
 }

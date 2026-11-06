@@ -14,7 +14,8 @@ import { toast } from "sonner";
 import { ChevronDown, Copy, MessageCircle, PackageOpen, Phone, Plus, Sparkles } from "lucide-react";
 import { AtendimentoPresencial, DevolverLead } from "@/components/representante/AtendimentoPresencial";
 import { repCpfDefinir, repCrm, repCrmMover, repEtapaNova, type RepCrm } from "@/lib/representante";
-import { NovaCandidata, wa } from "@/components/representante/AcoesRepresentante";
+import { wa } from "@/components/representante/AcoesRepresentante";
+import { AberturaNaRua } from "@/components/representante/AberturaNaRua";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
 
 type Card = RepCrm["cards"][number];
@@ -27,7 +28,7 @@ const ORIGEM: Record<string, string> = {
   encaminhada: "O Daniel passou para você (site)", rota: "Site · cidade da sua rota", link: "Veio pelo seu link", manual: "Você cadastrou", madrinha: "Indicação de consultora",
 };
 const STATUS: Record<string, string> = {
-  novo: "Aguardando a Lardan", em_analise: "Em análise na Lardan", qualificado: "Qualificada", aprovado: "Aprovada pela Lardan", recusado: "Não aprovada",
+  novo: "Nova", em_analise: "Em conversa", qualificado: "Qualificada", aprovado: "Aprovada", recusado: "Não aprovada",
 };
 const dias = (iso: string | null | undefined) => (iso ? Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000)) : 0);
 const primeiro = (n: string) => { const p = (n.split(" ")[0] ?? "").toLowerCase(); return p.charAt(0).toUpperCase() + p.slice(1); };
@@ -74,7 +75,7 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-lg font-semibold">Candidatas</h2>
-        <NovaCandidata rep={rep} />
+        <AberturaNaRua rep={rep} />
       </div>
 
       <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:px-0">
@@ -138,7 +139,7 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
                         Próximo: {proxima.nome}
                       </button>
                     ) : (
-                      <p className="flex h-12 flex-1 items-center justify-center rounded-xl bg-muted px-3 text-center text-xs text-muted-foreground">Aguardando a decisão da Lardan</p>
+                      <p className="flex h-12 flex-1 items-center justify-center rounded-xl bg-muted px-3 text-center text-xs text-muted-foreground">Quando ela topar, faça a abertura</p>
                     )}
                   </div>
                 )}

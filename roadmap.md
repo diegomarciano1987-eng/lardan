@@ -3,12 +3,12 @@
 ## Pacote 0259-2 — prévia por CPF das remessas SmallData (06/11/2026)
 - [x] Substituir somente a prévia (0260), preservando os vínculos 3009/3010; 9 testes isolados passaram, 43 asserções.
 - [x] Repetir prévia real de 924/925 como Diego: ambas bloqueadas por CPF ausente no cadastro Cloud de Marcelo/Guilherme; 10 maletas/350 peças em cada, nenhuma peça sem cadastro, zero transferidas. Não aplicar nem publicar.
-- [ ] Transferência aguarda conferência dos CPFs com Diego/Daniel e nova aprovação; não corrigir vínculos 3009/3010.
+- [ ] Aplicar com autorização explícita de Diego em 06/11 às 21:49 UTC: identidade confirmada pelos dois representantes ativos; registrar exceção pontual sem alterar CPF nem vínculos 3009/3010. Aceitar falta, sem expedir nem publicar.
 
 ## 0254 — maletas das remessas 924/925 do SmallData para o Cloud (06/11/2026)
 - [x] Extração JFLEX de 06/11: remessa 924 (rep. 3009, praça 14) e 925 (rep. 3010, praça 42), 10 maletas de abertura cada (cliente interno LARDAN), 35 peças por maleta, todas conferidas na saída. 924 → remessa 926 do Cloud; 925 → remessa 925.
 - [x] Prévia, aplicar (motor oficial: abertura com o representante → itens → conferir; expedir só se pedido) e desfazer; 9 testes isolados.
-- [ ] Rodar a prévia no banco real, mostrar ao Diego e aplicar só com aprovação.
+- [ ] Aplicar as duas remessas autorizadas e conferir persistência, 20 maletas/700 peças e idempotência.
 
 ## 0251 — abertura na rua, contrato Danilo, trocas pelos Correios (06/11/2026)
 - [x] Fluxo único da nova candidata (dados → perfil → maleta → assinaturas), sem aprovação interna; prova com desfazer automático e telas.

@@ -21421,6 +21421,10 @@ export type Database = {
         Args: { _actor?: string; _legado: number; _motivo: string }
         Returns: Json
       }
+      legado_transferencia_identidade_autorizada: {
+        Args: { _legado: number; _remessa: string; _representante: string }
+        Returns: boolean
+      }
       legado_transferencia_previa: {
         Args: { _actor?: string; _legado: number }
         Returns: Json

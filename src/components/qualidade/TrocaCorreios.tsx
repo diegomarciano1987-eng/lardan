@@ -93,6 +93,7 @@ function NovoEnvio({ trocaId, direcao, onFeito }: { trocaId: string; direcao: "v
 function EnvioLinha({ e, onFeito }: { e: Envio; onFeito: () => void }) {
   const etiquetaFn = useServerFn(trocaCorreiosEtiqueta);
   const cancelarFn = useServerFn(trocaCorreiosCancelar);
+  const [motivo, setMotivo] = React.useState<string | null>(null);
   const etiqueta = useMutation({ mutationFn: () => etiquetaFn({ data: { envioId: e.id } }), onSuccess: (r) => window.open(r.url, "_blank"), onError: (x: Error) => toast.error(x.message) });
   const cancelar = useMutation({ mutationFn: (motivo: string) => cancelarFn({ data: { envioId: e.id, motivo } }), onSuccess: () => { toast.success("Envio cancelado."); onFeito(); }, onError: (x: Error) => toast.error(x.message) });
   return (
@@ -103,9 +104,14 @@ function EnvioLinha({ e, onFeito }: { e: Envio; onFeito: () => void }) {
       </div>
       <div className="flex gap-1.5">
         {e.codigo_objeto && e.direcao === "ida" && <Button size="sm" variant="outline" className="gap-1" disabled={etiqueta.isPending} onClick={() => etiqueta.mutate()}><FileDown className="size-3.5" /> Etiqueta</Button>}
-        {e.status === "pre_postada" && (
-          <Button size="sm" variant="ghost" className="gap-1" disabled={cancelar.isPending} onClick={() => { const m = window.prompt("Motivo do cancelamento"); if (m && m.trim().length >= 3) cancelar.mutate(m); }}><XCircle className="size-3.5" /> Cancelar</Button>
-        )}
+        {e.status === "pre_postada" && (motivo === null ? (
+          <Button size="sm" variant="ghost" className="gap-1" onClick={() => setMotivo("")}><XCircle className="size-3.5" /> Cancelar</Button>
+        ) : (
+          <span className="flex gap-1.5">
+            <input autoFocus className="admin-input h-8 w-44" placeholder="Motivo do cancelamento" value={motivo} onChange={(x) => setMotivo(x.target.value)} />
+            <Button size="sm" disabled={motivo.trim().length < 3 || cancelar.isPending} onClick={() => cancelar.mutate(motivo)}>Confirmar</Button>
+          </span>
+        ))}
       </div>
     </div>
   );

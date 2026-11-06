@@ -333,7 +333,7 @@ function MaletaFicha() {
             <AcoesMaletaRua cycleId={id} status={d.ciclo.status} temConsultora={!!d.ciclo.consultora_party_id} />
           )}
           {podeMontar && d.ciclo.consultora_party_id && ["conferida", "expedida", "transito", "recebida", "operacao", "acerto", "encerrada"].includes(d.ciclo.status) && (
-            <CorreiosMaleta cycleId={id} status={d.ciclo.status} />
+            <div id="correios" className="scroll-mt-24"><CorreiosMaleta cycleId={id} status={d.ciclo.status} /></div>
           )}
           {podeMontar && ["rascunho", "montagem", "conferida"].includes(d.ciclo.status) && (
             <AjustesMaleta cycleId={id} consultoraId={d.ciclo.consultora_party_id} representante={d.representante} />

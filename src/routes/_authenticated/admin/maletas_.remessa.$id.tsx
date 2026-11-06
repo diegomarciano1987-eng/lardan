@@ -294,10 +294,11 @@ function RemessaPage() {
                 <NotaFiscalMaleta cycleId={m.cycle_id} status={m.status} nota={notas.porMaleta.get(m.cycle_id)} podeEmitir={master}
                   temConsultora={!!m.consultora_party_id} semPecas={semPecas} producao={notas.producao} />
                 {peloCorreio && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (
-                  <span className="inline-flex h-9 items-center rounded-full bg-muted px-3 text-xs text-ledger-muted"
-                    title="Pelo correio, a saída e a entrega são confirmadas sozinhas pelo rastreio (tela da maleta › Correios).">
-                    {m.status === "conferida" ? "Sai ao postar nos Correios" : "Entrega pelo rastreio"}
-                  </span>
+                  <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} hash="correios"
+                    className="admin-btn admin-btn-primary h-9 px-3 text-xs"
+                    title="Abre o painel Correios desta maleta: cotação, pré-postagem e etiqueta. Saída e entrega são confirmadas pelo rastreio.">
+                    {m.status === "conferida" ? "Enviar pelos Correios" : "Rastreio Correios"}
+                  </Link>
                 )}
                 {podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (!peloCorreio || master) && (
                   <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || liberarMaleta.isPending}

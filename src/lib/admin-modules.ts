@@ -264,6 +264,15 @@ export const ADMIN_MODULES: AdminModule[] = [
     state: "ativo",
   },
   {
+    slug: "acessos-consultoras",
+    path: "/admin/acessos-consultoras",
+    label: "Acessos das consultoras",
+    description: "Quem tem login, e-mail, último acesso e definir senha nova.",
+    icon: UsersRound,
+    roles: ["master", "diretoria"],
+    state: "ativo",
+  },
+  {
     slug: "usuarios",
     path: "/admin/usuarios",
     label: "Usuários e Convites",

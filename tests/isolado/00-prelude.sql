@@ -50,6 +50,8 @@ create table if not exists auth.users (
   raw_user_meta_data jsonb not null default '{}'::jsonb,
   raw_app_meta_data jsonb not null default '{}'::jsonb,
   banned_until timestamptz,
+  last_sign_in_at timestamptz,       -- como no Supabase (0245: acessos das consultoras)
+  email_confirmed_at timestamptz,
   created_at timestamptz not null default now()
 );
 

@@ -127,3 +127,21 @@ export const vincularConsultoraRemessa = (remessa: string, consultora: string) =
 /** Rótulo padrão de consultora nos seletores: "[Cód. 1234] Nome". */
 export const rotuloConsultora = (p: { display_name: string; code: string | null }) =>
   p.code ? `[Cód. ${p.code}] ${p.display_name}` : p.display_name;
+
+// ------------------------------------------------- 0246: informações da remessa (para o acerto)
+export type MotivoSemMaleta = "inadimplente" | "pausa" | "sem_estoque" | "desistiu" | "outro";
+export const MOTIVOS_SEM_MALETA: { id: MotivoSemMaleta; rotulo: string }[] = [
+  { id: "inadimplente", rotulo: "Inadimplente" },
+  { id: "pausa", rotulo: "Pediu pausa" },
+  { id: "sem_estoque", rotulo: "Sem peças/estoque" },
+  { id: "desistiu", rotulo: "Desistiu" },
+  { id: "outro", rotulo: "Outro (escreva)" },
+];
+export interface InformacaoRemessa {
+  party_id: string; nome: string; codigo: string | null; cycle_id: string | null; maleta: string | null; status_maleta: string | null;
+  tem_maleta: boolean; sem_maleta_motivo: MotivoSemMaleta | null; info_acerto: string | null; atualizado_por_nome: string | null;
+  updated_at: string | null; debito_vencido_cents: number;
+}
+export const informacoesDaRemessa = (id: string) => rpc<InformacaoRemessa[]>("remessa_informacoes_lista", { _remessa: id });
+export const salvarInformacaoRemessa = (remessa: string, party: string, motivo: MotivoSemMaleta | null, info: string) =>
+  rpc<unknown>("remessa_informacao_salvar", { _remessa: remessa, _party: party, _motivo: motivo, _info: info });

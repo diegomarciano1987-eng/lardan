@@ -1,4 +1,5 @@
 import * as React from "react";
+import { InformacoesRemessa, semAnotacao, useInformacoesRemessa } from "@/components/admin/maletas/InformacoesRemessa";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ import {
   consultorasSemPraca,
   dataBR,
   finalizarRemessa,
+  lerEnvioRemessa,
   listarRemessas,
   maletasDaRemessa,
   reabrirRemessa,
@@ -167,6 +169,11 @@ function RemessaPage() {
 
   // 0184: finalizar / reabrir
   const [confirmaNumero, setConfirmaNumero] = React.useState("");
+  const infos = useInformacoesRemessa(id);
+  // 0247: remessa pelo correio — envio e entrega confirmados pelo rastreio
+  const envio = useQuery({ queryKey: ["remessas", "envio", id], queryFn: () => lerEnvioRemessa(id) });
+  const peloCorreio = envio.data?.tipo_envio === "correio";
+  const pendInfo = semAnotacao(infos.data);
   const [motivoReabrir, setMotivoReabrir] = React.useState("");
   const finalizar = useMutation({
     mutationFn: () => finalizarRemessa(id, Number(confirmaNumero)),
@@ -286,7 +293,13 @@ function RemessaPage() {
                 </button>
                 <NotaFiscalMaleta cycleId={m.cycle_id} status={m.status} nota={notas.porMaleta.get(m.cycle_id)} podeEmitir={master}
                   temConsultora={!!m.consultora_party_id} semPecas={semPecas} producao={notas.producao} />
-                {podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (
+                {peloCorreio && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (
+                  <span className="inline-flex h-9 items-center rounded-full bg-muted px-3 text-xs text-ledger-muted"
+                    title="Pelo correio, a saída e a entrega são confirmadas sozinhas pelo rastreio (tela da maleta › Correios).">
+                    {m.status === "conferida" ? "Sai ao postar nos Correios" : "Entrega pelo rastreio"}
+                  </span>
+                )}
+                {podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (!peloCorreio || master) && (
                   <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || liberarMaleta.isPending}
                     onClick={() => liberarMaleta.mutate(m.cycle_id)}>
                     <CheckCircle2 aria-hidden className="size-3.5" /> {liberarMaleta.isPending && liberarMaleta.variables === m.cycle_id ? "Confirmando…" : "Confirmar entrega"}
@@ -306,6 +319,8 @@ function RemessaPage() {
         })}
       </Panel>
 
+      {podeMontar && r.status !== "cancelada" && <InformacoesRemessa remessaId={r.id} podeEditar={podeMontar} />}
+
       {podeMontar && r.status !== "cancelada" && (
         <Panel title={r.status === "fechada" ? "Remessa finalizada" : "Finalizar remessa"}>
           {r.status === "fechada" ? (
@@ -323,11 +338,12 @@ function RemessaPage() {
               <p className="text-ledger-muted">
                 Quando todas as maletas estiverem conferidas, finalize: a remessa {r.numero} fica fechada de vez, sem novas maletas.
                 {emMontagem > 0 && <strong className="text-ledger-text"> Ainda há {emMontagem} maleta(s) em montagem.</strong>}
+                {pendInfo > 0 && <strong className="text-ledger-text"> {pendInfo} consultora(s) da praça sem maleta e sem motivo anotado acima{master ? " (o Master pode finalizar assim mesmo)" : ""}.</strong>}
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <input className="admin-input w-56" inputMode="numeric" placeholder={`Digite ${r.numero} para confirmar`} value={confirmaNumero}
                   onChange={(e) => setConfirmaNumero(e.target.value.replace(/\D/g, ""))} aria-label="Número da remessa para confirmar" />
-                <button type="button" className="admin-btn admin-btn-primary" disabled={finalizar.isPending || emMontagem > 0 || Number(confirmaNumero) !== r.numero}
+                <button type="button" className="admin-btn admin-btn-primary" disabled={finalizar.isPending || emMontagem > 0 || Number(confirmaNumero) !== r.numero || (pendInfo > 0 && !master)}
                   onClick={() => finalizar.mutate()}>
                   <Lock aria-hidden className="size-4" /> {finalizar.isPending ? "Finalizando…" : "Finalizar remessa"}
                 </button>

@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/session";
-import { aceitarConvite, consultarConvite } from "@/lib/acessos.functions";
+import { aceitarConvite, consultarConvite, criarSenhaConvite } from "@/lib/acessos.functions";
 
 export const Route = createFileRoute("/convite/$token")({
   component: ConvitePage,
@@ -36,6 +36,8 @@ function ConvitePage() {
   const { session, loading } = useSession();
   const consultar = useServerFn(consultarConvite);
   const aceitar = useServerFn(aceitarConvite);
+  const criarSenha = useServerFn(criarSenhaConvite);
+  const [confirma, setConfirma] = React.useState("");
   const [info, setInfo] = React.useState<Awaited<ReturnType<typeof consultarConvite>> | null>(null);
   const [erro, setErro] = React.useState("");
   const [aviso, setAviso] = React.useState("");
@@ -75,24 +77,24 @@ function ConvitePage() {
     setOcupado(true);
     try {
       if (modo === "criar") {
+        // 0245: só senha e confirmação. O servidor cria a conta com o e-mail do convite já confirmado.
         if (senha.length < 8) throw new Error("A senha precisa ter pelo menos 8 caracteres.");
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim().toLowerCase(),
-          password: senha,
-          options: { emailRedirectTo: `${window.location.origin}/convite/${token}` },
-        });
-        if (error) throw error;
-        // 0199: e-mail que já tem conta — o Supabase não dá erro nem manda e-mail (proteção contra enumeração),
-        // e a consultora ficava esperando uma confirmação que nunca chega.
-        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-          setModo("entrar");
-          setAviso("Este e-mail já tem conta na Lardan. Entre com a senha que você já usa. Se não lembra, toque em “Esqueci minha senha”.");
-          return;
+        if (senha !== confirma) throw new Error("As duas senhas não são iguais. Digite de novo.");
+        const r = await criarSenha({ data: { token, senha } });
+        if (!r.ok) {
+          if (r.situacao === "conta_existente") {
+            setModo("entrar");
+            setEmail(r.email ?? "");
+            setSenha(""); setConfirma("");
+            setAviso("Este e-mail já tem conta na Lardan. Entre com a senha que você já usa. Se não lembra, toque em “Esqueci minha senha”.");
+            return;
+          }
+          throw new Error(MSG[r.situacao] ?? MSG["invalido"]);
         }
-        if (!data.session) {
-          setAviso("Enviamos um e-mail de confirmação. Abra-o neste aparelho e toque no link para concluir o aceite.");
-          return;
-        }
+        const { error } = await supabase.auth.signInWithPassword({ email: r.email!, password: senha });
+        if (error) throw new Error("Senha criada, mas não foi possível entrar agora. Entre com seu e-mail e a senha nova.");
+        await concluir();
+        return;
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password: senha });
         if (error) throw new Error("E-mail ou senha incorretos.");
@@ -154,20 +156,29 @@ function ConvitePage() {
                     </button>
                   ))}
                 </div>
+                {modo === "entrar" && (
+                  <label className="block text-sm">
+                    <span className="text-muted-foreground">E-mail</span>
+                    <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email"
+                      className="mt-1 w-full rounded-xl border border-input bg-background px-4 py-3 text-base" />
+                  </label>
+                )}
                 <label className="block text-sm">
-                  <span className="text-muted-foreground">E-mail do convite</span>
-                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email"
-                    className="mt-1 w-full rounded-xl border border-input bg-background px-4 py-3 text-base" />
-                </label>
-                <label className="block text-sm">
-                  <span className="text-muted-foreground">{modo === "criar" ? "Crie uma senha (mín. 8)" : "Senha"}</span>
+                  <span className="text-muted-foreground">{modo === "criar" ? "Crie sua senha (mínimo 8 caracteres)" : "Senha"}</span>
                   <input type="password" required value={senha} onChange={(e) => setSenha(e.target.value)}
                     autoComplete={modo === "criar" ? "new-password" : "current-password"}
                     className="mt-1 w-full rounded-xl border border-input bg-background px-4 py-3 text-base" />
                 </label>
+                {modo === "criar" && (
+                  <label className="block text-sm">
+                    <span className="text-muted-foreground">Confirme a senha</span>
+                    <input type="password" required value={confirma} onChange={(e) => setConfirma(e.target.value)} autoComplete="new-password"
+                      className="mt-1 w-full rounded-xl border border-input bg-background px-4 py-3 text-base" />
+                  </label>
+                )}
                 <button type="submit" disabled={ocupado}
                   className="w-full rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-50">
-                  {ocupado ? "Aguarde…" : modo === "criar" ? "Criar senha e confirmar e-mail" : "Entrar"}
+                  {ocupado ? "Aguarde…" : modo === "criar" ? "Criar senha e entrar" : "Entrar"}
                 </button>
                 {modo === "entrar" && (
                   <a href="/redefinir-senha" className="block text-center text-sm text-muted-foreground underline">Esqueci minha senha</a>

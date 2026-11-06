@@ -295,7 +295,7 @@ export function ContatoCobranca({ c, parcelas, rotulo }: { c: { party_id: string
   );
 }
 
-function NovaCandidata({ rep }: { rep: string }) {
+export function NovaCandidata({ rep }: { rep: string }) {
   const [aberto, setAberto] = React.useState(false);
   const [f, setF] = React.useState({ nome: "", whatsapp: "", cidade: "", uf: "", nota: "" });
   const qc = useQueryClient();

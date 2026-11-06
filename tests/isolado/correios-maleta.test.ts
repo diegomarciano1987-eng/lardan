@@ -9,14 +9,14 @@
  *  7. Corpo da pré-postagem (PAC 03298, reverso 03301, valor declarado 064).
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, criarVariante, rpc, type Conta } from "./base";
+import { adm, criarConta, criarDeposito, criarVariante, porEstoque, rpc, type Conta } from "./base";
 import { corpoPrePostagem, SERVICO, type EnderecoCorreios } from "../../src/lib/correios/api.server";
 
 let master: Conta, montagem: Conta, consultora: Conta, diretoria: Conta;
 let n = 0;
 const marca = () => `${Date.now().toString(36)}${++n}`;
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
-let emissorAntes: string | null = null, emissor: string, plano: string;
+let emissorAntes: string | null = null, emissor: string, emissorParty: string, plano: string;
 
 async function servico<T>(sql: string, p: unknown[] = []): Promise<{ dados: T | null; erro: string | null }> {
   const c = await adm.reserve();
@@ -59,6 +59,7 @@ beforeAll(async () => {
   consultora = await criarConta({ nome: `cor-cons-${marca()}`, papeis: ["consultora"], comParty: true });
   diretoria = await criarConta({ nome: `cor-dir-${marca()}`, papeis: ["diretoria"], comParty: true });
   const p = await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status, doc) values ('organizacao','Lardan ISO','Lardan ISO','ativo','43319208000180') returning id`);
+  emissorParty = p.id;
   await endereco(p.id);
   emissor = (await um<{ id: string }>(`insert into public.business_entities (legal_name, trade_name, party_id) values ('Lardan ISO','Lardan ISO',$1) returning id`, [p.id])).id;
   emissorAntes = (await um<{ e: string | null }>(`select emitter_entity_id::text e from public.fiscal_settings limit 1`))?.e ?? null;
@@ -67,6 +68,10 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await adm.unsafe(`update public.fiscal_settings set emitter_entity_id = $1`, [emissorAntes]);
+  // tira o CNPJ da TSM da empresa ISO para não atrapalhar a suíte do emissor fiscal
+  // (não dá para apagar: os títulos financeiros dos testes apontam para ela)
+  await adm.unsafe(`update public.business_entities set tax_id = null where id = $1`, [emissor]);
+  await adm.unsafe(`update public.parties set doc = null where id = $1`, [emissorParty]);
 });
 
 describe("1 a 3. ida", () => {
@@ -195,5 +200,39 @@ describe("7. corpo da pré-postagem", () => {
     expect(volta.logisticaReversa).toBe("S");
     expect(volta.dataValidadeLogReversa).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect("listaServicoAdicional" in volta).toBe(false);
+  });
+});
+
+describe("8. envio e entrega automáticos pelo rastreio (0247)", () => {
+  test("postado → expedida; entregue → recebida (aguarda aceite) e 30 dias da entrega", async () => {
+    const dep = await criarDeposito(`ISO COR ${marca()}`);
+    const v = await criarVariante(`ISO-COR-AUTO-${marca()}`);
+    await adm.unsafe(`update public.product_variants set finished_piece_cost_cents = 1200 where id = $1`, [v]);
+    await porEstoque(v, dep, 5);
+    const cons = await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status, doc) values ('pessoa',$1,$1,'ativo','52998224725') returning id`, [`ISO Auto ${marca()}`]);
+    await endereco(cons.id, "15520011");
+    await adm.unsafe(`insert into public.party_roles (party_id, role) values ($1,'consultora') on conflict do nothing`, [cons.id]);
+    const c = await rpc<{ cycle_id: string }>(master, "kit_cycle_create", { _payload: { origin_location_id: dep, consultora_party_id: cons.id } });
+    expect(c.erro).toBeNull();
+    const ciclo = c.dados.cycle_id;
+    expect((await rpc(master, "kit_item_upsert", { _cycle: ciclo, _variant: v, _qty: 3 })).erro).toBeNull();
+    expect((await rpc(master, "kit_conferir", { _cycle: ciclo, _note: null })).erro).toBeNull();
+    const a = await abrir(ciclo, "ida", master.uid);
+    expect(a.erro).toBeNull();
+    await resultado(a.dados!, true, `AD${String(Math.floor(Math.random() * 1e9)).padStart(9, "0")}BR`);
+    const postado = [{ codigo: "PO", tipo: "01", dtHrCriado: "2026-11-06T10:00:00", descricao: "Objeto postado" }];
+    expect((await servico(`select public.correios_envio_rastro($1,$2::text::jsonb) r`, [a.dados, JSON.stringify(postado)])).erro).toBeNull();
+    const k1 = await um<{ status: string }>(`select status::text from public.kit_cycles where id = $1`, [ciclo]);
+    expect(["expedida", "transito"]).toContain(k1.status);
+    const entregue = [{ codigo: "BDE", tipo: "01", dtHrCriado: "2026-11-10T15:00:00", descricao: "Objeto entregue ao destinatário" }, ...postado];
+    expect((await servico(`select public.correios_envio_rastro($1,$2::text::jsonb) r`, [a.dados, JSON.stringify(entregue)])).erro).toBeNull();
+    const k2 = await um<{ status: string; due: string }>(`select status::text, to_char(due_at at time zone 'America/Sao_Paulo','YYYY-MM-DD') due from public.kit_cycles where id = $1`, [ciclo]);
+    const e = await um<{ auto_erro: string | null; auto_entregue: boolean }>(`select auto_erro, auto_entregue_em is not null auto_entregue from public.correios_envios where id = $1`, [a.dados]);
+    expect(e.auto_erro).toBeNull();
+    expect(e.auto_entregue).toBe(true);
+    expect(k2.status).toBe("recebida");
+    expect(k2.due).toBe("2026-12-10");
+    // de novo, o mesmo rastreio não faz nada duas vezes
+    expect((await servico(`select public.correios_envio_rastro($1,$2::text::jsonb) r`, [a.dados, JSON.stringify(entregue)])).erro).toBeNull();
   });
 });

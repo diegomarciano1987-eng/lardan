@@ -1758,6 +1758,20 @@
       "when": 1793982745200,
       "tag": "0250_fiscal_nota_maleta_equipe_montagem",
       "breakpoints": true
+    },
+    {
+      "idx": 251,
+      "version": "7",
+      "when": 1793987952325,
+      "tag": "0251_abertura_rua_contrato_campos_troca_correios",
+      "breakpoints": true
+    },
+    {
+      "idx": 252,
+      "version": "7",
+      "when": 1793988220434,
+      "tag": "0252_abertura_rua_ibge",
+      "breakpoints": true
     }
   ]
 }

@@ -35,6 +35,8 @@ export const Route = createFileRoute("/api/public/asaas/sync-matinal")({
           try {
             const { atualizarRastros } = await import("@/lib/correios/correios.functions");
             correios = await atualizarRastros();
+            const { atualizarRastrosTrocas } = await import("@/lib/correios/troca.functions");
+            correios = { maletas: correios, trocas: await atualizarRastrosTrocas() };
           } catch (e) { correios = { erro: (e as Error).message }; }
           return Response.json({ ok: true, ...r, acordos_vencidos: acordos, correios });
         } catch (e) {

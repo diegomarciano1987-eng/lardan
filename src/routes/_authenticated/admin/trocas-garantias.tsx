@@ -10,6 +10,7 @@ import { useCapabilities } from "@/lib/capabilities";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { FotoPeca } from "@/components/FotoPeca";
 import { PecaTrocaPicker } from "@/components/qualidade/PecaTrocaPicker";
+import { TrocaCorreios } from "@/components/qualidade/TrocaCorreios";
 import { supabase } from "@/integrations/supabase/client";
 import { traduzir } from "@/lib/maletas";
 import { cn } from "@/lib/utils";
@@ -256,6 +257,7 @@ function Detalhe({ t, gerir, onMovido }: { t: Troca; gerir: boolean; onMovido: (
           </Button>
         </section>
       )}
+      {gerir && t.consultora_party_id && <TrocaCorreios trocaId={t.id} status={t.status} />}
 
       <section>
         <h3 className="mb-2 flex items-center gap-2 font-semibold"><MessageSquare className="size-4" aria-hidden /> Conversa e histórico</h3>

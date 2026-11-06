@@ -14642,6 +14642,86 @@ export type Database = {
         }
         Relationships: []
       }
+      qualidade_correios_envios: {
+        Row: {
+          ambiente: string
+          codigo_objeto: string | null
+          created_at: string
+          criado_por: string | null
+          direcao: string
+          entregue_em: string | null
+          erro: string | null
+          eventos: Json | null
+          frete_cents: number | null
+          id: string
+          payload: Json
+          postado_em: string | null
+          prepostagem_id: string | null
+          rastreado_em: string | null
+          resposta: Json | null
+          rotulo_path: string | null
+          servico: string
+          status: string
+          troca_id: string
+          updated_at: string
+          valor_declarado_cents: number
+        }
+        Insert: {
+          ambiente: string
+          codigo_objeto?: string | null
+          created_at?: string
+          criado_por?: string | null
+          direcao: string
+          entregue_em?: string | null
+          erro?: string | null
+          eventos?: Json | null
+          frete_cents?: number | null
+          id?: string
+          payload?: Json
+          postado_em?: string | null
+          prepostagem_id?: string | null
+          rastreado_em?: string | null
+          resposta?: Json | null
+          rotulo_path?: string | null
+          servico: string
+          status?: string
+          troca_id: string
+          updated_at?: string
+          valor_declarado_cents?: number
+        }
+        Update: {
+          ambiente?: string
+          codigo_objeto?: string | null
+          created_at?: string
+          criado_por?: string | null
+          direcao?: string
+          entregue_em?: string | null
+          erro?: string | null
+          eventos?: Json | null
+          frete_cents?: number | null
+          id?: string
+          payload?: Json
+          postado_em?: string | null
+          prepostagem_id?: string | null
+          rastreado_em?: string | null
+          resposta?: Json | null
+          rotulo_path?: string | null
+          servico?: string
+          status?: string
+          troca_id?: string
+          updated_at?: string
+          valor_declarado_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualidade_correios_envios_troca_id_fkey"
+            columns: ["troca_id"]
+            isOneToOne: false
+            referencedRelation: "qualidade_trocas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       qualidade_trocas: {
         Row: {
           aberto_em: string
@@ -21903,6 +21983,46 @@ export type Database = {
         Args: { _limite?: number; _termo: string }
         Returns: Json
       }
+      qualidade_correios_abrir: {
+        Args: {
+          _ambiente: string
+          _ator: string
+          _direcao: string
+          _payload: Json
+          _servico: string
+          _troca: string
+          _valor_cents: number
+        }
+        Returns: string
+      }
+      qualidade_correios_cancelar: {
+        Args: { _ator: string; _id: string; _motivo: string }
+        Returns: undefined
+      }
+      qualidade_correios_dados: {
+        Args: { _direcao: string; _troca: string }
+        Returns: Json
+      }
+      qualidade_correios_rastro: {
+        Args: { _eventos: Json; _id: string }
+        Returns: Json
+      }
+      qualidade_correios_resultado: {
+        Args: {
+          _codigo: string
+          _erro: string
+          _frete_cents: number
+          _id: string
+          _ok: boolean
+          _prepostagem: string
+          _resposta: Json
+        }
+        Returns: Json
+      }
+      qualidade_correios_rotulo: {
+        Args: { _id: string; _path: string }
+        Returns: undefined
+      }
       qualidade_fotos_validas: { Args: { _fotos: Json }; Returns: boolean }
       qualidade_peca: { Args: { _variant: string }; Returns: Json }
       qualidade_troca_abrir: {
@@ -22169,6 +22289,10 @@ export type Database = {
           status: string
           valor_cents: number
         }[]
+      }
+      rep_abertura_rua_cadastrar: {
+        Args: { _dados: Json; _perfil: Json; _rep: string }
+        Returns: Json
       }
       rep_acerto_campo_devolucao: {
         Args: { _cycle: string; _leituras: Json }

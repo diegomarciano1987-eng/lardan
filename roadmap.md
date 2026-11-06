@@ -1,5 +1,11 @@
 # Roadmap
 
+## 0251 — abertura na rua, contrato Danilo, trocas pelos Correios (06/11/2026)
+- [x] Fluxo único da nova candidata (dados → perfil → maleta → assinaturas), sem aprovação interna; prova com desfazer automático e telas.
+- [x] Contrato: {{email}}, {{rg}}, {{estado_civil}}, {{data_nascimento}} do cadastro; 2 testes.
+- [x] Trocas: código reverso e envio da peça nova pelos Correios; prévia conferida em troca real. Nenhuma postagem real gerada.
+- [ ] Publicar após aprovação de Diego.
+
 ## Pacote 0228 — documentos assinados (05/11/2026)
 - [x] Aba e armazenamento privado aplicados; carteira preservada, segredos e produção mantidos.
 - [x] 16 testes isolados + 5 transporte passaram; 209 documentos conferidos, 87 vinculados/63 cópias; PDF real HTTP 200 aberto. Provas: docs/provas-documentos-assinados-0228.md.

@@ -1849,6 +1849,13 @@
       "when": 1794009672829,
       "tag": "0263_auditoria_integridade",
       "breakpoints": true
+    },
+    {
+      "idx": 264,
+      "version": "7",
+      "when": 1794009723234,
+      "tag": "0264_auditoria_vitrine_codigo",
+      "breakpoints": true
     }
   ]
 }

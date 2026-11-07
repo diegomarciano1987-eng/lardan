@@ -19435,6 +19435,7 @@ export type Database = {
         Returns: Json
       }
       assinaturas_sem_copia: { Args: { _limite?: number }; Returns: Json }
+      auditoria_integridade: { Args: never; Returns: Json }
       aviso_registrar: {
         Args: { _ciente?: boolean; _dispositivo?: string; _id: string }
         Returns: string
@@ -19969,6 +19970,10 @@ export type Database = {
         Args: { _order: string }
         Returns: Json
       }
+      consultora_pode_receber_maleta: {
+        Args: { _party: string }
+        Returns: undefined
+      }
       consultora_pos_venda_abrir: {
         Args: {
           _chave: string
@@ -20262,6 +20267,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      estoque_reservas_presas: { Args: { _aplicar?: boolean }; Returns: Json }
       etiqueta_calibracao_ler: { Args: never; Returns: Json }
       etiqueta_calibracao_salvar: { Args: { _cfg: Json }; Returns: Json }
       expire_reservations_internal: {

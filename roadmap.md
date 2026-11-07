@@ -1,10 +1,11 @@
 # Roadmap
 
 ## Pacote 0263 — auditoria e integridade (06/11/2026)
-- [ ] Revisar e aplicar guardas de consultora e liberação oficial de reservas; executar testes isolados.
-- [ ] Rodar auditoria real e somente prévia de reservas presas; entregar todos os códigos, quantidades, exemplos e erros.
-- [ ] Conferir agendamentos/últimas execuções, privacidade de arquivos, autenticação e ambiente fiscal sem mudar configurações.
-- [ ] Publicação e correções de dados aguardam autorização explícita de Diego; não executar neste pacote.
+- [x] Guardas e liberação oficial aplicadas (0263–0265); 8 novos testes passaram; bancada limpa: 695 passaram, 2 falhas TSM anteriores ao pacote.
+- [x] Auditoria real autenticada: 39 itens sem erro; prévia de reservas = 0, nenhuma correção de dados executada. Relatório: docs/provas-auditoria-0263.md.
+- [x] Agendamentos ativos, 12 buckets privados, Focus já em produção conferidos sem mudar configurações; Asaas último início 06/11 09:00 UTC, Central último envio 19:32 UTC.
+- [ ] Horários individuais dos cron e confirmação de e-mail/HIBP/limite horário não verificáveis pelas ferramentas de leitura disponíveis.
+- [ ] Publicação e eventuais correções de dados aguardam autorização explícita de Diego; não executadas neste pacote.
 
 ## Pacote 0259-2 — prévia por CPF das remessas SmallData (06/11/2026)
 - [x] Substituir somente a prévia (0260), preservando os vínculos 3009/3010; 9 testes isolados passaram, 43 asserções.

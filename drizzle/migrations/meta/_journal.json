@@ -1856,6 +1856,13 @@
       "when": 1794009723234,
       "tag": "0264_auditoria_vitrine_codigo",
       "breakpoints": true
+    },
+    {
+      "idx": 265,
+      "version": "7",
+      "when": 1794009772175,
+      "tag": "0265_auditoria_fiscal_schema_real",
+      "breakpoints": true
     }
   ]
 }

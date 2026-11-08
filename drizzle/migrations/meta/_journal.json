@@ -1884,6 +1884,34 @@
       "when": 1794155808118,
       "tag": "0268_0268_destinatarias_uniao_parenteses",
       "breakpoints": true
+    },
+    {
+      "idx": 269,
+      "version": "7",
+      "when": 1794157511071,
+      "tag": "0269_0269_movimento_ativa_consultora",
+      "breakpoints": true
+    },
+    {
+      "idx": 270,
+      "version": "7",
+      "when": 1794157539882,
+      "tag": "0270_0270_movimento_gatilho_jsonb",
+      "breakpoints": true
+    },
+    {
+      "idx": 271,
+      "version": "7",
+      "when": 1794157662012,
+      "tag": "0271_0271_reativar_manual_com_divida",
+      "breakpoints": true
+    },
+    {
+      "idx": 272,
+      "version": "7",
+      "when": 1794157688650,
+      "tag": "0272_0272_reativar_manual_retorno",
+      "breakpoints": true
     }
   ]
 }

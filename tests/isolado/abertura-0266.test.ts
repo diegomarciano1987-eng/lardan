@@ -4,7 +4,7 @@
  * Banco ISOLADO, dados sintéticos.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, criarDeposito, criarVariante, ler, porEstoque, rpc, type Conta } from "./base";
+import { adm, criarConta, criarDeposito, criarVariante, ler, porEstoque, rpc, rpcServico, type Conta } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const base = 600000 + Math.floor(Math.random() * 90000);
@@ -102,9 +102,8 @@ describe("numeração na tela da remessa (remessa_maletas)", () => {
   test("ABERTURA numerada; maleta da consultora sai MALETA 01 (o banco aceita uma por consultora na remessa)", async () => {
     const a1 = (await rpc<{ cycle_id: string; abertura_numero: number }>(master, "remessa_abrir_maleta_representante", { _remessa: remessa })).dados;
     const m1 = (await rpc<{ cycle_id: string }>(master, "remessa_abrir_maleta", { _remessa: remessa, _consultora: cons.partyId })).dados.cycle_id;
-    const linhas = await rpc<{ cycle_id: string; abertura_numero: number | null; maleta_seq: number | null }[]>(master, "remessa_maletas", { _remessa: remessa });
-    expect(linhas.erro).toBeNull();
-    const por = new Map(linhas.dados.map((l) => [l.cycle_id, l]));
+    const linhas = await ler<{ cycle_id: string; abertura_numero: number | null; maleta_seq: number | null }>(master, `select * from public.remessa_maletas($1)`, [remessa]);
+    const por = new Map(linhas.linhas.map((l) => [l.cycle_id, l]));
     expect(a1.abertura_numero).toBeGreaterThan(0);
     expect(por.get(a1.cycle_id)?.abertura_numero).toBe(a1.abertura_numero);
     expect(por.get(a1.cycle_id)?.maleta_seq).toBeNull();
@@ -129,9 +128,8 @@ describe("conferência das assinaturas pendentes (rodízio)", () => {
                         values ('zapsign','producao','contrato',$1,$2,'pendente','Contrato teste','teste', now())`, [dono, tok(s)]);
     }
     expect((await rpc(master, "assinaturas_pendentes_conferir", { _limite: 5 })).ok).toBe(false);
-    await adm.unsafe(`select set_config('request.jwt.claims', '{"role":"service_role"}', false)`).catch(() => null);
-    const primeira = (await um<{ r: { doc_token: string }[] }>(`select public.assinaturas_pendentes_conferir(1) r`)).r;
-    const segunda = (await um<{ r: { doc_token: string }[] }>(`select public.assinaturas_pendentes_conferir(1) r`)).r;
+    const primeira = (await rpcServico<{ doc_token: string }[]>("assinaturas_pendentes_conferir", { _limite: 1 })).dados;
+    const segunda = (await rpcServico<{ doc_token: string }[]>("assinaturas_pendentes_conferir", { _limite: 1 })).dados;
     expect(primeira).toHaveLength(1);
     expect(segunda).toHaveLength(1);
     expect(primeira[0]!.doc_token).not.toBe(segunda[0]!.doc_token);

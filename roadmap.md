@@ -5,7 +5,7 @@
 - [x] Qualquer movimento em nome de inativa ativa na hora (bloqueada/desligada nunca); busca de maleta mostra inativas.
 - [x] Ajuste único: 617 consultoras com movimento em aberto ativadas (131 → 748 ativas), auditado.
 - [x] Testes: 8 isolados novos; bancada completa 713/713. Prova real da Gracielle (simulação desfeita) ok.
-- [ ] Aguardando Diego: ativar também as ~1.300 marcadas "ativa" no SmallData sem movimento em aberto?
+- [ ] Aguardando Diego: ativar também as 1.406 marcadas "ativa" no SmallData sem movimento em aberto?
 - [ ] Publicar (só o servidor do convite precisa; o banco já está valendo).
 
 ## Pacote 0266 — teste interno do Daniel (08/11/2026)

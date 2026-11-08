@@ -99,6 +99,26 @@ export async function importarDocumento(docToken: string): Promise<{ resultado: 
   return { resultado: "sem_cadastro", titulo: d.name, assinante: d.signers?.map((s) => s.name).join(", ") };
 }
 
+/**
+ * 0266 — conferência automática: relê na ZapSign os documentos pendentes em rodízio
+ * (assinaturas_pendentes_conferir marca conferido_em), para quando o aviso automático não chega.
+ */
+export async function conferirPendentes(limite = 8, orcamentoMs = 20_000) {
+  const inicio = Date.now();
+  const r = { conferidos: 0, assinados: 0, erros: 0 };
+  const lista = await rpc<{ doc_token: string; party_id: string }[]>("assinaturas_pendentes_conferir", { _limite: limite });
+  for (const item of lista) {
+    if (Date.now() - inicio > orcamentoMs) break;
+    try {
+      await importarDocumento(item.doc_token);
+      r.conferidos++;
+      const x = await rpc<{ status?: string } | null>("assinatura_ler_por_token", { _doc_token: item.doc_token });
+      if (x?.status === "assinado") r.assinados++;
+    } catch { r.erros++; }
+  }
+  return r;
+}
+
 /** Importa UMA página da conta da ZapSign (painel incluído) e completa até 10 cópias que faltam. A tela chama página a página. */
 export async function sincronizarPagina(pagina: number) {
   const { listarDocumentos } = await import("./api.server");

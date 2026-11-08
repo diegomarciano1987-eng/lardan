@@ -1912,6 +1912,13 @@
       "when": 1794157688650,
       "tag": "0272_0272_reativar_manual_retorno",
       "breakpoints": true
+    },
+    {
+      "idx": 273,
+      "version": "7",
+      "when": 1794158801437,
+      "tag": "0273_0273_rep_maleta_trocar_para_abertura",
+      "breakpoints": true
     }
   ]
 }

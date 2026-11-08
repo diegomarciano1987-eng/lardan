@@ -22666,6 +22666,15 @@ export type Database = {
         }
         Returns: Json
       }
+      rep_maleta_trocar_destino: {
+        Args: {
+          _consultora?: string
+          _cycle: string
+          _lead?: string
+          _rep: string
+        }
+        Returns: Json
+      }
       rep_maletas_carteira: { Args: { _rep: string }; Returns: Json }
       rep_parcela_cobravel: { Args: { _inst: string }; Returns: Json }
       rep_parcela_dono: { Args: { _inst: string }; Returns: string }

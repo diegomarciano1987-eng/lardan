@@ -82,7 +82,7 @@ describe("outros movimentos", () => {
   test("troca do histórico SmallData não ativa; troca nova ativa", async () => {
     const id = await consultora(`Troca Teste ${marca}`, "inativo", rep.partyId);
     await adm.unsafe(`insert into public.qualidade_trocas (origem, consultora_party_id, tipo, status, legado_id)
-                      values ('legado_smalldata',$1,'troca','finalizada',$2)`, [id, `mv69-${marca}`]).catch((e) => { throw e; });
+                      values ('legado_smalldata',$1,'troca','resolvida',$2)`, [id, `mv69-${marca}`]).catch((e) => { throw e; });
     expect((await situacao(id)).p).toBe("inativo");
     await adm.unsafe(`insert into public.qualidade_trocas (origem, consultora_party_id, tipo, status)
                       values ('admin_manual',$1,'troca','aberta')`, [id]);

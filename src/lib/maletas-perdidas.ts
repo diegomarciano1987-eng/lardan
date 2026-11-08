@@ -107,6 +107,18 @@ export const repassarMaleta = (rep: string, cycleId: string, d: Destinataria) =>
     _lead: d.tipo === "candidata" ? d.id : null,
   });
 
+/**
+ * 0273: usa uma maleta que está com o representante (mesmo já designada a outra consultora, ainda não
+ * entregue) para uma abertura. O banco recusa se algo já aconteceu em nome da consultora original.
+ */
+export const trocarDestinoMaleta = (rep: string, cycleId: string, d: Destinataria) =>
+  rpc<{ consultora_party_id: string; nova_consultora: boolean; consultora_anterior?: string | null; abertura_numero?: number | null }>("rep_maleta_trocar_destino", {
+    _rep: rep,
+    _cycle: cycleId,
+    _consultora: d.tipo === "consultora" ? d.id : null,
+    _lead: d.tipo === "candidata" ? d.id : null,
+  });
+
 /** 0254: representante entregou em mãos → a consultora confirma "recebi" e faz o aceite no app dela. */
 export const entregarEmMaos = (cycleId: string) =>
   rpc<{ transfer_id?: string; repetida?: boolean }>("kit_transfer_forward", { _cycle: cycleId, _payload: { note: "Entregue em mãos pelo representante" } });

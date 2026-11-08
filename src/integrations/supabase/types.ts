@@ -19894,6 +19894,10 @@ export type Database = {
         Returns: Json
       }
       consultora_ativar: { Args: { _party: string }; Returns: Json }
+      consultora_ativar_por_movimento: {
+        Args: { _actor: string; _origem: string; _party: string }
+        Returns: boolean
+      }
       consultora_aviso_proxima_maleta: { Args: never; Returns: Json }
       consultora_cliente_compras: { Args: { _cliente: string }; Returns: Json }
       consultora_clientes_resumo: { Args: never; Returns: Json }

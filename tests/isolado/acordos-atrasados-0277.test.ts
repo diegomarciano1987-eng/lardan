@@ -6,7 +6,7 @@
  *  4. Consultora sem permissão de cobrança é recusada.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, rpc, type Conta } from "./base";
+import { adm, criarConta, ler, rpc, type Conta } from "./base";
 
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
 let cob: Conta, consultora: Conta;
@@ -60,9 +60,11 @@ beforeAll(async () => {
   simCris = await acordo(cris, "cancelada", [{ venc: dia(-8), st: "OVERDUE", v: 30000 }]);
 });
 
+const lista = async (c: Conta) => { const r = await ler<Linha>(c, "select * from cob_acordos_atrasados_lista()"); return { erro: r.erro, dados: r.linhas }; };
+
 describe("acordos em atraso (0277)", () => {
   test("quem tem parcela do acordo vencida e não paga aparece com nome, parcelas, valor e data", async () => {
-    const r = await rpc<Linha[]>(cob, "cob_acordos_atrasados_lista", {});
+    const r = await lista(cob);
     expect(r.erro).toBeNull();
     const a = r.dados.find((x) => x.simulacao_id === simAna);
     expect(a?.nome).toBe(`Ana Atrasada ${marca}`);
@@ -74,14 +76,14 @@ describe("acordos em atraso (0277)", () => {
   });
 
   test("acordo com parcela vencida já paga ou acordo cancelado não aparecem", async () => {
-    const r = await rpc<Linha[]>(cob, "cob_acordos_atrasados_lista", {});
+    const r = await lista(cob);
     const ids = r.dados.map((x) => x.simulacao_id);
     expect(ids).not.toContain(simBia);
     expect(ids).not.toContain(simCris);
   });
 
   test("a lista tem exatamente a quantidade do indicador Acordos atrasados", async () => {
-    const r = await rpc<Linha[]>(cob, "cob_acordos_atrasados_lista", {});
+    const r = await lista(cob);
     const k = await rpc<{ acordos_atrasados: number }>(cob, "cob_kpis_periodo", { _de: dia(-30), _ate: dia(0) });
     expect(k.erro).toBeNull();
     expect(r.dados.length).toBe(Number(k.dados.acordos_atrasados));
@@ -89,7 +91,7 @@ describe("acordos em atraso (0277)", () => {
   });
 
   test("consultora sem permissão de cobrança é recusada", async () => {
-    const r = await rpc<Linha[]>(consultora, "cob_acordos_atrasados_lista", {});
+    const r = await ler<Linha>(consultora, "select * from cob_acordos_atrasados_lista()");
     expect(r.ok).toBe(false);
   });
 });

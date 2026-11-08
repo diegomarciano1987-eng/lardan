@@ -1870,6 +1870,13 @@
       "when": 1794155342600,
       "tag": "0266_0266_destinatarias_numeracao_remessa_zapsign_conferir",
       "breakpoints": true
+    },
+    {
+      "idx": 267,
+      "version": "7",
+      "when": 1794155774470,
+      "tag": "0267_0267_destinatarias_status_texto",
+      "breakpoints": true
     }
   ]
 }

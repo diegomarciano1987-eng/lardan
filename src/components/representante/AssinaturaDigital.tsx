@@ -1,24 +1,27 @@
 /**
  * Assinatura digital (ZapSign) na tela da consultora: contrato e promissória
  * de cada maleta. O link vai sozinho pelo WhatsApp dela; o representante
- * também pode copiar o link e mandar. Situação atualiza pelo aviso da ZapSign.
+ * também pode copiar o link e mandar. Situação atualiza pelo aviso da ZapSign
+ * e (0266) também consultando a ZapSign na hora: ao abrir a tela com documento
+ * pendente e pelo botão "Verificar se já assinou".
  */
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Copy, FileSignature, RefreshCw } from "lucide-react";
+import { CircleCheckBig, Copy, FileSignature, Loader2, RefreshCw, SearchCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { zapsignArquivo, zapsignEnviar } from "@/lib/zapsign/zapsign.functions";
+import { zapsignArquivo, zapsignEnviar, zapsignVerificar } from "@/lib/zapsign/zapsign.functions";
 
-interface Doc {
+export interface DocAssinatura {
   id: string; tipo: "contrato" | "promissoria"; titulo: string; status: "pendente" | "assinado" | "recusado" | "cancelado" | "erro";
   ambiente: string; sign_url: string | null; cycle_id: string | null; maleta: string | null; valor_cents: number | null;
   criado_em: string; assinado_em: string | null; enviado_whatsapp: boolean;
 }
 interface Maleta { cycle_id: string; maleta: string; status: string; remessa: number | null; valor_cents: number }
+type Dados = { documentos: DocAssinatura[]; maletas: Maleta[] };
 
-const STATUS: Record<Doc["status"], { rotulo: string; cor: string }> = {
+const STATUS: Record<DocAssinatura["status"], { rotulo: string; cor: string }> = {
   pendente: { rotulo: "Aguardando assinatura", cor: "text-amber-600" },
   assinado: { rotulo: "Assinado", cor: "text-emerald-600" },
   recusado: { rotulo: "Recusado", cor: "text-destructive" },
@@ -29,20 +32,59 @@ const brl = (c: number | null) => ((c ?? 0) / 100).toLocaleString("pt-BR", { sty
 const data = (s: string | null) => (s ? new Date(s).toLocaleDateString("pt-BR") : "");
 const msg = (e: unknown) => (e instanceof Error ? e.message : "Falha.");
 
-export function AssinaturaDigital({ party, rep }: { party: string; rep: string | null }) {
+/** Documentos da consultora + conferência automática na ZapSign dos pendentes (uma vez por tela aberta). */
+export function useAssinaturas(party: string, rep: string | null) {
   const qc = useQueryClient();
-  const enviarFn = useServerFn(zapsignEnviar);
-  const arquivoFn = useServerFn(zapsignArquivo);
-  const chave = ["assinaturas", party];
+  const verificarFn = useServerFn(zapsignVerificar);
+  const chave = React.useMemo(() => ["assinaturas", party], [party]);
   const q = useQuery({
     queryKey: chave,
     queryFn: async () => {
       const { data: d, error } = await supabase.rpc("assinaturas_da_consultora" as never, { _party: party, _rep: rep } as never);
       if (error) throw error;
-      return d as unknown as { documentos: Doc[]; maletas: Maleta[] };
+      return d as unknown as Dados;
     },
-    refetchInterval: (qq) => ((qq.state.data as { documentos: Doc[] } | undefined)?.documentos.some((d) => d.status === "pendente") ? 20_000 : false),
+    refetchInterval: (qq) => ((qq.state.data as Dados | undefined)?.documentos.some((d) => d.status === "pendente") ? 20_000 : false),
   });
+  const conferidos = React.useRef(new Set<string>());
+  const [verificando, setVerificando] = React.useState<string | null>(null);
+
+  const verificar = React.useCallback(async (id: string, avisar: boolean) => {
+    setVerificando(id);
+    try {
+      const r = await verificarFn({ data: { id, rep } });
+      if (avisar) {
+        if (r.status === "assinado") toast.success("Assinado! Já está confirmado no sistema.");
+        else toast.info("Ainda não assinou. Peça para ela abrir o link e concluir.");
+      }
+      await qc.invalidateQueries({ queryKey: chave });
+      void qc.invalidateQueries({ queryKey: ["rep"] });
+    } catch (e) {
+      if (avisar) toast.error(msg(e));
+    } finally {
+      setVerificando(null);
+    }
+  }, [verificarFn, rep, qc, chave]);
+
+  // Ao abrir: confere na ZapSign cada pendente uma vez (o aviso automático pode ter atrasado).
+  const pendentes = (q.data?.documentos ?? []).filter((d) => d.status === "pendente" && (d.tipo === "contrato" || d.tipo === "promissoria"));
+  const idsPendentes = pendentes.map((d) => d.id).join(",");
+  React.useEffect(() => {
+    for (const id of idsPendentes ? idsPendentes.split(",") : []) {
+      if (conferidos.current.has(id)) continue;
+      conferidos.current.add(id);
+      void verificar(id, false);
+    }
+  }, [idsPendentes, verificar]);
+
+  return { q, chave, verificar, verificando };
+}
+
+export function AssinaturaDigital({ party, rep }: { party: string; rep: string | null }) {
+  const qc = useQueryClient();
+  const enviarFn = useServerFn(zapsignEnviar);
+  const arquivoFn = useServerFn(zapsignArquivo);
+  const { q, chave, verificar, verificando } = useAssinaturas(party, rep);
   const enviar = useMutation({
     mutationFn: (v: { tipo: "contrato" | "promissoria"; cycleId?: string; reenviar?: boolean }) =>
       enviarFn({ data: { tipo: v.tipo, partyId: party, cycleId: v.cycleId ?? null, rep, reenviar: v.reenviar ?? false } }),
@@ -68,13 +110,23 @@ export function AssinaturaDigital({ party, rep }: { party: string; rep: string |
   const contrato = docs.find((d) => d.tipo === "contrato" && d.status !== "cancelado");
   const promissoriaDa = (cycle: string) => docs.find((d) => d.tipo === "promissoria" && d.cycle_id === cycle && d.status !== "cancelado");
 
-  const Linha = ({ d }: { d: Doc }) => (
-    <div className="flex flex-wrap items-center gap-2 text-xs">
-      <span className={`font-semibold ${STATUS[d.status].cor}`}>{STATUS[d.status].rotulo}</span>
-      <span className="text-muted-foreground">{d.status === "assinado" ? `em ${data(d.assinado_em)}` : `enviado em ${data(d.criado_em)}`}</span>
-      {d.ambiente === "sandbox" && <span className="rounded bg-muted px-1.5">teste</span>}
-      {d.sign_url && <button type="button" className="inline-flex items-center gap-1 underline" onClick={() => void copiar(d.sign_url!)}><Copy className="size-3" /> link</button>}
-      {d.status === "assinado" && <button type="button" className="underline" onClick={() => void baixar(d.id)}>baixar assinado</button>}
+  const Linha = ({ d }: { d: DocAssinatura }) => (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2 text-xs" data-situacao={d.status}>
+        {d.status === "assinado" && <CircleCheckBig className="size-4 text-emerald-600" aria-hidden />}
+        <span className={`font-semibold ${STATUS[d.status].cor}`}>{STATUS[d.status].rotulo}</span>
+        <span className="text-muted-foreground">{d.status === "assinado" ? `em ${data(d.assinado_em)}` : `enviado em ${data(d.criado_em)}`}</span>
+        {d.ambiente === "sandbox" && <span className="rounded bg-muted px-1.5">teste</span>}
+        {d.sign_url && d.status === "pendente" && <button type="button" className="inline-flex items-center gap-1 underline" onClick={() => void copiar(d.sign_url!)}><Copy className="size-3" /> link</button>}
+        {d.status === "assinado" && <button type="button" className="underline" onClick={() => void baixar(d.id)}>baixar assinado</button>}
+      </div>
+      {d.status === "pendente" && (
+        <button type="button" disabled={verificando === d.id} onClick={() => void verificar(d.id, true)}
+          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/5 px-3 text-xs font-semibold text-primary disabled:opacity-60">
+          {verificando === d.id ? <Loader2 className="size-3.5 animate-spin" /> : <SearchCheck className="size-3.5" />}
+          {verificando === d.id ? "Verificando na ZapSign…" : "Verificar se já assinou"}
+        </button>
+      )}
     </div>
   );
 
@@ -122,4 +174,16 @@ export function AssinaturaDigital({ party, rep }: { party: string; rep: string |
       )}
     </section>
   );
+}
+
+/** Selo curto para a lista das novas consultoras: "Contrato assinado" / "Contrato pendente". */
+export function SeloContrato({ party, rep }: { party: string; rep: string | null }) {
+  const { q } = useAssinaturas(party, rep);
+  const docs = q.data?.documentos ?? [];
+  const contrato = docs.find((d) => d.tipo === "contrato" && d.status !== "cancelado");
+  if (!q.data) return null;
+  if (!contrato) return <span className="rounded-full bg-muted px-2 py-0.5 text-[0.7rem] text-muted-foreground">Contrato não enviado</span>;
+  return contrato.status === "assinado"
+    ? <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/10 px-2 py-0.5 text-[0.7rem] font-semibold text-emerald-700"><CircleCheckBig className="size-3" /> Contrato assinado</span>
+    : <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.7rem] font-semibold text-amber-700">Contrato {STATUS[contrato.status].rotulo.toLowerCase()}</span>;
 }

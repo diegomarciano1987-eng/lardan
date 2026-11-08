@@ -22732,6 +22732,10 @@ export type Database = {
         Args: { _actor: string; _motivo: string; _party: string }
         Returns: boolean
       }
+      rep_reativar_manual: {
+        Args: { _actor: string; _motivo: string; _party: string }
+        Returns: boolean
+      }
       rep_recibo_json: {
         Args: { _r: Database["public"]["Tables"]["rep_recibos"]["Row"] }
         Returns: Json

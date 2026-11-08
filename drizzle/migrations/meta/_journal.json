@@ -1898,6 +1898,13 @@
       "when": 1794157539882,
       "tag": "0270_0270_movimento_gatilho_jsonb",
       "breakpoints": true
+    },
+    {
+      "idx": 271,
+      "version": "7",
+      "when": 1794157662012,
+      "tag": "0271_0271_reativar_manual_com_divida",
+      "breakpoints": true
     }
   ]
 }

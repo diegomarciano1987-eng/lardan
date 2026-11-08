@@ -16,6 +16,7 @@ import {
   mensagem,
   receberMaleta,
   repassarMaleta,
+  trocarDestinoMaleta,
   type Destinataria,
 } from "@/lib/maletas-perdidas";
 
@@ -23,6 +24,7 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["rep", rep, "maletas"], queryFn: () => maletasDoRepresentante(rep) });
   const recarregar = () => void qc.invalidateQueries({ queryKey: ["rep", rep, "maletas"] });
+  const [trocando, setTrocando] = React.useState<string | null>(null);
   const receber = useMutation({
     mutationFn: (transfer: string) => receberMaleta(transfer),
     onSuccess: () => {
@@ -107,6 +109,22 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
                   {entregar.isPending && entregar.variables === m.cycle_id ? "Registrando…" : "Entreguei em mãos"}
                 </button>
               </div>
+              {/* 0273: ele pode deixar esta maleta para uma abertura (outra consultora/candidata) */}
+              {trocando === m.cycle_id ? (
+                <div className="space-y-2 rounded-lg border border-dashed border-primary/40 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium">Usar esta maleta para outra pessoa</p>
+                    <button className="h-9 rounded-lg border border-border px-3 text-sm" onClick={() => setTrocando(null)}>Cancelar</button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{m.consultora} fica sem esta maleta. Escolha a candidata da abertura (ou outra consultora da sua carteira).</p>
+                  <Repasse rep={rep} trocarDe={m.consultora}
+                    maleta={{ cycle_id: m.cycle_id, maleta: m.maleta, remessa: m.remessa, praca: null, pecas: m.pecas, valor_cents: m.valor_cents, acerto: null }}
+                    onFeito={(r) => { setTrocando(null); recarregar(); if (r) onRepasse?.(r); }} />
+                </div>
+              ) : (
+                <button className="h-10 w-full rounded-lg border border-dashed border-border px-4 text-sm text-muted-foreground"
+                  onClick={() => setTrocando(m.cycle_id)}>Não vai ficar com ela? Usar para abertura</button>
+              )}
             </div>
           ))}
         </section>
@@ -135,10 +153,12 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
   );
 }
 
-function Repasse({ rep, maleta, onFeito }: {
+function Repasse({ rep, maleta, onFeito, trocarDe }: {
   rep: string;
   maleta: { cycle_id: string; maleta: string; remessa: number | null; praca: string | null; pecas: number; valor_cents: number; acerto: string | null };
   onFeito: (r?: { partyId: string; nome: string; nova: boolean }) => void;
+  /** 0273: maleta designada a esta consultora, ainda com o representante → troca de destino. */
+  trocarDe?: string;
 }) {
   const [busca, setBusca] = React.useState("");
   const [escolhida, setEscolhida] = React.useState<Destinataria | null>(null);
@@ -148,7 +168,7 @@ function Repasse({ rep, maleta, onFeito }: {
     enabled: busca.trim().length >= 2,
   });
   const passar = useMutation({
-    mutationFn: () => repassarMaleta(rep, maleta.cycle_id, escolhida!),
+    mutationFn: () => (trocarDe ? trocarDestinoMaleta : repassarMaleta)(rep, maleta.cycle_id, escolhida!),
     onSuccess: (r) => {
       toast.success(r.nova_consultora ? "Maleta enviada. A candidata agora é sua consultora." : "Maleta enviada para a consultora.");
       onFeito({ partyId: r.consultora_party_id, nome: escolhida?.nome ?? "", nova: r.nova_consultora });
@@ -160,14 +180,16 @@ function Repasse({ rep, maleta, onFeito }: {
     <div className="space-y-3 rounded-xl border border-border bg-card p-4">
       <div>
         <p className="font-medium">Maleta {maleta.maleta}{maleta.remessa ? ` · remessa ${maleta.remessa}` : ""}{maleta.praca ? ` · ${maleta.praca}` : ""}</p>
-        <p className="text-xs text-muted-foreground">{maleta.pecas} peças · {brl(maleta.valor_cents)} · acerto {dataBr(maleta.acerto)}</p>
+        <p className="text-xs text-muted-foreground">{maleta.pecas} peças · {brl(maleta.valor_cents)}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
       </div>
       {escolhida ? (
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <span>Passar para <strong>{escolhida.nome}</strong> ({escolhida.tipo === "candidata" ? "candidata — vira sua consultora" : "consultora"})</span>
           <button className="h-9 rounded-lg border border-border px-3" onClick={() => setEscolhida(null)}>Trocar</button>
           <button className="h-9 rounded-lg bg-primary px-4 font-semibold text-primary-foreground disabled:opacity-50"
-            disabled={passar.isPending} onClick={() => passar.mutate()}>{passar.isPending ? "Enviando…" : "Confirmar e enviar"}</button>
+            disabled={passar.isPending}
+            onClick={() => { if (trocarDe && !window.confirm(`${trocarDe} vai ficar sem a maleta ${maleta.maleta} e ${escolhida.nome} recebe no lugar. Confirmar?`)) return; passar.mutate(); }}>
+            {passar.isPending ? "Enviando…" : "Confirmar e enviar"}</button>
         </div>
       ) : (
         <div className="space-y-2">

@@ -16,7 +16,7 @@ import { DevolverLead } from "@/components/representante/AtendimentoPresencial";
 import { repCpfDefinir, repCrm, repCrmMover, repEtapaNova, type RepCrm } from "@/lib/representante";
 import { wa } from "@/components/representante/AcoesRepresentante";
 import { AberturaDaCandidata, AberturaNaRua } from "@/components/representante/AberturaNaRua";
-import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
+import { AssinaturaDigital, SeloContrato } from "@/components/representante/AssinaturaDigital";
 
 type Card = RepCrm["cards"][number];
 type Passo = "chamar" | "conversando" | "abrir" | "maleta" | "fora";
@@ -253,7 +253,7 @@ export function DocumentosNovasConsultoras({ rep }: { rep: string }) {
         {novas.map((c) => (
           <li key={c.lead_id} className="rounded-2xl border border-border bg-card p-3">
             <button type="button" onClick={() => setAberto(aberto === c.lead_id ? null : c.lead_id)} className="flex w-full items-center justify-between gap-2 text-left text-sm">
-              <span><strong>{c.nome}</strong> <span className="text-xs text-muted-foreground">· {c.sistema === "primeira_maleta" ? "com maleta" : "aprovada"}</span></span>
+              <span className="flex flex-wrap items-center gap-1.5"><strong>{c.nome}</strong> <span className="text-xs text-muted-foreground">· {c.sistema === "primeira_maleta" ? "com maleta" : "aprovada"}</span> <SeloContrato party={c.party_id!} rep={rep} /></span>
               <ChevronDown className={`size-4 transition-transform ${aberto === c.lead_id ? "rotate-180" : ""}`} />
             </button>
             {aberto === c.lead_id && (

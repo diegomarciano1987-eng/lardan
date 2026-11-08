@@ -6,6 +6,7 @@
  * Grava só por rep_abertura_rua_cadastrar e rep_maleta_repassar (carteira do representante, auditado).
  */
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -142,8 +143,9 @@ function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; 
   const campo = "h-12 w-full rounded-xl border border-border bg-background px-3.5 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20";
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background" role="dialog" aria-label="Nova candidata" data-tela-cheia="">
-      <header className="border-b border-border px-5 pb-3 pt-4">
+    <TelaCheia>
+    <div className="fixed inset-0 z-[200] flex h-[100dvh] flex-col bg-background" role="dialog" aria-modal="true" aria-label="Nova candidata" data-tela-cheia="">
+      <header className="border-b border-border px-5 pb-3 pt-[max(1rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between">
           <button type="button" aria-label="Voltar" disabled={passo === 0 || passo >= 2} onClick={() => setPasso((p) => p - 1)}
             className="grid size-10 place-items-center rounded-full border border-border disabled:invisible"><ChevronLeft className="size-5" /></button>
@@ -160,7 +162,7 @@ function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; 
         </ol>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-5 py-5">
+      <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5">
         <div className="mx-auto max-w-md space-y-5">
           {passo === 0 && (
             <>
@@ -233,7 +235,7 @@ function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; 
       </main>
 
       {passo < 2 && (
-        <footer className="border-t border-border bg-background px-5 py-3">
+        <footer className="border-t border-border bg-background px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="mx-auto max-w-md">
             {passo === 0 && (
               <button type="button" disabled={!ok1} onClick={() => setPasso(1)} className="h-13 min-h-12 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50">
@@ -249,7 +251,23 @@ function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; 
         </footer>
       )}
     </div>
+    </TelaCheia>
   );
+}
+
+/**
+ * 0266 — o fluxo abre direto no <body> (fora do card e do vidro do app), por cima de tudo:
+ * nada de botões por cima ou tela cortada. Trava a rolagem do fundo enquanto está aberto.
+ */
+function TelaCheia({ children }: { children: React.ReactNode }) {
+  const [alvo, setAlvo] = React.useState<HTMLElement | null>(null);
+  React.useEffect(() => {
+    setAlvo(document.body);
+    const antes = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = antes; };
+  }, []);
+  return alvo ? createPortal(children, alvo) : null;
 }
 
 function Bloco({ titulo, icone, children }: { titulo: string; icone?: React.ReactNode; children: React.ReactNode }) {

@@ -1863,6 +1863,27 @@
       "when": 1794009772175,
       "tag": "0265_auditoria_fiscal_schema_real",
       "breakpoints": true
+    },
+    {
+      "idx": 266,
+      "version": "7",
+      "when": 1794155342600,
+      "tag": "0266_0266_destinatarias_numeracao_remessa_zapsign_conferir",
+      "breakpoints": true
+    },
+    {
+      "idx": 267,
+      "version": "7",
+      "when": 1794155774470,
+      "tag": "0267_0267_destinatarias_status_texto",
+      "breakpoints": true
+    },
+    {
+      "idx": 268,
+      "version": "7",
+      "when": 1794155808118,
+      "tag": "0268_0268_destinatarias_uniao_parenteses",
+      "breakpoints": true
     }
   ]
 }

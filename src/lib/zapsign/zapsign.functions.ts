@@ -121,6 +121,30 @@ export const zapsignArquivo = createServerFn({ method: "POST" })
     return { url: d.signed_file ?? d.original_file ?? null, status: d.status };
   });
 
+/**
+ * 0266 — "Verificar se já assinou": consulta a ZapSign na hora (a fonte da verdade é a API, não a tela)
+ * e atualiza a situação; assinado guarda a cópia do PDF. Serve quando o aviso automático atrasa.
+ */
+export const zapsignVerificar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; rep?: string | null }) => {
+    if (!UUID.test(d?.id ?? "")) throw new Error("Documento inválido.");
+    if (d.rep && !UUID.test(d.rep)) throw new Error("Representante inválido.");
+    return { id: d.id, rep: d.rep ?? null };
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    const x = await rpcServidor<{ party_id: string; doc_token: string | null; status?: string } | null>("assinatura_ler", { _id: data.id });
+    if (!x?.doc_token) throw new Error("Documento não encontrado.");
+    const pode = await rpcUsuario<boolean>(c, "assinatura_pode", { _party: x.party_id, _rep: data.rep });
+    if (!pode) throw new Error("Sem permissão.");
+    const { importarDocumento } = await import("./documentos.server");
+    await importarDocumento(x.doc_token);
+    await rpcServidor("assinatura_conferida", { _doc_token: x.doc_token }).catch(() => null);
+    const y = await rpcServidor<{ status?: string } | null>("assinatura_ler", { _id: data.id });
+    return { status: y?.status ?? null };
+  });
+
 /** Modelos (Master edita). */
 export const zapsignModeloSalvar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

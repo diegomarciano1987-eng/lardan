@@ -129,6 +129,7 @@ import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.
 import { Route as ApiPublicRedeLocalizarRouteImport } from './routes/api/public/rede/localizar'
 import { Route as ApiPublicVitrineImgSplatRouteImport } from './routes/api/public/vitrine-img.$'
 import { Route as ApiPublicVitrineExpirarRouteImport } from './routes/api/public/vitrine/expirar'
+import { Route as ApiPublicZapsignConferirRouteImport } from './routes/api/public/zapsign/conferir'
 import { Route as ApiPublicZapsignWebhookRouteImport } from './routes/api/public/zapsign/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -806,6 +807,12 @@ const ApiPublicVitrineExpirarRoute = ApiPublicVitrineExpirarRouteImport.update({
   path: '/api/public/vitrine/expirar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicZapsignConferirRoute =
+  ApiPublicZapsignConferirRouteImport.update({
+    id: '/api/public/zapsign/conferir',
+    path: '/api/public/zapsign/conferir',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicZapsignWebhookRoute = ApiPublicZapsignWebhookRouteImport.update({
   id: '/api/public/zapsign/webhook',
   path: '/api/public/zapsign/webhook',
@@ -988,6 +995,7 @@ export interface FileRoutesByFullPath {
   '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/api/public/vitrine/expirar': typeof ApiPublicVitrineExpirarRoute
+  '/api/public/zapsign/conferir': typeof ApiPublicZapsignConferirRoute
   '/api/public/zapsign/webhook': typeof ApiPublicZapsignWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1118,6 +1126,7 @@ export interface FileRoutesByTo {
   '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/api/public/vitrine/expirar': typeof ApiPublicVitrineExpirarRoute
+  '/api/public/zapsign/conferir': typeof ApiPublicZapsignConferirRoute
   '/api/public/zapsign/webhook': typeof ApiPublicZapsignWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1252,6 +1261,7 @@ export interface FileRoutesById {
   '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/api/public/vitrine/expirar': typeof ApiPublicVitrineExpirarRoute
+  '/api/public/zapsign/conferir': typeof ApiPublicZapsignConferirRoute
   '/api/public/zapsign/webhook': typeof ApiPublicZapsignWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1386,6 +1396,7 @@ export interface FileRouteTypes {
     | '/api/public/rede/localizar'
     | '/api/public/vitrine-img/$'
     | '/api/public/vitrine/expirar'
+    | '/api/public/zapsign/conferir'
     | '/api/public/zapsign/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1516,6 +1527,7 @@ export interface FileRouteTypes {
     | '/api/public/rede/localizar'
     | '/api/public/vitrine-img/$'
     | '/api/public/vitrine/expirar'
+    | '/api/public/zapsign/conferir'
     | '/api/public/zapsign/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1649,6 +1661,7 @@ export interface FileRouteTypes {
     | '/api/public/rede/localizar'
     | '/api/public/vitrine-img/$'
     | '/api/public/vitrine/expirar'
+    | '/api/public/zapsign/conferir'
     | '/api/public/zapsign/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1722,6 +1735,7 @@ export interface RootRouteChildren {
   ApiPublicRedeLocalizarRoute: typeof ApiPublicRedeLocalizarRoute
   ApiPublicVitrineImgSplatRoute: typeof ApiPublicVitrineImgSplatRoute
   ApiPublicVitrineExpirarRoute: typeof ApiPublicVitrineExpirarRoute
+  ApiPublicZapsignConferirRoute: typeof ApiPublicZapsignConferirRoute
   ApiPublicZapsignWebhookRoute: typeof ApiPublicZapsignWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -2571,6 +2585,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicVitrineExpirarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/zapsign/conferir': {
+      id: '/api/public/zapsign/conferir'
+      path: '/api/public/zapsign/conferir'
+      fullPath: '/api/public/zapsign/conferir'
+      preLoaderRoute: typeof ApiPublicZapsignConferirRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/zapsign/webhook': {
       id: '/api/public/zapsign/webhook'
       path: '/api/public/zapsign/webhook'
@@ -2921,6 +2942,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRedeLocalizarRoute: ApiPublicRedeLocalizarRoute,
   ApiPublicVitrineImgSplatRoute: ApiPublicVitrineImgSplatRoute,
   ApiPublicVitrineExpirarRoute: ApiPublicVitrineExpirarRoute,
+  ApiPublicZapsignConferirRoute: ApiPublicZapsignConferirRoute,
   ApiPublicZapsignWebhookRoute: ApiPublicZapsignWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

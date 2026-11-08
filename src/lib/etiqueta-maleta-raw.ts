@@ -5,7 +5,8 @@ import type { LinguagemArgox } from "@/lib/etiquetas-raw";
  * Etiqueta da MALETA: papel próprio de 48 mm de largura × 28 mm de altura (diferente da etiqueta de joia).
  * Mesma Argox e mesmo QZ Tray da estação; 203 DPI = 8 pontos/mm.
  * Conteúdo (igual à etiqueta antiga + nosso código de barras): código - nome da cliente, cidade/UF,
- * representante, código de barras da maleta, número da remessa (grande) e número da maleta na remessa.
+ * representante, código de barras da maleta e número da remessa (grande).
+ * 0266 (Daniel, 08/11): o número solto da maleta no canto direito (11, 10, 9…) saiu da etiqueta.
  */
 export const ETIQUETA_MALETA = { largura: 48, altura: 28, gap: 2 } as const;
 const D = 8;
@@ -43,7 +44,6 @@ export function linhasEtiquetaMaleta(d: DadosEtiquetaMaleta) {
     l2: abertura ? "SEM CONSULTORA" : limpo(d.cidade ?? "").slice(0, 36),
     l3: abreviarNome(d.representante ?? "").slice(0, 36),
     remessa: d.remessa_numero != null ? String(d.remessa_numero) : "",
-    maleta: d.maleta_numero != null ? String(d.maleta_numero) : "",
   };
 }
 
@@ -65,7 +65,6 @@ export function comandosEtiquetaMaleta(codigo: string, ling: LinguagemArgox, cop
       `^FO${margem},${y3}^A0N,20,18^FD${L.l3}^FS`,
       `^FO${xBar},${yBar}^BY${modulo}^BCN,${hBar},N,N,N^FD${codigo}^FS`,
       `^FO${margem},${yBig}^A0N,31,25^FD${L.remessa}^FS`,
-      `^FO0,${yBig}^FB${larg - margem},1,0,R^A0N,31,25^FD${L.maleta}^FS`,
       `^PQ${n}`, "^XZ", "",
     ].join("\n");
   }
@@ -73,7 +72,7 @@ export function comandosEtiquetaMaleta(codigo: string, ling: LinguagemArgox, cop
     // PPLA: linha (0,1 mm) contada a partir da base da etiqueta.
     const S = "\x02", d = (v: number, w: number) => String(Math.max(0, Math.round(v))).padStart(w, "0");
     const base = (yDots: number, hMm: number) => d((ETIQUETA_MALETA.altura - yDots / D - hMm) * 10, 4);
-    const col = d(20, 4), colBar = d((xBar / D) * 10, 4), colDir = d(400, 4);
+    const col = d(20, 4), colBar = d((xBar / D) * 10, 4);
     const m = Math.max(1, Math.min(9, modulo));
     return [
       `${S}m`, `${S}L`, "D11", "H12",
@@ -82,12 +81,10 @@ export function comandosEtiquetaMaleta(codigo: string, ling: LinguagemArgox, cop
       `1211000${base(y3, 2.2)}${col}${L.l3}`,
       `1e${m}${m}${d(hBar, 3)}${base(yBar, 8)}${colBar}${codigo}`,
       `1411000${base(yBig, 3.9)}${col}${L.remessa}`,
-      `1411000${base(yBig, 3.9)}${colDir}${L.maleta}`,
       `Q${d(n, 4)}`, "E", "",
     ].join("\r\n");
   }
   // PPLB / EPL — fonte 2 = 10×16 pontos; fonte 4 = 14×24 (×2 = 28×48)
-  const xDir = Math.max(margem, larg - margem - L.maleta.length * 16);
   return [
     "", "N", `q${larg}`, `Q${alt},${gap}`, "ZT", "S2", "D10",
     `A${margem},${y1},0,3,1,1,N,"${L.l1}"`,
@@ -95,7 +92,6 @@ export function comandosEtiquetaMaleta(codigo: string, ling: LinguagemArgox, cop
     `A${margem},${y3},0,2,1,1,N,"${L.l3}"`,
     `B${xBar},${yBar},0,1,${modulo},${modulo},${hBar},N,"${codigo}"`,
     `A${margem},${yBig},0,4,1,1,N,"${L.remessa}"`,
-    `A${xDir},${yBig},0,4,1,1,N,"${L.maleta}"`,
     `P${n}`, "",
   ].join("\n");
 }

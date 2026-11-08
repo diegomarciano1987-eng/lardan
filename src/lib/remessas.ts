@@ -23,6 +23,18 @@ export interface MaletaDaRemessa {
   status: string;
   pecas: number;
   valor_cents: number;
+  /** 0266: maleta de abertura (sem consultora na saída) → ABERTURA 01, 02… */
+  abertura_numero?: number | null;
+  /** 0266: ordem da maleta da consultora nesta remessa → MALETA 01; acréscimo → MALETA 02 */
+  maleta_seq?: number | null;
+}
+
+const dois = (n: number) => String(n).padStart(2, "0");
+/** Rótulo da maleta na remessa: "ABERTURA 01" (abertura) ou "MALETA 01" (consultora). */
+export function rotuloMaletaRemessa(m: Pick<MaletaDaRemessa, "abertura_numero" | "maleta_seq" | "consultora_party_id">): string | null {
+  if (m.abertura_numero) return `ABERTURA ${dois(m.abertura_numero)}`;
+  if (m.consultora_party_id && m.maleta_seq) return `MALETA ${dois(m.maleta_seq)}`;
+  return null;
 }
 
 export const STATUS_REMESSA: Record<string, { rotulo: string; tom: "neutral" | "warning" | "success" | "danger" }> = {

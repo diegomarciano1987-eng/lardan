@@ -1467,6 +1467,7 @@ export type Database = {
           assinado_em: string | null
           assinante_nome: string | null
           atualizado_em: string
+          conferido_em: string | null
           criado_em: string
           criado_por: string | null
           cycle_id: string | null
@@ -1494,6 +1495,7 @@ export type Database = {
           assinado_em?: string | null
           assinante_nome?: string | null
           atualizado_em?: string
+          conferido_em?: string | null
           criado_em?: string
           criado_por?: string | null
           cycle_id?: string | null
@@ -1521,6 +1523,7 @@ export type Database = {
           assinado_em?: string | null
           assinante_nome?: string | null
           atualizado_em?: string
+          conferido_em?: string | null
           criado_em?: string
           criado_por?: string | null
           cycle_id?: string | null
@@ -19401,6 +19404,7 @@ export type Database = {
         Returns: undefined
       }
       assinatura_avulsa_registrar: { Args: { _d: Json }; Returns: Json }
+      assinatura_conferida: { Args: { _doc_token: string }; Returns: undefined }
       assinatura_dados: {
         Args: { _cycle: string; _party: string; _rep: string; _tipo: string }
         Returns: Json
@@ -19432,6 +19436,10 @@ export type Database = {
       }
       assinaturas_da_consultora: {
         Args: { _party: string; _rep: string }
+        Returns: Json
+      }
+      assinaturas_pendentes_conferir: {
+        Args: { _limite?: number }
         Returns: Json
       }
       assinaturas_sem_copia: { Args: { _limite?: number }; Returns: Json }
@@ -22415,10 +22423,12 @@ export type Database = {
       remessa_maletas: {
         Args: { _remessa: string }
         Returns: {
+          abertura_numero: number
           consultora: string
           consultora_party_id: string
           created_at: string
           cycle_id: string
+          maleta_seq: number
           pecas: number
           status: string
           valor_cents: number

@@ -17,6 +17,7 @@ const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
 let master: Conta, montagem: Conta, repC: Conta, outroRep: Conta, cons: Conta;
 let abertura = "", semDono = "", maletaCons = "", vA = "";
 let original: Record<string, unknown> | null = null;
+let empresaCriada: string | null = null;
 
 async function servico<T>(sql: string, p: unknown[] = []): Promise<{ ok: boolean; dados: T | null; erro: string | null }> {
   const c = await adm.reserve();
@@ -67,6 +68,12 @@ afterAll(async () => {
   await adm.unsafe(`delete from public.assinaturas_digitais where party_id = $1`, [cons.partyId]);
   if (original) await adm.unsafe(`update public.fiscal_settings set emission_active=$1, provider=$2, environment=$3, emitter_entity_id=$4, producao_todas=$5, producao_automatico=$6`,
     [original["emission_active"], original["provider"], original["environment"], original["emitter_entity_id"], original["producao_todas"], original["producao_automatico"]]);
+  // empresa ISO criada aqui: tira o CNPJ da TSM (dela e da pessoa ligada) para não atrapalhar a suíte do emissor fiscal
+  if (empresaCriada) {
+    const ligada = await um<{ party_id: string | null }>(`select party_id::text from public.business_entities where id = $1`, [empresaCriada]);
+    await adm.unsafe(`update public.business_entities set tax_id = null where id = $1`, [empresaCriada]);
+    if (ligada?.party_id) await adm.unsafe(`update public.parties set doc = null where id = $1`, [ligada.party_id]);
+  }
 });
 
 describe("1. abertura", () => {
@@ -91,8 +98,11 @@ describe("1. abertura", () => {
 
 describe("2. fila da nota na abertura", () => {
   test("ganhou consultora com produção automática ligada → remessa na fila", async () => {
-    const be = (await adm.unsafe(`select id from public.business_entities limit 1`) as { id: string }[])[0]
-      ?? await um<{ id: string }>(`insert into public.business_entities (legal_name, tax_id) values ('ISO TSM', '43319208000180') returning id`);
+    let be = (await adm.unsafe(`select id from public.business_entities limit 1`) as { id: string }[])[0];
+    if (!be) {
+      be = await um<{ id: string }>(`insert into public.business_entities (legal_name, tax_id) values ('ISO TSM', '43319208000180') returning id`);
+      empresaCriada = be.id;
+    }
     await adm.unsafe(`update public.fiscal_settings set provider='focus', environment='producao', emitter_entity_id=$1, emission_active=true, producao_todas=true, producao_automatico=true`, [be.id]);
     await adm.unsafe(`update public.kit_cycles set consultora_party_id = $2 where id = $1`, [abertura, cons.partyId]);
     expect((await um<{ n: number }>(`select count(*)::int n from public.fiscal_fila where cycle_id = $1 and etapa = 'remessa'`, [abertura])).n).toBe(1);

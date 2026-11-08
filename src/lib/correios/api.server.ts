@@ -39,11 +39,24 @@ export class ErroCorreios extends Error {
 // token em memória do servidor (a API limita a 3 pedidos de token por segundo)
 let cache: { token: string; expira: number; identidade: string } | null = null;
 
+// pedidos simultâneos (pico de etiquetas) esperam o MESMO pedido de token, em vez de cada um pedir o seu
+let emAndamento: { identidade: string; promessa: Promise<{ token: string; expiraEm: string | null; resposta: unknown }> } | null = null;
+
+/** Esquece o token guardado (os Correios recusaram com 401: venceu antes ou foi revogado). */
+export function esquecerToken() { cache = null; }
+
 export async function token(): Promise<{ token: string; expiraEm: string | null; resposta: unknown }> {
   const c = configCorreios();
   if (!c.pronto) throw new ErroCorreios(`Correios não configurado: falta ${c.faltando.join(", ")}.`);
   const identidade = JSON.stringify([c.ambiente, c.usuario, c.codigo, c.cartao, c.contrato, c.dr]);
   if (cache && cache.identidade === identidade && cache.expira - Date.now() > 5 * 60_000) return { token: cache.token, expiraEm: new Date(cache.expira).toISOString(), resposta: null };
+  if (emAndamento && emAndamento.identidade === identidade) return emAndamento.promessa;
+  const promessa = pedirToken(c, identidade);
+  emAndamento = { identidade, promessa };
+  try { return await promessa; } finally { if (emAndamento?.promessa === promessa) emAndamento = null; }
+}
+
+async function pedirToken(c: ReturnType<typeof configCorreios>, identidade: string): Promise<{ token: string; expiraEm: string | null; resposta: unknown }> {
   const r = await fetch(`${c.base}/token/v1/autentica/cartaopostagem`, {
     signal: AbortSignal.timeout(15000),
     method: "POST",
@@ -75,6 +88,13 @@ function mensagemCorreios(d: JsonCorreios): string | null {
 
 /** Chamada autenticada; devolve status e corpo sem lançar (o diagnóstico mostra tudo). */
 export async function chamar(metodo: "GET" | "POST" | "DELETE", caminho: string, corpo?: unknown): Promise<{ http: number; dados: JsonCorreios }> {
+  const r = await chamarUmaVez(metodo, caminho, corpo);
+  // token recusado: pede um novo e tenta UMA vez (só leitura ou pedido que os Correios recusaram sem processar)
+  if (r.http === 401) { esquecerToken(); return chamarUmaVez(metodo, caminho, corpo); }
+  return r;
+}
+
+async function chamarUmaVez(metodo: "GET" | "POST" | "DELETE", caminho: string, corpo?: unknown): Promise<{ http: number; dados: JsonCorreios }> {
   const c = configCorreios();
   const { token: t } = await token();
   const ctrl = new AbortController();

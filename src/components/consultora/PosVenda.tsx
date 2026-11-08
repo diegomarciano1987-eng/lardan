@@ -1,4 +1,5 @@
 import * as React from "react";
+import { compactarFoto } from "@/lib/foto-compacta";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Camera, ChevronRight, MessageCircle, Plus, Send } from "lucide-react";
@@ -64,7 +65,7 @@ function FormularioTroca({ pedido, onFim }: { pedido?: string; onFim: () => void
         <textarea className="admin-input mt-3 min-h-20 w-full" value={obs} maxLength={1000} onChange={(e) => setObs(e.target.value)} placeholder="Conte o detalhe (opcional)" aria-label="Observação" /></div>
       <div><p className="mb-2 font-semibold">4. Fotos {tipo === "garantia" ? "(obrigatória na garantia)" : "(opcional)"}</p>
         <label className="admin-btn min-h-12 w-full cursor-pointer justify-center gap-2"><Camera className="size-5" aria-hidden /> {fotos.length ? `${fotos.length} foto(s) escolhida(s)` : "Tirar ou escolher fotos (até 3)"}
-          <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple className="sr-only" onChange={(e) => { const fs = Array.from(e.target.files ?? []); if (fs.length > 3 || fs.some((f) => f.size > 5 * 1024 * 1024)) { toast.error("Envie até três fotos de até 5 MB."); return; } setFotos(fs); }} /></label></div>
+          <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple className="sr-only" onChange={async (e) => { const brutas = Array.from(e.target.files ?? []); if (brutas.length > 3) { toast.error("Envie até três fotos."); return; } const fs = await Promise.all(brutas.map((f) => compactarFoto(f))); if (fs.some((f) => f.size > 5 * 1024 * 1024)) { toast.error("Foto grande demais: tire de novo com menos zoom."); return; } setFotos(fs); }} /></label></div>
       <Button className="min-h-13 w-full text-base" disabled={!pronto || m.isPending} onClick={() => m.mutate()}>{m.isPending ? "Enviando…" : "Enviar para a Qualidade"}</Button>
       <p className="text-center text-sm text-muted-foreground">Nenhum valor ou estoque muda sozinho: a Qualidade da Lardan analisa e responde aqui.</p>
     </div>

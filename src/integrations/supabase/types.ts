@@ -20834,6 +20834,7 @@ export type Database = {
       }
       fiscal_focus_acerto_dados: { Args: { _cycle: string }; Returns: Json }
       fiscal_focus_ambiente: { Args: { _cycle: string }; Returns: string }
+      fiscal_focus_conferida: { Args: { _ref: string }; Returns: undefined }
       fiscal_focus_dados: {
         Args: { _itens: Json; _party: string }
         Returns: Json
@@ -20891,6 +20892,10 @@ export type Database = {
       fiscal_focus_exigir_servidor: { Args: never; Returns: undefined }
       fiscal_focus_maleta_dados: { Args: { _cycle: string }; Returns: Json }
       fiscal_focus_notas_maletas: { Args: { _cycles: string[] }; Returns: Json }
+      fiscal_focus_pendentes_conferir: {
+        Args: { _limite?: number }
+        Returns: Json
+      }
       fiscal_focus_pode: { Args: { _acao?: string }; Returns: boolean }
       fiscal_focus_pode_danfe: { Args: { _ref: string }; Returns: boolean }
       fiscal_focus_pode_maleta: { Args: never; Returns: boolean }

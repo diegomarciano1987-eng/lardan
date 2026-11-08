@@ -136,8 +136,37 @@ export async function enviarCopias(limite = 20) {
   return { enviados, falhas };
 }
 
-/** Fila automática (a cada minuto): emite o que entrou na fila e manda as cópias pendentes. */
+/**
+ * Notas sem resposta final (registradas e não enviadas, ou "processando" sem aviso da Focus):
+ * confere pela mesma referência. Se a Focus não tem a nota, ela vira erro_envio e a maleta pode
+ * emitir de novo; se tem, grava o estado real (autorizada, rejeitada...).
+ */
+export async function conferirPendentesFocus(limite = 10) {
+  const { consultarNfe } = await import("./api.server");
+  const lista = await rpcServidor<{ ref: string; ambiente: AmbienteNfe; status: string }[]>("fiscal_focus_pendentes_conferir", { _limite: limite });
+  let atualizadas = 0;
+  for (const n of lista) {
+    try {
+      const c = await consultarNfe(n.ambiente, n.ref);
+      if (c.http === 404) {
+        await rpcServidor("fiscal_focus_retorno", { _ref: n.ref, _fonte: "consulta", _resposta: { status: "erro_envio", mensagem: "A Focus não recebeu esta nota; pode emitir de novo." } });
+        atualizadas++;
+      } else if (c.http < 400 && c.dados?.status && c.dados.status !== n.status) {
+        await rpcServidor("fiscal_focus_retorno", { _ref: n.ref, _fonte: "consulta", _resposta: c.dados });
+        atualizadas++;
+      } else {
+        await rpcServidor("fiscal_focus_conferida", { _ref: n.ref });
+      }
+    } catch {
+      await rpcServidor("fiscal_focus_conferida", { _ref: n.ref }).catch(() => undefined);
+    }
+  }
+  return { conferidas: lista.length, atualizadas };
+}
+
+/** Fila automática (a cada minuto): confere notas sem resposta, emite o que entrou na fila e manda as cópias pendentes. */
 export async function processarFilaFiscal(limite = 5) {
+  const conferencia = await conferirPendentesFocus(10).catch(() => ({ conferidas: 0, atualizadas: 0 }));
   const itens = await rpcServidor<{ id: number; cycle_id: string; etapa: "remessa" | "acerto" }[]>("fiscal_fila_proximos", { _limite: limite });
   let feitos = 0, erros = 0;
   for (const it of itens) {
@@ -161,5 +190,5 @@ export async function processarFilaFiscal(limite = 5) {
     }
   }
   const copias = await enviarCopias(20);
-  return { processados: itens.length, feitos, erros, ...copias };
+  return { processados: itens.length, feitos, erros, ...copias, ...conferencia };
 }

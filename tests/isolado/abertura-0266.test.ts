@@ -4,8 +4,19 @@
  * Banco ISOLADO, dados sintéticos.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, criarDeposito, criarVariante, ler, porEstoque, rpc, rpcServico, type Conta } from "./base";
+import { adm, criarConta, criarDeposito, criarVariante, ler, porEstoque, rpc, type Conta } from "./base";
 
+async function servico<T>(sql: string): Promise<T | null> {
+  const c = await adm.reserve();
+  try {
+    await c.unsafe(`set role service_role`);
+    await c.unsafe(`select set_config('lardan.test_role','service_role',false), set_config('lardan.test_uid','',false)`);
+    return ((await c.unsafe(sql)) as { r: T }[])[0]?.r ?? null;
+  } finally {
+    try { await c.unsafe(`reset role`); await c.unsafe(`select set_config('lardan.test_role','',false)`); } catch { /* */ }
+    c.release();
+  }
+}
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const base = 600000 + Math.floor(Math.random() * 90000);
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
@@ -128,8 +139,8 @@ describe("conferência das assinaturas pendentes (rodízio)", () => {
                         values ('zapsign','producao','contrato',$1,$2,'pendente','Contrato teste','teste', now())`, [dono, tok(s)]);
     }
     expect((await rpc(master, "assinaturas_pendentes_conferir", { _limite: 5 })).ok).toBe(false);
-    const primeira = (await rpcServico<{ doc_token: string }[]>("assinaturas_pendentes_conferir", { _limite: 1 })).dados;
-    const segunda = (await rpcServico<{ doc_token: string }[]>("assinaturas_pendentes_conferir", { _limite: 1 })).dados;
+    const primeira = (await servico<{ doc_token: string }[]>(`select public.assinaturas_pendentes_conferir(1) r`))!;
+    const segunda = (await servico<{ doc_token: string }[]>(`select public.assinaturas_pendentes_conferir(1) r`))!;
     expect(primeira).toHaveLength(1);
     expect(segunda).toHaveLength(1);
     expect(primeira[0]!.doc_token).not.toBe(segunda[0]!.doc_token);

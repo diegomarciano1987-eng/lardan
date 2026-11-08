@@ -28,6 +28,7 @@ import {
   lerEnvioRemessa,
   listarRemessas,
   maletasDaRemessa,
+  rotuloMaletaRemessa,
   reabrirRemessa,
   vincularConsultoraRemessa,
 } from "@/lib/remessas";
@@ -309,6 +310,11 @@ function RemessaPage() {
           return (
             <div key={m.cycle_id} className="flex flex-wrap items-center justify-between gap-4 border-b border-line-soft px-6 py-4 transition hover:bg-surface-muted">
               <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} className="min-w-56 flex-1 font-semibold text-ledger-text hover:underline">
+                {rotuloMaletaRemessa(m) && (
+                  <span className="mr-2 inline-flex h-6 items-center rounded-md bg-primary/10 px-2 align-middle text-xs font-bold tracking-wide text-primary tabular-nums" data-rotulo-maleta="">
+                    {rotuloMaletaRemessa(m)}
+                  </span>
+                )}
                 {m.consultora ?? `Com o representante${r.representante ? ` ${r.representante}` : ""} · sem consultora`}
               </Link>
               <div className="flex flex-wrap items-center gap-2" aria-label={`Documentos de ${m.consultora ?? "maleta"}`}>

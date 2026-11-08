@@ -14,6 +14,15 @@ export interface RemessaCard {
   consultoras_praca: number;
   pecas: number;
   valor_cents: number;
+}
+
+export interface MaletaDaRemessa {
+  cycle_id: string;
+  consultora_party_id: string | null;
+  consultora: string | null;
+  status: string;
+  pecas: number;
+  valor_cents: number;
   /** 0266: maleta de abertura (sem consultora na saída) → ABERTURA 01, 02… */
   abertura_numero?: number | null;
   /** 0266: ordem da maleta da consultora nesta remessa → MALETA 01; acréscimo → MALETA 02 */
@@ -26,15 +35,6 @@ export function rotuloMaletaRemessa(m: Pick<MaletaDaRemessa, "abertura_numero" |
   if (m.abertura_numero) return `ABERTURA ${dois(m.abertura_numero)}`;
   if (m.consultora_party_id && m.maleta_seq) return `MALETA ${dois(m.maleta_seq)}`;
   return null;
-}
-
-export interface MaletaDaRemessa {
-  cycle_id: string;
-  consultora_party_id: string | null;
-  consultora: string | null;
-  status: string;
-  pecas: number;
-  valor_cents: number;
 }
 
 export const STATUS_REMESSA: Record<string, { rotulo: string; tom: "neutral" | "warning" | "success" | "danger" }> = {

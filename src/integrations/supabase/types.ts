@@ -19663,6 +19663,27 @@ export type Database = {
           simulacao_id: string
         }[]
       }
+      cob_acordos_atrasados_lista: {
+        Args: never
+        Returns: {
+          atrasado_cents: number
+          codigo: string
+          dias_atraso: number
+          documento: string
+          fatura_url: string
+          judicial: boolean
+          nome: string
+          origem: string
+          pago_cents: number
+          parcelas_atrasadas: number
+          party_id: string
+          prorrogacao_motivo: string
+          prorrogado: boolean
+          simulacao_id: string
+          total_cents: number
+          vencimento_mais_antigo: string
+        }[]
+      }
       cob_acordos_situacao: {
         Args: never
         Returns: {

@@ -10,6 +10,7 @@ import { KanbanCobranca, KpisCobranca } from "@/components/admin/cobranca/Kanban
 import { ProcessosJudiciais } from "@/components/admin/cobranca/ProcessosJudiciais";
 import { CobrancaHistorica } from "@/components/admin/cobranca/CobrancaHistorica";
 import { ReativacoesPendentes } from "@/components/admin/cobranca/ReativacoesPendentes";
+import { AcordosAtrasados } from "@/components/admin/cobranca/AcordosAtrasados";
 import { carteira, kpisCobranca, moverEtapa, cobConfig, salvarConfig, type CobConfig, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
 
 const busca = z.object({
@@ -106,6 +107,7 @@ function Cobranca() {
 
       <KpisCobranca filtro={s.f} onFiltro={(f) => set({ f })} />
 
+      {s.f === "acordos_atrasados" ? <AcordosAtrasados onFechar={() => set({ f: "" })} /> : <>
       {s.v !== "bi" && s.v !== "perdidas" && s.v !== "processos" && s.v !== "historica" && (
         <div className="flex flex-wrap gap-2">
           <BuscaLocal valor={s.q} onBuscar={(q) => set({ q })} />
@@ -128,6 +130,7 @@ function Cobranca() {
         : s.v === "kanban" ? <KanbanCobranca lista={lista} onMover={mover} />
         : s.v === "agenda" ? <Agenda lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
         : <BI todos={todos} />}
+      </>}
     </div>
   );
 }

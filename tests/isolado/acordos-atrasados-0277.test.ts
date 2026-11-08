@@ -71,7 +71,7 @@ describe("acordos em atraso (0277)", () => {
     expect(a?.parcelas_atrasadas).toBe(2);
     expect(Number(a?.atrasado_cents)).toBe(15000);
     expect(a?.dias_atraso).toBe(10);
-    expect(a?.vencimento_mais_antigo).toBe(dia(-10));
+    expect(new Date(String(a?.vencimento_mais_antigo)).toISOString().slice(0, 10)).toBe(dia(-10));
     expect(a?.fatura_url).toContain(`sim_atr_${marca}`);
   });
 

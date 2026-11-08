@@ -1,13 +1,14 @@
 # Roadmap
 
 ## Pacote 0266 — teste interno do Daniel (08/11/2026)
-- [ ] 1. Contrato assinado aparece como assinado para o representante (verificar na hora + conferência automática a cada 10 min).
-- [ ] 2. Busca da maleta de abertura encontra a candidata recém-cadastrada (nome por partes, CPF, protocolo).
-- [ ] 3. Etiqueta da maleta sem o número solto (11, 10, 9…).
-- [ ] 4. Romaneio com "Abertura 0N" ao lado da remessa.
-- [ ] 5. Nova candidata / Fazer abertura em tela cheia de verdade no celular.
-- [ ] 6. Tela da remessa: "ABERTURA 0N" e "MALETA 0N" (acréscimo = 02).
-- [ ] Testes, provas tela a tela e textos para o Daniel.
+- [x] 1. Contrato assinado aparece como assinado para o representante (verificar na hora + conferência automática a cada 10 min). Contrato do Guilherme corrigido pela própria ZapSign.
+- [x] 2. Busca da maleta de abertura encontra a candidata recém-cadastrada (nome por partes, CPF, protocolo).
+- [x] 3. Etiqueta da maleta sem o número solto (11, 10, 9…).
+- [x] 4. Romaneio com "Abertura 0N" ao lado da remessa.
+- [x] 5. Nova candidata / Fazer abertura em tela cheia de verdade no celular.
+- [x] 6. Tela da remessa: "ABERTURA 0N" e "MALETA 0N" (hoje sempre 01: o banco aceita uma maleta por consultora na remessa).
+- [x] Testes: 8 isolados novos + 9 unitários; bancada completa 705/705. Provas: docs/provas-0266.md.
+- [ ] Aviso automático da ZapSign não chegou no contrato do Guilherme; cadastro do aviso no painel da ZapSign não verificável daqui (a conferência a cada 10 min cobre).
 
 ## Pacote 0263 — auditoria e integridade (06/11/2026)
 - [x] Guardas e liberação oficial aplicadas (0263–0265); 8 novos testes passaram; bancada limpa: 695 passaram, 2 falhas TSM anteriores ao pacote.

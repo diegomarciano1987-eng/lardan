@@ -1891,6 +1891,13 @@
       "when": 1794157511071,
       "tag": "0269_0269_movimento_ativa_consultora",
       "breakpoints": true
+    },
+    {
+      "idx": 270,
+      "version": "7",
+      "when": 1794157539882,
+      "tag": "0270_0270_movimento_gatilho_jsonb",
+      "breakpoints": true
     }
   ]
 }

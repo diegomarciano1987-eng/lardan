@@ -1,5 +1,13 @@
 # Roadmap
 
+## Pacote 0269 — convite do representante e movimento ativa consultora (08/11/2026)
+- [x] Convite do representante para consultora inativa da carteira dele não trava mais (ativa no próprio convite).
+- [x] Qualquer movimento em nome de inativa ativa na hora (bloqueada/desligada nunca); busca de maleta mostra inativas.
+- [x] Ajuste único: 617 consultoras com movimento em aberto ativadas (131 → 748 ativas), auditado.
+- [x] Testes: 8 isolados novos; bancada completa 713/713. Prova real da Gracielle (simulação desfeita) ok.
+- [ ] Aguardando Diego: ativar também as ~1.300 marcadas "ativa" no SmallData sem movimento em aberto?
+- [ ] Publicar (só o servidor do convite precisa; o banco já está valendo).
+
 ## Pacote 0266 — teste interno do Daniel (08/11/2026)
 - [x] 1. Contrato assinado aparece como assinado para o representante (verificar na hora + conferência automática a cada 10 min). Contrato do Guilherme corrigido pela própria ZapSign.
 - [x] 2. Busca da maleta de abertura encontra a candidata recém-cadastrada (nome por partes, CPF, protocolo).

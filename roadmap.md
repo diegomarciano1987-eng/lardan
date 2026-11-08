@@ -1,5 +1,14 @@
 # Roadmap
 
+## Pacote 0266 — teste interno do Daniel (08/11/2026)
+- [ ] 1. Contrato assinado aparece como assinado para o representante (verificar na hora + conferência automática a cada 10 min).
+- [ ] 2. Busca da maleta de abertura encontra a candidata recém-cadastrada (nome por partes, CPF, protocolo).
+- [ ] 3. Etiqueta da maleta sem o número solto (11, 10, 9…).
+- [ ] 4. Romaneio com "Abertura 0N" ao lado da remessa.
+- [ ] 5. Nova candidata / Fazer abertura em tela cheia de verdade no celular.
+- [ ] 6. Tela da remessa: "ABERTURA 0N" e "MALETA 0N" (acréscimo = 02).
+- [ ] Testes, provas tela a tela e textos para o Daniel.
+
 ## Pacote 0263 — auditoria e integridade (06/11/2026)
 - [x] Guardas e liberação oficial aplicadas (0263–0265); 8 novos testes passaram; bancada limpa: 695 passaram, 2 falhas TSM anteriores ao pacote.
 - [x] Auditoria real autenticada: 39 itens sem erro; prévia de reservas = 0, nenhuma correção de dados executada. Relatório: docs/provas-auditoria-0263.md.

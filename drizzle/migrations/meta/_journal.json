@@ -1877,6 +1877,13 @@
       "when": 1794155774470,
       "tag": "0267_0267_destinatarias_status_texto",
       "breakpoints": true
+    },
+    {
+      "idx": 268,
+      "version": "7",
+      "when": 1794155808118,
+      "tag": "0268_0268_destinatarias_uniao_parenteses",
+      "breakpoints": true
     }
   ]
 }

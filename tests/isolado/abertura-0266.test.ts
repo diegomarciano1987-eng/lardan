@@ -103,7 +103,7 @@ describe("numeração na tela da remessa (remessa_maletas)", () => {
     const a1 = (await rpc<{ cycle_id: string; abertura_numero: number }>(master, "remessa_abrir_maleta_representante", { _remessa: remessa })).dados;
     const m1 = (await rpc<{ cycle_id: string }>(master, "remessa_abrir_maleta", { _remessa: remessa, _consultora: cons.partyId })).dados.cycle_id;
     // acréscimo: segunda maleta da mesma consultora na mesma remessa
-    const v = (await rpc<{ cycle_id: string }>(master, "kit_cycle_create", { _payload: { consultora_party_id: cons.partyId, representante_party_id: rep.partyId, label: "Acréscimo" } }));
+    const v = (await rpc<{ cycle_id: string }>(master, "kit_cycle_create", { _payload: { consultora_party_id: cons.partyId, representante_party_id: rep.partyId, origin_location_id: deposito, label: "Acréscimo" } }));
     expect(v.erro).toBeNull();
     const m2 = v.dados.cycle_id;
     await adm.unsafe(`update public.kit_cycles set remessa_id=$1, created_at = now() + interval '1 minute' where id=$2`, [remessa, m2]);
@@ -127,8 +127,8 @@ describe("conferência das assinaturas pendentes (rodízio)", () => {
   test("só o servidor chama; marca conferido_em e não repete o mesmo lote", async () => {
     const tok = (s: string) => `00000000-0000-4000-8000-${marca.padEnd(8, "0").slice(0, 8)}${s}`;
     for (const s of ["0001", "0002"]) {
-      await adm.unsafe(`insert into public.assinaturas_digitais (provedor, ambiente, tipo, party_id, doc_token, status, titulo, criado_em)
-                        values ('zapsign','producao','contrato',$1,$2,'pendente','Contrato teste', now())`, [cons.partyId, tok(s)]);
+      await adm.unsafe(`insert into public.assinaturas_digitais (provedor, ambiente, tipo, party_id, doc_token, status, titulo, texto_hash, criado_em)
+                        values ('zapsign','producao','contrato',$1,$2,'pendente','Contrato teste','teste', now())`, [cons.partyId, tok(s)]);
     }
     expect((await rpc(master, "assinaturas_pendentes_conferir", { _limite: 5 })).ok).toBe(false);
     await adm.unsafe(`select set_config('request.jwt.claims', '{"role":"service_role"}', false)`).catch(() => null);

@@ -39,8 +39,8 @@ async function acordo(party: string, status: string, cobrancas: { venc: string; 
     await adm.begin(async (tx) => {
       await tx.unsafe("select set_config('lardann.asaas_intent','on',true)");
       const ref = `iso-atr:${s.id}:${n}`;
-      await tx.unsafe(`insert into asaas_charge_intents(account_id,title_id,installment_id,party_id,value_cents,due_date,billing_type,internal_reference,idempotency_key,content_hash,acordo_simulacao_id,acordo_parcela,charge_id,external_id)
-        values ($1,$2,$3,$4,$5,$6,'PIX',$7,$7,$7,$8,$9,$10,$11)`, [acc, t.id, i.id, party, c.v, c.venc, ref, s.id, n, ch, ext]);
+      await tx.unsafe(`insert into asaas_charge_intents(account_id,title_id,installment_id,party_id,value_cents,due_date,billing_type,internal_reference,idempotency_key,content_hash,acordo_simulacao_id,acordo_parcela,charge_id,external_id,state)
+        values ($1,$2,$3,$4,$5,$6,'PIX',$7,$7,$7,$8,$9,$10,$11,'criada')`, [acc, t.id, i.id, party, c.v, c.venc, ref, s.id, n, ch, ext]);
     });
   }
   return s.id;

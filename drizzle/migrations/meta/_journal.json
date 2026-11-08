@@ -1919,6 +1919,13 @@
       "when": 1794158801437,
       "tag": "0273_0273_rep_maleta_trocar_para_abertura",
       "breakpoints": true
+    },
+    {
+      "idx": 274,
+      "version": "7",
+      "when": 1794159123235,
+      "tag": "0274_0274_troca_maleta_pendencia_fiscal",
+      "breakpoints": true
     }
   ]
 }

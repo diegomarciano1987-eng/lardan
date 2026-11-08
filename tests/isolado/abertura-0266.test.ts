@@ -20,12 +20,12 @@ function cpf(): string {
 }
 async function lead(nome: string, repId: string, partyId: string | null, cpfDigits: string | null) {
   return (await um<{ id: string }>(
-    `insert into public.leads (full_name, whatsapp, city, uf, privacy_version, stage_id, representante_party_id, party_id, cpf_digits)
-     values ($1,'43999998888','Ibaiti','PR','v1',(select id from public.candidatura_stages order by sort_order limit 1),$2,$3,$4) returning id`,
+    `insert into public.leads (full_name, whatsapp, city, uf, privacy_version, stage_id, representante_party_id, party_id, cpf, cpf_digits)
+     values ($1,'43999998888','Ibaiti','PR','v1',(select id from public.candidatura_stages order by sort_order limit 1),$2,$3,$4,$4) returning id`,
     [nome, repId, partyId, cpfDigits])).id;
 }
 async function pessoa(nome: string, doc: string, status = "ativo") {
-  return (await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, doc_digits, status) values ('pessoa',$1,$1,$2,$3) returning id`, [nome, doc, status])).id;
+  return (await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, doc, doc_digits, status) values ('pessoa',$1,$1,$2,$2,$3) returning id`, [nome, doc, status])).id;
 }
 
 beforeAll(async () => {
@@ -99,22 +99,20 @@ describe("busca da maleta de abertura (rep_maleta_destinatarias)", () => {
 });
 
 describe("numeração na tela da remessa (remessa_maletas)", () => {
-  test("ABERTURA numerada e MALETA 01/02 para acréscimo da mesma consultora", async () => {
+  test("ABERTURA numerada; maleta da consultora sai MALETA 01 (o banco aceita uma por consultora na remessa)", async () => {
     const a1 = (await rpc<{ cycle_id: string; abertura_numero: number }>(master, "remessa_abrir_maleta_representante", { _remessa: remessa })).dados;
     const m1 = (await rpc<{ cycle_id: string }>(master, "remessa_abrir_maleta", { _remessa: remessa, _consultora: cons.partyId })).dados.cycle_id;
-    // acréscimo: segunda maleta da mesma consultora na mesma remessa
-    const v = (await rpc<{ cycle_id: string }>(master, "kit_cycle_create", { _payload: { consultora_party_id: cons.partyId, representante_party_id: rep.partyId, origin_location_id: deposito, label: "Acréscimo" } }));
-    expect(v.erro).toBeNull();
-    const m2 = v.dados.cycle_id;
-    await adm.unsafe(`update public.kit_cycles set remessa_id=$1, created_at = now() + interval '1 minute' where id=$2`, [remessa, m2]);
     const linhas = await rpc<{ cycle_id: string; abertura_numero: number | null; maleta_seq: number | null }[]>(master, "remessa_maletas", { _remessa: remessa });
     expect(linhas.erro).toBeNull();
     const por = new Map(linhas.dados.map((l) => [l.cycle_id, l]));
+    expect(a1.abertura_numero).toBeGreaterThan(0);
     expect(por.get(a1.cycle_id)?.abertura_numero).toBe(a1.abertura_numero);
     expect(por.get(a1.cycle_id)?.maleta_seq).toBeNull();
     expect(por.get(m1)?.maleta_seq).toBe(1);
-    expect(por.get(m2)?.maleta_seq).toBe(2);
     expect(por.get(m1)?.abertura_numero).toBeNull();
+    // segunda maleta da mesma consultora na mesma remessa continua barrada pela trava existente
+    const repetida = await rpc<{ cycle_id: string; repetida?: boolean }>(master, "remessa_abrir_maleta", { _remessa: remessa, _consultora: cons.partyId });
+    expect(repetida.dados).toMatchObject({ cycle_id: m1, repetida: true });
   });
 
   test("consultora e representante não leem a lista da remessa", async () => {
@@ -126,9 +124,9 @@ describe("numeração na tela da remessa (remessa_maletas)", () => {
 describe("conferência das assinaturas pendentes (rodízio)", () => {
   test("só o servidor chama; marca conferido_em e não repete o mesmo lote", async () => {
     const tok = (s: string) => `00000000-0000-4000-8000-${marca.padEnd(8, "0").slice(0, 8)}${s}`;
-    for (const s of ["0001", "0002"]) {
+    for (const [s, dono] of [["0001", cons.partyId], ["0002", rep.partyId]] as const) {
       await adm.unsafe(`insert into public.assinaturas_digitais (provedor, ambiente, tipo, party_id, doc_token, status, titulo, texto_hash, criado_em)
-                        values ('zapsign','producao','contrato',$1,$2,'pendente','Contrato teste','teste', now())`, [cons.partyId, tok(s)]);
+                        values ('zapsign','producao','contrato',$1,$2,'pendente','Contrato teste','teste', now())`, [dono, tok(s)]);
     }
     expect((await rpc(master, "assinaturas_pendentes_conferir", { _limite: 5 })).ok).toBe(false);
     await adm.unsafe(`select set_config('request.jwt.claims', '{"role":"service_role"}', false)`).catch(() => null);

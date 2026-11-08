@@ -7,8 +7,9 @@
 - [x] Fotos do celular compactadas (≤1600 px) antes de subir: troca/garantia, divergência da conferência, pós-venda (antes recusava foto > 5 MB).
 - [x] App: consultas com 10 s de frescor e sem repetir erro de permissão 3 vezes (menos carga quando alterna WhatsApp ↔ app).
 - [x] 18 índices nos caminhos quentes (carteira do representante, maletas a receber, baixa Asaas, pedidos).
-- [x] Testes: 9 novos; bancada completa 723 pass (1 falha de ambiente).
-- [ ] Publicar.
+- [x] Testes: 9 novos; bancada completa 728/728 (teste da DANFE agora limpa o CNPJ da TSM que deixava para trás).
+- [x] Banco: estrutura como migração 0276; limpeza dos avisos do Asaas como pacote de dados (db/aplicados/0276).
+- [ ] Publicar — aguardando aprovação do Diego.
 
 ## Pacote 0269 — convite do representante e movimento ativa consultora (08/11/2026)
 - [x] Convite do representante para consultora inativa da carteira dele não trava mais (ativa no próprio convite).

@@ -1863,6 +1863,13 @@
       "when": 1794009772175,
       "tag": "0265_auditoria_fiscal_schema_real",
       "breakpoints": true
+    },
+    {
+      "idx": 266,
+      "version": "7",
+      "when": 1794155342600,
+      "tag": "0266_0266_destinatarias_numeracao_remessa_zapsign_conferir",
+      "breakpoints": true
     }
   ]
 }

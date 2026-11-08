@@ -180,7 +180,7 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
     <div className="space-y-3 rounded-xl border border-border bg-card p-4">
       <div>
         <p className="font-medium">Maleta {maleta.maleta}{maleta.remessa ? ` · remessa ${maleta.remessa}` : ""}{maleta.praca ? ` · ${maleta.praca}` : ""}</p>
-        <p className="text-xs text-muted-foreground">{maleta.pecas} peças · {brl(maleta.valor_cents)} · acerto {dataBr(maleta.acerto)}</p>
+        <p className="text-xs text-muted-foreground">{maleta.pecas} peças · {brl(maleta.valor_cents)}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
       </div>
       {escolhida ? (
         <div className="flex flex-wrap items-center gap-2 text-sm">

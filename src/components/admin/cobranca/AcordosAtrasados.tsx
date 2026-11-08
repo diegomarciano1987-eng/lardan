@@ -71,7 +71,7 @@ export function AcordosAtrasados({ onFechar }: { onFechar: () => void }) {
                         <td className="px-4 py-3 font-mono text-xs tabular-nums">{brl(Number(a.pago_cents))} de {brl(Number(a.total_cents))}</td>
                         <td className="px-4 py-3 text-xs">{a.prorrogado ? <span title={a.prorrogacao_motivo ?? undefined}>Já prorrogado</span> : <span className="text-muted-foreground">Disponível</span>}</td>
                         <td className="px-4 py-3">{a.fatura_url
-                          ? <a href={a.fatura_url} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center rounded-md bg-asaas px-3 text-xs font-semibold text-asaas-foreground">Abrir fatura</a>
+                          ? <a href={a.fatura_url} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center whitespace-nowrap rounded-md bg-asaas px-3 text-xs font-semibold text-asaas-foreground">Abrir fatura</a>
                           : <span className="text-xs text-muted-foreground">—</span>}</td>
                       </tr>
                     );

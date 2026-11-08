@@ -165,3 +165,5 @@
 - [x] Representante escolhe qualquer maleta com ele (ainda não entregue) para a abertura
 - [x] Nota já emitida não trava: troca na hora + pendência fiscal para a montagem na tela da remessa
 - [x] Testes isolados (6) + regressão do app do representante/abertura/acerto
+
+- [x] 0277 — "Acordos atrasados" abre a lista nominal de quem está em atraso (mesma conta do indicador)

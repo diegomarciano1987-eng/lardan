@@ -150,7 +150,7 @@ export function KpisCobranca({ filtro, onFiltro }: { filtro: string; onFiltro: (
           {t("hoje", "Ações de hoje", k ? String(k.hoje) : "…")}
           {t("atrasadas", "Ações atrasadas", k ? String(k.atrasadas) : "…", !!k && k.atrasadas > 0)}
           {t("", "Acordos gerados", k ? String(k.acordos_gerados) : "…")}
-          {t("", "Acordos atrasados", k ? String(k.acordos_atrasados) : "…", !!k && k.acordos_atrasados > 0)}
+          {t("acordos_atrasados", "Acordos atrasados", k ? String(k.acordos_atrasados) : "…", !!k && k.acordos_atrasados > 0)}
           {t("", "Previsto em acordos", k ? brl(Number(k.previsto_cents)) : "…")}
           {t("", `Realizado${pct != null ? ` · ${pct}%` : ""}`, k ? brl(Number(k.realizado_cents)) : "…")}
         </div>

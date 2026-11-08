@@ -172,11 +172,13 @@ export const convidarConsultora = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       party = pid as unknown as string;
     } else {
-      // Já ativa (ex.: representante convidando a própria carteira): não precisa reativar.
+      // 0269: convite é movimento — consultora inativa vira ativa no próprio convite (gatilho no banco).
+      // A equipe com registry.manage ainda cria o papel para quem nunca foi consultora; o representante
+      // não tem essa permissão e não precisa dela (a carteira dele já é conferida no convite).
       const { data: pre } = await sb.rpc("consultora_acesso_situacao" as never, { _party: party } as never);
       if (!(pre as { consultora_ativa?: boolean } | null)?.consultora_ativa) {
         const { error } = await sb.rpc("consultora_ativar" as never, { _party: party } as never);
-        if (error) throw new Error(error.message);
+        if (error && !/Sem permissão/i.test(error.message)) throw new Error(error.message);
       }
     }
     const { data: sit, error: e1 } = await sb.rpc("consultora_acesso_situacao" as never, { _party: party } as never);

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { compactarFoto } from "@/lib/foto-compacta";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera } from "lucide-react";
 import { toast } from "sonner";
@@ -22,7 +23,8 @@ export function FotosDivergencia({ cycleId, variantId, produto }: { cycleId: str
     },
   });
   const enviar = useMutation({
-    mutationFn: async (arq: File) => {
+    mutationFn: async (original: File) => {
+      const arq = await compactarFoto(original);
       const ext = TIPOS[arq.type];
       if (!ext) throw new Error("Use foto JPG, PNG ou WEBP.");
       if (arq.size > 8 * 1024 * 1024) throw new Error("Foto acima de 8 MB.");

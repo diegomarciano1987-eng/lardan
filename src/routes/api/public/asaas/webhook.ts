@@ -14,6 +14,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 const TAMANHO_MAXIMO = 256 * 1024;
+/** Avisos que não mudam a cobrança (o Asaas manda quando a cliente só abre o link). */
+const EVENTOS_INFORMATIVOS = new Set(["PAYMENT_CHECKOUT_VIEWED", "PAYMENT_BANK_SLIP_VIEWED", "PAYMENT_VIEWED"]);
 
 export const Route = createFileRoute("/api/public/asaas/webhook")({
   server: {
@@ -79,6 +81,10 @@ export const Route = createFileRoute("/api/public/asaas/webhook")({
         const pagamento = (corpo["payment"] ?? null) as Record<string, unknown> | null;
         if (!evento || !pagamento || !txt(pagamento["id"])) {
           return Response.json({ received: true, ignored: "sem_evento_ou_cobranca" });
+        }
+        // só informativo (a cliente abriu a página ou o boleto): não mexe em cobrança nem entra na fila de revisão
+        if (EVENTOS_INFORMATIVOS.has(evento)) {
+          return Response.json({ received: true, ignored: "informativo" });
         }
 
         // tarifa = valor − líquido quando os dois existem (mesma regra do espelho)

@@ -1,5 +1,15 @@
 # Roadmap
 
+## Pacote 0275 — resistência para o pico (08/11/2026)
+- [x] Nota fiscal (produção ligada): falha de rede/tempo/5xx com a Focus confere pela mesma referência antes de liberar outra nota; fila confere sozinha as notas sem resposta; fila fiscal reservada por 5 min.
+- [x] Correios: um pedido de token só no pico (sem estourar o limite de 3/s); 401 renova o token e tenta uma vez.
+- [x] Asaas: avisos "abriu a página/boleto" não entram mais na fila de revisão (os 69 pendentes saem).
+- [x] Fotos do celular compactadas (≤1600 px) antes de subir: troca/garantia, divergência da conferência, pós-venda (antes recusava foto > 5 MB).
+- [x] App: consultas com 10 s de frescor e sem repetir erro de permissão 3 vezes (menos carga quando alterna WhatsApp ↔ app).
+- [x] 18 índices nos caminhos quentes (carteira do representante, maletas a receber, baixa Asaas, pedidos).
+- [x] Testes: 9 novos; bancada completa 723 pass (1 falha de ambiente).
+- [ ] Publicar.
+
 ## Pacote 0269 — convite do representante e movimento ativa consultora (08/11/2026)
 - [x] Convite do representante para consultora inativa da carteira dele não trava mais (ativa no próprio convite).
 - [x] Qualquer movimento em nome de inativa ativa na hora (bloqueada/desligada nunca); busca de maleta mostra inativas.

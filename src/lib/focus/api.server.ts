@@ -111,13 +111,41 @@ export interface RespostaNfe {
   mensagem?: string;
 }
 
+/**
+ * Falha sem resposta clara (rede, 30 s sem resposta, erro 5xx da Focus): a nota PODE ter chegado.
+ * Nunca devolve "erro_envio" sem conferir pela mesma referência — senão o botão ou a fila mandam
+ * uma segunda nota (outro número) para a mesma maleta. Sem confirmação, a referência fica
+ * "processando" (conta como nota viva) e a fila confere de novo em alguns minutos.
+ */
+export async function conferirAposFalha(ambiente: AmbienteNfe, ref: string, motivo: string): Promise<{ http: number; dados: RespostaNfe }> {
+  try {
+    const c = await consultarNfe(ambiente, ref);
+    if (c.http === 404) {
+      return { http: 404, dados: { status: "erro_envio", mensagem_sefaz: `${motivo} A Focus não recebeu esta nota; pode emitir de novo.` } };
+    }
+    if (c.http < 400 && c.dados?.status) return c;
+  } catch { /* segue sem confirmação */ }
+  return {
+    http: 202,
+    dados: { status: "processando_autorizacao", mensagem_sefaz: `${motivo} Sem confirmação da Focus: a nota fica reservada nesta referência e é conferida sozinha em alguns minutos.` },
+  };
+}
+
 /** Envia a NF-e (assíncrono: a Focus responde 202 "processando_autorizacao"). */
 export async function emitirNfe(ambiente: AmbienteNfe, ref: string, nfe: Record<string, unknown>) {
-  const r = await chamar<RespostaNfe>(ambiente, "POST", `/nfe?ref=${encodeURIComponent(ref)}`, nfe);
+  let r: { http: number; dados: RespostaNfe };
+  try {
+    r = await chamar<RespostaNfe>(ambiente, "POST", `/nfe?ref=${encodeURIComponent(ref)}`, nfe);
+  } catch (e) {
+    // token recusado ou Focus não configurada: nada foi enviado
+    if (e instanceof ErroFocus && (e.http !== null || /não configurada/.test(e.message))) throw e;
+    return conferirAposFalha(ambiente, ref, (e as Error).message);
+  }
   // 422 "already_processed"/"pending_operation": a referência já existe lá; a consulta traz o estado real
   if (r.http === 422 && (r.dados?.codigo === "already_processed" || r.dados?.codigo === "pending_operation")) {
     return consultarNfe(ambiente, ref);
   }
+  if (r.http >= 500) return conferirAposFalha(ambiente, ref, `A Focus respondeu ${r.http}.`);
   if (r.http >= 400) {
     return { http: r.http, dados: { ...r.dados, status: "erro_envio", mensagem_sefaz: r.dados?.mensagem ?? `Focus respondeu ${r.http}.` } as RespostaNfe };
   }

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { compactarFoto } from "@/lib/foto-compacta";
 
 /** Canal de Qualidade (trocas e garantias): regras compartilhadas entre o painel Lardan e o app da consultora. */
 export const BUCKET_QUALIDADE = "consultora-pos-venda";
@@ -125,8 +126,9 @@ export async function enviarFotosTroca(arquivos: File[], chave: string): Promise
   if (authErro || !auth.user) throw new Error("Entre novamente para continuar.");
   const paths: string[] = [];
   for (let i = 0; i < arquivos.length; i++) {
-    const f = arquivos[i];
-    if (!f) continue;
+    const bruto = arquivos[i];
+    if (!bruto) continue;
+    const f = await compactarFoto(bruto);
     const ext = f.type === "image/png" ? "png" : f.type === "image/webp" ? "webp" : "jpg";
     const path = `${auth.user.id}/qualidade/${chave}/${i}.${ext}`;
     const { error } = await supabase.storage.from(BUCKET_QUALIDADE).upload(path, f, { contentType: f.type || "image/jpeg", upsert: false });

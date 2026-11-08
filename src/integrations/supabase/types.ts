@@ -12195,6 +12195,134 @@ export type Database = {
           },
         ]
       }
+      maleta_troca_pendencias: {
+        Row: {
+          consultora_anterior_nome: string | null
+          consultora_anterior_party_id: string | null
+          consultora_nova_nome: string | null
+          consultora_nova_party_id: string | null
+          criado_em: string
+          criado_por: string | null
+          cycle_id: string
+          id: string
+          maleta: string | null
+          nota_chave: string | null
+          nota_numero: string | null
+          observacao: string | null
+          remessa_id: string | null
+          resolvido_em: string | null
+          resolvido_por: string | null
+          status: string
+        }
+        Insert: {
+          consultora_anterior_nome?: string | null
+          consultora_anterior_party_id?: string | null
+          consultora_nova_nome?: string | null
+          consultora_nova_party_id?: string | null
+          criado_em?: string
+          criado_por?: string | null
+          cycle_id: string
+          id?: string
+          maleta?: string | null
+          nota_chave?: string | null
+          nota_numero?: string | null
+          observacao?: string | null
+          remessa_id?: string | null
+          resolvido_em?: string | null
+          resolvido_por?: string | null
+          status?: string
+        }
+        Update: {
+          consultora_anterior_nome?: string | null
+          consultora_anterior_party_id?: string | null
+          consultora_nova_nome?: string | null
+          consultora_nova_party_id?: string | null
+          criado_em?: string
+          criado_por?: string | null
+          cycle_id?: string
+          id?: string
+          maleta?: string | null
+          nota_chave?: string | null
+          nota_numero?: string | null
+          observacao?: string | null
+          remessa_id?: string | null
+          resolvido_em?: string | null
+          resolvido_por?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maleta_troca_pendencias_consultora_anterior_party_id_fkey"
+            columns: ["consultora_anterior_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maleta_troca_pendencias_consultora_anterior_party_id_fkey"
+            columns: ["consultora_anterior_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maleta_troca_pendencias_consultora_anterior_party_id_fkey"
+            columns: ["consultora_anterior_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "maleta_troca_pendencias_consultora_nova_party_id_fkey"
+            columns: ["consultora_nova_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maleta_troca_pendencias_consultora_nova_party_id_fkey"
+            columns: ["consultora_nova_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maleta_troca_pendencias_consultora_nova_party_id_fkey"
+            columns: ["consultora_nova_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "maleta_troca_pendencias_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maleta_troca_pendencias_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maleta_troca_pendencias_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_remessas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maleta_troca_pendencias_remessa_id_fkey"
+            columns: ["remessa_id"]
+            isOneToOne: false
+            referencedRelation: "remessas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maletas_perdidas: {
         Row: {
           atualizado_em: string
@@ -21511,6 +21639,10 @@ export type Database = {
       maleta_motivo_invisivel: { Args: { _cycle: string }; Returns: string }
       maleta_perdida_fiado: { Args: { _perdida: string }; Returns: string }
       maleta_total_sugerido: { Args: { _party: string }; Returns: Json }
+      maleta_troca_pendencia_resolver: {
+        Args: { _id: string; _obs?: string }
+        Returns: Json
+      }
       maletas_perdidas_smalldata_processar: {
         Args: { _aplicar?: boolean }
         Returns: Json

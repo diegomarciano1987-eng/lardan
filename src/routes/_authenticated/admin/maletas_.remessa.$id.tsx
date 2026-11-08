@@ -10,6 +10,7 @@ import { abrirMaletaRepresentante, devolverCustodiaRepresentante, expedirRemessa
 import { EnvioRemessa } from "@/components/admin/maletas/EnvioRemessa";
 import { NotaFiscalMaleta, useNotasMaletas } from "@/components/admin/maletas/NotaFiscalMaleta";
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
+import { TrocasPendentes } from "@/components/admin/maletas/TrocasPendentes";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import { liberarKitSemPreBaixa } from "@/lib/pre-baixa";
 import { toast } from "sonner";
@@ -298,6 +299,8 @@ function RemessaPage() {
           </div>
         </Panel>
       )}
+
+      <TrocasPendentes remessaId={id} podeResolver={podeNotaMaleta} />
 
       <Panel title="Maletas da remessa" flush>
         {maletas.isLoading && <div className="p-6"><Skeleton className="h-14" /></div>}

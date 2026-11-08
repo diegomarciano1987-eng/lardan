@@ -33,7 +33,7 @@ async function acordo(party: string, status: string, cobrancas: { venc: string; 
     const ch = await adm.begin(async (tx) => {
       await tx.unsafe("select set_config('lardann.asaas_link','on',true)");
       const r = (await tx.unsafe(`insert into asaas_charges(account_id, external_id, value_cents, due_date, billing_type, external_status, installment_id, title_id, party_id, invoice_url)
-        values ($1,$2,$3,$4,'PIX',$5,$6,$7,$8,$9) returning id`, [acc, ext, c.v, c.venc, c.st, i.id, t.id, party, `https://www.asaas.com/i/${ext}`])) as { id: string }[];
+        values ($1,$2,$3,$4,'PIX',$5,$6,$7,$8,$9) returning id`, [acc, ext, c.v, c.venc, c.st, i.id, t.id, party, `https://sandbox.asaas.com/i/${ext}`])) as { id: string }[];
       return r[0]!.id;
     });
     await adm.begin(async (tx) => {

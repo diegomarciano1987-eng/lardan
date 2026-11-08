@@ -10,7 +10,7 @@ import { adm, criarConta, rpc, type Conta } from "./base";
 
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
 let cob: Conta, consultora: Conta;
-let conta: string, acc: string;
+let conta: string, acc: string, emp: string;
 let simAna: string, simBia: string, simCris: string;
 type Linha = { party_id: string; simulacao_id: string; nome: string; parcelas_atrasadas: number; atrasado_cents: number; dias_atraso: number; vencimento_mais_antigo: string; fatura_url: string | null; judicial: boolean };
 
@@ -21,8 +21,8 @@ async function pessoa(nome: string) {
   return (await um<{ id: string }>(`insert into parties(kind, display_name, legal_name, code) values ('pessoa',$1,$1,$2) returning id`, [nome, `AT${marca}${nome[0]}`])).id;
 }
 async function acordo(party: string, status: string, cobrancas: { venc: string; st: string; v: number }[]) {
-  const t = await um<{ id: string }>(`insert into financial_titles(party_id, direction, descricao, emissao, competencia, valor_cents, origem, status)
-     values ($1,'receivable','acordo ${marca}', $2, $2, 50000, 'manual', 'ativo') returning id`, [party, dia(-60)]);
+  const t = await um<{ id: string }>(`insert into financial_titles(party_id, direction, descricao, emissao, competencia, valor_cents, origem, status, business_entity_id)
+     values ($1,'receivable','acordo ${marca}', $2, $2, 50000, 'manual', 'ativo', $3) returning id`, [party, dia(-60), emp]);
   const i = await um<{ id: string }>(`insert into financial_installments(title_id, numero, vencimento, valor_cents) values ($1,1,$2,50000) returning id`, [t.id, dia(-60)]);
   const s = await um<{ id: string }>(`insert into cob_simulacoes(party_id, installment_ids, data_base, multa_pct, juros_mes_pct, principal_cents, encargos_cents, total_cents, parcelas, status)
      values ($1, array[$2]::uuid[], $3, 0, 0, 30000, 0, 30000, $4, $5) returning id`, [party, i.id, dia(-30), cobrancas.length, status]);
@@ -50,7 +50,7 @@ beforeAll(async () => {
   cob = await criarConta({ nome: `atr-cob-${marca}`, papeis: ["cobranca"], comParty: true });
   consultora = await criarConta({ nome: `atr-cons-${marca}`, papeis: ["consultora"], comParty: true });
   conta = (await um<{ id: string }>("insert into financial_accounts(nome,kind) values($1,'conta_corrente') returning id", [`ISO Atraso ${marca}`])).id;
-  const emp = (await um<{ id: string }>("insert into business_entities(legal_name) values($1) returning id", [`ISO Empresa Atraso ${marca}`])).id;
+  emp = (await um<{ id: string }>("insert into business_entities(legal_name) values($1) returning id", [`ISO Empresa Atraso ${marca}`])).id;
   acc = (await um<{ id: string }>("insert into asaas_accounts(label,environment,financial_account_id,owner_entity_id) values($1,'sandbox',$2,$3) returning id", [`ISO Asaas Atraso ${marca}`, conta, emp])).id;
   const ana = await pessoa(`Ana Atrasada ${marca}`);
   const bia = await pessoa(`Bia Em Dia ${marca}`);

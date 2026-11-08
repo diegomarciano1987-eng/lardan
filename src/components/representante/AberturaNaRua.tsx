@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Check, ChevronLeft, CircleCheckBig, Loader2, MapPin, PackageOpen, UserPlus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { consultarCep } from "@/lib/br/lookup.functions";
-import { brl, maletasDoRepresentante, mensagem, receberMaleta, repassarMaleta } from "@/lib/maletas-perdidas";
+import { brl, maletasDoRepresentante, mensagem, receberMaleta, repassarMaleta, trocarDestinoMaleta } from "@/lib/maletas-perdidas";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
 
 export const ESTADOS_CIVIS = ["Solteira", "Casada", "União estável", "Divorciada", "Viúva"] as const;
@@ -283,20 +283,31 @@ function EscolherMaleta({ rep, leadId, nome, onEscolhida }: { rep: string; leadI
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["rep", rep, "maletas"], queryFn: () => maletasDoRepresentante(rep) });
   const [sel, setSel] = React.useState<string | null>(null);
+  const [verOutras, setVerOutras] = React.useState(false);
   const receber = useMutation({ mutationFn: (t: string) => receberMaleta(t), onSuccess: () => { toast.success("Recebimento confirmado."); void qc.invalidateQueries({ queryKey: ["rep", rep, "maletas"] }); }, onError: (e) => toast.error(mensagem(e)) });
   const passar = useMutation({
-    mutationFn: () => repassarMaleta(rep, sel!, { tipo: "candidata", id: leadId, nome, codigo: null, cidade: null }),
+    mutationFn: async () => {
+      const dest = { tipo: "candidata" as const, id: leadId, nome, codigo: null, cidade: null };
+      // 0273: maleta designada a outra consultora (ainda com o representante) também pode virar abertura
+      return outra ? trocarDestinoMaleta(rep, sel!, dest) : repassarMaleta(rep, sel!, dest);
+    },
     onSuccess: () => {
-      const m = q.data!.sem_consultora.find((x) => x.cycle_id === sel)!;
-      toast.success(`Maleta ${m.maleta} agora é de ${primeiroNome(nome)}.`);
+      toast.success(`Maleta ${escolhida!.maleta} agora é de ${primeiroNome(nome)}.`);
       void qc.invalidateQueries({ queryKey: ["rep", rep] });
-      onEscolhida({ cycle_id: m.cycle_id, nome: m.maleta });
+      onEscolhida({ cycle_id: escolhida!.cycle_id, nome: escolhida!.maleta });
     },
     onError: (e) => toast.error(mensagem(e)),
   });
   if (q.isLoading) return <p className="text-sm text-muted-foreground">Carregando suas maletas…</p>;
   if (q.error) return <p className="text-sm text-destructive">{mensagem(q.error)}</p>;
   const d = q.data!;
+  const designadas = d.para_entregar ?? [];
+  const outra = designadas.find((x) => x.cycle_id === sel) ?? null;
+  const escolhida: { cycle_id: string; maleta: string } | null = outra ?? d.sem_consultora.find((x) => x.cycle_id === sel) ?? null;
+  const confirmar = () => {
+    if (outra && !window.confirm(`A maleta ${outra.maleta} era de ${outra.consultora}. Ela vai ficar sem esta maleta e ${primeiroNome(nome)} recebe no lugar. Confirmar?`)) return;
+    passar.mutate();
+  };
   return (
     <Bloco titulo="Qual maleta fica com ela" icone={<PackageOpen className="size-4" />}>
       {d.a_receber.map((m) => (
@@ -305,9 +316,14 @@ function EscolherMaleta({ rep, leadId, nome, onEscolhida }: { rep: string; leadI
           <button type="button" disabled={receber.isPending} onClick={() => receber.mutate(m.transfer_id)} className="h-10 rounded-xl border border-border px-3 text-sm">Recebi</button>
         </div>
       ))}
-      {d.sem_consultora.length === 0 && (
+      {d.sem_consultora.length === 0 && designadas.length === 0 && (
         <p className="rounded-2xl bg-muted/60 p-4 text-sm text-muted-foreground">
-          Nenhuma maleta de abertura com você agora. O cadastro dela já está salvo: quando a maleta chegar, abra a candidata na lista e continue daqui.
+          Nenhuma maleta com você agora. O cadastro dela já está salvo: quando a maleta chegar, abra a candidata na lista e continue daqui.
+        </p>
+      )}
+      {d.sem_consultora.length === 0 && designadas.length > 0 && (
+        <p className="rounded-2xl bg-muted/60 p-4 text-sm text-muted-foreground">
+          Nenhuma maleta de abertura com você. Você pode usar uma das maletas que estão com você para outra consultora.
         </p>
       )}
       <div className="space-y-2">
@@ -322,9 +338,34 @@ function EscolherMaleta({ rep, leadId, nome, onEscolhida }: { rep: string; leadI
           </button>
         ))}
       </div>
-      {d.sem_consultora.length > 0 && (
-        <button type="button" disabled={!sel || passar.isPending} onClick={() => passar.mutate()} className="min-h-12 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50">
-          {passar.isPending ? "Vinculando…" : "Deixar esta maleta com ela"}
+      {designadas.length > 0 && (
+        <div className="space-y-2">
+          <button type="button" onClick={() => setVerOutras((v) => !v)} aria-expanded={verOutras || d.sem_consultora.length === 0}
+            className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-dashed border-border px-4 text-left text-sm font-medium">
+            <span>Usar uma maleta que era de outra consultora ({designadas.length})</span>
+            <span className="text-muted-foreground">{verOutras || d.sem_consultora.length === 0 ? "Fechar" : "Ver"}</span>
+          </button>
+          {(verOutras || d.sem_consultora.length === 0) && (
+            <>
+              <p className="px-1 text-xs text-muted-foreground">Só as que ainda não foram entregues em mãos. A consultora original fica sem esta maleta.</p>
+              {designadas.map((m) => (
+                <button key={m.cycle_id} type="button" onClick={() => setSel(m.cycle_id)}
+                  className={`flex w-full items-center justify-between gap-3 rounded-2xl border p-4 text-left ${sel === m.cycle_id ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border"}`}>
+                  <div className="min-w-0">
+                    <p className="font-semibold">{m.maleta}</p>
+                    <p className="text-xs text-muted-foreground">Era de {m.consultora}{m.cidade ? ` · ${m.cidade}` : ""}</p>
+                    <p className="text-xs text-muted-foreground">{m.pecas} peças · {brl(m.valor_cents)}{m.remessa ? ` · remessa ${m.remessa}` : ""}</p>
+                  </div>
+                  <span className={`grid size-7 shrink-0 place-items-center rounded-full border ${sel === m.cycle_id ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>{sel === m.cycle_id && <Check className="size-4" />}</span>
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+      {(d.sem_consultora.length > 0 || designadas.length > 0) && (
+        <button type="button" disabled={!escolhida || passar.isPending} onClick={confirmar} className="min-h-12 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          {passar.isPending ? "Vinculando…" : outra ? `Trocar: deixar ${outra.maleta} com ela` : "Deixar esta maleta com ela"}
         </button>
       )}
     </Bloco>

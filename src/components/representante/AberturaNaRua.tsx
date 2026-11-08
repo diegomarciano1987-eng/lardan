@@ -162,7 +162,7 @@ function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; 
         </ol>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-5 py-5">
+      <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5">
         <div className="mx-auto max-w-md space-y-5">
           {passo === 0 && (
             <>

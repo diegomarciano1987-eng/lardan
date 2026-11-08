@@ -4,7 +4,7 @@
  * Banco ISOLADO, dados sintéticos.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, criarDeposito, rpc, type Conta } from "./base";
+import { adm, criarConta, criarDeposito, ler, rpc, type Conta } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const base = 700000 + Math.floor(Math.random() * 90000);
@@ -29,8 +29,7 @@ beforeAll(async () => {
   rep = await criarConta({ nome: `mv69-rep-${base}`, papeis: ["representante"], comParty: true });
   repOutro = await criarConta({ nome: `mv69-rep2-${base}`, papeis: ["representante"], comParty: true });
   const deposito = await criarDeposito(`mv69-${marca}`);
-  praca = (await rpc<{ id: string }>(master, "praca_criar", { _nome: `MV69 ${marca}` })).dados.id
-    ?? (await um<{ id: string }>(`select id from public.cob_pracas order by created_at desc limit 1`)).id;
+  praca = (await ler<{ id: string }>(master, `select (public.praca_criar($1)).id`, [`MV69 ${marca}`])).linhas[0]!.id;
   remessa = (await rpc<{ id: string }>(master, "remessa_criar", { _praca: praca, _representante: rep.partyId, _deposito: deposito,
     _data_acerto: new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10) })).dados.id;
 });

@@ -53,6 +53,10 @@ export interface CandidaturaCard {
   reenvios: number;
   responsavel_id: string | null;
   responsavel: string | null;
+  /** 0278: representante da carteira (link, rota, encaminhada, cadastro na rua). */
+  representante_id?: string | null;
+  representante?: string | null;
+  representante_origem?: string | null;
   tags: Etiqueta[];
 }
 

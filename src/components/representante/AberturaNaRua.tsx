@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Check, ChevronLeft, CircleCheckBig, Loader2, MapPin, PackageOpen, UserPlus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { consultarCep } from "@/lib/br/lookup.functions";
-import { brl, maletasDoRepresentante, mensagem, receberMaleta, repassarMaleta, trocarDestinoMaleta } from "@/lib/maletas-perdidas";
+import { brl, maletasDoRepresentante, mensagem, receberMaleta, repassarMaleta, rotuloAbertura, trocarDestinoMaleta } from "@/lib/maletas-perdidas";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
 
 export const ESTADOS_CIVIS = ["Solteira", "Casada", "União estável", "Divorciada", "Viúva"] as const;
@@ -312,7 +312,7 @@ function EscolherMaleta({ rep, leadId, nome, onEscolhida }: { rep: string; leadI
     <Bloco titulo="Qual maleta fica com ela" icone={<PackageOpen className="size-4" />}>
       {d.a_receber.map((m) => (
         <div key={m.transfer_id} className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-border p-4">
-          <div><p className="font-medium">{m.maleta}</p><p className="text-xs text-muted-foreground">A caminho de você · {m.pecas} peças</p></div>
+          <div><p className="font-medium">{(!m.consultora && rotuloAbertura(m.abertura_numero, m.remessa)) || m.maleta}</p><p className="text-xs text-muted-foreground">A caminho de você · {m.pecas} peças</p></div>
           <button type="button" disabled={receber.isPending} onClick={() => receber.mutate(m.transfer_id)} className="h-10 rounded-xl border border-border px-3 text-sm">Recebi</button>
         </div>
       ))}
@@ -331,8 +331,8 @@ function EscolherMaleta({ rep, leadId, nome, onEscolhida }: { rep: string; leadI
           <button key={m.cycle_id} type="button" onClick={() => setSel(m.cycle_id)}
             className={`flex w-full items-center justify-between gap-3 rounded-2xl border p-4 text-left ${sel === m.cycle_id ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border"}`}>
             <div>
-              <p className="font-semibold">{m.maleta}</p>
-              <p className="text-xs text-muted-foreground">{m.pecas} peças · {brl(m.valor_cents)}{m.remessa ? ` · remessa ${m.remessa}` : ""}</p>
+              <p className="text-base font-bold tracking-wide">{rotuloAbertura(m.abertura_numero, m.remessa) ?? m.maleta}</p>
+              <p className="text-xs text-muted-foreground">{rotuloAbertura(m.abertura_numero, m.remessa) ? `Maleta ${m.maleta} · ` : ""}{m.pecas} peças · {brl(m.valor_cents)}{m.remessa && !m.abertura_numero ? ` · remessa ${m.remessa}` : ""}</p>
             </div>
             <span className={`grid size-7 place-items-center rounded-full border ${sel === m.cycle_id ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>{sel === m.cycle_id && <Check className="size-4" />}</span>
           </button>

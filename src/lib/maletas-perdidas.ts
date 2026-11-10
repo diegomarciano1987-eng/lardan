@@ -83,9 +83,15 @@ export const abrirMaletaRepresentante = (remessaId: string) =>
 
 export interface MaletasDoRepresentante {
   a_receber: { transfer_id: string; cycle_id: string; maleta: string; remessa: number | null; consultora: string | null; consultora_codigo?: string | null; abertura_numero?: number | null; pecas: number; valor_cents: number; enviada_em: string | null }[];
-  sem_consultora: { cycle_id: string; maleta: string; remessa: number | null; praca: string | null; pecas: number; valor_cents: number; acerto: string | null }[];
-  para_entregar?: { cycle_id: string; maleta: string; remessa: number | null; consultora: string; consultora_codigo: string | null; telefone: string | null; cidade: string | null; pecas: number; valor_cents: number }[];
-  a_caminho: { cycle_id: string; maleta: string; remessa: number | null; consultora: string; pecas: number }[];
+  sem_consultora: { cycle_id: string; maleta: string; remessa: number | null; praca: string | null; abertura_numero?: number | null; pecas: number; valor_cents: number; acerto: string | null }[];
+  para_entregar?: { cycle_id: string; maleta: string; remessa: number | null; consultora: string; consultora_codigo: string | null; abertura_numero?: number | null; telefone: string | null; cidade: string | null; pecas: number; valor_cents: number }[];
+  a_caminho: { cycle_id: string; maleta: string; remessa: number | null; consultora: string; abertura_numero?: number | null; pecas: number }[];
+}
+
+/** 0278: o mesmo texto do pedido impresso — "ABERTURA 01 · Remessa 925". */
+export function rotuloAbertura(numero: number | null | undefined, remessa?: number | null): string | null {
+  if (!numero) return null;
+  return `ABERTURA ${String(numero).padStart(2, "0")}${remessa ? ` · Remessa ${remessa}` : ""}`;
 }
 export const maletasDoRepresentante = (rep: string) => rpc<MaletasDoRepresentante>("rep_portal_maletas", { _rep: rep });
 

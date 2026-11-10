@@ -22,6 +22,14 @@ import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
+/** "GUILHERME AUGUSTO PELEGRINI DA SILVA" → "Guilherme Pelegrini" (primeiro + segundo sobrenome útil). */
+function nomeCurtoRep(n: string): string {
+  const partes = n.trim().toLowerCase().split(/\s+/).filter((p) => !["da", "de", "do", "das", "dos", "e"].includes(p));
+  const cap = (p: string) => p.charAt(0).toUpperCase() + p.slice(1);
+  if (partes.length <= 2) return partes.map(cap).join(" ");
+  return `${cap(partes[0]!)} ${cap(partes[2] ?? partes[1]!)}`;
+}
+
 /* ------------------------------------------------------------- selos -- */
 
 function Selo({
@@ -133,7 +141,8 @@ export function CardCandidatura({
         {p.tom === "atrasado" && <Selo tom="atrasado">Atrasado</Selo>}
         {p.tom === "hoje" && <Selo tom="hoje">Hoje</Selo>}
         {p.tom === "nenhum" && c.desfecho === "aberta" && <Selo tom="aviso">Sem próxima ação</Selo>}
-        {!c.responsavel_id && <Selo tom="aviso">Sem responsável</Selo>}
+        {c.representante && <Selo tom="neutro">Rep: {nomeCurtoRep(c.representante)}</Selo>}
+        {!c.responsavel_id && !c.representante && <Selo tom="aviso">Sem responsável</Selo>}
         {c.prioridade !== "normal" && (
           <Selo tom="prioridade">{c.prioridade === "urgente" ? "Urgente" : "Alta"}</Selo>
         )}
@@ -144,7 +153,7 @@ export function CardCandidatura({
         <div className="flex items-center gap-1.5">
           <UserRound aria-hidden className="size-3" />
           <dt className="sr-only">Responsável</dt>
-          <dd>{c.responsavel ?? "Sem responsável"}</dd>
+          <dd>{c.responsavel ?? (c.representante ? `Com o representante ${nomeCurtoRep(c.representante)}` : "Sem responsável")}</dd>
         </div>
         <div className="flex items-center gap-1.5">
           <Clock3 aria-hidden className="size-3" />

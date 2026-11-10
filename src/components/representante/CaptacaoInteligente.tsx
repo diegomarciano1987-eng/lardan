@@ -268,3 +268,61 @@ export function DocumentosNovasConsultoras({ rep }: { rep: string }) {
     </section>
   );
 }
+
+/**
+ * 0278 (Diego, 10/11): candidatas da carteira que ainda não receberam maleta aparecem também na aba
+ * Abertura — quem veio pelo link do representante, as que ele cadastrou e as que a Lardan passou.
+ * Ordem: aprovadas primeiro, depois as que vieram pelo link, depois as mais novas.
+ */
+export function CandidatasParaAbertura({ rep }: { rep: string }) {
+  const q = useQuery({ queryKey: ["rep", rep, "crm"], queryFn: () => repCrm(rep) });
+  // mesma pessoa cadastrada duas vezes (mesmo WhatsApp) aparece uma vez só: fica o cadastro mais adiantado
+  const vistos = new Set<string>();
+  const lista = (q.data?.cards ?? [])
+    .filter((c) => c.sistema !== "primeira_maleta" && c.sistema !== "nao_aprovada" && c.status_lardan !== "recusado")
+    .sort((a, b) => Number(b.sistema === "aprovada") - Number(a.sistema === "aprovada") || new Date(b.criado).getTime() - new Date(a.criado).getTime())
+    .filter((c) => {
+      const k = (c.whatsapp ?? "").replace(/\D/g, "").slice(-11) || c.lead_id;
+      if (vistos.has(k)) return false;
+      vistos.add(k);
+      return true;
+    })
+    .sort((a, b) =>
+      Number(b.sistema === "aprovada") - Number(a.sistema === "aprovada") ||
+      Number(b.origem === "link") - Number(a.origem === "link") ||
+      new Date(b.criado).getTime() - new Date(a.criado).getTime());
+  if (q.isLoading) return <p className="text-sm text-muted-foreground">Carregando candidatas…</p>;
+  if (q.error) return <p className="text-sm text-destructive">{(q.error as Error).message}</p>;
+  return (
+    <section className="space-y-2" aria-label="Candidatas esperando abertura">
+      <h3 className="text-base font-semibold">Candidatas esperando abertura ({lista.length})</h3>
+      {lista.length === 0 ? (
+        <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
+          Nenhuma candidata esperando maleta. Quem se cadastrar pelo seu link aparece aqui na hora.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {lista.map((c) => (
+            <li key={c.lead_id} className="rounded-2xl border border-border bg-card p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-base font-semibold">{c.nome}</p>
+                  <p className="text-xs text-muted-foreground">{c.cidade} · cadastro {dias(c.criado) === 0 ? "hoje" : `há ${dias(c.criado)} ${dias(c.criado) === 1 ? "dia" : "dias"}`}</p>
+                </div>
+                <a href={wa(c.whatsapp, `Olá, ${primeiro(c.nome)}! `)} target="_blank" rel="noreferrer"
+                  className="grid size-10 shrink-0 place-items-center rounded-full border border-border" aria-label="WhatsApp"><MessageCircle className="size-4" /></a>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5 text-[0.72rem]">
+                <span className="rounded-full bg-muted px-2 py-0.5">{ORIGEM[c.origem ?? ""] ?? ORIGEM["encaminhada"]}</span>
+                <span className="rounded-full bg-muted px-2 py-0.5">{c.sistema === "aprovada" ? "Aprovada" : (STATUS[c.status_lardan] ?? c.status_lardan)}</span>
+              </div>
+              <div className="mt-3 grid grid-cols-1">
+                <AberturaDaCandidata rep={rep} card={c} />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}

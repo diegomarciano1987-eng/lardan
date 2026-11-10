@@ -1940,6 +1940,13 @@
       "when": 1794163168830,
       "tag": "0276_0277_cob_acordos_atrasados_lista",
       "breakpoints": true
+    },
+    {
+      "idx": 277,
+      "version": "7",
+      "when": 1794316176034,
+      "tag": "0277_0278_link_representante_aberturas",
+      "breakpoints": true
     }
   ]
 }

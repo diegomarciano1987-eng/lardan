@@ -169,8 +169,8 @@
 - [x] 0277 — "Acordos atrasados" abre a lista nominal de quem está em atraso (mesma conta do indicador)
 
 ## Pacote 0278 — candidata do link e maletas de abertura (10/11/2026)
-- [ ] Link do representante (?rep=lc-…) grava a candidata na carteira dele na hora (origem "Veio pelo seu link")
-- [ ] Aba Abertura: lista "Candidatas esperando abertura" com botão Fazer abertura
-- [ ] Painel Master: card mostra o representante da candidata
-- [ ] Maletas de abertura com "ABERTURA 01 · Remessa X" e em ordem (abertura, depois remessa)
-- [ ] Testes isolados + provas de tela
+- [x] Link do representante (?rep=lc-…) grava a candidata na carteira dele na hora (origem "Veio pelo seu link")
+- [x] Aba Abertura: lista "Candidatas esperando abertura" com botão Fazer abertura
+- [x] Painel Master: card mostra o representante da candidata
+- [x] Maletas de abertura com "ABERTURA 01 · Remessa X" e em ordem (abertura, depois remessa)
+- [x] Testes isolados + provas de tela

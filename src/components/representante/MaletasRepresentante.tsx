@@ -16,6 +16,7 @@ import {
   mensagem,
   receberMaleta,
   repassarMaleta,
+  rotuloAbertura,
   trocarDestinoMaleta,
   type Destinataria,
 } from "@/lib/maletas-perdidas";
@@ -78,8 +79,8 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
           {d.a_receber.map((m) => (
             <div key={m.transfer_id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
               <div>
-                <p className="font-medium">{m.consultora ?? (m.abertura_numero ? `Abertura ${m.abertura_numero}` : "Sem consultora (abertura)")}{m.consultora_codigo ? <span className="text-muted-foreground"> · cód. {m.consultora_codigo}</span> : null}</p>
-                <p className="text-xs text-muted-foreground">Maleta {m.maleta}{m.remessa ? ` · remessa ${m.remessa}` : ""} · {m.pecas} peças · {brl(m.valor_cents)}</p>
+                <p className="font-medium">{m.consultora ?? rotuloAbertura(m.abertura_numero, m.remessa) ?? "Sem consultora (abertura)"}{m.consultora_codigo ? <span className="text-muted-foreground"> · cód. {m.consultora_codigo}</span> : null}</p>
+                <p className="text-xs text-muted-foreground">Maleta {m.maleta}{m.remessa && !(m.abertura_numero && !m.consultora) ? ` · remessa ${m.remessa}` : ""} · {m.pecas} peças · {brl(m.valor_cents)}</p>
               </div>
               <button className="h-10 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
                 disabled={receber.isPending} onClick={() => receber.mutate(m.transfer_id)}>Confirmar que recebi</button>
@@ -118,7 +119,7 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
                   </div>
                   <p className="text-xs text-muted-foreground">{m.consultora} fica sem esta maleta. Escolha a candidata da abertura (ou outra consultora da sua carteira).</p>
                   <Repasse rep={rep} trocarDe={m.consultora}
-                    maleta={{ cycle_id: m.cycle_id, maleta: m.maleta, remessa: m.remessa, praca: null, pecas: m.pecas, valor_cents: m.valor_cents, acerto: null }}
+                    maleta={{ cycle_id: m.cycle_id, maleta: m.maleta, remessa: m.remessa, praca: null, abertura_numero: m.abertura_numero ?? null, pecas: m.pecas, valor_cents: m.valor_cents, acerto: null }}
                     onFeito={(r) => { setTrocando(null); recarregar(); if (r) onRepasse?.(r); }} />
                 </div>
               ) : (
@@ -132,7 +133,8 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
 
       {d.sem_consultora.length > 0 && (
         <section className="space-y-2">
-          <h3 className="text-sm font-semibold">Com você, sem consultora ({d.sem_consultora.length})</h3>
+          <h3 className="text-base font-semibold">Maletas de abertura com você ({d.sem_consultora.length})</h3>
+          <p className="text-sm text-muted-foreground">Em ordem de número: é o mesmo "ABERTURA 01, 02…" impresso no pedido que vai dentro da maleta.</p>
           {d.sem_consultora.map((m) => (
             <Repasse key={m.cycle_id} rep={rep} maleta={m} onFeito={(r) => { recarregar(); if (r) onRepasse?.(r); }} />
           ))}
@@ -144,7 +146,8 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
           <h3 className="text-sm font-semibold">Entregues por você, aguardando a consultora confirmar</h3>
           {d.a_caminho.map((m) => (
             <div key={m.cycle_id} className="rounded-xl border border-border bg-card p-4 text-sm">
-              Maleta {m.maleta}{m.remessa ? ` · remessa ${m.remessa}` : ""} → <span className="font-medium">{m.consultora}</span> · {m.pecas} peças
+              {rotuloAbertura(m.abertura_numero, m.remessa) ? <span className="font-semibold">{rotuloAbertura(m.abertura_numero, m.remessa)} · </span> : null}
+              Maleta {m.maleta}{m.remessa && !m.abertura_numero ? ` · remessa ${m.remessa}` : ""} → <span className="font-medium">{m.consultora}</span> · {m.pecas} peças
             </div>
           ))}
         </section>
@@ -155,7 +158,7 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
 
 function Repasse({ rep, maleta, onFeito, trocarDe }: {
   rep: string;
-  maleta: { cycle_id: string; maleta: string; remessa: number | null; praca: string | null; pecas: number; valor_cents: number; acerto: string | null };
+  maleta: { cycle_id: string; maleta: string; remessa: number | null; praca: string | null; abertura_numero?: number | null; pecas: number; valor_cents: number; acerto: string | null };
   onFeito: (r?: { partyId: string; nome: string; nova: boolean }) => void;
   /** 0273: maleta designada a esta consultora, ainda com o representante → troca de destino. */
   trocarDe?: string;
@@ -179,8 +182,17 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
   return (
     <div className="space-y-3 rounded-xl border border-border bg-card p-4">
       <div>
-        <p className="font-medium">Maleta {maleta.maleta}{maleta.remessa ? ` · remessa ${maleta.remessa}` : ""}{maleta.praca ? ` · ${maleta.praca}` : ""}</p>
-        <p className="text-xs text-muted-foreground">{maleta.pecas} peças · {brl(maleta.valor_cents)}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
+        {rotuloAbertura(maleta.abertura_numero, maleta.remessa) && !trocarDe ? (
+          <>
+            <p className="text-lg font-bold tracking-wide">{rotuloAbertura(maleta.abertura_numero, maleta.remessa)}</p>
+            <p className="text-xs text-muted-foreground">Maleta {maleta.maleta}{maleta.praca ? ` · ${maleta.praca}` : ""} · {maleta.pecas} peças · {brl(maleta.valor_cents)}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
+          </>
+        ) : (
+          <>
+            <p className="font-medium">Maleta {maleta.maleta}{maleta.remessa ? ` · remessa ${maleta.remessa}` : ""}{maleta.praca ? ` · ${maleta.praca}` : ""}</p>
+            <p className="text-xs text-muted-foreground">{maleta.pecas} peças · {brl(maleta.valor_cents)}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
+          </>
+        )}
       </div>
       {escolhida ? (
         <div className="flex flex-wrap items-center gap-2 text-sm">

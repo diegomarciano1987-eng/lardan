@@ -583,7 +583,7 @@ function CandidaturasPage() {
                           <td className="px-4 py-3 text-xs">{rotuloOrigem(c.origem)}</td>
                           <td className="px-4 py-3 text-xs">{etapa?.nome ?? "—"}</td>
                           <td className="px-4 py-3 text-xs text-ledger-muted">
-                            {c.responsavel ?? "Sem responsável"}
+                            {c.responsavel ?? (c.representante ? `Rep. ${c.representante}` : "Sem responsável")}
                           </td>
                           <td className="px-4 py-3 text-xs text-ledger-muted">
                             {dataHora(c.ultimo_envio)}

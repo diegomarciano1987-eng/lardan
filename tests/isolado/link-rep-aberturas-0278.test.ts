@@ -90,8 +90,8 @@ describe("cadastro pelo link do representante", () => {
     const doc = cpf();
     await candidatura(doc, zap(), { representante: codigo });
     const l = await leadPorCpf(doc);
-    const card = (await ler<{ c: { representante_id: string; representante: string; representante_origem: string } }>(master,
-      `select public.crm_card(l) c from public.leads l where l.id=$1`, [l.id])).linhas[0]!.c;
+    const card = (await um<{ c: { representante_id: string; representante: string; representante_origem: string } }>(
+      `select public.crm_card(l) c from public.leads l where l.id=$1`, [l.id])).c;
     expect(card.representante_id).toBe(rep.partyId);
     expect(card.representante).toBe(`ISO l78-rep-${base}`);
     expect(card.representante_origem).toBe("link");

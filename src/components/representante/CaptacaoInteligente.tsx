@@ -276,8 +276,17 @@ export function DocumentosNovasConsultoras({ rep }: { rep: string }) {
  */
 export function CandidatasParaAbertura({ rep }: { rep: string }) {
   const q = useQuery({ queryKey: ["rep", rep, "crm"], queryFn: () => repCrm(rep) });
+  // mesma pessoa cadastrada duas vezes (mesmo WhatsApp) aparece uma vez só: fica o cadastro mais adiantado
+  const vistos = new Set<string>();
   const lista = (q.data?.cards ?? [])
     .filter((c) => c.sistema !== "primeira_maleta" && c.sistema !== "nao_aprovada" && c.status_lardan !== "recusado")
+    .sort((a, b) => Number(b.sistema === "aprovada") - Number(a.sistema === "aprovada") || new Date(b.criado).getTime() - new Date(a.criado).getTime())
+    .filter((c) => {
+      const k = (c.whatsapp ?? "").replace(/\D/g, "").slice(-11) || c.lead_id;
+      if (vistos.has(k)) return false;
+      vistos.add(k);
+      return true;
+    })
     .sort((a, b) =>
       Number(b.sistema === "aprovada") - Number(a.sistema === "aprovada") ||
       Number(b.origem === "link") - Number(a.origem === "link") ||

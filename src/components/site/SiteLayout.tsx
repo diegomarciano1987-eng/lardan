@@ -4,7 +4,7 @@ import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { VoltarLink } from "./VoltarLink";
 import { useAppleWebKit } from "@/hooks/use-scroll-progress";
-import { registrarIndicacao, registrarPrimeiroContato, registrarVisitaEditorial } from "@/lib/crm/tracking";
+import { registrarIndicacao, registrarPrimeiroContato, registrarRepresentante, registrarVisitaEditorial } from "@/lib/crm/tracking";
 import { CAMINHOS_EDITORIAIS } from "@/lib/editorial/rotas";
 import { EcossistemaLardanProvider } from "./EcossistemaLardan";
 
@@ -23,6 +23,9 @@ export function SiteLayout({ children, brandedHeader = false }: { children: Reac
     if (SEM_TRACKING.some((p) => pathname.startsWith(p))) return;
     registrarPrimeiroContato();
     registrarIndicacao();
+    // 0278: guarda o ?rep= do link do representante já na chegada (não só no envio),
+    // para não perder o código se ela navegar pelo site antes de preencher.
+    registrarRepresentante();
     if ((CAMINHOS_EDITORIAIS as readonly string[]).includes(pathname)) {
       registrarVisitaEditorial(pathname);
     }

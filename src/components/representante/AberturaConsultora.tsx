@@ -8,7 +8,7 @@
 import * as React from "react";
 import { MaletasRepresentante } from "@/components/representante/MaletasRepresentante";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
-import { DocumentosNovasConsultoras } from "@/components/representante/CaptacaoInteligente";
+import { CandidatasParaAbertura, DocumentosNovasConsultoras } from "@/components/representante/CaptacaoInteligente";
 
 export function AberturaConsultora({ rep }: { rep: string }) {
   const [vinculadas, setVinculadas] = React.useState<{ partyId: string; nome: string; nova: boolean }[]>([]);
@@ -28,6 +28,9 @@ export function AberturaConsultora({ rep }: { rep: string }) {
           <AssinaturaDigital party={v.partyId} rep={rep} />
         </div>
       ))}
+
+      {/* 0278: quem se cadastrou pelo link dele (ou ele cadastrou) aparece aqui, pronta para a abertura */}
+      <CandidatasParaAbertura rep={rep} />
 
       <MaletasRepresentante rep={rep} onRepasse={(r) => setVinculadas((l) => [r, ...l.filter((x) => x.partyId !== r.partyId)])} />
 

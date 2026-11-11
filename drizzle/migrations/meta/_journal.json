@@ -1989,6 +1989,13 @@
       "when": 1794430525933,
       "tag": "0283_teste_candidatura_0284",
       "breakpoints": true
+    },
+    {
+      "idx": 284,
+      "version": "7",
+      "when": 1794431105020,
+      "tag": "0284_teste_candidatura_etapa_0284b",
+      "breakpoints": true
     }
   ]
 }

@@ -67,8 +67,8 @@ describe("1. desfazer devolução feita por engano", () => {
     expect(await estoque()).toBe(antes);
     const c = await um<{ status: string; custodian_party_id: string }>(`select status::text, custodian_party_id from public.kit_cycles where id=$1`, [mAna]);
     expect(c).toMatchObject({ status: "transito", custodian_party_id: rep.partyId });
-    const b = await um<{ disp: number }>(`select sum(qty_available)::int disp from public.kit_balances where cycle_id=$1`, [mAna]);
-    expect(b.disp).toBe(3);
+    const b = await um<{ q: number }>(`select coalesce(sum(quantity),0)::int q from public.stock_balances where location_id=(select current_location_id from public.kit_cycles where id=$1)`, [mAna]);
+    expect(b.q).toBe(3);
     // não desfaz duas vezes
     expect((await rpc(master, "maleta_devolucao_desfazer", { _cycle: mAna, _motivo: "de novo engano" })).erro ?? "").toMatch(/não está devolvida/);
   });

@@ -11,6 +11,9 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { CandidaturaRecebidaDialog } from "@/components/site/CandidaturaRecebidaDialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { TesteCandidatura } from "@/components/candidatura-teste/TesteCandidatura";
+import { ACEITE_TEXTO, SITE } from "@/lib/candidatura-teste/perguntas";
 import { consultarCepPublico, listarMunicipiosPublico } from "@/lib/br/lookup.functions";
 import {
   formatarCep,
@@ -109,9 +112,12 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
   const [whatsapp, setWhatsapp] = useState("");
   const [cpf, setCpf] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
-  const [objetivo, setObjetivo] = useState("");
+  // 0284: as duas perguntas do teste que ficam no site (códigos) e a autorização de contato
   const [disponibilidade, setDisponibilidade] = useState("");
   const [experiencia, setExperiencia] = useState("");
+  const [aceiteContato, setAceiteContato] = useState(false);
+  const [testeToken, setTesteToken] = useState<string | null>(null);
+  const [testeAberto, setTesteAberto] = useState(false);
   const [sonhoValor, setSonhoValor] = useState("");
   const [consultandoCep, setConsultandoCep] = useState(false);
   const [estadoCep, setEstadoCep] = useState<string | null>(null);
@@ -190,6 +196,16 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
       setErro("Escolha ou digite a sua cidade.");
       return;
     }
+    if (!experiencia || !disponibilidade) {
+      setBusy(false);
+      setErro("Responda se você já vende e quanto tempo tem por semana.");
+      return;
+    }
+    if (!aceiteContato) {
+      setBusy(false);
+      setErro("Marque a autorização para a Lardan falar com você pelo WhatsApp.");
+      return;
+    }
     if (!isValidCpf(cpf)) {
       setBusy(false);
       setErro("Confira o CPF informado.");
@@ -217,11 +233,11 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
             street_number: semNumero ? undefined : texto("street_number"),
             no_number: semNumero,
             postal_code: normalizarCep(cep).canonico ?? undefined,
-            financial_goal: texto("financial_goal"),
-            availability: texto("availability"),
-            experience: texto("experience"),
-            audience: texto("audience"),
-            motivation: texto("motivation"),
+            availability: SITE.horas_semana.opcoes.find((o) => o.codigo === disponibilidade)?.texto,
+            experience: SITE.experiencia_venda.opcoes.find((o) => o.codigo === experiencia)?.texto,
+            experiencia_venda: experiencia,
+            horas_semana: disponibilidade,
+            aceite_contato: aceiteContato,
             dream: texto("dream"),
             dream_value_cents: centavosDoValor(sonhoValor),
             source: modo === "indicacao" ? "indicacao/link" : "site/seja-lardan",
@@ -245,7 +261,10 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
       }
       setFoiReenvio(resposta.reenvio);
       setProtocolo(resposta.protocolo);
-      setPopupAberto(true);
+      setTesteToken(resposta.testeToken ?? null);
+      // Com o teste pronto, ele abre direto aqui no site; sem ele, o aviso de sempre.
+      if (resposta.testeToken) setTesteAberto(true);
+      else setPopupAberto(true);
     } catch {
       setErro("Não foi possível confirmar o registro. Seus dados continuam preenchidos; tente enviar novamente.");
     } finally {
@@ -263,6 +282,8 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
         <p className="mt-2 text-sm text-muted-foreground">
           Protocolo <strong className="text-foreground">{protocolo}</strong>
         </p>
+        <TesteNoSite token={testeToken} aberto={testeAberto} onAbrir={() => setTesteAberto(true)} onFechar={() => setTesteAberto(false)} />
+
         <a href="/seja-lardan" className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground">
           Conheça nosso site e tudo que está à sua disposição
         </a>
@@ -286,6 +307,8 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
           número. A equipe Lardan analisa cada candidatura e responde em no máximo 3 dias; não há
           promessa de aprovação ou renda.
         </p>
+        <TesteNoSite token={testeToken} aberto={testeAberto} onAbrir={() => setTesteAberto(true)} onFechar={() => setTesteAberto(false)} />
+
       </div>
     );
   }
@@ -485,63 +508,10 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
         </div>
       </fieldset>
 
-      <fieldset className="space-y-4">
+      <fieldset className="space-y-6">
         <legend className="brand-eyebrow mb-4">Sobre você</legend>
-        <div>
-          <Label htmlFor="financial_goal">Qual é seu principal objetivo ao começar?</Label>
-          <SmartSelect
-            id="financial_goal"
-            name="financial_goal"
-            value={objetivo}
-            onChange={setObjetivo}
-            placeholder="Selecione o seu objetivo"
-            searchPlaceholder="Buscar…"
-            options={OBJETIVOS.map((o) => ({ value: o, label: o }))}
-          />
-        </div>
-        <div>
-          <Label htmlFor="availability">
-            Quanto tempo por semana você acredita que consegue dedicar?
-          </Label>
-          <SmartSelect
-            id="availability"
-            name="availability"
-            value={disponibilidade}
-            onChange={setDisponibilidade}
-            placeholder="Selecione a disponibilidade"
-            searchPlaceholder="Buscar…"
-            options={DISPONIBILIDADES.map((o) => ({ value: o, label: o }))}
-          />
-        </div>
-        <div>
-          <Label htmlFor="experience">Você já trabalhou com vendas?</Label>
-          <SmartSelect
-            id="experience"
-            name="experience"
-            value={experiencia}
-            onChange={setExperiencia}
-            placeholder="Selecione uma opção"
-            searchPlaceholder="Buscar…"
-            options={EXPERIENCIAS.map((o) => ({ value: o, label: o }))}
-          />
-        </div>
-        <div>
-          <Label htmlFor="audience">
-            Hoje você costuma vender ou se relacionar comercialmente por onde?
-          </Label>
-          <input
-            id="audience"
-            name="audience"
-            placeholder="WhatsApp, Instagram, presencialmente, indicação…"
-            className={field}
-          />
-        </div>
-        <div>
-          <Label htmlFor="motivation">
-            Conte um pouco sobre você e sua motivação para começar agora
-          </Label>
-          <textarea id="motivation" name="motivation" rows={5} className={field} />
-        </div>
+        <EscolhaSite titulo={SITE.experiencia_venda.pergunta} opcoes={SITE.experiencia_venda.opcoes} valor={experiencia} onChange={setExperiencia} />
+        <EscolhaSite titulo={SITE.horas_semana.pergunta} opcoes={SITE.horas_semana.opcoes} valor={disponibilidade} onChange={setDisponibilidade} />
       </fieldset>
 
       <fieldset className="space-y-4 rounded-xl border border-primary/30 bg-primary/5 p-6">
@@ -568,6 +538,11 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
           />
         </div>
       </fieldset>
+
+      <label className="flex items-start gap-3 text-sm leading-relaxed text-foreground">
+        <Checkbox checked={aceiteContato} onCheckedChange={(v) => setAceiteContato(v === true)} className="mt-0.5" aria-required="true" />
+        {ACEITE_TEXTO}
+      </label>
 
       <label className="flex items-start gap-3 text-xs leading-relaxed text-muted-foreground">
         <Checkbox
@@ -612,4 +587,41 @@ function mascaraReais(v: string): string {
 function centavosDoValor(v: string): string | undefined {
   const d = v.replace(/\D/g, "");
   return d ? String(Number(d) * 100) : undefined;
+}
+
+function EscolhaSite({ titulo, opcoes, valor, onChange }: { titulo: string; opcoes: readonly { codigo: string; texto: string }[]; valor: string; onChange: (v: string) => void }) {
+  return (
+    <div role="radiogroup" aria-label={titulo}>
+      <p className="brand-eyebrow mb-2">{titulo}</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {opcoes.map((o) => (
+          <button key={o.codigo} type="button" role="radio" aria-checked={valor === o.codigo} onClick={() => onChange(o.codigo)}
+            className={`min-h-11 rounded-xl border px-4 py-2.5 text-left text-sm ${valor === o.codigo ? "border-primary bg-primary/10 font-semibold text-foreground" : "border-border bg-card text-foreground hover:border-primary/50"}`}>
+            {o.texto}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** 0284: o teste de candidatura abre aqui mesmo no site, numa janela de tela cheia. */
+function TesteNoSite({ token, aberto, onAbrir, onFechar }: { token: string | null; aberto: boolean; onAbrir: () => void; onFechar: () => void }) {
+  if (!token) return null;
+  return (
+    <>
+      <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-5 text-left">
+        <p className="text-base font-semibold text-foreground">Próximo passo: o seu teste de perfil</p>
+        <p className="mt-1 text-sm text-muted-foreground">São uns 10 minutos. Fica salvo a cada tela; dá para continuar depois pelo link que vamos mandar no WhatsApp.</p>
+        <Button type="button" onClick={onAbrir} className="mt-4 h-11 rounded-full px-6">Responder agora</Button>
+      </div>
+      <Dialog open={aberto} onOpenChange={(v) => (v ? onAbrir() : onFechar())}>
+        <DialogContent className="h-[100dvh] max-h-[100dvh] w-full max-w-none overflow-y-auto rounded-none p-0 sm:h-[92dvh] sm:max-w-2xl sm:rounded-2xl">
+          <DialogTitle className="sr-only">Teste de candidatura Lardan</DialogTitle>
+          <DialogDescription className="sr-only">Três partes curtas sobre o seu dia a dia, organização e perfil.</DialogDescription>
+          <TesteCandidatura token={token} />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }

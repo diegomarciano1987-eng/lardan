@@ -11,6 +11,7 @@
  *   CORREIOS_CEP_ORIGEM      CEP de postagem (padrão 86200055, Ibiporã)
  * Fail-closed: sem credencial, nada é enviado e nada é simulado.
  */
+import { valorDeclaradoAceito, type FaixaValorDeclarado } from "./valor-declarado";
 export type AmbienteCorreios = "homologacao" | "producao";
 export type JsonCorreios = null | boolean | number | string | JsonCorreios[] | { [key: string]: JsonCorreios };
 
@@ -127,6 +128,7 @@ export function servicosDoContrato() {
 
 export function preco(codigoServico: string, cepDestino: string, valorDeclaradoCents = 0) {
   const c = configCorreios();
+  valorDeclaradoCents = valorDeclaradoAceito(valorDeclaradoCents);
   const q = new URLSearchParams({
     cepOrigem: c.cepOrigem, cepDestino: cepDestino.replace(/\D/g, ""), psObjeto: String(CAIXA_PADRAO.pesoGramas), tpObjeto: CAIXA_PADRAO.formato,
     comprimento: String(CAIXA_PADRAO.comprimento), largura: String(CAIXA_PADRAO.largura), altura: String(CAIXA_PADRAO.altura),
@@ -171,9 +173,9 @@ const dataBR = (d: Date) => d.toISOString().slice(0, 10);
 /** Monta o corpo da pré-postagem (ida = PAC; volta = PAC reverso com logística reversa). */
 export function corpoPrePostagem(o: {
   direcao: "ida" | "volta"; remetente: EnderecoCorreios; destinatario: EnderecoCorreios;
-  valorDeclaradoCents: number; referencia: string; validadeReversaDias?: number;
+  valorDeclaradoCents: number; referencia: string; validadeReversaDias?: number; faixa?: FaixaValorDeclarado;
 }) {
-  const valor = Math.max(o.valorDeclaradoCents, 0) / 100;
+  const valor = valorDeclaradoAceito(o.valorDeclaradoCents, o.faixa) / 100;
   const hoje = new Date(Date.now() - 3 * 3600_000);
   const validade = new Date(hoje.getTime() + (o.validadeReversaDias ?? 7) * 86_400_000);
   return {

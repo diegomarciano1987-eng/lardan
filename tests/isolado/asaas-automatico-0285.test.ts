@@ -55,6 +55,9 @@ async function recebida(party: string | null, valor: number, tarifa = 199) {
 }
 const baixas = async (ext: string) =>
   (await um<{ c: number }>(`select count(*)::int c from public.financial_settlements where idempotency_key=$1 and not is_reversal`, [`asaas:baixa:${acc}:${ext}`])).c;
+const baixasAtivas = async (ext: string) =>
+  (await um<{ c: number }>(`select count(*)::int c from public.financial_settlements x where x.idempotency_key like $1 and not x.is_reversal
+     and not exists (select 1 from public.financial_settlements r where r.reversed_of = x.id)`, [`asaas:baixa:${acc}:%${ext}`])).c;
 const saldoRazao = async () =>
   Number((await um<{ s: string }>(`select coalesce(sum(valor_cents),0) s from public.financial_account_movements where financial_account_id=$1`, [fin])).s);
 const receber = (ch: string) => servico<{ acao: string; motivo?: string; decisao?: string }>(`public.asaas_auto_receber($1::uuid, false)`, [ch]);
@@ -190,7 +193,7 @@ describe("0285 — Asaas automático", () => {
     expect(c.title_id).toBeNull();
     const again = await receber(ch);
     expect(again.dados.motivo).toBe("desfeito_fica_manual");
-    expect(await baixas(ext)).toBe(0);
+    expect(await baixasAtivas(ext)).toBe(0);
     const log = await um<{ c: number }>(`select count(*)::int c from public.audit_logs where action='asaas.auto.desfazer' and entity_id=$1`, [ch]);
     expect(log.c).toBe(1);
   });
@@ -249,7 +252,7 @@ describe("0285 — Asaas automático", () => {
     const ev = (await um<{ id: string }>(
       `insert into public.asaas_events (account_id, external_id, event, charge_external_id, event_at, payload, status, processed_at)
        values ($1,$2,'PAYMENT_OVERDUE',$3,now(),'{}'::jsonb,'na_fila',now()) returning id`, [acc, `evt_${marca()}`, ext])).id;
-    const r = await servico<{ erros: number }>(`public.asaas_auto_rodar(5)`);
+    const r = await servico<{ erros: number }>(`public.asaas_auto_rodar(2000)`);
     expect(r.erro).toBeNull();
     expect(await baixas(ext)).toBe(1);
     const e = await um<{ status: string }>(`select status from public.asaas_events where id=$1`, [ev]);

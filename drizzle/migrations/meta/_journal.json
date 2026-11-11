@@ -2024,6 +2024,13 @@
       "when": 1794440562339,
       "tag": "0288_asaas_extrato_desempenho_0288",
       "breakpoints": true
+    },
+    {
+      "idx": 289,
+      "version": "7",
+      "when": 1794440840086,
+      "tag": "0289_asaas_extrato_relatorio_por_tipo_0289",
+      "breakpoints": true
     }
   ]
 }

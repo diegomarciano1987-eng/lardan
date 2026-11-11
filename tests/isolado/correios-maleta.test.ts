@@ -236,3 +236,31 @@ describe("8. envio e entrega automáticos pelo rastreio (0247)", () => {
     expect((await servico(`select public.correios_envio_rastro($1,$2::text::jsonb) r`, [a.dados, JSON.stringify(entregue)])).erro).toBeNull();
   });
 });
+
+describe("0280. Correios com representante", () => {
+  test("maleta já com o representante (em trânsito) também pode ir pelo correio", async () => {
+    const m = await maleta("transito");
+    const d = await rpc<{ pendencias: string[] }>(montagem, "correios_maleta_dados", { _cycle: m.ciclo, _direcao: "ida" });
+    expect(d.erro).toBeNull();
+    const rec = await maleta("recebida");
+    expect((await rpc(montagem, "correios_maleta_dados", { _cycle: rec.ciclo, _direcao: "ida" })).erro ?? "").toMatch(/depois de conferida/);
+  });
+
+  test("com representante: entrega pelo correio não muda o acerto (vale a data da remessa)", async () => {
+    const m = await maleta("transito");
+    const rep = await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status) values ('pessoa','Rep ISO','Rep ISO','ativo') returning id`);
+    await adm.unsafe(`update public.kit_cycles set representante_party_id = $2, due_at = '2026-12-20 12:00-03' where id = $1`, [m.ciclo, rep.id]);
+    const a = await abrir(m.ciclo, "ida", montagem.uid);
+    expect(a.erro).toBeNull();
+    await resultado(a.dados!, true, `AC${String(Math.floor(Math.random() * 1e9)).padStart(9, "0")}BR`);
+    const eventos = [
+      { codigo: "BDE", tipo: "01", dtHrCriado: "2026-11-12T14:30:00", descricao: "Objeto entregue ao destinatário" },
+      { codigo: "PO", tipo: "01", dtHrCriado: "2026-11-06T10:00:00", descricao: "Objeto postado" },
+    ];
+    const r = await servico<{ status: string }>(`select public.correios_envio_rastro($1,$2::text::jsonb) r`, [a.dados, JSON.stringify(eventos)]);
+    expect(r.erro).toBeNull();
+    expect(r.dados!.status).toBe("entregue");
+    const c = await um<{ due: string }>(`select to_char(due_at at time zone 'America/Sao_Paulo','YYYY-MM-DD') due from public.kit_cycles where id = $1`, [m.ciclo]);
+    expect(c.due).toBe("2026-12-20");
+  });
+});

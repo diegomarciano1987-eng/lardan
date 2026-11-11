@@ -195,6 +195,33 @@ describe("0285 — Asaas automático", () => {
     expect(log.c).toBe(1);
   });
 
+  test("depois de desfazer, a Mesa relança preso ao mesmo pay_ (uma baixa ativa só) e a linha concilia", async () => {
+    const p = await pessoa();
+    const { ch, ext } = await recebida(p, 8800, 199);
+    const r = await receber(ch);
+    expect(r.dados.acao).toBe("titulo_3_1_1");
+    expect((await rpc(master, "asaas_auto_desfazer", { _decisao: r.dados.decisao, _motivo: "Classificar como outra receita" })).erro).toBeNull();
+    const file = (await um<{ id: string }>(`insert into public.financial_statement_files (financial_account_id, storage_path, original_name, format, sha256) values ($1,$2,'ISO','csv',$2) returning id`, [fin, `iso-${marca()}`])).id;
+    const imp = (await um<{ id: string }>(`insert into public.financial_statement_imports (file_id, financial_account_id) values ($1,$2) returning id`, [file, fin])).id;
+    const linha = (await um<{ id: string }>(
+      `insert into public.financial_statement_lines (financial_account_id, file_id, import_id, line_no, data, valor_cents, kind, historico, documento, bank_id, raw, status)
+       values ($1,$2,$3,1,$4,8800,'entrada','Recebimento',$5,$6,$7::text::jsonb,'pendente') returning id`,
+      [fin, file, imp, DIA, ext, `bk_${marca()}`, JSON.stringify({ type: "PAYMENT_RECEIVED", paymentId: ext })])).id;
+    await adm.unsafe(
+      `insert into public.financial_statement_lines (financial_account_id, file_id, import_id, line_no, data, valor_cents, kind, historico, documento, bank_id, raw, status)
+       values ($1,$2,$3,2,$4,199,'saida','Tarifa',$5,$6,$7::text::jsonb,'pendente')`,
+      [fin, file, imp, DIA, ext, `bk_${marca()}`, JSON.stringify({ type: "PAYMENT_FEE", paymentId: ext })]);
+    const antes = await saldoRazao();
+    const l = await rpc<{ acao: string; linha: string }>(master, "asaas_extrato_lancar", { _line: linha, _payload: { party_id: p, descricao: "Outra receita" } });
+    expect(l.erro).toBeNull();
+    expect(l.dados.linha).toBe("conciliada");
+    expect((await saldoRazao()) - antes).toBe(8800 - 199);
+    const ativas = await um<{ c: number }>(
+      `select count(*)::int c from public.financial_settlements x where x.idempotency_key like $1 and not x.is_reversal
+         and not exists (select 1 from public.financial_settlements r where r.reversed_of = x.id)`, [`asaas:baixa:${acc}:%${ext}`]);
+    expect(ativas.c).toBe(1);
+  });
+
   test("permissões: consultora não lança nem desfaz; a rotina e a prévia só rodam pelo serviço", async () => {
     const p = await pessoa();
     const { ch } = await recebida(p, 1000);

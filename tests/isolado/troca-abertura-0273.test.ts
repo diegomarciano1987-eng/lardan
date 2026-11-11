@@ -97,11 +97,16 @@ describe("maleta designada usada para abertura", () => {
     expect(a.n).toBe(1);
   });
 
-  test("depois de entregue em mãos, não troca de novo", async () => {
+  test("0279: entregue em mãos e ainda sem confirmação, troca de novo e a pendência fiscal continua uma só", async () => {
     const l2 = await lead(`Segunda Teste ${marca}`);
-    const r = await rpc(rep, "rep_maleta_trocar_destino", { _rep: rep.partyId, _cycle: maletaJoice, _consultora: null, _lead: l2 });
-    expect(r.ok).toBe(false);
-    expect(r.erro ?? "").toMatch(/já foi entregue em mãos/);
+    const r = await rpc<{ entregas_canceladas: number; pendencia_fiscal: boolean }>(
+      rep, "rep_maleta_trocar_destino", { _rep: rep.partyId, _cycle: maletaJoice, _consultora: null, _lead: l2 });
+    expect(r.erro).toBeNull();
+    expect(r.dados.entregas_canceladas).toBe(1);
+    expect(r.dados.pendencia_fiscal).toBe(true);
+    const p = await um<{ n: number; anterior: string }>(
+      `select count(*)::int n, max(consultora_anterior_party_id::text) anterior from public.maleta_troca_pendencias where cycle_id=$1`, [maletaJoice]);
+    expect(p).toEqual({ n: 1, anterior: joice.partyId });
   });
 
   test("sem nota: troca sem pendência fiscal", async () => {

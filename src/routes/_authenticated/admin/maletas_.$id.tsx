@@ -9,6 +9,7 @@ import { CorreiosMaleta } from "@/components/admin/maletas/CorreiosMaleta";
 import { ConferenciaPreBaixa } from "@/components/admin/maletas/ConferenciaPreBaixa";
 import { CheckCircle2, ClipboardCheck, FileText, Printer, ScanBarcode, Send, Truck } from "lucide-react";
 import { AjustesMaleta } from "@/components/admin/maletas/AjustesMaleta";
+import { STATUS_TRANSFERIR } from "@/components/admin/maletas/TransferirMaleta";
 import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
 import { ConferenciaMaleta } from "@/components/admin/maletas/ConferenciaMaleta";
 import { SugestaoMontagem } from "@/components/admin/historico/SugestaoMontagem";
@@ -335,8 +336,8 @@ function MaletaFicha() {
           {podeMontar && d.ciclo.consultora_party_id && ["conferida", "expedida", "transito", "recebida", "operacao", "acerto", "encerrada"].includes(d.ciclo.status) && (
             <div id="correios" className="scroll-mt-24"><CorreiosMaleta cycleId={id} status={d.ciclo.status} /></div>
           )}
-          {podeMontar && ["rascunho", "montagem", "conferida"].includes(d.ciclo.status) && (
-            <AjustesMaleta cycleId={id} consultoraId={d.ciclo.consultora_party_id} representante={d.representante} />
+          {podeMontar && STATUS_TRANSFERIR.includes(d.ciclo.status) && (
+            <AjustesMaleta cycleId={id} status={d.ciclo.status} />
           )}
           <Panel title="Identificação">
             <div className="flex flex-col items-center gap-3">

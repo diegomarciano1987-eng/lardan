@@ -378,13 +378,13 @@ function Assinaturas({ rep, party, maleta, nome }: { rep: string; party: string;
     queryFn: async () => {
       const { data, error } = await supabase.rpc("assinaturas_da_consultora" as never, { _party: party, _rep: rep } as never);
       if (error) throw error;
-      return data as unknown as { documentos: { tipo: string; status: string; cycle_id: string | null }[] };
+      return data as unknown as { documentos: { tipo: string; status: string; cycle_id: string | null; invalidada_em?: string | null }[] };
     },
     refetchInterval: 15_000,
   });
   const docs = q.data?.documentos ?? [];
   const contrato = docs.some((d) => d.tipo === "contrato" && d.status === "assinado");
-  const promissoria = docs.some((d) => d.tipo === "promissoria" && d.status === "assinado" && (!maleta || d.cycle_id === maleta.cycle_id));
+  const promissoria = docs.some((d) => d.tipo === "promissoria" && d.status === "assinado" && !d.invalidada_em && (!maleta || d.cycle_id === maleta.cycle_id));
   const concluida = contrato && promissoria;
   return (
     <div className="space-y-4">

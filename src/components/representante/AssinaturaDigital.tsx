@@ -17,6 +17,8 @@ export interface DocAssinatura {
   id: string; tipo: "contrato" | "promissoria"; titulo: string; status: "pendente" | "assinado" | "recusado" | "cancelado" | "erro";
   ambiente: string; sign_url: string | null; cycle_id: string | null; maleta: string | null; valor_cents: number | null;
   criado_em: string; assinado_em: string | null; enviado_whatsapp: boolean;
+  /** 0279: promissória substituída porque a maleta foi transferida para outra consultora */
+  invalidada_em?: string | null; invalidada_motivo?: string | null;
 }
 interface Maleta { cycle_id: string; maleta: string; status: string; remessa: number | null; valor_cents: number }
 type Dados = { documentos: DocAssinatura[]; maletas: Maleta[] };
@@ -108,7 +110,7 @@ export function AssinaturaDigital({ party, rep }: { party: string; rep: string |
 
   const docs = q.data?.documentos ?? [];
   const contrato = docs.find((d) => d.tipo === "contrato" && d.status !== "cancelado");
-  const promissoriaDa = (cycle: string) => docs.find((d) => d.tipo === "promissoria" && d.cycle_id === cycle && d.status !== "cancelado");
+  const promissoriaDa = (cycle: string) => docs.find((d) => d.tipo === "promissoria" && d.cycle_id === cycle && d.status !== "cancelado" && !d.invalidada_em);
 
   const Linha = ({ d }: { d: DocAssinatura }) => (
     <div className="space-y-2">
@@ -117,6 +119,7 @@ export function AssinaturaDigital({ party, rep }: { party: string; rep: string |
         <span className={`font-semibold ${STATUS[d.status].cor}`}>{STATUS[d.status].rotulo}</span>
         <span className="text-muted-foreground">{d.status === "assinado" ? `em ${data(d.assinado_em)}` : `enviado em ${data(d.criado_em)}`}</span>
         {d.ambiente === "sandbox" && <span className="rounded bg-muted px-1.5">teste</span>}
+        {d.invalidada_em && <span className="rounded bg-muted px-1.5 font-medium" title={d.invalidada_motivo ?? undefined}>Substituída — maleta transferida</span>}
         {d.sign_url && d.status === "pendente" && <button type="button" className="inline-flex items-center gap-1 underline" onClick={() => void copiar(d.sign_url!)}><Copy className="size-3" /> link</button>}
         {d.status === "assinado" && <button type="button" className="underline" onClick={() => void baixar(d.id)}>baixar assinado</button>}
       </div>

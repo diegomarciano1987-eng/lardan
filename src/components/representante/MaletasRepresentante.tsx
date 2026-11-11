@@ -20,6 +20,7 @@ import {
   trocarDestinoMaleta,
   type Destinataria,
 } from "@/lib/maletas-perdidas";
+import { avisosTransferencia } from "@/lib/transferencia-avisos";
 
 export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepasse?: (r: { partyId: string; nome: string; nova: boolean }) => void }) {
   const qc = useQueryClient();
@@ -145,9 +146,27 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
         <section className="space-y-2">
           <h3 className="text-sm font-semibold">Entregues por você, aguardando a consultora confirmar</h3>
           {d.a_caminho.map((m) => (
-            <div key={m.cycle_id} className="rounded-xl border border-border bg-card p-4 text-sm">
-              {rotuloAbertura(m.abertura_numero, m.remessa) ? <span className="font-semibold">{rotuloAbertura(m.abertura_numero, m.remessa)} · </span> : null}
-              Maleta {m.maleta}{m.remessa && !m.abertura_numero ? ` · remessa ${m.remessa}` : ""} → <span className="font-medium">{m.consultora}</span> · {m.pecas} peças
+            <div key={m.cycle_id} className="space-y-3 rounded-xl border border-border bg-card p-4 text-sm">
+              <p>
+                {rotuloAbertura(m.abertura_numero, m.remessa) ? <span className="font-semibold">{rotuloAbertura(m.abertura_numero, m.remessa)} · </span> : null}
+                Maleta {m.maleta}{m.remessa && !m.abertura_numero ? ` · remessa ${m.remessa}` : ""} → <span className="font-medium">{m.consultora}</span> · {m.pecas} peças
+              </p>
+              {/* 0279: ela ainda não confirmou — se a maleta não ficou com ela, passa para outra */}
+              {trocando === m.cycle_id ? (
+                <div className="space-y-2 rounded-lg border border-dashed border-primary/40 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium">Passar esta maleta para outra pessoa</p>
+                    <button className="h-9 rounded-lg border border-border px-3 text-sm" onClick={() => setTrocando(null)}>Cancelar</button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">A entrega para {m.consultora} é cancelada. Se ela já tinha promissória, a antiga é cancelada e a nova vai para quem ficar com a maleta.</p>
+                  <Repasse rep={rep} trocarDe={m.consultora}
+                    maleta={{ cycle_id: m.cycle_id, maleta: m.maleta, remessa: m.remessa, praca: null, abertura_numero: m.abertura_numero ?? null, pecas: m.pecas, valor_cents: 0, acerto: null }}
+                    onFeito={(r) => { setTrocando(null); recarregar(); if (r) onRepasse?.(r); }} />
+                </div>
+              ) : (
+                <button className="h-10 w-full rounded-lg border border-dashed border-border px-4 text-sm text-muted-foreground"
+                  onClick={() => setTrocando(m.cycle_id)}>Não ficou com ela? Passar para outra</button>
+              )}
             </div>
           ))}
         </section>
@@ -174,6 +193,7 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
     mutationFn: () => (trocarDe ? trocarDestinoMaleta : repassarMaleta)(rep, maleta.cycle_id, escolhida!),
     onSuccess: (r) => {
       toast.success(r.nova_consultora ? "Maleta enviada. A candidata agora é sua consultora." : "Maleta enviada para a consultora.");
+      for (const aviso of avisosTransferencia(r as Parameters<typeof avisosTransferencia>[0])) toast.info(aviso, { duration: 9000 });
       onFeito({ partyId: r.consultora_party_id, nome: escolhida?.nome ?? "", nova: r.nova_consultora });
     },
     onError: (e) => toast.error(mensagem(e)),
@@ -185,12 +205,12 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
         {rotuloAbertura(maleta.abertura_numero, maleta.remessa) && !trocarDe ? (
           <>
             <p className="text-lg font-bold tracking-wide">{rotuloAbertura(maleta.abertura_numero, maleta.remessa)}</p>
-            <p className="text-xs text-muted-foreground">Maleta {maleta.maleta}{maleta.praca ? ` · ${maleta.praca}` : ""} · {maleta.pecas} peças · {brl(maleta.valor_cents)}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
+            <p className="text-xs text-muted-foreground">Maleta {maleta.maleta}{maleta.praca ? ` · ${maleta.praca}` : ""} · {maleta.pecas} peças{maleta.valor_cents ? ` · ${brl(maleta.valor_cents)}` : ""}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
           </>
         ) : (
           <>
             <p className="font-medium">Maleta {maleta.maleta}{maleta.remessa ? ` · remessa ${maleta.remessa}` : ""}{maleta.praca ? ` · ${maleta.praca}` : ""}</p>
-            <p className="text-xs text-muted-foreground">{maleta.pecas} peças · {brl(maleta.valor_cents)}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
+            <p className="text-xs text-muted-foreground">{maleta.pecas} peças{maleta.valor_cents ? ` · ${brl(maleta.valor_cents)}` : ""}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
           </>
         )}
       </div>

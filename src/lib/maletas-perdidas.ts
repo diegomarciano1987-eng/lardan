@@ -114,16 +114,18 @@ export const repassarMaleta = (rep: string, cycleId: string, d: Destinataria) =>
   });
 
 /**
- * 0273: usa uma maleta que está com o representante (mesmo já designada a outra consultora, ainda não
- * entregue) para uma abertura. O banco recusa se algo já aconteceu em nome da consultora original.
+ * 0273/0279: passa uma maleta que é da carteira dele (com ele, entregue em mãos sem confirmação ou
+ * recebida sem aceite) para outra consultora ou candidata. O servidor cancela a promissória antiga na
+ * ZapSign e manda a nova; nota já emitida vira pendência da montagem.
  */
-export const trocarDestinoMaleta = (rep: string, cycleId: string, d: Destinataria) =>
-  rpc<{ consultora_party_id: string; nova_consultora: boolean; consultora_anterior?: string | null; abertura_numero?: number | null }>("rep_maleta_trocar_destino", {
-    _rep: rep,
-    _cycle: cycleId,
-    _consultora: d.tipo === "consultora" ? d.id : null,
-    _lead: d.tipo === "candidata" ? d.id : null,
-  });
+export const trocarDestinoMaleta = async (rep: string, cycleId: string, d: Destinataria) => {
+  const { maletaTransferir } = await import("@/lib/maletas-transferir.functions");
+  return maletaTransferir({ data: {
+    cycleId, modo: "representante", rep,
+    consultoraId: d.tipo === "consultora" ? d.id : null,
+    leadId: d.tipo === "candidata" ? d.id : null,
+  } }).then((r) => ({ ...r, consultora_party_id: r.consultora_party_id ?? "" }));
+};
 
 /** 0254: representante entregou em mãos → a consultora confirma "recebi" e faz o aceite no app dela. */
 export const entregarEmMaos = (cycleId: string) =>

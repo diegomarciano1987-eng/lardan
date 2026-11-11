@@ -15,7 +15,10 @@ export const Route = createFileRoute("/api/public/zapsign/conferir")({
         try {
           const { conferirPendentes } = await import("@/lib/zapsign/documentos.server");
           const r = await conferirPendentes(8, 20_000);
-          return Response.json({ ok: true, ...r });
+          // 0279: promissórias substituídas por transferência de maleta cuja recusa ainda não confirmou
+          const { recusarFilaZapsign } = await import("@/lib/zapsign/enviar.server");
+          const recusas = await recusarFilaZapsign(10).catch(() => null);
+          return Response.json({ ok: true, ...r, recusas });
         } catch (e) {
           return Response.json({ ok: false, erro: (e as Error).message }, { status: 500 });
         }

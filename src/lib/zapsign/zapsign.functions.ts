@@ -50,43 +50,8 @@ export const zapsignEnviar = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data, context }) => {
-    const c = context as unknown as Ctx;
-    const dados = await rpcUsuario<Dados>(c, "assinatura_dados", { _tipo: data.tipo, _party: data.partyId, _cycle: data.cycleId ?? null, _rep: data.rep ?? null });
-    const pendente = await rpcServidor<{ id: string; sign_url: string | null } | null>("assinatura_pendente",
-      { _tipo: data.tipo, _party: data.partyId, _cycle: data.cycleId ?? null });
-    if (pendente && !data.reenviar) {
-      return { id: pendente.id, signUrl: pendente.sign_url, jaExistia: true, whatsapp: false };
-    }
-    if (dados.pendencias.length) throw new Error(`Complete o cadastro da consultora: ${dados.pendencias.join(", ")}.`);
-
-    const { preencherModelo, valoresDosCampos, telefoneZapsign } = await import("./modelo");
-    const { configZapsign, criarDocumento } = await import("./api.server");
-    const { createHash } = await import("node:crypto");
-    const cfg = configZapsign();
-    const valores = valoresDosCampos(dados.campos);
-    const titulo = preencherModelo(dados.modelo.titulo, valores).replace(/\\/g, "").slice(0, 250);
-    const texto = preencherModelo(dados.modelo.texto, valores);
-    const fone = telefoneZapsign(dados.signer.whatsapp);
-    const externo = `lardan-${data.tipo}-${data.partyId.slice(0, 8)}-${Date.now().toString(36)}`;
-
-    const doc = await criarDocumento({
-      name: titulo, markdown_text: texto, external_id: externo, lang: "pt-br", brand_name: "LARDAN Semijoias",
-      signers: [{
-        name: dados.signer.nome, ...(fone ?? {}), ...(dados.signer.email ? { email: dados.signer.email } : {}),
-        ...(dados.signer.cpf ? { cpf: dados.signer.cpf } : {}),
-        auth_mode: "assinaturaTela", send_automatic_whatsapp: !!fone, send_automatic_email: !fone && !!dados.signer.email,
-        lock_name: true, lock_phone: !!fone, external_id: data.partyId,
-        custom_message: data.tipo === "contrato" ? "Olá! Segue o contrato de consignação da LARDAN para você assinar." : "Olá! Segue a nota promissória da sua maleta LARDAN para você assinar.",
-      }],
-    });
-    const signer = doc.signers?.[0];
-    const reg = await rpcServidor<{ id: string }>("assinatura_registrar", { _d: {
-      ambiente: cfg.ambiente, tipo: data.tipo, party_id: data.partyId, cycle_id: data.cycleId ?? "", rep: data.rep ?? "",
-      doc_token: doc.token, signer_token: signer?.token ?? null, sign_url: signer?.sign_url ?? null, status: "pendente",
-      titulo, texto_hash: createHash("sha256").update(texto).digest("hex"), valor_cents: dados.campos.valor_cents ?? "",
-      whatsapp: !!fone, ator: c.userId, substitui: pendente?.id ?? "",
-    } });
-    return { id: reg.id, signUrl: signer?.sign_url ?? null, jaExistia: false, whatsapp: !!fone };
+    const { enviarAssinatura } = await import("./enviar.server");
+    return enviarAssinatura(context as unknown as Ctx, data);
   });
 
 /** Link novo do PDF assinado (o da ZapSign expira em 60 minutos). */

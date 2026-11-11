@@ -11,6 +11,7 @@ import { EnvioRemessa } from "@/components/admin/maletas/EnvioRemessa";
 import { NotaFiscalMaleta, useNotasMaletas } from "@/components/admin/maletas/NotaFiscalMaleta";
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
 import { TrocasPendentes } from "@/components/admin/maletas/TrocasPendentes";
+import { STATUS_TRANSFERIR, TransferirMaletaBotao } from "@/components/admin/maletas/TransferirMaleta";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import { liberarKitSemPreBaixa } from "@/lib/pre-baixa";
 import { toast } from "sonner";
@@ -366,6 +367,11 @@ function RemessaPage() {
                 )}
                 {m.status === "recebida" && (
                   <span className="inline-flex h-9 items-center rounded-full bg-muted px-3 text-xs text-ledger-muted">Aguardando aceite da consultora</span>
+                )}
+                {/* 0279: transferir para outra consultora (antes da nota ou já na rua, sem aceite) */}
+                {podeNotaMaleta && STATUS_TRANSFERIR.includes(m.status) && m.status !== "rascunho" && (
+                  <TransferirMaletaBotao cycleId={m.cycle_id} pracaId={r.praca_id}
+                    rotulo={[rotuloMaletaRemessa(m), m.consultora ?? "sem consultora"].filter(Boolean).join(" · ")} />
                 )}
               </div>
               <div className="flex items-center gap-6 text-sm">

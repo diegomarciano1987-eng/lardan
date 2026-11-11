@@ -21,12 +21,15 @@ import {
   type Destinataria,
 } from "@/lib/maletas-perdidas";
 import { avisosTransferencia } from "@/lib/transferencia-avisos";
+import { DevolverEmpresaRep, useDevolucoesRep } from "@/components/representante/DevolverEmpresaRep";
 
 export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepasse?: (r: { partyId: string; nome: string; nova: boolean }) => void }) {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["rep", rep, "maletas"], queryFn: () => maletasDoRepresentante(rep) });
   const recarregar = () => void qc.invalidateQueries({ queryKey: ["rep", rep, "maletas"] });
   const [trocando, setTrocando] = React.useState<string | null>(null);
+  const devol = useDevolucoesRep(rep);
+  const pedidaDe = (cycle: string) => devol.data?.find((x) => x.cycle_id === cycle) ?? null;
   const receber = useMutation({
     mutationFn: (transfer: string) => receberMaleta(transfer),
     onSuccess: () => {
@@ -127,6 +130,7 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
                 <button className="h-10 w-full rounded-lg border border-dashed border-border px-4 text-sm text-muted-foreground"
                   onClick={() => setTrocando(m.cycle_id)}>Não vai ficar com ela? Usar para abertura</button>
               )}
+              <DevolverEmpresaRep rep={rep} cycleId={m.cycle_id} maleta={m.maleta} pedida={pedidaDe(m.cycle_id)} />
             </div>
           ))}
         </section>
@@ -137,7 +141,10 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
           <h3 className="text-base font-semibold">Maletas de abertura com você ({d.sem_consultora.length})</h3>
           <p className="text-sm text-muted-foreground">Em ordem de número: é o mesmo "ABERTURA 01, 02…" impresso no pedido que vai dentro da maleta.</p>
           {d.sem_consultora.map((m) => (
-            <Repasse key={m.cycle_id} rep={rep} maleta={m} onFeito={(r) => { recarregar(); if (r) onRepasse?.(r); }} />
+            <div key={m.cycle_id} className="space-y-2">
+              <Repasse rep={rep} maleta={m} onFeito={(r) => { recarregar(); if (r) onRepasse?.(r); }} />
+              <DevolverEmpresaRep rep={rep} cycleId={m.cycle_id} maleta={m.maleta} pedida={pedidaDe(m.cycle_id)} />
+            </div>
           ))}
         </section>
       )}
@@ -167,6 +174,7 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
                 <button className="h-10 w-full rounded-lg border border-dashed border-border px-4 text-sm text-muted-foreground"
                   onClick={() => setTrocando(m.cycle_id)}>Não ficou com ela? Passar para outra</button>
               )}
+              <DevolverEmpresaRep rep={rep} cycleId={m.cycle_id} maleta={m.maleta} pedida={pedidaDe(m.cycle_id)} />
             </div>
           ))}
         </section>

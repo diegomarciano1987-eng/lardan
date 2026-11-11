@@ -4,7 +4,22 @@
  * Vale para a equipe (Daniel/Master) e para o representante. Banco ISOLADO, dados sintéticos.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, criarDeposito, criarVariante, porEstoque, ler, rpc, rpcServico, type Conta } from "./base";
+import { adm, criarConta, criarDeposito, criarVariante, porEstoque, ler, rpc, type Conta } from "./base";
+
+/** Executor interno do servidor (service_role), como o servidor faz. */
+async function servico<T>(sql: string, p: unknown[] = []): Promise<{ ok: boolean; dados: T; erro: string | null }> {
+  const c = await adm.reserve();
+  try {
+    await c.unsafe(`set role service_role`);
+    await c.unsafe(`select set_config('lardan.test_role','service_role',false), set_config('lardan.test_uid','',false)`);
+    return { ok: true, dados: ((await c.unsafe(sql, p)) as { r: T }[])[0]!.r, erro: null };
+  } catch (e) {
+    return { ok: false, dados: null as T, erro: (e as Error).message };
+  } finally {
+    try { await c.unsafe(`reset role`); await c.unsafe(`select set_config('lardan.test_role','',false)`); } catch { /* */ }
+    c.release();
+  }
+}
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const base = 700000 + Math.floor(Math.random() * 90000);
@@ -132,13 +147,13 @@ describe("Momento 1 — depois da montagem, antes da nota (equipe)", () => {
   });
 
   test("fila da ZapSign: servidor pega a recusa, marca feita e retorno tardio não ressuscita", async () => {
-    const f = await rpcServico<{ doc_token: string }[]>("assinaturas_zapsign_cancelar_fila", { _limite: 50 });
+    const f = await servico<{ doc_token: string }[]>(`select public.assinaturas_zapsign_cancelar_fila(50) r`);
     expect(f.erro).toBeNull();
     expect(f.dados.map((x) => x.doc_token)).toContain(tok("joice"));
     expect((await rpc(master, "assinaturas_zapsign_cancelar_fila", { _limite: 5 })).ok).toBe(false);
-    expect((await rpcServico("assinatura_zapsign_cancelada", { _doc_token: tok("joice"), _resultado: "recusado" })).erro).toBeNull();
-    expect((await rpcServico<{ repetida: boolean }>("assinatura_zapsign_cancelada", { _doc_token: tok("joice") })).dados.repetida).toBe(true);
-    const ret = await rpcServico<{ status: string; invalidada: boolean }>("assinatura_retorno", { _doc_token: tok("joice"), _status: "signed", _assinado_em: null });
+    expect((await servico(`select public.assinatura_zapsign_cancelada($1,'recusado') r`, [tok("joice")])).erro).toBeNull();
+    expect((await servico<{ repetida: boolean }>(`select public.assinatura_zapsign_cancelada($1) r`, [tok("joice")])).dados.repetida).toBe(true);
+    const ret = await servico<{ status: string; invalidada: boolean }>(`select public.assinatura_retorno($1,'signed',null) r`, [tok("joice")]);
     expect(ret.dados).toMatchObject({ status: "cancelado", invalidada: true });
     expect((await um<{ s: string }>(`select status s from public.assinaturas_digitais where doc_token=$1`, [tok("joice")])).s).toBe("cancelado");
   });

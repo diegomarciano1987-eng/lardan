@@ -205,8 +205,10 @@
 - [x] "Não, é novo" com pay_ lança preso à cobrança (nunca dois lançamentos); desfazer com motivo
 - [x] Rotina a cada 10 min, extrato de hora em hora, relatório "Asaas automático"
 - [x] Primeira passada em produção: 41 recebimentos (R$ 10.441,87) lançados e conciliados, 3 exceções
-- [ ] Etapa B: tarifas 5.1.3 / notificações e negativação 5.1.1 por mês / transferência Asaas→banco / TED judicial 7.1.7
-- [ ] 576 recebimentos (R$ 123,5 mil) já baixados em títulos "Não identificado" — decidir se passam para a pessoa certa (aguarda Diego)
+- [x] Maleta em vendas também vai para a exceção; 14 lançamentos (R$ 3.641,31) desfeitos e postos na exceção
+- [x] 576 títulos "Não identificado" (R$ 123.534,06) passaram para a pessoa da cobrança; 349 linhas do extrato ligadas à baixa já lançada
+- [x] Tarifas 5.1.3 (348, R$ 712,48), notificações/negativação 5.1.1 por mês (2 meses, R$ 326,70), transferências conferidas (55, R$ 62.138,04)
+- [ ] TED judicial 7.1.7: nenhum TED pendente hoje; regra fica para quando chegar o próximo (extrato Santander)
 - [ ] Publicar (painel, Mesa e extrato de hora em hora só funcionam publicados)
 
 ## Pacote 0283 (Etapa 1)

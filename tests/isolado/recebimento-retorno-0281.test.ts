@@ -154,8 +154,8 @@ describe("3. recebimento na Qualidade", () => {
 describe("4. mudar remessa: remessa finalizada recebe maleta conferida", () => {
   test("finalizada aparece na lista e aceita maleta conferida; maleta em montagem não", async () => {
     await adm.unsafe(`update public.remessas set status='fechada' where id=$1`, [remFinal]);
-    const m = (await ok<{ cycle_id: string }>(master, "remessa_abrir_maleta", { _remessa: rem, _consultora: consultoraX.partyId })).cycle_id;
     await adm.unsafe(`insert into public.consultant_profiles (party_id, representative_party_id, praca_id) values ($1,$2,$3) on conflict (party_id) do nothing`, [consultoraX.partyId, rep.partyId, praca]);
+    const m = (await ok<{ cycle_id: string }>(master, "remessa_abrir_maleta", { _remessa: rem, _consultora: consultoraX.partyId })).cycle_id;
     const l1 = await ok<{ id: string }[]>(master, "remessas_destino_lista", { _cycle: m });
     expect(l1.some((x) => x.id === remFinal)).toBe(false);
     expect((await rpc(master, "remessa_maleta_mudar_remessa", { _cycle: m, _remessa: remFinal, _motivo: "passar para o outro" })).erro ?? "").toMatch(/só recebe maleta já conferida/);

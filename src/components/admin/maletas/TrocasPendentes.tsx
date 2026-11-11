@@ -17,6 +17,8 @@ interface Pendencia {
   consultora_nova_nome: string | null;
   nota_numero: string | null;
   criado_em: string;
+  origem: string | null;
+  motivo: string | null;
 }
 
 export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string; podeResolver: boolean }) {
@@ -26,7 +28,7 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
     queryFn: async () => {
       const { data, error } = await supabase
         .from("maleta_troca_pendencias" as never)
-        .select("id, cycle_id, maleta, consultora_anterior_nome, consultora_nova_nome, nota_numero, criado_em")
+        .select("id, cycle_id, maleta, consultora_anterior_nome, consultora_nova_nome, nota_numero, criado_em, origem, motivo")
         .eq("remessa_id", remessaId)
         .eq("status", "aberta")
         .order("criado_em");
@@ -47,10 +49,10 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
   const lista = q.data ?? [];
   if (lista.length === 0) return null;
   return (
-    <Panel title={`Maletas trocadas pelo representante — nota fiscal a resolver (${lista.length})`}>
+    <Panel title={`Maletas transferidas — nota fiscal a resolver (${lista.length})`}>
       <p className="mb-4 max-w-3xl text-sm text-ledger-muted">
-        O representante passou estas maletas para uma abertura depois que a nota de remessa já tinha saído em nome de outra consultora.
-        Faça a nota de devolução da consultora original e a nota nova da abertura; depois marque como resolvida.
+        Estas maletas mudaram de consultora depois que a nota de remessa já tinha saído em nome de outra.
+        A troca já valeu na rua. Faça a nota de devolução da consultora original e a nota nova de quem ficou com a maleta; depois marque como resolvida.
       </p>
       <div className="space-y-3">
         {lista.map((p) => (
@@ -58,8 +60,9 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
             <div className="min-w-64 flex-1">
               <p className="font-semibold text-ledger-text">{p.maleta ?? "Maleta"}: {p.consultora_anterior_nome ?? "—"} → {p.consultora_nova_nome ?? "—"}</p>
               <p className="text-xs text-ledger-muted">
-                Nota de remessa nº {p.nota_numero ?? "sem número"} em nome de {p.consultora_anterior_nome ?? "—"} · trocada em {new Date(p.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
+                Nota de remessa nº {p.nota_numero ?? "sem número"} em nome de {p.consultora_anterior_nome ?? "—"} · {p.origem === "equipe" ? "transferida pela equipe" : "trocada pelo representante"} em {new Date(p.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
               </p>
+              {p.motivo && <p className="text-xs text-ledger-muted">Motivo: {p.motivo}</p>}
             </div>
             {podeResolver && (
               <div className="flex flex-wrap items-center gap-2">

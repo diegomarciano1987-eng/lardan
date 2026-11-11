@@ -291,28 +291,46 @@ export type Database = {
       asaas_auto_config: {
         Row: {
           corte: string
+          extrato_ligado: boolean
+          favorecido_party_id: string | null
           id: boolean
           juros_max_cents: number
           juros_max_pct: number
           ligado: boolean
+          notificacao_chart_id: string | null
+          notificacao_cost_center_id: string | null
+          tarifa_chart_id: string | null
+          tarifa_cost_center_id: string | null
           updated_at: string
           updated_by: string | null
         }
         Insert: {
           corte?: string
+          extrato_ligado?: boolean
+          favorecido_party_id?: string | null
           id?: boolean
           juros_max_cents?: number
           juros_max_pct?: number
           ligado?: boolean
+          notificacao_chart_id?: string | null
+          notificacao_cost_center_id?: string | null
+          tarifa_chart_id?: string | null
+          tarifa_cost_center_id?: string | null
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
           corte?: string
+          extrato_ligado?: boolean
+          favorecido_party_id?: string | null
           id?: boolean
           juros_max_cents?: number
           juros_max_pct?: number
           ligado?: boolean
+          notificacao_chart_id?: string | null
+          notificacao_cost_center_id?: string | null
+          tarifa_chart_id?: string | null
+          tarifa_cost_center_id?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -388,6 +406,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      asaas_auto_extrato: {
+        Row: {
+          actor_id: string | null
+          charge_id: string | null
+          chave: string
+          criado_em: string
+          desfeito_em: string | null
+          desfeito_motivo: string | null
+          desfeito_por: string | null
+          detalhe: Json
+          financial_account_id: string | null
+          id: string
+          line_ids: string[]
+          motivo: string
+          reconciliation_id: string | null
+          tipo: string
+          title_id: string | null
+          transfer_id: string | null
+          valor_cents: number | null
+        }
+        Insert: {
+          actor_id?: string | null
+          charge_id?: string | null
+          chave: string
+          criado_em?: string
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          detalhe?: Json
+          financial_account_id?: string | null
+          id?: string
+          line_ids?: string[]
+          motivo: string
+          reconciliation_id?: string | null
+          tipo: string
+          title_id?: string | null
+          transfer_id?: string | null
+          valor_cents?: number | null
+        }
+        Update: {
+          actor_id?: string | null
+          charge_id?: string | null
+          chave?: string
+          criado_em?: string
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          detalhe?: Json
+          financial_account_id?: string | null
+          id?: string
+          line_ids?: string[]
+          motivo?: string
+          reconciliation_id?: string | null
+          tipo?: string
+          title_id?: string | null
+          transfer_id?: string | null
+          valor_cents?: number | null
+        }
+        Relationships: []
       }
       asaas_baixas_outra_forma: {
         Row: {
@@ -19686,6 +19764,22 @@ export type Database = {
       }
       asaas_auto_desfazer: {
         Args: { _decisao: string; _motivo: string }
+        Returns: Json
+      }
+      asaas_auto_extrato_desfazer: {
+        Args: { _id: string; _motivo: string }
+        Returns: Json
+      }
+      asaas_auto_extrato_nucleo: {
+        Args: { _ator: string; _limite?: number }
+        Returns: Json
+      }
+      asaas_auto_extrato_relatorio: {
+        Args: { _ate: string; _de: string }
+        Returns: Json
+      }
+      asaas_auto_extrato_rodar: {
+        Args: { _aplicar?: boolean; _limite?: number }
         Returns: Json
       }
       asaas_auto_previa: { Args: { _limite?: number }; Returns: Json }

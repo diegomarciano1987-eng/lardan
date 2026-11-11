@@ -2003,6 +2003,34 @@
       "when": 1794438639214,
       "tag": "0285_asaas_automatico_0285",
       "breakpoints": true
+    },
+    {
+      "idx": 286,
+      "version": "7",
+      "when": 1794440281488,
+      "tag": "0286_asaas_automatico_etapa_b_0286",
+      "breakpoints": true
+    },
+    {
+      "idx": 287,
+      "version": "7",
+      "when": 1794440397244,
+      "tag": "0287_asaas_indices_extrato_0286b",
+      "breakpoints": true
+    },
+    {
+      "idx": 288,
+      "version": "7",
+      "when": 1794440562339,
+      "tag": "0288_asaas_extrato_desempenho_0288",
+      "breakpoints": true
+    },
+    {
+      "idx": 289,
+      "version": "7",
+      "when": 1794440840086,
+      "tag": "0289_asaas_extrato_relatorio_por_tipo_0289",
+      "breakpoints": true
     }
   ]
 }

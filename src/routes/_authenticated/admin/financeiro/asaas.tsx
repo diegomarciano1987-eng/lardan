@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
 import { SaudeAsaas } from "@/components/admin/financeiro/SaudeAsaas";
 import { AsaasAutomatico } from "@/components/admin/financeiro/AsaasAutomatico";
+import { AsaasAutomaticoExtrato } from "@/components/admin/financeiro/AsaasAutomaticoExtrato";
 import { AsaasReceber } from "@/components/admin/financeiro/AsaasReceber";
 import { MesaAsaas } from "@/components/admin/financeiro/MesaAsaas";
 import { ConferenciaSaldoAsaas } from "@/components/admin/financeiro/ConferenciaSaldoAsaas";
@@ -23,6 +24,7 @@ function Pagina() {
       <div className="space-y-6">
         <SaudeAsaas />
         <AsaasAutomatico />
+        <AsaasAutomaticoExtrato />
         <ConferenciaSaldoAsaas />
         <MesaAsaas />
         <AsaasReceber />

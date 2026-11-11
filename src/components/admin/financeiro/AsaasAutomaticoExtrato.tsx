@@ -87,13 +87,15 @@ function Linha({ it, onDesfeito }: { it: ItemExtratoAuto; onDesfeito: () => void
   );
 }
 
-function Grupo({ tipo, itens, onDesfeito }: { tipo: TipoExtratoAuto; itens: ItemExtratoAuto[]; onDesfeito: () => void }) {
+function Grupo({ tipo, itens, total, onDesfeito }: { tipo: TipoExtratoAuto; itens: ItemExtratoAuto[]; total: number; onDesfeito: () => void }) {
   const [todos, setTodos] = React.useState(false);
   if (itens.length === 0) return null;
   const vis = todos ? itens : itens.slice(0, MOSTRAR);
   return (
     <div>
-      <p className="ledger-eyebrow mb-1">{ROTULO_TIPO_EXTRATO[tipo]} ({itens.length})</p>
+      <p className="ledger-eyebrow mb-1">
+        {ROTULO_TIPO_EXTRATO[tipo]} ({total > itens.length ? `${itens.length} mais recentes de ${total}` : itens.length})
+      </p>
       <ul>{vis.map((it) => <Linha key={it.id} it={it} onDesfeito={onDesfeito} />)}</ul>
       {itens.length > MOSTRAR ? (
         <button type="button" className="admin-btn mt-2 h-9" onClick={() => setTodos((v) => !v)}>
@@ -162,7 +164,13 @@ export function AsaasAutomaticoExtrato() {
             )}
           </div>
           {TIPOS.map((t) => (
-            <Grupo key={t} tipo={t} itens={d.itens.filter((i) => i.tipo === t)} onDesfeito={atualizar} />
+            <Grupo
+              key={t}
+              tipo={t}
+              itens={d.itens.filter((i) => i.tipo === t)}
+              total={d.resumo.find((r) => r.tipo === t)?.qtd ?? 0}
+              onDesfeito={atualizar}
+            />
           ))}
         </div>
       ) : null}

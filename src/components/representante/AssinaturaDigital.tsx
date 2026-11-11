@@ -110,7 +110,7 @@ export function AssinaturaDigital({ party, rep }: { party: string; rep: string |
 
   const docs = q.data?.documentos ?? [];
   const contrato = docs.find((d) => d.tipo === "contrato" && d.status !== "cancelado");
-  const promissoriaDa = (cycle: string) => docs.find((d) => d.tipo === "promissoria" && d.cycle_id === cycle && d.status !== "cancelado");
+  const promissoriaDa = (cycle: string) => docs.find((d) => d.tipo === "promissoria" && d.cycle_id === cycle && d.status !== "cancelado" && !d.invalidada_em);
 
   const Linha = ({ d }: { d: DocAssinatura }) => (
     <div className="space-y-2">

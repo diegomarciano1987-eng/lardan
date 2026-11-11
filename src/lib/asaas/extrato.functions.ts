@@ -286,20 +286,6 @@ export const processarFilaAsaas = createServerFn({ method: "POST" })
     const pode = await context.supabase.rpc("has_capability" as never, { _user_id: context.userId, _cap: "finance.receivable.manage" } as never);
     if (pode.error || pode.data !== true) throw new Error("Sem permissão para processar a fila do Asaas.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const fila = await supabaseAdmin.from("asaas_events").select("id,charge_external_id").eq("status", "na_fila").order("event_at", { ascending: true }).limit(1000);
-    if (fila.error) throw new Error(fila.error.message);
-    const ids = [...new Set((fila.data ?? []).map((e) => e.charge_external_id).filter(Boolean))] as string[];
-    const espelhadas = new Set<string>();
-    for (let i = 0; i < ids.length; i += 200) {
-      const r = await supabaseAdmin.from("asaas_charges").select("external_id").in("external_id", ids.slice(i, i + 200));
-      if (r.error) throw new Error(r.error.message);
-      for (const c of r.data ?? []) espelhadas.add(c.external_id as string);
-    }
-    const alvo = (fila.data ?? []).filter((e) => e.charge_external_id && espelhadas.has(e.charge_external_id));
-    let ok = 0, falha = 0;
-    for (const e of alvo) {
-      const r = await supabaseAdmin.rpc("asaas_evento_processar" as never, { _evento: e.id } as never);
-      if (r.error) falha++; else ok++;
-    }
-    return { naFila: fila.data?.length ?? 0, processados: ok, falhas: falha, semCobranca: (fila.data?.length ?? 0) - alvo.length };
+    const { drenarFilaAsaas } = await import("./fila.server");
+    return drenarFilaAsaas(supabaseAdmin as never);
   });

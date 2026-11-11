@@ -20,6 +20,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { useCapabilities } from "@/lib/capabilities";
 import { FollowupDialog } from "@/components/admin/candidaturas/FollowupDialog";
 import { EnvioRepresentante } from "@/components/admin/candidaturas/EnvioRepresentante";
+import { AnaliseTeste } from "@/components/admin/candidaturas/AnaliseTeste";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import {
   Dialog,
@@ -321,7 +322,7 @@ function CockpitCandidata() {
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
               <TabsTrigger value="atividade">Atividade</TabsTrigger>
               <TabsTrigger value="followups">Follow-ups</TabsTrigger>
-              <TabsTrigger value="avaliacoes">Avaliações</TabsTrigger>
+              <TabsTrigger value="avaliacoes">Análise</TabsTrigger>
               <TabsTrigger value="dados">Dados</TabsTrigger>
             </TabsList>
 
@@ -546,36 +547,9 @@ function CockpitCandidata() {
               </Panel>
             </TabsContent>
 
-            {/* AVALIAÇÕES — estrutura preparada, sem motor */}
+            {/* AVALIAÇÕES — 0284: teste de candidatura (link, análise e semáforo) */}
             <TabsContent value="avaliacoes">
-              <Panel title="Perfil e avaliações">
-                <div className="rounded-lg border border-line-soft bg-surface p-4">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <ClipboardList aria-hidden className="size-5 text-bronze" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-ledger-text">DISC</p>
-                      <p className="text-xs text-ledger-muted">
-                        {d.avaliacoes.find((a) => a.tipo === "disc")?.situacao === "nao_realizado"
-                          ? "Não realizado"
-                          : (d.avaliacoes.find((a) => a.tipo === "disc")?.situacao ?? "Não realizado")}
-                      </p>
-                    </div>
-                    {/* "Enviar teste DISC" volta quando o envio existir; botão morto removido. */}
-                  </div>
-                  <p className="mt-3 text-xs text-ledger-muted">
-                    DISC, recurso preparado para futura ativação. Não existe questionário, pontuação
-                    nem resultado neste sistema: a estrutura guarda apenas tipo, situação, data de
-                    envio, data de conclusão e referência do resultado.
-                  </p>
-                </div>
-                <div className="mt-4 rounded-lg border border-dashed border-line p-4">
-                  <p className="text-sm font-semibold text-ledger-text">Links e avaliações</p>
-                  <p className="mt-1 text-xs text-ledger-muted">
-                    Aguardando ativação. Quando o instrumento for definido, cada candidata receberá
-                    um link individual com token e validade. Nenhum link foi criado.
-                  </p>
-                </div>
-              </Panel>
+              <AnaliseTeste leadId={id} podeEditar={caps.includes("candidaturas.edit")} />
             </TabsContent>
 
             {/* DADOS TÉCNICOS */}

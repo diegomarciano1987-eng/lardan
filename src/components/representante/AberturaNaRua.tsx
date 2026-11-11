@@ -384,7 +384,7 @@ function Assinaturas({ rep, party, maleta, nome }: { rep: string; party: string;
   });
   const docs = q.data?.documentos ?? [];
   const contrato = docs.some((d) => d.tipo === "contrato" && d.status === "assinado");
-  const promissoria = docs.some((d) => d.tipo === "promissoria" && d.status === "assinado" && (!maleta || d.cycle_id === maleta.cycle_id));
+  const promissoria = docs.some((d) => d.tipo === "promissoria" && d.status === "assinado" && !d.invalidada_em && (!maleta || d.cycle_id === maleta.cycle_id));
   const concluida = contrato && promissoria;
   return (
     <div className="space-y-4">

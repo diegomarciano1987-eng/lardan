@@ -12207,6 +12207,72 @@ export type Database = {
           },
         ]
       }
+      maleta_devolucoes: {
+        Row: {
+          cancelado_em: string | null
+          cancelado_motivo: string | null
+          cancelado_por: string | null
+          cycle_id: string
+          id: string
+          motivo: string
+          origem: string
+          pecas: number | null
+          pedido_em: string
+          pedido_por: string | null
+          recebido_em: string | null
+          recebido_por: string | null
+          representante_party_id: string | null
+          status: string
+        }
+        Insert: {
+          cancelado_em?: string | null
+          cancelado_motivo?: string | null
+          cancelado_por?: string | null
+          cycle_id: string
+          id?: string
+          motivo: string
+          origem: string
+          pecas?: number | null
+          pedido_em?: string
+          pedido_por?: string | null
+          recebido_em?: string | null
+          recebido_por?: string | null
+          representante_party_id?: string | null
+          status?: string
+        }
+        Update: {
+          cancelado_em?: string | null
+          cancelado_motivo?: string | null
+          cancelado_por?: string | null
+          cycle_id?: string
+          id?: string
+          motivo?: string
+          origem?: string
+          pecas?: number | null
+          pedido_em?: string
+          pedido_por?: string | null
+          recebido_em?: string | null
+          recebido_por?: string | null
+          representante_party_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maleta_devolucoes_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maleta_devolucoes_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maleta_troca_pendencias: {
         Row: {
           consultora_anterior_nome: string | null
@@ -21688,6 +21754,20 @@ export type Database = {
           updated_at: string
         }[]
       }
+      maleta_devolucao_cancelar: {
+        Args: { _id: string; _motivo: string }
+        Returns: Json
+      }
+      maleta_devolucao_checar: {
+        Args: { _c: Database["public"]["Tables"]["kit_cycles"]["Row"] }
+        Returns: undefined
+      }
+      maleta_devolucao_pedir: {
+        Args: { _cycle: string; _motivo: string }
+        Returns: Json
+      }
+      maleta_devolucao_receber: { Args: { _id: string }; Returns: Json }
+      maleta_devolucoes_lista: { Args: { _rep?: string }; Returns: Json }
       maleta_motivo_invisivel: { Args: { _cycle: string }; Returns: string }
       maleta_perdida_fiado: { Args: { _perdida: string }; Returns: string }
       maleta_total_sugerido: { Args: { _party: string }; Returns: Json }
@@ -22618,6 +22698,10 @@ export type Database = {
         Args: { _cycle: string; _motivo: string }
         Returns: Json
       }
+      remessa_maleta_mudar_remessa: {
+        Args: { _cycle: string; _motivo: string; _remessa: string }
+        Returns: Json
+      }
       remessa_maleta_transferir: {
         Args: { _consultora: string; _cycle: string; _motivo: string }
         Returns: Json
@@ -22688,6 +22772,7 @@ export type Database = {
           valor_cents: number
         }[]
       }
+      remessas_destino_lista: { Args: { _cycle: string }; Returns: Json }
       remessas_lista: {
         Args: { _status?: string }
         Returns: {

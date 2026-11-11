@@ -24,6 +24,12 @@ export const Route = createFileRoute("/api/public/asaas/sync-matinal")({
         try {
           const { executarSyncAsaas } = await import("@/lib/asaas/espelho.server");
           const r = await executarSyncAsaas({ actor, de: modo === "completo" ? "2020-01-01" : inicio, ate: hoje, ignorarIntervalo: true, modo });
+          // 0282: avisos que chegaram antes da cobrança existir no espelho são processados agora.
+          let fila: unknown;
+          try {
+            const { drenarFilaAsaas } = await import("@/lib/asaas/fila.server");
+            fila = await drenarFilaAsaas(supabaseAdmin as never);
+          } catch (e) { fila = { erro: (e as Error).message }; }
           // Acordos sem 1º pagamento até venc. + 5 dias: cancela no Asaas e avisa quem fez o acordo.
           let acordos: unknown;
           try {
@@ -38,7 +44,7 @@ export const Route = createFileRoute("/api/public/asaas/sync-matinal")({
             const { atualizarRastrosTrocas } = await import("@/lib/correios/troca.functions");
             correios = { maletas: correios, trocas: await atualizarRastrosTrocas() };
           } catch (e) { correios = { erro: (e as Error).message }; }
-          return Response.json({ ok: true, ...r, acordos_vencidos: acordos, correios });
+          return Response.json({ ok: true, ...r, fila_avisos: fila, acordos_vencidos: acordos, correios });
         } catch (e) {
           return Response.json({ ok: false, erro: (e as Error).message }, { status: 500 });
         }

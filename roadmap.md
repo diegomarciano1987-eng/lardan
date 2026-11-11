@@ -189,3 +189,10 @@
 - [x] Expedição de retorno no app do representante (tudo que estava com ele precisa voltar)
 - [x] Testes isolados (9 novos, bateria 769/769) + 5 unitários Correios + provas de tela
 - [ ] Publicar (pedido do Diego) e Daniel testar com maleta real
+
+## 0282 — revisão 0266–0281 (pacote do Diego)
+- [x] Aplicar mudança de banco 0282 (raio-x M3/F6/F9, ABERTURA sem repetição, fila fiscal x pendência, encerrar não reativa)
+- [x] Código: fila do Asaas na rotina da manhã + botão usando a mesma função
+- [x] Testes: 7 novos, bateria isolada 776/776; mudança roda duas vezes sem erro
+- [ ] Publicar — aguarda aprovação do Diego
+- [ ] Devolver o bloco fila_avisos da próxima rotina da manhã — aguarda a rotina rodar

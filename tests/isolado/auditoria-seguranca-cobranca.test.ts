@@ -250,9 +250,10 @@ describe("5. baixa automática do Asaas", () => {
     expect(j.v).toBe(300);
   });
 
-  test("pago a mais sem explicação continua na revisão", async () => {
+  // 0285: até o menor entre R$ 50 e 10% do saldo vira juros sozinho; acima disso continua na revisão.
+  test("pago a mais sem explicação, acima do limite automático (11% de R$ 100), continua na revisão", async () => {
     const c = await cenario(10000, "BOLETO", false);
-    await oficial(`update public.asaas_charges set external_status='RECEIVED', received_cents=10600, payment_date=$2 where id=$1 returning id`, [c.ch, DIA]);
+    await oficial(`update public.asaas_charges set external_status='RECEIVED', received_cents=11100, payment_date=$2 where id=$1 returning id`, [c.ch, DIA]);
     const r = await rpcServico<{ baixa: boolean; motivo: string }>("asaas_baixa_automatica", { _charge: c.ch });
     expect(r.dados.baixa).toBe(false);
     expect(r.dados.motivo).toBe("valor_pago_maior_que_saldo");

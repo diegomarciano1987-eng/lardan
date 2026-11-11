@@ -121,6 +121,7 @@ import { Route as AuthenticatedAdminFinanceiroReceberRouteImport } from './route
 import { Route as AuthenticatedAdminMaletasIdRouteImport } from './routes/_authenticated/admin/maletas_.$id'
 import { Route as AuthenticatedAdminMaletasEntradaRouteImport } from './routes/_authenticated/admin/maletas_.entrada'
 import { Route as AuthenticatedFinanceiroSimulacaoIdRouteImport } from './routes/_authenticated/financeiro/simulacao.$id'
+import { Route as ApiPublicAsaasExtratoHoraRouteImport } from './routes/api/public/asaas/extrato-hora'
 import { Route as ApiPublicAsaasSyncMatinalRouteImport } from './routes/api/public/asaas/sync-matinal'
 import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
 import { Route as ApiPublicCentralLeadsEnviarRouteImport } from './routes/api/public/central-leads/enviar'
@@ -765,6 +766,12 @@ const AuthenticatedFinanceiroSimulacaoIdRoute =
     path: '/financeiro/simulacao/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicAsaasExtratoHoraRoute =
+  ApiPublicAsaasExtratoHoraRouteImport.update({
+    id: '/api/public/asaas/extrato-hora',
+    path: '/api/public/asaas/extrato-hora',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAsaasSyncMatinalRoute =
   ApiPublicAsaasSyncMatinalRouteImport.update({
     id: '/api/public/asaas/sync-matinal',
@@ -1000,6 +1007,7 @@ export interface FileRoutesByFullPath {
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/admin/maletas/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
+  '/api/public/asaas/extrato-hora': typeof ApiPublicAsaasExtratoHoraRoute
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
@@ -1133,6 +1141,7 @@ export interface FileRoutesByTo {
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/admin/maletas/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
+  '/api/public/asaas/extrato-hora': typeof ApiPublicAsaasExtratoHoraRoute
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
@@ -1270,6 +1279,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/maletas_/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/_authenticated/admin/maletas_/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
   '/_authenticated/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
+  '/api/public/asaas/extrato-hora': typeof ApiPublicAsaasExtratoHoraRoute
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
@@ -1407,6 +1417,7 @@ export interface FileRouteTypes {
     | '/admin/maletas/$id'
     | '/admin/maletas/entrada'
     | '/financeiro/simulacao/$id'
+    | '/api/public/asaas/extrato-hora'
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
     | '/api/public/central-leads/enviar'
@@ -1540,6 +1551,7 @@ export interface FileRouteTypes {
     | '/admin/maletas/$id'
     | '/admin/maletas/entrada'
     | '/financeiro/simulacao/$id'
+    | '/api/public/asaas/extrato-hora'
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
     | '/api/public/central-leads/enviar'
@@ -1676,6 +1688,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/maletas_/$id'
     | '/_authenticated/admin/maletas_/entrada'
     | '/_authenticated/financeiro/simulacao/$id'
+    | '/api/public/asaas/extrato-hora'
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
     | '/api/public/central-leads/enviar'
@@ -1751,6 +1764,7 @@ export interface RootRouteChildren {
   SemijoiasIndexRoute: typeof SemijoiasIndexRoute
   ApiPublicGaConfigRoute: typeof ApiPublicGaConfigRoute
   ApiPublicIndexnowRoute: typeof ApiPublicIndexnowRoute
+  ApiPublicAsaasExtratoHoraRoute: typeof ApiPublicAsaasExtratoHoraRoute
   ApiPublicAsaasSyncMatinalRoute: typeof ApiPublicAsaasSyncMatinalRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
   ApiPublicCentralLeadsEnviarRoute: typeof ApiPublicCentralLeadsEnviarRoute
@@ -2555,6 +2569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinanceiroSimulacaoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/asaas/extrato-hora': {
+      id: '/api/public/asaas/extrato-hora'
+      path: '/api/public/asaas/extrato-hora'
+      fullPath: '/api/public/asaas/extrato-hora'
+      preLoaderRoute: typeof ApiPublicAsaasExtratoHoraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/asaas/sync-matinal': {
       id: '/api/public/asaas/sync-matinal'
       path: '/api/public/asaas/sync-matinal'
@@ -2976,6 +2997,7 @@ const rootRouteChildren: RootRouteChildren = {
   SemijoiasIndexRoute: SemijoiasIndexRoute,
   ApiPublicGaConfigRoute: ApiPublicGaConfigRoute,
   ApiPublicIndexnowRoute: ApiPublicIndexnowRoute,
+  ApiPublicAsaasExtratoHoraRoute: ApiPublicAsaasExtratoHoraRoute,
   ApiPublicAsaasSyncMatinalRoute: ApiPublicAsaasSyncMatinalRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
   ApiPublicCentralLeadsEnviarRoute: ApiPublicCentralLeadsEnviarRoute,

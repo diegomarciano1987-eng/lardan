@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AreaFinanceiraGuard } from "@/components/admin/financeiro/FinanceiroShell";
 import { SaudeAsaas } from "@/components/admin/financeiro/SaudeAsaas";
+import { AsaasAutomatico } from "@/components/admin/financeiro/AsaasAutomatico";
 import { AsaasReceber } from "@/components/admin/financeiro/AsaasReceber";
 import { MesaAsaas } from "@/components/admin/financeiro/MesaAsaas";
 import { ConferenciaSaldoAsaas } from "@/components/admin/financeiro/ConferenciaSaldoAsaas";
@@ -21,6 +22,7 @@ function Pagina() {
     <AreaFinanceiraGuard capacidade="finance.receivable.view">
       <div className="space-y-6">
         <SaudeAsaas />
+        <AsaasAutomatico />
         <ConferenciaSaldoAsaas />
         <MesaAsaas />
         <AsaasReceber />

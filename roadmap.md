@@ -197,6 +197,18 @@
 - [x] Publicar — aprovado pelo Diego em 11/11 (publicação pedida 14h30)
 - [ ] 12/11 após 6h: devolver bloco fila_avisos da rotina e F6 do raio-x (esperado perto de 19) — aguarda a rotina rodar
 
+## 0285 — Asaas rodando sozinho (pedido do Diego, 11/11)
+- [x] Gislaine R$ 315,44: linha solta e lançada (título 3.1.1 já baixado)
+- [x] Botão "Processar fila" só processa pendentes, com tempo máximo
+- [x] Pix/fatura recebidos baixam sozinhos (pay_, fatura, código, CPF); sem nada em aberto → 3.1.1; maleta em acerto → exceção
+- [x] Juros automáticos até o menor entre R$ 50 e 10% do saldo
+- [x] "Não, é novo" com pay_ lança preso à cobrança (nunca dois lançamentos); desfazer com motivo
+- [x] Rotina a cada 10 min, extrato de hora em hora, relatório "Asaas automático"
+- [x] Primeira passada em produção: 41 recebimentos (R$ 10.441,87) lançados e conciliados, 3 exceções
+- [ ] Etapa B: tarifas 5.1.3 / notificações e negativação 5.1.1 por mês / transferência Asaas→banco / TED judicial 7.1.7
+- [ ] 576 recebimentos (R$ 123,5 mil) já baixados em títulos "Não identificado" — decidir se passam para a pessoa certa (aguarda Diego)
+- [ ] Publicar (painel, Mesa e extrato de hora em hora só funcionam publicados)
+
 ## Pacote 0283 (Etapa 1)
 - [x] Segunda maleta com motivo (equipe e representante), desfazer devolução (Master), Correções do administrador, Qualidade em 3 abas
 - [x] Etapa 2 (0284): teste de candidatura completo (site enxuto, link, análise, representante, parâmetros)

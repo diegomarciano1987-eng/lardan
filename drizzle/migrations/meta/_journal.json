@@ -1996,6 +1996,13 @@
       "when": 1794431105020,
       "tag": "0284_teste_candidatura_etapa_0284b",
       "breakpoints": true
+    },
+    {
+      "idx": 285,
+      "version": "7",
+      "when": 1794438639214,
+      "tag": "0285_asaas_automatico_0285",
+      "breakpoints": true
     }
   ]
 }

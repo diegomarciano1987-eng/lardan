@@ -21,13 +21,14 @@ export function RemessaDevolucaoMaleta({ cycleId, status }: { cycleId: string; s
   const qc = useQueryClient();
   const [modo, setModo] = React.useState<"" | "remessa" | "devolver">("");
   const [destino, setDestino] = React.useState("");
+  const [repDestino, setRepDestino] = React.useState("");
   const [motivo, setMotivo] = React.useState("");
   const podeMudar = MUDAR.includes(status);
   const podeDevolver = DEVOLVER.includes(status);
   const remessas = useQuery({ queryKey: ["maletas", "remessas-destino", cycleId], queryFn: () => remessasDestino(cycleId), enabled: modo === "remessa" });
   const devol = useQuery({ queryKey: ["maletas", "devolucoes"], queryFn: () => devolucoesAbertas(null), enabled: podeDevolver });
   const pedida = devol.data?.find((d) => d.cycle_id === cycleId) ?? null;
-  const fim = () => { setModo(""); setDestino(""); setMotivo(""); void qc.invalidateQueries({ queryKey: ["maletas"] }); };
+  const fim = () => { setModo(""); setDestino(""); setRepDestino(""); setMotivo(""); void qc.invalidateQueries({ queryKey: ["maletas"] }); };
 
   const mudar = useMutation({
     mutationFn: () => mudarRemessa(cycleId, destino, motivo),
@@ -55,9 +56,15 @@ export function RemessaDevolucaoMaleta({ cycleId, status }: { cycleId: string; s
   });
 
   if (!podeMudar && !podeDevolver) return null;
-  const opcoes = (remessas.data ?? []).map((r) => ({
+  // 0281: primeiro o representante, depois a remessa dele (inclui remessas finalizadas)
+  const SEM = "sem-representante";
+  const todas = remessas.data ?? [];
+  const reps = Array.from(new Map(todas.map((r) => [r.representante_party_id ?? SEM, r.representante ?? "Sem representante"])).entries())
+    .sort((a, b) => a[1].localeCompare(b[1], "pt-BR"))
+    .map(([value, label]) => ({ value, label, hint: `${todas.filter((r) => (r.representante_party_id ?? SEM) === value).length} remessa(s)` }));
+  const opcoes = todas.filter((r) => !repDestino || (r.representante_party_id ?? SEM) === repDestino).map((r) => ({
     value: r.id, label: `Remessa ${r.numero}${r.praca ? ` · ${r.praca}` : ""}`,
-    hint: `${r.representante ?? "sem representante"} · acerto ${dataBr(r.data_acerto)}`,
+    hint: `${r.status === "fechada" ? "Finalizada · " : ""}${r.representante ?? "sem representante"} · acerto ${dataBr(r.data_acerto)}`,
   }));
 
   return (
@@ -101,11 +108,19 @@ export function RemessaDevolucaoMaleta({ cycleId, status }: { cycleId: string; s
                 : "Use quando a consultora não ficou com a maleta e ela vai voltar para a empresa. A entrega para ela é cancelada; quando a maleta chegar, confirme aqui e as peças voltam ao estoque."}
             </p>
             {modo === "remessa" && (
-              <label className="block">
-                <span className="ledger-eyebrow">Remessa de destino</span>
-                <SmartSelect options={opcoes} value={destino} onChange={setDestino} loading={remessas.isLoading}
-                  placeholder="Escolha a remessa" searchPlaceholder="Número, praça ou representante" emptyLabel="Nenhuma remessa aberta." />
-              </label>
+              <>
+                <label className="block">
+                  <span className="ledger-eyebrow">1. Representante responsável</span>
+                  <SmartSelect options={reps} value={repDestino} onChange={(v) => { setRepDestino(v); setDestino(""); }} loading={remessas.isLoading}
+                    placeholder="Escolha o representante" searchPlaceholder="Nome do representante" emptyLabel="Nenhuma remessa disponível." />
+                </label>
+                <label className="block">
+                  <span className="ledger-eyebrow">2. Remessa de destino</span>
+                  <SmartSelect options={opcoes} value={destino} onChange={setDestino} loading={remessas.isLoading}
+                    placeholder={repDestino ? "Escolha a remessa" : "Escolha o representante primeiro (ou digite o número)"}
+                    searchPlaceholder="Digite o número da remessa ou a praça" emptyLabel="Nenhuma remessa deste representante." />
+                </label>
+              </>
             )}
             <label className="block">
               <span className="ledger-eyebrow">Motivo</span>
@@ -113,7 +128,7 @@ export function RemessaDevolucaoMaleta({ cycleId, status }: { cycleId: string; s
                 className="mt-1 w-full rounded-md border border-line-soft bg-paper px-3 py-2 text-sm" />
             </label>
             <div className="flex gap-2">
-              <button type="button" className="admin-btn" onClick={() => { setModo(""); setMotivo(""); setDestino(""); }}>Voltar</button>
+              <button type="button" className="admin-btn" onClick={() => { setModo(""); setMotivo(""); setDestino(""); setRepDestino(""); }}>Voltar</button>
               <button type="button" className="admin-btn admin-btn-primary flex-1"
                 disabled={motivo.trim().length < 5 || (modo === "remessa" && !destino) || mudar.isPending || pedir.isPending}
                 onClick={() => (modo === "remessa" ? mudar.mutate() : pedir.mutate())}>

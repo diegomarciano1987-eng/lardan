@@ -1961,6 +1961,13 @@
       "when": 1794412539795,
       "tag": "0279_0280_remessa_devolucao_correios",
       "breakpoints": true
+    },
+    {
+      "idx": 280,
+      "version": "7",
+      "when": 1794415071968,
+      "tag": "0280_0281_recebimento_retorno_maletas",
+      "breakpoints": true
     }
   ]
 }

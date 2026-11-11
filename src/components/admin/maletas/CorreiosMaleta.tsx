@@ -163,7 +163,9 @@ export function CorreiosMaleta({ cycleId, status, comRepresentante = false }: { 
               <>
                 <ul className="space-y-1">
                   <li>Para: <strong>{p.destinatario?.nome}</strong> — {p.destinatario?.logradouro}, {p.destinatario?.numero} · {p.destinatario?.bairro} · {p.destinatario?.cidade}/{p.destinatario?.uf} · CEP {p.destinatario?.cep}</li>
-                  <li>Valor declarado (custo das peças): <strong>{brl(p.valor_declarado_cents)}</strong></li>
+                  <li>Valor declarado (custo das peças): <strong>{brl(p.valor_declarado_cents)}</strong>
+                    {p.valor_declarado_correios_cents != null && p.valor_declarado_correios_cents !== p.valor_declarado_cents && p.valor_declarado_correios_cents > 0
+                      ? <> · vai como <strong>{brl(p.valor_declarado_correios_cents)}</strong> (faixa aceita pelos Correios)</> : null}</li>
                   <li>Frete estimado: <strong>{brl(p.cotacao.frete_cents)}</strong>{p.cotacao.prazo_dias ? ` · ${p.cotacao.prazo_dias} dias úteis` : ""}{p.ambiente !== "producao" ? " · homologação" : ""}</li>
                   {direcao === "ida" && <li>{comRepresentante ? "Maleta de remessa com representante: o acerto continua na data da remessa." : "Sem representante: os 30 dias de venda contam da entrega confirmada pelos Correios."}</li>}
                   {direcao === "volta" && <li>A consultora recebe o código e tem 5 dias para postar, contados do envio do código.</li>}

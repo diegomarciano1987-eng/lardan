@@ -11,6 +11,7 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { FotoPeca } from "@/components/FotoPeca";
 import { PecaTrocaPicker } from "@/components/qualidade/PecaTrocaPicker";
 import { TrocaCorreios } from "@/components/qualidade/TrocaCorreios";
+import { RecebimentoMaletas } from "@/components/qualidade/RecebimentoMaletas";
 import { supabase } from "@/integrations/supabase/client";
 import { traduzir } from "@/lib/maletas";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ import {
 } from "@/lib/qualidade-trocas";
 
 export const Route = createFileRoute("/_authenticated/admin/trocas-garantias")({
+  validateSearch: (s: Record<string, unknown>): { setor?: "recebimento" } => (s["setor"] === "recebimento" ? { setor: "recebimento" } : {}),
   component: Qualidade,
   head: () => ({
     meta: [
@@ -47,7 +49,31 @@ const ABAS: { id: string; label: string }[] = [
 const TOM: Record<StatusTroca, StatusTone> = { aberta: "warning", em_analise: "info", aguardando_envio: "info", resolvida: "success", recusada: "danger" };
 const POR_PAGINA = 50;
 
+/** 0281: o setor de Qualidade tem duas frentes — trocas/garantias e o recebimento das maletas que voltam. */
 function Qualidade() {
+  const { setor } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const ir = (s?: "recebimento") => void navigate({ search: s ? { setor: s } : {}, replace: true });
+  return (
+    <div className="space-y-4">
+      <div role="tablist" aria-label="Setor de Qualidade" className="inline-flex gap-1 rounded-full border border-line bg-surface p-1">
+        {([[undefined, "Trocas e garantias"], ["recebimento", "Recebimento de maletas"]] as const).map(([id, rot]) => (
+          <button key={rot} type="button" role="tab" aria-selected={setor === id} onClick={() => ir(id)}
+            className={cn("rounded-full px-4 py-2 text-sm font-semibold transition", setor === id ? "bg-bronze text-primary-foreground" : "text-ledger-text hover:bg-muted")}>{rot}</button>
+        ))}
+      </div>
+      {setor === "recebimento" ? (
+        <div className="space-y-6">
+          <PageHeader eyebrow="Setor de Qualidade" title="Recebimento de maletas" icon={PackageCheck}
+            description="Toda maleta que volta para a empresa passa aqui: do acerto (consultora → representante → empresa) ou que não ficou com a consultora." />
+          <RecebimentoMaletas />
+        </div>
+      ) : <TrocasGarantias />}
+    </div>
+  );
+}
+
+function TrocasGarantias() {
   const caps = useCapabilities();
   const ver = caps.includes("quality.view");
   const gerir = caps.includes("quality.manage");

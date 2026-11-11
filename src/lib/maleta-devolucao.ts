@@ -10,7 +10,7 @@ async function chamar<T>(fn: string, args: Record<string, unknown>): Promise<T> 
   return data as T;
 }
 
-export interface RemessaDestino { id: string; numero: number; praca: string | null; representante: string | null; data_acerto: string | null; status: string }
+export interface RemessaDestino { id: string; numero: number; praca: string | null; representante_party_id: string | null; representante: string | null; data_acerto: string | null; status: string }
 export interface DevolucaoAberta {
   id: string; cycle_id: string; maleta: string; remessa: number | null; consultora: string | null;
   representante: string | null; motivo: string; origem: "representante" | "equipe"; pedido_em: string; pecas: number;

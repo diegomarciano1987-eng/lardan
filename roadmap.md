@@ -179,3 +179,12 @@
 - [ ] 0279 publicar (aguarda Diego)
 - [x] 0280 Mudar remessa/representante de maleta pronta; devolver maleta à empresa (app do representante + confirmação da montagem, peças voltam ao estoque); Correios para maleta em trânsito; 30 dias só sem representante. 9 testes novos + bateria 760/760.
 - [ ] 0280 publicar (aguarda Diego)
+
+## Pacote 0281 — recebimento de maletas na Qualidade + correções 0280 (11/11/2026)
+- [ ] Corrigir "Saldo insuficiente (-95 peças)" ao confirmar chegada da maleta devolvida
+- [ ] Correios: valor declarado abaixo do mínimo (R$ 25,63) recusado — ajustar para o mínimo/máximo aceito
+- [ ] Mudar remessa: escolher representante primeiro, depois a remessa (ou digitar o número); listar todas as remessas
+- [ ] Responder: devolução não gera nota automática (pendência para a montagem)
+- [ ] Aba "Recebimento de maletas" na Qualidade (bipar maleta, chegando, conferir peças, pendente por representante)
+- [ ] Expedição de retorno no app do representante (tudo que estava com ele precisa voltar)
+- [ ] Testes isolados + provas + texto comercial sem emoji; publicar

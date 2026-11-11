@@ -66,6 +66,7 @@ const GRUPOS: { titulo: string; nota: string; itens: Card[] }[] = [
       { label: "Colaboradores", icon: IdCard, texto: "Time interno da LARDAN.", to: "/admin/cadastros/pessoas", papel: "colaborador", contador: "colaboradores" },
       { label: "Clientes", icon: Users, texto: "Consumidoras finais atendidas pela rede.", to: "/admin/cadastros/pessoas", papel: "cliente", contador: "clientes" },
       { label: "Lojas", icon: Store, texto: "Empresas e pontos comerciais parceiros.", to: "/admin/cadastros/pessoas", papel: "loja", contador: "lojas" },
+      { label: "Correções do administrador", icon: ShieldCheck, texto: "Master: vincular histórico de vendas, excluir venda de teste, cancelar remessa vazia.", to: "/admin/cadastros/correcoes" },
       { label: "Usuários e acessos", icon: ShieldCheck, texto: "Logins vinculados a pessoas e papéis.", to: "/admin/usuarios", contador: "usuarios" },
     ],
   },

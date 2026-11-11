@@ -2355,6 +2355,119 @@ export type Database = {
         }
         Relationships: []
       }
+      candidatura_teste_config: {
+        Row: {
+          criado_em: string
+          criado_por: string | null
+          params: Json
+          versao: string
+        }
+        Insert: {
+          criado_em?: string
+          criado_por?: string | null
+          params: Json
+          versao: string
+        }
+        Update: {
+          criado_em?: string
+          criado_por?: string | null
+          params?: Json
+          versao?: string
+        }
+        Relationships: []
+      }
+      candidatura_testes: {
+        Row: {
+          aceite_em: string | null
+          aceite_texto: string | null
+          atualizado_em: string
+          cancelado_em: string | null
+          concluido_em: string | null
+          criado_em: string
+          criado_por: string | null
+          disc_fim: string | null
+          disc_inicio: string | null
+          disc_ordem: Json | null
+          disc_respostas: Json
+          expira_em: string
+          id: string
+          lead_id: string
+          origem: string
+          parte: number
+          respostas: Json
+          resultado: Json | null
+          rp_ajuste: boolean
+          rp_ajuste_em: string | null
+          rp_ajuste_motivo: string | null
+          rp_ajuste_por: string | null
+          serasa_confere: string | null
+          token: string
+          versao_teste: string | null
+        }
+        Insert: {
+          aceite_em?: string | null
+          aceite_texto?: string | null
+          atualizado_em?: string
+          cancelado_em?: string | null
+          concluido_em?: string | null
+          criado_em?: string
+          criado_por?: string | null
+          disc_fim?: string | null
+          disc_inicio?: string | null
+          disc_ordem?: Json | null
+          disc_respostas?: Json
+          expira_em: string
+          id?: string
+          lead_id: string
+          origem: string
+          parte?: number
+          respostas?: Json
+          resultado?: Json | null
+          rp_ajuste?: boolean
+          rp_ajuste_em?: string | null
+          rp_ajuste_motivo?: string | null
+          rp_ajuste_por?: string | null
+          serasa_confere?: string | null
+          token: string
+          versao_teste?: string | null
+        }
+        Update: {
+          aceite_em?: string | null
+          aceite_texto?: string | null
+          atualizado_em?: string
+          cancelado_em?: string | null
+          concluido_em?: string | null
+          criado_em?: string
+          criado_por?: string | null
+          disc_fim?: string | null
+          disc_inicio?: string | null
+          disc_ordem?: Json | null
+          disc_respostas?: Json
+          expira_em?: string
+          id?: string
+          lead_id?: string
+          origem?: string
+          parte?: number
+          respostas?: Json
+          resultado?: Json | null
+          rp_ajuste?: boolean
+          rp_ajuste_em?: string | null
+          rp_ajuste_motivo?: string | null
+          rp_ajuste_por?: string | null
+          serasa_confere?: string | null
+          token?: string
+          versao_teste?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_testes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidatura_views: {
         Row: {
           created_at: string
@@ -19908,6 +20021,15 @@ export type Database = {
       can_view_kits: { Args: { _user_id: string }; Returns: boolean }
       candidata_acesso_situacao: { Args: { _lead: string }; Returns: Json }
       candidata_preparar_acesso: { Args: { _lead: string }; Returns: string }
+      candidatura_teste_concluido: {
+        Args: { _teste: string }
+        Returns: undefined
+      }
+      candidatura_teste_gerar: { Args: { _lead: string }; Returns: Json }
+      candidatura_teste_site: {
+        Args: { _aceite: string; _protocolo: string; _site: Json }
+        Returns: string
+      }
       catalog_markup_get: { Args: never; Returns: number }
       catalog_markup_set: { Args: { _percent: number }; Returns: number }
       catalog_overview: { Args: never; Returns: Json }
@@ -23071,6 +23193,7 @@ export type Database = {
         Args: { _actor: string; _payload: Json; _rep_user: string }
         Returns: Json
       }
+      rep_candidata_perfil: { Args: { _lead: string }; Returns: Json }
       rep_cheque_registrar: { Args: { _payload: Json }; Returns: string }
       rep_cob_historico: { Args: { _party: string }; Returns: Json }
       rep_cob_promessa: {

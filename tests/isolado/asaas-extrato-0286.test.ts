@@ -77,7 +77,7 @@ beforeAll(async () => {
   master = await criarConta({ nome: "master-ext-0286", papeis: ["master"], comParty: true });
   consultora = await criarConta({ nome: "cons-ext-0286", papeis: ["consultora"], comParty: true });
   fin = (await um<{ id: string }>(`insert into public.financial_accounts (nome, kind) values ($1,'provedor') returning id`, [`ISO Asaas B ${marca()}`])).id;
-  banco = (await um<{ id: string }>(`insert into public.financial_accounts (nome, kind) values ($1,'banco') returning id`, [`ISO Banco B ${marca()}`])).id;
+  banco = (await um<{ id: string }>(`insert into public.financial_accounts (nome, kind) values ($1,'conta_corrente') returning id`, [`ISO Banco B ${marca()}`])).id;
   emp = (await um<{ id: string }>(`insert into public.business_entities (legal_name, trade_name) values ($1,$1) returning id`, [`ISO Emp B ${marca()}`])).id;
   acc = (await um<{ id: string }>(
     `insert into public.asaas_accounts (label, environment, financial_account_id, owner_entity_id, is_active) values ($1,'sandbox',$2,$3,true) returning id`, [`ISO B ${marca()}`, fin, emp])).id;

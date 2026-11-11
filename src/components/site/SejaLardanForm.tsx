@@ -57,31 +57,6 @@ const UFS = [
   "TO",
 ];
 
-const OBJETIVOS = [
-  "Aumentar minha renda",
-  "Construir meu próprio negócio",
-  "Conciliar a atividade com minha rotina",
-  "Trabalhar com vendas",
-  "Desenvolver uma nova carreira",
-  "Outro",
-];
-
-const DISPONIBILIDADES = [
-  "Até 5 horas por semana",
-  "De 5 a 10 horas por semana",
-  "De 10 a 20 horas por semana",
-  "Mais de 20 horas por semana",
-  "Ainda não sei",
-];
-
-const EXPERIENCIAS = [
-  "Nunca trabalhei com vendas",
-  "Já vendi de forma informal",
-  "Já vendi semijoias ou joias",
-  "Já vendi cosméticos, moda ou produtos por relacionamento",
-  "Tenho experiência profissional em vendas",
-];
-
 const field =
   "w-full rounded-md border border-input bg-card px-4 py-3 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 

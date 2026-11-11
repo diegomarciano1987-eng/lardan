@@ -173,7 +173,7 @@ const dataBR = (d: Date) => d.toISOString().slice(0, 10);
 /** Monta o corpo da pré-postagem (ida = PAC; volta = PAC reverso com logística reversa). */
 export function corpoPrePostagem(o: {
   direcao: "ida" | "volta"; remetente: EnderecoCorreios; destinatario: EnderecoCorreios;
-  valorDeclaradoCents: number; referencia: string; validadeReversaDias?: number; faixa?: FaixaValorDeclarado;
+  valorDeclaradoCents: number; referencia: string; validadeReversaDias?: number; faixa?: FaixaValorDeclarado | undefined;
 }) {
   const valor = valorDeclaradoAceito(o.valorDeclaradoCents, o.faixa) / 100;
   const hoje = new Date(Date.now() - 3 * 3600_000);

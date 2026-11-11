@@ -64,7 +64,7 @@ export function RemessaDevolucaoMaleta({ cycleId, status }: { cycleId: string; s
     .map(([value, label]) => ({ value, label, hint: `${todas.filter((r) => (r.representante_party_id ?? SEM) === value).length} remessa(s)` }));
   const opcoes = todas.filter((r) => !repDestino || (r.representante_party_id ?? SEM) === repDestino).map((r) => ({
     value: r.id, label: `Remessa ${r.numero}${r.praca ? ` · ${r.praca}` : ""}`,
-    hint: `${r.status === "fechada" ? "Finalizada · " : ""}${r.representante ?? "sem representante"} · acerto ${dataBr(r.data_acerto)}`,
+    hint: `${r.status === "fechada" ? "Finalizada · " : ""}acerto ${dataBr(r.data_acerto)}${repDestino ? "" : ` · ${r.representante ?? "sem representante"}`}`,
   }));
 
   return (

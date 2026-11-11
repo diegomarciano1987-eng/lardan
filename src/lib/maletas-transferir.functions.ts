@@ -18,6 +18,8 @@ export interface PedidoTransferencia {
   leadId?: string | null;
   rep?: string | null;
   motivo?: string | null;
+  /** 0283: segunda maleta para uma consultora que já tem maleta nesta remessa (motivo obrigatório). */
+  segunda?: boolean;
 }
 
 export interface ResultadoTransferencia {
@@ -43,14 +45,20 @@ export const maletaTransferir = createServerFn({ method: "POST" })
     if (d.modo === "representante" && !UUID.test(d.rep ?? "")) throw new Error("Representante inválido.");
     if (d.modo === "representante" && !d.consultoraId === !d.leadId) throw new Error("Escolha uma consultora ou uma candidata.");
     if (d.modo === "equipe" && d.leadId) throw new Error("A equipe transfere para uma consultora ou deixa como abertura.");
+    if (d.segunda && !d.consultoraId) throw new Error("A segunda maleta é para uma consultora que já tem maleta.");
+    if (d.segunda && (d.motivo ?? "").trim().length < 5) throw new Error("Escreva o motivo da segunda maleta (mínimo 5 letras).");
     return {
       cycleId: d.cycleId, modo: d.modo, consultoraId: d.consultoraId ?? null, leadId: d.leadId ?? null,
-      rep: d.rep ?? null, motivo: (d.motivo ?? "").trim().slice(0, 500),
+      rep: d.rep ?? null, motivo: (d.motivo ?? "").trim().slice(0, 500), segunda: d.segunda === true,
     };
   })
   .handler(async ({ data, context }): Promise<ResultadoTransferencia> => {
     const c = context as unknown as { supabase: { rpc: Rpc }; userId: string };
-    const chamada = data.modo === "equipe"
+    const chamada = data.segunda
+      ? (data.modo === "equipe"
+        ? c.supabase.rpc("remessa_maleta_segunda", { _cycle: data.cycleId, _consultora: data.consultoraId, _motivo: data.motivo })
+        : c.supabase.rpc("rep_maleta_segunda", { _rep: data.rep, _cycle: data.cycleId, _consultora: data.consultoraId, _motivo: data.motivo }))
+      : data.modo === "equipe"
       ? c.supabase.rpc("remessa_maleta_transferir", { _cycle: data.cycleId, _consultora: data.consultoraId, _motivo: data.motivo })
       : c.supabase.rpc("rep_maleta_trocar_destino", { _rep: data.rep, _cycle: data.cycleId, _consultora: data.consultoraId, _lead: data.leadId });
     const { data: bruto, error } = await chamada;

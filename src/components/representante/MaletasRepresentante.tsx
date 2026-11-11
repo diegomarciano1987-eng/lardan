@@ -197,8 +197,18 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
     queryFn: () => destinatariasDoRepresentante(rep, busca),
     enabled: busca.trim().length >= 2,
   });
+  const [segunda, setSegunda] = React.useState(false);
+  const [motivoSegunda, setMotivoSegunda] = React.useState("");
   const passar = useMutation({
-    mutationFn: () => (trocarDe ? trocarDestinoMaleta : repassarMaleta)(rep, maleta.cycle_id, escolhida!),
+    mutationFn: async () => {
+      if (segunda && escolhida?.tipo === "consultora") {
+        if (motivoSegunda.trim().length < 5) throw new Error("Escreva o motivo da segunda maleta (mínimo 5 letras).");
+        const { maletaTransferir } = await import("@/lib/maletas-transferir.functions");
+        const r = await maletaTransferir({ data: { cycleId: maleta.cycle_id, modo: "representante", rep, consultoraId: escolhida.id, motivo: motivoSegunda.trim(), segunda: true } });
+        return { ...r, consultora_party_id: r.consultora_party_id ?? "" };
+      }
+      return (trocarDe ? trocarDestinoMaleta : repassarMaleta)(rep, maleta.cycle_id, escolhida!);
+    },
     onSuccess: (r) => {
       toast.success(r.nova_consultora ? "Maleta enviada. A candidata agora é sua consultora." : "Maleta enviada para a consultora.");
       for (const aviso of avisosTransferencia(r as Parameters<typeof avisosTransferencia>[0])) toast.info(aviso, { duration: 9000 });
@@ -223,13 +233,29 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
         )}
       </div>
       {escolhida ? (
+        <div className="space-y-2">
+        {escolhida.tipo === "consultora" && (
+          <div className="space-y-2 rounded-lg border border-border p-3 text-sm">
+            <label className="flex items-start gap-2">
+              <input type="checkbox" className="mt-1 size-5" checked={segunda} onChange={(e) => setSegunda(e.target.checked)} />
+              <span><strong>É uma segunda maleta para ela</strong>
+                <span className="block text-xs text-muted-foreground">Ela já tem maleta nesta remessa e vai ficar com mais esta.</span></span>
+            </label>
+            {segunda && (
+              <textarea value={motivoSegunda} onChange={(e) => setMotivoSegunda(e.target.value)} rows={2}
+                placeholder="Motivo (ex.: forçar uma melhor venda de fim de ano)"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            )}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <span>Passar para <strong>{escolhida.nome}</strong> ({escolhida.tipo === "candidata" ? "candidata — vira sua consultora" : "consultora"})</span>
           <button className="h-9 rounded-lg border border-border px-3" onClick={() => setEscolhida(null)}>Trocar</button>
           <button className="h-9 rounded-lg bg-primary px-4 font-semibold text-primary-foreground disabled:opacity-50"
             disabled={passar.isPending}
-            onClick={() => { if (trocarDe && !window.confirm(`${trocarDe} vai ficar sem a maleta ${maleta.maleta} e ${escolhida.nome} recebe no lugar. Confirmar?`)) return; passar.mutate(); }}>
+            onClick={() => { if (trocarDe && !segunda && !window.confirm(`${trocarDe} vai ficar sem a maleta ${maleta.maleta} e ${escolhida.nome} recebe no lugar. Confirmar?`)) return; passar.mutate(); }}>
             {passar.isPending ? "Enviando…" : "Confirmar e enviar"}</button>
+        </div>
         </div>
       ) : (
         <div className="space-y-2">

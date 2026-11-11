@@ -336,7 +336,7 @@ function MaletaFicha() {
           {podeMontar && d.ciclo.consultora_party_id && ["conferida", "expedida", "transito", "recebida", "operacao", "acerto", "encerrada"].includes(d.ciclo.status) && (
             <div id="correios" className="scroll-mt-24"><CorreiosMaleta cycleId={id} status={d.ciclo.status} /></div>
           )}
-          {(podeMontar || master) && STATUS_TRANSFERIR.includes(d.ciclo.status) && (
+          {podeMontar && STATUS_TRANSFERIR.includes(d.ciclo.status) && (
             <AjustesMaleta cycleId={id} status={d.ciclo.status} />
           )}
           <Panel title="Identificação">

@@ -208,7 +208,7 @@
 - [x] Maleta em vendas também vai para a exceção; 14 lançamentos (R$ 3.641,31) desfeitos e postos na exceção
 - [x] 576 títulos "Não identificado" (R$ 123.534,06) passaram para a pessoa da cobrança; 349 linhas do extrato ligadas à baixa já lançada
 - [x] Tarifas 5.1.3 (348, R$ 712,48), notificações/negativação 5.1.1 por mês (2 meses, R$ 326,70), transferências conferidas (55, R$ 62.138,04)
-- [ ] TED judicial 7.1.7: nenhum TED pendente hoje; regra fica para quando chegar o próximo (extrato Santander)
+- [ ] TED judicial 7.1.7 automático: a Mesa já sugere processo + 7.1.7 (0234); nenhum TED pendente hoje (25 conciliados, 83 ignorados/repetidos) — baixa sozinha fica para quando houver TED novo para testar
 - [ ] Publicar (painel, Mesa e extrato de hora em hora só funcionam publicados)
 
 ## Pacote 0283 (Etapa 1)

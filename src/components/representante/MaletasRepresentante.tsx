@@ -253,7 +253,7 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
           <button className="h-9 rounded-lg border border-border px-3" onClick={() => setEscolhida(null)}>Trocar</button>
           <button className="h-9 rounded-lg bg-primary px-4 font-semibold text-primary-foreground disabled:opacity-50"
             disabled={passar.isPending}
-            onClick={() => { if (trocarDe && !segunda && !window.confirm(`${trocarDe} vai ficar sem a maleta ${maleta.maleta} e ${escolhida.nome} recebe no lugar. Confirmar?`)) return; passar.mutate(); }}>
+            onClick={() => { if (trocarDe && !window.confirm(`${trocarDe} vai ficar sem a maleta ${maleta.maleta} e ${escolhida.nome} recebe no lugar. Confirmar?`)) return; passar.mutate(); }}>
             {passar.isPending ? "Enviando…" : "Confirmar e enviar"}</button>
         </div>
         </div>

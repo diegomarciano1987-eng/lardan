@@ -288,6 +288,107 @@ export type Database = {
           },
         ]
       }
+      asaas_auto_config: {
+        Row: {
+          corte: string
+          id: boolean
+          juros_max_cents: number
+          juros_max_pct: number
+          ligado: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          corte?: string
+          id?: boolean
+          juros_max_cents?: number
+          juros_max_pct?: number
+          ligado?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          corte?: string
+          id?: boolean
+          juros_max_cents?: number
+          juros_max_pct?: number
+          ligado?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      asaas_auto_decisoes: {
+        Row: {
+          acao: string
+          actor_id: string | null
+          atualizado_em: string
+          charge_id: string
+          criado_em: string
+          desfeito_em: string | null
+          desfeito_motivo: string | null
+          desfeito_por: string | null
+          detalhe: Json
+          id: string
+          installment_id: string | null
+          juros_cents: number
+          motivo: string
+          party_id: string | null
+          settlement_id: string | null
+          tentativas: number
+          title_id: string | null
+          valor_cents: number | null
+        }
+        Insert: {
+          acao: string
+          actor_id?: string | null
+          atualizado_em?: string
+          charge_id: string
+          criado_em?: string
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          detalhe?: Json
+          id?: string
+          installment_id?: string | null
+          juros_cents?: number
+          motivo: string
+          party_id?: string | null
+          settlement_id?: string | null
+          tentativas?: number
+          title_id?: string | null
+          valor_cents?: number | null
+        }
+        Update: {
+          acao?: string
+          actor_id?: string | null
+          atualizado_em?: string
+          charge_id?: string
+          criado_em?: string
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          detalhe?: Json
+          id?: string
+          installment_id?: string | null
+          juros_cents?: number
+          motivo?: string
+          party_id?: string | null
+          settlement_id?: string | null
+          tentativas?: number
+          title_id?: string | null
+          valor_cents?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_auto_decisoes_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_charges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_baixas_outra_forma: {
         Row: {
           actor_id: string
@@ -19567,6 +19668,40 @@ export type Database = {
         Args: { _actor: string; _cap: string }
         Returns: boolean
       }
+      asaas_auto_decidir: {
+        Args: {
+          _acao: string
+          _actor: string
+          _charge: string
+          _detalhe: Json
+          _inst: string
+          _juros: number
+          _motivo: string
+          _party: string
+          _settlement: string
+          _title: string
+          _valor: number
+        }
+        Returns: string
+      }
+      asaas_auto_desfazer: {
+        Args: { _decisao: string; _motivo: string }
+        Returns: Json
+      }
+      asaas_auto_previa: { Args: { _limite?: number }; Returns: Json }
+      asaas_auto_receber: {
+        Args: { _charge: string; _manual?: boolean }
+        Returns: Json
+      }
+      asaas_auto_receber_nucleo: {
+        Args: { _ator: string; _charge: string; _manual: boolean }
+        Returns: Json
+      }
+      asaas_auto_relatorio: {
+        Args: { _ate: string; _de: string }
+        Returns: Json
+      }
+      asaas_auto_rodar: { Args: { _limite?: number }; Returns: Json }
       asaas_baixa_automatica: { Args: { _charge: string }; Returns: Json }
       asaas_baixa_pendentes: { Args: { _executar?: boolean }; Returns: Json }
       asaas_cartao_creditar: { Args: { _charge: string }; Returns: Json }
@@ -19848,6 +19983,14 @@ export type Database = {
         Args: { _account: string; _external_id: string }
         Returns: boolean
       }
+      asaas_extrato_gravar_servico: {
+        Args: { _arquivo: Json; _linhas: Json }
+        Returns: Json
+      }
+      asaas_extrato_lancar: {
+        Args: { _line: string; _payload?: Json }
+        Returns: Json
+      }
       asaas_fatura_url_valida: {
         Args: { _account: string; _external_id: string; _url: string }
         Returns: boolean
@@ -19931,6 +20074,7 @@ export type Database = {
       asaas_receber_fila: { Args: { _filtros?: Json }; Returns: Json }
       asaas_receber_ocorrencias: { Args: { _filtros?: Json }; Returns: Json }
       asaas_receber_parcelas: { Args: { _filtros?: Json }; Returns: Json }
+      asaas_titulo_ext_livre: { Args: { _external: string }; Returns: string }
       asaas_vincular_interno: {
         Args: {
           _actor: string

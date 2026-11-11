@@ -181,10 +181,11 @@
 - [ ] 0280 publicar (aguarda Diego)
 
 ## Pacote 0281 — recebimento de maletas na Qualidade + correções 0280 (11/11/2026)
-- [ ] Corrigir "Saldo insuficiente (-95 peças)" ao confirmar chegada da maleta devolvida
-- [ ] Correios: valor declarado abaixo do mínimo (R$ 25,63) recusado — ajustar para o mínimo/máximo aceito
-- [ ] Mudar remessa: escolher representante primeiro, depois a remessa (ou digitar o número); listar todas as remessas
-- [ ] Responder: devolução não gera nota automática (pendência para a montagem)
-- [ ] Aba "Recebimento de maletas" na Qualidade (bipar maleta, chegando, conferir peças, pendente por representante)
-- [ ] Expedição de retorno no app do representante (tudo que estava com ele precisa voltar)
-- [ ] Testes isolados + provas + texto comercial sem emoji; publicar
+- [x] Corrigir "Saldo insuficiente (-95 peças)" ao confirmar chegada da maleta devolvida
+- [x] Correios: valor declarado abaixo do mínimo (R$ 25,63) recusado — ajustar para o mínimo/máximo aceito
+- [x] Mudar remessa: escolher representante primeiro, depois a remessa (ou digitar o número); listar todas as remessas
+- [x] Responder: devolução não gera nota automática (pendência para a montagem)
+- [x] Aba "Recebimento de maletas" na Qualidade (bipar maleta, chegando, conferir peças, pendente por representante)
+- [x] Expedição de retorno no app do representante (tudo que estava com ele precisa voltar)
+- [x] Testes isolados (9 novos, bateria 769/769) + 5 unitários Correios + provas de tela
+- [ ] Publicar (pedido do Diego) e Daniel testar com maleta real

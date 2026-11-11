@@ -154,16 +154,16 @@ export const FINAL_TEXTO =
 
 /** Respostas da candidata, como ficam gravadas (códigos, nunca pontos). */
 export interface Respostas {
-  experiencia_venda?: string;
-  horas_semana?: string;
-  local_trabalho?: string;
-  contatos_semana?: string;
-  publico_feminino?: string;
-  onde_pretende_vender?: string[];
-  contatos_whatsapp?: string;
-  o1?: string; o2?: string; o3?: string; o4?: string; o5?: string;
-  restricao_declarada?: string;
-  frases?: Record<string, number>;
+  experiencia_venda?: string | undefined;
+  horas_semana?: string | undefined;
+  local_trabalho?: string | undefined;
+  contatos_semana?: string | undefined;
+  publico_feminino?: string | undefined;
+  onde_pretende_vender?: string[] | undefined;
+  contatos_whatsapp?: string | undefined;
+  o1?: string | undefined; o2?: string | undefined; o3?: string | undefined; o4?: string | undefined; o5?: string | undefined;
+  restricao_declarada?: string | undefined;
+  frases?: Record<string, number> | undefined;
 }
 /** Uma resposta do DISC por grupo: o FATOR marcado em Mais e em Menos. */
 export type RespostaDisc = { mais: Fator; menos: Fator };

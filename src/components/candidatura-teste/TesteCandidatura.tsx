@@ -19,7 +19,7 @@ const btn = "min-h-11 rounded-xl border px-4 py-2.5 text-left text-sm transition
 const marcado = "border-primary bg-primary/10 font-semibold text-foreground";
 const livre = "border-border bg-card text-foreground hover:border-primary/50";
 
-function Escolha({ titulo, opcoes, valor, onChange }: { titulo: string; opcoes: readonly Opcao[]; valor?: string; onChange: (v: string) => void }) {
+function Escolha({ titulo, opcoes, valor, onChange }: { titulo: string; opcoes: readonly Opcao[]; valor?: string | undefined; onChange: (v: string) => void }) {
   return (
     <fieldset className="space-y-2">
       <legend className="mb-2 text-base font-semibold text-foreground">{titulo}</legend>

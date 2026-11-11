@@ -196,3 +196,8 @@
 - [x] Testes: 7 novos, bateria isolada 776/776; mudança roda duas vezes sem erro
 - [x] Publicar — aprovado pelo Diego em 11/11 (publicação pedida 14h30)
 - [ ] 12/11 após 6h: devolver bloco fila_avisos da rotina e F6 do raio-x (esperado perto de 19) — aguarda a rotina rodar
+
+## Pacote 0283 (Etapa 1)
+- [x] Segunda maleta com motivo (equipe e representante), desfazer devolução (Master), Correções do administrador, Qualidade em 3 abas
+- [ ] Etapa 2: candidaturas + DISC (aguarda aprovação do Diego)
+- [ ] Publicar 0283 (aguarda aprovação)

@@ -46,6 +46,34 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const master = useQuery({
+    queryKey: ["eu", "master"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return false;
+      const { data } = await supabase.rpc("has_role", { _user_id: u.user.id, _role: "master" });
+      return data === true;
+    },
+    staleTime: 300_000,
+  });
+  // 0283: devolução feita por engano — o Master desfaz e a maleta volta para o representante (depois é só Transferir)
+  const desfazer = useMutation({
+    mutationFn: async (p: Pendencia) => {
+      const motivo = window.prompt(`Desfazer a devolução da maleta ${p.maleta ?? ""}? As peças voltam para a maleta e ela fica de novo com o representante. Escreva o motivo:`, "Entreguei a maleta para a consultora errada");
+      if (motivo === null) return null;
+      const { data, error } = await supabase.rpc("maleta_devolucao_desfazer", { _cycle: p.cycle_id, _motivo: motivo });
+      if (error) throw new Error(error.message);
+      return data as unknown as { pecas: number };
+    },
+    onSuccess: (r) => {
+      if (!r) return;
+      toast.success(`Devolução desfeita: ${r.pecas} peças voltaram para a maleta. Agora use "Transferir" na maleta para passar para a consultora certa.`, { duration: 10000 });
+      void qc.invalidateQueries({ queryKey: ["remessas"] });
+      void qc.invalidateQueries({ queryKey: ["maletas"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const lista = q.data ?? [];
   if (lista.length === 0) return null;
   return (
@@ -64,6 +92,11 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
               </p>
               {p.motivo && <p className="text-xs text-ledger-muted">Motivo: {p.motivo}</p>}
             </div>
+            {master.data && p.origem === "devolucao" && (
+              <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={desfazer.isPending} onClick={() => desfazer.mutate(p)}>
+                Desfazer devolução (engano)
+              </button>
+            )}
             {podeResolver && (
               <div className="flex flex-wrap items-center gap-2">
                 <input className="admin-input h-9 w-64 text-sm" placeholder="Observação (nº das notas novas)" value={obs[p.id] ?? ""}

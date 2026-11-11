@@ -36,6 +36,7 @@ export function TransferirForm({ cycleId, pracaId, onFeito }: { cycleId: string;
   const [destino, setDestino] = React.useState<string | undefined>(undefined);
   const [motivo, setMotivo] = React.useState("");
   const [confirmar, setConfirmar] = React.useState(false);
+  const [segunda, setSegunda] = React.useState(false);
 
   const previa = useQuery({
     queryKey: ["maletas", "transferir-previa", cycleId],
@@ -63,12 +64,12 @@ export function TransferirForm({ cycleId, pracaId, onFeito }: { cycleId: string;
     mutationFn: () => {
       if (!destino) throw new Error("Escolha para quem vai a maleta.");
       if (motivo.trim().length < 5) throw new Error("Escreva o motivo (mínimo 5 letras).");
-      return transferirFn({ data: { cycleId, modo: "equipe", consultoraId: destino === ABERTURA ? null : destino, motivo: motivo.trim() } });
+      return transferirFn({ data: { cycleId, modo: "equipe", consultoraId: destino === ABERTURA ? null : destino, motivo: motivo.trim(), segunda: segunda && destino !== ABERTURA } });
     },
     onSuccess: (r) => {
       toast.success(r.consultora_nova ? `Maleta transferida para ${r.consultora_nova}.` : `Maleta virou ABERTURA ${String(r.abertura_numero ?? "").padStart(2, "0")} com o representante.`);
       for (const aviso of avisosTransferencia(r)) toast.info(aviso, { duration: 10000 });
-      setConfirmar(false); setDestino(undefined); setMotivo("");
+      setConfirmar(false); setDestino(undefined); setMotivo(""); setSegunda(false);
       void qc.invalidateQueries({ queryKey: ["maletas"] });
       void qc.invalidateQueries({ queryKey: ["remessas"] });
       onFeito?.();
@@ -115,6 +116,13 @@ export function TransferirForm({ cycleId, pracaId, onFeito }: { cycleId: string;
             <span className="font-semibold text-ledger-text">Motivo</span>
             <input className="admin-input w-full" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ex.: consultora desistiu; representante deixou com outra" />
           </label>
+          {destino && destino !== ABERTURA && (
+            <label className="flex items-start gap-2 rounded-xl border border-line-soft bg-surface p-3 text-sm">
+              <input type="checkbox" className="mt-1 size-4" checked={segunda} onChange={(e) => setSegunda(e.target.checked)} />
+              <span><strong className="text-ledger-text">É uma segunda maleta para ela nesta remessa</strong>
+                <span className="block text-xs text-ledger-muted">Use quando ela já tem maleta e vai ficar com mais uma. O motivo acima fica registrado (ex.: forçar uma melhor venda de fim de ano).</span></span>
+            </label>
+          )}
           {efeitos.length > 0 && (
             <div className="rounded-xl border border-line-soft bg-surface p-4">
               <p className="ledger-eyebrow mb-2">O que vai acontecer</p>

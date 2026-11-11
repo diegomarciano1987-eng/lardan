@@ -29,7 +29,7 @@ async function chamar<T>(metodo: "GET" | "POST", caminho: string, corpo?: unknow
   try {
     const r = await fetch(`${cfg.base}/api/v1${caminho}`, {
       method: metodo,
-      headers: { Authorization: `Bearer ${cfg.token}`, "Content-Type": "application/json", Accept: "application/json" },
+      headers: { Authorization: `Bearer ${cfg.token}`, "Content-Type": "application/json", Accept: "application/json", "User-Agent": "LARDAN-ERP/1.0" },
       body: corpo === undefined ? null : JSON.stringify(corpo),
       signal: ctrl.signal,
     });
@@ -72,4 +72,12 @@ export function detalharDocumento(docToken: string) {
 export function listarDocumentos(pagina: number) {
   return chamar<{ count: number; next: string | null; results: { token: string; name: string; status: string; created_at?: string }[] }>(
     "GET", `/docs/?page=${Math.max(1, Math.trunc(pagina))}`);
+}
+
+/**
+ * 0279 — recusa (cancela) um documento ainda em andamento: o link deixa de aceitar assinatura e o PDF
+ * ganha a marca "Documento recusado". 403 = já assinado/recusado (estado final), 404 = não existe.
+ */
+export function recusarDocumento(docToken: string, motivo: string) {
+  return chamar<unknown>("POST", "/refuse/", { doc_token: docToken, rejected_reason: motivo, notify_signer: false });
 }

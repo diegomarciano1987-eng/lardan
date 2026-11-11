@@ -177,3 +177,5 @@
 
 - [x] 0279 Transferir maleta em 2 momentos (equipe/Daniel e representante): antes da nota e na rua com nota/promissória; pendência fiscal única, promissória antiga cancelada/guardada, nova enviada. Testes 13 novos + bateria 751/751.
 - [ ] 0279 publicar (aguarda Diego)
+- [x] 0280 Mudar remessa/representante de maleta pronta; devolver maleta à empresa (app do representante + confirmação da montagem, peças voltam ao estoque); Correios para maleta em trânsito; 30 dias só sem representante. 9 testes novos + bateria 760/760.
+- [ ] 0280 publicar (aguarda Diego)

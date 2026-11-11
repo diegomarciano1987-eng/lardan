@@ -28,6 +28,7 @@ const COR: Record<string, string> = {
 const FX: Record<string, string> = { alta: "alta", media: "média", baixa: "baixa", baixo: "baixo", medio: "médio", alto: "alto" };
 const texto = (ops: readonly { codigo: string; texto: string }[], c?: string) => ops.find((o) => o.codigo === c)?.texto ?? "—";
 const urlTeste = (t: string) => `${typeof window !== "undefined" ? window.location.origin : "https://www.lardan.com.br"}/candidatura/${t}`;
+const br = (n: number) => n.toLocaleString("pt-BR");
 const horas = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
 
 function Pilula({ cor, children }: { cor: string; children: React.ReactNode }) {
@@ -182,7 +183,7 @@ export function AnaliseTeste({ leadId, podeEditar }: { leadId: string; podeEdita
               <tr><td className="py-2 pr-3 text-ledger-muted">{RESTRICAO.pergunta}</td><td className="py-2 text-ledger-text" colSpan={2}>{texto(RESTRICAO.opcoes, resp.restricao_declarada)}</td></tr>
             </tbody>
           </table>
-          <p className="text-ledger-muted">IOA = {pr.ioa_o} × {r.o_soma} + {pr.ioa_disciplina} × {r.disciplina} (disciplina) + {pr.ioa_cs} × {Math.max(0, Math.min(100, 50 + 2.5 * (r.disc.C + r.disc.S)))} (C+S) = <strong className="text-ledger-text">{r.ioa}</strong> · sinais críticos: {r.sinais_criticos.length}</p>
+          <p className="text-ledger-muted">IOA = {br(pr.ioa_o)} × {r.o_soma} + {br(pr.ioa_disciplina)} × {r.disciplina} (disciplina) + {br(pr.ioa_cs)} × {br(Math.max(0, Math.min(100, 50 + 2.5 * (r.disc.C + r.disc.S))))} (C+S) = <strong className="text-ledger-text">{r.ioa}</strong> · sinais críticos: {r.sinais_criticos.length}</p>
           {alertasRisco.length > 0 && <ul className="list-disc space-y-1 pl-5">{alertasRisco.map((a) => <li key={a}>{ALERTA_TEXTO[a] ?? a}</li>)}</ul>}
           <div className="rounded-xl border border-dashed border-line p-4">
             <p className="font-semibold text-ledger-text">Conferir no Serasa / perfil comercial</p>
@@ -205,12 +206,12 @@ export function AnaliseTeste({ leadId, podeEditar }: { leadId: string; podeEdita
             {FATORES.map((f) => (
               <div key={f} className="grid grid-cols-[1.5rem_1fr_4rem] items-center gap-2">
                 <strong>{f}</strong>
-                <div className="h-2.5 rounded-full bg-muted"><div className="h-2.5 rounded-full bg-primary" style={{ width: `${r.disc_pct[f]}%` }} /></div>
-                <span className="num text-right text-ledger-muted">{r.disc_pct[f]}% ({r.disc[f] > 0 ? "+" : ""}{r.disc[f]})</span>
+                <div className="h-2.5 rounded-full bg-muted"><div className="h-2.5 rounded-full bg-primary" style={{ width: `${br(r.disc_pct[f])}%` }} /></div>
+                <span className="num text-right text-ledger-muted">{br(r.disc_pct[f])}% ({r.disc[f] > 0 ? "+" : ""}{r.disc[f]})</span>
               </div>
             ))}
           </div>
-          <p className="text-ledger-muted">AV = {pr.av_disc} × {Math.max(0, Math.min(100, 50 + 2.5 * r.disc.I))} (I) + {pr.av_iniciativa} × {r.iniciativa} (iniciativa) = <strong className="text-ledger-text">{r.av}</strong>{r.disc_segundos !== null ? ` · tempo no perfil: ${Math.floor(r.disc_segundos / 60)} min ${r.disc_segundos % 60} s` : ""}</p>
+          <p className="text-ledger-muted">AV = {br(pr.av_disc)} × {br(Math.max(0, Math.min(100, 50 + 2.5 * r.disc.I)))} (I) + {br(pr.av_iniciativa)} × {r.iniciativa} (iniciativa) = <strong className="text-ledger-text">{r.av}</strong>{r.disc_segundos !== null ? ` · tempo no perfil: ${Math.floor(r.disc_segundos / 60)} min ${r.disc_segundos % 60} s` : ""}</p>
           {alertasDisc.length > 0 && <ul className="list-disc space-y-1 pl-5">{alertasDisc.map((a) => <li key={a}>{ALERTA_TEXTO[a] ?? a}</li>)}</ul>}
         </section>
 

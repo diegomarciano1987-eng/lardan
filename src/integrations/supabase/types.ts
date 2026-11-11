@@ -16316,6 +16316,144 @@ export type Database = {
           },
         ]
       }
+      retorno_expedicao_itens: {
+        Row: {
+          cycle_id: string
+          devolucao_id: string | null
+          expedicao_id: string
+          id: string
+          motivo: string
+          ocorrencia: string | null
+          ocorrencia_em: string | null
+          ocorrencia_por: string | null
+          pecas: number
+          pecas_recebidas: number | null
+          recebida_em: string | null
+          recebida_por: string | null
+          status: string
+        }
+        Insert: {
+          cycle_id: string
+          devolucao_id?: string | null
+          expedicao_id: string
+          id?: string
+          motivo: string
+          ocorrencia?: string | null
+          ocorrencia_em?: string | null
+          ocorrencia_por?: string | null
+          pecas?: number
+          pecas_recebidas?: number | null
+          recebida_em?: string | null
+          recebida_por?: string | null
+          status?: string
+        }
+        Update: {
+          cycle_id?: string
+          devolucao_id?: string | null
+          expedicao_id?: string
+          id?: string
+          motivo?: string
+          ocorrencia?: string | null
+          ocorrencia_em?: string | null
+          ocorrencia_por?: string | null
+          pecas?: number
+          pecas_recebidas?: number | null
+          recebida_em?: string | null
+          recebida_por?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retorno_expedicao_itens_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retorno_expedicao_itens_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retorno_expedicao_itens_devolucao_id_fkey"
+            columns: ["devolucao_id"]
+            isOneToOne: false
+            referencedRelation: "maleta_devolucoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retorno_expedicao_itens_expedicao_id_fkey"
+            columns: ["expedicao_id"]
+            isOneToOne: false
+            referencedRelation: "retorno_expedicoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retorno_expedicoes: {
+        Row: {
+          enviada_em: string
+          enviada_por: string | null
+          id: string
+          numero: number
+          observacao: string | null
+          origem: string
+          recebida_em: string | null
+          recebida_por: string | null
+          representante_party_id: string | null
+          status: string
+        }
+        Insert: {
+          enviada_em?: string
+          enviada_por?: string | null
+          id?: string
+          numero?: number
+          observacao?: string | null
+          origem?: string
+          recebida_em?: string | null
+          recebida_por?: string | null
+          representante_party_id?: string | null
+          status?: string
+        }
+        Update: {
+          enviada_em?: string
+          enviada_por?: string | null
+          id?: string
+          numero?: number
+          observacao?: string | null
+          origem?: string
+          recebida_em?: string | null
+          recebida_por?: string | null
+          representante_party_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retorno_expedicoes_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retorno_expedicoes_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retorno_expedicoes_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       role_capabilities: {
         Row: {
           capability: string
@@ -23071,6 +23209,47 @@ export type Database = {
         Returns: undefined
       }
       resync_all_public_prices: { Args: never; Returns: number }
+      retorno_a_devolver: {
+        Args: { _cycle?: string }
+        Returns: {
+          cycle_id: string
+          desde: string
+          devolucao_id: string
+          motivo: string
+          nao_veio: boolean
+          pecas: number
+          representante_party_id: string
+        }[]
+      }
+      retorno_ciclo_alcance: { Args: { _cycle: string }; Returns: boolean }
+      retorno_ciclo_info: { Args: { _cycle: string }; Returns: Json }
+      retorno_expedicao_json: { Args: { _exp: string }; Returns: Json }
+      retorno_expedicao_recalcular: { Args: { _exp: string }; Returns: string }
+      retorno_expedir: {
+        Args: {
+          _cycles: string[]
+          _motivo_nao_ficou?: string
+          _obs?: string
+          _rep: string
+        }
+        Returns: Json
+      }
+      retorno_item_retirar: {
+        Args: { _item: string; _motivo: string }
+        Returns: Json
+      }
+      retorno_nao_veio: {
+        Args: { _item: string; _motivo: string }
+        Returns: Json
+      }
+      retorno_painel: { Args: never; Returns: Json }
+      retorno_pode_receber: { Args: { _uid: string }; Returns: boolean }
+      retorno_pode_ver: { Args: { _uid: string }; Returns: boolean }
+      retorno_receber: {
+        Args: { _codigo?: string; _item?: string }
+        Returns: Json
+      }
+      retorno_rep_pendentes: { Args: { _rep: string }; Returns: Json }
       revoke_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -2,7 +2,7 @@
  * Cálculo do teste de candidatura — roda SÓ no servidor (a candidata não altera o resultado).
  * Nenhum resultado aprova ou reprova sozinho: o sistema sugere; analista e gestor decidem.
  */
-import { DISC, FRASES, FATORES, type Fator, type Respostas, type RespostaDisc } from "./perguntas";
+import { DISC, FRASES, FATORES, ORGANIZACAO, type Fator, type Respostas, type RespostaDisc } from "./perguntas";
 import type { ParametrosTeste } from "./padrao";
 
 export type Faixa = "alta" | "media" | "baixa";
@@ -136,3 +136,19 @@ export const O_QUE_FAZER: Record<Cor, string> = {
   amarelo: "Entrevista com foco no público real, tendência a maleta menor.",
   vermelho: "Entrevista curta de 10 min; sem público, recusar e guardar para recontato em 6 meses.",
 };
+
+/** O que falta responder (todas obrigatórias na versão final). */
+export function faltando(r: Respostas, disc: (RespostaDisc | null | undefined)[]): string[] {
+  const f: string[] = [];
+  if (!r.experiencia_venda) f.push("experiencia_venda");
+  if (!r.horas_semana) f.push("horas_semana");
+  if (!r.local_trabalho) f.push("local_trabalho");
+  for (const k of ["contatos_semana", "publico_feminino", "contatos_whatsapp"] as const) if (!r[k]) f.push(k);
+  if (!r.onde_pretende_vender?.length) f.push("onde_pretende_vender");
+  for (const o of ORGANIZACAO) if (!r[o.id]) f.push(o.id);
+  if (!r.restricao_declarada) f.push("restricao_declarada");
+  for (const fr of FRASES) if (typeof r.frases?.[fr.id] !== "number") f.push(fr.id);
+  DISC.forEach((_, i) => { const d = disc[i]; if (!d || d.mais === d.menos) f.push(`disc_${i + 1}`); });
+  return f;
+}
+

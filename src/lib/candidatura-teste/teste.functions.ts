@@ -6,9 +6,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { DISC, FATORES, FRASES, ORGANIZACAO, PARTE1, RESTRICAO, SITE, type Fator, type RespostaDisc, type Respostas } from "./perguntas";
+import { DISC, FRASES, ORGANIZACAO, PARTE1, RESTRICAO, SITE, type Fator, type RespostaDisc, type Respostas } from "./perguntas";
 import { mesclarParametros, type ParametrosTeste } from "./padrao";
-import { calcular } from "./calculo";
+import { calcular, faltando } from "./calculo";
 
 const admin = async () => (await import("@/integrations/supabase/client.server")).supabaseAdmin;
 const Token = z.string().regex(/^[a-f0-9]{64}$/);
@@ -59,21 +59,6 @@ function embaralhar(): number[][] {
     for (let i = a.length - 1; i > 0; i--) { const j = crypto.getRandomValues(new Uint32Array(1))[0]! % (i + 1); [a[i], a[j]] = [a[j]!, a[i]!]; }
     return a;
   });
-}
-
-/** O que falta responder (todas obrigatórias na versão final). */
-export function faltando(r: Respostas, disc: (RespostaDisc | null)[]): string[] {
-  const f: string[] = [];
-  if (!r.experiencia_venda) f.push("experiencia_venda");
-  if (!r.horas_semana) f.push("horas_semana");
-  if (!r.local_trabalho) f.push("local_trabalho");
-  for (const k of ["contatos_semana", "publico_feminino", "contatos_whatsapp"] as const) if (!r[k]) f.push(k);
-  if (!r.onde_pretende_vender?.length) f.push("onde_pretende_vender");
-  for (const o of ORGANIZACAO) if (!r[o.id]) f.push(o.id);
-  if (!r.restricao_declarada) f.push("restricao_declarada");
-  for (const fr of FRASES) if (typeof r.frases?.[fr.id] !== "number") f.push(fr.id);
-  DISC.forEach((_, i) => { const d = disc[i]; if (!d || d.mais === d.menos) f.push(`disc_${i + 1}`); });
-  return f;
 }
 
 export const testeAbrir = createServerFn({ method: "POST" })
@@ -183,4 +168,3 @@ export const testeSerasa = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export { FATORES };

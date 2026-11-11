@@ -40,6 +40,10 @@ const Entrada = z.object({
     marketing_consent: z.boolean().optional(),
     // 0159: "Quem te indicou?" (texto livre; pelo link de indicação já vem preenchido)
     quem_indicou: texto(120),
+    // 0284: perguntas do teste que ficam no site (R4/R6) e a autorização de contato pelo WhatsApp
+    experiencia_venda: z.enum(["vende_hoje", "ja_vendeu", "nunca"]).optional(),
+    horas_semana: z.enum(["ate3", "3a6", "7a15", "mais15"]).optional(),
+    aceite_contato: z.boolean().optional(),
   }),
   tracking: z
     .object({
@@ -113,8 +117,9 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
       },
     });
 
+    const { experiencia_venda, horas_semana, aceite_contato, ...payloadCadastro } = data.payload;
     const { data: resultado, error } = await cliente.rpc("submit_candidatura", {
-      _payload: data.payload,
+      _payload: payloadCadastro,
       _tracking: { ...data.tracking, ip, user_agent: userAgent },
     });
 
@@ -148,5 +153,17 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
       console.error("[candidatura] aviso interno falhou:", falha);
     }
 
-    return { status: "ok" as const, protocolo: r.protocol, reenvio: r.duplicate };
+    // 0284: link do teste para responder ali mesmo no site (só candidatura nova e com a autorização marcada).
+    let testeToken: string | null = null;
+    if (!r.duplicate && aceite_contato) {
+      try {
+        const { criarTesteDoSite } = await import("@/lib/candidatura-teste/site.server");
+        const { ACEITE_TEXTO } = await import("@/lib/candidatura-teste/perguntas");
+        testeToken = await criarTesteDoSite(r.protocol, { experiencia_venda, horas_semana }, ACEITE_TEXTO);
+      } catch (falha) {
+        console.error("[candidatura] teste do site falhou:", falha);
+      }
+    }
+
+    return { status: "ok" as const, protocolo: r.protocol, reenvio: r.duplicate, testeToken };
   });

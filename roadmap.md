@@ -174,3 +174,6 @@
 - [x] Painel Master: card mostra o representante da candidata
 - [x] Maletas de abertura com "ABERTURA 01 · Remessa X" e em ordem (abertura, depois remessa)
 - [x] Testes isolados + provas de tela
+
+- [x] 0279 Transferir maleta em 2 momentos (equipe/Daniel e representante): antes da nota e na rua com nota/promissória; pendência fiscal única, promissória antiga cancelada/guardada, nova enviada. Testes 13 novos + bateria 751/751.
+- [ ] 0279 publicar (aguarda Diego)

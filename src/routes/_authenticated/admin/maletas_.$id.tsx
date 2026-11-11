@@ -6,6 +6,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AcoesMaletaRua } from "@/components/admin/maletas/AcoesMaletaRua";
 import { CorreiosMaleta } from "@/components/admin/maletas/CorreiosMaleta";
+import { RemessaDevolucaoMaleta } from "@/components/admin/maletas/RemessaDevolucaoMaleta";
 import { ConferenciaPreBaixa } from "@/components/admin/maletas/ConferenciaPreBaixa";
 import { CheckCircle2, ClipboardCheck, FileText, Printer, ScanBarcode, Send, Truck } from "lucide-react";
 import { AjustesMaleta } from "@/components/admin/maletas/AjustesMaleta";
@@ -333,6 +334,7 @@ function MaletaFicha() {
           {(podeMontar || caps.includes("collection.operate") || caps.includes("finance.receivable.manage")) && (
             <AcoesMaletaRua cycleId={id} status={d.ciclo.status} temConsultora={!!d.ciclo.consultora_party_id} />
           )}
+          {podeMontar && <RemessaDevolucaoMaleta cycleId={id} status={d.ciclo.status} />}
           {podeMontar && d.ciclo.consultora_party_id && ["conferida", "expedida", "transito", "recebida", "operacao", "acerto", "encerrada"].includes(d.ciclo.status) && (
             <div id="correios" className="scroll-mt-24"><CorreiosMaleta cycleId={id} status={d.ciclo.status} /></div>
           )}

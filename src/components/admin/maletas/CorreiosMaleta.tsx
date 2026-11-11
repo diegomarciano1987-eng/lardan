@@ -35,7 +35,7 @@ function textoWhatsapp(e: Envio, limite: string) {
     `Você não paga nada. Prazo para postar: até ${limite}. Qualquer dúvida, fale com a gente.`;
 }
 
-export function CorreiosMaleta({ cycleId, status }: { cycleId: string; status: string }) {
+export function CorreiosMaleta({ cycleId, status, comRepresentante = false }: { cycleId: string; status: string; comRepresentante?: boolean }) {
   const qc = useQueryClient();
   const previaFn = useServerFn(correiosPreviaEnvio);
   const enviarFn = useServerFn(correiosEnviarMaleta);
@@ -101,7 +101,7 @@ export function CorreiosMaleta({ cycleId, status }: { cycleId: string; status: s
 
   const envios = painel.data?.envios ?? [];
   const viva = (d: "ida" | "volta") => envios.find((e) => e.direcao === d && !["erro", "cancelada", "expirada"].includes(e.status));
-  const podeIda = ["conferida", "expedida"].includes(status) && !viva("ida");
+  const podeIda = ["conferida", "expedida", "transito"].includes(status) && !viva("ida");
   const podeVolta = ["acerto", "operacao", "encerrada"].includes(status) && !viva("volta");
   const p = previa.data;
   const temDebito = (p?.debito_vencido_cents ?? 0) > 0 && direcao === "ida";
@@ -124,7 +124,7 @@ export function CorreiosMaleta({ cycleId, status }: { cycleId: string; status: s
             <p className="text-xs text-ledger-muted">
               Frete {brl(e.frete_cents)} · valor declarado {brl(e.valor_declarado_cents)}
               {e.postado_em ? ` · postada ${dt(e.postado_em)}` : ""}{e.entregue_em ? ` · entregue ${dt(e.entregue_em)}` : ""}
-              {e.direcao === "ida" && e.entregue_em ? " · 30 dias de venda contam da entrega" : ""}
+              {e.direcao === "ida" && e.entregue_em ? (comRepresentante ? " · acerto segue a data da remessa (representante)" : " · 30 dias de venda contam da entrega") : ""}
               {e.limite_postagem ? ` · postar até ${dt(e.limite_postagem)}` : ""}{e.ambiente !== "producao" ? " · homologação" : ""}
             </p>
             {e.ultimo_evento && <p className="text-xs">Último evento: {e.ultimo_evento}</p>}
@@ -165,6 +165,7 @@ export function CorreiosMaleta({ cycleId, status }: { cycleId: string; status: s
                   <li>Para: <strong>{p.destinatario?.nome}</strong> — {p.destinatario?.logradouro}, {p.destinatario?.numero} · {p.destinatario?.bairro} · {p.destinatario?.cidade}/{p.destinatario?.uf} · CEP {p.destinatario?.cep}</li>
                   <li>Valor declarado (custo das peças): <strong>{brl(p.valor_declarado_cents)}</strong></li>
                   <li>Frete estimado: <strong>{brl(p.cotacao.frete_cents)}</strong>{p.cotacao.prazo_dias ? ` · ${p.cotacao.prazo_dias} dias úteis` : ""}{p.ambiente !== "producao" ? " · homologação" : ""}</li>
+                  {direcao === "ida" && <li>{comRepresentante ? "Maleta de remessa com representante: o acerto continua na data da remessa." : "Sem representante: os 30 dias de venda contam da entrega confirmada pelos Correios."}</li>}
                   {direcao === "volta" && <li>A consultora recebe o código e tem 5 dias para postar, contados do envio do código.</li>}
                 </ul>
                 {p.pendencias.length > 0 && <p className="text-warning">Atenção: {p.pendencias.join("; ")}.</p>}

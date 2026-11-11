@@ -58,9 +58,9 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
         {lista.map((p) => (
           <div key={p.id} className="flex flex-wrap items-end justify-between gap-3 rounded-xl border border-line-soft bg-surface p-4">
             <div className="min-w-64 flex-1">
-              <p className="font-semibold text-ledger-text">{p.maleta ?? "Maleta"}: {p.consultora_anterior_nome ?? "—"} → {p.consultora_nova_nome ?? "—"}</p>
+              <p className="font-semibold text-ledger-text">{p.maleta ?? "Maleta"}: {p.consultora_anterior_nome ?? "—"} → {p.origem === "devolucao" ? "devolvida à empresa" : p.consultora_nova_nome ?? "—"}</p>
               <p className="text-xs text-ledger-muted">
-                Nota de remessa nº {p.nota_numero ?? "sem número"} em nome de {p.consultora_anterior_nome ?? "—"} · {p.origem === "equipe" ? "transferida pela equipe" : "trocada pelo representante"} em {new Date(p.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
+                Nota de remessa nº {p.nota_numero ?? "sem número"} em nome de {p.consultora_anterior_nome ?? "—"} · {p.origem === "devolucao" ? "maleta devolvida à empresa (fazer a nota de devolução)" : p.origem === "equipe" ? "transferida pela equipe" : "trocada pelo representante"} em {new Date(p.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
               </p>
               {p.motivo && <p className="text-xs text-ledger-muted">Motivo: {p.motivo}</p>}
             </div>
@@ -69,7 +69,7 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
                 <input className="admin-input h-9 w-64 text-sm" placeholder="Observação (nº das notas novas)" value={obs[p.id] ?? ""}
                   onChange={(e) => setObs((o) => ({ ...o, [p.id]: e.target.value }))} />
                 <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={resolver.isPending}
-                  onClick={() => { if (window.confirm("Confirmar que as notas desta troca já foram feitas?")) resolver.mutate(p.id); }}>
+                  onClick={() => { if (window.confirm("As notas desta troca são feitas pela montagem no emissor (o sistema não emite sozinho). Confirmar que a nota de devolução e a nota nova já foram feitas?")) resolver.mutate(p.id); }}>
                   Marcar como resolvida
                 </button>
               </div>

@@ -1475,6 +1475,8 @@ export type Database = {
           enviado_whatsapp: boolean
           erro: string | null
           id: string
+          invalidada_em: string | null
+          invalidada_motivo: string | null
           origem: string
           party_id: string
           provedor: string
@@ -1487,6 +1489,8 @@ export type Database = {
           tipo: string
           titulo: string
           valor_cents: number | null
+          zapsign_cancelado_em: string | null
+          zapsign_cancelar_em: string | null
         }
         Insert: {
           ambiente: string
@@ -1503,6 +1507,8 @@ export type Database = {
           enviado_whatsapp?: boolean
           erro?: string | null
           id?: string
+          invalidada_em?: string | null
+          invalidada_motivo?: string | null
           origem?: string
           party_id: string
           provedor?: string
@@ -1515,6 +1521,8 @@ export type Database = {
           tipo: string
           titulo: string
           valor_cents?: number | null
+          zapsign_cancelado_em?: string | null
+          zapsign_cancelar_em?: string | null
         }
         Update: {
           ambiente?: string
@@ -1531,6 +1539,8 @@ export type Database = {
           enviado_whatsapp?: boolean
           erro?: string | null
           id?: string
+          invalidada_em?: string | null
+          invalidada_motivo?: string | null
           origem?: string
           party_id?: string
           provedor?: string
@@ -1543,6 +1553,8 @@ export type Database = {
           tipo?: string
           titulo?: string
           valor_cents?: number | null
+          zapsign_cancelado_em?: string | null
+          zapsign_cancelar_em?: string | null
         }
         Relationships: [
           {
@@ -12206,9 +12218,11 @@ export type Database = {
           cycle_id: string
           id: string
           maleta: string | null
+          motivo: string | null
           nota_chave: string | null
           nota_numero: string | null
           observacao: string | null
+          origem: string
           remessa_id: string | null
           resolvido_em: string | null
           resolvido_por: string | null
@@ -12224,9 +12238,11 @@ export type Database = {
           cycle_id: string
           id?: string
           maleta?: string | null
+          motivo?: string | null
           nota_chave?: string | null
           nota_numero?: string | null
           observacao?: string | null
+          origem?: string
           remessa_id?: string | null
           resolvido_em?: string | null
           resolvido_por?: string | null
@@ -12242,9 +12258,11 @@ export type Database = {
           cycle_id?: string
           id?: string
           maleta?: string | null
+          motivo?: string | null
           nota_chave?: string | null
           nota_numero?: string | null
           observacao?: string | null
+          origem?: string
           remessa_id?: string | null
           resolvido_em?: string | null
           resolvido_por?: string | null
@@ -19562,6 +19580,10 @@ export type Database = {
         Args: { _assinado_em: string; _doc_token: string; _status: string }
         Returns: Json
       }
+      assinatura_zapsign_cancelada: {
+        Args: { _doc_token: string; _resultado?: string }
+        Returns: Json
+      }
       assinaturas_da_consultora: {
         Args: { _party: string; _rep: string }
         Returns: Json
@@ -19571,6 +19593,10 @@ export type Database = {
         Returns: Json
       }
       assinaturas_sem_copia: { Args: { _limite?: number }; Returns: Json }
+      assinaturas_zapsign_cancelar_fila: {
+        Args: { _limite?: number }
+        Returns: Json
+      }
       auditoria_integridade: { Args: never; Returns: Json }
       aviso_registrar: {
         Args: { _ciente?: boolean; _dispositivo?: string; _id: string }
@@ -21665,6 +21691,20 @@ export type Database = {
       maleta_motivo_invisivel: { Args: { _cycle: string }; Returns: string }
       maleta_perdida_fiado: { Args: { _perdida: string }; Returns: string }
       maleta_total_sugerido: { Args: { _party: string }; Returns: Json }
+      maleta_transferir_exec: {
+        Args: {
+          _abertura: boolean
+          _consultora: string
+          _cycle: string
+          _lead: string
+          _motivo: string
+          _origem: string
+          _rep: string
+        }
+        Returns: Json
+      }
+      maleta_transferir_previa: { Args: { _cycle: string }; Returns: Json }
+      maleta_transferir_situacao: { Args: { _cycle: string }; Returns: Json }
       maleta_troca_pendencia_resolver: {
         Args: { _id: string; _obs?: string }
         Returns: Json
@@ -22576,6 +22616,10 @@ export type Database = {
       remessa_informacoes_lista: { Args: { _remessa: string }; Returns: Json }
       remessa_maleta_excluir: {
         Args: { _cycle: string; _motivo: string }
+        Returns: Json
+      }
+      remessa_maleta_transferir: {
+        Args: { _consultora: string; _cycle: string; _motivo: string }
         Returns: Json
       }
       remessa_maleta_trocar_consultora: {

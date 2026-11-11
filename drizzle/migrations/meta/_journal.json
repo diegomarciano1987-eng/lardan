@@ -1947,6 +1947,13 @@
       "when": 1794316176034,
       "tag": "0277_0278_link_representante_aberturas",
       "breakpoints": true
+    },
+    {
+      "idx": 278,
+      "version": "7",
+      "when": 1794400390381,
+      "tag": "0278_0279_transferir_maleta_dois_momentos",
+      "breakpoints": true
     }
   ]
 }

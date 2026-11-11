@@ -1,4 +1,5 @@
 import * as React from "react";
+import { lancarPelaCobrancaAsaas, payDaLinha } from "@/lib/asaas-automatico";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowDownLeft, ArrowUpRight, Brain, Check, ChevronRight, FilePlus2, Link2, Scale, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
@@ -331,6 +332,8 @@ function Bancada({
   const saida = linha.kind === "saida";
   const direction = saida ? "payable" : "receivable";
   const valorLinha = (linha.valor_cents ?? 0) - linha.conciliado_cents;
+  // 0285: recebimento de cobrança do Asaas (pay_) — o "novo" nasce preso à cobrança, nunca um segundo lançamento
+  const payAsaas = payDaLinha(linha);
   const [modo, setModo] = React.useState<"existente" | "novo" | null>(null);
   const [aba, setAba] = React.useState<"sugestoes" | "buscar" | "baixadas">("sugestoes");
   const [busca, setBusca] = React.useState("");
@@ -448,6 +451,18 @@ function Bancada({
         .join(" · ");
       if (modo === "novo") {
         if (!party) throw new Error("Escolha quem recebeu ou pagou.");
+        if (payAsaas) {
+          return lancarPelaCobrancaAsaas(linha.id, {
+            party_id: party,
+            descricao: descricao.trim(),
+            ...(competencia ? { competencia } : {}),
+            ...(documento.trim() ? { documento: documento.trim() } : {}),
+            ...(obs ? { observacao: obs } : {}),
+            ...(centro ? { cost_center_id: centro } : {}),
+            ...(plano ? { chart_account_id: plano } : {}),
+            ...(forma ? { payment_method_id: forma } : {}),
+          });
+        }
         // uma só transação: cria o título já ativo e concilia; repetir devolve o mesmo resultado
         return novoLancamentoConciliar({
           line_id: linha.id,
@@ -563,7 +578,7 @@ function Bancada({
           {(
             [
               ["existente", Link2, "Sim, já existe", `Vincular a uma ${saida ? "conta a pagar" : "conta a receber"}`],
-              ["novo", FilePlus2, "Não, é novo", "Criar o lançamento agora e conciliar"],
+              ["novo", FilePlus2, "Não, é novo", payAsaas ? "Lançar preso à cobrança do Asaas" : "Criar o lançamento agora e conciliar"],
             ] as const
           ).map(([m, Icone, t, d], i) => (
             <button
@@ -598,6 +613,15 @@ function Bancada({
           </div>
         )}
 
+        {modo === "novo" && payAsaas && (
+          <div className="mt-4 flex items-start gap-3 rounded-[14px] border border-asaas/40 bg-cream-2 p-3 text-sm">
+            <span className="mt-0.5 shrink-0 rounded-md bg-asaas px-2 py-0.5 text-[0.7rem] font-semibold text-asaas-foreground">Asaas</span>
+            <p className="text-ledger-text">
+              Este recebimento é da cobrança <strong>{payAsaas}</strong>. O lançamento nasce preso a ela: a baixa e a tarifa vêm do
+              próprio Asaas e a linha se concilia sozinha. Se a cobrança já tiver baixa, o sistema bloqueia para não lançar duas vezes.
+            </p>
+          </div>
+        )}
         {modo === "novo" && pal && pal.vezes > 0 && !pal.judicial && (
           <div className="mt-4 flex items-start gap-3 rounded-[14px] border border-champagne/60 bg-cream-2 p-3 text-sm">
             <Brain aria-hidden className="mt-0.5 size-5 shrink-0 text-bronze" />
@@ -799,7 +823,7 @@ function Bancada({
           {podeConciliar && (
             <button type="button" className="admin-btn-primary h-12 flex-1 text-base" disabled={!pronto || aplicar.isPending} onClick={() => aplicar.mutate()}>
               <Check aria-hidden className="mr-1 inline size-5" />
-              {aplicar.isPending ? "Gravando…" : modo === "novo" ? "Criar lançamento e conciliar" : "Conciliar"}
+              {aplicar.isPending ? "Gravando…" : modo === "novo" ? (payAsaas ? "Lançar pela cobrança do Asaas" : "Criar lançamento e conciliar") : "Conciliar"}
             </button>
           )}
           <button type="button" className="admin-btn h-12" onClick={onPular}>

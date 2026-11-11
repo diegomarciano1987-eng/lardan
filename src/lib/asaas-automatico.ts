@@ -66,3 +66,40 @@ export const payDaLinha = (linha: { kind: string | null; raw: Record<string, unk
   const p = String(linha.raw?.["paymentId"] ?? "");
   return linha.kind === "entrada" && /^pay_/.test(p) && String(linha.raw?.["type"] ?? "PAYMENT_RECEIVED") === "PAYMENT_RECEIVED" ? p : null;
 };
+
+/** 0286 — etapa B: o que o Asaas conferiu sozinho no extrato. */
+export type TipoExtratoAuto = "identificacao" | "tarifa" | "notificacoes" | "transferencia";
+
+export const ROTULO_TIPO_EXTRATO: Record<TipoExtratoAuto, string> = {
+  identificacao: "Título da planilha identificado",
+  tarifa: "Tarifa Pix/boleto (5.1.3)",
+  notificacoes: "Notificações e negativação do mês (5.1.1)",
+  transferencia: "Transferência para o banco conferida",
+};
+
+export type ItemExtratoAuto = {
+  id: string;
+  tipo: TipoExtratoAuto;
+  motivo: string;
+  valor_cents: number | null;
+  quando: string;
+  desfeito_em: string | null;
+  desfeito_motivo: string | null;
+  detalhe: Record<string, unknown> | null;
+  pay: string | null;
+  pessoa: string | null;
+  pessoa_codigo: string | null;
+  titulo_numero: string | null;
+};
+
+export type RelatorioExtratoAuto = {
+  ligado: boolean | null;
+  resumo: { tipo: TipoExtratoAuto; qtd: number; valor_cents: number }[];
+  itens: ItemExtratoAuto[];
+};
+
+export const relatorioExtratoAuto = (de: string, ate: string) =>
+  rpc<RelatorioExtratoAuto>("asaas_auto_extrato_relatorio", { _de: de, _ate: ate });
+
+export const desfazerExtratoAuto = (id: string, motivo: string) =>
+  rpc<{ ok: boolean; tipo: TipoExtratoAuto }>("asaas_auto_extrato_desfazer", { _id: id, _motivo: motivo });

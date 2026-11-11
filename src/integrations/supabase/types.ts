@@ -4602,6 +4602,82 @@ export type Database = {
         }
         Relationships: []
       }
+      consultora_historico_vinculos: {
+        Row: {
+          criado_em: string
+          criado_por: string | null
+          desfeito_em: string | null
+          desfeito_por: string | null
+          destino_party_id: string
+          id: string
+          motivo: string
+          origem_party_id: string
+        }
+        Insert: {
+          criado_em?: string
+          criado_por?: string | null
+          desfeito_em?: string | null
+          desfeito_por?: string | null
+          destino_party_id: string
+          id?: string
+          motivo: string
+          origem_party_id: string
+        }
+        Update: {
+          criado_em?: string
+          criado_por?: string | null
+          desfeito_em?: string | null
+          desfeito_por?: string | null
+          destino_party_id?: string
+          id?: string
+          motivo?: string
+          origem_party_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultora_historico_vinculos_destino_party_id_fkey"
+            columns: ["destino_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_historico_vinculos_destino_party_id_fkey"
+            columns: ["destino_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_historico_vinculos_destino_party_id_fkey"
+            columns: ["destino_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "consultora_historico_vinculos_origem_party_id_fkey"
+            columns: ["origem_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_historico_vinculos_origem_party_id_fkey"
+            columns: ["origem_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultora_historico_vinculos_origem_party_id_fkey"
+            columns: ["origem_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       consultora_pos_venda: {
         Row: {
           compra_em: string
@@ -9304,6 +9380,7 @@ export type Database = {
           reference_total_cents: number
           remessa_id: string | null
           representante_party_id: string | null
+          segunda_maleta_motivo: string | null
           settlement_started_at: string | null
           shipped_at: string | null
           status: Database["public"]["Enums"]["kit_status"]
@@ -9335,6 +9412,7 @@ export type Database = {
           reference_total_cents?: number
           remessa_id?: string | null
           representante_party_id?: string | null
+          segunda_maleta_motivo?: string | null
           settlement_started_at?: string | null
           shipped_at?: string | null
           status?: Database["public"]["Enums"]["kit_status"]
@@ -9366,6 +9444,7 @@ export type Database = {
           reference_total_cents?: number
           remessa_id?: string | null
           representante_party_id?: string | null
+          segunda_maleta_motivo?: string | null
           settlement_started_at?: string | null
           shipped_at?: string | null
           status?: Database["public"]["Enums"]["kit_status"]
@@ -20296,11 +20375,29 @@ export type Database = {
         Returns: Json
       }
       consultora_ganhos: { Args: never; Returns: Json }
+      consultora_historico_desvincular: {
+        Args: { _id: string }
+        Returns: undefined
+      }
+      consultora_historico_partes: {
+        Args: { _party: string }
+        Returns: string[]
+      }
       consultora_historico_vendas: { Args: never; Returns: Json }
       consultora_historico_vendas_equipe: {
         Args: { _party: string }
         Returns: Json
       }
+      consultora_historico_vincular: {
+        Args: {
+          _destino: string
+          _executar?: boolean
+          _motivo: string
+          _origem: string
+        }
+        Returns: Json
+      }
+      consultora_historico_vinculos_lista: { Args: never; Returns: Json }
       consultora_incentivo: { Args: never; Returns: Json }
       consultora_lembretes_vencimento: {
         Args: never
@@ -21900,6 +21997,10 @@ export type Database = {
         Args: { _c: Database["public"]["Tables"]["kit_cycles"]["Row"] }
         Returns: undefined
       }
+      maleta_devolucao_desfazer: {
+        Args: { _cycle: string; _motivo: string }
+        Returns: Json
+      }
       maleta_devolucao_pedir: {
         Args: { _cycle: string; _motivo: string }
         Returns: Json
@@ -21908,6 +22009,10 @@ export type Database = {
       maleta_devolucoes_lista: { Args: { _rep?: string }; Returns: Json }
       maleta_motivo_invisivel: { Args: { _cycle: string }; Returns: string }
       maleta_perdida_fiado: { Args: { _perdida: string }; Returns: string }
+      maleta_segunda_marcar: {
+        Args: { _cycle: string; _motivo: string }
+        Returns: undefined
+      }
       maleta_total_sugerido: { Args: { _party: string }; Returns: Json }
       maleta_transferir_exec: {
         Args: {
@@ -22783,6 +22888,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      remessa_cancelar_vazia: {
+        Args: { _motivo: string; _remessa: string }
+        Returns: Json
+      }
       remessa_consultoras_sem_praca: {
         Args: { _remessa: string; _search?: string }
         Returns: {
@@ -22838,6 +22947,10 @@ export type Database = {
       }
       remessa_maleta_mudar_remessa: {
         Args: { _cycle: string; _motivo: string; _remessa: string }
+        Returns: Json
+      }
+      remessa_maleta_segunda: {
+        Args: { _consultora: string; _cycle: string; _motivo: string }
         Returns: Json
       }
       remessa_maleta_transferir: {
@@ -23087,6 +23200,15 @@ export type Database = {
           _consultora?: string
           _cycle: string
           _lead?: string
+          _rep: string
+        }
+        Returns: Json
+      }
+      rep_maleta_segunda: {
+        Args: {
+          _consultora: string
+          _cycle: string
+          _motivo: string
           _rep: string
         }
         Returns: Json
@@ -23501,6 +23623,11 @@ export type Database = {
       venda_forma: {
         Args: { _o: Database["public"]["Tables"]["sales_orders"]["Row"] }
         Returns: string
+      }
+      venda_teste_buscar: { Args: { _codigo: string }; Returns: Json }
+      venda_teste_excluir: {
+        Args: { _motivo: string; _order: string }
+        Returns: Json
       }
       vitrine_comprar: {
         Args: {

@@ -194,5 +194,5 @@
 - [x] Aplicar mudança de banco 0282 (raio-x M3/F6/F9, ABERTURA sem repetição, fila fiscal x pendência, encerrar não reativa)
 - [x] Código: fila do Asaas na rotina da manhã + botão usando a mesma função
 - [x] Testes: 7 novos, bateria isolada 776/776; mudança roda duas vezes sem erro
-- [ ] Publicar — aguarda aprovação do Diego
-- [ ] Devolver o bloco fila_avisos da próxima rotina da manhã — aguarda a rotina rodar
+- [x] Publicar — aprovado pelo Diego em 11/11 (publicação pedida 14h30)
+- [ ] 12/11 após 6h: devolver bloco fila_avisos da rotina e F6 do raio-x (esperado perto de 19) — aguarda a rotina rodar

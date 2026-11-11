@@ -17,6 +17,7 @@ import { repCpfDefinir, repCrm, repCrmMover, repEtapaNova, type RepCrm } from "@
 import { wa } from "@/components/representante/AcoesRepresentante";
 import { AberturaDaCandidata, AberturaNaRua } from "@/components/representante/AberturaNaRua";
 import { AssinaturaDigital, SeloContrato } from "@/components/representante/AssinaturaDigital";
+import { PerfilCandidata } from "@/components/representante/PerfilCandidata";
 
 type Card = RepCrm["cards"][number];
 type Passo = "chamar" | "conversando" | "abrir" | "maleta" | "fora";
@@ -168,6 +169,7 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
                   </select>
                 )}
               </div>
+              <PerfilCandidata lead={c.lead_id} nome={c.nome} whatsapp={c.whatsapp ?? null} />
               {aberto === c.lead_id && c.party_id && (
                 <div className="mt-3 space-y-3">
                   <CpfRapido rep={rep} party={c.party_id} temNaCandidatura={!!c.tem_cpf} />

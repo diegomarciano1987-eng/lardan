@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PARAMETROS_PADRAO, type ParametrosRemessa } from "@/lib/remessa";
 import { ConfigPedido, PrecoNovo } from "@/components/admin/config/PedidoEPreco";
 import { LiderELiga } from "@/components/admin/config/LiderELiga";
+import { ConfigTesteCandidatura } from "@/components/admin/config/ConfigTesteCandidatura";
 import { TelefonesRepetidos } from "@/components/admin/config/TelefonesRepetidos";
 
 export const Route = createFileRoute("/_authenticated/admin/configuracoes")({
@@ -46,6 +47,7 @@ function Configuracoes() {
       <PrecoNovo master={roles.includes("master" as never)} />
       <ConfigPedido master={roles.includes("master" as never)} />
       <LiderELiga master={roles.includes("master" as never)} />
+      <ConfigTesteCandidatura master={roles.includes("master" as never)} />
       <TelefonesRepetidos master={roles.includes("master" as never)} />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {itens.map((m) => (

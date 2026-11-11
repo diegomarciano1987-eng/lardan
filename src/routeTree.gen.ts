@@ -49,6 +49,7 @@ import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authentic
 import { Route as AuthenticatedConsultoraRouteImport } from './routes/_authenticated/consultora'
 import { Route as AuthenticatedConsultoraManualRouteImport } from './routes/_authenticated/consultora-manual'
 import { Route as AuthenticatedRepresentanteRouteImport } from './routes/_authenticated/representante'
+import { Route as CandidaturaTokenRouteImport } from './routes/candidatura.$token'
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as DCodigoRouteImport } from './routes/d.$codigo'
 import { Route as GuiaSemijoiaFolheadoOuBijuteriaRouteImport } from './routes/guia.semijoia-folheado-ou-bijuteria'
@@ -349,6 +350,11 @@ const AuthenticatedRepresentanteRoute =
     path: '/representante',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const CandidaturaTokenRoute = CandidaturaTokenRouteImport.update({
+  id: '/candidatura/$token',
+  path: '/candidatura/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConviteTokenRoute = ConviteTokenRouteImport.update({
   id: '/convite/$token',
   path: '/convite/$token',
@@ -924,6 +930,7 @@ export interface FileRoutesByFullPath {
   '/consultora': typeof AuthenticatedConsultoraRoute
   '/consultora-manual': typeof AuthenticatedConsultoraManualRoute
   '/representante': typeof AuthenticatedRepresentanteRoute
+  '/candidatura/$token': typeof CandidaturaTokenRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
@@ -1057,6 +1064,7 @@ export interface FileRoutesByTo {
   '/consultora': typeof AuthenticatedConsultoraRoute
   '/consultora-manual': typeof AuthenticatedConsultoraManualRoute
   '/representante': typeof AuthenticatedRepresentanteRoute
+  '/candidatura/$token': typeof CandidaturaTokenRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
@@ -1192,6 +1200,7 @@ export interface FileRoutesById {
   '/_authenticated/consultora': typeof AuthenticatedConsultoraRoute
   '/_authenticated/consultora-manual': typeof AuthenticatedConsultoraManualRoute
   '/_authenticated/representante': typeof AuthenticatedRepresentanteRoute
+  '/candidatura/$token': typeof CandidaturaTokenRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
@@ -1328,6 +1337,7 @@ export interface FileRouteTypes {
     | '/consultora'
     | '/consultora-manual'
     | '/representante'
+    | '/candidatura/$token'
     | '/convite/$token'
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
@@ -1461,6 +1471,7 @@ export interface FileRouteTypes {
     | '/consultora'
     | '/consultora-manual'
     | '/representante'
+    | '/candidatura/$token'
     | '/convite/$token'
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
@@ -1595,6 +1606,7 @@ export interface FileRouteTypes {
     | '/_authenticated/consultora'
     | '/_authenticated/consultora-manual'
     | '/_authenticated/representante'
+    | '/candidatura/$token'
     | '/convite/$token'
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
@@ -1727,6 +1739,7 @@ export interface RootRouteChildren {
   SitemapPagesDotxmlRoute: typeof SitemapPagesDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WebinarRegistrationRoute: typeof WebinarRegistrationRoute
+  CandidaturaTokenRoute: typeof CandidaturaTokenRoute
   ConviteTokenRoute: typeof ConviteTokenRoute
   DCodigoRoute: typeof DCodigoRoute
   GuiaSemijoiaFolheadoOuBijuteriaRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
@@ -2037,6 +2050,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/representante'
       preLoaderRoute: typeof AuthenticatedRepresentanteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/candidatura/$token': {
+      id: '/candidatura/$token'
+      path: '/candidatura/$token'
+      fullPath: '/candidatura/$token'
+      preLoaderRoute: typeof CandidaturaTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/convite/$token': {
       id: '/convite/$token'
@@ -2944,6 +2964,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapPagesDotxmlRoute: SitemapPagesDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WebinarRegistrationRoute: WebinarRegistrationRoute,
+  CandidaturaTokenRoute: CandidaturaTokenRoute,
   ConviteTokenRoute: ConviteTokenRoute,
   DCodigoRoute: DCodigoRoute,
   GuiaSemijoiaFolheadoOuBijuteriaRoute: GuiaSemijoiaFolheadoOuBijuteriaRoute,

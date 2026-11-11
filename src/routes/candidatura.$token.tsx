@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ClientOnly } from "@tanstack/react-router";
+import { ClientOnly, createFileRoute } from "@tanstack/react-router";
 import { TesteCandidatura } from "@/components/candidatura-teste/TesteCandidatura";
 
 export const Route = createFileRoute("/candidatura/$token")({

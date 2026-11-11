@@ -129,7 +129,8 @@ export const correiosPreviaEnvio = createServerFn({ method: "POST" })
         };
       } catch (e) { cotacao.erro = (e as Error).message; }
     }
-    return { ...d, ambiente: cfg.ambiente, configurado: cfg.pronto, cotacao };
+    const { valorDeclaradoAceito } = await import("./valor-declarado");
+    return { ...d, valor_declarado_correios_cents: valorDeclaradoAceito(d.valor_declarado_cents), ambiente: cfg.ambiente, configurado: cfg.pronto, cotacao };
   });
 
 /** Gera a pré-postagem (ida PAC ou volta reversa), grava o código e guarda a etiqueta em PDF. */
@@ -148,17 +149,24 @@ export const correiosEnviarMaleta = createServerFn({ method: "POST" })
     const { data: dados, error } = await c.supabase.rpc("correios_maleta_dados", { _cycle: data.cycleId, _direcao: data.direcao });
     if (error) throw new Error(error.message);
     const d = dados as DadosEnvio;
-    const corpo = api.corpoPrePostagem({ direcao: data.direcao, remetente: d.remetente, destinatario: d.destinatario,
-      valorDeclaradoCents: d.valor_declarado_cents, referencia: `Maleta ${data.cycleId.slice(0, 8)} ${data.direcao}` });
+    const vd = await import("./valor-declarado");
+    const montar = (faixa?: import("./valor-declarado").FaixaValorDeclarado) => api.corpoPrePostagem({ direcao: data.direcao, remetente: d.remetente, destinatario: d.destinatario,
+      valorDeclaradoCents: d.valor_declarado_cents, referencia: `Maleta ${data.cycleId.slice(0, 8)} ${data.direcao}`, faixa });
+    let corpo = montar();
     const servico = corpo.codigoServico;
     // 1) registra antes de chamar (regras, débito e "um envio vivo" no banco)
     const envioId = await servidor<string>("correios_envio_abrir", {
       _cycle: data.cycleId, _direcao: data.direcao, _ambiente: cfg.ambiente, _servico: servico,
-      _valor_cents: d.valor_declarado_cents, _payload: corpo, _ator: c.userId, _liberar_debito: data.liberarDebito,
+      _valor_cents: vd.valorDeclaradoAceito(d.valor_declarado_cents), _payload: corpo, _ator: c.userId, _liberar_debito: data.liberarDebito,
     });
     // 2) pré-postagem
     let r: { http: number; dados: unknown };
-    try { r = await api.criarPrePostagem(corpo); }
+    try {
+      r = await api.criarPrePostagem(corpo);
+      // recusa por faixa do valor declarado: tenta uma vez com a faixa que os próprios Correios informaram
+      const faixa = r.http >= 300 ? vd.faixaDoErro(String(((r.dados ?? {}) as Record<string, unknown>)["erro"] ?? "")) : null;
+      if (faixa) { corpo = montar(faixa); r = await api.criarPrePostagem(corpo); }
+    }
     catch (e) {
       await servidor("correios_envio_resultado", { _id: envioId, _ok: false, _resposta: null, _codigo: null, _prepostagem: null, _frete_cents: null, _prazo: null, _erro: (e as Error).message });
       throw new Error((e as Error).message);

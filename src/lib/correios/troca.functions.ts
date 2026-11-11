@@ -58,7 +58,8 @@ export const trocaCorreiosEnviar = createServerFn({ method: "POST" })
       direcao: data.direcao, remetente: d.remetente, destinatario: d.destinatario,
       valorDeclaradoCents: d.valor_declarado_cents, referencia: `Troca ${data.trocaId.slice(0, 8)} ${data.direcao}`,
     });
-    corpo.itensDeclaracaoConteudo = [{ conteudo: "Semijoia (troca/garantia)", quantidade: "1", valor: (Math.max(d.valor_declarado_cents, 0) / 100).toFixed(2) }];
+    const { valorDeclaradoAceito } = await import("./valor-declarado");
+    corpo.itensDeclaracaoConteudo = [{ conteudo: "Semijoia (troca/garantia)", quantidade: "1", valor: (valorDeclaradoAceito(d.valor_declarado_cents) / 100).toFixed(2) }];
     const envioId = await servidor<string>("qualidade_correios_abrir", {
       _troca: data.trocaId, _direcao: data.direcao, _ambiente: cfg.ambiente, _servico: corpo.codigoServico,
       _valor_cents: d.valor_declarado_cents, _payload: corpo, _ator: c.userId,

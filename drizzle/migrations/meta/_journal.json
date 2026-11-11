@@ -2031,6 +2031,13 @@
       "when": 1794440840086,
       "tag": "0289_asaas_extrato_relatorio_por_tipo_0289",
       "breakpoints": true
+    },
+    {
+      "idx": 290,
+      "version": "7",
+      "when": 1794441257319,
+      "tag": "0290_showcase_publish_sem_retentativa",
+      "breakpoints": true
     }
   ]
 }

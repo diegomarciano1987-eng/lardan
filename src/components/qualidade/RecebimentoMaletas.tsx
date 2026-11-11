@@ -221,8 +221,8 @@ function Expedicao({ e, podeReceber, receber, onFeito }: { e: ExpedicaoRetorno; 
 
 function Numero({ rotulo, valor, dica, destaque, alerta }: { rotulo: string; valor: number; dica?: string; destaque?: boolean; alerta?: boolean }) {
   return (
-    <div className={cn("rounded-2xl border bg-surface p-4", destaque ? "border-bronze" : "border-line-soft")} title={dica}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-ledger-muted">{rotulo}</p>
+    <div className={cn("ledger-panel px-4 py-3.5", destaque && "ring-1 ring-bronze/50", alerta && "ring-1 ring-danger/50")} title={dica}>
+      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-ledger-muted">{rotulo}</p>
       <p className={cn("mt-1 text-2xl font-bold tabular-nums", alerta && "text-danger")}>{valor.toLocaleString("pt-BR")}</p>
       {dica && <p className="mt-1 text-xs text-ledger-muted">{dica}</p>}
     </div>

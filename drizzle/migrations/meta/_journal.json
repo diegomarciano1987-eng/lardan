@@ -2010,6 +2010,13 @@
       "when": 1794440281488,
       "tag": "0286_asaas_automatico_etapa_b_0286",
       "breakpoints": true
+    },
+    {
+      "idx": 287,
+      "version": "7",
+      "when": 1794440397244,
+      "tag": "0287_asaas_indices_extrato_0286b",
+      "breakpoints": true
     }
   ]
 }

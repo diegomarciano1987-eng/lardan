@@ -205,12 +205,12 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
         {rotuloAbertura(maleta.abertura_numero, maleta.remessa) && !trocarDe ? (
           <>
             <p className="text-lg font-bold tracking-wide">{rotuloAbertura(maleta.abertura_numero, maleta.remessa)}</p>
-            <p className="text-xs text-muted-foreground">Maleta {maleta.maleta}{maleta.praca ? ` · ${maleta.praca}` : ""} · {maleta.pecas} peças · {brl(maleta.valor_cents)}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
+            <p className="text-xs text-muted-foreground">Maleta {maleta.maleta}{maleta.praca ? ` · ${maleta.praca}` : ""} · {maleta.pecas} peças{maleta.valor_cents ? ` · ${brl(maleta.valor_cents)}` : ""}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
           </>
         ) : (
           <>
             <p className="font-medium">Maleta {maleta.maleta}{maleta.remessa ? ` · remessa ${maleta.remessa}` : ""}{maleta.praca ? ` · ${maleta.praca}` : ""}</p>
-            <p className="text-xs text-muted-foreground">{maleta.pecas} peças · {brl(maleta.valor_cents)}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
+            <p className="text-xs text-muted-foreground">{maleta.pecas} peças{maleta.valor_cents ? ` · ${brl(maleta.valor_cents)}` : ""}{maleta.acerto ? ` · acerto ${dataBr(maleta.acerto)}` : ""}</p>
           </>
         )}
       </div>

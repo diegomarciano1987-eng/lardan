@@ -378,7 +378,7 @@ function Assinaturas({ rep, party, maleta, nome }: { rep: string; party: string;
     queryFn: async () => {
       const { data, error } = await supabase.rpc("assinaturas_da_consultora" as never, { _party: party, _rep: rep } as never);
       if (error) throw error;
-      return data as unknown as { documentos: { tipo: string; status: string; cycle_id: string | null }[] };
+      return data as unknown as { documentos: { tipo: string; status: string; cycle_id: string | null; invalidada_em?: string | null }[] };
     },
     refetchInterval: 15_000,
   });

@@ -21,8 +21,8 @@ type Teste = {
   serasa_confere: "sim" | "nao" | null; versao_teste: string | null;
 };
 const COR: Record<string, string> = {
-  verde: "bg-emerald-600/15 text-emerald-700 dark:text-emerald-300 border-emerald-600/40",
-  amarelo: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/40",
+  verde: "bg-success/15 text-success border-success/40",
+  amarelo: "bg-warning/15 text-warning border-warning/40",
   vermelho: "bg-destructive/15 text-destructive border-destructive/40",
 };
 const FX: Record<string, string> = { alta: "alta", media: "média", baixa: "baixa", baixo: "baixo", medio: "médio", alto: "alto" };

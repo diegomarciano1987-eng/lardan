@@ -47,7 +47,12 @@ export function SaudeAsaas() {
           <button type="button" className="admin-btn" disabled={m.isPending} onClick={() => m.mutate()}>
             {m.isPending ? "Processando…" : "Processar fila"}
           </button>
-          {m.data ? <span className="font-medium">{m.data.processados} processados · {m.data.semCobranca} sem cobrança · {m.data.falhas} com erro</span> : null}
+          {m.data ? (
+            <span className="font-medium">
+              {m.data.processados} processados · {m.data.semCobranca} sem cobrança · {m.data.falhas} com erro
+              {m.data.parcial ? " · o restante continua na próxima rodada" : ""}
+            </span>
+          ) : null}
           {m.error ? <span className="font-medium">{(m.error as Error).message}</span> : null}
         </div>
       ) : null}
@@ -64,6 +69,10 @@ export function SaudeAsaas() {
           valor={quando(d?.ultimoWebhook ?? null)}
         />
         <Item rotulo="Avisos aguardando processamento" valor={d ? `${d.avisosNaFila} na fila (não são falhas)` : "—"} />
+        <Item
+          rotulo="Avisos aguardando decisão"
+          valor={d ? `${d.avisosAguardandoDecisao ?? 0} (cobrança sem título, apagada ou fora de ordem — resolvidos na conferência, não pelo botão)` : "—"}
+        />
         <Item
           rotulo="Última importação de cobranças"
           valor={`${quando(d?.ultimaImportacao ?? null)}${d?.situacaoImportacao ? ` · ${d.situacaoImportacao}` : ""}`}

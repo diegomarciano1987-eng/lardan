@@ -125,7 +125,7 @@ describe("fila de avisos do Asaas depois do espelho", () => {
     const chamados: string[] = [];
     const tabela = (rows: unknown[]) => {
       const q: Record<string, unknown> = {};
-      for (const m of ["select", "eq", "order", "limit", "in"]) q[m] = () => q;
+      for (const m of ["select", "eq", "is", "order", "limit", "in"]) q[m] = () => q;
       (q as { then: unknown }).then = (ok: (v: unknown) => void) => ok({ data: rows, error: null });
       return q;
     };
@@ -140,3 +140,30 @@ describe("fila de avisos do Asaas depois do espelho", () => {
     expect(r).toEqual({ naFila: 3, processados: 1, falhas: 0, semCobranca: 2 });
   });
 });
+
+describe("fila de avisos do Asaas não reprocessa o que aguarda decisão (0285)", () => {
+  test("busca só avisos sem processed_at e para no teto de tempo", async () => {
+    const { drenarFilaAsaas } = await import("@/lib/asaas/fila.server");
+    const filtros: string[] = [];
+    const tabela = (rows: unknown[]) => {
+      const q: Record<string, unknown> = {};
+      for (const m of ["select", "eq", "order", "limit", "in"]) q[m] = () => q;
+      q["is"] = (c: string, v: unknown) => { filtros.push(`${c}=${String(v)}`); return q; };
+      (q as { then: unknown }).then = (ok: (v: unknown) => void) => ok({ data: rows, error: null });
+      return q;
+    };
+    let chamadas = 0;
+    const admin = {
+      from: (t: string) => t === "asaas_events"
+        ? tabela([{ id: "e1", charge_external_id: "pay_a", account_id: "A" }, { id: "e2", charge_external_id: "pay_a", account_id: "A" }])
+        : tabela([{ account_id: "A", external_id: "pay_a" }]),
+      rpc: async () => { chamadas++; await new Promise((r) => setTimeout(r, 30)); return { data: {}, error: null }; },
+    };
+    const r = await drenarFilaAsaas(admin as never, 300, 10);
+    expect(filtros).toContain("processed_at=null");
+    expect(chamadas).toBe(1);
+    expect(r.parcial).toBe(true);
+    expect(r.processados).toBe(1);
+  });
+});
+

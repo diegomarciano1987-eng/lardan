@@ -248,9 +248,11 @@ export const saudeAsaas = createServerFn({ method: "POST" })
     const { contasResolvidas } = await import("./servidor.server");
     const { transporteDaResolucao } = await import("./configuracao.server");
     const sb = context.supabase;
-    const [ev, falhas, imp, ext] = await Promise.all([
+    const [ev, falhas, decisao, imp, ext] = await Promise.all([
       sb.from("asaas_events").select("received_at").order("received_at", { ascending: false }).limit(1).maybeSingle(),
-      sb.from("asaas_events").select("id", { count: "exact", head: true }).eq("status", "na_fila"),
+      // 0285: "na fila" = ainda não processado; o que já foi processado e espera alguém decidir é contado à parte.
+      sb.from("asaas_events").select("id", { count: "exact", head: true }).eq("status", "na_fila").is("processed_at", null),
+      sb.from("asaas_events").select("id", { count: "exact", head: true }).eq("status", "na_fila").not("processed_at", "is", null),
       sb.from("asaas_charge_sync_runs").select("iniciado_em,status,inseridas,atualizadas").order("iniciado_em", { ascending: false }).limit(1).maybeSingle(),
       sb.from("financial_statement_files").select("created_at").ilike("original_name", "Extrato Asaas%").order("created_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
@@ -259,6 +261,7 @@ export const saudeAsaas = createServerFn({ method: "POST" })
       ultimoWebhook: (ev.data?.received_at as string | undefined) ?? null,
       falhasWebhook: 0,
       avisosNaFila: falhas.count ?? 0,
+      avisosAguardandoDecisao: decisao.count ?? 0,
       ultimaImportacao: (imp.data?.iniciado_em as string | undefined) ?? null,
       situacaoImportacao: imp.data ? (imp.data.status === "concluida" ? "concluída" : String(imp.data.status)) : null,
       ultimoExtrato: (ext.data?.created_at as string | undefined) ?? null,

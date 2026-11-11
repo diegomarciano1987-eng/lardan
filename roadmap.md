@@ -199,5 +199,7 @@
 
 ## Pacote 0283 (Etapa 1)
 - [x] Segunda maleta com motivo (equipe e representante), desfazer devolução (Master), Correções do administrador, Qualidade em 3 abas
-- [ ] Etapa 2: candidaturas + DISC (aguarda aprovação do Diego)
+- [x] Etapa 2 (0284): teste de candidatura completo (site enxuto, link, análise, representante, parâmetros)
+- [ ] Textos DEVOLUTIVA/ENTREVISTA/ACOMP do protótipo (aguarda Daniel)
+- [ ] MAL-00359 x MAL-00441: qual maleta está com Leila Maria (aguarda Diego)
 - [ ] Publicar 0283 (aguarda aprovação)

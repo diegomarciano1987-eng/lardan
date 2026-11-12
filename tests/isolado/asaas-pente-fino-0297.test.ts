@@ -122,7 +122,7 @@ describe("0297 — parcela fantasma só cancela por pessoa, com motivo e desfaze
 
   test("cliente com processo judicial fica para decisão manual, salvo se a mesma fatura já foi renegociada em outra parcela", async () => {
     const p = await pessoa();
-    await adm.unsafe(`insert into public.cob_judicial_processos (origem_chave, party_id, nome, numero_processo) values ($2,$1,'ISO','0000001-00.2026.8.16.0001')`, [p, `iso0297:${marca()}`]);
+    await adm.unsafe(`insert into public.cob_judicial_processos (origem_chave, lote, party_id, nome, numero_processo) values ($2,gen_random_uuid(),$1,'ISO','0000001-00.2026.8.16.0001')`, [p, `iso0297:${marca()}`]);
     const r = await receber(p, 40883);
     const c = await cobranca(p, r, 40883, `ISO${marca()}`);
     await espelhar(c.ext, { deleted: true });

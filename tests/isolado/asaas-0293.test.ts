@@ -93,6 +93,7 @@ async function maletaAceita(c: Conta, rem: string, itens: [string, number][]) {
 }
 
 let ciclo = "", vA = "", vB = "";
+let faixasOriginais: unknown = [];
 beforeAll(async () => {
   master = await criarConta({ nome: "master-0293", papeis: ["master"], comParty: true });
   cons = await criarConta({ nome: `cons-0293-${marca()}`, papeis: ["consultora"], comParty: true });
@@ -128,6 +129,7 @@ beforeAll(async () => {
   vA = await criarVariante(`p293-a-${marca()}`, 10000);
   vB = await criarVariante(`p293-b-${marca()}`, 5000);
   for (const v of [vA, vB]) await porEstoque(v, deposito, 20);
+  faixasOriginais = (await um<{ j: unknown }>(`select coalesce(json_agg(f), '[]'::json) j from public.consultora_comissao_faixas f`)).j;
   await adm.unsafe(`delete from public.consultora_comissao_faixas`);
   await adm.unsafe(`insert into public.consultora_comissao_faixas (min_vendido_cents, percentual, titulo) values (0,20,'20%'),(20000,25,'25%'),(50000,30,'30%')`);
   const remessa = (await rpc<{ id: string }>(master, "remessa_criar", { _praca: praca, _deposito: deposito,
@@ -136,6 +138,9 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await adm.unsafe(`update public.asaas_auto_config set ligado = false, extrato_ligado = false`);
+  // devolve as faixas de comissão como estavam: outras baterias dependem delas
+  await adm.unsafe(`delete from public.consultora_comissao_faixas`);
+  await adm.unsafe(`insert into public.consultora_comissao_faixas select * from json_populate_recordset(null::public.consultora_comissao_faixas, $1::text::json)`, [JSON.stringify(faixasOriginais)]);
 });
 
 describe("0293 — Pix com maleta aberta e acerto", () => {

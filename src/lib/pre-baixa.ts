@@ -19,6 +19,8 @@ export interface Conferencia {
   pecas_faltando: number; pecas_voltaram_vendidas: number; vendido_declarado_cents: number; vendido_final_cents: number;
   comissao_pct: number; comissao_cents: number; valor_final_cents: number; valor_pre_baixa_cents: number; diferenca_cents: number;
   bateu: boolean; pre_baixa_paga: boolean; aplicado: boolean; status?: string;
+  /** 0293: Pix da consultora abatidos (total) e abatidos agora na conferência. */
+  adiantado_consultora_cents?: number; adiantado_depois_cents?: number;
   itens: { variant_id: string; enviada: number; vendida: number; lida: number; faltando: number; voltou_vendida: number; preco_cents: number }[];
 }
 

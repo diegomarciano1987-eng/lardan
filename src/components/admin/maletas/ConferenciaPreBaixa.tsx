@@ -107,6 +107,7 @@ export function ConferenciaPreBaixa({ cycleId, podeConferir }: { cycleId: string
                     {prev.pecas_voltaram_vendidas ? `${prev.pecas_voltaram_vendidas} peça(s) declaradas vendidas voltaram: estorno. ` : ""}
                     Vendido final {brl(prev.vendido_final_cents)} · comissão {Number(prev.comissao_pct)}% · diferença{" "}
                     <strong>{prev.diferenca_cents > 0 ? `${brl(prev.diferenca_cents)} a cobrar` : `${brl(-prev.diferenca_cents)} a devolver`}</strong>.
+                    {Number(prev.adiantado_depois_cents ?? 0) > 0 ? ` Já descontado ${brl(Number(prev.adiantado_depois_cents))} de Pix que ela pagou pelo app.` : ""}
                   </p>
                 )}
               </div>

@@ -163,7 +163,7 @@ export class TransporteHttpAsaas implements TransporteAsaas {
   }
 
   /** Monta a requisição sem enviá-la (usado também pelos testes). */
-  montar(metodo: "GET" | "POST" | "DELETE", caminho: string, o: { query?: Record<string, string | number | null | undefined>; corpo?: Json } = {}) {
+  montar(metodo: "GET" | "POST" | "PUT" | "DELETE", caminho: string, o: { query?: Record<string, string | number | null | undefined>; corpo?: Json } = {}) {
     const url = new URL(BASE[this.ambiente] + caminho);
     for (const [k, v] of Object.entries(o.query ?? {})) if (v !== null && v !== undefined && v !== "") url.searchParams.set(k, String(v));
     const headers: Record<string, string> = {
@@ -179,7 +179,7 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     return { url: url.toString(), init };
   }
 
-  private async enviar<T>(metodo: "GET" | "POST" | "DELETE", caminho: string, o: Parameters<TransporteHttpAsaas["montar"]>[2] = {}, aceitar404 = false): Promise<T | null> {
+  private async enviar<T>(metodo: "GET" | "POST" | "PUT" | "DELETE", caminho: string, o: Parameters<TransporteHttpAsaas["montar"]>[2] = {}, aceitar404 = false): Promise<T | null> {
     if (!this.chave) throw new FalhaAntesDoEnvio("Credencial do servidor ausente.");
     const { url, init } = this.montar(metodo, caminho, o);
     let r: Response;
@@ -357,9 +357,10 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     await this.enviar<Json>("DELETE", `/payments/${encodeURIComponent(id)}`, {}, true);
   }
 
-  /** 0303: atualiza vencimento/valor de cobrança aberta (POST /payments/{id}; o Asaas exige forma, valor e vencimento). */
+  /** 0303: atualiza vencimento/valor de cobrança aberta (PUT /payments/{id}, doc. oficial; forma, valor e vencimento obrigatórios).
+   *  Juros/multa não são enviados para manter os da conta. */
   async atualizarCobranca(id: string, d: { valueCents: number; dueDate: string; billingType: FormaPagamento }) {
-    const c = await this.enviar<Json>("POST", `/payments/${encodeURIComponent(id)}`, {
+    const c = await this.enviar<Json>("PUT", `/payments/${encodeURIComponent(id)}`, {
       corpo: { billingType: d.billingType, value: paraReais(d.valueCents), dueDate: d.dueDate },
     });
     try {

@@ -1116,6 +1116,51 @@ export type Database = {
           },
         ]
       }
+      asaas_cobranca_cancelamentos: {
+        Row: {
+          actor_id: string
+          charge_id: string
+          created_at: string
+          erro: string | null
+          external_id: string
+          id: string
+          installment_id: string | null
+          motivo: string
+          resultado: string
+          status_remoto: string | null
+          valor_cents: number | null
+          vencimento: string | null
+        }
+        Insert: {
+          actor_id: string
+          charge_id: string
+          created_at?: string
+          erro?: string | null
+          external_id: string
+          id?: string
+          installment_id?: string | null
+          motivo: string
+          resultado: string
+          status_remoto?: string | null
+          valor_cents?: number | null
+          vencimento?: string | null
+        }
+        Update: {
+          actor_id?: string
+          charge_id?: string
+          created_at?: string
+          erro?: string | null
+          external_id?: string
+          id?: string
+          installment_id?: string | null
+          motivo?: string
+          resultado?: string
+          status_remoto?: string | null
+          valor_cents?: number | null
+          vencimento?: string | null
+        }
+        Relationships: []
+      }
       asaas_customer_leases: {
         Row: {
           account_id: string
@@ -20336,6 +20381,21 @@ export type Database = {
         }
       }
       asaas_clientes_cadastrar: { Args: { _actor: string }; Returns: Json }
+      asaas_cobranca_cancelar_preparar: {
+        Args: { _actor: string; _charge: string }
+        Returns: Json
+      }
+      asaas_cobranca_cancelar_registrar: {
+        Args: {
+          _actor: string
+          _charge: string
+          _erro: string
+          _motivo: string
+          _resultado: string
+          _status_remoto: string
+        }
+        Returns: Json
+      }
       asaas_cobranca_preparar: { Args: { _payload: Json }; Returns: Json }
       asaas_cobranca_preparar_nucleo: {
         Args: { _actor: string; _payload: Json; _saldo: boolean }
@@ -21597,6 +21657,10 @@ export type Database = {
       }
       crm_followups_list: {
         Args: { _escopo?: string; _somente_meus?: boolean }
+        Returns: Json
+      }
+      crm_lead_maleta: {
+        Args: { _l: Database["public"]["Tables"]["leads"]["Row"] }
         Returns: Json
       }
       crm_list: {

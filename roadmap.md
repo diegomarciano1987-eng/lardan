@@ -15,6 +15,16 @@
 - [x] 3 transferências de R$ 300 (06/01, 07/01, 09/01) religadas às transferências já lançadas (Sicoob, Sicoob, Santander).
 - [x] Testes: 12 novos + 2 antigos atualizados; bancada completa 825/825 (antes do 0294) e baterias do Asaas/acerto 39/39 depois.
 
+## Pacote 0297 — pente fino Asaas × Lardan (Diego, 12/11/2026)
+- [x] Comparação completa (por pessoa, parcelas com cobrança excluída, cobranças do Asaas sem parcela) entregue em 3 planilhas.
+- [x] Alerta na hora: cobrança excluída ou com valor/vencimento alterado no Asaas abre alerta (41 parcelas fantasmas já alertadas, R$ 15.546,79).
+- [x] Busca da manhã confere uma a uma as cobranças abertas que sumiram da lista do Asaas (rodízio de 120/dia).
+- [x] Cancelar parcela fantasma só por pessoa, com motivo e Desfazer (nada cancelado sozinho).
+- [x] Mesa: lançamento desfeito não trava mais a mesma linha (taxa da Joyce, Marcia, Lucimara).
+- [ ] Aguardando aprovação do Diego: quais das 41 parcelas fantasmas cancelar (Joyce 2026-023773 inclusa no pedido).
+- [ ] Aguardando decisão: 208 cobranças abertas no Asaas sem parcela no Lardan (R$ 82.717,01) — criar a conta a receber no Lardan?
+- [ ] Próxima etapa: alterar valor/vencimento e parcelar pelo Lardan (hoje o Lardan só cria e cancela no Asaas).
+
 ## Pacote 0295/0296 — fechar a Mesa do Asaas (Diego, 12/11/2026)
 - [x] 14 Pix de novembro (adiantamento de maleta refeito) + Thalia (com a taxa de R$ 1,99) ligados às baixas que já existiam; a ligação automática agora usa chave nova depois de desfazer.
 - [x] Sayla: recebimento +R$ 76,18 e baixa da antecipação −R$ 76,18 conferidos como par neutro; regra automática nova para os próximos cartões antecipados.

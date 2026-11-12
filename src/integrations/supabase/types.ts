@@ -1258,6 +1258,76 @@ export type Database = {
           },
         ]
       }
+      asaas_divergencia_alertas: {
+        Row: {
+          antes: Json
+          charge_id: string
+          criado_em: string
+          depois: Json
+          id: string
+          installment_id: string | null
+          party_id: string | null
+          resolucao: string | null
+          resolvido_em: string | null
+          resolvido_por: string | null
+          saldo_cents: number | null
+          tipo: string
+          title_id: string | null
+        }
+        Insert: {
+          antes?: Json
+          charge_id: string
+          criado_em?: string
+          depois?: Json
+          id?: string
+          installment_id?: string | null
+          party_id?: string | null
+          resolucao?: string | null
+          resolvido_em?: string | null
+          resolvido_por?: string | null
+          saldo_cents?: number | null
+          tipo: string
+          title_id?: string | null
+        }
+        Update: {
+          antes?: Json
+          charge_id?: string
+          criado_em?: string
+          depois?: Json
+          id?: string
+          installment_id?: string | null
+          party_id?: string | null
+          resolucao?: string | null
+          resolvido_em?: string | null
+          resolvido_por?: string | null
+          saldo_cents?: number | null
+          tipo?: string
+          title_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_divergencia_alertas_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_divergencia_alertas_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_divergencia_alertas_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_event_types: {
         Row: {
           ajuste_ou_tarifa: string
@@ -1364,6 +1434,69 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "asaas_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asaas_fantasmas: {
+        Row: {
+          actor_id: string | null
+          charge_ids: string[]
+          criado_em: string
+          desfeito_em: string | null
+          desfeito_motivo: string | null
+          desfeito_por: string | null
+          id: string
+          installment_id: string
+          motivo: string
+          party_id: string | null
+          saldo_cents: number
+          title_id: string
+          valor_cents: number
+        }
+        Insert: {
+          actor_id?: string | null
+          charge_ids: string[]
+          criado_em?: string
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          id?: string
+          installment_id: string
+          motivo: string
+          party_id?: string | null
+          saldo_cents: number
+          title_id: string
+          valor_cents: number
+        }
+        Update: {
+          actor_id?: string | null
+          charge_ids?: string[]
+          criado_em?: string
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          id?: string
+          installment_id?: string
+          motivo?: string
+          party_id?: string | null
+          saldo_cents?: number
+          title_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_fantasmas_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_fantasmas_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
             referencedColumns: ["id"]
           },
         ]
@@ -19920,6 +20053,10 @@ export type Database = {
         Args: { _party: string }
         Returns: number
       }
+      asaas_alerta_resolver: {
+        Args: { _id: string; _resolucao: string }
+        Returns: Json
+      }
       asaas_ator_pode: {
         Args: { _actor: string; _cap: string }
         Returns: boolean
@@ -20263,6 +20400,14 @@ export type Database = {
         Args: { _line: string; _payload?: Json }
         Returns: Json
       }
+      asaas_fantasma_cancelar: {
+        Args: { _inst: string; _motivo: string }
+        Returns: Json
+      }
+      asaas_fantasma_desfazer: {
+        Args: { _id: string; _motivo: string }
+        Returns: Json
+      }
       asaas_fatura_url_valida: {
         Args: { _account: string; _external_id: string; _url: string }
         Returns: boolean
@@ -20342,6 +20487,7 @@ export type Database = {
         }
         Returns: Json
       }
+      asaas_pente_fino: { Args: { _limite?: number }; Returns: Json }
       asaas_receber_contas: { Args: never; Returns: Json }
       asaas_receber_fila: { Args: { _filtros?: Json }; Returns: Json }
       asaas_receber_ocorrencias: { Args: { _filtros?: Json }; Returns: Json }

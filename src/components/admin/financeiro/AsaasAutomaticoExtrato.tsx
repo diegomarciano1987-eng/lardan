@@ -35,7 +35,7 @@ function Linha({ it, onDesfeito }: { it: ItemExtratoAuto; onDesfeito: () => void
   });
   const mes = typeof it.detalhe?.["mes"] === "string" ? String(it.detalhe["mes"]) : null;
   const titulo =
-    it.tipo === "identificacao"
+    it.tipo === "identificacao" || (it.tipo === "antecipacao_par" && it.pessoa)
       ? (it.pessoa ?? "Pessoa da cobrança")
       : it.tipo === "notificacoes" && mes
         ? `Asaas · ${mes.slice(5, 7)}/${mes.slice(0, 4)}`

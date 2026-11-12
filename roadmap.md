@@ -1,11 +1,15 @@
 # Roadmap
 
 ## Pacote 0301 — pedido do Diego 12/11/2026 17:36
-- [ ] 1. CRM de candidaturas: tirar testes (Diego Marciano, Davi Fiamengo, Cinthia Fiamengo, TESTE) e candidatas que já têm maleta (ex.: Noeli Santana) → aba "Concluídos".
-- [ ] 2. Cobrar pelo Asaas: botão "Cancelar cobrança" (vencimento errado).
-- [ ] 3. Cockpit da consultora: atalho exato para título/documento/pagamento em todas as abas.
-- [ ] 4. Nota fiscal automática: LIGAR (Diego confirmou). Só maletas próximas; 34 na rua aguardam resposta. PDV fica fora.
-- [ ] 5. Limpeza geral de vendas com Diego Marciano, Daniel Maciel e Larissa Persinato como CLIENTES (nunca o papel de representante do Daniel).
+- [x] 1. CRM de candidaturas: tirar testes (Diego Marciano, Davi Fiamengo, Cinthia Fiamengo, TESTE) e candidatas que já têm maleta (ex.: Noeli Santana) → aba "Concluídos".
+- [x] 2. Cobrar pelo Asaas: botão "Cancelar cobrança" (vencimento errado).
+- [x] 3. Cockpit da consultora: atalho exato para título/documento/pagamento em todas as abas.
+- [x] 4. Nota fiscal automática ligada (12/11, em nome do Diego). PDV fora.
+- [ ] 4b. Aguardando Diego: emitir ou não a nota de remessa das maletas que já estão na rua sem nota.
+- [x] 5. Limpeza geral de vendas (8 pedidos do Daniel + conta do PED-000059)
+- [ ] 5b. Aguardando Diego: 3 pedidos da Larissa (PED-000078/092/093, acerto dela já fechado) e pedidos de teste PED-000057/063 (cliente guilherme) ainda com cobrança no Asaas.
+- [x] 6. 0302: reemissão pelo saldo não trava mais quando a cobrança foi excluída direto no Asaas.
+- [ ] 6b. Próximo: vencimento alterado no Lardan não muda a cobrança no Asaas (ex.: Thais 2026-027046, Lardan 20/11, Asaas 12/11). com Diego Marciano, Daniel Maciel e Larissa Persinato como CLIENTES (nunca o papel de representante do Daniel).
 
 ## Pacote 0293/0294 — ajustes do Asaas pedidos pelo Diego (12/11/2026)
 - [x] 1/8. Pix com maleta aberta entra em 3.1.1 ligado à consultora (adiantamento); 21 exceções (R$ 5.075,76, 20 consultoras) já passaram pela regra nova. Joyce (R$ 166,75, valor que não casa) segue na exceção.

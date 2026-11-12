@@ -12,6 +12,7 @@ import { PainelRepresentante } from "@/components/representante/PainelRepresenta
 import { brl, dataBR, repCobrancasLista, repConsultoras, repResumo, type FaixaCobranca } from "@/lib/representante";
 import { CobrarParcela, ContatoCobranca } from "@/components/representante/AcoesRepresentante";
 import { CaptacaoInteligente } from "@/components/representante/CaptacaoInteligente";
+import { AberturaHost } from "@/components/representante/AberturaNaRua";
 import { AcertosRepresentante, InformacoesRemessaRep } from "@/components/representante/AcertosRepresentante";
 import { AgendaVisitas, MaletasCarteira } from "@/components/representante/CampoRepresentante";
 import { EnviarConvites } from "@/components/representante/EnviarConvites";

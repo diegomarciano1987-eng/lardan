@@ -11,8 +11,8 @@
 - [x] 7b. Mesa: aba "Transferência interna".
 - [x] 7c. Mesa: "Baixas já realizadas" acha a baixa da própria cobrança e busca fora dos 60 dias (Eliane 871021163 aparece).
 - [x] 9. TED judicial: 7.1.7 + Administrativo (automático, palpite da Mesa e os 3 TEDs do Asaas já lançados).
-- [ ] Aguardando Diego: mudar também para Administrativo os 7.1.7 antigos do banco/planilha (25 do Santander, 145 da planilha, 9 manuais)?
-- [ ] Aguardando Diego: as 3 transferências de R$ 300 marcadas "Ignorar" podem ser religadas pela aba nova (opcional).
+- [x] 7.1.7 antigos para Administrativo: 179 títulos ativos (R$ 49.297,93); agora 183 em Administrativo; 10 cancelados intocados.
+- [x] 3 transferências de R$ 300 (06/01, 07/01, 09/01) religadas às transferências já lançadas (Sicoob, Sicoob, Santander).
 - [x] Testes: 12 novos + 2 antigos atualizados; bancada completa 825/825 (antes do 0294) e baterias do Asaas/acerto 39/39 depois.
 
 ## Pacote 0275 — resistência para o pico (08/11/2026)

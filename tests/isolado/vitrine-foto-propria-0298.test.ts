@@ -21,6 +21,7 @@ async function ok<T>(conta: Conta, fn: string, args: Record<string, unknown>) {
 const midias = async () => ((await adm.unsafe(`select count(*)::int n from public.product_media`)) as { n: number }[])[0]!.n;
 
 beforeAll(async () => {
+  await adm.unsafe(`insert into storage.buckets (id, name, public) values ('vitrine-originais','vitrine-originais',false) on conflict (id) do nothing`);
   master = await criarConta({ nome: `f98-master-${base}`, papeis: ["master"], comParty: true });
   rep = await criarConta({ nome: `f98-rep-${base}`, papeis: ["representante"], comParty: true });
   ana = await criarConta({ nome: `f98-ana-${base}`, papeis: ["consultora"], comParty: true });

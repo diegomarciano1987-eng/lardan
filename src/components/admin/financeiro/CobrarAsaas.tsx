@@ -207,7 +207,7 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
             </button>
             <button
               type="button"
-              className="rounded-[10px] bg-danger px-4 py-2 text-sm font-semibold text-danger-foreground disabled:opacity-50"
+              className="rounded-[10px] border border-danger bg-danger/10 px-4 py-2 text-sm font-semibold text-danger hover:bg-danger/20 disabled:opacity-50"
               disabled={motivo.trim().length < 5 || cancelar.isPending}
               onClick={() => cancelar.mutate()}
             >

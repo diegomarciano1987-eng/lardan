@@ -15,6 +15,15 @@
 - [x] 3 transferências de R$ 300 (06/01, 07/01, 09/01) religadas às transferências já lançadas (Sicoob, Sicoob, Santander).
 - [x] Testes: 12 novos + 2 antigos atualizados; bancada completa 825/825 (antes do 0294) e baterias do Asaas/acerto 39/39 depois.
 
+## Pacote 0295/0296 — fechar a Mesa do Asaas (Diego, 12/11/2026)
+- [x] 14 Pix de novembro (adiantamento de maleta refeito) + Thalia (com a taxa de R$ 1,99) ligados às baixas que já existiam; a ligação automática agora usa chave nova depois de desfazer.
+- [x] Sayla: recebimento +R$ 76,18 e baixa da antecipação −R$ 76,18 conferidos como par neutro; regra automática nova para os próximos cartões antecipados.
+- [x] Sugestão da Mesa para recebimento do Asaas usa a pessoa da cobrança (não mais a Fatima Marcelino).
+- [x] Listas enviadas: 179 títulos 7.1.7 para Administrativo e as 14 baixas refeitas.
+- [ ] Aguardando Diego/Daniel: Barbara Caroline (Pix Santander 27/10 de Paulo Sergio de Freitas quitou a parcela 1), Marcia (Pix Santander 28/10 de outro CPF quitou a parcela 1) e Lucimara (Pix de 05/10 da fatura da parcela 1 foi ligado à parcela 2).
+- [ ] Aguardando Diego: Joyce (adiantamento ou devolução).
+- [ ] Paulo Cesar Baggio (pedido, Pix global de 12/11): entra sozinho depois da busca de cobranças das 6h.
+
 ## Pacote 0275 — resistência para o pico (08/11/2026)
 - [x] Nota fiscal (produção ligada): falha de rede/tempo/5xx com a Focus confere pela mesma referência antes de liberar outra nota; fila confere sozinha as notas sem resposta; fila fiscal reservada por 5 min.
 - [x] Correios: um pedido de token só no pico (sem estourar o limite de 3/s); 401 renova o token e tenta uma vez.

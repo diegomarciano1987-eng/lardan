@@ -17,7 +17,7 @@ const PERIODOS = [
   { id: "ontem", rotulo: "Ontem", dias: 1 },
   { id: "7", rotulo: "Últimos 7 dias", dias: 7 },
 ] as const;
-const TIPOS: TipoExtratoAuto[] = ["identificacao", "tarifa", "notificacoes", "transferencia"];
+const TIPOS: TipoExtratoAuto[] = ["identificacao", "fatura_baixa", "antecipacao_par", "tarifa", "notificacoes", "negativacao", "transferencia"];
 const quando = (d: string) => new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(d));
 const MOSTRAR = 15;
 
@@ -35,7 +35,7 @@ function Linha({ it, onDesfeito }: { it: ItemExtratoAuto; onDesfeito: () => void
   });
   const mes = typeof it.detalhe?.["mes"] === "string" ? String(it.detalhe["mes"]) : null;
   const titulo =
-    it.tipo === "identificacao"
+    it.tipo === "identificacao" || (it.tipo === "antecipacao_par" && it.pessoa)
       ? (it.pessoa ?? "Pessoa da cobrança")
       : it.tipo === "notificacoes" && mes
         ? `Asaas · ${mes.slice(5, 7)}/${mes.slice(0, 4)}`

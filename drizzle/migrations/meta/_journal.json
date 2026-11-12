@@ -2066,6 +2066,20 @@
       "when": 1794492095602,
       "tag": "0294_asaas_refazer_manual_0294",
       "breakpoints": true
+    },
+    {
+      "idx": 295,
+      "version": "7",
+      "when": 1794497488977,
+      "tag": "0295_asaas_fechar_mesa_0295",
+      "breakpoints": true
+    },
+    {
+      "idx": 296,
+      "version": "7",
+      "when": 1794497549428,
+      "tag": "0296_asaas_par_antecipacao_alias_0296",
+      "breakpoints": true
     }
   ]
 }

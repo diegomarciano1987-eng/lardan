@@ -1,7 +1,8 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BriefcaseBusiness, Plus, ScanLine, Search, X } from "lucide-react";
+import { BriefcaseBusiness, Plus, ScanLine, Search, ShieldCheck, X } from "lucide-react";
+import { useAdminRoles } from "@/components/admin/AdminShell";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, PageHeader, Panel, StatusBadge, Skeleton } from "@/components/admin/ui";
@@ -195,6 +196,7 @@ function RemessasPage() {
   const escopo = useColabEscopo();
   const colab = escopo.data?.colaboradora === true;
   const podeMontar = caps.includes("kit.manage");
+  const master = useAdminRoles().includes("master" as never);
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [situacao, setSituacao] = React.useState("todas");
@@ -254,6 +256,11 @@ function RemessasPage() {
         actions={
           <div className="flex flex-wrap gap-2">
             {escopo.isSuccess && !colab && <ConfigurarImpressora />}
+            {master && (
+              <Link to="/admin/cadastros/correcoes" className="admin-btn" title="Master: cancelar remessa vazia, excluir venda de teste, vincular histórico.">
+                <ShieldCheck aria-hidden className="size-4" /> Correções do administrador
+              </Link>
+            )}
             {caps.includes("stock.operate") && (
               <Link to="/admin/maletas/entrada" className="admin-btn">
                 <ScanLine aria-hidden className="size-4" /> Entrada de maleta

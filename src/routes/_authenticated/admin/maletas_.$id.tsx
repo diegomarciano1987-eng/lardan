@@ -8,9 +8,10 @@ import { AcoesMaletaRua } from "@/components/admin/maletas/AcoesMaletaRua";
 import { CorreiosMaleta } from "@/components/admin/maletas/CorreiosMaleta";
 import { RemessaDevolucaoMaleta } from "@/components/admin/maletas/RemessaDevolucaoMaleta";
 import { ConferenciaPreBaixa } from "@/components/admin/maletas/ConferenciaPreBaixa";
-import { CheckCircle2, ClipboardCheck, FileText, Printer, ScanBarcode, Send, Truck } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Printer, ScanBarcode, Send, Truck } from "lucide-react";
 import { AjustesMaleta } from "@/components/admin/maletas/AjustesMaleta";
 import { STATUS_TRANSFERIR } from "@/components/admin/maletas/TransferirMaleta";
+import { AvisoNotaTrocaMaleta, LinkNotaNaRemessa } from "@/components/admin/maletas/TrocasPendentes";
 import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
 import { ConferenciaMaleta } from "@/components/admin/maletas/ConferenciaMaleta";
 import { SugestaoMontagem } from "@/components/admin/historico/SugestaoMontagem";
@@ -167,6 +168,8 @@ function MaletaFicha() {
           </div>
         }
       />
+
+      {podeMontar && <AvisoNotaTrocaMaleta cycleId={id} />}
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="min-w-0 space-y-6">
@@ -424,15 +427,7 @@ function MaletaFicha() {
                       </div>
                     </div>
                   )}
-                  <button
-                    type="button"
-                    className="admin-btn w-full"
-                    disabled
-                    title="A emissão da nota fiscal será liberada em breve."
-                  >
-                    <FileText aria-hidden className="size-4" /> Gerar nota fiscal
-                    <span className="text-[0.65rem] uppercase tracking-wider text-ledger-muted">em breve</span>
-                  </button>
+                  <LinkNotaNaRemessa cycleId={id} />
                 </div>
               </div>
             </Panel>

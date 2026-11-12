@@ -6,12 +6,15 @@
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
+import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Panel } from "@/components/admin/ui";
 
-interface Pendencia {
+export interface Pendencia {
   id: string;
   cycle_id: string;
+  remessa_id: string | null;
   maleta: string | null;
   consultora_anterior_nome: string | null;
   consultora_nova_nome: string | null;
@@ -21,14 +24,17 @@ interface Pendencia {
   motivo: string | null;
 }
 
-export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string; podeResolver: boolean }) {
-  const qc = useQueryClient();
-  const q = useQuery({
+const CAMPOS = "id, cycle_id, remessa_id, maleta, consultora_anterior_nome, consultora_nova_nome, nota_numero, criado_em, origem, motivo";
+export const ANCORA_NOTAS_TROCA = "notas-a-resolver";
+
+/** Pendências fiscais de troca abertas na remessa (mesma consulta do painel; usada também nas linhas das maletas). */
+export function useTrocasPendentes(remessaId: string) {
+  return useQuery({
     queryKey: ["remessas", "trocas-pendentes", remessaId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("maleta_troca_pendencias" as never)
-        .select("id, cycle_id, maleta, consultora_anterior_nome, consultora_nova_nome, nota_numero, criado_em, origem, motivo")
+        .select(CAMPOS)
         .eq("remessa_id", remessaId)
         .eq("status", "aberta")
         .order("criado_em");
@@ -36,13 +42,72 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
       return (data ?? []) as unknown as Pendencia[];
     },
   });
+}
+
+const novaDe = (p: Pendencia) => (p.origem === "devolucao" ? "a empresa (devolvida)" : p.consultora_nova_nome ?? "—");
+
+/** Selo ao lado do botão DANFE: a nota mostrada ainda é da consultora anterior. */
+export function SeloNotaTroca({ pendencia }: { pendencia: Pendencia }) {
+  return (
+    <a href={`#${ANCORA_NOTAS_TROCA}`}
+      className="inline-flex h-9 items-center gap-1.5 rounded-full border border-warning/50 bg-warning/10 px-3 text-xs font-semibold text-ledger-text hover:bg-warning/20"
+      title={`A nota nº ${pendencia.nota_numero ?? "—"} foi emitida para ${pendencia.consultora_anterior_nome ?? "a consultora anterior"} e não muda de nome. Veja os passos no quadro "Maletas transferidas".`}>
+      <AlertTriangle aria-hidden className="size-3.5 text-warning" />
+      Nota em nome de {pendencia.consultora_anterior_nome ?? "outra consultora"} · como resolver
+    </a>
+  );
+}
+
+/** Aviso na página da maleta quando ela mudou de dona depois da nota. */
+export function AvisoNotaTrocaMaleta({ cycleId }: { cycleId: string }) {
+  const q = useQuery({
+    queryKey: ["remessas", "trocas-pendentes", "maleta", cycleId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("maleta_troca_pendencias" as never)
+        .select(CAMPOS)
+        .eq("cycle_id", cycleId)
+        .eq("status", "aberta")
+        .order("criado_em");
+      if (error) throw error;
+      return (data ?? []) as unknown as Pendencia[];
+    },
+  });
+  const lista = q.data ?? [];
+  if (lista.length === 0) return null;
+  return (
+    <div role="status" className="space-y-3 rounded-2xl border border-warning/50 bg-warning/5 p-5 text-sm">
+      {lista.map((p) => (
+        <div key={p.id} className="space-y-2">
+          <p className="flex items-center gap-2 font-semibold text-ledger-text">
+            <AlertTriangle aria-hidden className="size-4 text-warning" />
+            Maleta passou de {p.consultora_anterior_nome ?? "—"} para {novaDe(p)}, mas a nota nº {p.nota_numero ?? "sem número"} continua em nome de {p.consultora_anterior_nome ?? "—"}.
+          </p>
+          <p className="max-w-3xl text-ledger-muted">
+            Nota autorizada não muda de nome. No emissor: faça a nota de devolução de {p.consultora_anterior_nome ?? "quem estava com a maleta"}
+            {p.origem === "devolucao" ? "" : ` e a nota nova de remessa para ${p.consultora_nova_nome ?? "quem ficou com a maleta"}`}; depois marque como resolvida na página da remessa.
+          </p>
+          {p.remessa_id && (
+            <Link to="/admin/maletas/remessa/$id" params={{ id: p.remessa_id }} hash={ANCORA_NOTAS_TROCA} className="admin-btn h-9 px-3 text-xs">
+              Ir para a remessa e resolver
+            </Link>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string; podeResolver: boolean }) {
+  const qc = useQueryClient();
+  const q = useTrocasPendentes(remessaId);
   const [obs, setObs] = React.useState<Record<string, string>>({});
   const resolver = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.rpc("maleta_troca_pendencia_resolver" as never, { _id: id, _obs: obs[id] || null } as never);
       if (error) throw new Error(error.message);
     },
-    onSuccess: () => { toast.success("Pendência marcada como resolvida."); void qc.invalidateQueries({ queryKey: ["remessas", "trocas-pendentes", remessaId] }); },
+    onSuccess: () => { toast.success("Pendência marcada como resolvida."); void qc.invalidateQueries({ queryKey: ["remessas", "trocas-pendentes"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -77,16 +142,24 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
   const lista = q.data ?? [];
   if (lista.length === 0) return null;
   return (
+    <div id={ANCORA_NOTAS_TROCA} className="scroll-mt-24">
     <Panel title={`Maletas transferidas — nota fiscal a resolver (${lista.length})`}>
-      <p className="mb-4 max-w-3xl text-sm text-ledger-muted">
+      <p className="mb-3 max-w-3xl text-sm text-ledger-muted">
         Estas maletas mudaram de consultora depois que a nota de remessa já tinha saído em nome de outra.
-        A troca já valeu na rua. Faça a nota de devolução da consultora original e a nota nova de quem ficou com a maleta; depois marque como resolvida.
+        A troca já valeu na rua e no app. Por isso o botão DANFE da maleta ainda abre a nota antiga: nota autorizada não muda de nome.
       </p>
+      <ol className="mb-4 max-w-3xl list-decimal space-y-1 pl-5 text-sm text-ledger-text">
+        <li>No emissor, faça a <strong>nota de devolução</strong> em nome da consultora anterior (anula a remessa dela).</li>
+        <li>Faça a <strong>nota nova de remessa</strong> em nome de quem ficou com a maleta (não precisa quando a maleta voltou para a empresa).</li>
+        <li>Escreva os números das notas novas na observação e clique em <strong>Marcar como resolvida</strong>.</li>
+      </ol>
       <div className="space-y-3">
         {lista.map((p) => (
           <div key={p.id} className="flex flex-wrap items-end justify-between gap-3 rounded-xl border border-line-soft bg-surface p-4">
             <div className="min-w-64 flex-1">
-              <p className="font-semibold text-ledger-text">{p.maleta ?? "Maleta"}: {p.consultora_anterior_nome ?? "—"} → {p.origem === "devolucao" ? "devolvida à empresa" : p.consultora_nova_nome ?? "—"}</p>
+              <p className="font-semibold text-ledger-text">
+                <Link to="/admin/maletas/$id" params={{ id: p.cycle_id }} className="hover:underline">{p.maleta ?? "Maleta"}</Link>: {p.consultora_anterior_nome ?? "—"} → {p.origem === "devolucao" ? "devolvida à empresa" : p.consultora_nova_nome ?? "—"}
+              </p>
               <p className="text-xs text-ledger-muted">
                 Nota de remessa nº {p.nota_numero ?? "sem número"} em nome de {p.consultora_anterior_nome ?? "—"} · {p.origem === "devolucao" ? "maleta devolvida à empresa (fazer a nota de devolução)" : p.origem === "equipe" ? "transferida pela equipe" : "trocada pelo representante"} em {new Date(p.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
               </p>
@@ -111,5 +184,32 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
         ))}
       </div>
     </Panel>
+    </div>
+  );
+}
+
+/** Página da maleta: a nota fiscal é emitida e consultada na linha da maleta, dentro da remessa. */
+export function LinkNotaNaRemessa({ cycleId }: { cycleId: string }) {
+  const q = useQuery({
+    queryKey: ["maletas", "remessa-do-ciclo", cycleId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("kit_cycles").select("remessa_id").eq("id", cycleId).maybeSingle();
+      if (error) throw error;
+      return (data as { remessa_id: string | null } | null)?.remessa_id ?? null;
+    },
+    staleTime: 300_000,
+  });
+  if (!q.data) {
+    return (
+      <p className="rounded-lg border border-line-soft p-3 text-xs text-ledger-muted">
+        A nota fiscal desta maleta é feita na página da remessa dela.
+      </p>
+    );
+  }
+  return (
+    <Link to="/admin/maletas/remessa/$id" params={{ id: q.data }} className="admin-btn w-full"
+      title="A nota fiscal de remessa, o DANFE e as notas do acerto ficam na linha desta maleta, na página da remessa.">
+      Nota fiscal: abrir na remessa
+    </Link>
   );
 }

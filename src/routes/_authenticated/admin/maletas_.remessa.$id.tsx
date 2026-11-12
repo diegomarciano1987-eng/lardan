@@ -3,14 +3,15 @@ import { InformacoesRemessa, semAnotacao, useInformacoesRemessa } from "@/compon
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, FileText, Lock, Plus, ScrollText, Tag, UserRound } from "lucide-react";
+import { Ban, CheckCircle2, FileText, Lock, Plus, ScrollText, ShieldCheck, Tag, UserRound } from "lucide-react";
 import { imprimirPedidoConsignacao, imprimirPromissoriaMaleta } from "@/components/admin/maletas/DocumentosMaleta";
 import { imprimirEtiquetaMaleta } from "@/components/admin/maletas/EtiquetaMaleta";
 import { abrirMaletaRepresentante, devolverCustodiaRepresentante, expedirRemessaRepresentante, mensagem } from "@/lib/maletas-perdidas";
 import { EnvioRemessa } from "@/components/admin/maletas/EnvioRemessa";
 import { NotaFiscalMaleta, useNotasMaletas } from "@/components/admin/maletas/NotaFiscalMaleta";
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
-import { TrocasPendentes } from "@/components/admin/maletas/TrocasPendentes";
+import { SeloNotaTroca, TrocasPendentes, useTrocasPendentes } from "@/components/admin/maletas/TrocasPendentes";
+import { supabase } from "@/integrations/supabase/client";
 import { DevolucoesPendentes } from "@/components/admin/maletas/DevolucoesPendentes";
 import { STATUS_TRANSFERIR, TransferirMaletaBotao } from "@/components/admin/maletas/TransferirMaleta";
 import { useAdminRoles } from "@/components/admin/AdminShell";
@@ -83,6 +84,25 @@ function RemessaPage() {
   });
   const maletas = useQuery({ queryKey: ["remessas", "maletas", id], queryFn: () => maletasDaRemessa(id) });
   const notas = useNotasMaletas((maletas.data ?? []).map((m) => m.cycle_id));
+  const trocas = useTrocasPendentes(id);
+  const trocaPorMaleta = React.useMemo(() => new Map((trocas.data ?? []).map((t) => [t.cycle_id, t])), [trocas.data]);
+  // Master: remessa criada por engano (sem nenhuma maleta) cancela aqui mesmo, com motivo (remessa_cancelar_vazia)
+  const cancelarVazia = useMutation({
+    mutationFn: async (numero: number) => {
+      const motivo = window.prompt(`Cancelar a remessa ${numero}? Ela não tem nenhuma maleta. Escreva o motivo (fica na auditoria):`, "Remessa criada por engano");
+      if (motivo === null) return null;
+      const { error } = await supabase.rpc("remessa_cancelar_vazia", { _remessa: id, _motivo: motivo });
+      if (error) throw new Error(error.message);
+      return numero;
+    },
+    onSuccess: (n) => {
+      if (!n) return;
+      toast.success(`Remessa ${n} cancelada.`);
+      void qc.invalidateQueries({ queryKey: ["remessas"] });
+      navigate({ to: "/admin/maletas" });
+    },
+    onError: (e) => toast.error(traduzir(e)),
+  });
   const r = remessa.data;
   const consultoras = useQuery({
     queryKey: ["remessas", "consultoras", r?.praca_id, busca],
@@ -228,6 +248,11 @@ function RemessaPage() {
           <div className="mt-2"><EnvioRemessa remessaId={r.id} podeAlterar={podeMontar && r.status !== "fechada" && r.status !== "cancelada"} /></div>
         </div>
         <StatusBadge tone={s.tom}>{s.rotulo}</StatusBadge>
+        {master && (
+          <Link to="/admin/cadastros/correcoes" className="admin-btn" title="Master: cancelar remessa vazia, excluir venda de teste, vincular histórico.">
+            <ShieldCheck aria-hidden className="size-4" /> Correções do administrador
+          </Link>
+        )}
         {escopo.isSuccess && !escopo.data?.colaboradora && <ConfigurarImpressora />}
         <EtiquetasImprimir origens={(maletas.data ?? []).map((m) => ({ cycleId: m.cycle_id }))} />
       </div>
@@ -302,6 +327,19 @@ function RemessaPage() {
         </Panel>
       )}
 
+      {master && maletas.isSuccess && (maletas.data?.length ?? 0) === 0 && r.status !== "cancelada" && r.status !== "fechada" && (
+        <Panel title="Remessa criada por engano?">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="max-w-2xl text-sm text-ledger-muted">
+              A remessa {r.numero} está vazia (nenhuma maleta). Se foi aberta por engano, cancele aqui. Ela sai das listas e fica registrada na auditoria com o motivo.
+            </p>
+            <button type="button" className="admin-btn" disabled={cancelarVazia.isPending} onClick={() => cancelarVazia.mutate(r.numero)}>
+              <Ban aria-hidden className="size-4" /> {cancelarVazia.isPending ? "Cancelando…" : `Cancelar remessa ${r.numero}`}
+            </button>
+          </div>
+        </Panel>
+      )}
+
       <TrocasPendentes remessaId={id} podeResolver={podeNotaMaleta} />
       {podeMontar && <DevolucoesPendentes remessaNumero={r.numero} />}
 
@@ -338,6 +376,7 @@ function RemessaPage() {
                 </button>
                 <NotaFiscalMaleta cycleId={m.cycle_id} status={m.status} nota={notas.porMaleta.get(m.cycle_id)} podeEmitir={podeNotaMaleta}
                   temConsultora={!!m.consultora_party_id} semPecas={semPecas} producao={notas.producao} />
+                {trocaPorMaleta.get(m.cycle_id) && <SeloNotaTroca pendencia={trocaPorMaleta.get(m.cycle_id)!} />}
                 {peloCorreio && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (
                   <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} hash="correios"
                     className="admin-btn admin-btn-primary h-9 px-3 text-xs"

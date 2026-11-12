@@ -50,3 +50,15 @@ describe("rascunho da abertura na rua", () => {
     expect(chaveCandidata({ nome: "Ana", whatsapp: "(43) 99999-0000" })).toBe("43999990000");
   });
 });
+
+import { linkSms } from "./AssinaturaDigital";
+describe("SMS da assinatura (0300)", () => {
+  it("abre o SMS com o número dela (+55) e o link", () => {
+    const l = linkSms("(43) 99999-0000", "https://app.zapsign.com.br/verificar/abc", "contrato");
+    expect(l.startsWith("sms:+5543999990000?&body=")).toBe(true);
+    expect(decodeURIComponent(l)).toContain("https://app.zapsign.com.br/verificar/abc");
+  });
+  it("sem número abre o SMS para escolher o contato", () => {
+    expect(linkSms(null, "https://x", "promissoria").startsWith("sms:?&body=")).toBe(true);
+  });
+});

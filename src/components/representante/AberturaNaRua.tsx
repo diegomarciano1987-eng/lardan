@@ -343,7 +343,7 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
           )}
 
           {passo === 2 && feito && <EscolherMaleta rep={rep} leadId={feito.lead_id} nome={f.nome} onEscolhida={(m) => { setMaleta(m); setPasso(3); }} />}
-          {passo === 3 && feito && <Assinaturas rep={rep} party={feito.party_id} maleta={maleta} nome={f.nome} onConcluida={concluir} />}
+          {passo === 3 && feito && <Assinaturas rep={rep} party={feito.party_id} maleta={maleta} nome={f.nome} telefone={f.whatsapp} onConcluida={concluir} />}
         </div>
       </main>
 
@@ -485,7 +485,7 @@ function EscolherMaleta({ rep, leadId, nome, onEscolhida }: { rep: string; leadI
   );
 }
 
-function Assinaturas({ rep, party, maleta, nome, onConcluida }: { rep: string; party: string; maleta: { cycle_id: string; nome: string } | null; nome: string; onConcluida: () => void }) {
+function Assinaturas({ rep, party, maleta, nome, telefone, onConcluida }: { rep: string; party: string; maleta: { cycle_id: string; nome: string } | null; nome: string; telefone: string; onConcluida: () => void }) {
   const q = useQuery({
     queryKey: ["assinaturas", party],
     queryFn: async () => {
@@ -517,7 +517,7 @@ function Assinaturas({ rep, party, maleta, nome, onConcluida }: { rep: string; p
           </div>
         </div>
       )}
-      <AssinaturaDigital party={party} rep={rep} />
+      <AssinaturaDigital party={party} rep={rep} telefone={telefone} />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import {
   type CobrancaExterna,
   type EventoExterno,
   type FiltroCobrancas,
+  type FormaPagamento,
   type NovaCobranca,
   type Pagina,
   RecusadoPeloProvedor,
@@ -297,6 +298,25 @@ export class SimuladorAsaas implements TransporteAsaas {
     }
     c.status = "DELETED";
     this.gravar();
+  }
+
+  /** 0303: como o Asaas, só altera cobrança em aberto; vencimento no passado é recusado. */
+  chamadasAtualizar = 0;
+  async atualizarCobranca(id: string, d: { valueCents: number; dueDate: string; billingType: FormaPagamento }) {
+    const c = this.cobrancas.get(id);
+    if (!c) throw new RecusadoPeloProvedor("Cobrança inexistente (simulação).", 404, ["not_found"]);
+    if (c.status !== "PENDING" && c.status !== "OVERDUE") {
+      throw new RecusadoPeloProvedor("Só cobrança em aberto pode ser alterada (simulação).", 400, ["invalid_action"]);
+    }
+    const hoje = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+    if (d.dueDate < hoje) throw new RecusadoPeloProvedor("Vencimento no passado (simulação).", 400, ["invalid_dueDate"]);
+    this.chamadasAtualizar += 1;
+    c.valueCents = d.valueCents;
+    c.dueDate = d.dueDate;
+    c.billingType = d.billingType;
+    c.status = "PENDING";
+    this.gravar();
+    return { ...c };
   }
 
   async receberEventos() {

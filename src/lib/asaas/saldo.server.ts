@@ -3,7 +3,8 @@
  *
  * Baixa no Lardan (manual, OFX, outra conta, desconto) ou título cancelado deixa a cobrança do Asaas cobrando a mais.
  * O banco planeja (asaas_saldo_reservar); aqui: conferir no Asaas, cancelar a antiga, criar a nova pelo saldo exato
- * pelo executor oficial (mesma intenção/posse/idempotência do "Gerar link"). Nada aqui lança dinheiro.
+ * pelo executor oficial (mesma intenção/posse/idempotência do "Gerar link"). Vencimento/valor mudado no Lardan (0303)
+ * atualiza a mesma cobrança. Nada aqui lança dinheiro.
  */
 import type { BancoAsaas } from "./banco";
 import type { TransporteAsaas } from "./contrato";
@@ -18,7 +19,10 @@ export interface DepsSaldo {
 }
 
 type Cobranca = { charge_id: string; external_id: string; valor_cents: number };
-type Tarefa = { id: string; acao: string; motivo: string; cancelar: Cobranca[]; intent_id: string | null; intent_state: string | null };
+type Tarefa = {
+  id: string; acao: string; motivo: string; cancelar: Cobranca[]; intent_id: string | null; intent_state: string | null;
+  alvo?: (Cobranca & { billing_type?: string | null }) | null; novo_valor_cents?: number | null; novo_vencimento?: string | null;
+};
 export type ResultadoTarefa = { id: string; estado: string; erro?: string | null; nova?: string | null };
 
 const PAGAS = new Set(["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"]);
@@ -42,7 +46,40 @@ async function cancelarUma(d: DepsSaldo, c: Cobranca) {
   }
 }
 
+/**
+ * 0303: vencimento/valor mudou no Lardan → atualiza a MESMA cobrança no Asaas.
+ * Sempre confere antes (paga → não mexe; excluída → exceção) e confere depois (o Asaas tem que devolver a data/valor pedidos).
+ */
+async function alterar(d: DepsSaldo, worker: string, t: Tarefa): Promise<ResultadoTarefa> {
+  const fim = async (resultado: string, status: string | null, erro: string | null) => {
+    const r = await d.servico.rpc<{ estado: string }>("asaas_saldo_alteracao", { _job: t.id, _worker: worker, _resultado: resultado, _status_remoto: status, _erro: erro });
+    return { id: t.id, estado: r.estado, erro };
+  };
+  const alvo = t.alvo;
+  const valor = Number(t.novo_valor_cents ?? 0);
+  const venc = (t.novo_vencimento ?? "").slice(0, 10);
+  if (!alvo || !valor || !venc) return fim("falhou", null, "Tarefa sem cobrança, valor ou vencimento.");
+  try {
+    const tr = await d.transporteCobranca(alvo.charge_id);
+    const remoto = await tr.consultarCobranca(alvo.external_id);
+    if (!remoto || remoto.status === "DELETED") return fim("ja_excluida", remoto?.status ?? null, null);
+    if (PAGAS.has(remoto.status)) return fim("paga_no_asaas", remoto.status, null);
+    if (!ABERTAS.has(remoto.status)) return fim("falhou", remoto.status, `Situação no Asaas: ${remoto.status}`);
+    if (remoto.dueDate === venc && remoto.valueCents === valor) return fim("ja_igual", remoto.status, null);
+    if (!tr.atualizarCobranca) return fim("falhou", remoto.status, "Esta conta não permite alterar pelo sistema.");
+    await tr.atualizarCobranca(alvo.external_id, { valueCents: valor, dueDate: venc, billingType: remoto.billingType });
+    const depois = await tr.consultarCobranca(alvo.external_id);
+    if (!depois || depois.dueDate !== venc || depois.valueCents !== valor) {
+      return fim("falhou", depois?.status ?? null, `O Asaas não confirmou a alteração (vence ${depois?.dueDate ?? "?"}, valor ${depois?.valueCents ?? "?"}).`);
+    }
+    return fim("alterada", depois.status, null);
+  } catch (e) {
+    return fim("falhou", null, msg(e));
+  }
+}
+
 async function processar(d: DepsSaldo, worker: string, t: Tarefa): Promise<ResultadoTarefa> {
+  if (t.acao === "alterar") return alterar(d, worker, t);
   for (const c of t.cancelar) {
     const r = await cancelarUma(d, c);
     const x = await d.servico.rpc<{ continuar: boolean }>("asaas_saldo_cancelamento", {
@@ -59,7 +96,8 @@ async function processar(d: DepsSaldo, worker: string, t: Tarefa): Promise<Resul
 }
 
 export async function sincronizarSaldos(d: DepsSaldo) {
-  const worker = d.worker ?? `saldo-${Math.random().toString(36).slice(2, 10)}`;
+  // "saldo2-": este trabalhador sabe alterar vencimento/valor (0303); o banco só entrega 'alterar' a ele
+  const worker = d.worker ?? `saldo2-${Math.random().toString(36).slice(2, 10)}`;
   const r = await d.servico.rpc<{ varridas: number; tarefas: Tarefa[] }>("asaas_saldo_reservar", { _worker: worker, _limite: d.limite ?? 20 });
   const resultados: ResultadoTarefa[] = [];
   for (const t of r.tarefas) {

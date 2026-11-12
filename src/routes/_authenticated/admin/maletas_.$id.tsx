@@ -8,7 +8,7 @@ import { AcoesMaletaRua } from "@/components/admin/maletas/AcoesMaletaRua";
 import { CorreiosMaleta } from "@/components/admin/maletas/CorreiosMaleta";
 import { RemessaDevolucaoMaleta } from "@/components/admin/maletas/RemessaDevolucaoMaleta";
 import { ConferenciaPreBaixa } from "@/components/admin/maletas/ConferenciaPreBaixa";
-import { CheckCircle2, ClipboardCheck, FileText, Printer, ScanBarcode, Send, Truck } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Printer, ScanBarcode, Send, Truck } from "lucide-react";
 import { AjustesMaleta } from "@/components/admin/maletas/AjustesMaleta";
 import { STATUS_TRANSFERIR } from "@/components/admin/maletas/TransferirMaleta";
 import { AvisoNotaTrocaMaleta, LinkNotaNaRemessa } from "@/components/admin/maletas/TrocasPendentes";

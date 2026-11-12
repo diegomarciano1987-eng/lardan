@@ -217,6 +217,29 @@ describe("0299 baixa no Lardan → Asaas", () => {
     expect(abertas.map((x) => x.value_cents)).toEqual([20000]);
   });
 
+  test("parcelamento no Asaas com uma parte já paga lá: o resto aberto bate com o saldo e nada muda", async () => {
+    const c = await cenario(15000);
+    const cli = (await um<{ e: string }>(`select external_id e from public.asaas_customers where account_id=$1 and party_id=$2`, [c.conta, c.party])).e;
+    // aumenta a parcela para 30000 com uma segunda cobrança de 15000 já recebida no Asaas e baixada
+    const t2 = await rpc<string>(master, "fin_title_create", { _payload: {
+      direction: "receivable", business_entity_id: c.empresa, party_id: c.party, descricao: `ISO parc ${marca()}`,
+      valor_cents: 30000, emissao: "2026-10-10", origem: "manual", status: "ativo", parcelas: [{ vencimento: "2026-11-10", valor_cents: 30000 }] } });
+    await rpc(master, "fin_title_approve", { _title: t2.dados, _motivo: "ISO" });
+    const inst = (await um<{ id: string }>(`select id from public.financial_installments where title_id=$1`, [t2.dados])).id;
+    const a = c.sim.semearCobranca({ customer: cli, valueCents: 15000, dueDate: "2026-10-10", billingType: "PIX", status: "RECEIVED", description: null, externalReference: null, dateCreated: "2026-10-01" });
+    const b = c.sim.semearCobranca({ customer: cli, valueCents: 15000, dueDate: "2026-11-10", billingType: "PIX", status: "PENDING", description: null, externalReference: null, dateCreated: "2026-10-01" });
+    for (const [x, st] of [[a, "RECEIVED"], [b, "PENDING"]] as const) {
+      await oficial(`insert into public.asaas_charges (account_id, external_id, customer_external_id, value_cents, due_date, billing_type, external_status, party_id, title_id, installment_id, reconcile_status, raw)
+                     values ($1,$2,$3,15000,$7,'PIX',$4,$5,$6,$8,'vinculado','{}'::jsonb)`, [c.conta, x.id, cli, st, c.party, t2.dados, x.dueDate, inst]);
+    }
+    await baixar({ banco: c.banco, inst }, 15000);
+    const criadas = c.sim.chamadasCriar;
+    await sync(c.sim);
+    expect((await tarefas(inst)).length).toBe(0);
+    expect(c.sim.chamadasCriar).toBe(criadas);
+    expect((await c.sim.consultarCobranca(b.id))!.status).toBe("PENDING");
+  });
+
   test("parcela dentro de acordo: nunca troca sozinha", async () => {
     const c = await cenario(30000);
     await adm.unsafe(`insert into public.cob_simulacoes (party_id, installment_ids, data_base, multa_pct, juros_mes_pct, principal_cents, encargos_cents, total_cents, status)

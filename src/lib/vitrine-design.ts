@@ -100,7 +100,7 @@ export interface EstudioDados {
   publicado: DesignVitrine | null;
   publicado_em: string | null;
   revisao: number;
-  itens: (VitrineItem & { midias: string[] })[];
+  itens: (VitrineItem & { midias: string[]; foto_propria?: string | null })[];
   versoes: { id: string; numero: number; em: string }[];
 }
 
@@ -127,6 +127,30 @@ export async function enviarArquivo(party: string, tipo: "pub" | "orig", blob: B
   });
   if (error) throw error;
   return path;
+}
+
+/**
+ * 0298: foto da peça tirada pela consultora. Fica na pasta privada dela e só aparece
+ * na vitrine dela; o catálogo oficial da Lardan não muda.
+ */
+export async function fotoPecaSalvar(party: string, variantId: string, blob: Blob) {
+  const path = `${party}/peca/${crypto.randomUUID()}.webp`;
+  const { error } = await supabase.storage.from("vitrine-originais").upload(path, blob, {
+    contentType: "image/webp", upsert: false, cacheControl: "31536000",
+  });
+  if (error) throw error;
+  try {
+    const r = await rpc<{ path: string; anterior: string | null }>("vitrine_foto_propria_salvar", { _variant: variantId, _path: path });
+    if (r.anterior) void supabase.storage.from("vitrine-originais").remove([r.anterior]);
+    return path;
+  } catch (e) {
+    void supabase.storage.from("vitrine-originais").remove([path]);
+    throw e;
+  }
+}
+export async function fotoPecaRemover(variantId: string) {
+  const r = await rpc<{ anterior: string | null }>("vitrine_foto_propria_remover", { _variant: variantId });
+  if (r.anterior) void supabase.storage.from("vitrine-originais").remove([r.anterior]);
 }
 
 /** Links temporários para a prévia do rascunho (somente a dona enxerga). */

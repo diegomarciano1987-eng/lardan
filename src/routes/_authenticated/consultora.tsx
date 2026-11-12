@@ -371,9 +371,15 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
           <div className="mt-4 space-y-3">
             {lista.map((b) => (
               <div key={b.variant_id} className="flex items-center gap-3">
-                {proprias.data?.mapa[b.variant_id]
-                  ? <img src={proprias.data.mapa[b.variant_id]} alt="" className="size-14 shrink-0 rounded-xl object-cover" loading="lazy" />
-                  : <FotoPeca mediaId={b.media_id} variantId={b.variant_id} className="size-14 rounded-xl" />}
+                {(() => {
+                  const mini = proprias.data?.mapa[b.variant_id]
+                    ? <img src={proprias.data.mapa[b.variant_id]} alt="" className="size-14 shrink-0 rounded-xl object-cover" loading="lazy" />
+                    : <FotoPeca mediaId={b.media_id} variantId={b.variant_id} className="size-14 rounded-xl" />;
+                  return proprias.data?.party
+                    ? <BotaoFotoPropria userId={user.id} party={proprias.data.party} variantId={b.variant_id} produto={b.produto}
+                        temPropria={proprias.data.tem.has(b.variant_id)} temOficial={!!b.media_id}>{mini}</BotaoFotoPropria>
+                    : mini;
+                })()}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">{b.produto}</p>
                   <p className="text-xs text-ledger-muted">
@@ -388,10 +394,6 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
                 >
                   {b.publicado ? "Na vitrine" : "Oculta"}
                 </button>
-                {proprias.data?.party && (
-                  <BotaoFotoPropria userId={user.id} party={proprias.data.party} variantId={b.variant_id} produto={b.produto}
-                    temPropria={proprias.data.tem.has(b.variant_id)} temOficial={!!b.media_id} />
-                )}
               </div>
             ))}
           </div>

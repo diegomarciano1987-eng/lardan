@@ -251,3 +251,5 @@
 - [ ] Textos DEVOLUTIVA/ENTREVISTA/ACOMP do protótipo (aguarda Daniel)
 - [ ] MAL-00359 x MAL-00441: qual maleta está com Leila Maria (aguarda Diego)
 - [ ] Publicar 0283 (aguarda aprovação)
+
+- [x] 0298 Fotos próprias da consultora na vitrine (Estúdio > Organização e Minha maleta), catálogo oficial intocado

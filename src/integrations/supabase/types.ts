@@ -1854,6 +1854,138 @@ export type Database = {
           },
         ]
       }
+      asaas_saldo_sync: {
+        Row: {
+          aberto_cents: number
+          acao: string
+          account_id: string | null
+          cobrancas: Json
+          concluida_em: string | null
+          created_at: string
+          decidido_por: string | null
+          decisao_motivo: string | null
+          erro: string | null
+          estado: string
+          forcar: boolean
+          id: string
+          impressao: string
+          installment_id: string
+          intent_id: string | null
+          lease_until: string | null
+          motivo: string
+          nova_charge_id: string | null
+          novo_billing_type: string | null
+          novo_valor_cents: number | null
+          novo_vencimento: string | null
+          party_id: string | null
+          progresso: boolean
+          proxima_em: string | null
+          saldo_cents: number
+          tentativas: number
+          title_id: string
+          updated_at: string
+          worker: string | null
+        }
+        Insert: {
+          aberto_cents: number
+          acao: string
+          account_id?: string | null
+          cobrancas?: Json
+          concluida_em?: string | null
+          created_at?: string
+          decidido_por?: string | null
+          decisao_motivo?: string | null
+          erro?: string | null
+          estado?: string
+          forcar?: boolean
+          id?: string
+          impressao: string
+          installment_id: string
+          intent_id?: string | null
+          lease_until?: string | null
+          motivo: string
+          nova_charge_id?: string | null
+          novo_billing_type?: string | null
+          novo_valor_cents?: number | null
+          novo_vencimento?: string | null
+          party_id?: string | null
+          progresso?: boolean
+          proxima_em?: string | null
+          saldo_cents: number
+          tentativas?: number
+          title_id: string
+          updated_at?: string
+          worker?: string | null
+        }
+        Update: {
+          aberto_cents?: number
+          acao?: string
+          account_id?: string | null
+          cobrancas?: Json
+          concluida_em?: string | null
+          created_at?: string
+          decidido_por?: string | null
+          decisao_motivo?: string | null
+          erro?: string | null
+          estado?: string
+          forcar?: boolean
+          id?: string
+          impressao?: string
+          installment_id?: string
+          intent_id?: string | null
+          lease_until?: string | null
+          motivo?: string
+          nova_charge_id?: string | null
+          novo_billing_type?: string | null
+          novo_valor_cents?: number | null
+          novo_vencimento?: string | null
+          party_id?: string | null
+          progresso?: boolean
+          proxima_em?: string | null
+          saldo_cents?: number
+          tentativas?: number
+          title_id?: string
+          updated_at?: string
+          worker?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_saldo_sync_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_saldo_sync_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_saldo_sync_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_charge_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_saldo_sync_nova_charge_id_fkey"
+            columns: ["nova_charge_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_saldo_sync_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assinatura_modelos: {
         Row: {
           atualizado_em: string
@@ -20205,6 +20337,10 @@ export type Database = {
       }
       asaas_clientes_cadastrar: { Args: { _actor: string }; Returns: Json }
       asaas_cobranca_preparar: { Args: { _payload: Json }; Returns: Json }
+      asaas_cobranca_preparar_nucleo: {
+        Args: { _actor: string; _payload: Json; _saldo: boolean }
+        Returns: Json
+      }
       asaas_conciliacao_automatica: {
         Args: { _actor: string; _executar?: boolean }
         Returns: Json
@@ -20545,6 +20681,48 @@ export type Database = {
       asaas_receber_fila: { Args: { _filtros?: Json }; Returns: Json }
       asaas_receber_ocorrencias: { Args: { _filtros?: Json }; Returns: Json }
       asaas_receber_parcelas: { Args: { _filtros?: Json }; Returns: Json }
+      asaas_saldo_cancelamento: {
+        Args: {
+          _charge: string
+          _erro: string
+          _job: string
+          _resultado: string
+          _status_remoto: string
+          _worker: string
+        }
+        Returns: Json
+      }
+      asaas_saldo_concluir: {
+        Args: { _erro?: string; _job: string; _worker: string }
+        Returns: Json
+      }
+      asaas_saldo_decidir: {
+        Args: { _decisao: string; _job: string; _motivo: string }
+        Returns: Json
+      }
+      asaas_saldo_enfileirar: {
+        Args: {
+          _actor?: string
+          _forcar?: boolean
+          _inst: string
+          _motivo?: string
+        }
+        Returns: string
+      }
+      asaas_saldo_painel: { Args: { _limite?: number }; Returns: Json }
+      asaas_saldo_plano: {
+        Args: { _forcar?: boolean; _inst: string }
+        Returns: Json
+      }
+      asaas_saldo_preparar: {
+        Args: { _job: string; _worker: string }
+        Returns: Json
+      }
+      asaas_saldo_reservar: {
+        Args: { _limite?: number; _worker: string }
+        Returns: Json
+      }
+      asaas_saldo_varrer: { Args: never; Returns: number }
       asaas_titulo_ext_livre: { Args: { _external: string }; Returns: string }
       asaas_vincular_interno: {
         Args: {

@@ -2094,6 +2094,13 @@
       "when": 1794504682624,
       "tag": "0298_vitrine_foto_propria_0298",
       "breakpoints": true
+    },
+    {
+      "idx": 299,
+      "version": "7",
+      "when": 1794512994895,
+      "tag": "0299_asaas_saldo_espelho_0299",
+      "breakpoints": true
     }
   ]
 }

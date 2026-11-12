@@ -150,3 +150,48 @@ export const cancelarFantasma = (inst: string, motivo: string) =>
   rpc<{ ok: boolean; numero: string; saldo_cents: number }>("asaas_fantasma_cancelar", { _inst: inst, _motivo: motivo });
 export const desfazerFantasma = (id: string, motivo: string) => rpc<{ ok: boolean }>("asaas_fantasma_desfazer", { _id: id, _motivo: motivo });
 export const resolverAlerta = (id: string, resolucao: string) => rpc<{ ok: boolean }>("asaas_alerta_resolver", { _id: id, _resolucao: resolucao });
+
+/** 0299 — baixa no Lardan espelhada no Asaas: cobrança antiga cancelada e, havendo saldo, nova pelo saldo. */
+export type TarefaSaldo = {
+  id: string;
+  acao: "cancelar" | "substituir" | "reabrir" | "excecao";
+  motivo: string;
+  estado: "pendente" | "processando" | "concluida" | "excecao" | "falhou" | "ignorada";
+  saldo_cents: number;
+  aberto_cents: number;
+  cobrancas: { external_id: string; valor_cents: number; vencimento: string; resultado: string | null }[];
+  novo_valor_cents: number | null;
+  novo_vencimento: string | null;
+  erro: string | null;
+  decisao_motivo: string | null;
+  created_at: string;
+  concluida_em: string | null;
+  tentativas: number;
+  titulo_numero: string;
+  pessoa: string | null;
+  pessoa_codigo: string | null;
+  nova_external_id: string | null;
+  nova_invoice_url: string | null;
+};
+export type PainelSaldo = {
+  resumo: { concluidas: number; canceladas_cents: number; novas: number; novas_cents: number; excecoes: number; andamento: number };
+  tarefas: TarefaSaldo[];
+};
+export const ROTULO_MOTIVO_SALDO: Record<string, string> = {
+  baixa_parcial: "Baixa parcial no Lardan",
+  quitada: "Quitada no Lardan",
+  titulo_cancelado: "Título cancelado no Lardan",
+  estorno: "Baixa estornada no Lardan",
+  saldo_abaixo_minimo: "Saldo abaixo de R$ 5,00 (cobrar por fora)",
+  varias_cobrancas: "Várias cobranças na mesma parcela",
+  cliente_judicial: "Cliente com processo judicial",
+  parcela_em_acordo: "Parcela dentro de acordo",
+  cliente_sem_vinculo: "Cliente sem cadastro no Asaas",
+  cliente_duplicado: "Cliente com dois cadastros no Asaas",
+  conta_asaas: "Conta Asaas da empresa indefinida",
+  titulo_nao_aprovado: "Título ainda não aprovado",
+  pago_no_asaas: "Já paga no Asaas (conferir pagamento em dobro)",
+  nova_cobranca_recusada: "Antiga cancelada; nova não foi criada",
+  cobranca_viva_encontrada: "Outra cobrança aberta encontrada",
+};
+export const painelSaldo = () => rpc<PainelSaldo>("asaas_saldo_painel", { _limite: 150 });

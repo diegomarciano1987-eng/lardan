@@ -1,0 +1,38 @@
+/** 0299 — botões do painel "Baixa no Lardan → Asaas". */
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+type Rpc = (f: string, a: object) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+type Ctx = { supabase: { rpc: Rpc }; userId: string };
+
+async function exigir(c: Ctx) {
+  const pode = await c.supabase.rpc("asaas_ator_pode", { _actor: c.userId, _cap: "finance.receivable.manage" });
+  if (pode.error || !pode.data) throw new Error("Sem acesso ao financeiro.");
+}
+
+export const sincronizarSaldosAgora = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const c = context as unknown as Ctx;
+    await exigir(c);
+    const { sincronizarSaldosProducao } = await import("./saldo.server");
+    return sincronizarSaldosProducao(30);
+  });
+
+export const decidirSaldo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; decisao: "substituir" | "ignorar" | "tentar"; motivo: string }) => {
+    if (!/^[0-9a-f-]{36}$/i.test(d?.id ?? "")) throw new Error("Tarefa inválida.");
+    if (!["substituir", "ignorar", "tentar"].includes(d.decisao)) throw new Error("Decisão inválida.");
+    if ((d.motivo ?? "").trim().length < 5) throw new Error("Informe o motivo (mínimo 5 letras).");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    await exigir(c);
+    const r = await c.supabase.rpc("asaas_saldo_decidir", { _job: data.id, _decisao: data.decisao, _motivo: data.motivo.trim() });
+    if (r.error) throw new Error(r.error.message);
+    if (data.decisao === "ignorar") return { ok: true, sync: null };
+    const { sincronizarSaldosProducao } = await import("./saldo.server");
+    return { ok: true, sync: await sincronizarSaldosProducao(10) };
+  });

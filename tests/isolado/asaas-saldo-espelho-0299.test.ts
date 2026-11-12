@@ -68,7 +68,7 @@ async function baixar(c: { banco: string; inst: string }, valor: number) {
   return r.dados.id;
 }
 const cobrancas = (inst: string) =>
-  adm.unsafe(`select id, external_id, external_status, value_cents, due_date::text due, billing_type from public.asaas_charges where installment_id=$1 order by created_at`, [inst]) as Promise<
+  adm.unsafe(`select id, external_id, external_status, value_cents, due_date::text due, billing_type from public.asaas_charges where installment_id=$1 order by imported_at, updated_at`, [inst]) as Promise<
     { id: string; external_id: string; external_status: string; value_cents: number; due: string; billing_type: string }[]>;
 const tarefas = (inst: string) =>
   adm.unsafe(`select * from public.asaas_saldo_sync where installment_id=$1 order by created_at`, [inst]) as Promise<Record<string, unknown>[]>;

@@ -521,7 +521,6 @@ function CandidaturasPage() {
         ) : concluidos ? (
           <Panel
             title={`Concluídos${lista.data ? ` · ${lista.data.total} candidata(s) que já receberam maleta` : ""}`}
-            description="Quem já tem maleta sai do funil e fica aqui com o histórico preservado."
             flush
           >
             {lista.isLoading ? (

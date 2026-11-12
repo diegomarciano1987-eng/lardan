@@ -173,6 +173,9 @@ describe("0293 — Pix com maleta aberta e acerto", () => {
   });
 
   test("Pix pago depois do fechamento abate a diferença da conferência; o que sobra fica para o próximo acerto", async () => {
+    // ela paga o título do acerto (valor exato: baixa normal) e depois manda mais um Pix com a maleta ainda em conferência
+    const pago = await cobranca(cons.partyId!, 12500);
+    expect((await receber(pago.ch)).dados.acao).toBe("baixa_titulo");
     const { ch } = await cobranca(cons.partyId!, 5000);
     const r = await receber(ch);
     expect(r.dados.acao).toBe("adiantamento_maleta");
@@ -213,21 +216,18 @@ describe("0293 — extrato: tarifas e baixas já importadas", () => {
   test("tarifa de boleto vai para 4.1.2 e tarifa do Pix para 5.1.3", async () => {
     const out: Record<string, string> = {};
     for (const [nome, desc] of [["boleto", "Taxa de boleto - fatura nr. 700000001 ISO"], ["pix", "Taxa do Pix - fatura nr. 700000002 ISO"]] as const) {
-      const p = await pessoa();
-      const { ch, ext } = await cobranca(p, 4000);
-      expect((await receber(ch)).dados.acao).toBe("titulo_3_1_1");
-      await linha("entrada", 4000, { type: "PAYMENT_RECEIVED", paymentId: ext });
-      // a baixa automática já liga a linha do recebimento; a tarifa só entra quando a baixa não a descontou
-      await adm.unsafe(`update public.financial_statement_lines l set status='conciliada' where l.raw->>'paymentId'=$1 and l.kind='entrada'`, [ext]);
-      await adm.unsafe(`delete from public.financial_account_movements where settlement_id in (select id from public.financial_settlements where idempotency_key like $1) and valor_cents < 0`, [`asaas:baixa:%${ext}`]);
-      // cobrança vira de outro sistema para a etapa da tarifa (sem baixa asaas:baixa): simula planilha
-      await adm.unsafe(`update public.financial_settlements set idempotency_key = 'iso-planilha-' || id where idempotency_key like $1`, [`asaas:baixa:%${ext}`]);
+      const ext = `pay_${marca()}`;
+      // recebimento já baixado pela planilha (sem tarifa) e a linha dele ligada a essa baixa
+      const b = await baixaImportada("receivable", `Recebimento planilha ${ext}`, 4000);
+      const rec = await linha("entrada", 4000, { type: "PAYMENT_RECEIVED", paymentId: ext });
+      const lig = await rpc(master, "fin_reconcile_baixa_existente", { _line_ids: [rec], _settlement_id: b.settlement, _idempotency_key: `iso-lig-${ext}`, _observacao: "ISO" });
+      expect(lig.erro).toBeNull();
       out[nome] = await linha("saida", 199, { type: "PAYMENT_FEE", paymentId: ext, description: desc });
     }
     const r = await rodarExtrato();
     expect(r.erro).toBeNull();
     for (const [nome, codigo] of [["boleto", "4.1.2"], ["pix", "5.1.3"]] as const) {
-      const e = await um<{ codigo: string }>(
+      const e = await um<{ codigo: string } | undefined>(
         `select ca.codigo from public.asaas_auto_extrato e join public.financial_titles t on t.id=e.title_id
            join public.chart_of_accounts ca on ca.id=t.chart_account_id where e.tipo='tarifa' and e.chave=$1`, [out[nome]]);
       expect(e?.codigo).toBe(codigo);

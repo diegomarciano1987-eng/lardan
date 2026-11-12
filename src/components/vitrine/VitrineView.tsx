@@ -309,13 +309,17 @@ function CapaPadrao(p: {
         <h1 className="cl-serif cl-nome mt-2 break-words">{p.nome}</h1>
         {p.frase && <p className="cl-frase mt-3 max-w-md">{p.frase}</p>}
         {p.horarios && <p className="cl-pilula mt-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5"><Clock aria-hidden className="size-4" />{p.horarios}</p>}
-        <div className="mt-6 w-full space-y-3 @3xl:flex @3xl:items-center @3xl:justify-center @3xl:gap-3 @3xl:space-y-0">
+        <div className="mt-6 flex w-full flex-col gap-3 @3xl:flex-row @3xl:flex-wrap @3xl:items-center @3xl:justify-center">
+          <a href={p.previa ? undefined : "/a-lardan"} target="_blank" rel="noreferrer" className="cl-conheca inline-flex items-center justify-center gap-2 self-center rounded-full px-5 @3xl:order-2">
+            <svg viewBox="0 0 3234.59 2206.02" aria-hidden="true" className="cl-conheca-gema"><path fillRule="evenodd" fill="currentColor" d={DIAMANTE} /></svg>
+            Conheça a Lardan
+          </a>
           {p.zap && (
-            <a href={p.previa ? undefined : p.zap} target="_blank" rel="noreferrer" className="cl-zap flex w-full items-center justify-center gap-2.5 rounded-full px-6 @3xl:w-auto">
+            <a href={p.previa ? undefined : p.zap} target="_blank" rel="noreferrer" className="cl-zap flex w-full items-center justify-center gap-2.5 rounded-full px-6 @3xl:order-1 @3xl:w-auto">
               <MessageCircle aria-hidden className="size-5" /> Falar com {p.primeiroNome} no WhatsApp
             </a>
           )}
-          <div className={`grid gap-3 ${p.instagram ? "grid-cols-2" : "grid-cols-1"} @3xl:flex`}>
+          <div className={`grid gap-3 ${p.instagram ? "grid-cols-2" : "grid-cols-1"} @3xl:order-3 @3xl:flex @3xl:basis-full @3xl:justify-center`}>
             <button type="button" onClick={p.onCompartilhar} className="cl-sec inline-flex items-center justify-center gap-2 rounded-full px-6"><Share2 aria-hidden className="size-4" /> Compartilhar</button>
             {p.instagram && <a href={p.previa ? undefined : p.instagram} target="_blank" rel="noreferrer" className="cl-sec inline-flex items-center justify-center gap-2 rounded-full px-6"><Instagram aria-hidden className="size-4" /> Instagram</a>}
           </div>

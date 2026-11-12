@@ -220,7 +220,7 @@ describe("0293 — extrato: tarifas e baixas já importadas", () => {
       // recebimento já baixado pela planilha (sem tarifa) e a linha dele ligada a essa baixa
       const b = await baixaImportada("receivable", `Recebimento planilha ${ext}`, 4000);
       const rec = await linha("entrada", 4000, { type: "PAYMENT_RECEIVED", paymentId: ext });
-      const lig = await rpc(master, "fin_reconcile_baixa_existente", { _line_ids: [rec], _settlement_id: b.settlement, _idempotency_key: `iso-lig-${ext}`, _observacao: "ISO" });
+      const lig = await rpc(master, "fin_reconcile_baixa_existente", { _line_ids: [rec], _settlement: b.settlement, _idempotency_key: `iso-lig-${ext}`, _observacao: "ISO" });
       expect(lig.erro).toBeNull();
       out[nome] = await linha("saida", 199, { type: "PAYMENT_FEE", paymentId: ext, description: desc });
     }

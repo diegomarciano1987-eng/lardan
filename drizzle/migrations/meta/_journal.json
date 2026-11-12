@@ -2122,6 +2122,13 @@
       "when": 1794516912527,
       "tag": "0302_asaas_saldo_reemitir_apos_exclusao_0302",
       "breakpoints": true
+    },
+    {
+      "idx": 303,
+      "version": "7",
+      "when": 1794523426195,
+      "tag": "0303_asaas_espelho_vencimento_0303",
+      "breakpoints": true
     }
   ]
 }

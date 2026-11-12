@@ -1373,6 +1373,66 @@ export type Database = {
           },
         ]
       }
+      asaas_espelho_pedidos: {
+        Row: {
+          actor_id: string | null
+          antes: Json | null
+          atendido_em: string | null
+          created_at: string
+          depois: Json | null
+          id: string
+          installment_id: string
+          job_id: string | null
+          motivo: string | null
+          origem: string
+          resultado: string | null
+          updated_at: string
+        }
+        Insert: {
+          actor_id?: string | null
+          antes?: Json | null
+          atendido_em?: string | null
+          created_at?: string
+          depois?: Json | null
+          id?: string
+          installment_id: string
+          job_id?: string | null
+          motivo?: string | null
+          origem: string
+          resultado?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actor_id?: string | null
+          antes?: Json | null
+          atendido_em?: string | null
+          created_at?: string
+          depois?: Json | null
+          id?: string
+          installment_id?: string
+          job_id?: string | null
+          motivo?: string | null
+          origem?: string
+          resultado?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_espelho_pedidos_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "financial_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_espelho_pedidos_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_saldo_sync"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_event_types: {
         Row: {
           ajuste_ou_tarifa: string
@@ -20420,6 +20480,11 @@ export type Database = {
       }
       asaas_conta_situacao: { Args: { _account: string }; Returns: Json }
       asaas_customer_sensivel: { Args: { _customer: string }; Returns: Json }
+      asaas_espelho_diferencas: { Args: { _limite?: number }; Returns: Json }
+      asaas_espelho_pedir: {
+        Args: { _inst: string; _motivo: string }
+        Returns: Json
+      }
       asaas_espelho_upsert: {
         Args: { _account_id: string; _rows: Json }
         Returns: Json
@@ -20741,6 +20806,16 @@ export type Database = {
       asaas_receber_fila: { Args: { _filtros?: Json }; Returns: Json }
       asaas_receber_ocorrencias: { Args: { _filtros?: Json }; Returns: Json }
       asaas_receber_parcelas: { Args: { _filtros?: Json }; Returns: Json }
+      asaas_saldo_alteracao: {
+        Args: {
+          _erro: string
+          _job: string
+          _resultado: string
+          _status_remoto: string
+          _worker: string
+        }
+        Returns: Json
+      }
       asaas_saldo_cancelamento: {
         Args: {
           _charge: string

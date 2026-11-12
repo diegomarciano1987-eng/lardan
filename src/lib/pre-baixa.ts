@@ -7,7 +7,9 @@ export interface ItemPreBaixa {
   enviada: number; app: number; vendida: number; preco_cents: number; lida: number | null; faltando: number; voltou_vendida: number;
   etiqueta_nova: boolean; etiqueta_atualizada: boolean;
 }
-export interface Calculo { vendido_cents: number; base_faixa_cents: number; comissao_pct: number; comissao_cents: number; valor_pagar_cents: number; recebido_lardan_cents?: number; aguardando_lardan_cents?: number }
+export interface Calculo { vendido_cents: number; base_faixa_cents: number; comissao_pct: number; comissao_cents: number; valor_pagar_cents: number; recebido_lardan_cents?: number; aguardando_lardan_cents?: number;
+  /** 0293: Pix/boletos que a consultora já pagou pelo app com a maleta aberta, abatidos do acerto. */
+  adiantado_consultora_cents?: number; adiantamento_disponivel_cents?: number }
 export interface PreBaixa {
   id: string; cycle_id: string; status: string; situacao: SituacaoPreBaixa; prazo: string | null; dias_para_prazo: number | null;
   fechada_em: string | null; encerrada_em: string | null; installment_id: string | null; diferenca_cents: number | null;

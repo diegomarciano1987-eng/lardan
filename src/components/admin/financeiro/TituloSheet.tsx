@@ -212,8 +212,11 @@ export function TituloSheet({
       return editarParcelaFin(editandoParcela.id, v["vencimento"] ?? "", cents, (v["motivo"] ?? "").trim());
     },
     onSuccess: () => {
-      toast.success("Parcela alterada. A mudança ficou no histórico.");
+      toast.success("Parcela alterada. A mudança ficou no histórico.", {
+        description: "Se houver cobrança aberta no Asaas, ela recebe o mesmo vencimento e valor em até 1 minuto. Diferenças aparecem em Financeiro → Asaas.",
+      });
       setEditandoParcela(null);
+      void qc.invalidateQueries({ queryKey: ["asaas-espelho-diferencas"] });
       void qc.invalidateQueries({ queryKey: ["fin-title", id] });
       void qc.invalidateQueries({ queryKey: ["fin-titles"] });
       void qc.invalidateQueries({ queryKey: ["fin-pagar-receber"] });

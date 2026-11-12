@@ -7,6 +7,7 @@ import { AsaasReceber } from "@/components/admin/financeiro/AsaasReceber";
 import { MesaAsaas } from "@/components/admin/financeiro/MesaAsaas";
 import { AsaasPenteFino } from "@/components/admin/financeiro/AsaasPenteFino";
 import { AsaasSaldoEspelho } from "@/components/admin/financeiro/AsaasSaldoEspelho";
+import { AsaasEspelhoDiferencas } from "@/components/admin/financeiro/AsaasEspelhoDiferencas";
 import { ConferenciaSaldoAsaas } from "@/components/admin/financeiro/ConferenciaSaldoAsaas";
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/asaas")({
@@ -27,6 +28,7 @@ function Pagina() {
         <SaudeAsaas />
         <AsaasAutomatico />
         <AsaasAutomaticoExtrato />
+        <AsaasEspelhoDiferencas />
         <AsaasSaldoEspelho />
         <AsaasPenteFino />
         <ConferenciaSaldoAsaas />

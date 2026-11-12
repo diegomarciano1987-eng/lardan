@@ -6,7 +6,9 @@ async function rpc<T>(f: string, a: Record<string, unknown> = {}): Promise<T> {
   return r.data as T;
 }
 
-export type AcaoAuto = "baixa_titulo" | "baixa_com_juros" | "titulo_3_1_1" | "vinculo_ja_baixado" | "lancado_pela_mesa" | "excecao";
+export type AcaoAuto =
+  | "baixa_titulo" | "baixa_com_juros" | "titulo_3_1_1" | "vinculo_ja_baixado" | "lancado_pela_mesa" | "excecao"
+  | "adiantamento_maleta" | "titulo_judicial";
 
 export const ROTULO_ACAO: Record<AcaoAuto, string> = {
   baixa_titulo: "Baixou conta em aberto",
@@ -15,6 +17,8 @@ export const ROTULO_ACAO: Record<AcaoAuto, string> = {
   vinculo_ja_baixado: "Ligado a baixa já existente",
   lancado_pela_mesa: "Lançado pela Mesa",
   excecao: "Exceção (decisão manual)",
+  adiantamento_maleta: "Pix da consultora com maleta aberta (3.1.1, abate no acerto)",
+  titulo_judicial: "TED judicial (7.1.7, Administrativo)",
 };
 
 export type ItemAuto = {
@@ -68,12 +72,14 @@ export const payDaLinha = (linha: { kind: string | null; raw: Record<string, unk
 };
 
 /** 0286 — etapa B: o que o Asaas conferiu sozinho no extrato. */
-export type TipoExtratoAuto = "identificacao" | "tarifa" | "notificacoes" | "transferencia";
+export type TipoExtratoAuto = "identificacao" | "tarifa" | "notificacoes" | "transferencia" | "negativacao" | "fatura_baixa";
 
 export const ROTULO_TIPO_EXTRATO: Record<TipoExtratoAuto, string> = {
   identificacao: "Título da planilha identificado",
-  tarifa: "Tarifa Pix/boleto (5.1.3)",
-  notificacoes: "Notificações e negativação do mês (5.1.1)",
+  tarifa: "Tarifa Pix (5.1.3) e boleto (4.1.2)",
+  notificacoes: "Notificações do mês (5.1.1)",
+  negativacao: "Negativação Serasa/SPC do mês (4.1.5)",
+  fatura_baixa: "Ligada à baixa já importada (mesma fatura)",
   transferencia: "Transferência para o banco conferida",
 };
 

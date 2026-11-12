@@ -335,7 +335,7 @@ function Bancada({
   // 0285: recebimento de cobrança do Asaas (pay_) — o "novo" nasce preso à cobrança, nunca um segundo lançamento
   const payAsaas = payDaLinha(linha);
   const [modo, setModo] = React.useState<"existente" | "novo" | null>(null);
-  const [aba, setAba] = React.useState<"sugestoes" | "buscar" | "baixadas">("sugestoes");
+  const [aba, setAba] = React.useState<"sugestoes" | "buscar" | "baixadas" | "transferencia">("sugestoes");
   const [busca, setBusca] = React.useState("");
   const [buscaLenta, setBuscaLenta] = React.useState("");
   const [bandeja, setBandeja] = React.useState<{ c: Candidata; texto: string }[]>([]);
@@ -401,7 +401,7 @@ function Bancada({
       setPalpiteAplicado(true);
       setPlano((v) => v || p.judicial?.chart_account_id || "");
       setParty((v) => v || p.judicial?.party_id || p.party_id || "");
-      setCentro((v) => v || p.cost_center_id || "");
+      setCentro((v) => v || p.judicial?.cost_center_id || p.cost_center_id || "");
       setForma((v) => v || p.payment_method_id || "");
       return;
     }
@@ -892,7 +892,7 @@ function Bancada({
       ) : (
         <section className="flex min-h-0 flex-col p-6">
           <div className="flex gap-2">
-            {(["sugestoes", "buscar", "baixadas"] as const).map((a) => (
+            {(["sugestoes", "buscar", "baixadas", "transferencia"] as const).map((a) => (
               <button
                 key={a}
                 type="button"
@@ -901,12 +901,15 @@ function Bancada({
                   aba === a ? "bg-primary text-primary-foreground" : "bg-cream-2 text-ledger-text hover:bg-cream-2/70"
                 }`}
               >
-                {a === "sugestoes" ? `Sugestões${sugestoes.data ? ` (${sugestoes.data.length})` : ""}` : a === "buscar" ? "Procurar outra conta" : "Baixas já realizadas"}
+                {a === "sugestoes" ? `Sugestões${sugestoes.data ? ` (${sugestoes.data.length})` : ""}` : a === "buscar" ? "Procurar outra conta" : a === "baixadas" ? "Baixas já realizadas" : "Transferência interna"}
               </button>
             ))}
           </div>
           {aba === "baixadas" && (
             <BaixasJaRealizadas linha={linha} valorLinha={valorLinha} podeConciliar={podeConciliar} onFeito={onFeito} />
+          )}
+          {aba === "transferencia" && (
+            <TransferenciaInterna linha={linha} valorLinha={valorLinha} podeLigar={podeConciliar && podeMarcar} onFeito={onFeito} />
           )}
           {aba === "buscar" && (
             <div className="relative mt-3">
@@ -999,7 +1002,7 @@ function Bancada({
   );
 }
 
-type BaixaExistente = { id: string; data: string; valor_cents: number; liquido: number; titulos: string | null };
+type BaixaExistente = { id: string; data: string; valor_cents: number; liquido: number; titulos: string | null; fora_janela?: boolean; achada_pela_busca?: boolean };
 
 /** Liga a linha do extrato a uma baixa que já foi lançada — não cria baixa nova. */
 function BaixasJaRealizadas({ linha, valorLinha, podeConciliar, onFeito }: {
@@ -1031,10 +1034,10 @@ function BaixasJaRealizadas({ linha, valorLinha, podeConciliar, onFeito }: {
     <div className="mt-3 flex min-h-0 flex-1 flex-col">
       <div className="relative">
         <Search aria-hidden className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
-        <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Nome, descrição ou número do título já baixado"
+        <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Nº da fatura, pay_…, nome, descrição ou número do título já baixado"
           className="h-12 w-full rounded-[12px] border border-line bg-surface pl-10 pr-3 text-base outline-none focus:border-champagne" />
       </div>
-      <p className="mt-2 text-xs text-ledger-muted">Baixas desta conta, até 60 dias antes ou depois da linha, ainda sem extrato ligado. Nada é lançado de novo.</p>
+      <p className="mt-2 text-xs text-ledger-muted">Baixas desta conta ainda sem extrato ligado: até 60 dias antes ou depois da linha e, de qualquer data, as da mesma fatura da linha ou as encontradas pelo nº da fatura, pay_, número do título ou nome. Nada é lançado de novo.</p>
       <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
         {q.isLoading && <Skeleton className="h-24 w-full" />}
         {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
@@ -1047,7 +1050,7 @@ function BaixasJaRealizadas({ linha, valorLinha, podeConciliar, onFeito }: {
             <div key={b.id} className="flex items-center gap-4 rounded-[14px] border-2 border-line bg-surface p-4">
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold text-ledger-text">{b.titulos || "Baixa sem título vinculado"}</p>
-                <p className="text-sm text-ledger-muted">Baixada em {dataBR(b.data)}</p>
+                <p className="text-sm text-ledger-muted">Baixada em {dataBR(b.data)}{b.fora_janela ? " · fora dos 60 dias" : ""}</p>
               </div>
               <div className="text-right">
                 <p className="text-lg font-bold tabular-nums text-ledger-text">{formatBRLFromCents(b.liquido)}</p>
@@ -1056,6 +1059,77 @@ function BaixasJaRealizadas({ linha, valorLinha, podeConciliar, onFeito }: {
               <button type="button" className="admin-btn" disabled={!podeConciliar || !igual || ligar.isPending}
                 title={igual ? "Ligar esta linha a esta baixa" : "O valor precisa ser igual ao da linha"}
                 onClick={() => ligar.mutate(b)}>
+                <Link2 className="size-4" /> Ligar
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+type TransferenciaCandidata = {
+  id: string; data: string; valor_cents: number; mesmo_valor: boolean;
+  referencia: string | null; motivo: string | null; conta_origem: string | null; conta_destino: string | null;
+};
+
+/** 0293 — liga a linha a uma transferência entre contas já lançada: sem receita nem despesa, desfazível com motivo. */
+function TransferenciaInterna({ linha, valorLinha, podeLigar, onFeito }: {
+  linha: LinhaExtratoRow; valorLinha: number; podeLigar: boolean; onFeito: () => void;
+}) {
+  const [busca, setBusca] = React.useState("");
+  const [lenta, setLenta] = React.useState("");
+  React.useEffect(() => { const t = setTimeout(() => setLenta(busca.trim()), 350); return () => clearTimeout(t); }, [busca]);
+  const q = useQuery({
+    queryKey: ["mesa-transferencias", linha.id, lenta],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("fin_mesa_transferencias" as never, { _line_id: linha.id, _busca: lenta || null } as never);
+      if (error) throw error;
+      return (data ?? []) as unknown as TransferenciaCandidata[];
+    },
+  });
+  const ligar = useMutation({
+    mutationFn: async (t: TransferenciaCandidata) => {
+      const { error } = await supabase.rpc("fin_mesa_ligar_transferencia" as never, { _line_id: linha.id, _transfer_id: t.id, _observacao: null } as never);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Linha ligada à transferência entre contas."); onFeito(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const lista = q.data ?? [];
+  return (
+    <div className="mt-3 flex min-h-0 flex-1 flex-col">
+      <div className="relative">
+        <Search aria-hidden className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
+        <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Conta, referência ou valor da transferência"
+          className="h-12 w-full rounded-[12px] border border-line bg-surface pl-10 pr-3 text-base outline-none focus:border-champagne" />
+      </div>
+      <p className="mt-2 text-xs text-ledger-muted">
+        Transferências entre contas já lançadas que passam por esta conta (até 15 dias da linha, ou de qualquer data pela busca) e ainda não estão
+        ligadas a outra linha. A linha fica conferida, sem receita nem despesa; dá para desfazer com motivo.
+      </p>
+      <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+        {q.isLoading && <Skeleton className="h-24 w-full" />}
+        {q.error && <p className="text-sm text-destructive">{(q.error as Error).message}</p>}
+        {!q.isLoading && !q.error && lista.length === 0 && (
+          <div className="rounded-[14px] bg-cream-2 p-6 text-center text-sm text-ledger-muted">Nenhuma transferência entre contas encontrada.</div>
+        )}
+        {lista.map((t) => {
+          const igual = t.valor_cents === valorLinha;
+          return (
+            <div key={t.id} className="flex items-center gap-4 rounded-[14px] border-2 border-line bg-surface p-4">
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold text-ledger-text">{t.conta_origem ?? "?"} → {t.conta_destino ?? "?"}</p>
+                <p className="truncate text-sm text-ledger-muted">{dataBR(t.data)}{t.referencia ? ` · ${t.referencia}` : ""}{t.motivo ? ` · ${t.motivo}` : ""}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold tabular-nums text-ledger-text">{formatBRLFromCents(t.valor_cents)}</p>
+                <p className={`text-[11px] font-semibold ${igual ? "text-bronze" : "text-ledger-muted"}`}>{igual ? "valor igual" : "valor diferente"}</p>
+              </div>
+              <button type="button" className="admin-btn" disabled={!podeLigar || !igual || ligar.isPending}
+                title={igual ? "Ligar esta linha a esta transferência" : "O valor precisa ser igual ao da linha"}
+                onClick={() => ligar.mutate(t)}>
                 <Link2 className="size-4" /> Ligar
               </button>
             </div>

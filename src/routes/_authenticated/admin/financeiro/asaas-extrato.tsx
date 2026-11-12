@@ -106,7 +106,7 @@ function ExtratoAsaas() {
             {sync.isPending ? "Buscando no Asaas…" : "Buscar movimentações do Asaas"}
           </button>
           <span className="text-xs font-medium text-ledger-muted">
-            {ultimaTxt}. O sistema sincroniza sozinho uma vez por manhã; depois, só quando você clicar.
+            {ultimaTxt}. O sistema busca sozinho de hora em hora; o botão busca na hora.
           </span>
         </div>
       )}

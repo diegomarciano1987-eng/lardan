@@ -253,3 +253,5 @@
 - [ ] Publicar 0283 (aguarda aprovação)
 
 - [x] 0298 Fotos próprias da consultora na vitrine (Estúdio > Organização e Minha maleta), catálogo oficial intocado
+- [x] 0299 Baixa no Lardan espelhada no Asaas: antiga cancelada, nova pelo saldo, rotina a cada minuto, painel com decisões; saneamento das 7 cobranças feito e conferido no Asaas
+- [ ] Publicar 0299 (quadro na tela e rotina de 1 minuto só valem no site publicado)

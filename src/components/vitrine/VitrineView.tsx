@@ -9,6 +9,7 @@ import { brl, imagem, type VitrineItem } from "@/lib/maletas";
 import { linhaPeca, urlPublica } from "@/lib/pedido-publico";
 
 import { designPadrao, whatsappLink, type DesignVitrine } from "@/lib/vitrine-design";
+import { SITE_URL } from "@/lib/seo";
 
 type Item = VitrineItem & { midias?: string[]; ilustracao?: string | null };
 
@@ -310,7 +311,7 @@ function CapaPadrao(p: {
         {p.frase && <p className="cl-frase mt-3 max-w-md">{p.frase}</p>}
         {p.horarios && <p className="cl-pilula mt-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5"><Clock aria-hidden className="size-4" />{p.horarios}</p>}
         <div className="mt-6 flex w-full flex-col gap-3 @3xl:flex-row @3xl:flex-wrap @3xl:items-center @3xl:justify-center">
-          <a href={p.previa ? undefined : "/a-lardan"} target="_blank" rel="noreferrer" className="cl-conheca inline-flex items-center justify-center gap-2 self-center rounded-full px-5 @3xl:order-2">
+          <a href={p.previa ? undefined : SITE_URL} target="_blank" rel="noreferrer" className="cl-conheca inline-flex items-center justify-center gap-2 self-center rounded-full px-5 @3xl:order-2">
             <svg viewBox="0 0 3234.59 2206.02" aria-hidden="true" className="cl-conheca-gema"><path fillRule="evenodd" fill="currentColor" d={DIAMANTE} /></svg>
             Conheça a Lardan
           </a>

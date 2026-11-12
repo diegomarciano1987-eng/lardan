@@ -2080,6 +2080,13 @@
       "when": 1794497549428,
       "tag": "0296_asaas_par_antecipacao_alias_0296",
       "breakpoints": true
+    },
+    {
+      "idx": 297,
+      "version": "7",
+      "when": 1794503025215,
+      "tag": "0297_asaas_pente_fino_0297",
+      "breakpoints": true
     }
   ]
 }

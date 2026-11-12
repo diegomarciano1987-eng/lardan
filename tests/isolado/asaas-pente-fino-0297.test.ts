@@ -34,12 +34,12 @@ async function receber(party: string, valor: number, venc = "2026-10-10") {
   return { title: t.dados, inst };
 }
 /** Cobrança do Asaas já ligada à parcela do Lardan. */
-async function cobranca(party: string, inst: string | null, valor: number, ref: string | null = null, status = "PENDING") {
+async function cobranca(party: string, r: { title: string; inst: string } | null, valor: number, ref: string | null = null, status = "PENDING") {
   const ext = `pay_${marca()}`;
   const id = (await oficial<{ id: string }>(
-    `insert into public.asaas_charges (account_id, external_id, customer_external_id, value_cents, due_date, billing_type, external_status, party_id, installment_id, raw, reconcile_status)
-     values ($1,$2,'cus_iso',$3,'2026-10-10','BOLETO',$7,$4,$5,$6::text::jsonb,'pendente') returning id`,
-    [acc, ext, valor, party, inst, JSON.stringify(ref ? { externalReference: ref } : {}), status])).id;
+    `insert into public.asaas_charges (account_id, external_id, customer_external_id, value_cents, due_date, billing_type, external_status, party_id, title_id, installment_id, raw, reconcile_status)
+     values ($1,$2,'cus_iso',$3,'2026-10-10','BOLETO',$7,$4,$8,$5,$6::text::jsonb,$9) returning id`,
+    [acc, ext, valor, party, r?.inst ?? null, JSON.stringify(ref ? { externalReference: ref } : {}), status, r?.title ?? null, r ? "vinculado" : "pendente"])).id;
   return { id, ext };
 }
 /** O que a busca da manhã grava quando o Asaas devolve a cobrança. */
@@ -63,7 +63,7 @@ describe("0297 — alerta na hora", () => {
   test("cobrança excluída no Asaas (deleted=true) vira DELETED no espelho e abre alerta da parcela em aberto", async () => {
     const p = await pessoa();
     const r = await receber(p, 51316);
-    const c = await cobranca(p, r.inst, 51316);
+    const c = await cobranca(p, r, 51316);
     await espelhar(c.ext, { value: 513.16, deleted: true });
     expect((await um<{ s: string }>(`select external_status s from public.asaas_charges where id=$1`, [c.id])).s).toBe("DELETED");
     expect(await alertas(c.id)).toEqual([{ tipo: "cobranca_excluida", resolvido: false }]);
@@ -75,8 +75,8 @@ describe("0297 — alerta na hora", () => {
   test("parcela que ainda tem outra cobrança viva no Asaas não é fantasma: sem alerta", async () => {
     const p = await pessoa();
     const r = await receber(p, 60000);
-    const a = await cobranca(p, r.inst, 30000);
-    await cobranca(p, r.inst, 30000);
+    const a = await cobranca(p, r, 30000);
+    await cobranca(p, r, 30000);
     await espelhar(a.ext, { deleted: true });
     expect(await alertas(a.id)).toEqual([]);
   });
@@ -84,7 +84,7 @@ describe("0297 — alerta na hora", () => {
   test("valor alterado no Asaas abre alerta com antes e depois; cobrança restaurada fecha o alerta de exclusão", async () => {
     const p = await pessoa();
     const r = await receber(p, 30000);
-    const c = await cobranca(p, r.inst, 30000);
+    const c = await cobranca(p, r, 30000);
     await espelhar(c.ext, { value: 250 });
     const al = await um<{ antes: { valor_cents: number }; depois: { valor_cents: number } }>(
       `select antes, depois from public.asaas_divergencia_alertas where charge_id=$1 and tipo='valor_alterado'`, [c.id]);
@@ -100,7 +100,7 @@ describe("0297 — parcela fantasma só cancela por pessoa, com motivo e desfaze
   test("cancelar exige motivo; cancela o título, fecha o alerta e o desfazer reativa", async () => {
     const p = await pessoa();
     const r = await receber(p, 51316);
-    const c = await cobranca(p, r.inst, 51316);
+    const c = await cobranca(p, r, 51316);
     await espelhar(c.ext, { value: 513.16, deleted: true });
     expect((await rpc(master, "asaas_fantasma_cancelar", { _inst: r.inst, _motivo: "" })).erro).toContain("motivo");
     const ok = await rpc<{ fantasma_id: string; saldo_cents: number }>(master, "asaas_fantasma_cancelar", { _inst: r.inst, _motivo: "Excluída no Asaas e reparcelada" });
@@ -116,21 +116,21 @@ describe("0297 — parcela fantasma só cancela por pessoa, com motivo e desfaze
   test("recusa quando a cobrança ainda está viva no Asaas", async () => {
     const p = await pessoa();
     const r = await receber(p, 10000);
-    await cobranca(p, r.inst, 10000);
+    await cobranca(p, r, 10000);
     expect((await rpc(master, "asaas_fantasma_cancelar", { _inst: r.inst, _motivo: "teste de trava" })).erro).toContain("viva no Asaas");
   });
 
   test("cliente com processo judicial fica para decisão manual, salvo se a mesma fatura já foi renegociada em outra parcela", async () => {
     const p = await pessoa();
-    await adm.unsafe(`insert into public.cob_judicial_processos (party_id, nome, numero_processo) values ($1,'ISO','0000001-00.2026.8.16.0001')`, [p]);
+    await adm.unsafe(`insert into public.cob_judicial_processos (origem_chave, party_id, nome, numero_processo) values ($2,$1,'ISO','0000001-00.2026.8.16.0001')`, [p, `iso0297:${marca()}`]);
     const r = await receber(p, 40883);
-    const c = await cobranca(p, r.inst, 40883, `ISO${marca()}`);
+    const c = await cobranca(p, r, 40883, `ISO${marca()}`);
     await espelhar(c.ext, { deleted: true });
     expect((await rpc(master, "asaas_fantasma_cancelar", { _inst: r.inst, _motivo: "teste judicial" })).erro).toContain("processo judicial");
     // a mesma fatura (mesma referência) reparcelada no Asaas e já ligada a outra parcela do Lardan = dívida em dobro
     const ref = (await um<{ r: string }>(`select raw->>'externalReference' r from public.asaas_charges where id=$1`, [c.id])).r;
     const nova = await receber(p, 30159);
-    await cobranca(p, nova.inst, 30159, ref);
+    await cobranca(p, nova, 30159, ref);
     const ok = await rpc<{ renegociada: boolean }>(master, "asaas_fantasma_cancelar", { _inst: r.inst, _motivo: "Reparcelada em 3x no Asaas" });
     expect(ok.erro).toBeNull();
     expect(ok.dados.renegociada).toBe(true);
@@ -160,7 +160,7 @@ describe("0297 — Mesa e comparação", () => {
   test("comparação por pessoa: R$ 500 em aberto no Lardan e R$ 300 no Asaas = Lardan maior", async () => {
     const p = await pessoa(`ISO 0297 compara ${marca()}`);
     const r = await receber(p, 50000);
-    await cobranca(p, r.inst, 30000);
+    await cobranca(p, r, 30000);
     const pf = await rpc<{ pessoas: { nome: string; categoria: string; lardan_cents: number; asaas_cents: number }[] }>(master, "asaas_pente_fino", { _limite: 5000 });
     expect(pf.erro).toBeNull();
     const eu = pf.dados.pessoas.find((x) => x.nome.startsWith("ISO 0297 compara"));

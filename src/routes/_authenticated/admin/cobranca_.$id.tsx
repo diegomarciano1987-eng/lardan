@@ -13,6 +13,7 @@ import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPess
 import { DateField } from "@/components/premium/DateField";
 import { AbaJudicial, FormProcesso } from "@/components/admin/cobranca/Judicial";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
+import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
 import {
   devedor, registrar, moverEtapa, criarPromessa, cancelarPromessa, criarTarefa, concluirTarefa,
   brl, dataBR, hojeSP, suspensao, suspender, ETAPAS, rotuloEtapa, ROTULO_TIPO, ROTULO_PROMESSA, type Etapa,
@@ -40,6 +41,7 @@ function Cockpit() {
   const [editar, setEditar] = React.useState(false);
   const [encaminhar, setEncaminhar] = React.useState(false);
   const [ligando, setLigando] = React.useState(false);
+  const [tituloAberto, setTituloAberto] = React.useState<{ id: string; parcela: string; baixa: boolean } | null>(null);
   const recarregar = () => qc.invalidateQueries({ queryKey: ["cob"] });
   const alternarSuspensao = async () => {
     const s = !susp.data?.suspensa;
@@ -199,17 +201,31 @@ function Cockpit() {
       {aba === "titulos" && (
         <div className="overflow-hidden rounded-xl border border-border bg-card">
           <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left text-xs text-muted-foreground"><tr>{["Título", "Vencimento", "Valor", "Saldo", "Atraso", "Eventos"].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}</tr></thead>
+            <thead className="bg-muted/40 text-left text-xs text-muted-foreground"><tr>{["Título", "Vencimento", "Valor", "Saldo", "Atraso", "Eventos", "Ações"].map((h) => <th key={h} className="px-4 py-3">{h}</th>)}</tr></thead>
             <tbody>{d.parcelas.map((p) => (
               <tr key={p.installment_id} className="border-t border-border">
-                <td className="px-4 py-3">{p.numero ?? "—"}</td><td className="px-4 py-3">{dataBR(p.vencimento)}</td>
+                <td className="px-4 py-3">
+                  <button type="button" onClick={() => setTituloAberto({ id: p.title_id, parcela: p.installment_id, baixa: false })} title="Abrir a ficha do título"
+                    className="font-mono font-semibold text-primary underline-offset-2 hover:underline">{p.numero ?? "Abrir título"}</button>
+                </td><td className="px-4 py-3">{dataBR(p.vencimento)}</td>
                 <td className="px-4 py-3 font-mono">{brl(Number(p.valor_cents))}</td><td className="px-4 py-3 font-mono">{brl(Number(p.saldo_cents))}</td>
                 <td className={`px-4 py-3 ${p.atraso > 0 ? "text-destructive" : ""}`}>{p.atraso} dias</td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">{d.interacoes.filter((i) => i.installment_ids.includes(p.installment_id)).length} interação(ões) · {d.recebimentos.filter((r) => r.installment_id === p.installment_id).length} baixa(s)</td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    <button type="button" onClick={() => setTituloAberto({ id: p.title_id, parcela: p.installment_id, baixa: true })}
+                      className="h-8 rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground">Receber</button>
+                    <button type="button" onClick={() => setTituloAberto({ id: p.title_id, parcela: p.installment_id, baixa: false })}
+                      className="h-8 rounded-lg border border-border px-3 text-xs font-medium">Ficha completa</button>
+                  </div>
+                </td>
               </tr>))}</tbody>
           </table>
+          <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground">Na ficha do título: receber total ou parcial, pago de outra forma, editar vencimento e valor da parcela, cobrar ou cancelar no Asaas, cancelar o título e estornar baixa.</p>
         </div>
       )}
+      <TituloSheet id={tituloAberto?.id ?? null} parcelaInicial={tituloAberto?.parcela ?? null} focoBaixa={tituloAberto?.baixa ?? false}
+        onOpenChange={(v) => { if (!v) { setTituloAberto(null); recarregar(); } }} />
       {aba === "linha" && (
         <ol className="space-y-2">
           {[

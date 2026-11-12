@@ -1,5 +1,7 @@
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
 import { cockpitFinanceiro, notasEFechamentos, brl, dataBR, hojeSP, rotuloEtapa } from "@/lib/cobranca";
 import { CobrarParcelaAsaas } from "@/components/admin/financeiro/CobrarParcelaAsaas";
 import { FinanceiroSmallData, ResumoSmallData, useFinanceiroSmallData } from "./FinanceiroSmallData";
@@ -17,6 +19,8 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
   const sd = useFinanceiroSmallData(partyId);
   const nf = useQuery({ queryKey: ["cob", "notas-fechamentos", partyId], queryFn: () => notasEFechamentos(partyId) });
   const [aba, setAba] = React.useState<Aba | null>(null);
+  // 0301: todo título do cockpit abre a ficha oficial (parcelas, baixas, Asaas e histórico)
+  const [tituloAberto, setTituloAberto] = React.useState<{ id: string; parcela?: string | null } | null>(null);
   if (q.isLoading) return <p className="p-5 text-sm text-muted-foreground">Carregando o financeiro…</p>;
   if (q.error) return <p className="p-5 text-sm text-destructive">{(q.error as Error).message}</p>;
   const d = q.data!;
@@ -34,6 +38,19 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
       <p className={`mt-1 font-mono text-lg tabular-nums ${alerta ? "text-destructive" : ""}`}>{v}</p>
     </div>
   );
+  const AbrirTitulo = ({ id, numero, parcela }: { id?: string | null; numero?: string | null; parcela?: string | null }) =>
+    id ? (
+      <button type="button" onClick={() => setTituloAberto({ id, parcela })} title="Abrir a ficha do título"
+        className="font-mono font-semibold text-primary underline-offset-2 hover:underline">{numero ?? "Abrir título"}</button>
+    ) : <>{numero ?? "—"}</>;
+  const AbrirMaleta = ({ cycleId, texto }: { cycleId?: string | null; texto: React.ReactNode }) =>
+    cycleId ? (
+      <Link to="/admin/maletas/$id" params={{ id: cycleId }} title="Abrir a ficha da maleta"
+        className="font-semibold text-primary underline-offset-2 hover:underline">{texto}</Link>
+    ) : <>{texto}</>;
+  // maleta Lardan → ciclo (para as notas, que trazem só o código da maleta)
+  const cicloDaMaleta = new Map<string, string>();
+  for (const f of nf.data?.fechamentos ?? []) if (f.origem === "lardan" && f.maleta) cicloDaMaleta.set(`${f.remessa ?? ""}|${f.maleta}`, f.id);
   const vazio = (t: string) => <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">{t}</p>;
   const Tabela = ({ cab, linhas }: { cab: string[]; linhas: React.ReactNode[][] }) => (
     <div className="overflow-auto rounded-xl border border-border bg-card">
@@ -65,22 +82,22 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
         ))}
       </div>
       {abaAtual === "abertas" && (d.parcelas.length ? <Tabela cab={["Título", "Descrição", "Origem", "Vencimento", "Valor", "Saldo", "Atraso", "Asaas"]} linhas={d.parcelas.map((p) => [
-        p.numero ?? "—", p.descricao, p.origem === "fiado_historico" ? "Fiado" : p.origem ?? "Manual",
+        <AbrirTitulo id={p.title_id} numero={p.numero} parcela={p.installment_id} />, p.descricao, p.origem === "fiado_historico" ? "Fiado" : p.origem ?? "Manual",
         <span className={p.vencimento < hoje ? "text-destructive" : ""}>{dataBR(p.vencimento)}</span>,
         <span className="font-mono tabular-nums">{brl(Number(p.valor_cents))}</span>, <span className="font-mono tabular-nums">{brl(Number(p.saldo_cents))}</span>,
         p.atraso ? `${p.atraso} dias` : "—",
         <CobrarParcelaAsaas installmentId={p.installment_id} saldoCents={Number(p.saldo_cents)} vencimento={p.vencimento} compacto />])} /> : vazio("Sem débitos em aberto."))}
       {abaAtual === "fiado" && (d.fiado.length ? <>
         <p className="text-xs text-muted-foreground">Cada linha é a linha original da planilha de fiados, guardada sem alteração e ligada ao título a receber que ela gerou.</p>
-        <Tabela cab={["Lote / linha", "Data da cobrança", "Vencimento", "Parcela", "Valor", "Situação hoje"]} linhas={d.fiado.map((f) => [
-          `${f.lote} · ${f.linha}`, dataBR(f.data_cobranca), dataBR(f.vencimento), String(f.parcela),
+        <Tabela cab={["Lote / linha", "Título", "Data da cobrança", "Vencimento", "Parcela", "Valor", "Situação hoje"]} linhas={d.fiado.map((f) => [
+          `${f.lote} · ${f.linha}`, <AbrirTitulo id={f.title_id} numero={f.titulo ?? (f.title_id ? "Abrir título" : null)} />, dataBR(f.data_cobranca), dataBR(f.vencimento), String(f.parcela),
           <span className="font-mono tabular-nums">{brl(Number(f.valor_cents))}</span>, SIT[f.situacao_titulo ?? ""] ?? "—"])} />
       </> : vazio("Sem fiado importado para esta pessoa."))}
       {abaAtual === "recebimentos" && (d.recebimentos.length ? <Tabela cab={["Data", "Título", "Referência", "Valor"]} linhas={d.recebimentos.map((x) => [
-        dataBR(x.data), x.titulo ?? "—", x.referencia ?? "—",
+        dataBR(x.data), <AbrirTitulo id={x.title_id} numero={x.titulo} />, x.referencia ?? "—",
         <span className={`font-mono tabular-nums ${x.estorno ? "text-destructive" : ""}`}>{x.estorno ? "− " : ""}{brl(Number(x.valor_cents))}</span>])} /> : vazio("Sem pagamentos registrados."))}
       {abaAtual === "comissoes" && (d.comissoes.length ? <Tabela cab={["Data", "Indicada", "Venda da maleta", "%", "Comissão", "Situação"]} linhas={d.comissoes.map((c) => [
-        dataBR(c.data), c.indicada ?? "—", <span className="font-mono tabular-nums">{brl(Number(c.venda_cents))}</span>, `${c.percentual}%`,
+        dataBR(c.data), c.indicada_id ? <Link to="/admin/cobranca/$id" params={{ id: c.indicada_id }} title="Abrir o cockpit da indicada" className="font-semibold text-primary underline-offset-2 hover:underline">{c.indicada ?? "—"}</Link> : (c.indicada ?? "—"), <span className="font-mono tabular-nums">{brl(Number(c.venda_cents))}</span>, `${c.percentual}%`,
         <span className="font-mono tabular-nums">{brl(Number(c.comissao_cents))}</span>, c.status])} /> : vazio("Sem comissões de indicação."))}
       {abaAtual === "smalldata" && (sd.isLoading ? <p className="p-5 text-sm text-muted-foreground">Carregando o histórico do SmallData…</p>
         : sd.error ? <p className="p-5 text-sm text-destructive">{(sd.error as Error).message}</p>
@@ -91,7 +108,7 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
         <p className="text-xs text-muted-foreground">Cada maleta que ela recebeu, do SmallData e da Lardan: o que foi, o que voltou, o que vendeu, o acerto e as notas.</p>
         <Tabela cab={["Origem", "Remessa / maleta", "Enviada", "Fechamento", "Situação", "Peças env. / dev. / vend.", "Enviado", "Vendido", "Comissão", "A pagar / pago", "Notas"]} linhas={nf.data.fechamentos.map((f) => [
           f.origem === "lardan" ? "Lardan" : "SmallData",
-          <span>{f.remessa ?? "—"} · {f.maleta}</span>,
+          <span>{f.remessa ?? "—"} · <AbrirMaleta cycleId={f.origem === "lardan" ? f.id : null} texto={f.maleta} /></span>,
           dataBR(f.enviada), dataBR(f.fechamento),
           <span className={f.acerto_divergente ? "text-destructive" : ""}>{SIT_FECH[f.situacao] ?? f.situacao}{f.acerto_divergente ? " · divergente" : ""}{f.sem_cobranca ? " · sem cobrança" : ""}</span>,
           <span className="font-mono tabular-nums">{f.pecas_enviadas ?? "—"} / {f.pecas_devolvidas ?? "—"} / {f.pecas_vendidas ?? "—"}</span>,
@@ -109,14 +126,16 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
           `${n.numero ?? "—"}${n.serie ? ` / ${n.serie}` : ""}`,
           TIPO_NF[n.tipo] ?? n.natureza ?? n.tipo,
           n.cfop ?? "—",
-          `${n.remessa ?? "—"}${n.maleta ? ` · ${n.maleta}` : ""}`,
+          <span>{n.remessa ?? "—"}{n.maleta ? <> · <AbrirMaleta cycleId={n.origem === "lardan" ? cicloDaMaleta.get(`${n.remessa ?? ""}|${n.maleta}`) : null} texto={n.maleta} /></> : null}</span>,
           n.pecas ?? "—",
           <span className={`font-mono tabular-nums ${n.situacao === "cancelada" ? "line-through text-muted-foreground" : ""}`}>{brl(Number(n.valor_cents))}</span>,
           <span className={n.situacao === "cancelada" ? "text-destructive" : ""}>{SIT_NF[n.situacao ?? ""] ?? n.situacao ?? "—"}</span>])} />
       </> : vazio("Nenhuma nota fiscal encontrada para ela."))}
-      {abaAtual === "maletas" && (d.maletas.length ? <Tabela cab={["Ciclo", "Situação", "Peças", "Valor de referência", "Recebida", "Fechada"]} linhas={d.maletas.map((m) => [
-        String(m.ciclo), m.status, String(m.pecas ?? "—"), <span className="font-mono tabular-nums">{m.valor_cents != null ? brl(Number(m.valor_cents)) : "—"}</span>,
+      {abaAtual === "maletas" && (d.maletas.length ? <Tabela cab={["Maleta", "Situação", "Peças", "Valor de referência", "Recebida", "Fechada"]} linhas={d.maletas.map((m) => [
+        <AbrirMaleta cycleId={m.id} texto={m.codigo ? `${m.codigo} · ciclo ${m.ciclo}` : `Ciclo ${m.ciclo}`} />, m.status, String(m.pecas ?? "—"), <span className="font-mono tabular-nums">{m.valor_cents != null ? brl(Number(m.valor_cents)) : "—"}</span>,
         dataBR(m.recebida), dataBR(m.fechada)])} /> : vazio("Sem maletas."))}
+      <TituloSheet id={tituloAberto?.id ?? null} parcelaInicial={tituloAberto?.parcela ?? null}
+        onOpenChange={(v) => { if (!v) { setTituloAberto(null); void q.refetch(); } }} />
     </div>
   );
 }

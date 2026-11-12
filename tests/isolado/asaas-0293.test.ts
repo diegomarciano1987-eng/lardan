@@ -319,3 +319,69 @@ describe("0293 — Mesa", () => {
     expect(auto.dados.some((b) => b.id === velha.settlement)).toBe(true);
   });
 });
+
+describe("0295 — fechar a Mesa do Asaas", () => {
+  test("Pix desfeito e refeito: a linha do extrato liga sozinha à baixa nova (chave :refeita:1), sem lançamento a mais", async () => {
+    const p = await pessoa();
+    const { ch, ext } = await cobranca(p, 6100);
+    const l = await linha("entrada", 6100, { type: "PAYMENT_RECEIVED", paymentId: ext, description: "Cobrança recebida - fatura nr. 955000001 ISO" });
+    const r1 = await receber(ch);
+    expect(r1.dados.acao).toBe("titulo_3_1_1");
+    expect(await statusLinha(l)).toBe("conciliada");
+    expect((await rpc(master, "asaas_auto_desfazer", { _decisao: r1.dados.decisao, _motivo: "regra mudou" })).erro).toBeNull();
+    expect(await statusLinha(l)).toBe("pendente");
+    const r2 = await receber(ch);
+    expect(r2.erro).toBeNull();
+    expect(await statusLinha(l)).toBe("conciliada");
+    const k = await um<{ k: string }>(
+      `select rc.idempotency_key k from public.financial_reconciliation_allocations ra join public.financial_reconciliations rc on rc.id=ra.reconciliation_id
+        where ra.line_id=$1 and rc.status='ativa'`, [l]);
+    expect(k.k).toBe(`asaas:extrato-auto:${ext}:refeita:1`);
+    const ativas = await um<{ c: number }>(
+      `select count(*)::int c from public.financial_settlements s where s.idempotency_key like $1 and not s.is_reversal
+         and not exists (select 1 from public.financial_settlements x where x.reversed_of = s.id)`, [`asaas:baixa:${acc}:%${ext}`]);
+    expect(ativas.c).toBe(1);
+  });
+
+  test("cartão antecipado: recebimento + baixa da antecipação do mesmo dia ficam conferidos juntos, sem lançamento; desfazer volta as duas", async () => {
+    const ant = `ant-${marca()}`;
+    const fat = "932857000";
+    const venda = await baixaImportada("receivable", `Venda PDV ISO fatura ${fat}`, 7618, "2026-10-13");
+    const cred = await linha("entrada", 7618, { type: "RECEIVABLE_ANTICIPATION_GROSS_CREDIT", anticipationId: ant, description: `Antecipação - fatura nr. ${fat} ISO SAYLLA` }, "2026-10-13");
+    expect((await rpc(master, "fin_reconcile_baixa_existente", { _line_ids: [cred], _settlement: venda.settlement, _idempotency_key: `iso-ant-${ant}`, _observacao: "ISO" })).erro).toBeNull();
+    const pay = `pay_${marca()}`;
+    const rec = await linha("entrada", 7618, { type: "PAYMENT_RECEIVED", paymentId: pay, description: `Cobrança recebida - fatura nr. ${fat} ISO SAYLLA` }, "2026-11-11");
+    const deb = await linha("saida", 7618, { type: "RECEIVABLE_ANTICIPATION_DEBIT", anticipationId: ant, description: `Baixa da antecipação - fatura nr. ${fat} ISO SAYLLA` }, "2026-11-11");
+    // outra operação com a antecipação ainda não conciliada: não mexe
+    const ant2 = `ant-${marca()}`;
+    await linha("entrada", 5000, { type: "RECEIVABLE_ANTICIPATION_GROSS_CREDIT", anticipationId: ant2, description: "Antecipação - fatura nr. 932857111 ISO" }, "2026-10-13");
+    const rec2 = await linha("entrada", 5000, { type: "PAYMENT_RECEIVED", paymentId: `pay_${marca()}`, description: "Cobrança recebida - fatura nr. 932857111 ISO" }, "2026-11-11");
+    const deb2 = await linha("saida", 5000, { type: "RECEIVABLE_ANTICIPATION_DEBIT", anticipationId: ant2, description: "Baixa da antecipação - fatura nr. 932857111 ISO" }, "2026-11-11");
+    const antesSaldo = await saldoRazao();
+    const antesTit = await titulos();
+    const r = await rodarExtrato();
+    expect(r.erro).toBeNull();
+    expect(await statusLinha(rec)).toBe("ignorada");
+    expect(await statusLinha(deb)).toBe("ignorada");
+    expect(await statusLinha(rec2)).toBe("pendente");
+    expect(await statusLinha(deb2)).toBe("pendente");
+    expect(await saldoRazao()).toBe(antesSaldo);
+    expect(await titulos()).toBe(antesTit);
+    const e = await um<{ id: string; valor: number }>(`select id, valor_cents::int valor from public.asaas_auto_extrato where tipo='antecipacao_par' and chave=$1`, [ant]);
+    expect(e.valor).toBe(7618);
+    expect((await rpc(master, "asaas_auto_extrato_desfazer", { _id: e.id, _motivo: "Conferir à mão" })).erro).toBeNull();
+    expect(await statusLinha(rec)).toBe("pendente");
+    expect(await statusLinha(deb)).toBe("pendente");
+    await rodarExtrato();
+    expect(await statusLinha(rec)).toBe("pendente");
+  });
+
+  test("sugestão da Mesa para recebimento do Asaas traz a pessoa da cobrança", async () => {
+    const p = await pessoa("ISO Sayla Cobrança");
+    const { ext } = await cobranca(p, 4321);
+    const l = await linha("entrada", 4321, { type: "PAYMENT_RECEIVED", paymentId: ext, description: "Cobrança recebida - fatura nr. 955000777 ISO SAYLA" });
+    const s = await rpc<{ party_id: string | null }>(master, "fin_mesa_palpite", { _line: l });
+    expect(s.erro).toBeNull();
+    expect(s.dados.party_id).toBe(p);
+  });
+});

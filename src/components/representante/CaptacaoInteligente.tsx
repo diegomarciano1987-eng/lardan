@@ -173,7 +173,7 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
               {aberto === c.lead_id && c.party_id && (
                 <div className="mt-3 space-y-3">
                   <CpfRapido rep={rep} party={c.party_id} temNaCandidatura={!!c.tem_cpf} />
-                  <AssinaturaDigital party={c.party_id} rep={rep} />
+                  <AssinaturaDigital party={c.party_id} rep={rep} telefone={c.whatsapp} />
                 </div>
               )}
             </li>
@@ -261,7 +261,7 @@ export function DocumentosNovasConsultoras({ rep }: { rep: string }) {
             {aberto === c.lead_id && (
               <div className="mt-3 space-y-3">
                 <CpfRapido rep={rep} party={c.party_id!} temNaCandidatura={!!c.tem_cpf} />
-                <AssinaturaDigital party={c.party_id!} rep={rep} />
+                <AssinaturaDigital party={c.party_id!} rep={rep} telefone={c.whatsapp} />
               </div>
             )}
           </li>

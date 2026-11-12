@@ -1,5 +1,19 @@
 # Roadmap
 
+## Pacote 0293 — ajustes do Asaas pedidos pelo Diego (12/11/2026)
+- [ ] 1/8. Pix com maleta aberta entra em 3.1.1 ligado à consultora (adiantamento); as 21 exceções de maleta aberta passam pela regra nova.
+- [ ] 2. Acerto abate os Pix que a consultora já pagou (adiantamentos); o que sobrar vira o título do acerto.
+- [ ] 3. Negativação (Serasa/SPC) em 4.1.5: títulos mensais existentes e novos.
+- [ ] 4. Tarifa de boleto em 4.1.2 (lançadas pelo automático e novas).
+- [ ] 5. Pix/TED e demais tarifas continuam em 5.1.3.
+- [ ] 6. Texto do extrato ("de hora em hora") + publicar painel, Mesa e extrato.
+- [ ] 7a. Mesa: linha com mesmo nº de fatura e valor de baixa já importada liga sozinha (antecipação, taxa de antecipação, taxa de cartão).
+- [ ] 7b. Mesa: opção "ligar a uma transferência interna".
+- [ ] 7c. Mesa: "Baixas já realizadas" busca fora da janela de 60 dias (nº da fatura, pay_).
+- [ ] 9. TED judicial: 7.1.7 + centro de custo Administrativo (automático, Mesa e os já lançados).
+- [ ] Testes isolados + regras no AGENTS.md + memória.
+
+
 ## Pacote 0275 — resistência para o pico (08/11/2026)
 - [x] Nota fiscal (produção ligada): falha de rede/tempo/5xx com a Focus confere pela mesma referência antes de liberar outra nota; fila confere sozinha as notas sem resposta; fila fiscal reservada por 5 min.
 - [x] Correios: um pedido de token só no pico (sem estourar o limite de 3/s); 401 renova o token e tenta uma vez.

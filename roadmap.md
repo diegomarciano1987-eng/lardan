@@ -1,5 +1,12 @@
 # Roadmap
 
+## Pacote 0301 — pedido do Diego 12/11/2026 17:36
+- [ ] 1. CRM de candidaturas: tirar testes (Diego Marciano, Davi Fiamengo, Cinthia Fiamengo, TESTE) e candidatas que já têm maleta (ex.: Noeli Santana) → aba "Concluídos".
+- [ ] 2. Cobrar pelo Asaas: botão "Cancelar cobrança" (vencimento errado).
+- [ ] 3. Cockpit da consultora: atalho exato para título/documento/pagamento em todas as abas.
+- [ ] 4. Nota fiscal automática: LIGAR (Diego confirmou). Só maletas próximas; 34 na rua aguardam resposta. PDV fica fora.
+- [ ] 5. Limpeza geral de vendas com Diego Marciano, Daniel Maciel e Larissa Persinato como CLIENTES (nunca o papel de representante do Daniel).
+
 ## Pacote 0293/0294 — ajustes do Asaas pedidos pelo Diego (12/11/2026)
 - [x] 1/8. Pix com maleta aberta entra em 3.1.1 ligado à consultora (adiantamento); 21 exceções (R$ 5.075,76, 20 consultoras) já passaram pela regra nova. Joyce (R$ 166,75, valor que não casa) segue na exceção.
 - [x] 2. Acerto abate os Pix que a consultora já pagou pelo app; o resto vira o título do acerto (e a conferência abate o que entrar depois).

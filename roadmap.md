@@ -1,18 +1,19 @@
 # Roadmap
 
-## Pacote 0293 — ajustes do Asaas pedidos pelo Diego (12/11/2026)
-- [ ] 1/8. Pix com maleta aberta entra em 3.1.1 ligado à consultora (adiantamento); as 21 exceções de maleta aberta passam pela regra nova.
-- [ ] 2. Acerto abate os Pix que a consultora já pagou (adiantamentos); o que sobrar vira o título do acerto.
-- [ ] 3. Negativação (Serasa/SPC) em 4.1.5: títulos mensais existentes e novos.
-- [ ] 4. Tarifa de boleto em 4.1.2 (lançadas pelo automático e novas).
-- [ ] 5. Pix/TED e demais tarifas continuam em 5.1.3.
-- [ ] 6. Texto do extrato ("de hora em hora") + publicar painel, Mesa e extrato.
-- [ ] 7a. Mesa: linha com mesmo nº de fatura e valor de baixa já importada liga sozinha (antecipação, taxa de antecipação, taxa de cartão).
-- [ ] 7b. Mesa: opção "ligar a uma transferência interna".
-- [ ] 7c. Mesa: "Baixas já realizadas" busca fora da janela de 60 dias (nº da fatura, pay_).
-- [ ] 9. TED judicial: 7.1.7 + centro de custo Administrativo (automático, Mesa e os já lançados).
-- [ ] Testes isolados + regras no AGENTS.md + memória.
-
+## Pacote 0293/0294 — ajustes do Asaas pedidos pelo Diego (12/11/2026)
+- [x] 1/8. Pix com maleta aberta entra em 3.1.1 ligado à consultora (adiantamento); 21 exceções (R$ 5.075,76, 20 consultoras) já passaram pela regra nova. Joyce (R$ 166,75, valor que não casa) segue na exceção.
+- [x] 2. Acerto abate os Pix que a consultora já pagou pelo app; o resto vira o título do acerto (e a conferência abate o que entrar depois).
+- [x] 3. Negativação em 4.1.5: títulos de agosto e setembro reclassificados (R$ 326,70) e os novos já nascem em 4.1.5.
+- [x] 4. Tarifa de boleto em 4.1.2: 90 tarifas (R$ 179,10) reclassificadas; novas já nascem em 4.1.2.
+- [x] 5. Pix/TED e demais tarifas seguem 5.1.3; notificações seguem 5.1.1.
+- [x] 6. Texto do extrato corrigido ("de hora em hora"; a rotina já roda de hora em hora). Publicar — aguardando o Diego clicar em Publicar.
+- [x] 7a. Mesma fatura + mesmo valor de baixa importada liga sozinho (2 tarifas de cartão duplicadas desfeitas e religadas).
+- [x] 7b. Mesa: aba "Transferência interna".
+- [x] 7c. Mesa: "Baixas já realizadas" acha a baixa da própria cobrança e busca fora dos 60 dias (Eliane 871021163 aparece).
+- [x] 9. TED judicial: 7.1.7 + Administrativo (automático, palpite da Mesa e os 3 TEDs do Asaas já lançados).
+- [ ] Aguardando Diego: mudar também para Administrativo os 7.1.7 antigos do banco/planilha (25 do Santander, 145 da planilha, 9 manuais)?
+- [ ] Aguardando Diego: as 3 transferências de R$ 300 marcadas "Ignorar" podem ser religadas pela aba nova (opcional).
+- [x] Testes: 12 novos + 2 antigos atualizados; bancada completa 825/825 (antes do 0294) e baterias do Asaas/acerto 39/39 depois.
 
 ## Pacote 0275 — resistência para o pico (08/11/2026)
 - [x] Nota fiscal (produção ligada): falha de rede/tempo/5xx com a Focus confere pela mesma referência antes de liberar outra nota; fila confere sozinha as notas sem resposta; fila fiscal reservada por 5 min.

@@ -2038,6 +2038,13 @@
       "when": 1794441257319,
       "tag": "0290_showcase_publish_sem_retentativa",
       "breakpoints": true
+    },
+    {
+      "idx": 291,
+      "version": "7",
+      "when": 1794487778309,
+      "tag": "0291_migration",
+      "breakpoints": true
     }
   ]
 }

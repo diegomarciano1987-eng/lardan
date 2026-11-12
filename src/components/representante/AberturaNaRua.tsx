@@ -261,7 +261,7 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
       <header className="border-b border-border px-5 pb-3 pt-[max(1rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between">
           <button type="button" aria-label="Voltar" disabled={passo === 0 || passo >= 2} onClick={() => setPasso((p) => p - 1)}
-            className="grid size-10 place-items-center rounded-full border border-border disabled:invisible"><ChevronLeft className="size-5" /></button>
+            className="grid size-11 place-items-center rounded-full border border-border disabled:invisible"><ChevronLeft className="size-5" /></button>
           <p className="text-base font-semibold">{feito ? primeiroNome(f.nome) : "Nova candidata"}</p>
           <button type="button" aria-label="Fechar" onClick={sair} className="grid size-11 place-items-center rounded-full border border-border"><X className="size-4" /></button>
         </div>

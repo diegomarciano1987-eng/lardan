@@ -136,6 +136,7 @@ function AreaRepresentante() {
       </div>
 
       <BarraCelular aba={aba} ir={ir} />
+      {rep && <AberturaHost rep={rep} />}
     </div>
     </OperationalGlass>
   );

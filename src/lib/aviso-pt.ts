@@ -28,7 +28,7 @@ const REGRAS: [RegExp, string][] = [
   [/quota|storage.*full|exceeded the quota/i, "O aparelho está sem espaço para guardar os dados."],
   [/file.*too large|payload too large|\b413\b/i, "O arquivo é grande demais."],
 ];
-const PALAVRAS_EN = /\b(the|failed|error|invalid|unable|cannot|could not|couldn't|request|unexpected|denied|missing|required|please|try again|something went wrong|is not|does not|must be|should be|only|already|undefined|null|object|function|status code)\b/i;
+const PALAVRAS_EN = /\b(the|failed|error|invalid|unable|cannot|could not|couldn't|request|unexpected|denied|missing|required|please|try again|something went wrong|is not|does not|must be|should be|only|already|undefined|null|object|function|status code|expired|violates|value|column|constraint|token|signer|document|payment|customer)\b/i;
 const MARCAS_PT = /[áàâãéêíóôõúç]|\b(não|nao|você|para|com|está|já|uma|ser|foi|tente|confira|falta|erro ao)\b/i;
 
 /** Parece inglês (e não português)? */
@@ -40,8 +40,9 @@ export function pareceIngles(t: string): boolean {
 export function avisoPt(t: string): string {
   const s = t.trim();
   if (!s) return s;
-  if (!pareceIngles(s)) return t;
+  if (MARCAS_PT.test(s)) return t;
   for (const [re, pt] of REGRAS) if (re.test(s)) return pt;
+  if (!pareceIngles(s)) return t;
   return "Não foi possível concluir agora. Tente de novo; se repetir, avise a Lardan.";
 }
 

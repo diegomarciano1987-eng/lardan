@@ -190,6 +190,27 @@ describe("0293 — Pix com maleta aberta e acerto", () => {
     expect(Number((await um<{ v: string }>(`select adiantado_cents v from public.kit_pre_baixas where cycle_id=$1`, [ciclo])).v)).toBe(13750);
   });
 
+  test("0294: Pix desfeito antes só é refeito à mão; refazer vira adiantamento com chave nova e uma baixa ativa só", async () => {
+    const outra = await criarConta({ nome: `cons-0294-${marca()}`, papeis: ["consultora"], comParty: true });
+    const kit = (await um<{ id: string }>(`insert into public.kits(code) values($1) returning id`, [`ISO-0294-${marca()}`])).id;
+    await adm.unsafe(`insert into public.kit_cycles (kit_id, cycle_no, consultora_party_id, status) values ($1, 1, $2, 'operacao')`, [kit, outra.partyId]);
+    const { ch, ext } = await cobranca(outra.partyId!, 8800);
+    const r1 = await receber(ch);
+    expect(r1.dados.acao).toBe("adiantamento_maleta");
+    expect((await rpc(master, "asaas_auto_desfazer", { _decisao: r1.dados.decisao, _motivo: "conferir à mão" })).erro).toBeNull();
+    const auto = await servico<{ acao: string; motivo: string }>(`public.asaas_auto_receber($1::uuid, false)`, [ch]);
+    expect(auto.dados.acao).toBe("ignorado");
+    const r2 = await receber(ch);
+    expect(r2.erro).toBeNull();
+    expect(r2.dados.acao).toBe("adiantamento_maleta");
+    const ativas = await um<{ c: number; k: string }>(
+      `select count(*)::int c, min(idempotency_key) k from public.financial_settlements s where s.idempotency_key like $1 and not s.is_reversal
+         and not exists (select 1 from public.financial_settlements x where x.reversed_of = s.id)`, [`asaas:baixa:${acc}:%${ext}`]);
+    expect(ativas.c).toBe(1);
+    expect(ativas.k).toBe(`asaas:baixa:${acc}:r1:${ext}`);
+    expect((await receber(ch)).dados.acao).toBe("ignorado");
+  });
+
   test("Pix sem maleta aberta e sem nada em aberto continua 3.1.1 comum", async () => {
     const p = await pessoa();
     const { ch } = await cobranca(p, 7000);

@@ -202,11 +202,7 @@ describe("0303 vencimento/valor do Lardan → mesma cobrança no Asaas", () => {
     expect((await rpc(consultora, "asaas_espelho_pedir", { _inst: c.inst, _motivo: "tentativa indevida" })).ok).toBe(false);
     expect((await rpc(fin, "asaas_espelho_pedir", { _inst: c.inst, _motivo: "x" })).ok).toBe(false);
     expect((await rpc(fin, "asaas_espelho_pedir", { _inst: c.inst, _motivo: "Asaas igual ao Lardan" })).erro).toBeNull();
-    await adm.begin(async (tx) => {
-      await tx.unsafe(`select set_config('lardann.asaas_link','on',true)`);
-      // o simulador também estava com a data do Asaas
-      await tx.unsafe(`select 1`);
-    });
+    // o "Asaas" simulado também estava com a data diferente
     await c.sim.atualizarCobranca(c.ext, { valueCents: 10000, dueDate: dia(25), billingType: "UNDEFINED" });
     await sync(c.sim);
     expect((await c.sim.consultarCobranca(c.ext))!.dueDate).toBe(dia(20));

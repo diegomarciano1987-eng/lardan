@@ -47,6 +47,8 @@ beforeAll(async () => {
   await ok(master, "kit_item_upsert", { _cycle: maletaMarcelo, _variant: v, _qty: 2 });
   await ok(master, "kit_conferir", { _cycle: maletaMarcelo, _note: null });
   await ok(master, "remessa_expedir_representante", { _remessa: rem });
+  const tr = ((await adm.unsafe(`select id from public.kit_transfers where cycle_id=$1 and status='transito' and to_party_id=$2 order by seq desc limit 1`, [maletaMarcelo, repMarcelo.partyId])) as { id: string }[])[0]!.id;
+  await ok(repMarcelo, "kit_transfer_confirm", { _transfer: tr, _payload: {} });
   await colab(tatiane, String(30000000 + base).slice(-8), { qualidade: "alterar" });
   await colab(outraColab, String(40000000 + base).slice(-8), { maletas: "ver" });
 });

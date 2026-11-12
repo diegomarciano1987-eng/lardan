@@ -1470,7 +1470,7 @@ body.consultora-glass-active {
   align-items: flex-start;
   gap: 0.9rem;
   width: 100%;
-  padding: 1.05rem 2.6rem 1.05rem 1.15rem;
+  padding: 1.05rem 3.6rem 1.05rem 1.15rem; /* 0300: espaço para o X grande */
   border-radius: 16px;
   border: 1px solid color-mix(in oklab, var(--color-champagne) 42%, transparent);
   background:
@@ -1545,14 +1545,15 @@ body.consultora-glass-active {
   color: color-mix(in oklab, var(--color-warm-ivory) 62%, transparent);
 }
 
+/* 0300: X de fechar grande (44 px), fácil de tocar no celular */
 .lardan-toast__close {
   position: absolute;
-  top: 0.7rem;
-  right: 0.7rem;
+  top: 0.55rem;
+  right: 0.55rem;
   display: grid;
   place-items: center;
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--color-warm-ivory) 18%, transparent);
   background: transparent;
@@ -1563,6 +1564,7 @@ body.consultora-glass-active {
     background 0.25s ease;
 }
 
+.lardan-toast__close svg { width: 1.1rem; height: 1.1rem; }
 .lardan-toast__close:hover {
   color: var(--color-warm-ivory);
   border-color: color-mix(in oklab, var(--color-champagne) 70%, transparent);

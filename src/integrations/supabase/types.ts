@@ -288,15 +288,64 @@ export type Database = {
           },
         ]
       }
+      asaas_adiantamento_usos: {
+        Row: {
+          adiantamento_id: string
+          criado_em: string
+          criado_por: string | null
+          id: string
+          momento: string
+          pre_baixa_id: string
+          valor_cents: number
+        }
+        Insert: {
+          adiantamento_id: string
+          criado_em?: string
+          criado_por?: string | null
+          id?: string
+          momento: string
+          pre_baixa_id: string
+          valor_cents: number
+        }
+        Update: {
+          adiantamento_id?: string
+          criado_em?: string
+          criado_por?: string | null
+          id?: string
+          momento?: string
+          pre_baixa_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_adiantamento_usos_adiantamento_id_fkey"
+            columns: ["adiantamento_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_maleta_adiantamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_adiantamento_usos_pre_baixa_id_fkey"
+            columns: ["pre_baixa_id"]
+            isOneToOne: false
+            referencedRelation: "kit_pre_baixas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_auto_config: {
         Row: {
+          boleto_chart_id: string | null
           corte: string
           extrato_ligado: boolean
           favorecido_party_id: string | null
           id: boolean
+          judicial_chart_id: string | null
+          judicial_cost_center_id: string | null
           juros_max_cents: number
           juros_max_pct: number
           ligado: boolean
+          negativacao_chart_id: string | null
           notificacao_chart_id: string | null
           notificacao_cost_center_id: string | null
           tarifa_chart_id: string | null
@@ -305,13 +354,17 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          boleto_chart_id?: string | null
           corte?: string
           extrato_ligado?: boolean
           favorecido_party_id?: string | null
           id?: boolean
+          judicial_chart_id?: string | null
+          judicial_cost_center_id?: string | null
           juros_max_cents?: number
           juros_max_pct?: number
           ligado?: boolean
+          negativacao_chart_id?: string | null
           notificacao_chart_id?: string | null
           notificacao_cost_center_id?: string | null
           tarifa_chart_id?: string | null
@@ -320,13 +373,17 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          boleto_chart_id?: string | null
           corte?: string
           extrato_ligado?: boolean
           favorecido_party_id?: string | null
           id?: boolean
+          judicial_chart_id?: string | null
+          judicial_cost_center_id?: string | null
           juros_max_cents?: number
           juros_max_pct?: number
           ligado?: boolean
+          negativacao_chart_id?: string | null
           notificacao_chart_id?: string | null
           notificacao_cost_center_id?: string | null
           tarifa_chart_id?: string | null
@@ -1607,6 +1664,59 @@ export type Database = {
             columns: ["title_id"]
             isOneToOne: false
             referencedRelation: "financial_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asaas_maleta_adiantamentos: {
+        Row: {
+          charge_id: string
+          criado_em: string
+          decisao_id: string | null
+          desfeito_em: string | null
+          desfeito_motivo: string | null
+          id: string
+          installment_id: string | null
+          maletas: string[]
+          party_id: string
+          settlement_id: string | null
+          title_id: string
+          valor_cents: number
+        }
+        Insert: {
+          charge_id: string
+          criado_em?: string
+          decisao_id?: string | null
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          id?: string
+          installment_id?: string | null
+          maletas?: string[]
+          party_id: string
+          settlement_id?: string | null
+          title_id: string
+          valor_cents: number
+        }
+        Update: {
+          charge_id?: string
+          criado_em?: string
+          decisao_id?: string | null
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          id?: string
+          installment_id?: string | null
+          maletas?: string[]
+          party_id?: string
+          settlement_id?: string | null
+          title_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_maleta_adiantamentos_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "asaas_charges"
             referencedColumns: ["id"]
           },
         ]
@@ -6558,6 +6668,63 @@ export type Database = {
         }
         Relationships: []
       }
+      fin_extrato_transferencias: {
+        Row: {
+          criado_em: string
+          criado_por: string | null
+          desfeito_em: string | null
+          desfeito_motivo: string | null
+          desfeito_por: string | null
+          financial_account_id: string
+          id: string
+          line_id: string
+          observacao: string | null
+          transfer_id: string
+          valor_cents: number
+        }
+        Insert: {
+          criado_em?: string
+          criado_por?: string | null
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          financial_account_id: string
+          id?: string
+          line_id: string
+          observacao?: string | null
+          transfer_id: string
+          valor_cents: number
+        }
+        Update: {
+          criado_em?: string
+          criado_por?: string | null
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          financial_account_id?: string
+          id?: string
+          line_id?: string
+          observacao?: string | null
+          transfer_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_extrato_transferencias_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "financial_statement_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_extrato_transferencias_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "financial_transfers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fin_orcamento: {
         Row: {
           chart_id: string | null
@@ -10446,6 +10613,7 @@ export type Database = {
       }
       kit_pre_baixas: {
         Row: {
+          adiantado_cents: number
           base_faixa_cents: number
           campo_em: string | null
           campo_por: string | null
@@ -10478,6 +10646,7 @@ export type Database = {
           vendido_final_cents: number | null
         }
         Insert: {
+          adiantado_cents?: number
           base_faixa_cents?: number
           campo_em?: string | null
           campo_por?: string | null
@@ -10510,6 +10679,7 @@ export type Database = {
           vendido_final_cents?: number | null
         }
         Update: {
+          adiantado_cents?: number
           base_faixa_cents?: number
           campo_em?: string | null
           campo_por?: string | null
@@ -19742,6 +19912,14 @@ export type Database = {
         }
         Returns: Json
       }
+      asaas_adiantamento_consumir: {
+        Args: { _max: number; _momento: string; _party: string; _pb: string }
+        Returns: number
+      }
+      asaas_adiantamento_disponivel: {
+        Args: { _party: string }
+        Returns: number
+      }
       asaas_ator_pode: {
         Args: { _actor: string; _cap: string }
         Returns: boolean
@@ -21359,9 +21537,21 @@ export type Database = {
       }
       fin_mesa_centros: { Args: never; Returns: Json }
       fin_mesa_contrapartes: { Args: { _busca?: string }; Returns: Json }
+      fin_mesa_desligar_transferencia: {
+        Args: { _line_id: string; _motivo: string }
+        Returns: Json
+      }
+      fin_mesa_ligar_transferencia: {
+        Args: { _line_id: string; _observacao?: string; _transfer_id: string }
+        Returns: Json
+      }
       fin_mesa_novo_conciliar: { Args: { _payload: Json }; Returns: Json }
       fin_mesa_palpite: { Args: { _line: string }; Returns: Json }
       fin_mesa_titulo_da_parcela: { Args: { _inst: string }; Returns: Json }
+      fin_mesa_transferencias: {
+        Args: { _busca?: string; _line_id: string }
+        Returns: Json
+      }
       fin_microtarifas_conciliar: {
         Args: { _ate?: string; _conta: string }
         Returns: Json

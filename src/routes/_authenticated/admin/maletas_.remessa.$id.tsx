@@ -84,6 +84,16 @@ function RemessaPage() {
   });
   const maletas = useQuery({ queryKey: ["remessas", "maletas", id], queryFn: () => maletasDaRemessa(id) });
   const notas = useNotasMaletas((maletas.data ?? []).map((m) => m.cycle_id));
+  const idsConsultoras = React.useMemo(() => [...new Set((maletas.data ?? []).map((m) => m.consultora_party_id).filter(Boolean) as string[])].sort(), [maletas.data]);
+  const codigos = useQuery({
+    queryKey: ["remessas", "codigos", idsConsultoras],
+    enabled: idsConsultoras.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("parties").select("id, code").in("id", idsConsultoras);
+      if (error) throw error;
+      return new Map((data ?? []).map((p) => [p.id, p.code as string | null]));
+    },
+  });
   const trocas = useTrocasPendentes(id);
   const trocaPorMaleta = React.useMemo(() => new Map((trocas.data ?? []).map((t) => [t.cycle_id, t])), [trocas.data]);
   // Master: remessa criada por engano (sem nenhuma maleta) cancela aqui mesmo, com motivo (remessa_cancelar_vazia)
@@ -358,6 +368,9 @@ function RemessaPage() {
                   <span className="mr-2 inline-flex h-6 items-center rounded-md bg-primary/10 px-2 align-middle text-xs font-bold tracking-wide text-primary tabular-nums" data-rotulo-maleta="">
                     {rotuloMaletaRemessa(m)}
                   </span>
+                )}
+                {m.consultora_party_id && codigos.data?.get(m.consultora_party_id) && (
+                  <span className="mr-2 align-middle text-sm font-semibold tabular-nums text-ledger-muted">[Cód. {codigos.data.get(m.consultora_party_id)}]</span>
                 )}
                 {m.consultora ?? `Com o representante${r.representante ? ` ${r.representante}` : ""} · sem consultora`}
               </Link>

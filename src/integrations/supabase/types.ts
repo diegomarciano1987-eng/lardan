@@ -22174,6 +22174,10 @@ export type Database = {
       legado_centavos: { Args: { _v: string }; Returns: number }
       legado_codigos_da_pessoa: { Args: { _party: string }; Returns: number[] }
       legado_consultora_dados: { Args: { _codclis: number[] }; Returns: Json }
+      legado_consultora_dados_rede: {
+        Args: { _codclis: number[] }
+        Returns: Json
+      }
       legado_consultora_dados_rep: {
         Args: { _codclis: number[]; _remessas: number[] }
         Returns: Json

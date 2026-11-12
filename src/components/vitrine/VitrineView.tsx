@@ -319,7 +319,7 @@ function CapaPadrao(p: {
               <MessageCircle aria-hidden className="size-5" /> Falar com {p.primeiroNome} no WhatsApp
             </a>
           )}
-          <div className={`grid gap-3 ${p.instagram ? "grid-cols-2" : "grid-cols-1"} @3xl:order-3 @3xl:flex`}>
+          <div className={`grid gap-3 ${p.instagram ? "grid-cols-2" : "grid-cols-1"} @3xl:order-3 @3xl:flex @3xl:basis-full @3xl:justify-center`}>
             <button type="button" onClick={p.onCompartilhar} className="cl-sec inline-flex items-center justify-center gap-2 rounded-full px-6"><Share2 aria-hidden className="size-4" /> Compartilhar</button>
             {p.instagram && <a href={p.previa ? undefined : p.instagram} target="_blank" rel="noreferrer" className="cl-sec inline-flex items-center justify-center gap-2 rounded-full px-6"><Instagram aria-hidden className="size-4" /> Instagram</a>}
           </div>

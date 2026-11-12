@@ -1796,7 +1796,7 @@ body:has([data-tela-cheia="sim"]) [data-bottom-dock] {
 .capa-lardan .cl-conheca { height: 38px; font-size: 13px; letter-spacing: .06em; color: var(--c-caramelo); background: linear-gradient(180deg, #FFFDFA, var(--c-pilula)); border: 1px solid color-mix(in srgb, var(--c-rose) 70%, transparent); box-shadow: 0 1px 0 #fff inset, 0 4px 14px -8px color-mix(in srgb, var(--c-caramelo) 45%, transparent); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
 .capa-lardan .cl-conheca:hover { transform: translateY(-1px); border-color: var(--c-rose); box-shadow: 0 1px 0 #fff inset, 0 8px 18px -10px color-mix(in srgb, var(--c-caramelo) 60%, transparent); }
 .capa-lardan .cl-conheca:focus-visible { outline: 2px solid var(--c-rose); outline-offset: 2px; }
-.capa-lardan .cl-conheca-gema { width: 17px; height: 12px; color: var(--c-rose); flex-shrink: 0; }
+.capa-lardan .cl-conheca-gema { width: 18px; height: 12px; color: var(--c-rotulo); flex-shrink: 0; }
 .capa-lardan .cl-confianca { border-top: 1px solid var(--c-linha); border-bottom: 1px solid var(--c-linha); color: var(--c-frase); }
 .capa-lardan .cl-confianca svg { color: var(--c-rotulo); }
 @container (min-width: 48rem) {

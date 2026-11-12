@@ -5,6 +5,7 @@ import { MeuFinanceiro } from "@/components/consultora/MeuFinanceiro";
 import { Indicacoes } from "@/components/consultora/Indicacoes";
 import { PedidosConsultora } from "@/components/consultora/PedidosConsultora";
 import { FotoPeca } from "@/components/FotoPeca";
+import { BotaoFotoPropria, useFotosProprias } from "@/components/vitrine/FotosPropriasMaleta";
 import * as React from "react";
 import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
@@ -109,6 +110,7 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
   const [catPeca, setCatPeca] = React.useState("");
   const [soDisp, setSoDisp] = React.useState(false);
   const opcoes = useQuery({ queryKey: ["consultora", "pecas", "opcoes"], queryFn: () => buscarPecas() });
+  const proprias = useFotosProprias(user.id);
   const catDe = React.useMemo(() => Object.fromEntries((opcoes.data ?? []).filter((p) => p.cycle_id === cycleId && p.categoria).map((p) => [p.variant_id, p.categoria as string])), [opcoes.data, cycleId]);
 
   const ficha = useQuery({
@@ -369,7 +371,9 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
           <div className="mt-4 space-y-3">
             {lista.map((b) => (
               <div key={b.variant_id} className="flex items-center gap-3">
-                <FotoPeca mediaId={b.media_id} variantId={b.variant_id} className="size-14 rounded-xl" />
+                {proprias.data?.mapa[b.variant_id]
+                  ? <img src={proprias.data.mapa[b.variant_id]} alt="" className="size-14 shrink-0 rounded-xl object-cover" loading="lazy" />
+                  : <FotoPeca mediaId={b.media_id} variantId={b.variant_id} className="size-14 rounded-xl" />}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">{b.produto}</p>
                   <p className="text-xs text-ledger-muted">
@@ -384,6 +388,10 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
                 >
                   {b.publicado ? "Na vitrine" : "Oculta"}
                 </button>
+                {proprias.data?.party && (
+                  <BotaoFotoPropria userId={user.id} party={proprias.data.party} variantId={b.variant_id} produto={b.produto}
+                    temPropria={proprias.data.tem.has(b.variant_id)} temOficial={!!b.media_id} />
+                )}
               </div>
             ))}
           </div>

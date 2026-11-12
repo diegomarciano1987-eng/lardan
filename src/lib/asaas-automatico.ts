@@ -72,7 +72,7 @@ export const payDaLinha = (linha: { kind: string | null; raw: Record<string, unk
 };
 
 /** 0286 — etapa B: o que o Asaas conferiu sozinho no extrato. */
-export type TipoExtratoAuto = "identificacao" | "tarifa" | "notificacoes" | "transferencia" | "negativacao" | "fatura_baixa";
+export type TipoExtratoAuto = "identificacao" | "tarifa" | "notificacoes" | "transferencia" | "negativacao" | "fatura_baixa" | "antecipacao_par";
 
 export const ROTULO_TIPO_EXTRATO: Record<TipoExtratoAuto, string> = {
   identificacao: "Título da planilha identificado",
@@ -80,6 +80,7 @@ export const ROTULO_TIPO_EXTRATO: Record<TipoExtratoAuto, string> = {
   notificacoes: "Notificações do mês (5.1.1)",
   negativacao: "Negativação Serasa/SPC do mês (4.1.5)",
   fatura_baixa: "Ligada à baixa já importada (mesma fatura)",
+  antecipacao_par: "Cartão antecipado: recebimento e baixa da antecipação (sem lançamento)",
   transferencia: "Transferência para o banco conferida",
 };
 

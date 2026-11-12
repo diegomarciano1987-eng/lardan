@@ -20,7 +20,7 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
   const nf = useQuery({ queryKey: ["cob", "notas-fechamentos", partyId], queryFn: () => notasEFechamentos(partyId) });
   const [aba, setAba] = React.useState<Aba | null>(null);
   // 0301: todo título do cockpit abre a ficha oficial (parcelas, baixas, Asaas e histórico)
-  const [tituloAberto, setTituloAberto] = React.useState<{ id: string; parcela?: string | null } | null>(null);
+  const [tituloAberto, setTituloAberto] = React.useState<{ id: string; parcela?: string | null | undefined } | null>(null);
   if (q.isLoading) return <p className="p-5 text-sm text-muted-foreground">Carregando o financeiro…</p>;
   if (q.error) return <p className="p-5 text-sm text-destructive">{(q.error as Error).message}</p>;
   const d = q.data!;
@@ -38,12 +38,12 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
       <p className={`mt-1 font-mono text-lg tabular-nums ${alerta ? "text-destructive" : ""}`}>{v}</p>
     </div>
   );
-  const AbrirTitulo = ({ id, numero, parcela }: { id?: string | null; numero?: string | null; parcela?: string | null }) =>
+  const AbrirTitulo = ({ id, numero, parcela }: { id?: string | null | undefined; numero?: string | null | undefined; parcela?: string | null | undefined }) =>
     id ? (
       <button type="button" onClick={() => setTituloAberto({ id, parcela })} title="Abrir a ficha do título"
         className="font-mono font-semibold text-primary underline-offset-2 hover:underline">{numero ?? "Abrir título"}</button>
     ) : <>{numero ?? "—"}</>;
-  const AbrirMaleta = ({ cycleId, texto }: { cycleId?: string | null; texto: React.ReactNode }) =>
+  const AbrirMaleta = ({ cycleId, texto }: { cycleId?: string | null | undefined; texto: React.ReactNode }) =>
     cycleId ? (
       <Link to="/admin/maletas/$id" params={{ id: cycleId }} title="Abrir a ficha da maleta"
         className="font-semibold text-primary underline-offset-2 hover:underline">{texto}</Link>

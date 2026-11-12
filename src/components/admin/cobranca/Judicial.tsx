@@ -220,7 +220,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
               <ul className="max-h-72 space-y-2 overflow-auto">{plano.map((x, i) => (
                 <li key={i} className="flex items-center gap-2 text-sm"><span className="w-8 text-xs text-ledger-muted">{i + 1}ª</span>
                   <div className="flex-1"><DateField value={paraData(x.data)} onChange={(d) => d && setManual(plano.map((y, k) => (k === i ? { ...y, data: iso(d) } : y)))} /></div>
-                  <input value={x.valor} onChange={(e) => setManual(plano.map((y, k) => (k === i ? { ...y, valor: e.target.value } : y)))} className="h-10 w-28 rounded-lg border border-line bg-surface px-3 text-right font-mono text-sm" />
+                  <input aria-label={`Valor da ${i + 1}ª parcela`} inputMode="decimal" autoComplete="off" value={x.valor} onChange={(e) => setManual(plano.map((y, k) => (k === i ? { ...y, valor: limparDinheiro(e.target.value) } : y)))} className="h-10 w-28 rounded-lg border border-line bg-surface px-3 text-right font-mono text-sm" />
                   <label data-testid={`jud-asaas-${i + 1}`} className={`flex h-10 w-40 cursor-pointer items-center gap-2 rounded-lg border px-2 text-xs font-semibold ${x.asaas ? "border-asaas/60 bg-asaas/10 text-asaas" : "border-bronze/50 bg-bronze/10 text-bronze"}`}>
                     <input type="checkbox" checked={x.asaas} onChange={(e) => setManual(plano.map((y, k) => (k === i ? { ...y, asaas: e.target.checked } : y)))} />
                     {x.asaas ? "Cobrar no Asaas" : "Alvará / judicial"}

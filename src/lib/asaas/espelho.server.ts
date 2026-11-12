@@ -60,6 +60,7 @@ export async function executarSyncAsaas(p: { actor: string; de: string; ate: str
     .single();
   const runId = (run as { id: string } | null)?.id;
   let paginas = 0, recebidas = 0, inseridas = 0, atualizadas = 0;
+  const vistas = new Set<string>();
   try {
     const modo = p.modo ?? "diario";
     const passadas: Record<string, string>[] =
@@ -78,6 +79,7 @@ export async function executarSyncAsaas(p: { actor: string; de: string; ate: str
         const j = (await getAsaas(chave, `/payments?${qs}`)) as { data: Record<string, unknown>[]; hasMore: boolean };
         paginas++;
         recebidas += j.data.length;
+        for (const x of j.data) if (typeof x["id"] === "string") vistas.add(x["id"]);
         if (j.data.length) {
           const { data: r, error } = await supabaseAdmin.rpc("asaas_espelho_upsert" as never, {
             _account_id: CONTA_PRODUCAO,
@@ -92,6 +94,9 @@ export async function executarSyncAsaas(p: { actor: string; de: string; ate: str
         offset += j.data.length;
       }
     }
+    // 0297: a listagem do Asaas não devolve cobrança excluída — ela some e o espelho ficaria "em aberto".
+    // Confere uma a uma, em rodízio, as abertas no espelho que a busca não trouxe; o banco gera o alerta.
+    const conferencia = await conferirAbertasSumidas(chave, supabaseAdmin as never, vistas).catch((e) => ({ erro: (e as Error).message }));
     await supabaseAdmin
       .from("asaas_charge_sync_runs" as never)
       .update({ status: "concluida", paginas, recebidas, inseridas, atualizadas, concluido_em: new Date().toISOString() } as never)
@@ -126,7 +131,7 @@ export async function executarSyncAsaas(p: { actor: string; de: string; ate: str
       _actor: p.actor, _executar: true,
     } as never);
     if (!ec && conc) ({ vinculadas, ambiguas, baixas } = conc as { vinculadas: number; ambiguas: number; baixas: number });
-    return { paginas, recebidas, inseridas, atualizadas, clientesNovos, vinculadas, ambiguas, baixas, conciliacaoErro: ec?.message ?? null };
+    return { paginas, recebidas, inseridas, atualizadas, conferencia, clientesNovos, vinculadas, ambiguas, baixas, conciliacaoErro: ec?.message ?? null };
   } catch (e) {
     const msg = (e as Error).message.replace(/\$aact_[A-Za-z0-9_]+/g, "[oculto]").slice(0, 300);
     await supabaseAdmin
@@ -135,4 +140,42 @@ export async function executarSyncAsaas(p: { actor: string; de: string; ate: str
       .eq("id", runId as never);
     throw new Error(msg);
   }
+}
+
+const POR_RODADA = 120;
+
+type Admin = {
+  from: (t: string) => {
+    select: (c: string) => {
+      eq: (c: string, v: string) => { in: (c: string, v: string[]) => { order: (c: string) => { range: (a: number, b: number) => Promise<{ data: unknown[] | null; error: { message: string } | null }> } } };
+    };
+  };
+  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+};
+
+/** Cobranças abertas no espelho que a busca do dia não trouxe: GET uma a uma (rodízio diário de até 120). */
+async function conferirAbertasSumidas(chave: string, db: Admin, vistas: Set<string>) {
+  const abertas: string[] = [];
+  for (let de = 0; ; de += 1000) {
+    const { data, error } = await db.from("asaas_charges").select("external_id")
+      .eq("account_id", CONTA_PRODUCAO).in("external_status", ["PENDING", "OVERDUE"]).order("external_id").range(de, de + 999);
+    if (error) throw new Error(error.message);
+    const linhas = (data ?? []) as { external_id: string }[];
+    abertas.push(...linhas.map((l) => l.external_id).filter((id) => !vistas.has(id)));
+    if (linhas.length < 1000) break;
+  }
+  if (!abertas.length) return { pendentes: 0, conferidas: 0, excluidas: 0 };
+  const dia = Math.floor(Date.now() / 86_400_000);
+  const inicio = (dia * POR_RODADA) % abertas.length;
+  const lote = [...abertas.slice(inicio), ...abertas.slice(0, inicio)].slice(0, POR_RODADA);
+  const atuais: Record<string, unknown>[] = [];
+  for (const id of lote) {
+    try { atuais.push(await getAsaas(chave, `/payments/${encodeURIComponent(id)}`)); } catch { /* fica para a próxima rodada */ }
+  }
+  const excluidas = atuais.filter((x) => x["deleted"] === true).length;
+  for (let i = 0; i < atuais.length; i += 100) {
+    const { error } = await db.rpc("asaas_espelho_upsert", { _account_id: CONTA_PRODUCAO, _rows: atuais.slice(i, i + 100) });
+    if (error) throw new Error(error.message);
+  }
+  return { pendentes: abertas.length, conferidas: atuais.length, excluidas };
 }

@@ -116,7 +116,8 @@ export function AsaasAutomatico() {
             <StatusBadge tone={d.config?.ligado ? "success" : "neutral"}>{d.config?.ligado ? "Ligado" : "Desligado"}</StatusBadge>
             <span>
               A cada 10 minutos: avisos da fila, Pix e faturas recebidos. Juros automáticos até{" "}
-              {formatBRLFromCents(d.config?.juros_max_cents ?? 0)} ou {d.config?.juros_max_pct ?? 0}% do saldo (o menor). Extrato de hora em hora.
+              {formatBRLFromCents(d.config?.juros_max_cents ?? 0)} ou {d.config?.juros_max_pct ?? 0}% do saldo (o menor). Pix da consultora com
+              maleta aberta entra em 3.1.1 no nome dela e é abatido no acerto; TED judicial vai para 7.1.7 (Administrativo). Extrato de hora em hora.
             </span>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

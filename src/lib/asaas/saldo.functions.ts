@@ -3,7 +3,19 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 type Rpc = (f: string, a: object) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
-type Ctx = { supabase: { rpc: Rpc }; userId: string };
+type Ctx = {
+  supabase: {
+    rpc: Rpc;
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (k: string, v: string) => {
+          order: (k: string, o: { ascending: boolean }) => { limit: (n: number) => PromiseLike<{ data: unknown[] | null; error: { message: string } | null }> };
+        };
+      };
+    };
+  };
+  userId: string;
+};
 
 async function exigir(c: Ctx) {
   const pode = await c.supabase.rpc("asaas_ator_pode", { _actor: c.userId, _cap: "finance.receivable.manage" });
@@ -52,5 +64,8 @@ export const espelharParcelaAgora = createServerFn({ method: "POST" })
     if (r.error) throw new Error(r.error.message);
     const { sincronizarSaldosProducao } = await import("./saldo.server");
     const sync = await sincronizarSaldosProducao(10);
-    return { ok: true, sync };
+    const t = await c.supabase.from("asaas_saldo_sync").select("estado, motivo, erro").eq("installment_id", data.installmentId)
+      .order("created_at", { ascending: false }).limit(1);
+    const ult = (t.data?.[0] ?? null) as { estado: string; motivo: string; erro: string | null } | null;
+    return { ok: true, processadas: sync.processadas, tarefa: ult };
   });

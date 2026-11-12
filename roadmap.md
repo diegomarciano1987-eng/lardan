@@ -1,5 +1,12 @@
 # Roadmap
 
+## Pacote 0303 — decisões do Diego 12/11/2026 19:27
+- [ ] 1. Emitir agora a nota de remessa das maletas que estão na rua sem nota.
+- [x] 2. PED-000078/092/093 (Larissa): NÃO cancelar (decisão do Diego).
+- [ ] 3. PED-000057/063 (cliente guilherme): cancelar as cobranças vencidas no Asaas.
+- [ ] 4. Simone R$ 60,94: exclusão foi proposital — não reemitir e travar para a rotina não reemitir.
+- [ ] 5. Espelho de vencimento/valor Lardan → Asaas (Thais 2026-027046) e aviso ao usuário de qualquer diferença.
+
 ## Pacote 0301 — pedido do Diego 12/11/2026 17:36
 - [x] 1. CRM de candidaturas: tirar testes (Diego Marciano, Davi Fiamengo, Cinthia Fiamengo, TESTE) e candidatas que já têm maleta (ex.: Noeli Santana) → aba "Concluídos".
 - [x] 2. Cobrar pelo Asaas: botão "Cancelar cobrança" (vencimento errado).

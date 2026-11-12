@@ -76,7 +76,7 @@ export function FichaConsultora({ party, rep, onClose }: { party: string | null;
               </div>
             )}
 
-            {f.na_carteira && <AssinaturaDigital party={f.id} rep={rep} />}
+            {f.na_carteira && <AssinaturaDigital party={f.id} rep={rep} telefone={whats} />}
 
             <section className="space-y-2 rounded-2xl border border-border p-4">
               <h3 className="text-sm font-semibold">Contato e endereço</h3>

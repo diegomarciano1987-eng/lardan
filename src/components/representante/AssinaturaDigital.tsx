@@ -9,7 +9,7 @@ import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { CircleCheckBig, Copy, FileSignature, Loader2, RefreshCw, SearchCheck } from "lucide-react";
+import { CircleCheckBig, Copy, FileSignature, Loader2, MessageSquareText, RefreshCw, SearchCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { zapsignArquivo, zapsignEnviar, zapsignVerificar } from "@/lib/zapsign/zapsign.functions";
 
@@ -33,6 +33,18 @@ const STATUS: Record<DocAssinatura["status"], { rotulo: string; cor: string }> =
 const brl = (c: number | null) => ((c ?? 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const data = (s: string | null) => (s ? new Date(s).toLocaleDateString("pt-BR") : "");
 const msg = (e: unknown) => (e instanceof Error ? e.message : "Falha.");
+
+/**
+ * 0300 (Diego, 12/11/2026): quem mora no sítio e não usa e-mail recebe o link por SMS.
+ * A ZapSign só manda o link sozinha por WhatsApp ou e-mail; o SMS sai do celular de quem está atendendo,
+ * já com o número dela e a mensagem prontos (abre o aplicativo de mensagens do aparelho).
+ */
+export function linkSms(telefone: string | null | undefined, url: string, tipo: "contrato" | "promissoria") {
+  const d = (telefone ?? "").replace(/\D/g, "");
+  const num = d.length === 10 || d.length === 11 ? `+55${d}` : d.length === 12 || d.length === 13 ? `+${d}` : "";
+  const texto = `LARDAN Semijoias: segue o link para você assinar ${tipo === "contrato" ? "o contrato de consignação" : "a nota promissória da sua maleta"}: ${url}`;
+  return `sms:${num}?&body=${encodeURIComponent(texto)}`;
+}
 
 /** Documentos da consultora + conferência automática na ZapSign dos pendentes (uma vez por tela aberta). */
 export function useAssinaturas(party: string, rep: string | null) {
@@ -82,7 +94,7 @@ export function useAssinaturas(party: string, rep: string | null) {
   return { q, chave, verificar, verificando };
 }
 
-export function AssinaturaDigital({ party, rep }: { party: string; rep: string | null }) {
+export function AssinaturaDigital({ party, rep, telefone }: { party: string; rep: string | null; telefone?: string | null }) {
   const qc = useQueryClient();
   const enviarFn = useServerFn(zapsignEnviar);
   const arquivoFn = useServerFn(zapsignArquivo);
@@ -120,9 +132,20 @@ export function AssinaturaDigital({ party, rep }: { party: string; rep: string |
         <span className="text-muted-foreground">{d.status === "assinado" ? `em ${data(d.assinado_em)}` : `enviado em ${data(d.criado_em)}`}</span>
         {d.ambiente === "sandbox" && <span className="rounded bg-muted px-1.5">teste</span>}
         {d.invalidada_em && <span className="rounded bg-muted px-1.5 font-medium" title={d.invalidada_motivo ?? undefined}>Substituída — maleta transferida</span>}
-        {d.sign_url && d.status === "pendente" && <button type="button" className="inline-flex items-center gap-1 underline" onClick={() => void copiar(d.sign_url!)}><Copy className="size-3" /> link</button>}
         {d.status === "assinado" && <button type="button" className="underline" onClick={() => void baixar(d.id)}>baixar assinado</button>}
       </div>
+      {d.sign_url && d.status === "pendente" && (
+        <div className="grid grid-cols-2 gap-2">
+          <a href={linkSms(telefone, d.sign_url, d.tipo)}
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 text-sm font-semibold">
+            <MessageSquareText className="size-4" aria-hidden /> Mandar por SMS
+          </a>
+          <button type="button" onClick={() => void copiar(d.sign_url!)}
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 text-sm font-semibold">
+            <Copy className="size-4" aria-hidden /> Copiar link
+          </button>
+        </div>
+      )}
       {d.status === "pendente" && (
         <button type="button" disabled={verificando === d.id} onClick={() => void verificar(d.id, true)}
           className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/5 px-3 text-xs font-semibold text-primary disabled:opacity-60">

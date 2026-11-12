@@ -79,7 +79,7 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
         <AberturaNaRua rep={rep} />
       </div>
 
-      <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:px-0">
+      <div className="flex flex-wrap gap-2">
         {FILTROS.map((f) => (
           <button key={f.id} type="button" onClick={() => setFiltro(f.id)}
             className={`shrink-0 rounded-full border px-3.5 py-2 text-sm ${filtro === f.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground"}`}>
@@ -173,7 +173,7 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
               {aberto === c.lead_id && c.party_id && (
                 <div className="mt-3 space-y-3">
                   <CpfRapido rep={rep} party={c.party_id} temNaCandidatura={!!c.tem_cpf} />
-                  <AssinaturaDigital party={c.party_id} rep={rep} />
+                  <AssinaturaDigital party={c.party_id} rep={rep} telefone={c.whatsapp} />
                 </div>
               )}
             </li>
@@ -261,7 +261,7 @@ export function DocumentosNovasConsultoras({ rep }: { rep: string }) {
             {aberto === c.lead_id && (
               <div className="mt-3 space-y-3">
                 <CpfRapido rep={rep} party={c.party_id!} temNaCandidatura={!!c.tem_cpf} />
-                <AssinaturaDigital party={c.party_id!} rep={rep} />
+                <AssinaturaDigital party={c.party_id!} rep={rep} telefone={c.whatsapp} />
               </div>
             )}
           </li>

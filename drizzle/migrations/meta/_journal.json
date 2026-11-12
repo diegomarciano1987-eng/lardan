@@ -2101,6 +2101,13 @@
       "when": 1794512994895,
       "tag": "0299_asaas_saldo_espelho_0299",
       "breakpoints": true
+    },
+    {
+      "idx": 300,
+      "version": "7",
+      "when": 1794514098213,
+      "tag": "0300_qualidade_ve_todo_retorno_0300",
+      "breakpoints": true
     }
   ]
 }

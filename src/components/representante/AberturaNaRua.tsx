@@ -4,6 +4,14 @@
  *   → 3. Escolher a maleta que está com o representante → 4. Contrato + promissória (ZapSign) → Concluída.
  * A decisão é de quem está na rua: não passa por aprovação do time interno.
  * Grava só por rep_abertura_rua_cadastrar e rep_maleta_repassar (carteira do representante, auditado).
+ *
+ * 0300 (Diego, 12/11/2026): o fluxo nunca mais fecha sozinho nem perde o que foi digitado.
+ *   Antes ele vivia dentro do cartão da candidata; ao ligar a maleta (etapa 3 → 4) ela ia para
+ *   "Com maleta", o cartão sumia da lista e o fluxo fechava junto. Agora o fluxo é aberto por um
+ *   anfitrião fixo da tela do representante (AberturaHost) e o rascunho fica guardado no aparelho
+ *   (24 h) a cada toque: sair, trocar de aplicativo para o WhatsApp ou recarregar a página e voltar
+ *   continua exatamente de onde parou. O rascunho só é apagado quando as duas assinaturas terminam
+ *   ou quando o representante toca em "Descartar".
  */
 import * as React from "react";
 import { createPortal } from "react-dom";
@@ -73,40 +81,145 @@ export function faltando(f: Dados): string[] {
   return out;
 }
 
-export function AberturaNaRua({ rep }: { rep: string }) {
-  const [aberto, setAberto] = React.useState(false);
+// ---------------------------------------------------------------- rascunho guardado no aparelho (0300)
+type Feito = { lead_id: string; party_id: string; perfil: string };
+type MaletaEscolhida = { cycle_id: string; nome: string };
+export type Rascunho = {
+  v: 1; rep: string; chave: string; passo: number; f: Dados; perfil: Record<string, number>;
+  feito: Feito | null; maleta: MaletaEscolhida | null; salvo_em: number;
+};
+const VALIDADE_MS = 24 * 60 * 60 * 1000;
+const chaveStorage = (rep: string) => `lardan:abertura-rua:${rep}`;
+/** Quem é a candidata do rascunho: "nova" para "Nova candidata", senão os dígitos do WhatsApp (ou o nome). */
+export const chaveCandidata = (card?: { nome: string; whatsapp: string | null }) =>
+  card ? (so(card.whatsapp ?? "", 11) || card.nome.trim().toLowerCase()) : "nova";
+
+export function lerRascunho(rep: string, agora = Date.now()): Rascunho | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(chaveStorage(rep));
+    if (!raw) return null;
+    const r = JSON.parse(raw) as Rascunho;
+    if (r?.v !== 1 || r.rep !== rep || typeof r.salvo_em !== "number" || agora - r.salvo_em > VALIDADE_MS) {
+      window.localStorage.removeItem(chaveStorage(rep));
+      return null;
+    }
+    return { ...r, f: { ...VAZIO, ...r.f } };
+  } catch { return null; }
+}
+export function gravarRascunho(r: Rascunho) {
+  try { window.localStorage.setItem(chaveStorage(r.rep), JSON.stringify(r)); } catch { /* aparelho sem espaço: segue sem guardar */ }
+}
+export function apagarRascunho(rep: string) {
+  try { window.localStorage.removeItem(chaveStorage(rep)); } catch { /* nada */ }
+  avisar();
+}
+/** Há algo que valha guardar? (qualquer campo digitado além do que veio da lista, ou já passou da etapa 1) */
+export function rascunhoTemConteudo(r: Pick<Rascunho, "passo" | "f" | "perfil" | "feito">, inicial: Dados = VAZIO) {
+  if (r.passo > 0 || r.feito || Object.keys(r.perfil).length > 0) return true;
+  return (Object.keys(VAZIO) as (keyof Dados)[]).some((k) => (r.f[k] ?? "") !== (inicial[k] ?? ""));
+}
+
+// ---------------------------------------------------------------- anfitrião fixo do fluxo (0300)
+type Ativo = { rep: string; chave: string; inicial: Dados } | null;
+let ativo: Ativo = null;
+const ouvintes = new Set<() => void>();
+function avisar() { for (const o of ouvintes) o(); }
+function abrir(rep: string, chave: string, inicial: Dados) {
+  const atual = lerRascunho(rep);
+  if (atual && atual.chave !== chave && rascunhoTemConteudo(atual)) {
+    const quem = primeiroNome(atual.f.nome) || "outra candidata";
+    if (!window.confirm(`Você tem uma abertura em andamento de ${quem}, com os dados guardados.\n\nOK = começar esta nova e descartar a de ${quem}.\nCancelar = continuar a de ${quem}.`)) {
+      ativo = { rep, chave: atual.chave, inicial: atual.f };
+      avisar();
+      return;
+    }
+    apagarRascunho(rep);
+  }
+  ativo = { rep, chave, inicial };
+  avisar();
+}
+function fechar() { ativo = null; avisar(); }
+function useAtivo() {
+  return React.useSyncExternalStore(
+    (cb) => { ouvintes.add(cb); return () => { ouvintes.delete(cb); }; },
+    () => ativo,
+    () => null,
+  );
+}
+
+/**
+ * Fica montado na tela do representante o tempo todo (fora das listas): mostra o fluxo aberto e,
+ * se existe abertura guardada no aparelho, a faixa "Continuar a abertura de …".
+ */
+export function AberturaHost({ rep }: { rep: string }) {
+  const a = useAtivo();
+  const [rascunho, setRascunho] = React.useState<Rascunho | null>(null);
+  React.useEffect(() => {
+    const ler = () => setRascunho(lerRascunho(rep));
+    ler();
+    ouvintes.add(ler);
+    window.addEventListener("storage", ler);
+    return () => { ouvintes.delete(ler); window.removeEventListener("storage", ler); };
+  }, [rep]);
+  if (a && a.rep === rep) return <Fluxo key={a.chave} rep={rep} chave={a.chave} inicial={a.inicial} onFechar={fechar} />;
+  if (!rascunho || !rascunhoTemConteudo(rascunho)) return null;
+  const nome = primeiroNome(rascunho.f.nome) || "candidata";
   return (
-    <>
-      <button type="button" onClick={() => setAberto(true)} className="flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm">
-        <UserPlus className="size-4" /> Nova candidata
-      </button>
-      {aberto && <Fluxo rep={rep} onFechar={() => setAberto(false)} />}
-    </>
+    <div role="status" className="fixed inset-x-3 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-primary/40 bg-card p-3 shadow-lg md:bottom-6 md:right-6 md:left-auto">
+      <PackageOpen className="size-5 shrink-0 text-primary" aria-hidden />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold">Abertura de {nome} em andamento</p>
+        <p className="text-xs text-muted-foreground">Etapa {Math.min(rascunho.passo, 3) + 1} de 4 · dados guardados</p>
+      </div>
+      <button type="button" onClick={() => { if (window.confirm(`Descartar os dados guardados da abertura de ${nome}?`)) apagarRascunho(rep); }}
+        className="min-h-11 shrink-0 rounded-xl px-2 text-xs text-muted-foreground underline">Descartar</button>
+      <button type="button" onClick={() => { ativo = { rep, chave: rascunho.chave, inicial: rascunho.f }; avisar(); }}
+        className="min-h-11 shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Continuar</button>
+    </div>
+  );
+}
+
+export function AberturaNaRua({ rep }: { rep: string }) {
+  return (
+    <button type="button" onClick={() => abrir(rep, chaveCandidata(), VAZIO)} className="flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm">
+      <UserPlus className="size-4" /> Nova candidata
+    </button>
   );
 }
 
 /** Candidata que já está na lista: mesmo fluxo, com nome, WhatsApp e cidade já preenchidos. */
 export function AberturaDaCandidata({ rep, card }: { rep: string; card: { nome: string; whatsapp: string | null; cidade: string | null } }) {
-  const [aberto, setAberto] = React.useState(false);
   const [cid, uf] = (card.cidade ?? "").split("/").map((x) => x.trim());
   const inicial = { ...VAZIO, nome: card.nome, whatsapp: mFone(card.whatsapp ?? ""), cidade: cid ?? "", uf: (uf ?? "").slice(0, 2).toUpperCase() };
   return (
-    <>
-      <button type="button" onClick={() => setAberto(true)} className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-primary/40 bg-primary/5 text-sm font-semibold text-primary">
-        <PackageOpen className="size-4" /> Fazer abertura
-      </button>
-      {aberto && <Fluxo rep={rep} inicial={inicial} onFechar={() => setAberto(false)} />}
-    </>
+    <button type="button" onClick={() => abrir(rep, chaveCandidata(card), inicial)} className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-primary/40 bg-primary/5 text-sm font-semibold text-primary">
+      <PackageOpen className="size-4" /> Fazer abertura
+    </button>
   );
 }
 
-function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; inicial?: Dados }) {
+function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; onFechar: () => void; inicial: Dados }) {
   const qc = useQueryClient();
-  const [passo, setPasso] = React.useState(0);
-  const [f, setF] = React.useState<Dados>(inicial ?? VAZIO);
-  const [perfil, setPerfil] = React.useState<Record<string, number>>({});
-  const [feito, setFeito] = React.useState<{ lead_id: string; party_id: string; perfil: string } | null>(null);
-  const [maleta, setMaleta] = React.useState<{ cycle_id: string; nome: string } | null>(null);
+  // 0300: começa do rascunho guardado desta mesma candidata, se houver
+  const [guardado] = React.useState(() => { const r = lerRascunho(rep); return r && r.chave === chave ? r : null; });
+  const [passo, setPasso] = React.useState(guardado?.passo ?? 0);
+  const [f, setF] = React.useState<Dados>(guardado?.f ?? inicial);
+  const [perfil, setPerfil] = React.useState<Record<string, number>>(guardado?.perfil ?? {});
+  const [feito, setFeito] = React.useState<Feito | null>(guardado?.feito ?? null);
+  const [maleta, setMaleta] = React.useState<MaletaEscolhida | null>(guardado?.maleta ?? null);
+  const concluidaRef = React.useRef(false);
+  React.useEffect(() => {
+    if (concluidaRef.current) return;
+    const r = { passo, f, perfil, feito };
+    if (rascunhoTemConteudo(r, inicial)) gravarRascunho({ v: 1, rep, chave, passo, f, perfil, feito, maleta, salvo_em: Date.now() });
+  }, [rep, chave, passo, f, perfil, feito, maleta, inicial]);
+  const concluir = React.useCallback(() => { concluidaRef.current = true; apagarRascunho(rep); }, [rep]);
+  const sair = () => {
+    if (!concluidaRef.current && rascunhoTemConteudo({ passo, f, perfil, feito }, inicial))
+      toast.success("Dados guardados neste aparelho. Toque em Continuar para seguir de onde parou.");
+    onFechar();
+  };
   const cepFn = useServerFn(consultarCep);
   const [buscandoCep, setBuscandoCep] = React.useState(false);
 
@@ -148,9 +261,9 @@ function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; 
       <header className="border-b border-border px-5 pb-3 pt-[max(1rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between">
           <button type="button" aria-label="Voltar" disabled={passo === 0 || passo >= 2} onClick={() => setPasso((p) => p - 1)}
-            className="grid size-10 place-items-center rounded-full border border-border disabled:invisible"><ChevronLeft className="size-5" /></button>
+            className="grid size-11 place-items-center rounded-full border border-border disabled:invisible"><ChevronLeft className="size-5" /></button>
           <p className="text-base font-semibold">{feito ? primeiroNome(f.nome) : "Nova candidata"}</p>
-          <button type="button" aria-label="Fechar" onClick={onFechar} className="grid size-10 place-items-center rounded-full border border-border"><X className="size-4" /></button>
+          <button type="button" aria-label="Fechar" onClick={sair} className="grid size-11 place-items-center rounded-full border border-border"><X className="size-4" /></button>
         </div>
         <ol className="mt-4 grid grid-cols-4 gap-1.5" aria-label="Etapas">
           {PASSOS.map((p, i) => (
@@ -230,7 +343,7 @@ function Fluxo({ rep, onFechar, inicial }: { rep: string; onFechar: () => void; 
           )}
 
           {passo === 2 && feito && <EscolherMaleta rep={rep} leadId={feito.lead_id} nome={f.nome} onEscolhida={(m) => { setMaleta(m); setPasso(3); }} />}
-          {passo === 3 && feito && <Assinaturas rep={rep} party={feito.party_id} maleta={maleta} nome={f.nome} />}
+          {passo === 3 && feito && <Assinaturas rep={rep} party={feito.party_id} maleta={maleta} nome={f.nome} telefone={f.whatsapp} onConcluida={concluir} />}
         </div>
       </main>
 
@@ -372,7 +485,7 @@ function EscolherMaleta({ rep, leadId, nome, onEscolhida }: { rep: string; leadI
   );
 }
 
-function Assinaturas({ rep, party, maleta, nome }: { rep: string; party: string; maleta: { cycle_id: string; nome: string } | null; nome: string }) {
+function Assinaturas({ rep, party, maleta, nome, telefone, onConcluida }: { rep: string; party: string; maleta: { cycle_id: string; nome: string } | null; nome: string; telefone: string; onConcluida: () => void }) {
   const q = useQuery({
     queryKey: ["assinaturas", party],
     queryFn: async () => {
@@ -386,6 +499,7 @@ function Assinaturas({ rep, party, maleta, nome }: { rep: string; party: string;
   const contrato = docs.some((d) => d.tipo === "contrato" && d.status === "assinado");
   const promissoria = docs.some((d) => d.tipo === "promissoria" && d.status === "assinado" && !d.invalidada_em && (!maleta || d.cycle_id === maleta.cycle_id));
   const concluida = contrato && promissoria;
+  React.useEffect(() => { if (concluida) onConcluida(); }, [concluida, onConcluida]);
   return (
     <div className="space-y-4">
       {concluida ? (
@@ -403,7 +517,7 @@ function Assinaturas({ rep, party, maleta, nome }: { rep: string; party: string;
           </div>
         </div>
       )}
-      <AssinaturaDigital party={party} rep={rep} />
+      <AssinaturaDigital party={party} rep={rep} telefone={telefone} />
     </div>
   );
 }

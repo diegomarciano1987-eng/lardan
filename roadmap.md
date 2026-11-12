@@ -255,3 +255,15 @@
 - [x] 0298 Fotos próprias da consultora na vitrine (Estúdio > Organização e Minha maleta), catálogo oficial intocado
 - [x] 0299 Baixa no Lardan espelhada no Asaas: antiga cancelada, nova pelo saldo, rotina a cada minuto, painel com decisões; saneamento das 7 cobranças feito e conferido no Asaas
 - [ ] Publicar 0299 (quadro na tela e rotina de 1 minuto só valem no site publicado)
+
+## Pacote 0300 — 10 itens do Diego (12/11/2026)
+- [x] 1 Qualidade (Tatiane) vê todas as maletas que voltam, de qualquer representante (banco já valendo; 3 testes isolados)
+- [x] 2 Cobrança de volta na barra do celular do representante + menu "Mais"
+- [x] 3 App do representante não anda para o lado no celular (360 e 390 px, todas as abas e janelas)
+- [x] 4 Nova candidata não fecha nem perde dados na assinatura (rascunho 24 h + continuar; 6 testes)
+- [x] 5 Avisos sempre em português + X de fechar grande (6 testes + prova na tela)
+- [ ] 6 Aparecida Borsuk: Pix de 06/10 (parcela 1) ligado na parcela 2 por engano; aguarda aprovação para corrigir e restaurar a cobrança 10/11 no Asaas; outras 9 pessoas para conferir
+- [ ] 7 Cartão 1–3x sem juros / 4–12x com juros: aguarda Diego dizer como os juros entram (taxa da conta Asaas ou juros ao cliente)
+- [x] 8 Acordo judicial: campos de dinheiro sem perder letra e "172.16" não vira R$ 17.216 (6 testes + prova)
+- [x] 9 SMS: botão "Mandar por SMS" com o link da assinatura (ZapSign só envia sozinha por WhatsApp/e-mail)
+- [ ] 10 Nota fiscal automática: chave "automático" existe e está desligada; aguarda Diego confirmar ligar (nota real na SEFAZ) e o que fazer com 34 maletas sem nota

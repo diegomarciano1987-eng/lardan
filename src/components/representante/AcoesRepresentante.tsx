@@ -369,11 +369,11 @@ export function Captacao({ rep }: { rep: string; espelho?: boolean }) {
           <h2 className="text-lg font-semibold">Funil de captação <span className="text-sm font-normal text-muted-foreground">· {d.cards.length} candidatas</span></h2>
           <NovaCandidata rep={rep} />
         </div>
-        <div className="-mx-5 flex snap-x gap-3 overflow-x-auto px-5 pb-2 md:mx-0 md:px-0">
+        <div className="flex flex-col gap-3 md:flex-row md:snap-x md:overflow-x-auto md:pb-2">
           {d.etapas.map((e, i) => {
             const cards = d.cards.filter((c) => c.etapa_id === e.id);
             return (
-              <div key={e.id} className="w-[82vw] shrink-0 snap-start rounded-2xl border border-border bg-card md:w-72">
+              <div key={e.id} className="w-full rounded-2xl border border-border bg-card md:w-72 md:shrink-0 md:snap-start">
                 <div className="flex items-center justify-between rounded-t-2xl px-4 py-3" style={{ background: `color-mix(in oklab, var(--primary) ${8 + i * 6}%, transparent)` }}>
                   <span className="flex items-center gap-1.5 text-sm font-semibold">{e.sistema && <Lock aria-hidden className="size-3.5" />}{e.nome}</span><span className="text-xs text-muted-foreground">{cards.length}</span>
                 </div>

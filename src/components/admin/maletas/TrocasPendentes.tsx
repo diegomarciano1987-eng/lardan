@@ -187,3 +187,29 @@ export function TrocasPendentes({ remessaId, podeResolver }: { remessaId: string
     </div>
   );
 }
+
+/** Página da maleta: a nota fiscal é emitida e consultada na linha da maleta, dentro da remessa. */
+export function LinkNotaNaRemessa({ cycleId }: { cycleId: string }) {
+  const q = useQuery({
+    queryKey: ["maletas", "remessa-do-ciclo", cycleId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("kit_cycles").select("remessa_id").eq("id", cycleId).maybeSingle();
+      if (error) throw error;
+      return (data as { remessa_id: string | null } | null)?.remessa_id ?? null;
+    },
+    staleTime: 300_000,
+  });
+  if (!q.data) {
+    return (
+      <p className="rounded-lg border border-line-soft p-3 text-xs text-ledger-muted">
+        A nota fiscal desta maleta é feita na página da remessa dela.
+      </p>
+    );
+  }
+  return (
+    <Link to="/admin/maletas/remessa/$id" params={{ id: q.data }} className="admin-btn w-full"
+      title="A nota fiscal de remessa, o DANFE e as notas do acerto ficam na linha desta maleta, na página da remessa.">
+      Nota fiscal: abrir na remessa
+    </Link>
+  );
+}

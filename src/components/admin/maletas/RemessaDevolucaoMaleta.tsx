@@ -32,7 +32,7 @@ export function RemessaDevolucaoMaleta({ cycleId, status }: { cycleId: string; s
 
   const mudar = useMutation({
     mutationFn: () => mudarRemessa(cycleId, destino, motivo),
-    onSuccess: (r) => { toast.success(`Maleta passou para a remessa ${r.remessa}.${r.custodia_mudou ? " Ela agora está com o novo representante." : ""}`); fim(); },
+    onSuccess: (r) => { toast.success(`Maleta passou para a remessa ${r.remessa}.${r.custodia_mudou ? " Ela agora está com o novo representante." : ""}${r.carteira_mudou ? ` A consultora agora é da carteira e da praça de ${r.representante_nome ?? "o novo representante"}.` : ""}`); fim(); },
     onError: (e) => toast.error((e as Error).message),
   });
   const pedir = useMutation({

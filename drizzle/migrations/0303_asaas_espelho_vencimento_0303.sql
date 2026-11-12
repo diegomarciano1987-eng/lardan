@@ -1,6 +1,6 @@
 -- 0303 — Espelho Lardan → Asaas também para vencimento e valor da parcela.
 -- Mudou o vencimento/valor no Lardan (fin_installment_editar ou qualquer UPDATE): nasce um pedido; a rotina de 1 minuto
--- atualiza a MESMA cobrança no Asaas (PUT /payments/{id}), depois de conferir lá que ela segue em aberto.
+-- atualiza a MESMA cobrança no Asaas (POST /payments/{id}), depois de conferir lá que ela segue em aberto.
 -- Cobrança criada pelo Lardan e excluída direto no Asaas não é reemitida sozinha (decisão do Diego, caso Simone): vira exceção.
 -- Nada aqui lança dinheiro.
 

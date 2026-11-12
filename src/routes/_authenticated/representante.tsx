@@ -333,8 +333,8 @@ function Cobrancas({ rep }: { rep: string; espelho: boolean }) {
       {q.data && q.data.itens.length > 0 && <p className="text-xs text-muted-foreground">{q.data.total} parcela(s) · {brl(q.data.total_cents)}</p>}
       <ul className="divide-y divide-border">
         {q.data?.itens.map((c) => (
-          <li key={c.installment_id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-            <button type="button" onClick={() => setFicha(c.party_id)} className="min-w-0 flex-1 text-left">
+          <li key={c.installment_id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <button type="button" onClick={() => setFicha(c.party_id)} className="w-full min-w-0 text-left sm:flex-1">
               <p className="truncate font-medium underline-offset-2 hover:underline">{c.display_name}</p>
               <p className="text-xs text-muted-foreground">
                 {c.code} · título {c.numero ?? "—"} · vence {dataBR(c.vencimento)}
@@ -348,8 +348,8 @@ function Cobrancas({ rep }: { rep: string; espelho: boolean }) {
                 </p>
               )}
             </button>
-            <div className="flex shrink-0 items-center gap-2">
-              <span className="font-semibold tabular-nums">{brl(c.saldo_cents)}</span>
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 sm:justify-end">
+              <span className="mr-auto font-semibold tabular-nums sm:mr-0">{brl(c.saldo_cents)}</span>
               <ContatoCobranca c={c} parcelas={[c]} />
               <CobrarParcela c={c} rep={rep} />
             </div>

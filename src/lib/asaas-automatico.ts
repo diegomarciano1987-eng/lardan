@@ -110,3 +110,43 @@ export const relatorioExtratoAuto = (de: string, ate: string) =>
 
 export const desfazerExtratoAuto = (id: string, motivo: string) =>
   rpc<{ ok: boolean; tipo: TipoExtratoAuto }>("asaas_auto_extrato_desfazer", { _id: id, _motivo: motivo });
+
+/** 0297 — pente fino Asaas × Lardan: alertas de cobrança excluída/alterada e comparação por pessoa. */
+export type AlertaAsaas = {
+  id: string;
+  tipo: "cobranca_excluida" | "valor_alterado" | "vencimento_alterado";
+  criado_em: string;
+  antes: { valor_cents?: number; vencimento?: string; status?: string };
+  depois: { valor_cents?: number; vencimento?: string; status?: string };
+  saldo_cents: number | null;
+  installment_id: string | null;
+  pay: string;
+  titulo_numero: string | null;
+  pessoa: string | null;
+  pessoa_codigo: string | null;
+  judicial: boolean;
+};
+export type CategoriaPente = "igual" | "so_asaas" | "so_lardan" | "lardan_maior" | "asaas_maior" | "mesmo_total";
+export const ROTULO_CATEGORIA: Record<CategoriaPente, string> = {
+  igual: "Iguais",
+  so_asaas: "Só no Asaas",
+  so_lardan: "Só no Lardan",
+  lardan_maior: "Lardan maior",
+  asaas_maior: "Asaas maior",
+  mesmo_total: "Mesmo total, montado diferente",
+};
+export type PenteFino = {
+  gerado_em: string;
+  resumo: { categoria: CategoriaPente; pessoas: number; lardan_cents: number; asaas_cents: number }[];
+  pessoas: {
+    codigo: string | null; nome: string; categoria: CategoriaPente; lardan_cents: number; asaas_cents: number;
+    asaas_sem_parcela_cents: number; lardan_sem_cobranca_cents: number; fantasma_cents: number;
+  }[];
+  alertas: AlertaAsaas[];
+  fantasmas: { id: string; criado_em: string; saldo_cents: number; motivo: string; desfeito_em: string | null; titulo_numero: string; pessoa: string | null; pessoa_codigo: string | null }[];
+};
+export const penteFino = () => rpc<PenteFino>("asaas_pente_fino", { _limite: 300 });
+export const cancelarFantasma = (inst: string, motivo: string) =>
+  rpc<{ ok: boolean; numero: string; saldo_cents: number }>("asaas_fantasma_cancelar", { _inst: inst, _motivo: motivo });
+export const desfazerFantasma = (id: string, motivo: string) => rpc<{ ok: boolean }>("asaas_fantasma_desfazer", { _id: id, _motivo: motivo });
+export const resolverAlerta = (id: string, resolucao: string) => rpc<{ ok: boolean }>("asaas_alerta_resolver", { _id: id, _resolucao: resolucao });

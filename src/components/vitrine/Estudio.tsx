@@ -11,6 +11,7 @@ import { formatarTelefone, normalizarWhatsapp } from "@/lib/br/canonico";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { VitrineView } from "@/components/vitrine/VitrineView";
 import { RecorteFoto } from "@/components/vitrine/RecorteFoto";
+import { FotoPropriaPeca } from "@/components/vitrine/FotoPropriaPeca";
 import { brl, imagem, traduzir } from "@/lib/maletas";
 import {
   CAPAS, CARTOES, FONTES, GRADES, LIMITES, PALETAS, SECOES_NOME, TEMAS, designPadrao, enviarArquivo, estudioCarregar,
@@ -87,7 +88,8 @@ export function Estudio() {
 
   // links temporários das imagens do rascunho
   const caminhos = d ? [d.imagens.avatar?.path, d.imagens.avatar?.path2x, d.imagens.capa?.path, d.imagens.capa?.path_m, d.compartilhar.imagem,
-    q.data?.publicado?.imagens.avatar?.path, q.data?.publicado?.imagens.capa?.path].filter(Boolean) as string[] : [];
+    q.data?.publicado?.imagens.avatar?.path, q.data?.publicado?.imagens.capa?.path,
+    ...(q.data?.itens ?? []).map((i) => i.foto_propria)].filter(Boolean) as string[] : [];
   const chave = caminhos.join("|");
   React.useEffect(() => {
     const faltam = caminhos.filter((c) => !links[c]);
@@ -144,7 +146,8 @@ export function Estudio() {
         {painel === "contato" && <PainelContato d={d} muda={muda} />}
         {painel === "foto" && <PainelFoto d={d} muda={muda} party={dados.party_id} img={img} onLinks={(m) => setLinks((l) => ({ ...l, ...m }))} />}
         {painel === "aparencia" && <PainelAparencia d={d} muda={muda} />}
-        {painel === "organizacao" && <PainelOrganizacao d={d} muda={muda} itens={dados.itens} />}
+        {painel === "organizacao" && <PainelOrganizacao d={d} muda={muda} itens={dados.itens} party={dados.party_id} img={img}
+          onFotoMudou={async () => { await qc.invalidateQueries({ queryKey: ["consultora", "estudio"] }); }} />}
         {painel === "compartilhar" && (
           <PainelCompartilhar d={d} muda={muda} party={dados.party_id} img={img} origem={origem} publicadoSlug={dados.no_ar ? dados.slug : null}
             onLinks={(m) => setLinks((l) => ({ ...l, ...m }))} nome={dados.nome_cadastro} />
@@ -462,12 +465,16 @@ function PainelFoto({ d, muda, party, img, onLinks }: { d: DesignVitrine; muda: 
 }
 
 /* ---------- organização ---------- */
-function PainelOrganizacao({ d, muda, itens }: { d: DesignVitrine; muda: Muda; itens: { variant_id: string; produto: string; variante: string | null; preco_cents: number; media_id: string | null; midias: string[] }[] }) {
+function PainelOrganizacao({ d, muda, itens, party, img, onFotoMudou }: {
+  d: DesignVitrine; muda: Muda; party: string; img: (p?: string | null) => string | null; onFotoMudou: () => Promise<void>;
+  itens: { variant_id: string; produto: string; variante: string | null; preco_cents: number; media_id: string | null; midias: string[]; foto_propria?: string | null }[];
+}) {
   const o = d.organizacao;
   const pos = (id: string) => { const i = o.ordem.indexOf(id); return i < 0 ? 1e6 : i; };
   const lista = [...itens].sort((a, b) => pos(a.variant_id) - pos(b.variant_id));
   const [arrastando, setArrastando] = React.useState<string | null>(null);
   const [fotoDe, setFotoDe] = React.useState<string | null>(null);
+  const semFoto = itens.filter((i) => !i.foto_propria && !i.media_id).length;
 
   const mover = (id: string, para: number) => muda((x) => {
     const ids = lista.map((i) => i.variant_id).filter((v) => v !== id);
@@ -537,6 +544,11 @@ function PainelOrganizacao({ d, muda, itens }: { d: DesignVitrine; muda: Muda; i
 
       <section>
         <p className="mb-1 text-xs uppercase tracking-widest text-ledger-muted">Suas peças</p>
+        {semFoto > 0 && (
+          <p className="mb-2 rounded-lg bg-primary/10 px-3 py-2 text-xs">
+            <Camera className="mr-1 inline size-3.5" /> {semFoto === 1 ? "1 peça está sem foto" : `${semFoto} peças estão sem foto`}. Toque na miniatura para fotografar.
+          </p>
+        )}
         <p className="mb-2 text-[0.7rem] text-ledger-muted">Arraste para ordenar (ou use as setas). <Star className="inline size-3" /> destaca, <EyeOff className="inline size-3" /> esconde da vitrine sem mexer no seu estoque. Peças só aparecem enquanto estiverem disponíveis na sua maleta.</p>
         {lista.length === 0 ? (
           <p className="rounded-lg border border-dashed border-line-soft p-4 text-center text-xs text-ledger-muted">Você ainda não tem peças disponíveis. Elas aparecem aqui depois do aceite da maleta e de publicar as peças em “Minha maleta”.</p>
@@ -545,6 +557,7 @@ function PainelOrganizacao({ d, muda, itens }: { d: DesignVitrine; muda: Muda; i
             {lista.map((i, idx) => {
               const destaque = o.destaques.includes(i.variant_id); const oculta = o.ocultas.includes(i.variant_id);
               const fEsc = o.fotos[i.variant_id]; const fotoId = fEsc && i.midias.includes(fEsc) ? fEsc : i.media_id;
+              const miniatura = (i.foto_propria ? img(i.foto_propria) : null) ?? (fotoId ? imagem(fotoId) : null);
               return (
                 <li key={i.variant_id} draggable onDragStart={() => setArrastando(i.variant_id)} onDragOver={(e) => e.preventDefault()}
                   onDrop={() => { if (arrastando && arrastando !== i.variant_id) mover(arrastando, idx); setArrastando(null); }}
@@ -552,11 +565,11 @@ function PainelOrganizacao({ d, muda, itens }: { d: DesignVitrine; muda: Muda; i
                   <div className="flex items-center gap-2">
                     <GripVertical className="size-4 shrink-0 cursor-grab text-ledger-muted" aria-hidden />
                     <button type="button" onClick={() => setFotoDe(fotoDe === i.variant_id ? null : i.variant_id)} className="size-11 shrink-0 overflow-hidden rounded bg-muted" aria-label="Escolher foto principal">
-                      {fotoId && <img src={imagem(fotoId)!} alt="" className="size-full object-cover" loading="lazy" />}
+                      {miniatura ? <img src={miniatura} alt="" className="size-full object-cover" loading="lazy" /> : <Camera className="m-auto mt-3 size-4 text-ledger-muted" />}
                     </button>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm">{i.produto}</p>
-                      <p className="text-[0.7rem] text-ledger-muted">{brl(i.preco_cents)}</p>
+                      <p className="text-[0.7rem] text-ledger-muted">{brl(i.preco_cents)}{i.foto_propria ? " · foto sua" : !fotoId ? " · sem foto" : ""}</p>
                     </div>
                     <button type="button" aria-label="Subir" className="admin-btn px-1.5" disabled={idx === 0} onClick={() => mover(i.variant_id, idx - 1)}><ArrowUp className="size-3.5" /></button>
                     <button type="button" aria-label="Descer" className="admin-btn px-1.5" disabled={idx === lista.length - 1} onClick={() => mover(i.variant_id, idx + 1)}><ArrowDown className="size-3.5" /></button>
@@ -564,14 +577,17 @@ function PainelOrganizacao({ d, muda, itens }: { d: DesignVitrine; muda: Muda; i
                     <button type="button" aria-pressed={oculta} aria-label={oculta ? "Mostrar na vitrine" : "Esconder da vitrine"} className="admin-btn px-1.5" onClick={() => alterna("ocultas", i.variant_id)}>{oculta ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}</button>
                   </div>
                   {fotoDe === i.variant_id && (
-                    <div className="mt-2 flex flex-wrap gap-1.5 pl-6">
-                      {i.midias.length <= 1 && <span className="text-[0.7rem] text-ledger-muted">Esta peça tem só uma foto aprovada.</span>}
+                    <div className="mt-2 space-y-2 pl-6">
+                    <FotoPropriaPeca party={party} variantId={i.variant_id} produto={i.produto} temPropria={!!i.foto_propria} temOficial={!!i.media_id} onMudou={onFotoMudou} />
+                    {!i.foto_propria && <div className="flex flex-wrap gap-1.5">
+                      {i.midias.length === 1 && <span className="text-[0.7rem] text-ledger-muted">Esta peça tem só uma foto oficial.</span>}
                       {i.midias.length > 1 && i.midias.map((m) => (
                         <button key={m} type="button" aria-pressed={fotoId === m} onClick={() => muda((x) => { x.organizacao.fotos[i.variant_id] = m; return x; })}
                           className={`size-14 overflow-hidden rounded border-2 ${fotoId === m ? "border-primary" : "border-transparent"}`}>
                           <img src={imagem(m)!} alt="" className="size-full object-cover" loading="lazy" />
                         </button>
                       ))}
+                    </div>}
                     </div>
                   )}
                 </li>

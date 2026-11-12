@@ -2,14 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 
 /**
  * Imagens publicadas das vitrines das consultoras. O armazenamento é privado:
- * só sai daqui o arquivo citado na versão publicada de uma vitrine no ar.
+ * só sai daqui o arquivo citado na versão publicada de uma vitrine no ar
+ * ou a foto de peça que a própria consultora tirou (0298), com a vitrine dela no ar.
  */
 export const Route = createFileRoute("/api/public/vitrine-img/$")({
   server: {
     handlers: {
       GET: async ({ params, request }) => {
         const path = params._splat ?? "";
-        if (!/^[0-9a-f-]{36}\/pub\/[0-9a-f-]{36}(-\d{3,4})?\.(webp|jpg|jpeg|png)$/.test(path)) {
+        if (!/^[0-9a-f-]{36}\/(pub\/[0-9a-f-]{36}(-\d{3,4})?\.(webp|jpg|jpeg|png)|peca\/[0-9a-f-]{36}\.(webp|jpg|jpeg))$/.test(path)) {
           return new Response("Not found", { status: 404 });
         }
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

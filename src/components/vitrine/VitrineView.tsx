@@ -11,7 +11,7 @@ import { linhaPeca, urlPublica } from "@/lib/pedido-publico";
 import { designPadrao, whatsappLink, type DesignVitrine } from "@/lib/vitrine-design";
 import { SITE_URL } from "@/lib/seo";
 
-type Item = VitrineItem & { midias?: string[]; ilustracao?: string | null };
+type Item = VitrineItem & { midias?: string[]; ilustracao?: string | null; foto_propria?: string | null };
 
 export interface VitrineViewProps {
   design: Partial<DesignVitrine> | null | undefined;
@@ -53,7 +53,12 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   const categorias = Array.from(new Set(visiveis.map((i) => i.categoria).filter(Boolean))) as string[];
   const catalogo = categoria === "todas" ? visiveis : visiveis.filter((i) => i.categoria === categoria);
 
-  const foto = (i: Item) => { const f = o.fotos[i.variant_id]; return imagem(f && i.midias?.includes(f) ? f : i.media_id); };
+  /** 0298: a foto que a própria consultora tirou vem primeiro; depois a oficial do catálogo. */
+  const foto = (i: Item) => {
+    const propria = i.foto_propria ? img(i.foto_propria) : null;
+    if (propria) return propria;
+    const f = o.fotos[i.variant_id]; return imagem(f && i.midias?.includes(f) ? f : i.media_id);
+  };
   const pecas = Object.values(sacola).reduce((x, y) => x + y, 0);
   const total = visiveis.reduce((s, i) => s + (sacola[i.variant_id] ?? 0) * i.preco_cents, 0);
 
@@ -89,6 +94,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
   const grade = a.grade === "lista" ? "grid grid-cols-1 gap-3" : a.grade === "2" ? "grid grid-cols-2 gap-4 @3xl:gap-6" : "grid grid-cols-2 gap-4 @3xl:grid-cols-3 @3xl:gap-6";
 
   const corpoDe = (i: Item) => {
+    if (i.foto_propria) return null;
     const principal = foto(i);
     const midias = i.midias ?? [];
     return midias.length > 1 ? (midias.find((m) => m !== (principal ? principal.split("/").pop() : "")) ?? null) : null;
@@ -100,7 +106,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
         const q = sacola[i.variant_id] ?? 0;
         const principal = foto(i);
         const midias = i.midias ?? [];
-        const corpoId = midias.length > 1 ? (midias.find((m) => m !== (principal ? principal.split("/").pop() : "")) ?? null) : null;
+        const corpoId = !i.foto_propria && midias.length > 1 ? (midias.find((m) => m !== (principal ? principal.split("/").pop() : "")) ?? null) : null;
         const verCorpo = !!corpoId && !!noCorpo[i.variant_id];
         const real = verCorpo ? imagem(corpoId) : principal;
         const src = real ?? i.ilustracao ?? null;

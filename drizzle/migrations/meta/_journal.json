@@ -2087,6 +2087,13 @@
       "when": 1794503025215,
       "tag": "0297_asaas_pente_fino_0297",
       "breakpoints": true
+    },
+    {
+      "idx": 298,
+      "version": "7",
+      "when": 1794504682624,
+      "tag": "0298_vitrine_foto_propria_0298",
+      "breakpoints": true
     }
   ]
 }

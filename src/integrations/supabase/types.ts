@@ -18477,6 +18477,59 @@ export type Database = {
           },
         ]
       }
+      vitrine_fotos_proprias: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          party_id: string
+          path: string
+          variant_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          party_id: string
+          path: string
+          variant_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          party_id?: string
+          path?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vitrine_fotos_proprias_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vitrine_fotos_proprias_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vitrine_fotos_proprias_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "vitrine_fotos_proprias_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       colab_v_cob_pracas: {
@@ -24351,6 +24404,14 @@ export type Database = {
         Returns: Json
       }
       vitrine_endereco_disponivel: { Args: { _slug: string }; Returns: Json }
+      vitrine_foto_propria_remover: {
+        Args: { _variant: string }
+        Returns: Json
+      }
+      vitrine_foto_propria_salvar: {
+        Args: { _path: string; _variant: string }
+        Returns: Json
+      }
       vitrine_pagamento_situacao: { Args: { _token: string }; Returns: Json }
       vitrine_whatsapp_registrar: { Args: { _numero: string }; Returns: Json }
     }

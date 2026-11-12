@@ -11,6 +11,7 @@ import { formatarTelefone, normalizarWhatsapp } from "@/lib/br/canonico";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { VitrineView } from "@/components/vitrine/VitrineView";
 import { RecorteFoto } from "@/components/vitrine/RecorteFoto";
+import { FotoPropriaPeca } from "@/components/vitrine/FotoPropriaPeca";
 import { brl, imagem, traduzir } from "@/lib/maletas";
 import {
   CAPAS, CARTOES, FONTES, GRADES, LIMITES, PALETAS, SECOES_NOME, TEMAS, designPadrao, enviarArquivo, estudioCarregar,
@@ -586,6 +587,7 @@ function PainelOrganizacao({ d, muda, itens, party, img, onFotoMudou }: {
                           <img src={imagem(m)!} alt="" className="size-full object-cover" loading="lazy" />
                         </button>
                       ))}
+                    </div>}
                     </div>
                   )}
                 </li>

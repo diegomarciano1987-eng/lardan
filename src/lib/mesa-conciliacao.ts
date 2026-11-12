@@ -38,6 +38,8 @@ export type Palpite = {
   payment_method_id?: string | null;
   /** Recebimento judicial (alvará/TED de recurso judicial): sugere 7.1.7; nunca concilia sozinho. */
   judicial?: {
+    /** 0293: TED judicial vai para o centro Administrativo. */
+    cost_center_id?: string | null;
     chart_account_id: string | null;
     party_id: string | null;
     party_nome: string | null;

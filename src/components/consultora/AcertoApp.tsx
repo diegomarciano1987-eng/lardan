@@ -65,6 +65,7 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
   const c = d.calculo;
   const recebido = Number(c.recebido_lardan_cents ?? 0);
   const aguardando = Number(c.aguardando_lardan_cents ?? 0);
+  const adiantado = Number(c.adiantado_consultora_cents ?? 0);
   const lista = d.itens.filter((i) => !busca.trim() || `${i.produto} ${i.variante ?? ""} ${i.sku ?? ""}`.toLowerCase().includes(busca.trim().toLowerCase()));
   const editavel = d.status === "aberta";
 
@@ -82,6 +83,7 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[["Vendido", brl(c.vendido_cents)], [`Sua comissão (${Number(c.comissao_pct)}%)`, brl(c.comissao_cents)],
           ...(recebido > 0 ? [["Clientes já pagaram à Lardan", brl(recebido)]] : []),
+          ...(adiantado > 0 ? [["Você já pagou pelo app", brl(adiantado)]] : []),
           c.valor_pagar_cents < 0 ? ["A Lardan te deve", brl(-c.valor_pagar_cents)] : ["Valor a pagar", brl(c.valor_pagar_cents)],
           ["Peças", `${vendidas}/${total}`]].map(([t, v]) => (
           <div key={t} className="rounded-2xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">{t}</p><p className="mt-0.5 text-lg font-semibold tabular-nums">{v}</p></div>

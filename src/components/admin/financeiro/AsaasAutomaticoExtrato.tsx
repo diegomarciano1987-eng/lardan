@@ -147,8 +147,9 @@ export function AsaasAutomaticoExtrato() {
           <div className="flex flex-wrap items-center gap-3 text-sm text-ledger-text">
             <StatusBadge tone={d.ligado ? "success" : "neutral"}>{d.ligado ? "Ligado" : "Desligado"}</StatusBadge>
             <span>
-              Títulos da planilha passam para a pessoa da cobrança, tarifa do Pix/boleto vai para 5.1.3, notificações e negativação viram um
-              título por mês em 5.1.1 e transferência para o banco já lançada é só conferida.
+              Títulos da planilha passam para a pessoa da cobrança; linha com o mesmo nº de fatura e valor de uma baixa já importada é ligada a
+              ela; tarifa do Pix vai para 5.1.3 e a do boleto para 4.1.2; notificações viram um título por mês em 5.1.1 e a negativação
+              (Serasa/SPC) outro em 4.1.5; transferência para o banco já lançada é só conferida.
             </span>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

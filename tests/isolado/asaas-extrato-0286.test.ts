@@ -101,7 +101,7 @@ afterAll(async () => {
 });
 
 describe("0286 — Asaas automático, etapa B", () => {
-  test("consultora com maleta em vendas (não só em acerto): Pix sem conta em aberto vai para a exceção", async () => {
+  test("consultora com maleta em vendas: Pix sem conta em aberto entra como adiantamento (0293)", async () => {
     const p = await pessoa();
     const kit = (await um<{ id: string }>(`insert into public.kits(code) values($1) returning id`, [`ISO-B-${marca()}`])).id;
     await adm.unsafe(`insert into public.kit_cycles (kit_id, cycle_no, consultora_party_id, status) values ($1, 1, $2, 'operacao')`, [kit, p]);
@@ -111,10 +111,12 @@ describe("0286 — Asaas automático, etapa B", () => {
        values ($1,$2,15000,15000,199,14801,'2026-11-05','2026-11-05','PIX','RECEIVED',$3) returning id`, [acc, ext, p])).id;
     const r = await servico<{ acao: string; motivo: string }>(`public.asaas_auto_receber($1::uuid, false)`, [ch]);
     expect(r.erro).toBeNull();
-    expect(r.dados.acao).toBe("excecao");
-    expect(r.dados.motivo).toBe("maleta_em_acerto");
-    const c = await um<{ title_id: string | null }>(`select title_id from public.asaas_charges where id=$1`, [ch]);
-    expect(c.title_id).toBeNull();
+    // 0293: maleta aberta = adiantamento em 3.1.1 no nome dela (antes ia para a exceção)
+    expect(r.dados.acao).toBe("adiantamento_maleta");
+    const c = await um<{ party: string; codigo: string }>(
+      `select t.party_id::text party, ca.codigo from public.asaas_charges c join public.financial_titles t on t.id=c.title_id
+         join public.chart_of_accounts ca on ca.id=t.chart_account_id where c.id=$1`, [ch]);
+    expect(c).toEqual({ party: p, codigo: "3.1.1" });
   });
 
   test("prévia não grava; aplicar passa o título para a pessoa, liga a linha à baixa da planilha (sem dinheiro novo) e lança a tarifa em 5.1.3", async () => {
@@ -196,14 +198,18 @@ describe("0286 — Asaas automático, etapa B", () => {
     expect(await statusLinha(a)).toBe("conciliada");
     expect(await statusLinha(b)).toBe("conciliada");
     expect(await statusLinha(atual)).toBe("pendente");
+    // 0293: notificações ficam em 5.1.1; negativação (Serasa/SPC) tem o próprio título do mês (4.1.5 quando configurada)
     const e = await um<{ id: string; valor: number; codigo: string; n: number }>(
       `select e.id, e.valor_cents::int valor, ca.codigo, cardinality(e.line_ids) n from public.asaas_auto_extrato e
          join public.financial_titles t on t.id=e.title_id join public.chart_of_accounts ca on ca.id=t.chart_account_id
         where e.tipo='notificacoes' and $1 = any(e.line_ids)`, [a]);
-    expect(e).toMatchObject({ valor: 1089, codigo: "5.1.1", n: 2 });
+    expect(e).toMatchObject({ valor: 99, codigo: "5.1.1", n: 1 });
+    const neg = await um<{ id: string; valor: number }>(`select id, valor_cents::int valor from public.asaas_auto_extrato where tipo='negativacao' and $1 = any(line_ids)`, [b]);
+    expect(neg.valor).toBe(990);
     expect((await saldoRazao()) - antes).toBe(-1089);
     const u = await rpc(master, "asaas_auto_extrato_desfazer", { _id: e.id, _motivo: "Conferir mês à mão" });
     expect(u.erro).toBeNull();
+    expect((await rpc(master, "asaas_auto_extrato_desfazer", { _id: neg.id, _motivo: "Conferir mês à mão" })).erro).toBeNull();
     expect(await saldoRazao()).toBe(antes);
     expect(await statusLinha(a)).toBe("pendente");
     await rodar(true);

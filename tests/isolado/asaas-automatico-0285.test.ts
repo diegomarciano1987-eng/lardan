@@ -1,6 +1,6 @@
 /**
  * 0285 — Asaas automático (banco ISOLADO, dados sintéticos).
- * Regras do Diego: Pix sem nada em aberto vira 3.1.1 já baixado; consultora com maleta em
+ * Regras do Diego: Pix sem nada em aberto vira 3.1.1 já baixado; (0293: maleta aberta = adiantamento 3.1.1) consultora com maleta em
  * acerto vai para exceção; pagou a mais até o menor entre R$ 50 e 10% do saldo vira juros;
  * "Não, é novo" em linha com pay_ nunca cria segundo lançamento; um pay_ = um lançamento;
  * tudo automático é reversível com motivo.
@@ -100,17 +100,17 @@ describe("0285 — Asaas automático", () => {
     expect(d.c).toBe(1);
   });
 
-  test("consultora com maleta em acerto: vai para a exceção e nada é lançado", async () => {
+  // 0293 (Diego, 12/11): a exceção de maleta aberta foi substituída pelo adiantamento (3.1.1 no nome dela, abatido no acerto)
+  test("consultora com maleta em acerto: entra em 3.1.1 no nome dela como adiantamento (uma baixa só)", async () => {
     const p = await pessoa();
     const kit = (await um<{ id: string }>(`insert into public.kits(code) values($1) returning id`, [`ISO-AUTO-${marca()}`])).id;
     await adm.unsafe(`insert into public.kit_cycles (kit_id, cycle_no, consultora_party_id, status) values ($1, 1, $2, 'acerto')`, [kit, p]);
     const { ch, ext } = await recebida(p, 20000);
     const r = await receber(ch);
-    expect(r.dados.acao).toBe("excecao");
-    expect(r.dados.motivo).toBe("maleta_em_acerto");
-    expect(await baixas(ext)).toBe(0);
-    const c = await um<{ title_id: string | null }>(`select title_id from public.asaas_charges where id=$1`, [ch]);
-    expect(c.title_id).toBeNull();
+    expect(r.dados.acao).toBe("adiantamento_maleta");
+    expect(await baixas(ext)).toBe(1);
+    const a = await um<{ party: string; valor: number }>(`select party_id::text party, valor_cents::int valor from public.asaas_maleta_adiantamentos where charge_id=$1`, [ch]);
+    expect(a).toEqual({ party: p, valor: 20000 });
   });
 
   test("pagou R$ 3,00 a mais numa conta de R$ 100,00: diferença vira juros na própria baixa", async () => {

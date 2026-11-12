@@ -2052,6 +2052,20 @@
       "when": 1794489906667,
       "tag": "0292_carteira_segue_remessa",
       "breakpoints": true
+    },
+    {
+      "idx": 293,
+      "version": "7",
+      "when": 1794491923043,
+      "tag": "0293_asaas_ajustes_diego_0293",
+      "breakpoints": true
+    },
+    {
+      "idx": 294,
+      "version": "7",
+      "when": 1794492095602,
+      "tag": "0294_asaas_refazer_manual_0294",
+      "breakpoints": true
     }
   ]
 }

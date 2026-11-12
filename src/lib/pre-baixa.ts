@@ -7,7 +7,9 @@ export interface ItemPreBaixa {
   enviada: number; app: number; vendida: number; preco_cents: number; lida: number | null; faltando: number; voltou_vendida: number;
   etiqueta_nova: boolean; etiqueta_atualizada: boolean;
 }
-export interface Calculo { vendido_cents: number; base_faixa_cents: number; comissao_pct: number; comissao_cents: number; valor_pagar_cents: number; recebido_lardan_cents?: number; aguardando_lardan_cents?: number }
+export interface Calculo { vendido_cents: number; base_faixa_cents: number; comissao_pct: number; comissao_cents: number; valor_pagar_cents: number; recebido_lardan_cents?: number; aguardando_lardan_cents?: number;
+  /** 0293: Pix/boletos que a consultora já pagou pelo app com a maleta aberta, abatidos do acerto. */
+  adiantado_consultora_cents?: number; adiantamento_disponivel_cents?: number }
 export interface PreBaixa {
   id: string; cycle_id: string; status: string; situacao: SituacaoPreBaixa; prazo: string | null; dias_para_prazo: number | null;
   fechada_em: string | null; encerrada_em: string | null; installment_id: string | null; diferenca_cents: number | null;
@@ -17,6 +19,8 @@ export interface Conferencia {
   pecas_faltando: number; pecas_voltaram_vendidas: number; vendido_declarado_cents: number; vendido_final_cents: number;
   comissao_pct: number; comissao_cents: number; valor_final_cents: number; valor_pre_baixa_cents: number; diferenca_cents: number;
   bateu: boolean; pre_baixa_paga: boolean; aplicado: boolean; status?: string;
+  /** 0293: Pix da consultora abatidos (total) e abatidos agora na conferência. */
+  adiantado_consultora_cents?: number; adiantado_depois_cents?: number;
   itens: { variant_id: string; enviada: number; vendida: number; lida: number; faltando: number; voltou_vendida: number; preco_cents: number }[];
 }
 

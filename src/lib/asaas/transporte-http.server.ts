@@ -357,6 +357,18 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     await this.enviar<Json>("DELETE", `/payments/${encodeURIComponent(id)}`, {}, true);
   }
 
+  /** 0303: atualiza vencimento/valor de cobrança aberta (POST /payments/{id}; o Asaas exige forma, valor e vencimento). */
+  async atualizarCobranca(id: string, d: { valueCents: number; dueDate: string; billingType: FormaPagamento }) {
+    const c = await this.enviar<Json>("POST", `/payments/${encodeURIComponent(id)}`, {
+      corpo: { billingType: d.billingType, value: paraReais(d.valueCents), dueDate: d.dueDate },
+    });
+    try {
+      return traduzirCobranca(c!);
+    } catch {
+      throw new RespostaPerdida("Resposta de alteração sem identificador legível.");
+    }
+  }
+
   async receberEventos(): Promise<EventoExterno[]> {
     // eventos reais chegam pelo webhook, não por consulta
     return [];

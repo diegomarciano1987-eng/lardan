@@ -123,7 +123,7 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
                   {c.due_date ? ` · vence ${dataBR(c.due_date)}` : ""}
                 </span>
                 <span className="flex flex-wrap gap-2">
-                  {c.invoice_url && (
+                  {c.invoice_url && c.external_status !== "DELETED" && (
                     <>
                       <a href={c.invoice_url} target="_blank" rel="noreferrer" className="admin-btn">Abrir fatura</a>
                       <button type="button" className="admin-btn" onClick={() => void copiar(c.invoice_url!)}>Copiar link</button>

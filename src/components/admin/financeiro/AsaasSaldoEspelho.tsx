@@ -25,14 +25,14 @@ function Decisao({ t, onFeito }: { t: TarefaSaldo; onFeito: () => void }) {
     onSuccess: () => { toast.success(aberta === "ignorar" ? "Mantida como está." : "Enviado ao Asaas."); setAberta(""); setMotivo(""); onFeito(); },
     onError: (e: Error) => toast.error(e.message),
   });
-  const podeSubstituir = t.estado === "excecao" && ["varias_cobrancas", "cliente_judicial"].includes(t.motivo);
-  const podeTentar = t.estado === "falhou" || (t.estado === "excecao" && !["parcela_em_acordo", "varias_cobrancas", "cliente_judicial"].includes(t.motivo));
+  const podeSubstituir = t.estado === "excecao" && ["varias_cobrancas", "cliente_judicial", "excluida_no_asaas"].includes(t.motivo);
+  const podeTentar = t.estado === "falhou" || (t.estado === "excecao" && !["parcela_em_acordo", "varias_cobrancas", "cliente_judicial", "excluida_no_asaas"].includes(t.motivo));
   return (
     <div className="mt-3">
       <div className="flex flex-wrap gap-2">
         {podeSubstituir ? (
           <button type="button" className="inline-flex h-9 items-center rounded-[10px] bg-asaas px-3 text-sm font-semibold text-asaas-foreground" onClick={() => setAberta("substituir")}>
-            Trocar por uma cobrança do saldo
+            {t.motivo === "excluida_no_asaas" ? "Reemitir pelo saldo" : "Trocar por uma cobrança do saldo"}
           </button>
         ) : null}
         {podeTentar ? <button type="button" className="admin-btn h-9" onClick={() => setAberta("tentar")}>Tentar de novo</button> : null}
@@ -69,10 +69,17 @@ function Linha({ t, onFeito }: { t: TarefaSaldo; onFeito: () => void }) {
           <p className="text-xs text-ledger-muted">
             título {t.titulo_numero} · {ROTULO_MOTIVO_SALDO[t.motivo] ?? t.motivo} · {quando(t.concluida_em ?? t.created_at)}
           </p>
+          {t.acao === "alterar" ? (
+            <p className="mt-1 text-xs text-ledger-text">
+              Mesma cobrança {t.cobrancas[0]?.external_id ?? "—"}: de {formatBRLFromCents(t.cobrancas[0]?.valor_cents ?? 0)}, vence {data(t.cobrancas[0]?.vencimento)}
+              {" → "}<strong>{formatBRLFromCents(t.novo_valor_cents ?? 0)}</strong>, vence <strong>{data(t.novo_vencimento)}</strong>
+            </p>
+          ) : (
           <p className="mt-1 text-xs text-ledger-text">
             Cancelada{t.cobrancas.length > 1 ? "s" : ""}: {antigas || "—"}
             {t.nova_external_id ? <> → nova <strong>{t.nova_external_id}</strong> de <strong>{formatBRLFromCents(t.novo_valor_cents ?? 0)}</strong>, vence {data(t.novo_vencimento)}</> : null}
           </p>
+          )}
           {t.erro ? <p className="mt-1 text-xs text-ledger-muted">{t.erro}</p> : null}
           {t.decisao_motivo ? <p className="mt-1 text-xs text-ledger-muted">Decisão: {t.decisao_motivo}</p> : null}
         </div>
@@ -107,7 +114,7 @@ export function AsaasSaldoEspelho() {
   const feitas = (d?.tarefas ?? []).filter((t) => !(t.estado === "excecao" || t.estado === "falhou"));
   return (
     <Panel
-      title="Baixa no Lardan → cobrança no Asaas"
+      title="Lardan → cobrança no Asaas (baixa, vencimento e valor)"
       action={
         <button type="button" disabled={agora.isPending} onClick={() => agora.mutate()}
           className="inline-flex h-9 items-center gap-2 rounded-[10px] bg-asaas px-3 text-sm font-semibold text-asaas-foreground disabled:opacity-60">
@@ -121,7 +128,8 @@ export function AsaasSaldoEspelho() {
         <div className="space-y-5">
           <p className="text-sm text-ledger-text">
             Toda baixa feita aqui (manual, OFX, Pix em outra conta, desconto) ou título cancelado cancela a cobrança antiga no Asaas em até 1 minuto.
-            Se sobrar saldo, o Asaas recebe na hora uma cobrança nova com o valor exato e vencimento a partir de hoje. Acordos não são tocados.
+            Se sobrar saldo, o Asaas recebe na hora uma cobrança nova com o valor exato e o vencimento do Lardan (nunca no passado).
+            Mudou só o vencimento ou o valor da parcela: a mesma cobrança é atualizada. Cobrança excluída direto no Asaas não é reemitida sozinha: vira decisão sua. Acordos não são tocados.
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-[12px] border border-line-soft bg-cream-2 p-4">

@@ -125,10 +125,10 @@ export interface CockpitFinanceiro {
   resumo: { vencido_cents: number; a_vencer_cents: number; parcelas_abertas: number; maior_atraso: number; recebido_cents: number; comissao_cents: number;
     praca: { codigo: number; nome: string } | null; representante: string | null; codigo_legado: string | null; etapa_cobranca: string | null };
   parcelas: (Parcela & { origem: string | null; descricao: string })[];
-  fiado: { linha: number; lote: string; data_cobranca: string | null; vencimento: string; parcela: number; valor_cents: number; situacao_titulo: string | null; title_id: string; importado_em: string }[];
-  recebimentos: { data: string; valor_cents: number; estorno: boolean; referencia: string | null; titulo: string | null }[];
-  comissoes: { id: string; data: string; indicada: string | null; venda_cents: number; percentual: number; comissao_cents: number; status: string }[];
-  maletas: { id: string; ciclo: number; status: string; valor_cents: number | null; pecas: number | null; recebida: string | null; fechada: string | null }[];
+  fiado: { linha: number; lote: string; data_cobranca: string | null; vencimento: string; parcela: number; valor_cents: number; situacao_titulo: string | null; title_id: string; titulo?: string | null; importado_em: string }[];
+  recebimentos: { data: string; valor_cents: number; estorno: boolean; referencia: string | null; titulo: string | null; title_id?: string | null; settlement_id?: string | null }[];
+  comissoes: { id: string; data: string; indicada: string | null; indicada_id?: string | null; venda_cents: number; percentual: number; comissao_cents: number; status: string }[];
+  maletas: { id: string; ciclo: number; codigo?: string | null; status: string; valor_cents: number | null; pecas: number | null; recebida: string | null; fechada: string | null }[];
   promessas: { valor_cents: number; data: string; status: string }[];
 }
 export const cockpitFinanceiro = (party: string) => call<CockpitFinanceiro>("consultora_cockpit_financeiro", { _party: party });

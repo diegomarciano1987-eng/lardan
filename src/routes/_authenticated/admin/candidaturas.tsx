@@ -43,7 +43,7 @@ import { cn } from "@/lib/utils";
 
 /** Filtros vivem na URL: voltar do cockpit devolve o quadro exatamente como estava. */
 type Busca = {
-  vista?: "kanban" | "lista" | "followups";
+  vista?: "kanban" | "lista" | "followups" | "concluidos";
   q?: string;
   etapa?: string;
   desfecho?: string;
@@ -170,6 +170,7 @@ function CandidaturasPage() {
     const { vista: _v, ...resto } = busca;
     return resto;
   }, [busca]);
+  const concluidos = busca.vista === "concluidos";
 
   const opcoes = useQuery({
     queryKey: ["crm", "opcoes"],
@@ -180,12 +181,13 @@ function CandidaturasPage() {
   const board = useQuery({
     queryKey: ["crm", "board", filtros],
     queryFn: () => carregarBoard(filtros),
-    enabled: podeVer && busca.vista !== "lista" && busca.vista !== "followups",
+    enabled: podeVer && busca.vista !== "lista" && busca.vista !== "followups" && !concluidos,
   });
   const lista = useQuery({
-    queryKey: ["crm", "lista", filtros],
-    queryFn: () => carregarLista(filtros, 100, 0),
-    enabled: podeVer && busca.vista === "lista",
+    queryKey: ["crm", "lista", filtros, concluidos],
+    queryFn: () =>
+      carregarLista(concluidos ? { ...filtros, concluidas: true } : filtros, concluidos ? 300 : 100, 0),
+    enabled: podeVer && (busca.vista === "lista" || concluidos),
   });
   const radar = useQuery({
     queryKey: ["crm", "radar"],
@@ -265,6 +267,7 @@ function CandidaturasPage() {
                 ["kanban", "Kanban", Columns3],
                 ["lista", "Lista", List],
                 ["followups", "Follow-ups", CalendarClock],
+                ["concluidos", `Concluídos${r?.concluidas ? ` · ${r.concluidas}` : ""}`, CheckCircle2],
               ] as const
             ).map(([v, rotulo, Icone]) => (
               <button
@@ -515,6 +518,80 @@ function CandidaturasPage() {
               )}
             </div>
           </Panel>
+        ) : concluidos ? (
+          <Panel
+            title={`Concluídos${lista.data ? ` · ${lista.data.total} candidata(s) que já receberam maleta` : ""}`}
+            flush
+          >
+            {lista.isLoading ? (
+              <div className="px-5 py-6">
+                <Skeleton className="h-40 w-full" />
+              </div>
+            ) : lista.error ? (
+              <div className="px-5 py-4">
+                <ErrorState message={(lista.error as Error).message} />
+              </div>
+            ) : (lista.data?.itens.length ?? 0) === 0 ? (
+              <div className="px-5">
+                <EmptyState
+                  title="Nenhuma candidata concluída."
+                  description="Quando uma candidata recebe a primeira maleta, ela aparece aqui automaticamente."
+                />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[900px] text-sm">
+                  <thead>
+                    <tr className="border-b border-line text-left">
+                      {["Nome", "Cidade", "WhatsApp", "Maleta", "Situação da maleta", "Maleta desde", "Representante"].map((h) => (
+                        <th key={h} className="ledger-eyebrow px-4 py-3 whitespace-nowrap">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line-soft">
+                    {lista.data!.itens.map((c) => (
+                      <tr key={c.id} className="hover:bg-warm-ivory/60">
+                        <td className="px-4 py-3">
+                          <Link
+                            to="/admin/candidaturas/$id"
+                            params={{ id: c.id }}
+                            className="font-semibold text-ledger-text hover:text-bronze"
+                          >
+                            {c.nome}
+                          </Link>
+                          <span className="block text-[0.6875rem] text-ledger-muted num">{c.protocolo}</span>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-ledger-muted">
+                          {c.cidade}/{c.uf}
+                        </td>
+                        <td className="px-4 py-3 text-xs num">{c.whatsapp}</td>
+                        <td className="px-4 py-3 text-xs">
+                          {c.maleta ? (
+                            <Link
+                              to="/admin/maletas/$id"
+                              params={{ id: c.maleta.cycle_id }}
+                              className="font-semibold text-bronze hover:underline num"
+                            >
+                              {c.maleta.maleta}
+                            </Link>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs">{rotuloSituacaoMaleta(c.maleta?.situacao)}</td>
+                        <td className="px-4 py-3 text-xs text-ledger-muted">
+                          {c.maleta ? new Date(c.maleta.em).toLocaleDateString("pt-BR") : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-ledger-muted">{c.representante ?? "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Panel>
         ) : busca.vista === "lista" ? (
           <Panel
             title={`Lista${lista.data ? ` · ${lista.data.total} candidatura(s)` : ""}`}
@@ -664,6 +741,21 @@ function CandidaturasPage() {
       )}
     </div>
   );
+}
+
+const SITUACAO_MALETA: Record<string, string> = {
+  montagem: "Em montagem",
+  conferida: "Conferida",
+  expedida: "Expedida",
+  transito: "Em trânsito",
+  recebida: "Recebida",
+  operacao: "Com a consultora",
+  acerto: "Em acerto",
+  encerrada: "Acertada",
+};
+function rotuloSituacaoMaleta(s?: string) {
+  if (!s) return "—";
+  return SITUACAO_MALETA[s] ?? s;
 }
 
 /** Reexportado para manter o card do quadro acessível a outras telas. */

@@ -12,6 +12,10 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { formatBRLFromCents } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { gerarLinkCobranca } from "@/lib/asaas/cobranca.functions";
+import { cancelarCobrancaAsaas } from "@/lib/asaas/cancelar-cobranca.functions";
+import { useCapabilities } from "@/lib/capabilities";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 type Parcela = { id: string; numero: number; vencimento: string; saldo: number };
 type Forma = "PIX" | "BOLETO" | "UNDEFINED";
@@ -37,6 +41,11 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
   const [parcela, setParcela] = React.useState(abertas[0]?.id ?? "");
   const [forma, setForma] = React.useState<Forma>("PIX");
   const [aviso, setAviso] = React.useState<string | null>(null);
+  const caps = useCapabilities();
+  const podeCancelar = caps.includes("finance.receivable.manage");
+  const cancelarFn = useServerFn(cancelarCobrancaAsaas);
+  const [cancelando, setCancelando] = React.useState<{ id: string; valor: number; vence: string | null; parcela: number | null } | null>(null);
+  const [motivo, setMotivo] = React.useState("");
 
   const cobrancas = useQuery({
     queryKey: ["asaas-cobrancas-titulo", tituloId],
@@ -60,6 +69,23 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
         setAviso(x.reaproveitada ? "Esta parcela já tinha cobrança no Asaas: reaproveitada, nada duplicado." : "Cobrança criada no Asaas.");
         toast.success("Cobrança pronta para enviar.");
       } else setAviso(x.erro ?? `Situação: ${x.state}. Acompanhe em Recebíveis Asaas.`);
+      void qc.invalidateQueries({ queryKey: ["asaas-cobrancas-titulo", tituloId] });
+      void qc.invalidateQueries({ queryKey: ["asaas"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const cancelar = useMutation({
+    mutationFn: () => cancelarFn({ data: { chargeId: cancelando!.id, motivo } }),
+    onSuccess: (r) => {
+      if (r.resultado === "cancelada" || r.resultado === "ja_excluida") {
+        toast.success("Cobrança cancelada no Asaas. A parcela continua em aberto no Lardan: gere a cobrança nova com a data certa.");
+        setCancelando(null);
+        setMotivo("");
+      } else if (r.resultado === "paga_no_asaas") {
+        toast.error("Não cancelado: esta cobrança já foi paga no Asaas. A baixa entra sozinha.");
+        setCancelando(null);
+      } else toast.error(`Não foi possível cancelar no Asaas agora. ${r.erro ?? ""} Tente de novo em instantes.`);
       void qc.invalidateQueries({ queryKey: ["asaas-cobrancas-titulo", tituloId] });
       void qc.invalidateQueries({ queryKey: ["asaas"] });
     },
@@ -96,13 +122,28 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
                   <strong>{ESTADOS[c.external_status ?? ""] ?? c.external_status ?? "—"}</strong>
                   {c.due_date ? ` · vence ${dataBR(c.due_date)}` : ""}
                 </span>
-                {c.invoice_url && (
-                  <span className="flex gap-2">
-                    <a href={c.invoice_url} target="_blank" rel="noreferrer" className="admin-btn">Abrir fatura</a>
-                    <button type="button" className="admin-btn" onClick={() => void copiar(c.invoice_url!)}>Copiar link</button>
-                    <a href={whats(c.invoice_url, c.value_cents ?? 0)} target="_blank" rel="noreferrer" className="admin-btn">WhatsApp</a>
-                  </span>
-                )}
+                <span className="flex flex-wrap gap-2">
+                  {c.invoice_url && c.external_status !== "DELETED" && (
+                    <>
+                      <a href={c.invoice_url} target="_blank" rel="noreferrer" className="admin-btn">Abrir fatura</a>
+                      <button type="button" className="admin-btn" onClick={() => void copiar(c.invoice_url!)}>Copiar link</button>
+                      <a href={whats(c.invoice_url, c.value_cents ?? 0)} target="_blank" rel="noreferrer" className="admin-btn">WhatsApp</a>
+                    </>
+                  )}
+                  {podeCancelar && (c.external_status === "PENDING" || c.external_status === "OVERDUE") && (
+                    <button
+                      type="button"
+                      className="admin-btn border-danger/50 text-danger hover:bg-danger/10"
+                      data-testid="cancelar-cobranca-asaas"
+                      onClick={() => {
+                        setMotivo("");
+                        setCancelando({ id: c.id, valor: c.value_cents ?? 0, vence: c.due_date, parcela: p?.numero ?? null });
+                      }}
+                    >
+                      Cancelar no Asaas
+                    </button>
+                  )}
+                </span>
               </li>
             );
           })}
@@ -136,6 +177,45 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
         </>
       )}
       {aviso && <p className="mt-3 text-sm font-medium text-ledger-text" data-testid="aviso-asaas">{aviso}</p>}
+
+      <Dialog open={!!cancelando} onOpenChange={(v) => !v && !cancelar.isPending && setCancelando(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cancelar cobrança no Asaas</DialogTitle>
+            <DialogDescription>
+              {cancelando
+                ? `Parcela ${cancelando.parcela ?? "—"} · ${formatBRLFromCents(cancelando.valor)}${cancelando.vence ? ` · vence ${dataBR(cancelando.vence)}` : ""}. `
+                : ""}
+              A cobrança é excluída no Asaas e a dívida continua em aberto no Lardan. Antes de excluir, o sistema confere no Asaas: se a cliente já pagou, nada é cancelado.
+            </DialogDescription>
+          </DialogHeader>
+          <label className="block">
+            <span className="ledger-eyebrow">Motivo (fica registrado)</span>
+            <Textarea
+              className="mt-1.5"
+              rows={3}
+              maxLength={300}
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+              placeholder="Ex.: vencimento lançado errado, a certa é 20/11"
+              autoFocus
+            />
+          </label>
+          <DialogFooter>
+            <button type="button" className="admin-btn" disabled={cancelar.isPending} onClick={() => setCancelando(null)}>
+              Voltar
+            </button>
+            <button
+              type="button"
+              className="rounded-[10px] border border-danger bg-danger/10 px-4 py-2 text-sm font-semibold text-danger hover:bg-danger/20 disabled:opacity-50"
+              disabled={motivo.trim().length < 5 || cancelar.isPending}
+              onClick={() => cancelar.mutate()}
+            >
+              {cancelar.isPending ? "Conferindo no Asaas…" : "Cancelar cobrança"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

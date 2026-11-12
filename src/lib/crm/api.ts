@@ -57,6 +57,8 @@ export interface CandidaturaCard {
   representante_id?: string | null;
   representante?: string | null;
   representante_origem?: string | null;
+  /** 0301: primeira maleta da pessoa (não cancelada) — presente = candidata concluída. */
+  maleta?: { cycle_id: string; maleta: string; situacao: string; em: string; party_id: string } | null;
   tags: Etiqueta[];
 }
 
@@ -68,6 +70,8 @@ export interface Radar {
   novas: number;
   sem_responsavel: number;
   total: number;
+  /** 0301: candidatas que já têm maleta (aba Concluídos). */
+  concluidas?: number;
 }
 
 export interface Board {
@@ -231,6 +235,8 @@ export interface Filtros {
   ate?: string | undefined;
   followup?: string | undefined;
   arquivadas?: boolean | undefined;
+  /** 0301: true = só quem já tem maleta (aba Concluídos). */
+  concluidas?: boolean | undefined;
 }
 
 /* -------------------------------------------------------- chamadas -- */

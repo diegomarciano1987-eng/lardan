@@ -2108,6 +2108,20 @@
       "when": 1794514098213,
       "tag": "0300_qualidade_ve_todo_retorno_0300",
       "breakpoints": true
+    },
+    {
+      "idx": 301,
+      "version": "7",
+      "when": 1794516353091,
+      "tag": "0301_crm_concluidos_cancelar_cobranca_0301",
+      "breakpoints": true
+    },
+    {
+      "idx": 302,
+      "version": "7",
+      "when": 1794516912527,
+      "tag": "0302_asaas_saldo_reemitir_apos_exclusao_0302",
+      "breakpoints": true
     }
   ]
 }

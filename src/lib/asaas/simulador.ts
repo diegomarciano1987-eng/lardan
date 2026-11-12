@@ -288,6 +288,17 @@ export class SimuladorAsaas implements TransporteAsaas {
     return c.invoiceUrl ?? this.link(chargeId);
   }
 
+  /** Exclui como o Asaas: só cobrança em aberto; inexistente = já excluída; paga não se exclui. */
+  async cancelarCobranca(id: string): Promise<void> {
+    const c = this.cobrancas.get(id);
+    if (!c || c.status === "DELETED") return;
+    if (c.status !== "PENDING" && c.status !== "OVERDUE") {
+      throw new RecusadoPeloProvedor("Só cobrança em aberto pode ser excluída (simulação).", 400, ["invalid_action"]);
+    }
+    c.status = "DELETED";
+    this.gravar();
+  }
+
   async receberEventos() {
     const fila = this.eventos;
     this.eventos = [];

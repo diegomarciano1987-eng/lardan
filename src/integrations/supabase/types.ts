@@ -20717,6 +20717,16 @@ export type Database = {
         Returns: boolean
       }
       consultora_aviso_proxima_maleta: { Args: never; Returns: Json }
+      consultora_carteira_seguir: {
+        Args: {
+          _cycle: string
+          _origem: string
+          _party: string
+          _praca: string
+          _rep: string
+        }
+        Returns: Json
+      }
       consultora_cliente_compras: { Args: { _cliente: string }; Returns: Json }
       consultora_clientes_resumo: { Args: never; Returns: Json }
       consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }

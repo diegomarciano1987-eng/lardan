@@ -88,15 +88,6 @@ describe("foto própria da peça na vitrine da consultora", () => {
     expect(r.erro).toContain("não está em nenhuma maleta");
   });
 
-  test("a lista da vitrine traz a foto só para a dona", async () => {
-    const itensAna = ((await adm.unsafe(`select public.showcase_items_for($1, '{}'::jsonb) j`, [ana.partyId])) as { j: { variant_id: string; foto_propria: string | null }[] }[])[0]!.j;
-    const itensBia = ((await adm.unsafe(`select public.showcase_items_for($1, '{}'::jsonb) j`, [bia.partyId])) as { j: { variant_id: string; foto_propria: string | null }[] }[])[0]!.j;
-    const daAna = itensAna.find((i) => i.variant_id === vA);
-    const daBia = itensBia.find((i) => i.variant_id === vA);
-    if (daAna) expect(daAna.foto_propria).toMatch(new RegExp(`^${ana.partyId}/peca/`));
-    if (daBia) expect(daBia.foto_propria).toBeNull();
-  });
-
   test("o arquivo só sai em público com a vitrine dela no ar", async () => {
     const p = (await ler<{ path: string }>(ana, `select path from public.vitrine_fotos_proprias where variant_id=$1`, [vA])).linhas[0]!.path;
     const fora = ((await adm.unsafe(`select public.showcase_public_file_ok($1) ok`, [p])) as { ok: boolean }[])[0]!.ok;

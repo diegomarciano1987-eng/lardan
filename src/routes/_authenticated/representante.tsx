@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BarChart3, Briefcase, CalendarDays, ChevronLeft, ChevronRight, ClipboardCheck, Eye, HandCoins, ListChecks, LogOut, PackageOpen, PiggyBank, Search, Send, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, LayoutGrid, X, Briefcase, CalendarDays, ChevronLeft, ChevronRight, ClipboardCheck, Eye, HandCoins, ListChecks, LogOut, PackageOpen, PiggyBank, Search, Send, Sparkles, Users } from "lucide-react";
 import wordmarkAsset from "@/assets/lardan-wordmark.png.asset.json";
 import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
@@ -39,7 +39,9 @@ const ABAS: { id: Aba; rotulo: string; curto: string; icone: typeof Users }[] = 
 /** No celular o representante vê só o trabalho de rua (pedido do Diego, 05/11/2026). 0245: Agenda e
  *  Abertura ficam dentro de Captação; na base só Captação e Convite. */
 // 0254: "Maletas" no celular — receber a remessa e entregar em mãos a cada consultora
-const ABAS_CELULAR: Aba[] = ["captacao", "maletas", "acertos", "remessas", "convites"];
+// 0300 (Diego, 12/11/2026): Cobrança (financeiro da carteira) volta para a barra do celular; o resto fica em "Mais"
+const ABAS_CELULAR: Aba[] = ["captacao", "maletas", "acertos", "cobranca"];
+const ABAS_MAIS: Aba[] = ["remessas", "consultoras", "familia", "convites", "painel"];
 const GRUPO_CAPTACAO: Aba[] = ["captacao", "agenda", "abertura"];
 const ESPELHO: AppRole[] = ["master", "diretoria", "financeiro", "cobranca"] as AppRole[];
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -133,19 +135,62 @@ function AreaRepresentante() {
         )}
       </div>
 
+      <BarraCelular aba={aba} ir={ir} />
+    </div>
+    </OperationalGlass>
+  );
+}
+
+/** Barra do celular: 4 abas de rua + "Mais" (folha com botões grandes para o resto, inclusive o financeiro). */
+function BarraCelular({ aba, ir }: { aba: Aba; ir: (id: Aba) => void }) {
+  const [mais, setMais] = React.useState(false);
+  const maisAtiva = ABAS_MAIS.includes(aba);
+  React.useEffect(() => {
+    if (!mais) return;
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setMais(false); };
+    window.addEventListener("keydown", esc);
+    return () => window.removeEventListener("keydown", esc);
+  }, [mais]);
+  const botao = "flex min-w-0 flex-col items-center gap-1 py-3 text-[0.78rem] leading-tight";
+  return (
+    <>
+      {mais && (
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Mais opções">
+          <button type="button" className="absolute inset-0 bg-foreground/30" aria-label="Fechar" onClick={() => setMais(false)} />
+          <div className="absolute inset-x-0 bottom-0 rounded-t-3xl border-t border-border bg-card px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-4 shadow-2xl">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="font-display text-xl">Mais opções</p>
+              <button type="button" onClick={() => setMais(false)} className="grid size-12 place-items-center rounded-full bg-muted" aria-label="Fechar">
+                <X className="size-5" aria-hidden />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {ABAS_MAIS.map((id) => ABAS.find((x) => x.id === id)!).map((a) => (
+                <button key={a.id} type="button" onClick={() => { setMais(false); ir(a.id); }} aria-current={aba === a.id ? "page" : undefined}
+                  className={`flex min-h-16 min-w-0 items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm ${aba === a.id ? "border-primary bg-primary/10 font-semibold text-primary" : "border-border"}`}>
+                  <a.icone className="size-5 shrink-0" aria-hidden /> <span className="min-w-0">{a.rotulo}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
         {ABAS_CELULAR.map((id) => ABAS.find((x) => x.id === id)!).map((a) => {
           const ativa = aba === a.id || (a.id === "captacao" && GRUPO_CAPTACAO.includes(aba));
           return (
           <button key={a.id} type="button" onClick={() => ir(a.id)} aria-current={ativa ? "page" : undefined}
-            className={`flex min-w-0 flex-col items-center gap-1 py-3 text-[0.78rem] leading-tight ${ativa ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+            className={`${botao} ${ativa ? "font-semibold text-primary" : "text-muted-foreground"}`}>
             <a.icone className="size-5" aria-hidden /> <span className="max-w-full truncate px-0.5">{a.curto}</span>
           </button>
           );
         })}
+        <button type="button" onClick={() => setMais(true)} aria-expanded={mais} aria-current={maisAtiva ? "page" : undefined}
+          className={`${botao} ${maisAtiva ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+          <LayoutGrid className="size-5" aria-hidden /> <span className="max-w-full truncate px-0.5">Mais</span>
+        </button>
       </nav>
-    </div>
-    </OperationalGlass>
+    </>
   );
 }
 

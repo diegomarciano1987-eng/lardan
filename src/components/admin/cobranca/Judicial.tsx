@@ -8,12 +8,14 @@ import { SmartSelect } from "@/components/premium/SmartSelect";
 import { brl, dataBR, hojeSP, judicial, judicialDocs, acordosJudiciais, encaminharJudicial, salvarAcordoJudicial, statusAcordoJudicial, TIPOS_DOC_JUDICIAL, type Parcela } from "@/lib/cobranca";
 import { enviarDocJudicial, abrirDocJudicial, excluirDocJudicial } from "@/lib/cobranca.functions";
 import { montarPlano, addMeses } from "@/lib/cobranca-acordo";
+import { centavosDigitados, limparDinheiro } from "@/lib/dinheiro-digitado";
 import { AcordoAsaas } from "./AcordoAsaas";
 import { AlvaraJudicial } from "./AlvaraJudicial";
 
 const iso = (d?: Date) => (d ? d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }) : "");
 const paraData = (s: string) => (s ? new Date(s + "T12:00:00") : undefined);
-const reais = (s: string) => Math.round(Number(s.replace(/\./g, "").replace(",", ".") || 0) * 100);
+// 0300: "172.16" não vira R$ 17.216; letras são ignoradas
+const reais = (s: string) => centavosDigitados(s);
 const txt = (c: number) => (c / 100).toFixed(2).replace(".", ",");
 const inp = "h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm";
 const ROT_ST: Record<string, string> = { vigente: "Vigente", cumprido: "Cumprido", descumprido: "Descumprido", cancelado: "Cancelado" };
@@ -136,8 +138,9 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
     const m = prompt("Motivo / observação"); if (!m) return;
     try { await statusAcordoJudicial(id, st, m); qc.invalidateQueries({ queryKey: ["cob"] }); toast.success("Atualizado."); } catch (e) { toast.error(e instanceof Error ? e.message : "Falhou."); }
   };
-  const Linha = ({ r, v, set, testid }: { r: string; v: string; set: (s: string) => void; testid?: string }) => (
-    <div className="flex items-center justify-between gap-3"><dt className="text-sm">{r}</dt><dd><input data-testid={testid} value={v} onChange={(e) => reset(set)(e.target.value)} placeholder="0,00" className="h-10 w-36 rounded-lg border border-line bg-surface px-3 text-right font-mono text-sm" /></dd></div>
+  // 0300: função (não componente) — um componente criado dentro do render remontava o campo a cada tecla e perdia o foco
+  const linha = (r: string, v: string, set: (s: string) => void, testid?: string) => (
+    <div className="flex items-center justify-between gap-3"><dt className="text-sm">{r}</dt><dd><input data-testid={testid} aria-label={r} inputMode="decimal" autoComplete="off" value={v} onChange={(e) => reset(set)(limparDinheiro(e.target.value))} placeholder="0,00" className="h-10 w-36 rounded-lg border border-line bg-surface px-3 text-right font-mono text-sm" /></dd></div>
   );
 
   return (
@@ -198,13 +201,13 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
           <label className="block w-56 text-xs font-medium text-ledger-muted">Data do acordo<div className="mt-1"><DateField value={paraData(dataAc)} onChange={(d) => d && setDataAc(iso(d))} /></div></label>
           <dl className="space-y-2">
             <div className="flex justify-between text-sm"><dt>Dívida original</dt><dd className="font-mono">{brl(principal)}</dd></div>
-            <Linha r="Honorários do advogado" v={hon} set={setHon} testid="jud-honorarios" />
-            <Linha r="Cartório / protesto" v={cart} set={setCart} />
-            <Linha r="Custas processuais" v={cust} set={setCust} />
-            <div className="flex items-center justify-between gap-3"><dt><input value={outDesc} onChange={(e) => setOutDesc(e.target.value)} placeholder="Outros (descreva)" className="h-10 w-48 rounded-lg border border-line bg-surface px-3 text-sm" /></dt><dd><input value={out} onChange={(e) => reset(setOut)(e.target.value)} placeholder="0,00" className="h-10 w-36 rounded-lg border border-line bg-surface px-3 text-right font-mono text-sm" /></dd></div>
-            <Linha r="Desconto" v={desc} set={setDesc} />
+            {linha("Honorários do advogado", hon, setHon, "jud-honorarios")}
+            {linha("Cartório / protesto", cart, setCart, "jud-cartorio")}
+            {linha("Custas processuais", cust, setCust, "jud-custas")}
+            <div className="flex items-center justify-between gap-3"><dt><input value={outDesc} onChange={(e) => setOutDesc(e.target.value)} placeholder="Outros (descreva)" className="h-10 w-48 rounded-lg border border-line bg-surface px-3 text-sm" /></dt><dd><input aria-label="Outros (valor)" inputMode="decimal" autoComplete="off" value={out} onChange={(e) => reset(setOut)(limparDinheiro(e.target.value))} placeholder="0,00" className="h-10 w-36 rounded-lg border border-line bg-surface px-3 text-right font-mono text-sm" /></dd></div>
+            {linha("Desconto", desc, setDesc, "jud-desconto")}
             <div className="flex justify-between border-t border-line pt-2 text-sm text-ledger-muted"><dt>Calculado</dt><dd className="font-mono">{brl(calculado)}</dd></div>
-            <div className="flex items-center justify-between gap-3 text-base font-semibold"><dt>Valor total do acordo</dt><dd><input data-testid="jud-total" value={totalManual} onChange={(e) => reset(setTotalManual)(e.target.value)} placeholder={txt(calculado)} className="h-11 w-40 rounded-lg border-2 border-bronze/60 bg-surface px-3 text-right font-mono text-base" /></dd></div>
+            <div className="flex items-center justify-between gap-3 text-base font-semibold"><dt>Valor total do acordo</dt><dd><input data-testid="jud-total" inputMode="decimal" autoComplete="off" value={totalManual} onChange={(e) => reset(setTotalManual)(limparDinheiro(e.target.value))} placeholder={txt(calculado)} className="h-11 w-40 rounded-lg border-2 border-bronze/60 bg-surface px-3 text-right font-mono text-base" /></dd></div>
           </dl>
           <p className="text-xs text-ledger-muted">Deixe o total em branco para usar o calculado, ou digite o valor homologado.</p>
           <div className="flex flex-wrap items-end gap-3">

@@ -18,7 +18,7 @@ export interface DevolucaoAberta {
 
 export const remessasDestino = (cycle: string) => chamar<RemessaDestino[]>("remessas_destino_lista", { _cycle: cycle });
 export const mudarRemessa = (cycle: string, remessa: string, motivo: string) =>
-  chamar<{ remessa: number; custodia_mudou: boolean; abertura_numero: number | null }>("remessa_maleta_mudar_remessa", { _cycle: cycle, _remessa: remessa, _motivo: motivo });
+  chamar<{ remessa: number; custodia_mudou: boolean; abertura_numero: number | null; carteira_mudou?: boolean; representante_nome?: string | null }>("remessa_maleta_mudar_remessa", { _cycle: cycle, _remessa: remessa, _motivo: motivo });
 export const pedirDevolucao = (cycle: string, motivo: string) => chamar<{ id: string }>("maleta_devolucao_pedir", { _cycle: cycle, _motivo: motivo });
 export const cancelarDevolucao = (id: string, motivo: string) => chamar<{ id: string }>("maleta_devolucao_cancelar", { _id: id, _motivo: motivo });
 export const receberDevolucao = (id: string) =>

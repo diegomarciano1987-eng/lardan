@@ -357,6 +357,9 @@ body.operational-glass-active * {
   }
   :is(.operational-glass, body.operational-glass-active) :is(.admin-btn-primary,button.bg-primary,a.bg-primary):hover:not(:disabled) { filter: brightness(1.12); }
 }
+/* 0300: o app do representante nunca anda para o lado no celular (nada passa da largura da tela). */
+.representante-shell { max-width: 100vw; overflow-x: clip; }
+html:has(.representante-shell) { overscroll-behavior-x: none; }
 @media (max-width: 767px) {
   .operational-glass .representante-shell > nav {
     left: 12px;

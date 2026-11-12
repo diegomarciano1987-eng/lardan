@@ -31,7 +31,7 @@ function SeletorPeriodo({ p, setP, de, ate, setDe, setAte }: { p: Periodo; setP:
   const ops: [Periodo, string][] = [["semana", "Esta semana"], ["proxima", "Próxima semana"], ["passada", "Semana passada"], ["mes", "Este mês"], ["outro", "Escolher datas"]];
   return (
     <div className="space-y-2">
-      <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:px-0">
+      <div className="flex flex-wrap gap-2">
         {ops.map(([id, r]) => (
           <button key={id} type="button" onClick={() => setP(id)}
             className={`shrink-0 rounded-full border px-3.5 py-2 text-sm ${p === id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground"}`}>{r}</button>

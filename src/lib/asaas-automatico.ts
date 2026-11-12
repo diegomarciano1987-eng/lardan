@@ -154,7 +154,7 @@ export const resolverAlerta = (id: string, resolucao: string) => rpc<{ ok: boole
 /** 0299 — baixa no Lardan espelhada no Asaas: cobrança antiga cancelada e, havendo saldo, nova pelo saldo. */
 export type TarefaSaldo = {
   id: string;
-  acao: "cancelar" | "substituir" | "reabrir" | "excecao";
+  acao: "cancelar" | "substituir" | "reabrir" | "alterar" | "excecao";
   motivo: string;
   estado: "pendente" | "processando" | "concluida" | "excecao" | "falhou" | "ignorada";
   saldo_cents: number;
@@ -193,5 +193,34 @@ export const ROTULO_MOTIVO_SALDO: Record<string, string> = {
   pago_no_asaas: "Já paga no Asaas (conferir pagamento em dobro)",
   nova_cobranca_recusada: "Antiga cancelada; nova não foi criada",
   cobranca_viva_encontrada: "Outra cobrança aberta encontrada",
+  vencimento_alterado: "Vencimento mudado no Lardan",
+  valor_alterado: "Valor mudado no Lardan",
+  vencimento_no_passado: "Vencimento do Lardan já passou (o Asaas não aceita data passada)",
+  excluida_no_asaas: "Excluída direto no Asaas (não reemitida sozinha)",
 };
 export const painelSaldo = () => rpc<PainelSaldo>("asaas_saldo_painel", { _limite: 150 });
+
+/** 0303 — diferenças AGORA entre a parcela do Lardan e a cobrança aberta no Asaas. */
+export type DiferencaEspelho = {
+  charge_id: string;
+  external_id: string;
+  external_status: string;
+  invoice_url: string | null;
+  asaas_vencimento: string;
+  asaas_valor_cents: number;
+  installment_id: string;
+  lardan_vencimento: string;
+  parcela_valor_cents: number;
+  lardan_saldo_cents: number;
+  title_id: string;
+  titulo_numero: string;
+  pessoa: string | null;
+  pessoa_codigo: string | null;
+  valor_diferente: boolean;
+  vencimento_diferente: boolean;
+  pode_levar: boolean;
+  tarefa_estado: string | null;
+  tarefa_motivo: string | null;
+  pedido_aberto: boolean;
+};
+export const diferencasEspelho = () => rpc<DiferencaEspelho[]>("asaas_espelho_diferencas", { _limite: 300 });

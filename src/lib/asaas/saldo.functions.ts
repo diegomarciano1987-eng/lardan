@@ -36,3 +36,21 @@ export const decidirSaldo = createServerFn({ method: "POST" })
     const { sincronizarSaldosProducao } = await import("./saldo.server");
     return { ok: true, sync: await sincronizarSaldosProducao(10) };
   });
+
+/** 0303 — "Levar o Lardan ao Asaas": pede o espelho de vencimento/valor de uma parcela e roda a rotina na hora. */
+export const espelharParcelaAgora = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { installmentId: string; motivo: string }) => {
+    if (!/^[0-9a-f-]{36}$/i.test(d?.installmentId ?? "")) throw new Error("Parcela inválida.");
+    if ((d.motivo ?? "").trim().length < 5) throw new Error("Informe o motivo (mínimo 5 letras).");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    await exigir(c);
+    const r = await c.supabase.rpc("asaas_espelho_pedir", { _inst: data.installmentId, _motivo: data.motivo.trim() });
+    if (r.error) throw new Error(r.error.message);
+    const { sincronizarSaldosProducao } = await import("./saldo.server");
+    const sync = await sincronizarSaldosProducao(10);
+    return { ok: true, sync };
+  });

@@ -124,11 +124,11 @@ describe("0297 — parcela fantasma só cancela por pessoa, com motivo e desfaze
     const p = await pessoa();
     await adm.unsafe(`insert into public.cob_judicial_processos (origem_chave, lote, party_id, nome, numero_processo) values ($2,gen_random_uuid(),$1,'ISO','0000001-00.2026.8.16.0001')`, [p, `iso0297:${marca()}`]);
     const r = await receber(p, 40883);
-    const c = await cobranca(p, r, 40883, `ISO${marca()}`);
-    await espelhar(c.ext, { deleted: true });
+    const ref = `ISO${marca()}`;
+    const c = await cobranca(p, r, 40883, ref);
+    await espelhar(c.ext, { deleted: true, externalReference: ref });
     expect((await rpc(master, "asaas_fantasma_cancelar", { _inst: r.inst, _motivo: "teste judicial" })).erro).toContain("processo judicial");
     // a mesma fatura (mesma referência) reparcelada no Asaas e já ligada a outra parcela do Lardan = dívida em dobro
-    const ref = (await um<{ r: string }>(`select raw->>'externalReference' r from public.asaas_charges where id=$1`, [c.id])).r;
     const nova = await receber(p, 30159);
     await cobranca(p, nova, 30159, ref);
     const ok = await rpc<{ renegociada: boolean }>(master, "asaas_fantasma_cancelar", { _inst: r.inst, _motivo: "Reparcelada em 3x no Asaas" });

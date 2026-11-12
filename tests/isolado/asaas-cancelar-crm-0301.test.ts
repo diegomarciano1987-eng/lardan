@@ -113,8 +113,8 @@ describe("0301 cancelar cobrança no Asaas (vencimento errado)", () => {
   });
 });
 
-describe("0302 cobrança do saldo excluída direto no Asaas (caso Simone)", () => {
-  test("reemite o saldo de R$ 60,94 em vez de travar com intenção viva", async () => {
+describe("0302/0303 cobrança do saldo excluída direto no Asaas (caso Simone)", () => {
+  test("não reemite sozinha (exclusão proposital); só reemite R$ 60,94 quando o financeiro decide, sem travar", async () => {
     const c = await cenario(36094);
     await baixar(c, 30000);
     await sync(c.sim);
@@ -123,11 +123,40 @@ describe("0302 cobrança do saldo excluída direto no Asaas (caso Simone)", () =
     // alguém exclui a cobrança de R$ 60,94 direto no Asaas
     await c.sim.cancelarCobranca!(cs[1]!.external_id);
     await oficial(`update public.asaas_charges set external_status='DELETED' where id=$1`, [cs[1]!.id]);
+    const criadas = c.sim.chamadasCriar;
+    await sync(c.sim);
+    await sync(c.sim);
+    expect(c.sim.chamadasCriar).toBe(criadas);
+    cs = await cobrancas(c.inst);
+    expect(cs.map((x) => [x.external_status, x.value_cents])).toEqual([["DELETED", 36094], ["DELETED", 6094]]);
+    let ts = (await adm.unsafe(`select id, acao, estado, motivo from public.asaas_saldo_sync where installment_id=$1 order by created_at`, [c.inst])) as { id: string; acao: string; estado: string; motivo: string }[];
+    expect(ts.map((t) => [t.acao, t.estado, t.motivo])).toEqual([["substituir", "concluida", "baixa_parcial"], ["excecao", "excecao", "excluida_no_asaas"]]);
+    // "Manter como está" (decisão do Diego para a Simone): continua sem reemitir
+    // e "Reemitir pelo saldo" reemite a mesma dívida sem travar na intenção viva (0302)
+    const d = await rpc(fin, "asaas_saldo_decidir", { _job: ts[1]!.id, _decisao: "substituir", _motivo: "Excluída por engano, reemitir" });
+    expect(d.erro).toBeNull();
     await sync(c.sim);
     cs = await cobrancas(c.inst);
     expect(cs.map((x) => [x.external_status, x.value_cents])).toEqual([["DELETED", 36094], ["DELETED", 6094], ["PENDING", 6094]]);
-    const ts = (await adm.unsafe(`select acao, estado, motivo from public.asaas_saldo_sync where installment_id=$1 order by created_at`, [c.inst])) as { acao: string; estado: string }[];
-    expect(ts.map((t) => [t.acao, t.estado])).toEqual([["substituir", "concluida"], ["reabrir", "concluida"]]);
+    ts = (await adm.unsafe(`select id, acao, estado, motivo from public.asaas_saldo_sync where installment_id=$1 order by created_at`, [c.inst])) as typeof ts;
+    expect(ts.at(-1)!.acao).toBe("reabrir");
+    expect(ts.at(-1)!.estado).toBe("concluida");
+  });
+
+  test("manter como está: a rotina nunca reemite depois", async () => {
+    const c = await cenario(36094);
+    await baixar(c, 30000);
+    await sync(c.sim);
+    const cs = await cobrancas(c.inst);
+    await c.sim.cancelarCobranca!(cs[1]!.external_id);
+    await oficial(`update public.asaas_charges set external_status='DELETED' where id=$1`, [cs[1]!.id]);
+    await sync(c.sim);
+    const [, ex] = (await adm.unsafe(`select id from public.asaas_saldo_sync where installment_id=$1 order by created_at`, [c.inst])) as { id: string }[];
+    expect((await rpc(fin, "asaas_saldo_decidir", { _job: ex!.id, _decisao: "ignorar", _motivo: "Exclusão proposital no Asaas" })).erro).toBeNull();
+    const criadas = c.sim.chamadasCriar;
+    for (let k = 0; k < 3; k++) await sync(c.sim);
+    expect(c.sim.chamadasCriar).toBe(criadas);
+    expect((await cobrancas(c.inst)).every((x) => x.external_status === "DELETED")).toBe(true);
   });
 });
 

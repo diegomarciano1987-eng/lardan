@@ -2157,6 +2157,13 @@
       "when": 1794580460496,
       "tag": "0307_espelho_cliente_conferir_0306b",
       "breakpoints": true
+    },
+    {
+      "idx": 308,
+      "version": "7",
+      "when": 1794580512009,
+      "tag": "0308_espelho_cliente_proximos_fix",
+      "breakpoints": true
     }
   ]
 }

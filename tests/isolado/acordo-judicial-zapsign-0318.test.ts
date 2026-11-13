@@ -22,7 +22,7 @@ beforeAll(async () => {
   consultora = await criarConta({ nome: "cons-acjud", papeis: ["consultora"] });
   outraPessoa = await criarConta({ nome: "outra-acjud", papeis: ["consultora"], comParty: true });
   expect((await rpcServico("access_financial_full_set", { _user: larissa.uid, _enabled: true, _actor: master.uid, _reason: "Autorização de acesso completo" })).ok).toBe(true);
-  await adm.unsafe("update parties set doc_digits='13262660981' where id=$1", [larissa.partyId]);
+  await adm.unsafe("update parties set doc='529.982.247-25' where id=$1", [larissa.partyId]);
   await adm.unsafe("insert into contact_points(party_id,kind,value,is_primary) values($1,'whatsapp','+5543996087837',true)", [larissa.partyId]);
   const t = await rpc<string>(larissa, "fin_title_create", { _payload: { direction: "receivable", party_id: larissa.partyId, descricao: "ISO dívida judicial", valor_cents: 395133, parcelas: [{ vencimento: "2026-01-10", valor_cents: 395133 }] } });
   expect(t.ok).toBe(true);
@@ -60,6 +60,7 @@ test("quem cobra recebe os dados do PDF; consultora, foto e PDF de outra pessoa 
 test("registro só pelo servidor, um link pendente por acordo e reenvio recusa o link antigo na ZapSign", async () => {
   expect((await rpc(larissa, "assinatura_registrar", { _d: { tipo: "acordo_judicial" } })).ok).toBe(false);
   const a = await registrar({ doc_token: `iso-acjud-1-${acordo}` });
+  if (!a.ok) console.log(a.erro);
   expect(a.ok).toBe(true);
   expect((await registrar({ doc_token: `iso-acjud-dup-${acordo}` })).ok).toBe(false);
   const b = await registrar({ doc_token: `iso-acjud-2-${acordo}`, substitui: a.dados.id });

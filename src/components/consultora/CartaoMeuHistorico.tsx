@@ -7,8 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import { meuHistorico } from "@/lib/historico-jflex";
 import { comissaoPorRemessa, faixasComissao } from "@/lib/comissao-maletas";
 import { brl } from "@/lib/maletas";
+import { supabase } from "@/integrations/supabase/client";
+import { chaveCategoria, textoBanhos, useBanhos } from "@/components/admin/historico/BanhosCategoria";
 
-function Barra({ nome, pct, detalhe }: { nome: string; pct: number; detalhe: string }) {
+function Barra({ nome, pct, detalhe, banho }: { nome: string; pct: number; detalhe: string; banho?: string | null }) {
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2 text-[1.02rem]">
@@ -18,6 +20,7 @@ function Barra({ nome, pct, detalhe }: { nome: string; pct: number; detalhe: str
       <div className="mt-1 h-3 w-full overflow-hidden rounded-full bg-muted">
         <div className="h-full rounded-full bg-primary/70" style={{ width: `${Math.max(pct, 4)}%` }} />
       </div>
+      {banho && <span className="mt-1 block text-[0.95rem] text-muted-foreground">{banho}</span>}
     </div>
   );
 }
@@ -46,6 +49,12 @@ function MinhasComissoes({ maletas }: { maletas: { remessa: number; kit: number;
 
 export function CartaoMeuHistorico() {
   const q = useQuery({ queryKey: ["consultora", "meu-historico"], queryFn: meuHistorico });
+  const eu = useQuery({ queryKey: ["consultora", "my-party-id"], staleTime: Infinity, queryFn: async () => {
+    const { data, error } = await supabase.rpc("my_party_id" as never);
+    if (error) throw error;
+    return (data as unknown as string | null) ?? null;
+  } });
+  const banhos = useBanhos(eu.data);
   if (q.isLoading || q.isError) return null;
   const d = q.data;
   if (!d?.vinculada) return null;
@@ -79,7 +88,7 @@ export function CartaoMeuHistorico() {
           <p className="text-[1.02rem] font-semibold">Suas categorias favoritas</p>
           {top.map((c) => (
             <Barra key={c.categoria} nome={c.categoria.toLowerCase()} pct={(c.participacao_vendas_pct ?? 0) / maxPart * 100}
-              detalhe={`${c.participacao_vendas_pct ?? 0}% das suas vendas`} />
+              detalhe={`${c.participacao_vendas_pct ?? 0}% das suas vendas`} banho={textoBanhos(banhos.data?.porCategoria.get(chaveCategoria(c.categoria)))} />
           ))}
         </div>
       )}

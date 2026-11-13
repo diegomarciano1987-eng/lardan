@@ -53,6 +53,8 @@ export interface ItemComposicao {
   produto: string;
   variante: string | null;
   sku: string | null;
+  /** 0315: referência da etiqueta (variante, depois produto) */
+  referencia?: string | null;
   quantidade: number;
   valor_unitario: number;
   media_id: string | null;
@@ -62,6 +64,7 @@ export interface SaldoMaleta {
   variant_id: string;
   produto: string;
   variante: string | null;
+  referencia?: string | null;
   alocado: number;
   aceito: number;
   divergente: number;

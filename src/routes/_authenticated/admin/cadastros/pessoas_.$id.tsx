@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { ContatosRefFicha } from "@/components/admin/ContatosRecado";
 import { MaletasDaConsultora } from "@/components/admin/maletas/MaletasDaConsultora";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -584,6 +585,9 @@ function FichaPessoa() {
                 />
               )}
             </div>
+          </Panel>
+          <Panel title="Recado e referência">
+            <ContatosRefFicha partyId={id} podeEditar={podeEditar} inputClass="h-10 w-full rounded-lg border border-line-soft bg-surface px-3 text-sm" />
           </Panel>
         </TabsContent>
 

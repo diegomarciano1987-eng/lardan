@@ -149,7 +149,7 @@ function MaletaFicha() {
   const montando = d.ciclo.status === "rascunho" || d.ciclo.status === "montagem";
   const emTransito = d.entregas.filter((t) => t.situacao === "transito");
   const nomes: Record<string, string> = {};
-  for (const c of d.composicao) nomes[c.variant_id] = `${c.produto}${c.variante ? ` · ${c.variante}` : ""}`;
+  for (const c of d.composicao) nomes[c.variant_id] = `${c.referencia ? `${c.referencia} · ` : ""}${c.produto}${c.variante ? ` · ${c.variante}` : ""}`;
   for (const b of d.saldos) nomes[b.variant_id] ??= `${b.produto}${b.variante ? ` · ${b.variante}` : ""}`;
 
   return (
@@ -254,7 +254,10 @@ function MaletaFicha() {
                 >
                   <FotoPeca mediaId={c.media_id} variantId={c.variant_id} className="size-12 shrink-0 rounded-lg" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-ledger-text">{c.produto}</p>
+                    <p className="truncate font-semibold text-ledger-text">
+                      {c.referencia && <span className="mr-2 font-mono text-bronze">{c.referencia}</span>}
+                      {c.produto}
+                    </p>
                     <p className="text-xs text-ledger-muted">
                       {c.variante ?? "—"} {c.sku ? `· ${c.sku}` : ""}
                     </p>
@@ -277,7 +280,10 @@ function MaletaFicha() {
                 <div key={b.variant_id} className="flex flex-wrap items-center gap-4 border-b border-line-soft px-6 py-3 last:border-0">
                   <FotoPeca variantId={b.variant_id} alt={b.produto} size="md" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-ledger-text">{b.produto}</p>
+                    <p className="truncate font-semibold text-ledger-text">
+                      {b.referencia && <span className="mr-2 font-mono text-bronze">{b.referencia}</span>}
+                      {b.produto}
+                    </p>
                     <p className="text-xs text-ledger-muted">{b.variante ?? "—"}</p>
                   </div>
                   <span className="text-xs text-ledger-muted">aceitas {b.aceito}</span>

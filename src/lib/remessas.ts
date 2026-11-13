@@ -84,8 +84,27 @@ export const consultorasDaPraca = async (praca: string, termo: string) => {
     _praca: praca,
     _search: termo.trim() || null,
   });
-  return linhas.map((p) => ({ value: p.party_id, label: rotuloConsultora(p), ...(p.cpf ? { hint: `CPF ${p.cpf}` } : {}) }));
+  // 0315: cidade e responsável junto do nome na busca da abertura
+  const ctx = await contextoPessoas(linhas.map((p) => p.party_id));
+  return linhas.map((p) => {
+    const hint = [p.cpf ? `CPF ${p.cpf}` : null, ...dicaContexto(ctx.get(p.party_id))].filter(Boolean).join(" · ");
+    return { value: p.party_id, label: rotuloConsultora(p), ...(hint ? { hint } : {}) };
+  });
 };
+
+type ContextoPessoa = { party_id: string; cidade: string | null; uf: string | null; praca: string | null; responsavel: string | null };
+/** 0315: cidade/UF, praça e responsável de cada pessoa (só de quem o usuário já pode ver). Falha vira sem contexto, nunca bloqueia a busca. */
+export async function contextoPessoas(ids: string[]): Promise<Map<string, ContextoPessoa>> {
+  const m = new Map<string, ContextoPessoa>();
+  if (!ids.length) return m;
+  for (let i = 0; i < ids.length; i += 2000) {
+    const { data } = await supabase.rpc("pessoas_busca_contexto" as never, { _ids: ids.slice(i, i + 2000) } as never);
+    for (const x of ((data ?? []) as unknown as ContextoPessoa[])) m.set(x.party_id, x);
+  }
+  return m;
+}
+export const dicaContexto = (c?: ContextoPessoa) =>
+  c ? [c.cidade ? `${c.cidade}${c.uf ? `/${c.uf}` : ""}` : null, c.responsavel ? `Resp. ${c.responsavel}` : null] : [];
 
 export const dataBR = (d: string | null) => (d ? d.slice(0, 10).split("-").reverse().join("/") : "—");
 export const isoDia = (d?: Date) =>

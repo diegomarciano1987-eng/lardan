@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Panel, Skeleton, StatusBadge } from "@/components/admin/ui";
 import { sugestaoMontagem, type SugestaoMontagem } from "@/lib/historico-jflex";
 import { supabase } from "@/integrations/supabase/client";
+import { chaveCategoria, textoBanhos, useBanhos } from "@/components/admin/historico/BanhosCategoria";
 
 const SELO: Record<SugestaoMontagem["confianca"], { tone: "success" | "warning" | "danger"; texto: string }> = {
   alta: { tone: "success", texto: "Confiança alta" },
@@ -39,6 +40,7 @@ export function SugestaoMontagem({ partyId }: { partyId: string }) {
     enabled: totalUsado != null,
   });
 
+  const banhos = useBanhos(partyId);
   if (padrao.isLoading) return <Skeleton className="h-24 w-full" />;
   const d = q.data;
 
@@ -76,7 +78,12 @@ export function SugestaoMontagem({ partyId }: { partyId: string }) {
             <tbody>
               {d.categorias.map((c) => (
                 <tr key={c.categoria} className="border-b border-line-soft last:border-0">
-                  <td className="py-2 pr-4 font-medium text-ledger-text">{c.categoria}</td>
+                  <td className="py-2 pr-4 font-medium text-ledger-text">
+                    {c.categoria}
+                    {textoBanhos(banhos.data?.porCategoria.get(chaveCategoria(c.categoria))) && (
+                      <span className="block text-xs font-normal text-ledger-muted">Banho: {textoBanhos(banhos.data?.porCategoria.get(chaveCategoria(c.categoria)))}</span>
+                    )}
+                  </td>
                   <td className="py-2 pr-4 text-right tabular-nums font-semibold">{c.pecas_sugeridas}</td>
                   <td className="py-2 pr-4 text-right tabular-nums">{c.participacao_sugerida_pct}%</td>
                   <td className="py-2 pr-4 text-right tabular-nums">{c.consultora_giro_pct != null ? `${c.consultora_giro_pct}%` : "—"}</td>

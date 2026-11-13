@@ -8,6 +8,7 @@ import { EmptyState, ErrorState, Panel, Skeleton, formatBRLFromCents } from "@/c
 import { historicoConsultora, type CategoriaHistorico } from "@/lib/historico-jflex";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComissaoMaletas } from "@/components/admin/historico/ComissaoMaletas";
+import { LinhaBanhos, chaveCategoria, useBanhos, type BanhoPct } from "@/components/admin/historico/BanhosCategoria";
 
 const brl = formatBRLFromCents;
 const data = (v?: string | null) => (v ? v.slice(0, 10).split("-").reverse().join("/") : "—");
@@ -21,7 +22,7 @@ function Dado({ rotulo, valor, destaque }: { rotulo: string; valor: string; dest
   );
 }
 
-function BarrasCategorias({ categorias }: { categorias: CategoriaHistorico[] }) {
+function BarrasCategorias({ categorias, banhos }: { categorias: CategoriaHistorico[]; banhos?: Map<string, BanhoPct[]> | undefined }) {
   const max = Math.max(...categorias.map((c) => c.participacao_vendas_pct ?? 0), 1);
   return (
     <div className="space-y-4">
@@ -46,6 +47,7 @@ function BarrasCategorias({ categorias }: { categorias: CategoriaHistorico[] }) 
             <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-surface-muted">
               <div className="h-full rounded-full bg-bronze" style={{ width: `${Math.round(((c.participacao_vendas_pct ?? 0) / max) * 100)}%` }} />
             </div>
+            <LinhaBanhos banhos={banhos?.get(chaveCategoria(c.categoria))} />
           </div>
         );
       })}
@@ -55,6 +57,7 @@ function BarrasCategorias({ categorias }: { categorias: CategoriaHistorico[] }) 
 
 export function HistoricoJFlexPessoa({ partyId }: { partyId: string }) {
   const q = useQuery({ queryKey: ["historico-jflex", "consultora", partyId], queryFn: () => historicoConsultora(partyId) });
+  const banhos = useBanhos(partyId);
 
   if (q.isLoading) return <Skeleton className="h-64 w-full" />;
   if (q.isError) return <ErrorState message={(q.error as Error).message} onRetry={() => void q.refetch()} />;
@@ -96,8 +99,8 @@ export function HistoricoJFlexPessoa({ partyId }: { partyId: string }) {
         {d.praca?.nome && <Dado rotulo="Praça no SmallData" valor={d.praca.nome} />}
       </div>
 
-      <Panel title="Categorias — participação nas vendas e giro comparado à praça">
-        {d.categorias && d.categorias.length > 0 ? <BarrasCategorias categorias={d.categorias} /> : <p className="text-sm text-ledger-muted">Sem dados.</p>}
+      <Panel title="Categorias — participação nas vendas, giro comparado à praça e banho mais vendido">
+        {d.categorias && d.categorias.length > 0 ? <BarrasCategorias categorias={d.categorias} banhos={banhos.data?.porCategoria} /> : <p className="text-sm text-ledger-muted">Sem dados.</p>}
       </Panel>
 
       <Panel title="Top produtos vendidos" flush>

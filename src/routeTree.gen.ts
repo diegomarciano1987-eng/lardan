@@ -120,6 +120,7 @@ import { Route as AuthenticatedAdminFinanceiroPlanoContasRouteImport } from './r
 import { Route as AuthenticatedAdminFinanceiroReceberRouteImport } from './routes/_authenticated/admin/financeiro/receber'
 import { Route as AuthenticatedAdminMaletasIdRouteImport } from './routes/_authenticated/admin/maletas_.$id'
 import { Route as AuthenticatedAdminMaletasEntradaRouteImport } from './routes/_authenticated/admin/maletas_.entrada'
+import { Route as AuthenticatedAdminMaletasMovimentosRouteImport } from './routes/_authenticated/admin/maletas_.movimentos'
 import { Route as AuthenticatedFinanceiroSimulacaoIdRouteImport } from './routes/_authenticated/financeiro/simulacao.$id'
 import { Route as ApiPublicAsaasExtratoHoraRouteImport } from './routes/api/public/asaas/extrato-hora'
 import { Route as ApiPublicAsaasSaldoSyncRouteImport } from './routes/api/public/asaas/saldo-sync'
@@ -761,6 +762,12 @@ const AuthenticatedAdminMaletasEntradaRoute =
     path: '/maletas/entrada',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminMaletasMovimentosRoute =
+  AuthenticatedAdminMaletasMovimentosRouteImport.update({
+    id: '/maletas_/movimentos',
+    path: '/maletas/movimentos',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedFinanceiroSimulacaoIdRoute =
   AuthenticatedFinanceiroSimulacaoIdRouteImport.update({
     id: '/financeiro/simulacao/$id',
@@ -1012,6 +1019,7 @@ export interface FileRoutesByFullPath {
   '/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/admin/maletas/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
+  '/admin/maletas/movimentos': typeof AuthenticatedAdminMaletasMovimentosRoute
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/extrato-hora': typeof ApiPublicAsaasExtratoHoraRoute
   '/api/public/asaas/saldo-sync': typeof ApiPublicAsaasSaldoSyncRoute
@@ -1147,6 +1155,7 @@ export interface FileRoutesByTo {
   '/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/admin/maletas/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/admin/maletas/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
+  '/admin/maletas/movimentos': typeof AuthenticatedAdminMaletasMovimentosRoute
   '/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/extrato-hora': typeof ApiPublicAsaasExtratoHoraRoute
   '/api/public/asaas/saldo-sync': typeof ApiPublicAsaasSaldoSyncRoute
@@ -1286,6 +1295,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/financeiro/receber': typeof AuthenticatedAdminFinanceiroReceberRoute
   '/_authenticated/admin/maletas_/$id': typeof AuthenticatedAdminMaletasIdRoute
   '/_authenticated/admin/maletas_/entrada': typeof AuthenticatedAdminMaletasEntradaRoute
+  '/_authenticated/admin/maletas_/movimentos': typeof AuthenticatedAdminMaletasMovimentosRoute
   '/_authenticated/financeiro/simulacao/$id': typeof AuthenticatedFinanceiroSimulacaoIdRoute
   '/api/public/asaas/extrato-hora': typeof ApiPublicAsaasExtratoHoraRoute
   '/api/public/asaas/saldo-sync': typeof ApiPublicAsaasSaldoSyncRoute
@@ -1425,6 +1435,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/receber'
     | '/admin/maletas/$id'
     | '/admin/maletas/entrada'
+    | '/admin/maletas/movimentos'
     | '/financeiro/simulacao/$id'
     | '/api/public/asaas/extrato-hora'
     | '/api/public/asaas/saldo-sync'
@@ -1560,6 +1571,7 @@ export interface FileRouteTypes {
     | '/admin/financeiro/receber'
     | '/admin/maletas/$id'
     | '/admin/maletas/entrada'
+    | '/admin/maletas/movimentos'
     | '/financeiro/simulacao/$id'
     | '/api/public/asaas/extrato-hora'
     | '/api/public/asaas/saldo-sync'
@@ -1698,6 +1710,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/financeiro/receber'
     | '/_authenticated/admin/maletas_/$id'
     | '/_authenticated/admin/maletas_/entrada'
+    | '/_authenticated/admin/maletas_/movimentos'
     | '/_authenticated/financeiro/simulacao/$id'
     | '/api/public/asaas/extrato-hora'
     | '/api/public/asaas/saldo-sync'
@@ -2575,6 +2588,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMaletasEntradaRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/maletas_/movimentos': {
+      id: '/_authenticated/admin/maletas_/movimentos'
+      path: '/maletas/movimentos'
+      fullPath: '/admin/maletas/movimentos'
+      preLoaderRoute: typeof AuthenticatedAdminMaletasMovimentosRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/financeiro/simulacao/$id': {
       id: '/_authenticated/financeiro/simulacao/$id'
       path: '/financeiro/simulacao/$id'
@@ -2862,6 +2882,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCobrancaLoteRoute: typeof AuthenticatedAdminCobrancaLoteRoute
   AuthenticatedAdminMaletasIdRoute: typeof AuthenticatedAdminMaletasIdRoute
   AuthenticatedAdminMaletasEntradaRoute: typeof AuthenticatedAdminMaletasEntradaRoute
+  AuthenticatedAdminMaletasMovimentosRoute: typeof AuthenticatedAdminMaletasMovimentosRoute
   AuthenticatedAdminCadastrosIndexRoute: typeof AuthenticatedAdminCadastrosIndexRoute
   AuthenticatedAdminCadastrosPessoasIdRoute: typeof AuthenticatedAdminCadastrosPessoasIdRoute
   AuthenticatedAdminCadastrosPessoasNovoRoute: typeof AuthenticatedAdminCadastrosPessoasNovoRoute
@@ -2926,6 +2947,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminMaletasIdRoute: AuthenticatedAdminMaletasIdRoute,
     AuthenticatedAdminMaletasEntradaRoute:
       AuthenticatedAdminMaletasEntradaRoute,
+    AuthenticatedAdminMaletasMovimentosRoute:
+      AuthenticatedAdminMaletasMovimentosRoute,
     AuthenticatedAdminCadastrosIndexRoute:
       AuthenticatedAdminCadastrosIndexRoute,
     AuthenticatedAdminCadastrosPessoasIdRoute:

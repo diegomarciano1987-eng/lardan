@@ -8,7 +8,7 @@ async function servidor<T = unknown>(fn: string, args: Record<string, unknown>):
     await c.unsafe(`set role service_role`);
     await c.unsafe(`select set_config('lardan.test_role','service_role',false), set_config('lardan.test_uid','',false), set_config('request.jwt.claims','',false)`);
     const nomes = Object.keys(args);
-    const r = (await c.unsafe(`select public.${fn}(${nomes.map((n, i) => `${n} => $${i + 1}`).join(", ")}) as r`, nomes.map((n) => { const v = args[n]; return v !== null && typeof v === "object" ? JSON.stringify(v) : v; }))) as { r: T }[];
+    const r = (await c.unsafe(`select public.${fn}(${nomes.map((n, i) => { const v = args[n]; return `${n} => $${i + 1}::text${v !== null && typeof v === "object" ? "::jsonb" : n === "_assinado_em" ? "::timestamptz" : ""}`; }).join(", ")}) as r`, nomes.map((n) => { const v = args[n]; return v !== null && typeof v === "object" ? JSON.stringify(v) : v; }))) as { r: T }[];
     return { ok: true, dados: r[0]!.r, erro: null };
   } catch (e) {
     return { ok: false, dados: null as T, erro: (e as Error).message };
@@ -77,7 +77,6 @@ test("quem cobra recebe os dados do PDF; consultora, foto e PDF de outra pessoa 
 test("registro só pelo servidor, um link pendente por acordo e reenvio recusa o link antigo na ZapSign", async () => {
   expect((await rpc(larissa, "assinatura_registrar", { _d: { tipo: "acordo_judicial" } })).ok).toBe(false);
   const a = await registrar({ doc_token: `iso-acjud-1-${acordo}` });
-  console.log("REG", a.erro);
   expect(a.ok).toBe(true);
   expect((await registrar({ doc_token: `iso-acjud-dup-${acordo}` })).ok).toBe(false);
   const b = await registrar({ doc_token: `iso-acjud-2-${acordo}`, substitui: a.dados.id });

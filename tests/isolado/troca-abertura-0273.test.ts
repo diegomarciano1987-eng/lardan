@@ -120,12 +120,13 @@ describe("maleta designada usada para abertura", () => {
     expect(n.n).toBe(0);
   });
 
-  test("representante não resolve a pendência; montagem/Master resolve", async () => {
+  test("0324: ninguém resolve à mão — a pendência fica para a troca automática da nota", async () => {
     const p = await um<{ id: string }>(`select id from public.maleta_troca_pendencias where cycle_id=$1`, [maletaJoice]);
     const negado = await rpc(rep, "maleta_troca_pendencia_resolver", { _id: p.id, _obs: null });
     expect(negado.ok).toBe(false);
-    const ok = await rpc(master, "maleta_troca_pendencia_resolver", { _id: p.id, _obs: "NF devolução 96, nova 97" });
-    expect(ok.erro).toBeNull();
-    expect((await um<{ status: string }>(`select status from public.maleta_troca_pendencias where id=$1`, [p.id])).status).toBe("resolvida");
+    const master0324 = await rpc(master, "maleta_troca_pendencia_resolver", { _id: p.id, _obs: "NF devolução 96, nova 97" });
+    expect(master0324.erro ?? "").toMatch(/sai sozinha/);
+    expect((await um<{ status: string; auto_status: string }>(`select status, auto_status from public.maleta_troca_pendencias where id=$1`, [p.id])))
+      .toEqual({ status: "aberta", auto_status: "aguardando" });
   });
 });

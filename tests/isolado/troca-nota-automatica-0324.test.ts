@@ -141,7 +141,7 @@ describe("0324: nota da troca de maleta sem ninguém marcar nada", () => {
     const d = await um<{ operacao: string; party_id: string; ref_origem: string }>(`select operacao, party_id, ref_origem from public.fiscal_focus_envios where ref=$1`, [dev]);
     expect(d).toMatchObject({ operacao: "devolucao", party_id: cris.partyId, ref_origem: ref });
     // SEFAZ autorizou a devolução
-    await adm.unsafe(`update public.fiscal_focus_envios set status='autorizado', numero='990' where ref=$1`, [dev]);
+    await adm.unsafe(`update public.fiscal_focus_envios set status='autorizado', numero='990', serie='3' where ref=$1`, [dev]);
     const o = await um<{ anulada_em: string | null; anulada_por_ref: string }>(`select anulada_em, anulada_por_ref from public.fiscal_focus_envios where ref=$1`, [ref]);
     expect(o.anulada_em).not.toBeNull();
     expect(o.anulada_por_ref).toBe(dev);

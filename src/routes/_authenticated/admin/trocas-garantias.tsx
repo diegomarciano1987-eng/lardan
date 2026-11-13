@@ -27,9 +27,9 @@ export const Route = createFileRoute("/_authenticated/admin/trocas-garantias")({
   component: Qualidade,
   head: () => ({
     meta: [
-      { title: "Trocas e garantias — LARDAN Cloud" },
+      { title: "Qualidade — LARDAN Cloud" },
       { name: "description", content: "Setor de Qualidade Lardan: trocas e garantias das consultoras com devolutiva e histórico." },
-      { property: "og:title", content: "Trocas e garantias — LARDAN" },
+      { property: "og:title", content: "Qualidade — LARDAN" },
       { property: "og:description", content: "Canal de mão dupla entre a Qualidade Lardan e as consultoras." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

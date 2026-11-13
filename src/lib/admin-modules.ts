@@ -215,15 +215,17 @@ export const ADMIN_MODULES: AdminModule[] = [
     roles: ["master", "diretoria", "cobranca", "financeiro"],
     state: "ativo",
   },
-  { slug: "trocas-garantias", path: "/admin/trocas-garantias", label: "Trocas e garantias", description: "Solicitações de pós-venda e análise com histórico.", icon: ShieldCheck, roles: ["master", "qualidade"], capability: "quality.view", state: "ativo" },
+  // Diego, 13/11/2026: "Trocas e garantias" deixou de ser botão próprio — tudo dele agora fica dentro de Qualidade (abas).
+  // Mesmo endereço e mesma permissão de antes, para ninguém perder acesso.
   {
     slug: "qualidade",
+    path: "/admin/trocas-garantias",
     label: "Qualidade",
-    description: "Garantia, reparo e conferência de peças.",
+    description: "Conferência das maletas que voltam, trocas e garantias e conferência de peças.",
     icon: ShieldCheck,
-    roles: ["master", "diretoria", "qualidade"],
-    capability: "stock.view",
-    state: "em_breve",
+    roles: ["master", "qualidade"],
+    capability: "quality.view",
+    state: "ativo",
   },
   {
     slug: "academy",

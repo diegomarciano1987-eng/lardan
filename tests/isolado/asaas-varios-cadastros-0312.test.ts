@@ -206,7 +206,7 @@ describe("0312 vários cadastros no Asaas", () => {
     const existente = sim.semearCliente({ name: "ISO fora do Lardan", cpfCnpj: doc, email: null, dateCreated: "2026-10-01" });
     const antes = sim.chamadasCriarCliente;
     const inst = await titulo(empresa, p, 4000);
-    const it = await prepararIntencao(banco(fin), { installmentId: inst, billingType: "PIX", criarCliente: true } as never);
+    const it = await prepararIntencao(banco(fin), { installmentId: inst, billingType: "PIX" });
     const r = await executarIntencao(servico, sim, it.id!, { actor: fin.uid, worker: "w-0312d" });
     expect(r.state).toBe("criada");
     expect(sim.chamadasCriarCliente).toBe(antes);

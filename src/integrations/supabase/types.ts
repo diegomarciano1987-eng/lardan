@@ -13345,6 +13345,54 @@ export type Database = {
           },
         ]
       }
+      maleta_movimentos_desfeitos: {
+        Row: {
+          aceite_desfeito: boolean
+          copia: Json
+          cycle_id: string
+          de_party_id: string | null
+          desfeito_em: string
+          desfeito_por: string
+          evento_id: string
+          id: string
+          maleta: string | null
+          motivo: string
+          para_party_id: string | null
+          representante_party_id: string | null
+          resultado: Json
+        }
+        Insert: {
+          aceite_desfeito?: boolean
+          copia?: Json
+          cycle_id: string
+          de_party_id?: string | null
+          desfeito_em?: string
+          desfeito_por: string
+          evento_id: string
+          id?: string
+          maleta?: string | null
+          motivo: string
+          para_party_id?: string | null
+          representante_party_id?: string | null
+          resultado?: Json
+        }
+        Update: {
+          aceite_desfeito?: boolean
+          copia?: Json
+          cycle_id?: string
+          de_party_id?: string | null
+          desfeito_em?: string
+          desfeito_por?: string
+          evento_id?: string
+          id?: string
+          maleta?: string | null
+          motivo?: string
+          para_party_id?: string | null
+          representante_party_id?: string | null
+          resultado?: Json
+        }
+        Relationships: []
+      }
       maleta_troca_pendencias: {
         Row: {
           consultora_anterior_nome: string | null
@@ -14107,6 +14155,64 @@ export type Database = {
           },
           {
             foreignKeyName: "party_links_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      party_referencias: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          criado_por: string | null
+          id: string
+          nome: string | null
+          parentesco: string | null
+          party_id: string
+          telefone: string | null
+          tipo: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          criado_por?: string | null
+          id?: string
+          nome?: string | null
+          parentesco?: string | null
+          party_id: string
+          telefone?: string | null
+          tipo: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          criado_por?: string | null
+          id?: string
+          nome?: string | null
+          parentesco?: string | null
+          party_id?: string
+          telefone?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_referencias_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_referencias_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "party_referencias_party_id_fkey"
             columns: ["party_id"]
             isOneToOne: false
             referencedRelation: "v_network_consultants"
@@ -21154,6 +21260,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      banho_da_peca: { Args: { _nome: string; _tipo: string }; Returns: string }
       barcode_lookup: { Args: { _code: string }; Returns: Json }
       barcode_resolver: {
         Args: { _code: string; _criar?: boolean }
@@ -21627,6 +21734,8 @@ export type Database = {
         Returns: boolean
       }
       consultora_aviso_proxima_maleta: { Args: never; Returns: Json }
+      consultora_banhos_categoria: { Args: { _party: string }; Returns: Json }
+      consultora_banhos_dados: { Args: { _party: string }; Returns: Json }
       consultora_carteira_seguir: {
         Args: {
           _cycle: string
@@ -23312,6 +23421,28 @@ export type Database = {
         Returns: Json
       }
       maleta_motivo_invisivel: { Args: { _cycle: string }; Returns: string }
+      maleta_movimento_desfazer: {
+        Args: { _evento: string; _motivo: string; _rep?: string }
+        Returns: Json
+      }
+      maleta_movimento_desfazer_nucleo: {
+        Args: {
+          _aplicar: boolean
+          _evento: string
+          _motivo: string
+          _rep: string
+        }
+        Returns: Json
+      }
+      maleta_movimento_kinds: { Args: never; Returns: string[] }
+      maleta_movimento_previa: {
+        Args: { _evento: string; _rep?: string }
+        Returns: Json
+      }
+      maleta_movimentos_lista: {
+        Args: { _busca?: string; _limite?: number; _rep?: string }
+        Returns: Json
+      }
       maleta_perdida_fiado: { Args: { _perdida: string }; Returns: string }
       maleta_segunda_marcar: {
         Args: { _cycle: string; _motivo: string }
@@ -23506,6 +23637,15 @@ export type Database = {
       party_por_assinante: {
         Args: { _cpf: string; _email: string; _fone: string }
         Returns: string
+      }
+      party_referencias_ler: { Args: { _party: string }; Returns: Json }
+      party_referencias_pode: {
+        Args: { _escrever: boolean; _party: string }
+        Returns: boolean
+      }
+      party_referencias_salvar: {
+        Args: { _itens: Json; _party: string }
+        Returns: Json
       }
       party_unificar: {
         Args: {
@@ -23754,6 +23894,16 @@ export type Database = {
           codigo: string
           external_id: string
           order_id: string
+        }[]
+      }
+      pessoas_busca_contexto: {
+        Args: { _ids: string[] }
+        Returns: {
+          cidade: string
+          party_id: string
+          praca: string
+          responsavel: string
+          uf: string
         }[]
       }
       phone_canon: { Args: { v: string }; Returns: string }

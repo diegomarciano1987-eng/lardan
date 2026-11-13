@@ -60,9 +60,34 @@ function paraEnvio(campo: Campo, v: string): string {
   return v.trim().replace(/\s+/g, " ");
 }
 
-export function comparar(lardan: DadosCliente, asaas: (DadosCliente & { notificationDisabled?: boolean | null }) | null) {
+/** Semelhança 0–1 entre dois textos já normalizados (distância de edição). */
+export function semelhanca(a: string, b: string): number {
+  if (!a && !b) return 1;
+  const m = a.length, n = b.length;
+  let ant = Array.from({ length: n + 1 }, (_, j) => j);
+  for (let i = 1; i <= m; i++) {
+    const at = [i];
+    for (let j = 1; j <= n; j++) at[j] = Math.min(ant[j]! + 1, at[j - 1]! + 1, ant[j - 1]! + (a[i - 1] === b[j - 1] ? 0 : 1));
+    ant = at;
+  }
+  return 1 - ant[n]! / Math.max(m, n);
+}
+
+export interface OpcoesComparar {
+  /** primeira conferência de um cadastro antigo: não sobrescreve contato que o Lardan não conhece (pode ter sido corrigido no Asaas) */
+  primeira?: boolean;
+  /** todos os números (só dígitos) que o Lardan tem para a pessoa */
+  conhecidos?: string[];
+  /** o celular do Lardan também está no cadastro de outra pessoa */
+  celularCompartilhado?: boolean;
+  /** pedido explícito de uma pessoa ("Usar o do Lardan"): manda mesmo nos casos acima */
+  forcar?: boolean;
+}
+
+export function comparar(lardan: DadosCliente, asaas: (DadosCliente & { notificationDisabled?: boolean | null }) | null, o: OpcoesComparar = {}) {
   const enviar: DadosCliente = {};
   const diferencas: Diferenca[] = [];
+  const conhecidos = new Set((o.conhecidos ?? []).map((x) => normalizar("mobilePhone", x)));
   for (const campo of CAMPOS) {
     const l = (lardan[campo] ?? "").trim() || null;
     const a = (asaas?.[campo] ?? "")?.toString().trim() || null;
@@ -74,6 +99,24 @@ export function comparar(lardan: DadosCliente, asaas: (DadosCliente & { notifica
     if (campo === "cpfCnpj" && a) {
       diferencas.push({ campo, lardan: l, asaas: a, acao: "conferir", nota: "CPF diferente: não é trocado sozinho." });
       continue;
+    }
+    if (!o.forcar) {
+      if (campo === "mobilePhone" && o.celularCompartilhado) {
+        diferencas.push({ campo, lardan: l, asaas: a, acao: "conferir", nota: "Este celular também está no cadastro de outra pessoa no Lardan." });
+        continue;
+      }
+      if (o.primeira && a && (campo === "mobilePhone" || campo === "phone") && !conhecidos.has(normalizar(campo, a))) {
+        diferencas.push({ campo, lardan: l, asaas: a, acao: "conferir", nota: "O Asaas tem um número que o Lardan não conhece: confira com a cliente." });
+        continue;
+      }
+      if (o.primeira && a && campo === "email") {
+        diferencas.push({ campo, lardan: l, asaas: a, acao: "conferir", nota: "O Asaas tem outro e-mail: confira com a cliente." });
+        continue;
+      }
+      if (o.primeira && a && campo === "name" && semelhanca(normalizar("name", l), normalizar("name", a)) < 0.85) {
+        diferencas.push({ campo, lardan: l, asaas: a, acao: "conferir", nota: "Nome bem diferente no Asaas: confira se é a mesma pessoa." });
+        continue;
+      }
     }
     enviar[campo] = paraEnvio(campo, l);
     diferencas.push({ campo, lardan: l, asaas: a, acao: "enviar" });

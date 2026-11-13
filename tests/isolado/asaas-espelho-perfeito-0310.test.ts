@@ -108,7 +108,7 @@ describe("0309 espelho Asaas × Lardan", () => {
     expect(ts.some((t) => t["estado"] === "excecao" && t["motivo"] === "cliente_sem_vinculo")).toBe(true);
   });
 
-  test("cliente Asaas única ligada pelo CPF vira 'vinculado'; duas da mesma pessoa continuam 'pendente'", async () => {
+  test("cliente Asaas única ligada pelo CPF vira 'vinculado'; duas da mesma pessoa ficam ligadas com um principal (0312)", async () => {
     const c = await cenario(10000);
     const conta = c.conta;
     const cpf = () => { const d = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)); for (const n of [9, 10]) { const s = d.reduce((a, x, i) => a + x * (n + 1 - i), 0); d.push(((s * 10) % 11) % 10); } return d.join(""); };
@@ -125,9 +125,11 @@ describe("0309 espelho Asaas × Lardan", () => {
     expect(r.erro).toBeNull();
     const st = async (p: string) => ((await adm.unsafe(`select match_status s from public.asaas_customers where party_id=$1 order by external_id`, [p])) as { s: string }[]).map((x) => x.s);
     expect(await st(p1)).toEqual(["vinculado"]);
+    // 0312: mesmo CPF = mesma pessoa; os dois cadastros ficam ligados e só um é o principal
     const dois = await st(p2);
-    expect(dois.length).toBe(2);
-    expect(dois.filter((s) => s === "vinculado").length).toBeLessThanOrEqual(1);
+    expect(dois).toEqual(["vinculado", "vinculado"]);
+    const principais = await um<{ n: number }>(`select count(*)::int n from public.asaas_customers where party_id=$1 and principal`, [p2]);
+    expect(principais.n).toBe(1);
     // vínculo novo entra na fila do espelho como primeira conferência (não apaga contato que o Lardan não conhece)
     const m = await um<{ motivo: string }>(`select e.motivo from public.asaas_cliente_espelho e join public.asaas_customers c on c.id=e.customer_id where c.party_id=$1`, [p1]);
     expect(m.motivo.startsWith("primeira conferência")).toBe(true);

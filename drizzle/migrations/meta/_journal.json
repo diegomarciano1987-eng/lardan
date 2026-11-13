@@ -2276,6 +2276,13 @@
       "when": 1794604259806,
       "tag": "0324_troca_nota_automatica_0324",
       "breakpoints": true
+    },
+    {
+      "idx": 325,
+      "version": "7",
+      "when": 1794605585034,
+      "tag": "0325_rep_remessa_dono_e_aceite_administrativo",
+      "breakpoints": true
     }
   ]
 }

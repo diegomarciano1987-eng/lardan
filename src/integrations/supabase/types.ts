@@ -23111,6 +23111,10 @@ export type Database = {
         Args: { _cycle: string; _idempotency_key?: string; _itens: Json }
         Returns: Json
       }
+      kit_aceite_administrativo: {
+        Args: { _cycle: string; _motivo: string }
+        Returns: Json
+      }
       kit_acrescimo: { Args: { _cycle: string; _payload: Json }; Returns: Json }
       kit_acrescimo_confirmar: {
         Args: { _movement: string; _payload?: Json }
@@ -24549,6 +24553,7 @@ export type Database = {
         Args: { _consultora: string; _motivo: string; _remessa: string }
         Returns: Json
       }
+      remessa_aceites_pendentes: { Args: { _remessa: string }; Returns: Json }
       remessa_atualizar: {
         Args: {
           _data_acerto: string

@@ -197,6 +197,12 @@ export class SimuladorAsaas implements TransporteAsaas {
     return id ? (this.clientes.get(id) ?? null) : null;
   }
 
+  async localizarClientesPorCpf(cpfCnpj: string) {
+    const doc = cpfCnpj.replace(/\D/g, "");
+    if (!doc) return [];
+    return [...this.clientes.values()].filter((c) => (c.cpfCnpj ?? "").replace(/\D/g, "") === doc);
+  }
+
   async prepararCliente(d: { name: string; cpfCnpj?: string | null; email?: string | null; ref: string }) {
     this.chamadasCriarCliente += 1;
     const falha = this.falhasCliente[d.ref] ?? "nenhuma";

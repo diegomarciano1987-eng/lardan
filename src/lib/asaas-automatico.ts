@@ -225,3 +225,28 @@ export type DiferencaEspelho = {
   pedido_aberto: boolean;
 };
 export const diferencasEspelho = () => rpc<DiferencaEspelho[]>("asaas_espelho_diferencas", { _limite: 300 });
+
+/* ---------------------------------------------------------------- 0312: vários cadastros no Asaas */
+export type CadastroAsaas = {
+  customer_id: string;
+  external_id: string;
+  principal: boolean;
+  situacao: "vinculado" | "pendente";
+  espelho: string | null;
+  conferido_em: string | null;
+  criado: string | null;
+  abertas: number;
+  aberto_cents: number;
+};
+export type ClienteVariosCadastros = {
+  party_id: string;
+  pessoa: string;
+  codigo: string | null;
+  pendentes: number;
+  iguais: number;
+  principal: string | null;
+  cadastros: CadastroAsaas[];
+};
+export const clientesVariosCadastros = () => rpc<ClienteVariosCadastros[]>("asaas_clientes_varios_cadastros");
+export const trocarCadastroPrincipal = (customerId: string, motivo: string) =>
+  rpc<{ ok: boolean; de: string | null; para: string }>("asaas_cliente_principal_trocar", { _customer: customerId, _motivo: motivo });

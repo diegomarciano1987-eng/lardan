@@ -19,6 +19,7 @@ import {
   ConsultaIndisponivel,
   ReferenciaAmbigua,
   RecusadoPeloProvedor,
+  type ClienteExterno,
   type FormaPagamento,
   type TransporteAsaas,
 } from "./contrato";
@@ -124,6 +125,19 @@ interface ReservaCliente {
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e)).slice(0, 400);
 export const refCliente = (partyId: string) => `lardan:party:${partyId}`;
+
+/**
+ * 0312: cadastro já existente no Asaas com o mesmo CPF/CNPJ (o mais recente; empate pelo id maior).
+ * Evita nascer um cadastro duplicado quando a pessoa já tem cliente no Asaas criado fora do Lardan.
+ */
+export async function clientePeloCpf(transporte: TransporteAsaas, doc: string | null | undefined): Promise<ClienteExterno | null> {
+  const d = (doc ?? "").replace(/\D/g, "");
+  if ((d.length !== 11 && d.length !== 14) || !transporte.localizarClientesPorCpf) return null;
+  const lista = (await transporte.localizarClientesPorCpf(d)).filter((c) => (c.cpfCnpj ?? "").replace(/\D/g, "") === d);
+  if (!lista.length) return null;
+  lista.sort((a, b) => (b.dateCreated ?? "").localeCompare(a.dateCreated ?? "") || b.id.localeCompare(a.id));
+  return lista[0]!;
+}
 
 async function obterLinkSeguro(t: TransporteAsaas, id: string, dado?: string | null) {
   if (dado) return dado;
@@ -284,6 +298,8 @@ export async function executarIntencao(
     try {
       const ref = refCliente(r.party_id);
       let c = await transporte.localizarClientePorReferencia(ref);
+      // 0312: não criar cadastro novo para quem já tem cadastro no Asaas com o mesmo CPF
+      if (!c) c = await clientePeloCpf(transporte, r.devedor.doc);
       if (!c) {
         await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, { ...base, _token: tk, _state: "criar", _erro: null });
         c = await comRenovacao(

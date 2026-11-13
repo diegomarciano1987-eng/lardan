@@ -114,7 +114,7 @@ export function traduzirCobranca(p: Json): CobrancaExterna {
 
 export function traduzirCliente(p: Json): ClienteExterno {
   if (!txt(p["id"])) throw new Error("Cliente sem identificador na resposta.");
-  return { id: p["id"] as string, name: String(p["name"] ?? ""), cpfCnpj: txt(p["cpfCnpj"]), email: txt(p["email"]) };
+  return { id: p["id"] as string, name: String(p["name"] ?? ""), cpfCnpj: txt(p["cpfCnpj"]), email: txt(p["email"]), dateCreated: txt(p["dateCreated"]) };
 }
 
 /* ------------------------------------------------------------ erros */
@@ -249,6 +249,14 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     const p = this.pagina(c, { limit: 10, offset: 0 }, traduzirCliente);
     if (p.itens.length > 1) throw new ReferenciaAmbigua(ref, p.itens.length);
     return p.itens[0] ?? null;
+  }
+
+  /** 0312: antes de criar cliente novo, procura quem já tem este CPF no Asaas (a lista do Asaas não traz excluídos). */
+  async localizarClientesPorCpf(cpfCnpj: string) {
+    const doc = cpfCnpj.replace(/\D/g, "");
+    if (doc.length !== 11 && doc.length !== 14) return [];
+    const c = await this.enviar<Json>("GET", "/customers", { query: { cpfCnpj: doc, limit: 100, offset: 0 } });
+    return this.pagina(c, { limit: 100, offset: 0 }, traduzirCliente).itens;
   }
 
   async prepararCliente(d: { name: string; cpfCnpj?: string | null; email?: string | null; ref: string }) {

@@ -1339,6 +1339,7 @@ export type Database = {
           match_status: string
           name: string | null
           party_id: string | null
+          principal: boolean
           raw: Json
           updated_at: string
         }
@@ -1353,6 +1354,7 @@ export type Database = {
           match_status?: string
           name?: string | null
           party_id?: string | null
+          principal?: boolean
           raw?: Json
           updated_at?: string
         }
@@ -1367,6 +1369,7 @@ export type Database = {
           match_status?: string
           name?: string | null
           party_id?: string | null
+          principal?: boolean
           raw?: Json
           updated_at?: string
         }
@@ -20627,7 +20630,20 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      asaas_cliente_principal_escolher: {
+        Args: { _account: string; _actor?: string; _party: string }
+        Returns: string
+      }
+      asaas_cliente_principal_id: {
+        Args: { _account: string; _party: string }
+        Returns: string
+      }
+      asaas_cliente_principal_trocar: {
+        Args: { _customer: string; _motivo: string }
+        Returns: Json
+      }
       asaas_clientes_cadastrar: { Args: { _actor: string }; Returns: Json }
+      asaas_clientes_varios_cadastros: { Args: never; Returns: Json }
       asaas_cobranca_cancelar_preparar: {
         Args: { _actor: string; _charge: string }
         Returns: Json
@@ -20667,6 +20683,10 @@ export type Database = {
       }
       asaas_conta_situacao: { Args: { _account: string }; Returns: Json }
       asaas_customer_sensivel: { Args: { _customer: string }; Returns: Json }
+      asaas_duplicados_ligar: {
+        Args: { _aplicar?: boolean; _party?: string }
+        Returns: Json
+      }
       asaas_espelho_diferencas: { Args: { _limite?: number }; Returns: Json }
       asaas_espelho_pedir: {
         Args: { _inst: string; _motivo: string }

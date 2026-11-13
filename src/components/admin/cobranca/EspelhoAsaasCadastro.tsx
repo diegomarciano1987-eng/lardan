@@ -90,7 +90,7 @@ export function EspelhoAsaasCadastro({ partyId }: { partyId: string }) {
             <li key={`${x.campo}-${i}`} className="flex flex-wrap gap-x-2">
               <span className="rounded bg-card px-1.5 text-xs font-semibold">{ACAO[x.acao] ?? x.acao}</span>
               <span className="font-medium">{ROTULO[x.campo]}:</span>
-              <span>Lardan {x.lardan ?? "vazio"}</span><span className="text-muted-foreground">· Asaas {x.asaas ?? "vazio"}</span>
+              {x.campo !== "avisos" && <><span>Lardan {x.lardan ?? "vazio"}</span><span className="text-muted-foreground">· Asaas {x.asaas ?? "vazio"}</span></>}
               {x.nota && <span className="w-full text-xs text-muted-foreground">{x.nota}</span>}
             </li>
           ))}

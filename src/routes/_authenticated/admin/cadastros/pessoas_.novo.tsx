@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CONTATOS_VAZIOS, CamposContatosRef, conferirContatos, contatosPreenchidos, salvarContatosRef, type ContatosRef } from "@/components/admin/ContatosRecado";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -206,9 +207,12 @@ function NovoCadastro() {
     }
   }
 
+  const [contatosRef, setContatosRef] = useState<ContatosRef>(CONTATOS_VAZIOS);
   const criar = useMutation({
     mutationFn: async () => {
       const nome = form.display_name.trim();
+      const erroRef = pessoa ? conferirContatos(contatosRef) : null;
+      if (erroRef) throw new Error(erroRef);
       if (!nome) throw new Error("Informe o nome para criar o cadastro.");
       const doc = normalizarDocumento(form.doc, pessoa ? "cpf" : "cnpj");
       if (form.doc.trim() && doc.estado !== "valido")
@@ -238,6 +242,7 @@ function NovoCadastro() {
       if (whatsapp.canonico)
         await saveContact(id, { kind: "whatsapp", value: whatsapp.canonico, is_primary: true });
       if (email.canonico) await saveContact(id, { kind: "email", value: email.canonico });
+      if (pessoa && contatosPreenchidos(contatosRef)) await salvarContatosRef(id, contatosRef);
       if (form.city.trim() || form.street.trim() || form.postal_code.trim()) {
         await saveAddress(id, {
           label: "Principal",
@@ -400,6 +405,12 @@ function NovoCadastro() {
           </Campo>
         </div>
       </Panel>
+
+      {pessoa && (
+        <Panel title="Recado e referência">
+          <CamposContatosRef value={contatosRef} onChange={setContatosRef} inputClass={inputCls} />
+        </Panel>
+      )}
 
       <Panel title="Endereço principal" flush>
         <div className="grid gap-4 p-5 md:grid-cols-2">

@@ -1,13 +1,13 @@
 # Roadmap
 
 ## Pacote 0315 — Diego 13/11/2026 15:27
-- [ ] 1. Cartão: 1 a 3x sem juros; 4x a 12x com a taxa do Asaas repassada à cliente (3,49% 2–6x / 3,99% 7–12x + R$ 0,49).
-- [ ] 2. Busca de pessoas: mostrar cidade e representante responsável no resultado (busca geral e abertura de maleta).
-- [ ] 3. Cadastro/abertura de consultora: telefone de recado + contato de referência (nome, parentesco, telefone) — opcionais.
-- [ ] 4. Tela da maleta: referência junto do nome da peça.
-- [ ] 5. Lugar para desfazer transferência errada de maleta (equipe e representante), com motivo. NÃO desfazer MAL-00459/MAL-00429 por conta própria.
-- [ ] 6. Mais vendidos por categoria com divisão por banho em % (cockpit e onde mais se consulta vendas).
-- [ ] 7. Provas e guia "como fazer" de cada item.
+- [ ] 1. (próxima etapa, mexe no motor de baixa automática do Asaas) Cartão: 1 a 3x sem juros; 4x a 12x com a taxa do Asaas repassada à cliente (3,49% 2–6x / 3,99% 7–12x + R$ 0,49).
+- [x] 2. Busca de pessoas: mostrar cidade e representante responsável no resultado (busca geral e abertura de maleta).
+- [x] 3. Cadastro/abertura de consultora: telefone de recado + contato de referência (nome, parentesco, telefone) — opcionais.
+- [x] 4. Tela da maleta: referência junto do nome da peça.
+- [x] 5. Lugar para desfazer transferência errada de maleta (equipe e representante), com motivo. NÃO desfazer MAL-00459/MAL-00429 por conta própria.
+- [x] 6. Mais vendidos por categoria com divisão por banho em % (cockpit e onde mais se consulta vendas).
+- [x] 7. Provas e guia "como fazer" de cada item.
 
 ## Pacote 0309/0310 do Diego (aplicado como 0310/0311) — 13/11/2026 12:43
 - [x] 1. Telas do financeiro que liam vazio (pago por outra forma, espelho de saldo, pedidos, cancelamentos).

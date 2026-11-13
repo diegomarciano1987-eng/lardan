@@ -32,7 +32,7 @@ function situacao(t: Troca): { tom: StatusTone; texto: string } {
   if (t.status === "resolvida") return { tom: "success", texto: "Concluída" };
   if (t.auto_status === "erro") return { tom: "danger", texto: "Parou" };
   if (t.auto_status === "processando") return { tom: "info", texto: t.auto_acao === "cancelar" ? "Cancelando" : "Devolução na SEFAZ" };
-  return { tom: "neutral", texto: `Começa ${hora(t.proxima_em)}` };
+  return { tom: "neutral", texto: new Date(t.proxima_em) <= new Date() ? "Na fila" : `Começa ${hora(t.proxima_em)}` };
 }
 
 export function TrocasFiscaisAutomaticas() {

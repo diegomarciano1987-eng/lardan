@@ -56,7 +56,7 @@ export const enviarDocJudicial = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { partyId: string; tipo: string; titulo: string; arquivoNome: string; arquivoTipo: string; arquivoBase64: string }) => {
     if (!/^[0-9a-f-]{36}$/i.test(d?.partyId ?? "")) throw new Error("Pessoa inválida.");
-    if (!["termo_assinado", "peticao", "certidao", "sentenca", "comprovante", "outro"].includes(d.tipo)) throw new Error("Tipo inválido.");
+    if (!["minuta_acordo", "termo_assinado", "peticao", "certidao", "sentenca", "comprovante", "outro"].includes(d.tipo)) throw new Error("Tipo inválido.");
     if (!/^(image\/(png|jpeg|webp)|application\/pdf)$/.test(d.arquivoTipo)) throw new Error("Envie PDF ou foto (PNG/JPG).");
     if (d.arquivoBase64.length > 28_000_000) throw new Error("Arquivo maior que 20 MB.");
     return d;

@@ -172,8 +172,11 @@ export async function judicialDocs(party: string) { const r = await tab<Judicial
 export async function acordosJudiciais(party: string) { const r = await tab<AcordoJudicial>("cob_judicial_acordos").select("*").eq("party_id", party).order("created_at", { ascending: false }); if (r.error) throw new Error(r.error.message); return r.data ?? []; }
 export const encaminharJudicial = (party: string, d: Record<string, string>) => call<void>("cob_judicial_encaminhar", { _party: party, _d: d });
 export const salvarAcordoJudicial = (party: string, d: Record<string, unknown>) => call<string>("cob_judicial_acordo_salvar", { _party: party, _d: d });
+export interface AssinaturaJudicial { id: string; acordo_id: string; status: "pendente" | "assinado" | "recusado" | "cancelado" | "erro"; titulo: string; ambiente: string; sign_url: string | null; criado_em: string; assinado_em: string | null; tem_copia: boolean; whatsapp: boolean; assinantes: { papel: string; nome: string; whatsapp?: boolean; email?: boolean; sign_url?: string | null }[] | null; doc_titulo: string | null; invalidada_motivo: string | null }
+export const contatoJudicial = (party: string) => call<{ whatsapp: string | null; email: string | null }>("cob_judicial_contato", { _party: party });
+export const assinaturasJudiciais = (party: string) => call<AssinaturaJudicial[]>("cob_judicial_assinaturas", { _party: party });
 export const statusAcordoJudicial = (id: string, status: "cumprido" | "descumprido" | "cancelado", motivo: string) => call<void>("cob_judicial_acordo_status", { _id: id, _status: status, _motivo: motivo });
-export const TIPOS_DOC_JUDICIAL: [string, string][] = [["termo_assinado", "Termo/acordo assinado"], ["peticao", "Petição"], ["certidao", "Certidão / protocolo"], ["sentenca", "Sentença / homologação"], ["comprovante", "Comprovante"], ["outro", "Outro"]];
+export const TIPOS_DOC_JUDICIAL: [string, string][] = [["minuta_acordo", "Minuta do acordo (para assinar)"], ["termo_assinado", "Termo/acordo assinado"], ["peticao", "Petição"], ["certidao", "Certidão / protocolo"], ["sentenca", "Sentença / homologação"], ["comprovante", "Comprovante"], ["outro", "Outro"]];
 
 /** 0161: toda NF lançada contra a consultora e todo fechamento de maleta (SmallData + Lardan). Somente leitura. */
 export interface NotaConsultora {

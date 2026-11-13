@@ -5,12 +5,15 @@ import { toast } from "sonner";
 import { Gavel, FileText, Upload, Scale, Landmark } from "lucide-react";
 import { DateField } from "@/components/premium/DateField";
 import { SmartSelect } from "@/components/premium/SmartSelect";
-import { brl, dataBR, hojeSP, judicial, judicialDocs, acordosJudiciais, encaminharJudicial, salvarAcordoJudicial, statusAcordoJudicial, TIPOS_DOC_JUDICIAL, type Parcela } from "@/lib/cobranca";
+import { brl, dataBR, hojeSP, judicial, judicialDocs, acordosJudiciais, encaminharJudicial, salvarAcordoJudicial, statusAcordoJudicial, assinaturasJudiciais, contatoJudicial, TIPOS_DOC_JUDICIAL, type Parcela } from "@/lib/cobranca";
 import { enviarDocJudicial, abrirDocJudicial, excluirDocJudicial } from "@/lib/cobranca.functions";
 import { montarPlano, addMeses } from "@/lib/cobranca-acordo";
 import { centavosDigitados, limparDinheiro } from "@/lib/dinheiro-digitado";
 import { AcordoAsaas } from "./AcordoAsaas";
 import { AlvaraJudicial } from "./AlvaraJudicial";
+import { AssinaturaAcordoJudicial } from "./AssinaturaAcordoJudicial";
+
+const foneBR = (d: string | null) => { const x = (d ?? "").replace(/\D/g, "").replace(/^55(?=\d{10,11}$)/, ""); return x.length === 11 ? `(${x.slice(0, 2)}) ${x.slice(2, 7)}-${x.slice(7)}` : x.length === 10 ? `(${x.slice(0, 2)}) ${x.slice(2, 6)}-${x.slice(6)}` : x || null; };
 
 const iso = (d?: Date) => (d ? d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }) : "");
 const paraData = (s: string) => (s ? new Date(s + "T12:00:00") : undefined);
@@ -60,6 +63,8 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
   const proc = useQuery({ queryKey: ["cob", "jud", partyId], queryFn: () => judicial(partyId) });
   const docs = useQuery({ queryKey: ["cob", "jud-docs", partyId], queryFn: () => judicialDocs(partyId) });
   const acs = useQuery({ queryKey: ["cob", "jud-ac", partyId], queryFn: () => acordosJudiciais(partyId) });
+  const assin = useQuery({ queryKey: ["cob", "jud-assin", partyId], queryFn: () => assinaturasJudiciais(partyId) });
+  const contato = useQuery({ queryKey: ["cob", "jud-contato", partyId], queryFn: () => contatoJudicial(partyId) });
   const [editProc, setEditProc] = React.useState(false);
   const enviar = useServerFn(enviarDocJudicial);
   const abrir = useServerFn(abrirDocJudicial);
@@ -245,6 +250,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
             </div>
             <p className="text-xs text-ledger-muted">Dívida {brl(Number(a.principal_cents))} · honorários {brl(Number(a.honorarios_cents))} · cartório {brl(Number(a.cartorio_cents))} · custas {brl(Number(a.custas_cents))}{Number(a.outros_cents) > 0 && ` · ${a.outros_descricao ?? "outros"} ${brl(Number(a.outros_cents))}`}{Number(a.desconto_cents) > 0 && ` · desconto ${brl(Number(a.desconto_cents))}`}</p>
             <p className="text-xs text-ledger-muted">{a.plano.map((x) => `${x.numero}ª ${dataBR(x.data)} ${brl(x.valor_cents)}${x.asaas ? " (Asaas)" : " (alvará/judicial)"}`).join(" · ")}</p>
+            {(a.status === "vigente" || (assin.data ?? []).some((x) => x.acordo_id === a.id)) && <AssinaturaAcordoJudicial partyId={partyId} acordo={a} docs={docs.data ?? []} assinaturas={assin.data ?? []} advogadoPadrao={p.advogado} contato={{ whatsapp: foneBR(contato.data?.whatsapp ?? null), email: contato.data?.email ?? null }} />}
             {a.simulacao_id && a.status === "vigente" && <AcordoAsaas simId={a.simulacao_id} temEntrada={false} />}
             <AlvaraJudicial acordo={a} />
             {!a.simulacao_id && <p className="text-xs text-bronze">Sem parcelas no Asaas: aguarda alvará / pagamento em juízo.</p>}

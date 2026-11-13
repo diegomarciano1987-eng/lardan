@@ -2143,6 +2143,27 @@
       "when": 1794578046983,
       "tag": "0305_asaas_smalldata_substitui_0305",
       "breakpoints": true
+    },
+    {
+      "idx": 306,
+      "version": "7",
+      "when": 1794580163606,
+      "tag": "0306_pacote_0306_entrega_boleto_espelho",
+      "breakpoints": true
+    },
+    {
+      "idx": 307,
+      "version": "7",
+      "when": 1794580460496,
+      "tag": "0307_espelho_cliente_conferir_0306b",
+      "breakpoints": true
+    },
+    {
+      "idx": 308,
+      "version": "7",
+      "when": 1794580512009,
+      "tag": "0308_espelho_cliente_proximos_fix",
+      "breakpoints": true
     }
   ]
 }

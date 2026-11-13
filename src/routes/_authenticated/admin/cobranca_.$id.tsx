@@ -14,6 +14,7 @@ import { DateField } from "@/components/premium/DateField";
 import { AbaJudicial, FormProcesso } from "@/components/admin/cobranca/Judicial";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
+import { EspelhoAsaasCadastro } from "@/components/admin/cobranca/EspelhoAsaasCadastro";
 import {
   devedor, registrar, moverEtapa, criarPromessa, cancelarPromessa, criarTarefa, concluirTarefa,
   brl, dataBR, hojeSP, suspensao, suspender, ETAPAS, rotuloEtapa, ROTULO_TIPO, ROTULO_PROMESSA, type Etapa,
@@ -140,6 +141,8 @@ function Cockpit() {
         <AcessoPortalBotao partyId={id} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-4 text-sm font-semibold" />
         {!ehJudicial && <button onClick={() => setEncaminhar(true)} className="inline-flex h-10 items-center gap-2 rounded-lg bg-bronze px-4 text-sm font-semibold text-primary-foreground"><Gavel className="h-4 w-4" />Encaminhar para judicial</button>}
       </div>
+
+      <EspelhoAsaasCadastro partyId={id} />
 
       {encaminhar && <FormProcesso partyId={id} onFim={() => { setEncaminhar(false); recarregar(); setAba("judicial"); }} />}
       {acao && (

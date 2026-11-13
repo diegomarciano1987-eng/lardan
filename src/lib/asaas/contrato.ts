@@ -181,6 +181,10 @@ export interface TransporteAsaas {
   /** 0303: atualiza vencimento/valor da MESMA cobrança aberta (o Lardan manda); opcional como o cancelar */
   atualizarCobranca?(chargeExternalId: string, d: { valueCents: number; dueDate: string; billingType: FormaPagamento }): Promise<CobrancaExterna>;
 
+  /** 0306: espelho do cadastro (opcionais como o cancelar: o simulador pode não ter) */
+  lerClienteCompleto?(id: string): Promise<Record<string, unknown> | null>;
+  atualizarClienteCampos?(id: string, campos: Record<string, string>): Promise<void>;
+
   /** fila local de eventos (no futuro, entregues pelo webhook) */
   receberEventos(): Promise<EventoExterno[]>;
 }

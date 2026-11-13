@@ -1116,6 +1116,104 @@ export type Database = {
           },
         ]
       }
+      asaas_cliente_espelho: {
+        Row: {
+          account_id: string
+          atualizado_em: string
+          conferido_em: string | null
+          customer_id: string
+          diferencas: Json
+          enviado_em: string | null
+          erro: string | null
+          estado: string
+          forcado_por: string | null
+          forcar: boolean
+          motivo: string | null
+          party_id: string
+          pedido_em: string
+          reservado_em: string | null
+          tentativas: number
+          worker: string | null
+        }
+        Insert: {
+          account_id: string
+          atualizado_em?: string
+          conferido_em?: string | null
+          customer_id: string
+          diferencas?: Json
+          enviado_em?: string | null
+          erro?: string | null
+          estado?: string
+          forcado_por?: string | null
+          forcar?: boolean
+          motivo?: string | null
+          party_id: string
+          pedido_em?: string
+          reservado_em?: string | null
+          tentativas?: number
+          worker?: string | null
+        }
+        Update: {
+          account_id?: string
+          atualizado_em?: string
+          conferido_em?: string | null
+          customer_id?: string
+          diferencas?: Json
+          enviado_em?: string | null
+          erro?: string | null
+          estado?: string
+          forcado_por?: string | null
+          forcar?: boolean
+          motivo?: string | null
+          party_id?: string
+          pedido_em?: string
+          reservado_em?: string | null
+          tentativas?: number
+          worker?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_cliente_espelho_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "asaas_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asaas_cliente_espelho_log: {
+        Row: {
+          actor_id: string | null
+          campos: Json
+          criado_em: string
+          customer_id: string
+          external_id: string
+          id: string
+          origem: string
+          party_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          campos: Json
+          criado_em?: string
+          customer_id: string
+          external_id: string
+          id?: string
+          origem?: string
+          party_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          campos?: Json
+          criado_em?: string
+          customer_id?: string
+          external_id?: string
+          id?: string
+          origem?: string
+          party_id?: string
+        }
+        Relationships: []
+      }
       asaas_cobranca_cancelamentos: {
         Row: {
           actor_id: string
@@ -20474,6 +20572,35 @@ export type Database = {
         }
         Returns: Json
       }
+      asaas_cliente_dados_lardan: { Args: { _party: string }; Returns: Json }
+      asaas_cliente_espelho_pedir: {
+        Args: { _motivo: string; _party: string }
+        Returns: number
+      }
+      asaas_cliente_espelho_proximos: {
+        Args: { _limite?: number; _party?: string; _worker: string }
+        Returns: Json
+      }
+      asaas_cliente_espelho_registrar: {
+        Args: {
+          _actor?: string
+          _customer: string
+          _diferencas: Json
+          _enviados?: Json
+          _erro?: string
+          _estado: string
+          _worker: string
+        }
+        Returns: string
+      }
+      asaas_cliente_espelho_situacao: {
+        Args: { _party: string }
+        Returns: Json
+      }
+      asaas_cliente_espelho_solicitar: {
+        Args: { _forcar?: boolean; _party: string }
+        Returns: number
+      }
       asaas_cliente_posse: {
         Args: {
           _account: string
@@ -23159,6 +23286,10 @@ export type Database = {
       }
       maleta_devolucao_receber: { Args: { _id: string }; Returns: Json }
       maleta_devolucoes_lista: { Args: { _rep?: string }; Returns: Json }
+      maleta_entregue_em_maos: {
+        Args: { _cycle: string; _motivo: string }
+        Returns: Json
+      }
       maleta_motivo_invisivel: { Args: { _cycle: string }; Returns: string }
       maleta_perdida_fiado: { Args: { _perdida: string }; Returns: string }
       maleta_segunda_marcar: {
@@ -24107,6 +24238,15 @@ export type Database = {
       }
       remessa_maleta_transferir: {
         Args: { _consultora: string; _cycle: string; _motivo: string }
+        Returns: Json
+      }
+      remessa_maleta_transferir_entregue: {
+        Args: {
+          _consultora: string
+          _cycle: string
+          _motivo: string
+          _segunda?: boolean
+        }
         Returns: Json
       }
       remessa_maleta_trocar_consultora: {

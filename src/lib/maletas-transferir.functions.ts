@@ -20,6 +20,8 @@ export interface PedidoTransferencia {
   motivo?: string | null;
   /** 0283: segunda maleta para uma consultora que já tem maleta nesta remessa (motivo obrigatório). */
   segunda?: boolean;
+  /** 0306: (equipe) o representante já deixou a maleta com ela — registra a entrega; ela confirma e aceita no app. */
+  jaComEla?: boolean;
 }
 
 export interface ResultadoTransferencia {
@@ -32,6 +34,7 @@ export interface ResultadoTransferencia {
   nota_numero: string | null;
   entregas_canceladas: number;
   voltou_do_recebimento: boolean;
+  entrega_registrada: boolean;
   promissoria: { antiga_recusada: number; antiga_pendente_fila: number; nova: "enviada" | "ja_existia" | "nao_precisa" | "falhou"; aviso?: string; signUrl?: string | null };
 }
 
@@ -47,14 +50,17 @@ export const maletaTransferir = createServerFn({ method: "POST" })
     if (d.modo === "equipe" && d.leadId) throw new Error("A equipe transfere para uma consultora ou deixa como abertura.");
     if (d.segunda && !d.consultoraId) throw new Error("A segunda maleta é para uma consultora que já tem maleta.");
     if (d.segunda && (d.motivo ?? "").trim().length < 5) throw new Error("Escreva o motivo da segunda maleta (mínimo 5 letras).");
+    if (d.jaComEla && (d.modo !== "equipe" || !d.consultoraId)) throw new Error("A entrega em mãos é registrada pela equipe, para uma consultora.");
     return {
       cycleId: d.cycleId, modo: d.modo, consultoraId: d.consultoraId ?? null, leadId: d.leadId ?? null,
-      rep: d.rep ?? null, motivo: (d.motivo ?? "").trim().slice(0, 500), segunda: d.segunda === true,
+      rep: d.rep ?? null, motivo: (d.motivo ?? "").trim().slice(0, 500), segunda: d.segunda === true, jaComEla: d.jaComEla === true,
     };
   })
   .handler(async ({ data, context }): Promise<ResultadoTransferencia> => {
     const c = context as unknown as { supabase: { rpc: Rpc }; userId: string };
-    const chamada = data.segunda
+    const chamada = data.jaComEla
+      ? c.supabase.rpc("remessa_maleta_transferir_entregue", { _cycle: data.cycleId, _consultora: data.consultoraId, _motivo: data.motivo, _segunda: data.segunda })
+      : data.segunda
       ? (data.modo === "equipe"
         ? c.supabase.rpc("remessa_maleta_segunda", { _cycle: data.cycleId, _consultora: data.consultoraId, _motivo: data.motivo })
         : c.supabase.rpc("rep_maleta_segunda", { _rep: data.rep, _cycle: data.cycleId, _consultora: data.consultoraId, _motivo: data.motivo }))
@@ -95,6 +101,7 @@ export const maletaTransferir = createServerFn({ method: "POST" })
       nota_numero: (r["nota_numero"] as string | null) ?? null,
       entregas_canceladas: Number(r["entregas_canceladas"] ?? 0),
       voltou_do_recebimento: r["voltou_do_recebimento"] === true,
+      entrega_registrada: r["entrega_registrada"] === true,
       promissoria,
     };
   });

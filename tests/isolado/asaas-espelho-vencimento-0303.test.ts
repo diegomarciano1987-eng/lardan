@@ -81,6 +81,7 @@ beforeAll(async () => {
 describe("0303 vencimento/valor do Lardan → mesma cobrança no Asaas", () => {
   test("caso Thais: vencimento mudado no Lardan muda a MESMA cobrança no Asaas, sem cobrança nova nem dinheiro", async () => {
     const c = await cenario(8018, dia(0));
+    await sync(c.sim); // a rotina varre a base inteira: drena sobras de arquivos anteriores (ex.: 0301) antes de medir
     const criadas = c.sim.chamadasCriar;
     expect((await editar(c.inst, dia(8), 8018)).erro).toBeNull();
     const r = await sync(c.sim);

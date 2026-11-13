@@ -30,7 +30,7 @@ const TIPO: Record<string, string> = {
   "maleta.repassada": "Repasse da abertura",
 };
 
-export function DesfazerMovimentos({ rep, compacto }: { rep?: string; compacto?: boolean }) {
+export function DesfazerMovimentos({ rep, compacto }: { rep?: string | undefined; compacto?: boolean }) {
   const [busca, setBusca] = React.useState("");
   const [termo, setTermo] = React.useState("");
   const [aberto, setAberto] = React.useState<MovimentoMaleta | null>(null);
@@ -109,7 +109,7 @@ export function DesfazerMovimentos({ rep, compacto }: { rep?: string; compacto?:
   );
 }
 
-function DialogoDesfazer({ mov, rep, onFechar }: { mov: MovimentoMaleta; rep?: string; onFechar: () => void }) {
+function DialogoDesfazer({ mov, rep, onFechar }: { mov: MovimentoMaleta; rep?: string | undefined; onFechar: () => void }) {
   const qc = useQueryClient();
   const desfazerFn = useServerFn(maletaDesfazerMovimento);
   const [motivo, setMotivo] = React.useState("");

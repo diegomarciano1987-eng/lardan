@@ -22,7 +22,7 @@ function Dado({ rotulo, valor, destaque }: { rotulo: string; valor: string; dest
   );
 }
 
-function BarrasCategorias({ categorias, banhos }: { categorias: CategoriaHistorico[]; banhos?: Map<string, BanhoPct[]> }) {
+function BarrasCategorias({ categorias, banhos }: { categorias: CategoriaHistorico[]; banhos?: Map<string, BanhoPct[]> | undefined }) {
   const max = Math.max(...categorias.map((c) => c.participacao_vendas_pct ?? 0), 1);
   return (
     <div className="space-y-4">

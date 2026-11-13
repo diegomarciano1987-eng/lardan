@@ -46,7 +46,7 @@ export function textoBanhos(banhos?: BanhoPct[] | null) {
   return banhos.map((b) => `${ROTULO_BANHO[b.banho] ?? b.banho} ${b.pct}%`).join(" · ");
 }
 
-export function LinhaBanhos({ banhos, className }: { banhos?: BanhoPct[] | null; className?: string }) {
+export function LinhaBanhos({ banhos, className }: { banhos?: BanhoPct[] | null | undefined; className?: string }) {
   const t = textoBanhos(banhos);
   if (!t) return null;
   return <p className={className ?? "mt-1 text-xs text-ledger-muted"}><span className="font-semibold">Banho:</span> {t}</p>;

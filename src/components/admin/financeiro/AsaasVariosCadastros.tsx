@@ -81,7 +81,7 @@ function Cliente({ k, podeTrocar, onFeito }: { k: ClienteVariosCadastros; podeTr
           <ChevronDown className={`h-4 w-4 text-ledger-muted transition-transform ${aberto ? "rotate-180" : ""}`} aria-hidden />
         </span>
       </button>
-      {aberto ? <ul className="mt-2 rounded-[10px] bg-surface-soft px-3">{k.cadastros.map((c) => <Cadastro key={c.customer_id} c={c} podeTrocar={podeTrocar} onFeito={onFeito} />)}</ul> : null}
+      {aberto ? <ul className="mt-2 rounded-[10px] border border-line-soft bg-cream-50 px-3">{k.cadastros.map((c) => <Cadastro key={c.customer_id} c={c} podeTrocar={podeTrocar} onFeito={onFeito} />)}</ul> : null}
     </li>
   );
 }

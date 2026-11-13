@@ -99,7 +99,8 @@ describe("fila fiscal x pendência de nota da transferência", () => {
 
   test("gatilho da maleta não cria fila de remessa enquanto a pendência estiver aberta", async () => {
     const def = await um<{ d: string }>(`select pg_get_functiondef('public.fiscal_fila_kit_trg()'::regprocedure) d`);
-    expect(def.d.split("0282: nota da anterior").length - 1).toBe(1);
+    // 0324: a troca automática termina primeiro e ela mesma pede a nota nova
+    expect(def.d).toContain("p.status = 'aberta') THEN\n    RETURN NEW; -- 0282/0324");
   });
 });
 

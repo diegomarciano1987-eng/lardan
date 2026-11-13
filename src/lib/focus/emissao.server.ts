@@ -164,9 +164,81 @@ export async function conferirPendentesFocus(limite = 10) {
   return { conferidas: lista.length, atualizadas };
 }
 
-/** Fila automática (a cada minuto): confere notas sem resposta, emite o que entrou na fila e manda as cópias pendentes. */
+interface PlanoTroca {
+  pendencia: string;
+  acao: "cancelar" | "devolucao";
+  ambiente: AmbienteNfe;
+  ref: string;
+  numero: string | null;
+  maleta: string | null;
+  justificativa?: string;
+  cancelar_falhou?: boolean;
+  destinatario?: DestinatarioNfe & { party_id: string };
+  pendencias?: string[];
+  itens?: (ItemBanco & { numero_item_origem: number })[];
+  origem?: { chave: string; numero: string | null; data: string };
+  texto?: string | null;
+}
+
+/**
+ * 0324: maleta trocada ou devolvida que já tinha nota autorizada — sem ninguém marcar nada.
+ * O banco decide (fiscal_trocas_proximas): cancelar a nota antiga (menos de 23 h, maleta não saiu) ou fazer a
+ * nota de devolução em nome de quem está nela. O retorno da SEFAZ fecha a troca e põe a nota nova na fila normal.
+ */
+export async function processarTrocasFiscais(limite = 5) {
+  const planos = await rpcServidor<PlanoTroca[]>("fiscal_trocas_proximas", { _limite: limite });
+  let feitas = 0, falhas = 0;
+  for (const p of planos) {
+    try {
+      const { cancelarNfe, consultarNfe } = await import("./api.server");
+      if (p.acao === "cancelar") {
+        const r = await cancelarNfe(p.ambiente, p.ref, p.justificativa ?? "Remessa sem efeito: a maleta mudou de consultora antes de sair da empresa.");
+        const salvo = await rpcServidor<{ status: string }>("fiscal_focus_retorno", { _ref: p.ref, _fonte: "cancelamento", _resposta: r.dados ?? {} });
+        if (salvo.status === "cancelado") { feitas++; continue; }
+        const msg = (r.dados as { mensagem_sefaz?: string; mensagem?: string } | null)?.mensagem_sefaz
+          ?? (r.dados as { mensagem?: string } | null)?.mensagem ?? `Focus respondeu ${r.http}`;
+        // cancelamento recusado (prazo, nota já circulou...): a próxima volta faz a nota de devolução
+        await rpcServidor("fiscal_troca_falhou", { _pendencia: p.pendencia, _erro: `Cancelamento recusado: ${msg}. Vai pela nota de devolução.`, _cancelar_falhou: true });
+        falhas++;
+        continue;
+      }
+      // devolução: se antes tentamos cancelar, confere na Focus se a nota antiga não foi cancelada mesmo assim
+      if (p.cancelar_falhou) {
+        try {
+          const c = await consultarNfe(p.ambiente, p.ref);
+          if (c.http < 400 && c.dados?.status && c.dados.status !== "autorizado") {
+            await rpcServidor("fiscal_focus_retorno", { _ref: p.ref, _fonte: "consulta", _resposta: c.dados });
+            feitas++;
+            continue;
+          }
+        } catch { /* segue para a devolução */ }
+      }
+      if (p.pendencias?.length) throw new Error(`Cadastro de quem está na nota incompleto: ${p.pendencias.join("; ")}.`);
+      if (!p.destinatario || !p.origem || !p.itens?.length) throw new Error("A nota antiga não tem as peças para devolver.");
+      const { montarNfe, novaReferencia } = await import("./nfe");
+      const em = await emitenteFiscal(rpcServidor);
+      const kit = /REMESSA:\s*([^\s]+)\s+KIT:\s*([^\s]+)/.exec(p.texto ?? "");
+      const nfe = montarNfe({
+        operacao: "devolucao", ambiente: p.ambiente, cnpjEmitente: em.cnpj, ufEmitente: em.uf, destinatario: p.destinatario,
+        itens: p.itens, origem: { chave: p.origem.chave, numero: p.origem.numero ?? "", data: p.origem.data },
+        remessa: kit ? { numero: kit[1]!, kit: kit[2]! } : null,
+      });
+      const ref = novaReferencia(prefixo(p.ambiente), "devolucao");
+      await rpcServidor("fiscal_troca_registrar", { _pendencia: p.pendencia, _ref: ref, _payload: nfe });
+      const r = await enviar(p.ambiente, ref, nfe);
+      if (["autorizado", "processando_autorizacao"].includes(r.status)) feitas++; else falhas++;
+    } catch (e) {
+      falhas++;
+      await rpcServidor("fiscal_troca_falhou", { _pendencia: p.pendencia, _erro: (e as Error).message, _cancelar_falhou: false }).catch(() => undefined);
+    }
+  }
+  return { trocas: planos.length, trocas_feitas: feitas, trocas_falhas: falhas };
+}
+
+/** Fila automática (a cada minuto): confere notas sem resposta, resolve as trocas de maleta, emite o que entrou na fila e manda as cópias pendentes. */
 export async function processarFilaFiscal(limite = 5) {
   const conferencia = await conferirPendentesFocus(10).catch(() => ({ conferidas: 0, atualizadas: 0 }));
+  const trocas = await processarTrocasFiscais(5).catch((e) => ({ trocas: 0, trocas_feitas: 0, trocas_falhas: 0, trocas_erro: (e as Error).message }));
   const itens = await rpcServidor<{ id: number; cycle_id: string; etapa: "remessa" | "acerto" }[]>("fiscal_fila_proximos", { _limite: limite });
   let feitos = 0, erros = 0;
   for (const it of itens) {
@@ -190,5 +262,5 @@ export async function processarFilaFiscal(limite = 5) {
     }
   }
   const copias = await enviarCopias(20);
-  return { processados: itens.length, feitos, erros, ...copias, ...conferencia };
+  return { processados: itens.length, feitos, erros, ...copias, ...conferencia, ...trocas };
 }

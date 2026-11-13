@@ -9080,6 +9080,8 @@ export type Database = {
       fiscal_focus_envios: {
         Row: {
           ambiente: string
+          anulada_em: string | null
+          anulada_por_ref: string | null
           caminho_danfe: string | null
           caminho_xml: string | null
           caminho_xml_cancelamento: string | null
@@ -9105,10 +9107,13 @@ export type Database = {
           status_sefaz: string | null
           tentativas: number
           teste: boolean
+          troca_pendencia_id: string | null
           updated_at: string
         }
         Insert: {
           ambiente: string
+          anulada_em?: string | null
+          anulada_por_ref?: string | null
           caminho_danfe?: string | null
           caminho_xml?: string | null
           caminho_xml_cancelamento?: string | null
@@ -9134,10 +9139,13 @@ export type Database = {
           status_sefaz?: string | null
           tentativas?: number
           teste?: boolean
+          troca_pendencia_id?: string | null
           updated_at?: string
         }
         Update: {
           ambiente?: string
+          anulada_em?: string | null
+          anulada_por_ref?: string | null
           caminho_danfe?: string | null
           caminho_xml?: string | null
           caminho_xml_cancelamento?: string | null
@@ -9163,6 +9171,7 @@ export type Database = {
           status_sefaz?: string | null
           tentativas?: number
           teste?: boolean
+          troca_pendencia_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -9208,6 +9217,13 @@ export type Database = {
             referencedRelation: "fiscal_focus_envios"
             referencedColumns: ["ref"]
           },
+          {
+            foreignKeyName: "fiscal_focus_envios_troca_pendencia_id_fkey"
+            columns: ["troca_pendencia_id"]
+            isOneToOne: false
+            referencedRelation: "maleta_troca_pendencias"
+            referencedColumns: ["id"]
+          },
         ]
       }
       fiscal_focus_eventos: {
@@ -9234,6 +9250,66 @@ export type Database = {
           id?: number
           ref?: string
           resposta?: Json
+        }
+        Relationships: []
+      }
+      fiscal_inutilizacoes: {
+        Row: {
+          ambiente: string
+          caminho_xml: string | null
+          created_at: string
+          id: string
+          justificativa: string
+          mensagem_sefaz: string | null
+          numero_final: number
+          numero_inicial: number
+          ok: boolean
+          pedido_por: string
+          protocolo: string | null
+          refs: string[]
+          resposta: Json
+          resultado: string
+          serie: string
+          status: string | null
+          status_sefaz: string | null
+        }
+        Insert: {
+          ambiente: string
+          caminho_xml?: string | null
+          created_at?: string
+          id?: string
+          justificativa: string
+          mensagem_sefaz?: string | null
+          numero_final: number
+          numero_inicial: number
+          ok?: boolean
+          pedido_por: string
+          protocolo?: string | null
+          refs?: string[]
+          resposta?: Json
+          resultado: string
+          serie: string
+          status?: string | null
+          status_sefaz?: string | null
+        }
+        Update: {
+          ambiente?: string
+          caminho_xml?: string | null
+          created_at?: string
+          id?: string
+          justificativa?: string
+          mensagem_sefaz?: string | null
+          numero_final?: number
+          numero_inicial?: number
+          ok?: boolean
+          pedido_por?: string
+          protocolo?: string | null
+          refs?: string[]
+          resposta?: Json
+          resultado?: string
+          serie?: string
+          status?: string | null
+          status_sefaz?: string | null
         }
         Relationships: []
       }
@@ -13445,6 +13521,14 @@ export type Database = {
       }
       maleta_troca_pendencias: {
         Row: {
+          atualizado_em: string
+          auto_acao: string | null
+          auto_cancelar_falhou: boolean
+          auto_erro: string | null
+          auto_proxima_em: string
+          auto_ref: string | null
+          auto_status: string
+          auto_tentativas: number
           consultora_anterior_nome: string | null
           consultora_anterior_party_id: string | null
           consultora_nova_nome: string | null
@@ -13457,6 +13541,7 @@ export type Database = {
           motivo: string | null
           nota_chave: string | null
           nota_numero: string | null
+          nota_ref: string | null
           observacao: string | null
           origem: string
           remessa_id: string | null
@@ -13465,6 +13550,14 @@ export type Database = {
           status: string
         }
         Insert: {
+          atualizado_em?: string
+          auto_acao?: string | null
+          auto_cancelar_falhou?: boolean
+          auto_erro?: string | null
+          auto_proxima_em?: string
+          auto_ref?: string | null
+          auto_status?: string
+          auto_tentativas?: number
           consultora_anterior_nome?: string | null
           consultora_anterior_party_id?: string | null
           consultora_nova_nome?: string | null
@@ -13477,6 +13570,7 @@ export type Database = {
           motivo?: string | null
           nota_chave?: string | null
           nota_numero?: string | null
+          nota_ref?: string | null
           observacao?: string | null
           origem?: string
           remessa_id?: string | null
@@ -13485,6 +13579,14 @@ export type Database = {
           status?: string
         }
         Update: {
+          atualizado_em?: string
+          auto_acao?: string | null
+          auto_cancelar_falhou?: boolean
+          auto_erro?: string | null
+          auto_proxima_em?: string
+          auto_ref?: string | null
+          auto_status?: string
+          auto_tentativas?: number
           consultora_anterior_nome?: string | null
           consultora_anterior_party_id?: string | null
           consultora_nova_nome?: string | null
@@ -13497,6 +13599,7 @@ export type Database = {
           motivo?: string | null
           nota_chave?: string | null
           nota_numero?: string | null
+          nota_ref?: string | null
           observacao?: string | null
           origem?: string
           remessa_id?: string | null
@@ -22718,6 +22821,25 @@ export type Database = {
         }
         Returns: Json
       }
+      fiscal_inutilizacao_faixa_motivo: {
+        Args: { _ambiente: string; _fim: number; _ini: number; _serie: string }
+        Returns: string
+      }
+      fiscal_inutilizacao_registrar: {
+        Args: {
+          _ambiente: string
+          _fim: number
+          _ini: number
+          _justificativa: string
+          _refs: string[]
+          _resposta: Json
+          _serie: string
+          _usuario: string
+        }
+        Returns: Json
+      }
+      fiscal_inutilizacoes_lista: { Args: never; Returns: Json }
+      fiscal_numeros_pulados: { Args: never; Returns: Json }
       fiscal_peca_codigo: { Args: { _variant: string }; Returns: string }
       fiscal_peca_descricao: { Args: { _variant: string }; Returns: string }
       fiscal_producao_definir: {
@@ -22754,6 +22876,20 @@ export type Database = {
       fiscal_recusas_conferidas_lista: { Args: never; Returns: Json }
       fiscal_recusas_incertas_pendentes: { Args: never; Returns: Json }
       fiscal_roteiro_observado: { Args: never; Returns: Json }
+      fiscal_troca_concluir: {
+        Args: { _obs: string; _pendencia: string }
+        Returns: Json
+      }
+      fiscal_troca_falhou: {
+        Args: { _cancelar_falhou?: boolean; _erro: string; _pendencia: string }
+        Returns: undefined
+      }
+      fiscal_troca_registrar: {
+        Args: { _payload: Json; _pendencia: string; _ref: string }
+        Returns: Json
+      }
+      fiscal_trocas_lista: { Args: never; Returns: Json }
+      fiscal_trocas_proximas: { Args: { _limite?: number }; Returns: Json }
       gen_protocol: { Args: { prefix: string }; Returns: string }
       geo_fila_proxima: {
         Args: { _ibge?: string; _limite?: number }

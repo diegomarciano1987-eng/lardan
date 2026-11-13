@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { reprocessarAssinados, situacaoClicksign } from "@/lib/clicksign.functions";
 import { FiscalProntidao } from "@/components/admin/FiscalProntidao";
 import { FocusHomologacao } from "@/components/admin/fiscal/FocusHomologacao";
+import { TrocasFiscaisAutomaticas } from "@/components/admin/fiscal/TrocasFiscaisAutomaticas";
 import { ProducaoFiscal } from "@/components/admin/fiscal/ProducaoFiscal";
 import { AssinaturaConfig } from "@/components/admin/assinatura/AssinaturaConfig";
 import { CorreiosDiagnostico } from "@/components/admin/correios/CorreiosDiagnostico";
@@ -68,6 +69,7 @@ function Integracoes() {
       <AssinaturaConfig master={souMaster} />
       <CorreiosPainel />
       <CorreiosDiagnostico master={souMaster} />
+      {can(caps, "finance.view") && <TrocasFiscaisAutomaticas />}
       {can(caps, "finance.view") && <FocusHomologacao />}
       <Panel title="Clicksign — termo de recebimento da maleta">
         {!s ? (

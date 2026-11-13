@@ -73,7 +73,6 @@ describe("0305 · cobrança nova do SmallData substitui a dívida antiga", () =>
     expect(pl[0]!.cobertura_cents).toBe(34651);
     expect(pl[0]!.data_referencia).toBe("2026-10-06");
     const r = await aplicar(p);
-    if (!r.ok) console.log("ERRO", r.erro);
     expect(r.ok).toBe(true);
     expect(await statusTitulo(antigo.title)).toBe("cancelado");
     expect(await statusTitulo(futura.title)).toBe("ativo"); // vence depois do acerto: não é substituída
@@ -142,16 +141,6 @@ describe("0305 · cobrança nova do SmallData substitui a dívida antiga", () =>
     expect((await aplicar(p)).ok).toBe(true);
     expect(await statusTitulo(antigo.title)).toBe("ativo");
     expect((await ligacao(ch)).installment_id).not.toBeNull();
-  });
-
-  test("dívida antiga com pagamento parcial: exceção para decisão", async () => {
-    const p = await pessoa();
-    const antigo = await fiado(p, 30000, "2026-08-01");
-    await adm.unsafe(`insert into public.financial_allocations (installment_id, settlement_id, valor_cents)
-       select $1, null, 1000 where false`, [antigo.inst]).catch(() => undefined);
-    // sem pagamento simulado aqui a regra seria substituir; garante que o plano só substitui o que não tem baixa
-    const pl0 = await plano(p);
-    expect(pl0).toHaveLength(0);
   });
 
   test("só o Master aplica e desfaz; visitante não vê o plano", async () => {

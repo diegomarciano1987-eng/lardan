@@ -26,7 +26,7 @@ export function AceiteAdministrativo({ remessaId }: { remessaId: string }) {
   });
   const aplicar = useMutation({
     mutationFn: async () => {
-      const res: { codigo: string; ok: boolean; erro?: string }[] = [];
+      const res: { codigo: string; ok: boolean; erro?: string | undefined }[] = [];
       for (const m of (q.data ?? []).filter((x) => sel.has(x.cycle_id))) {
         const { error } = await supabase.rpc("kit_aceite_administrativo" as never, { _cycle: m.cycle_id, _motivo: motivo.trim() } as never);
         res.push({ codigo: m.codigo, ok: !error, erro: error?.message });

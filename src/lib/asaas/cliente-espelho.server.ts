@@ -113,7 +113,7 @@ export async function espelharClientesProducao(o: { limite?: number; party?: str
   type Config = Parameters<typeof transporteDaConfiguracao>[0];
   const servico = await bancoExecutor();
   return espelharClientes({
-    servico, limite: o.limite, party: o.party ?? null, actor: o.actor ?? null,
+    servico, limite: o.limite ?? 15, party: o.party ?? null, actor: o.actor ?? null,
     transporteConta: async (acc) =>
       (await transporteDaConfiguracao(await servico.rpc<Config>("asaas_exec_config", { _account: acc, _operacao: "link" }))) as unknown as TransporteCliente,
   });

@@ -81,3 +81,14 @@ export function listarDocumentos(pagina: number) {
 export function recusarDocumento(docToken: string, motivo: string) {
   return chamar<unknown>("POST", "/refuse/", { doc_token: docToken, rejected_reason: motivo, notify_signer: false });
 }
+
+/** 0318 — documento a partir de um PDF pronto (minuta do advogado), sem reescrever o texto. */
+export function criarDocumentoPdf(corpo: {
+  name: string; base64_pdf: string; external_id: string;
+  signers: { name: string; phone_country?: string; phone_number?: string; email?: string; cpf?: string; auth_mode: string; qualification?: string;
+             send_automatic_whatsapp: boolean; send_automatic_email: boolean; lock_name: boolean; lock_phone: boolean; lock_email?: boolean;
+             external_id: string; custom_message?: string; require_selfie_photo?: boolean; require_document_photo?: boolean }[];
+  brand_name?: string; lang: "pt-br";
+}) {
+  return chamar<DocZapsign>("POST", "/docs/", corpo);
+}

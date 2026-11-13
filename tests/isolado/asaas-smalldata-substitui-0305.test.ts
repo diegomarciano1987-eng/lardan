@@ -73,6 +73,7 @@ describe("0305 · cobrança nova do SmallData substitui a dívida antiga", () =>
     expect(pl[0]!.cobertura_cents).toBe(34651);
     expect(pl[0]!.data_referencia).toBe("2026-10-06");
     const r = await aplicar(p);
+    if (!r.ok) console.log("ERRO", r.erro);
     expect(r.ok).toBe(true);
     expect(await statusTitulo(antigo.title)).toBe("cancelado");
     expect(await statusTitulo(futura.title)).toBe("ativo"); // vence depois do acerto: não é substituída

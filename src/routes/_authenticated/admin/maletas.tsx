@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BriefcaseBusiness, Plus, ScanLine, Search, ShieldCheck, X } from "lucide-react";
+import { BriefcaseBusiness, Plus, ScanLine, Search, ShieldCheck, Undo2, X } from "lucide-react";
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -260,6 +260,11 @@ function RemessasPage() {
             {master && (
               <Link to="/admin/cadastros/correcoes" className="admin-btn" title="Master: cancelar remessa vazia, excluir venda de teste, vincular histórico.">
                 <ShieldCheck aria-hidden className="size-4" /> Correções do administrador
+              </Link>
+            )}
+            {(podeMontar || master) && (
+              <Link to="/admin/maletas/movimentos" className="admin-btn" title="Desfazer troca errada de maleta entre consultoras.">
+                <Undo2 aria-hidden className="size-4" /> Desfazer movimento
               </Link>
             )}
             {caps.includes("stock.operate") && (

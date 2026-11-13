@@ -52,7 +52,7 @@ export function TrocasFiscaisAutomaticas() {
         (se ela tem menos de 23 horas e a maleta não saiu) ou faz a nota de devolução. Depois a nota nova sai sozinha
         para quem ficou com a maleta. Espera 10 minutos depois do último movimento, para um engano desfeito na hora não gerar nota.
       </p>
-      {q.isLoading ? <Skeleton className="h-24" /> : q.error ? <ErrorState title="Não foi possível carregar as trocas." /> : (q.data ?? []).length === 0 ? (
+      {q.isLoading ? <Skeleton className="h-24" /> : q.error ? <ErrorState message="Não foi possível carregar as trocas." onRetry={() => void q.refetch()} /> : (q.data ?? []).length === 0 ? (
         <p className="text-sm text-ledger-muted">Sem trocas nos últimos 30 dias.</p>
       ) : (
         <ul className="divide-y divide-line-soft">

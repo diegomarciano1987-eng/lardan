@@ -25,6 +25,9 @@ export interface NotaMaleta {
   tem_danfe: boolean;
   desatualizada: boolean;
   created_at: string;
+  /** 0324: remessa devolvida pela troca automática (não é mais a nota viva da maleta) */
+  anulada?: boolean;
+  devolucao_troca?: { ref: string; status: string; numero: string | null; tem_danfe: boolean } | null;
   /** notas do acerto (devolução, venda, perda) ligadas a esta remessa */
   acerto?: { operacao: "devolucao" | "venda" | "perda"; ref: string; status: string; numero: string | null;
              mensagem_sefaz: string | null; erros: { mensagem?: string }[] | null; tem_danfe: boolean }[];
@@ -103,7 +106,9 @@ export function NotaFiscalMaleta({
   const sufixo = producao ? "" : " (teste)";
   // Emissão real ligada: nota de TESTE (homologação) não conta como nota da maleta (0225).
   const testeAntigo = producao && notaRecebida?.ambiente === "homologacao" ? notaRecebida : undefined;
-  const nota = testeAntigo ? undefined : notaRecebida;
+  // 0324: a remessa antiga foi devolvida na troca — a maleta precisa da nota nova (a fila emite sozinha)
+  const devolvida = !testeAntigo && notaRecebida?.anulada ? notaRecebida : undefined;
+  const nota = testeAntigo || devolvida ? undefined : notaRecebida;
   const qc = useQueryClient();
   const emitirFn = useServerFn(focusEmitirRemessaMaleta);
   const tam = grande ? "justify-center" : "h-9 px-3 text-xs";
@@ -134,6 +139,7 @@ export function NotaFiscalMaleta({
   });
   // DANFE enxuto (0224): gerado do XML autorizado, uma linha por peça
   const abrirDanfe = (ref = nota!.ref) => imprimirDanfe(ref);
+  const devTroca = devolvida?.devolucao_troca;
 
   if (nota && nota.status === "autorizado") {
     return (
@@ -193,6 +199,12 @@ export function NotaFiscalMaleta({
       </button>
       {recusa && <span className="max-w-72 text-xs text-destructive" title={recusa}>Recusada: {recusa}</span>}
       {testeAntigo && <span className="text-xs text-ledger-muted">Já teve nota de teste{testeAntigo.numero ? ` nº ${testeAntigo.numero}` : ""} (sem valor fiscal).</span>}
+      {devolvida && devTroca?.status === "autorizado" && (
+        <button type="button" className={`admin-btn ${tam}`} disabled={!devTroca.tem_danfe} onClick={() => void imprimirDanfe(devTroca.ref)}
+          title={`Nota de devolução da remessa nº ${devolvida.numero ?? "—"}, feita sozinha na troca da maleta.`}>
+          <Receipt aria-hidden className={icone} /> Devolução{devTroca.numero ? ` nº ${devTroca.numero}` : ""}
+        </button>
+      )}
     </span>
   );
 }

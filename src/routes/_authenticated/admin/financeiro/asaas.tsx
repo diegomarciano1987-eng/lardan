@@ -8,6 +8,7 @@ import { MesaAsaas } from "@/components/admin/financeiro/MesaAsaas";
 import { AsaasPenteFino } from "@/components/admin/financeiro/AsaasPenteFino";
 import { AsaasSaldoEspelho } from "@/components/admin/financeiro/AsaasSaldoEspelho";
 import { AsaasEspelhoDiferencas } from "@/components/admin/financeiro/AsaasEspelhoDiferencas";
+import { AsaasVariosCadastros } from "@/components/admin/financeiro/AsaasVariosCadastros";
 import { ConferenciaSaldoAsaas } from "@/components/admin/financeiro/ConferenciaSaldoAsaas";
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro/asaas")({
@@ -30,6 +31,7 @@ function Pagina() {
         <AsaasAutomaticoExtrato />
         <AsaasEspelhoDiferencas />
         <AsaasSaldoEspelho />
+        <AsaasVariosCadastros />
         <AsaasPenteFino />
         <ConferenciaSaldoAsaas />
         <MesaAsaas />

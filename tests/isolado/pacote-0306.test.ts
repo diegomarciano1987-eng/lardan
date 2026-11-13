@@ -40,8 +40,16 @@ let master: Conta, rep: Conta, juce: Conta, outra: Conta;
 let deposito = "", vA = "", praca = "", remessa = "";
 const transitoPara = async (cycle: string, para: string) =>
   um<{ id: string } | undefined>(`select id from public.kit_transfers where cycle_id=$1 and status='transito' and to_party_id=$2 order by seq desc limit 1`, [cycle, para]);
+async function novaConsultora() {
+  const c = await criarConta({ nome: `p306-c-${marca()}`, papeis: ["consultora"], comParty: true });
+  await adm.unsafe(`insert into public.consultant_profiles (party_id, representative_party_id, praca_id) values ($1,$2,$3)
+                    on conflict (party_id) do update set representative_party_id=excluded.representative_party_id, praca_id=excluded.praca_id`,
+    [c.partyId, rep.partyId, praca]);
+  return c;
+}
 async function conferida(c: Conta | null) {
-  const id = (await ok<{ cycle_id: string }>(master, "remessa_abrir_maleta", { _remessa: remessa, _consultora: c?.partyId ?? juce.partyId })).cycle_id;
+  const dono = c ?? (await novaConsultora());
+  const id = (await ok<{ cycle_id: string }>(master, "remessa_abrir_maleta", { _remessa: remessa, _consultora: dono.partyId })).cycle_id;
   await ok(master, "kit_item_upsert", { _cycle: id, _variant: vA, _qty: 3 });
   await ok(master, "kit_conferir", { _cycle: id, _note: null });
   return id;
@@ -73,8 +81,8 @@ describe("1 · segunda maleta já com ela segue o mesmo aceite da primeira", () 
   let primeira = "", segunda = "", terceira = "";
   beforeAll(async () => {
     primeira = await conferida(juce);
-    segunda = await conferida(outra); // montada para outra; a equipe transfere como 2ª maleta da Jucélia
-    terceira = await conferida(outra);
+    segunda = await conferida(null); // montada para outra; a equipe transfere como 2ª maleta da Jucélia
+    terceira = await conferida(null);
     await ok(master, "remessa_expedir_representante", { _remessa: remessa });
     for (const m of [primeira, segunda, terceira]) await ok(rep, "kit_transfer_confirm", { _transfer: (await transitoPara(m, rep.partyId!))!.id, _payload: {} });
     // primeira maleta: entregue, confirmada e aceita
@@ -126,7 +134,7 @@ describe("1 · segunda maleta já com ela segue o mesmo aceite da primeira", () 
   });
 
   test("representante ainda não confirmou que recebeu: recusa e não transfere nada (tudo ou nada)", async () => {
-    const quarta = await conferida(outra);
+    const quarta = await conferida(null);
     await ok(master, "remessa_expedir_representante", { _remessa: remessa });
     const antes = await ciclo(quarta);
     const r = await rpc(master, "remessa_maleta_transferir_entregue", { _cycle: quarta, _consultora: juce.partyId, _motivo: "teste sem confirmação", _segunda: true });

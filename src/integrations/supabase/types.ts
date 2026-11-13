@@ -9237,6 +9237,66 @@ export type Database = {
         }
         Relationships: []
       }
+      fiscal_inutilizacoes: {
+        Row: {
+          ambiente: string
+          caminho_xml: string | null
+          created_at: string
+          id: string
+          justificativa: string
+          mensagem_sefaz: string | null
+          numero_final: number
+          numero_inicial: number
+          ok: boolean
+          pedido_por: string
+          protocolo: string | null
+          refs: string[]
+          resposta: Json
+          resultado: string
+          serie: string
+          status: string | null
+          status_sefaz: string | null
+        }
+        Insert: {
+          ambiente: string
+          caminho_xml?: string | null
+          created_at?: string
+          id?: string
+          justificativa: string
+          mensagem_sefaz?: string | null
+          numero_final: number
+          numero_inicial: number
+          ok?: boolean
+          pedido_por: string
+          protocolo?: string | null
+          refs?: string[]
+          resposta?: Json
+          resultado: string
+          serie: string
+          status?: string | null
+          status_sefaz?: string | null
+        }
+        Update: {
+          ambiente?: string
+          caminho_xml?: string | null
+          created_at?: string
+          id?: string
+          justificativa?: string
+          mensagem_sefaz?: string | null
+          numero_final?: number
+          numero_inicial?: number
+          ok?: boolean
+          pedido_por?: string
+          protocolo?: string | null
+          refs?: string[]
+          resposta?: Json
+          resultado?: string
+          serie?: string
+          status?: string | null
+          status_sefaz?: string | null
+        }
+        Relationships: []
+      }
       fiscal_pendencias: {
         Row: {
           created_at: string
@@ -22718,6 +22778,25 @@ export type Database = {
         }
         Returns: Json
       }
+      fiscal_inutilizacao_faixa_motivo: {
+        Args: { _ambiente: string; _fim: number; _ini: number; _serie: string }
+        Returns: string
+      }
+      fiscal_inutilizacao_registrar: {
+        Args: {
+          _ambiente: string
+          _fim: number
+          _ini: number
+          _justificativa: string
+          _refs: string[]
+          _resposta: Json
+          _serie: string
+          _usuario: string
+        }
+        Returns: Json
+      }
+      fiscal_inutilizacoes_lista: { Args: never; Returns: Json }
+      fiscal_numeros_pulados: { Args: never; Returns: Json }
       fiscal_peca_codigo: { Args: { _variant: string }; Returns: string }
       fiscal_peca_descricao: { Args: { _variant: string }; Returns: string }
       fiscal_producao_definir: {

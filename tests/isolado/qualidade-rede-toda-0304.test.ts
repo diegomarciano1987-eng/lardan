@@ -96,7 +96,7 @@ describe("1. Tatiane (gerente da Qualidade) confere maleta de qualquer represent
 
   test("confere as peças do acerto e fecha a conferência", async () => {
     const c = await ok<{ status: string }>(tatiane, "pre_baixa_conferir", { _cycle: maleta, _leituras: [{ variant_id: vA, qtd: 3 }], _aplicar: true });
-    expect(["conferida", "pendencia"]).toContain(c.status);
+    expect(c.status).toBe("encerrada");
   });
 
   test("vê o cadastro da consultora do Marcelo e a remessa dele", async () => {

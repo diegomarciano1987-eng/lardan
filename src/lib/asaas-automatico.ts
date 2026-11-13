@@ -179,6 +179,7 @@ export type PainelSaldo = {
 };
 export const ROTULO_MOTIVO_SALDO: Record<string, string> = {
   baixa_parcial: "Baixa parcial no Lardan",
+  baixa_parcial_sem_reemissao: "Baixa parcial: a antiga foi cancelada no Asaas; gere a nova pela tela",
   quitada: "Quitada no Lardan",
   titulo_cancelado: "Título cancelado no Lardan",
   estorno: "Baixa estornada no Lardan",

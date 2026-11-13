@@ -20,6 +20,7 @@ import { Panel, Skeleton, ErrorState, formatBRLFromCents, formatInt } from "@/co
 import { cn } from "@/lib/utils";
 import { PulsoCards } from "@/components/admin/PulsoCards";
 import { CentralVendas } from "@/components/admin/CentralVendas";
+import { Previsibilidade } from "@/components/admin/Previsibilidade";
 
 interface Painel {
   fluxo: { mes: string; entradas: number; saidas: number }[];
@@ -74,7 +75,7 @@ const STATUS_MALETA: Record<string, string> = {
   cancelada: "Cancelada",
 };
 
-type Aba = "pulso" | "financeiro" | "operacao" | "vendas";
+type Aba = "pulso" | "financeiro" | "operacao" | "vendas" | "previsao";
 
 function Dica({ active, payload, label, formato }: { active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string; formato?: (l: string) => string }) {
   if (!active || !payload?.length) return null;
@@ -134,6 +135,7 @@ export function VisaoGeralPainel({ saldoContas, vencidoReceber, vencidoPagar }: 
           ["financeiro", "Financeiro e Asaas"],
           ["operacao", "Operação e rede"],
           ["vendas", "Central de vendas"],
+          ["previsao", "Previsibilidade"],
         ] as [Aba, string][]).map(([a, r]) => (
           <button key={a} type="button" onClick={() => setAba(a)} className={a === "financeiro" ? "admin-btn bg-asaas text-asaas-foreground" : aba === a ? "admin-btn-primary text-warm-ivory" : "admin-btn"} aria-current={aba === a ? "page" : undefined}>
             {r}
@@ -143,6 +145,8 @@ export function VisaoGeralPainel({ saldoContas, vencidoReceber, vencidoPagar }: 
 
       {aba === "vendas" ? (
         <CentralVendas />
+      ) : aba === "previsao" ? (
+        <Previsibilidade />
       ) : !d ? (
         <div className="grid gap-3 md:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (

@@ -1,6 +1,6 @@
 /** 0306 — espelho do cadastro Lardan → Asaas: regras puras (Diego 13/11/2026: Lardan manda, nada some do Asaas). */
 import { describe, expect, test } from "bun:test";
-import { comparar, normalizar } from "../src/lib/asaas/cliente-espelho";
+import { comparar, normalizar } from "../../src/lib/asaas/cliente-espelho";
 
 const cacildaLardan = { name: "Cacilda da Luz", cpfCnpj: "06181892974", email: null, mobilePhone: "42999121933", phone: null,
   postalCode: "85200000", address: "Rua Guairaca", addressNumber: "1481", complement: null, province: "Maristela" };

@@ -18,6 +18,7 @@ import { AgendaVisitas, MaletasCarteira } from "@/components/representante/Campo
 import { EnviarConvites } from "@/components/representante/EnviarConvites";
 import { FichaConsultora } from "@/components/representante/FichaConsultora";
 import { MaletasRepresentante } from "@/components/representante/MaletasRepresentante";
+import { DesfazerRep } from "@/components/representante/DesfazerRep";
 import { ExpedicaoRetornoRep } from "@/components/representante/ExpedicaoRetornoRep";
 import { AberturaConsultora } from "@/components/representante/AberturaConsultora";
 import { OperationalGlass } from "@/components/premium/OperationalGlass";
@@ -227,7 +228,7 @@ function Painel({ rep, aba, espelho, onSair, ir }: { rep: string; aba: Aba; espe
         </div>}
         {aba === "cobranca" && <Cobrancas rep={rep} espelho={espelho} />}
         {aba === "consultoras" && <Consultoras rep={rep} espelho={espelho} />}
-        {aba === "maletas" && <div className="space-y-6"><MaletasRepresentante rep={rep} /><ExpedicaoRetornoRep rep={rep} /><MaletasCarteira rep={rep} /></div>}
+        {aba === "maletas" && <div className="space-y-6"><MaletasRepresentante rep={rep} /><ExpedicaoRetornoRep rep={rep} /><MaletasCarteira rep={rep} /><DesfazerRep rep={rep} /></div>}
         {GRUPO_CAPTACAO.includes(aba) && (
           <div className="grid grid-cols-3 gap-1 rounded-full bg-muted p-1 text-sm" role="tablist" aria-label="Captação">
             {([["captacao", "Candidatas"], ["agenda", "Agenda"], ["abertura", "Abertura"]] as [Aba, string][]).map(([id, rot]) => (

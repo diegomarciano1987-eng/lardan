@@ -1,5 +1,14 @@
 # Roadmap
 
+## Pacote 0309/0310 do Diego (aplicado como 0310/0311) — 13/11/2026 12:43
+- [x] 1. Telas do financeiro que liam vazio (pago por outra forma, espelho de saldo, pedidos, cancelamentos).
+- [x] 2. Clientes Asaas 'pendente' com cadastro único → 'vinculado' (129 confirmadas; 83 duplicadas seguem 'pendente').
+- [ ] 2b. Aguarda Diego: 13 clientes com nome ou celular diferente entre Lardan e Asaas seguem 'pendente' (planilha clientes-asaas-confirmadas-0310.xlsx).
+- [x] 3. Asaas nunca cobra mais que o saldo do Lardan (Luciana 2026-027091: R$ 317,82 cancelada, R$ 117,82 emitida).
+- [x] 4. Aba Previsibilidade na Visão Geral (banco já ativo; tela precisa de publicação).
+- [ ] 5. Aguarda Diego: importar o SmallData (último 22/10) para a previsão de novembro ficar confiável.
+- [ ] 6. Publicar (aguarda aprovação do Diego).
+
 ## Pacote 0306 — Diego 13/11/2026 11:10
 - [x] 1. Jucélia (9061) MAL-00446: segunda maleta precisa passar pelo mesmo aceite da primeira (hoje aparece "Em uso" em trânsito sem aceite).
 - [x] 2. Cacilda da Luz: boleto de R$ 50 (venc. 01/10, já pago) foi abatido da parcela 2026-024033 — corrigir.

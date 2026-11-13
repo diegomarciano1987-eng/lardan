@@ -20676,6 +20676,7 @@ export type Database = {
         Args: { _account_id: string; _rows: Json }
         Returns: Json
       }
+      asaas_eu_posso: { Args: { _cap: string }; Returns: boolean }
       asaas_evento_processar: { Args: { _evento: string }; Returns: Json }
       asaas_evento_registrar: {
         Args: { _actor?: string; _origem: string; _payload: Json }
@@ -23861,6 +23862,7 @@ export type Database = {
       }
       preco_reajuste_resumo: { Args: never; Returns: Json }
       preco_regra_lardan: { Args: { _cents: number }; Returns: number }
+      previsibilidade_painel: { Args: never; Returns: Json }
       product_banho_salvar: {
         Args: {
           _alterar_valor?: boolean

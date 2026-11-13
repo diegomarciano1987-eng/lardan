@@ -1126,6 +1126,8 @@ export type Database = {
           enviado_em: string | null
           erro: string | null
           estado: string
+          forcado_por: string | null
+          forcar: boolean
           motivo: string | null
           party_id: string
           pedido_em: string
@@ -1142,6 +1144,8 @@ export type Database = {
           enviado_em?: string | null
           erro?: string | null
           estado?: string
+          forcado_por?: string | null
+          forcar?: boolean
           motivo?: string | null
           party_id: string
           pedido_em?: string
@@ -1158,6 +1162,8 @@ export type Database = {
           enviado_em?: string | null
           erro?: string | null
           estado?: string
+          forcado_por?: string | null
+          forcar?: boolean
           motivo?: string | null
           party_id?: string
           pedido_em?: string
@@ -20590,6 +20596,10 @@ export type Database = {
       asaas_cliente_espelho_situacao: {
         Args: { _party: string }
         Returns: Json
+      }
+      asaas_cliente_espelho_solicitar: {
+        Args: { _forcar?: boolean; _party: string }
+        Returns: number
       }
       asaas_cliente_posse: {
         Args: {

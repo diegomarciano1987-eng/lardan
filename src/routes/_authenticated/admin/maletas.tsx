@@ -52,7 +52,7 @@ async function buscarPracas() {
 async function buscarRepresentantes(termo: string) {
   const { lerColabEscopo } = await import("@/lib/colab-escopo");
   const escopo = await lerColabEscopo();
-  if (escopo.colaboradora) return escopo.representante ? [{ value: escopo.representante, label: escopo.nome ?? "Representante vinculado" }] : [];
+  if (escopo.carteira) return escopo.representante ? [{ value: escopo.representante, label: escopo.nome ?? "Representante vinculado" }] : [];
   const { data, error } = await supabase.rpc("list_parties", {
     _limit: 40,
     _offset: 0,
@@ -81,11 +81,11 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
   const [buscaR, setBuscaR] = React.useState("");
   const [deposito, setDeposito] = React.useState("");
   const [envio, setEnvio] = React.useState<TipoEnvio>("pessoal");
-  React.useEffect(() => { if (escopo.data?.colaboradora) setRepresentante(escopo.data.representante ?? ""); }, [escopo.data]);
+  React.useEffect(() => { if (escopo.data?.carteira) setRepresentante(escopo.data.representante ?? ""); }, [escopo.data]);
 
   const pracas = useQuery({ queryKey: ["remessas", "pracas"], queryFn: buscarPracas, enabled: aberto });
-  const reps = useQuery({ queryKey: ["remessas", "reps", escopo.data?.colaboradora, escopo.data?.representante, buscaR], queryFn: () => buscarRepresentantes(buscaR), enabled: aberto && escopo.isSuccess });
-  const representantes = escopo.data?.colaboradora ? (escopo.data.representante ? [{ value: escopo.data.representante, label: escopo.data.nome ?? "Representante vinculado" }] : []) : reps.data ?? [];
+  const reps = useQuery({ queryKey: ["remessas", "reps", escopo.data?.carteira, escopo.data?.representante, buscaR], queryFn: () => buscarRepresentantes(buscaR), enabled: aberto && escopo.isSuccess });
+  const representantes = escopo.data?.carteira ? (escopo.data.representante ? [{ value: escopo.data.representante, label: escopo.data.nome ?? "Representante vinculado" }] : []) : reps.data ?? [];
   const depositos = useQuery({ queryKey: ["remessas", "depositos"], queryFn: buscarDepositos, enabled: aberto });
   React.useEffect(() => {
     const principal = depositos.data?.find((d) => d.label.startsWith("DEP-01")) ?? (depositos.data?.length === 1 ? depositos.data[0] : undefined);
@@ -149,8 +149,8 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
         </label>
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Representante</span>
-          <SmartSelect value={escopo.data?.colaboradora ? escopo.data.representante ?? "" : representante} onChange={setRepresentante} options={representantes} {...(!escopo.data?.colaboradora ? { onSearch: setBuscaR } : {})}
-            loading={reps.isFetching} searchPlaceholder="Buscar representante" placeholder={escopo.data?.colaboradora ? "Sem representante vinculado" : "Entrega direta"} />
+          <SmartSelect value={escopo.data?.carteira ? escopo.data.representante ?? "" : representante} onChange={setRepresentante} options={representantes} {...(!escopo.data?.carteira ? { onSearch: setBuscaR } : {})}
+            loading={reps.isFetching} searchPlaceholder="Buscar representante" placeholder={escopo.data?.carteira ? "Sem representante vinculado" : "Entrega direta"} />
         </label>
         <label className="grid gap-1.5 text-sm">
           <span className="ledger-eyebrow">Depósito de origem</span>
@@ -195,6 +195,7 @@ function RemessasPage() {
   const caps = useCapabilities();
   const escopo = useColabEscopo();
   const colab = escopo.data?.colaboradora === true;
+  const carteira = escopo.data?.carteira === true;
   const podeMontar = caps.includes("kit.manage");
   const master = useAdminRoles().includes("master" as never);
   const navigate = useNavigate();
@@ -210,15 +211,15 @@ function RemessasPage() {
   const [remessaAberta, setRemessaAberta] = React.useState<number | null>(null);
   const [periodo, setPeriodo] = React.useState<DateRange | undefined>();
   const [campoData, setCampoData] = React.useState<"emissao" | "acerto">("emissao");
-  React.useEffect(() => { if (escopo.data?.colaboradora) setRep(escopo.data.representante ?? ""); }, [escopo.data]);
+  React.useEffect(() => { if (escopo.data?.carteira) setRep(escopo.data.representante ?? ""); }, [escopo.data]);
   React.useEffect(() => {
     const t = setTimeout(() => setBusca(texto), 300);
     return () => clearTimeout(t);
   }, [texto]);
 
   const pracas = useQuery({ queryKey: ["remessas", "pracas"], queryFn: buscarPracas });
-  const reps = useQuery({ queryKey: ["remessas", "reps", colab, escopo.data?.representante, buscaRep], queryFn: () => buscarRepresentantes(buscaRep), enabled: escopo.isSuccess });
-  const representantes = colab ? (escopo.data?.representante ? [{ value: escopo.data.representante, label: escopo.data.nome ?? "Representante vinculado" }] : []) : reps.data ?? [];
+  const reps = useQuery({ queryKey: ["remessas", "reps", carteira, escopo.data?.representante, buscaRep], queryFn: () => buscarRepresentantes(buscaRep), enabled: escopo.isSuccess });
+  const representantes = carteira ? (escopo.data?.representante ? [{ value: escopo.data.representante, label: escopo.data.nome ?? "Representante vinculado" }] : []) : reps.data ?? [];
   const filtros = {
     busca, status: situacao, praca, representante: rep,
     de: isoDia(periodo?.from), ate: isoDia(periodo?.to ?? periodo?.from), campoData,
@@ -232,7 +233,7 @@ function RemessasPage() {
   );
   const temFiltro = !!(texto || praca || rep || periodo || situacao !== "todas");
   function limpar() {
-    setTexto(""); setPraca(""); setRep(colab ? escopo.data?.representante ?? "" : ""); setPeriodo(undefined); setSituacao("todas");
+    setTexto(""); setPraca(""); setRep(carteira ? escopo.data?.representante ?? "" : ""); setPeriodo(undefined); setSituacao("todas");
   }
 
   async function abrirPorQr() {
@@ -313,9 +314,9 @@ function RemessasPage() {
           </label>
           <label className="grid gap-1.5 text-sm lg:col-span-4">
             <span className="ledger-eyebrow">Representante</span>
-            <SmartSelect value={colab ? escopo.data?.representante ?? "" : rep} onChange={setRep} {...(!colab ? { onSearch: setBuscaRep } : {})} loading={reps.isFetching}
-              options={[...(!colab ? [{ value: "", label: "Todos os representantes" }] : []), ...representantes]}
-              searchPlaceholder="Buscar representante" placeholder={colab ? "Representante vinculado" : "Todos os representantes"} />
+            <SmartSelect value={carteira ? escopo.data?.representante ?? "" : rep} onChange={setRep} {...(!carteira ? { onSearch: setBuscaRep } : {})} loading={reps.isFetching}
+              options={[...(!carteira ? [{ value: "", label: "Todos os representantes" }] : []), ...representantes]}
+              searchPlaceholder="Buscar representante" placeholder={carteira ? "Representante vinculado" : "Todos os representantes"} />
           </label>
           <label className="grid gap-1.5 text-sm lg:col-span-2">
             <span className="ledger-eyebrow">Período por</span>

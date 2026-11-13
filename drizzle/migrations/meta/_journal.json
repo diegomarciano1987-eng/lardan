@@ -2143,6 +2143,13 @@
       "when": 1794578046983,
       "tag": "0305_asaas_smalldata_substitui_0305",
       "breakpoints": true
+    },
+    {
+      "idx": 306,
+      "version": "7",
+      "when": 1794580163606,
+      "tag": "0306_pacote_0306_entrega_boleto_espelho",
+      "breakpoints": true
     }
   ]
 }

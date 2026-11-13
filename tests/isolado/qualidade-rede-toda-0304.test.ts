@@ -12,7 +12,8 @@ import { COLAB_MODULOS, capsDeEscolha } from "../../src/lib/colab-modulos";
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const base = 304000 + Math.floor(Math.random() * 90000);
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-let master: Conta, repDaniel: Conta, repMarcelo: Conta, tatiane: Conta, montagem: Conta, consultora: Conta;
+let master: Conta, repDaniel: Conta, repMarcelo: Conta, tatiane: Conta, montagem: Conta, consultora: Conta, consultora2: Conta;
+let maleta2 = "";
 let maleta = "", vA = "", deposito = "";
 
 async function ok<T>(conta: Conta, fn: string, args: Record<string, unknown>) {
@@ -38,6 +39,7 @@ beforeAll(async () => {
   tatiane = await criarConta({ nome: `q304-tatiane-${base}`, papeis: [], comParty: true });
   montagem = await criarConta({ nome: `q304-montagem-${base}`, papeis: [], comParty: true });
   consultora = await criarConta({ nome: `q304-cons-${base}`, papeis: ["consultora"], comParty: true });
+  consultora2 = await criarConta({ nome: `q304-cons2-${base}`, papeis: ["consultora"], comParty: true });
   await adm.unsafe(`insert into public.party_roles (party_id, role) values ($1,'representante'),($2,'representante'),($3,'colaborador'),($4,'colaborador') on conflict do nothing`,
     [repDaniel.partyId, repMarcelo.partyId, tatiane.partyId, montagem.partyId]);
   deposito = await criarDeposito(`q304-${marca}`);
@@ -47,12 +49,20 @@ beforeAll(async () => {
   await adm.unsafe(`insert into public.consultant_profiles (party_id, representative_party_id, praca_id) values ($1,$2,$3)
                     on conflict (party_id) do update set representative_party_id=excluded.representative_party_id, praca_id=excluded.praca_id`,
     [consultora.partyId, repMarcelo.partyId, praca]);
+  await adm.unsafe(`insert into public.consultant_profiles (party_id, representative_party_id, praca_id) values ($1,$2,$3)
+                    on conflict (party_id) do update set representative_party_id=excluded.representative_party_id, praca_id=excluded.praca_id`,
+    [consultora2.partyId, repMarcelo.partyId, praca]);
   const acerto = new Date(Date.now() + 40 * 864e5).toISOString().slice(0, 10);
   const rem = (await ok<{ id: string }>(master, "remessa_criar", { _praca: praca, _representante: repMarcelo.partyId, _deposito: deposito, _data_acerto: acerto })).id;
   maleta = (await ok<{ cycle_id: string }>(master, "remessa_abrir_maleta", { _remessa: rem, _consultora: consultora.partyId })).cycle_id;
   await ok(master, "kit_item_upsert", { _cycle: maleta, _variant: vA, _qty: 3 });
   await ok(master, "kit_conferir", { _cycle: maleta, _note: null });
+  maleta2 = (await ok<{ cycle_id: string }>(master, "remessa_abrir_maleta", { _remessa: rem, _consultora: consultora2.partyId })).cycle_id;
+  await ok(master, "kit_item_upsert", { _cycle: maleta2, _variant: vA, _qty: 2 });
+  await ok(master, "kit_conferir", { _cycle: maleta2, _note: null });
   await ok(master, "remessa_expedir_representante", { _remessa: rem });
+  await ok(repMarcelo, "kit_transfer_confirm", { _transfer: (await transitoPara(maleta2, repMarcelo.partyId!)).id, _payload: {} });
+  await ok(repMarcelo, "maleta_devolucao_pedir", { _cycle: maleta2, _motivo: "não ficou com a consultora" });
   await ok(repMarcelo, "kit_transfer_confirm", { _transfer: (await transitoPara(maleta, repMarcelo.partyId!)).id, _payload: {} });
   await ok(repMarcelo, "kit_transfer_forward", { _cycle: maleta, _payload: { note: "Entregue em mãos" } });
   await ok(consultora, "kit_transfer_confirm", { _transfer: (await transitoPara(maleta, consultora.partyId!)).id, _payload: {} });
@@ -75,6 +85,13 @@ describe("1. Tatiane (gerente da Qualidade) confere maleta de qualquer represent
     expect(r).toMatchObject({ motivo: "acerto", pecas: 3, precisa_conferir: true });
     const ev = await um<{ n: number }>(`select count(*)::int n from public.kit_events where cycle_id=$1 and kind='retorno.recebido' and actor_user_id=$2`, [maleta, tatiane.uid]);
     expect(ev.n).toBe(1);
+  });
+
+  test("confirma a chegada da maleta devolvida (não ficou com a consultora) — era aqui o 'Maleta fora da carteira'", async () => {
+    const r = await ok<{ motivo: string; pecas: number }>(tatiane, "retorno_receber", { _codigo: await codigo(maleta2) });
+    expect(r).toMatchObject({ motivo: "nao_ficou", pecas: 2 });
+    const c = await um<{ status: string }>(`select status::text from public.kit_cycles where id=$1`, [maleta2]);
+    expect(c.status).toBe("cancelada");
   });
 
   test("confere as peças do acerto e fecha a conferência", async () => {

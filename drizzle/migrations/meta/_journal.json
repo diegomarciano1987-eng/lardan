@@ -2164,6 +2164,13 @@
       "when": 1794580512009,
       "tag": "0308_espelho_cliente_proximos_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 309,
+      "version": "7",
+      "when": 1794583236502,
+      "tag": "0309_espelho_cliente_reconferencia_diaria",
+      "breakpoints": true
     }
   ]
 }

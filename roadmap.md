@@ -4,8 +4,10 @@
 - [x] 1. Jucélia (9061) MAL-00446: segunda maleta precisa passar pelo mesmo aceite da primeira (hoje aparece "Em uso" em trânsito sem aceite).
 - [x] 2. Cacilda da Luz: boleto de R$ 50 (venc. 01/10, já pago) foi abatido da parcela 2026-024033 — corrigir.
 - [x] 3. Cadastro da consultora = espelho perfeito no Asaas (celular, e-mail, endereço etc.).
-- [ ] 4. Decidir: 56 pontos "para conferir" do espelho (43 celulares que só o Asaas tem) — aguarda Larissa/Diego.
-- [ ] 5. Decidir: Lucimara (R$ 102,77 de 07/11 sem lançamento) e Maria Celina (R$ 299,22 na parcela de outro boleto) — mesmo erro da Cacilda, aguarda Diego.
+- [x] 4. Diego 13/11 12:08: nos 56 pontos vale o do Asaas (copiar celular/nome para o Lardan; avisos ficam); de hoje em diante só vale o Lardan (tirar as travas da primeira conferência, reconferência diária).
+- [x] 5a. Lucimara: corrigir igual à Cacilda (parcela 1 nova + conciliar 05/10 e 07/11 nas parcelas certas).
+- [ ] 5b. Maria Celina: NÃO é o erro da Cacilda (R$ 299,22 é a parcela 2 refeita após Pix de R$ 357,00 em 12/10 lançado em "Não identificado" 2026-025442) — aguarda Diego autorizar mover os R$ 357,00 para a parcela 2.
+- [ ] 6. Publicar (aviso de celular repetido e avisos desligados como informação; a regra "só vale o Lardan" e a reconferência diária já valem no banco).
 
 ## Pacote 0303 — decisões do Diego 12/11/2026 19:27
 - [ ] 1. Emitir agora a nota de remessa das maletas que estão na rua sem nota. (32 na fila; 10 travadas por endereço incompleto da consultora; MAL-00323 e MAL-00492 aguardam o Diego dizer se são teste)
@@ -55,7 +57,7 @@
 - [x] Sayla: recebimento +R$ 76,18 e baixa da antecipação −R$ 76,18 conferidos como par neutro; regra automática nova para os próximos cartões antecipados.
 - [x] Sugestão da Mesa para recebimento do Asaas usa a pessoa da cobrança (não mais a Fatima Marcelino).
 - [x] Listas enviadas: 179 títulos 7.1.7 para Administrativo e as 14 baixas refeitas.
-- [ ] Aguardando Diego/Daniel: Barbara Caroline (Pix Santander 27/10 de Paulo Sergio de Freitas quitou a parcela 1), Marcia (Pix Santander 28/10 de outro CPF quitou a parcela 1) e Lucimara (Pix de 05/10 da fatura da parcela 1 foi ligado à parcela 2).
+- [ ] Aguardando Diego/Daniel: Barbara Caroline (Pix Santander 27/10 de Paulo Sergio de Freitas quitou a parcela 1), Marcia (Pix Santander 28/10 de outro CPF quitou a parcela 1). (Lucimara resolvida no 0306 em 13/11.)
 - [ ] Aguardando Diego: Joyce (adiantamento ou devolução).
 - [ ] Paulo Cesar Baggio (pedido, Pix global de 12/11): entra sozinho depois da busca de cobranças das 6h.
 

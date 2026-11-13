@@ -1,6 +1,6 @@
-/** 0306 — espelho do cadastro Lardan → Asaas: regras puras (Diego 13/11/2026: Lardan manda, nada some do Asaas). */
+/** 0306/0309 — espelho do cadastro Lardan → Asaas: regras puras (Diego 13/11/2026: só vale o Lardan, nada some do Asaas). */
 import { describe, expect, test } from "bun:test";
-import { comparar, normalizar } from "../../src/lib/asaas/cliente-espelho";
+import { comparar, normalizar, pendentes, resumoEspelho } from "../../src/lib/asaas/cliente-espelho";
 
 const cacildaLardan = { name: "Cacilda da Luz", cpfCnpj: "06181892974", email: null, mobilePhone: "42999121933", phone: null,
   postalCode: "85200000", address: "Rua Guairaca", addressNumber: "1481", complement: null, province: "Maristela" };
@@ -25,18 +25,21 @@ describe("espelho do cadastro", () => {
     expect(r.enviar.cpfCnpj).toBeUndefined();
     expect(r.diferencas[0]).toMatchObject({ campo: "cpfCnpj", acao: "conferir" });
   });
-  test("primeira conferência: número que o Lardan não conhece fica para conferir; 'Usar o do Lardan' manda", () => {
-    const asaas = { ...cacildaAsaas, mobilePhone: "5543999553978" };
-    const r1 = comparar(cacildaLardan, asaas, { primeira: true, conhecidos: ["5542999121933"] });
-    expect(r1.enviar).toEqual({});
-    expect(r1.diferencas[0]).toMatchObject({ campo: "mobilePhone", acao: "conferir" });
-    expect(comparar(cacildaLardan, asaas, { primeira: true, forcar: true }).enviar).toEqual({ mobilePhone: "42999121933" });
-    // depois da primeira conferência, mudança no Lardan manda direto
-    expect(comparar(cacildaLardan, asaas, { primeira: false }).enviar).toEqual({ mobilePhone: "42999121933" });
+  test("só vale o Lardan: número que alguém pôs direto no Asaas é trocado pelo do Lardan", () => {
+    const r = comparar(cacildaLardan, { ...cacildaAsaas, mobilePhone: "5543999553978" });
+    expect(r.enviar).toEqual({ mobilePhone: "42999121933" });
+    expect(pendentes(r.diferencas)).toEqual([]);
   });
-  test("celular que também é de outra pessoa no Lardan não é enviado sem conferência", () => {
+  test("celular que também é de outra pessoa no Lardan vai mesmo assim, com aviso", () => {
     const r = comparar({ ...cacildaLardan, mobilePhone: "42988887777" }, cacildaAsaas, { celularCompartilhado: true });
+    expect(r.enviar).toEqual({ mobilePhone: "42988887777" });
+    expect(r.diferencas[0]?.nota).toContain("outra pessoa");
+  });
+  test("avisos desligados no Asaas ficam como estão e não contam como ponto para conferir", () => {
+    const r = comparar(cacildaLardan, { ...cacildaAsaas, notificationDisabled: true });
     expect(r.enviar).toEqual({});
+    expect(r.diferencas).toMatchObject([{ campo: "avisos", acao: "so_no_asaas" }]);
+    expect(resumoEspelho("igual", r.diferencas)).toEqual({ texto: "Asaas igual ao Lardan", tom: "ok" });
   });
   test("mudou o CEP: vai o endereço inteiro do Lardan junto (o Asaas não completa sozinho)", () => {
     const r = comparar({ ...cacildaLardan, postalCode: "85200001" }, cacildaAsaas);
@@ -46,10 +49,9 @@ describe("espelho do cadastro", () => {
     const r = comparar({ ...cacildaLardan, email: "sem-arroba", mobilePhone: "4299121933" }, { ...cacildaAsaas, mobilePhone: null });
     expect(r.enviar).toEqual({});
   });
-  test("nome com erro de digitação é corrigido; nome muito diferente na primeira vez fica para conferir", () => {
-    expect(comparar({ ...cacildaLardan, name: "Kauani Mendes da Costa" }, { ...cacildaAsaas, name: "KAWANY MENDES DA COSTA" }, { primeira: true }).enviar.name).toBe("Kauani Mendes da Costa");
-    const r = comparar({ ...cacildaLardan, name: "Lucilene Fonseca da Cunha" }, { ...cacildaAsaas, name: "LUCILENE INOCENCIA" }, { primeira: true });
-    expect(r.enviar.name).toBeUndefined();
+  test("nome diferente no Asaas é trocado pelo do Lardan", () => {
+    expect(comparar({ ...cacildaLardan, name: "Kauani Mendes da Costa" }, { ...cacildaAsaas, name: "KAWANY MENDES DA COSTA" }).enviar.name).toBe("Kauani Mendes da Costa");
+    expect(comparar({ ...cacildaLardan, name: "Lucilene Fonseca da Cunha" }, { ...cacildaAsaas, name: "LUCILENE INOCENCIA" }).enviar.name).toBe("Lucilene Fonseca da Cunha");
   });
   test("S/N e telefone com 55", () => {
     expect(normalizar("addressNumber", "s/n")).toBe("S/N");

@@ -1,6 +1,7 @@
 /**
  * 0306 — situação do cadastro da cliente no Asaas (espelho do Lardan): igual, atualizando ou com pontos para conferir.
- * Botões azuis Asaas: "Atualizar cadastro no Asaas" (confere agora) e "Usar o do Lardan" (manda também os pontos para conferir).
+ * Botão azul Asaas "Atualizar cadastro no Asaas" (confere agora). Desde 13/11/2026 só vale o Lardan: não há mais
+ * "Usar o do Lardan" — o que difere vai sozinho; só CPF diferente fica para uma pessoa.
  */
 import * as React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,12 +19,12 @@ type Situacao = {
   ultimas: { external_id: string; campos: Record<string, { de: string | null; para: string | null }>; origem: string; criado_em: string }[];
 };
 
-const ACAO: Record<string, string> = { so_no_asaas: "Só no Asaas", conferir: "Conferir", recusado: "Asaas recusou", enviar: "Atualizando" };
+const ACAO: Record<string, string> = { so_no_asaas: "Só no Asaas", conferir: "Conferir", recusado: "Asaas recusou", enviar: "Enviado do Lardan" };
 
 export function EspelhoAsaasCadastro({ partyId }: { partyId: string }) {
   const qc = useQueryClient();
   const fn = useServerFn(espelharClienteAgora);
-  const [rodando, setRodando] = React.useState<null | "conferir" | "forcar">(null);
+  const [rodando, setRodando] = React.useState(false);
   const q = useQuery({
     queryKey: ["cob", "espelho-asaas", partyId],
     queryFn: async () => {
@@ -41,14 +42,12 @@ export function EspelhoAsaasCadastro({ partyId }: { partyId: string }) {
   const estado = estados.find((e) => e === "erro") ?? estados.find((e) => e === "pendente" || e === "processando")
     ?? estados.find((e) => e === "diferente") ?? estados[0] ?? null;
   const r = resumoEspelho(estado, difs);
-  const temConferir = difs.some((x) => x.acao === "conferir" && x.campo !== "cpfCnpj" && x.campo !== "avisos");
   const ultimo = s.clientes.map((c) => c.conferido_em).filter(Boolean).sort().pop();
 
-  const rodar = async (forcar: boolean) => {
-    if (forcar && !confirm("Mandar para o Asaas o que está no cadastro do Lardan, também nos pontos marcados para conferir? O que estava no Asaas fica guardado no histórico.")) return;
-    setRodando(forcar ? "forcar" : "conferir");
+  const rodar = async () => {
+    setRodando(true);
     try {
-      const x = await fn({ data: { partyId, forcar } });
+      const x = await fn({ data: { partyId, forcar: false } });
       if (x.semCadastro) toast.error("Esta cliente não tem cadastro ligado no Asaas.");
       else if (x.erros) toast.error("O Asaas não respondeu agora. A rotina tenta de novo sozinha em alguns minutos.");
       else if (x.atualizadas) toast.success("Cadastro atualizado no Asaas e conferido de novo.");
@@ -57,7 +56,7 @@ export function EspelhoAsaasCadastro({ partyId }: { partyId: string }) {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível atualizar no Asaas.");
     } finally {
-      setRodando(null);
+      setRodando(false);
       void qc.invalidateQueries({ queryKey: ["cob", "espelho-asaas", partyId] });
     }
   };
@@ -72,16 +71,10 @@ export function EspelhoAsaasCadastro({ partyId }: { partyId: string }) {
           {ultimo && <span className="text-xs text-muted-foreground">· conferido em {dataBR(ultimo.slice(0, 10))}</span>}
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => rodar(false)} disabled={!!rodando}
+          <button type="button" onClick={() => rodar()} disabled={rodando}
             className="inline-flex h-9 items-center gap-2 rounded-lg bg-asaas px-3 text-xs font-semibold text-asaas-foreground disabled:opacity-60">
-            <RefreshCw aria-hidden className={`size-3.5 ${rodando === "conferir" ? "animate-spin" : ""}`} />{rodando === "conferir" ? "Conferindo…" : "Atualizar cadastro no Asaas"}
+            <RefreshCw aria-hidden className={`size-3.5 ${rodando ? "animate-spin" : ""}`} />{rodando ? "Conferindo…" : "Atualizar cadastro no Asaas"}
           </button>
-          {temConferir && (
-            <button type="button" onClick={() => rodar(true)} disabled={!!rodando}
-              className="inline-flex h-9 items-center gap-2 rounded-lg border border-asaas px-3 text-xs font-semibold text-asaas disabled:opacity-60">
-              {rodando === "forcar" ? "Enviando…" : "Usar o do Lardan"}
-            </button>
-          )}
         </div>
       </div>
       {difs.filter((x) => x.acao !== "enviar" || estado === "erro").length > 0 && (

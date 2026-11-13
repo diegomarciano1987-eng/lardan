@@ -1,7 +1,7 @@
 /**
  * 0306 — espelho do cadastro Lardan → cliente Asaas (regras puras, sem rede).
  * Lardan manda: campo preenchido no Lardan e diferente no Asaas é enviado.
- * Nunca apaga: o que só o Asaas tem fica lá e aparece como diferença para conferir.
+ * Nunca apaga: o que só o Asaas tem fica lá e aparece como informação ("Só no Asaas").
  * CPF diferente nunca é trocado sozinho (identidade): fica para uma pessoa decidir.
  */
 export const CAMPOS = ["name", "cpfCnpj", "email", "mobilePhone", "phone", "postalCode", "address", "addressNumber", "complement", "province"] as const;
@@ -74,20 +74,21 @@ export function semelhanca(a: string, b: string): number {
 }
 
 export interface OpcoesComparar {
-  /** primeira conferência de um cadastro antigo: não sobrescreve contato que o Lardan não conhece (pode ter sido corrigido no Asaas) */
-  primeira?: boolean;
-  /** todos os números (só dígitos) que o Lardan tem para a pessoa */
-  conhecidos?: string[];
-  /** o celular do Lardan também está no cadastro de outra pessoa */
+  /** o celular do Lardan também está no cadastro de outra pessoa: vai mesmo assim (só vale o Lardan), com aviso na tela */
   celularCompartilhado?: boolean;
-  /** pedido explícito de uma pessoa ("Usar o do Lardan"): manda mesmo nos casos acima */
-  forcar?: boolean;
 }
 
+/** Diferenças que pedem uma pessoa (o resto é informativo ou já foi enviado). */
+export const pendentes = (difs: Diferenca[]) => difs.filter((d) => d.acao === "conferir" || d.acao === "recusado");
+
+/**
+ * Diego 13/11/2026: "de hoje em diante só vale o Lardan". Campo preenchido e válido no Lardan sempre vai para o Asaas
+ * (inclusive o que alguém mudou direto lá). Exceções: CPF diferente (identidade) nunca troca sozinho; o que o Lardan
+ * não tem nunca é apagado no Asaas; avisos desligados no Asaas ficam como estão (o Lardan não guarda essa opção).
+ */
 export function comparar(lardan: DadosCliente, asaas: (DadosCliente & { notificationDisabled?: boolean | null }) | null, o: OpcoesComparar = {}) {
   const enviar: DadosCliente = {};
   const diferencas: Diferenca[] = [];
-  const conhecidos = new Set((o.conhecidos ?? []).map((x) => normalizar("mobilePhone", x)));
   for (const campo of CAMPOS) {
     const l = (lardan[campo] ?? "").trim() || null;
     const a = (asaas?.[campo] ?? "")?.toString().trim() || null;
@@ -100,26 +101,9 @@ export function comparar(lardan: DadosCliente, asaas: (DadosCliente & { notifica
       diferencas.push({ campo, lardan: l, asaas: a, acao: "conferir", nota: "CPF diferente: não é trocado sozinho." });
       continue;
     }
-    if (!o.forcar) {
-      if (campo === "mobilePhone" && o.celularCompartilhado) {
-        diferencas.push({ campo, lardan: l, asaas: a, acao: "conferir", nota: "Este celular também está no cadastro de outra pessoa no Lardan." });
-        continue;
-      }
-      if (o.primeira && a && (campo === "mobilePhone" || campo === "phone") && !conhecidos.has(normalizar(campo, a))) {
-        diferencas.push({ campo, lardan: l, asaas: a, acao: "conferir", nota: "O Asaas tem um número que o Lardan não conhece: confira com a cliente." });
-        continue;
-      }
-      if (o.primeira && a && campo === "email") {
-        diferencas.push({ campo, lardan: l, asaas: a, acao: "conferir", nota: "O Asaas tem outro e-mail: confira com a cliente." });
-        continue;
-      }
-      if (o.primeira && a && campo === "name" && semelhanca(normalizar("name", l), normalizar("name", a)) < 0.85) {
-        diferencas.push({ campo, lardan: l, asaas: a, acao: "conferir", nota: "Nome bem diferente no Asaas: confira se é a mesma pessoa." });
-        continue;
-      }
-    }
     enviar[campo] = paraEnvio(campo, l);
-    diferencas.push({ campo, lardan: l, asaas: a, acao: "enviar" });
+    diferencas.push({ campo, lardan: l, asaas: a, acao: "enviar",
+      ...(campo === "mobilePhone" && o.celularCompartilhado ? { nota: "Este celular também está no cadastro de outra pessoa no Lardan." } : {}) });
   }
   // endereço vai sempre junto: o Asaas completa rua/bairro pelo CEP e trocaria o resto sozinho
   const ENDERECO: Campo[] = ["postalCode", "address", "addressNumber", "complement", "province"];
@@ -130,14 +114,14 @@ export function comparar(lardan: DadosCliente, asaas: (DadosCliente & { notifica
     }
   }
   if (asaas?.notificationDisabled === true) {
-    diferencas.push({ campo: "avisos", lardan: null, asaas: "desligados", acao: "conferir", nota: "Os avisos desta cliente estão desligados no Asaas." });
+    diferencas.push({ campo: "avisos", lardan: null, asaas: "desligados", acao: "so_no_asaas", nota: "Os avisos desta cliente estão desligados no Asaas (decisão do Diego em 13/11: fica como está no Asaas)." });
   }
   return { enviar, diferencas };
 }
 
 /** Texto curto para a tela. */
 export function resumoEspelho(estado: string | null | undefined, difs: Diferenca[]): { texto: string; tom: "ok" | "aviso" | "espera" | "erro" } {
-  const pend = difs.filter((d) => d.acao !== "enviar");
+  const pend = pendentes(difs);
   switch (estado) {
     case "igual": case "atualizado":
       return pend.length ? { texto: `Asaas igual ao Lardan, com ${pend.length} ponto(s) para conferir`, tom: "aviso" } : { texto: "Asaas igual ao Lardan", tom: "ok" };

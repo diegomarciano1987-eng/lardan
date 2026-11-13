@@ -37,6 +37,8 @@ export function TransferirForm({ cycleId, pracaId, onFeito }: { cycleId: string;
   const [motivo, setMotivo] = React.useState("");
   const [confirmar, setConfirmar] = React.useState(false);
   const [segunda, setSegunda] = React.useState(false);
+  /** 0306: na rua, onde a maleta está agora (obrigatório escolher) */
+  const [ondeEsta, setOndeEsta] = React.useState<"" | "com_ela" | "com_rep">("");
 
   const previa = useQuery({
     queryKey: ["maletas", "transferir-previa", cycleId],
@@ -64,12 +66,15 @@ export function TransferirForm({ cycleId, pracaId, onFeito }: { cycleId: string;
     mutationFn: () => {
       if (!destino) throw new Error("Escolha para quem vai a maleta.");
       if (motivo.trim().length < 5) throw new Error("Escreva o motivo (mínimo 5 letras).");
-      return transferirFn({ data: { cycleId, modo: "equipe", consultoraId: destino === ABERTURA ? null : destino, motivo: motivo.trim(), segunda: segunda && destino !== ABERTURA } });
+      if (perguntarOnde && !ondeEsta) throw new Error("Diga onde a maleta está agora.");
+      return transferirFn({ data: { cycleId, modo: "equipe", consultoraId: destino === ABERTURA ? null : destino, motivo: motivo.trim(),
+        segunda: segunda && destino !== ABERTURA, jaComEla: perguntarOnde && ondeEsta === "com_ela" } });
     },
     onSuccess: (r) => {
       toast.success(r.consultora_nova ? `Maleta transferida para ${r.consultora_nova}.` : `Maleta virou ABERTURA ${String(r.abertura_numero ?? "").padStart(2, "0")} com o representante.`);
       for (const aviso of avisosTransferencia(r)) toast.info(aviso, { duration: 10000 });
-      setConfirmar(false); setDestino(undefined); setMotivo(""); setSegunda(false);
+      if (r.entrega_registrada) toast.info(`Entrega registrada: o app de ${r.consultora_nova ?? "dela"} pede para confirmar o recebimento e aceitar as peças, como na primeira maleta.`, { duration: 12000 });
+      setConfirmar(false); setDestino(undefined); setMotivo(""); setSegunda(false); setOndeEsta("");
       void qc.invalidateQueries({ queryKey: ["maletas"] });
       void qc.invalidateQueries({ queryKey: ["remessas"] });
       onFeito?.();

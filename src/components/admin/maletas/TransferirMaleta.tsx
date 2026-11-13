@@ -96,7 +96,8 @@ export function TransferirForm({ cycleId, pracaId, onFeito }: { cycleId: string;
   if (p.promissoria === "assinada") efeitos.push(`A promissória assinada por ${p.consultora} fica guardada como prova, marcada como substituída (nunca é cobrada), e a nova vai para quem ficar com a maleta.`);
   if (p.nota_numero) efeitos.push(`A nota fiscal nº ${p.nota_numero} está em nome de ${p.consultora}: vira pendência fiscal nesta remessa (devolução da nota antiga + nota nova).`);
   else if (p.consultora) efeitos.push("Ainda não tem nota fiscal: a nota sai direto no nome de quem ficar com a maleta.");
-  if (["transito", "recebida"].includes(p.status) && p.representante) efeitos.push(`Quem entrega em mãos continua sendo ${p.representante}.`);
+  if (perguntarOnde && ondeEsta === "com_ela") efeitos.push(`Fica registrado que ${p.representante} já entregou: o app dela pede o recebimento e o aceite peça a peça.`);
+  else if (["transito", "recebida"].includes(p.status) && p.representante) efeitos.push(`Quem entrega em mãos continua sendo ${p.representante}.`);
 
   return (
     <div className="space-y-4" data-transferir-maleta="">

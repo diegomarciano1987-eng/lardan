@@ -5,7 +5,7 @@
  */
 import type { BancoAsaas } from "./banco";
 import { RecusadoPeloProvedor } from "./contrato";
-import { CAMPOS, comparar, normalizar, type Campo, type DadosCliente, type Diferenca } from "./cliente-espelho";
+import { CAMPOS, comparar, normalizar, pendentes, type Campo, type DadosCliente, type Diferenca } from "./cliente-espelho";
 
 type Item = {
   customer_id: string; party_id: string; account_id: string; external_id: string;
@@ -50,10 +50,11 @@ async function umCliente(d: DepsCliente, worker: string, it: Item, transporte: T
     const antesRaw = await transporte.lerClienteCompleto(it.external_id);
     if (!antesRaw || antesRaw["deleted"] === true) return fim("excluido_no_asaas", []);
     const antes = paraDados(antesRaw);
-    const opc = { primeira: it.primeira, conhecidos: it.conhecidos ?? [], celularCompartilhado: it.celular_compartilhado, forcar: it.forcar };
+    // só vale o Lardan (Diego 13/11/2026): sem travas de primeira conferência; celular repetido vai com aviso
+    const opc = { celularCompartilhado: it.celular_compartilhado };
     const c1 = comparar(it.lardan, antes, opc);
     const pedidos = Object.entries(c1.enviar) as [Campo, string][];
-    if (!pedidos.length) return fim(c1.diferencas.length ? "diferente" : "igual", c1.diferencas);
+    if (!pedidos.length) return fim(pendentes(c1.diferencas).length ? "diferente" : "igual", c1.diferencas);
 
     const recusados: Diferenca[] = [];
     try {
@@ -79,10 +80,10 @@ async function umCliente(d: DepsCliente, worker: string, it: Item, transporte: T
       if (normalizar(k, depois[k]) === normalizar(k, v)) enviados[k] = { de: antes[k] ?? null, para: depois[k] ?? null };
       else naoConfirmados.push({ campo: k, lardan: v, asaas: depois[k] ?? null, acao: "enviar", nota: "O Asaas não confirmou a alteração." });
     }
-    const c2 = comparar(it.lardan, depois, { ...opc, forcar: false });
+    const c2 = comparar(it.lardan, depois, opc);
     const difs = [...c2.diferencas.filter((x) => x.acao !== "enviar"), ...recusados, ...naoConfirmados];
     if (naoConfirmados.length) return fim("erro", difs, enviados, `O Asaas não confirmou: ${naoConfirmados.map((x) => x.campo).join(", ")}`);
-    return fim(difs.length ? "diferente" : "atualizado", difs, enviados);
+    return fim(pendentes(difs).length ? "diferente" : "atualizado", difs, enviados);
   } catch (e) {
     return fim("erro", [], {}, msg(e));
   }

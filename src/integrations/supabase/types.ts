@@ -23862,6 +23862,7 @@ export type Database = {
       }
       preco_reajuste_resumo: { Args: never; Returns: Json }
       preco_regra_lardan: { Args: { _cents: number }; Returns: number }
+      previsibilidade_painel: { Args: never; Returns: Json }
       product_banho_salvar: {
         Args: {
           _alterar_valor?: boolean

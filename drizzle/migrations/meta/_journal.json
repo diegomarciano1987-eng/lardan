@@ -2171,6 +2171,13 @@
       "when": 1794583236502,
       "tag": "0309_espelho_cliente_reconferencia_diaria",
       "breakpoints": true
+    },
+    {
+      "idx": 310,
+      "version": "7",
+      "when": 1794585095376,
+      "tag": "0310_asaas_espelho_perfeito_0310",
+      "breakpoints": true
     }
   ]
 }

@@ -20676,6 +20676,7 @@ export type Database = {
         Args: { _account_id: string; _rows: Json }
         Returns: Json
       }
+      asaas_eu_posso: { Args: { _cap: string }; Returns: boolean }
       asaas_evento_processar: { Args: { _evento: string }; Returns: Json }
       asaas_evento_registrar: {
         Args: { _actor?: string; _origem: string; _payload: Json }

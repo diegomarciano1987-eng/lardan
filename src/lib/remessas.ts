@@ -78,6 +78,14 @@ export const criarRemessa = (p: {
 export const abrirMaletaNaRemessa = (remessa: string, consultora: string) =>
   rpc<{ cycle_id: string; repetida?: boolean }>("remessa_abrir_maleta", { _remessa: remessa, _consultora: consultora });
 
+/** 0322: segunda maleta para quem já tem maleta nesta remessa (motivo obrigatório, fica na auditoria). */
+export const abrirSegundaMaletaNaRemessa = (remessa: string, consultora: string, motivo: string) =>
+  rpc<{ cycle_id: string; repetida?: boolean; primeira_maleta?: string }>("remessa_abrir_segunda_maleta", {
+    _remessa: remessa,
+    _consultora: consultora,
+    _motivo: motivo,
+  });
+
 export const consultorasDaPraca = async (praca: string, termo: string) => {
   // 0224: busca por nome (por partes), código atual/antigo/legado ou CPF.
   const linhas = await rpc<{ party_id: string; display_name: string; code: string | null; cpf: string | null }[]>("praca_consultoras_busca", {

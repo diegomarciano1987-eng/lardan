@@ -121,6 +121,14 @@ export function comparar(lardan: DadosCliente, asaas: (DadosCliente & { notifica
     enviar[campo] = paraEnvio(campo, l);
     diferencas.push({ campo, lardan: l, asaas: a, acao: "enviar" });
   }
+  // endereço vai sempre junto: o Asaas completa rua/bairro pelo CEP e trocaria o resto sozinho
+  const ENDERECO: Campo[] = ["postalCode", "address", "addressNumber", "complement", "province"];
+  if (ENDERECO.some((k) => k in enviar)) {
+    for (const k of ENDERECO) {
+      const l = (lardan[k] ?? "").trim();
+      if (!(k in enviar) && l && valido(k, l)) enviar[k] = paraEnvio(k, l);
+    }
+  }
   if (asaas?.notificationDisabled === true) {
     diferencas.push({ campo: "avisos", lardan: null, asaas: "desligados", acao: "conferir", nota: "Os avisos desta cliente estão desligados no Asaas." });
   }

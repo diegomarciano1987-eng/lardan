@@ -272,6 +272,16 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     });
   }
 
+  /** 0306: cadastro completo da cliente no Asaas (somente leitura; 404 = null). */
+  async lerClienteCompleto(id: string): Promise<Json | null> {
+    return this.enviar<Json>("GET", `/customers/${encodeURIComponent(id)}`, {}, true);
+  }
+
+  /** 0306: espelho do cadastro — atualiza só os campos pedidos (o Lardan manda). */
+  async atualizarClienteCampos(id: string, campos: Record<string, string>): Promise<void> {
+    await this.enviar<Json>("POST", `/customers/${encodeURIComponent(id)}`, { corpo: campos });
+  }
+
   async listarCobrancas(f: FiltroCobrancas) {
     const lim = Math.min(Math.max(f.limit, 1), 100);
     // A API não expressa "janela OU em aberto anterior": sem dueDate[ge] e filtro local.

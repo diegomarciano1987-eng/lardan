@@ -356,11 +356,25 @@ export class TransporteHttpAsaas implements TransporteAsaas {
         externalReference: n.externalReference,
       },
     });
+    let criada: CobrancaExterna;
     try {
-      return traduzirCobranca(c!);
+      criada = traduzirCobranca(c!);
     } catch {
       throw new RespostaPerdida("Resposta de criação sem identificador legível.");
     }
+    // 0325: o Asaas não disparava o aviso da cobrança criada pela API; pede o envio (WhatsApp/SMS/e-mail) na hora.
+    // Falha aqui nunca desfaz a cobrança (ela já existe); fica só registrada no log.
+    try {
+      await this.enviar<Json>("POST", `/payments/${encodeURIComponent(criada.id)}/resendNotification`, {});
+    } catch (e) {
+      console.warn("[asaas] aviso da cobrança não enviado", criada.id, e instanceof Error ? e.message : e);
+    }
+    return criada;
+  }
+
+  /** 0325: reenviar o aviso do Asaas (WhatsApp/SMS/e-mail) de uma cobrança aberta. */
+  async reenviarAviso(id: string): Promise<void> {
+    await this.enviar<Json>("POST", `/payments/${encodeURIComponent(id)}/resendNotification`, {});
   }
 
   async obterLinkFatura(id: string) {

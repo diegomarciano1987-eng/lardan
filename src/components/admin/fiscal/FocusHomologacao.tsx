@@ -19,6 +19,7 @@ import {
   focusEmitirTeste,
   focusEnviarEscritorio,
   focusEstado,
+  focusInutilizar,
   focusRegistrarAviso,
 } from "@/lib/focus/focus.functions";
 import { valorFiscalUnitario, type OperacaoNfe } from "@/lib/focus/nfe";
@@ -402,6 +403,7 @@ export function FocusHomologacao() {
             {envios.isError && <ErrorState message={msgErro(envios.error)} onRetry={() => void envios.refetch()} />}
             {envios.data?.length === 0 && <p className="text-ledger-muted">Nenhuma nota de teste ainda.</p>}
             <RecusasIncertas pode={s.podeEmitir} consultar={(ref) => consultar({ data: { ref } })} onFeito={recarregar} />
+            <InutilizarNumeros pode={s.podeEmitir} onFeito={recarregar} />
             <ul className="space-y-3">
               {(envios.data ?? []).map((e) => {
                 const st = STATUS[e.status] ?? { rotulo: e.status, tom: "neutral" as StatusTone };
@@ -541,6 +543,148 @@ function RecusasIncertas({ pode, consultar, onFeito }: { pode: boolean; consulta
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+/** Junta números seguidos da mesma série em faixas (179, 180, 181 → 179–181). */
+function faixas(nums: { serie: string; numero: number }[]) {
+  const out: { serie: string; de: number; ate: number }[] = [];
+  for (const n of nums) {
+    const u = out[out.length - 1];
+    if (u && u.serie === n.serie && n.numero === u.ate + 1 && n.numero - u.de < 20) u.ate = n.numero;
+    else out.push({ serie: n.serie, de: n.numero, ate: n.numero });
+  }
+  return out;
+}
+
+const RESULTADO_INUT: Record<string, string> = {
+  inutilizada: "inutilizada na SEFAZ",
+  ja_inutilizada: "já estava inutilizada",
+  numero_usado: "RECUSADA: a SEFAZ diz que o número já foi usado",
+  recusada: "recusada",
+  sem_resposta: "sem resposta da Focus (pode pedir de novo)",
+};
+
+/**
+ * 0318: números pulados na série de produção (raio-x F11) com o botão "Inutilizar na SEFAZ".
+ * Marque as recusas incertas que correspondem a esses números: com a SEFAZ confirmando, elas ficam como "não foi autorizada".
+ */
+function InutilizarNumeros({ pode, onFeito }: { pode: boolean; onFeito: () => void }) {
+  const qc = useQueryClient();
+  const inutilizar = useServerFn(focusInutilizar);
+  const pulados = useQuery({
+    queryKey: ["fiscal", "numeros-pulados"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("fiscal_numeros_pulados" as never);
+      if (error) throw error;
+      return ((data ?? []) as unknown as { serie: string; numero: number }[]).map((x) => ({ serie: String(x.serie), numero: Number(x.numero) }));
+    },
+  });
+  const historico = useQuery({
+    queryKey: ["fiscal", "inutilizacoes"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("fiscal_inutilizacoes_lista" as never);
+      if (error) throw error;
+      return (data ?? []) as unknown as { id: string; ambiente: string; serie: string; de: number; ate: number; ok: boolean; resultado: string;
+        status_sefaz: string | null; mensagem: string | null; protocolo: string | null; quando: string }[];
+    },
+  });
+  const recusas = useQuery({
+    queryKey: ["fiscal", "recusas-incertas"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("fiscal_recusas_incertas_pendentes" as never);
+      if (error) throw error;
+      return (data ?? []) as unknown as { ref: string; created_at: string; consultora: string | null; maleta: string | null; outra_nota: string | null }[];
+    },
+  });
+  const [aberta, setAberta] = React.useState<string | null>(null);
+  const [just, setJust] = React.useState("Numeracao nao utilizada: nota rejeitada pela SEFAZ (635) e reemitida com outro numero.");
+  const [refs, setRefs] = React.useState<string[]>([]);
+  const m = useMutation({
+    mutationFn: (f: { serie: string; de: number; ate: number }) =>
+      inutilizar({ data: { serie: f.serie, numeroInicial: f.de, numeroFinal: f.ate, justificativa: just, refs } }),
+    onSuccess: (r) => {
+      if (r.ok) toast.success(`Números ${RESULTADO_INUT[r.resultado] ?? r.resultado}${r.protocolo ? ` (protocolo ${r.protocolo})` : ""}. ${r.recusas_baixadas} recusa(s) conferida(s).`);
+      else toast.error(`${RESULTADO_INUT[r.resultado] ?? r.resultado}: ${r.mensagem ?? ""}`, { duration: 20000 });
+      setAberta(null);
+      setRefs([]);
+      void qc.invalidateQueries({ queryKey: ["fiscal"] });
+      onFeito();
+    },
+    onError: (x) => toast.error((x as Error).message),
+  });
+  const lista = faixas(pulados.data ?? []);
+  const hist = historico.data ?? [];
+  if (!lista.length && !hist.length) return null;
+  return (
+    <section aria-label="Números pulados na série" className="mb-4 rounded-xl border border-line-soft p-3">
+      {lista.length > 0 && (
+        <>
+          <p className="font-semibold text-ledger-text">Números pulados na série de produção</p>
+          <p className="text-xs text-ledger-muted">
+            Números que nunca viraram nota no Lardan. Confira na Focus (Painel API › Requisições › Número) e inutilize na SEFAZ.
+            Se a SEFAZ responder que o número já foi usado, a nota original existe: cancele a nota nova da mesma maleta dentro de 24 h.
+          </p>
+          <ul className="mt-2 space-y-2">
+            {lista.map((f) => {
+              const k = `${f.serie}:${f.de}`;
+              const rotulo = `série ${f.serie} nº ${f.de}${f.ate > f.de ? `–${f.ate}` : ""}`;
+              return (
+                <li key={k} className="rounded-lg border border-line-soft p-3 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-ledger-text">{rotulo}</span>
+                    {pode && aberta !== k && (
+                      <button type="button" className="admin-btn" onClick={() => { setAberta(k); setRefs([]); }}>Inutilizar na SEFAZ</button>
+                    )}
+                  </div>
+                  {pode && aberta === k && (
+                    <div className="mt-2 space-y-2 text-xs">
+                      <label className="flex flex-col gap-1">Justificativa (15 a 255 letras, vai para a SEFAZ)
+                        <input className="admin-input" value={just} maxLength={255} onChange={(ev) => setJust(ev.target.value)} />
+                      </label>
+                      {(recusas.data?.length ?? 0) > 0 && (
+                        <fieldset className="space-y-1">
+                          <legend className="text-ledger-muted">Recusas que viraram estes números (ficam como "não foi autorizada" se a SEFAZ confirmar)</legend>
+                          {recusas.data!.map((r) => (
+                            <label key={r.ref} className="flex items-center gap-2">
+                              <input type="checkbox" checked={refs.includes(r.ref)}
+                                onChange={(ev) => setRefs((a) => (ev.target.checked ? [...a, r.ref] : a.filter((x) => x !== r.ref)))} />
+                              {r.maleta ?? "Maleta"} · {r.consultora ?? "—"} · {new Date(r.created_at).toLocaleString("pt-BR")}
+                              {r.outra_nota ? ` · já tem a nota nº ${r.outra_nota}` : ""}
+                            </label>
+                          ))}
+                        </fieldset>
+                      )}
+                      <div className="flex gap-2">
+                        <button type="button" className="admin-btn admin-btn-primary" disabled={m.isPending || just.trim().length < 15}
+                          onClick={() => m.mutate(f)}>
+                          {m.isPending ? "Enviando…" : `Confirmar inutilização de ${rotulo}`}
+                        </button>
+                        <button type="button" className="admin-btn" disabled={m.isPending} onClick={() => setAberta(null)}>Voltar</button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+      {hist.length > 0 && (
+        <div className="mt-3">
+          <p className="ledger-eyebrow">Inutilizações pedidas</p>
+          <ul className="mt-1 space-y-1 text-xs">
+            {hist.slice(0, 10).map((h) => (
+              <li key={h.id} className={cn("text-ledger-muted", h.resultado === "numero_usado" && "font-semibold text-destructive")}>
+                {new Date(h.quando).toLocaleString("pt-BR")} · série {h.serie} nº {h.de}{h.ate > h.de ? `–${h.ate}` : ""} ·{" "}
+                {RESULTADO_INUT[h.resultado] ?? h.resultado}{h.status_sefaz ? ` (SEFAZ ${h.status_sefaz})` : ""}
+                {h.protocolo ? ` · protocolo ${h.protocolo}` : ""}{!h.ok && h.mensagem ? ` · ${h.mensagem}` : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }

@@ -324,6 +324,47 @@ export const focusCancelar = createServerFn({ method: "POST" })
     return { ref: data.ref, status: salvo.status, mensagem: r.dados?.mensagem_sefaz ?? r.dados?.mensagem ?? null };
   });
 
+/**
+ * 0318: inutiliza números de NF-e de PRODUÇÃO que ficaram para trás na série (ex.: recusa 635 que nunca virou nota).
+ * Só quem emite (Master). O banco confere a faixa antes (passada, sem nota registrada, ≤ 20 números, não inutilizada)
+ * e guarda a resposta; se a SEFAZ confirmou, as recusas incertas indicadas ganham a conferência "não foi autorizada".
+ */
+export const focusInutilizar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { serie: string; numeroInicial: number; numeroFinal: number; justificativa: string; refs?: string[] }) => {
+    const serie = String(d?.serie ?? "").trim();
+    if (!/^[0-9]{1,3}$/.test(serie)) throw new Error("Série inválida.");
+    const ini = Number(d?.numeroInicial);
+    const fim = Number(d?.numeroFinal);
+    if (!Number.isInteger(ini) || !Number.isInteger(fim) || ini < 1 || fim < ini) throw new Error("Faixa inválida.");
+    if (fim - ini >= 20) throw new Error("No máximo 20 números por pedido.");
+    const j = (d?.justificativa ?? "").trim();
+    if (j.length < 15 || j.length > 255) throw new Error("A justificativa precisa ter de 15 a 255 caracteres.");
+    const refs = (d?.refs ?? []).filter((r) => /^[A-Za-z0-9_-]{6,60}$/.test(r)).slice(0, 20);
+    return { serie, numeroInicial: ini, numeroFinal: fim, justificativa: j, refs };
+  })
+  .handler(async ({ data, context }) => {
+    const c = context as unknown as Ctx;
+    await exigir(c, "emitir");
+    const ambiente = "producao" as const;
+    const motivo = await rpcServidor<string | null>("fiscal_inutilizacao_faixa_motivo", {
+      _ambiente: ambiente, _serie: data.serie, _ini: data.numeroInicial, _fim: data.numeroFinal,
+    });
+    if (motivo) throw new Error(motivo);
+    const em = await emitente(c);
+    const { inutilizarNfe } = await import("./api.server");
+    const r = await inutilizarNfe(ambiente, {
+      cnpj: em.cnpj, serie: data.serie, numero_inicial: data.numeroInicial, numero_final: data.numeroFinal, justificativa: data.justificativa,
+    });
+    return rpcServidor<{ ok: boolean; resultado: string; status_sefaz: string | null; mensagem: string | null; protocolo: string | null; recusas_baixadas: number }>(
+      "fiscal_inutilizacao_registrar",
+      {
+        _ambiente: ambiente, _serie: data.serie, _ini: data.numeroInicial, _fim: data.numeroFinal, _justificativa: data.justificativa,
+        _resposta: r.dados ?? {}, _refs: data.refs, _usuario: c.userId,
+      },
+    );
+  });
+
 /** Cadastra na Focus o aviso automático (webhook) de NF-e. */
 export const focusRegistrarAviso = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

@@ -162,6 +162,48 @@ export function cancelarNfe(ambiente: AmbienteNfe, ref: string, justificativa: s
   return chamar<RespostaNfe>(ambiente, "DELETE", `/nfe/${encodeURIComponent(ref)}`, { justificativa: j });
 }
 
+export interface RespostaInutilizacao {
+  status?: string;
+  status_sefaz?: string;
+  mensagem_sefaz?: string;
+  protocolo?: string;
+  caminho_xml?: string;
+  serie?: string;
+  numero_inicial?: string | number;
+  numero_final?: string | number;
+  codigo?: string;
+  mensagem?: string;
+  erros?: { codigo?: string; campo?: string; mensagem?: string }[];
+}
+
+/**
+ * 0318: inutiliza uma faixa de numeração NF-e (POST /v2/nfe/inutilizacao). Síncrono: a resposta já traz o retorno da SEFAZ
+ * (102 = homologada; 241 = número já usado; 256/563 = já inutilizada). Falha de rede/30 s devolve objeto vazio —
+ * o registro fica "sem_resposta" e o pedido pode ser repetido (a SEFAZ responde 256/563 se já tiver valido).
+ */
+export async function inutilizarNfe(ambiente: AmbienteNfe, p: { cnpj: string; serie: string; numero_inicial: number; numero_final: number; justificativa: string }) {
+  const j = p.justificativa.trim();
+  if (j.length < 15 || j.length > 255) throw new ErroFocus("A justificativa precisa ter de 15 a 255 caracteres.");
+  try {
+    const r = await chamar<RespostaInutilizacao>(ambiente, "POST", "/nfe/inutilizacao", {
+      cnpj: p.cnpj.replace(/\D/g, ""),
+      serie: p.serie,
+      numero_inicial: p.numero_inicial,
+      numero_final: p.numero_final,
+      justificativa: j,
+    });
+    const d = (r.dados ?? {}) as RespostaInutilizacao;
+    if (r.http >= 400 && !d.status_sefaz) {
+      const det = d.erros?.map((e) => e.mensagem).filter(Boolean).join("; ");
+      return { http: r.http, dados: { ...d, status: d.status ?? "erro", mensagem_sefaz: det || d.mensagem || `Focus respondeu ${r.http}.` } };
+    }
+    return { http: r.http, dados: d };
+  } catch (e) {
+    if (e instanceof ErroFocus && (e.http !== null || /não configurada/.test(e.message))) throw e;
+    return { http: 0, dados: {} as RespostaInutilizacao };
+  }
+}
+
 /** Cadastra na Focus o aviso (gatilho) de NF-e apontando para o nosso webhook. */
 export async function registrarAviso(ambiente: AmbienteNfe, cnpj: string) {
   const url = process.env["FOCUS_WEBHOOK_URL"];

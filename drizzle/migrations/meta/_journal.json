@@ -2269,6 +2269,13 @@
       "when": 1794603508201,
       "tag": "0323_inutilizacao_focus_0318",
       "breakpoints": true
+    },
+    {
+      "idx": 324,
+      "version": "7",
+      "when": 1794604259806,
+      "tag": "0324_troca_nota_automatica_0324",
+      "breakpoints": true
     }
   ]
 }

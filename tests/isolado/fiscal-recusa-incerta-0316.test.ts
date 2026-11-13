@@ -85,6 +85,19 @@ describe("0316: recusa incerta da SEFAZ", () => {
     expect((await viva(c)).n).toBe(0);
   });
 
+  test("0317: a lista de recusas incertas mostra as pendentes e some depois da conferência", async () => {
+    const c = await novoCiclo(5);
+    const ref = `iso-0316-e-${marca}`;
+    await nota(ref, c, "processando_autorizacao");
+    await adm.unsafe(`update public.fiscal_focus_envios set status='erro_autorizacao', status_sefaz='635' where ref=$1`, [ref]);
+    const antes = await rpc<{ ref: string }[]>(master, "fiscal_recusas_incertas_pendentes", {});
+    expect(antes.dados.some((x) => x.ref === ref)).toBe(true);
+    expect((await rpc(fin, "fiscal_recusas_incertas_pendentes", {})).ok).toBe(true);
+    await rpc(master, "fiscal_recusa_conferir", { _ref: ref, _resultado: "nao_autorizada", _observacao: "inutilizada na SEFAZ hoje" });
+    const depois = await rpc<{ ref: string }[]>(master, "fiscal_recusas_incertas_pendentes", {});
+    expect(depois.dados.some((x) => x.ref === ref)).toBe(false);
+  });
+
   test("raio-x tem F10 e F11", async () => {
     const r = await rpc<{ itens?: { codigo: string }[] } | { codigo: string }[]>(master, "auditoria_integridade", {});
     expect(r.erro).toBeNull();

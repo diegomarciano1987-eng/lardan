@@ -401,6 +401,7 @@ export function FocusHomologacao() {
             {envios.isLoading && <Skeleton className="h-16 w-full" />}
             {envios.isError && <ErrorState message={msgErro(envios.error)} onRetry={() => void envios.refetch()} />}
             {envios.data?.length === 0 && <p className="text-ledger-muted">Nenhuma nota de teste ainda.</p>}
+            <RecusasIncertas pode={s.podeEmitir} consultar={(ref) => consultar({ data: { ref } })} onFeito={recarregar} />
             <ul className="space-y-3">
               {(envios.data ?? []).map((e) => {
                 const st = STATUS[e.status] ?? { rotulo: e.status, tom: "neutral" as StatusTone };
@@ -508,5 +509,38 @@ function ConferirRecusa({ refNota, pode, onFeito }: { refNota: string; pode: boo
         </div>
       )}
     </div>
+  );
+}
+
+/** 0317: todas as recusas incertas ainda sem conferência (a lista acima só mostra as 30 notas mais recentes). */
+function RecusasIncertas({ pode, consultar, onFeito }: { pode: boolean; consultar: (ref: string) => Promise<unknown>; onFeito: () => void }) {
+  const qc = useQueryClient();
+  const q = useQuery({
+    queryKey: ["fiscal", "recusas-incertas"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("fiscal_recusas_incertas_pendentes" as never);
+      if (error) throw error;
+      return (data ?? []) as unknown as { ref: string; status: string; status_sefaz: string | null; mensagem_sefaz: string | null; created_at: string;
+        consultora: string | null; maleta: string | null; outra_nota: string | null }[];
+    },
+  });
+  if (!q.data?.length) return null;
+  const atualizar = () => { void qc.invalidateQueries({ queryKey: ["fiscal"] }); onFeito(); };
+  return (
+    <section aria-label="Notas que precisam de conferência" className="mb-4 rounded-xl border border-warning/40 p-3">
+      <p className="font-semibold text-ledger-text">{q.data.length} nota(s) para conferir na Focus antes de qualquer outra emissão</p>
+      <ul className="mt-2 space-y-3">
+        {q.data.map((e) => (
+          <li key={e.ref} className="rounded-lg border border-line-soft p-3 text-sm">
+            <p className="text-ledger-text">{e.maleta ?? "Maleta"} · {e.consultora ?? "—"} · {new Date(e.created_at).toLocaleString("pt-BR")}</p>
+            <p className="text-xs text-ledger-muted">ref {e.ref} · SEFAZ {e.status_sefaz}: {e.mensagem_sefaz}{e.outra_nota ? ` · esta maleta já tem a nota nº ${e.outra_nota}` : ""}</p>
+            <button type="button" className="admin-btn mt-2" onClick={() => void consultar(e.ref).then(atualizar).catch((x) => toast.error((x as Error).message))}>
+              <RefreshCw aria-hidden className="size-4" /> Consultar na Focus
+            </button>
+            <ConferirRecusa refNota={e.ref} pode={pode} onFeito={atualizar} />
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

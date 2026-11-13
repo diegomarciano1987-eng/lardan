@@ -27,7 +27,7 @@ describe("0313: recusa da SEFAZ reabre a fila", () => {
   test("processando → erro_autorizacao: fila 'feito' volta para 'pendente' com o motivo", async () => {
     await nota(`iso-0313-a-${marca}`, c1, "processando_autorizacao");
     await adm.unsafe(`insert into public.fiscal_fila (cycle_id, etapa, status) values ($1,'remessa','feito')`, [c1]);
-    await adm.unsafe(`update public.fiscal_focus_envios set status='erro_autorizacao', mensagem_sefaz='NF-e com mesmo numero e Serie ja transmitida' where ref=$1`, [`iso-0313-a-${marca}`]);
+    await adm.unsafe(`update public.fiscal_focus_envios set status='erro_autorizacao', status_sefaz='225', mensagem_sefaz='Rejeicao: Falha no Schema XML da NFe' where ref=$1`, [`iso-0313-a-${marca}`]);
     const f = await fila(c1);
     expect(f.status).toBe("pendente");
     expect(f.erro).toContain("SEFAZ recusou");

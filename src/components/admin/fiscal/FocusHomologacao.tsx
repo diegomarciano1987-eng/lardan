@@ -424,6 +424,9 @@ export function FocusHomologacao() {
                         {e.erros?.map((x) => ` ${x.campo ? `[${x.campo}] ` : ""}${x.mensagem ?? ""}`).join(";")}
                       </p>
                     )}
+                    {e.ambiente === "producao" && e.status !== "autorizado" && recusaIncerta(e) && (
+                      <ConferirRecusa refNota={e.ref} pode={s.podeEmitir} onFeito={recarregar} />
+                    )}
                     <div className="mt-2 flex flex-wrap gap-2">
                       <button type="button" className="admin-btn" onClick={() => void consultar({ data: { ref: e.ref } }).then(recarregar).catch((x) => toast.error(msgErro(x)))}>
                         <RefreshCw aria-hidden className="size-4" /> Consultar na Focus
@@ -451,5 +454,59 @@ export function FocusHomologacao() {
         </div>
       )}
     </Panel>
+  );
+}
+
+/** 0316: recusa SEFAZ 204/539/635 — a nota original pode ter sido autorizada. Nada reemite até alguém conferir na Focus/SEFAZ. */
+const recusaIncerta = (e: { status: string; status_sefaz: string | null; mensagem_sefaz: string | null }) =>
+  ["erro_autorizacao", "erro_envio"].includes(e.status) &&
+  (["204", "539", "635"].includes(String(e.status_sefaz ?? "")) ||
+    /(duplicidade de nf|aguardando processamento|mesmo n[uú]mero e s[eé]rie j[aá] transmitida)/i.test(e.mensagem_sefaz ?? ""));
+
+function ConferirRecusa({ refNota, pode, onFeito }: { refNota: string; pode: boolean; onFeito: () => void }) {
+  const qc = useQueryClient();
+  const lista = useQuery({
+    queryKey: ["fiscal", "recusas-conferidas"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("fiscal_recusas_conferidas_lista" as never);
+      if (error) throw error;
+      return (data ?? {}) as Record<string, { resultado: string; numero: string | null; observacao: string; quando: string }>;
+    },
+  });
+  const [obs, setObs] = React.useState("");
+  const [numero, setNumero] = React.useState("");
+  const m = useMutation({
+    mutationFn: async (resultado: "nao_autorizada" | "autorizada") => {
+      const { error } = await supabase.rpc("fiscal_recusa_conferir" as never, { _ref: refNota, _resultado: resultado, _numero: numero || null, _observacao: obs } as never);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Conferência registrada."); void qc.invalidateQueries({ queryKey: ["fiscal", "recusas-conferidas"] }); onFeito(); },
+    onError: (x) => toast.error((x as Error).message),
+  });
+  const feita = lista.data?.[refNota];
+  if (feita) {
+    return (
+      <p className="mt-2 rounded-lg border border-line-soft px-3 py-2 text-xs text-ledger-muted">
+        Conferida em {new Date(feita.quando).toLocaleString("pt-BR")}: {feita.resultado === "autorizada" ? `foi autorizada (nº ${feita.numero})` : "não foi autorizada"} · {feita.observacao}
+      </p>
+    );
+  }
+  return (
+    <div className="mt-2 rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs text-ledger-text">
+      <p className="font-semibold">Confira na Focus antes de emitir outra nota</p>
+      <p className="mt-1 text-ledger-muted">A SEFAZ respondeu que a nota estava em processamento ou duplicada: a original pode ter sido autorizada. Até alguém conferir, o sistema não emite outra nota para esta maleta.</p>
+      {pode && (
+        <div className="mt-2 flex flex-wrap items-end gap-2">
+          <label className="flex min-w-[220px] flex-1 flex-col gap-1">Como conferiu
+            <input className="admin-input" value={obs} onChange={(ev) => setObs(ev.target.value)} placeholder="Ex.: consultei no painel da Focus: rejeitada" />
+          </label>
+          <label className="flex w-28 flex-col gap-1">Nº autorizado
+            <input className="admin-input" value={numero} onChange={(ev) => setNumero(ev.target.value.replace(/\D/g, ""))} inputMode="numeric" />
+          </label>
+          <button type="button" className="admin-btn" disabled={m.isPending || obs.trim().length < 10} onClick={() => m.mutate("nao_autorizada")}>Não foi autorizada</button>
+          <button type="button" className="admin-btn" disabled={m.isPending || obs.trim().length < 10 || !numero} onClick={() => m.mutate("autorizada")}>Foi autorizada</button>
+        </div>
+      )}
+    </div>
   );
 }

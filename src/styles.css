@@ -2,6 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 @import "./operational-glass.css";
+@import "./vidro-fume.css";
 
 @custom-variant dark (&:is(.dark *));
 

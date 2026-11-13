@@ -19,6 +19,7 @@ import {
   ConsultaIndisponivel,
   ReferenciaAmbigua,
   RecusadoPeloProvedor,
+  type ClienteExterno,
   type FormaPagamento,
   type TransporteAsaas,
 } from "./contrato";

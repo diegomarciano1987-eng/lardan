@@ -25,6 +25,7 @@ import { SITUACAO_MALETA, brl, expedir, liberarParaConsultora, traduzir } from "
 import {
   STATUS_REMESSA,
   abrirMaletaNaRemessa,
+  abrirSegundaMaletaNaRemessa,
   consultorasDaPraca,
   consultorasSemPraca,
   dataBR,
@@ -135,6 +136,27 @@ function RemessaPage() {
     onError: (e) => {
       const t = traduzir(e);
       // 0158: maleta anterior sem pré-baixa fechada — o Master pode liberar com motivo
+      if (/pré-baixa/i.test(t)) setSemPreBaixa(t);
+      toast.error(t);
+    },
+  });
+  // 0322: segunda maleta para a mesma consultora nesta remessa (motivo obrigatório)
+  const [motivoSegunda, setMotivoSegunda] = React.useState("");
+  const maletasDela = (maletas.data ?? []).filter((m) => consultora && m.consultora_party_id === consultora && m.status !== "cancelada");
+  const abrirSegunda = useMutation({
+    mutationFn: () => {
+      if (!consultora) throw new Error("Escolha a consultora.");
+      if (motivoSegunda.trim().length < 5) throw new Error("Escreva o motivo da segunda maleta (mínimo 5 letras).");
+      return abrirSegundaMaletaNaRemessa(id, consultora, motivoSegunda.trim());
+    },
+    onSuccess: (res) => {
+      toast.success(res.repetida ? "Ela já tem uma segunda maleta vazia aberta: abrindo essa." : "Segunda maleta aberta para montagem.");
+      setMotivoSegunda("");
+      qc.invalidateQueries({ queryKey: ["remessas"] });
+      navigate({ to: "/admin/maletas/$id", params: { id: res.cycle_id } });
+    },
+    onError: (e) => {
+      const t = traduzir(e);
       if (/pré-baixa/i.test(t)) setSemPreBaixa(t);
       toast.error(t);
     },
@@ -289,6 +311,23 @@ function RemessaPage() {
             <button type="button" className="admin-btn admin-btn-primary" disabled={abrir.isPending} onClick={() => abrir.mutate()}>
               <Plus aria-hidden className="size-4" /> {abrir.isPending ? "Abrindo…" : "Abrir maleta"}
             </button>
+            {maletasDela.length > 0 && (
+              <div className="grid w-full gap-2 rounded-xl border border-warning/50 bg-warning/5 p-3 text-sm" aria-label="Segunda maleta para a mesma consultora">
+                <p className="text-ledger-text">
+                  <strong>Ela já tem {maletasDela.length === 1 ? "uma maleta" : `${maletasDela.length} maletas`} nesta remessa.</strong>{" "}
+                  "Abrir maleta" leva para a que ela já tem. Para montar mais uma, escreva o motivo e use "Abrir 2ª maleta".
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <input className="admin-input min-w-72 flex-1" value={motivoSegunda} onChange={(e) => setMotivoSegunda(e.target.value)}
+                    aria-label="Motivo da segunda maleta" placeholder="Motivo (ex.: vende muito, pediu mais peças para o fim de ano)" />
+                  <button type="button" className="admin-btn admin-btn-primary" disabled={abrirSegunda.isPending || motivoSegunda.trim().length < 5}
+                    onClick={() => abrirSegunda.mutate()}>
+                    <Plus aria-hidden className="size-4" /> {abrirSegunda.isPending ? "Abrindo…" : "Abrir 2ª maleta"}
+                  </button>
+                </div>
+                <p className="text-xs text-ledger-muted">O motivo fica registrado. A comissão continua somando as maletas dela na remessa.</p>
+              </div>
+            )}
             {semPreBaixa && master && (
               <div className="flex w-full flex-wrap items-center gap-2 rounded-xl border border-warning/50 bg-warning/5 p-3 text-sm">
                 <span className="w-full text-ledger-muted">{semPreBaixa}</span>

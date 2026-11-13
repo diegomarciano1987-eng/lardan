@@ -24409,6 +24409,10 @@ export type Database = {
         Args: { _remessa: string }
         Returns: Json
       }
+      remessa_abrir_segunda_maleta: {
+        Args: { _consultora: string; _motivo: string; _remessa: string }
+        Returns: Json
+      }
       remessa_atualizar: {
         Args: {
           _data_acerto: string

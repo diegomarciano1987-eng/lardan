@@ -1,5 +1,5 @@
 /**
- * 0310 — Previsibilidade: previsão de venda (R$ e peças), paradas e novas pelo histórico.
+ * 0311 (pacote 0310 do Diego) — Previsibilidade: previsão de venda (R$ e peças), paradas e novas pelo histórico.
  * Banco ISOLADO; histórico sintético do SmallData com giro conhecido por consultora.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";

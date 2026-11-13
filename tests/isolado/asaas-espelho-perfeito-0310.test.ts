@@ -1,5 +1,5 @@
 /**
- * 0309 — espelho sem furo: (1) a equipe do financeiro lê as tabelas do Asaas (antes "permission denied");
+ * 0310 (pacote 0309 do Diego) — espelho sem furo: (1) a equipe do financeiro lê as tabelas do Asaas (antes "permission denied");
  * (2) cliente Asaas ligada pelo CPF deixa de ficar "pendente"; (3) baixa parcial com cliente sem vínculo:
  * o Asaas não continua cobrando o valor antigo (cancela e vira exceção para a equipe gerar a nova pela tela).
  * Banco ISOLADO + simulador do Asaas; nenhuma rede.
@@ -119,6 +119,8 @@ describe("0309 espelho Asaas × Lardan", () => {
     await ins(`cus_a${marca()}`, cpf1);
     await ins(`cus_b${marca()}`, cpf2);
     await ins(`cus_c${marca()}`, cpf2);
+    // a bancada é compartilhada: clientes soltas de outros testes com CPF de dígitos repetidos (inválido) não podem travar o cadastro
+    await oficial(`update public.asaas_customers set doc = null where party_id is null and doc ~ '^(\\d)\\1+$'`);
     const r = await rpc(master, "asaas_clientes_cadastrar", { _actor: master.uid });
     expect(r.erro).toBeNull();
     const st = async (p: string) => ((await adm.unsafe(`select match_status s from public.asaas_customers where party_id=$1 order by external_id`, [p])) as { s: string }[]).map((x) => x.s);

@@ -49,6 +49,8 @@ export function TransferirForm({ cycleId, pracaId, onFeito }: { cycleId: string;
     },
   });
   const p = previa.data;
+  /** na rua com o representante, para uma consultora: perguntar se ele já deixou com ela */
+  const perguntarOnde = !!p && p.status === "transito" && !!p.representante && !!destino && destino !== ABERTURA;
   const consultoras = useQuery({
     queryKey: ["remessas", "consultoras", pracaId, busca],
     queryFn: () => consultorasDaPraca(pracaId!, busca),
@@ -113,7 +115,7 @@ export function TransferirForm({ cycleId, pracaId, onFeito }: { cycleId: string;
         <>
           <label className="grid gap-1.5 text-sm">
             <span className="font-semibold text-ledger-text">Para quem vai a maleta</span>
-            <SmartSelect value={destino} onChange={(v) => { setDestino(v); setConfirmar(false); }} options={opcoes} onSearch={setBusca}
+            <SmartSelect value={destino} onChange={(v) => { setDestino(v); setConfirmar(false); setOndeEsta(""); }} options={opcoes} onSearch={setBusca}
               loading={consultoras.isFetching} searchPlaceholder="Buscar por código, nome ou CPF"
               placeholder={pracaId ? "Escolher consultora da praça" : "Maleta fora de remessa"} disabled={!pracaId && !p.representante} />
           </label>
@@ -128,6 +130,21 @@ export function TransferirForm({ cycleId, pracaId, onFeito }: { cycleId: string;
                 <span className="block text-xs text-ledger-muted">Use quando ela já tem maleta e vai ficar com mais uma. O motivo acima fica registrado (ex.: forçar uma melhor venda de fim de ano).</span></span>
             </label>
           )}
+          {perguntarOnde && (
+            <fieldset className="space-y-2 rounded-xl border border-line-soft bg-surface p-3 text-sm">
+              <legend className="px-1 font-semibold text-ledger-text">Onde a maleta está agora?</legend>
+              <label className="flex items-start gap-2">
+                <input type="radio" name="onde-esta" className="mt-1 size-4" checked={ondeEsta === "com_ela"} onChange={() => setOndeEsta("com_ela")} />
+                <span><strong className="text-ledger-text">Já está com ela</strong> (o representante deixou)
+                  <span className="block text-xs text-ledger-muted">O app dela pede para confirmar o recebimento e aceitar as peças, igual à primeira maleta. Ninguém aceita por ela.</span></span>
+              </label>
+              <label className="flex items-start gap-2">
+                <input type="radio" name="onde-esta" className="mt-1 size-4" checked={ondeEsta === "com_rep"} onChange={() => setOndeEsta("com_rep")} />
+                <span><strong className="text-ledger-text">Ainda com o representante</strong>
+                  <span className="block text-xs text-ledger-muted">Ele toca em "Entreguei em mãos" no app quando entregar; aí ela confirma e aceita.</span></span>
+              </label>
+            </fieldset>
+          )}
           {efeitos.length > 0 && (
             <div className="rounded-xl border border-line-soft bg-surface p-4">
               <p className="ledger-eyebrow mb-2">O que vai acontecer</p>
@@ -135,7 +152,7 @@ export function TransferirForm({ cycleId, pracaId, onFeito }: { cycleId: string;
             </div>
           )}
           {!confirmar ? (
-            <button type="button" className="admin-btn admin-btn-primary w-full justify-center" disabled={!destino || motivo.trim().length < 5}
+            <button type="button" className="admin-btn admin-btn-primary w-full justify-center" disabled={!destino || motivo.trim().length < 5 || (perguntarOnde && !ondeEsta)}
               onClick={() => setConfirmar(true)}>
               {destino === ABERTURA ? <UserRound aria-hidden className="size-4" /> : <ArrowRightLeft aria-hidden className="size-4" />} Transferir maleta
             </button>

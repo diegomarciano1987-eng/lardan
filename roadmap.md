@@ -1,5 +1,10 @@
 # Roadmap
 
+## Pacote 0306 — Diego 13/11/2026 11:10
+- [ ] 1. Jucélia (9061) MAL-00446: segunda maleta precisa passar pelo mesmo aceite da primeira (hoje aparece "Em uso" em trânsito sem aceite).
+- [ ] 2. Cacilda da Luz: boleto de R$ 50 (venc. 01/10, já pago) foi abatido da parcela 2026-024033 — corrigir.
+- [ ] 3. Cadastro da consultora = espelho perfeito no Asaas (celular, e-mail, endereço etc.).
+
 ## Pacote 0303 — decisões do Diego 12/11/2026 19:27
 - [ ] 1. Emitir agora a nota de remessa das maletas que estão na rua sem nota. (32 na fila; 10 travadas por endereço incompleto da consultora; MAL-00323 e MAL-00492 aguardam o Diego dizer se são teste)
 - [x] 2. PED-000078/092/093 (Larissa): NÃO cancelar (decisão do Diego).

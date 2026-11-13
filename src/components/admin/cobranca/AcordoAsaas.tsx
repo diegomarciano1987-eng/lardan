@@ -40,6 +40,13 @@ export function AcordoAsaas({ simId, temEntrada }: { simId: string; temEntrada: 
         {temEntrada && <label className="flex items-center gap-1"><input type="checkbox" checked={entrada} onChange={(e) => setEntrada(e.target.checked)} />Incluir a entrada</label>}
         <button disabled={indo} onClick={enviar} className="h-9 rounded-lg bg-asaas px-4 font-semibold text-asaas-foreground disabled:opacity-50">{indo ? "Enviando…" : "Gerar cobranças no Asaas"}</button>
       </div>
+      {(q.data ?? []).some((l) => l.invoice_url) && (
+        <button type="button" onClick={() => {
+          const linhas = (q.data ?? []).filter((l) => l.invoice_url && !["RECEIVED", "CONFIRMED", "DELETED"].includes(l.external_status ?? "")).map((l) => `${l.parcela === 0 ? "Entrada" : `${l.parcela}ª parcela`} — ${brl(Number(l.valor_cents))} — vence ${dataBR(l.vencimento)}: ${l.invoice_url}`);
+          void navigator.clipboard.writeText(`Olá! Seguem os dados para pagamento do seu acordo (Pix, boleto ou cartão pelo link de cada parcela):\n\n${linhas.join("\n")}`);
+          toast.success("Mensagem com os links de pagamento copiada.");
+        }} className="h-8 rounded-lg border border-asaas/50 px-3 text-xs font-semibold text-asaas">Copiar dados para pagamento</button>
+      )}
       {(q.data ?? []).length > 0 && <ul className="space-y-1 text-xs">{q.data!.map((l) => (
         <li key={l.intent_id}>{l.parcela === 0 ? "Entrada" : `${l.parcela}ª`} · {dataBR(l.vencimento)} · <span className="font-mono">{brl(Number(l.valor_cents))}</span> · {l.external_status ? ROT[l.external_status] ?? l.external_status : l.state}
           {l.invoice_url && <> · <a className="underline" href={l.invoice_url} target="_blank" rel="noopener noreferrer">abrir fatura</a></>}{l.erro && <span className="text-destructive"> — {l.erro}</span>}</li>

@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { consultarCep } from "@/lib/br/lookup.functions";
 import { brl, maletasDoRepresentante, mensagem, receberMaleta, repassarMaleta, rotuloAbertura, trocarDestinoMaleta } from "@/lib/maletas-perdidas";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
+import { CONTATOS_VAZIOS, CamposContatosRef, conferirContatos, contatosPreenchidos, salvarContatosRef, type ContatosRef } from "@/components/admin/ContatosRecado";
 
 export const ESTADOS_CIVIS = ["Solteira", "Casada", "União estável", "Divorciada", "Viúva"] as const;
 const PERGUNTAS = [
@@ -208,6 +209,7 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
   const [perfil, setPerfil] = React.useState<Record<string, number>>(guardado?.perfil ?? {});
   const [feito, setFeito] = React.useState<Feito | null>(guardado?.feito ?? null);
   const [maleta, setMaleta] = React.useState<MaletaEscolhida | null>(guardado?.maleta ?? null);
+  const [contatosRef, setContatosRef] = React.useState<ContatosRef>(CONTATOS_VAZIOS);
   const concluidaRef = React.useRef(false);
   React.useEffect(() => {
     if (concluidaRef.current) return;
@@ -241,11 +243,18 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
 
   const cadastrar = useMutation({
     mutationFn: async () => {
+      const erroRef = conferirContatos(contatosRef);
+      if (erroRef) throw new Error(erroRef);
       const { data, error } = await supabase.rpc("rep_abertura_rua_cadastrar" as never, {
         _rep: rep, _dados: { ...f, nascimento: dataIso(f.nascimento) }, _perfil: perfil,
       } as never);
       if (error) throw new Error(error.message);
-      return data as unknown as { lead_id: string; party_id: string; perfil: string };
+      const r = data as unknown as { lead_id: string; party_id: string; perfil: string };
+      // 0315: recado e referência (opcionais) — falha aqui não desfaz o cadastro, só avisa
+      if (contatosPreenchidos(contatosRef)) {
+        await salvarContatosRef(r.party_id, contatosRef).catch((e: Error) => toast.error(`Cadastro feito, mas o recado/referência não foi salvo: ${e.message}`));
+      }
+      return r;
     },
     onSuccess: (r) => { setFeito(r); setPasso(2); toast.success(`${primeiroNome(f.nome)} cadastrada. ${r.perfil}.`); void qc.invalidateQueries({ queryKey: ["rep", rep, "crm"] }); },
     onError: (e: Error) => toast.error(e.message),
@@ -302,6 +311,9 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
               <Bloco titulo="Contato">
                 <Rot t="WhatsApp"><input className={campo} inputMode="tel" placeholder="(43) 99999-9999" value={f.whatsapp} onChange={set("whatsapp", mFone)} /></Rot>
                 <Rot t="E-mail"><input className={campo} type="email" inputMode="email" autoCapitalize="none" value={f.email} onChange={set("email", (v) => v.trim())} /></Rot>
+              </Bloco>
+              <Bloco titulo="Recado e referência">
+                <CamposContatosRef value={contatosRef} onChange={setContatosRef} inputClass={campo} labelClass="mb-1.5 block text-[0.78rem] font-medium text-muted-foreground" />
               </Bloco>
               <Bloco titulo="Endereço" icone={<MapPin className="size-4" />}>
                 <Rot t="CEP">

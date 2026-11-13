@@ -121,6 +121,20 @@ describe("desfazer movimento errado — representante", () => {
     expect(p).toMatchObject({ pode: true, aceita: true });
   });
 
+  test("0316: pedido de cliente ativo trava o desfazer; depois de cancelado (venda de teste) não trava mais", async () => {
+    const ev = await ultimoMov(mDora);
+    const ped = await um<{ id: string }>(`insert into public.sales_orders (consultora_party_id, customer_name, channel, status, subtotal_cents, items_count)
+      values ($1, 'Venda teste', 'consultora', 'aguardando_pagamento', 10000, 1) returning id`, [eva.partyId]);
+    await adm.unsafe(`insert into public.sales_order_items (order_id, cycle_id, variant_id, product_name, quantity, unit_price_cents)
+      values ($1, $2, $3, 'peça teste', 1, 10000)`, [ped.id, mDora, vA]);
+    const antes = await ok<{ pode: boolean; bloqueio: string }>(master, "maleta_movimento_previa", { _evento: ev.id });
+    expect(antes.pode).toBe(false);
+    expect(antes.bloqueio).toContain("pedido de cliente");
+    await adm.unsafe(`update public.sales_orders set status='cancelado', cancelled_at=now() where id=$1`, [ped.id]);
+    const depois = await ok<{ pode: boolean }>(master, "maleta_movimento_previa", { _evento: ev.id });
+    expect(depois.pode).toBe(true);
+  });
+
   test("com peça vendida o Master também não desfaz (o caminho é o acerto)", async () => {
     const ev = await ultimoMov(mDora);
     await adm.unsafe(`update public.kit_balances set qty_sold=1 where cycle_id=$1`, [mDora]);

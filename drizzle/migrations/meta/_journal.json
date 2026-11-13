@@ -2213,6 +2213,13 @@
       "when": 1794595337490,
       "tag": "0315_0315_desfazer_movimento_banho_recado",
       "breakpoints": true
+    },
+    {
+      "idx": 316,
+      "version": "7",
+      "when": 1794597127802,
+      "tag": "0316_0316_pedido_cancelado_nao_trava_maleta",
+      "breakpoints": true
     }
   ]
 }

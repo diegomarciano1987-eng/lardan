@@ -11,6 +11,6 @@ export function avisosTransferencia(r: Partial<ResultadoTransferencia> | null | 
   if (p?.antiga_pendente_fila) a.push("A ZapSign não respondeu agora: o cancelamento da promissória antiga será refeito sozinho em até 10 minutos.");
   if (p?.nova === "enviada") a.push(`Promissória nova enviada para ${r.consultora_nova ?? "a nova consultora"} assinar pelo WhatsApp.`);
   if (p?.nova === "falhou") a.push(`A promissória nova não foi enviada: ${p.aviso ?? "tente pelo botão Assinatura digital"}.`);
-  if (r.pendencia_fiscal) a.push(`Nota fiscal nº ${r.nota_numero ?? "—"} está em nome de ${r.consultora_anterior ?? "outra consultora"}: a montagem recebeu a pendência para fazer a devolução e a nota nova.`);
+  if (r.pendencia_fiscal) a.push(`Nota fiscal: a nota nº ${r.nota_numero ?? "—"} de ${r.consultora_anterior ?? "outra consultora"} é devolvida sozinha e a nota nova sai automaticamente.`);
   return a;
 }

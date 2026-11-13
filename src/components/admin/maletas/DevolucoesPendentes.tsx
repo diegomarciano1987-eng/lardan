@@ -15,7 +15,7 @@ export function DevolucoesPendentes({ remessaNumero }: { remessaNumero: number }
     mutationFn: (id: string) => receberDevolucao(id),
     onSuccess: (r) => {
       toast.success(`Maleta recebida: ${r.pecas} peças voltaram ao estoque.`);
-      if (r.pendencia_fiscal) toast.info("A maleta tinha nota de remessa: ficou a pendência da nota de devolução logo acima.", { duration: 9000 });
+      if (r.pendencia_fiscal) toast.info("A nota de devolução da maleta sai sozinha em alguns minutos.", { duration: 7000 });
       void qc.invalidateQueries({ queryKey: ["maletas"] });
       void qc.invalidateQueries({ queryKey: ["remessas"] });
     },

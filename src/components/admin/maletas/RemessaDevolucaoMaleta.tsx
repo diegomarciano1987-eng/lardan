@@ -44,7 +44,7 @@ export function RemessaDevolucaoMaleta({ cycleId, status }: { cycleId: string; s
     mutationFn: () => receberDevolucao(pedida!.id),
     onSuccess: (r) => {
       toast.success(r.repetida ? "Esta devolução já estava confirmada." : `Maleta recebida: ${r.pecas} peças voltaram ao estoque.`);
-      if (r.pendencia_fiscal) toast.info("A maleta tinha nota de remessa: ficou uma pendência na remessa para fazer a nota de devolução.", { duration: 9000 });
+      if (r.pendencia_fiscal) toast.info("A nota de devolução da maleta sai sozinha em alguns minutos.", { duration: 7000 });
       fim();
     },
     onError: (e) => toast.error((e as Error).message),

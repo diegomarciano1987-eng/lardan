@@ -11,7 +11,7 @@ import { ConferenciaPreBaixa } from "@/components/admin/maletas/ConferenciaPreBa
 import { CheckCircle2, ClipboardCheck, Printer, ScanBarcode, Send, Truck } from "lucide-react";
 import { AjustesMaleta } from "@/components/admin/maletas/AjustesMaleta";
 import { STATUS_TRANSFERIR } from "@/components/admin/maletas/TransferirMaleta";
-import { AvisoNotaTrocaMaleta, LinkNotaNaRemessa } from "@/components/admin/maletas/TrocasPendentes";
+import { AvisoNotaTrocaMaleta, DesfazerDevolucaoMaleta, LinkNotaNaRemessa } from "@/components/admin/maletas/TrocasPendentes";
 import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
 import { ConferenciaMaleta } from "@/components/admin/maletas/ConferenciaMaleta";
 import { SugestaoMontagem } from "@/components/admin/historico/SugestaoMontagem";
@@ -344,6 +344,7 @@ function MaletaFicha() {
             <AcoesMaletaRua cycleId={id} status={d.ciclo.status} temConsultora={!!d.ciclo.consultora_party_id} />
           )}
           {podeMontar && <RemessaDevolucaoMaleta cycleId={id} status={d.ciclo.status} />}
+          {d.ciclo.status === "cancelada" && <DesfazerDevolucaoMaleta cycleId={id} maleta={d.maleta.codigo} />}
           {podeMontar && d.ciclo.consultora_party_id && ["conferida", "expedida", "transito", "recebida", "operacao", "acerto", "encerrada"].includes(d.ciclo.status) && (
             <div id="correios" className="scroll-mt-24"><CorreiosMaleta cycleId={id} status={d.ciclo.status} comRepresentante={!!d.ciclo.representante_party_id} /></div>
           )}

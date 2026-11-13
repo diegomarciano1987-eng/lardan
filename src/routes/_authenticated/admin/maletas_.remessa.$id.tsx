@@ -10,7 +10,7 @@ import { abrirMaletaRepresentante, devolverCustodiaRepresentante, expedirRemessa
 import { EnvioRemessa } from "@/components/admin/maletas/EnvioRemessa";
 import { NotaFiscalMaleta, useNotasMaletas } from "@/components/admin/maletas/NotaFiscalMaleta";
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
-import { SeloNotaTroca, TrocasPendentes, useTrocasPendentes } from "@/components/admin/maletas/TrocasPendentes";
+import { SeloNotaTroca, useTrocasPendentes } from "@/components/admin/maletas/TrocasPendentes";
 import { supabase } from "@/integrations/supabase/client";
 import { DevolucoesPendentes } from "@/components/admin/maletas/DevolucoesPendentes";
 import { STATUS_TRANSFERIR, TransferirMaletaBotao } from "@/components/admin/maletas/TransferirMaleta";
@@ -389,7 +389,6 @@ function RemessaPage() {
         </Panel>
       )}
 
-      <TrocasPendentes remessaId={id} podeResolver={podeNotaMaleta} />
       {podeMontar && <DevolucoesPendentes remessaNumero={r.numero} />}
 
       <Panel title="Maletas da remessa" flush>

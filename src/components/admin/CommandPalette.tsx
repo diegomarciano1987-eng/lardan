@@ -203,13 +203,21 @@ async function search(term: string, caps: Capability[], escopo: Escopo): Promise
       .sort((a, b) => peso(a.status) - peso(b.status))
       .slice(0, 8);
   }
+  // 0315: cidade e responsável (representante) aparecem na própria busca
+  const ctx = new Map<string, { cidade: string | null; uf: string | null; responsavel: string | null }>();
+  if (listaPessoas.length) {
+    const r = await supabase.rpc("pessoas_busca_contexto" as never, { _ids: listaPessoas.map((p) => p.id) } as never);
+    for (const x of ((r.data ?? []) as unknown as { party_id: string; cidade: string | null; uf: string | null; responsavel: string | null }[])) ctx.set(x.party_id, x);
+  }
   for (const p of listaPessoas) {
+    const c = ctx.get(p.id);
+    const cidade = c?.cidade ? `${c.cidade}${c.uf ? `/${c.uf}` : ""}` : null;
     hits.push({
       id: `pes-${p.id}`,
       group: "Pessoas e consultoras",
       icon: ContactRound,
       title: p.display_name ?? p.legal_name ?? "Pessoa",
-      context: [p.code, p.doc_masked, p.status].filter(Boolean).join(" · "),
+      context: [p.code, p.doc_masked, p.status, cidade, c?.responsavel ? `Resp. ${c.responsavel}` : null].filter(Boolean).join(" · "),
       to: `/admin/cadastros/pessoas/${p.id}`,
     });
   }

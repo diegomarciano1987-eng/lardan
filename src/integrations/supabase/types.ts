@@ -2091,6 +2091,66 @@ export type Database = {
           },
         ]
       }
+      asaas_smalldata_substituicoes: {
+        Row: {
+          acao: string
+          actor_id: string | null
+          antigo_cents: number
+          antigos_titulos: string[]
+          charge_ids: string[]
+          cobertura_cents: number
+          criado_em: string
+          data_referencia: string | null
+          desfeito_em: string | null
+          desfeito_motivo: string | null
+          desfeito_por: string | null
+          detalhe: Json
+          id: string
+          ligado_installment_id: string | null
+          lote: string
+          novos_titulos: string[]
+          party_id: string
+        }
+        Insert: {
+          acao: string
+          actor_id?: string | null
+          antigo_cents?: number
+          antigos_titulos?: string[]
+          charge_ids: string[]
+          cobertura_cents?: number
+          criado_em?: string
+          data_referencia?: string | null
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          detalhe?: Json
+          id?: string
+          ligado_installment_id?: string | null
+          lote: string
+          novos_titulos?: string[]
+          party_id: string
+        }
+        Update: {
+          acao?: string
+          actor_id?: string | null
+          antigo_cents?: number
+          antigos_titulos?: string[]
+          charge_ids?: string[]
+          cobertura_cents?: number
+          criado_em?: string
+          data_referencia?: string | null
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          detalhe?: Json
+          id?: string
+          ligado_installment_id?: string | null
+          lote?: string
+          novos_titulos?: string[]
+          party_id?: string
+        }
+        Relationships: []
+      }
       assinatura_modelos: {
         Row: {
           atualizado_em: string
@@ -20858,6 +20918,16 @@ export type Database = {
         Returns: Json
       }
       asaas_saldo_varrer: { Args: never; Returns: number }
+      asaas_smalldata_aplicar: {
+        Args: { _limite?: number; _parties?: string[] }
+        Returns: Json
+      }
+      asaas_smalldata_data_ref: { Args: { _charge: string }; Returns: string }
+      asaas_smalldata_desfazer: {
+        Args: { _lote: string; _motivo: string }
+        Returns: Json
+      }
+      asaas_smalldata_plano: { Args: { _parties?: string[] }; Returns: Json }
       asaas_titulo_ext_livre: { Args: { _external: string }; Returns: string }
       asaas_vincular_interno: {
         Args: {

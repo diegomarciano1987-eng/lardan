@@ -20,12 +20,13 @@ export interface ResultadoDesfazer {
 
 export const maletaDesfazerMovimento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { eventoId: string; motivo: string; rep?: string | null }) => {
+  .inputValidator((d: { eventoId: string; cycleId: string; motivo: string; rep?: string | null }) => {
     if (!UUID.test(d?.eventoId ?? "")) throw new Error("Movimento inválido.");
+    if (!UUID.test(d?.cycleId ?? "")) throw new Error("Maleta inválida.");
     if (d.rep && !UUID.test(d.rep)) throw new Error("Representante inválido.");
     const motivo = (d.motivo ?? "").trim();
     if (motivo.length < 10) throw new Error("Escreva o motivo de desfazer (mínimo 10 letras).");
-    return { eventoId: d.eventoId, motivo: motivo.slice(0, 500), rep: d.rep ?? null };
+    return { eventoId: d.eventoId, cycleId: d.cycleId, motivo: motivo.slice(0, 500), rep: d.rep ?? null };
   })
   .handler(async ({ data, context }): Promise<ResultadoDesfazer> => {
     const c = context as unknown as { supabase: { rpc: Rpc }; userId: string };
@@ -44,7 +45,7 @@ export const maletaDesfazerMovimento = createServerFn({ method: "POST" })
     if (r["tinha_promissoria"] === true && nova) {
       try {
         const { enviarAssinatura } = await import("@/lib/zapsign/enviar.server");
-        const e = await enviarAssinatura(c, { tipo: "promissoria", partyId: nova, cycleId: String(r["cycle_id"] ?? ""), rep: data.rep });
+        const e = await enviarAssinatura(c, { tipo: "promissoria", partyId: nova, cycleId: data.cycleId, rep: data.rep });
         promissoria.nova = e.jaExistia ? "ja_existia" : "enviada";
       } catch (e) {
         promissoria.nova = "falhou";

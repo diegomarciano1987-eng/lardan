@@ -284,6 +284,8 @@ export async function executarIntencao(
     try {
       const ref = refCliente(r.party_id);
       let c = await transporte.localizarClientePorReferencia(ref);
+      // 0312: não criar cadastro novo para quem já tem cadastro no Asaas com o mesmo CPF
+      if (!c) c = await clientePeloCpf(transporte, r.devedor.doc);
       if (!c) {
         await servico.rpc(ROTINAS_EXECUTOR.clienteEstado, { ...base, _token: tk, _state: "criar", _erro: null });
         c = await comRenovacao(

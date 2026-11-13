@@ -21,6 +21,8 @@ export interface ClienteExterno {
   name: string;
   cpfCnpj?: string | null;
   email?: string | null;
+  /** data de criação no provedor (AAAA-MM-DD), quando informada */
+  dateCreated?: string | null;
 }
 
 export interface CobrancaExterna {
@@ -166,6 +168,8 @@ export interface TransporteAsaas {
   /** localiza o cliente já vinculado; nunca procura por nome */
   localizarClientePorReferencia(ref: string): Promise<ClienteExterno | null>;
   prepararCliente(dados: { name: string; cpfCnpj?: string | null; email?: string | null; ref: string }): Promise<ClienteExterno>;
+  /** 0312: cadastros já existentes no provedor com este CPF/CNPJ (opcional; sem o método, nada é aproveitado). */
+  localizarClientesPorCpf?(cpfCnpj: string): Promise<ClienteExterno[]>;
 
   listarCobrancas(f: FiltroCobrancas): Promise<Pagina<CobrancaExterna>>;
   consultarCobranca(id: string): Promise<CobrancaExterna | null>;

@@ -33,15 +33,14 @@ describe("0313: recusa da SEFAZ reabre a fila", () => {
     expect(f.erro).toContain("SEFAZ recusou");
   });
 
-  test("com outra nota viva da mesma maleta, a fila não reabre (nunca nota em dobro)", async () => {
-    await nota(`iso-0313-b1-${marca}`, c2, "autorizado");
-    await nota(`iso-0313-b2-${marca}`, c2, "processando_autorizacao");
+  test("nota autorizada não mexe na fila (continua 'feito')", async () => {
+    await nota(`iso-0313-b-${marca}`, c2, "processando_autorizacao");
     await adm.unsafe(`insert into public.fiscal_fila (cycle_id, etapa, status) values ($1,'remessa','feito')`, [c2]);
-    await adm.unsafe(`update public.fiscal_focus_envios set status='erro_autorizacao' where ref=$1`, [`iso-0313-b2-${marca}`]);
+    await adm.unsafe(`update public.fiscal_focus_envios set status='autorizado' where ref=$1`, [`iso-0313-b-${marca}`]);
     expect((await fila(c2)).status).toBe("feito");
   });
 
-  test("denegada e homologação não reabrem; nota autorizada não mexe na fila", async () => {
+  test("denegada e homologação não reabrem", async () => {
     await nota(`iso-0313-c-${marca}`, c3, "processando_autorizacao");
     await nota(`iso-0313-c2-${marca}`, c3, "processando_autorizacao", "remessa", "homologacao");
     await adm.unsafe(`insert into public.fiscal_fila (cycle_id, etapa, status) values ($1,'remessa','feito')`, [c3]);

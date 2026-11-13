@@ -2136,6 +2136,13 @@
       "when": 1794576365101,
       "tag": "0304_qualidade_rede_toda_0304",
       "breakpoints": true
+    },
+    {
+      "idx": 305,
+      "version": "7",
+      "when": 1794578046983,
+      "tag": "0305_asaas_smalldata_substitui_0305",
+      "breakpoints": true
     }
   ]
 }

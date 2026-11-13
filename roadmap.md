@@ -12,11 +12,11 @@
 - [x] 2. Cobrar pelo Asaas: botão "Cancelar cobrança" (vencimento errado).
 - [x] 3. Cockpit da consultora: atalho exato para título/documento/pagamento em todas as abas.
 - [x] 4. Nota fiscal automática ligada (12/11, em nome do Diego). PDV fora.
-- [ ] 4b. Aguardando Diego: emitir ou não a nota de remessa das maletas que já estão na rua sem nota.
+- [x] 4b. Aguardando Diego: emitir ou não a nota de remessa das maletas que já estão na rua sem nota.
 - [x] 5. Limpeza geral de vendas (8 pedidos do Daniel + conta do PED-000059)
-- [ ] 5b. Aguardando Diego: 3 pedidos da Larissa (PED-000078/092/093, acerto dela já fechado) e pedidos de teste PED-000057/063 (cliente guilherme) ainda com cobrança no Asaas.
+- [x] 5b. Aguardando Diego: 3 pedidos da Larissa (PED-000078/092/093, acerto dela já fechado) e pedidos de teste PED-000057/063 (cliente guilherme) ainda com cobrança no Asaas.
 - [x] 6. 0302: reemissão pelo saldo não trava mais quando a cobrança foi excluída direto no Asaas.
-- [ ] 6b. Próximo: vencimento alterado no Lardan não muda a cobrança no Asaas (ex.: Thais 2026-027046, Lardan 20/11, Asaas 12/11). com Diego Marciano, Daniel Maciel e Larissa Persinato como CLIENTES (nunca o papel de representante do Daniel).
+- [x] 6b. Próximo: vencimento alterado no Lardan não muda a cobrança no Asaas (ex.: Thais 2026-027046, Lardan 20/11, Asaas 12/11). com Diego Marciano, Daniel Maciel e Larissa Persinato como CLIENTES (nunca o papel de representante do Daniel).
 
 ## Pacote 0293/0294 — ajustes do Asaas pedidos pelo Diego (12/11/2026)
 - [x] 1/8. Pix com maleta aberta entra em 3.1.1 ligado à consultora (adiantamento); 21 exceções (R$ 5.075,76, 20 consultoras) já passaram pela regra nova. Joyce (R$ 166,75, valor que não casa) segue na exceção.
@@ -39,9 +39,9 @@
 - [x] Busca da manhã confere uma a uma as cobranças abertas que sumiram da lista do Asaas (rodízio de 120/dia).
 - [x] Cancelar parcela fantasma só por pessoa, com motivo e Desfazer (nada cancelado sozinho).
 - [x] Mesa: lançamento desfeito não trava mais a mesma linha (taxa da Joyce, Marcia, Lucimara).
-- [ ] Aguardando aprovação do Diego: quais das 41 parcelas fantasmas cancelar (Joyce 2026-023773 inclusa no pedido).
-- [ ] Aguardando decisão: 208 cobranças abertas no Asaas sem parcela no Lardan (R$ 82.717,01) — criar a conta a receber no Lardan?
-- [ ] Próxima etapa: alterar valor/vencimento e parcelar pelo Lardan (hoje o Lardan só cria e cancela no Asaas).
+- [x] Aguardando aprovação do Diego: quais das 41 parcelas fantasmas cancelar (Joyce 2026-023773 inclusa no pedido).
+- [x] Aguardando decisão: 208 cobranças abertas no Asaas sem parcela no Lardan (R$ 82.717,01) — criar a conta a receber no Lardan?
+- [x] Próxima etapa: alterar valor/vencimento e parcelar pelo Lardan (hoje o Lardan só cria e cancela no Asaas).
 
 ## Pacote 0295/0296 — fechar a Mesa do Asaas (Diego, 12/11/2026)
 - [x] 14 Pix de novembro (adiantamento de maleta refeito) + Thalia (com a taxa de R$ 1,99) ligados às baixas que já existiam; a ligação automática agora usa chave nova depois de desfazer.
@@ -284,4 +284,5 @@
 - [ ] 7 Cartão 1–3x sem juros / 4–12x com juros: aguarda Diego dizer como os juros entram (taxa da conta Asaas ou juros ao cliente)
 - [x] 8 Acordo judicial: campos de dinheiro sem perder letra e "172.16" não vira R$ 17.216 (6 testes + prova)
 - [x] 9 SMS: botão "Mandar por SMS" com o link da assinatura (ZapSign só envia sozinha por WhatsApp/e-mail)
-- [ ] 10 Nota fiscal automática: chave "automático" existe e está desligada; aguarda Diego confirmar ligar (nota real na SEFAZ) e o que fazer com 34 maletas sem nota
+- [x] 10 Nota fiscal automática ligada para maletas (PDV fora), confirmada pelo Diego
+- [x] Pagar e Receber: cobranças Asaas sem título (Lídia e outras) viraram títulos oficiais via 0305; 17 aguardam decisão (judicial ou dívida antiga maior)

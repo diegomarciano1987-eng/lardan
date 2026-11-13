@@ -22752,6 +22752,7 @@ export type Database = {
         Returns: boolean
       }
       fiscal_recusas_conferidas_lista: { Args: never; Returns: Json }
+      fiscal_recusas_incertas_pendentes: { Args: never; Returns: Json }
       fiscal_roteiro_observado: { Args: never; Returns: Json }
       gen_protocol: { Args: { prefix: string }; Returns: string }
       geo_fila_proxima: {

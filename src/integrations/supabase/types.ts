@@ -2286,6 +2286,7 @@ export type Database = {
           arquivo_sha256: string | null
           assinado_em: string | null
           assinante_nome: string | null
+          assinantes: Json | null
           atualizado_em: string
           conferido_em: string | null
           criado_em: string
@@ -2297,6 +2298,8 @@ export type Database = {
           id: string
           invalidada_em: string | null
           invalidada_motivo: string | null
+          judicial_acordo_id: string | null
+          judicial_doc_id: string | null
           origem: string
           party_id: string
           provedor: string
@@ -2318,6 +2321,7 @@ export type Database = {
           arquivo_sha256?: string | null
           assinado_em?: string | null
           assinante_nome?: string | null
+          assinantes?: Json | null
           atualizado_em?: string
           conferido_em?: string | null
           criado_em?: string
@@ -2329,6 +2333,8 @@ export type Database = {
           id?: string
           invalidada_em?: string | null
           invalidada_motivo?: string | null
+          judicial_acordo_id?: string | null
+          judicial_doc_id?: string | null
           origem?: string
           party_id: string
           provedor?: string
@@ -2350,6 +2356,7 @@ export type Database = {
           arquivo_sha256?: string | null
           assinado_em?: string | null
           assinante_nome?: string | null
+          assinantes?: Json | null
           atualizado_em?: string
           conferido_em?: string | null
           criado_em?: string
@@ -2361,6 +2368,8 @@ export type Database = {
           id?: string
           invalidada_em?: string | null
           invalidada_motivo?: string | null
+          judicial_acordo_id?: string | null
+          judicial_doc_id?: string | null
           origem?: string
           party_id?: string
           provedor?: string
@@ -2389,6 +2398,20 @@ export type Database = {
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assinaturas_digitais_judicial_acordo_id_fkey"
+            columns: ["judicial_acordo_id"]
+            isOneToOne: false
+            referencedRelation: "cob_judicial_acordos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assinaturas_digitais_judicial_doc_id_fkey"
+            columns: ["judicial_doc_id"]
+            isOneToOne: false
+            referencedRelation: "cob_judicial_docs"
             referencedColumns: ["id"]
           },
           {
@@ -21512,6 +21535,11 @@ export type Database = {
         Returns: Json
       }
       cob_judicial_alvaras: { Args: { _acordo: string }; Returns: Json }
+      cob_judicial_assinatura_dados: {
+        Args: { _acordo: string; _doc: string }
+        Returns: Json
+      }
+      cob_judicial_assinaturas: { Args: { _party: string }; Returns: Json }
       cob_judicial_desconto_final: {
         Args: { _acordo: string; _settlement: string }
         Returns: undefined

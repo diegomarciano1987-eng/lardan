@@ -21540,6 +21540,7 @@ export type Database = {
         Returns: Json
       }
       cob_judicial_assinaturas: { Args: { _party: string }; Returns: Json }
+      cob_judicial_contato: { Args: { _party: string }; Returns: Json }
       cob_judicial_desconto_final: {
         Args: { _acordo: string; _settlement: string }
         Returns: undefined

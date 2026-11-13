@@ -60,7 +60,7 @@ beforeAll(async () => {
   await ok(repMarcelo, "rep_acerto_campo_devolucao", { _cycle: maleta, _leituras: [{ variant_id: vA, qtd: 3 }] });
   await ok(repMarcelo, "pre_baixa_fechar", { _cycle: maleta });
   // Tatiane: Qualidade "alterar" + os mesmos módulos de maleta/cadastro que ela tem hoje
-  await colab(tatiane, String(30400000 + base).slice(-8), { qualidade: "alterar", maletas: "alterar", consultoras: "alterar" });
+  await colab(tatiane, String(30400000 + base).slice(-8), { qualidade: "alterar", maletas: "alterar", cadastros: "alterar" });
   await colab(montagem, String(40400000 + base).slice(-8), { maletas: "alterar" });
 });
 

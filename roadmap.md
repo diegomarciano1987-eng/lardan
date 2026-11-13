@@ -285,4 +285,4 @@
 - [x] 8 Acordo judicial: campos de dinheiro sem perder letra e "172.16" não vira R$ 17.216 (6 testes + prova)
 - [x] 9 SMS: botão "Mandar por SMS" com o link da assinatura (ZapSign só envia sozinha por WhatsApp/e-mail)
 - [ ] 10 Nota fiscal automática: chave "automático" existe e está desligada; aguarda Diego confirmar ligar (nota real na SEFAZ) e o que fazer com 34 maletas sem nota
-- [ ] Pagar e Receber: cobrança Asaas sem número de título (ex.: Lídia) precisa abrir a ficha com baixa manual/cancelamento — via substituição SmallData 0305
+- [x] Pagar e Receber: cobranças Asaas sem título (Lídia e outras) viraram títulos oficiais via 0305; 17 aguardam decisão (judicial ou dívida antiga maior)

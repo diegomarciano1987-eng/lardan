@@ -21287,6 +21287,7 @@ export type Database = {
         Returns: undefined
       }
       colab_caps_permitidas: { Args: never; Returns: string[] }
+      colab_conta: { Args: never; Returns: boolean }
       colab_cycle_ids: { Args: never; Returns: string[] }
       colab_cycle_ok: { Args: { _id: string }; Returns: boolean }
       colab_exigir_master: { Args: { _actor: string }; Returns: undefined }
@@ -21334,6 +21335,7 @@ export type Database = {
       colab_praca_ids: { Args: never; Returns: string[] }
       colab_praca_ok: { Args: { _id: string }; Returns: boolean }
       colab_proximo_codigo: { Args: never; Returns: string }
+      colab_rede_toda: { Args: never; Returns: boolean }
       colab_rem_ids: { Args: never; Returns: string[] }
       colab_rem_ok: { Args: { _id: string }; Returns: boolean }
       colab_rep: { Args: never; Returns: string }

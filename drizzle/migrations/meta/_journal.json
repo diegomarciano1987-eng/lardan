@@ -2129,6 +2129,13 @@
       "when": 1794523426195,
       "tag": "0303_asaas_espelho_vencimento_0303",
       "breakpoints": true
+    },
+    {
+      "idx": 304,
+      "version": "7",
+      "when": 1794576365101,
+      "tag": "0304_qualidade_rede_toda_0304",
+      "breakpoints": true
     }
   ]
 }

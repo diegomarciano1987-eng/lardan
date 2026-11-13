@@ -630,7 +630,7 @@ function Produtos({ recorte }: { recorte: RecorteBi }) {
 export function BiHistorico() {
   const f = useRecorte();
   const escopo = useColabEscopo();
-  const colab = escopo.data?.colaboradora === true;
+  const colab = escopo.data?.carteira === true;
   const { recorte } = f;
 
   const opcoes = useQuery({ queryKey: ["historico-bi", "opcoes"], queryFn: biOpcoes, staleTime: 10 * 60_000 });

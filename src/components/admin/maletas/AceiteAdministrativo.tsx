@@ -49,7 +49,7 @@ export function AceiteAdministrativo({ remessaId }: { remessaId: string }) {
   return (
     <Panel title="Consultora já aceitou (somente Master)">
       <p className="text-sm text-muted-foreground">
-        Maletas que já estão com a consultora mas não têm aceite no app. Marque as que ela aceitou de verdade.
+        Maletas que já saíram da empresa e ainda não têm aceite no app (com o representante ou com a consultora). Marque as que ela aceitou de verdade.
         A maleta passa para "em operação" e aparece pronta no app dela, sem pedir a conferência de novo. Fica registrado com o seu nome e o motivo.
       </p>
       <div className="mt-3 divide-y divide-line-soft rounded-xl border border-line-soft">

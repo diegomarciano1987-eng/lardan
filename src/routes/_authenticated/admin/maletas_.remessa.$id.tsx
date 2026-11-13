@@ -12,6 +12,7 @@ import { NotaFiscalMaleta, useNotasMaletas } from "@/components/admin/maletas/No
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
 import { SeloNotaTroca, useTrocasPendentes } from "@/components/admin/maletas/TrocasPendentes";
 import { supabase } from "@/integrations/supabase/client";
+import { AceiteAdministrativo } from "@/components/admin/maletas/AceiteAdministrativo";
 import { DevolucoesPendentes } from "@/components/admin/maletas/DevolucoesPendentes";
 import { STATUS_TRANSFERIR, TransferirMaletaBotao } from "@/components/admin/maletas/TransferirMaleta";
 import { useAdminRoles } from "@/components/admin/AdminShell";
@@ -391,6 +392,7 @@ function RemessaPage() {
 
       {podeMontar && <DevolucoesPendentes remessaNumero={r.numero} />}
 
+      {master && <AceiteAdministrativo remessaId={id} />}
       <Panel title="Maletas da remessa" flush>
         {maletas.isLoading && <div className="p-6"><Skeleton className="h-14" /></div>}
         {maletas.data?.length === 0 && (

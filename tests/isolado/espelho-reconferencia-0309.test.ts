@@ -22,37 +22,35 @@ async function servico<T = unknown>(sql: string, p: unknown[] = []): Promise<T> 
 }
 
 describe("0309 · reconferência diária do cadastro no Asaas", () => {
-  let acc = "", velha = "", nova = "", mudou = "", party = "";
-  const cliente = async (nome: string) => {
-    party = (await um<{ id: string }>(`insert into public.parties (kind, display_name, status) values ('pessoa',$1,'ativo') returning id`, [nome])).id;
-    return (await um<{ id: string }>(`insert into public.asaas_customers (account_id, external_id, name, party_id, match_status) values ($1,$2,'X',$3,'vinculado') returning id`, [acc, `cus_${marca()}`, party])).id;
-  };
+  let acc = "", p1 = "", p2 = "", velha = "", nova = "", mudou = "";
+  const pessoa = async (nome: string) => (await um<{ id: string }>(`insert into public.parties (kind, display_name, status) values ('pessoa',$1,'ativo') returning id`, [nome])).id;
+  const cliente = async (party: string) =>
+    (await um<{ id: string }>(`insert into public.asaas_customers (account_id, external_id, name, party_id, match_status) values ($1,$2,'X',$3,'vinculado') returning id`, [acc, `cus_${marca()}`, party])).id;
+  const proximos = (party: string, limite: number) =>
+    servico<{ customer_id: string; primeira: boolean }[]>(`public.asaas_cliente_espelho_proximos('w0309', $2::int, $1::uuid)`, [party, limite]);
   beforeAll(async () => {
     const fin = (await um<{ id: string }>(`insert into public.financial_accounts (nome, kind) values ($1,'provedor') returning id`, [`ISO 0309 ${marca()}`])).id;
     acc = (await um<{ id: string }>(`insert into public.asaas_accounts (label, environment, financial_account_id, is_active) values ($1,'sandbox',$2,true) returning id`, [`ISO 0309 ${marca()}`, fin])).id;
-    velha = await cliente(`ISO 0309 velha ${marca()}`);
-    nova = await cliente(`ISO 0309 nova ${marca()}`);
-    mudou = await cliente(`ISO 0309 mudou ${marca()}`);
+    p1 = await pessoa(`ISO 0309 duas contas ${marca()}`);
+    p2 = await pessoa(`ISO 0309 conferida hoje ${marca()}`);
+    velha = await cliente(p1);
+    mudou = await cliente(p1);
+    nova = await cliente(p2);
     await adm.unsafe(`update public.asaas_cliente_espelho set estado='igual', conferido_em = now() - interval '25 hours', pedido_em = now() - interval '30 days' where customer_id=$1`, [velha]);
-    await adm.unsafe(`update public.asaas_cliente_espelho set estado='igual', conferido_em = now() - interval '2 hours' where customer_id=$1`, [nova]);
     await adm.unsafe(`update public.asaas_cliente_espelho set estado='pendente', pedido_em = now() where customer_id=$1`, [mudou]);
+    await adm.unsafe(`update public.asaas_cliente_espelho set estado='igual', conferido_em = now() - interval '2 hours' where customer_id=$1`, [nova]);
   });
 
-  test("conferida há mais de um dia volta; conferida hoje não; mudança no Lardan vem primeiro", async () => {
-    const lote = await servico<{ customer_id: string; primeira: boolean }[]>(`public.asaas_cliente_espelho_proximos('w0309', 50, null)`);
-    const ids = lote.map((x) => x.customer_id);
-    expect(ids).toContain(velha);
-    expect(ids).toContain(mudou);
-    expect(ids).not.toContain(nova);
-    expect(ids.indexOf(mudou)).toBeLessThan(ids.indexOf(velha));
-    expect(lote.every((x) => x.primeira === false)).toBe(true);
-    // devolve o que este teste reservou de outras suítes para não atrapalhar
-    await adm.unsafe(`update public.asaas_cliente_espelho set estado='pendente', worker=null where worker='w0309' and customer_id <> all($1::uuid[])`, [[velha, mudou]]);
+  test("mudança no Lardan passa na frente; depois vem a conferida há mais de um dia; a conferida hoje não volta", async () => {
+    const um1 = await proximos(p1, 1);
+    expect(um1.map((x) => x.customer_id)).toEqual([mudou]);
+    expect(um1[0]!.primeira).toBe(false);
+    expect((await proximos(p1, 50)).map((x) => x.customer_id)).toEqual([velha]);
+    expect(await proximos(p2, 50)).toEqual([]);
   });
 
   test("depois de gravar, só volta no dia seguinte", async () => {
     expect(await servico<string>(`public.asaas_cliente_espelho_registrar($1::uuid,'w0309','igual','[]'::jsonb)`, [velha])).toBe("igual");
-    const lote = await servico<{ customer_id: string }[]>(`public.asaas_cliente_espelho_proximos('w0309b', 50, $1::uuid)`, [party]);
-    expect(lote.map((x) => x.customer_id)).not.toContain(velha);
+    expect((await proximos(p1, 50)).map((x) => x.customer_id)).not.toContain(velha);
   });
 });

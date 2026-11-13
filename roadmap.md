@@ -4,8 +4,9 @@
 - [x] 1. Jucélia (9061) MAL-00446: segunda maleta precisa passar pelo mesmo aceite da primeira (hoje aparece "Em uso" em trânsito sem aceite).
 - [x] 2. Cacilda da Luz: boleto de R$ 50 (venc. 01/10, já pago) foi abatido da parcela 2026-024033 — corrigir.
 - [x] 3. Cadastro da consultora = espelho perfeito no Asaas (celular, e-mail, endereço etc.).
-- [ ] 4. Decidir: 56 pontos "para conferir" do espelho (43 celulares que só o Asaas tem) — aguarda Larissa/Diego.
-- [ ] 5. Decidir: Lucimara (R$ 102,77 de 07/11 sem lançamento) e Maria Celina (R$ 299,22 na parcela de outro boleto) — mesmo erro da Cacilda, aguarda Diego.
+- [ ] 4. Diego 13/11 12:08: nos 56 pontos vale o do Asaas (copiar celular/nome para o Lardan; avisos ficam); de hoje em diante só vale o Lardan (tirar as travas da primeira conferência, reconferência diária).
+- [ ] 5a. Lucimara: corrigir igual à Cacilda (parcela 1 nova + conciliar 05/10 e 07/11 nas parcelas certas).
+- [ ] 5b. Maria Celina: conferir antes de mexer (boleto de R$ 299,22 pode ser a própria parcela 2 refeita).
 
 ## Pacote 0303 — decisões do Diego 12/11/2026 19:27
 - [ ] 1. Emitir agora a nota de remessa das maletas que estão na rua sem nota. (32 na fila; 10 travadas por endereço incompleto da consultora; MAL-00323 e MAL-00492 aguardam o Diego dizer se são teste)

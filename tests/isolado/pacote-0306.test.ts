@@ -204,7 +204,7 @@ describe("3 · cadastro do Lardan pede o espelho no Asaas", () => {
   beforeAll(async () => {
     const fin = (await um<{ id: string }>(`insert into public.financial_accounts (nome, kind) values ($1,'provedor') returning id`, [`ISO Asaas cli ${marca()}`])).id;
     acc = (await um<{ id: string }>(`insert into public.asaas_accounts (label, environment, financial_account_id, is_active) values ($1,'sandbox',$2,true) returning id`, [`ISO cli ${marca()}`, fin])).id;
-    party = (await um<{ id: string }>(`insert into public.parties (kind, display_name, doc_digits, status) values ('pessoa',$1,'06181892974','ativo') returning id`, [`ISO Espelho ${marca()}`])).id;
+    party = (await um<{ id: string }>(`insert into public.parties (kind, display_name, doc, status) values ('pessoa',$1,'061.818.929-74','ativo') returning id`, [`ISO Espelho ${marca()}`])).id;
     cust = (await um<{ id: string }>(`insert into public.asaas_customers (account_id, external_id, name, party_id, match_status) values ($1,$2,'X',$3,'vinculado') returning id`, [acc, `cus_${marca()}`, party])).id;
   });
   const estado = async () => um<{ estado: string; motivo: string }>(`select estado, motivo from public.asaas_cliente_espelho where customer_id=$1`, [cust]);

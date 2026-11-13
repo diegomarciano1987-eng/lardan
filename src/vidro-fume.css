@@ -1,0 +1,195 @@
+/*
+ * Vidro fumê — tema ESCURO da área interna (equipe, representante, PDV). Escolha do Diego em 13/11/2026.
+ * O tema claro não muda. Só cores, transparências, bordas e fundo: nenhum botão, atalho, rota ou ordem de menu mudou
+ * (a barra de atalhos da esquerda e a barra de módulos de baixo continuam iguais, só com o vidro novo).
+ *
+ * Regras do visual:
+ * - fundo quase preto com três luzes difusas (rosé, bronze, ameixa) — sem imagem, sem animação;
+ * - painéis de vidro translúcido com borda fina e um filete de luz em cima (nada de borda branca forte);
+ * - UMA cor de destaque (rosé-ouro); verde-menta = bom, coral = ruim, azul só para o que é do Asaas.
+ * Carregado depois de operational-glass.css; os seletores com :not(...-light) ganham dele só no escuro.
+ */
+:is(.operational-glass:not(.operational-glass-light), body.operational-glass-active:not(.operational-glass-light-active)) {
+  --background: oklch(0.145 0.004 20);
+  --foreground: oklch(0.955 0.008 50);
+  --card: oklch(1 0 0 / 0.045);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.19 0.006 20 / 0.96);
+  --popover-foreground: var(--foreground);
+  --muted: oklch(1 0 0 / 0.06);
+  --muted-foreground: oklch(0.75 0.014 40);
+  --primary: oklch(0.83 0.06 45);
+  --primary-foreground: oklch(0.20 0.02 30);
+  --secondary: var(--muted);
+  --secondary-foreground: var(--foreground);
+  --accent: oklch(0.83 0.06 45 / 0.16);
+  --accent-foreground: var(--foreground);
+  --acao: var(--primary);
+  --acao-foreground: var(--primary-foreground);
+  --border: oklch(1 0 0 / 0.09);
+  --input: oklch(1 0 0 / 0.12);
+  --ring: oklch(0.83 0.06 45);
+  --destructive: oklch(0.77 0.13 28);
+  --destructive-foreground: var(--foreground);
+  --color-ink: oklch(0.12 0.004 20);
+  --color-graphite: oklch(0.17 0.005 20);
+  --color-surface: var(--card);
+  --color-surface-muted: var(--muted);
+  --color-line: var(--border);
+  --color-line-soft: oklch(1 0 0 / 0.06);
+  --color-ledger-text: var(--foreground);
+  --color-ledger-muted: var(--muted-foreground);
+  --color-bronze: oklch(0.80 0.07 60);
+  --color-champagne: oklch(0.86 0.06 50);
+  --color-champagne-soft: oklch(0.83 0.06 45 / 0.16);
+  --rose: oklch(0.83 0.06 45);
+  --rose-deep: oklch(0.77 0.13 28);
+  --color-success: oklch(0.85 0.10 165);
+  --color-danger: var(--destructive);
+  --color-warning: oklch(0.87 0.11 85);
+  --color-info: oklch(0.78 0.09 250);
+  --chart-1: var(--primary);
+  --chart-2: var(--color-success);
+  --chart-3: var(--color-bronze);
+  --chart-4: var(--color-info);
+  --chart-5: var(--color-danger);
+  --op-reflection: oklch(1 0 0 / 0.05);
+  --op-edge: oklch(1 0 0 / 0.10);
+  --op-shadow-color: oklch(0 0 0 / 0.55);
+  --op-control: oklch(1 0 0 / 0.06);
+  --op-action: oklch(0.83 0.06 45 / 0.16);
+  --op-action-tint: oklch(0.83 0.06 45 / 0.10);
+  --op-action-edge: oklch(0.83 0.06 45 / 0.38);
+  --op-veil: oklch(0.12 0.004 20 / 0.55);
+  --op-veil-end: oklch(0.12 0.004 20 / 0.40);
+  --op-reflection-gradient: linear-gradient(180deg, var(--op-reflection), transparent 60%);
+  --op-action-gradient: linear-gradient(180deg, oklch(1 0 0 / 0.08), transparent 70%), var(--op-action);
+  --op-panel-shadow: inset 0 1px 0 var(--op-edge), 0 24px 60px -32px var(--op-shadow-color);
+  --op-control-shadow: inset 0 1px 0 var(--op-reflection), 0 8px 20px -16px var(--op-shadow-color);
+  --op-asaas-glass: linear-gradient(180deg, var(--op-reflection), transparent 60%), oklch(0.62 0.13 255 / 0.20);
+  --op-dock-reflection: oklch(1 0 0 / 0.08);
+  --op-dock-gradient: linear-gradient(180deg, var(--op-dock-reflection), transparent 55%);
+  --vf-dock: oklch(0.17 0.006 20 / 0.62);
+  color-scheme: dark;
+}
+
+/* Fundo: quase preto com três luzes difusas. Fixo, sem custo de animação. */
+.operational-glass:not(.operational-glass-light)::before {
+  background:
+    radial-gradient(42vmax 42vmax at 4% -8%, oklch(0.56 0.09 32 / 0.42), transparent 70%),
+    radial-gradient(38vmax 38vmax at 102% 18%, oklch(0.50 0.08 62 / 0.30), transparent 70%),
+    radial-gradient(52vmax 36vmax at 55% 110%, oklch(0.42 0.09 315 / 0.40), transparent 70%),
+    oklch(0.145 0.004 20);
+}
+body.operational-glass-active:not(.operational-glass-light-active) { background: oklch(0.145 0.004 20); }
+
+/* Painéis e cartões: vidro fumê arredondado. */
+:is(.operational-glass:not(.operational-glass-light), body.operational-glass-active:not(.operational-glass-light-active)) :is(.ledger-panel, .bg-card, .bg-surface) {
+  background: var(--op-reflection-gradient), var(--card);
+  border-color: var(--border);
+  box-shadow: var(--op-panel-shadow);
+  backdrop-filter: blur(24px) saturate(140%);
+}
+.operational-glass:not(.operational-glass-light) :is(.ledger-panel, .admin-deck) { border-radius: 20px; }
+.operational-glass:not(.operational-glass-light) .ledger-panel :is(.bg-card, .bg-surface) { box-shadow: none; backdrop-filter: none; }
+
+/* Botão ativo (abas, filtros, ação principal): rosé translúcido, texto rosé, sem sombra no texto. */
+:is(.operational-glass:not(.operational-glass-light), body.operational-glass-active:not(.operational-glass-light-active)) :is(.admin-btn-primary, .btn-app-principal, button.bg-primary, a.bg-primary, button.bg-acao),
+.operational-glass:not(.operational-glass-light) button[aria-selected="true"] {
+  background: var(--op-action-gradient);
+  color: oklch(0.91 0.045 45);
+  border: 1px solid var(--op-action-edge);
+  text-shadow: none;
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.10);
+}
+/* Asaas: azul em vidro discreto (antes era um bloco azul forte no meio das abas). */
+:is(.operational-glass:not(.operational-glass-light), body.operational-glass-active:not(.operational-glass-light-active)) :is(button.bg-asaas, a.bg-asaas),
+.operational-glass:not(.operational-glass-light) .admin-scope .admin-btn.bg-asaas {
+  background: var(--op-asaas-glass);
+  color: oklch(0.88 0.06 250);
+  border-color: oklch(0.70 0.11 255 / 0.40);
+}
+
+/* Barra de módulos (embaixo) e barra de atalhos (esquerda): mesmo vidro fumê, mesmos botões. */
+.operational-glass:not(.operational-glass-light) :is([aria-label="Atalhos rápidos"], [data-bottom-dock]) > div {
+  background: var(--op-dock-gradient), var(--vf-dock);
+  border: 1px solid oklch(1 0 0 / 0.12);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.10), 0 20px 50px -20px oklch(0 0 0 / 0.60);
+  backdrop-filter: blur(30px) saturate(160%);
+}
+@media (min-width: 768px) {
+  .operational-glass:not(.operational-glass-light) [data-bottom-dock] > div {
+    background: var(--op-dock-gradient), var(--vf-dock);
+    border-color: oklch(1 0 0 / 0.12);
+    border-radius: 24px;
+  }
+}
+.operational-glass:not(.operational-glass-light) [aria-label="Atalhos rápidos"] a { color: var(--muted-foreground); border-radius: 12px; }
+.operational-glass:not(.operational-glass-light) [aria-label="Atalhos rápidos"] a:hover { color: var(--foreground); background: oklch(1 0 0 / 0.06); }
+.operational-glass:not(.operational-glass-light) [aria-label="Atalhos rápidos"] a[aria-current="page"] {
+  color: oklch(0.91 0.045 45);
+  background: var(--accent);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.10);
+}
+.operational-glass:not(.operational-glass-light) :is([data-bottom-dock], [aria-label="Áreas do Financeiro"]) :is(a, button).bg-champagne-soft {
+  background: var(--accent);
+  color: oklch(0.91 0.045 45);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.10);
+}
+
+/* Cabeçalho fixo e janelas. */
+.operational-glass:not(.operational-glass-light) .admin-scope > header {
+  background: var(--op-reflection-gradient), oklch(0.15 0.005 20 / 0.70);
+  box-shadow: inset 0 -1px 0 var(--border);
+}
+.operational-glass:not(.operational-glass-light) [data-module-overlay] { background: oklch(0.10 0.004 20 / 0.55); }
+
+/* Gráficos: linhas sem sombra pesada; grade discreta. */
+.operational-glass:not(.operational-glass-light) :is(.recharts-line-curve, .recharts-area-curve) { filter: none; }
+.operational-glass:not(.operational-glass-light) .recharts-cartesian-grid line { stroke: oklch(1 0 0 / 0.08); stroke-opacity: 1; }
+
+/* Celular: menos desfoque (bateria e rolagem leves). */
+@media (max-width: 767px) {
+  :is(.operational-glass:not(.operational-glass-light), body.operational-glass-active:not(.operational-glass-light-active)) :is(.ledger-panel, .bg-card, .bg-surface) {
+    backdrop-filter: blur(14px) saturate(130%);
+  }
+}
+/* Quem pede menos transparência (acessibilidade) ou aparelho sem desfoque: vidro vira superfície sólida. */
+@media (prefers-reduced-transparency: reduce) {
+  :is(.operational-glass:not(.operational-glass-light), body.operational-glass-active:not(.operational-glass-light-active)) {
+    --card: oklch(0.20 0.006 20);
+    --op-control: oklch(0.23 0.006 20);
+    --vf-dock: oklch(0.19 0.006 20);
+  }
+}
+@supports not (backdrop-filter: blur(18px)) {
+  :is(.operational-glass:not(.operational-glass-light), body.operational-glass-active:not(.operational-glass-light-active)) {
+    --card: oklch(0.20 0.006 20);
+    --op-control: oklch(0.23 0.006 20);
+    --vf-dock: oklch(0.19 0.006 20 / 0.96);
+  }
+}
+/* Alto contraste e impressão: os mesmos ajustes da camada base, com a força dos seletores do escuro. */
+@media (prefers-contrast: more) {
+  :is(.operational-glass:not(.operational-glass-light), body.operational-glass-active:not(.operational-glass-light-active)) {
+    --card: oklch(0.18 0.004 20);
+    --muted-foreground: var(--foreground);
+    --border: var(--foreground);
+    --op-control: oklch(0.18 0.004 20);
+  }
+}
+@media print {
+  :is(.operational-glass:not(.operational-glass-light), body.operational-glass-active:not(.operational-glass-light-active)) {
+    --foreground: oklch(0.20 0 0);
+    --background: oklch(1 0 0);
+    --card: oklch(1 0 0);
+    --muted-foreground: var(--foreground);
+    --color-ledger-text: var(--foreground);
+    --color-ledger-muted: var(--foreground);
+    --border: oklch(0.80 0 0);
+    --op-control: oklch(1 0 0);
+    --op-reflection: transparent;
+    color-scheme: light;
+  }
+  .operational-glass:not(.operational-glass-light)::before { display: none; }
+}

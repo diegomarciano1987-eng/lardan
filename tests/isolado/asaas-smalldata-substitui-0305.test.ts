@@ -3,7 +3,7 @@
  * Decisão do Diego (13/11/2026): a cobrança nova do acerto SUBSTITUI a dívida antiga; cobrança de mesmo valor
  * liga na dívida já lançada; boleto repetido é cancelado pelo espelho oficial; tudo desfazível por lote.
  */
-import { beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { adm, criarConta, rpc, type Conta } from "./base";
 
 let master: Conta, financeiro: Conta;
@@ -17,6 +17,12 @@ const oficial = async <T>(sql: string, p: unknown[] = []) =>
   }))[0]!;
 let fin: string, emp: string, acc: string;
 let cod = 90000 + Math.floor(Math.random() * 9000);
+const codInicial = cod;
+// 0316: o acerto SmallData (fonte 'cobranca') liga o "modo cobrança" do banco inteiro; deixar a linha para trás
+// zerava o valor vendido de cockpit-notas-fechamentos, historico-jflex e bi-historico quando rodavam depois.
+afterAll(async () => {
+  await adm.unsafe(`delete from public.legado_acertos_consultora where remessa = 864 and codcli > $1 and codcli <= $2`, [codInicial, cod]);
+});
 
 async function pessoa() {
   return (await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status) values ('pessoa',$1,$1,'ativo') returning id`, [`ISO 0305 ${marca()}`])).id;

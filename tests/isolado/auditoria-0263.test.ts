@@ -60,7 +60,7 @@ describe("raio-x de integridade", () => {
     expect((await rpc(null, "auditoria_integridade", {})).ok).toBe(false);
     const r = await rpc<{ itens: { codigo: string; erro?: string; quantidade: number; exemplos: string[] }[] }>(master, "auditoria_integridade", {});
     expect(r.erro).toBeNull();
-    expect(r.dados.itens.length).toBe(40); // 0282: + F9 (recebido no Asaas sem título)
+    expect(r.dados.itens.length).toBe(42); // 0282: + F9 · 0316: + F10 e F11 (nota incerta e número pulado)
     expect(r.dados.itens.filter((i) => i.erro)).toEqual([]);
     const texto = JSON.stringify(r.dados);
     const docs = (await adm.unsafe(`select doc_digits d from parties where doc_digits is not null`)) as { d: string }[];

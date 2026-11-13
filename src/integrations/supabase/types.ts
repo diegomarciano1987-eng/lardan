@@ -9244,6 +9244,33 @@ export type Database = {
         }
         Relationships: []
       }
+      fiscal_recusas_conferidas: {
+        Row: {
+          conferido_em: string
+          conferido_por: string
+          numero_autorizado: string | null
+          observacao: string | null
+          ref: string
+          resultado: string
+        }
+        Insert: {
+          conferido_em?: string
+          conferido_por: string
+          numero_autorizado?: string | null
+          observacao?: string | null
+          ref: string
+          resultado: string
+        }
+        Update: {
+          conferido_em?: string
+          conferido_por?: string
+          numero_autorizado?: string | null
+          observacao?: string | null
+          ref?: string
+          resultado?: string
+        }
+        Relationships: []
+      }
       fiscal_roteiro_referencia: {
         Row: {
           cfop_interestadual: string | null
@@ -22677,6 +22704,25 @@ export type Database = {
       }
       fiscal_producao_estado: { Args: never; Returns: Json }
       fiscal_prontidao: { Args: never; Returns: Json }
+      fiscal_recusa_conferir: {
+        Args: {
+          _numero?: string
+          _observacao?: string
+          _ref: string
+          _resultado: string
+        }
+        Returns: Json
+      }
+      fiscal_recusa_incerta: {
+        Args: {
+          _mensagem: string
+          _ref: string
+          _status: string
+          _status_sefaz: string
+        }
+        Returns: boolean
+      }
+      fiscal_recusas_conferidas_lista: { Args: never; Returns: Json }
       fiscal_roteiro_observado: { Args: never; Returns: Json }
       gen_protocol: { Args: { prefix: string }; Returns: string }
       geo_fila_proxima: {

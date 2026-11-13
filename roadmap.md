@@ -313,3 +313,10 @@
 - [x] 9 SMS: botão "Mandar por SMS" com o link da assinatura (ZapSign só envia sozinha por WhatsApp/e-mail)
 - [x] 10 Nota fiscal automática ligada para maletas (PDV fora), confirmada pelo Diego
 - [x] Pagar e Receber: cobranças Asaas sem título (Lídia e outras) viraram títulos oficiais via 0305; 17 aguardam decisão (judicial ou dívida antiga maior)
+
+## 0316 (13/11) — nota em dobro, espelho de vencimentos, Vidro fumê
+- [x] Aplicar a 0316 (recusa incerta 204/539/635 segura a fila; conferência pelo Master; raio-x F10/F11; 5 vencimentos levados ao Asaas)
+- [x] Tela de conferência na nota recusada; Vidro fumê no tema escuro (tema claro igual)
+- [x] Testes: 941/941 no banco isolado (corrigido o teste 0305 que deixava acerto SmallData para trás)
+- [ ] Notas 179/180/181 (MAL-00474/475/476): Focus confirma recusa 635 sem número; inutilização dos 3 números tentada 5x em 13/11 e a SEFAZ-PR não respondeu (erro de conexão). Tentar de novo; se a SEFAZ recusar por número já usado, cancelar a nota mais nova (197 até 14/11 12h20; 213/214 até 14/11 14h58, horário de Brasília).
+- [ ] Publicar a 0316 (aguarda aprovação do Diego)

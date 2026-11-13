@@ -2220,6 +2220,13 @@
       "when": 1794597127802,
       "tag": "0316_0316_pedido_cancelado_nao_trava_maleta",
       "breakpoints": true
+    },
+    {
+      "idx": 317,
+      "version": "7",
+      "when": 1794597586530,
+      "tag": "0317_0316_auditoria_nf_asaas_0316",
+      "breakpoints": true
     }
   ]
 }

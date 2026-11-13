@@ -77,6 +77,7 @@ test("quem cobra recebe os dados do PDF; consultora, foto e PDF de outra pessoa 
 test("registro só pelo servidor, um link pendente por acordo e reenvio recusa o link antigo na ZapSign", async () => {
   expect((await rpc(larissa, "assinatura_registrar", { _d: { tipo: "acordo_judicial" } })).ok).toBe(false);
   const a = await registrar({ doc_token: `iso-acjud-1-${acordo}` });
+  console.log("REG", a.erro);
   expect(a.ok).toBe(true);
   expect((await registrar({ doc_token: `iso-acjud-dup-${acordo}` })).ok).toBe(false);
   const b = await registrar({ doc_token: `iso-acjud-2-${acordo}`, substitui: a.dados.id });

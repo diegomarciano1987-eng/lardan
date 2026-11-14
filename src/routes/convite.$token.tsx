@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/session";
+import { PasswordInput } from "@/components/ui/password-input";
 import { aceitarConvite, consultarConvite, criarSenhaConvite } from "@/lib/acessos.functions";
 
 export const Route = createFileRoute("/convite/$token")({
@@ -165,15 +166,15 @@ function ConvitePage() {
                 )}
                 <label className="block text-sm">
                   <span className="text-muted-foreground">{modo === "criar" ? "Crie sua senha (mínimo 8 caracteres)" : "Senha"}</span>
-                  <input type="password" required value={senha} onChange={(e) => setSenha(e.target.value)}
+                  <div className="mt-1"><PasswordInput required value={senha} onChange={(e) => setSenha(e.target.value)}
                     autoComplete={modo === "criar" ? "new-password" : "current-password"}
-                    className="mt-1 w-full rounded-xl border border-input bg-background px-4 py-3 text-base" />
+                    className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base" /></div>
                 </label>
                 {modo === "criar" && (
                   <label className="block text-sm">
                     <span className="text-muted-foreground">Confirme a senha</span>
-                    <input type="password" required value={confirma} onChange={(e) => setConfirma(e.target.value)} autoComplete="new-password"
-                      className="mt-1 w-full rounded-xl border border-input bg-background px-4 py-3 text-base" />
+                    <div className="mt-1"><PasswordInput required value={confirma} onChange={(e) => setConfirma(e.target.value)} autoComplete="new-password"
+                      className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base" /></div>
                   </label>
                 )}
                 <button type="submit" disabled={ocupado}

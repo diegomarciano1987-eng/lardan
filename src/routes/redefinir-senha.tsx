@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export const Route = createFileRoute("/redefinir-senha")({
   component: RedefinirSenha,
@@ -69,7 +70,7 @@ function RedefinirSenha() {
           <form onSubmit={trocar} className="mt-6 space-y-3">
             <label className="block text-sm">
               <span className="text-muted-foreground">Nova senha (mín. 8)</span>
-              <input type="password" required autoComplete="new-password" value={senha} onChange={(e) => setSenha(e.target.value)} className={campo} />
+              <div className="mt-1"><PasswordInput required autoComplete="new-password" value={senha} onChange={(e) => setSenha(e.target.value)} className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base" /></div>
             </label>
             <button disabled={ocupado} className="w-full rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-50">
               Salvar nova senha

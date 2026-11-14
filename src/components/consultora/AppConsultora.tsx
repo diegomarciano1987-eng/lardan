@@ -15,7 +15,7 @@ import { CombinaComEla } from "@/components/consultora/CombinaComEla";
 import { CartaoMeuHistorico } from "@/components/consultora/CartaoMeuHistorico";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
 import { Link, useRouteContext } from "@tanstack/react-router";
-import { mostrarPilotoGlass } from "@/lib/consultora-glass";
+import { mostrarGlassConsultora } from "@/lib/consultora-glass";
 import { useTemaConsultora } from "@/lib/consultora-tema";
 import { TemaClaroEscuro } from "@/components/consultora/TemaClaroEscuro";
 import { inicioQuery, clientesQuery } from "@/lib/consultora-queries";
@@ -76,11 +76,12 @@ const grupoDe = (a: AbaApp): AbaApp => (a === "novo" ? "pedidos" : EXTRAS.some((
 
 export function CascaConsultora({ nav, ir, ajuda, children, bloqueada = false }: { nav: Nav; ir: Ir; ajuda: string; children: React.ReactNode; bloqueada?: boolean }) {
   const { user } = useRouteContext({ from: "/_authenticated" });
-  const pilotoGlass = mostrarPilotoGlass(user.id, nav.aba);
+  const tema = useTemaConsultora();
+  const temaClaro = tema === "light";
+  const pilotoGlass = mostrarGlassConsultora(user.id, nav.aba, tema);
   const ativo = grupoDe(nav.aba);
   const grande = useLetraGrande();
   const [menuAberto, setMenuAberto] = React.useState(false);
-  const temaClaro = useTemaConsultora() === "light";
   // Barra inferior vai direto para o <body>: nenhum container (overflow/blur/transform) pode deslocá-la no iPhone.
   const [montado, setMontado] = React.useState(false);
   React.useEffect(() => setMontado(true), []);
@@ -1012,8 +1013,6 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
 /* ------------------------------------------------------------------ mais */
 
 export function Mais({ ir }: { ir: Ir }) {
-  const { user } = useRouteContext({ from: "/_authenticated" });
-  const pilotoMais = mostrarPilotoGlass(user.id, "mais");
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/equipe"; };
   const itens = [
     { r: "Meu financeiro", d: "Pagamentos e acertos", i: Wallet, n: { aba: "financeiro" } as Nav },
@@ -1033,7 +1032,7 @@ export function Mais({ ir }: { ir: Ir }) {
       <ul className="space-y-3">
         <li><InstalarApp /></li>
         <li><LetraGrande /></li>
-        {pilotoMais && <li><TemaClaroEscuro /></li>}
+        <li><TemaClaroEscuro /></li>
         {itens.map((x) => (
           <li key={x.r}>
             <button type="button" onClick={() => ir(x.n)} className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-5 text-left active:bg-muted">

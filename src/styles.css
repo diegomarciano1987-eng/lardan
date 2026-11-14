@@ -1997,3 +1997,93 @@ body.consultora-glass-light-active :is([role="dialog"], [role="alertdialog"]) im
   background: var(--background) !important;
   backdrop-filter: none !important;
 }
+
+/*
+ * Modo escuro do app da consultora = vidro fumê (o mesmo escuro novo da área interna, escolha do Diego em 13/11/2026).
+ * Só cores, vidro e fundo: nenhum botão, aba, posição ou função muda. O claro continua sendo o padrão.
+ * Fica no fim do arquivo para valer sobre a casca de vidro antiga da consultora.
+ */
+.consultora-glass-pilot:not(.consultora-glass-light),
+body.consultora-glass-active:not(.consultora-glass-light-active) {
+  --background: oklch(0.145 0.004 20);
+  --foreground: oklch(0.96 0.008 50);
+  --card: oklch(1 0 0 / 0.055);
+  --card-foreground: var(--foreground);
+  --muted: oklch(1 0 0 / 0.07);
+  --muted-foreground: oklch(0.82 0.014 40);
+  --primary: oklch(0.83 0.06 45);
+  --primary-foreground: oklch(0.20 0.02 30);
+  --acao: oklch(0.83 0.06 45);
+  --acao-foreground: oklch(0.20 0.02 30);
+  --border: oklch(1 0 0 / 0.11);
+  --input: oklch(1 0 0 / 0.16);
+  --ring: oklch(0.83 0.06 45);
+  --popover: oklch(0.19 0.006 20 / 0.97);
+  --popover-foreground: var(--foreground);
+  --secondary: oklch(1 0 0 / 0.07);
+  --secondary-foreground: var(--foreground);
+  --accent: oklch(0.83 0.06 45 / 0.16);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.77 0.13 28);
+  --color-champagne: var(--primary);
+  --color-success: oklch(0.85 0.10 165);
+  --color-danger: var(--destructive);
+  --glass-surface: oklch(0.17 0.006 20 / 0.62);
+  --glass-highlight: oklch(1 0 0 / 0.12);
+  --glass-reflection: oklch(1 0 0 / 0.06);
+  --glass-reflection-end: oklch(1 0 0 / 0.01);
+  --glass-shade: oklch(0 0 0 / 0.55);
+  --glass-overlay: oklch(0.12 0.004 20 / 0.55);
+  --glass-overlay-end: oklch(0.12 0.004 20 / 0.40);
+  --glass-scroll-thumb: oklch(0.83 0.06 45 / 0.40);
+  --glass-scroll-hover: oklch(0.83 0.06 45 / 0.70);
+  --glass-mobile-surface: oklch(0.17 0.006 20 / 0.78);
+  --shadow-app: 0 8px 24px -14px oklch(0 0 0 / 0.6);
+  --glass-action-base: oklch(0.83 0.06 45 / 0.16);
+  --glass-action-tint: oklch(0.83 0.06 45 / 0.10);
+  --glass-action-clear: oklch(1 0 0 / 0.08);
+  --glass-action-edge: oklch(0.83 0.06 45 / 0.45);
+  --glass-action-hover: oklch(0.83 0.06 45 / 0.24);
+  --glass-control-base: oklch(1 0 0 / 0.06);
+  color-scheme: dark;
+}
+.consultora-glass-pilot:not(.consultora-glass-light):has(.consultora-inicio) {
+  --glass-home-surface: oklch(0.17 0.006 20 / 0.66);
+  --glass-home-reflection: oklch(1 0 0 / 0.06);
+  --glass-home-edge: oklch(1 0 0 / 0.12);
+  --glass-home-hover: oklch(0.22 0.008 20 / 0.78);
+  --glass-home-shadow: 0 14px 32px -18px oklch(0 0 0 / 0.6), inset 0 1px 0 oklch(1 0 0 / 0.10);
+  --glass-overlay-end: oklch(0.12 0.004 20 / 0.50);
+}
+/* Fundo: quase preto com três luzes difusas (rosé, bronze, ameixa). Fixo, sem animação. */
+.consultora-glass-pilot:not(.consultora-glass-light)::before {
+  background:
+    radial-gradient(42vmax 42vmax at 4% -8%, oklch(0.56 0.09 32 / 0.42), transparent 70%),
+    radial-gradient(38vmax 38vmax at 102% 18%, oklch(0.50 0.08 62 / 0.30), transparent 70%),
+    radial-gradient(52vmax 36vmax at 55% 110%, oklch(0.42 0.09 315 / 0.40), transparent 70%),
+    oklch(0.145 0.004 20);
+}
+/* Ação principal: rosé translúcido com texto rosé claro, igual à área interna. */
+:is(.consultora-glass-pilot:not(.consultora-glass-light), body.consultora-glass-active:not(.consultora-glass-light-active)) :is(.btn-app-principal, .admin-btn-primary, button.bg-acao, button.bg-primary) {
+  color: oklch(0.93 0.045 45);
+  border-color: var(--glass-action-edge);
+}
+:is(.consultora-glass-pilot:not(.consultora-glass-light), body.consultora-glass-active:not(.consultora-glass-light-active)) :is(.btn-app-principal, .admin-btn-primary, button.bg-acao, button.bg-primary) svg {
+  color: oklch(0.93 0.045 45);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .consultora-glass-pilot:not(.consultora-glass-light),
+  body.consultora-glass-active:not(.consultora-glass-light-active) {
+    --card: oklch(0.20 0.006 20);
+    --glass-surface: oklch(0.20 0.006 20);
+    --glass-mobile-surface: oklch(0.20 0.006 20);
+  }
+}
+@media (prefers-contrast: more) {
+  .consultora-glass-pilot:not(.consultora-glass-light),
+  body.consultora-glass-active:not(.consultora-glass-light-active) {
+    --card: oklch(0.18 0.004 20);
+    --muted-foreground: var(--foreground);
+    --border: var(--foreground);
+  }
+}

@@ -11,7 +11,8 @@ export const getRouter = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 10_000,
+        // 0326: 60 s — voltar para a aba não recarrega tudo de novo a cada 10 s (telas com atualização própria seguem iguais)
+        staleTime: 60_000,
         retry: (falhas, erro) => {
           const msg = String((erro as { message?: unknown } | null)?.message ?? erro ?? "");
           if (/permiss|não pode|nao pode|inválid|invalid|não encontrad|42501|PGRST|JWT|sessão/i.test(msg)) return false;

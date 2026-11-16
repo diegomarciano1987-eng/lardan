@@ -58,6 +58,17 @@ export const vitrineComprar = createServerFn({ method: "POST" })
     };
   })
   .handler(async ({ data }): Promise<ResultadoCompra> => {
+    // 0326: contra robô travando vitrines com compras falsas (cada compra segura a peça por 1 h e abre cobrança no Asaas)
+    const { ipCliente, exigirLimites } = await import("./seguranca/limite.server");
+    const ip = ipCliente();
+    await exigirLimites(
+      [
+        [ip ? `vitrine:ip:${ip}` : null, 15, 3600], // 15: operadoras de celular dividem o mesmo IP entre muitos clientes
+        [`vitrine:loja:${data.slug}`, 30, 3600],
+        ["vitrine:total", 300, 3600],
+      ],
+      "Muitas tentativas de compra agora. Tente de novo mais tarde ou fale com a consultora pelo WhatsApp.",
+    );
     const t = await rpcAdmin<{
       order_id: string; codigo: string; token: string; total_cents: number; installment_id: string; actor: string;
       forma: Forma; vencimento: string; expira_em: string | null; consultora_user: string | null; consultora_nome: string | null; repetido?: boolean;

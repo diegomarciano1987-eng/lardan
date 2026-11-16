@@ -379,8 +379,9 @@ describe("9. visitante sem login", () => {
     const publico = (await adm.unsafe(
       `select count(*)::int n from pg_proc p join pg_namespace s on s.oid = p.pronamespace
         where s.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute')
-          and p.proname = any (array['public_catalog_browse','showcase_public','submit_candidatura','pdv_unidade_acesso'])`,
+          and p.proname = any (array['public_catalog_browse','showcase_public','pdv_unidade_acesso'])`,
     )) as { n: number }[];
-    expect(publico[0]!.n).toBe(4);
+    // 0326: submit_candidatura saiu da lista — o site chama pelo servidor (com o IP real), nunca direto
+    expect(publico[0]!.n).toBe(3);
   });
 });

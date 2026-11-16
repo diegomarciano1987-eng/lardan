@@ -18114,6 +18114,24 @@ export type Database = {
           },
         ]
       }
+      seguranca_limites: {
+        Row: {
+          chave: string
+          contagem: number
+          janela: string
+        }
+        Insert: {
+          chave: string
+          contagem?: number
+          janela: string
+        }
+        Update: {
+          chave?: string
+          contagem?: number
+          janela?: string
+        }
+        Relationships: []
+      }
       showcase_batches: {
         Row: {
           action: string
@@ -25076,6 +25094,11 @@ export type Database = {
           tipo: string
           titulo: string
         }[]
+      }
+      seguranca_ip: { Args: never; Returns: string }
+      seguranca_limite: {
+        Args: { _chave: string; _janela_seg: number; _max: number }
+        Returns: boolean
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }

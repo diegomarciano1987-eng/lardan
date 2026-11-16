@@ -27,6 +27,10 @@ export const entrarPorCodigo = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const sb = await admin();
+    // 0326: limite por aparelho/rede antes de gastar as 5 tentativas do código (evita travar a equipe toda e chute de senha)
+    const { ipCliente, exigirLimites } = await import("./seguranca/limite.server");
+    const ip = ipCliente();
+    await exigirLimites([[ip ? `login-colab:ip:${ip}` : null, 20, 900]], ERRO_LOGIN);
     // 0136: a tentativa é reservada no banco de forma atômica (5 erradas travam 15 min, mesmo em paralelo).
     // Código inexistente, suspenso, travado ou de conta da equipe: mesma resposta, sem dizer qual.
     const { data: reservado, error: re } = await sb.rpc("colab_login_reservar" as never, { _codigo: data.codigo } as never);

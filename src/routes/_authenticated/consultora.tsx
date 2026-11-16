@@ -201,6 +201,17 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
   // 0254: maleta com o representante (ainda não entregue em mãos): só divulgação, sem conferência nem venda
   const comRepresentante = ["expedida", "transito"].includes(d.ciclo.status) && !aguardandoRecebimento;
   const precisaAceitar = !comRepresentante && ["expedida", "transito", "recebida"].includes(d.ciclo.status);
+  // Mesmo botão (mesma ação e travas) no topo e no fim da lista: a consultora não precisa rolar todas as peças para aceitar.
+  const botaoAceite = (posicao: "topo" | "rodape") => termoAtivo ? null : (
+    <Button
+      data-aceite={posicao}
+      className="mt-4 min-h-14 w-full whitespace-normal text-base"
+      disabled={aceite.isPending || confirmar.isPending || d.ciclo.status !== "recebida" || !termo.data || termo.isError}
+      onClick={() => aceite.mutate()}
+    >
+      {aceite.isPending ? "Registrando…" : exigeTermo ? "Conferi as peças — gerar termo e assinar" : Object.values(divergencias).some((n) => n > 0) ? "Confirmar conferência com divergência" : "Conferi e recebi todas as peças"}
+    </Button>
+  );
 
   return (
     <div className="space-y-4">
@@ -271,6 +282,7 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
             Toda peça precisa ser classificada: o que você não informar como faltante ou com defeito
             é registrado como recebido em ordem.
           </p>
+          {botaoAceite("topo")}
           <div className="mt-4 space-y-4">
             {d.composicao.map((c, index) => {
               const div = Math.min(Math.max(divergencias[c.variant_id] ?? 0, 0), c.quantidade);
@@ -331,13 +343,7 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
               );
             })}
           </div>
-          {!termoAtivo && <Button
-            className="mt-4 min-h-14 w-full whitespace-normal text-base"
-            disabled={aceite.isPending || confirmar.isPending || d.ciclo.status !== "recebida" || !termo.data || termo.isError}
-            onClick={() => aceite.mutate()}
-          >
-            {aceite.isPending ? "Registrando…" : exigeTermo ? "Conferi as peças — gerar termo e assinar" : Object.values(divergencias).some((n) => n > 0) ? "Confirmar conferência com divergência" : "Conferi e recebi todas as peças"}
-          </Button>}
+          {botaoAceite("rodape")}
           {termo.isError && <p role="alert" className="mt-3 text-destructive">{traduzir(termo.error)} <Button variant="outline" onClick={() => void termo.refetch()}>Tentar novamente</Button></p>}
           {d.ciclo.status !== "recebida" && <p className="mt-3 text-base text-ledger-muted">A conferência só pode ser confirmada depois de registrar o recebimento físico.</p>}
           {exigeTermo && (

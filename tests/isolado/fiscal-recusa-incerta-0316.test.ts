@@ -4,7 +4,7 @@
  * Banco ISOLADO, dados sintéticos.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, rpc, type Conta } from "./base";
+import { adm, criarConta, rpc, rpcServico, type Conta } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
@@ -99,7 +99,7 @@ describe("0316: recusa incerta da SEFAZ", () => {
   });
 
   test("raio-x tem F10 e F11", async () => {
-    const r = await rpc<{ itens?: { codigo: string }[] } | { codigo: string }[]>(master, "auditoria_integridade", {});
+    const r = await rpcServico<{ itens?: { codigo: string }[] } | { codigo: string }[]>("auditoria_integridade", {});
     expect(r.erro).toBeNull();
     const itens = (Array.isArray(r.dados) ? r.dados : r.dados.itens ?? []) as { codigo: string }[];
     expect(itens.some((i) => i.codigo === "F10")).toBe(true);

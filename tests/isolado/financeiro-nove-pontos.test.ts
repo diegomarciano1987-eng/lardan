@@ -1,5 +1,5 @@
 import { beforeAll, expect, test } from 'bun:test';
-import { adm, criarConta, rpc, escritaDireta, type Conta } from './base';
+import { adm, criarConta, rpc, escritaDireta, rpcServico, type Conta } from './base';
 
 let master: Conta;
 let consultora: Conta;
@@ -98,9 +98,10 @@ test('5 unificação oficial move título para Daniel canônico preservando núm
   if (!t.ok) throw new Error(t.erro ?? 'Falha');
   const before = await one('select numero,valor_cents::int valor from financial_titles where id=$1',[t.dados]);
   const args = { _canonica:party,_duplicada:dup,_motivo:'Unificar Daniel para pró-labore' };
-  const preview = await rpc<{ previa:boolean }>(master,'party_unificar',{...args,_executar:false});
+  expect((await rpc(master,'party_unificar',{...args,_executar:false})).ok).toBe(false); // 0328: só o servidor
+  const preview = await rpcServico<{ previa:boolean }>('party_unificar',{...args,_executar:false});
   expect(preview.dados.previa).toBe(true);
-  const r = await rpc(master,'party_unificar',{...args,_executar:true});
+  const r = await rpcServico('party_unificar',{...args,_executar:true});
   expect(r.erro).toBeNull();
   expect(await one('select numero,valor_cents::int valor,party_id from financial_titles where id=$1',[t.dados])).toMatchObject({...before,party_id:party});
   expect((await one('select count(*)::int n from party_unificacoes where canonica_id=$1 and duplicada_id=$2',[party,dup])).n).toBe(1);

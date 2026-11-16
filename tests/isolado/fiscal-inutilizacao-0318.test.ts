@@ -3,7 +3,7 @@
  * Caso real: série 3, nº 179–181 (recusa 635 em 12/11/2026). Banco ISOLADO, dados sintéticos (série 97).
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, rpc, type Conta } from "./base";
+import { adm, criarConta, rpc, rpcServico, type Conta } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
@@ -85,7 +85,7 @@ describe("0318: inutilização de números pulados", () => {
     const pul = await rpc<{ serie: string; numero: number }[]>(master, "fiscal_numeros_pulados", {});
     expect(pul.erro).toBeNull();
     expect(pul.dados.some((x) => x.serie === SERIE)).toBe(false);
-    const a = await rpc<{ itens?: { codigo: string; refs?: string[]; amostra?: string[] }[] }>(master, "auditoria_integridade", {});
+    const a = await rpcServico<{ itens?: { codigo: string; refs?: string[]; amostra?: string[] }[] }>("auditoria_integridade", {});
     expect(JSON.stringify(a.dados)).not.toContain(`série ${SERIE} nº 13`);
     const hist = await rpc<{ serie: string; resultado: string }[]>(master, "fiscal_inutilizacoes_lista", {});
     expect(hist.dados.some((h) => h.serie === SERIE && h.resultado === "inutilizada")).toBe(true);

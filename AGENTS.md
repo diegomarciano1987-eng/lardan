@@ -33,7 +33,7 @@
 - Biblioteca type is separate from social format; shared publication/storage policies. Why: preserve arts/privacy.
 - Outside portfolio: name/code/status/debt only, restrito=true; blocked/departed cannot move portfolio/reactivate. Why: privacy/finance.
 - With asaas_accounts.conta_cartao_receber_id set, settle there; asaas_cartao_creditar transfers to Asaas idempotently on/after credit_date, skipping reversed settlements. Empty preserves old behavior; asaas_baixa_pendentes sweeps lost-webhook credits. Why: accurate cash timing/recovery.
-- All installment balances use fin_installment_saldo: amount + interest/fine - discount/abatement - allocations. Never valor minus allocations. Why: one balance.
+- All installment balances use fin_installment_saldo (single row) or the service-only view fin_installment_saldos (batch), which holds the one formula: amount + interest/fine - discount/abatement - allocations. Never valor minus allocations. Why: one balance, no per-row calls.
 - Test-kit cleanup: service-only kit_testes_cancelar, seven expected cycles/quantities, official transfers, immutable snapshots; retain history. Why: stock/remessas.
 - SmallData rules (legado_*, BI, 0149 cockpit, maleta situation 0127, party code 0129, first montagem links 0136) live in drizzle/AGENTS.md; read it before touching legado_* or SmallData screens.
 - Consultant commission tiers apply to the remessa total: UI uses comissaoPorRemessa (src/lib/comissao-maletas.ts) and consultora_ganhos sums every open cycle of the same remessa. Why: splitting kits lowers the tier.
@@ -55,3 +55,4 @@
 - Barcodes 5-digit seq (never EAN-13); barcode/ref unique incl. product×variant (codigo_unico_guarda). Why: Argox, scans.
 - Signed-document rules: src/lib/zapsign/AGENTS.md. Why: privacy.
 - SmallData remessa transfer preview verifies the legacy representative CPF against the destination representative document, without rewriting legacy party links; apply consumes the same preview. A missing-document exception for 924/925 requires an exact representative/remessa audit authorization by the executing Master, a unique active representative name and expires after one day. Why: preserve identity and portfolio scope without permanent bypasses.
+- RLS policies call auth-only role/capability helpers wrapped as ( SELECT has_capability(auth.uid(), ...) ); my_capabilities() must keep returning exactly has_capability per capability (tests/isolado/alivio-banco-0327). Why: per-row helper calls overloaded the database (0327).

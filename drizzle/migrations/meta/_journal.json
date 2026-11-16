@@ -2297,6 +2297,13 @@
       "when": 1794842653324,
       "tag": "0327_alivio_banco_0327",
       "breakpoints": true
+    },
+    {
+      "idx": 328,
+      "version": "7",
+      "when": 1794842926397,
+      "tag": "0328_seguranca_rotinas_internas_0328",
+      "breakpoints": true
     }
   ]
 }

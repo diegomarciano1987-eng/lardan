@@ -55,3 +55,4 @@
 - Barcodes 5-digit seq (never EAN-13); barcode/ref unique incl. product×variant (codigo_unico_guarda). Why: Argox, scans.
 - Signed-document rules: src/lib/zapsign/AGENTS.md. Why: privacy.
 - SmallData remessa transfer preview verifies the legacy representative CPF against the destination representative document, without rewriting legacy party links; apply consumes the same preview. A missing-document exception for 924/925 requires an exact representative/remessa audit authorization by the executing Master, a unique active representative name and expires after one day. Why: preserve identity and portfolio scope without permanent bypasses.
+- Public write doors (candidatura, contato, vitrine purchase, colab login) are throttled server-side via service-only seguranca_limite (limite.server reads Cloudflare IP, fails open); anon SECURITY DEFINER whitelist is guarded by tests/isolado/seguranca-0326. Why: no mass submissions or spoofed IPs.

@@ -42,6 +42,11 @@ export function ContatoForm() {
 
     setBusy(false);
     if (error || !data) {
+      // 0326: limite contra envio em massa (5 mensagens a cada 10 minutos por rede)
+      if (error?.message?.includes("limite_envios")) {
+        setErro("Recebemos várias mensagens daqui em pouco tempo. Aguarde alguns minutos ou fale com a gente pelo WhatsApp.");
+        return;
+      }
       setErro("Não foi possível enviar a mensagem. Confira os campos e tente novamente.");
       return;
     }

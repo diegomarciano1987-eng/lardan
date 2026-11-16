@@ -3,8 +3,8 @@ import { z } from "zod";
 import { getCookie, getRequestHeader } from "@tanstack/react-start/server";
 
 /**
- * Capas das peças (foto de posição 0) para qualquer usuário logado,
- * inclusive consultoras: recebe ids de produto ou variante e devolve
+ * Capas das peças (foto de posição 0) para quem tem papel no sistema (equipe,
+ * consultora, representante) ou terminal do PDV: recebe ids de produto ou variante e devolve
  * URL assinada de 1 h. Nunca devolve mais nada além da foto.
  */
 export const capasDasPecas = createServerFn({ method: "POST" })
@@ -23,7 +23,11 @@ export const capasDasPecas = createServerFn({ method: "POST" })
     const bearer = getRequestHeader("authorization")?.replace(/^Bearer\s+/i, "");
     if (bearer) {
       const { data: u } = await supabaseAdmin.auth.getUser(bearer);
-      autorizado = Boolean(u?.user);
+      // 0326: conta criada pelo site (/minha-conta) não tem papel no sistema e não vê foto de peça não publicada
+      if (u?.user) {
+        const { count } = await supabaseAdmin.from("user_roles").select("user_id", { count: "exact", head: true }).eq("user_id", u.user.id);
+        autorizado = (count ?? 0) > 0;
+      }
     }
     if (!autorizado) {
       const t = getCookie("lardan_pdv");

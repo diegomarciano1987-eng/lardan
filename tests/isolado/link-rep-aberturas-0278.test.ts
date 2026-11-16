@@ -4,7 +4,7 @@
  * o card do painel mostra o representante. Banco ISOLADO, dados sintéticos.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, criarDeposito, criarVariante, porEstoque, ler, rpc, type Conta } from "./base";
+import { adm, criarConta, criarDeposito, criarVariante, porEstoque, ler, rpc, type Conta, rpcServico } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const base = 100000 + Math.floor(Math.random() * 800000);
@@ -20,7 +20,8 @@ function cpf(): string {
 }
 const zap = () => `4399${String(Math.floor(Math.random() * 1e7)).padStart(7, "0")}`;
 function candidatura(doc: string, whatsapp: string, tracking: Record<string, unknown>) {
-  return rpc<{ protocol: string; duplicate: boolean }>(null, "submit_candidatura", {
+  // 0326: a candidatura só entra pelo servidor (service_role)
+  return rpcServico<{ protocol: string; duplicate: boolean }>("submit_candidatura", {
     _payload: { first_name: "Larissa", last_name: `Link ${marca}`, cpf: doc, whatsapp, city: "Cornélio Procópio", uf: "PR", privacy_version: "v1" },
     _tracking: tracking,
   });

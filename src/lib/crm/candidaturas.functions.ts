@@ -95,30 +95,17 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => Entrada.parse(data))
   .handler(async ({ data }) => {
     const { getRequest } = await import("@tanstack/react-start/server");
-    const { createClient } = await import("@supabase/supabase-js");
 
     const req = getRequest();
     const headers = req.headers;
     const ip = ipDaRequisicao(headers);
     const userAgent = (headers.get("user-agent") ?? "").slice(0, 500);
 
-    const chave = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-    const cliente = createClient(process.env["SUPABASE_URL"]!, chave, {
-      auth: { persistSession: false, autoRefreshToken: false },
-      global: {
-        fetch: (input, init) => {
-          const h = new Headers(init?.headers);
-          if (chave.startsWith("sb_") && h.get("Authorization") === `Bearer ${chave}`) {
-            h.delete("Authorization");
-          }
-          h.set("apikey", chave);
-          return fetch(input, { ...init, headers: h });
-        },
-      },
-    });
+    // 0326: a rotina do banco só aceita o servidor; o IP gravado é o da requisição real.
+    const { supabaseAdmin: cliente } = await import("@/integrations/supabase/client.server");
 
     const { experiencia_venda, horas_semana, aceite_contato, ...payloadCadastro } = data.payload;
-    const { data: resultado, error } = await cliente.rpc("submit_candidatura", {
+    const { data: resultado, error } = await (cliente as unknown as { rpc: (f: string, a: object) => PromiseLike<{ data: unknown; error: { message: string } | null }> }).rpc("submit_candidatura", {
       _payload: payloadCadastro,
       _tracking: { ...data.tracking, ip, user_agent: userAgent },
     });

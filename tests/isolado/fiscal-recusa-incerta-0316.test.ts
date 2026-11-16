@@ -99,7 +99,7 @@ describe("0316: recusa incerta da SEFAZ", () => {
   });
 
   test("raio-x tem F10 e F11", async () => {
-    const r = await rpc<{ itens?: { codigo: string }[] } | { codigo: string }[]>(master, "auditoria_integridade", {});
+    const r = await rpcServico<{ itens?: { codigo: string }[] } | { codigo: string }[]>("auditoria_integridade", {});
     expect(r.erro).toBeNull();
     const itens = (Array.isArray(r.dados) ? r.dados : r.dados.itens ?? []) as { codigo: string }[];
     expect(itens.some((i) => i.codigo === "F10")).toBe(true);

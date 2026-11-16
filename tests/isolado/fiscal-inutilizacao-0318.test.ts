@@ -85,7 +85,7 @@ describe("0318: inutilização de números pulados", () => {
     const pul = await rpc<{ serie: string; numero: number }[]>(master, "fiscal_numeros_pulados", {});
     expect(pul.erro).toBeNull();
     expect(pul.dados.some((x) => x.serie === SERIE)).toBe(false);
-    const a = await rpc<{ itens?: { codigo: string; refs?: string[]; amostra?: string[] }[] }>(master, "auditoria_integridade", {});
+    const a = await rpcServico<{ itens?: { codigo: string; refs?: string[]; amostra?: string[] }[] }>("auditoria_integridade", {});
     expect(JSON.stringify(a.dados)).not.toContain(`série ${SERIE} nº 13`);
     const hist = await rpc<{ serie: string; resultado: string }[]>(master, "fiscal_inutilizacoes_lista", {});
     expect(hist.dados.some((h) => h.serie === SERIE && h.resultado === "inutilizada")).toBe(true);

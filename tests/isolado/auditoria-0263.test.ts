@@ -54,11 +54,12 @@ beforeAll(async () => {
 });
 
 describe("raio-x de integridade", () => {
-  test("só Master ou servidor; roda todos os itens sem erro e sem dado pessoal", async () => {
+  test("só o servidor (0328: nem Master logado chama direto); roda todos os itens sem erro e sem dado pessoal", async () => {
     expect((await rpc(cons, "auditoria_integridade", {})).ok).toBe(false);
+    expect((await rpc(master, "auditoria_integridade", {})).ok).toBe(false);
     expect((await rpc(rep, "auditoria_integridade", {})).ok).toBe(false);
     expect((await rpc(null, "auditoria_integridade", {})).ok).toBe(false);
-    const r = await rpc<{ itens: { codigo: string; erro?: string; quantidade: number; exemplos: string[] }[] }>(master, "auditoria_integridade", {});
+    const r = await rpcServico<{ itens: { codigo: string; erro?: string; quantidade: number; exemplos: string[] }[] }>("auditoria_integridade", {});
     expect(r.erro).toBeNull();
     expect(r.dados.itens.length).toBe(42); // 0282: + F9 · 0316: + F10 e F11 (nota incerta e número pulado)
     expect(r.dados.itens.filter((i) => i.erro)).toEqual([]);
@@ -66,7 +67,6 @@ describe("raio-x de integridade", () => {
     const docs = (await adm.unsafe(`select doc_digits d from parties where doc_digits is not null`)) as { d: string }[];
     expect(docs.filter((x) => texto.includes(x.d))).toEqual([]); // nenhum CPF
     expect(texto).not.toMatch(/@/); // nenhum e-mail
-    const sv = await rpcServico("auditoria_integridade", {}); expect(sv.erro).toBeNull();
   });
 });
 

@@ -45,6 +45,9 @@ export interface CobrancaExterna {
   dateCreated?: string | null;
   /** endereço da fatura devolvido pelo provedor — nunca montado por concatenação */
   invoiceUrl?: string | null;
+  /** 0329: parcelamento do Asaas a que esta cobrança pertence (cartão parcelado) */
+  installmentId?: string | null;
+  installmentNumber?: number | null;
 }
 
 export interface Pagina<T> {
@@ -84,8 +87,11 @@ export interface NovaCobranca {
   externalReference: string;
   /** chave de repetição do nosso lado */
   idempotencyKey: string;
-  /** parcelas máximas no cartão (conta Lardan: 3x); só faz sentido em CREDIT_CARD */
+  /** @deprecated o Asaas ignora este campo em /payments (era a causa do link sempre em 1x); não enviar */
   maxInstallmentCount?: number;
+  /** 0329: cartão parcelado oficial — quantidade de parcelas (2 a 12) e valor total cobrado da cliente */
+  installmentCount?: number;
+  totalValueCents?: number;
 }
 
 export interface EventoExterno {
@@ -175,6 +181,10 @@ export interface TransporteAsaas {
   consultarCobranca(id: string): Promise<CobrancaExterna | null>;
   consultarCobrancaPorReferencia(ref: string): Promise<CobrancaExterna | null>;
   criarCobranca(n: NovaCobranca): Promise<CobrancaExterna>;
+  /** 0329: todas as cobranças (parcelas) de um parcelamento, em ordem de parcela */
+  listarParcelasDoParcelamento?(installmentId: string): Promise<CobrancaExterna[]>;
+  /** 0329: cobranças vivas com esta referência (o parcelamento repete a referência em todas as parcelas) */
+  listarCobrancasPorReferencia?(ref: string): Promise<CobrancaExterna[]>;
 
   /** endereço da fatura, como o provedor devolve */
   obterLinkFatura(chargeId: string): Promise<string>;

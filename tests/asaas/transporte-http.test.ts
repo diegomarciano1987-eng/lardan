@@ -62,15 +62,33 @@ describe("montagem da requisição", () => {
     expect(c.invoiceUrl).toBe(pagamento.invoiceUrl);
   });
 
-  test("cartão de crédito leva maxInstallmentCount 3; pix não leva", async () => {
-    const { f, chamadas } = falso(() => json(200, { ...pagamento, billingType: "CREDIT_CARD" }));
-    await http(f).criarCobranca({ customer: "cus_1", valueCents: 30000, dueDate: "2026-10-10", billingType: "CREDIT_CARD", externalReference: "r", idempotencyKey: "k", maxInstallmentCount: 3 });
+  test("0329: cartão parcelado vai como parcelamento oficial (installmentCount + totalValue), nunca maxInstallmentCount", async () => {
+    const { f, chamadas } = falso(() => json(200, { ...pagamento, billingType: "CREDIT_CARD", installment: "ins_1", installmentNumber: 1, value: 77.84 }));
+    const c = await http(f).criarCobranca({ customer: "cus_1", valueCents: 30000, dueDate: "2026-10-10", billingType: "CREDIT_CARD", externalReference: "r", idempotencyKey: "k", installmentCount: 4, totalValueCents: 31136 });
     const corpo = JSON.parse(chamadas[0]!.init.body as string);
     expect(corpo.billingType).toBe("CREDIT_CARD");
-    expect(corpo.maxInstallmentCount).toBe(3);
+    expect(corpo.installmentCount).toBe(4);
+    expect(corpo.totalValue).toBe(311.36);
+    expect(corpo.value).toBeUndefined();
+    expect(corpo.maxInstallmentCount).toBeUndefined();
+    expect(c.installmentId).toBe("ins_1");
+    expect(c.installmentNumber).toBe(1);
+    // à vista e Pix: valor simples, sem parcelamento
     const { f: f2, chamadas: c2 } = falso(() => json(200, pagamento));
     await http(f2).criarCobranca({ customer: "cus_1", valueCents: 100, dueDate: "2026-10-10", billingType: "PIX", externalReference: "r", idempotencyKey: "k" });
-    expect(JSON.parse(c2[0]!.init.body as string).maxInstallmentCount).toBeUndefined();
+    const corpo2 = JSON.parse(c2[0]!.init.body as string);
+    expect(corpo2.value).toBe(1);
+    expect(corpo2.installmentCount).toBeUndefined();
+    expect(corpo2.maxInstallmentCount).toBeUndefined();
+  });
+
+  test("0329: lê as parcelas do parcelamento pelo id, em ordem", async () => {
+    const { f, chamadas } = falso(() => json(200, { object: "list", hasMore: false, totalCount: 2, limit: 100, offset: 0, data: [
+      { ...pagamento, id: "pay_b", installment: "ins_1", installmentNumber: 2 }, { ...pagamento, id: "pay_a", installment: "ins_1", installmentNumber: 1 }] }));
+    const l = await http(f).listarParcelasDoParcelamento("ins_1");
+    expect(chamadas[0]!.url).toContain("/payments?");
+    expect(chamadas[0]!.url).toContain("installment=ins_1");
+    expect(l.map((x) => x.id)).toEqual(["pay_a", "pay_b"]);
   });
 
   test("produção usa a base de produção; GET não leva corpo", async () => {
@@ -210,7 +228,9 @@ describe("fábrica de transporte (resolução única por conta)", () => {
       expect(r.executavel).toBe(true);
       const t = await transporteDaResolucao(r);
       await t.criarCobranca({ customer: "cus_1", valueCents: 12990, dueDate: "2026-10-10", billingType: "PIX", externalReference: "r", idempotencyKey: "k" });
-      expect(e.chamadas.length).toBe(1);
+      // 0325: depois de criar, pede ao Asaas o envio do aviso da cobrança
+      expect(e.chamadas.length).toBe(2);
+      expect(e.chamadas[1]!.url).toContain("/resendNotification");
       const h = e.chamadas[0]!.init.headers as Record<string, string>;
       expect(e.chamadas[0]!.url).toBe("https://api-sandbox.asaas.com/v3/payments");
       expect(h["access_token"]).toBe("$aact_hmlg_valor_sintetico");

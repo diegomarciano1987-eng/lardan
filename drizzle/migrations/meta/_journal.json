@@ -2304,6 +2304,13 @@
       "when": 1794842926397,
       "tag": "0328_seguranca_rotinas_internas_0328",
       "breakpoints": true
+    },
+    {
+      "idx": 329,
+      "version": "7",
+      "when": 1794844086469,
+      "tag": "0329_cartao_parcelado_link_asaas_0329",
+      "breakpoints": true
     }
   ]
 }

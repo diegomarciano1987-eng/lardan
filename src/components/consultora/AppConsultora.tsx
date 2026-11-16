@@ -20,6 +20,7 @@ import { useTemaConsultora } from "@/lib/consultora-tema";
 import { TemaClaroEscuro } from "@/components/consultora/TemaClaroEscuro";
 import { inicioQuery, clientesQuery } from "@/lib/consultora-queries";
 import { PagamentoLardan, LembretesPagamento } from "@/components/consultora/PagamentoLardan";
+import { simularParcelas } from "@/lib/cartao-parcelas";
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -974,7 +975,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
             </div>
             {(forma === "credito" || forma === "a_prazo") && (
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <SmartSelect value={parcelas} onChange={setParcelas} placeholder="Parcelas" options={Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: i ? `${i + 1}x de ${brl(Math.round(total / (i + 1)))}` : `À vista · ${brl(total)}` }))} />
+                <SmartSelect value={parcelas} onChange={setParcelas} placeholder="Parcelas" options={Array.from({ length: 12 }, (_, i) => { const s = simularParcelas(total, forma === "credito" ? i + 1 : 1); return { value: String(i + 1), label: !i ? `À vista · ${brl(total)}` : forma !== "credito" ? `${i + 1}x de ${brl(Math.round(total / (i + 1)))}` : s.semJuros ? `${i + 1}x de ${brl(Math.floor(total / (i + 1)))} sem juros` : `${i + 1}x de ${brl(simularParcelas(total, i + 1).parcelaCents)} · total ${brl(simularParcelas(total, i + 1).totalCents)}` }; })} />
                 {forma === "a_prazo" && <DateField value={vencimento} onChange={setVencimento} placeholder="Data do 1º pagamento" />}
               </div>
             )}
@@ -996,7 +997,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
             {combinadoTexto && <p className="mt-2 text-[1rem]">Pagamento combinado: <strong>{combinadoTexto}</strong></p>}
             <p className="mt-2 text-[0.98rem] text-muted-foreground">Situação: em atendimento. As peças não foram reservadas.</p>
           </div>
-          {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} />}
+          {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} parcelasIniciais={forma === "credito" ? Number(parcelas) : 1} />}
           {cl && linkWhats(cl.telefone) && (
             <ResumoWhats orderId={resultado.order_id} telefone={cl.telefone} cliente={cl.nome} codigo={resultado.codigo} total={resultado.total_cents} combinado={combinadoTexto}
               itensLocais={escolhidas.map((p) => ({ nome: p.produto, variante: p.variante, quantidade: qtd[k(p)] ?? 0, unitario_cents: p.preco_cents, referencia: null }))} />

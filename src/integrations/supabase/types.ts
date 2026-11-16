@@ -673,6 +673,7 @@ export type Database = {
           account_id: string
           acordo_parcela: number | null
           acordo_simulacao_id: string | null
+          acrescimo_cartao_cents: number
           attempts: number
           billing_type: string
           charge_id: string | null
@@ -693,6 +694,7 @@ export type Database = {
           last_error: string | null
           lease_until: string | null
           next_attempt_at: string | null
+          parcelas_cartao: number | null
           party_id: string
           processing_at: string | null
           recuperacoes: number
@@ -711,6 +713,7 @@ export type Database = {
           account_id: string
           acordo_parcela?: number | null
           acordo_simulacao_id?: string | null
+          acrescimo_cartao_cents?: number
           attempts?: number
           billing_type: string
           charge_id?: string | null
@@ -731,6 +734,7 @@ export type Database = {
           last_error?: string | null
           lease_until?: string | null
           next_attempt_at?: string | null
+          parcelas_cartao?: number | null
           party_id: string
           processing_at?: string | null
           recuperacoes?: number
@@ -749,6 +753,7 @@ export type Database = {
           account_id?: string
           acordo_parcela?: number | null
           acordo_simulacao_id?: string | null
+          acrescimo_cartao_cents?: number
           attempts?: number
           billing_type?: string
           charge_id?: string | null
@@ -769,6 +774,7 @@ export type Database = {
           last_error?: string | null
           lease_until?: string | null
           next_attempt_at?: string | null
+          parcelas_cartao?: number | null
           party_id?: string
           processing_at?: string | null
           recuperacoes?: number
@@ -985,6 +991,7 @@ export type Database = {
       asaas_charges: {
         Row: {
           account_id: string
+          acrescimo_cartao_cents: number
           billing_type: string | null
           confirmed_date: string | null
           credit_date: string | null
@@ -1019,6 +1026,7 @@ export type Database = {
         }
         Insert: {
           account_id: string
+          acrescimo_cartao_cents?: number
           billing_type?: string | null
           confirmed_date?: string | null
           credit_date?: string | null
@@ -1053,6 +1061,7 @@ export type Database = {
         }
         Update: {
           account_id?: string
+          acrescimo_cartao_cents?: number
           billing_type?: string | null
           confirmed_date?: string | null
           credit_date?: string | null
@@ -20996,6 +21005,10 @@ export type Database = {
       asaas_auto_rodar: { Args: { _limite?: number }; Returns: Json }
       asaas_baixa_automatica: { Args: { _charge: string }; Returns: Json }
       asaas_baixa_pendentes: { Args: { _executar?: boolean }; Returns: Json }
+      asaas_cartao_acrescimo: {
+        Args: { _base_cents: number; _parcelas: number }
+        Returns: number
+      }
       asaas_cartao_creditar: { Args: { _charge: string }; Returns: Json }
       asaas_charge_vincular: {
         Args: {
@@ -21253,6 +21266,7 @@ export type Database = {
           account_id: string
           acordo_parcela: number | null
           acordo_simulacao_id: string | null
+          acrescimo_cartao_cents: number
           attempts: number
           billing_type: string
           charge_id: string | null
@@ -21273,6 +21287,7 @@ export type Database = {
           last_error: string | null
           lease_until: string | null
           next_attempt_at: string | null
+          parcelas_cartao: number | null
           party_id: string
           processing_at: string | null
           recuperacoes: number

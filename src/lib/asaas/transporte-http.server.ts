@@ -109,6 +109,8 @@ export function traduzirCobranca(p: Json): CobrancaExterna {
     externalReference: txt(p["externalReference"]),
     dateCreated: txt(p["dateCreated"]),
     invoiceUrl: txt(p["invoiceUrl"]),
+    installmentId: txt(p["installment"]),
+    installmentNumber: typeof p["installmentNumber"] === "number" ? (p["installmentNumber"] as number) : null,
   };
 }
 
@@ -349,10 +351,12 @@ export class TransporteHttpAsaas implements TransporteAsaas {
       corpo: {
         customer: n.customer,
         billingType: n.billingType,
-        value: paraReais(n.valueCents),
+        // 0329: cartão parcelado oficial (installmentCount + totalValue); "maxInstallmentCount" não existe em /payments
+        ...(n.installmentCount && n.installmentCount > 1
+          ? { installmentCount: n.installmentCount, totalValue: paraReais(n.totalValueCents ?? n.valueCents) }
+          : { value: paraReais(n.valueCents) }),
         dueDate: n.dueDate,
         ...(n.description ? { description: n.description } : {}),
-        ...(n.maxInstallmentCount ? { maxInstallmentCount: n.maxInstallmentCount } : {}),
         externalReference: n.externalReference,
       },
     });
@@ -370,6 +374,19 @@ export class TransporteHttpAsaas implements TransporteAsaas {
       console.warn("[asaas] aviso da cobrança não enviado", criada.id, e instanceof Error ? e.message : e);
     }
     return criada;
+  }
+
+  /** 0329: parcelas de um parcelamento (GET /payments?installment=), em ordem de parcela. */
+  async listarParcelasDoParcelamento(installmentId: string) {
+    const c = await this.enviar<Json>("GET", "/payments", { query: { installment: installmentId, limit: 100, offset: 0 } });
+    const p = this.pagina(c, { limit: 100, offset: 0 }, traduzirCobranca);
+    return p.itens.filter((x) => x.status !== "DELETED").sort((a, b) => (a.installmentNumber ?? 0) - (b.installmentNumber ?? 0) || a.dueDate.localeCompare(b.dueDate));
+  }
+
+  /** 0329: cobranças vivas com a mesma referência (as parcelas de um parcelamento a repetem). */
+  async listarCobrancasPorReferencia(ref: string) {
+    const c = await this.enviar<Json>("GET", "/payments", { query: { externalReference: ref, limit: 100, offset: 0 } });
+    return this.pagina(c, { limit: 100, offset: 0 }, traduzirCobranca).itens.filter((x) => x.status !== "DELETED");
   }
 
   /** 0325: reenviar o aviso do Asaas (WhatsApp/SMS/e-mail) de uma cobrança aberta. */

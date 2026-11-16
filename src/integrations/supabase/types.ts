@@ -809,6 +809,13 @@ export type Database = {
             foreignKeyName: "asaas_charge_intents_installment_id_fkey"
             columns: ["installment_id"]
             isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
+          {
+            foreignKeyName: "asaas_charge_intents_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
             referencedRelation: "financial_installments"
             referencedColumns: ["id"]
           },
@@ -892,6 +899,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "asaas_charges"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_charge_matches_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
           },
           {
             foreignKeyName: "asaas_charge_matches_installment_id_fkey"
@@ -1078,6 +1092,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "asaas_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_charges_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
           },
           {
             foreignKeyName: "asaas_charges_installment_id_fkey"
@@ -1462,6 +1483,13 @@ export type Database = {
             foreignKeyName: "asaas_divergencia_alertas_installment_id_fkey"
             columns: ["installment_id"]
             isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
+          {
+            foreignKeyName: "asaas_divergencia_alertas_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
             referencedRelation: "financial_installments"
             referencedColumns: ["id"]
           },
@@ -1518,6 +1546,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "asaas_espelho_pedidos_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
           {
             foreignKeyName: "asaas_espelho_pedidos_installment_id_fkey"
             columns: ["installment_id"]
@@ -1691,6 +1726,13 @@ export type Database = {
           valor_cents?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "asaas_fantasmas_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
           {
             foreignKeyName: "asaas_fantasmas_installment_id_fkey"
             columns: ["installment_id"]
@@ -1967,6 +2009,13 @@ export type Database = {
             foreignKeyName: "asaas_import_stage_installment_id_fkey"
             columns: ["installment_id"]
             isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
+          {
+            foreignKeyName: "asaas_import_stage_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
             referencedRelation: "financial_installments"
             referencedColumns: ["id"]
           },
@@ -2161,6 +2210,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "asaas_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_saldo_sync_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
           },
           {
             foreignKeyName: "asaas_saldo_sync_installment_id_fkey"
@@ -3796,6 +3852,13 @@ export type Database = {
           valor_cents?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "cob_comprovantes_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
           {
             foreignKeyName: "cob_comprovantes_installment_id_fkey"
             columns: ["installment_id"]
@@ -7622,6 +7685,13 @@ export type Database = {
             foreignKeyName: "financial_adjustments_installment_id_fkey"
             columns: ["installment_id"]
             isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
+          {
+            foreignKeyName: "financial_adjustments_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
             referencedRelation: "financial_installments"
             referencedColumns: ["id"]
           },
@@ -7678,6 +7748,13 @@ export type Database = {
             foreignKeyName: "financial_allocation_targets_installment_id_fkey"
             columns: ["installment_id"]
             isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
+          {
+            foreignKeyName: "financial_allocation_targets_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
             referencedRelation: "financial_installments"
             referencedColumns: ["id"]
           },
@@ -7706,6 +7783,13 @@ export type Database = {
           valor_cents?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "financial_allocations_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
           {
             foreignKeyName: "financial_allocations_installment_id_fkey"
             columns: ["installment_id"]
@@ -7850,6 +7934,13 @@ export type Database = {
           vencimento?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "financial_import_ap_stage_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
           {
             foreignKeyName: "financial_import_ap_stage_installment_id_fkey"
             columns: ["installment_id"]
@@ -8020,6 +8111,13 @@ export type Database = {
             foreignKeyName: "financial_match_suggestions_installment_id_fkey"
             columns: ["installment_id"]
             isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
+          {
+            foreignKeyName: "financial_match_suggestions_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
             referencedRelation: "financial_installments"
             referencedColumns: ["id"]
           },
@@ -8058,6 +8156,13 @@ export type Database = {
           valor_cents?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "financial_reconciliation_allocations_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
           {
             foreignKeyName: "financial_reconciliation_allocations_installment_id_fkey"
             columns: ["installment_id"]
@@ -11403,6 +11508,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "kit_cycles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_pre_baixas_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
           },
           {
             foreignKeyName: "kit_pre_baixas_installment_id_fkey"
@@ -17237,8 +17349,22 @@ export type Database = {
             foreignKeyName: "rep_cobrancas_parciais_installment_origem_fkey"
             columns: ["installment_origem"]
             isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
+          },
+          {
+            foreignKeyName: "rep_cobrancas_parciais_installment_origem_fkey"
+            columns: ["installment_origem"]
+            isOneToOne: false
             referencedRelation: "financial_installments"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_cobrancas_parciais_installment_parcial_fkey"
+            columns: ["installment_parcial"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
           },
           {
             foreignKeyName: "rep_cobrancas_parciais_installment_parcial_fkey"
@@ -17496,6 +17622,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "financial_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_recibos_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
           },
           {
             foreignKeyName: "rep_recibos_installment_id_fkey"
@@ -18076,6 +18209,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "sales_orders_pay_installment_id_fkey"
+            columns: ["pay_installment_id"]
+            isOneToOne: false
+            referencedRelation: "fin_installment_saldos"
+            referencedColumns: ["installment_id"]
           },
           {
             foreignKeyName: "sales_orders_pay_installment_id_fkey"
@@ -20630,6 +20770,21 @@ export type Database = {
             referencedColumns: ["party_id"]
           },
         ]
+      }
+      fin_installment_saldos: {
+        Row: {
+          installment_id: string | null
+          saldo_cents: number | null
+        }
+        Insert: {
+          installment_id?: string | null
+          saldo_cents?: never
+        }
+        Update: {
+          installment_id?: string | null
+          saldo_cents?: never
+        }
+        Relationships: []
       }
       v_network_consultants: {
         Row: {

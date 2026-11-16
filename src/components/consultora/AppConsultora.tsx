@@ -996,7 +996,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
             {combinadoTexto && <p className="mt-2 text-[1rem]">Pagamento combinado: <strong>{combinadoTexto}</strong></p>}
             <p className="mt-2 text-[0.98rem] text-muted-foreground">Situação: em atendimento. As peças não foram reservadas.</p>
           </div>
-          {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} />}
+          {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} parcelasIniciais={forma === "credito" ? Number(parcelas) : 1} />}
           {cl && linkWhats(cl.telefone) && (
             <ResumoWhats orderId={resultado.order_id} telefone={cl.telefone} cliente={cl.nome} codigo={resultado.codigo} total={resultado.total_cents} combinado={combinadoTexto}
               itensLocais={escolhidas.map((p) => ({ nome: p.produto, variante: p.variante, quantidade: qtd[k(p)] ?? 0, unitario_cents: p.preco_cents, referencia: null }))} />

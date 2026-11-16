@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { consultoraCobrancaGerar } from "@/lib/consultora-pagamento.functions";
 import { DateField } from "@/components/premium/DateField";
 import { linkWhats } from "@/lib/consultora";
+import { SmartSelect } from "@/components/premium/SmartSelect";
+import { PARCELAS_MAX, simularParcelas } from "@/lib/cartao-parcelas";
 
 type Forma = "pix" | "cartao" | "depois" | "dinheiro";
 const brl = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -26,11 +28,14 @@ const OPCOES: { id: Forma; titulo: string; dica: string; icone: typeof QrCode }[
   { id: "depois", titulo: "Receber depois", dica: "Fica nos seus pedidos e a Lardan te lembra no dia", icone: Clock },
 ];
 
-export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: string; total: number; cliente: string; telefone: string }) {
+export function PagamentoLardan({ pedido, total, cliente, telefone, parcelasIniciais }: { pedido: string; total: number; cliente: string; telefone: string; parcelasIniciais?: number }) {
   const gerar = useServerFn(consultoraCobrancaGerar);
   const qc = useQueryClient();
   const [forma, setForma] = React.useState<Forma | null>(null);
   const [cpf, setCpf] = React.useState("");
+  // 0329: parcelas do cartão escolhidas pela consultora (já vem o combinado na venda, se houver)
+  const [parcelas, setParcelas] = React.useState(String(Math.min(Math.max(parcelasIniciais ?? 1, 1), PARCELAS_MAX)));
+  const sim = simularParcelas(total, Number(parcelas));
   const [venc, setVenc] = React.useState(somarDias(hoje(), 7));
   const [res, setRes] = React.useState<Awaited<ReturnType<typeof consultoraCobrancaGerar>> | null>(null);
   const [lembrete, setLembrete] = React.useState<string | null>(null);
@@ -49,7 +54,7 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
   });
 
   const m = useMutation({
-    mutationFn: () => gerar({ data: { pedido, forma: forma as "pix" | "cartao", cpf, vencimento: null } }),
+    mutationFn: () => gerar({ data: { pedido, forma: forma as "pix" | "cartao", cpf, vencimento: null, parcelas: forma === "cartao" ? Number(parcelas) : 1 } }),
     onMutate: () => setErroCobranca(null),
     onSuccess: (r) => { setRes(r); void qc.invalidateQueries({ queryKey: ["consultora"] }); },
     onError: (e) => { const msg = (e as Error).message; setErroCobranca(msg); toast.error(msg); },
@@ -75,7 +80,9 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
   const textoWhats = res
     ? res.forma === "pix" && res.copia
       ? `Olá, ${primeiro}! Segue o Pix da Lardan Semijoias de ${brl(total)}. Copie e cole no app do seu banco:\n\n${res.copia}`
-      : `Olá, ${primeiro}! Segue o link seguro da Lardan Semijoias para pagar ${brl(total)}:\n${res.url ?? ""}`
+      : (res.parcelas ?? 1) > 1
+        ? `Olá, ${primeiro}! Segue o link seguro da Lardan Semijoias para pagar no cartão em ${res.parcelas}x de ${brl(simularParcelas(total, res.parcelas ?? 1).parcelaCents)}${(res.parcelas ?? 1) <= 3 ? " sem juros" : ` (total ${brl(simularParcelas(total, res.parcelas ?? 1).totalCents)})`}:\n${res.url ?? ""}`
+        : `Olá, ${primeiro}! Segue o link seguro da Lardan Semijoias para pagar ${brl(total)}:\n${res.url ?? ""}`
     : "";
   const whats = res ? linkWhats(telefone, textoWhats) : null;
   const copiar = async (t: string) => { await navigator.clipboard.writeText(t); toast.success("Copiado!"); };
@@ -113,7 +120,7 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
   if (res) {
     return (
       <div className="space-y-4 rounded-3xl border border-border bg-card p-5">
-        <p className="text-lg font-semibold">{res.forma === "pix" ? "Pix gerado" : "Link do cartão gerado"}</p>
+        <p className="text-lg font-semibold">{res.forma === "pix" ? "Pix gerado" : (res.parcelas ?? 1) > 1 ? `Link do cartão gerado em ${res.parcelas}x` : "Link do cartão gerado"}</p>
         {res.forma === "pix" && res.qr && <img src={res.qr} alt="QR code do Pix" className="mx-auto size-64 rounded-xl border border-border bg-background p-2" />}
         {res.forma === "pix" && res.copia && (
           <button type="button" className="btn-app-principal w-full" onClick={() => copiar(res.copia!)}><Copy className="size-5" aria-hidden /> Copiar Pix copia e cola</button>
@@ -173,8 +180,21 @@ export function PagamentoLardan({ pedido, total, cliente, telefone }: { pedido: 
             <input inputMode="numeric" autoComplete="off" value={mascaraCpf(cpf)} onChange={(e) => setCpf(e.target.value.replace(/\D/g, "").slice(0, 11))}
               placeholder="000.000.000-00" className="admin-input min-h-13 w-full text-[1.05rem]" />
           </label>
+          {forma === "cartao" && (
+            <div>
+              <span className="mb-1 block text-[1rem] font-medium">Em quantas vezes?</span>
+              <SmartSelect value={parcelas} onChange={setParcelas} placeholder="Parcelas"
+                options={Array.from({ length: PARCELAS_MAX }, (_, i) => {
+                  const s = simularParcelas(total, i + 1);
+                  return { value: String(i + 1), label: i === 0 ? `À vista · ${brl(total)}` : s.semJuros ? `${i + 1}x de ${brl(s.parcelaCents)} sem juros` : `${i + 1}x de ${brl(s.parcelaCents)} · total ${brl(s.totalCents)}` };
+                })} />
+              <p className="mt-2 text-[0.95rem] text-muted-foreground">
+                {sim.semJuros ? "Até 3x sem juros para a cliente." : `De 4x a 12x a cliente paga a taxa do cartão: ${brl(sim.totalCents - total)} a mais no total.`}
+              </p>
+            </div>
+          )}
           <button type="button" className="btn-app-principal w-full" disabled={cpf.length !== 11 || m.isPending} onClick={() => m.mutate()}>
-            {m.isPending ? "Gerando…" : `Gerar cobrança de ${brl(total)}`}
+            {m.isPending ? "Gerando…" : forma === "cartao" && sim.parcelas > 1 ? `Gerar link em ${sim.parcelas}x de ${brl(sim.parcelaCents)}` : `Gerar cobrança de ${brl(total)}`}
           </button>
           {erroCobranca && (
             <div role="alert" className="space-y-2 rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-[0.98rem]">

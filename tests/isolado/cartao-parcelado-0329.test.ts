@@ -11,7 +11,7 @@ import { gerarLinkDeCobranca } from "../../src/lib/asaas/cobranca";
 import { acrescimoCartaoCents, simularParcelas } from "../../src/lib/cartao-parcelas";
 
 let financeiro: Conta, master: Conta;
-let empresa: string, conta: string, party: string, fin: string;
+let empresa: string, conta: string, party: string, fin: string, clienteExt: string;
 let n = 0;
 const marca = () => `${Date.now().toString(36)}-${++n}`;
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
@@ -29,6 +29,7 @@ async function parcelaAberta(valor: number) {
 const cobrancas = (inst: string) => adm.unsafe(
   `select id, external_id, value_cents::int v, acrescimo_cartao_cents::int a, installment_number as parcela_numero, installment_external_id as parcelamento_externo from public.asaas_charges where installment_id=$1 order by installment_number nulls first`, [inst]) as Promise<{ id: string; external_id: string; v: number; a: number; parcela_numero: number | null; parcelamento_externo: string | null }[]>;
 const saldo = async (inst: string) => Number((await rpcServico<number>("fin_installment_saldo", { _installment: inst })).dados);
+const novoSim = (semente: string) => { const sim = new SimuladorAsaas({ conta, semente }); sim.semearCliente({ id: clienteExt, name: "ISO", cpfCnpj: null, email: null }); return sim; };
 const gerar = (sim: SimuladorAsaas, inst: string, parcelas?: number) =>
   gerarLinkDeCobranca(banco(financeiro), servico, sim, { installmentId: inst, billingType: "CREDIT_CARD", ...(parcelas ? { parcelasCartao: parcelas } : {}) }, { actor: financeiro.uid });
 
@@ -41,7 +42,8 @@ beforeAll(async () => {
     `insert into public.asaas_accounts (label, environment, state, owner_entity_id, opening_balance_strategy, external_account_id, financial_account_id)
      values ($1,'sandbox','simulada',$2,'ignorar_anteriores',$3,$4) returning id`, [`ISO 0329 ${marca()}`, empresa, `acc_${marca()}`, fin])).id;
   party = (await um<{ id: string }>(`insert into public.parties (kind, display_name, legal_name, status) values ('pessoa',$1,$1,'ativo') returning id`, [`ISO Cliente 0329 ${marca()}`])).id;
-  await adm.unsafe(`insert into public.asaas_customers (account_id, external_id, name, party_id, match_status) values ($1,$2,'ISO',$3,'vinculado')`, [conta, `cus_${marca()}`, party]);
+  clienteExt = `cus_${marca()}`;
+  await adm.unsafe(`insert into public.asaas_customers (account_id, external_id, name, party_id, match_status) values ($1,$2,'ISO',$3,'vinculado')`, [conta, clienteExt, party]);
 });
 
 describe("0329: taxa do cartão (mesma conta no app e no banco)", () => {
@@ -62,7 +64,7 @@ describe("0329: taxa do cartão (mesma conta no app e no banco)", () => {
 
 describe("0329: link em parcelas", () => {
   test("4x: o Asaas recebe 4 parcelas com a taxa somada e as 4 ficam ligadas à mesma dívida", async () => {
-    const sim = new SimuladorAsaas({ conta, semente: `p4-${marca()}` });
+    const sim = novoSim(`p4-${marca()}`);
     const inst = await parcelaAberta(30000);
     const r = await gerar(sim, inst, 4);
     expect(r.state).toBe("criada");
@@ -77,7 +79,7 @@ describe("0329: link em parcelas", () => {
   });
 
   test("3x: sem juros — soma das parcelas é exatamente o valor da venda", async () => {
-    const sim = new SimuladorAsaas({ conta, semente: `p3-${marca()}` });
+    const sim = novoSim(`p3-${marca()}`);
     const inst = await parcelaAberta(30000);
     expect((await gerar(sim, inst, 3)).state).toBe("criada");
     const cs = await cobrancas(inst);
@@ -87,7 +89,7 @@ describe("0329: link em parcelas", () => {
   });
 
   test("pedido sem parcelas (equipe/Pix/boleto) continua igual: uma cobrança só", async () => {
-    const sim = new SimuladorAsaas({ conta, semente: `p1-${marca()}` });
+    const sim = novoSim(`p1-${marca()}`);
     const inst = await parcelaAberta(30000);
     expect((await gerar(sim, inst)).state).toBe("criada");
     const cs = await cobrancas(inst);
@@ -97,7 +99,7 @@ describe("0329: link em parcelas", () => {
   });
 
   test("venda que já tem link em 1x não vira outra cobrança em 4x: avisa para cancelar antes", async () => {
-    const sim = new SimuladorAsaas({ conta, semente: `troca-${marca()}` });
+    const sim = novoSim(`troca-${marca()}`);
     const inst = await parcelaAberta(30000);
     expect((await gerar(sim, inst, 1)).state).toBe("criada");
     await expect(gerar(sim, inst, 4)).rejects.toThrow(/já tem um link de cartão em 1x/);
@@ -109,7 +111,7 @@ describe("0329: link em parcelas", () => {
 
 describe("0329: baixa de cada parcela do cartão", () => {
   test("cada pay_ baixa só a sua parte com a taxa como juros; o saldo fecha em zero e nada é reemitido no meio", async () => {
-    const sim = new SimuladorAsaas({ conta, semente: `bx-${marca()}` });
+    const sim = novoSim(`bx-${marca()}`);
     const inst = await parcelaAberta(30000);
     await gerar(sim, inst, 4);
     const cs = await cobrancas(inst);
@@ -140,7 +142,7 @@ describe("0329: baixa de cada parcela do cartão", () => {
   });
 
   test("varredura de saldo não marca o parcelamento como cobrança a mais", async () => {
-    const sim = new SimuladorAsaas({ conta, semente: `var-${marca()}` });
+    const sim = novoSim(`var-${marca()}`);
     const inst = await parcelaAberta(50000);
     await gerar(sim, inst, 10);
     await rpcServico("asaas_saldo_varrer", {});

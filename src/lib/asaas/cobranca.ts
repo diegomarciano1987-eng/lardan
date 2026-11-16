@@ -32,6 +32,8 @@ export interface PedidoCobranca {
   dueDate?: string | null;
   idempotencyKey?: string | null;
   criarCliente?: boolean;
+  /** 0329: cartão parcelado escolhido (1 a 12); só vale para CREDIT_CARD. Ausente = fluxo antigo, sem mudança. */
+  parcelasCartao?: number | null;
 }
 
 export interface OpcoesExecutor {
@@ -72,6 +74,7 @@ export const prepararIntencao = (banco: BancoAsaas, p: PedidoCobranca) =>
       due_date: p.dueDate ?? null,
       idempotency_key: p.idempotencyKey ?? null,
       criar_cliente: p.criarCliente ?? true,
+      ...(p.parcelasCartao && p.billingType === "CREDIT_CARD" ? { parcelas_cartao: p.parcelasCartao } : {}),
     },
   });
 
@@ -110,6 +113,9 @@ interface Reserva {
   external_id: string | null;
   invoice_url?: string | null;
   charge_id?: string | null;
+  /** 0329: cartão parcelado (2 a 12) e taxa paga pela cliente */
+  parcelas_cartao?: number | null;
+  acrescimo_cartao_cents?: number | null;
 }
 
 interface ReservaCliente {
@@ -240,7 +246,20 @@ export async function executarIntencao(
     try {
       achada = await transporte.consultarCobrancaPorReferencia(r.internal_reference);
     } catch (e) {
-      if (e instanceof ReferenciaAmbigua) return revisar(e);
+      // 0329: no cartão parcelado todas as parcelas têm a mesma referência — fica a 1ª do único parcelamento
+      if (e instanceof ReferenciaAmbigua && (r.parcelas_cartao ?? 0) > 1 && transporte.listarCobrancasPorReferencia) {
+        try {
+          const vivas = await transporte.listarCobrancasPorReferencia(r.internal_reference);
+          const parcs = new Set(vivas.map((v) => v.installmentId ?? ""));
+          if (parcs.size !== 1 || parcs.has("")) return revisar(e);
+          achada = [...vivas].sort((a, b) => (a.installmentNumber ?? 0) - (b.installmentNumber ?? 0))[0]!;
+        } catch (e2) {
+          return (await recuperavel(e2)) ?? adiar("consulta_indisponivel", e2 instanceof Error ? e2 : new Error(msg(e2)));
+        }
+      } else if (e instanceof ReferenciaAmbigua) return revisar(e);
+      else return (await recuperavel(e)) ?? adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
+    }
+    if (false as boolean) {
       return (await recuperavel(e)) ?? adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
     }
     if (achada) {
@@ -248,7 +267,7 @@ export async function executarIntencao(
         try { await vincularCliente(achada.customer); } catch { /* vínculo divergente fica para revisão; a cobrança é registrada */ }
       }
       const link = await obterLinkSeguro(transporte, achada.id, achada.invoiceUrl);
-      return gravar({ resultado: "criada", external_id: achada.id, invoice_url: link, status: achada.status });
+      return gravar({ resultado: "criada", external_id: achada.id, invoice_url: link, status: achada.status, ...(await dadosParcelamento(transporte, r, achada)) });
     }
     if (r.customer_external_id) {
       return gravar({ resultado: "rejeitada", fase: "sem_registro_apos_consulta", erro: "Provedor consultado: nenhuma cobrança com esta referência. Nova solicitação é permitida." });
@@ -357,8 +376,10 @@ async function executarIntencaoAposCliente(
         billingType: r.billing_type,
         externalReference: r.internal_reference,
         idempotencyKey: r.internal_reference,
-        // cartão liberado até 12x; juros do parcelamento seguem a configuração da conta Asaas (repasse ao pagador)
-        ...(r.billing_type === "CREDIT_CARD" || r.billing_type === "UNDEFINED" ? { maxInstallmentCount: 12 } : {}),
+        // 0329: cartão parcelado oficial. 1x a 3x sem juros; 4x a 12x a taxa paga pela cliente já vem somada.
+        ...(r.billing_type === "CREDIT_CARD" && (r.parcelas_cartao ?? 0) > 1
+          ? { installmentCount: r.parcelas_cartao!, totalValueCents: r.valor_cents + (r.acrescimo_cartao_cents ?? 0) }
+          : {}),
       }),
       renovar,
       lease,
@@ -372,7 +393,29 @@ async function executarIntencaoAposCliente(
   }
 
   const link = await obterLinkSeguro(transporte, criada.id, criada.invoiceUrl);
-  return gravar({ resultado: "criada", external_id: criada.id, invoice_url: link, status: criada.status });
+  return gravar({ resultado: "criada", external_id: criada.id, invoice_url: link, status: criada.status, ...(await dadosParcelamento(transporte, r, criada)) });
+}
+
+/**
+ * 0329: cartão parcelado — a resposta do Asaas é só a 1ª parcela. As outras são lidas pelo id do parcelamento
+ * para que cada uma fique ligada à mesma parcela do Lardan (um pay_ = um lançamento). Se a leitura falhar,
+ * a 1ª é gravada assim mesmo e as seguintes ficam para conciliação (nunca se cria outra cobrança).
+ */
+async function dadosParcelamento(transporte: TransporteAsaas, r: Reserva, primeira: { id: string; valueCents: number; dueDate: string; installmentId?: string | null; installmentNumber?: number | null }) {
+  if ((r.parcelas_cartao ?? 0) <= 1) return {};
+  const base = { valor_cents: primeira.valueCents, vencimento: primeira.dueDate, parcela_numero: primeira.installmentNumber ?? 1 };
+  if (!primeira.installmentId || !transporte.listarParcelasDoParcelamento) return base;
+  let irmas: Awaited<ReturnType<NonNullable<TransporteAsaas["listarParcelasDoParcelamento"]>>> = [];
+  for (let k = 0; k < 3; k++) {
+    try { irmas = await transporte.listarParcelasDoParcelamento(primeira.installmentId); break; }
+    catch { await new Promise((ok) => setTimeout(ok, 400 * (k + 1))); }
+  }
+  return {
+    ...base, parcelamento: primeira.installmentId,
+    irmas: irmas.filter((x) => x.id !== primeira.id).map((x) => ({
+      external_id: x.id, valor_cents: x.valueCents, vencimento: x.dueDate, status: x.status, invoice_url: x.invoiceUrl ?? null, parcela_numero: x.installmentNumber ?? null,
+    })),
+  };
 }
 
 /** Link de cobrança já espelhada (criada aqui ou importada): consulta pelo ID, nunca cria. */

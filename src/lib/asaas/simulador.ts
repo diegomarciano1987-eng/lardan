@@ -241,6 +241,15 @@ export class SimuladorAsaas implements TransporteAsaas {
     return c ? { ...c } : null;
   }
 
+  async listarParcelasDoParcelamento(installmentId: string) {
+    return [...this.cobrancas.values()].filter((c) => c.installmentId === installmentId)
+      .sort((a, b) => (a.installmentNumber ?? 0) - (b.installmentNumber ?? 0)).map((c) => this.publica(c));
+  }
+
+  async listarCobrancasPorReferencia(ref: string) {
+    return [...this.cobrancas.values()].filter((c) => c.externalReference === ref && c.status !== "DELETED").map((c) => this.publica(c));
+  }
+
   async consultarCobrancaPorReferencia(ref: string) {
     const achadas = [...this.cobrancas.values()].filter((c) => c.externalReference === ref);
     if (achadas.length > 1) throw new ReferenciaAmbigua(ref, achadas.length);
@@ -257,6 +266,23 @@ export class SimuladorAsaas implements TransporteAsaas {
     if (!this.clientes.has(n.customer)) {
       this.gravar();
       throw new RecusadoPeloProvedor("Cliente inexistente no provedor (simulação).", 400, ["invalid_customer"]);
+    }
+    // 0329: cartão parcelado — o provedor cria uma cobrança por parcela (a resposta é a 1ª) com o id do parcelamento
+    if (n.installmentCount && n.installmentCount > 1) {
+      const total = n.totalValueCents ?? n.valueCents;
+      const base = Math.floor(total / n.installmentCount);
+      const parc = this.id("ins");
+      let primeira: CobrancaExterna | null = null;
+      for (let k = 1; k <= n.installmentCount; k++) {
+        const venc = new Date(n.dueDate + "T12:00:00Z"); venc.setUTCMonth(venc.getUTCMonth() + k - 1);
+        const c = this.semearCobranca({
+          customer: n.customer, valueCents: k === n.installmentCount ? total - base * (n.installmentCount - 1) : base,
+          dueDate: venc.toISOString().slice(0, 10), billingType: n.billingType, status: "PENDING", description: n.description ?? null,
+          externalReference: n.externalReference, dateCreated: new Date().toISOString().slice(0, 10), installmentId: parc, installmentNumber: k,
+        });
+        if (k === 1) primeira = c;
+      }
+      return this.publica(primeira!);
     }
     // o provedor NÃO garante unicidade por externalReference: a correlação é nossa
     const criada = this.semearCobranca(

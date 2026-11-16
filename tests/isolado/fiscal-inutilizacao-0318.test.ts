@@ -3,7 +3,7 @@
  * Caso real: série 3, nº 179–181 (recusa 635 em 12/11/2026). Banco ISOLADO, dados sintéticos (série 97).
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, rpc, type Conta } from "./base";
+import { adm, criarConta, rpc, rpcServico, type Conta } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;

@@ -1,5 +1,5 @@
 import { beforeAll, expect, test } from 'bun:test';
-import { adm, criarConta, rpc, escritaDireta, type Conta } from './base';
+import { adm, criarConta, rpc, escritaDireta, rpcServico, type Conta } from './base';
 
 let master: Conta;
 let consultora: Conta;

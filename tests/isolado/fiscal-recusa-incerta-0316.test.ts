@@ -4,7 +4,7 @@
  * Banco ISOLADO, dados sintéticos.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, rpc, type Conta } from "./base";
+import { adm, criarConta, rpc, rpcServico, type Conta } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;

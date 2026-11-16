@@ -3,7 +3,14 @@
  * Prova que as leituras rápidas devolvem exatamente o mesmo que as antigas.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { adm, criarConta, ler, type Conta } from "./base";
+
+/** Tabelas que só existem nas propostas de db/pendentes (aplicadas só aqui na bancada, ainda não no sistema real). */
+const pastaPendentes = join(import.meta.dir, "../../db/pendentes");
+const soPropostas = readdirSync(pastaPendentes).filter((f) => f.endsWith(".sql"))
+  .flatMap((f) => [...readFileSync(join(pastaPendentes, f), "utf8").matchAll(/create table (?:if not exists )?(?:public\.)?([a-z_]+)/gi)].map((m) => m[1]!.toLowerCase()));
 
 const base = 700000 + Math.floor(Math.random() * 90000);
 let contas: Conta[] = [];
@@ -73,8 +80,9 @@ describe("0327: saldo das parcelas", () => {
 describe("0327: regras de acesso", () => {
   test("nenhuma regra confere papel/permissão linha a linha", async () => {
     const r = (await adm.unsafe(
-      `select tablename, policyname from pg_policies where schemaname='public'
-          and (coalesce(qual,'') || ' ' || coalesce(with_check,'')) ~ '(?<!SELECT )\\m(has_role|has_capability|has_any_role|cob_pode|can_manage_leads|can_manage_content|is_staff|can_manage_kits|can_view_costs|can_view_kits|pdv_gestao|access_pode_ver_convites)\\(auth\\.uid\\(\\)(, ''[^'']*''::[a-z_]+|, ARRAY\\[[^]]*\\])?\\)'`)) as unknown[];
+      `select tablename, policyname from pg_policies where schemaname='public' and tablename <> all($1::text[])
+          and (coalesce(qual,'') || ' ' || coalesce(with_check,'')) ~ '(?<!SELECT )\\m(has_role|has_capability|has_any_role|cob_pode|can_manage_leads|can_manage_content|is_staff|can_manage_kits|can_view_costs|can_view_kits|pdv_gestao|access_pode_ver_convites)\\(auth\\.uid\\(\\)(, ''[^'']*''::[a-z_]+|, ARRAY\\[[^]]*\\])?\\)'`, [soPropostas])) as unknown[];
+    expect(soPropostas.length).toBeGreaterThan(0);
     expect(r).toEqual([]);
   });
 });

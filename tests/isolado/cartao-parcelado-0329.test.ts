@@ -27,7 +27,7 @@ async function parcelaAberta(valor: number) {
   return (await um<{ id: string }>(`select id from public.financial_installments where title_id=$1`, [r.dados])).id;
 }
 const cobrancas = (inst: string) => adm.unsafe(
-  `select id, external_id, value_cents::int v, acrescimo_cartao_cents::int a, parcela_numero, parcelamento_externo from public.asaas_charges where installment_id=$1 order by parcela_numero nulls first`, [inst]) as Promise<{ id: string; external_id: string; v: number; a: number; parcela_numero: number | null; parcelamento_externo: string | null }[]>;
+  `select id, external_id, value_cents::int v, acrescimo_cartao_cents::int a, installment_number as parcela_numero, installment_external_id as parcelamento_externo from public.asaas_charges where installment_id=$1 order by installment_number nulls first`, [inst]) as Promise<{ id: string; external_id: string; v: number; a: number; parcela_numero: number | null; parcelamento_externo: string | null }[]>;
 const saldo = async (inst: string) => Number((await rpcServico<number>("fin_installment_saldo", { _installment: inst })).dados);
 const gerar = (sim: SimuladorAsaas, inst: string, parcelas?: number) =>
   gerarLinkDeCobranca(banco(financeiro), servico, sim, { installmentId: inst, billingType: "CREDIT_CARD", ...(parcelas ? { parcelasCartao: parcelas } : {}) }, { actor: financeiro.uid });

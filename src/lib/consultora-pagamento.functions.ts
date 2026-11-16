@@ -21,9 +21,12 @@ async function rpcAdmin<T = any>(f: string, a: object): Promise<T> {
 
 export const consultoraCobrancaGerar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { pedido: string; forma: Forma; cpf: string; vencimento?: string | null }) => {
+  .inputValidator((d: { pedido: string; forma: Forma; cpf: string; vencimento?: string | null; parcelas?: number | null }) => {
     if (!d?.pedido || !["pix", "cartao", "depois"].includes(d.forma)) throw new Error("Dados inválidos.");
-    return { pedido: String(d.pedido).slice(0, 40), forma: d.forma, cpf: String(d.cpf ?? "").replace(/\D/g, "").slice(0, 11), vencimento: d.vencimento && /^\d{4}-\d{2}-\d{2}$/.test(d.vencimento) ? d.vencimento : null };
+    // 0329: parcelas do cartão (1 a 12); só valem para cartão
+    const parcelas = d.forma === "cartao" ? Math.trunc(Number(d.parcelas ?? 1)) : 1;
+    if (!Number.isFinite(parcelas) || parcelas < 1 || parcelas > 12) throw new Error("Parcelas do cartão: de 1 a 12.");
+    return { pedido: String(d.pedido).slice(0, 40), forma: d.forma, cpf: String(d.cpf ?? "").replace(/\D/g, "").slice(0, 11), vencimento: d.vencimento && /^\d{4}-\d{2}-\d{2}$/.test(d.vencimento) ? d.vencimento : null, parcelas };
   })
   .handler(async ({ data, context }) => {
     const { data: t, error } = await (context.supabase as any).rpc("consultora_pagamento_titulo", { _order: data.pedido, _forma: data.forma, _doc: data.cpf, _venc: data.vencimento });
@@ -34,7 +37,7 @@ export const consultoraCobrancaGerar = createServerFn({ method: "POST" })
     const { envDoServidor } = await import("./asaas/configuracao.server");
     const executor = await bancoExecutor();
     const usuario = { rpc: <T,>(_f: string, a: Record<string, unknown>) => rpcAdmin<T>("consultora_asaas_preparar", { _actor: tt.actor, _payload: a["_payload"] }) };
-    const r = await solicitarCobranca(usuario as never, executor, tt.actor, { installmentId: tt.installment_id, billingType: BILLING[tt.forma], dueDate: tt.vencimento }, { env: envDoServidor() });
+    const r = await solicitarCobranca(usuario as never, executor, tt.actor, { installmentId: tt.installment_id, billingType: BILLING[tt.forma], dueDate: tt.vencimento, ...(tt.forma === "cartao" ? { parcelasCartao: data.parcelas } : {}) }, { env: envDoServidor() });
     if ((r as { state: string }).state === "indisponivel") throw new Error((r as { aviso?: string }).aviso || "Cobrança indisponível no momento.");
     const rr = r as { charge_id?: string | null; invoice_url?: string | null; external_id?: string | null; simulado?: boolean };
     await rpcAdmin("consultora_pagamento_registrar", { _order: data.pedido, _charge: rr.charge_id ?? null, _url: rr.invoice_url ?? null });
@@ -48,5 +51,5 @@ export const consultoraCobrancaGerar = createServerFn({ method: "POST" })
         copia = px?.payload ?? null; qr = px?.encodedImage ? `data:image/png;base64,${px.encodedImage}` : null;
       } catch (e) { console.error("pix qrcode consultora", (e as Error).message); }
     }
-    return { forma: tt.forma, vencimento: tt.vencimento, url: rr.invoice_url ?? null, copia, qr };
+    return { forma: tt.forma, vencimento: tt.vencimento, url: rr.invoice_url ?? null, copia, qr, parcelas: tt.forma === "cartao" ? data.parcelas : 1 };
   });

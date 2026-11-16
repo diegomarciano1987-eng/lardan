@@ -38,7 +38,7 @@ export async function solicitarCobranca(
   const r = resolverConta(sit, d.env);
   if (!r.executavel) return { state: "indisponivel", situacao: r.situacao, aviso: r.motivo, reaproveitada: false };
   const transporte = d.transporte ? await d.transporte(r.accountId) : await transporteDaResolucao(r, d.fetch ? { fetch: d.fetch } : {});
-  return gerarLinkDeCobranca(usuario, servico, transporte, { installmentId: p.installmentId, billingType: p.billingType, ...(p.dueDate ? { dueDate: p.dueDate } : {}) }, {
+  return gerarLinkDeCobranca(usuario, servico, transporte, { installmentId: p.installmentId, billingType: p.billingType, ...(p.dueDate ? { dueDate: p.dueDate } : {}), ...(p.parcelasCartao ? { parcelasCartao: p.parcelasCartao } : {}) }, {
     actor, contaEsperada: r.accountId, ...(d.worker ? { worker: d.worker } : {}), ...(d.agora ? { agora: d.agora } : {}),
   });
 }

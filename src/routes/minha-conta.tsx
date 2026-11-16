@@ -24,6 +24,9 @@ export const Route = createFileRoute("/minha-conta")({
   component: MinhaConta,
 });
 
+/** Cadastro de cliente desligado até a loja online (o login também recusa contas novas). Ligar junto com o e-commerce. */
+const CADASTRO_ABERTO = false;
+
 const inputClass =
   "w-full rounded-md border border-input bg-card px-4 py-3 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 const botao =
@@ -137,13 +140,19 @@ function MinhaConta() {
                 {busy ? "Aguarde…" : modo === "entrar" ? "Entrar" : "Criar conta"}
               </button>
             </form>
-            <button
-              type="button"
-              onClick={() => { setModo(modo === "entrar" ? "criar" : "entrar"); setErro(null); setAviso(null); }}
-              className="mt-6 text-xs text-muted-foreground underline"
-            >
-              {modo === "entrar" ? "Ainda não tem conta? Criar conta" : "Já tem conta? Entrar"}
-            </button>
+            {CADASTRO_ABERTO ? (
+              <button
+                type="button"
+                onClick={() => { setModo(modo === "entrar" ? "criar" : "entrar"); setErro(null); setAviso(null); }}
+                className="mt-6 text-xs text-muted-foreground underline"
+              >
+                {modo === "entrar" ? "Ainda não tem conta? Criar conta" : "Já tem conta? Entrar"}
+              </button>
+            ) : (
+              <p className="mt-6 text-center text-xs text-muted-foreground">
+                O cadastro de novas contas de cliente estará disponível em breve.
+              </p>
+            )}
           </>
         )}
       </section>

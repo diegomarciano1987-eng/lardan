@@ -11,8 +11,11 @@ export const PARCELAS_MAX = 12;
 
 export function acrescimoCartaoCents(baseCents: number, parcelas: number): number {
   if (!(baseCents > 0) || parcelas <= PARCELAS_SEM_JUROS) return 0;
-  const pct = parcelas <= 6 ? 0.0349 : 0.0399;
-  return Math.ceil((baseCents + 49) / (1 - pct) - 1e-9) - baseCents;
+  // conta inteira (sem arredondamento de vírgula): total = teto((base + 49) / (1 − taxa))
+  const n = (Math.round(baseCents) + 49) * 10000;
+  const d = parcelas <= 6 ? 10000 - 349 : 10000 - 399;
+  const total = Math.floor(n / d) + (n % d === 0 ? 0 : 1);
+  return total - Math.round(baseCents);
 }
 
 export function simularParcelas(baseCents: number, parcelas: number) {

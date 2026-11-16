@@ -259,9 +259,6 @@ export async function executarIntencao(
       } else if (e instanceof ReferenciaAmbigua) return revisar(e);
       else return (await recuperavel(e)) ?? adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
     }
-    if (false as boolean) {
-      return (await recuperavel(e)) ?? adiar("consulta_indisponivel", e instanceof Error ? e : new Error(msg(e)));
-    }
     if (achada) {
       if (!r.customer_external_id && achada.customer) {
         try { await vincularCliente(achada.customer); } catch { /* vínculo divergente fica para revisão; a cobrança é registrada */ }

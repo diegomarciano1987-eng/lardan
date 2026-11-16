@@ -228,7 +228,9 @@ describe("fábrica de transporte (resolução única por conta)", () => {
       expect(r.executavel).toBe(true);
       const t = await transporteDaResolucao(r);
       await t.criarCobranca({ customer: "cus_1", valueCents: 12990, dueDate: "2026-10-10", billingType: "PIX", externalReference: "r", idempotencyKey: "k" });
-      expect(e.chamadas.length).toBe(1);
+      // 0325: depois de criar, pede ao Asaas o envio do aviso da cobrança
+      expect(e.chamadas.length).toBe(2);
+      expect(e.chamadas[1]!.url).toContain("/resendNotification");
       const h = e.chamadas[0]!.init.headers as Record<string, string>;
       expect(e.chamadas[0]!.url).toBe("https://api-sandbox.asaas.com/v3/payments");
       expect(h["access_token"]).toBe("$aact_hmlg_valor_sintetico");

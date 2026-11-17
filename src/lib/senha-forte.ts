@@ -14,7 +14,8 @@ function aleatorio(max: number) {
 export function gerarSenhaForte() {
   const p1 = PALAVRAS[aleatorio(PALAVRAS.length)]!;
   let p2 = PALAVRAS[aleatorio(PALAVRAS.length)]!;
-  while (p2 === p1) p2 = PALAVRAS[aleatorio(PALAVRAS.length)]!;
+  // duas palavras curtas davam 11 caracteres; a senha precisa ter pelo menos 12
+  while (p2 === p1 || p1.length + p2.length < 8) p2 = PALAVRAS[aleatorio(PALAVRAS.length)]!;
   const num = String(1000 + aleatorio(9000));
   return `${p1}${p2}${num}`;
 }

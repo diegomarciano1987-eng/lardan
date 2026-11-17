@@ -15,6 +15,7 @@
  * qualquer acesso à rede. Não presumimos unicidade de externalReference nem
  * idempotência no provedor: a correlação e a repetição são controladas por nós.
  */
+import { canaisParaLigar, celularAsaas } from "./cliente-espelho";
 import {
   proximoOffsetOficial,
   type ClienteExterno,
@@ -277,9 +278,30 @@ export class TransporteHttpAsaas implements TransporteAsaas {
 
   /** Liga os avisos do Asaas na cliente e completa e-mail/celular quando conhecidos. */
   async ativarAvisos(id: string, d: { email?: string | null; celular?: string | null }) {
+    // 17/11: nunca mandar o 55 (o Asaas grava 13 dígitos e o SMS/WhatsApp falham) nem número inválido
+    const celular = celularAsaas(d.celular);
     await this.enviar<Json>("POST", `/customers/${encodeURIComponent(id)}`, {
-      corpo: { notificationDisabled: false, ...(d.email ? { email: d.email } : {}), ...(d.celular ? { mobilePhone: d.celular } : {}) },
+      corpo: { notificationDisabled: false, ...(d.email ? { email: d.email } : {}), ...(celular ? { mobilePhone: celular } : {}) },
     });
+    await this.ligarCanaisAvisos(id);
+  }
+
+  /**
+   * 17/11 (caso Érica/Taynara): o Asaas cria a cliente com os canais de cada aviso desligados quando ela nasce sem
+   * e-mail/celular, e completar o cadastro depois NÃO religa. Aqui cada aviso fica com e-mail (se houver e-mail) e
+   * SMS + WhatsApp (se houver celular) ligados. Nunca desliga canal que já estava ligado.
+   */
+  async ligarCanaisAvisos(id: string): Promise<number> {
+    const c = await this.enviar<Json>("GET", `/customers/${encodeURIComponent(id)}`, {}, true);
+    if (!c) return 0;
+    const temEmail = Boolean(c["email"]);
+    const temCel = Boolean(celularAsaas(c["mobilePhone"] as string | null));
+    const lista = await this.enviar<Json>("GET", `/customers/${encodeURIComponent(id)}/notifications`, {}, true);
+    const notas = Array.isArray(lista?.["data"]) ? (lista!["data"] as Json[]) : [];
+    const lote = canaisParaLigar(notas, temEmail, temCel);
+    if (!lote.length) return 0;
+    await this.enviar<Json>("PUT", "/notifications/batch", { corpo: { customer: id, notifications: lote } });
+    return lote.length;
   }
 
   /** 0306: cadastro completo da cliente no Asaas (somente leitura; 404 = null). */

@@ -1,6 +1,6 @@
 // 0300: o rascunho da "Nova candidata" não pode se perder (Diego, 12/11/2026).
 import { beforeEach, describe, expect, it } from "vitest";
-import { apagarRascunho, chaveCandidata, gravarRascunho, lerRascunho, rascunhoTemConteudo, type Rascunho } from "./AberturaNaRua";
+import { apagarRascunho, assinaturaConcluida, chaveCandidata, gravarRascunho, lerRascunho, listarRascunhos, rascunhoTemConteudo, type Rascunho } from "./AberturaNaRua";
 
 const mem = new Map<string, string>();
 beforeEach(() => {
@@ -48,6 +48,35 @@ describe("rascunho da abertura na rua", () => {
   it("cada candidata tem sua chave", () => {
     expect(chaveCandidata()).toBe("nova");
     expect(chaveCandidata({ nome: "Ana", whatsapp: "(43) 99999-0000" })).toBe("43999990000");
+  });
+});
+
+describe("várias aberturas ao mesmo tempo (0334, caso Paula/Marcelo)", () => {
+  it("começar outra abertura não apaga a anterior", () => {
+    gravarRascunho(base({ chave: "paula", f: { ...base().f, nome: "Paula Souza" } }));
+    gravarRascunho(base({ chave: "ana", f: { ...base().f, nome: "Ana Lima" }, salvo_em: Date.now() + 1 }));
+    const l = listarRascunhos("rep-1");
+    expect(l.map((r) => r.chave)).toEqual(["ana", "paula"]);
+    expect(lerRascunho("rep-1", "paula")?.f.nome).toBe("Paula Souza");
+  });
+  it("descartar uma não mexe na outra", () => {
+    gravarRascunho(base({ chave: "paula" }));
+    gravarRascunho(base({ chave: "ana" }));
+    apagarRascunho("rep-1", "paula");
+    expect(listarRascunhos("rep-1").map((r) => r.chave)).toEqual(["ana"]);
+  });
+  it("rascunho do formato antigo (uma chave só) continua aparecendo", () => {
+    mem.set("lardan:abertura-rua:rep-1", JSON.stringify(base({ chave: "antiga" })));
+    expect(listarRascunhos("rep-1").map((r) => r.chave)).toEqual(["antiga"]);
+    expect(mem.has("lardan:abertura-rua:rep-1")).toBe(false);
+  });
+  it("abertura concluída = contrato assinado + promissória da maleta assinada (digital ou papel)", () => {
+    const contrato = { tipo: "contrato", status: "assinado", cycle_id: null };
+    expect(assinaturaConcluida({ documentos: [contrato] }, "c1")).toBe(false);
+    expect(assinaturaConcluida({ documentos: [contrato, { tipo: "promissoria", status: "assinado", cycle_id: "c1" }] }, "c1")).toBe(true);
+    expect(assinaturaConcluida({ documentos: [contrato, { tipo: "promissoria", status: "assinado", cycle_id: "outra" }] }, "c1")).toBe(false);
+    expect(assinaturaConcluida({ documentos: [contrato], papel: [{ cycle_id: "c1" }] }, "c1")).toBe(true);
+    expect(assinaturaConcluida({ documentos: [{ tipo: "promissoria", status: "assinado", cycle_id: "c1" }], papel: [{ cycle_id: "c1" }] }, "c1")).toBe(false);
   });
 });
 

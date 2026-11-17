@@ -181,6 +181,11 @@ export interface MetasMontagem {
   total_pecas: number;
   /** historico = média das 3 últimas maletas dela; informado = o montador mudou; parametro = padrão */
   total_origem: "historico" | "informado" | "parametro";
+  /** 0331: sugestão = média das peças ENVIADAS nas últimas 3 maletas (ou o padrão de cliente nova) */
+  total_sugerido?: number;
+  sugestao_base?: { pecas: number; quando: string | null; origem: "smalldata" | "lardan" }[];
+  /** modo gravado na maleta pela montagem (null = seguir o sugerido) */
+  modo_escolhido?: "historico" | "padrao" | null;
   metas_padrao: Record<TipoMeta, number>;
   metas_historico: Record<TipoMeta, number> | null;
   categorias: (SugestaoMontagem["categorias"][number] & { tipo: TipoMeta })[];
@@ -198,6 +203,9 @@ export interface MetasMontagem {
 /** Metas da maleta aberta no leitor. total = null usa a média das últimas maletas dela. Só leitura. */
 export const metasMontagem = (cycleId: string, total: number | null = null) =>
   rpc<MetasMontagem>("montagem_metas_ciclo", { _cycle: cycleId, _total: total });
+/** 0331: grava na maleta a quantidade escolhida na montagem (null = voltar à sugestão) e o modo das metas. */
+export const montagemTotalDefinir = (cycleId: string, total: number | null, modo: "historico" | "padrao" | null = null) =>
+  rpc<{ ok: boolean }>("montagem_total_definir", { _cycle: cycleId, _total: total, _modo: modo });
 export const categoriaTipoLista = () => rpc<{ categoria: string; tipo: TipoMeta; mapeada: boolean }[]>("legado_categoria_tipo_lista");
 export const categoriaTipoDefinir = (categoria: string, tipo: TipoMeta) =>
   rpc("legado_categoria_tipo_definir", { _categoria: categoria, _tipo: tipo });

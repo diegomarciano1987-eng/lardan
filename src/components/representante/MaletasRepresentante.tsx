@@ -22,6 +22,8 @@ import {
 } from "@/lib/maletas-perdidas";
 import { avisosTransferencia } from "@/lib/transferencia-avisos";
 import { DevolverEmpresaRep, useDevolucoesRep } from "@/components/representante/DevolverEmpresaRep";
+import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
+import { maletaJaTemNaRemessa } from "@/lib/rep-assinaturas";
 
 export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepasse?: (r: { partyId: string; nome: string; nova: boolean }) => void }) {
   const qc = useQueryClient();
@@ -114,6 +116,8 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
                   {entregar.isPending && entregar.variables === m.cycle_id ? "Registrando…" : "Entreguei em mãos"}
                 </button>
               </div>
+              {/* 0332: promissória desta maleta no mesmo cartão — ZapSign ou papel A4; não trava a entrega */}
+              {m.consultora_party_id && <PromissoriaDaMaleta party={m.consultora_party_id} rep={rep} telefone={m.telefone} cycleId={m.cycle_id} />}
               {/* 0273: ele pode deixar esta maleta para uma abertura (outra consultora/candidata) */}
               {trocando === m.cycle_id ? (
                 <div className="space-y-2 rounded-lg border border-dashed border-primary/40 p-3">
@@ -158,6 +162,7 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
                 {rotuloAbertura(m.abertura_numero, m.remessa) ? <span className="font-semibold">{rotuloAbertura(m.abertura_numero, m.remessa)} · </span> : null}
                 Maleta {m.maleta}{m.remessa && !m.abertura_numero ? ` · remessa ${m.remessa}` : ""} → <span className="font-medium">{m.consultora}</span> · {m.pecas} peças
               </p>
+              {m.consultora_party_id && <PromissoriaDaMaleta party={m.consultora_party_id} rep={rep} telefone={m.telefone ?? null} cycleId={m.cycle_id} />}
               {/* 0279: ela ainda não confirmou — se a maleta não ficou com ela, passa para outra */}
               {trocando === m.cycle_id ? (
                 <div className="space-y-2 rounded-lg border border-dashed border-primary/40 p-3">
@@ -199,18 +204,26 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
   });
   const [segunda, setSegunda] = React.useState(false);
   const [motivoSegunda, setMotivoSegunda] = React.useState("");
+  // 0332 (Diego 17/11): se ela já tem maleta nesta remessa, o app já oferece "2ª maleta" em vez de dar erro
+  const jaTem = useQuery({
+    queryKey: ["rep", rep, "ja-tem", maleta.cycle_id, escolhida?.tipo === "consultora" ? escolhida.id : null],
+    queryFn: () => maletaJaTemNaRemessa(rep, maleta.cycle_id, escolhida!.id),
+    enabled: escolhida?.tipo === "consultora",
+  });
+  const outraMaleta = escolhida?.tipo === "consultora" ? jaTem.data?.maleta ?? null : null;
+  React.useEffect(() => { if (outraMaleta) setSegunda(true); }, [outraMaleta]);
   const passar = useMutation({
     mutationFn: async () => {
       if (segunda && escolhida?.tipo === "consultora") {
-        if (motivoSegunda.trim().length < 5) throw new Error("Escreva o motivo da segunda maleta (mínimo 5 letras).");
+        const motivo = motivoSegunda.trim().length >= 5 ? motivoSegunda.trim() : "Segunda maleta deixada pelo representante na rua";
         const { maletaTransferir } = await import("@/lib/maletas-transferir.functions");
-        const r = await maletaTransferir({ data: { cycleId: maleta.cycle_id, modo: "representante", rep, consultoraId: escolhida.id, motivo: motivoSegunda.trim(), segunda: true } });
+        const r = await maletaTransferir({ data: { cycleId: maleta.cycle_id, modo: "representante", rep, consultoraId: escolhida.id, motivo, segunda: true } });
         return { ...r, consultora_party_id: r.consultora_party_id ?? "" };
       }
       return (trocarDe ? trocarDestinoMaleta : repassarMaleta)(rep, maleta.cycle_id, escolhida!);
     },
     onSuccess: (r) => {
-      toast.success(r.nova_consultora ? "Maleta enviada. A candidata agora é sua consultora." : "Maleta enviada para a consultora.");
+      toast.success(r.nova_consultora ? "Maleta enviada. A candidata agora é sua consultora." : segunda ? "Segunda maleta enviada para a consultora. A promissória desta maleta aparece no cartão dela." : "Maleta enviada para a consultora.");
       for (const aviso of avisosTransferencia(r as Parameters<typeof avisosTransferencia>[0])) toast.info(aviso, { duration: 9000 });
       onFeito({ partyId: r.consultora_party_id, nome: escolhida?.nome ?? "", nova: r.nova_consultora });
     },
@@ -235,15 +248,18 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
       {escolhida ? (
         <div className="space-y-2">
         {escolhida.tipo === "consultora" && (
-          <div className="space-y-2 rounded-lg border border-border p-3 text-sm">
+          <div className={`space-y-2 rounded-lg border p-3 text-sm ${outraMaleta ? "border-primary/50 bg-primary/5" : "border-border"}`}>
+            {outraMaleta && (
+              <p className="font-medium">{escolhida.nome} já tem a maleta {outraMaleta} nesta remessa. Esta vai como <strong>2ª maleta</strong> — pode deixar.</p>
+            )}
             <label className="flex items-start gap-2">
               <input type="checkbox" className="mt-1 size-5" checked={segunda} onChange={(e) => setSegunda(e.target.checked)} />
               <span><strong>É uma segunda maleta para ela</strong>
-                <span className="block text-xs text-muted-foreground">Ela já tem maleta nesta remessa e vai ficar com mais esta.</span></span>
+                <span className="block text-xs text-muted-foreground">Ela fica com as duas. Cada maleta tem a sua promissória, com o valor dela.</span></span>
             </label>
             {segunda && (
               <textarea value={motivoSegunda} onChange={(e) => setMotivoSegunda(e.target.value)} rows={2}
-                placeholder="Motivo (ex.: forçar uma melhor venda de fim de ano)"
+                placeholder="Motivo (opcional — ex.: vende muito, fim de ano)"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
             )}
           </div>
@@ -277,5 +293,20 @@ function Repasse({ rep, maleta, onFeito, trocarDe }: {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * 0332: promissória da maleta dentro do cartão de entrega. Fechada por padrão (a lista pode ter dezenas de
+ * maletas e cada uma consultaria a assinatura); ao abrir: ZapSign (enviar/copiar/SMS) ou papel A4.
+ */
+function PromissoriaDaMaleta({ party, rep, telefone, cycleId }: { party: string; rep: string; telefone: string | null; cycleId: string }) {
+  const [aberta, setAberta] = React.useState(false);
+  if (aberta) return <AssinaturaDigital party={party} rep={rep} telefone={telefone} soMaleta={cycleId} />;
+  return (
+    <button type="button" onClick={() => setAberta(true)}
+      className="h-11 w-full rounded-lg border border-border px-4 text-sm font-medium">
+      Promissória: assinar no celular ou no papel
+    </button>
   );
 }

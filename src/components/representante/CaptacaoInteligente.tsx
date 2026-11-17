@@ -18,6 +18,7 @@ import { wa } from "@/components/representante/AcoesRepresentante";
 import { AberturaDaCandidata, AberturaNaRua } from "@/components/representante/AberturaNaRua";
 import { AssinaturaDigital, SeloContrato } from "@/components/representante/AssinaturaDigital";
 import { PerfilCandidata } from "@/components/representante/PerfilCandidata";
+import { AberturasAssinatura } from "@/components/representante/AberturasAssinatura";
 
 type Card = RepCrm["cards"][number];
 type Passo = "chamar" | "conversando" | "abrir" | "maleta" | "fora";
@@ -78,6 +79,8 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
         <h2 className="text-lg font-semibold">Candidatas</h2>
         <AberturaNaRua rep={rep} />
       </div>
+
+      <AberturasAssinatura rep={rep} />
 
       <div className="flex flex-wrap gap-2">
         {FILTROS.map((f) => (

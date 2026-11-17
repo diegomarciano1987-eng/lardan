@@ -7,11 +7,12 @@ import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-quer
 import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Search, Sparkles, X } from "lucide-react";
 import { filtrarComposicao } from "@/lib/busca-composicao";
 import { supabase } from "@/integrations/supabase/client";
-import { metasMontagem, type MetasMontagem } from "@/lib/historico-jflex";
+import { metasMontagem, montagemTotalDefinir, type MetasMontagem } from "@/lib/historico-jflex";
 import { brl, operarMontagem, traduzir, type ItemComposicao } from "@/lib/maletas";
 import {
   PARAMETROS_PADRAO,
   TIPO_PECA_LABEL,
+  metasPadraoNoTotal,
   metasPorTipo,
   type ParametrosRemessa,
   type TipoPeca,
@@ -115,14 +116,17 @@ function FaixaHistorico({
   dados,
   carregando,
   modo,
-  somaPadrao,
   aoModo,
   aoTotal,
+  salvando,
+  total,
 }: {
   dados: MetasMontagem | undefined;
   carregando: boolean;
   modo: ModoMetas;
-  somaPadrao: number;
+  salvando: boolean;
+  /** total na tela agora (a escolha mais recente, mesmo antes de o banco responder) */
+  total: number;
   aoModo: (m: ModoMetas) => void;
   aoTotal: (n: number | null) => void;
 }) {
@@ -133,10 +137,11 @@ function FaixaHistorico({
   const temHistorico = dados.metas_historico !== null && dados.vinculada;
   const origem =
     dados.total_origem === "historico"
-      ? "o tamanho das últimas maletas dela"
+      ? "sugerido pelas últimas maletas dela"
       : dados.total_origem === "informado"
-        ? "ajustado aqui"
+        ? "escolhido na montagem (fica gravado nesta maleta)"
         : "padrão de cliente nova";
+  const base = dados.sugestao_base ?? [];
   return (
     <div className="ledger-panel space-y-3 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -163,26 +168,32 @@ function FaixaHistorico({
             </button>
           </div>
         </div>
-        {modo === "historico" ? (
-          <div className="flex items-center gap-2 text-sm">
-            <button type="button" aria-label="Menos 5 peças" className="rounded-md border border-line p-1 hover:bg-surface-muted"
-              onClick={() => aoTotal(Math.max(5, dados.total_pecas - 5))}>
-              <Minus className="size-3" />
+        <div className="flex items-center gap-2 text-sm">
+          <button type="button" aria-label="Menos 5 peças" className="rounded-md border border-line p-1 hover:bg-surface-muted"
+            onClick={() => aoTotal(Math.max(5, total - 5))}>
+            <Minus className="size-3" />
+          </button>
+          <span className="font-display text-xl font-bold tabular-nums text-ledger-text">{total}</span>
+          <button type="button" aria-label="Mais 5 peças" className="rounded-md border border-line p-1 hover:bg-surface-muted"
+            onClick={() => aoTotal(Math.min(1000, total + 5))}>
+            <Plus className="size-3" />
+          </button>
+          <span className="text-ledger-muted">peças · {origem}{modo === "padrao" ? " · metas do padrão" : ""}</span>
+          {dados.total_origem === "informado" && (
+            <button type="button" className="text-ledger-muted underline" onClick={() => aoTotal(null)}>
+              voltar ao sugerido{typeof dados.total_sugerido === "number" ? ` (${dados.total_sugerido})` : ""}
             </button>
-            <span className="font-display text-xl font-bold tabular-nums text-ledger-text">{dados.total_pecas}</span>
-            <button type="button" aria-label="Mais 5 peças" className="rounded-md border border-line p-1 hover:bg-surface-muted"
-              onClick={() => aoTotal(Math.min(1000, dados.total_pecas + 5))}>
-              <Plus className="size-3" />
-            </button>
-            <span className="text-ledger-muted">peças · {origem}</span>
-            {dados.total_origem === "informado" && (
-              <button type="button" className="text-ledger-muted underline" onClick={() => aoTotal(null)}>voltar ao sugerido</button>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-ledger-muted">{somaPadrao} peças · parâmetros de remessa</p>
-        )}
+          )}
+          {salvando && <span className="text-xs text-ledger-muted">gravando…</span>}
+        </div>
       </div>
+
+      <p className="text-sm text-ledger-muted" data-testid="sugestao-pecas">
+        Sugestão: <strong className="text-ledger-text">{dados.total_sugerido ?? dados.total_pecas} peças</strong>
+        {base.length > 0
+          ? ` · média das peças enviadas nas últimas ${base.length === 1 ? "maleta" : `${base.length} maletas`}: ${base.map((b) => b.pecas).join(", ")}`
+          : " · sem maletas anteriores: padrão de cliente nova"}
+      </p>
 
       {temHistorico ? (
         <p className="text-sm text-ledger-muted">
@@ -293,8 +304,10 @@ export function MontagemLeitor({
   });
 
   // Metas pelo histórico de venda dela (0113). Erro = sem permissão ou sem histórico: fica no padrão.
+  // 0331: a quantidade e o modo escolhidos ficam gravados na maleta (reabrir mantém); totalMetas = mudança ainda não relida
   const [totalMetas, setTotalMetas] = React.useState<number | null>(null);
   const [modoEscolhido, setModoEscolhido] = React.useState<ModoMetas | null>(null);
+  const [salvandoMetas, setSalvandoMetas] = React.useState(0);
   const historico = useQuery({
     queryKey: ["maletas", "metas-historico", cycleId, totalMetas],
     queryFn: () => metasMontagem(cycleId, totalMetas),
@@ -513,11 +526,34 @@ export function MontagemLeitor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itens, tipoDe]);
 
-  const metasPadrao = metasPorTipo(parametros.data ?? PARAMETROS_PADRAO);
-  const somaPadrao = Object.values(metasPadrao).reduce((s, n) => s + n, 0);
+  const metasPadraoBase = metasPorTipo(parametros.data ?? PARAMETROS_PADRAO);
+  const metasPadrao = historico.data ? metasPadraoNoTotal(metasPadraoBase, historico.data.total_pecas) : metasPadraoBase;
   const metasHistorico = historico.data?.vinculada ? historico.data.metas_historico : null;
-  const modoMetas: ModoMetas = metasHistorico ? (modoEscolhido ?? historico.data!.modo_sugerido) : "padrao";
+  const modoMetas: ModoMetas = metasHistorico
+    ? (modoEscolhido ?? historico.data!.modo_escolhido ?? historico.data!.modo_sugerido)
+    : "padrao";
   const metas: Record<TipoPeca, number> = modoMetas === "historico" && metasHistorico ? metasHistorico : metasPadrao;
+
+  const gravarMetas = async (total: number | null, modo: ModoMetas | null) => {
+    setSalvandoMetas((n) => n + 1);
+    try {
+      await montagemTotalDefinir(cycleId, total, modo);
+    } catch {
+      /* sem permissão ou maleta fora da montagem: a escolha vale só nesta tela */
+    } finally {
+      setSalvandoMetas((n) => n - 1);
+      void qc.invalidateQueries({ queryKey: ["maletas", "metas-historico", cycleId] });
+    }
+  };
+  const mudarTotal = (n: number | null) => {
+    setTotalMetas(n);
+    void gravarMetas(n, modoMetas);
+  };
+  const mudarModo = (m: ModoMetas) => {
+    setModoEscolhido(m);
+    const d = historico.data;
+    void gravarMetas(d && d.total_origem === "informado" ? d.total_pecas : null, m);
+  };
   const tiposVisiveis: TipoPeca[] = metas.outro > 0 || bipadoPorTipo.outro > 0 ? [...ORDEM_TIPOS, "outro"] : ORDEM_TIPOS;
 
   if (etapa === "conferencia") {
@@ -573,9 +609,10 @@ export function MontagemLeitor({
           dados={historico.data}
           carregando={historico.isLoading}
           modo={modoMetas}
-          somaPadrao={somaPadrao}
-          aoModo={setModoEscolhido}
-          aoTotal={setTotalMetas}
+          salvando={salvandoMetas > 0}
+          total={totalMetas ?? historico.data?.total_pecas ?? 0}
+          aoModo={mudarModo}
+          aoTotal={mudarTotal}
         />
 
         {/* Cards de meta por tipo: o que a maleta precisa × o que já foi bipado */}

@@ -1,15 +1,33 @@
 /** 0306/0309 — espelho do cadastro Lardan → Asaas: regras puras (Diego 13/11/2026: só vale o Lardan, nada some do Asaas). */
 import { describe, expect, test } from "bun:test";
-import { comparar, normalizar, pendentes, resumoEspelho } from "../../src/lib/asaas/cliente-espelho";
+import { canaisParaLigar, celularAsaas, comparar, normalizar, pendentes, resumoEspelho, telefoneTorto } from "../../src/lib/asaas/cliente-espelho";
 
 const cacildaLardan = { name: "Cacilda da Luz", cpfCnpj: "06181892974", email: null, mobilePhone: "42999121933", phone: null,
   postalCode: "85200000", address: "Rua Guairaca", addressNumber: "1481", complement: null, province: "Maristela" };
-const cacildaAsaas = { name: "CACILDA DA LUZ", cpfCnpj: "06181892974", email: null, mobilePhone: "5542999121933", phone: null,
+const cacildaAsaas = { name: "CACILDA DA LUZ", cpfCnpj: "06181892974", email: null, mobilePhone: "42999121933", phone: null,
   postalCode: "85200000", address: "RUA GUAIRACA", addressNumber: "1481", complement: null, province: "MARISTELA", notificationDisabled: false };
 
 describe("espelho do cadastro", () => {
-  test("Cacilda: maiúsculas, acento e 55 no celular não contam como diferença", () => {
+  test("Cacilda: maiúsculas e acento não contam como diferença", () => {
     expect(comparar(cacildaLardan, cacildaAsaas)).toEqual({ enviar: {}, diferencas: [] });
+  });
+  test("17/11 Taynara: celular com 55 na frente no Asaas é corrigido (SMS/WhatsApp falhavam)", () => {
+    const r = comparar(cacildaLardan, { ...cacildaAsaas, mobilePhone: "5542999121933" });
+    expect(r.enviar).toEqual({ mobilePhone: "42999121933" });
+    expect(r.diferencas[0]?.acao).toBe("enviar");
+  });
+  test("55 no Asaas é corrigido mesmo quando o Lardan não tem celular", () => {
+    const r = comparar({ ...cacildaLardan, mobilePhone: null }, { ...cacildaAsaas, mobilePhone: "5518996980258" });
+    expect(r.enviar).toEqual({ mobilePhone: "18996980258" });
+  });
+  test("celular enviado ao Asaas nunca leva o 55", () => {
+    expect(celularAsaas("+5518996980258")).toBe("18996980258");
+    expect(celularAsaas("5518996980258")).toBe("18996980258");
+    expect(celularAsaas("(18) 99698-0258")).toBe("18996980258");
+    expect(celularAsaas("1832220000")).toBeNull();
+    expect(celularAsaas(null)).toBeNull();
+    expect(telefoneTorto("mobilePhone", "5518996980258")).toBe(true);
+    expect(telefoneTorto("mobilePhone", "18996980258")).toBe(false);
   });
   test("celular novo no Lardan é enviado sem o 55", () => {
     const r = comparar({ ...cacildaLardan, mobilePhone: "42988887777" }, cacildaAsaas);
@@ -56,5 +74,21 @@ describe("espelho do cadastro", () => {
   test("S/N e telefone com 55", () => {
     expect(normalizar("addressNumber", "s/n")).toBe("S/N");
     expect(normalizar("mobilePhone", "+55 (42) 99912-1933")).toBe("42999121933");
+  });
+  test("17/11 Érica: canais de aviso desligados são ligados conforme o contato; nada é desligado", () => {
+    const notas = [
+      { id: "not_1", enabled: true, emailEnabledForCustomer: false, smsEnabledForCustomer: false, whatsappEnabledForCustomer: false },
+      { id: "not_2", enabled: true, emailEnabledForCustomer: false, smsEnabledForCustomer: false },
+      { id: "not_3", enabled: true, emailEnabledForCustomer: true, smsEnabledForCustomer: true, whatsappEnabledForCustomer: true },
+    ];
+    expect(canaisParaLigar(notas, true, true)).toEqual([
+      { id: "not_1", enabled: true, emailEnabledForCustomer: true, smsEnabledForCustomer: true, whatsappEnabledForCustomer: true },
+      { id: "not_2", enabled: true, emailEnabledForCustomer: true, smsEnabledForCustomer: true },
+    ]);
+    // sem celular: SMS/WhatsApp não são ligados; o que já estava ligado continua
+    expect(canaisParaLigar([notas[2]!], true, false)).toEqual([]);
+    expect(canaisParaLigar([notas[0]!], true, false)).toEqual([
+      { id: "not_1", enabled: true, emailEnabledForCustomer: true, smsEnabledForCustomer: false, whatsappEnabledForCustomer: false },
+    ]);
   });
 });

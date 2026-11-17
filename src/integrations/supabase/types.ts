@@ -10600,6 +10600,8 @@ export type Database = {
           due_at: string | null
           id: string
           kit_id: string
+          montagem_metas_modo: string | null
+          montagem_total_pecas: number | null
           notes: string | null
           objetivo_cents: number | null
           objetivo_em: string | null
@@ -10632,6 +10634,8 @@ export type Database = {
           due_at?: string | null
           id?: string
           kit_id: string
+          montagem_metas_modo?: string | null
+          montagem_total_pecas?: number | null
           notes?: string | null
           objetivo_cents?: number | null
           objetivo_em?: string | null
@@ -10664,6 +10668,8 @@ export type Database = {
           due_at?: string | null
           id?: string
           kit_id?: string
+          montagem_metas_modo?: string | null
+          montagem_total_pecas?: number | null
           notes?: string | null
           objetivo_cents?: number | null
           objetivo_em?: string | null
@@ -16383,6 +16389,108 @@ export type Database = {
           {
             foreignKeyName: "profiles_party_id_fkey"
             columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
+      promissorias_papel: {
+        Row: {
+          cancelada_em: string | null
+          cancelada_motivo: string | null
+          cancelada_por: string | null
+          cycle_id: string
+          foto_path: string | null
+          id: string
+          observacao: string | null
+          party_id: string
+          registrado_em: string
+          registrado_por: string
+          representante_party_id: string | null
+          valor_cents: number | null
+        }
+        Insert: {
+          cancelada_em?: string | null
+          cancelada_motivo?: string | null
+          cancelada_por?: string | null
+          cycle_id: string
+          foto_path?: string | null
+          id?: string
+          observacao?: string | null
+          party_id: string
+          registrado_em?: string
+          registrado_por: string
+          representante_party_id?: string | null
+          valor_cents?: number | null
+        }
+        Update: {
+          cancelada_em?: string | null
+          cancelada_motivo?: string | null
+          cancelada_por?: string | null
+          cycle_id?: string
+          foto_path?: string | null
+          id?: string
+          observacao?: string | null
+          party_id?: string
+          registrado_em?: string
+          registrado_por?: string
+          representante_party_id?: string | null
+          valor_cents?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promissorias_papel_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promissorias_papel_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "kit_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promissorias_papel_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promissorias_papel_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promissorias_papel_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "promissorias_papel_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promissorias_papel_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promissorias_papel_representante_party_id_fkey"
+            columns: ["representante_party_id"]
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
@@ -23871,6 +23979,7 @@ export type Database = {
         Args: { _id: string; _obs?: string }
         Returns: Json
       }
+      maleta_valor_cents: { Args: { _cycle: string }; Returns: number }
       maletas_perdidas_smalldata_processar: {
         Args: { _aplicar?: boolean }
         Returns: Json
@@ -23906,6 +24015,10 @@ export type Database = {
       }
       montagem_sugestao: {
         Args: { _party: string; _total?: number }
+        Returns: Json
+      }
+      montagem_total_definir: {
+        Args: { _cycle: string; _modo?: string; _total: number }
         Returns: Json
       }
       my_capabilities: {
@@ -24478,6 +24591,18 @@ export type Database = {
         Args: { _banho: string; _category_id: string; _product_id?: string }
         Returns: string
       }
+      promissoria_dados_impressao: {
+        Args: { _cycle: string; _rep: string }
+        Returns: Json
+      }
+      promissoria_papel_cancelar: {
+        Args: { _id: string; _motivo: string; _rep: string }
+        Returns: Json
+      }
+      promissoria_papel_registrar: {
+        Args: { _cycle: string; _obs?: string; _rep: string }
+        Returns: Json
+      }
       public_catalog_browse: {
         Args: {
           _category_slug?: string
@@ -24919,6 +25044,7 @@ export type Database = {
         Args: { _dados: Json; _perfil: Json; _rep: string }
         Returns: Json
       }
+      rep_aberturas_assinatura: { Args: { _rep: string }; Returns: Json }
       rep_acerto_campo_devolucao: {
         Args: { _cycle: string; _leituras: Json }
         Returns: Json
@@ -24944,6 +25070,7 @@ export type Database = {
         Args: { _actor: string; _payload: Json; _rep_user: string }
         Returns: Json
       }
+      rep_candidata_ficha: { Args: { _lead: string }; Returns: Json }
       rep_candidata_perfil: { Args: { _lead: string }; Returns: Json }
       rep_cheque_registrar: { Args: { _payload: Json }; Returns: string }
       rep_cob_historico: { Args: { _party: string }; Returns: Json }
@@ -25067,6 +25194,10 @@ export type Database = {
       }
       rep_maleta_destinatarias: {
         Args: { _busca?: string; _rep: string }
+        Returns: Json
+      }
+      rep_maleta_ja_tem: {
+        Args: { _consultora: string; _cycle: string; _rep: string }
         Returns: Json
       }
       rep_maleta_repassar: {

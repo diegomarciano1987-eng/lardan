@@ -19,7 +19,7 @@ export function SugestaoMontagem({ partyId }: { partyId: string }) {
   const [texto, setTexto] = React.useState<string | null>(null);
 
   const padrao = useQuery({
-    // Média vendida nas 3 últimas maletas dela + 30%; sem histórico, 35.
+    // 0331: média das peças ENVIADAS nas 3 últimas maletas dela (de 5 em 5); sem histórico, 35.
     queryKey: ["historico-jflex", "total-sugerido", partyId],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("maleta_total_sugerido" as never, { _party: partyId } as never);

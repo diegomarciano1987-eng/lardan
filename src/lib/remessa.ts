@@ -65,6 +65,20 @@ export function metasPorTipo(p: ParametrosRemessa): Record<TipoPeca, number> {
   };
 }
 
+/**
+ * 0331: metas do padrão Lardan ajustadas a outro total de peças (a montagem escolheu 50 em vez de 35):
+ * colar/pulseira/anel/tornozeleira na mesma proporção, o resto em brincos. Soma sempre = total.
+ */
+export function metasPadraoNoTotal(base: Record<TipoPeca, number>, total: number): Record<TipoPeca, number> {
+  const soma = Object.values(base).reduce((s, n) => s + n, 0);
+  if (!soma || total === soma) return { ...base };
+  const f = total / soma;
+  const r = (n: number) => Math.round(n * f);
+  const out = { colar: r(base.colar), pulseira: r(base.pulseira), anel: r(base.anel), tornozeleira: r(base.tornozeleira), brinco: 0, outro: 0 };
+  out.brinco = Math.max(total - out.colar - out.pulseira - out.anel - out.tornozeleira, 0);
+  return out;
+}
+
 /* ---------------- valor por extenso (promissória) ---------------- */
 
 const UNIDADES = ["", "Um", "Dois", "Três", "Quatro", "Cinco", "Seis", "Sete", "Oito", "Nove"];

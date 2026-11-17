@@ -99,10 +99,11 @@ describe("montagem pelo histórico", () => {
   test("metas por tipo somam o total, que vem da média das 3 últimas maletas", async () => {
     const r = await rpc<Resultado>(estoque, "montagem_metas_ciclo", { _cycle: cicloA });
     expect(r.erro).toBeNull();
-    // 0155: total sugerido = média das peças VENDIDAS nas 3 últimas maletas × 1,3 (18 × 1,3 = 23,4 → 24)
+    // 0331 (Diego 17/11): total sugerido = média das peças ENVIADAS nas 3 últimas maletas (50, 60, 70 → 60), de 5 em 5
     expect(r.dados).toMatchObject({ vinculada: true, modo_sugerido: "historico", confianca: "alta",
-      total_pecas: 24, total_origem: "historico", maletas_fechadas: 3 });
-    expect(soma(r.dados.metas_historico!)).toBe(24);
+      total_pecas: 60, total_origem: "historico", total_sugerido: 60, maletas_fechadas: 3 });
+    expect((r.dados as unknown as { sugestao_base: { pecas: number }[] }).sugestao_base.map((b) => b.pecas)).toEqual([70, 60, 50]);
+    expect(soma(r.dados.metas_historico!)).toBe(60);
     expect(r.dados.ultimas_maletas.map((m) => m.remessa)).toEqual([REM + 3, REM + 2, REM + 1]);
   });
 
@@ -125,6 +126,31 @@ describe("montagem pelo histórico", () => {
     expect(r.dados).toMatchObject({ total_pecas: 41, total_origem: "informado" });
     expect(soma(r.dados.metas_historico!)).toBe(41);
     expect((await rpc(estoque, "montagem_metas_ciclo", { _cycle: cicloA, _total: 0 })).ok).toBe(false);
+  });
+
+  test("0331: a quantidade escolhida (30 → 50) fica gravada na maleta e volta ao sugerido quando pedem", async () => {
+    expect((await rpc(estoque, "montagem_total_definir", { _cycle: cicloA, _total: 50, _modo: "historico" })).erro).toBeNull();
+    // reabrir o leitor (sem _total) mantém os 50
+    const r = await rpc<Resultado & { modo_escolhido: string; total_sugerido: number }>(estoque, "montagem_metas_ciclo", { _cycle: cicloA });
+    expect(r.dados).toMatchObject({ total_pecas: 50, total_origem: "informado", modo_escolhido: "historico", total_sugerido: 60 });
+    expect(soma(r.dados.metas_historico!)).toBe(50);
+    // outra pessoa da montagem também vê os 50
+    expect((await rpc<Resultado>(master, "montagem_metas_ciclo", { _cycle: cicloA })).dados.total_pecas).toBe(50);
+    // voltar ao sugerido
+    expect((await rpc(estoque, "montagem_total_definir", { _cycle: cicloA, _total: null })).erro).toBeNull();
+    const v = await rpc<Resultado>(estoque, "montagem_metas_ciclo", { _cycle: cicloA });
+    expect(v.dados).toMatchObject({ total_pecas: 60, total_origem: "historico" });
+    // limites e permissões
+    expect((await rpc(estoque, "montagem_total_definir", { _cycle: cicloA, _total: 0 })).ok).toBe(false);
+    expect((await rpc(consA, "montagem_total_definir", { _cycle: cicloA, _total: 40 })).ok).toBe(false);
+    expect((await rpc(rep, "montagem_total_definir", { _cycle: cicloA, _total: 40 })).ok).toBe(false);
+  });
+
+  test("0331: maleta que já saiu da montagem não aceita mudar a quantidade", async () => {
+    const c = await novoCiclo(consNova.partyId!);
+    await adm.unsafe(`update public.kit_cycles set status='conferida' where id=$1`, [c]);
+    const r = await rpc(estoque, "montagem_total_definir", { _cycle: c, _total: 40 });
+    expect(r.ok).toBe(false);
   });
 
   test("consultora sem histórico: modo padrão com as metas de remessa_parametros", async () => {

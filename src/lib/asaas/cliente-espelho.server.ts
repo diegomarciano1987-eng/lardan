@@ -15,6 +15,7 @@ type Item = {
 export interface TransporteCliente {
   lerClienteCompleto?(id: string): Promise<Record<string, unknown> | null>;
   atualizarClienteCampos?(id: string, campos: Record<string, string>): Promise<void>;
+  ligarCanaisAvisos?(id: string): Promise<number>;
 }
 export interface DepsCliente {
   servico: BancoAsaas;
@@ -54,6 +55,12 @@ async function umCliente(d: DepsCliente, worker: string, it: Item, transporte: T
     const opc = { celularCompartilhado: it.celular_compartilhado };
     const c1 = comparar(it.lardan, antes, opc);
     const pedidos = Object.entries(c1.enviar) as [Campo, string][];
+    // 17/11: canais de aviso (e-mail/SMS/WhatsApp) desligados no Asaas impedem os avisos mesmo com o cadastro certo
+    const ligarCanais = async () => {
+      if (!transporte.ligarCanaisAvisos || antes.notificationDisabled === true) return;
+      try { await transporte.ligarCanaisAvisos(it.external_id); } catch { /* não trava a conferência do cadastro */ }
+    };
+    if (!pedidos.length) await ligarCanais();
     if (!pedidos.length) return fim(pendentes(c1.diferencas).length ? "diferente" : "igual", c1.diferencas);
 
     const recusados: Diferenca[] = [];
@@ -80,6 +87,7 @@ async function umCliente(d: DepsCliente, worker: string, it: Item, transporte: T
       if (normalizar(k, depois[k]) === normalizar(k, v)) enviados[k] = { de: antes[k] ?? null, para: depois[k] ?? null };
       else naoConfirmados.push({ campo: k, lardan: v, asaas: depois[k] ?? null, acao: "enviar", nota: "O Asaas não confirmou a alteração." });
     }
+    await ligarCanais();
     const c2 = comparar(it.lardan, depois, opc);
     const difs = [...c2.diferencas.filter((x) => x.acao !== "enviar"), ...recusados, ...naoConfirmados];
     if (naoConfirmados.length) return fim("erro", difs, enviados, `O Asaas não confirmou: ${naoConfirmados.map((x) => x.campo).join(", ")}`);

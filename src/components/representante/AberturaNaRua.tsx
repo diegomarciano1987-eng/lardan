@@ -12,10 +12,14 @@
  *   (24 h) a cada toque: sair, trocar de aplicativo para o WhatsApp ou recarregar a página e voltar
  *   continua exatamente de onde parou. O rascunho só é apagado quando as duas assinaturas terminam
  *   ou quando o representante toca em "Descartar".
+ *
+ * 0334 (Diego 17/11, Paula/Marcelo): várias aberturas ao mesmo tempo, cada uma guardada separada; a que
+ *   terminou de assinar (mesmo com o fluxo fechado) sai sozinha. A lista "Aguardando assinatura" da
+ *   Captação vem do servidor, então não depende do aparelho.
  */
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Check, ChevronLeft, CircleCheckBig, Loader2, MapPin, PackageOpen, UserPlus, X } from "lucide-react";
@@ -90,29 +94,82 @@ export type Rascunho = {
   feito: Feito | null; maleta: MaletaEscolhida | null; salvo_em: number;
 };
 const VALIDADE_MS = 24 * 60 * 60 * 1000;
-const chaveStorage = (rep: string) => `lardan:abertura-rua:${rep}`;
+/**
+ * 0334 (Diego 17/11, caso Paula/Marcelo): cada candidata tem o seu rascunho; começar outra abertura nunca
+ * apaga a anterior. Índice das chaves por representante (o armazenamento do aparelho não é percorrido).
+ */
+const prefixo = (rep: string) => `lardan:abertura-rua:${rep}`;
+const chaveStorage = (rep: string, chave: string) => `${prefixo(rep)}:${chave}`;
+const chaveIndice = (rep: string) => `${prefixo(rep)}:lista`;
 /** Quem é a candidata do rascunho: "nova" para "Nova candidata", senão os dígitos do WhatsApp (ou o nome). */
 export const chaveCandidata = (card?: { nome: string; whatsapp: string | null }) =>
   card ? (so(card.whatsapp ?? "", 11) || card.nome.trim().toLowerCase()) : "nova";
 
-export function lerRascunho(rep: string, agora = Date.now()): Rascunho | null {
-  if (typeof window === "undefined") return null;
+function lerIndice(rep: string): string[] {
+  try { const v = JSON.parse(window.localStorage.getItem(chaveIndice(rep)) ?? "[]"); return Array.isArray(v) ? v.filter((x) => typeof x === "string") : []; } catch { return []; }
+}
+function gravarIndice(rep: string, chaves: string[]) {
   try {
-    const raw = window.localStorage.getItem(chaveStorage(rep));
+    if (chaves.length) window.localStorage.setItem(chaveIndice(rep), JSON.stringify([...new Set(chaves)]));
+    else window.localStorage.removeItem(chaveIndice(rep));
+  } catch { /* nada */ }
+}
+function lerUm(rep: string, chave: string, agora: number): Rascunho | null {
+  try {
+    const raw = window.localStorage.getItem(chaveStorage(rep, chave));
     if (!raw) return null;
     const r = JSON.parse(raw) as Rascunho;
     if (r?.v !== 1 || r.rep !== rep || typeof r.salvo_em !== "number" || agora - r.salvo_em > VALIDADE_MS) {
-      window.localStorage.removeItem(chaveStorage(rep));
+      window.localStorage.removeItem(chaveStorage(rep, chave));
       return null;
     }
     return { ...r, f: { ...VAZIO, ...r.f } };
   } catch { return null; }
 }
-export function gravarRascunho(r: Rascunho) {
-  try { window.localStorage.setItem(chaveStorage(r.rep), JSON.stringify(r)); } catch { /* aparelho sem espaço: segue sem guardar */ }
+/** Rascunho antigo (uma chave só por representante, até 0333) vira um item da lista. */
+function migrarAntigo(rep: string) {
+  try {
+    const raw = window.localStorage.getItem(prefixo(rep));
+    if (!raw) return;
+    window.localStorage.removeItem(prefixo(rep));
+    const r = JSON.parse(raw) as Rascunho;
+    if (r?.v === 1 && r.rep === rep && r.chave) {
+      window.localStorage.setItem(chaveStorage(rep, r.chave), raw);
+      gravarIndice(rep, [...lerIndice(rep), r.chave]);
+    }
+  } catch { /* nada */ }
 }
-export function apagarRascunho(rep: string) {
-  try { window.localStorage.removeItem(chaveStorage(rep)); } catch { /* nada */ }
+
+/** Todas as aberturas guardadas neste aparelho, a mais recente primeiro. */
+export function listarRascunhos(rep: string, agora = Date.now()): Rascunho[] {
+  if (typeof window === "undefined") return [];
+  migrarAntigo(rep);
+  const chaves = lerIndice(rep);
+  const out = chaves.map((c) => lerUm(rep, c, agora)).filter((r): r is Rascunho => !!r);
+  if (out.length !== chaves.length) gravarIndice(rep, out.map((r) => r.chave));
+  return out.sort((x, y) => y.salvo_em - x.salvo_em);
+}
+/** Sem chave: a abertura guardada mais recente. */
+export function lerRascunho(rep: string, chave?: string, agora = Date.now()): Rascunho | null {
+  if (typeof window === "undefined") return null;
+  if (chave) { migrarAntigo(rep); return lerUm(rep, chave, agora); }
+  return listarRascunhos(rep, agora)[0] ?? null;
+}
+export function gravarRascunho(r: Rascunho) {
+  try {
+    window.localStorage.setItem(chaveStorage(r.rep, r.chave), JSON.stringify(r));
+    const idx = lerIndice(r.rep);
+    if (!idx.includes(r.chave)) gravarIndice(r.rep, [...idx, r.chave]);
+  } catch { /* aparelho sem espaço: segue sem guardar */ }
+}
+/** Com chave: apaga só aquela abertura. Sem chave: todas deste representante. */
+export function apagarRascunho(rep: string, chave?: string) {
+  try {
+    const alvo = chave ? [chave] : lerIndice(rep);
+    for (const c of alvo) window.localStorage.removeItem(chaveStorage(rep, c));
+    if (!chave) window.localStorage.removeItem(prefixo(rep));
+    gravarIndice(rep, chave ? lerIndice(rep).filter((c) => c !== chave) : []);
+  } catch { /* nada */ }
   avisar();
 }
 /** Há algo que valha guardar? (qualquer campo digitado além do que veio da lista, ou já passou da etapa 1) */
@@ -127,17 +184,8 @@ let ativo: Ativo = null;
 const ouvintes = new Set<() => void>();
 function avisar() { for (const o of ouvintes) o(); }
 function abrir(rep: string, chave: string, inicial: Dados) {
-  const atual = lerRascunho(rep);
-  if (atual && atual.chave !== chave && rascunhoTemConteudo(atual)) {
-    const quem = primeiroNome(atual.f.nome) || "outra candidata";
-    if (!window.confirm(`Você tem uma abertura em andamento de ${quem}, com os dados guardados.\n\nOK = começar esta nova e descartar a de ${quem}.\nCancelar = continuar a de ${quem}.`)) {
-      ativo = { rep, chave: atual.chave, inicial: atual.f };
-      avisar();
-      return;
-    }
-    apagarRascunho(rep);
-  }
-  ativo = { rep, chave, inicial };
+  // 0334: abrir outra candidata não descarta a anterior — cada uma fica guardada na lista
+  ativo = { rep, chave, inicial: lerRascunho(rep, chave)?.f ?? inicial };
   avisar();
 }
 function fechar() { ativo = null; avisar(); }
@@ -155,35 +203,100 @@ function useAtivo() {
  */
 export function AberturaHost({ rep }: { rep: string }) {
   const a = useAtivo();
-  const [rascunho, setRascunho] = React.useState<Rascunho | null>(null);
+  const [rascunhos, setRascunhos] = React.useState<Rascunho[]>([]);
+  const [lista, setLista] = React.useState(false);
   React.useEffect(() => {
-    const ler = () => setRascunho(lerRascunho(rep));
+    const ler = () => setRascunhos(listarRascunhos(rep).filter((r) => rascunhoTemConteudo(r)));
     ler();
     ouvintes.add(ler);
     window.addEventListener("storage", ler);
     return () => { ouvintes.delete(ler); window.removeEventListener("storage", ler); };
   }, [rep]);
+  // 0334: abertura já cadastrada que terminou de assinar (mesmo com o fluxo fechado) sai sozinha da lista
+  const comCadastro = rascunhos.filter((r) => r.feito?.party_id);
+  const status = useQueries({
+    queries: comCadastro.map((r) => ({
+      queryKey: ["assinaturas", r.feito!.party_id],
+      queryFn: async () => {
+        const { data, error } = await supabase.rpc("assinaturas_da_consultora" as never, { _party: r.feito!.party_id, _rep: rep } as never);
+        if (error) throw error;
+        return data as unknown as DadosAssinatura;
+      },
+      refetchInterval: 60_000,
+      enabled: !(a && a.chave === r.chave),
+    })),
+  });
+  React.useEffect(() => {
+    comCadastro.forEach((r, i) => {
+      const d = status[i]?.data;
+      if (d && assinaturaConcluida(d, r.maleta?.cycle_id ?? null)) apagarRascunho(rep, r.chave);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status.map((s) => s.dataUpdatedAt).join(","), rep]);
+
   if (a && a.rep === rep) return <Fluxo key={a.chave} rep={rep} chave={a.chave} inicial={a.inicial} onFechar={fechar} />;
-  if (!rascunho || !rascunhoTemConteudo(rascunho)) return null;
-  const nome = primeiroNome(rascunho.f.nome) || "candidata";
+  if (!rascunhos.length) return null;
+  const continuar = (r: Rascunho) => { ativo = { rep, chave: r.chave, inicial: r.f }; setLista(false); avisar(); };
+  const descartar = (r: Rascunho) => {
+    const nome = primeiroNome(r.f.nome) || "candidata";
+    if (window.confirm(`Descartar os dados guardados da abertura de ${nome}?${r.feito ? "\n\nO cadastro dela continua salvo na Lardan." : ""}`)) apagarRascunho(rep, r.chave);
+  };
+  const etapa = (r: Rascunho) => `Etapa ${Math.min(r.passo, 3) + 1} de 4${r.passo >= 3 ? " · aguardando assinatura" : " · dados guardados"}`;
+  const um = rascunhos.length === 1 ? rascunhos[0]! : null;
   return (
-    <div role="status" className="fixed inset-x-3 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-primary/40 bg-card p-3 shadow-lg md:bottom-6 md:right-6 md:left-auto">
-      <PackageOpen className="size-5 shrink-0 text-primary" aria-hidden />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold">Abertura de {nome} em andamento</p>
-        <p className="text-xs text-muted-foreground">Etapa {Math.min(rascunho.passo, 3) + 1} de 4 · dados guardados</p>
-      </div>
-      <button type="button" onClick={() => { if (window.confirm(`Descartar os dados guardados da abertura de ${nome}?`)) apagarRascunho(rep); }}
-        className="min-h-11 shrink-0 rounded-xl px-2 text-xs text-muted-foreground underline">Descartar</button>
-      <button type="button" onClick={() => { ativo = { rep, chave: rascunho.chave, inicial: rascunho.f }; avisar(); }}
-        className="min-h-11 shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Continuar</button>
+    <div role="status" className="fixed inset-x-3 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-md space-y-2 rounded-2xl border border-primary/40 bg-card p-3 shadow-lg md:bottom-6 md:right-6 md:left-auto">
+      {um ? (
+        <div className="flex items-center gap-3">
+          <PackageOpen className="size-5 shrink-0 text-primary" aria-hidden />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">Abertura de {primeiroNome(um.f.nome) || "candidata"} em andamento</p>
+            <p className="text-xs text-muted-foreground">{etapa(um)}</p>
+          </div>
+          <button type="button" onClick={() => descartar(um)} className="min-h-11 shrink-0 rounded-xl px-2 text-xs text-muted-foreground underline">Descartar</button>
+          <button type="button" onClick={() => continuar(um)} className="min-h-11 shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Continuar</button>
+        </div>
+      ) : (
+        <>
+          <button type="button" onClick={() => setLista((v) => !v)} aria-expanded={lista} className="flex min-h-11 w-full items-center gap-3 text-left">
+            <PackageOpen className="size-5 shrink-0 text-primary" aria-hidden />
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold">{rascunhos.length} aberturas em andamento</span>
+              <span className="block text-xs text-muted-foreground">Cada uma guardada separada. Toque para ver.</span>
+            </span>
+            <span className="text-xs font-semibold text-primary">{lista ? "Fechar" : "Ver"}</span>
+          </button>
+          {lista && (
+            <ul className="max-h-[50vh] space-y-2 overflow-auto">
+              {rascunhos.map((r) => (
+                <li key={r.chave} className="flex items-center gap-2 rounded-xl border border-border p-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{primeiroNome(r.f.nome) || "Nova candidata"}</p>
+                    <p className="text-xs text-muted-foreground">{etapa(r)}</p>
+                  </div>
+                  <button type="button" onClick={() => descartar(r)} className="min-h-11 shrink-0 px-2 text-xs text-muted-foreground underline">Descartar</button>
+                  <button type="button" onClick={() => continuar(r)} className="min-h-11 shrink-0 rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground">Continuar</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
     </div>
   );
 }
 
+type DadosAssinatura = { documentos: { tipo: string; status: string; cycle_id: string | null; invalidada_em?: string | null }[]; papel?: { cycle_id: string }[] };
+/** Contrato assinado + promissória da maleta assinada (digital ou no papel). */
+export function assinaturaConcluida(d: DadosAssinatura, cycle: string | null) {
+  const contrato = d.documentos.some((x) => x.tipo === "contrato" && x.status === "assinado" && !x.invalidada_em);
+  const promDigital = d.documentos.some((x) => x.tipo === "promissoria" && x.status === "assinado" && !x.invalidada_em && (!cycle || x.cycle_id === cycle));
+  const promPapel = (d.papel ?? []).some((x) => !cycle || x.cycle_id === cycle);
+  return contrato && (promDigital || promPapel);
+}
+
 export function AberturaNaRua({ rep }: { rep: string }) {
   return (
-    <button type="button" onClick={() => abrir(rep, chaveCandidata(), VAZIO)} className="flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm">
+    <button type="button" onClick={() => abrir(rep, `${chaveCandidata()}-${Date.now().toString(36)}`, VAZIO)} className="flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm">
       <UserPlus className="size-4" /> Nova candidata
     </button>
   );
@@ -203,7 +316,7 @@ export function AberturaDaCandidata({ rep, card }: { rep: string; card: { nome: 
 function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; onFechar: () => void; inicial: Dados }) {
   const qc = useQueryClient();
   // 0300: começa do rascunho guardado desta mesma candidata, se houver
-  const [guardado] = React.useState(() => { const r = lerRascunho(rep); return r && r.chave === chave ? r : null; });
+  const [guardado] = React.useState(() => lerRascunho(rep, chave));
   const [passo, setPasso] = React.useState(guardado?.passo ?? 0);
   const [f, setF] = React.useState<Dados>(guardado?.f ?? inicial);
   const [perfil, setPerfil] = React.useState<Record<string, number>>(guardado?.perfil ?? {});
@@ -216,7 +329,7 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
     const r = { passo, f, perfil, feito };
     if (rascunhoTemConteudo(r, inicial)) gravarRascunho({ v: 1, rep, chave, passo, f, perfil, feito, maleta, salvo_em: Date.now() });
   }, [rep, chave, passo, f, perfil, feito, maleta, inicial]);
-  const concluir = React.useCallback(() => { concluidaRef.current = true; apagarRascunho(rep); }, [rep]);
+  const concluir = React.useCallback(() => { concluidaRef.current = true; apagarRascunho(rep, chave); }, [rep, chave]);
   const sair = () => {
     if (!concluidaRef.current && rascunhoTemConteudo({ passo, f, perfil, feito }, inicial))
       toast.success("Dados guardados neste aparelho. Toque em Continuar para seguir de onde parou.");
@@ -503,14 +616,15 @@ function Assinaturas({ rep, party, maleta, nome, telefone, onConcluida }: { rep:
     queryFn: async () => {
       const { data, error } = await supabase.rpc("assinaturas_da_consultora" as never, { _party: party, _rep: rep } as never);
       if (error) throw error;
-      return data as unknown as { documentos: { tipo: string; status: string; cycle_id: string | null; invalidada_em?: string | null }[] };
+      return data as unknown as DadosAssinatura;
     },
     refetchInterval: 15_000,
   });
   const docs = q.data?.documentos ?? [];
   const contrato = docs.some((d) => d.tipo === "contrato" && d.status === "assinado");
-  const promissoria = docs.some((d) => d.tipo === "promissoria" && d.status === "assinado" && !d.invalidada_em && (!maleta || d.cycle_id === maleta.cycle_id));
-  const concluida = contrato && promissoria;
+  const promissoria = docs.some((d) => d.tipo === "promissoria" && d.status === "assinado" && !d.invalidada_em && (!maleta || d.cycle_id === maleta.cycle_id))
+    || (q.data?.papel ?? []).some((x) => !maleta || x.cycle_id === maleta.cycle_id);
+  const concluida = !!q.data && assinaturaConcluida(q.data, maleta?.cycle_id ?? null);
   React.useEffect(() => { if (concluida) onConcluida(); }, [concluida, onConcluida]);
   return (
     <div className="space-y-4">

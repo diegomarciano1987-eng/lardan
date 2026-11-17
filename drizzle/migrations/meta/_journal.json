@@ -2311,6 +2311,41 @@
       "when": 1794844086469,
       "tag": "0329_cartao_parcelado_link_asaas_0329",
       "breakpoints": true
+    },
+    {
+      "idx": 330,
+      "version": "7",
+      "when": 1794942343922,
+      "tag": "0330_montagem_sugestao_enviadas_e_escolha_gravada",
+      "breakpoints": true
+    },
+    {
+      "idx": 331,
+      "version": "7",
+      "when": 1794942406450,
+      "tag": "0331_montagem_sugestao_enviadas_0331",
+      "breakpoints": true
+    },
+    {
+      "idx": 332,
+      "version": "7",
+      "when": 1794942918125,
+      "tag": "0332_rep_aberturas_promissoria_papel_ficha_0332",
+      "breakpoints": true
+    },
+    {
+      "idx": 333,
+      "version": "7",
+      "when": 1794942997598,
+      "tag": "0333_rep_portal_maletas_party_0333",
+      "breakpoints": true
+    },
+    {
+      "idx": 334,
+      "version": "7",
+      "when": 1794943473700,
+      "tag": "0334_montagem_sugestao_ordem_recente",
+      "breakpoints": true
     }
   ]
 }

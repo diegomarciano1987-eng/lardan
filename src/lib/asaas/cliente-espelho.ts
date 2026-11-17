@@ -19,7 +19,7 @@ export interface Diferenca { campo: Campo | "avisos"; lardan: string | null; asa
 const semAcento = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 const digitos = (s: string) => s.replace(/\D/g, "");
 
-/** Valor comparável (o Asaas guarda maiúsculo, sem acento, celular com 55 etc.). */
+/** Valor comparável (o Asaas guarda maiúsculo, sem acento etc.). Celular: compara sem o 55, mas o 55 gravado no Asaas é defeito — ver telefoneTorto. */
 export function normalizar(campo: Campo, v: string | null | undefined): string {
   const s = String(v ?? "").trim();
   if (!s) return "";
@@ -51,6 +51,41 @@ export function valido(campo: Campo, v: string | null | undefined): boolean {
     case "cpfCnpj": return n.length === 11 || n.length === 14;
     default: return n.length > 0;
   }
+}
+
+/**
+ * 17/11/2026 (caso Taynara): celular gravado no Asaas com 55 na frente (13 dígitos) faz o SMS e o WhatsApp falharem.
+ * Devolve o celular no único formato que o Asaas aceita (DDD + 9 + 8 dígitos) ou null.
+ */
+export function celularAsaas(v: string | null | undefined): string | null {
+  return valido("mobilePhone", v) ? normalizar("mobilePhone", v) : null;
+}
+
+/**
+ * Avisos do Asaas cujo canal precisa ser ligado: e-mail quando há e-mail; SMS e WhatsApp quando há celular válido.
+ * Só devolve o que muda; nunca desliga canal ligado.
+ */
+export function canaisParaLigar(notas: Array<Record<string, unknown>>, temEmail: boolean, temCel: boolean) {
+  const out: Array<Record<string, unknown>> = [];
+  for (const n of notas) {
+    if (!n["id"] || n["deleted"] === true) continue;
+    const quer = {
+      enabled: true,
+      emailEnabledForCustomer: n["emailEnabledForCustomer"] === true || temEmail,
+      smsEnabledForCustomer: n["smsEnabledForCustomer"] === true || temCel,
+      ...("whatsappEnabledForCustomer" in n ? { whatsappEnabledForCustomer: n["whatsappEnabledForCustomer"] === true || temCel } : {}),
+    };
+    const muda = Object.entries(quer).some(([k, v]) => n[k] !== v);
+    if (muda) out.push({ id: n["id"], ...quer });
+  }
+  return out;
+}
+
+/** O valor gravado no Asaas tem dígitos a mais (ex.: 55 na frente) em relação ao formato aceito. */
+export function telefoneTorto(campo: Campo, a: string | null | undefined): boolean {
+  if (campo !== "mobilePhone" && campo !== "phone") return false;
+  const bruto = digitos(String(a ?? ""));
+  return bruto.length > 0 && bruto !== normalizar(campo, a);
 }
 
 /** Valor a enviar (formato que o Asaas espera). */
@@ -92,7 +127,14 @@ export function comparar(lardan: DadosCliente, asaas: (DadosCliente & { notifica
   for (const campo of CAMPOS) {
     const l = (lardan[campo] ?? "").trim() || null;
     const a = (asaas?.[campo] ?? "")?.toString().trim() || null;
-    if (normalizar(campo, l) === normalizar(campo, a)) continue;
+    const torto = telefoneTorto(campo, a);
+    if (normalizar(campo, l) === normalizar(campo, a) && !torto) continue;
+    if (torto && (!l || !valido(campo, l) || normalizar(campo, l) === normalizar(campo, a)) && valido(campo, a)) {
+      // 55 na frente no Asaas: SMS/WhatsApp falham. Corrige para o formato aceito (mesmo número).
+      enviar[campo] = normalizar(campo, a);
+      diferencas.push({ campo, lardan: l, asaas: a, acao: "enviar", nota: "Número gravado no Asaas com 55 na frente: corrigido para os avisos chegarem." });
+      continue;
+    }
     if (!l || !valido(campo, l)) {
       if (a) diferencas.push({ campo, lardan: l, asaas: a, acao: "so_no_asaas", nota: l ? "O valor do Lardan é inválido; o do Asaas ficou." : "O Lardan não tem; o Asaas ficou como está." });
       continue;

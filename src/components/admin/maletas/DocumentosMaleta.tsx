@@ -9,39 +9,18 @@ import { NotaFiscalMaleta, useNotasMaletas } from "./NotaFiscalMaleta";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, detalheMaleta, traduzir, type ItemComposicao } from "@/lib/maletas";
-import { valorPorExtenso } from "@/lib/remessa";
+import { htmlPromissoria, type DocConsultora } from "@/lib/promissoria-html";
 import { documentoPedido, type PedidoDados } from "@/lib/pedido-consignacao";
 import diamante from "@/assets/lardan-diamante.png.asset.json";
 import { confirmarImpressora } from "@/components/admin/ConfirmarImpressora";
 import { validarPixGlobal, type PixPedido } from "@/lib/pix-pedido";
 import QRCode from "qrcode";
 
-interface DocConsultora {
-  /** null na maleta de abertura (com o representante) */
-  nome: string | null;
-  abertura?: boolean;
-  doc: string | null;
-  rg: string | null;
-  praca: string | null;
-  endereco: string | null;
-  bairro: string | null;
-  cidade: string | null;
-  cep: string | null;
-  whatsapp: string | null;
-  vencimento: string | null;
-  remessa_numero?: number | null;
-  remessa_emissao?: string | null;
-  representante?: string | null;
-}
 
 async function docConsultora(cycleId: string): Promise<DocConsultora> {
   const { data, error } = await supabase.rpc("kit_consultora_doc" as never, { _cycle: cycleId } as never);
   if (error) throw error;
   return data as unknown as DocConsultora;
-}
-
-function dataPorExtenso(d: Date) {
-  return d.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
 }
 
 function dataCurta(iso: string | null | undefined) {
@@ -126,33 +105,6 @@ export async function imprimirPedidoConsignacao(cycleId: string) {
 export async function imprimirRomaneio(cycleId: string, composicao: ItemComposicao[], _codigoMaleta: string, _dataAcerto: string | null) {
   if (!composicao.length) { toast.error("A maleta ainda não tem peças para o romaneio."); return; }
   await imprimirPedidoConsignacao(cycleId);
-}
-
-const CREDOR = "TSM COMÉRCIO DE SEMIJOIAS LTDA";
-const CNPJ = "43.319.208/0001-80";
-const PRACA_PAGAMENTO = "Ibiporã - PR";
-
-function htmlPromissoria(doc: DocConsultora, valorCents: number, codigoMaleta: string) {
-  const hoje = new Date();
-  const venc = doc.vencimento ? new Date(doc.vencimento) : new Date(hoje.getTime() + 10 * 864e5);
-  const extenso = valorPorExtenso(valorCents);
-  return `
-  <h1>NOTA PROMISSÓRIA</h1>
-  <h2>Referente à maleta ${codigoMaleta}</h2>
-  <div class="caixa" style="position:relative">
-    <p class="r" style="margin:0 0 10px;font-size:20px;font-weight:700">VENCIMENTO: ${venc.toLocaleDateString("pt-BR")}</p>
-    <p class="valor r">${brl(valorCents)} &nbsp;·&nbsp; ${extenso}</p>
-    <p>Em <strong>${dataPorExtenso(venc)}</strong> pagarei por esta única via de NOTA PROMISSÓRIA a
-    <strong>${CREDOR}</strong> inscrita no CNPJ/MF sob nº <strong>${CNPJ}</strong>, ou a sua ordem,
-    a quantia de <strong>(${extenso})</strong> em moeda corrente deste país.</p>
-    <p>Pagável em <strong>${PRACA_PAGAMENTO}</strong>.</p>
-    <p style="margin-top:18px">Emitente (DEVEDOR): <strong>${doc.nome ?? "________________________________________"}</strong></p>
-    <p>Endereço: ${doc.endereco ?? "________________________"}${doc.bairro ? ` - ${doc.bairro}` : ""}</p>
-    <p>Cidade/UF: ${doc.cidade ?? "__________"} &nbsp; CEP: ${doc.cep ?? "________"}</p>
-    <p>CPF/MF: ${doc.doc ?? "____________________"}${doc.abertura ? " &nbsp; RG: ____________________ &nbsp; WhatsApp: ____________________" : ""}</p>
-    <p class="r">IBIPORÃ/PR, ${dataPorExtenso(hoje)}</p>
-    <div class="assinatura">Assinatura: ${doc.nome ?? ""}</div>
-  </div>`;
 }
 
 /** Promissória direto da lista da remessa: valor = soma das peças gravadas na maleta (mesma conta da ficha). */

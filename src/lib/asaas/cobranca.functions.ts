@@ -5,16 +5,13 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { validarPedidoCobranca, type PedidoCobrancaTela } from "./pedido-cobranca";
 
 type Ctx = { supabase: never; userId: string };
 
 export const gerarLinkCobranca = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { installmentId: string; billingType: "PIX" | "BOLETO" | "UNDEFINED" }) => {
-    if (!d?.installmentId) throw new Error("Parcela obrigatória.");
-    if (!["PIX", "BOLETO", "UNDEFINED"].includes(d.billingType)) throw new Error("Forma de pagamento inválida.");
-    return d;
-  })
+  .inputValidator((d: PedidoCobrancaTela) => validarPedidoCobranca(d))
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
     const { solicitarCobranca } = await import("./operacoes");

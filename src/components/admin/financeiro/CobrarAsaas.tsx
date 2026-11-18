@@ -1,5 +1,5 @@
 /**
- * Cobrar pelo Asaas direto da ficha do título: Pix, boleto ou link de pagamento.
+ * Cobrar pelo Asaas direto da ficha do título: Pix, boleto, cartão (1x a 12x) ou link de pagamento.
  * A emissão passa pela rotina oficial do servidor (preflight, intenção
  * idempotente, reaproveita cobrança existente). Quando o Asaas confirma o
  * pagamento, a baixa entra sozinha pelo webhook.
@@ -16,14 +16,18 @@ import { cancelarCobrancaAsaas } from "@/lib/asaas/cancelar-cobranca.functions";
 import { useCapabilities } from "@/lib/capabilities";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { ParcelasCartaoAsaas } from "@/components/admin/financeiro/ParcelasCartaoAsaas";
+import { simularParcelas } from "@/lib/cartao-parcelas";
 
 type Parcela = { id: string; numero: number; vencimento: string; saldo: number };
-type Forma = "PIX" | "BOLETO" | "UNDEFINED";
+type Forma = "PIX" | "BOLETO" | "CREDIT_CARD" | "UNDEFINED";
 const FORMAS: { id: Forma; rotulo: string; dica: string }[] = [
   { id: "PIX", rotulo: "Pix", dica: "QR Code e copia e cola" },
   { id: "BOLETO", rotulo: "Boleto", dica: "linha digitável + Pix" },
-  { id: "UNDEFINED", rotulo: "Link de pagamento", dica: "cliente escolhe Pix, boleto ou cartão" },
+  { id: "CREDIT_CARD", rotulo: "Cartão", dica: "cartão de crédito em 1x a 12x" },
+  { id: "UNDEFINED", rotulo: "Link de pagamento", dica: "cliente escolhe Pix, boleto ou cartão à vista" },
 ];
+const FORMA_ROTULO: Record<string, string> = { PIX: "Pix", BOLETO: "Boleto", CREDIT_CARD: "Cartão", UNDEFINED: "Link" };
 const ESTADOS: Record<string, string> = {
   RECEIVED: "Paga no Asaas",
   CONFIRMED: "Confirmada (aguardando crédito)",
@@ -31,6 +35,10 @@ const ESTADOS: Record<string, string> = {
   OVERDUE: "Vencida",
   DUNNING_REQUESTED: "Em negativação",
   DELETED: "Removida",
+};
+const textoBotaoCartao = (saldo: number, n: number) => {
+  const s = simularParcelas(saldo, n);
+  return n > 1 ? `Gerar link do cartão em ${n}x de ${formatBRLFromCents(s.parcelaCents)}` : `Gerar link do cartão à vista (${formatBRLFromCents(saldo)})`;
 };
 const dataBR = (d: string) => new Intl.DateTimeFormat("pt-BR").format(new Date(`${d}T12:00:00`));
 
@@ -40,6 +48,7 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
   const abertas = parcelas.filter((p) => p.saldo > 0);
   const [parcela, setParcela] = React.useState(abertas[0]?.id ?? "");
   const [forma, setForma] = React.useState<Forma>("PIX");
+  const [parcelasCartao, setParcelasCartao] = React.useState(1);
   const [aviso, setAviso] = React.useState<string | null>(null);
   const caps = useCapabilities();
   const podeCancelar = caps.includes("finance.receivable.manage");
@@ -53,7 +62,7 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
       const ids = parcelas.map((p) => p.id);
       const { data, error } = await supabase
         .from("asaas_charges")
-        .select("id, external_id, installment_id, external_status, billing_type, invoice_url, value_cents, due_date")
+        .select("id, external_id, installment_id, external_status, billing_type, invoice_url, value_cents, due_date, installment_count, installment_number")
         .in("installment_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
       if (error) throw error;
       return data ?? [];
@@ -61,7 +70,7 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
   });
 
   const emitir = useMutation({
-    mutationFn: () => gerar({ data: { installmentId: parcela, billingType: forma } }),
+    mutationFn: () => gerar({ data: { installmentId: parcela, billingType: forma, ...(forma === "CREDIT_CARD" ? { parcelasCartao } : {}) } }),
     onSuccess: (r) => {
       const x = r as { state: string; aviso?: string; reaproveitada?: boolean; invoice_url?: string | null; erro?: string | null };
       if (x.state === "indisponivel") setAviso(x.aviso ?? "Integração indisponível neste momento.");
@@ -96,9 +105,10 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
     await navigator.clipboard.writeText(u);
     toast.success("Link copiado.");
   };
-  const whats = (u: string, valor: number) => {
+  const whats = (u: string, valor: number, vezes?: number | null) => {
     const fone = (telefone ?? "").replace(/\D/g, "");
-    const txt = encodeURIComponent(`Olá! Segue o link para pagamento de ${formatBRLFromCents(valor)} — LARDAN: ${u}`);
+    const oque = (vezes ?? 0) > 1 ? `pagar no cartão em ${vezes}x de ${formatBRLFromCents(valor)}` : `pagamento de ${formatBRLFromCents(valor)}`;
+    const txt = encodeURIComponent(`Olá! Segue o link para ${oque} — LARDAN: ${u}`);
     return `https://wa.me/${fone ? (fone.startsWith("55") ? fone : `55${fone}`) : ""}?text=${txt}`;
   };
 
@@ -118,7 +128,8 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
             return (
               <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
                 <span className="text-sm text-ledger-text">
-                  Parcela {p?.numero ?? "—"} · {c.billing_type === "UNDEFINED" ? "Link" : c.billing_type === "BOLETO" ? "Boleto" : "Pix"} ·{" "}
+                  Parcela {p?.numero ?? "—"} · {FORMA_ROTULO[c.billing_type ?? ""] ?? c.billing_type ?? "—"}
+                  {c.billing_type === "CREDIT_CARD" && (c.installment_count ?? 0) > 1 ? ` ${c.installment_number ?? 1}/${c.installment_count}` : ""} ·{" "}
                   <strong>{ESTADOS[c.external_status ?? ""] ?? c.external_status ?? "—"}</strong>
                   {c.due_date ? ` · vence ${dataBR(c.due_date)}` : ""}
                 </span>
@@ -127,7 +138,7 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
                     <>
                       <a href={c.invoice_url} target="_blank" rel="noreferrer" className="admin-btn">Abrir fatura</a>
                       <button type="button" className="admin-btn" onClick={() => void copiar(c.invoice_url!)}>Copiar link</button>
-                      <a href={whats(c.invoice_url, c.value_cents ?? 0)} target="_blank" rel="noreferrer" className="admin-btn">WhatsApp</a>
+                      <a href={whats(c.invoice_url, c.value_cents ?? 0, c.billing_type === "CREDIT_CARD" ? c.installment_count : null)} target="_blank" rel="noreferrer" className="admin-btn">WhatsApp</a>
                     </>
                   )}
                   {podeCancelar && (c.external_status === "PENDING" || c.external_status === "OVERDUE") && (
@@ -164,15 +175,25 @@ export function CobrarAsaas({ tituloId, parcelas, telefone }: { tituloId: string
             <div className="flex gap-2" role="group" aria-label="Forma de cobrança">
               {FORMAS.map((f) => (
                 <button key={f.id} type="button" aria-pressed={forma === f.id} title={f.dica} onClick={() => setForma(f.id)}
+                  data-testid={`forma-${f.id}`}
                   className={`flex-1 rounded-[10px] border px-2 py-2 text-xs font-semibold ${forma === f.id ? "border-asaas bg-asaas text-asaas-foreground" : "border-line text-ledger-muted"}`}>
                   {f.rotulo}
                 </button>
               ))}
             </div>
           </div>
+          {forma === "CREDIT_CARD" && (
+            <div className="mt-3">
+              <ParcelasCartaoAsaas baseCents={abertas.find((p) => p.id === parcela)?.saldo ?? 0} value={parcelasCartao} onChange={setParcelasCartao} />
+            </div>
+          )}
           <button type="button" className="mt-3 rounded-[10px] bg-asaas px-4 py-2.5 text-sm font-semibold text-asaas-foreground disabled:opacity-50"
             disabled={!parcela || emitir.isPending} onClick={() => emitir.mutate()}>
-            {emitir.isPending ? "Gerando no Asaas…" : `Gerar ${FORMAS.find((f) => f.id === forma)!.rotulo.toLowerCase()}`}
+            {emitir.isPending
+              ? "Gerando no Asaas…"
+              : forma === "CREDIT_CARD"
+                ? textoBotaoCartao(abertas.find((p) => p.id === parcela)?.saldo ?? 0, parcelasCartao)
+                : `Gerar ${FORMAS.find((f) => f.id === forma)!.rotulo.toLowerCase()}`}
           </button>
         </>
       )}

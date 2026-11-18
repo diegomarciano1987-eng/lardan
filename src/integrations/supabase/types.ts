@@ -22070,6 +22070,17 @@ export type Database = {
         Args: { _party: string; _titulo: string; _vence: string }
         Returns: string
       }
+      cob_termos_confissao: {
+        Args: { _sims: string[] }
+        Returns: {
+          assinado_em: string
+          criado_em: string
+          enviado_whatsapp: boolean
+          sign_url: string
+          simulacao_id: string
+          status: string
+        }[]
+      }
       cob_vincular_asaas_fiado: {
         Args: { _actor: string; _desde?: string }
         Returns: Json

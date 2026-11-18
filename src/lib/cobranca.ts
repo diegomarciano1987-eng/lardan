@@ -26,6 +26,7 @@ export interface Simulacao {
   principal_cents: number; encargos_cents: number; desconto_cents: number; total_cents: number;
   entrada_cents: number; entrada_data: string | null; parcelas: number; primeira_data: string | null;
   plano: { numero: number; data: string; valor_cents: number }[]; observacao: string | null; status: string; created_at: string;
+  origem?: string | null;
 }
 export async function simulacoes(party: string): Promise<Simulacao[]> {
   const { data, error } = await (supabase.from as unknown as (t: string) => { select: (c: string) => { eq: (a: string, b: string) => { order: (c: string, o: { ascending: boolean }) => Promise<{ data: Simulacao[] | null; error: { message: string } | null }> } } })("cob_simulacoes").select("*").eq("party_id", party).order("created_at", { ascending: false });

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, dataBR } from "@/lib/cobranca";
 import { gerarCobrancasAcordo } from "@/lib/cobranca-asaas.functions";
+import { zapsignConfissao } from "@/lib/zapsign/zapsign.functions";
 import { conferirAvisosAsaas, reenviarAvisosAcordo, type ResultadoConferencia } from "@/lib/asaas/prontidao-avisos.functions";
 import { fraseFaltas } from "@/lib/asaas/prontidao-avisos";
 import { chaveAvisos } from "./ProntidaoAvisosAsaas";
@@ -12,9 +13,10 @@ import { chaveAvisos } from "./ProntidaoAvisosAsaas";
 interface Linha { parcela: number; intent_id: string; state: string; valor_cents: number; vencimento: string; forma: string; invoice_url: string | null; external_status: string | null; erro: string | null }
 const ROT: Record<string, string> = { RECEIVED: "paga", CONFIRMED: "paga", PENDING: "aguardando pagamento", OVERDUE: "vencida" };
 
-export function AcordoAsaas({ simId, partyId, temEntrada }: { simId: string; partyId?: string; temEntrada: boolean }) {
+export function AcordoAsaas({ simId, partyId, temEntrada, termoObrigatorio = false }: { simId: string; partyId?: string; temEntrada: boolean; termoObrigatorio?: boolean }) {
   const qc = useQueryClient();
   const gerar = useServerFn(gerarCobrancasAcordo);
+  const termo = useServerFn(zapsignConfissao);
   const conferir = useServerFn(conferirAvisosAsaas);
   const reenviar = useServerFn(reenviarAvisosAcordo);
   const [reenviando, setReenviando] = React.useState(false);
@@ -43,6 +45,16 @@ export function AcordoAsaas({ simId, partyId, temEntrada }: { simId: string; par
       const r = await gerar({ data: { simId, forma, incluirEntrada: entrada } });
       if (r.erros.length) toast.error(`${r.cobrancas - r.erros.length} de ${r.cobrancas} criadas. ${r.erros[0]}`);
       else toast.success(`${r.cobrancas} cobrança(s) criadas no Asaas e aviso pedido ao Asaas para cada uma.`);
+      // 18/11 (Diego): acordo com dívida até 2025 sai junto com o termo de confissão para assinar (ZapSign).
+      if (termoObrigatorio && r.cobrancas > r.erros.length) {
+        try {
+          const t = await termo({ data: { simulacaoId: simId, reenviar: false } });
+          if (t.jaExistia) toast.info("O termo de confissão deste acordo já estava aguardando assinatura.");
+          else toast.success(t.whatsapp ? "Termo de confissão enviado pelo WhatsApp dela para assinar." : "Termo de confissão criado, mas sem WhatsApp: copie o link e envie para ela.", { duration: 10000 });
+        } catch (e) {
+          toast.error(`As cobranças foram geradas, mas o termo de confissão NÃO foi enviado: ${e instanceof Error ? e.message : "erro na ZapSign"}. Corrija e clique em "Enviar termo de confissão".`, { duration: 15000 });
+        }
+      }
       qc.invalidateQueries({ queryKey: ["cob"] });
       if (partyId) {
         // o Asaas liga os avisos do cadastro ao criar; confere de novo e mostra o resultado real

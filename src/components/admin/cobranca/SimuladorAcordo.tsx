@@ -6,6 +6,7 @@ import { DateField } from "@/components/premium/DateField";
 import { brl, dataBR, hojeSP, cobConfig, simulacoes, salvarSimulacao, statusSimulacao, excluirSimulacao, comprovantes, ROTULO_SIMULACAO, type Parcela } from "@/lib/cobranca";
 import { abrirComprovante } from "@/lib/cobranca.functions";
 import { calcularEncargos, montarPlano, addMeses } from "@/lib/cobranca-acordo";
+import { acordoPedeTermo } from "@/lib/cobranca-historica";
 import { ComprovanteDialog } from "./ComprovanteDialog";
 import { TermoConfissao } from "./TermoConfissao";
 import { AcordoAsaas } from "./AcordoAsaas";
@@ -153,8 +154,8 @@ export function SimuladorAcordo({ partyId, parcelas, selecaoInicial }: { partyId
                 {s.status !== "efetivada" && s.status !== "excluida" && <button className="text-danger underline" onClick={() => excluir(s.id)}>Excluir acordo</button>}
               </span>
             </div>
-            {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <AcordoAsaas simId={s.id} partyId={partyId} temEntrada={Number(s.entrada_cents) > 0} />}
-            {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <TermoConfissao simId={s.id} />}
+            {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <AcordoAsaas simId={s.id} partyId={partyId} temEntrada={Number(s.entrada_cents) > 0} termoObrigatorio={acordoPedeTermo(s, parcelas)} />}
+            {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <TermoConfissao simId={s.id} obrigatorio={acordoPedeTermo(s, parcelas)} />}
             {s.plano.length > 0 && <p className="text-xs text-ledger-muted">{s.plano.map((p) => `${p.numero}ª ${dataBR(p.data)} ${brl(p.valor_cents)}`).join(" · ")}</p>}
             {(comps.data ?? []).filter((c) => c.simulacao_id === s.id).map((c) => (
               <p key={c.id} className="text-xs">Comprovante {brl(Number(c.valor_cents))} em {dataBR(c.data_pagamento)}{c.banco && ` (${c.banco})`} · {c.status === "aguardando_baixa" ? "aguarda baixa no financeiro" : c.status} · <button className="underline" onClick={() => verComp(c.id)}>ver arquivo</button></p>

@@ -7,7 +7,7 @@ import * as React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Archive, Search, Handshake, Mail, MessageCircle } from "lucide-react";
+import { Archive, Search, Handshake, Mail, MessageCircle, FileSignature } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { GavetaAcordoHistorica } from "./GavetaAcordoHistorica";
 import { format } from "date-fns";
@@ -16,7 +16,9 @@ import { DateField } from "@/components/premium/DateField";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, dataBR } from "@/lib/cobranca";
 import { dispararLoteAsaas, type ResultadoItem } from "@/lib/cobranca-asaas.functions";
-import { situacaoHistorica, type DevedorHistorico } from "@/lib/cobranca-historica";
+import { situacaoHistorica, rotuloTermo, type DevedorHistorico } from "@/lib/cobranca-historica";
+import { termosConfissao } from "@/lib/termo-confissao";
+import { zapsignConfissao } from "@/lib/zapsign/zapsign.functions";
 
 type Rpc = (f: string, a: object) => Promise<{ data: unknown; error: { message: string } | null }>;
 const rpc: Rpc = (f, a) => (supabase.rpc as unknown as Rpc).call(supabase, f, a);
@@ -27,6 +29,7 @@ type Consolidacao = { lote: string | null; aplicado: boolean; criadas: number; t
 export function CobrancaHistorica() {
   const qc = useQueryClient();
   const disparar = useServerFn(dispararLoteAsaas);
+  const mandarTermo = useServerFn(zapsignConfissao);
   const q = useQuery({
     queryKey: ["cob", "historica"],
     queryFn: async () => {
@@ -46,6 +49,14 @@ export function CobrancaHistorica() {
       return new Map(((data ?? []) as Contato[]).map((c) => [c.party_id, c]));
     },
   });
+  // 18/11 (Diego): todo acordo da base histórica leva termo de confissão — a lista mostra quem já assinou.
+  const acordoIds = (q.data ?? []).map((d) => d.acordo_id).filter((x): x is string => !!x);
+  const termos = useQuery({
+    queryKey: ["cob", "historica-termos", acordoIds.join(",").length, acordoIds.length],
+    enabled: acordoIds.length > 0,
+    queryFn: () => termosConfissao(acordoIds),
+  });
+  const [termoRes, setTermoRes] = React.useState<Record<string, string>>({});
   const [acordoDe, setAcordoDe] = React.useState<DevedorHistorico | null>(null);
   const [busca, setBusca] = React.useState("");
   const [buscaLenta, setBuscaLenta] = React.useState("");
@@ -60,7 +71,7 @@ export function CobrancaHistorica() {
       return new Set((data ?? []) as string[]);
     },
   });
-  const [filtro, setFiltro] = React.useState<"aptas" | "todas" | "bloqueadas" | "faturadas">("aptas");
+  const [filtro, setFiltro] = React.useState<"aptas" | "todas" | "bloqueadas" | "faturadas" | "sem_termo">("aptas");
   const [sel, setSel] = React.useState<string[]>([]);
   const [venc, setVenc] = React.useState<Date | undefined>(() => { const d = new Date(); d.setDate(d.getDate() + 7); return d; });
   const [previa, setPrevia] = React.useState<Consolidacao | null>(null);
@@ -73,6 +84,7 @@ export function CobrancaHistorica() {
     if (filtro === "aptas" && s.tipo !== "apta") return false;
     if (filtro === "bloqueadas" && (s.tipo === "apta" || s.tipo === "faturada")) return false;
     if (filtro === "faturadas" && s.tipo !== "faturada") return false;
+    if (filtro === "sem_termo" && (!d.acordo_id || s.tipo === "judicial" || rotuloTermo(termos.data?.get(d.acordo_id)).tipo === "assinado")) return false;
     if (!buscaLenta) return true;
     return qb.data ? qb.data.has(d.party_id) : true;
   });
@@ -108,8 +120,20 @@ export function CobrancaHistorica() {
       const r = await disparar({ data: { itens, forma: "UNDEFINED" } });
       setRes(r);
       const ok = r.filter((x) => x.ok).length;
-      if (ok === r.length) toast.success(`${ok} de ${r.length} enviadas ao Asaas.`);
+      if (ok === r.length) toast.success(`${ok} de ${r.length} enviadas ao Asaas. Enviando os termos de confissão…`);
       else toast.warning(`${ok} de ${r.length} enviadas. Veja o motivo das outras abaixo.`);
+      // Termo de confissão de cada fatura enviada, um por vez; o que faltar no cadastro aparece na linha.
+      const out: Record<string, string> = {};
+      let termosOk = 0;
+      for (const x of r.filter((y) => y.ok)) {
+        try {
+          const t = await mandarTermo({ data: { simulacaoId: x.id, reenviar: false } });
+          termosOk++;
+          out[x.id] = t.jaExistia ? "termo já aguardava assinatura" : t.whatsapp ? "termo enviado no WhatsApp" : "termo criado sem WhatsApp — copie o link no acordo";
+        } catch (e) { out[x.id] = `termo NÃO enviado: ${e instanceof Error ? e.message : "erro na ZapSign"}`; }
+        setTermoRes({ ...out });
+      }
+      if (ok) (termosOk === ok ? toast.success : toast.warning)(`Termos de confissão: ${termosOk} de ${ok} enviados.`);
       qc.invalidateQueries({ queryKey: ["cob"] });
     } catch (e) { toast.error((e as Error).message); } finally { setOcupado(false); }
   };
@@ -125,7 +149,7 @@ export function CobrancaHistorica() {
             <h2 className="text-base font-semibold">Cobrança histórica — dívidas vencidas até 31/12/2025</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Soma todas as parcelas antigas em aberto de cada pessoa numa fatura única, sem juros e sem desconto — ou use “Gerar acordo” na linha da pessoa para parcelar (entrada, 2x a 48x, desconto). As dívidas originais
-              são abatidas da mais antiga para a mais nova quando a fatura for paga. Nada vai ao Asaas sem a sua confirmação.
+              são abatidas da mais antiga para a mais nova quando a fatura for paga. Nada vai ao Asaas sem a sua confirmação; ao gerar as cobranças, o termo de confissão de dívida segue junto para ela assinar (ZapSign).
             </p>
           </div>
         </div>
@@ -154,7 +178,7 @@ export function CobrancaHistorica() {
               className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm" />
           </label>
           <div className="flex rounded-md border border-border p-0.5" role="tablist" aria-label="Filtro">
-            {([["aptas", "Prontas"], ["bloqueadas", "Bloqueadas"], ["faturadas", "Com fatura"], ["todas", "Todas"]] as const).map(([v, r]) => (
+            {([["aptas", "Prontas"], ["bloqueadas", "Bloqueadas"], ["faturadas", "Com fatura"], ["sem_termo", "Termo não assinado"], ["todas", "Todas"]] as const).map(([v, r]) => (
               <button key={v} type="button" role="tab" aria-selected={filtro === v} onClick={() => setFiltro(v)}
                 className={`rounded px-3 py-1 text-sm ${filtro === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>{r}</button>
             ))}
@@ -190,6 +214,7 @@ export function CobrancaHistorica() {
               <p key={r.id} className={r.ok ? "text-foreground" : "text-destructive"}>
                 {r.nome}: {r.ok ? `enviada${r.links[0] ? " · " : ""}` : r.erro}
                 {r.ok && r.links[0] && <a className="underline" href={r.links[0]} target="_blank" rel="noreferrer">abrir fatura</a>}
+                {(() => { const t = termoRes[r.id]; return t ? <span className={t.startsWith("termo NÃO") ? "text-destructive" : "text-muted-foreground"}> · {t}</span> : null; })()}
               </p>
             ))}
           </div>
@@ -211,13 +236,13 @@ export function CobrancaHistorica() {
             <thead className="bg-muted/50 text-left text-xs text-muted-foreground">
               <tr><th className="w-10 px-3 py-2" /><th className="px-3 py-2">Pessoa</th><th className="px-3 py-2 text-right">Parcelas</th>
                 <th className="px-3 py-2">Vencimentos</th><th className="px-3 py-2 text-right">Saldo antigo</th><th className="px-3 py-2">Situação</th>
-                <th className="px-3 py-2">Avisos Asaas</th><th className="px-3 py-2 text-right">Acordo</th></tr>
+                <th className="px-3 py-2">Avisos Asaas</th><th className="px-3 py-2">Termo</th><th className="px-3 py-2 text-right">Acordo</th></tr>
             </thead>
             <tbody>
-              {q.isLoading && <tr><td colSpan={8} className="px-3 py-8 text-center text-muted-foreground">Carregando…</td></tr>}
-              {q.error && <tr><td colSpan={8} className="px-3 py-8 text-center text-destructive">{(q.error as Error).message}</td></tr>}
-              {buscaLenta && qb.isFetching && <tr><td colSpan={8} className="px-3 py-3 text-center text-xs text-muted-foreground">Buscando…</td></tr>}
-              {!q.isLoading && !qb.isFetching && !lista.length && <tr><td colSpan={8} className="px-3 py-8 text-center text-muted-foreground">{buscaLenta ? `Nada encontrado para “${buscaLenta}”.` : "Sem dados."}</td></tr>}
+              {q.isLoading && <tr><td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">Carregando…</td></tr>}
+              {q.error && <tr><td colSpan={9} className="px-3 py-8 text-center text-destructive">{(q.error as Error).message}</td></tr>}
+              {buscaLenta && qb.isFetching && <tr><td colSpan={9} className="px-3 py-3 text-center text-xs text-muted-foreground">Buscando…</td></tr>}
+              {!q.isLoading && !qb.isFetching && !lista.length && <tr><td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">{buscaLenta ? `Nada encontrado para “${buscaLenta}”.` : "Sem dados."}</td></tr>}
               {lista.slice(0, 300).map((d) => {
                 const s = situacaoHistorica(d);
                 const apta = s.tipo === "apta";
@@ -244,6 +269,13 @@ export function CobrancaHistorica() {
                             <MessageCircle aria-hidden className="size-3" />{c.celular ? "WhatsApp/SMS" : c.telefone_invalido ? "celular inválido" : "sem celular"}</span>
                         </span>
                       );
+                    })()}</td>
+                    <td className="px-3 py-2 text-xs">{(() => {
+                      if (!d.acordo_id || s.tipo === "judicial") return <span className="text-muted-foreground">—</span>;
+                      if (termos.isLoading) return <span className="text-muted-foreground">…</span>;
+                      const t = rotuloTermo(termos.data?.get(d.acordo_id));
+                      const cor = t.tipo === "assinado" ? "bg-success/10 text-success" : t.tipo === "pendente" ? "bg-warning/10 text-warning" : "bg-danger/10 text-danger";
+                      return <span data-termo-linha={t.tipo} className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 ${cor}`}><FileSignature aria-hidden className="size-3" />{t.tipo === "assinado" ? "assinado" : t.tipo === "pendente" ? "aguardando" : "sem termo"}</span>;
                     })()}</td>
                     <td className="px-3 py-2 text-right">
                       {s.tipo === "judicial" ? <span className="text-xs text-muted-foreground">Jurídico</span> : (

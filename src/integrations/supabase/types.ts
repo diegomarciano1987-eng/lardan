@@ -21030,6 +21030,15 @@ export type Database = {
         Args: { _motivo: string; _party: string; _user: string }
         Returns: Json
       }
+      anel_tamanho_peca: {
+        Args: {
+          _barcode: string
+          _label: string
+          _legacy: string
+          _size: string
+        }
+        Returns: string
+      }
       apply_stock_delta: {
         Args: { _delta: number; _location: string; _variant: string }
         Returns: number
@@ -22179,6 +22188,11 @@ export type Database = {
         Returns: Json
       }
       consultora_acesso_situacao: { Args: { _party: string }; Returns: Json }
+      consultora_aneis_tamanhos: { Args: { _party: string }; Returns: Json }
+      consultora_aneis_tamanhos_dados: {
+        Args: { _party: string }
+        Returns: Json
+      }
       consultora_asaas_preparar: {
         Args: { _actor: string; _payload: Json }
         Returns: Json

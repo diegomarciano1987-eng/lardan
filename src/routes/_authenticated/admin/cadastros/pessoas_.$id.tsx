@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import { DocumentosAssinados } from "@/components/admin/cadastros/DocumentosAssinados";
 import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
+import { SugestaoMontagem } from "@/components/admin/historico/SugestaoMontagem";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import { AcessoPortalBotao } from "@/components/admin/acessos/AcessoPortalBotao";
 import { AcessoColaboradora } from "@/components/admin/acessos/AcessoColaboradora";
@@ -307,6 +308,7 @@ function FichaPessoa() {
           {!colab && <TabsTrigger value="acesso">Acesso</TabsTrigger>}
           {!colab && <TabsTrigger value="historico">Histórico</TabsTrigger>}
           <TabsTrigger value="historico-jflex">Histórico SmallData</TabsTrigger>
+          {caps.includes("kit.manage") && <TabsTrigger value="historico-vendas">Histórico de vendas</TabsTrigger>}
         </TabsList>
 
         {/* RESUMO */}
@@ -766,6 +768,12 @@ function FichaPessoa() {
         <TabsContent value="historico-jflex" className="mt-4">
           <HistoricoJFlexPessoa partyId={id} />
         </TabsContent>
+        {caps.includes("kit.manage") && (
+          <TabsContent value="historico-vendas" className="mt-4">
+            {/* 0335: o mesmo parâmetro da montagem (sugestão pelo histórico + tamanhos de anel); só leitura */}
+            <SugestaoMontagem partyId={id} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

@@ -2346,6 +2346,13 @@
       "when": 1794943473700,
       "tag": "0334_montagem_sugestao_ordem_recente",
       "breakpoints": true
+    },
+    {
+      "idx": 335,
+      "version": "7",
+      "when": 1795008393641,
+      "tag": "0335_aneis_tamanhos_mais_vendidos_0335",
+      "breakpoints": true
     }
   ]
 }

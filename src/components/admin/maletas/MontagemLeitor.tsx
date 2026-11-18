@@ -20,6 +20,9 @@ import {
 import { useTiposPeca } from "@/lib/tipo-peca";
 import { ConferenciaMaleta } from "./ConferenciaMaleta";
 import { DocumentosMaleta } from "./DocumentosMaleta";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
+import { LinhaTamanhosAnel, ehAnel, textoTamanhos, useAneisTamanhos, type AneisTamanhos } from "@/components/admin/historico/AneisTamanhos";
 
 type Leitura = { id: string; codigo: string; ok: boolean; texto: string; detalhe?: string; hora: string; variantId?: string };
 type Res = {
@@ -120,8 +123,11 @@ function FaixaHistorico({
   aoTotal,
   salvando,
   total,
+  aneis,
 }: {
   dados: MetasMontagem | undefined;
+  /** 0335: tamanhos de anel que ela mais vende */
+  aneis?: AneisTamanhos | undefined;
   carregando: boolean;
   modo: ModoMetas;
   salvando: boolean;
@@ -222,6 +228,14 @@ function FaixaHistorico({
         </ul>
       )}
 
+      {textoTamanhos(aneis) && (
+        <p className="text-sm text-ledger-text" data-testid="faixa-tamanhos-anel">
+          <span className="mr-2 rounded-full bg-surface-muted px-2 py-0.5 text-xs font-semibold text-ledger-muted">anéis</span>
+          Tamanhos que ela mais vende: <strong>{textoTamanhos(aneis)}</strong>
+          {aneis!.sem_tamanho > 0 && <span className="text-ledger-muted"> · ajustável/sem aro: {aneis!.sem_tamanho}</span>}
+        </p>
+      )}
+
       {temHistorico && dados.categorias.length > 0 && (
         <details className="text-sm">
           <summary className="cursor-pointer text-ledger-muted">Ver por categoria</summary>
@@ -238,7 +252,10 @@ function FaixaHistorico({
             <tbody>
               {dados.categorias.map((c) => (
                 <tr key={c.categoria} className="border-t border-line">
-                  <td className="py-1">{nomeCategoria(c.categoria)}</td>
+                  <td className="py-1">
+                    {nomeCategoria(c.categoria)}
+                    {ehAnel(c.categoria) && <LinhaTamanhosAnel dados={aneis} vendidasNaCategoria={c.consultora_pecas_vendidas} className="text-xs text-ledger-muted" />}
+                  </td>
                   <td className="py-1 text-right font-semibold">{c.pecas_sugeridas}</td>
                   <td className="py-1 text-right">{c.consultora_pecas_vendidas}</td>
                   <td className="py-1 text-right">{c.consultora_giro_pct === null ? "—" : `${c.consultora_giro_pct}%`}</td>
@@ -315,6 +332,8 @@ export function MontagemLeitor({
     staleTime: 5 * 60_000,
     placeholderData: keepPreviousData,
   });
+  const aneis = useAneisTamanhos(info.data?.party_id);
+  const [abaHistorico, setAbaHistorico] = React.useState<"vendas" | "smalldata">("vendas");
   const campeas = React.useRef<Set<string>>(new Set());
   React.useEffect(() => {
     campeas.current = new Set(historico.data?.variantes_campeas ?? []);
@@ -373,7 +392,8 @@ export function MontagemLeitor({
     const t = window.setInterval(() => {
       const a = document.activeElement;
       // A busca da composição é a única exceção: enquanto ela estiver em uso, o foco fica nela.
-      if (!impressaoAberta.current && a !== campo.current && a !== campoBusca.current && !(a instanceof HTMLButtonElement)) campo.current?.focus();
+      // preventScroll: lendo a aba Histórico SmallData, a tela não pula de volta a cada 400 ms (a bipagem segue no campo).
+      if (!impressaoAberta.current && a !== campo.current && a !== campoBusca.current && !(a instanceof HTMLButtonElement)) campo.current?.focus({ preventScroll: true });
     }, 400);
     return () => {
       window.clearInterval(t);
@@ -605,15 +625,41 @@ export function MontagemLeitor({
           </div>
         </div>
 
-        <FaixaHistorico
-          dados={historico.data}
-          carregando={historico.isLoading}
-          modo={modoMetas}
-          salvando={salvandoMetas > 0}
-          total={totalMetas ?? historico.data?.total_pecas ?? 0}
-          aoModo={mudarModo}
-          aoTotal={mudarTotal}
-        />
+        {/* 0335: dois parâmetros da consultora em abas — histórico de vendas (metas desta maleta) e histórico SmallData */}
+        <Tabs
+          value={abaHistorico}
+          onValueChange={(v) => {
+            setAbaHistorico(v as "vendas" | "smalldata");
+            // a aba é um botão: devolve o foco ao leitor para o próximo bipe não se perder
+            window.setTimeout(() => campo.current?.focus({ preventScroll: true }), 60);
+          }}
+        >
+          <TabsList aria-label="Parâmetros da consultora">
+            <TabsTrigger value="vendas">Histórico de vendas</TabsTrigger>
+            <TabsTrigger value="smalldata" disabled={!info.data?.party_id}>Histórico SmallData</TabsTrigger>
+          </TabsList>
+          <TabsContent value="vendas" className="mt-3">
+            <FaixaHistorico
+              dados={historico.data}
+              carregando={historico.isLoading}
+              modo={modoMetas}
+              salvando={salvandoMetas > 0}
+              total={totalMetas ?? historico.data?.total_pecas ?? 0}
+              aoModo={mudarModo}
+              aoTotal={mudarTotal}
+              aneis={aneis.data}
+            />
+          </TabsContent>
+          <TabsContent value="smalldata" className="mt-3">
+            <div className="ledger-panel max-h-[60vh] overflow-auto p-5" data-testid="montagem-historico-smalldata">
+              {info.data?.party_id ? (
+                <HistoricoJFlexPessoa partyId={info.data.party_id} semLinks />
+              ) : (
+                <p className="text-sm text-ledger-muted">Sem consultora definida nesta maleta.</p>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Cards de meta por tipo: o que a maleta precisa × o que já foi bipado */}
         <div className={`grid grid-cols-2 gap-3 ${tiposVisiveis.length > 5 ? "md:grid-cols-6" : "md:grid-cols-5"}`}>

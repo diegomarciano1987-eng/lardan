@@ -15,6 +15,8 @@ import { AvisoNotaTrocaMaleta, DesfazerDevolucaoMaleta, LinkNotaNaRemessa } from
 import { MontagemLeitor } from "@/components/admin/maletas/MontagemLeitor";
 import { ConferenciaMaleta } from "@/components/admin/maletas/ConferenciaMaleta";
 import { SugestaoMontagem } from "@/components/admin/historico/SugestaoMontagem";
+import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { EtiquetaMaleta } from "@/components/admin/maletas/EtiquetaMaleta";
 import {
@@ -238,7 +240,19 @@ function MaletaFicha() {
             </Panel>
           )}
           {podeMontar && montando && d.ciclo.consultora_party_id && (
-            <SugestaoMontagem partyId={d.ciclo.consultora_party_id} />
+            /* 0335: os dois parâmetros da consultora para a montadora, em abas */
+            <Tabs defaultValue="vendas">
+              <TabsList aria-label="Parâmetros da consultora">
+                <TabsTrigger value="vendas">Histórico de vendas</TabsTrigger>
+                <TabsTrigger value="smalldata">Histórico SmallData</TabsTrigger>
+              </TabsList>
+              <TabsContent value="vendas" className="mt-4">
+                <SugestaoMontagem partyId={d.ciclo.consultora_party_id} />
+              </TabsContent>
+              <TabsContent value="smalldata" className="mt-4">
+                <HistoricoJFlexPessoa partyId={d.ciclo.consultora_party_id} />
+              </TabsContent>
+            </Tabs>
           )}
 
           <Panel title="Composição" flush>

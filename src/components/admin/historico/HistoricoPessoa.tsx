@@ -9,6 +9,7 @@ import { historicoConsultora, type CategoriaHistorico } from "@/lib/historico-jf
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComissaoMaletas } from "@/components/admin/historico/ComissaoMaletas";
 import { LinhaBanhos, chaveCategoria, useBanhos, type BanhoPct } from "@/components/admin/historico/BanhosCategoria";
+import { LinhaTamanhosAnel, ehAnel, useAneisTamanhos, type AneisTamanhos } from "@/components/admin/historico/AneisTamanhos";
 
 const brl = formatBRLFromCents;
 const data = (v?: string | null) => (v ? v.slice(0, 10).split("-").reverse().join("/") : "—");
@@ -22,7 +23,7 @@ function Dado({ rotulo, valor, destaque }: { rotulo: string; valor: string; dest
   );
 }
 
-function BarrasCategorias({ categorias, banhos }: { categorias: CategoriaHistorico[]; banhos?: Map<string, BanhoPct[]> | undefined }) {
+function BarrasCategorias({ categorias, banhos, aneis }: { categorias: CategoriaHistorico[]; banhos?: Map<string, BanhoPct[]> | undefined; aneis?: AneisTamanhos | undefined }) {
   const max = Math.max(...categorias.map((c) => c.participacao_vendas_pct ?? 0), 1);
   return (
     <div className="space-y-4">
@@ -48,6 +49,7 @@ function BarrasCategorias({ categorias, banhos }: { categorias: CategoriaHistori
               <div className="h-full rounded-full bg-bronze" style={{ width: `${Math.round(((c.participacao_vendas_pct ?? 0) / max) * 100)}%` }} />
             </div>
             <LinhaBanhos banhos={banhos?.get(chaveCategoria(c.categoria))} />
+            {ehAnel(c.categoria) && <LinhaTamanhosAnel dados={aneis} vendidasNaCategoria={c.pecas_vendidas} />}
           </div>
         );
       })}
@@ -55,9 +57,11 @@ function BarrasCategorias({ categorias, banhos }: { categorias: CategoriaHistori
   );
 }
 
-export function HistoricoJFlexPessoa({ partyId }: { partyId: string }) {
+/** `semLinks`: dentro da montagem por leitor, nada pode levar para outra tela no meio da bipagem. */
+export function HistoricoJFlexPessoa({ partyId, semLinks = false }: { partyId: string; semLinks?: boolean }) {
   const q = useQuery({ queryKey: ["historico-jflex", "consultora", partyId], queryFn: () => historicoConsultora(partyId) });
   const banhos = useBanhos(partyId);
+  const aneis = useAneisTamanhos(partyId);
 
   if (q.isLoading) return <Skeleton className="h-64 w-full" />;
   if (q.isError) return <ErrorState message={(q.error as Error).message} onRetry={() => void q.refetch()} />;
@@ -100,7 +104,7 @@ export function HistoricoJFlexPessoa({ partyId }: { partyId: string }) {
       </div>
 
       <Panel title="Categorias — participação nas vendas, giro comparado à praça e banho mais vendido">
-        {d.categorias && d.categorias.length > 0 ? <BarrasCategorias categorias={d.categorias} banhos={banhos.data?.porCategoria} /> : <p className="text-sm text-ledger-muted">Sem dados.</p>}
+        {d.categorias && d.categorias.length > 0 ? <BarrasCategorias categorias={d.categorias} banhos={banhos.data?.porCategoria} aneis={aneis.data} /> : <p className="text-sm text-ledger-muted">Sem dados.</p>}
       </Panel>
 
       <Panel title="Top produtos vendidos" flush>
@@ -119,7 +123,7 @@ export function HistoricoJFlexPessoa({ partyId }: { partyId: string }) {
               {d.produtos_top.map((p) => (
                 <tr key={p.produto} className="border-b border-line-soft last:border-0">
                   <td className="px-6 py-3 font-medium text-ledger-text">
-                    {p.product_id ? (
+                    {p.product_id && !semLinks ? (
                       <Link to="/admin/cadastros/produtos/$id" params={{ id: p.product_id }} className="admin-link">
                         {p.nome ?? "Produto"}
                       </Link>

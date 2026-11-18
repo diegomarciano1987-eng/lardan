@@ -8,6 +8,7 @@ import { Panel, Skeleton, StatusBadge } from "@/components/admin/ui";
 import { sugestaoMontagem, type SugestaoMontagem } from "@/lib/historico-jflex";
 import { supabase } from "@/integrations/supabase/client";
 import { chaveCategoria, textoBanhos, useBanhos } from "@/components/admin/historico/BanhosCategoria";
+import { LinhaTamanhosAnel, ehAnel, useAneisTamanhos } from "@/components/admin/historico/AneisTamanhos";
 
 const SELO: Record<SugestaoMontagem["confianca"], { tone: "success" | "warning" | "danger"; texto: string }> = {
   alta: { tone: "success", texto: "Confiança alta" },
@@ -41,6 +42,7 @@ export function SugestaoMontagem({ partyId }: { partyId: string }) {
   });
 
   const banhos = useBanhos(partyId);
+  const aneis = useAneisTamanhos(partyId);
   if (padrao.isLoading) return <Skeleton className="h-24 w-full" />;
   const d = q.data;
 
@@ -82,6 +84,9 @@ export function SugestaoMontagem({ partyId }: { partyId: string }) {
                     {c.categoria}
                     {textoBanhos(banhos.data?.porCategoria.get(chaveCategoria(c.categoria))) && (
                       <span className="block text-xs font-normal text-ledger-muted">Banho: {textoBanhos(banhos.data?.porCategoria.get(chaveCategoria(c.categoria)))}</span>
+                    )}
+                    {ehAnel(c.categoria) && (
+                      <LinhaTamanhosAnel dados={aneis.data} vendidasNaCategoria={c.consultora_pecas_vendidas} className="block text-xs font-normal text-ledger-muted" />
                     )}
                   </td>
                   <td className="py-2 pr-4 text-right tabular-nums font-semibold">{c.pecas_sugeridas}</td>

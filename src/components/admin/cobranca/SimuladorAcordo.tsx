@@ -9,6 +9,7 @@ import { calcularEncargos, montarPlano, addMeses } from "@/lib/cobranca-acordo";
 import { ComprovanteDialog } from "./ComprovanteDialog";
 import { TermoConfissao } from "./TermoConfissao";
 import { AcordoAsaas } from "./AcordoAsaas";
+import { ProntidaoAvisosAsaas } from "./ProntidaoAvisosAsaas";
 
 const iso = (d?: Date) => (d ? d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }) : "");
 const paraData = (s: string) => (s ? new Date(s + "T12:00:00") : undefined);
@@ -16,13 +17,17 @@ const reais = (s: string) => Math.round(Number(s.replace(/\./g, "").replace(",",
 const txt = (c: number) => (c / 100).toFixed(2).replace(".", ",");
 type Linha = { numero: number; data: string; valor: string };
 
-export function SimuladorAcordo({ partyId, parcelas }: { partyId: string; parcelas: Parcela[] }) {
+export function SimuladorAcordo({ partyId, parcelas, selecaoInicial }: { partyId: string; parcelas: Parcela[]; selecaoInicial?: string[] }) {
   const qc = useQueryClient();
   const abrir = useServerFn(abrirComprovante);
   const cfg = useQuery({ queryKey: ["cob", "config"], queryFn: cobConfig });
   const hist = useQuery({ queryKey: ["cob", "sim", partyId], queryFn: () => simulacoes(partyId) });
   const comps = useQuery({ queryKey: ["cob", "comprovantes", partyId], queryFn: () => comprovantes(partyId) });
-  const [sel, setSel] = React.useState<string[]>(() => parcelas.map((p) => p.installment_id));
+  const [sel, setSel] = React.useState<string[]>(() => {
+    const todas = parcelas.map((p) => p.installment_id);
+    const ini = selecaoInicial?.filter((x) => todas.includes(x));
+    return ini?.length ? ini : todas;
+  });
   const [base, setBase] = React.useState(hojeSP());
   const [aplicar, setAplicar] = React.useState(true);
   const [multa, setMulta] = React.useState<number | null>(null);
@@ -79,6 +84,7 @@ export function SimuladorAcordo({ partyId, parcelas }: { partyId: string; parcel
 
   return (
     <div className="space-y-5">
+      <ProntidaoAvisosAsaas partyId={partyId} />
       <p className="rounded-lg border border-line-soft bg-warm-ivory/60 p-3 text-xs text-ledger-muted">Simulação e acordo não mexem no financeiro. A dívida só muda pela baixa oficial quando o dinheiro entra.</p>
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
         <section className="space-y-4 rounded-xl border border-line bg-surface p-5">
@@ -147,7 +153,7 @@ export function SimuladorAcordo({ partyId, parcelas }: { partyId: string; parcel
                 {s.status !== "efetivada" && s.status !== "excluida" && <button className="text-danger underline" onClick={() => excluir(s.id)}>Excluir acordo</button>}
               </span>
             </div>
-            {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <AcordoAsaas simId={s.id} temEntrada={Number(s.entrada_cents) > 0} />}
+            {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <AcordoAsaas simId={s.id} partyId={partyId} temEntrada={Number(s.entrada_cents) > 0} />}
             {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <TermoConfissao simId={s.id} />}
             {s.plano.length > 0 && <p className="text-xs text-ledger-muted">{s.plano.map((p) => `${p.numero}ª ${dataBR(p.data)} ${brl(p.valor_cents)}`).join(" · ")}</p>}
             {(comps.data ?? []).filter((c) => c.simulacao_id === s.id).map((c) => (

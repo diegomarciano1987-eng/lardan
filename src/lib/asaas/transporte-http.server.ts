@@ -304,6 +304,13 @@ export class TransporteHttpAsaas implements TransporteAsaas {
     return lote.length;
   }
 
+  /** 18/11: avisos configurados no cadastro da cliente (somente leitura; 404 = null). Usado na conferência antes do acordo. */
+  async lerAvisosCliente(id: string): Promise<Json[] | null> {
+    const lista = await this.enviar<Json>("GET", `/customers/${encodeURIComponent(id)}/notifications`, {}, true);
+    if (!lista) return null;
+    return Array.isArray(lista["data"]) ? (lista["data"] as Json[]) : [];
+  }
+
   /** 0306: cadastro completo da cliente no Asaas (somente leitura; 404 = null). */
   async lerClienteCompleto(id: string): Promise<Json | null> {
     return this.enviar<Json>("GET", `/customers/${encodeURIComponent(id)}`, {}, true);

@@ -2353,6 +2353,13 @@
       "when": 1795008393641,
       "tag": "0335_aneis_tamanhos_mais_vendidos_0335",
       "breakpoints": true
+    },
+    {
+      "idx": 336,
+      "version": "7",
+      "when": 1795018374782,
+      "tag": "0336_0336_historica_acordo_avisos",
+      "breakpoints": true
     }
   ]
 }

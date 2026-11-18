@@ -7,7 +7,9 @@ import * as React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Archive, Search } from "lucide-react";
+import { Archive, Search, Handshake, Mail, MessageCircle } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { GavetaAcordoHistorica } from "./GavetaAcordoHistorica";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { DateField } from "@/components/premium/DateField";
@@ -19,6 +21,7 @@ import { situacaoHistorica, type DevedorHistorico } from "@/lib/cobranca-histori
 type Rpc = (f: string, a: object) => Promise<{ data: unknown; error: { message: string } | null }>;
 const rpc: Rpc = (f, a) => (supabase.rpc as unknown as Rpc).call(supabase, f, a);
 type Item = { party_id: string; nome: string; saldo_cents: number; parcelas: number; ok: boolean; motivo: string | null; simulacao_id: string | null };
+type Contato = { party_id: string; email: string | null; celular: string | null; telefone_invalido: string | null; cpf_ok: boolean; asaas_vinculado: boolean };
 type Consolidacao = { lote: string | null; aplicado: boolean; criadas: number; total_cents: number; itens: Item[] };
 
 export function CobrancaHistorica() {
@@ -32,6 +35,18 @@ export function CobrancaHistorica() {
       return (data ?? []) as DevedorHistorico[];
     },
   });
+  // 18/11: contato de cada pessoa (e-mail / celular que recebe SMS e WhatsApp) — se faltar, a tela avisa antes do acordo.
+  const ids = (q.data ?? []).map((d) => d.party_id);
+  const contatos = useQuery({
+    queryKey: ["cob", "historica-contatos", ids.length],
+    enabled: ids.length > 0,
+    queryFn: async () => {
+      const { data, error } = await rpc("cob_contatos_avisos", { _parties: ids.slice(0, 2000) });
+      if (error) throw new Error(error.message);
+      return new Map(((data ?? []) as Contato[]).map((c) => [c.party_id, c]));
+    },
+  });
+  const [acordoDe, setAcordoDe] = React.useState<DevedorHistorico | null>(null);
   const [busca, setBusca] = React.useState("");
   const [buscaLenta, setBuscaLenta] = React.useState("");
   React.useEffect(() => { const t = setTimeout(() => setBuscaLenta(busca.trim()), 350); return () => clearTimeout(t); }, [busca]);
@@ -109,7 +124,7 @@ export function CobrancaHistorica() {
           <div>
             <h2 className="text-base font-semibold">Cobrança histórica — dívidas vencidas até 31/12/2025</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Soma todas as parcelas antigas em aberto de cada pessoa numa fatura única, sem juros e sem desconto. As dívidas originais
+              Soma todas as parcelas antigas em aberto de cada pessoa numa fatura única, sem juros e sem desconto — ou use “Gerar acordo” na linha da pessoa para parcelar (entrada, 2x a 48x, desconto). As dívidas originais
               são abatidas da mais antiga para a mais nova quando a fatura for paga. Nada vai ao Asaas sem a sua confirmação.
             </p>
           </div>
@@ -180,17 +195,29 @@ export function CobrancaHistorica() {
           </div>
         )}
 
+        {contatos.data && todos.length > 0 && (() => {
+          const semEmail = todos.filter((d) => !contatos.data.get(d.party_id)?.email).length;
+          const semCel = todos.filter((d) => !contatos.data.get(d.party_id)?.celular).length;
+          return (semEmail || semCel) ? (
+            <p className="mt-4 rounded-xl border border-danger/30 bg-danger/5 p-3 text-sm" data-aviso-contatos>
+              <b>Atenção aos avisos do Asaas:</b> {semEmail} de {todos.length} sem e-mail no cadastro (não recebem a fatura por e-mail) e {semCel} sem celular válido
+              (não recebem SMS nem WhatsApp). Ao gerar o acordo, a tela mostra o que falta e deixa corrigir.
+            </p>
+          ) : null;
+        })()}
+
         <div className="mt-4 overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left text-xs text-muted-foreground">
               <tr><th className="w-10 px-3 py-2" /><th className="px-3 py-2">Pessoa</th><th className="px-3 py-2 text-right">Parcelas</th>
-                <th className="px-3 py-2">Vencimentos</th><th className="px-3 py-2 text-right">Saldo antigo</th><th className="px-3 py-2">Situação</th></tr>
+                <th className="px-3 py-2">Vencimentos</th><th className="px-3 py-2 text-right">Saldo antigo</th><th className="px-3 py-2">Situação</th>
+                <th className="px-3 py-2">Avisos Asaas</th><th className="px-3 py-2 text-right">Acordo</th></tr>
             </thead>
             <tbody>
-              {q.isLoading && <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">Carregando…</td></tr>}
-              {q.error && <tr><td colSpan={6} className="px-3 py-8 text-center text-destructive">{(q.error as Error).message}</td></tr>}
-              {buscaLenta && qb.isFetching && <tr><td colSpan={6} className="px-3 py-3 text-center text-xs text-muted-foreground">Buscando…</td></tr>}
-              {!q.isLoading && !qb.isFetching && !lista.length && <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">{buscaLenta ? `Nada encontrado para “${buscaLenta}”.` : "Sem dados."}</td></tr>}
+              {q.isLoading && <tr><td colSpan={8} className="px-3 py-8 text-center text-muted-foreground">Carregando…</td></tr>}
+              {q.error && <tr><td colSpan={8} className="px-3 py-8 text-center text-destructive">{(q.error as Error).message}</td></tr>}
+              {buscaLenta && qb.isFetching && <tr><td colSpan={8} className="px-3 py-3 text-center text-xs text-muted-foreground">Buscando…</td></tr>}
+              {!q.isLoading && !qb.isFetching && !lista.length && <tr><td colSpan={8} className="px-3 py-8 text-center text-muted-foreground">{buscaLenta ? `Nada encontrado para “${buscaLenta}”.` : "Sem dados."}</td></tr>}
               {lista.slice(0, 300).map((d) => {
                 const s = situacaoHistorica(d);
                 const apta = s.tipo === "apta";
@@ -200,12 +227,31 @@ export function CobrancaHistorica() {
                       <input type="checkbox" aria-label={`Selecionar ${d.nome}`} disabled={!apta} checked={sel.includes(d.party_id)}
                         onChange={(e) => setSel((v) => e.target.checked ? [...v, d.party_id] : v.filter((x) => x !== d.party_id))} className="size-4 accent-primary" />
                     </td>
-                    <td className="px-3 py-2"><span className="font-medium">{d.nome}</span>{d.codigo && <span className="ml-2 text-xs text-muted-foreground">Cód. {d.codigo}</span>}
+                    <td className="px-3 py-2"><Link to="/admin/cobranca/$id" params={{ id: d.party_id }} className="font-medium hover:underline">{d.nome}</Link>{d.codigo && <span className="ml-2 text-xs text-muted-foreground">Cód. {d.codigo}</span>}
                       {d.tem_recente && <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[0.6875rem]">também deve em 2026</span>}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{d.parcelas}</td>
                     <td className="px-3 py-2 tabular-nums text-muted-foreground">{dataBR(d.venc_min)}{d.venc_max !== d.venc_min ? ` a ${dataBR(d.venc_max)}` : ""}</td>
                     <td className="px-3 py-2 text-right font-mono tabular-nums">{brl(Number(d.saldo_cents))}</td>
                     <td className={`px-3 py-2 text-xs ${apta ? "text-foreground" : "text-muted-foreground"}`}>{s.rotulo}</td>
+                    <td className="px-3 py-2 text-xs">{(() => {
+                      const c = contatos.data?.get(d.party_id);
+                      if (!c) return <span className="text-muted-foreground">…</span>;
+                      return (
+                        <span className="flex flex-wrap gap-1">
+                          <span title={c.email ?? "Sem e-mail no cadastro"} className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 ${c.email ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}>
+                            <Mail aria-hidden className="size-3" />{c.email ? "e-mail" : "sem e-mail"}</span>
+                          <span title={c.celular ?? (c.telefone_invalido ? `Número inválido: ${c.telefone_invalido}` : "Sem celular")} className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 ${c.celular ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}>
+                            <MessageCircle aria-hidden className="size-3" />{c.celular ? "WhatsApp/SMS" : c.telefone_invalido ? "celular inválido" : "sem celular"}</span>
+                        </span>
+                      );
+                    })()}</td>
+                    <td className="px-3 py-2 text-right">
+                      {s.tipo === "judicial" ? <span className="text-xs text-muted-foreground">Jurídico</span> : (
+                        <Button type="button" size="sm" variant={s.tipo === "apta" ? "default" : "outline"} onClick={() => setAcordoDe(d)} aria-label={`Gerar acordo de ${d.nome}`}>
+                          <Handshake aria-hidden className="size-3.5" />{s.tipo === "acordo" || s.tipo === "faturada" ? "Ver acordo" : "Gerar acordo"}
+                        </Button>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
@@ -214,6 +260,7 @@ export function CobrancaHistorica() {
           {lista.length > 300 && <p className="border-t border-border px-3 py-2 text-xs text-muted-foreground">Mostrando 300 de {lista.length}. Use a busca para achar as outras.</p>}
         </div>
       </section>
+      <GavetaAcordoHistorica alvo={acordoDe} onClose={() => setAcordoDe(null)} />
     </div>
   );
 }

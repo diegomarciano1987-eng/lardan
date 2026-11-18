@@ -21894,12 +21894,24 @@ export type Database = {
           vencido_cents: number
         }[]
       }
+      cob_celular_norm: { Args: { _v: string }; Returns: string }
       cob_comprovante_registrar: { Args: { _d: Json }; Returns: string }
       cob_config_salvar: {
         Args: { _carencia: number; _juros: number; _multa: number }
         Returns: undefined
       }
       cob_confissao_dados: { Args: { _simulacao: string }; Returns: Json }
+      cob_contatos_avisos: {
+        Args: { _parties: string[] }
+        Returns: {
+          asaas_vinculado: boolean
+          celular: string
+          cpf_ok: boolean
+          email: string
+          party_id: string
+          telefone_invalido: string
+        }[]
+      }
       cob_devedor: { Args: { _party: string }; Returns: Json }
       cob_fiado_importar: {
         Args: { _linhas: Json; _lote: string }

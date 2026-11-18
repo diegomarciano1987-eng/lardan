@@ -51,7 +51,7 @@ export function escolherContato(l: ContatoLardan) {
 
 const ativos = (avisos: Array<Record<string, unknown>>) => avisos.filter((n) => n["id"] && n["deleted"] !== true);
 
-export function avaliarProntidao(l: ContatoLardan, clientes: ClienteAsaasLido[], conta: { conectada: boolean; motivo?: string | null } = { conectada: true }): Prontidao {
+export function avaliarProntidao(l: ContatoLardan, clientes: ClienteAsaasLido[], conta: { conectada: boolean; motivo?: string | null } = { conectada: true }, totalCadastros = clientes.length): Prontidao {
   const itens: ItemProntidao[] = [];
   const { email, celular } = escolherContato(l);
   const doc = (l.doc ?? "").replace(/\D/g, "");
@@ -68,22 +68,26 @@ export function avaliarProntidao(l: ContatoLardan, clientes: ClienteAsaasLido[],
 
   if (celular) itens.push({ chave: "celular", status: "ok", titulo: "Celular (SMS e WhatsApp)", detalhe: fone(celular) });
   else {
-    const ruim = l.telefones.map((t) => t.valor.replace(/\D/g, "")).find(Boolean);
+    const ruim = l.telefones.map((t) => normalizar("mobilePhone", t.valor)).find(Boolean);
+    // número antigo de 8 dígitos (sem o 9): só sugere, nunca troca sozinho
+    const antigo = ruim && /^\d{2}[6-9]\d{7}$/.test(ruim) ? ` Parece número antigo sem o 9 — confirme com ela se é ${fone(ruim.slice(0, 2) + "9" + ruim.slice(2))}.` : "";
     itens.push({
       chave: "celular", status: "falta", resolve: "lardan", titulo: "Celular (SMS e WhatsApp)",
-      detalhe: ruim ? `O número ${fone(ruim)} não é celular válido (precisa DDD + 9 + 8 dígitos): SMS e WhatsApp NÃO chegam.` : "Sem celular no cadastro: SMS e WhatsApp NÃO chegam.",
+      detalhe: ruim ? `O número ${fone(ruim)} não é celular válido (precisa DDD + 9 + 8 dígitos): SMS e WhatsApp NÃO chegam.${antigo}` : "Sem celular no cadastro: SMS e WhatsApp NÃO chegam.",
     });
   }
 
   // ---- Asaas
   const canais: Record<Canal, boolean> = { email: !!email, sms: !!celular, whatsapp: !!celular };
+  let emailSoAsaas: string | null = null;
   if (!conta.conectada) {
     itens.push({ chave: "conta", status: "falta", titulo: "Conta Asaas", detalhe: conta.motivo || "A conta Asaas não está conectada agora: nada foi conferido lá." });
     canais.email = canais.sms = canais.whatsapp = false;
   } else if (!clientes.length) {
     itens.push({ chave: "cadastro_asaas", status: "atencao", titulo: "Cadastro no Asaas", detalhe: "Ainda não tem cadastro no Asaas. Ele é criado ao gerar as cobranças, já com o e-mail, o celular e os avisos ligados." });
   } else {
-    if (clientes.length > 1) itens.push({ chave: "varios", status: "atencao", titulo: "Cadastros no Asaas", detalhe: `${clientes.length} cadastros desta cliente no Asaas. Todos foram conferidos.` });
+    if (totalCadastros > 1) itens.push({ chave: "varios", status: "atencao", titulo: "Cadastros no Asaas",
+      detalhe: totalCadastros > clientes.length ? `${totalCadastros} cadastros desta cliente no Asaas (duplicados). Conferidos o principal e os ${clientes.length - 1} mais recentes.` : `${totalCadastros} cadastros desta cliente no Asaas. Todos foram conferidos.` });
     for (const [k, c] of clientes.entries()) {
       const suf = clientes.length > 1 ? ` (${k + 1}º cadastro)` : "";
       if (c.erro) { itens.push({ chave: `erro_${k}`, status: "falta", titulo: `Asaas${suf}`, detalhe: `O Asaas não respondeu: ${c.erro}` }); canais.email = canais.sms = canais.whatsapp = false; continue; }
@@ -96,8 +100,8 @@ export function avaliarProntidao(l: ContatoLardan, clientes: ClienteAsaasLido[],
       if (email && normalizar("email", ea) !== normalizar("email", email)) {
         itens.push({ chave: `email_asaas_${k}`, status: "falta", resolve: "asaas", titulo: `E-mail no Asaas${suf}`, detalhe: ea ? `No Asaas está “${ea}”, diferente do Lardan.` : "O Asaas está sem o e-mail dela." });
         canais.email = false;
-      } else if (!email && ea && valido("email", ea)) {
-        itens.push({ chave: `email_so_asaas_${k}`, status: "atencao", titulo: `E-mail no Asaas${suf}`, detalhe: `Só o Asaas tem e-mail (${ea}). Confirme com ela e cadastre no Lardan.` });
+      } else if (!email && ea && valido("email", ea) && !c.dados.notificationDisabled) {
+        emailSoAsaas = emailSoAsaas ?? ea;
         canais.email = true;
       }
       const ma = c.dados.mobilePhone ?? null;
@@ -109,22 +113,28 @@ export function avaliarProntidao(l: ContatoLardan, clientes: ClienteAsaasLido[],
       if (c.avisos) {
         const lista = ativos(c.avisos);
         const total = lista.length;
-        const off = (campo: string) => lista.filter((n) => n[campo] !== true).length;
+        // só conta canal que o Asaas oferece naquele aviso (ex.: SEND_LINHA_DIGITAVEL não tem WhatsApp → null, não é "desligado")
+        const off = (campo: string) => lista.filter((n) => n[campo] === false).length;
         const desligados = lista.filter((n) => n["enabled"] === false).length;
         if (desligados) itens.push({ chave: `eventos_${k}`, status: "falta", resolve: "asaas", titulo: `Avisos no Asaas${suf}`, detalhe: `${desligados} de ${total} avisos (ex.: vencimento, atraso) estão desligados no Asaas.` });
         if (email && off("emailEnabledForCustomer")) { itens.push({ chave: `canal_email_${k}`, status: "falta", resolve: "asaas", titulo: `Canal e-mail${suf}`, detalhe: `E-mail desligado em ${off("emailEnabledForCustomer")} de ${total} avisos no Asaas.` }); canais.email = false; }
         if (celular && off("smsEnabledForCustomer")) { itens.push({ chave: `canal_sms_${k}`, status: "falta", resolve: "asaas", titulo: `Canal SMS${suf}`, detalhe: `SMS desligado em ${off("smsEnabledForCustomer")} de ${total} avisos no Asaas.` }); canais.sms = false; }
-        const temWhats = lista.some((n) => "whatsappEnabledForCustomer" in n);
+        const temWhats = lista.some((n) => typeof n["whatsappEnabledForCustomer"] === "boolean");
         if (celular && total && !temWhats) { itens.push({ chave: `canal_whats_${k}`, status: "atencao", titulo: `Canal WhatsApp${suf}`, detalhe: "O Asaas não oferece WhatsApp nos avisos desta cliente (depende do plano da conta Asaas)." }); canais.whatsapp = false; }
         else if (celular && off("whatsappEnabledForCustomer")) { itens.push({ chave: `canal_whats_${k}`, status: "falta", resolve: "asaas", titulo: `Canal WhatsApp${suf}`, detalhe: `WhatsApp desligado em ${off("whatsappEnabledForCustomer")} de ${total} avisos no Asaas.` }); canais.whatsapp = false; }
       }
     }
     if (!itens.some((i) => i.chave.startsWith("cel_asaas") || i.chave.startsWith("email_asaas") || i.chave.startsWith("canal_") || i.chave.startsWith("desligado") || i.chave.startsWith("eventos") || i.chave.startsWith("excluido") || i.chave.startsWith("erro")))
-      itens.push({ chave: "asaas_ok", status: "ok", titulo: "Cadastro no Asaas", detalhe: "Conferido agora no Asaas: dados iguais ao Lardan e avisos ligados." });
+      itens.push({ chave: "asaas_ok", status: "ok", titulo: "Cadastro no Asaas", detalhe: "Conferido agora no Asaas: cadastro ativo e avisos ligados lá." });
   }
 
+  if (emailSoAsaas && canais.email) {
+    const it = itens.find((i) => i.chave === "email");
+    if (it) { it.status = "atencao"; it.detalhe = `Sem e-mail no Lardan, mas o Asaas tem “${emailSoAsaas}” e a fatura vai para lá. Confirme com ela e cadastre no Lardan.`; }
+  }
+  const itensFinais = juntarRepetidos(itens);
   const faltas = (Object.keys(canais) as Canal[]).filter((c) => !canais[c]).map((c) => ROTULO_CANAL[c]);
-  return { pronto: !itens.some((i) => i.status === "falta"), canais, email, celular, itens, faltas };
+  return { pronto: !itensFinais.some((i) => i.status === "falta"), canais, email, celular, itens: itensFinais, faltas };
 }
 
 /** Frase curta para confirmação antes de gerar cobranças. */
@@ -132,4 +142,21 @@ export function fraseFaltas(p: Prontidao): string {
   if (!p.faltas.length) return "";
   const motivos = p.itens.filter((i) => i.status === "falta").map((i) => `• ${i.titulo}: ${i.detalhe}`).join("\n");
   return `A cliente NÃO vai receber o aviso por: ${p.faltas.join(", ")}.\n\n${motivos}`;
+}
+
+/** Cliente com vários cadastros no Asaas: a mesma falha em cada um vira uma linha só ("em 5 cadastros"). */
+function juntarRepetidos(itens: ItemProntidao[]): ItemProntidao[] {
+  const out: ItemProntidao[] = [];
+  const vistos = new Map<string, { item: ItemProntidao; n: number }>();
+  for (const i of itens) {
+    const base = i.chave.replace(/_\d+$/, "");
+    const titulo = i.titulo.replace(/ \(\d+º cadastro\)$/, "");
+    const k = `${base}|${i.detalhe}`;
+    const v = vistos.get(k);
+    if (v) { v.n++; v.item.titulo = `${titulo} (em ${v.n} cadastros)`; continue; }
+    const novo = { ...i, chave: base === i.chave ? i.chave : `${base}_${out.length}`, titulo };
+    vistos.set(k, { item: novo, n: 1 });
+    out.push(novo);
+  }
+  return out;
 }

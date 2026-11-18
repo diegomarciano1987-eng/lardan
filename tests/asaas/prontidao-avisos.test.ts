@@ -57,3 +57,32 @@ describe("prontidão dos avisos do Asaas", () => {
     expect(r.faltas).toEqual(["E-mail", "SMS", "WhatsApp"]);
   });
 });
+
+describe("casos reais do Asaas", () => {
+  test("aviso sem WhatsApp no Asaas (linha digitável) não conta como desligado", () => {
+    const r = avaliarProntidao(base, [cliente({}, [aviso(), aviso({ id: "n2", whatsappEnabledForCustomer: null })])]);
+    expect(r.canais.whatsapp).toBe(true);
+    expect(r.pronto).toBe(true);
+  });
+  test("mesma falha em vários cadastros vira uma linha só", () => {
+    const c = cliente({ notificationDisabled: true });
+    const r = avaliarProntidao(base, [c, { ...c, external_id: "cus_2" }, { ...c, external_id: "cus_3" }]);
+    const linhas = r.itens.filter((i) => i.chave.startsWith("desligado"));
+    expect(linhas).toHaveLength(1);
+    expect(linhas[0]?.titulo).toContain("em 3 cadastros");
+  });
+});
+
+describe("e-mail só no Asaas e número antigo", () => {
+  test("sem e-mail no Lardan mas o Asaas tem: e-mail vai, fica como atenção (não bloqueia)", () => {
+    const r = avaliarProntidao({ ...base, emails: [] }, [cliente({ email: "julia@gmail.com" })]);
+    expect(r.canais.email).toBe(true);
+    expect(r.itens.find((i) => i.chave === "email")?.status).toBe("atencao");
+    expect(r.pronto).toBe(true);
+  });
+  test("número antigo sem o 9: sugere, não troca", () => {
+    const r = avaliarProntidao({ ...base, telefones: [{ kind: "whatsapp", valor: "+554497020914" }] }, []);
+    expect(r.celular).toBeNull();
+    expect(r.itens.find((i) => i.chave === "celular")?.detalhe).toContain("(44) 99702-0914");
+  });
+});

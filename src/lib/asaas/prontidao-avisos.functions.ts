@@ -42,7 +42,8 @@ export const conferirAvisosAsaas = createServerFn({ method: "POST" })
     const [pp, cps, vinc] = await Promise.all([
       supabaseAdmin.from("parties" as never).select("display_name, legal_name, doc_digits").eq("id", data.partyId).maybeSingle(),
       supabaseAdmin.from("contact_points" as never).select("kind, value, is_primary, updated_at").eq("party_id", data.partyId),
-      supabaseAdmin.from("asaas_customers" as never).select("account_id, external_id").eq("party_id", data.partyId).eq("match_status", "vinculado"),
+      supabaseAdmin.from("asaas_customers" as never).select("account_id, external_id, principal, updated_at").eq("party_id", data.partyId).eq("match_status", "vinculado")
+        .order("principal", { ascending: false, nullsFirst: false }).order("updated_at", { ascending: false }),
     ]);
     if (pp.error) throw new Error(pp.error.message);
     const p = pp.data as { display_name: string | null; legal_name: string | null; doc_digits: string | null } | null;
@@ -59,7 +60,9 @@ export const conferirAvisosAsaas = createServerFn({ method: "POST" })
 
     const { resolverPorConta } = await import("./servidor.server");
     const { transporteDaResolucao } = await import("./configuracao.server");
-    const lista = (vinc.data ?? []) as { account_id: string; external_id: string }[];
+    // Quem tem dezenas de cadastros duplicados no Asaas: confere o principal e os mais recentes (até 5) para a tela não travar.
+    const todosVinc = (vinc.data ?? []) as { account_id: string; external_id: string }[];
+    const lista = todosVinc.slice(0, 5);
     const clientes: ClienteAsaasLido[] = [];
     let conta: { conectada: boolean; motivo?: string | null } = { conectada: true };
     let corrigidos = 0;
@@ -76,12 +79,12 @@ export const conferirAvisosAsaas = createServerFn({ method: "POST" })
         clientes.push({ external_id: v.external_id, dados: null, avisos: null, erro: texto(e) });
       }
     }
-    const r = avaliarProntidao(lardan, clientes, conta);
+    const r = avaliarProntidao(lardan, clientes, conta, todosVinc.length);
     await supabaseAdmin.from("audit_logs" as never).insert({
       actor_id: c.userId, action: data.corrigir ? "asaas.avisos_corrigidos" : "asaas.avisos_conferidos", entity: "party", entity_id: data.partyId,
       payload: { corrigidos, pronto: r.pronto, faltas: r.faltas, itens: r.itens.filter((i) => i.status !== "ok").map((i) => i.chave) },
     } as never).then(() => undefined, () => undefined);
-    return { ...r, corrigidos, conferidoEm: new Date().toISOString(), cadastrosAsaas: lista.length };
+    return { ...r, corrigidos, conferidoEm: new Date().toISOString(), cadastrosAsaas: todosVinc.length };
   });
 
 /** Reenvia, pelo Asaas, o aviso de cada parcela ABERTA do acordo (PENDING/OVERDUE). Não mexe em valor nem vencimento. */

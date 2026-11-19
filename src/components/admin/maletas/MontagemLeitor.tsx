@@ -25,6 +25,7 @@ import { ConferenciaMaleta } from "./ConferenciaMaleta";
 import { DocumentosMaleta } from "./DocumentosMaleta";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
+import { ROTULO_BANHO, chaveCategoria, useBanhos, type BanhoPct } from "@/components/admin/historico/BanhosCategoria";
 import { LinhaTamanhosAnel, ehAnel, textoTamanhos, useAneisTamanhos, type AneisTamanhos } from "@/components/admin/historico/AneisTamanhos";
 import { GRADE_PADRAO, arosDaGrade, aroDaPeca, ehAnelAjustavel, ehNomeDeAnel, normalizarAro } from "@/lib/anel-aro";
 
@@ -173,8 +174,11 @@ function FaixaHistorico({
   salvando,
   total,
   aneis,
+  banhos,
 }: {
   dados: MetasMontagem | undefined;
+  /** banho de cada categoria vendida por ela (consultora_banhos_categoria, só leitura) */
+  banhos?: Map<string, BanhoPct[]> | undefined;
   /** 0335: tamanhos de anel que ela mais vende */
   aneis?: AneisTamanhos | undefined;
   carregando: boolean;
@@ -197,6 +201,11 @@ function FaixaHistorico({
         ? "escolhido na montagem (fica gravado nesta maleta)"
         : "padrão de cliente nova";
   const base = dados.sugestao_base ?? [];
+  // colunas de banho: só os banhos que aparecem nas vendas das categorias listadas ("sem banho" por último)
+  const banhosDe = (cat: string) => banhos?.get(chaveCategoria(cat)) ?? [];
+  const colunasBanho = [...new Set(dados.categorias.flatMap((c) => banhosDe(c.categoria).map((b) => b.banho)))].sort(
+    (a, b) => (a === "sem_banho" ? 1 : 0) - (b === "sem_banho" ? 1 : 0) || Object.keys(ROTULO_BANHO).indexOf(a) - Object.keys(ROTULO_BANHO).indexOf(b),
+  );
   return (
     <div className="ledger-panel space-y-3 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -288,6 +297,7 @@ function FaixaHistorico({
       {temHistorico && dados.categorias.length > 0 && (
         <details className="text-sm">
           <summary className="cursor-pointer text-ledger-muted">Ver por categoria</summary>
+          <div className="overflow-x-auto">
           <table className="mt-2 w-full text-left tabular-nums">
             <thead className="text-ledger-muted">
               <tr>
@@ -296,6 +306,9 @@ function FaixaHistorico({
                 <th className="py-1 text-right font-medium">Vendidas por ela</th>
                 <th className="py-1 text-right font-medium">Giro dela</th>
                 <th className="py-1 text-right font-medium">Giro {dados.referencia === "praca" ? "praça" : "rede"}</th>
+                {colunasBanho.map((b) => (
+                  <th key={b} className="py-1 pl-3 text-right font-medium">{b === "sem_banho" ? "Sem banho" : (ROTULO_BANHO[b] ?? b)}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -309,11 +322,28 @@ function FaixaHistorico({
                   <td className="py-1 text-right">{c.consultora_pecas_vendidas}</td>
                   <td className="py-1 text-right">{c.consultora_giro_pct === null ? "—" : `${c.consultora_giro_pct}%`}</td>
                   <td className="py-1 text-right">{c.referencia_giro_pct === null ? "—" : `${c.referencia_giro_pct}%`}</td>
+                  {colunasBanho.map((b) => {
+                    const lista = banhosDe(c.categoria);
+                    const x = lista.find((y) => y.banho === b);
+                    const maior = x && b !== "sem_banho" && lista.filter((y) => y.banho !== "sem_banho").every((y) => y.qtd <= x.qtd);
+                    return (
+                      <td key={b} className={`py-1 pl-3 text-right ${maior ? "font-semibold text-ledger-text" : "text-ledger-muted"}`}
+                        title={x ? `${x.qtd} peça(s) vendida(s) neste banho` : undefined}>
+                        {x ? `${x.pct}%` : "—"}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
           <p className="mt-2 text-xs text-ledger-muted">{dados.como_ler}</p>
+          {colunasBanho.length > 0 && (
+            <p className="mt-1 text-xs text-ledger-muted">
+              Colunas de banho: em quais banhos ela vendeu cada categoria (% das peças vendidas, SmallData + acertos do Lardan). Em negrito, o banho que mais vendeu.
+            </p>
+          )}
         </details>
       )}
     </div>
@@ -383,6 +413,7 @@ export function MontagemLeitor({
     placeholderData: keepPreviousData,
   });
   const aneis = useAneisTamanhos(info.data?.party_id);
+  const banhos = useBanhos(info.data?.party_id);
   const [abaHistorico, setAbaHistorico] = React.useState<"vendas" | "smalldata">("vendas");
   const campeas = React.useRef<Set<string>>(new Set());
   React.useEffect(() => {
@@ -777,6 +808,7 @@ export function MontagemLeitor({
               aoModo={mudarModo}
               aoTotal={mudarTotal}
               aneis={aneis.data}
+              banhos={banhos.data?.porCategoria}
             />
           </TabsContent>
           <TabsContent value="smalldata" className="mt-3">

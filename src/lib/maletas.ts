@@ -329,7 +329,7 @@ export interface Movimento {
   situacao: "pendente" | "confirmado" | "cancelado";
   quando: string;
   confirmado_em: string | null;
-  confirmado_por: "consultora" | "representante" | "matriz" | null;
+  confirmado_por: "consultora" | "representante" | "matriz" | "automatico" | null;
   de_pessoa: string | null;
   para_pessoa: string | null;
   de_local: string | null;

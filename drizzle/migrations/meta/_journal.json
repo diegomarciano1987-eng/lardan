@@ -2472,6 +2472,13 @@
       "when": 1795114375611,
       "tag": "0352_0352_nova_maleta_direta",
       "breakpoints": true
+    },
+    {
+      "idx": 353,
+      "version": "7",
+      "when": 1795114813174,
+      "tag": "0353_0353_consultora_editar_venda",
+      "breakpoints": true
     }
   ]
 }

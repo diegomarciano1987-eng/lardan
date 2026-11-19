@@ -14,7 +14,7 @@ import { AcordosAtrasados } from "@/components/admin/cobranca/AcordosAtrasados";
 import { carteira, kpisCobranca, moverEtapa, cobConfig, salvarConfig, type CobConfig, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
 
 const busca = z.object({
-  v: z.enum(["lista", "kanban", "agenda", "bi", "perdidas", "processos", "historica"]).catch("lista"),
+  v: z.enum(["lista", "kanban", "agenda", "bi", "perdidas", "processos", "historica"]).catch("kanban") /* Diego 19/11: Cobranças sempre abre no Kanban */,
   q: z.string().catch(""),
   f: z.string().catch(""),
   etapa: z.string().catch(""),

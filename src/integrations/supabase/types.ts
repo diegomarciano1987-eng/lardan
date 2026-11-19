@@ -22363,6 +22363,10 @@ export type Database = {
         Args: { _banho?: string; _busca?: string; _categoria?: string }
         Returns: Json
       }
+      consultora_pedido_editar: {
+        Args: { _itens?: Json; _order: string }
+        Returns: Json
+      }
       consultora_pedido_entregue: { Args: { _order: string }; Returns: Json }
       consultora_pedido_pago_dinheiro: {
         Args: { _order: string }

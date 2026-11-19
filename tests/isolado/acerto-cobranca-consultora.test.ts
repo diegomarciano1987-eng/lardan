@@ -227,3 +227,44 @@ describe("M1–M3 — cobrança da consultora e o acerto", () => {
     expect(Number((await rpc<{ total: number }>(master, "acerto_ajustes_reprocessar", { _aplicar: false })).dados.total)).toBe(0);
   });
 });
+
+// 0353 (Diego, 19/11/2026): a consultora edita a venda (peças e forma de pagamento) enquanto a cliente não pagou.
+describe("0353 — editar venda antes do pagamento", () => {
+  let pedido = "", clienteBia = "";
+  const editar = (c: Conta, itens: unknown) => rpc<{ total_cents: number; pecas: number; cobranca_cancelada: boolean }>(c, "consultora_pedido_editar", { _order: pedido, _itens: itens });
+
+  test("troca as peças e cancela a cobrança antiga ainda não paga", async () => {
+    clienteBia = (await ler<{ id: string }>(bia, `insert into public.consultant_clients (consultora_party_id, nome, telefone) values ($1,'Duda Cliente','43933334444') returning id`, [bia.partyId])).linhas[0]!.id;
+    const o = await rpc<{ order_id: string }>(bia, "consultant_order_create", { _client: clienteBia, _itens: [{ cycle_id: cicloBia, variant_id: vA, quantidade: 1 }], _idempotency_key: `ed-${marca}` });
+    expect(o.erro).toBeNull();
+    pedido = o.dados.order_id;
+    const t = await rpc<{ installment_id: string }>(bia, "consultora_pagamento_titulo", { _order: pedido, _forma: "depois", _doc: novoCpf(), _venc: null });
+    expect(t.erro).toBeNull();
+    const titulo = (await um<{ id: string }>(`select pay_title_id id from public.sales_orders where id=$1`, [pedido])).id;
+
+    const e = await editar(bia, [{ cycle_id: cicloBia, variant_id: vA, quantidade: 2 }]);
+    expect(e.erro).toBeNull();
+    expect(e.dados).toMatchObject({ total_cents: 20000, pecas: 2, cobranca_cancelada: true });
+    expect((await um<{ s: string }>(`select status s from public.financial_titles where id=$1`, [titulo])).s).toBe("cancelado");
+    const so = await um<Record<string, unknown>>(`select subtotal_cents::int v, pay_title_id, pay_method, payment_status::text ps from public.sales_orders where id=$1`, [pedido]);
+    expect(so).toEqual({ v: 20000, pay_title_id: null, pay_method: null, ps: "nao_iniciado" });
+    // nova cobrança com o valor certo
+    const t2 = await rpc(bia, "consultora_pagamento_titulo", { _order: pedido, _forma: "depois", _doc: novoCpf(), _venc: null });
+    expect(t2.erro).toBeNull();
+    expect((await um<{ v: number }>(`select t.valor_cents::int v from public.financial_titles t join public.sales_orders o on o.pay_title_id=t.id where o.id=$1`, [pedido])).v).toBe(20000);
+  });
+
+  test("só troca a forma de pagamento (sem mexer nas peças)", async () => {
+    const e = await editar(bia, null);
+    expect(e.erro).toBeNull();
+    expect(e.dados).toMatchObject({ total_cents: 20000, pecas: 2, cobranca_cancelada: true });
+  });
+
+  test("não passa do que tem na maleta, outra consultora não edita, e paga fica fechada", async () => {
+    expect((await editar(bia, [{ cycle_id: cicloBia, variant_id: vA, quantidade: 4 }])).erro).toContain("Restam 3");
+    expect((await editar(ana, [{ cycle_id: cicloBia, variant_id: vA, quantidade: 1 }])).erro).toContain("Pedido não encontrado");
+    expect((await editar(bia, [])).erro).toContain("pelo menos uma peça");
+    expect((await rpc(bia, "consultora_pedido_pago_dinheiro", { _order: pedido })).erro).toBeNull();
+    expect((await editar(bia, [{ cycle_id: cicloBia, variant_id: vA, quantidade: 1 }])).erro).toContain("já foi paga");
+  });
+});

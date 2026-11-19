@@ -2367,6 +2367,13 @@
       "when": 1795024427505,
       "tag": "0337_0337_termo_confissao_situacao",
       "breakpoints": true
+    },
+    {
+      "idx": 338,
+      "version": "7",
+      "when": 1795092788035,
+      "tag": "0338_0338_aneis_aro_nunca_trava",
+      "breakpoints": true
     }
   ]
 }

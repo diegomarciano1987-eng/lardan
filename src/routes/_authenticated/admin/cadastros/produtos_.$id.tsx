@@ -26,6 +26,8 @@ import {
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { ProdutoFicha } from "@/components/admin/ProdutoFicha";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
+import { GradeAros } from "@/components/admin/GradeAros";
+import { ehNomeDeAnel } from "@/lib/anel-aro";
 import {
   salvarVariante as salvarVarianteRpc,
   registrarCusto,
@@ -59,6 +61,8 @@ function ProdutoDetalhe() {
   const capacidades = useCapabilities();
   const podeVerCustos = can(capacidades, "catalog.cost.view");
   const podeEditar = can(capacidades, "product.manage");
+  // 0338: grade de aros — quem cadastra, opera estoque ou monta maleta
+  const podeGradeAros = podeEditar || can(capacidades, "stock.operate") || can(capacidades, "kit.manage");
 
 
   const [variante, setVariante] = useState<VarianteRow | null>(null);
@@ -347,6 +351,19 @@ function ProdutoDetalhe() {
 
   const p = produto.data;
 
+  /** 0338: anel pela categoria (Anéis) ou pelo nome (AN/ANEL), igual ao banco. */
+  const categoriaAnel = useQuery({
+    queryKey: ["produto-categoria-anel", p?.category_id, p?.subcategory_id],
+    enabled: !!p && !ehNomeDeAnel(p.name) && !!(p.category_id || p.subcategory_id),
+    queryFn: async () => {
+      const ids = [p?.category_id, p?.subcategory_id].filter((x): x is string => !!x);
+      const { data, error } = await supabase.from("categories").select("name, parent_id").in("id", ids);
+      if (error) throw error;
+      return (data ?? []).some((c) => !c.parent_id && /^an.*is$/i.test(c.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
+    },
+  });
+  const ehAnel = !!p && (ehNomeDeAnel(p.name) || categoriaAnel.data === true);
+
 
   if (produto.isLoading) return <Skeleton className="h-64 w-full" />;
   if (produto.error || !p)
@@ -373,8 +390,12 @@ function ProdutoDetalhe() {
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
           <Panel title="Variantes vendáveis">
-            {podeEditar ? (
-            <div className="mb-4 flex justify-end">
+            {podeEditar || (ehAnel && podeGradeAros) ? (
+            <div className="mb-4 flex justify-end gap-2">
+              {ehAnel && podeGradeAros ? (
+                <GradeAros productId={id} nome={p.name} arosExistentes={(variantes.data ?? []).filter((v) => v.is_active).map((v) => v.size)} />
+              ) : null}
+              {podeEditar ? (
               <button
                 type="button"
                 className="admin-btn border-champagne"
@@ -382,6 +403,7 @@ function ProdutoDetalhe() {
               >
                 <Plus aria-hidden className="size-4" /> Nova variante
               </button>
+              ) : null}
             </div>
             ) : null}
             {variantes.isLoading ? (

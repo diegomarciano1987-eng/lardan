@@ -21030,6 +21030,29 @@ export type Database = {
         Args: { _motivo: string; _party: string; _user: string }
         Returns: Json
       }
+      anel_ajustavel: { Args: { _nome: string }; Returns: boolean }
+      anel_aro_garantir: {
+        Args: {
+          _criar: boolean
+          _lido: string
+          _origem: string
+          _p: string
+          _tam: string
+        }
+        Returns: Json
+      }
+      anel_aro_variante: {
+        Args: { _product: string; _tamanho: string }
+        Returns: Json
+      }
+      anel_codigo_reservado: { Args: { _code: string }; Returns: boolean }
+      anel_eh_produto: { Args: { _p: string }; Returns: boolean }
+      anel_grade_gerar: {
+        Args: { _ate: number; _de: number; _product: string }
+        Returns: Json
+      }
+      anel_pode_registrar_aro: { Args: never; Returns: boolean }
+      anel_tamanho_norm: { Args: { _t: string }; Returns: string }
       anel_tamanho_peca: {
         Args: {
           _barcode: string
@@ -21721,7 +21744,7 @@ export type Database = {
       banho_da_peca: { Args: { _nome: string; _tipo: string }; Returns: string }
       barcode_lookup: { Args: { _code: string }; Returns: Json }
       barcode_resolver: {
-        Args: { _code: string; _criar?: boolean }
+        Args: { _code: string; _criar?: boolean; _interativo?: boolean }
         Returns: Json
       }
       can_manage_catalog: { Args: { _user_id: string }; Returns: boolean }

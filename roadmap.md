@@ -7,3 +7,8 @@
 - [x] 5. Montagem: sugestão = média de peças enviadas nas últimas 3; escolha gravada na maleta
 - [x] 6. Ficha completa da candidata para o representante
 - [x] 7. PDF "Como instalar o app no celular"
+
+# Anéis aro 4–30 (19/11)
+- [x] Leitor aceita aro com 2 e 1 dígito, base/referência pergunta o aro, código duplo pergunta o anel
+- [x] Grade de aros na ficha do anel (LAN0353 gerada 04–30)
+- [x] Testes isolados e prints de prova

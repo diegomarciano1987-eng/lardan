@@ -7,6 +7,7 @@ import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-quer
 import { CheckCircle2, ClipboardCheck, Minus, Plus, ScanBarcode, Search, Sparkles, X } from "lucide-react";
 import { filtrarComposicao } from "@/lib/busca-composicao";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { metasMontagem, montagemTotalDefinir, type MetasMontagem } from "@/lib/historico-jflex";
 import { brl, operarMontagem, traduzir, type ItemComposicao } from "@/lib/maletas";
 import {
@@ -23,11 +24,25 @@ import { DocumentosMaleta } from "./DocumentosMaleta";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
 import { LinhaTamanhosAnel, ehAnel, textoTamanhos, useAneisTamanhos, type AneisTamanhos } from "@/components/admin/historico/AneisTamanhos";
+import { GRADE_PADRAO, arosDaGrade, aroDaPeca, ehAnelAjustavel, ehNomeDeAnel, normalizarAro } from "@/lib/anel-aro";
 
-type Leitura = { id: string; codigo: string; ok: boolean; texto: string; detalhe?: string; hora: string; variantId?: string };
+type Leitura = { id: string; codigo: string; ok: boolean; aviso?: boolean; texto: string; detalhe?: string; hora: string; variantId?: string };
+/** 0338: anel lido sem aro (pergunta o aro) ou código que cabe em dois anéis (pergunta qual). A bipagem não para. */
+type Pendente =
+  | { id: string; tipo: "aro"; codigo: string; productId: string; produto: string; varianteBaseId: string; preco: number; aros: string[] }
+  | { id: string; tipo: "ambiguo"; codigo: string; opcoes: { product_id: string; produto: string; tamanho: string; codigo_base: string }[] };
 type Res = {
   encontrado: boolean;
   precisa_criar?: boolean;
+  pede_aro?: boolean;
+  ambiguo?: boolean;
+  product_id?: string;
+  variant_id_base?: string;
+  codigo_base?: string | null;
+  aros_existentes?: string[];
+  opcoes?: { product_id: string; produto: string; tamanho: string; codigo_base: string }[];
+  codigo_proprio?: boolean;
+  barcode?: string | null;
   variant_id?: string;
   produto?: string;
   variante?: string;
@@ -63,8 +78,28 @@ function apito(ok: boolean) {
   }
 }
 
+/** 0338: dois bipes médios = "falta escolher o aro" (nem acerto, nem erro). */
+function apitoAtencao() {
+  try {
+    audioCtx ??= new AudioContext();
+    for (const atraso of [0, 0.16]) {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "triangle";
+      o.frequency.value = 660;
+      g.gain.value = 0.15;
+      o.connect(g).connect(audioCtx.destination);
+      o.start(audioCtx.currentTime + atraso);
+      o.stop(audioCtx.currentTime + atraso + 0.1);
+    }
+  } catch {
+    /* sem som */
+  }
+}
+
 async function resolver(cod: string, criar: boolean) {
-  const { data, error } = await supabase.rpc("barcode_resolver" as never, { _code: cod, _criar: criar } as never);
+  // 0338: modo interativo — base de anel pede o aro; código que cabe em dois anéis pergunta qual
+  const { data, error } = await supabase.rpc("barcode_resolver" as never, { _code: cod, _criar: criar, _interativo: true } as never);
   if (error) throw error;
   return data as unknown as Res;
 }
@@ -78,18 +113,30 @@ async function buscarPecas(termo: string): Promise<Sugestao[]> {
   const partes = t.split(/\s+/).filter(Boolean);
   let q = supabase
     .from("products")
-    .select("id, name, internal_code, product_variants(id, label, barcode, sku, is_active)")
+    .select("id, name, internal_code, reference_code, product_variants(id, label, barcode, sku, size, is_default, is_active)")
     .limit(12);
   if (/^\d+$/.test(t)) {
     q = q.or(`internal_code.ilike.%${t}%,barcode.ilike.%${t}%,name.ilike.%${t}%`);
+  } else if (/^L[A-Z]{2}\d/i.test(t) && partes.length === 1) {
+    // 0338: referência da etiqueta (ex.: LAN0353)
+    q = q.ilike("reference_code", `%${t}%`);
   } else {
     for (const p of partes) q = q.ilike("name", `%${p}%`);
   }
   const { data, error } = await q;
   if (error) throw error;
   const out: Sugestao[] = [];
-  type V = { id: string; label: string | null; barcode: string | null; sku: string | null; is_active: boolean };
-  for (const p of (data ?? []) as unknown as { id: string; name: string; internal_code: string | null; product_variants: V[] }[]) {
+  type V = { id: string; label: string | null; barcode: string | null; sku: string | null; size: string | null; is_default: boolean; is_active: boolean };
+  for (const p of (data ?? []) as unknown as { id: string; name: string; internal_code: string | null; reference_code: string | null; product_variants: V[] }[]) {
+    // 0338: anel com aro — uma linha só ("escolher aro"); o aro é escolhido no quadro amarelo, mesmo se ainda não existir
+    if (ehNomeDeAnel(p.name) && !ehAnelAjustavel(p.name)) {
+      const base = (p.product_variants ?? []).filter((v) => v.is_active && !v.size && v.barcode)
+        .sort((a, b) => Number(b.is_default) - Number(a.is_default))[0];
+      if (base?.barcode) {
+        out.push({ codigo: base.barcode, nome: `${p.name}${p.reference_code ? ` · ${p.reference_code}` : ""} · escolher aro` });
+        continue;
+      }
+    }
     for (const v of p.product_variants ?? []) {
       if (!v.is_active) continue;
       const codigo = v.barcode || v.sku || p.internal_code;
@@ -292,6 +339,7 @@ export function MontagemLeitor({
   const [itens, setItens] = React.useState<Record<string, { nome: string; qtd: number; preco: number; sku: string | null }>>({});
   const [codigo, setCodigo] = React.useState("");
   const [leituras, setLeituras] = React.useState<Leitura[]>([]);
+  const [pendentesAro, setPendentesAro] = React.useState<Pendente[]>([]);
   const [pendentes, setPendentes] = React.useState(0);
   const [nesta, setNesta] = React.useState(0);
   const [etapa, setEtapa] = React.useState<Etapa>("montagem");
@@ -393,7 +441,8 @@ export function MontagemLeitor({
       const a = document.activeElement;
       // A busca da composição é a única exceção: enquanto ela estiver em uso, o foco fica nela.
       // preventScroll: lendo a aba Histórico SmallData, a tela não pula de volta a cada 400 ms (a bipagem segue no campo).
-      if (!impressaoAberta.current && a !== campo.current && a !== campoBusca.current && !(a instanceof HTMLButtonElement)) campo.current?.focus({ preventScroll: true });
+      const manter = a instanceof HTMLElement && !!a.closest("[data-manter-foco]");
+      if (!impressaoAberta.current && !manter && a !== campo.current && a !== campoBusca.current && !(a instanceof HTMLButtonElement)) campo.current?.focus({ preventScroll: true });
     }, 400);
     return () => {
       window.clearInterval(t);
@@ -431,6 +480,22 @@ export function MontagemLeitor({
       registrar({ codigo: cod, ok: false, texto: "Falha ao ler", detalhe: traduzir(e) });
       return;
     }
+    if (r?.encontrado && r.pede_aro && r.product_id && r.variant_id_base) {
+      apitoAtencao();
+      const p: Pendente = {
+        id: crypto.randomUUID(), tipo: "aro", codigo: cod, productId: r.product_id, produto: r.produto ?? "Anel",
+        varianteBaseId: r.variant_id_base, preco: r.preco_cents ?? 0, aros: r.aros_existentes ?? [],
+      };
+      setPendentesAro((l) => [p, ...l]);
+      registrar({ codigo: cod, ok: false, aviso: true, texto: r.produto ?? "Anel", detalhe: "Escolha o aro no quadro amarelo — pode continuar bipando." });
+      return;
+    }
+    if (r?.encontrado && r.ambiguo && r.opcoes?.length) {
+      apitoAtencao();
+      setPendentesAro((l) => [{ id: crypto.randomUUID(), tipo: "ambiguo", codigo: cod, opcoes: r!.opcoes! }, ...l]);
+      registrar({ codigo: cod, ok: false, aviso: true, texto: "Qual anel é este?", detalhe: "O código serve para dois anéis — escolha no quadro amarelo." });
+      return;
+    }
     if (!r?.encontrado || !r.variant_id) {
       apito(false);
       registrar({ codigo: cod, ok: false, texto: "Código não cadastrado", detalhe: "Cadastre a peça antes de montar." });
@@ -444,13 +509,66 @@ export function MontagemLeitor({
       const extra = [
         campeas.current.has(r.variant_id) ? "★ campeã de venda dela" : null,
         r.unidade ? "unidade" : null,
-        r.forma === "anel_tamanho" && r.tamanho ? `aro ${r.tamanho}${r.variante_criada ? " (tamanho registrado agora)" : ""}` : null,
+        r.forma === "anel_tamanho" && r.tamanho ? `aro ${r.tamanho}${r.variante_criada ? " (tamanho registrado agora)" : ""}${r.codigo_proprio ? ` · código próprio ${r.barcode}` : ""}` : null,
       ].filter(Boolean).join(" · ");
       registrar({ codigo: cod, ok: true, texto: nome, variantId: r.variant_id, ...(extra ? { detalhe: extra } : {}) });
     } catch (e) {
       apito(false);
       registrar({ codigo: cod, ok: false, texto: nome || "Não entrou", detalhe: traduzir(e) });
     }
+  }
+
+  /** 0338: aro escolhido no quadro amarelo — acha ou registra o aro e põe o anel na maleta. */
+  function escolherAro(p: { id: string; codigo: string }, productId: string, tamanho: string) {
+    const tam = normalizarAro(tamanho);
+    if (!tam) {
+      toast.error("Aro inválido. Use um número de 1 a 99.");
+      return;
+    }
+    setPendentesAro((l) => l.filter((x) => x.id !== p.id));
+    enfileirar(async () => {
+      try {
+        const r = await aroDaPeca(productId, tam);
+        if (!r.variant_id) throw new Error("Aro não registrado.");
+        const nome = [r.produto, r.variante].filter(Boolean).join(" · ");
+        await ajustar(r.variant_id, nome, 1, r.preco_cents ?? 0, r.barcode ?? p.codigo, "manual");
+        apito(true);
+        setNesta((n) => n + 1);
+        const extra = [
+          campeas.current.has(r.variant_id) ? "★ campeã de venda dela" : null,
+          `aro ${r.tamanho ?? tam}${r.variante_criada ? " (tamanho registrado agora)" : ""}`,
+          r.codigo_proprio ? `código próprio ${r.barcode}` : null,
+        ].filter(Boolean).join(" · ");
+        registrar({ codigo: p.codigo, ok: true, texto: nome, variantId: r.variant_id, detalhe: extra });
+      } catch (e) {
+        apito(false);
+        registrar({ codigo: p.codigo, ok: false, texto: "Anel não entrou", detalhe: traduzir(e) });
+      }
+      campo.current?.focus({ preventScroll: true });
+    });
+  }
+
+  /** Anel sem aro de verdade (ajustável): entra pela peça-base, como antes. */
+  function semAro(p: Extract<Pendente, { tipo: "aro" }>) {
+    setPendentesAro((l) => l.filter((x) => x.id !== p.id));
+    enfileirar(async () => {
+      try {
+        await ajustar(p.varianteBaseId, p.produto, 1, p.preco, p.codigo, "manual");
+        apito(true);
+        setNesta((n) => n + 1);
+        registrar({ codigo: p.codigo, ok: true, texto: p.produto, variantId: p.varianteBaseId, detalhe: "sem aro (ajustável)" });
+      } catch (e) {
+        apito(false);
+        registrar({ codigo: p.codigo, ok: false, texto: "Anel não entrou", detalhe: traduzir(e) });
+      }
+      campo.current?.focus({ preventScroll: true });
+    });
+  }
+
+  function descartarPendente(p: Pendente) {
+    setPendentesAro((l) => l.filter((x) => x.id !== p.id));
+    registrar({ codigo: p.codigo, ok: false, texto: p.tipo === "aro" ? p.produto : "Anel", detalhe: "Não entrou na maleta: aro não escolhido." });
+    campo.current?.focus({ preventScroll: true });
   }
 
   function enfileirar(fn: () => Promise<void>) {
@@ -460,6 +578,12 @@ export function MontagemLeitor({
 
   const [sugestoes, setSugestoes] = React.useState<Sugestao[]>([]);
   const buscaTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const buscaSeq = React.useRef(0);
+  function cancelarBusca() {
+    if (buscaTimer.current) clearTimeout(buscaTimer.current);
+    buscaSeq.current++;
+    setSugestoes([]);
+  }
 
   function aoDigitar(valor: string) {
     setCodigo(valor);
@@ -469,14 +593,16 @@ export function MontagemLeitor({
       setSugestoes([]);
       return;
     }
+    const pedido = ++buscaSeq.current;
     buscaTimer.current = setTimeout(() => {
-      void buscarPecas(t).then(setSugestoes).catch(() => setSugestoes([]));
+      // 0338: resposta que chega depois do Enter (bipagem rápida) não reabre a lista por cima do quadro
+      void buscarPecas(t).then((l) => { if (pedido === buscaSeq.current) setSugestoes(l); }).catch(() => setSugestoes([]));
     }, 250);
   }
 
   function escolher(s: Sugestao) {
     setCodigo("");
-    setSugestoes([]);
+    cancelarBusca();
     enfileirar(() => processar(s.codigo, "manual"));
     campo.current?.focus();
   }
@@ -485,11 +611,12 @@ export function MontagemLeitor({
     e.preventDefault();
     const cod = codigo.trim();
     setCodigo("");
-    setSugestoes([]);
+    const lista = sugestoes;
+    cancelarBusca();
     if (!cod) return;
     // Digitou um nome e sobrou uma única sugestão: entra ela. Senão, vai como código.
-    if (!/^[A-Za-z0-9-]+$/.test(cod) && sugestoes.length === 1) {
-      const sugestao = sugestoes[0];
+    if (!/^[A-Za-z0-9-]+$/.test(cod) && lista.length === 1) {
+      const sugestao = lista[0];
       if (sugestao) enfileirar(() => processar(sugestao.codigo, "manual"));
       return;
     }
@@ -614,13 +741,13 @@ export function MontagemLeitor({
             <button
               type="button"
               className="admin-btn"
-              disabled={pendentes > 0 || total === 0}
+              disabled={pendentes > 0 || total === 0 || pendentesAro.length > 0}
               onClick={() => void irParaConferencia()}
             >
               <ClipboardCheck aria-hidden className="size-4" /> Conferência
             </button>
-            <button type="button" className="admin-btn admin-btn-primary" disabled={pendentes > 0} onClick={() => void irParaConferencia()}>
-              <CheckCircle2 aria-hidden className="size-4" /> {pendentes > 0 ? `Gravando ${pendentes}…` : "Concluir montagem"}
+            <button type="button" className="admin-btn admin-btn-primary" disabled={pendentes > 0 || pendentesAro.length > 0} onClick={() => void irParaConferencia()}>
+              <CheckCircle2 aria-hidden className="size-4" /> {pendentes > 0 ? `Gravando ${pendentes}…` : pendentesAro.length > 0 ? `Falta escolher ${pendentesAro.length} aro(s)` : "Concluir montagem"}
             </button>
           </div>
         </div>
@@ -757,10 +884,19 @@ export function MontagemLeitor({
                 </ul>
               )}
             </form>
+            {pendentesAro.length > 0 && (
+              <QuadroAros
+                pendentes={pendentesAro}
+                maisVendidos={(aneis.data?.tamanhos ?? []).slice(0, 3).map((t) => normalizarAro(t.tamanho)).filter((t): t is string => !!t)}
+                aoEscolher={escolherAro}
+                aoSemAro={semAro}
+                aoDescartar={descartarPendente}
+              />
+            )}
             {ultima && (
-              <div role="status" className={`mt-5 grid grid-cols-2 gap-5 rounded-2xl p-5 ${ultima.ok ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>
+              <div role="status" className={`mt-5 grid grid-cols-2 gap-5 rounded-2xl p-5 ${ultima.ok ? "bg-success/15 text-success" : ultima.aviso ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive"}`}>
                 <div className="min-w-0 self-center">
-                  <p className="text-sm font-bold uppercase tracking-[0.12em]">{ultima.ok ? "✓ Na maleta" : "✕ Recusado"}</p>
+                  <p className="text-sm font-bold uppercase tracking-[0.12em]">{ultima.ok ? "✓ Na maleta" : ultima.aviso ? "● Falta o aro" : "✕ Recusado"}</p>
                   <p className="mt-1 text-2xl font-bold leading-tight break-words">{ultima.texto}</p>
                   {ultima.detalhe && <p className="mt-2 text-lg font-semibold">{ultima.detalhe}</p>}
                   <p className="mt-2 text-sm opacity-70">Código {ultima.codigo}</p>
@@ -782,7 +918,7 @@ export function MontagemLeitor({
             <ul className="mt-5 max-h-48 divide-y divide-line overflow-auto text-sm">
               {leituras.slice(1).map((l) => (
                 <li key={l.id} className="flex justify-between gap-3 py-2">
-                  <span className={l.ok ? "text-ledger-text" : "text-destructive"}>{l.ok ? "✓" : "✕"} {l.texto}{l.detalhe ? ` — ${l.detalhe}` : ""}</span>
+                  <span className={l.ok ? "text-ledger-text" : l.aviso ? "text-warning" : "text-destructive"}>{l.ok ? "✓" : l.aviso ? "●" : "✕"} {l.texto}{l.detalhe ? ` — ${l.detalhe}` : ""}</span>
                   <span className="shrink-0 text-ledger-muted">{l.codigo} · {l.hora}</span>
                 </li>
               ))}
@@ -860,6 +996,80 @@ export function MontagemLeitor({
           </aside>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * 0338: quadro amarelo dos anéis que esperam o aro. Não bloqueia a bipagem: cada anel fica aqui até a
+ * colaboradora tocar no aro (4 a 30 na tela; outro número no campo). Aros já cadastrados ficam marcados
+ * e os que a consultora mais vende ganham ★.
+ */
+function QuadroAros({ pendentes, maisVendidos, aoEscolher, aoSemAro, aoDescartar }: {
+  pendentes: Pendente[];
+  maisVendidos: string[];
+  aoEscolher: (p: { id: string; codigo: string }, productId: string, tamanho: string) => void;
+  aoSemAro: (p: Extract<Pendente, { tipo: "aro" }>) => void;
+  aoDescartar: (p: Pendente) => void;
+}) {
+  const grade = arosDaGrade(GRADE_PADRAO.de, GRADE_PADRAO.ate);
+  const [outro, setOutro] = React.useState<Record<string, string>>({});
+  return (
+    <div className="mt-5 space-y-3 rounded-2xl border-2 border-warning/60 bg-warning/10 p-5" data-testid="quadro-aros" data-manter-foco>
+      <p className="text-sm font-bold uppercase tracking-[0.12em] text-warning">
+        {pendentes.length === 1 ? "1 anel esperando o aro" : `${pendentes.length} anéis esperando o aro`} · pode continuar bipando
+      </p>
+      {pendentes.map((p) => (
+        <div key={p.id} className="space-y-3 rounded-xl border border-line-soft bg-surface p-4">
+          {p.tipo === "ambiguo" ? (
+            <>
+              <p className="text-base font-semibold text-ledger-text">Código {p.codigo}: qual anel é este?</p>
+              <div className="flex flex-wrap gap-2">
+                {p.opcoes.map((o) => (
+                  <button key={`${o.product_id}-${o.tamanho}`} type="button" className="admin-btn border-champagne"
+                    onClick={() => aoEscolher(p, o.product_id, o.tamanho)}>
+                    {o.produto} · aro {o.tamanho}
+                  </button>
+                ))}
+                <button type="button" className="admin-btn" onClick={() => aoDescartar(p)}>Descartar</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-base font-semibold text-ledger-text">{p.produto}</p>
+                <p className="text-sm text-ledger-muted">Código {p.codigo} · olhe o aro na peça e toque no número</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5" role="group" aria-label={`Aro de ${p.produto}`}>
+                {grade.map((a) => {
+                  const existe = p.aros.includes(a);
+                  const campeao = maisVendidos.includes(a);
+                  return (
+                    <button key={a} type="button" aria-label={`Aro ${a}`}
+                      className={`h-11 min-w-11 rounded-lg border px-2 font-display text-lg font-bold tabular-nums transition hover:bg-surface-muted ${existe ? "border-ink text-ledger-text" : "border-line text-ledger-muted"} ${campeao ? "ring-2 ring-success/50" : ""}`}
+                      onClick={() => aoEscolher(p, p.productId, a)}>
+                      {a}{campeao ? "★" : ""}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <form className="flex items-center gap-2" onSubmit={(e) => { e.preventDefault(); aoEscolher(p, p.productId, outro[p.id] ?? ""); }}>
+                  <input inputMode="numeric" maxLength={2} aria-label="Outro aro" placeholder="Outro aro"
+                    className="admin-input h-10 w-28" value={outro[p.id] ?? ""}
+                    onChange={(e) => setOutro((m) => ({ ...m, [p.id]: e.target.value.replace(/\D/g, "") }))} />
+                  <button type="submit" className="admin-btn" disabled={!normalizarAro(outro[p.id])}>Usar</button>
+                </form>
+                <button type="button" className="admin-btn" onClick={() => aoSemAro(p)}>Sem aro (ajustável)</button>
+                <button type="button" className="admin-btn" onClick={() => aoDescartar(p)}>Descartar</button>
+              </div>
+              <p className="text-xs text-ledger-muted">
+                Contorno escuro = aro já cadastrado{maisVendidos.length > 0 ? " · ★ = aros que ela mais vende" : ""}. Aro novo é registrado na hora, com código próprio se precisar.
+              </p>
+            </>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

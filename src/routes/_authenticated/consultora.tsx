@@ -418,7 +418,6 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
           ...d.saldos.map((b) => [b.variant_id, `${comReferencia(refDe(b.variant_id), b.produto)}${b.variante ? ` · ${b.variante}` : ""}`] as const),
         ])}
         podeGerir={false}
-        podeAcrescentar={false}
       />}
     </div>
   );

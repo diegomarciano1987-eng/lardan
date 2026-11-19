@@ -33,7 +33,7 @@ beforeAll(async () => {
   await adm.unsafe(`insert into public.consultant_profiles (party_id, praca_id) values ($1,$2) on conflict (party_id) do update set praca_id=excluded.praca_id`, [cons.partyId, praca]);
   vA = await criarVariante(`nf-a-${base}`, 10000);
   await porEstoque(vA, deposito, 10);
-  const rem = (await rpc<{ id: string }>(master, "remessa_criar", { _praca: praca, _deposito: deposito })).dados.id;
+  const rem = (await rpc<{ id: string }>(master, "remessa_criar", { _praca: praca, _deposito: deposito, _data_acerto: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10) /* 0345: obrigatória */ })).dados.id;
   const m = await rpc<{ cycle_id: string }>(master, "remessa_abrir_maleta", { _remessa: rem, _consultora: cons.partyId });
   ciclo = m.dados.cycle_id;
   await rpc(master, "kit_item_upsert", { _cycle: ciclo, _variant: vA, _qty: 3 });

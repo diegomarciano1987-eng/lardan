@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { CheckCircle2, ScanBarcode, Tags } from "lucide-react";
 import { Panel, StatusBadge } from "@/components/admin/ui";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
-import { conferirPreBaixa, lerPreBaixa, marcarEtiquetas, resolverPendencia, ROTULO_SITUACAO, type Conferencia } from "@/lib/pre-baixa";
+import { conferirPreBaixa, desfazerPreBaixa, lerPreBaixa, marcarEtiquetas, resolverPendencia, ROTULO_SITUACAO, type Conferencia } from "@/lib/pre-baixa";
 import { traduzir } from "@/lib/maletas";
 
 const brl = (c: number) => (Number(c) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -35,6 +35,17 @@ export function ConferenciaPreBaixa({ cycleId, podeConferir }: { cycleId: string
     onError: (e) => toast.error(traduzir(e)),
   });
   const resolver = useMutation({ mutationFn: () => resolverPendencia(cycleId, motivo), onSuccess: () => { toast.success("Pendência resolvida."); setMotivo(""); recarregar(); }, onError: (e) => toast.error(traduzir(e)) });
+  // 0343: desfazer baixa fechada sem querer (antes da conferência e sem pagamento)
+  const [desfazendo, setDesfazendo] = React.useState(false);
+  const [motivoDesfazer, setMotivoDesfazer] = React.useState("");
+  const desfazer = useMutation({
+    mutationFn: () => desfazerPreBaixa(cycleId, motivoDesfazer.trim()),
+    onSuccess: (r) => {
+      toast.success(r.repetida ? "Esta baixa já estava desfeita." : "Baixa desfeita: a consultora volta a lançar as vendas e o título do acerto foi cancelado.");
+      setDesfazendo(false); setMotivoDesfazer(""); recarregar();
+    },
+    onError: (e) => toast.error(traduzir(e)),
+  });
   const etiquetas = useMutation({ mutationFn: (v: string[]) => marcarEtiquetas(cycleId, v), onSuccess: () => { toast.success("Etiquetas marcadas como atualizadas."); recarregar(); } });
 
   if (!d) return null;
@@ -62,6 +73,25 @@ export function ConferenciaPreBaixa({ cycleId, podeConferir }: { cycleId: string
           <span className="text-ledger-muted">Vendido {brl(d.calculo.vendido_cents)} · comissão {Number(d.calculo.comissao_pct)}% · a pagar {brl(d.calculo.valor_pagar_cents)}</span>
         </div>
         {d.situacao === "aguardando_pagamento" && <p className="text-ledger-muted">A consultora fechou a pré-baixa, mas o Pix ainda não caiu. Dá para conferir a maleta assim mesmo; o título continua em aberto na cobrança.</p>}
+        {d.status === "fechada" && podeConferir && (d.situacao === "aguardando_pagamento" || d.situacao === "aguardando_conferencia") && (
+          !desfazendo ? (
+            <button type="button" className="admin-btn" onClick={() => setDesfazendo(true)}>Desfazer baixa (feita sem querer)</button>
+          ) : (
+            <div className="space-y-2 rounded-xl border border-warning/50 p-3">
+              <p className="text-ledger-text">A baixa volta para "lançando as vendas", o título do acerto é cancelado e o Pix em aberto no Asaas é cancelado. As vendas que a consultora marcou continuam marcadas. Só funciona se nada foi pago.</p>
+              <input className="admin-input w-full" placeholder="Motivo (ex.: consultora clicou sem querer)" value={motivoDesfazer} onChange={(e) => setMotivoDesfazer(e.target.value)} />
+              <div className="flex gap-2">
+                <button type="button" className="admin-btn" onClick={() => { setDesfazendo(false); setMotivoDesfazer(""); }}>Voltar</button>
+                <button type="button" className="admin-btn admin-btn-primary" disabled={desfazer.isPending || motivoDesfazer.trim().length < 5} onClick={() => desfazer.mutate()}>
+                  {desfazer.isPending ? "Desfazendo…" : "Confirmar: desfazer baixa"}
+                </button>
+              </div>
+            </div>
+          )
+        )}
+        {d.status === "aberta" && d.janela?.acerto_em && (
+          <p className="text-ledger-muted">A consultora pode fechar a baixa pelo app a partir de {d.janela.libera_em?.split("-").reverse().join("/")} (10 dias antes do acerto em {d.janela.acerto_em.split("-").reverse().join("/")}).</p>
+        )}
 
         {conferivel && (
           <>

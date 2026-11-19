@@ -14,6 +14,15 @@ export interface PreBaixa {
   id: string; cycle_id: string; status: string; situacao: SituacaoPreBaixa; prazo: string | null; dias_para_prazo: number | null;
   fechada_em: string | null; encerrada_em: string | null; installment_id: string | null; diferenca_cents: number | null;
   pendencia_motivo: string | null; calculo: Calculo; faixas: { min_cents: number; percentual: number }[]; itens: ItemPreBaixa[];
+  /** 0343: a consultora só fecha a partir de 10 dias antes do acerto (janela_vale = a regra vale para quem lê). */
+  janela?: JanelaBaixa; janela_vale?: boolean;
+}
+export interface JanelaBaixa { acerto_em: string | null; libera_em: string | null; dias_antes: number; liberada: boolean }
+
+/** 0343: a baixa está travada para quem lê? (consultora antes de acerto − 10 dias, ou sem data de acerto) */
+export function baixaTravada(d: Pick<PreBaixa, "janela" | "janela_vale"> | null | undefined): boolean {
+  if (!d?.janela_vale || !d.janela) return false;
+  return !d.janela.liberada;
 }
 export interface Conferencia {
   pecas_faltando: number; pecas_voltaram_vendidas: number; vendido_declarado_cents: number; vendido_final_cents: number;
@@ -37,6 +46,8 @@ export const conferirPreBaixa = (cycle: string, leituras: { variant_id: string; 
   rpc<Conferencia>("pre_baixa_conferir", { _cycle: cycle, _leituras: leituras, _aplicar: aplicar });
 export const resolverPendencia = (cycle: string, motivo: string) => rpc<null>("pre_baixa_pendencia_resolver", { _cycle: cycle, _motivo: motivo });
 export const marcarEtiquetas = (cycle: string, variants: string[]) => rpc<number>("pre_baixa_etiqueta_atualizada", { _cycle: cycle, _variants: variants });
+export const desfazerPreBaixa = (cycle: string, motivo: string) =>
+  rpc<{ pre_baixa: string; repetida: boolean; titulo_cancelado?: string | null }>("pre_baixa_desfazer", { _cycle: cycle, _motivo: motivo });
 export const liberarKitSemPreBaixa = (consultora: string, motivo: string) => rpc<string>("pre_baixa_liberar_kit", { _consultora: consultora, _motivo: motivo });
 export const exigirPreBaixa = (ligar: boolean) => rpc<boolean>("pre_baixa_exigir_definir", { _ligar: ligar });
 export const painelPreBaixas = (situacao?: string) =>

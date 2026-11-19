@@ -31,7 +31,7 @@ import {
   formatDateTime,
 } from "@/components/admin/ui";
 import { VariantPicker, type VariantOption } from "@/components/admin/VariantPicker";
-import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
+import { Movimentacoes, PecasExtras } from "@/components/admin/maletas/Movimentacoes";
 import { TermosMaleta } from "@/components/maletas/TermoAssinatura";
 import { useCapabilities } from "@/lib/capabilities";
 import {
@@ -320,12 +320,7 @@ function MaletaFicha() {
             </Panel>
           )}
 
-          <Movimentacoes
-            cycleId={id}
-            nomes={nomes}
-            podeGerir={podeMontar}
-            podeAcrescentar={podeMontar || caps.includes("kit.acrescimo")}
-          />
+          <Movimentacoes cycleId={id} nomes={nomes} podeGerir={podeMontar} />
 
           <Panel title="Assinatura do termo">
             <TermosMaleta cycleId={id} titulo="Termos desta maleta" />
@@ -355,6 +350,15 @@ function MaletaFicha() {
         </div>
 
         <div className="min-w-0 space-y-6">
+          {/* 0343: peças extras no topo, perto de Correios e Identificação */}
+          {!montando && (
+            <PecasExtras
+              cycleId={id}
+              nomes={nomes}
+              podeAcrescentar={podeMontar || caps.includes("kit.acrescimo")}
+              emOperacao={["transito", "recebida", "operacao"].includes(d.ciclo.status)}
+            />
+          )}
           {["operacao", "acerto", "encerrada"].includes(d.ciclo.status) && (
             <ConferenciaPreBaixa cycleId={id} podeConferir={podeMontar} />
           )}

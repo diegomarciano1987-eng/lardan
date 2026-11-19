@@ -96,6 +96,7 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
   const criar = useMutation({
     mutationFn: async () => {
       if (!praca) throw new Error("Escolha a praça da remessa.");
+      if (!acerto) throw new Error("Informe a data de acerto: ela é obrigatória.");
       const r = await criarRemessa({
         praca,
         numero: numero.trim() ? Number(numero) : null,
@@ -145,7 +146,7 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
           <DateField value={emissao} onChange={setEmissao} />
         </label>
         <label className="grid gap-1.5 text-sm">
-          <span className="ledger-eyebrow">Data de acerto</span>
+          <span className="ledger-eyebrow">Data de acerto <span className="text-destructive">*</span> (obrigatória)</span>
           <DateField value={acerto} onChange={setAcerto} />
         </label>
         <label className="grid gap-1.5 text-sm">
@@ -159,7 +160,7 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
         </label>
       </div>
       <div className="mt-5 flex gap-2">
-        <button type="button" className="admin-btn admin-btn-primary" disabled={criar.isPending} onClick={() => criar.mutate()}>
+        <button type="button" className="admin-btn admin-btn-primary" disabled={criar.isPending || !acerto || !praca} onClick={() => criar.mutate()}>
           {criar.isPending ? "Abrindo…" : "Abrir remessa"}
         </button>
         <button type="button" className="admin-btn" onClick={() => setAberto(false)}>Cancelar</button>

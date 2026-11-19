@@ -125,7 +125,7 @@ describe("Lardan + sistema antigo, gravado na maleta e no PDF", () => {
     await adm.unsafe(`insert into public.consultant_profiles (party_id, praca_id) values ($1,$2) on conflict (party_id) do update set praca_id=excluded.praca_id`, [cons.partyId, praca]);
     const v = await criarVariante(`hv-${base}`, 10000);
     await porEstoque(v, deposito, 20);
-    const rem = (await rpc<{ id: string; numero: number }>(master, "remessa_criar", { _praca: praca, _deposito: deposito })).dados;
+    const rem = (await rpc<{ id: string; numero: number }>(master, "remessa_criar", { _praca: praca, _deposito: deposito, _data_acerto: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10) /* 0345: obrigatória */ })).dados;
     remId = rem.id;
     remNumero = Number(((await adm.unsafe(`select numero from public.remessas where id=$1`, [remId])) as { numero: number }[])[0]!.numero);
     // acerto Lardan fechado em outubro (R$ 1.000, comissão 300) da MESMA remessa que também veio do sistema antigo

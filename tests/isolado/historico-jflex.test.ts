@@ -264,7 +264,7 @@ describe("6. numeração de remessa", () => {
       [base, `ISO ${base}`]);
     const resumo = await rpc<{ numeracao: { proxima_remessa_lardan: number } }>(master, "legado_resumo");
     expect(resumo.dados.numeracao.proxima_remessa_lardan).toBeGreaterThan(REM + 1); // REM é maior que qualquer remessa real
-    const ruim = await rpc(master, "remessa_criar", { _praca: praca.id, _numero: REM });
+    const ruim = await rpc(master, "remessa_criar", { _praca: praca.id, _numero: REM, _data_acerto: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10) /* 0345: obrigatória */ });
     expect(ruim.ok).toBe(false);
     expect(String(ruim.erro)).toContain("SmallData");
   });

@@ -72,7 +72,7 @@ beforeAll(async () => {
   await adm.unsafe(`insert into public.consultora_cobranca_config (id, ator_user_id, business_entity_id, financial_account_id) values (true,$1,$2,$3)`, [master.uid, emp, fin]);
   await adm.unsafe(`delete from public.consultora_comissao_faixas where true`);
   await adm.unsafe(`insert into public.consultora_comissao_faixas (min_vendido_cents, percentual, titulo) values (0,20,'20%'),(20000,25,'25%'),(50000,30,'30%'),(65000,35,'35%'),(120000,40,'40%')`);
-  const acerto = new Date(Date.now() + 20 * 864e5).toISOString().slice(0, 10);
+  const acerto = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10) /* 0343: dentro da janela de 10 dias da baixa */;
   remAna = (await rpc<{ id: string }>(master, "remessa_criar", { _praca: pracaAna, _deposito: deposito, _data_acerto: acerto })).dados.id;
   remBia = (await rpc<{ id: string }>(master, "remessa_criar", { _praca: pracaBia, _deposito: deposito, _data_acerto: acerto })).dados.id;
   cicloAna = await maletaAceita(ana, remAna, [[vA, 2], [vB, 2], [vUnica, 1]]);

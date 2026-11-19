@@ -68,7 +68,7 @@ beforeAll(async () => {
   await adm.unsafe(`delete from public.consultora_comissao_faixas`);
   await adm.unsafe(`insert into public.consultora_comissao_faixas (min_vendido_cents, percentual, titulo) values (0,20,'20%'),(20000,25,'25%'),(50000,30,'30%'),(65000,35,'35%'),(120000,40,'40%')`);
   remessa = (await rpc<{ id: string }>(master, "remessa_criar", { _praca: praca, _deposito: deposito,
-    _data_acerto: new Date(Date.now() + 20 * 864e5).toISOString().slice(0, 10) })).dados.id;
+    _data_acerto: new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10) /* 0343: dentro da janela de 10 dias da baixa */ })).dados.id;
   ciclo = await maletaAceita(cons, remessa, [[vA, 4], [vB, 2]]);
   cliente = (await ler<{ id: string }>(cons, `insert into public.consultant_clients (consultora_party_id, nome, telefone, aniversario) values ($1,'Bia Cliente','43911113333',$2) returning id`,
     [cons.partyId, `1990-${hoje().slice(5)}`])).linhas[0]!.id;

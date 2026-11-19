@@ -24563,6 +24563,10 @@ export type Database = {
         Args: { _aplicar?: boolean; _cycle: string; _leituras: Json }
         Returns: Json
       }
+      pre_baixa_desfazer: {
+        Args: { _cycle: string; _motivo: string }
+        Returns: Json
+      }
       pre_baixa_etiqueta_atualizada: {
         Args: { _cycle: string; _variants: string[] }
         Returns: number
@@ -24574,6 +24578,8 @@ export type Database = {
         Args: { _ate?: string; _de?: string }
         Returns: Json
       }
+      pre_baixa_janela: { Args: { _cycle: string }; Returns: Json }
+      pre_baixa_janela_vale: { Args: { _cycle: string }; Returns: boolean }
       pre_baixa_ler: { Args: { _cycle: string }; Returns: Json }
       pre_baixa_liberar_kit: {
         Args: { _consultora: string; _motivo: string }

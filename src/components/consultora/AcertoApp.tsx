@@ -10,7 +10,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Check, Copy, Minus, Plus, QrCode, Search } from "lucide-react";
-import { abrirPreBaixa, lerPreBaixa, ROTULO_SITUACAO, venderNaPreBaixa, type PreBaixa } from "@/lib/pre-baixa";
+import { abrirPreBaixa, baixaTravada, lerPreBaixa, ROTULO_SITUACAO, venderNaPreBaixa, type PreBaixa } from "@/lib/pre-baixa";
 import { preBaixaFecharPix } from "@/lib/pre-baixa.functions";
 
 const brl = (c: number) => (Number(c) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -71,6 +71,8 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
   const adiantado = Number(c.adiantado_consultora_cents ?? 0);
   const lista = d.itens.filter((i) => !busca.trim() || `${refs.data?.get(i.variant_id) ?? ""} ${i.produto} ${i.variante ?? ""} ${i.sku ?? ""}`.toLowerCase().includes(busca.trim().toLowerCase()));
   const editavel = d.status === "aberta";
+  // 0343: baixa só a partir de 10 dias antes do acerto
+  const travada = baixaTravada(d);
 
   return (
     <section className="space-y-4 rounded-3xl border border-border bg-card p-5">
@@ -128,7 +130,13 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
               </ul>
             </div>
           )}
-          {!confirmar ? (
+          {travada ? (
+            <p className="rounded-2xl border border-border bg-muted/40 p-4 text-[0.98rem]">
+              {d.janela?.libera_em
+                ? <>O fechamento do acerto abre em <strong>{dataBR(d.janela.libera_em)}</strong>, 10 dias antes do acerto ({dataBR(d.janela.acerto_em)}). Até lá, continue marcando as peças que vender.</>
+                : <>A data do acerto desta maleta ainda não foi definida. O fechamento abre 10 dias antes do acerto. Continue marcando as peças que vender.</>}
+            </p>
+          ) : !confirmar ? (
             <button type="button" className="btn-app-principal w-full" onClick={() => setConfirmar(true)}>Fechar a pré-baixa</button>
           ) : (
             <div className="space-y-3 rounded-2xl border border-warning/50 bg-warning/5 p-4">

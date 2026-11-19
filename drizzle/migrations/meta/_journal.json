@@ -2402,6 +2402,27 @@
       "when": 1795109761434,
       "tag": "0342_estoque_busca_referencia",
       "breakpoints": true
+    },
+    {
+      "idx": 343,
+      "version": "7",
+      "when": 1795110417725,
+      "tag": "0343_0343_acrescimo_janela_baixa",
+      "breakpoints": true
+    },
+    {
+      "idx": 344,
+      "version": "7",
+      "when": 1795110662988,
+      "tag": "0344_0344_acrescimo_equipe_busca_numero",
+      "breakpoints": true
+    },
+    {
+      "idx": 345,
+      "version": "7",
+      "when": 1795110971442,
+      "tag": "0345_0345_remessa_acerto_obrigatorio",
+      "breakpoints": true
     }
   ]
 }

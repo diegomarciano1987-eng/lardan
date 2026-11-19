@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { EmptyState, ErrorState, Panel, Skeleton, StatusBadge, formatDateTime } from "@/components/admin/ui";
 import { VariantPicker, type VariantOption } from "@/components/admin/VariantPicker";
+import { SmartSelect } from "@/components/premium/SmartSelect";
+import { comReferencia, useReferencias } from "@/lib/referencias-pecas";
 import {
   DESTINO_RETORNO,
   TIPO_MOVIMENTO,
@@ -29,12 +31,10 @@ export function Movimentacoes({
   cycleId,
   nomes,
   podeGerir,
-  podeAcrescentar,
 }: {
   cycleId: string;
   nomes: Nomes;
   podeGerir: boolean;
-  podeAcrescentar: boolean;
 }) {
   const qc = useQueryClient();
   const recarregar = () => qc.invalidateQueries({ queryKey: ["maletas"] });
@@ -48,7 +48,6 @@ export function Movimentacoes({
     <div className="space-y-6">
       <Conferencia estado={conc} nome={nome} />
       <AcoesRetorno cycleId={cycleId} nome={nome} podeGerir={podeGerir} onFeito={recarregar} />
-      {podeAcrescentar && <FormAcrescimo cycleId={cycleId} onFeito={recarregar} />}
       <Historico estado={hist} nome={nome} onFeito={recarregar} />
     </div>
   );
@@ -156,14 +155,137 @@ function Conferencia({
   );
 }
 
-/* ---------------- acréscimo ---------------- */
+/* ---------------- peças extras (acréscimo) ---------------- */
+
+type LinhaExtra = { peca: VariantOption; qtd: number };
+const chaveLista = (cycleId: string) => `lardan:acrescimo:${cycleId}`;
+
+/**
+ * 0343 — "Peças extras do ciclo": fica no topo da maleta, perto de Correios e Identificação.
+ * Lista exclusiva de todo acréscimo já gravado (a caminho / recebido) + formulário para enviar mais.
+ * A lista ainda não enviada fica guardada nesta aba do navegador: sair da tela não apaga nada.
+ */
+export function PecasExtras({
+  cycleId,
+  nomes,
+  podeAcrescentar,
+  emOperacao,
+}: {
+  cycleId: string;
+  nomes: Nomes;
+  podeAcrescentar: boolean;
+  emOperacao: boolean;
+}) {
+  const qc = useQueryClient();
+  const recarregar = () => qc.invalidateQueries({ queryKey: ["maletas"] });
+  const hist = useQuery({ queryKey: ["maletas", "historico", cycleId], queryFn: () => historicoMaleta(cycleId) });
+  const extras = (hist.data?.movimentos ?? []).filter((m) => m.tipo === "acrescimo" && m.situacao !== "cancelado");
+  const varIds = extras.flatMap((m) => m.itens.map((i) => i.variant_id));
+  const refs = useReferencias(varIds);
+  const nome = (id: string) => nomes[id] ?? comReferencia(refs.data?.get(id), "Peça extra");
+  const total = extras.reduce((s, m) => s + m.itens.reduce((t, i) => t + i.quantidade, 0), 0);
+  const aCaminho = extras.filter((m) => m.situacao === "pendente").reduce((s, m) => s + m.itens.reduce((t, i) => t + i.quantidade, 0), 0);
+
+  if (!podeAcrescentar && extras.length === 0) return null;
+
+  return (
+    <Panel title="Peças extras do ciclo">
+      <div className="space-y-4">
+        {hist.isLoading ? (
+          <Skeleton className="h-16" />
+        ) : extras.length === 0 ? (
+          <p className="text-sm text-ledger-muted">Nenhuma peça extra enviada para esta maleta.</p>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-ledger-text">
+              <strong className="tabular-nums">{total}</strong> peça(s) extra(s) neste ciclo
+              {aCaminho > 0 ? <span className="text-warning"> · {aCaminho} a caminho, falta confirmar o recebimento</span> : null}
+            </p>
+            {extras.map((m) => (
+              <ExtraEnviado key={m.id} m={m} nome={nome} onFeito={recarregar} />
+            ))}
+          </div>
+        )}
+        {podeAcrescentar && emOperacao && <FormAcrescimo cycleId={cycleId} onFeito={recarregar} />}
+        {podeAcrescentar && !emOperacao && (
+          <p className="text-xs text-ledger-muted">Dá para acrescentar peças depois que a maleta é expedida e enquanto está com a consultora.</p>
+        )}
+      </div>
+    </Panel>
+  );
+}
+
+function ExtraEnviado({ m, nome, onFeito }: { m: Movimento; nome: (id: string) => string; onFeito: () => void }) {
+  const confirmar = useMutation({
+    mutationFn: () => confirmarAcrescimo(m.id),
+    onSuccess: (r) => {
+      toast.success(r.repetida ? "Recebimento já registrado." : "Recebimento confirmado.");
+      onFeito();
+    },
+    onError: (e) => toast.error(traduzir(e)),
+  });
+  const pendente = m.situacao === "pendente";
+  return (
+    <div className="rounded-xl border border-line-soft px-4 py-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusBadge tone={pendente ? "warning" : "success"}>{pendente ? "A caminho" : "Recebida"}</StatusBadge>
+        <span className="text-xs text-ledger-muted">
+          enviada {formatDateTime(m.quando)}
+          {m.confirmado_em ? ` · recebida ${formatDateTime(m.confirmado_em)}` : ""}
+        </span>
+      </div>
+      <ul className="mt-2 space-y-1 text-sm">
+        {m.itens.map((i) => (
+          <li key={i.id} className="flex items-center gap-2">
+            <FotoPeca variantId={i.variant_id} size="xs" />
+            <span className="min-w-0 flex-1 truncate text-ledger-text">{nome(i.variant_id)}</span>
+            <span className="tabular-nums text-ledger-muted">{i.quantidade} un</span>
+          </li>
+        ))}
+      </ul>
+      {m.observacao ? <p className="mt-1 text-xs text-ledger-muted">{m.observacao}</p> : null}
+      {pendente && (
+        <button type="button" className="admin-btn mt-2" disabled={confirmar.isPending} onClick={() => confirmar.mutate()}>
+          Confirmar recebimento
+        </button>
+      )}
+    </div>
+  );
+}
 
 function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => void }) {
-  const [linhas, setLinhas] = React.useState<{ peca: VariantOption; qtd: number }[]>([]);
+  const [linhas, setLinhas] = React.useState<LinhaExtra[]>([]);
+  const [carregou, setCarregou] = React.useState(false);
   const [peca, setPeca] = React.useState<VariantOption | null>(null);
   const [qtd, setQtd] = React.useState(1);
   const [origem, setOrigem] = React.useState("");
   const [nota, setNota] = React.useState("");
+
+  // lista ainda não enviada: guardada nesta aba (sair da tela e voltar não perde nada)
+  React.useEffect(() => {
+    try {
+      const salvo = sessionStorage.getItem(chaveLista(cycleId));
+      if (salvo) setLinhas(JSON.parse(salvo) as LinhaExtra[]);
+    } catch {
+      /* lista vazia */
+    }
+    setCarregou(true);
+  }, [cycleId]);
+  React.useEffect(() => {
+    if (!carregou) return;
+    try {
+      if (linhas.length) sessionStorage.setItem(chaveLista(cycleId), JSON.stringify(linhas));
+      else sessionStorage.removeItem(chaveLista(cycleId));
+    } catch {
+      /* sem armazenamento: segue só na tela */
+    }
+  }, [linhas, carregou, cycleId]);
+  React.useEffect(() => {
+    if (linhas.length === 0) return;
+    const avisar = (e: BeforeUnloadEvent) => { e.preventDefault(); };
+    window.addEventListener("beforeunload", avisar);
+    return () => window.removeEventListener("beforeunload", avisar);
+  }, [linhas.length]);
 
   const depositos = useQuery({ queryKey: ["maletas", "depositos"], queryFn: depositosAtivos });
   React.useEffect(() => { const p = depositos.data?.find((d) => d.code === "DEP-01"); if (p && !origem) setOrigem(p.id); }, [depositos.data, origem]);
@@ -172,6 +294,7 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
   // ou nova tentativa depois de um erro de rede usam a MESMA chave e o banco
   // devolve o movimento já registrado em vez de criar outro.
   const chaveRef = React.useRef(chaveIdempotencia());
+  const pecasNaLista = linhas.reduce((s, l) => s + l.qtd, 0);
 
   const enviar = useMutation({
     mutationFn: () =>
@@ -185,32 +308,36 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
       toast.success(
         r.repetida
           ? "Este acréscimo já estava registrado."
-          : `${r.quantidade} peças a caminho. Falta a confirmação de quem recebe.`,
+          : `${r.quantidade} peça(s) extra(s) gravadas e a caminho. Falta a confirmação de quem recebe.`,
       );
       chaveRef.current = chaveIdempotencia();
       setLinhas([]);
       setNota("");
       onFeito();
     },
-    onError: (e) => toast.error(traduzir(e)),
+    onError: (e) => {
+      // nova chave: a próxima tentativa (talvez com outra lista) não colide com a que falhou
+      chaveRef.current = chaveIdempotencia();
+      toast.error(`Nada foi gravado: ${traduzir(e)}`);
+    },
   });
 
   return (
-    <Panel title="Acrescentar peças ao ciclo">
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-72 flex-1">
-          <VariantPicker value={peca} onChange={setPeca} />
-        </div>
+    <div className="space-y-3 rounded-xl border border-line-soft p-4">
+      <p className="text-sm font-semibold text-ledger-text">Acrescentar peças</p>
+      <VariantPicker value={peca} onChange={setPeca} />
+      <div className="flex items-center gap-2">
         <input
           type="number"
           min={1}
-          className="admin-input w-24"
+          aria-label="Quantidade"
+          className="admin-input w-20"
           value={qtd}
           onChange={(e) => setQtd(Math.max(1, Number(e.target.value)))}
         />
         <button
           type="button"
-          className="admin-btn"
+          className="admin-btn flex-1"
           disabled={!peca}
           onClick={() => {
             if (!peca) return;
@@ -219,40 +346,43 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
             setQtd(1);
           }}
         >
-          Incluir na lista
+          Pôr na lista
         </button>
       </div>
 
       {linhas.length > 0 && (
-        <ul className="mt-4 space-y-2">
-          {linhas.map((l) => (
-            <li key={l.peca.id} className="flex items-center gap-3 text-sm">
-              <span className="min-w-0 flex-1 truncate">{l.peca.label}</span>
-              <span className="tabular-nums">{l.qtd} un</span>
-              <button
-                type="button"
-                className="admin-btn"
-                onClick={() => setLinhas((v) => v.filter((x) => x.peca.id !== l.peca.id))}
-              >
-                Tirar
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="space-y-2">
+            {linhas.map((l) => (
+              <li key={l.peca.id} className="flex items-center gap-2 text-sm">
+                <span className="min-w-0 flex-1 truncate">{l.peca.label}</span>
+                <span className="tabular-nums">{l.qtd} un</span>
+                <button
+                  type="button"
+                  className="admin-btn"
+                  onClick={() => setLinhas((v) => v.filter((x) => x.peca.id !== l.peca.id))}
+                >
+                  Tirar
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="rounded-lg border border-warning/60 bg-surface-muted px-3 py-2 text-xs text-warning">
+            {pecasNaLista} peça(s) na lista ainda NÃO foram gravadas. Clique em "Gravar peças extras".
+          </p>
+        </>
       )}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <label className="text-sm">
+      <div className="grid gap-2">
+        <div className="text-sm">
           <span className="mb-1 block text-xs font-semibold text-ledger-muted">Depósito de origem</span>
-          <select className="admin-input w-full" value={origem} onChange={(e) => setOrigem(e.target.value)}>
-            <option value="">Depósito de origem da maleta</option>
-            {(depositos.data ?? []).map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </label>
+          <SmartSelect
+            options={(depositos.data ?? []).map((d) => ({ value: d.id, label: d.name }))}
+            value={origem}
+            onChange={setOrigem}
+            placeholder="Depósito de origem da maleta"
+          />
+        </div>
         <label className="text-sm">
           <span className="mb-1 block text-xs font-semibold text-ledger-muted">Observação</span>
           <input className="admin-input w-full" value={nota} onChange={(e) => setNota(e.target.value)} />
@@ -261,17 +391,17 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
 
       <button
         type="button"
-        className="admin-btn admin-btn-primary mt-4"
+        className="admin-btn admin-btn-primary w-full justify-center"
         disabled={linhas.length === 0 || enviar.isPending}
         onClick={() => enviar.mutate()}
       >
-        Enviar acréscimo
+        {enviar.isPending ? "Gravando…" : `Gravar peças extras${pecasNaLista ? ` (${pecasNaLista})` : ""}`}
       </button>
-      <p className="mt-3 text-xs text-ledger-muted">
-        A baixa acontece no depósito de origem no mesmo instante. As peças só entram sob responsabilidade de
-        quem está com a maleta depois da confirmação de recebimento.
+      <p className="text-xs text-ledger-muted">
+        Funciona mesmo com o estoque ainda não contado. As peças ficam "a caminho" até quem está com a maleta
+        confirmar o recebimento.
       </p>
-    </Panel>
+    </div>
   );
 }
 

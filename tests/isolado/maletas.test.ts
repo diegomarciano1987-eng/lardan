@@ -374,9 +374,10 @@ describe("Simultaneidade", () => {
   });
 
   it("13. duas operações simultâneas disputando o mesmo estoque não deixam saldo negativo", async () => {
-    // 5 unidades no depósito, duas saídas de 4 ao mesmo tempo
+    // 5 unidades no depósito do representante, duas saídas de 4 ao mesmo tempo
+    // (0344: só a equipe da Lardan acrescenta com estoque ainda não contado; o representante fica no que tem)
     const [a, b] = await Promise.all([
-      rpc(matriz, "kit_acrescimo", {
+      rpc(rep, "kit_acrescimo", {
         _cycle: ciclo1,
         _payload: {
           origem_location_id: depA,
@@ -384,7 +385,7 @@ describe("Simultaneidade", () => {
           idempotency_key: chave("disputa-a"),
         },
       }),
-      rpc(matriz, "kit_acrescimo", {
+      rpc(rep, "kit_acrescimo", {
         _cycle: ciclo1,
         _payload: {
           origem_location_id: depA,
@@ -654,8 +655,8 @@ describe("Atomicidade", () => {
       ciclo1,
     ])) as { n: number }[];
 
-    // segundo item excede o estoque: a operação inteira precisa cair
-    const r = await rpc(matriz, "kit_acrescimo", {
+    // segundo item excede o estoque do representante: a operação inteira precisa cair
+    const r = await rpc(rep, "kit_acrescimo", {
       _cycle: ciclo1,
       _payload: {
         origem_location_id: depA,

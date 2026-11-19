@@ -15,6 +15,7 @@ import { LembretesClientes } from "@/components/consultora/LembretesClientes";
 import { CombinaComEla } from "@/components/consultora/CombinaComEla";
 import { CartaoMeuHistorico } from "@/components/consultora/CartaoMeuHistorico";
 import { AvatarConsultora } from "@/components/consultora/AvatarConsultora";
+import { BotaoCompartilharVitrine } from "@/components/consultora/CompartilharVitrine";
 import { Link, useRouteContext } from "@tanstack/react-router";
 import { mostrarGlassConsultora } from "@/lib/consultora-glass";
 import { useTemaConsultora } from "@/lib/consultora-tema";
@@ -277,6 +278,10 @@ export function Inicio({ ir }: { ir: Ir }) {
         </div>
         <span className="lg:hidden"><BotaoAjuda tela="inicio" /></span>
       </header>
+      {/* Diego 19/11: botão pequeno para compartilhar a vitrine, logo abaixo do nome (celular) */}
+      <div className="-mt-4 lg:hidden">
+        <BotaoCompartilharVitrine abrirVitrine={() => ir({ aba: "vitrine" })} nome={primeiroNome} />
+      </div>
       <div className="space-y-3">
         <CartaoLiga compacto />
         {/* 0246 (Diego, 05/11): "Vendidos" logo abaixo da Liga, na cara */}

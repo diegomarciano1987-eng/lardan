@@ -26,7 +26,7 @@
 - [x] E1b. Referência junto da peça: notas fiscais, Central de Vendas, indicações, escolha do aro
 - [x] URGENTE. Peças extras: sem confirmação; vão direto para a maleta e o aceite da consultora é automático
 - [x] Montagem "Ver por categoria": colunas de banho na tabela de mais vendidas
-- [ ] App da consultora: botão pequeno "Compartilhar vitrine" na tela inicial (celular)
+- [x] App da consultora: botão pequeno "Compartilhar vitrine" na tela inicial (celular)
 - [ ] E3. Pedidos da consultora no app não entram no Contas a Receber até a cliente pagar
 - [ ] E3. "Nova maleta" direta (sem praça/representante): data de acerto + responsável
 - [ ] E3. Cancelar todos os pré-acertos fechados pela consultora no app (Pix gerado sem querer), sem mexer nos pagos

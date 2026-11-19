@@ -2486,6 +2486,13 @@
       "when": 1795115805370,
       "tag": "0354_acerto_unico_maletas_mesma_remessa",
       "breakpoints": true
+    },
+    {
+      "idx": 355,
+      "version": "7",
+      "when": 1795116345160,
+      "tag": "0355_relatorio_acertos_periodo",
+      "breakpoints": true
     }
   ]
 }

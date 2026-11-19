@@ -21024,6 +21024,7 @@ export type Database = {
         Args: { _aplicar?: boolean }
         Returns: Json
       }
+      acertos_relatorio: { Args: { _ate: string; _de: string }; Returns: Json }
       address_geo_fingerprint: {
         Args: {
           _city: string

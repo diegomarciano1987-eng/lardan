@@ -21,6 +21,7 @@ import { MaletasNaRua } from "@/components/admin/maletas/MaletasNaRua";
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
 import { AcertosPainel } from "@/components/admin/maletas/AcertosPainel";
 import { NovaMaletaDireta } from "@/components/admin/maletas/NovaMaletaDireta";
+import { RelatorioAcertos } from "@/components/admin/maletas/RelatorioAcertos";
 import { STATUS_REMESSA, buscarRemessas, criarRemessa, dataBR, definirEnvioRemessa, isoDia, type RemessaCard, type TipoEnvio } from "@/lib/remessas";
 
 export const Route = createFileRoute("/_authenticated/admin/maletas")({
@@ -262,6 +263,7 @@ function RemessasPage() {
         actions={
           <div className="flex flex-wrap gap-2">
             {escopo.isSuccess && !colab && <ConfigurarImpressora />}
+            <RelatorioAcertos />
             {master && (
               <Link to="/admin/cadastros/correcoes" className="admin-btn" title="Master: cancelar remessa vazia, excluir venda de teste, vincular histórico.">
                 <ShieldCheck aria-hidden className="size-4" /> Correções do administrador

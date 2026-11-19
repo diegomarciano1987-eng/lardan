@@ -3,7 +3,7 @@ import { InformacoesRemessa, semAnotacao, useInformacoesRemessa } from "@/compon
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Ban, CheckCircle2, FileText, Lock, Plus, ScrollText, Search, ShieldCheck, Tag, UserRound } from "lucide-react";
+import { Ban, CheckCircle2, ChevronRight, FileText, Lock, Plus, ScrollText, Search, ShieldCheck, Tag, UserRound } from "lucide-react";
 import { imprimirPedidoConsignacao, imprimirPromissoriaMaleta } from "@/components/admin/maletas/DocumentosMaleta";
 import { imprimirEtiquetaMaleta } from "@/components/admin/maletas/EtiquetaMaleta";
 import { abrirMaletaRepresentante, devolverCustodiaRepresentante, expedirRemessaRepresentante, mensagem } from "@/lib/maletas-perdidas";
@@ -109,6 +109,7 @@ function RemessaPage() {
     },
   });
   const [buscaMaleta, setBuscaMaleta] = React.useState("");
+  const [gruposAbertos, setGruposAbertos] = React.useState<Set<string>>(new Set());
   const maletasFiltradas = React.useMemo(() => (maletas.data ?? []).filter((m) => casaBusca(buscaMaleta, [
     m.consultora, m.consultora_party_id ? codigos.data?.get(m.consultora_party_id) : null,
     codigosMaleta.data?.get(m.cycle_id), rotuloMaletaRemessa(m),
@@ -284,6 +285,100 @@ function RemessaPage() {
   if (!r) return <EmptyState title="Remessa não encontrada" description="Ela pode não existir ou não estar visível para você." />;
   const s = STATUS_REMESSA[r.status] ?? { rotulo: r.status, tom: "neutral" as const };
 
+  const alternarGrupo = (k: string) => setGruposAbertos((s) => { const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n; });
+  const gruposMaletas = (() => {
+    const mapa = new Map<string, { chave: string; itens: typeof maletasFiltradas }>();
+    for (const m of maletasFiltradas) {
+      const chave = m.consultora_party_id ? `c:${m.consultora_party_id}` : `m:${m.cycle_id}`;
+      const g = mapa.get(chave) ?? { chave, itens: [] };
+      g.itens.push(m);
+      mapa.set(chave, g);
+    }
+    return [...mapa.values()];
+  })();
+  // Remessa (Diego 19/11): mesma consultora com 2+ maletas na remessa vira uma linha só, que abre as maletas dela
+  const linhaMaleta = (m: (typeof maletasFiltradas)[number], sub = false) => {
+          const st = SITUACAO_MALETA[m.status] ?? { rotulo: m.status, tom: "neutro" as const };
+          const semPecas = !m.pecas;
+          return (
+            <div key={m.cycle_id} data-maleta-linha={sub ? "sub" : ""} className={`flex flex-wrap items-center justify-between gap-4 border-b border-line-soft py-4 transition hover:bg-surface-muted ${sub ? "pl-12 pr-6 last:border-b-0" : "px-6"}`}>
+              <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} className="min-w-56 flex-1 font-semibold text-ledger-text hover:underline">
+                {rotuloMaletaRemessa(m) && (
+                  <span className="mr-2 inline-flex h-6 items-center rounded-md bg-primary/10 px-2 align-middle text-xs font-bold tracking-wide text-primary tabular-nums" data-rotulo-maleta="">
+                    {rotuloMaletaRemessa(m)}
+                  </span>
+                )}
+                {m.consultora_party_id && codigos.data?.get(m.consultora_party_id) && (
+                  <span className="mr-2 align-middle text-sm font-semibold tabular-nums text-ledger-muted">[Cód. {codigos.data.get(m.consultora_party_id)}]</span>
+                )}
+                {m.consultora ?? `Com o representante${r.representante ? ` ${r.representante}` : ""} · sem consultora`}
+                {codigosMaleta.data?.get(m.cycle_id) && (
+                  <span className="ml-2 whitespace-nowrap align-middle text-xs font-semibold tabular-nums text-ledger-muted">{codigosMaleta.data.get(m.cycle_id)}</span>
+                )}
+              </Link>
+              <div className="flex flex-wrap items-center gap-2" aria-label={`Documentos de ${m.consultora ?? "maleta"}`}>
+                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={semPecas || imprimindo !== null}
+                  onClick={() => void imprimir(m.cycle_id, "pedido")}>
+                  <FileText aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:pedido` ? "Preparando…" : "Pedido"}
+                </button>
+                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={semPecas || imprimindo !== null}
+                  onClick={() => void imprimir(m.cycle_id, "promissoria")}>
+                  <ScrollText aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:promissoria` ? "Preparando…" : "Promissória"}
+                </button>
+                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={imprimindo !== null}
+                  onClick={() => void imprimir(m.cycle_id, "etiqueta")}>
+                  <Tag aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:etiqueta` ? "Preparando…" : "Etiqueta"}
+                </button>
+                <NotaFiscalMaleta cycleId={m.cycle_id} status={m.status} nota={notas.porMaleta.get(m.cycle_id)} podeEmitir={podeNotaMaleta}
+                  temConsultora={!!m.consultora_party_id} semPecas={semPecas} producao={notas.producao} />
+                {trocaPorMaleta.get(m.cycle_id) && <SeloNotaTroca pendencia={trocaPorMaleta.get(m.cycle_id)!} />}
+                {peloCorreio && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (
+                  <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} hash="correios"
+                    className="admin-btn admin-btn-primary h-9 px-3 text-xs"
+                    title="Abre o painel Correios desta maleta: cotação, pré-postagem e etiqueta. Saída e entrega são confirmadas pelo rastreio.">
+                    {m.status === "conferida" ? "Enviar pelos Correios" : "Rastreio Correios"}
+                  </Link>
+                )}
+                {comRep && m.status === "conferida" && podeMontar && (
+                  <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || paraRep.isPending}
+                    onClick={() => paraRep.mutate([m.cycle_id])}>
+                    <UserRound aria-hidden className="size-3.5" /> Entregar ao representante
+                  </button>
+                )}
+                {comRep && m.status === "transito" && (
+                  <span className="inline-flex h-9 items-center rounded-full bg-muted px-3 text-xs text-ledger-muted">Com o representante · entrega em mãos</span>
+                )}
+                {comRep && m.status === "recebida" && podeMontar && (
+                  <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={devolver.isPending}
+                    title="Use quando a maleta foi marcada como entregue à consultora por engano e ainda está com o representante."
+                    onClick={() => { const mot = window.prompt("Motivo para voltar a maleta para o representante (fica registrado):", "Entregue direto por engano; está com o representante"); if (mot && mot.trim().length >= 5) devolver.mutate({ cycle: m.cycle_id, motivo: mot }); }}>
+                    Voltar para o representante
+                  </button>
+                )}
+                {!comRep && podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (!peloCorreio || master) && (
+                  <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || liberarMaleta.isPending}
+                    onClick={() => liberarMaleta.mutate(m.cycle_id)}>
+                    <CheckCircle2 aria-hidden className="size-3.5" /> {liberarMaleta.isPending && liberarMaleta.variables === m.cycle_id ? "Confirmando…" : "Confirmar entrega"}
+                  </button>
+                )}
+                {m.status === "recebida" && (
+                  <span className="inline-flex h-9 items-center rounded-full bg-muted px-3 text-xs text-ledger-muted">Aguardando aceite da consultora</span>
+                )}
+                {/* 0279: transferir para outra consultora (antes da nota ou já na rua, sem aceite) */}
+                {podeNotaMaleta && STATUS_TRANSFERIR.includes(m.status) && m.status !== "rascunho" && (
+                  <TransferirMaletaBotao cycleId={m.cycle_id} pracaId={r.praca_id}
+                    rotulo={[rotuloMaletaRemessa(m), m.consultora ?? "sem consultora"].filter(Boolean).join(" · ")} />
+                )}
+              </div>
+              <div className="flex items-center gap-6 text-sm">
+                <span className="tabular-nums text-ledger-muted">{m.pecas} peças</span>
+                <span className="tabular-nums font-semibold text-ledger-text">{brl(Number(m.valor_cents ?? 0))}</span>
+                <StatusBadge tone={TOM[st.tom]}>{st.rotulo}</StatusBadge>
+              </div>
+            </div>
+          );
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-start gap-4">
@@ -432,84 +527,36 @@ function RemessaPage() {
         {buscaMaleta.trim() && maletasFiltradas.length === 0 && (maletas.data?.length ?? 0) > 0 && (
           <div className="px-6 py-6"><EmptyState title="Nenhuma maleta encontrada" description="Confira o nome, o código da consultora ou o número da maleta." /></div>
         )}
-        {maletasFiltradas.map((m) => {
-          const st = SITUACAO_MALETA[m.status] ?? { rotulo: m.status, tom: "neutro" as const };
-          const semPecas = !m.pecas;
+        {gruposMaletas.map((g) => {
+          if (g.itens.length === 1) return linhaMaleta(g.itens[0]!);
+          const aberto = buscaMaleta.trim().length > 0 || gruposAbertos.has(g.chave);
+          const m0 = g.itens[0]!;
+          const pecas = g.itens.reduce((t, m) => t + Number(m.pecas ?? 0), 0);
+          const valor = g.itens.reduce((t, m) => t + Number(m.valor_cents ?? 0), 0);
           return (
-            <div key={m.cycle_id} className="flex flex-wrap items-center justify-between gap-4 border-b border-line-soft px-6 py-4 transition hover:bg-surface-muted">
-              <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} className="min-w-56 flex-1 font-semibold text-ledger-text hover:underline">
-                {rotuloMaletaRemessa(m) && (
-                  <span className="mr-2 inline-flex h-6 items-center rounded-md bg-primary/10 px-2 align-middle text-xs font-bold tracking-wide text-primary tabular-nums" data-rotulo-maleta="">
-                    {rotuloMaletaRemessa(m)}
+            <div key={g.chave} className="border-b border-line-soft" data-grupo-consultora="">
+              <button type="button" aria-expanded={aberto} onClick={() => alternarGrupo(g.chave)}
+                className="flex w-full flex-wrap items-center justify-between gap-4 px-6 py-4 text-left transition hover:bg-surface-muted">
+                <span className="flex min-w-56 flex-1 items-center gap-2 font-semibold text-ledger-text">
+                  <ChevronRight aria-hidden className={`size-4 shrink-0 text-ledger-muted transition-transform ${aberto ? "rotate-90" : ""}`} />
+                  <span className="min-w-0">
+                    {m0.consultora_party_id && codigos.data?.get(m0.consultora_party_id) && (
+                      <span className="mr-2 align-middle text-sm font-semibold tabular-nums text-ledger-muted">[Cód. {codigos.data.get(m0.consultora_party_id)}]</span>
+                    )}
+                    {m0.consultora}
+                    <span className="ml-2 inline-flex h-6 items-center rounded-md bg-primary/10 px-2 align-middle text-xs font-bold text-primary">{g.itens.length} maletas</span>
+                    <span className="ml-2 whitespace-nowrap align-middle text-xs font-semibold tabular-nums text-ledger-muted">
+                      {g.itens.map((m) => codigosMaleta.data?.get(m.cycle_id) ?? rotuloMaletaRemessa(m)).filter(Boolean).join(" + ")}
+                    </span>
                   </span>
-                )}
-                {m.consultora_party_id && codigos.data?.get(m.consultora_party_id) && (
-                  <span className="mr-2 align-middle text-sm font-semibold tabular-nums text-ledger-muted">[Cód. {codigos.data.get(m.consultora_party_id)}]</span>
-                )}
-                {m.consultora ?? `Com o representante${r.representante ? ` ${r.representante}` : ""} · sem consultora`}
-                {codigosMaleta.data?.get(m.cycle_id) && (
-                  <span className="ml-2 whitespace-nowrap align-middle text-xs font-semibold tabular-nums text-ledger-muted">{codigosMaleta.data.get(m.cycle_id)}</span>
-                )}
-              </Link>
-              <div className="flex flex-wrap items-center gap-2" aria-label={`Documentos de ${m.consultora ?? "maleta"}`}>
-                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={semPecas || imprimindo !== null}
-                  onClick={() => void imprimir(m.cycle_id, "pedido")}>
-                  <FileText aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:pedido` ? "Preparando…" : "Pedido"}
-                </button>
-                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={semPecas || imprimindo !== null}
-                  onClick={() => void imprimir(m.cycle_id, "promissoria")}>
-                  <ScrollText aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:promissoria` ? "Preparando…" : "Promissória"}
-                </button>
-                <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={imprimindo !== null}
-                  onClick={() => void imprimir(m.cycle_id, "etiqueta")}>
-                  <Tag aria-hidden className="size-3.5" /> {imprimindo === `${m.cycle_id}:etiqueta` ? "Preparando…" : "Etiqueta"}
-                </button>
-                <NotaFiscalMaleta cycleId={m.cycle_id} status={m.status} nota={notas.porMaleta.get(m.cycle_id)} podeEmitir={podeNotaMaleta}
-                  temConsultora={!!m.consultora_party_id} semPecas={semPecas} producao={notas.producao} />
-                {trocaPorMaleta.get(m.cycle_id) && <SeloNotaTroca pendencia={trocaPorMaleta.get(m.cycle_id)!} />}
-                {peloCorreio && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (
-                  <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} hash="correios"
-                    className="admin-btn admin-btn-primary h-9 px-3 text-xs"
-                    title="Abre o painel Correios desta maleta: cotação, pré-postagem e etiqueta. Saída e entrega são confirmadas pelo rastreio.">
-                    {m.status === "conferida" ? "Enviar pelos Correios" : "Rastreio Correios"}
-                  </Link>
-                )}
-                {comRep && m.status === "conferida" && podeMontar && (
-                  <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || paraRep.isPending}
-                    onClick={() => paraRep.mutate([m.cycle_id])}>
-                    <UserRound aria-hidden className="size-3.5" /> Entregar ao representante
-                  </button>
-                )}
-                {comRep && m.status === "transito" && (
-                  <span className="inline-flex h-9 items-center rounded-full bg-muted px-3 text-xs text-ledger-muted">Com o representante · entrega em mãos</span>
-                )}
-                {comRep && m.status === "recebida" && podeMontar && (
-                  <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={devolver.isPending}
-                    title="Use quando a maleta foi marcada como entregue à consultora por engano e ainda está com o representante."
-                    onClick={() => { const mot = window.prompt("Motivo para voltar a maleta para o representante (fica registrado):", "Entregue direto por engano; está com o representante"); if (mot && mot.trim().length >= 5) devolver.mutate({ cycle: m.cycle_id, motivo: mot }); }}>
-                    Voltar para o representante
-                  </button>
-                )}
-                {!comRep && podeMontar && m.consultora_party_id && ["conferida", "expedida", "transito"].includes(m.status) && (!peloCorreio || master) && (
-                  <button type="button" className="admin-btn admin-btn-primary h-9 px-3 text-xs" disabled={semPecas || liberarMaleta.isPending}
-                    onClick={() => liberarMaleta.mutate(m.cycle_id)}>
-                    <CheckCircle2 aria-hidden className="size-3.5" /> {liberarMaleta.isPending && liberarMaleta.variables === m.cycle_id ? "Confirmando…" : "Confirmar entrega"}
-                  </button>
-                )}
-                {m.status === "recebida" && (
-                  <span className="inline-flex h-9 items-center rounded-full bg-muted px-3 text-xs text-ledger-muted">Aguardando aceite da consultora</span>
-                )}
-                {/* 0279: transferir para outra consultora (antes da nota ou já na rua, sem aceite) */}
-                {podeNotaMaleta && STATUS_TRANSFERIR.includes(m.status) && m.status !== "rascunho" && (
-                  <TransferirMaletaBotao cycleId={m.cycle_id} pracaId={r.praca_id}
-                    rotulo={[rotuloMaletaRemessa(m), m.consultora ?? "sem consultora"].filter(Boolean).join(" · ")} />
-                )}
-              </div>
-              <div className="flex items-center gap-6 text-sm">
-                <span className="tabular-nums text-ledger-muted">{m.pecas} peças</span>
-                <span className="tabular-nums font-semibold text-ledger-text">{brl(Number(m.valor_cents ?? 0))}</span>
-                <StatusBadge tone={TOM[st.tom]}>{st.rotulo}</StatusBadge>
-              </div>
+                </span>
+                <span className="flex items-center gap-6 text-sm">
+                  <span className="tabular-nums text-ledger-muted">{pecas} peças</span>
+                  <span className="tabular-nums font-semibold text-ledger-text">{brl(valor)}</span>
+                  <span className="text-xs text-ledger-muted">{aberto ? "Fechar" : "Abrir as maletas"}</span>
+                </span>
+              </button>
+              {aberto && <div className="border-t border-line-soft bg-surface-muted/40">{g.itens.map((m) => linhaMaleta(m, true))}</div>}
             </div>
           );
         })}

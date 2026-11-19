@@ -62,14 +62,25 @@ export function htmlRelatorioAcertos(r: RelatorioAcertos, por: AgruparPor, opcoe
           <td class="r n">${l.pecas ?? "—"}</td><td class="r n">${brl(l.valor_cents)}</td></tr>`).join("")}</tbody>
       </table>
     </section>`).join("");
+  // Uma folha de anotação por consultora (2+ maletas na mesma praça/representante viram um bloco só).
+  const porConsultora = (itens: LinhaAcerto[]) => {
+    const m = new Map<string, LinhaAcerto[]>();
+    for (const l of itens) { const k = l.party_id ?? `${l.codigo}:${l.consultora}`; m.set(k, [...(m.get(k) ?? []), l]); }
+    return [...m.values()];
+  };
   const blocos = grupos.map((g) => `
     <h2 class="sec">${por === "praca" ? "Praça" : "Representante"}: ${esc(g.titulo)}</h2>
-    ${g.itens.map((l) => `
+    ${porConsultora(g.itens).map((ls) => {
+      const l = ls[0]!;
+      const maletas = ls.map((x) => `${esc(x.maleta)}${x.remessa ? ` (remessa ${esc(x.remessa)})` : ""}`).join(" + ");
+      const datas = [...new Set(ls.map((x) => dataBR(x.acerto)))].join(", ");
+      return `
       <div class="nota">
-        <div class="cab"><b>${l.codigo ? `[Cód. ${esc(l.codigo)}] ` : ""}${esc(l.consultora)}</b><span>Acerto ${dataBR(l.acerto)}</span></div>
-        <div class="sub">${esc(telefoneBR(l.telefone))} · ${esc(l.cidade ?? "cidade não informada")} · ${esc(l.maleta)}${l.remessa ? ` · remessa ${esc(l.remessa)}` : ""} · ${esc(outro(l))}</div>
+        <div class="cab"><b>${l.codigo ? `[Cód. ${esc(l.codigo)}] ` : ""}${esc(l.consultora)}</b><span>Acerto ${datas}</span></div>
+        <div class="sub">${esc(telefoneBR(l.telefone))} · ${esc(l.cidade ?? "cidade não informada")} · ${maletas} · ${esc(outro(l))}</div>
         ${"<div class=\"pauta\"></div>".repeat(6)}
-      </div>`).join("")}`).join("");
+      </div>`;
+    }).join("")}`).join("");
   const quando = opcoes.impressoEm.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Acertos de ${dataBR(r.de)} a ${dataBR(r.ate)}</title>
 <style>

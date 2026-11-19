@@ -30,10 +30,10 @@
 - [x] E3. Pedidos da consultora no app não entram no Contas a Receber até a cliente pagar
 - [x] E3. "Nova maleta" direta (sem praça/representante): data de acerto + responsável
 - [x] E3. Cancelar todos os pré-acertos fechados pela consultora no app (Pix gerado sem querer), sem mexer nos pagos
-- [ ] E3. Duas maletas da mesma remessa e mesmo acerto: unidas no app/vitrine da consultora (Graziella 8335), separadas para a Lardan
-- [ ] E3. Tela de remessas: mesma consultora com 2 maletas vira 1 linha que abre as duas
+- [x] E3. Duas maletas da mesma remessa e mesmo acerto: unidas no app/vitrine da consultora (Graziella 8335), separadas para a Lardan
+- [x] E3. Tela de remessas: mesma consultora com 2 maletas vira 1 linha que abre as duas
 - [x] E3. App da consultora: editar venda (peças e forma de pagamento) enquanto não paga
 - [x] Cobranças: ao entrar no menu, aba Kanban sempre selecionada (todos os usuários)
-- [ ] App da consultora: "Nova venda" e "Divulgar" (antigo Compartilhar vitrine) lado a lado, dois botões quadrados no início
-- [ ] App da consultora: tirar o cartão "Vendidos" do início; botão "Pedidos" da barra de baixo vira "Minhas vendas" (mesma função)
-- [ ] E4. Relatório de acertos por período (praça/representante), A4 com logo e linhas de anotação
+- [x] App da consultora: "Nova venda" e "Divulgar" (antigo Compartilhar vitrine) lado a lado, dois botões quadrados no início
+- [x] App da consultora: tirar o cartão "Vendidos" do início; botão "Pedidos" da barra de baixo vira "Minhas vendas" (mesma função)
+- [x] E4. Relatório de acertos por período (praça/representante), A4 com logo e linhas de anotação

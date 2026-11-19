@@ -157,37 +157,31 @@ describe("Cenário obrigatório 50 + 5 − 20", () => {
     acrescimo1 = r.dados.movement_id;
     expect(antes - (await saldo(vPrincipal, depA))).toBe(5);
 
-    // ainda a caminho: não conta como saído
-    const c = await conciliar(matriz, ciclo1);
-    expect(c.dados.totais["saiu"]).toBe(50);
-  });
-
-  it("3. quem recebe é quem está com a maleta: aqui a consultora, e sem aceite novo", async () => {
-    const antes = (await adm.unsafe(`select count(*)::int as n from public.kit_acceptances where cycle_id = $1`, [
-      ciclo1,
-    ])) as { n: number }[];
-
-    // a custódia é da consultora: o representante não confirma por ela
-    const negado = await rpc(rep, "kit_acrescimo_confirmar", { _movement: acrescimo1, _payload: {} });
-    expect(negado.ok).toBe(false);
-
-    const r = await rpc<{ recebido_por: string }>(cons, "kit_acrescimo_confirmar", {
-      _movement: acrescimo1,
-      _payload: {},
-    });
-    expect(r.ok).toBe(true);
-    expect(r.dados.recebido_por).toBe("consultora");
-
-    const depois = (await adm.unsafe(`select count(*)::int as n from public.kit_acceptances where cycle_id = $1`, [
-      ciclo1,
-    ])) as { n: number }[];
-    expect(depois[0]!.n).toBe(antes[0]!.n);
-
+    // 0350: peça extra entra direto na maleta (sem confirmação de ninguém)
     const c = await conciliar(matriz, ciclo1);
     expect(c.dados.totais["saiu"]).toBe(55);
   });
 
-  it("3b. maleta em poder do representante: ele confirma como representante, sem aceite da consultora", async () => {
+  it("3. 0350: o acréscimo já entrou como recebido, automático, sem aceite novo e sem confirmação", async () => {
+    const m = (await adm.unsafe(`select status, confirmed_as from public.kit_movements where id = $1`, [acrescimo1])) as {
+      status: string; confirmed_as: string;
+    }[];
+    expect(m[0]).toEqual({ status: "confirmado", confirmed_as: "automatico" });
+    const aceites = (await adm.unsafe(`select count(*)::int as n from public.kit_acceptances where cycle_id = $1`, [
+      ciclo1,
+    ])) as { n: number }[];
+    const r = await rpc<{ repetida: boolean }>(cons, "kit_acrescimo_confirmar", { _movement: acrescimo1, _payload: {} });
+    expect(r.ok).toBe(true);
+    expect(r.dados.repetida).toBe(true);
+    const depois = (await adm.unsafe(`select count(*)::int as n from public.kit_acceptances where cycle_id = $1`, [
+      ciclo1,
+    ])) as { n: number }[];
+    expect(depois[0]!.n).toBe(aceites[0]!.n);
+    const c = await conciliar(matriz, ciclo1);
+    expect(c.dados.totais["saiu"]).toBe(55);
+  });
+
+  it("3b. maleta em poder do representante: acréscimo entra direto, sem confirmação e sem aceite da consultora", async () => {
     const ciclo = await abrirCiclo(cons, rep, depA);
     await rpc(matriz, "kit_item_upsert", { _cycle: ciclo, _variant: vPrincipal, _qty: 10 });
     await rpc(matriz, "kit_conferir", { _cycle: ciclo, _note: null });
@@ -196,7 +190,7 @@ describe("Cenário obrigatório 50 + 5 − 20", () => {
     const entrega = await rpc(rep, "kit_transfer_confirm", { _transfer: await primeiraTransferencia(ciclo), _payload: {} });
     expect(entrega.ok).toBe(true);
 
-    const acr = await rpc<{ movement_id: string }>(matriz, "kit_acrescimo", {
+    const acr = await rpc<{ movement_id: string; situacao: string }>(matriz, "kit_acrescimo", {
       _cycle: ciclo,
       _payload: {
         origem_location_id: depA,
@@ -205,13 +199,11 @@ describe("Cenário obrigatório 50 + 5 − 20", () => {
       },
     });
     expect(acr.ok).toBe(true);
-
-    const conf = await rpc<{ recebido_por: string }>(rep, "kit_acrescimo_confirmar", {
-      _movement: acr.dados.movement_id,
-      _payload: {},
-    });
-    expect(conf.ok).toBe(true);
-    expect(conf.dados.recebido_por).toBe("representante");
+    expect(acr.dados.situacao).toBe("confirmado");
+    const b = (await adm.unsafe(`select qty_incoming, qty_allocated from public.kit_balances where cycle_id = $1 and variant_id = $2`, [
+      ciclo, vPrincipal,
+    ])) as { qty_incoming: number; qty_allocated: number }[];
+    expect(b[0]!.qty_incoming).toBe(0);
 
     const aceites = (await adm.unsafe(`select count(*)::int as n from public.kit_acceptances where cycle_id = $1`, [
       ciclo,

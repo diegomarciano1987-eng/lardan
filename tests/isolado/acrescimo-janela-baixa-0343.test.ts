@@ -73,14 +73,18 @@ describe("Acréscimo com estoque ainda não contado", () => {
     expect(r.dados.quantidade).toBe(2);
     expect(await saldo(vZero, depVazio)).toBe(-2);
     const mov = await um<{ status: string; n: number }>(`select m.status, (select sum(quantity) from public.kit_movement_items i where i.movement_id=m.id)::int n from public.kit_movements m where m.id=$1`, [r.dados.movement_id]);
-    expect(mov).toEqual({ status: "pendente", n: 2 });
+    // 0350: entra direto na maleta, sem confirmação
+    expect(mov).toEqual({ status: "confirmado", n: 2 });
     const aud = await um<{ n: number }>(`select count(*)::int n from public.audit_logs where action='stock.transfer.acima_do_disponivel' and entity_id=$1`, [vZero]);
     expect(aud.n).toBeGreaterThan(0);
   });
 
-  test("a consultora confirma o recebimento e a peça extra entra no saldo da maleta", async () => {
+  test("0350: a peça extra já entra no saldo da maleta sem ninguém confirmar", async () => {
     const m = await um<{ id: string }>(`select id from public.kit_movements where cycle_id=$1 and kind='acrescimo' order by created_at desc limit 1`, [ciclo]);
-    expect((await rpc(cons, "kit_acrescimo_confirmar", { _movement: m.id, _payload: {} })).erro).toBeNull();
+    // confirmar de novo não faz nada (já entrou)
+    const r = await rpc<{ repetida: boolean }>(cons, "kit_acrescimo_confirmar", { _movement: m.id, _payload: {} });
+    expect(r.erro).toBeNull();
+    expect(r.dados.repetida).toBe(true);
     const b = await um<{ qty_accepted: number }>(`select qty_accepted from public.kit_balances where cycle_id=$1 and variant_id=$2`, [ciclo, vZero]);
     expect(b.qty_accepted).toBe(2);
   });

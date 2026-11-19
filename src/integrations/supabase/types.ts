@@ -23472,6 +23472,10 @@ export type Database = {
         Returns: Json
       }
       kit_acrescimo: { Args: { _cycle: string; _payload: Json }; Returns: Json }
+      kit_acrescimo_auto_receber: {
+        Args: { _movement: string }
+        Returns: number
+      }
       kit_acrescimo_confirmar: {
         Args: { _movement: string; _payload?: Json }
         Returns: Json

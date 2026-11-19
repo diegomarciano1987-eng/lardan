@@ -199,10 +199,10 @@ export function PecasExtras({
           <div className="space-y-3">
             <p className="text-sm text-ledger-text">
               <strong className="tabular-nums">{total}</strong> peça(s) extra(s) neste ciclo
-              {aCaminho > 0 ? <span className="text-warning"> · {aCaminho} a caminho, falta confirmar o recebimento</span> : null}
+              {aCaminho > 0 ? <span className="text-ledger-muted"> · {aCaminho} entrando na maleta</span> : null}
             </p>
             {extras.map((m) => (
-              <ExtraEnviado key={m.id} m={m} nome={nome} onFeito={recarregar} />
+              <ExtraEnviado key={m.id} m={m} nome={nome} />
             ))}
           </div>
         )}
@@ -215,23 +215,14 @@ export function PecasExtras({
   );
 }
 
-function ExtraEnviado({ m, nome, onFeito }: { m: Movimento; nome: (id: string) => string; onFeito: () => void }) {
-  const confirmar = useMutation({
-    mutationFn: () => confirmarAcrescimo(m.id),
-    onSuccess: (r) => {
-      toast.success(r.repetida ? "Recebimento já registrado." : "Recebimento confirmado.");
-      onFeito();
-    },
-    onError: (e) => toast.error(traduzir(e)),
-  });
-  const pendente = m.situacao === "pendente";
+function ExtraEnviado({ m, nome }: { m: Movimento; nome: (id: string) => string }) {
+  // 0350: peça extra entra direto na maleta, já recebida (sem confirmação)
   return (
     <div className="rounded-xl border border-line-soft px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge tone={pendente ? "warning" : "success"}>{pendente ? "A caminho" : "Recebida"}</StatusBadge>
+        <StatusBadge tone="success">Na maleta</StatusBadge>
         <span className="text-xs text-ledger-muted">
           enviada {formatDateTime(m.quando)}
-          {m.confirmado_em ? ` · recebida ${formatDateTime(m.confirmado_em)}` : ""}
         </span>
       </div>
       <ul className="mt-2 space-y-1 text-sm">
@@ -244,11 +235,6 @@ function ExtraEnviado({ m, nome, onFeito }: { m: Movimento; nome: (id: string) =
         ))}
       </ul>
       {m.observacao ? <p className="mt-1 text-xs text-ledger-muted">{m.observacao}</p> : null}
-      {pendente && (
-        <button type="button" className="admin-btn mt-2" disabled={confirmar.isPending} onClick={() => confirmar.mutate()}>
-          Confirmar recebimento
-        </button>
-      )}
     </div>
   );
 }
@@ -308,7 +294,7 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
       toast.success(
         r.repetida
           ? "Este acréscimo já estava registrado."
-          : `${r.quantidade} peça(s) extra(s) gravadas e a caminho. Falta a confirmação de quem recebe.`,
+          : `${r.quantidade} peça(s) extra(s) já estão na maleta da consultora.`,
       );
       chaveRef.current = chaveIdempotencia();
       setLinhas([]);
@@ -398,8 +384,8 @@ function FormAcrescimo({ cycleId, onFeito }: { cycleId: string; onFeito: () => v
         {enviar.isPending ? "Gravando…" : `Gravar peças extras${pecasNaLista ? ` (${pecasNaLista})` : ""}`}
       </button>
       <p className="text-xs text-ledger-muted">
-        Funciona mesmo com o estoque ainda não contado. As peças ficam "a caminho" até quem está com a maleta
-        confirmar o recebimento.
+        Funciona mesmo com o estoque ainda não contado. As peças entram direto na maleta da consultora,
+        já como recebidas: ninguém precisa confirmar.
       </p>
     </div>
   );
@@ -594,7 +580,7 @@ function LinhaMovimento({ m, nome, onFeito }: { m: Movimento; nome: (id: string)
         <StatusBadge tone={tom}>{m.situacao}</StatusBadge>
         <span className="text-xs text-ledger-muted">
           {formatDateTime(m.quando)}
-          {m.confirmado_por ? ` · confirmado por ${m.confirmado_por}` : ""}
+          {m.confirmado_por ? (m.confirmado_por === "automatico" ? " · entrou direto na maleta" : ` · confirmado por ${m.confirmado_por}`) : ""}
         </span>
       </div>
 

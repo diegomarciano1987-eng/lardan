@@ -2451,6 +2451,13 @@
       "when": 1795111863490,
       "tag": "0349_0349_trocas_fiscais_codigo_consultora",
       "breakpoints": true
+    },
+    {
+      "idx": 350,
+      "version": "7",
+      "when": 1795113283055,
+      "tag": "0350_0350_acrescimo_entra_direto",
+      "breakpoints": true
     }
   ]
 }

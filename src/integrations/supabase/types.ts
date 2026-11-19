@@ -25376,6 +25376,7 @@ export type Database = {
         Returns: Json
       }
       rep_maletas_carteira: { Args: { _rep: string }; Returns: Json }
+      rep_nome_norm: { Args: { _nome: string }; Returns: string }
       rep_parcela_cobravel: { Args: { _inst: string }; Returns: Json }
       rep_parcela_dono: { Args: { _inst: string }; Returns: string }
       rep_pode_assumir: {

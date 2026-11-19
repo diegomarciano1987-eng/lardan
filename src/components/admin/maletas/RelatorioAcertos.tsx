@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DateRangeField } from "@/components/premium/DateRangeField";
 import { confirmarImpressora } from "@/components/admin/ConfirmarImpressora";
-import { agruparAcertos, dataBR, filtrarAcertos, htmlRelatorioAcertos, lerRelatorioAcertos, opcoesAlvo, telefoneBR, type AgruparPor } from "@/lib/relatorio-acertos";
+import { agruparAcertos, dataBR, ehGeral, filtrarAcertos, htmlRelatorioAcertos, lerRelatorioAcertos, lerRepresentantesCadastro, opcoesAlvo, telefoneBR, type AgruparPor } from "@/lib/relatorio-acertos";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import logo from "@/assets/lardan-logo-completa.png.asset.json";
 
@@ -58,10 +58,11 @@ export function RelatorioAcertos({ repInicial = "", pracaInicial = "" }: { repIn
   const q = useQuery({ queryKey: ["remessas", "relatorio-acertos", de, ate], enabled: aberto && !!de && !!ate, queryFn: () => lerRelatorioAcertos(de!, ate!), retry: false });
   const linhas = q.data ? filtrarAcertos(q.data.linhas, por, alvo) : [];
   const grupos = agruparAcertos(linhas, por);
-  const opcoes = q.data && por !== "geral" ? opcoesAlvo(q.data.linhas, por) : [];
-  const diretas = q.data ? q.data.linhas.filter((l) => l.direta).length : 0;
+  const reps = useQuery({ queryKey: ["remessas", "relatorio-acertos", "representantes"], enabled: aberto, queryFn: lerRepresentantesCadastro, staleTime: 300_000, retry: false });
+  const opcoes = q.data && por !== "geral" ? opcoesAlvo(q.data.linhas, por, reps.data ?? []) : [];
+  const diretas = q.data ? q.data.linhas.filter(ehGeral).length : 0;
   const rotuloAlvo = opcoes.find((o) => o.value === alvo)?.label;
-  const filtro = por === "geral" ? "Geral: maletas diretas, sem representante"
+  const filtro = por === "geral" ? "Geral: maletas sem representante"
     : rotuloAlvo ? `${por === "praca" ? "Praça" : "Representante"}: ${rotuloAlvo}` : undefined;
   const operador = (user as { user_metadata?: { full_name?: string } }).user_metadata?.full_name || user.email || "equipe Lardan";
 
@@ -83,14 +84,14 @@ export function RelatorioAcertos({ repInicial = "", pracaInicial = "" }: { repIn
             <div role="radiogroup" aria-label="Agrupar por" className="inline-flex rounded-full border border-line p-1">
               {([["praca", "Por praça"], ["representante", "Por representante"], ["geral", "Geral"]] as const).map(([v, r]) => (
                 <button key={v} type="button" role="radio" aria-checked={por === v} onClick={() => trocarModo(v)}
-                  title={v === "geral" ? "Maletas abertas por Nova maleta: sem representante" : undefined}
+                  title={v === "geral" ? "Maletas sem representante: abertas por Nova maleta ou fora de remessa" : undefined}
                   className={`h-9 rounded-full px-4 text-sm font-semibold ${por === v ? "bg-primary text-primary-foreground" : "text-ledger-muted"}`}>{r}</button>
               ))}
             </div>
           </div>
           {por !== "geral" && (
             <label className="grid gap-1.5 text-sm font-medium">{por === "praca" ? "Qual praça" : "Qual representante"}
-              <SmartSelect value={alvo} onChange={setAlvo} loading={q.isFetching}
+              <SmartSelect value={alvo} onChange={setAlvo} loading={q.isFetching || reps.isFetching}
                 options={[{ value: "", label: por === "praca" ? "Todas as praças" : "Todos os representantes" }, ...opcoes]}
                 placeholder={por === "praca" ? "Todas as praças" : "Todos os representantes"}
                 searchPlaceholder={por === "praca" ? "Buscar praça" : "Buscar representante"}
@@ -103,9 +104,9 @@ export function RelatorioAcertos({ repInicial = "", pracaInicial = "" }: { repIn
             : q.data && (
               <div className="space-y-3">
                 <p className="text-sm"><strong>{linhas.length}</strong> {linhas.length === 1 ? "maleta" : "maletas"} para acertar de {dataBR(q.data.de)} a {dataBR(q.data.ate)}
-                  {por === "geral" ? " · maletas diretas, sem representante" : rotuloAlvo ? ` · ${rotuloAlvo}` : ` · ${grupos.length} ${por === "praca" ? "praças" : "representantes"}`}
-                  {por !== "geral" && diretas > 0 && <span className="text-ledger-muted"> · {diretas} {diretas === 1 ? "maleta direta está" : "maletas diretas estão"} em Geral</span>}</p>
-                {linhas.length === 0 ? <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-ledger-muted">{por === "geral" ? "Nenhuma maleta direta com acerto neste período." : "Nenhum acerto neste período."}</p> : (
+                  {por === "geral" ? " · maletas sem representante" : rotuloAlvo ? ` · ${rotuloAlvo}` : ` · ${grupos.length} ${por === "praca" ? "praças" : "representantes"}`}
+                  {por !== "geral" && diretas > 0 && <span className="text-ledger-muted"> · {diretas} {diretas === 1 ? "maleta sem representante está" : "maletas sem representante estão"} em Geral</span>}</p>
+                {linhas.length === 0 ? <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-ledger-muted">{por === "geral" ? "Nenhuma maleta sem representante com acerto neste período." : "Nenhum acerto neste período."}</p> : (
                   <div className="max-h-[45vh] overflow-auto rounded-xl border border-line-soft">
                     {grupos.map((g) => (
                       <div key={g.titulo}>

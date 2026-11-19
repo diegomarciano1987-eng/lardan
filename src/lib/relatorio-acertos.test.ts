@@ -30,3 +30,24 @@ describe("Relatório de acertos — filtros (0356)", () => {
     expect(agruparAcertos(filtrarAcertos(linhas, "representante", ""), "representante").map((g) => g.itens.length)).toEqual([2, 1]);
   });
 });
+
+describe("Relatório de acertos — lista de representantes (0357)", () => {
+  const cadastro = [{ value: "r1", label: "Daniel de Freitas Maciel" }, { value: "r9", label: "Guilherme Augusto" }];
+  test("todos os representantes do cadastro aparecem, mesmo sem acerto no período (0 maletas)", () => {
+    const o = opcoesAlvo(linhas, "representante", cadastro);
+    expect(o.find((x) => x.value === "r9")?.hint).toBe("0 maletas");
+    expect(o.find((x) => x.value === "r1")).toMatchObject({ label: "Daniel de Freitas Maciel", hint: "2 maletas" });
+  });
+  test("por praça a lista do cadastro de representantes não entra", () => {
+    expect(opcoesAlvo(linhas, "praca", cadastro).map((x) => x.value)).toEqual(["p1", "p2"]);
+  });
+});
+
+describe("Relatório de acertos — Geral pega toda maleta sem representante (0357)", () => {
+  const solta = l({ maleta: "E", consultora: "Eva", representante: "Sem representante", rep_id: null, praca: "Sem praça", praca_id: null });
+  test("maleta Lardan sem representante (fora de remessa) vai para Geral e sai da lista de representantes", () => {
+    const todas = [...linhas, solta];
+    expect(filtrarAcertos(todas, "geral", "").map((x) => x.maleta)).toEqual(["D", "E"]);
+    expect(opcoesAlvo(todas, "representante").map((o) => o.label)).not.toContain("Sem representante");
+  });
+});

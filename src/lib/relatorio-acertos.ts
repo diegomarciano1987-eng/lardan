@@ -19,23 +19,41 @@ export type AgruparPor = "praca" | "representante" | "geral";
 export const chaveAlvo = (l: LinhaAcerto, por: AgruparPor) =>
   por === "praca" ? (l.praca_id ?? `nome:${l.praca}`) : (l.rep_id ?? `nome:${l.representante}`);
 
+/** 0357: Geral = maleta direta ou maleta Lardan sem representante (ex.: aberta fora de remessa) — sem representante e sem praça de rede. */
+export const ehGeral = (l: LinhaAcerto) => !!l.direta || (l.fonte === "lardan" && !l.rep_id);
+
 /** 0356: "Geral" = só maletas diretas; praça/representante = sem as diretas e, se escolhido, só aquela praça/representante. */
 export function filtrarAcertos(linhas: LinhaAcerto[], por: AgruparPor, alvo: string) {
-  if (por === "geral") return linhas.filter((l) => l.direta);
-  return linhas.filter((l) => !l.direta && (!alvo || chaveAlvo(l, por) === alvo));
+  if (por === "geral") return linhas.filter(ehGeral);
+  return linhas.filter((l) => !ehGeral(l) && (!alvo || chaveAlvo(l, por) === alvo));
 }
 
-/** Opções do seletor: cada praça/representante que tem acerto no período, com a quantidade de maletas. */
-export function opcoesAlvo(linhas: LinhaAcerto[], por: Exclude<AgruparPor, "geral">) {
+/**
+ * Opções do seletor: cada praça/representante que tem acerto no período, com a quantidade de maletas.
+ * 0357: em "representante", `cadastro` (lista de Representantes) entra inteiro, mesmo quem não tem acerto (0 maletas).
+ */
+export function opcoesAlvo(linhas: LinhaAcerto[], por: Exclude<AgruparPor, "geral">, cadastro: { value: string; label: string }[] = []) {
   const m = new Map<string, { label: string; n: number }>();
+  if (por === "representante") for (const c of cadastro) m.set(c.value, { label: c.label, n: 0 });
   for (const l of linhas) {
-    if (l.direta) continue;
+    if (ehGeral(l)) continue;
     const k = chaveAlvo(l, por);
     const atual = m.get(k);
-    m.set(k, { label: por === "praca" ? l.praca : l.representante, n: (atual?.n ?? 0) + 1 });
+    m.set(k, { label: atual?.label ?? (por === "praca" ? l.praca : l.representante), n: (atual?.n ?? 0) + 1 });
   }
   return [...m.entries()].map(([value, v]) => ({ value, label: v.label, hint: `${v.n} ${v.n === 1 ? "maleta" : "maletas"}` }))
     .sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
+}
+
+/** 0357: cadastros de Representantes (colaboradora de carteira vê só o representante dela). */
+export async function lerRepresentantesCadastro(): Promise<{ value: string; label: string }[]> {
+  const { lerColabEscopo } = await import("@/lib/colab-escopo");
+  const escopo = await lerColabEscopo();
+  if (escopo.carteira) return escopo.representante ? [{ value: escopo.representante, label: escopo.nome ?? "Representante vinculado" }] : [];
+  const { data, error } = await supabase.rpc("list_parties", { _limit: 200, _offset: 0, _role: "representante" } as never);
+  if (error) throw error;
+  return ((data ?? []) as unknown as { id: string; display_name: string; status?: string }[])
+    .filter((p) => p.status !== "desligado").map((p) => ({ value: p.id, label: p.display_name }));
 }
 
 export async function lerRelatorioAcertos(de: string, ate: string): Promise<RelatorioAcertos> {
@@ -63,7 +81,7 @@ const SIT: Record<string, string> = {
 export function agruparAcertos(linhas: LinhaAcerto[], por: AgruparPor) {
   if (por === "geral") {
     const itens = [...linhas].sort((a, b) => a.acerto.localeCompare(b.acerto) || a.consultora.localeCompare(b.consultora, "pt-BR"));
-    return itens.length ? [{ titulo: "Maletas diretas (sem representante)", itens }] : [];
+    return itens.length ? [{ titulo: "Geral: maletas sem representante", itens }] : [];
   }
   // mesma praça/representante pela chave (id), mesmo que o nome venha escrito diferente do SmallData
   const rot = (l: LinhaAcerto) => (por === "praca" ? l.praca : l.representante);
@@ -85,7 +103,7 @@ export function htmlRelatorioAcertos(r: RelatorioAcertos, por: AgruparPor, opcoe
   const outro = (l: LinhaAcerto) => (por === "praca" ? l.representante : l.praca);
   const rotGrupo = por === "praca" ? "Praça" : por === "representante" ? "Representante" : "Geral";
   const rotOutro = por === "praca" ? "Representante" : "Praça";
-  const rotPor = por === "praca" ? "praça" : por === "representante" ? "representante" : "geral (maletas diretas)";
+  const rotPor = por === "praca" ? "praça" : por === "representante" ? "representante" : "geral (sem representante)";
   const rotGrupos = por === "praca" ? "praças" : por === "representante" ? "representantes" : "grupo";
   const lista = grupos.map((g) => `
     <section class="grupo">

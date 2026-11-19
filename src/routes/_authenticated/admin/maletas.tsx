@@ -225,7 +225,8 @@ function RemessasPage() {
   const reps = useQuery({ queryKey: ["remessas", "reps", carteira, escopo.data?.representante, buscaRep], queryFn: () => buscarRepresentantes(buscaRep), enabled: escopo.isSuccess });
   const representantes = carteira ? (escopo.data?.representante ? [{ value: escopo.data.representante, label: escopo.data.nome ?? "Representante vinculado" }] : []) : reps.data ?? [];
   const filtros = {
-    busca, status: situacao, praca, representante: rep,
+    // 0356: na carteira o servidor já limita ao representante dela; sem mandar o representante, as maletas diretas (sem representante) também aparecem
+    busca, status: situacao, praca, representante: carteira ? "" : rep,
     de: isoDia(periodo?.from), ate: isoDia(periodo?.to ?? periodo?.from), campoData,
   };
   const lista = useQuery({ queryKey: ["remessas", "busca", filtros], queryFn: () => buscarRemessas(filtros) });
@@ -263,7 +264,7 @@ function RemessasPage() {
         actions={
           <div className="flex flex-wrap gap-2">
             {escopo.isSuccess && !colab && <ConfigurarImpressora />}
-            <RelatorioAcertos />
+            <RelatorioAcertos repInicial={carteira ? "" : rep} pracaInicial={praca} />
             {master && (
               <Link to="/admin/cadastros/correcoes" className="admin-btn" title="Master: cancelar remessa vazia, excluir venda de teste, vincular histórico.">
                 <ShieldCheck aria-hidden className="size-4" /> Correções do administrador
@@ -279,7 +280,8 @@ function RemessasPage() {
                 <ScanLine aria-hidden className="size-4" /> Entrada de maleta
               </Link>
             )}
-            {podeMontar && !carteira && (
+            {/* 0356: Nova maleta para TODA colaboradora com módulo de maletas (carteira inclusive) */}
+            {podeMontar && (
               <NovaMaletaDireta aoCriar={(id) => {
                 qc.invalidateQueries({ queryKey: ["remessas"] });
                 navigate({ to: "/admin/maletas/$id", params: { id } });

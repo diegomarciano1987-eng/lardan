@@ -22135,6 +22135,8 @@ export type Database = {
       colab_conta: { Args: never; Returns: boolean }
       colab_cycle_ids: { Args: never; Returns: string[] }
       colab_cycle_ok: { Args: { _id: string }; Returns: boolean }
+      colab_direta_party_ids: { Args: never; Returns: string[] }
+      colab_direta_pode: { Args: never; Returns: boolean }
       colab_exigir_master: { Args: { _actor: string }; Returns: undefined }
       colab_kit_reserva_criar_interna: {
         Args: {

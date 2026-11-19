@@ -58,11 +58,20 @@ test("Visão geral com estoque não é entregue à colaboradora", async () => {
 });
 test("Sem vínculo não retorna Consultoras nem libera rede", async () => {
   await adm.unsafe("update consultant_profiles set representative_party_id=null where party_id=$1", [colab.partyId]);
-  const empty = await ler(colab, "select id from public.list_parties(_limit=>100)");
-  expect(empty.erro).toBeNull();
-  expect(empty.linhas).toEqual([]);
-  expect((await rpc(colab, "network_scope")).erro).not.toBeNull();
-  await adm.unsafe("update consultant_profiles set representative_party_id=$2 where party_id=$1", [colab.partyId, rep.partyId]);
+  try {
+    // 0356: só as consultoras de maletas diretas (operação geral) podem aparecer; nenhuma da carteira de representante
+    const empty = await ler<{ id: string }>(colab, "select id from public.list_parties(_limit=>100)");
+    expect(empty.erro).toBeNull();
+    const ids = empty.linhas.map((x) => x.id);
+    expect(ids).not.toContain(inside.partyId);
+    expect(ids).not.toContain(outside.partyId);
+    const diretas = (await adm.unsafe(`select distinct c.consultora_party_id id from kit_cycles c join remessas r on r.id=c.remessa_id
+      where r.direta and r.representante_party_id is null and c.status <> 'cancelada'`)).map((x: { id: string }) => x.id);
+    expect(ids.every((id) => diretas.includes(id))).toBe(true);
+    expect((await rpc(colab, "network_scope")).erro).not.toBeNull();
+  } finally {
+    await adm.unsafe("update consultant_profiles set representative_party_id=$2 where party_id=$1", [colab.partyId, rep.partyId]);
+  }
 });test("0199: sugestão de montagem (maleta_total_sugerido) só para consultora da carteira", async () => {
   const fora = await ler<{ r: unknown }>(colab, "select public.maleta_total_sugerido($1) r", [outside.partyId]);
   expect(fora.erro).toBeNull();

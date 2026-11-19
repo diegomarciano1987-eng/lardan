@@ -9,9 +9,34 @@ export interface LinhaAcerto {
   fonte: "lardan" | "smalldata"; maleta: string; remessa: number | null; acerto: string; party_id: string | null;
   consultora: string; codigo: string | null; praca: string; representante: string; pecas: number | null; valor_cents: number | null;
   situacao: string; telefone: string | null; cidade: string | null;
+  /** 0356: maleta direta (Nova maleta, sem representante) — aparece só em "Geral". */
+  direta?: boolean; praca_id?: string | null; rep_id?: string | null;
 }
 export interface RelatorioAcertos { de: string; ate: string; gerado_em: string; linhas: LinhaAcerto[] }
-export type AgruparPor = "praca" | "representante";
+export type AgruparPor = "praca" | "representante" | "geral";
+
+/** Chave estável da praça/representante (id; sem id, o nome). */
+export const chaveAlvo = (l: LinhaAcerto, por: AgruparPor) =>
+  por === "praca" ? (l.praca_id ?? `nome:${l.praca}`) : (l.rep_id ?? `nome:${l.representante}`);
+
+/** 0356: "Geral" = só maletas diretas; praça/representante = sem as diretas e, se escolhido, só aquela praça/representante. */
+export function filtrarAcertos(linhas: LinhaAcerto[], por: AgruparPor, alvo: string) {
+  if (por === "geral") return linhas.filter((l) => l.direta);
+  return linhas.filter((l) => !l.direta && (!alvo || chaveAlvo(l, por) === alvo));
+}
+
+/** Opções do seletor: cada praça/representante que tem acerto no período, com a quantidade de maletas. */
+export function opcoesAlvo(linhas: LinhaAcerto[], por: Exclude<AgruparPor, "geral">) {
+  const m = new Map<string, { label: string; n: number }>();
+  for (const l of linhas) {
+    if (l.direta) continue;
+    const k = chaveAlvo(l, por);
+    const atual = m.get(k);
+    m.set(k, { label: por === "praca" ? l.praca : l.representante, n: (atual?.n ?? 0) + 1 });
+  }
+  return [...m.entries()].map(([value, v]) => ({ value, label: v.label, hint: `${v.n} ${v.n === 1 ? "maleta" : "maletas"}` }))
+    .sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
+}
 
 export async function lerRelatorioAcertos(de: string, ate: string): Promise<RelatorioAcertos> {
   const { data, error } = await supabase.rpc("acertos_relatorio" as never, { _de: de, _ate: ate } as never);
@@ -36,25 +61,37 @@ const SIT: Record<string, string> = {
 
 /** Agrupa mantendo a ordem: praça/representante → data do acerto → nome. */
 export function agruparAcertos(linhas: LinhaAcerto[], por: AgruparPor) {
-  const mapa = new Map<string, LinhaAcerto[]>();
-  const ord = [...linhas].sort((a, b) => (por === "praca" ? a.praca : a.representante).localeCompare(por === "praca" ? b.praca : b.representante, "pt-BR")
-    || a.acerto.localeCompare(b.acerto) || a.consultora.localeCompare(b.consultora, "pt-BR"));
-  for (const l of ord) {
-    const k = por === "praca" ? l.praca : l.representante;
-    mapa.set(k, [...(mapa.get(k) ?? []), l]);
+  if (por === "geral") {
+    const itens = [...linhas].sort((a, b) => a.acerto.localeCompare(b.acerto) || a.consultora.localeCompare(b.consultora, "pt-BR"));
+    return itens.length ? [{ titulo: "Maletas diretas (sem representante)", itens }] : [];
   }
-  return [...mapa.entries()].map(([titulo, itens]) => ({ titulo, itens }));
+  // mesma praça/representante pela chave (id), mesmo que o nome venha escrito diferente do SmallData
+  const rot = (l: LinhaAcerto) => (por === "praca" ? l.praca : l.representante);
+  const ord = [...linhas].sort((a, b) => rot(a).localeCompare(rot(b), "pt-BR")
+    || a.acerto.localeCompare(b.acerto) || a.consultora.localeCompare(b.consultora, "pt-BR"));
+  const mapa = new Map<string, { titulo: string; itens: LinhaAcerto[] }>();
+  for (const l of ord) {
+    const k = chaveAlvo(l, por);
+    const g = mapa.get(k) ?? { titulo: rot(l), itens: [] };
+    g.itens.push(l);
+    mapa.set(k, g);
+  }
+  return [...mapa.values()];
 }
 
-export function htmlRelatorioAcertos(r: RelatorioAcertos, por: AgruparPor, opcoes: { logoUrl: string; operador: string; impressoEm: Date }) {
+export function htmlRelatorioAcertos(r: RelatorioAcertos, por: AgruparPor, opcoes: { logoUrl: string; operador: string; impressoEm: Date; filtro?: string }) {
   const grupos = agruparAcertos(r.linhas, por);
   const consultoras = new Set(r.linhas.map((l) => l.party_id ?? `${l.codigo}:${l.consultora}`)).size;
   const outro = (l: LinhaAcerto) => (por === "praca" ? l.representante : l.praca);
+  const rotGrupo = por === "praca" ? "Praça" : por === "representante" ? "Representante" : "Geral";
+  const rotOutro = por === "praca" ? "Representante" : "Praça";
+  const rotPor = por === "praca" ? "praça" : por === "representante" ? "representante" : "geral (maletas diretas)";
+  const rotGrupos = por === "praca" ? "praças" : por === "representante" ? "representantes" : "grupo";
   const lista = grupos.map((g) => `
     <section class="grupo">
-      <h2>${por === "praca" ? "Praça" : "Representante"}: ${esc(g.titulo)} <span>${g.itens.length} ${g.itens.length === 1 ? "maleta" : "maletas"}</span></h2>
+      <h2>${rotGrupo}: ${esc(g.titulo)} <span>${g.itens.length} ${g.itens.length === 1 ? "maleta" : "maletas"}</span></h2>
       <table>
-        <thead><tr><th>Acerto</th><th>Cód.</th><th>Consultora</th><th>Telefone</th><th>Cidade</th><th>${por === "praca" ? "Representante" : "Praça"}</th><th>Maleta</th><th class="r">Peças</th><th class="r">Valor</th></tr></thead>
+        <thead><tr><th>Acerto</th><th>Cód.</th><th>Consultora</th><th>Telefone</th><th>Cidade</th><th>${rotOutro}</th><th>Maleta</th><th class="r">Peças</th><th class="r">Valor</th></tr></thead>
         <tbody>${g.itens.map((l) => `<tr>
           <td class="n">${dataBR(l.acerto)}</td><td class="n">${esc(l.codigo ?? "—")}</td><td><b>${esc(l.consultora)}</b><div class="sit">${esc(SIT[l.situacao] ?? l.situacao)}</div></td>
           <td class="n">${esc(telefoneBR(l.telefone))}</td><td>${esc(l.cidade ?? "—")}</td><td>${esc(outro(l))}</td>
@@ -69,7 +106,7 @@ export function htmlRelatorioAcertos(r: RelatorioAcertos, por: AgruparPor, opcoe
     return [...m.values()];
   };
   const blocos = grupos.map((g) => `
-    <h2 class="sec">${por === "praca" ? "Praça" : "Representante"}: ${esc(g.titulo)}</h2>
+    <h2 class="sec">${rotGrupo}: ${esc(g.titulo)}</h2>
     ${porConsultora(g.itens).map((ls) => {
       const l = ls[0]!;
       const maletas = ls.map((x) => `${esc(x.maleta)}${x.remessa ? ` (remessa ${esc(x.remessa)})` : ""}`).join(" + ");
@@ -115,8 +152,8 @@ export function htmlRelatorioAcertos(r: RelatorioAcertos, por: AgruparPor, opcoe
   .vazio{padding:30px;text-align:center;border:1px dashed #b9a59d;border-radius:8px}
 </style></head><body>
   <div class="topo"><img src="${esc(opcoes.logoUrl)}" alt="LARDAN"><div class="t"><h1>Acertos de ${dataBR(r.de)} a ${dataBR(r.ate)}</h1>
-    <p>Por ${por === "praca" ? "praça" : "representante"} · impresso em ${esc(quando)} por ${esc(opcoes.operador)}</p></div></div>
-  <div class="resumo"><div><b>${r.linhas.length}</b><span>maletas para acertar</span></div><div><b>${consultoras}</b><span>consultoras</span></div><div><b>${grupos.length}</b><span>${por === "praca" ? "praças" : "representantes"}</span></div></div>
+    <p>${opcoes.filtro ? `${esc(opcoes.filtro)} · ` : `Por ${rotPor} · `}impresso em ${esc(quando)} por ${esc(opcoes.operador)}</p></div></div>
+  <div class="resumo"><div><b>${r.linhas.length}</b><span>maletas para acertar</span></div><div><b>${consultoras}</b><span>consultoras</span></div><div><b>${grupos.length}</b><span>${rotGrupos}</span></div></div>
   ${r.linhas.length === 0 ? `<div class="vazio">Nenhum acerto neste período.</div>` : lista}
   <p class="rodape">Lista para a ligação antes do acerto: pergunte o que vendeu mais, que tipo de peça e qual modelo ela quer na próxima maleta. Anote nas páginas seguintes.</p>
   ${r.linhas.length === 0 ? "" : `<div class="quebra"></div>

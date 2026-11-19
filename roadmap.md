@@ -37,3 +37,8 @@
 - [x] App da consultora: "Nova venda" e "Divulgar" (antigo Compartilhar vitrine) lado a lado, dois botões quadrados no início
 - [x] App da consultora: tirar o cartão "Vendidos" do início; botão "Pedidos" da barra de baixo vira "Minhas vendas" (mesma função)
 - [x] E4. Relatório de acertos por período (praça/representante), A4 com logo e linhas de anotação
+
+## Rodada 19/11 tarde — relatório e Nova maleta
+- [x] Relatório de acertos: modo "Geral" (maletas diretas, sem representante/praça)
+- [x] Relatório de acertos: escolher um representante ou praça específico (ex.: Daniel) e listar só os dele; poder trocar de representante
+- [ ] Botão "Nova maleta" para todas as colaboradoras (inclusive as de carteira), com prova de abrir e montar

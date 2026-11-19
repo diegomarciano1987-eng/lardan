@@ -12,7 +12,8 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DateRangeField } from "@/components/premium/DateRangeField";
 import { confirmarImpressora } from "@/components/admin/ConfirmarImpressora";
-import { agruparAcertos, dataBR, htmlRelatorioAcertos, lerRelatorioAcertos, telefoneBR, type AgruparPor } from "@/lib/relatorio-acertos";
+import { agruparAcertos, dataBR, filtrarAcertos, htmlRelatorioAcertos, lerRelatorioAcertos, opcoesAlvo, telefoneBR, type AgruparPor } from "@/lib/relatorio-acertos";
+import { SmartSelect } from "@/components/premium/SmartSelect";
 import logo from "@/assets/lardan-logo-completa.png.asset.json";
 
 const iso = (d: Date) => format(d, "yyyy-MM-dd");
@@ -35,20 +36,38 @@ async function imprimirHtml(html: string) {
   void Promise.race([Promise.all(imagens), new Promise<void>((ok) => window.setTimeout(ok, 2500))]).then(() => { w.focus(); w.print(); });
 }
 
-export function RelatorioAcertos() {
+/**
+ * 0356: três modos — Por praça, Por representante e Geral (maletas diretas, sem representante).
+ * Em praça/representante dá para escolher um só (ex.: Daniel); a lista e a impressão mostram só ele.
+ * Abre já com a praça/representante escolhidos nos filtros da tela de Remessas.
+ */
+export function RelatorioAcertos({ repInicial = "", pracaInicial = "" }: { repInicial?: string; pracaInicial?: string }) {
   const { user } = useRouteContext({ from: "/_authenticated" });
   const [aberto, setAberto] = React.useState(false);
   const [periodo, setPeriodo] = React.useState<DateRange | undefined>(proximaSemana);
   const [por, setPor] = React.useState<AgruparPor>("praca");
+  const [alvo, setAlvo] = React.useState("");
+  function abrir() {
+    if (repInicial) { setPor("representante"); setAlvo(repInicial); }
+    else if (pracaInicial) { setPor("praca"); setAlvo(pracaInicial); }
+    setAberto(true);
+  }
+  function trocarModo(v: AgruparPor) { setPor(v); setAlvo(""); }
   const de = periodo?.from ? iso(periodo.from) : null;
   const ate = periodo?.to ? iso(periodo.to) : de;
   const q = useQuery({ queryKey: ["remessas", "relatorio-acertos", de, ate], enabled: aberto && !!de && !!ate, queryFn: () => lerRelatorioAcertos(de!, ate!), retry: false });
-  const grupos = q.data ? agruparAcertos(q.data.linhas, por) : [];
+  const linhas = q.data ? filtrarAcertos(q.data.linhas, por, alvo) : [];
+  const grupos = agruparAcertos(linhas, por);
+  const opcoes = q.data && por !== "geral" ? opcoesAlvo(q.data.linhas, por) : [];
+  const diretas = q.data ? q.data.linhas.filter((l) => l.direta).length : 0;
+  const rotuloAlvo = opcoes.find((o) => o.value === alvo)?.label;
+  const filtro = por === "geral" ? "Geral: maletas diretas, sem representante"
+    : rotuloAlvo ? `${por === "praca" ? "Praça" : "Representante"}: ${rotuloAlvo}` : undefined;
   const operador = (user as { user_metadata?: { full_name?: string } }).user_metadata?.full_name || user.email || "equipe Lardan";
 
   return (
     <>
-      <button type="button" className="admin-btn" onClick={() => setAberto(true)} title="Imprimir a lista de quem acerta no período, para a ligação antes do acerto.">
+      <button type="button" className="admin-btn" onClick={abrir} title="Imprimir a lista de quem acerta no período, para a ligação antes do acerto.">
         <CalendarClock aria-hidden className="size-4" /> Relatório de acertos
       </button>
       <Dialog open={aberto} onOpenChange={setAberto}>
@@ -62,19 +81,31 @@ export function RelatorioAcertos() {
               <DateRangeField value={periodo} onChange={setPeriodo} placeholder="Escolha o período" />
             </label>
             <div role="radiogroup" aria-label="Agrupar por" className="inline-flex rounded-full border border-line p-1">
-              {([["praca", "Por praça"], ["representante", "Por representante"]] as const).map(([v, r]) => (
-                <button key={v} type="button" role="radio" aria-checked={por === v} onClick={() => setPor(v)}
+              {([["praca", "Por praça"], ["representante", "Por representante"], ["geral", "Geral"]] as const).map(([v, r]) => (
+                <button key={v} type="button" role="radio" aria-checked={por === v} onClick={() => trocarModo(v)}
+                  title={v === "geral" ? "Maletas abertas por Nova maleta: sem representante" : undefined}
                   className={`h-9 rounded-full px-4 text-sm font-semibold ${por === v ? "bg-primary text-primary-foreground" : "text-ledger-muted"}`}>{r}</button>
               ))}
             </div>
           </div>
+          {por !== "geral" && (
+            <label className="grid gap-1.5 text-sm font-medium">{por === "praca" ? "Qual praça" : "Qual representante"}
+              <SmartSelect value={alvo} onChange={setAlvo} loading={q.isFetching}
+                options={[{ value: "", label: por === "praca" ? "Todas as praças" : "Todos os representantes" }, ...opcoes]}
+                placeholder={por === "praca" ? "Todas as praças" : "Todos os representantes"}
+                searchPlaceholder={por === "praca" ? "Buscar praça" : "Buscar representante"}
+                emptyLabel="Ninguém com acerto neste período" searchThreshold={6} />
+            </label>
+          )}
           {!de ? <p className="text-sm text-ledger-muted">Escolha o período do acerto.</p>
             : q.isLoading ? <p className="text-sm text-ledger-muted" role="status">Buscando os acertos…</p>
             : q.isError ? <p className="text-sm text-destructive" role="alert">{(q.error as Error).message}</p>
             : q.data && (
               <div className="space-y-3">
-                <p className="text-sm"><strong>{q.data.linhas.length}</strong> maletas para acertar de {dataBR(q.data.de)} a {dataBR(q.data.ate)} · {grupos.length} {por === "praca" ? "praças" : "representantes"}</p>
-                {q.data.linhas.length === 0 ? <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-ledger-muted">Nenhum acerto neste período.</p> : (
+                <p className="text-sm"><strong>{linhas.length}</strong> {linhas.length === 1 ? "maleta" : "maletas"} para acertar de {dataBR(q.data.de)} a {dataBR(q.data.ate)}
+                  {por === "geral" ? " · maletas diretas, sem representante" : rotuloAlvo ? ` · ${rotuloAlvo}` : ` · ${grupos.length} ${por === "praca" ? "praças" : "representantes"}`}
+                  {por !== "geral" && diretas > 0 && <span className="text-ledger-muted"> · {diretas} {diretas === 1 ? "maleta direta está" : "maletas diretas estão"} em Geral</span>}</p>
+                {linhas.length === 0 ? <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-ledger-muted">{por === "geral" ? "Nenhuma maleta direta com acerto neste período." : "Nenhum acerto neste período."}</p> : (
                   <div className="max-h-[45vh] overflow-auto rounded-xl border border-line-soft">
                     {grupos.map((g) => (
                       <div key={g.titulo}>
@@ -95,8 +126,8 @@ export function RelatorioAcertos() {
                   </div>
                 )}
                 <div className="flex justify-end">
-                  <button type="button" className="admin-btn admin-btn-primary" disabled={q.data.linhas.length === 0}
-                    onClick={() => void imprimirHtml(htmlRelatorioAcertos(q.data!, por, { logoUrl: new URL(logo.url, window.location.origin).href, operador, impressoEm: new Date() }))}>
+                  <button type="button" className="admin-btn admin-btn-primary" disabled={linhas.length === 0}
+                    onClick={() => void imprimirHtml(htmlRelatorioAcertos({ ...q.data!, linhas }, por, { logoUrl: new URL(logo.url, window.location.origin).href, operador, impressoEm: new Date(), ...(filtro ? { filtro } : {}) }))}>
                     <Printer aria-hidden className="size-4" /> Imprimir relatório
                   </button>
                 </div>

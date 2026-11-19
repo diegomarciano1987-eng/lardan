@@ -2493,6 +2493,13 @@
       "when": 1795116345160,
       "tag": "0355_relatorio_acertos_periodo",
       "breakpoints": true
+    },
+    {
+      "idx": 356,
+      "version": "7",
+      "when": 1795118436738,
+      "tag": "0356_maleta_direta_todas_colaboradoras",
+      "breakpoints": true
     }
   ]
 }

@@ -59,7 +59,7 @@ const deIso = (s: string | null) => (s ? new Date(s + "T12:00:00") : undefined);
 const PRINCIPAIS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
   { aba: "inicio", rotulo: "Início", icone: Home },
   { aba: "clientes", rotulo: "Minhas clientes", icone: Users },
-  { aba: "pedidos", rotulo: "Pedidos", icone: ShoppingBag },
+  { aba: "pedidos", rotulo: "Minhas vendas", icone: ShoppingBag },
   { aba: "maleta", rotulo: "Maleta", icone: BriefcaseBusiness },
 ];
 const EXTRAS: { aba: AbaApp; rotulo: string; icone: typeof Home }[] = [
@@ -278,32 +278,23 @@ export function Inicio({ ir }: { ir: Ir }) {
         </div>
         <span className="lg:hidden"><BotaoAjuda tela="inicio" /></span>
       </header>
-      {/* Diego 19/11: botão pequeno para compartilhar a vitrine, logo abaixo do nome (celular) */}
-      <div className="-mt-4 lg:hidden">
-        <BotaoCompartilharVitrine abrirVitrine={() => ir({ aba: "vitrine" })} nome={primeiroNome} />
-      </div>
-      <div className="space-y-3">
-        <CartaoLiga compacto />
-        {/* 0246 (Diego, 05/11): "Vendidos" logo abaixo da Liga, na cara */}
-        <button type="button" onClick={() => ir({ aba: "vendidos" })}
-          className="flex min-h-16 w-full items-center gap-4 rounded-2xl border border-border bg-card px-5 py-3 text-left shadow-[var(--shadow-app)] active:scale-[0.99]">
-          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/10 text-primary"><ShoppingBag className="size-6" aria-hidden /></span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-lg font-semibold leading-tight">Vendidos</span>
-            <span className="block text-sm text-muted-foreground">Tudo o que você vendeu e como cada cliente pagou</span>
+      {/* Diego 19/11: "Nova venda" protagonista, quadrada, ao lado de "Divulgar" (celular) */}
+      <div className="-mt-3 grid grid-cols-2 gap-3 lg:hidden" data-acoes-topo="">
+        <button type="button" onClick={() => ir({ aba: "novo" })}
+          className="flex aspect-square w-full flex-col items-start justify-between rounded-3xl bg-acao p-4 text-left text-acao-foreground shadow-[var(--shadow-app)] transition active:scale-[0.98]">
+          <span className="grid size-12 place-items-center rounded-2xl bg-acao-foreground/15"><Plus className="size-7" aria-hidden /></span>
+          <span>
+            <span className="block text-xl font-semibold leading-tight">Nova venda</span>
+            <span className="block text-sm font-medium opacity-90">Cliente e peças</span>
           </span>
-          <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
         </button>
+        <BotaoCompartilharVitrine quadrado abrirVitrine={() => ir({ aba: "vitrine" })} nome={primeiroNome} />
       </div>
+      <CartaoLiga compacto />
       <LembretesPagamento ir={ir} />
 
-      {/* Celular: 9 botões grandes estilo app de banco (Nova venda ocupa dois lugares) */}
+      {/* Celular: botões grandes estilo app de banco ("Nova venda" fica no topo, ao lado de "Divulgar") */}
       <nav aria-label="Atalhos principais" className="consultora-nove grid grid-cols-2 gap-3 lg:hidden">
-        <button type="button" onClick={() => ir({ aba: "novo" })}
-          className="col-span-2 flex min-h-24 items-center gap-4 rounded-3xl bg-acao px-6 py-5 text-left text-acao-foreground shadow-[var(--shadow-app)] active:scale-[0.99]">
-          <span className="grid size-14 shrink-0 place-items-center rounded-full bg-acao-foreground/15"><Plus className="size-7" aria-hidden /></span>
-          <span className="text-2xl font-semibold">Nova venda</span>
-        </button>
         {BOTOES_INICIO.map((b) => (
           <button key={b.r} type="button" onClick={() => ir(b.n)}
             className="consultora-nove-botao flex min-h-28 flex-col items-start justify-between gap-3 rounded-3xl border border-border bg-card p-4 text-left active:scale-[0.98]">

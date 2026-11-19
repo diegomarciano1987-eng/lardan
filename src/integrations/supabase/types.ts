@@ -11405,6 +11405,7 @@ export type Database = {
           encerrada_em: string | null
           fechada_em: string | null
           fechada_por: string | null
+          grupo_id: string | null
           id: string
           installment_id: string | null
           origem: string
@@ -11438,6 +11439,7 @@ export type Database = {
           encerrada_em?: string | null
           fechada_em?: string | null
           fechada_por?: string | null
+          grupo_id?: string | null
           id?: string
           installment_id?: string | null
           origem?: string
@@ -11471,6 +11473,7 @@ export type Database = {
           encerrada_em?: string | null
           fechada_em?: string | null
           fechada_por?: string | null
+          grupo_id?: string | null
           id?: string
           installment_id?: string | null
           origem?: string
@@ -24622,6 +24625,10 @@ export type Database = {
       pre_baixa_exigir_definir: { Args: { _ligar: boolean }; Returns: boolean }
       pre_baixa_faixa: { Args: { _vendido: number }; Returns: number }
       pre_baixa_fechar: { Args: { _cycle: string }; Returns: Json }
+      pre_baixa_grupo_abrir: { Args: { _cycle: string }; Returns: string[] }
+      pre_baixa_grupo_ciclos: { Args: { _cycle: string }; Returns: string[] }
+      pre_baixa_grupo_fechar: { Args: { _cycle: string }; Returns: Json }
+      pre_baixa_grupo_ler: { Args: { _cycle: string }; Returns: Json }
       pre_baixa_indicadores: {
         Args: { _ate?: string; _de?: string }
         Returns: Json

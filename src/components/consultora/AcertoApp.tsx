@@ -10,14 +10,29 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Check, Copy, Minus, Plus, QrCode, Search } from "lucide-react";
-import { abrirPreBaixa, baixaTravada, lerPreBaixa, ROTULO_SITUACAO, venderNaPreBaixa, type PreBaixa } from "@/lib/pre-baixa";
+import { abrirAcertoGrupo, abrirPreBaixa, baixaTravada, lerAcertoGrupo, lerPreBaixa, ROTULO_SITUACAO, venderNaPreBaixa, type Calculo, type JanelaBaixa, type MaletaGrupo, type PreBaixa, type SituacaoPreBaixa } from "@/lib/pre-baixa";
 import { preBaixaFecharPix } from "@/lib/pre-baixa.functions";
 
 const brl = (c: number) => (Number(c) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const dataBR = (s: string | null) => (s ? s.slice(0, 10).split("-").reverse().join("/") : "—");
 const msg = (e: unknown) => (e instanceof Error ? e.message : String((e as { message?: string })?.message ?? "Não deu certo. Tente de novo."));
 
-function ProximaFaixa({ d }: { d: PreBaixa }) {
+/** 0354: uma maleta ou o acerto único de duas maletas da mesma remessa (um Pix só). */
+type ItemVista = { cycle_id: string; maleta?: string; variant_id: string; sku: string | null; produto: string; variante: string | null; enviada: number; app: number; vendida: number; preco_cents: number };
+type Vista = {
+  grupo: boolean; iniciado: boolean; maletas: MaletaGrupo[]; situacao: SituacaoPreBaixa; status: string; prazo: string | null; dias_para_prazo: number | null;
+  encerrada_em: string | null; pendencia_motivo: string | null; janela?: JanelaBaixa; janela_vale?: boolean; calculo: Calculo;
+  faixas: PreBaixa["faixas"]; itens: ItemVista[];
+};
+async function lerVista(cycleId: string): Promise<Vista | null> {
+  const g = await lerAcertoGrupo(cycleId);
+  if (g.grupo) return { ...g, situacao: (g.situacao ?? "aberta") as SituacaoPreBaixa, grupo: true };
+  const p = await lerPreBaixa(cycleId);
+  if (!p) return null;
+  return { ...p, grupo: false, iniciado: true, maletas: [], itens: p.itens.map((i) => ({ ...i, cycle_id: cycleId })) };
+}
+
+function ProximaFaixa({ d }: { d: Pick<Vista, "calculo" | "faixas"> }) {
   const base = Number(d.calculo.base_faixa_cents);
   const prox = [...d.faixas].sort((a, b) => a.min_cents - b.min_cents).find((f) => Number(f.min_cents) > base);
   if (!prox) return <p className="text-sm text-muted-foreground">Você está na maior faixa de comissão.</p>;
@@ -27,17 +42,18 @@ function ProximaFaixa({ d }: { d: PreBaixa }) {
 export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; podeComecar?: boolean }) {
   const qc = useQueryClient();
   const fecharPix = useServerFn(preBaixaFecharPix);
-  const q = useQuery({ queryKey: ["consultora", "pre-baixa", cycleId], queryFn: () => lerPreBaixa(cycleId),
-    refetchInterval: (x) => ((x.state.data as PreBaixa | null | undefined)?.situacao === "aguardando_pagamento" ? 10000 : false) });
+  const q = useQuery({ queryKey: ["consultora", "pre-baixa", cycleId], queryFn: () => lerVista(cycleId),
+    refetchInterval: (x) => ((x.state.data as Vista | null | undefined)?.situacao === "aguardando_pagamento" ? 10000 : false) });
   const [aberto, setAberto] = React.useState(false);
   const [busca, setBusca] = React.useState("");
   const [confirmar, setConfirmar] = React.useState(false);
   const [pix, setPix] = React.useState<{ valor_cents: number; copia: string | null; qr: string | null; url: string | null } | null>(null);
-  const recarregar = () => void qc.invalidateQueries({ queryKey: ["consultora", "pre-baixa", cycleId] });
+  const recarregar = () => void qc.invalidateQueries({ queryKey: ["consultora", "pre-baixa"] });
+  const grupo = !!q.data?.grupo;
 
-  const abrir = useMutation({ mutationFn: () => abrirPreBaixa(cycleId), onSuccess: () => { setAberto(true); recarregar(); }, onError: (e) => toast.error(msg(e)) });
+  const abrir = useMutation({ mutationFn: async (): Promise<unknown> => (grupo ? abrirAcertoGrupo(cycleId) : abrirPreBaixa(cycleId)), onSuccess: () => { setAberto(true); recarregar(); }, onError: (e) => toast.error(msg(e)) });
   const vender = useMutation({
-    mutationFn: (v: { variant: string; qtd: number }) => venderNaPreBaixa(cycleId, v.variant, v.qtd),
+    mutationFn: (v: { cycle: string; variant: string; qtd: number }) => venderNaPreBaixa(v.cycle, v.variant, v.qtd),
     onSuccess: recarregar, onError: (e) => toast.error(msg(e)),
   });
   const fechar = useMutation({
@@ -53,12 +69,14 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
   const vendidas = d?.itens.reduce((s, i) => s + i.vendida, 0) ?? 0;
   const total = d?.itens.reduce((s, i) => s + i.enviada, 0) ?? 0;
 
-  if (!d) {
+  const titulo = d?.grupo ? `Acerto das maletas ${d.maletas.map((m) => m.maleta).join(" + ")}` : "Acerto da maleta";
+  if (!d || !d.iniciado) {
     if (!podeComecar) return null;
     return (
       <section className="rounded-3xl border border-border bg-card p-5">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">Acerto da maleta</p>
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">{titulo}</p>
         <p className="mt-1 text-lg font-semibold">Faça o acerto pelo app</p>
+        {d?.grupo && <p className="mt-1 text-[0.98rem] font-medium">Suas {d.maletas.length} maletas desta remessa têm um acerto só: um Pix só, com o total.</p>}
         <p className="mt-1 text-sm text-muted-foreground">Marque o que vendeu, veja sua comissão e pague o acerto pelo Pix com o valor exato. Sem pré-baixa fechada, a Lardan não libera o kit novo.</p>
         <button type="button" className="btn-app-principal mt-4 w-full" disabled={abrir.isPending} onClick={() => abrir.mutate()}>Começar a pré-baixa</button>
       </section>
@@ -78,8 +96,9 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
     <section className="space-y-4 rounded-3xl border border-border bg-card p-5">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">Acerto da maleta</p>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">{titulo}</p>
           <p className="mt-1 text-lg font-semibold">{ROTULO_SITUACAO[d.situacao]}</p>
+          {d.grupo && <p className="text-sm text-muted-foreground">Um acerto só para as {d.maletas.length} maletas: um Pix só, com o total.</p>}
           <p className="text-sm text-muted-foreground">Data do acerto {dataBR(d.prazo)}{d.dias_para_prazo != null && d.status === "aberta" ? (d.dias_para_prazo >= 0 ? ` · faltam ${d.dias_para_prazo} dias` : ` · atrasado ${-d.dias_para_prazo} dias`) : ""}</p>
         </div>
         <span className="rounded-full bg-muted px-3 py-1 text-sm font-medium">Vendeu {vendidas} de {total} peças</span>
@@ -113,17 +132,17 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
               </label>
               <ul className="divide-y divide-border rounded-2xl border border-border">
                 {lista.map((i) => (
-                  <li key={i.variant_id} className="flex items-center gap-3 p-3">
+                  <li key={`${i.cycle_id}:${i.variant_id}`} className="flex items-center gap-3 p-3">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[0.98rem] font-medium">{comReferencia(refs.data?.get(i.variant_id), i.produto)}{i.variante && !["U", "UN"].includes(i.variante) ? ` · ${i.variante}` : ""}</p>
-                      <p className="text-xs text-muted-foreground">{i.sku ?? ""} · {brl(i.preco_cents)} · recebeu {i.enviada}{i.app ? ` · ${i.app} paga(s) pelo app` : ""}</p>
+                      <p className="text-xs text-muted-foreground">{i.sku ?? ""} · {brl(i.preco_cents)} · recebeu {i.enviada}{i.app ? ` · ${i.app} paga(s) pelo app` : ""}{d.grupo && i.maleta ? ` · ${i.maleta}` : ""}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       <button type="button" aria-label="Uma a menos" className="grid size-10 place-items-center rounded-full border border-border disabled:opacity-40"
-                        disabled={vender.isPending || i.vendida <= i.app} onClick={() => vender.mutate({ variant: i.variant_id, qtd: i.vendida - 1 })}><Minus className="size-4" /></button>
+                        disabled={vender.isPending || i.vendida <= i.app} onClick={() => vender.mutate({ cycle: i.cycle_id, variant: i.variant_id, qtd: i.vendida - 1 })}><Minus className="size-4" /></button>
                       <span className="w-8 text-center text-lg font-semibold tabular-nums">{i.vendida}</span>
                       <button type="button" aria-label="Uma a mais" className="grid size-10 place-items-center rounded-full border border-border disabled:opacity-40"
-                        disabled={vender.isPending || i.vendida >= i.enviada} onClick={() => vender.mutate({ variant: i.variant_id, qtd: i.vendida + 1 })}><Plus className="size-4" /></button>
+                        disabled={vender.isPending || i.vendida >= i.enviada} onClick={() => vender.mutate({ cycle: i.cycle_id, variant: i.variant_id, qtd: i.vendida + 1 })}><Plus className="size-4" /></button>
                     </div>
                   </li>
                 ))}

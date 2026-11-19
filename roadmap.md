@@ -34,4 +34,6 @@
 - [ ] E3. Tela de remessas: mesma consultora com 2 maletas vira 1 linha que abre as duas
 - [x] E3. App da consultora: editar venda (peças e forma de pagamento) enquanto não paga
 - [x] Cobranças: ao entrar no menu, aba Kanban sempre selecionada (todos os usuários)
+- [ ] App da consultora: "Nova venda" e "Divulgar" (antigo Compartilhar vitrine) lado a lado, dois botões quadrados no início
+- [ ] App da consultora: tirar o cartão "Vendidos" do início; botão "Pedidos" da barra de baixo vira "Minhas vendas" (mesma função)
 - [ ] E4. Relatório de acertos por período (praça/representante), A4 com logo e linhas de anotação

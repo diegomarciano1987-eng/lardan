@@ -10,7 +10,8 @@ import { BotaoFotoPropria, useFotosProprias } from "@/components/vitrine/FotosPr
 import * as React from "react";
 import { Movimentacoes } from "@/components/admin/maletas/Movimentacoes";
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ciclosDoGrupo } from "@/lib/pre-baixa";
 import { BriefcaseBusiness, PackageCheck, ShoppingBag, Store } from "lucide-react";
 import { toast } from "sonner";
 import { Estudio } from "@/components/vitrine/Estudio";
@@ -423,6 +424,103 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
   );
 }
 
+/* ---------------- 0354: duas maletas da mesma remessa e do mesmo acerto, juntas para a consultora ---------------- */
+function MaletaUnida({ cycleIds }: { cycleIds: string[] }) {
+  const { user } = useRouteContext({ from: "/_authenticated" });
+  const qc = useQueryClient();
+  const [buscaPeca, setBuscaPeca] = React.useState("");
+  const [catPeca, setCatPeca] = React.useState("");
+  const [soDisp, setSoDisp] = React.useState(false);
+  const proprias = useFotosProprias(user.id);
+  const opcoes = useQuery({ queryKey: ["consultora", "pecas", "opcoes"], queryFn: () => buscarPecas() });
+  const fichas = useQueries({ queries: cycleIds.map((id) => ({ queryKey: ["consultora", "maleta", id, user.id], queryFn: () => conferenciaMaleta(id) })) });
+  const publicar = useMutation({
+    mutationFn: (v: { cycle: string; variant: string; publicar: boolean }) => publicarPeca(v.cycle, v.variant, v.publicar),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["consultora"] }),
+    onError: (e) => toast.error(traduzir(e)),
+  });
+  const prontas = fichas.every((f) => f.data);
+  const saldos = prontas ? fichas.flatMap((f, i) => (f.data!.saldos ?? []).map((b) => ({ ...b, cycle_id: cycleIds[i]!, maleta: f.data!.maleta.codigo }))) : [];
+  const composicao = prontas ? fichas.flatMap((f) => f.data!.composicao ?? []) : [];
+  const refs = useReferencias(saldos.map((b) => b.variant_id));
+  const refDe = (v: string) => composicao.find((c) => c.variant_id === v)?.referencia || refs.data?.get(v) || null;
+  const catDe = React.useMemo(() => Object.fromEntries((opcoes.data ?? []).filter((p) => cycleIds.includes(p.cycle_id) && p.categoria).map((p) => [p.variant_id, p.categoria as string])), [opcoes.data, cycleIds]);
+  if (fichas.some((f) => f.isError)) return <Cartao>{traduzir(fichas.find((f) => f.isError)!.error)}</Cartao>;
+  if (!prontas) return <Cartao>Carregando suas maletas…</Cartao>;
+  const ds = fichas.map((f) => f.data!);
+  const pecas = ds.reduce((t, d) => t + Number(d.ciclo.quantity_total ?? 0), 0);
+  const valor = ds.reduce((t, d) => t + Number(d.ciclo.reference_total_cents ?? 0), 0);
+  const termo = semAcento(buscaPeca.trim());
+  const lista = saldos.filter((b) => (!catPeca || catDe[b.variant_id] === catPeca) && (!soDisp || b.disponivel > 0)
+    && (!termo || semAcento(`${refDe(b.variant_id) ?? ""} ${b.produto} ${b.variante ?? ""}`).includes(termo)));
+  const cats = Array.from(new Set(saldos.map((b) => catDe[b.variant_id]).filter((c): c is string => !!c)));
+  return (
+    <div className="space-y-4" data-maleta-unida="">
+      <Cartao>
+        <p className="text-xs uppercase tracking-widest text-ledger-muted">Maletas {ds.map((d) => d.maleta.codigo).join(" + ")}</p>
+        {ds[0]?.remessa_numero != null && <p className="mt-2 text-base font-semibold">Remessa {String(ds[0].remessa_numero).padStart(5, "0")}</p>}
+        <p className="mt-1 text-2xl font-semibold">Estão com você</p>
+        <p className="mt-1 text-sm text-ledger-muted">{pecas} peças · valor de venda {brl(valor)}</p>
+        <p className="mt-3 text-[0.95rem]">Suas {ds.length} maletas desta remessa aparecem juntas aqui: uma lista de peças, um acerto e um Pix só.</p>
+        <p className="mt-1 text-xs text-ledger-muted">Valor de venda das peças enviadas para você. Não é o valor do acerto.</p>
+      </Cartao>
+
+      <AcertoApp cycleId={cycleIds[0]!} />
+
+      {saldos.length > 0 && (
+        <Cartao>
+          <p className="font-semibold">Minhas peças <span className="font-normal text-ledger-muted">· {lista.length} de {saldos.length}</span></p>
+          <input type="search" aria-label="Buscar peça na maleta" placeholder="Buscar peça pela referência ou nome" value={buscaPeca} onChange={(e) => setBuscaPeca(e.target.value)} className="admin-input mt-3 min-h-12 text-base" />
+          <div role="radiogroup" aria-label="Categoria" className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">
+            {["", ...cats].map((c) => (
+              <button key={c || "todas"} type="button" role="radio" aria-checked={catPeca === c} onClick={() => setCatPeca(c)}
+                className={`flex min-h-12 shrink-0 items-center gap-2 rounded-full border px-4 text-[0.98rem] font-medium ${catPeca === c ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}>
+                <span aria-hidden>{iconeCategoria(c)}</span>{c || "Todas"}
+              </button>
+            ))}
+            <button type="button" role="switch" aria-checked={soDisp} onClick={() => setSoDisp(!soDisp)}
+              className={`min-h-12 shrink-0 rounded-full border px-4 text-[0.98rem] font-medium ${soDisp ? "border-primary bg-primary/10" : "border-border bg-card"}`}>{soDisp ? "✓ " : ""}Só disponíveis</button>
+          </div>
+          {lista.length === 0 && <p className="mt-4 text-base text-ledger-muted">Nenhuma peça com esse filtro.</p>}
+          <div className="mt-4 space-y-3">
+            {lista.map((b) => (
+              <div key={`${b.cycle_id}:${b.variant_id}`} className="flex items-center gap-3">
+                {(() => {
+                  const mini = proprias.data?.mapa[b.variant_id]
+                    ? <img src={proprias.data.mapa[b.variant_id]} alt="" className="size-14 shrink-0 rounded-xl object-cover" loading="lazy" />
+                    : <FotoPeca mediaId={b.media_id} variantId={b.variant_id} className="size-14 rounded-xl" />;
+                  return proprias.data?.party
+                    ? <BotaoFotoPropria userId={user.id} party={proprias.data.party} variantId={b.variant_id} produto={b.produto}
+                        temPropria={proprias.data.tem.has(b.variant_id)} temOficial={!!b.media_id}>{mini}</BotaoFotoPropria>
+                    : mini;
+                })()}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{comReferencia(refDe(b.variant_id), b.produto)}</p>
+                  <p className="text-xs text-ledger-muted">
+                    disponível {b.disponivel} · reservadas {b.reservado}{b.divergente > 0 ? ` · divergentes ${b.divergente}` : ""}
+                  </p>
+                </div>
+                <button type="button" className="admin-btn" onClick={() => publicar.mutate({ cycle: b.cycle_id, variant: b.variant_id, publicar: !b.publicado })}>
+                  {b.publicado ? "Na vitrine" : "Oculta"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </Cartao>
+      )}
+
+      {ds.map((d, i) => (
+        <Movimentacoes key={cycleIds[i]} cycleId={cycleIds[i]!}
+          nomes={Object.fromEntries([
+            ...d.composicao.map((c) => [c.variant_id, `${comReferencia(c.referencia, c.produto)}${c.variante ? ` · ${c.variante}` : ""}`] as const),
+            ...d.saldos.map((b) => [b.variant_id, `${comReferencia(refDe(b.variant_id), b.produto)}${b.variante ? ` · ${b.variante}` : ""}`] as const),
+          ])}
+          podeGerir={false} />
+      ))}
+    </div>
+  );
+}
+
 /* ---------------- pedidos ---------------- */
 function Pedidos() {
   const qc = useQueryClient();
@@ -606,20 +704,42 @@ function AreaConsultoraLiberada() {
     const prioridade = ["operacao", "recebida", "transito", "expedida", "acerto"];
     return prioridade.indexOf(a.situacao) - prioridade.indexOf(b.situacao);
   });
+  // 0354: duas maletas da mesma remessa e do mesmo acerto aparecem juntas (uma entrada, um acerto, um Pix)
+  const idsAbertas = abertas.map((m) => m.cycle_id);
+  const grupos = useQuery({
+    queryKey: ["consultora", "grupos-maleta", idsAbertas.join(",")],
+    enabled: abertas.length > 1,
+    staleTime: 60_000,
+    queryFn: () => Promise.all(idsAbertas.map((id) => ciclosDoGrupo(id).catch(() => [id]))),
+  });
+  const entradas = React.useMemo(() => {
+    const vistos = new Set<string>();
+    const res: { ids: string[]; maletas: typeof abertas }[] = [];
+    abertas.forEach((m, i) => {
+      if (vistos.has(m.cycle_id)) return;
+      const ids = (grupos.data?.[i] ?? [m.cycle_id]).filter((id) => idsAbertas.includes(id));
+      const juntos = ids.includes(m.cycle_id) ? ids : [m.cycle_id];
+      juntos.forEach((id) => vistos.add(id));
+      res.push({ ids: juntos, maletas: juntos.map((id) => abertas.find((x) => x.cycle_id === id)!).filter(Boolean) });
+    });
+    return res;
+  }, [abertas, grupos.data, idsAbertas]);
   const valida = escolhida && abertas.some((m) => m.cycle_id === escolhida) ? escolhida : null;
   const atual = valida ?? abertas[0]?.cycle_id ?? null;
+  const entradaAtual = entradas.find((e) => atual && e.ids.includes(atual));
   const aba = navImediata.aba ?? "inicio";
   const ajuda = aba === "indicacoes" || aba === "biblioteca" || aba === "familia" ? "inicio" : aba === "historico" || aba === "financeiro" || aba === "vendas" || aba === "vendidos" ? "maleta" : aba === "novo" ? "pedidos" : aba === "jornada" ? "clientes" : aba === "liga" ? "inicio" : aba;
 
-  const seletorMaleta = abertas.length > 1 && (
+  const seletorMaleta = (soMaleta: boolean) => (soMaleta ? entradas.length > 1 : abertas.length > 1) && (
     <div role="radiogroup" aria-label="Maleta em uso" className="mb-5 grid gap-2">
       <span className="text-[1.05rem] font-semibold">Maleta em uso</span>
-      {abertas.map((m) => {
-        const sel = m.cycle_id === atual;
+      {(soMaleta ? entradas : abertas.map((m) => ({ ids: [m.cycle_id], maletas: [m] }))).map((e) => {
+        const sel = !!atual && e.ids.includes(atual);
+        const m = e.maletas[0]!;
         return (
-          <button key={m.cycle_id} type="button" role="radio" aria-checked={sel} onClick={() => setEscolhida(m.cycle_id)}
+          <button key={e.ids.join("+")} type="button" role="radio" aria-checked={sel} onClick={() => setEscolhida(e.ids[0]!)}
             className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-base ${sel ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
-            <span>{m.codigo} · ciclo {m.ciclo}</span>
+            <span>{e.ids.length > 1 ? `${e.maletas.map((x) => x.codigo).join(" + ")} · ${e.ids.length} maletas juntas` : `${m.codigo} · ciclo ${m.ciclo}`}</span>
             <span className="text-[0.95rem]">{sel ? "✓ Em uso" : (SITUACAO_MALETA[m.situacao]?.rotulo ?? m.situacao)}</span>
           </button>
         );
@@ -640,9 +760,9 @@ function AreaConsultoraLiberada() {
       {aba === "clientes" && (navImediata.modo ? <FormCliente id={navImediata.modo === "editar" ? navImediata.id : undefined} ir={ir} />
         : navImediata.id ? <FichaCliente id={navImediata.id} nav={navImediata} ir={ir} /> : <Clientes nav={navImediata} ir={ir} />)}
       {aba === "novo" && <NovoPedido clienteInicial={navImediata.id} ir={ir} />}
-      {aba === "pedidos" && (<><Topo titulo="Pedidos" ajuda="pedidos"><button type="button" className="btn-app-principal hidden sm:inline-flex" onClick={() => ir({ aba: "novo" })}>Nova venda</button></Topo><PedidosConsultora /></>)}
-      {aba === "maleta" && (<><Topo titulo="Minha maleta" ajuda="maleta" />{seletorMaleta}<div className="max-w-3xl"><MinhaMaleta cycleId={atual} /></div></>)}
-      {aba === "historico" && (<><Topo titulo="Entregas da maleta" ajuda="maleta" voltar={() => ir({ aba: "mais" })} />{seletorMaleta}<div className="max-w-3xl"><Historico cycleId={atual} /></div></>)}
+      {aba === "pedidos" && (<><Topo titulo="Minhas vendas" ajuda="pedidos"><button type="button" className="btn-app-principal hidden sm:inline-flex" onClick={() => ir({ aba: "novo" })}>Nova venda</button></Topo><PedidosConsultora /></>)}
+      {aba === "maleta" && (<><Topo titulo="Minha maleta" ajuda="maleta" />{seletorMaleta(true)}<div className="max-w-3xl">{entradaAtual && entradaAtual.ids.length > 1 ? <MaletaUnida cycleIds={entradaAtual.ids} /> : <MinhaMaleta cycleId={atual} />}</div></>)}
+      {aba === "historico" && (<><Topo titulo="Entregas da maleta" ajuda="maleta" voltar={() => ir({ aba: "mais" })} />{seletorMaleta(false)}<div className="max-w-3xl"><Historico cycleId={atual} /></div></>)}
       {aba === "vitrine" && (<><Topo titulo="Minha vitrine" ajuda="vitrine" voltar={() => ir({ aba: "mais" })} /><Estudio /></>)}
       {aba === "indicacoes" && (<><Topo titulo="Minhas indicadas" ajuda="inicio" voltar={() => ir({ aba: "mais" })} /><Indicacoes /></>)}
       {aba === "financeiro" && (<><Topo titulo="Meu financeiro" ajuda="maleta" voltar={() => ir({ aba: "mais" })} /><MeuFinanceiro verMaleta={() => ir({ aba: "maleta" })} /></>)}
@@ -660,7 +780,7 @@ function AreaConsultoraLiberada() {
 
 const PASSOS = [
   { t: "Bem-vinda à sua área", d: "Aqui você cuida das suas clientes, dos seus pedidos, da sua maleta, do seu acerto e da sua vitrine, tudo pelo celular." },
-  { t: "Menu embaixo da tela", d: "Início, Minhas clientes, Pedidos, Maleta e Mais. Em “Mais” ficam Meu financeiro, a sua vitrine, as entregas e as suas indicadas." },
+  { t: "Menu embaixo da tela", d: "Início, Minhas clientes, Minhas vendas, Maleta e Mais. Em “Mais” ficam Meu financeiro, a sua vitrine, as entregas e as suas indicadas." },
   { t: "Nova venda", d: "No Início, toque em “Nova venda”: escolha a cliente, as peças e confira antes de confirmar. Cliente nova? Toque em “Nova cliente”." },
   { t: "Acerto pelo app", d: "Antes da data do acerto, abra Maleta, marque o que vendeu, feche a pré-baixa e pague o Pix com o valor exato." },
   { t: "Dúvidas?", d: "Toque em “Ajuda” no alto da tela. Ao fechar, você volta para onde estava. Este passeio pode ser revisto na Central de Ajuda." },

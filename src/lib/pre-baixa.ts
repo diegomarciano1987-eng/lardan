@@ -66,3 +66,18 @@ export const ROTULO_SITUACAO: Record<SituacaoPreBaixa, string> = {
   pendencia: "Acerto com pendência",
   cancelada: "Cancelada",
 };
+
+/* ---------------- 0354: acerto único (duas maletas da mesma remessa e do mesmo acerto) ---------------- */
+export interface ItemGrupo { cycle_id: string; maleta: string; variant_id: string; sku: string | null; barcode: string | null; produto: string; variante: string | null;
+  enviada: number; app: number; vendida: number; preco_cents: number }
+export interface MaletaGrupo { cycle_id: string; maleta: string; pecas: number; valor_cents: number }
+export type AcertoGrupo = { grupo: false } | {
+  grupo: true; iniciado: boolean; situacao: SituacaoPreBaixa | null; status: "aberta" | "fechada"; prazo: string | null; dias_para_prazo: number | null;
+  fechada_em: string | null; encerrada_em: string | null; installment_id: string | null; pendencia_motivo: string | null;
+  janela: JanelaBaixa; janela_vale: boolean; calculo: Calculo; faixas: { min_cents: number; percentual: number }[];
+  maletas: MaletaGrupo[]; itens: ItemGrupo[];
+};
+/** Maletas que andam juntas no app (a própria, se estiver sozinha). */
+export const ciclosDoGrupo = (cycle: string) => rpc<string[]>("pre_baixa_grupo_ciclos", { _cycle: cycle });
+export const lerAcertoGrupo = (cycle: string) => rpc<AcertoGrupo>("pre_baixa_grupo_ler", { _cycle: cycle });
+export const abrirAcertoGrupo = (cycle: string) => rpc<string[]>("pre_baixa_grupo_abrir", { _cycle: cycle });

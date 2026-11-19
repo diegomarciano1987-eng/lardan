@@ -2479,6 +2479,13 @@
       "when": 1795114813174,
       "tag": "0353_0353_consultora_editar_venda",
       "breakpoints": true
+    },
+    {
+      "idx": 354,
+      "version": "7",
+      "when": 1795115805370,
+      "tag": "0354_acerto_unico_maletas_mesma_remessa",
+      "breakpoints": true
     }
   ]
 }

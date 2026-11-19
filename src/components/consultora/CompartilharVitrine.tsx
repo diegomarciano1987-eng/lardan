@@ -19,7 +19,7 @@ async function minhaVitrine(): Promise<{ slug: string | null; no_ar: boolean }> 
   return { slug: data?.slug ?? null, no_ar: Boolean(data?.is_public && data?.slug) };
 }
 
-export function BotaoCompartilharVitrine({ abrirVitrine, nome }: { abrirVitrine: () => void; nome?: string | null | undefined }) {
+export function BotaoCompartilharVitrine({ abrirVitrine, nome, quadrado = false }: { abrirVitrine: () => void; nome?: string | null | undefined; quadrado?: boolean }) {
   const q = useQuery({ queryKey: ["consultora", "vitrine-link"], queryFn: minhaVitrine, staleTime: 5 * 60_000, retry: false });
   const [ocupado, setOcupado] = React.useState(false);
 
@@ -43,6 +43,18 @@ export function BotaoCompartilharVitrine({ abrirVitrine, nome }: { abrirVitrine:
       setOcupado(false);
     }
   };
+
+  // Diego 19/11: no início fica quadrado, ao lado de "Nova venda", com o nome "Divulgar"
+  if (quadrado) return (
+    <button type="button" onClick={() => void compartilhar()} disabled={q.isLoading || ocupado} aria-label="Divulgar minha vitrine"
+      className="flex aspect-square w-full flex-col items-start justify-between rounded-3xl border border-primary/25 bg-primary/10 p-4 text-left text-primary shadow-[var(--shadow-app)] transition active:scale-[0.98] disabled:opacity-60">
+      <span className="grid size-12 place-items-center rounded-2xl bg-primary/15"><Share2 className="size-6" aria-hidden /></span>
+      <span>
+        <span className="block text-xl font-semibold leading-tight">Divulgar</span>
+        <span className="block text-sm font-medium opacity-80">Mande sua vitrine</span>
+      </span>
+    </button>
+  );
 
   return (
     <button

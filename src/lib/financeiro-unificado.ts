@@ -38,6 +38,8 @@ export interface RespostaPR {
   rows: LinhaPR[];
   totais: {
     linhas: number;
+    /** 0351: cobranças das consultoras para as clientes delas, ainda não pagas (fora do total) */
+    pedidos_consultora_aguardando?: { qtd: number; valor_cents: number };
     receber: Bloco;
     pagar: Bloco;
     asaas_a_vincular: {

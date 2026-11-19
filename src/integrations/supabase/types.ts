@@ -22959,6 +22959,10 @@ export type Database = {
         Args: { _ativo: boolean; _id: string }
         Returns: undefined
       }
+      fin_pedido_consultora_aguardando: {
+        Args: { _title: string }
+        Returns: boolean
+      }
       fin_periodo_fechado: {
         Args: { _data: string; _ent: string }
         Returns: boolean

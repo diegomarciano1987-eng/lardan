@@ -2458,6 +2458,13 @@
       "when": 1795113283055,
       "tag": "0350_0350_acrescimo_entra_direto",
       "breakpoints": true
+    },
+    {
+      "idx": 351,
+      "version": "7",
+      "when": 1795114033236,
+      "tag": "0351_0351_receber_sem_pedidos_consultora_pendentes",
+      "breakpoints": true
     }
   ]
 }

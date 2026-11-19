@@ -334,6 +334,12 @@ function ListaUnificada({
               </button>
             ) : null}
           </div>
+          {filtros.natureza !== "pagar" && (t.pedidos_consultora_aguardando?.qtd ?? 0) > 0 ? (
+            <p className="mx-5 mt-3 rounded-[10px] border border-line-soft bg-surface-muted px-4 py-2 text-sm text-ledger-text">
+              <strong className="tabular-nums">{formatInt(t.pedidos_consultora_aguardando!.qtd)}</strong> pedido(s) de consultoras aguardando a cliente pagar
+              ({formatBRLFromCents(t.pedidos_consultora_aguardando!.valor_cents)}) ficam fora desta lista e do total. Entram aqui sozinhos quando a cliente pagar.
+            </p>
+          ) : null}
           <p className="px-5 pt-2 text-xs text-ledger-muted">
             {d.criterio} Período {dataBR(d.periodo.de)} a {dataBR(d.periodo.ate)} · saldo na data {dataBR(d.periodo.corte)}.
           </p>

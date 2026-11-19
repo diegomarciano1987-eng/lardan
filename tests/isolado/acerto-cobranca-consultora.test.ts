@@ -140,6 +140,20 @@ describe("M1–M3 — cobrança da consultora e o acerto", () => {
     expect((await rpc<{ cobrancas: unknown[] }>(bia, "consultora_meu_financeiro", {})).dados.cobrancas).toEqual([]);
   });
 
+  // 0351 (Diego, 19/11/2026): cobrança da consultora para a cliente dela só entra no Contas a Receber da Lardan depois de paga.
+  const naListaReceber = async (parcela: string) => {
+    const t = await um<{ id: string; numero: string }>(`select t.id, t.numero from public.financial_titles t join public.financial_installments i on i.title_id=t.id where i.id=$1`, [parcela]);
+    const r = await ler<{ l: { rows: { id: string }[] } }>(master, `select public.fin_titles_list('receivable', $1) l`, [t.numero]);
+    return r.linhas[0]!.l.rows.some((x) => x.id === t.id);
+  };
+
+  test("0351: cobrança da consultora ainda não paga fica fora do Contas a Receber e aparece só no aviso", async () => {
+    expect(await naListaReceber(parcelaTarde)).toBe(false);
+    const pr = await ler<{ r: { totais: { pedidos_consultora_aguardando: { qtd: number; valor_cents: number } } } }>(master,
+      `select public.fin_pagar_receber('receber', current_date - 30, current_date + 400) r`);
+    expect(Number(pr.linhas[0]!.r.totais.pedidos_consultora_aguardando.qtd)).toBeGreaterThanOrEqual(2);
+  });
+
   test("cliente paga DEPOIS da conferência: abate o acerto em aberto, resto a devolver; acerto conferido intocado", async () => {
     expect((await rpc(ana, "pre_baixa_fechar", { _cycle: cicloAna })).erro).toBeNull();
     // vendeu 1 A + 1 B = 150,00 → 20% = 30,00 → acerto de 120,00 (título em aberto)
@@ -161,6 +175,10 @@ describe("M1–M3 — cobrança da consultora e o acerto", () => {
     const f = await rpc<{ ajustes: { tipo: string; valor_cents: number }[] }>(ana, "consultora_meu_financeiro", {});
     expect(f.dados.ajustes).toEqual([expect.objectContaining({ tipo: "credito", valor_cents: 10000 })]);
     expect((await ler(bia, `select * from public.consultora_acerto_ajustes`)).linhas).toEqual([]);
+  });
+
+  test("0351: depois que a cliente paga, a cobrança aparece no Contas a Receber", async () => {
+    expect(await naListaReceber(parcelaTarde)).toBe(true);
   });
 
   test("rodar de novo não duplica (idempotente) e o reprocessamento mostra nada a fazer", async () => {

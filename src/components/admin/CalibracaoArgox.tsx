@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Minus, Plus, Printer, RotateCcw, Save, Ruler } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { LadosEtiqueta, useLadosEtiqueta } from "@/components/admin/LadosEtiqueta";
 import {
-  AMOSTRA_CALIBRACAO, CONFIG_ETIQUETA, ETIQUETA, LIMITES_CALIBRACAO, completarConfig, documentoTeste,
+  AMOSTRA_ANEL, AMOSTRA_CALIBRACAO, CONFIG_ETIQUETA, ETIQUETA, LIMITES_CALIBRACAO, completarConfig, documentoTeste,
   lerCalibracao, textoEtiqueta, validarCalibracao, type EtiquetaConfig,
 } from "@/lib/etiquetas";
 import { EstacaoArgoxPainel } from "@/components/admin/EstacaoArgox";
@@ -21,6 +22,7 @@ const CAMPOS: { key: Campo; titulo: string; dica: string; passo: number; un: str
   { key: "alturaBarras", titulo: "Altura das barras", dica: "Leitor não lê? aumente um pouco.", passo: 0.2, un: "mm" },
   { key: "fonteNome", titulo: "Letra do nome", dica: "Nome da peça na linha de cima.", passo: 0.5, un: "pt" },
   { key: "fonteReferencia", titulo: "Letra da referência", dica: "Linha REFERÊNCIA-PREÇO.", passo: 0.5, un: "pt" },
+  { key: "segundoLado", titulo: "Distância do 2º lado", dica: "Só no modo 2 lados: do início do 1º lado até o início do 2º.", passo: 0.5, un: "mm" },
 ];
 const arred = (n: number) => Math.round(n * 10) / 10;
 
@@ -29,16 +31,19 @@ export function CalibracaoArgox() {
   const [cfg, setCfg] = useState<Required<EtiquetaConfig>>(completarConfig(null));
   const [salvo, setSalvo] = useState<Required<EtiquetaConfig>>(completarConfig(null));
   useEffect(() => { const c = lerCalibracao(); setCfg(c); setSalvo(c); void lerCalibracaoGlobal().then((g) => { setCfg(g); setSalvo(g); }); }, []);
-  const erro = validarCalibracao(cfg);
+  const [duplicar] = useLadosEtiqueta();
+  const [anel, setAnel] = useState(false);
+  const erro = validarCalibracao(cfg, { duplicar });
   const alterado = JSON.stringify(cfg) !== JSON.stringify(salvo);
-  const previa = useMemo(() => { try { return documentoTeste("amostra", cfg); } catch { return null; } }, [cfg]);
+  const previa = useMemo(() => { try { return documentoTeste("amostra", cfg, 1, { duplicar, anel }); } catch { return null; } }, [cfg, duplicar, anel]);
+  const amostra = anel ? AMOSTRA_ANEL : AMOSTRA_CALIBRACAO;
   const ajustar = (k: Campo, v: number) => {
     const [min, max] = LIMITES_CALIBRACAO[k];
     setCfg((c) => ({ ...c, [k]: arred(Math.min(max, Math.max(min, v))) }));
   };
   const testar = async (modo: "amostra" | "regua") => {
     try {
-      if (modo === "amostra") { const n = await imprimirDireto(comandosTeste(cfg, lerEstacao().linguagem, 3)); toast.success(`3 amostras enviadas direto para ${n}.`); }
+      if (modo === "amostra") { const n = await imprimirDireto(comandosTeste(cfg, lerEstacao().linguagem, 3, { duplicar, anel })); toast.success(`3 amostras${duplicar ? " em 2 lados" : ""} enviadas direto para ${n}.`); }
       else imprimirPdf(await pdfTeste("regua", cfg, 1));
     }
     catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir o teste."); }
@@ -62,15 +67,27 @@ export function CalibracaoArgox() {
     </section>
 
     <section className="rounded-xl border border-line p-4">
-      <p className="mb-3 text-sm font-semibold">Prévia (ampliada 4×, fita de {ETIQUETA.suporte} × {arred(altura)} mm)</p>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold">Prévia (ampliada 4×, fita de {ETIQUETA.suporte} × {arred(altura)} mm)</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <LadosEtiqueta />
+          <div role="radiogroup" aria-label="Amostra" className="inline-flex items-center rounded-full border border-line bg-surface p-0.5 text-xs font-semibold">
+            {([[false, "Amostra brinco"], [true, "Amostra anel (aro)"]] as const).map(([v, rot]) => (
+              <button key={rot} type="button" role="radio" aria-checked={anel === v} onClick={() => setAnel(v)}
+                className={`min-h-8 rounded-full px-3 ${anel === v ? "bg-bronze text-primary-foreground" : "text-ledger-muted"}`}>{rot}</button>
+            ))}
+          </div>
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <div className="relative rounded-md bg-white shadow-inner" style={{ width: ETIQUETA.suporte * esc, height: altura * esc }}>
           {previa && <iframe title="Prévia da etiqueta" srcDoc={previa} className="pointer-events-none absolute left-0 top-0 origin-top-left border-0"
             style={{ width: `${ETIQUETA.suporte}mm`, height: `${altura}mm`, transform: `scale(${esc / (96 / 25.4)})` }} />}
           <div aria-hidden className="pointer-events-none absolute border border-dashed border-destructive/60" style={{ left: cfg.margemEsquerda * esc, top: cfg.margemSuperior * esc, width: cfg.areaLargura * esc, height: ETIQUETA.altura * esc }} />
+          {duplicar && <div aria-hidden className="pointer-events-none absolute border border-dashed border-destructive/60" style={{ left: (cfg.margemEsquerda + cfg.segundoLado) * esc, top: cfg.margemSuperior * esc, width: cfg.areaLargura * esc, height: ETIQUETA.altura * esc }} />}
         </div>
       </div>
-      <p className="mt-2 text-xs text-ledger-muted">Amostra fixa: {AMOSTRA_CALIBRACAO.nome} · {textoEtiqueta(AMOSTRA_CALIBRACAO.referencia, AMOSTRA_CALIBRACAO.precoCents)}. Tracejado = área impressa.</p>
+      <p className="mt-2 text-xs text-ledger-muted">Amostra fixa: {amostra.nome}{amostra.aro ? ` · aro ${amostra.aro} no canto direito` : ""} · {textoEtiqueta(amostra.referencia, amostra.precoCents)}. Tracejado = área impressa{duplicar ? " (os dois lados)" : ""}. O modo 2 lados vale para todas as etiquetas de peça deste computador.</p>
     </section>
 
     <section className="grid gap-3 sm:grid-cols-2">

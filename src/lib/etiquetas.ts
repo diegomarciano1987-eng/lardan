@@ -7,7 +7,27 @@ export interface EtiquetaItem {
   referencia: string | null;
   quantidade: number;
   precoCents?: number | null;
+  /** 0340: aro do anel (só o número: 6, 10, 16), impresso no canto direito da linha do nome. */
+  aro?: string | null;
 }
+
+/** Aro do anel vindo do cadastro: tamanho numérico (04 → 4) ou rótulo "Aro 16". Outras peças: null. */
+export function aroEtiqueta(tamanho?: string | null, rotulo?: string | null): string | null {
+  const t = (tamanho ?? "").trim();
+  const m = /^\d{1,2}$/.test(t) ? t : /^aro\s*(\d{1,2})$/i.exec((rotulo ?? "").trim())?.[1];
+  if (!m) return null;
+  const n = Number(m);
+  return n >= 1 && n <= 99 ? String(n) : null;
+}
+
+/** Nome cortado para caber na linha, sempre deixando o espaço do aro (+1 de respiro) no fim. */
+export function nomeComEspacoAro(nome: string, maxCar: number, aro?: string | null): string {
+  const reserva = aro ? aro.length + 1 : 0;
+  return nome.slice(0, Math.max(1, maxCar - reserva)).trimEnd();
+}
+
+/** 0340: "2 lados" = a mesma etiqueta repetida ao lado, deslocada pela distância do 2º lado. */
+export interface OpcoesEtiqueta { duplicar?: boolean }
 
 /** Linha inferior SISPR: referência à esquerda do traço, preço de venda em centavos com 6 dígitos à direita. */
 export function textoEtiqueta(referencia: string | null, precoCents?: number | null): string {
@@ -26,15 +46,17 @@ export interface EtiquetaConfig {
   /** Tamanho da letra do nome e da referência (pt). */
   fonteNome?: number;
   fonteReferencia?: number;
+  /** 0340: distância (mm) do início do 1º lado ao início do 2º lado, na impressão em 2 lados. */
+  segundoLado?: number;
 }
 export const ETIQUETA = { largura: 95, suporte: 100, areaImpressao: 30, altura: 12, pistas: 1, intervalo: 3, dpi: 203 } as const;
 export const CONFIG_ETIQUETA: EtiquetaConfig = {
   entreLinhas: 3, margemEsquerda: 0, margemSuperior: 0,
-  areaLargura: 30, alturaBarras: 4.6, fonteNome: 5, fonteReferencia: 8.5,
+  areaLargura: 30, alturaBarras: 4.6, fonteNome: 5, fonteReferencia: 8.5, segundoLado: 30,
 };
 export const LIMITES_CALIBRACAO = {
   entreLinhas: [0, 10], margemEsquerda: [0, 5], margemSuperior: [0, 10],
-  areaLargura: [20, 60], alturaBarras: [2.5, 8], fonteNome: [3, 9], fonteReferencia: [5, 12],
+  areaLargura: [20, 60], alturaBarras: [2.5, 8], fonteNome: [3, 9], fonteReferencia: [5, 12], segundoLado: [20, 65],
 } as const;
 export const CALIBRACAO_KEY = "lardan.etiquetas.argox.alca-direita.v4";
 export function completarConfig(c: Partial<EtiquetaConfig> | null | undefined): Required<EtiquetaConfig> {
@@ -47,7 +69,7 @@ export function completarConfig(c: Partial<EtiquetaConfig> | null | undefined): 
   return out;
 }
 /** Retorna mensagem de erro ou null. */
-export function validarCalibracao(c: EtiquetaConfig): string | null {
+export function validarCalibracao(c: EtiquetaConfig, op: OpcoesEtiqueta = {}): string | null {
   const f = completarConfig(c);
   for (const [k, [min, max]] of Object.entries(LIMITES_CALIBRACAO) as [keyof EtiquetaConfig, readonly [number, number]][]) {
     const v = c[k] ?? f[k];
@@ -56,6 +78,10 @@ export function validarCalibracao(c: EtiquetaConfig): string | null {
   if (f.margemSuperior > f.entreLinhas) return "Margem superior não pode passar do espaço entre etiquetas.";
   if (f.margemEsquerda + ETIQUETA.largura > ETIQUETA.suporte) return "A calibração excede o suporte de 100 mm.";
   if (f.alturaBarras > ETIQUETA.altura - 3) return "Barras altas demais para a etiqueta de 12 mm.";
+  if (op.duplicar) {
+    if (f.segundoLado < f.areaLargura) return "No modo 2 lados, a distância do 2º lado precisa ser maior ou igual à largura da área impressa (senão um lado encosta no outro).";
+    if (f.margemEsquerda + f.segundoLado + f.areaLargura > ETIQUETA.suporte) return "No modo 2 lados, o 2º lado passa do fim da etiqueta de 100 mm. Diminua a distância do 2º lado.";
+  }
   return null;
 }
 
@@ -111,33 +137,37 @@ function folha(body: string, cfg: Required<EtiquetaConfig>, extra = "") {
   section{position:relative;width:${width}mm;height:${height}mm;padding-left:${cfg.margemEsquerda}mm;padding-top:${cfg.margemSuperior}mm;break-after:page;page-break-after:always;overflow:hidden}
   section:last-child{break-after:auto;page-break-after:auto}
   article{width:${cfg.areaLargura}mm;height:12mm;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0.4mm 0.6mm;overflow:hidden;font-family:"OCR-B","Consolas","Lucida Console","Courier New",monospace;letter-spacing:0}
-  .nome{font-size:${cfg.fonteNome}pt;line-height:1.1;width:100%;white-space:nowrap;overflow:hidden;text-transform:uppercase;text-align:left;margin-bottom:0.3mm}
+  .nome{font-size:${cfg.fonteNome}pt;line-height:1.1;width:100%;white-space:nowrap;overflow:hidden;text-transform:uppercase;text-align:left;margin-bottom:0.3mm;display:flex;justify-content:space-between;gap:0.8mm}.nome span{overflow:hidden}.nome b{flex-shrink:0;font-weight:700}
+  .lados{display:flex}.lados article{flex-shrink:0}.lados article+article{margin-left:${Math.max(0, cfg.segundoLado - cfg.areaLargura)}mm}
   svg{display:block;flex-shrink:0;fill:var(--ink);height:${cfg.alturaBarras}mm;max-width:100%;margin-left:-0.6mm}.referencia{font-size:${cfg.fonteReferencia}pt;line-height:1;margin-top:0.3mm;white-space:nowrap;max-width:100%;text-align:left}
   ${extra}</style></head><body>${body}</body></html>`;
 }
 
-export function documentoEtiquetas(itens: EtiquetaItem[], config: EtiquetaConfig): string {
+export function documentoEtiquetas(itens: EtiquetaItem[], config: EtiquetaConfig, op: OpcoesEtiqueta = {}): string {
   const rows = comporEtiquetas(itens);
-  const erro = validarCalibracao(config);
+  const erro = validarCalibracao(config, op);
   if (erro) throw new Error(erro);
   const cfg = completarConfig(config);
-  const body = rows.map((row) => `<section>${row.map((item) => item ? `<article><div class="nome">${escapeHtml(item.nome.toUpperCase())}</div>${svgEtiqueta(item.barcode ?? "", cfg.areaLargura)}<div class="referencia">${escapeHtml(textoEtiqueta(item.referencia || item.barcode, item.precoCents))}</div></article>` : "<article></article>").join("")}</section>`).join("");
+  const bloco = (item: EtiquetaItem) => `<article><div class="nome"><span>${escapeHtml(item.nome.toUpperCase())}</span>${item.aro ? `<b>${escapeHtml(item.aro)}</b>` : ""}</div>${svgEtiqueta(item.barcode ?? "", cfg.areaLargura)}<div class="referencia">${escapeHtml(textoEtiqueta(item.referencia || item.barcode, item.precoCents))}</div></article>`;
+  const body = rows.map((row) => `<section><div class="lados">${row.map((item) => item ? (op.duplicar ? bloco(item) + bloco(item) : bloco(item)) : "<article></article>").join("")}</div></section>`).join("");
   return folha(body, cfg);
 }
 
 /** Amostra fixa do modelo SISPR usada só para calibrar; não consulta nem altera cadastro. */
 export const AMOSTRA_CALIBRACAO: EtiquetaItem = { id: "calibracao", nome: "BR PR CIRCULO CRUZ", barcode: "LBRP0295-005499", referencia: "LBRP0295", precoCents: 5499, quantidade: 1 };
+/** 0340: amostra de anel (modelo da etiqueta antiga) para conferir o aro no canto e os 2 lados; não consulta cadastro. */
+export const AMOSTRA_ANEL: EtiquetaItem = { id: "calibracao-anel", nome: "AN PR SOLITARIO 2 FIOS", barcode: "LANP0349-008990", referencia: "LANP0349", precoCents: 8990, aro: "16", quantidade: 1 };
 
 /**
  * Folha de teste: "amostra" imprime a etiqueta modelo; "regua" imprime moldura
  * da área útil com marcas a cada 1 mm/5 mm para medir o deslocamento na fita.
  */
-export function documentoTeste(modo: "amostra" | "regua", config: EtiquetaConfig, copias = 1): string {
-  const erro = validarCalibracao(config);
+export function documentoTeste(modo: "amostra" | "regua", config: EtiquetaConfig, copias = 1, op: OpcoesEtiqueta & { anel?: boolean } = {}): string {
+  const erro = validarCalibracao(config, op);
   if (erro) throw new Error(erro);
   const cfg = completarConfig(config);
   const n = Math.min(Math.max(1, Math.trunc(copias)), 5);
-  if (modo === "amostra") return documentoEtiquetas([{ ...AMOSTRA_CALIBRACAO, quantidade: n }], cfg);
+  if (modo === "amostra") return documentoEtiquetas([{ ...(op.anel ? AMOSTRA_ANEL : AMOSTRA_CALIBRACAO), quantidade: n }], cfg, op);
   const marcas = Array.from({ length: Math.floor(cfg.areaLargura) + 1 }, (_, i) => `<i style="left:${i}mm;height:${i % 5 ? 1.2 : 2.6}mm"></i>`).join("");
   const regua = `<article class="regua"><div class="marcas">${marcas}</div><b>X ${cfg.margemEsquerda.toFixed(1)} · Y ${cfg.margemSuperior.toFixed(1)} · ${cfg.areaLargura}mm</b></article>`;
   const extra = `.regua{position:relative;border:0.25mm solid var(--ink);justify-content:flex-end}.marcas{position:absolute;left:0;top:0;width:100%;height:3mm}.marcas i{position:absolute;top:0;width:0.2mm;background:var(--ink)}.regua b{font:700 6pt monospace;padding-bottom:0.6mm}`;

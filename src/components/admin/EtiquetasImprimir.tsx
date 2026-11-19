@@ -11,6 +11,7 @@ import { imprimirHtml } from "@/lib/imprimir-html";
 import { CalibracaoArgox } from "@/components/admin/CalibracaoArgox";
 import { buscarEtiquetas, lerItensEtiquetas, type EtiquetaBusca, type EtiquetaOrigem } from "@/lib/etiquetas-dados";
 import { toast } from "sonner";
+import { LadosEtiqueta } from "@/components/admin/LadosEtiqueta";
 
 /**
  * Envio direto: a etiqueta é montada num quadro invisível da própria página e
@@ -24,7 +25,8 @@ export async function enviarParaImpressora(items: EtiquetaItem[]) {
   for (const i of validos) {
     try { barrasEtiqueta(i.barcode ?? ""); } catch (e) { throw new Error(`${i.nome}: ${e instanceof Error ? e.message : "código inválido."}`); }
   }
-  await imprimirDireto(comandosEtiquetas(validos, await lerCalibracaoGlobal(), lerEstacao().linguagem));
+  const est = lerEstacao();
+  await imprimirDireto(comandosEtiquetas(validos, await lerCalibracaoGlobal(), est.linguagem, { duplicar: est.duplicar === true }), est);
   return validos.reduce((s, i) => s + i.quantidade, 0);
 }
 
@@ -32,7 +34,8 @@ async function imprimirOrigens(origens: EtiquetaOrigem[], umaCada: boolean, copi
   try {
     const items = (await lerItensEtiquetas(origens)).map((i) => (umaCada ? { ...i, quantidade: copias } : i));
     const n = await enviarParaImpressora(items);
-    if (n) toast.success(n === 1 ? "Impressão de 1 etiqueta preparada." : `Impressão de ${n} etiquetas preparada.`);
+    const lados = lerEstacao().duplicar ? " (2 lados)" : "";
+    if (n) toast.success(n === 1 ? `Impressão de 1 etiqueta preparada${lados}.` : `Impressão de ${n} etiquetas preparada${lados}.`);
   } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir a etiqueta."); }
 }
 
@@ -84,7 +87,7 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
   useEffect(() => { const t = setTimeout(() => setDebounced(termo.trim()), 250); return () => clearTimeout(t); }, [termo]);
   const q = useQuery({ queryKey: ["etiquetas", "busca", debounced], queryFn: () => buscarEtiquetas(debounced), enabled: open && debounced.length >= 2 });
   async function imprimir(r: EtiquetaBusca) {
-    try { const n = await enviarParaImpressora([{ id: r.variantId, nome: r.nome, barcode: r.barcode, referencia: r.referencia, precoCents: r.precoCents, quantidade: 1 }]); if (n) { toast.success(`Impressão preparada: ${r.nome}`); setTermo(""); } }
+    try { const n = await enviarParaImpressora([{ id: r.variantId, nome: r.nome, barcode: r.barcode, referencia: r.referencia, precoCents: r.precoCents, aro: r.aro, quantidade: 1 }]); if (n) { toast.success(`Impressão preparada: ${r.nome}${lerEstacao().duplicar ? " (2 lados)" : ""}`); setTermo(""); } }
     catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir."); }
   }
   async function enter() {
@@ -111,10 +114,10 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
           : q.error ? <div role="alert" className="text-sm"><p>Não foi possível buscar.</p><Button variant="outline" onClick={() => void q.refetch()}>Tentar novamente</Button></div>
           : !rs.length ? <p className="text-sm text-ledger-muted">Nenhuma peça encontrada para “{debounced}”.</p>
           : <ul className="divide-y divide-line">{rs.map((r) => <li key={r.variantId} className="flex items-center justify-between gap-4 py-3">
-              <div className="min-w-0"><p className="truncate text-sm font-semibold">{r.nome}</p><p className="text-xs text-ledger-muted">Barras: {r.barcode || "sem código"} · {textoEtiqueta(r.referencia, r.precoCents) || "sem referência"}</p></div>
+              <div className="min-w-0"><p className="truncate text-sm font-semibold">{r.nome}</p><p className="text-xs text-ledger-muted">Barras: {r.barcode || "sem código"} · {textoEtiqueta(r.referencia, r.precoCents) || "sem referência"}{r.aro ? ` · Aro ${r.aro}` : ""}</p></div>
               <Button size="sm" disabled={!r.barcode} onClick={() => imprimir(r)}><Printer aria-hidden />Imprimir 1</Button>
             </li>)}</ul>}
-        <div className="flex justify-end border-t border-line pt-3"><AjustesEstacao /></div>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3"><span className="flex items-center gap-2 text-xs text-ledger-muted"><LadosEtiqueta />neste computador</span><AjustesEstacao /></div>
       </DialogContent>
     </Dialog>
   </>;
@@ -127,10 +130,12 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
  */
 export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = false }: { origens: EtiquetaOrigem[]; label?: string; compact?: boolean; onOpenChange?: (open: boolean) => void }) {
   const [enviando, setEnviando] = useState(false);
-  return (
+  const botao = (
     <Button variant="outline" size={compact ? "icon" : "default"} title={origens.length ? label : "Sem dados de peças para imprimir"} aria-label={label} disabled={!origens.length || enviando}
       onClick={(e) => { e.stopPropagation(); setEnviando(true); void imprimirOrigens(origens, false).finally(() => setEnviando(false)); }}>
       {enviando ? <Loader2 aria-hidden className="animate-spin" /> : <Printer aria-hidden />}{compact ? null : label}
     </Button>
   );
+  // 0340: ao lado do botão grande, a escolha 1 lado / 2 lados (vale para todas as etiquetas de peça deste computador).
+  return compact ? botao : <span className="inline-flex flex-wrap items-center gap-2">{botao}<LadosEtiqueta /></span>;
 }

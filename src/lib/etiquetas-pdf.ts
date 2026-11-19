@@ -1,7 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import {
   AMOSTRA_CALIBRACAO, ETIQUETA, barrasEtiqueta, completarConfig, comporEtiquetas, textoEtiqueta, validarCalibracao,
-  type EtiquetaConfig, type EtiquetaItem,
+  type EtiquetaConfig, type EtiquetaItem, type OpcoesEtiqueta,
 } from "@/lib/etiquetas";
 
 /**
@@ -10,8 +10,8 @@ import {
  */
 const MM = 72 / 25.4;
 
-export async function pdfEtiquetas(itens: EtiquetaItem[], config: EtiquetaConfig, regua = false): Promise<Uint8Array> {
-  const erro = validarCalibracao(config); if (erro) throw new Error(erro);
+export async function pdfEtiquetas(itens: EtiquetaItem[], config: EtiquetaConfig, regua = false, op: OpcoesEtiqueta = {}): Promise<Uint8Array> {
+  const erro = validarCalibracao(config, op); if (erro) throw new Error(erro);
   const cfg = completarConfig(config);
   const rows = regua ? itens.flatMap((i) => Array.from({ length: i.quantidade }, () => [i])) : comporEtiquetas(itens);
   const pdf = await PDFDocument.create();
@@ -24,7 +24,8 @@ export async function pdfEtiquetas(itens: EtiquetaItem[], config: EtiquetaConfig
   for (const [item] of rows) {
     if (!item) continue;
     const page = pdf.addPage([W, H]);
-    const x0 = (cfg.margemEsquerda + 0.6) * MM;
+    for (const dx of op.duplicar && !regua ? [0, cfg.segundoLado] : [0]) {
+    const x0 = (cfg.margemEsquerda + 0.6 + dx) * MM;
     const topo = H - (cfg.margemSuperior + 0.4) * MM;
     const area = cfg.areaLargura * MM;
     if (regua) {
@@ -36,11 +37,14 @@ export async function pdfEtiquetas(itens: EtiquetaItem[], config: EtiquetaConfig
       page.drawText(`X ${cfg.margemEsquerda.toFixed(1)} Y ${cfg.margemSuperior.toFixed(1)} ${cfg.areaLargura}mm`, { x: x0, y: H - (cfg.margemSuperior + 10.5) * MM, size: 6, font: negrito, color: preto });
       continue;
     }
-    // nome
+    // nome (com o espaço do aro reservado no fim quando for anel)
+    const aro = item.aro ?? "";
+    const reserva = aro ? negrito.widthOfTextAtSize(` ${aro}`, cfg.fonteNome) : 0;
     let nome = item.nome.toUpperCase();
-    while (nome.length > 1 && fonte.widthOfTextAtSize(nome, cfg.fonteNome) > area - 1.2 * MM) nome = nome.slice(0, -1);
+    while (nome.length > 1 && fonte.widthOfTextAtSize(nome, cfg.fonteNome) > area - 1.2 * MM - reserva) nome = nome.slice(0, -1);
     const yNome = topo - cfg.fonteNome * 0.85;
     page.drawText(nome, { x: x0, y: yNome, size: cfg.fonteNome, font: fonte, color: preto });
+    if (aro) page.drawText(aro, { x: x0 + area - 1.2 * MM - negrito.widthOfTextAtSize(aro, cfg.fonteNome), y: yNome, size: cfg.fonteNome, font: negrito, color: preto });
     // barras (módulo inteiro de pontos de 203 DPI)
     const bits = barrasEtiqueta(item.barcode ?? "");
     const total = bits.length + 20;
@@ -56,6 +60,7 @@ export async function pdfEtiquetas(itens: EtiquetaItem[], config: EtiquetaConfig
     }
     // referência-preço
     page.drawText(textoEtiqueta(item.referencia || item.barcode, item.precoCents), { x: x0, y: yBar - 0.4 * MM - cfg.fonteReferencia * 0.8, size: cfg.fonteReferencia, font: fonte, color: preto });
+    }
   }
   return pdf.save();
 }

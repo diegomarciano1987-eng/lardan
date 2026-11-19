@@ -26,6 +26,7 @@ import {
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { ProdutoFicha } from "@/components/admin/ProdutoFicha";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
+import { LadosEtiqueta } from "@/components/admin/LadosEtiqueta";
 import { GradeAros } from "@/components/admin/GradeAros";
 import { ehNomeDeAnel } from "@/lib/anel-aro";
 import {
@@ -390,8 +391,8 @@ function ProdutoDetalhe() {
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
           <Panel title="Variantes vendáveis">
-            {podeEditar || (ehAnel && podeGradeAros) ? (
-            <div className="mb-4 flex justify-end gap-2">
+            <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+              <span className="mr-auto flex items-center gap-2 text-xs text-ledger-muted"><LadosEtiqueta />etiquetas deste computador</span>
               {ehAnel && podeGradeAros ? (
                 <GradeAros productId={id} nome={p.name} arosExistentes={(variantes.data ?? []).filter((v) => v.is_active).map((v) => v.size)} />
               ) : null}
@@ -405,7 +406,6 @@ function ProdutoDetalhe() {
               </button>
               ) : null}
             </div>
-            ) : null}
             {variantes.isLoading ? (
               <Skeleton className="h-24 w-full" />
             ) : (variantes.data?.length ?? 0) === 0 ? (

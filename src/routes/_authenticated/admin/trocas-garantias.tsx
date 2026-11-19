@@ -2,7 +2,7 @@ import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, Camera, Clock3, Lock, MessageSquare, PackageCheck, Plus, Search, Send, ShieldCheck, Store, Smartphone, History } from "lucide-react";
+import { AlertTriangle, ArrowRight, Camera, Clock3, Lock, MessageSquare, PackageCheck, Plus, Repeat2, Search, Send, ShieldCheck, Store, Smartphone, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageHeader, Panel, EmptyState, ErrorState, StatusBadge, type StatusTone } from "@/components/admin/ui";
@@ -260,7 +260,8 @@ function Detalhe({ t, gerir, onMovido }: { t: Troca; gerir: boolean; onMovido: (
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
-        <Peca titulo="Peça devolvida" variant={t.dev_variant_id} ref_={t.dev_referencia} nome={t.dev_nome} tam={t.dev_tamanho} valor={t.dev_valor_cents} />
+        <Peca titulo="Peça devolvida" variant={t.dev_variant_id} ref_={t.dev_referencia} nome={t.dev_nome} tam={t.dev_tamanho} valor={t.dev_valor_cents}
+          acao={gerir && t.origem !== "legado_smalldata" && !["resolvida", "recusada"].includes(t.status) ? <TrocarPecaDevolvida t={t} /> : null} />
         {(t.rep_referencia || t.rep_nome) ? <Peca titulo="Peça enviada" variant={t.rep_variant_id} ref_={t.rep_referencia} nome={t.rep_nome} tam={t.rep_tamanho} valor={t.rep_valor_cents} />
           : <div className="rounded-xl border border-dashed border-line px-4 py-3 text-sm text-ledger-muted">Peça de reposição ainda não definida.</div>}
       </div>
@@ -317,17 +318,69 @@ function Detalhe({ t, gerir, onMovido }: { t: Troca; gerir: boolean; onMovido: (
   );
 }
 
-function Peca({ titulo, variant, ref_, nome, tam, valor }: { titulo: string; variant: string | null; ref_: string | null; nome: string | null; tam: string | null; valor: number | null }) {
+function Peca({ titulo, variant, ref_, nome, tam, valor, acao }: { titulo: string; variant: string | null; ref_: string | null; nome: string | null; tam: string | null; valor: number | null; acao?: React.ReactNode }) {
   return (
     <div className="flex gap-3 rounded-xl border border-line bg-surface px-3.5 py-3">
       <FotoPeca variantId={variant} alt={nome ?? ""} size="lg" />
-      <div className="min-w-0 text-sm">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-ledger-muted">{titulo}</p>
+      <div className="min-w-0 flex-1 text-sm">
+        <div className="flex items-start justify-between gap-2"><p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-ledger-muted">{titulo}</p>{acao}</div>
         <p className="font-semibold">{ref_ ?? "s/ referência"}</p>
         <p className="line-clamp-2 text-ledger-muted">{nome}</p>
         <p className="tabular-nums">{tam ? `Tam. ${tam} · ` : ""}{brlTroca(valor)}</p>
       </div>
     </div>
+  );
+}
+
+const MOTIVOS_CORRECAO = ["Digitei a referência errada", "Bipei a peça errada", "É outra peça da mesma consultora"];
+
+/** 0339: corrige a peça devolvida escolhida por engano (mesma consultora, mesmo protocolo), com motivo e histórico. */
+function TrocarPecaDevolvida({ t }: { t: Troca }) {
+  const qc = useQueryClient();
+  const [aberto, setAberto] = React.useState(false);
+  const [peca, setPeca] = React.useState<PecaBusca | null>(null);
+  const [refManual, setRefManual] = React.useState("");
+  const [motivo, setMotivo] = React.useState("");
+  const limpar = () => { setPeca(null); setRefManual(""); setMotivo(""); };
+  const m = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("qualidade_troca_peca_corrigir" as never, { _id: t.id, _variant: peca?.id ?? null, _referencia: peca ? null : refManual, _motivo: motivo } as never);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success(`${protocoloTroca(t.protocolo)}: peça devolvida corrigida. Fica no histórico e a consultora vê no app.`); void qc.invalidateQueries({ queryKey: ["qualidade"] }); limpar(); setAberto(false); },
+    onError: (e) => toast.error(traduzir(e)),
+  });
+  const pronto = (!!peca || refManual.trim().length >= 3) && motivo.trim().length >= 3 && peca?.id !== t.dev_variant_id;
+  const novaRef = peca?.referencia ?? (refManual.trim() || null);
+  const difNova = peca && t.rep_valor_cents != null && peca.valor_cents != null && t.solucao !== "mesma_peca" && t.solucao !== "conserto" ? diferencaTroca(peca.valor_cents, t.rep_valor_cents) : null;
+  return (
+    <>
+      <Button type="button" variant="outline" size="sm" className="h-7 shrink-0 gap-1 px-2 text-xs" onClick={() => setAberto(true)}><Repeat2 className="size-3.5" aria-hidden /> Trocar peça</Button>
+      <Dialog open={aberto} onOpenChange={(o) => { setAberto(o); if (!o) limpar(); }}>
+        <DialogContent className="max-h-[92dvh] max-w-2xl overflow-y-auto">
+          <DialogHeader><DialogTitle>Trocar a peça devolvida — {protocoloTroca(t.protocolo)}</DialogTitle>
+            <DialogDescription>Para quando a peça foi escolhida errada. A troca continua da mesma consultora ([Cód. {t.consultora_codigo ?? "—"}] {t.consultora_nome}); a correção fica no histórico.</DialogDescription></DialogHeader>
+          <div className="space-y-4">
+            <div><p className="mb-1 text-sm font-semibold">Peça certa</p><PecaTrocaPicker value={peca} onChange={setPeca} />
+              {!peca && <input className="admin-input mt-2 h-11 w-full" value={refManual} onChange={(e) => setRefManual(e.target.value.toUpperCase())} placeholder="Ou digite a referência da etiqueta (ex.: LANP0342)" aria-label="Referência da peça certa" />}
+              {peca?.id === t.dev_variant_id && <p role="alert" className="mt-1 text-sm text-danger">Esta já é a peça devolvida da troca.</p>}</div>
+            {(peca || refManual.trim().length >= 3) && (
+              <div className="grid items-center gap-2 rounded-xl border border-line bg-cream-2/60 p-3 text-sm sm:grid-cols-[1fr_auto_1fr]">
+                <div><p className="text-xs text-ledger-muted">Hoje</p><p className="font-semibold">{t.dev_referencia ?? "s/ referência"}</p><p className="line-clamp-2 text-ledger-muted">{t.dev_nome}</p><p className="tabular-nums">{brlTroca(t.dev_valor_cents)}</p></div>
+                <ArrowRight className="mx-auto size-4 text-ledger-muted" aria-hidden />
+                <div><p className="text-xs text-ledger-muted">Fica</p><p className="font-semibold">{novaRef ?? "s/ referência"}</p><p className="line-clamp-2 text-ledger-muted">{peca?.nome ?? "Peça pela referência digitada"}</p><p className="tabular-nums">{peca ? `${peca.tamanho ? `Tam. ${peca.tamanho} · ` : ""}${brlTroca(peca.valor_cents)}` : "—"}</p></div>
+              </div>
+            )}
+            {difNova != null && <p className="text-sm">Nova diferença da troca: <strong className={cn("tabular-nums", difNova < 0 && "text-danger")}>{brlTroca(difNova)}</strong></p>}
+            <div><p className="mb-1 text-sm font-semibold">Motivo da correção</p>
+              <div className="flex flex-wrap gap-1.5">{MOTIVOS_CORRECAO.map((x) => <button key={x} type="button" onClick={() => setMotivo(x)} className={cn("rounded-full border px-3 py-1 text-sm", motivo === x ? "border-bronze bg-champagne/30" : "border-line")}>{x}</button>)}</div>
+              <input className="admin-input mt-2 h-11 w-full" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Motivo" maxLength={300} aria-label="Motivo da correção" /></div>
+            <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setAberto(false)}>Cancelar</Button>
+              <Button disabled={!pronto || m.isPending} onClick={() => m.mutate()} className="gap-2"><Repeat2 className="size-4" aria-hidden />{m.isPending ? "Trocando…" : "Confirmar troca da peça"}</Button></div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

@@ -138,6 +138,7 @@ export function VitrineView({ design, nome, itens, img, previa = false, urlCompa
             </div>
             <div className={a.grade === "lista" ? "flex-1 py-1" : "px-1 pb-1 pt-3"}>
               <p className="text-sm font-medium leading-snug">{i.produto}</p>
+              {i.referencia && <p className="vitrine-ref text-[0.68rem] font-medium uppercase tracking-[0.08em] text-[var(--v-muted)]">Ref. {i.referencia}</p>}
               <p className="text-xs text-[var(--v-muted)]">{[i.variante, i.tamanho, i.cor].filter(Boolean).join(" · ") || "Peça única"}</p>
               <p className="mt-1 text-sm font-semibold">{brl(i.preco_cents)}</p>
               <a href={MANUAL_CUIDADOS_URL} target="_blank" rel="noreferrer" className="mt-2 block text-sm underline underline-offset-4">Garantia de dois anos e cuidados</a>
@@ -420,7 +421,7 @@ function Ampliada({ item, corpo, peca, noCorpoSrc, onCorpo, onFechar, zap, previ
         <div className="flex flex-wrap items-center gap-3">
           <div className="min-w-0 basis-full sm:basis-auto sm:flex-1">
             <p className="vz-nome truncate text-xl leading-tight">{item.produto}</p>
-            <p className="vz-sub truncate text-xs">{detalhe || "Peça única"} · <strong className="vz-preco">{brl(item.preco_cents)}</strong></p>
+            <p className="vz-sub truncate text-xs">{item.referencia ? `Ref. ${item.referencia} · ` : ""}{detalhe || "Peça única"} · <strong className="vz-preco">{brl(item.preco_cents)}</strong></p>
           </div>
           {onComprar && (
             <Button type="button" onClick={onComprar} className="vz-zap inline-flex h-12 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-semibold">

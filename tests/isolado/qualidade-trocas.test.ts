@@ -62,10 +62,10 @@ describe("Canal de Qualidade", () => {
   });
 
   test("Lardan lança manualmente e a consultora vê", async () => {
-    const r = await rpc<{ id: string }>(qual, "qualidade_troca_lancar", { _party: eu.partyId, _variant: null, _referencia: "lref999", _nome: "Anel digitado", _tamanho: "18", _valor_cents: 5000, _tipo: "troca", _motivo: "Peça achada", _observacao: "veio no retorno", _fotos: [], _chave: crypto.randomUUID() });
+    const r = await rpc<{ id: string }>(qual, "qualidade_troca_lancar", { _party: eu.partyId, _variant: null, _referencia: `lref${marca}`, _nome: "Anel digitado", _tamanho: "18", _valor_cents: 5000, _tipo: "troca", _motivo: "Peça achada", _observacao: "veio no retorno", _fotos: [], _chave: crypto.randomUUID() });
     expect(r.erro).toBeNull();
     const vis = await ler<{ origem: string; dev_referencia: string }>(eu, `select origem, dev_referencia from qualidade_trocas where id=$1`, [r.dados.id]);
-    expect(vis.linhas[0]).toMatchObject({ origem: "admin_manual", dev_referencia: "LREF999" });
+    expect(vis.linhas[0]).toMatchObject({ origem: "admin_manual", dev_referencia: `LREF${marca}`.toUpperCase() });
     expect((await rpc(eu, "qualidade_troca_lancar", { _party: eu.partyId, _variant: barata, _referencia: null, _nome: null, _tamanho: null, _valor_cents: null, _tipo: "troca", _motivo: "x de novo", _observacao: "", _fotos: [], _chave: crypto.randomUUID() })).ok).toBe(false);
   });
 
@@ -98,7 +98,7 @@ describe("Canal de Qualidade", () => {
     const porCodigo = await rpc<{ total: number }>(qual, "qualidade_troca_buscar", { _termo: `Q${marca}`, _status: "todas", _limite: 50, _offset: 0 });
     expect(porCodigo.erro).toBeNull();
     expect(porCodigo.dados.total).toBe(2);
-    const porRef = await rpc<{ total: number }>(qual, "qualidade_troca_buscar", { _termo: "LREF999", _status: "todas", _limite: 50, _offset: 0 });
+    const porRef = await rpc<{ total: number }>(qual, "qualidade_troca_buscar", { _termo: `LREF${marca}`.toUpperCase(), _status: "todas", _limite: 50, _offset: 0 });
     expect(porRef.dados.total).toBe(1);
     expect((await rpc(eu, "qualidade_troca_buscar", { _termo: "", _status: "todas", _limite: 50, _offset: 0 })).ok).toBe(false);
     const pecas = await rpc<{ id: string }[]>(eu, "qualidade_buscar_peca", { _termo: `LQT${marca}B`, _limite: 5 });

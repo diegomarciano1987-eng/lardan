@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { EtiquetaComQuantidade, EtiquetasBusca } from "@/components/admin/EtiquetasImprimir";
+import { LadosEtiqueta } from "@/components/admin/LadosEtiqueta";
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -307,6 +308,7 @@ function ProdutosPage() {
         actions={
           <>
           <EtiquetasBusca label="Imprimir etiquetas" />
+          <LadosEtiqueta />
           {can(caps, "product.manage") ? (
             <Link to="/admin/cadastros/produtos/novo" className="admin-btn border-champagne">
               <Plus aria-hidden className="size-4" /> Novo produto

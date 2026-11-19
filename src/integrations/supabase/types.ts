@@ -24862,6 +24862,15 @@ export type Database = {
         Args: { _dados?: Json; _id: string; _status: string; _texto: string }
         Returns: undefined
       }
+      qualidade_troca_peca_corrigir: {
+        Args: {
+          _id: string
+          _motivo: string
+          _referencia: string
+          _variant: string
+        }
+        Returns: Json
+      }
       qualidade_troca_resumo: { Args: never; Returns: Json }
       rede_auditoria_sem_representante: {
         Args: never

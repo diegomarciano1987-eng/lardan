@@ -56,3 +56,4 @@
 - Signed-document rules: src/lib/zapsign/AGENTS.md. Why: privacy.
 - SmallData remessa transfer preview verifies the legacy representative CPF against the destination representative document, without rewriting legacy party links; apply consumes the same preview. A missing-document exception for 924/925 requires an exact representative/remessa audit authorization by the executing Master, a unique active representative name and expires after one day. Why: preserve identity and portfolio scope without permanent bypasses.
 - RLS: (SELECT fn(auth.uid())) wrappers. Why: per-row load.
+- Consultant-app client charges (financial_titles.origem='consultora') stay out of fin_titles_list, fin_overview, fin_pagar_receber, fin_cashflow(_detail) until any allocation exists (fin_pedido_consultora_aguardando); pagar-receber shows only a count/value note. Why: unpaid street invoices are not Lardan receivables (0351).

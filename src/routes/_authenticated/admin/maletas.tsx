@@ -20,6 +20,7 @@ import { RemessasHistorico } from "@/components/admin/historico/RemessasHistoric
 import { MaletasNaRua } from "@/components/admin/maletas/MaletasNaRua";
 import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpressora";
 import { AcertosPainel } from "@/components/admin/maletas/AcertosPainel";
+import { NovaMaletaDireta } from "@/components/admin/maletas/NovaMaletaDireta";
 import { STATUS_REMESSA, buscarRemessas, criarRemessa, dataBR, definirEnvioRemessa, isoDia, type RemessaCard, type TipoEnvio } from "@/lib/remessas";
 
 export const Route = createFileRoute("/_authenticated/admin/maletas")({
@@ -275,6 +276,12 @@ function RemessasPage() {
               <Link to="/admin/maletas/entrada" className="admin-btn">
                 <ScanLine aria-hidden className="size-4" /> Entrada de maleta
               </Link>
+            )}
+            {podeMontar && !carteira && (
+              <NovaMaletaDireta aoCriar={(id) => {
+                qc.invalidateQueries({ queryKey: ["remessas"] });
+                navigate({ to: "/admin/maletas/$id", params: { id } });
+              }} />
             )}
             {podeMontar && (
               <NovaRemessa aoCriar={(id) => {

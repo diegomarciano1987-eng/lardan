@@ -184,3 +184,25 @@ export interface InformacaoRemessa {
 export const informacoesDaRemessa = (id: string) => rpc<InformacaoRemessa[]>("remessa_informacoes_lista", { _remessa: id });
 export const salvarInformacaoRemessa = (remessa: string, party: string, motivo: MotivoSemMaleta | null, info: string) =>
   rpc<unknown>("remessa_informacao_salvar", { _remessa: remessa, _party: party, _motivo: motivo, _info: info });
+
+/** 0352: "Nova maleta" direta — sem representante; consultora, data de acerto e responsável. */
+export type ConsultoraDireta = { party_id: string; display_name: string; code: string | null; cpf: string | null; praca_id: string | null; praca: string | null };
+export const consultorasMaletaDireta = (termo: string) =>
+  termo.trim().length < 2 ? Promise.resolve([] as ConsultoraDireta[]) : rpc<ConsultoraDireta[]>("maleta_direta_consultoras", { _search: termo.trim() });
+export const responsaveisMaletaDireta = () => rpc<{ user_id: string; nome: string }[]>("maleta_direta_responsaveis", {});
+export const abrirMaletaDireta = (p: {
+  consultora: string;
+  data_acerto: string;
+  responsavel: string;
+  deposito?: string | null;
+  praca?: string | null;
+  tipo_envio?: TipoEnvio;
+}) =>
+  rpc<{ cycle_id: string; remessa_id: string; remessa_numero: number; repetida?: boolean }>("maleta_direta_abrir", {
+    _consultora: p.consultora,
+    _data_acerto: p.data_acerto,
+    _responsavel: p.responsavel,
+    _deposito: p.deposito ?? null,
+    _praca: p.praca ?? null,
+    _tipo_envio: p.tipo_envio ?? "pessoal",
+  });

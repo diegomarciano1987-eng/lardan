@@ -17267,12 +17267,14 @@ export type Database = {
           created_by: string | null
           data_acerto: string | null
           data_emissao: string
+          direta: boolean
           id: string
           numero: number
           observacoes: string | null
           origin_location_id: string | null
           praca_id: string
           representante_party_id: string | null
+          responsavel_user_id: string | null
           status: string
           tipo_envio: string
           updated_at: string
@@ -17282,12 +17284,14 @@ export type Database = {
           created_by?: string | null
           data_acerto?: string | null
           data_emissao?: string
+          direta?: boolean
           id?: string
           numero: number
           observacoes?: string | null
           origin_location_id?: string | null
           praca_id: string
           representante_party_id?: string | null
+          responsavel_user_id?: string | null
           status?: string
           tipo_envio?: string
           updated_at?: string
@@ -17297,12 +17301,14 @@ export type Database = {
           created_by?: string | null
           data_acerto?: string | null
           data_emissao?: string
+          direta?: boolean
           id?: string
           numero?: number
           observacoes?: string | null
           origin_location_id?: string | null
           praca_id?: string
           representante_party_id?: string | null
+          responsavel_user_id?: string | null
           status?: string
           tipo_envio?: string
           updated_at?: string
@@ -23996,6 +24002,36 @@ export type Database = {
       }
       maleta_devolucao_receber: { Args: { _id: string }; Returns: Json }
       maleta_devolucoes_lista: { Args: { _rep?: string }; Returns: Json }
+      maleta_direta_abrir: {
+        Args: {
+          _consultora: string
+          _data_acerto: string
+          _deposito?: string
+          _numero?: number
+          _praca?: string
+          _responsavel: string
+          _tipo_envio?: string
+        }
+        Returns: Json
+      }
+      maleta_direta_consultoras: {
+        Args: { _search: string }
+        Returns: {
+          code: string
+          cpf: string
+          display_name: string
+          party_id: string
+          praca: string
+          praca_id: string
+        }[]
+      }
+      maleta_direta_responsaveis: {
+        Args: never
+        Returns: {
+          nome: string
+          user_id: string
+        }[]
+      }
       maleta_entregue_em_maos: {
         Args: { _cycle: string; _motivo: string }
         Returns: Json

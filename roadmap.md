@@ -27,9 +27,9 @@
 - [x] URGENTE. Peças extras: sem confirmação; vão direto para a maleta e o aceite da consultora é automático
 - [x] Montagem "Ver por categoria": colunas de banho na tabela de mais vendidas
 - [x] App da consultora: botão pequeno "Compartilhar vitrine" na tela inicial (celular)
-- [ ] E3. Pedidos da consultora no app não entram no Contas a Receber até a cliente pagar
-- [ ] E3. "Nova maleta" direta (sem praça/representante): data de acerto + responsável
-- [ ] E3. Cancelar todos os pré-acertos fechados pela consultora no app (Pix gerado sem querer), sem mexer nos pagos
+- [x] E3. Pedidos da consultora no app não entram no Contas a Receber até a cliente pagar
+- [x] E3. "Nova maleta" direta (sem praça/representante): data de acerto + responsável
+- [x] E3. Cancelar todos os pré-acertos fechados pela consultora no app (Pix gerado sem querer), sem mexer nos pagos
 - [ ] E3. Duas maletas da mesma remessa e mesmo acerto: unidas no app/vitrine da consultora (Graziella 8335), separadas para a Lardan
 - [ ] E3. Tela de remessas: mesma consultora com 2 maletas vira 1 linha que abre as duas
 - [ ] E3. App da consultora: editar venda (peças e forma de pagamento) enquanto não paga

@@ -1,6 +1,5 @@
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
-import { LadosEtiqueta } from "@/components/admin/LadosEtiqueta";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { EtiquetaMaleta } from "./EtiquetaMaleta";
 import { BotaoTelaCheia } from "@/components/admin/TelaCheia";
@@ -947,8 +946,6 @@ export function MontagemLeitor({
               <EtiquetaMaleta cycleId={cycleId} />
               <div className="mb-2 flex items-center justify-between gap-2">
                 <p className="ledger-eyebrow">Composição</p>
-                {/* 0340: etiqueta em 1 ou 2 lados; depois do clique o cursor volta para a bipagem */}
-                <span onClickCapture={() => window.setTimeout(() => campo.current?.focus(), 150)}><LadosEtiqueta /></span>
               </div>
               {lista.length > 0 && (
                 <div className="relative mb-2">

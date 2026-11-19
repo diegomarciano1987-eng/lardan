@@ -1,6 +1,5 @@
 import * as React from "react";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
-import { LadosEtiqueta } from "@/components/admin/LadosEtiqueta";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDownLeft, ArrowUpRight, BookmarkPlus, FileUp, MapPin, PackagePlus } from "lucide-react";
@@ -498,7 +497,6 @@ function EstoquePage() {
             actions={
               podeOperar ? (
                 <div className="flex flex-wrap items-center gap-3">
-                  <LadosEtiqueta />
                   <Link to="/admin/cadastros/locais" className="admin-btn">
                     <MapPin aria-hidden className="mr-2 inline size-4" />
                     Locais

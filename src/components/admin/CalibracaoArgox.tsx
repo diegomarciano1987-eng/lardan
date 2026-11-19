@@ -3,7 +3,6 @@ import { Minus, Plus, Printer, RotateCcw, Save, Ruler } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LadosEtiqueta, useLadosEtiqueta } from "@/components/admin/LadosEtiqueta";
-import { voltarUmLado } from "@/lib/lados-etiqueta";
 import {
   AMOSTRA_ANEL, AMOSTRA_CALIBRACAO, CONFIG_ETIQUETA, ETIQUETA, LIMITES_CALIBRACAO, completarConfig, documentoTeste,
   lerCalibracao, textoEtiqueta, validarCalibracao, type EtiquetaConfig,
@@ -32,7 +31,7 @@ export function CalibracaoArgox() {
   const [cfg, setCfg] = useState<Required<EtiquetaConfig>>(completarConfig(null));
   const [salvo, setSalvo] = useState<Required<EtiquetaConfig>>(completarConfig(null));
   useEffect(() => { const c = lerCalibracao(); setCfg(c); setSalvo(c); void lerCalibracaoGlobal().then((g) => { setCfg(g); setSalvo(g); }); }, []);
-  const [duplicar] = useLadosEtiqueta();
+  const [duplicar, setDuplicar] = useLadosEtiqueta();
   const [anel, setAnel] = useState(false);
   const erro = validarCalibracao(cfg, { duplicar });
   const alterado = JSON.stringify(cfg) !== JSON.stringify(salvo);
@@ -44,7 +43,7 @@ export function CalibracaoArgox() {
   };
   const testar = async (modo: "amostra" | "regua") => {
     try {
-      if (modo === "amostra") { const n = await imprimirDireto(comandosTeste(cfg, lerEstacao().linguagem, 3, { duplicar, anel })); if (duplicar) voltarUmLado(); toast.success(`3 amostras${duplicar ? " em 2 lados" : ""} enviadas direto para ${n}.`); }
+      if (modo === "amostra") { const n = await imprimirDireto(comandosTeste(cfg, lerEstacao().linguagem, 3, { duplicar, anel })); if (duplicar) setDuplicar(false); toast.success(`3 amostras${duplicar ? " em 2 lados" : ""} enviadas direto para ${n}.`); }
       else imprimirPdf(await pdfTeste("regua", cfg, 1));
     }
     catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir o teste."); }
@@ -71,7 +70,7 @@ export function CalibracaoArgox() {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-semibold">Prévia (ampliada 4×, fita de {ETIQUETA.suporte} × {arred(altura)} mm)</p>
         <div className="flex flex-wrap items-center gap-2">
-          <LadosEtiqueta />
+          <LadosEtiqueta value={duplicar} onChange={setDuplicar} />
           <div role="radiogroup" aria-label="Amostra" className="inline-flex items-center rounded-full border border-line bg-surface p-0.5 text-xs font-semibold">
             {([[false, "Amostra brinco"], [true, "Amostra anel (aro)"]] as const).map(([v, rot]) => (
               <button key={rot} type="button" role="radio" aria-checked={anel === v} onClick={() => setAnel(v)}

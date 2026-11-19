@@ -11,8 +11,7 @@ import { imprimirHtml } from "@/lib/imprimir-html";
 import { CalibracaoArgox } from "@/components/admin/CalibracaoArgox";
 import { buscarEtiquetas, lerItensEtiquetas, type EtiquetaBusca, type EtiquetaOrigem } from "@/lib/etiquetas-dados";
 import { toast } from "sonner";
-import { LadosEtiqueta } from "@/components/admin/LadosEtiqueta";
-import { ladosAtual, voltarUmLado } from "@/lib/lados-etiqueta";
+import { LadosEtiqueta, useLadosEtiqueta } from "@/components/admin/LadosEtiqueta";
 
 /**
  * Envio direto: a etiqueta é montada num quadro invisível da própria página e
@@ -20,39 +19,45 @@ import { ladosAtual, voltarUmLado } from "@/lib/lados-etiqueta";
  * Nenhuma aba ou PDF extra é aberto pelo LARDAN. A escolha física permanece
  * no navegador; impressão silenciosa não é segura com dois destinos.
  */
-export async function enviarParaImpressora(items: EtiquetaItem[]) {
+export async function enviarParaImpressora(items: EtiquetaItem[], duplicar = false) {
   const validos = items.filter((i) => i.quantidade > 0);
   if (!validos.length) throw new Error("Sem dados de peças para imprimir.");
   for (const i of validos) {
     try { barrasEtiqueta(i.barcode ?? ""); } catch (e) { throw new Error(`${i.nome}: ${e instanceof Error ? e.message : "código inválido."}`); }
   }
   const est = lerEstacao();
-  // 0341: 2 lados vale só para esta impressão; enviada, volta para 1 lado (falhou, mantém para tentar de novo).
-  const duplicar = ladosAtual();
+  // 0342: 1 lado é o padrão; 2 lados só quando o seletor ao lado da impressora foi marcado.
   await imprimirDireto(comandosEtiquetas(validos, await lerCalibracaoGlobal(), est.linguagem, { duplicar }), est);
-  if (duplicar) voltarUmLado();
   return { n: validos.reduce((s, i) => s + i.quantidade, 0), duplicar };
 }
 const avisoLados = (duplicar: boolean) => (duplicar ? " em 2 lados. A próxima volta para 1 lado" : "");
 
-async function imprimirOrigens(origens: EtiquetaOrigem[], umaCada: boolean, copias = 1) {
+/** Envia e devolve true quando a etiqueta foi enviada (para o seletor voltar a 1 lado). */
+async function imprimirOrigens(origens: EtiquetaOrigem[], umaCada: boolean, copias = 1, duplicar = false): Promise<boolean> {
   try {
     const items = (await lerItensEtiquetas(origens)).map((i) => (umaCada ? { ...i, quantidade: copias } : i));
-    const { n, duplicar } = await enviarParaImpressora(items);
+    const { n } = await enviarParaImpressora(items, duplicar);
     const lados = avisoLados(duplicar);
     if (n) toast.success(n === 1 ? `Impressão de 1 etiqueta preparada${lados}.` : `Impressão de ${n} etiquetas preparada${lados}.`);
-  } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir a etiqueta."); }
+    return true;
+  } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir a etiqueta."); return false; }
 }
 
-/** Botão de 1 clique: 1 etiqueta (uma por variante ativa) direto para a impressora. */
+/** Botão de 1 clique: 1 etiqueta (uma por variante ativa) direto para a impressora, com 1/2 lados ao lado. */
 export function EtiquetaDireta({ origens, label = "Imprimir etiqueta" }: { origens: EtiquetaOrigem[]; label?: string }) {
-  return <Button variant="outline" size="icon" title={origens.length ? label : "Sem dados de peças para imprimir"} aria-label={label} disabled={!origens.length} onClick={(e) => { e.stopPropagation(); void imprimirOrigens(origens, true); }}><Printer aria-hidden /></Button>;
+  const [duplicar, setDuplicar] = useLadosEtiqueta();
+  return <span className="inline-flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+    <Button variant="outline" size="icon" title={origens.length ? label : "Sem dados de peças para imprimir"} aria-label={label} disabled={!origens.length} onClick={() => { void imprimirOrigens(origens, true, 1, duplicar).then((ok) => { if (ok) setDuplicar(false); }); }}><Printer aria-hidden /></Button>
+    <LadosEtiqueta mini value={duplicar} onChange={setDuplicar} />
+  </span>;
 }
 
 /** Campo de cópias + impressora: sai N etiquetas da mesma peça, uma atrás da outra. */
 export function EtiquetaComQuantidade({ origens, label = "Imprimir etiqueta" }: { origens: EtiquetaOrigem[]; label?: string }) {
   const [qtd, setQtd] = useState("1");
+  const [duplicar, setDuplicar] = useLadosEtiqueta();
   const n = Math.min(500, Math.max(1, Math.floor(Number(qtd)) || 1));
+  const imprimir = () => void imprimirOrigens(origens, true, n, duplicar).then((ok) => { if (ok) setDuplicar(false); });
   return (
     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
       <input
@@ -63,10 +68,11 @@ export function EtiquetaComQuantidade({ origens, label = "Imprimir etiqueta" }: 
         value={qtd}
         onChange={(e) => setQtd(e.target.value.replace(/\D/g, "").slice(0, 3))}
         onBlur={() => setQtd(String(n))}
-        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void imprimirOrigens(origens, true, n); } }}
+        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); imprimir(); } }}
         className="admin-input num h-9 w-14 text-center"
       />
-      <Button variant="outline" size="icon" title={origens.length ? `${label} (${n})` : "Sem dados de peças para imprimir"} aria-label={`${label} (${n})`} disabled={!origens.length} onClick={() => void imprimirOrigens(origens, true, n)}><Printer aria-hidden /></Button>
+      <Button variant="outline" size="icon" title={origens.length ? `${label} (${n})` : "Sem dados de peças para imprimir"} aria-label={`${label} (${n})`} disabled={!origens.length} onClick={imprimir}><Printer aria-hidden /></Button>
+      <LadosEtiqueta mini value={duplicar} onChange={setDuplicar} />
     </div>
   );
 }
@@ -91,9 +97,9 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
   const [debounced, setDebounced] = useState("");
   useEffect(() => { const t = setTimeout(() => setDebounced(termo.trim()), 250); return () => clearTimeout(t); }, [termo]);
   const q = useQuery({ queryKey: ["etiquetas", "busca", debounced], queryFn: () => buscarEtiquetas(debounced), enabled: open && debounced.length >= 2 });
-  async function imprimir(r: EtiquetaBusca) {
-    try { const { n, duplicar } = await enviarParaImpressora([{ id: r.variantId, nome: r.nome, barcode: r.barcode, referencia: r.referencia, precoCents: r.precoCents, aro: r.aro, quantidade: 1 }]); if (n) { toast.success(`Impressão preparada: ${r.nome}${avisoLados(duplicar)}.`); setTermo(""); } }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir."); }
+  async function imprimir(r: EtiquetaBusca, duplicar = false): Promise<boolean> {
+    try { const { n } = await enviarParaImpressora([{ id: r.variantId, nome: r.nome, barcode: r.barcode, referencia: r.referencia, precoCents: r.precoCents, aro: r.aro, quantidade: 1 }], duplicar); if (n) { toast.success(`Impressão preparada: ${r.nome}${avisoLados(duplicar)}.`); setTermo(""); } return true; }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir."); return false; }
   }
   async function enter() {
     const t = termo.trim(); if (t.length < 2) return;
@@ -101,7 +107,7 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
       const rs = await buscarEtiquetas(t);
       const exatos = rs.filter((r) => r.barcode === t || r.referencia?.toUpperCase() === t.toUpperCase());
       if (exatos.length !== 1) { setDebounced(t); if (!rs.length) toast.error("Nenhuma peça encontrada."); return; }
-      imprimir(exatos[0]!);
+      void imprimir(exatos[0]!);
     } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir."); }
   }
   const rs = q.data ?? [];
@@ -120,12 +126,20 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
           : !rs.length ? <p className="text-sm text-ledger-muted">Nenhuma peça encontrada para “{debounced}”.</p>
           : <ul className="divide-y divide-line">{rs.map((r) => <li key={r.variantId} className="flex items-center justify-between gap-4 py-3">
               <div className="min-w-0"><p className="truncate text-sm font-semibold">{r.nome}</p><p className="text-xs text-ledger-muted">Barras: {r.barcode || "sem código"} · {textoEtiqueta(r.referencia, r.precoCents) || "sem referência"}{r.aro ? ` · Aro ${r.aro}` : ""}</p></div>
-              <Button size="sm" disabled={!r.barcode} onClick={() => imprimir(r)}><Printer aria-hidden />Imprimir 1</Button>
+              <ImprimirUmComLados disabled={!r.barcode} onImprimir={(d) => imprimir(r, d)} />
             </li>)}</ul>}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3"><span className="flex items-center gap-2 text-xs text-ledger-muted"><LadosEtiqueta />1 lado é o padrão</span><AjustesEstacao /></div>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3"><span className="text-xs text-ledger-muted">1 lado é o padrão. Para 2 lados, marque 2 lados ao lado da impressora.</span><AjustesEstacao /></div>
       </DialogContent>
     </Dialog>
   </>;
+}
+
+function ImprimirUmComLados({ disabled, onImprimir }: { disabled: boolean; onImprimir: (duplicar: boolean) => Promise<boolean> }) {
+  const [duplicar, setDuplicar] = useLadosEtiqueta();
+  return <span className="inline-flex shrink-0 items-center gap-1.5">
+    <Button size="sm" disabled={disabled} onClick={() => { void onImprimir(duplicar).then((ok) => { if (ok) setDuplicar(false); }); }}><Printer aria-hidden />Imprimir 1</Button>
+    <LadosEtiqueta mini value={duplicar} onChange={setDuplicar} />
+  </span>;
 }
 
 /**
@@ -135,12 +149,13 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
  */
 export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = false }: { origens: EtiquetaOrigem[]; label?: string; compact?: boolean; onOpenChange?: (open: boolean) => void }) {
   const [enviando, setEnviando] = useState(false);
+  const [duplicar, setDuplicar] = useLadosEtiqueta();
   const botao = (
     <Button variant="outline" size={compact ? "icon" : "default"} title={origens.length ? label : "Sem dados de peças para imprimir"} aria-label={label} disabled={!origens.length || enviando}
-      onClick={(e) => { e.stopPropagation(); setEnviando(true); void imprimirOrigens(origens, false).finally(() => setEnviando(false)); }}>
+      onClick={(e) => { e.stopPropagation(); setEnviando(true); void imprimirOrigens(origens, false, 1, duplicar).then((ok) => { if (ok) setDuplicar(false); }).finally(() => setEnviando(false)); }}>
       {enviando ? <Loader2 aria-hidden className="animate-spin" /> : <Printer aria-hidden />}{compact ? null : label}
     </Button>
   );
-  // 0341: ao lado do botão grande, 1 lado já marcado; 2 lados só para a próxima impressão.
-  return compact ? botao : <span className="inline-flex flex-wrap items-center gap-2">{botao}<LadosEtiqueta /></span>;
+  // 0342: todo ícone de impressora (lista ou botão grande) tem o seu 1/2 lados colado ao lado; 1 lado sempre marcado.
+  return <span className={compact ? "inline-flex items-center gap-1.5" : "inline-flex flex-wrap items-center gap-2"} onClick={(e) => e.stopPropagation()}>{botao}<LadosEtiqueta mini={compact} value={duplicar} onChange={setDuplicar} /></span>;
 }

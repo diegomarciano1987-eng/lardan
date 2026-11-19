@@ -7,7 +7,7 @@ import type { LinguagemArgox } from "@/lib/etiquetas-raw";
  * Nome da impressora e linguagem ficam neste computador (cada estação tem a sua Argox).
  */
 const ESTACAO_KEY = "lardan.argox.estacao.v1";
-/** 1 lado / 2 lados não fica guardado na estação (0341): veja lados-etiqueta.ts. */
+/** 1 lado / 2 lados não fica guardado na estação (0341): escolha feita no seletor ao lado de cada impressora (LadosEtiqueta). */
 export type EstacaoArgox = { impressora: string | null; linguagem: LinguagemArgox };
 export const EVENTO_ESTACAO = "lardan:argox-estacao";
 export const QZ_DOWNLOAD = "https://qz.io/download/";

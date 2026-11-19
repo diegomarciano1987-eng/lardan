@@ -1,23 +1,25 @@
-import { useSyncExternalStore } from "react";
-import { escolherLados, ladosAtual, ouvirLados } from "@/lib/lados-etiqueta";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-/** 1 lado (sempre o padrão) ou 2 lados só para a próxima impressão; volta sozinho para 1 lado depois de imprimir. */
+/**
+ * 1 lado / 2 lados da etiqueta de peça (0342): cada ícone de impressora tem o seu
+ * seletor colado ao lado. 1 lado vem sempre marcado; 2 lados vale só para o próximo
+ * clique daquela impressora e volta sozinho para 1 lado quando a etiqueta é enviada.
+ * Nunca é guardado no computador.
+ */
 export function useLadosEtiqueta(): [boolean, (v: boolean) => void] {
-  const duplicar = useSyncExternalStore(ouvirLados, ladosAtual, () => false);
-  return [duplicar, escolherLados];
+  return useState(false);
 }
 
-/** Seletor "1 lado | 2 lados": 1 lado já vem marcado; para 2 lados, marque e depois clique na impressora. */
-export function LadosEtiqueta({ className }: { className?: string }) {
-  const [duplicar, setDuplicar] = useLadosEtiqueta();
+export function LadosEtiqueta({ value, onChange, mini = false, className }: { value: boolean; onChange: (v: boolean) => void; mini?: boolean; className?: string }) {
   return (
-    <div role="radiogroup" aria-label="Lados da etiqueta" title={duplicar ? "A próxima etiqueta sai em 2 lados; depois volta para 1 lado" : "Etiqueta em 1 lado (padrão). Para 2 lados, marque 2 lados e clique na impressora"}
-      className={cn("inline-flex shrink-0 items-center rounded-full border border-line bg-surface p-0.5 text-xs font-semibold", className)}
+    <div role="radiogroup" aria-label="Lados da etiqueta"
+      title={value ? "Este clique sai em 2 lados; depois volta para 1 lado" : "1 lado (padrão). Para 2 lados, marque 2 lados e clique na impressora ao lado"}
+      className={cn("inline-flex shrink-0 items-center rounded-full border border-line bg-surface p-0.5 font-semibold", mini ? "text-[11px]" : "text-xs", className)}
       onClick={(e) => e.stopPropagation()}>
       {([[false, "1 lado"], [true, "2 lados"]] as const).map(([v, rot]) => (
-        <button key={rot} type="button" role="radio" aria-checked={duplicar === v} onClick={() => setDuplicar(v)}
-          className={cn("min-h-8 rounded-full px-3 transition", duplicar === v ? "bg-bronze text-primary-foreground" : "text-ledger-muted hover:text-ledger-text")}>
+        <button key={rot} type="button" role="radio" aria-checked={value === v} onClick={() => onChange(v)}
+          className={cn("whitespace-nowrap rounded-full transition", mini ? "min-h-7 px-2" : "min-h-8 px-3", value === v ? "bg-bronze text-primary-foreground" : "text-ledger-muted hover:text-ledger-text")}>
           {rot}
         </button>
       ))}

@@ -15,6 +15,8 @@ import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
+import { deveRecarregarSessao } from "@/lib/sessao-regras";
+import { esquecerSessao } from "@/lib/sessao-estavel";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SITE_URL } from "@/lib/seo";
 import { setAnalyticsRoute, trackPageView } from "@/lib/analytics";
@@ -145,8 +147,14 @@ function RootComponent() {
 
   // Um único assinante de sessão em toda a aplicação.
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+    // 0358: o login reavisa "SIGNED_IN" a cada volta para a aba; com a mesma pessoa não recarrega nada.
+    let pessoa: string | null | undefined;
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      const atual = session?.user?.id ?? null;
+      const recarregar = deveRecarregarSessao(event, pessoa, atual);
+      pessoa = atual;
+      if (event === "SIGNED_OUT") esquecerSessao();
+      if (!recarregar) return;
       void router.invalidate();
       if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
     });

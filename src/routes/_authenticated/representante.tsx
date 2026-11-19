@@ -7,6 +7,8 @@ import { fetchMyRoles, type AppRole } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
 import { supabase } from "@/integrations/supabase/client";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
+import { ConexaoInstavel } from "@/components/site/ConexaoInstavel";
+import { estadoPermissao } from "@/lib/sessao-regras";
 import { AberturaApp, InstalarApp } from "@/components/consultora/InstalarApp";
 import { PainelRepresentante } from "@/components/representante/PainelRepresentante";
 import { brl, dataBR, repCobrancasLista, repConsultoras, repResumo, type FaixaCobranca } from "@/lib/representante";
@@ -83,7 +85,8 @@ async function minhaFicha(): Promise<string | null> {
 }
 
 function AreaRepresentante() {
-  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
+  const { data: roles, isLoading } = rolesQ;
   const minha = useQuery({ queryKey: ["representante", "minha-ficha"], queryFn: minhaFicha });
   const celular = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
   const { aba = celular ? "captacao" : "cobranca", rep: repEspelho } = Route.useSearch();
@@ -91,6 +94,7 @@ function AreaRepresentante() {
   const sair = async () => { await supabase.auth.signOut(); window.location.href = "/acesso"; };
 
   if (isLoading || minha.isLoading) return null;
+  if (estadoPermissao([rolesQ]) === "instavel") return <ConexaoInstavel onTentar={() => void rolesQ.refetch()} />;
   const r = roles ?? [];
   const espelho = !!repEspelho;
   if (espelho ? !r.some((x) => ESPELHO.includes(x)) : !portaLiberada("representante", r)) return <AcessoNaoLiberado />;

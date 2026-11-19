@@ -18,6 +18,8 @@ import { Estudio } from "@/components/vitrine/Estudio";
 import { CascaConsultora, Clientes, FichaCliente, FormCliente, Inicio, Mais, NovoPedido, Topo, type AbaApp, type Ir, type Nav } from "@/components/consultora/AppConsultora";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
+import { ConexaoInstavel } from "@/components/site/ConexaoInstavel";
+import { estadoPermissao } from "@/lib/sessao-regras";
 import { fetchMyRoles } from "@/lib/session";
 import { portaLiberada } from "@/lib/portas";
 import { useServerFn } from "@tanstack/react-start";
@@ -667,8 +669,10 @@ function Historico({ cycleId }: { cycleId: string | null }) {
 }
 
 function AreaConsultora() {
-  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
+  const { data: roles, isLoading } = rolesQ;
   if (isLoading) return null;
+  if (estadoPermissao([rolesQ]) === "instavel") return <ConexaoInstavel onTentar={() => void rolesQ.refetch()} />;
   if (!portaLiberada("consultora", roles ?? [])) return <AcessoNaoLiberado />;
   return <AreaConsultoraLiberada />;
 }

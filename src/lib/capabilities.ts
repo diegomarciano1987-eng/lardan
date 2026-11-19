@@ -113,6 +113,13 @@ export async function fetchSouColab(): Promise<boolean> {
   return data === true;
 }
 
+/** Mesma pergunta para a tela da Operação: falha de rede vira erro (tenta de novo e mantém a última resposta boa), nunca "não é colaboradora". */
+export async function fetchSouColabEstrito(): Promise<boolean> {
+  const { data, error } = await supabase.rpc("meu_acesso_colab" as never);
+  if (error) throw error;
+  return data === true;
+}
+
 export const CapabilitiesContext = createContext<Capability[]>([]);
 export const useCapabilities = () => useContext(CapabilitiesContext);
 

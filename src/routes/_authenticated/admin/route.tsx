@@ -2,9 +2,11 @@ import { createFileRoute, Navigate, Outlet, useLocation } from "@tanstack/react-
 import { useQuery } from "@tanstack/react-query";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
+import { ConexaoInstavel } from "@/components/site/ConexaoInstavel";
+import { estadoPermissao } from "@/lib/sessao-regras";
 import { fetchMyRoles } from "@/lib/session";
 import { inicioOperacao, portaLiberada, soModulos } from "@/lib/portas";
-import { fetchMyCapabilities, fetchSouColab } from "@/lib/capabilities";
+import { fetchMyCapabilities, fetchSouColabEstrito } from "@/lib/capabilities";
 import { ALL_MODULES, moduleAllowed } from "@/lib/admin-modules";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -19,12 +21,17 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminLayout() {
   const { user } = Route.useRouteContext();
-  const { data: roles, isLoading } = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: fetchMyRoles, staleTime: 10 * 60_000 });
+  const roles = rolesQ.data;
   const capsQ = useQuery({ queryKey: ["my-capabilities"], queryFn: fetchMyCapabilities, staleTime: 10 * 60_000 });
-  const colabQ = useQuery({ queryKey: ["sou-colab"], queryFn: fetchSouColab });
+  const colabQ = useQuery({ queryKey: ["sou-colab"], queryFn: fetchSouColabEstrito, staleTime: 10 * 60_000 });
   const { pathname } = useLocation();
-  if (isLoading || capsQ.isLoading || colabQ.isLoading) return null;
-  if (capsQ.isError || colabQ.isError) return <AcessoNaoLiberado />;
+  // 0358: releitura que falhe mantém a última resposta boa; falha de rede nunca vira "acesso não liberado".
+  const estado = estadoPermissao([rolesQ, capsQ, colabQ]);
+  if (estado === "carregando") return null;
+  if (estado === "instavel") {
+    return <ConexaoInstavel onTentar={() => { void rolesQ.refetch(); void capsQ.refetch(); void colabQ.refetch(); }} />;
+  }
   if (!portaLiberada("operacao", roles ?? [], capsQ.data ?? [], colabQ.data === true)) {
     // Quem não é da operação vai direto para a própria área, sem tela de bloqueio.
     if (portaLiberada("representante", roles ?? [])) return <Navigate to="/representante" replace />;

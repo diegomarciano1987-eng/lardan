@@ -1,14 +1,13 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { conferirSessao } from "@/lib/sessao-estavel";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/equipe" });
-    // Garante a ficha do usuário (perfil) no primeiro acesso autenticado.
-    await supabase.rpc("ensure_profile");
-    return { user: data.user };
+    // 0358: oscilação de internet não derruba quem está trabalhando; só sai quem saiu de verdade.
+    const user = await conferirSessao();
+    if (!user) throw redirect({ to: "/equipe" });
+    return { user };
   },
   component: () => <Outlet />,
 });

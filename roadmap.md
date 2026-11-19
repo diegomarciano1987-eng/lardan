@@ -41,4 +41,4 @@
 ## Rodada 19/11 tarde — relatório e Nova maleta
 - [x] Relatório de acertos: modo "Geral" (maletas diretas, sem representante/praça)
 - [x] Relatório de acertos: escolher um representante ou praça específico (ex.: Daniel) e listar só os dele; poder trocar de representante
-- [ ] Botão "Nova maleta" para todas as colaboradoras (inclusive as de carteira), com prova de abrir e montar
+- [x] Botão "Nova maleta" para todas as colaboradoras (inclusive as de carteira), com prova de abrir e montar

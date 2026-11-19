@@ -1,3 +1,4 @@
+import { NomePeca } from "@/components/NomePeca";
 import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -531,7 +532,7 @@ function PainelOrganizacao({ d, muda, itens, party, img, onFotoMudou }: {
                   return (
                     <button key={i.variant_id} type="button" aria-pressed={dentro} onClick={() => muda((x) => { const s = x.organizacao.selecoes[si]!; s.itens = dentro ? s.itens.filter((v) => v !== i.variant_id) : [...s.itens, i.variant_id]; return x; })}
                       className={`rounded-full border px-2.5 py-1 text-[0.7rem] ${dentro ? "border-primary bg-primary/10" : "border-line-soft text-ledger-muted"}`}>
-                      {i.produto}
+                      <NomePeca variantId={i.variant_id} nome={i.produto} />
                     </button>
                   );
                 })}
@@ -568,7 +569,7 @@ function PainelOrganizacao({ d, muda, itens, party, img, onFotoMudou }: {
                       {miniatura ? <img src={miniatura} alt="" className="size-full object-cover" loading="lazy" /> : <Camera className="m-auto mt-3 size-4 text-ledger-muted" />}
                     </button>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm">{i.produto}</p>
+                      <p className="truncate text-sm"><NomePeca variantId={i.variant_id} nome={i.produto} /></p>
                       <p className="text-[0.7rem] text-ledger-muted">{brl(i.preco_cents)}{i.foto_propria ? " · foto sua" : !fotoId ? " · sem foto" : ""}</p>
                     </div>
                     <button type="button" aria-label="Subir" className="admin-btn px-1.5" disabled={idx === 0} onClick={() => mover(i.variant_id, idx - 1)}><ArrowUp className="size-3.5" /></button>

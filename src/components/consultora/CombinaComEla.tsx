@@ -1,3 +1,4 @@
+import { comReferencia, useReferencias } from "@/lib/referencias-pecas";
 import { useQuery } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
 import { FotoPeca } from "@/components/FotoPeca";
@@ -11,11 +12,13 @@ const raiz = (w: string) => w.replace(/(oes|aes|es|s)$/, "");
 /** Peças disponíveis na maleta que combinam com o que a cliente gosta (pelas preferências anotadas). */
 export function CombinaComEla({ cl }: { cl: Cliente }) {
   const pecas = useQuery({ queryKey: ["consultora", "pecas", "opcoes"], queryFn: () => buscarPecas() });
+  const refs = useReferencias((pecas.data ?? []).map((p) => p.variant_id));
+  const nome = (p: { variant_id: string; produto: string }) => comReferencia(refs.data?.get(p.variant_id), p.produto);
   const palavras = Array.from(new Set(norm(cl.preferencias ?? "").split(/[^a-z0-9]+/).filter((w) => w.length >= 4).map(raiz)));
   if (!palavras.length || !pecas.data?.length) return null;
   const achadas = pecas.data.filter((p) => p.disponivel > 0 && palavras.some((w) => norm(`${p.produto} ${p.categoria ?? ""} ${p.banho ?? ""} ${p.variante ?? ""}`).includes(w))).slice(0, 6);
   if (!achadas.length) return null;
-  const texto = `Oi, ${cl.nome.split(" ")[0]}! Separei peças que combinam com você:\n${achadas.map((p) => `• ${p.produto}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents)}${p.media_id ? `\n  Foto: ${fotoPecaUrl(p.media_id)}` : ""}`).join("\n")}\nQuer ver?`;
+  const texto = `Oi, ${cl.nome.split(" ")[0]}! Separei peças que combinam com você:\n${achadas.map((p) => `• ${nome(p)}${p.variante ? ` (${p.variante})` : ""} — ${brl(p.preco_cents)}${p.media_id ? `\n  Foto: ${fotoPecaUrl(p.media_id)}` : ""}`).join("\n")}\nQuer ver?`;
   const w = linkWhats(cl.telefone, texto);
   return (
     <section className="rounded-2xl border border-border bg-card p-5">
@@ -25,7 +28,7 @@ export function CombinaComEla({ cl }: { cl: Cliente }) {
         {achadas.map((p) => (
           <li key={`${p.cycle_id}:${p.variant_id}`} className="min-w-0">
             <FotoPeca mediaId={p.media_id} variantId={p.variant_id} className="aspect-square w-full rounded-xl" />
-            <p className="mt-1 truncate text-[0.98rem] font-medium">{p.produto}</p>
+            <p className="mt-1 truncate text-[0.98rem] font-medium">{nome(p)}</p>
             <p className="num text-[0.95rem]">{brl(p.preco_cents)}</p>
           </li>
         ))}

@@ -117,9 +117,9 @@ async function buscarPecas(termo: string): Promise<Sugestao[]> {
     .limit(12);
   if (/^\d+$/.test(t)) {
     q = q.or(`internal_code.ilike.%${t}%,barcode.ilike.%${t}%,name.ilike.%${t}%`);
-  } else if (/^L[A-Z]{2}\d/i.test(t) && partes.length === 1) {
-    // 0338: referência da etiqueta (ex.: LAN0353)
-    q = q.ilike("reference_code", `%${t}%`);
+  } else if (partes.length === 1) {
+    // 0338/0340: referência da etiqueta (ex.: LAN0353, A0018) ou parte do nome
+    q = q.or(`reference_code.ilike.%${t}%,name.ilike.%${t}%`);
   } else {
     for (const p of partes) q = q.ilike("name", `%${p}%`);
   }

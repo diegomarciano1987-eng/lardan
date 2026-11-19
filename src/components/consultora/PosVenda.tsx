@@ -1,3 +1,4 @@
+import { comReferencia, useReferencias } from "@/lib/referencias-pecas";
 import * as React from "react";
 import { compactarFoto } from "@/lib/foto-compacta";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -28,6 +29,7 @@ export function AbrirPosVenda({ pedido }: { pedido: string }) {
 function FormularioTroca({ pedido, onFim }: { pedido?: string; onFim: () => void }) {
   const qc = useQueryClient();
   const ped = useQuery({ queryKey: ["consultora", "pedido", pedido], enabled: !!pedido, queryFn: () => detalhePedido(pedido ?? "") });
+  const refsPed = useReferencias((ped.data?.itens ?? []).map((i) => i.variant_id));
   const [peca, setPeca] = React.useState<PecaBusca | null>(null);
   const [itemPedido, setItemPedido] = React.useState("");
   const [refManual, setRefManual] = React.useState("");
@@ -56,7 +58,7 @@ function FormularioTroca({ pedido, onFim }: { pedido?: string; onFim: () => void
   return (
     <div className="space-y-5 text-[1.02rem]">
       <div><p className="mb-2 font-semibold">1. Qual peça?</p>
-        {pedido ? <SmartSelect value={itemPedido} onChange={setItemPedido} placeholder={ped.isLoading ? "Carregando peças…" : "Escolha a peça do pedido"} options={(ped.data?.itens ?? []).map((i) => ({ value: i.id, label: `${i.quantity}× ${i.product_name}` }))} />
+        {pedido ? <SmartSelect value={itemPedido} onChange={setItemPedido} placeholder={ped.isLoading ? "Carregando peças…" : "Escolha a peça do pedido"} options={(ped.data?.itens ?? []).map((i) => ({ value: i.id, label: `${i.quantity}× ${comReferencia(refsPed.data?.get(i.variant_id), i.product_name)}` }))} />
           : <><PecaTrocaPicker value={peca} onChange={setPeca} placeholder="Busque pela referência da etiqueta ou nome" />
             {!peca && <input className="admin-input mt-2 min-h-12 w-full" value={refManual} onChange={(e) => setRefManual(e.target.value.toUpperCase())} placeholder="Ou digite a referência (ex.: LANP0342)" aria-label="Referência da etiqueta" />}</>}
       </div>

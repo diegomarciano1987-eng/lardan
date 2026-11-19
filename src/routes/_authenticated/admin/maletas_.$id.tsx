@@ -1,3 +1,5 @@
+import { useCodigosPessoas } from "@/lib/codigos-consultoras";
+import { comCodigo } from "@/lib/busca-maletas";
 import { FotoPeca } from "@/components/FotoPeca";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { imprimirRomaneio } from "@/components/admin/maletas/DocumentosMaleta";
@@ -144,21 +146,23 @@ function MaletaFicha() {
     onError: (e) => toast.error(traduzir(e)),
   });
 
+  const codigoConsultora = useCodigosPessoas([ficha.data?.ciclo.consultora_party_id]);
   if (ficha.isLoading) return <Skeleton className="h-64" />;
   if (ficha.isError) return <ErrorState message={traduzir(ficha.error)} onRetry={() => void ficha.refetch()} />;
   const d = ficha.data!;
   const s = SITUACAO_MALETA[d.ciclo.status] ?? { rotulo: d.ciclo.status, tom: "neutro" as const };
   const montando = d.ciclo.status === "rascunho" || d.ciclo.status === "montagem";
+  const consultoraRotulo = d.consultora ? comCodigo(d.consultora, d.ciclo.consultora_party_id ? codigoConsultora.data?.get(d.ciclo.consultora_party_id) : null) : null;
   const emTransito = d.entregas.filter((t) => t.situacao === "transito");
   const nomes: Record<string, string> = {};
-  for (const c of d.composicao) nomes[c.variant_id] = `${c.referencia ? `${c.referencia} · ` : ""}${c.produto}${c.variante ? ` · ${c.variante}` : ""}`;
-  for (const b of d.saldos) nomes[b.variant_id] ??= `${b.produto}${b.variante ? ` · ${b.variante}` : ""}`;
+  for (const c of d.composicao) nomes[c.variant_id] = `${c.referencia ? `${c.referencia} · ` : "Sem referência · "}${c.produto}${c.variante ? ` · ${c.variante}` : ""}`;
+  for (const b of d.saldos) nomes[b.variant_id] ??= `${b.referencia ? `${b.referencia} · ` : "Sem referência · "}${b.produto}${b.variante ? ` · ${b.variante}` : ""}`;
 
   return (
     <div className="space-y-8">
       <PageHeader
         eyebrow={`Maleta ${d.maleta.codigo} · ciclo ${d.ciclo.cycle_no}`}
-        title={d.consultora ?? "Sem consultora definida"}
+        title={consultoraRotulo ?? "Sem consultora definida"}
         description={`${d.ciclo.quantity_total} peças · ${brl(Number(d.ciclo.reference_total_cents ?? 0))} em valor de referência`}
         actions={
           <div className="flex items-center gap-2">
@@ -179,7 +183,7 @@ function MaletaFicha() {
           {leitor && (
             <MontagemLeitor
               cycleId={id}
-              titulo={`Maleta ${d.maleta.codigo} · ${d.consultora ?? "sem consultora"}`}
+              titulo={`Maleta ${d.maleta.codigo} · ${consultoraRotulo ?? "sem consultora"}`}
               composicao={d.composicao}
               codigoMaleta={d.maleta.codigo}
               dataAcerto={(d.ciclo as { due_at?: string | null }).due_at ?? null}
@@ -189,7 +193,7 @@ function MaletaFicha() {
           {conferindo && (
             <ConferenciaMaleta
               cycleId={id}
-              titulo={`Maleta ${d.maleta.codigo} · ${d.consultora ?? "sem consultora"}`}
+              titulo={`Maleta ${d.maleta.codigo} · ${consultoraRotulo ?? "sem consultora"}`}
               composicao={d.composicao}
               aoConcluir={() => {
                 setConferindo(false);

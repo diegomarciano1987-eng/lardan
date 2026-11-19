@@ -9,12 +9,15 @@ import { AlertTriangle, ChevronDown } from "lucide-react";
 import { formatBRLFromCents, formatInt } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
 import { visibilidadeMaletas } from "@/lib/maletas-visibilidade";
+import { useCodigosPessoas } from "@/lib/codigos-consultoras";
+import { comCodigo } from "@/lib/busca-maletas";
 
 const dataBr = (v?: string | null) => (v ? v.slice(0, 10).split("-").reverse().join("/") : "—");
 
 export function MaletasNaRua() {
   const [aberto, setAberto] = React.useState(false);
   const q = useQuery({ queryKey: ["maletas", "visibilidade"], queryFn: () => visibilidadeMaletas(300), staleTime: 60_000, retry: false });
+  const codigos = useCodigosPessoas((q.data?.lardan.lista ?? []).map((m) => m.party_id));
   if (q.isError || !q.data) return null; // sem permissão ou carregando: não ocupa espaço
   const { lardan: l, smalldata: s } = q.data;
   if (s.consultoras === 0 && (s.por_situacao ?? []).length === 0 && l.invisiveis === 0) return null;
@@ -54,7 +57,7 @@ export function MaletasNaRua() {
                   <li key={m.cycle_id}>
                     <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} className="admin-link">{m.kit}</Link>{" "}
                     {m.party_id ? (
-                      <Link to="/admin/cobranca/$id" params={{ id: m.party_id }} className="admin-link">{m.consultora}</Link>
+                      <Link to="/admin/cobranca/$id" params={{ id: m.party_id }} className="admin-link">{comCodigo(m.consultora, codigos.data?.get(m.party_id))}</Link>
                     ) : (
                       <span>{m.consultora ?? "sem consultora"}</span>
                     )}

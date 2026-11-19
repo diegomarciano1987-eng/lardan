@@ -1,3 +1,4 @@
+import { comReferencia, useReferencias } from "@/lib/referencias-pecas";
 import { Button } from "@/components/ui/button";
 import { BarraIncentivo } from "./EtiquetaIncentivo";
 import { ComprasCliente } from "@/components/consultora/ComprasCliente";
@@ -804,6 +805,9 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
   const clientes = useQuery({ queryKey: ["consultora", "clientes", buscaCliente], queryFn: () => listarClientes(buscaCliente) });
   const opcoes = useQuery({ queryKey: ["consultora", "pecas", "opcoes"], queryFn: () => buscarPecas() });
   const pecas = useQuery({ queryKey: ["consultora", "pecas", busca, categoria, banho], queryFn: () => buscarPecas(busca, categoria, banho) });
+  // 0341: referência sempre junto do nome da peça
+  const refs = useReferencias([...(pecas.data ?? []).map((p) => p.variant_id), ...(opcoes.data ?? []).map((p) => p.variant_id)]);
+  const nomePeca = (p: { variant_id: string; produto: string }) => comReferencia(refs.data?.get(p.variant_id), p.produto);
   const clienteFicha = useQuery({ queryKey: ["consultora", "cliente", cliente], queryFn: () => cliente ? obterCliente(cliente) : Promise.resolve(null), enabled: !!cliente });
   const cl = clienteFicha.data ?? clientes.data?.find((c) => c.id === cliente);
   const k = (p: Peca) => `${p.cycle_id}:${p.variant_id}`;
@@ -923,7 +927,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
                 <li key={k(p)} className={`flex gap-3 rounded-2xl border bg-card p-3 ${n > 0 ? "border-primary" : "border-border"}`}>
                   <FotoAmpliavel mediaId={p.media_id} variantId={p.variant_id} nome={p.produto} />
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <p className="text-[1.05rem] font-semibold leading-snug">{p.produto}</p>
+                    <p className="text-[1.05rem] font-semibold leading-snug">{nomePeca(p)}</p>
                     <p className="text-[0.95rem] text-muted-foreground">{p.variante ?? "Tamanho único"} · {p.disponivel} disponível{p.disponivel > 1 ? "is" : ""}</p>
                     <p className="text-[1.1rem] font-semibold">{brl(p.preco_cents)}</p>
                     <Button type="button" variant={n ? "secondary" : "default"} className="mt-auto min-h-12 w-full" onClick={() => set(n ? 0 : 1)}>{n ? "✓ Adicionada" : "Adicionar"}</Button>
@@ -937,7 +941,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
               );
             })}
           </ul>
-          {escolhidas.some((p) => p.collection_id) && <section className="border-t border-border pt-4"><h3 className="mb-3 text-xl font-semibold">Combina com</h3><div className="flex flex-wrap gap-3">{(opcoes.data ?? []).filter((p) => !qtd[k(p)] && p.collection_id && escolhidas.some((e) => e.collection_id === p.collection_id && e.categoria !== p.categoria)).slice(0, 3).map((p) => <Button key={k(p)} variant="outline" className="h-auto min-h-12" onClick={() => { setSelecionadas((s) => ({ ...s, [k(p)]: p })); setQtd((s) => ({ ...s, [k(p)]: 1 })); }}>{p.produto} · {brl(p.preco_cents)} · Adicionar</Button>)}</div></section>}
+          {escolhidas.some((p) => p.collection_id) && <section className="border-t border-border pt-4"><h3 className="mb-3 text-xl font-semibold">Combina com</h3><div className="flex flex-wrap gap-3">{(opcoes.data ?? []).filter((p) => !qtd[k(p)] && p.collection_id && escolhidas.some((e) => e.collection_id === p.collection_id && e.categoria !== p.categoria)).slice(0, 3).map((p) => <Button key={k(p)} variant="outline" className="h-auto min-h-12" onClick={() => { setSelecionadas((s) => ({ ...s, [k(p)]: p })); setQtd((s) => ({ ...s, [k(p)]: 1 })); }}>{nomePeca(p)} · {brl(p.preco_cents)} · Adicionar</Button>)}</div></section>}
           {(opcoes.data?.length ?? 0) > 0 && <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur lg:static lg:rounded-2xl lg:border">
             <div className="mx-auto flex max-w-5xl items-center gap-3">
               <p className="min-w-0 flex-1 text-[1.02rem]">{unidades === 0 && <span className="block">Escolha pelo menos 1 peça</span>}<strong>{unidades}</strong> peça{unidades === 1 ? "" : "s"} · <strong>{brl(total)}</strong></p>
@@ -955,7 +959,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
               <li key={k(p)} className="flex items-center gap-3 p-4">
                 <FotoPeca mediaId={p.media_id} variantId={p.variant_id} className="size-14 rounded-lg" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[1.02rem] font-semibold">{p.produto}</p>
+                  <p className="text-[1.02rem] font-semibold">{nomePeca(p)}</p>
                   <p className="text-[0.95rem] text-muted-foreground">{p.variante ?? "Tamanho único"} · {qtd[k(p)]} × {brl(p.preco_cents)}</p>
                 </div>
                 <p className="num text-[1.05rem] font-semibold">{brl(p.preco_cents * (qtd[k(p)] ?? 0))}</p>
@@ -1000,7 +1004,7 @@ export function NovoPedido({ clienteInicial, ir }: { clienteInicial?: string | u
           {cl && <PagamentoLardan pedido={resultado.order_id} total={resultado.total_cents} cliente={cl.nome} telefone={cl.telefone} parcelasIniciais={forma === "credito" ? Number(parcelas) : 1} />}
           {cl && linkWhats(cl.telefone) && (
             <ResumoWhats orderId={resultado.order_id} telefone={cl.telefone} cliente={cl.nome} codigo={resultado.codigo} total={resultado.total_cents} combinado={combinadoTexto}
-              itensLocais={escolhidas.map((p) => ({ nome: p.produto, variante: p.variante, quantidade: qtd[k(p)] ?? 0, unitario_cents: p.preco_cents, referencia: null }))} />
+              itensLocais={escolhidas.map((p) => ({ nome: p.produto, variante: p.variante, quantidade: qtd[k(p)] ?? 0, unitario_cents: p.preco_cents, referencia: refs.data?.get(p.variant_id) ?? null }))} />
           )}
           <Link to="/consultora-garantia/$id" params={{ id: resultado.order_id }} target="_blank" className="flex items-center justify-center gap-2 py-2 text-[1rem] text-muted-foreground underline underline-offset-4"><FileText className="size-4" aria-hidden /> Imprimir em folha A4</Link>
           <button type="button" className="admin-btn min-h-13 w-full justify-center text-base" onClick={() => ir({ aba: "pedidos" })}>Ver meus pedidos</button>
@@ -1058,7 +1062,7 @@ export function Mais({ ir }: { ir: Ir }) {
 
 /** Resumo do pedido para a cliente: referência de cada peça + link da página com as fotos (pedido_publico). */
 function ResumoWhats(a: { orderId: string; telefone: string; cliente: string; codigo: string; total: number; combinado: string | null | undefined;
-  itensLocais: { nome: string; variante: string | null; quantidade: number; unitario_cents: number; referencia: null }[] }) {
+  itensLocais: { nome: string; variante: string | null; quantidade: number; unitario_cents: number; referencia: string | null }[] }) {
   const q = useQuery({
     queryKey: ["consultora", "pedido-publico", a.orderId],
     queryFn: async () => {

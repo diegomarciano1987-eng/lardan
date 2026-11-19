@@ -4,6 +4,7 @@
  * 2) Fecha a pré-baixa: o app mostra total vendido, comissão pela faixa e o valor exato a pagar, e gera o Pix.
  * 3) Depois do Pix: "aguardando conferência". A Lardan confere a maleta pelo código e encerra o acerto.
  */
+import { comReferencia, useReferencias } from "@/lib/referencias-pecas";
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -46,6 +47,8 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
   });
 
   const d = q.data;
+  // 0341: referência sempre junto do nome da peça
+  const refs = useReferencias((d?.itens ?? []).map((i) => i.variant_id));
   if (q.isLoading) return null;
   const vendidas = d?.itens.reduce((s, i) => s + i.vendida, 0) ?? 0;
   const total = d?.itens.reduce((s, i) => s + i.enviada, 0) ?? 0;
@@ -66,7 +69,7 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
   const recebido = Number(c.recebido_lardan_cents ?? 0);
   const aguardando = Number(c.aguardando_lardan_cents ?? 0);
   const adiantado = Number(c.adiantado_consultora_cents ?? 0);
-  const lista = d.itens.filter((i) => !busca.trim() || `${i.produto} ${i.variante ?? ""} ${i.sku ?? ""}`.toLowerCase().includes(busca.trim().toLowerCase()));
+  const lista = d.itens.filter((i) => !busca.trim() || `${refs.data?.get(i.variant_id) ?? ""} ${i.produto} ${i.variante ?? ""} ${i.sku ?? ""}`.toLowerCase().includes(busca.trim().toLowerCase()));
   const editavel = d.status === "aberta";
 
   return (
@@ -104,13 +107,13 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
           {aberto && (
             <div className="space-y-2">
               <label className="flex items-center gap-2 rounded-xl border border-border px-3"><Search className="size-4 text-muted-foreground" aria-hidden />
-                <input className="h-11 flex-1 bg-transparent text-base outline-none" placeholder="Buscar peça" value={busca} onChange={(e) => setBusca(e.target.value)} />
+                <input className="h-11 flex-1 bg-transparent text-base outline-none" placeholder="Buscar peça pela referência ou nome" value={busca} onChange={(e) => setBusca(e.target.value)} />
               </label>
               <ul className="divide-y divide-border rounded-2xl border border-border">
                 {lista.map((i) => (
                   <li key={i.variant_id} className="flex items-center gap-3 p-3">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[0.98rem] font-medium">{i.produto}{i.variante && !["U", "UN"].includes(i.variante) ? ` · ${i.variante}` : ""}</p>
+                      <p className="truncate text-[0.98rem] font-medium">{comReferencia(refs.data?.get(i.variant_id), i.produto)}{i.variante && !["U", "UN"].includes(i.variante) ? ` · ${i.variante}` : ""}</p>
                       <p className="text-xs text-muted-foreground">{i.sku ?? ""} · {brl(i.preco_cents)} · recebeu {i.enviada}{i.app ? ` · ${i.app} paga(s) pelo app` : ""}</p>
                     </div>
                     <div className="flex items-center gap-1">

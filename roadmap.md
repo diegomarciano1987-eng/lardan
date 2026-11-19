@@ -12,3 +12,15 @@
 - [x] Leitor aceita aro com 2 e 1 dígito, base/referência pergunta o aro, código duplo pergunta o anel
 - [x] Grade de aros na ficha do anel (LAN0353 gerada 04–30)
 - [x] Testes isolados e prints de prova
+
+# Melhorias críticas 19/11 (4 etapas)
+- [x] E1. Busca de maleta por nome/código da consultora (Qualidade, Remessas, dentro da remessa)
+- [x] E1. Busca de peça por referência (LAN...) em todos os buscadores de peças
+- [x] E1. Código da consultora ao lado do nome nas telas da equipe
+- [x] E1. Referência sempre junto do nome da peça (app da consultora, maleta e demais telas)
+- [ ] E2. "Acrescentar peças" no topo da maleta + seção "Peças extras do ciclo"
+- [ ] E2. Investigar peças extras sumidas MAL-00467 (Isabela)
+- [ ] E2. Baixa no app só a partir de 10 dias antes do acerto; desfazer MAL-00607 e MAL-00545
+- [ ] E3. Pedidos da consultora no app não entram no Contas a Receber até a cliente pagar
+- [ ] E3. "Nova maleta" direta (sem praça/representante): data de acerto + responsável
+- [ ] E4. Relatório de acertos por período (praça/representante), A4 com logo e linhas de anotação

@@ -1,3 +1,4 @@
+import { NomePeca } from "@/components/NomePeca";
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -334,7 +335,7 @@ export function ReservationDialog({
                   size="lg"
                 />
                 <div className="min-w-0 text-sm">
-                  <p className="truncate font-semibold text-ledger-text">{item.data.produto}</p>
+                  <p className="truncate font-semibold text-ledger-text"><NomePeca variantId={item.data.variant_id} nome={item.data.produto} /></p>
                   <p className="truncate text-xs text-ledger-muted">
                     {item.data.variante}
                     {item.data.sku ? ` · ${item.data.sku}` : ""}

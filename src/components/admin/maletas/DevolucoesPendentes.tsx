@@ -7,6 +7,8 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Panel } from "@/components/admin/ui";
 import { devolucoesAbertas, receberDevolucao } from "@/lib/maleta-devolucao";
+import { useCodigosPorMaleta } from "@/lib/codigos-consultoras";
+import { comCodigo } from "@/lib/busca-maletas";
 
 export function DevolucoesPendentes({ remessaNumero }: { remessaNumero: number }) {
   const qc = useQueryClient();
@@ -22,6 +24,7 @@ export function DevolucoesPendentes({ remessaNumero }: { remessaNumero: number }
     onError: (e) => toast.error((e as Error).message),
   });
   const lista = (q.data ?? []).filter((d) => d.remessa === remessaNumero);
+  const codigos = useCodigosPorMaleta(lista.map((d) => d.cycle_id));
   if (lista.length === 0) return null;
   return (
     <Panel title={`Maletas voltando para a empresa (${lista.length})`}>
@@ -30,7 +33,7 @@ export function DevolucoesPendentes({ remessaNumero }: { remessaNumero: number }
           <div key={d.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line-soft bg-surface p-4">
             <div className="min-w-64 flex-1">
               <p className="font-semibold text-ledger-text">
-                <Link to="/admin/maletas/$id" params={{ id: d.cycle_id }} className="admin-link">{d.maleta}</Link> · {d.consultora ?? "abertura"} · {d.pecas} peças
+                <Link to="/admin/maletas/$id" params={{ id: d.cycle_id }} className="admin-link">{d.maleta}</Link> · {d.consultora ? comCodigo(d.consultora, codigos.data?.get(d.cycle_id)) : "abertura"} · {d.pecas} peças
               </p>
               <p className="text-xs text-ledger-muted">
                 {d.origem === "representante" ? `Devolvida por ${d.representante ?? "representante"}` : "Registrada pela equipe"} em{" "}

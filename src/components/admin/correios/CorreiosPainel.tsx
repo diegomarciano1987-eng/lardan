@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Panel, StatusBadge } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
+import { useCodigosPorMaleta } from "@/lib/codigos-consultoras";
+import { comCodigo } from "@/lib/busca-maletas";
 
 interface Painel {
   envios: { id: string; cycle_id: string; kit: string; consultora: string | null; direcao: string; status: string; codigo_objeto: string | null;
@@ -26,6 +28,7 @@ export function CorreiosPainel() {
     },
     retry: false,
   });
+  const codigos = useCodigosPorMaleta([...(q.data?.alertas_volta ?? []).map((a) => a.cycle_id), ...(q.data?.envios ?? []).slice(0, 50).map((e) => e.cycle_id)]);
   if (q.error) return null;   // sem permissão ou ainda não publicado
   const d = q.data;
   if (!d) return null;
@@ -49,7 +52,7 @@ export function CorreiosPainel() {
             <ul className="mt-2 divide-y divide-line-soft">
               {d.alertas_volta.map((a) => (
                 <li key={a.id} className="flex flex-wrap justify-between gap-2 py-1.5">
-                  <Link to="/admin/maletas/$id" params={{ id: a.cycle_id }} className="admin-link">{a.kit} · {a.consultora ?? "—"}</Link>
+                  <Link to="/admin/maletas/$id" params={{ id: a.cycle_id }} className="admin-link">{a.kit} · {a.consultora ? comCodigo(a.consultora, codigos.data?.get(a.cycle_id)) : "—"}</Link>
                   <span className="text-xs">código {a.codigo_objeto} · prazo {dt(a.limite_postagem)} · {a.dias_atraso} dia(s) de atraso</span>
                 </li>
               ))}
@@ -64,7 +67,7 @@ export function CorreiosPainel() {
                 {d.envios.slice(0, 50).map((e) => (
                   <tr key={e.id} className="border-t border-line-soft">
                     <td className="py-1.5"><Link to="/admin/maletas/$id" params={{ id: e.cycle_id }} className="admin-link">{e.kit}</Link></td>
-                    <td>{e.consultora ?? "—"}</td>
+                    <td>{e.consultora ? comCodigo(e.consultora, codigos.data?.get(e.cycle_id)) : "—"}</td>
                     <td>{e.direcao === "ida" ? "Ida" : "Volta"}</td>
                     <td className="font-mono text-xs">{e.codigo_objeto ?? "—"}</td>
                     <td><StatusBadge tone={e.status === "entregue" ? "success" : e.status === "erro" ? "danger" : "neutral"}>{e.status.replace("_", " ")}</StatusBadge>

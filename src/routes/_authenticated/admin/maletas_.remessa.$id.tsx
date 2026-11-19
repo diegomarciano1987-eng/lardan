@@ -3,7 +3,7 @@ import { InformacoesRemessa, semAnotacao, useInformacoesRemessa } from "@/compon
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Ban, CheckCircle2, FileText, Lock, Plus, ScrollText, ShieldCheck, Tag, UserRound } from "lucide-react";
+import { Ban, CheckCircle2, FileText, Lock, Plus, ScrollText, Search, ShieldCheck, Tag, UserRound } from "lucide-react";
 import { imprimirPedidoConsignacao, imprimirPromissoriaMaleta } from "@/components/admin/maletas/DocumentosMaleta";
 import { imprimirEtiquetaMaleta } from "@/components/admin/maletas/EtiquetaMaleta";
 import { abrirMaletaRepresentante, devolverCustodiaRepresentante, expedirRemessaRepresentante, mensagem } from "@/lib/maletas-perdidas";
@@ -18,6 +18,7 @@ import { STATUS_TRANSFERIR, TransferirMaletaBotao } from "@/components/admin/mal
 import { useAdminRoles } from "@/components/admin/AdminShell";
 import { liberarKitSemPreBaixa } from "@/lib/pre-baixa";
 import { toast } from "sonner";
+import { casaBusca } from "@/lib/busca-maletas";
 import { BackButton, EmptyState, ErrorState, Panel, Skeleton, StatusBadge } from "@/components/admin/ui";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { useCapabilities } from "@/lib/capabilities";
@@ -96,6 +97,22 @@ function RemessaPage() {
       return new Map((data ?? []).map((p) => [p.id, p.code as string | null]));
     },
   });
+  // 0340: número da maleta (MAL-…) de cada linha, para mostrar e para a busca dentro da remessa
+  const idsCiclos = React.useMemo(() => (maletas.data ?? []).map((m) => m.cycle_id).sort(), [maletas.data]);
+  const codigosMaleta = useQuery({
+    queryKey: ["remessas", "codigos-maleta", idsCiclos],
+    enabled: idsCiclos.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("kit_cycles").select("id, kits(code)").in("id", idsCiclos);
+      if (error) throw error;
+      return new Map((data ?? []).map((c) => [c.id as string, ((c as unknown as { kits: { code: string } | null }).kits?.code ?? null) as string | null]));
+    },
+  });
+  const [buscaMaleta, setBuscaMaleta] = React.useState("");
+  const maletasFiltradas = React.useMemo(() => (maletas.data ?? []).filter((m) => casaBusca(buscaMaleta, [
+    m.consultora, m.consultora_party_id ? codigos.data?.get(m.consultora_party_id) : null,
+    codigosMaleta.data?.get(m.cycle_id), rotuloMaletaRemessa(m),
+  ])), [maletas.data, buscaMaleta, codigos.data, codigosMaleta.data]);
   const trocas = useTrocasPendentes(id);
   const trocaPorMaleta = React.useMemo(() => new Map((trocas.data ?? []).map((t) => [t.cycle_id, t])), [trocas.data]);
   // Master: remessa criada por engano (sem nenhuma maleta) cancela aqui mesmo, com motivo (remessa_cancelar_vazia)
@@ -398,7 +415,24 @@ function RemessaPage() {
         {maletas.data?.length === 0 && (
           <div className="px-6"><EmptyState title="Nenhuma maleta ainda" description="Escolha uma consultora da praça acima para abrir a primeira maleta." /></div>
         )}
-        {maletas.data?.map((m) => {
+        {(maletas.data?.length ?? 0) > 0 && (
+          <div className="flex flex-wrap items-center gap-3 border-b border-line-soft px-6 py-4">
+            <label className="flex h-11 min-w-[18rem] flex-1 items-center gap-2 rounded-[10px] border border-line bg-surface px-3 focus-within:border-champagne">
+              <Search aria-hidden className="size-4 shrink-0 text-ledger-muted" />
+              <input value={buscaMaleta} onChange={(e) => setBuscaMaleta(e.target.value)} aria-label="Buscar maleta nesta remessa"
+                placeholder="Buscar consultora (nome ou código) ou maleta (MAL-00467, 467, MALETA 02)"
+                className="h-full w-full bg-transparent text-sm outline-none placeholder:text-ledger-muted" />
+              {buscaMaleta && <button type="button" className="text-xs text-ledger-muted hover:text-ledger-text" onClick={() => setBuscaMaleta("")}>Limpar</button>}
+            </label>
+            <span className="text-sm tabular-nums text-ledger-muted">
+              {buscaMaleta.trim() ? `${maletasFiltradas.length} de ${maletas.data?.length ?? 0} maletas` : `${maletas.data?.length ?? 0} maletas`}
+            </span>
+          </div>
+        )}
+        {buscaMaleta.trim() && maletasFiltradas.length === 0 && (maletas.data?.length ?? 0) > 0 && (
+          <div className="px-6 py-6"><EmptyState title="Nenhuma maleta encontrada" description="Confira o nome, o código da consultora ou o número da maleta." /></div>
+        )}
+        {maletasFiltradas.map((m) => {
           const st = SITUACAO_MALETA[m.status] ?? { rotulo: m.status, tom: "neutro" as const };
           const semPecas = !m.pecas;
           return (
@@ -413,6 +447,9 @@ function RemessaPage() {
                   <span className="mr-2 align-middle text-sm font-semibold tabular-nums text-ledger-muted">[Cód. {codigos.data.get(m.consultora_party_id)}]</span>
                 )}
                 {m.consultora ?? `Com o representante${r.representante ? ` ${r.representante}` : ""} · sem consultora`}
+                {codigosMaleta.data?.get(m.cycle_id) && (
+                  <span className="ml-2 whitespace-nowrap align-middle text-xs font-semibold tabular-nums text-ledger-muted">{codigosMaleta.data.get(m.cycle_id)}</span>
+                )}
               </Link>
               <div className="flex flex-wrap items-center gap-2" aria-label={`Documentos de ${m.consultora ?? "maleta"}`}>
                 <button type="button" className="admin-btn h-9 px-3 text-xs" disabled={semPecas || imprimindo !== null}

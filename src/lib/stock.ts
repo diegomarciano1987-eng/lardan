@@ -240,26 +240,38 @@ export async function listStockLocations() {
 }
 
 /** Busca de peças no servidor, por nome do produto, variação, SKU ou código de barras. */
-export async function searchVariants(term: string, limit = 20) {
-  const termo = term.trim().replace(/[,()]/g, " ");
-  let query = supabase
-    .from("product_variants")
-    .select("id, label, sku, barcode, products!inner(name)")
-    .eq("is_active", true)
-    .order("label")
-    .limit(limit);
-  if (termo.length >= 2) {
-    query = query.or(`label.ilike.%${termo}%,sku.ilike.%${termo}%,barcode.ilike.%${termo}%`);
-  }
-  const { data, error } = await query;
+export interface PecaBuscada {
+  id: string;
+  product_id: string;
+  produto: string;
+  label: string;
+  sku: string | null;
+  barcode: string | null;
+  referencia: string | null;
+  tamanho: string | null;
+}
+
+/**
+ * 0340: busca de peça no servidor por referência (LAN...), nome (por partes, sem acento), SKU,
+ * código de barras e código interno. Referência/código exatos vêm primeiro. Usada em todo buscador de peças.
+ */
+export async function buscarPecas(term: string, limit = 30): Promise<PecaBuscada[]> {
+  const { data, error } = await supabase.rpc("pecas_buscar" as never, { _termo: term, _limite: limit } as never);
   if (error) throw error;
-  return (data ?? []) as unknown as {
-    id: string;
-    label: string;
-    sku: string | null;
-    barcode: string | null;
-    products: { name: string } | null;
-  }[];
+  return (data ?? []) as unknown as PecaBuscada[];
+}
+
+export async function searchVariants(term: string, limit = 20) {
+  const rows = await buscarPecas(term, limit);
+  return rows.map((r) => ({
+    id: r.id,
+    label: r.label,
+    sku: r.sku,
+    barcode: r.barcode,
+    referencia: r.referencia,
+    tamanho: r.tamanho,
+    products: { name: r.produto } as { name: string } | null,
+  }));
 }
 
 export interface MovementInput {

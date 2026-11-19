@@ -1,3 +1,4 @@
+import { buscarPecas as buscarPecasServidor } from "@/lib/stock";
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -47,33 +48,18 @@ type Detalhe = EntradaResumo & { leituras: Leitura[]; consultora_status_anterior
 type Resultado = { ok: boolean; texto: string; codigo: string };
 type Sugestao = { codigo: string; nome: string; product_id: string; variant_id: string };
 
-/** Busca peças por nome, código ou referência para entrada sem leitor. */
+/** Busca peças por referência (LAN…), nome, SKU, código de barras ou código interno — 0340, no servidor. */
 async function buscarPecas(termo: string): Promise<Sugestao[]> {
-  const t = termo.trim().replace(/[%,()]/g, " ");
-  if (t.length < 2) return [];
-  const partes = t.split(/\s+/).filter(Boolean);
-  let q = supabase
-    .from("products")
-    .select("id, name, internal_code, product_variants(id, label, barcode, sku, is_active, is_default)")
-    .limit(12);
-  if (/^\d+$/.test(t)) {
-    q = q.or(`internal_code.ilike.%${t}%,barcode.ilike.%${t}%,name.ilike.%${t}%`);
-  } else {
-    for (const p of partes) q = q.ilike("name", `%${p}%`);
-  }
-  const { data, error } = await q;
-  if (error) throw error;
-  const out: Sugestao[] = [];
-  type V = { id: string; label: string | null; barcode: string | null; sku: string | null; is_active: boolean };
-  for (const p of (data ?? []) as unknown as { id: string; name: string; internal_code: string | null; product_variants: V[] }[]) {
-    for (const v of p.product_variants ?? []) {
-      if (!v.is_active) continue;
-      const codigo = v.barcode || v.sku || p.internal_code;
-      if (!codigo) continue;
-      out.push({ codigo, nome: [p.name, v.label].filter(Boolean).join(" · "), product_id: p.id, variant_id: v.id });
-    }
-  }
-  return out.slice(0, 15);
+  if (termo.trim().length < 2) return [];
+  const rows = await buscarPecasServidor(termo, 15);
+  return rows
+    .map((v) => ({
+      codigo: v.barcode || v.sku || "",
+      nome: [v.referencia, v.produto, v.label].filter(Boolean).join(" · "),
+      product_id: v.product_id,
+      variant_id: v.id,
+    }))
+    .filter((v) => v.codigo);
 }
 
 async function rpc<T>(nome: string, args: Record<string, unknown>) {
@@ -374,7 +360,7 @@ function Conferencia({ id, aoFechar }: { id: string; aoFechar: () => void }) {
                 disabled={!aberta}
                 autoComplete="off"
                 aria-label="Código de barras, número ou nome da peça"
-                placeholder={aberta ? "Bipe, digite o código ou o nome da peça…" : "Entrada encerrada"}
+                placeholder={aberta ? "Bipe, digite a referência, o código ou o nome da peça…" : "Entrada encerrada"}
                 className="w-full bg-transparent font-display text-4xl font-bold tracking-wide text-ledger-text outline-none placeholder:text-ledger-muted/60"
               />
             </label>

@@ -10,13 +10,15 @@ export interface VariantOption {
   label: string;
   sku: string | null;
   produto: string;
+  /** 0340: referência da etiqueta (LAN...) — a equipe trabalha por ela. */
+  referencia?: string | null;
 }
 
 /** Buscador de peças com consulta no servidor, debounce e resultado honesto. */
 export function VariantPicker({
   value,
   onChange,
-  placeholder = "Buscar peça por nome, SKU ou código de barras…",
+  placeholder = "Buscar peça por referência, nome, SKU ou código de barras…",
 }: {
   value: VariantOption | null;
   onChange: (v: VariantOption | null) => void;
@@ -41,6 +43,7 @@ export function VariantPicker({
             label: v.label,
             sku: v.sku,
             produto: v.products?.name ?? "—",
+            referencia: v.referencia,
           })),
         );
         setEstado("idle");
@@ -64,7 +67,7 @@ export function VariantPicker({
           className="flex h-11 w-full items-center justify-between gap-2 rounded-[10px] border border-line bg-surface px-3 text-left text-sm font-medium text-ledger-text shadow-sm transition-colors hover:border-champagne focus-visible:ring-2 focus-visible:ring-champagne/30 focus-visible:outline-none"
         >
           <span className={cn("truncate", !value && "font-normal text-ledger-muted")}>
-            {value ? `${value.produto} · ${value.label}${value.sku ? ` · ${value.sku}` : ""}` : placeholder}
+            {value ? [value.referencia, value.produto, value.label, value.sku].filter(Boolean).join(" · ") : placeholder}
           </span>
           <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
         </button>
@@ -80,7 +83,8 @@ export function VariantPicker({
             autoFocus
             value={term}
             onChange={(e) => setTerm(e.target.value)}
-            placeholder="Nome, SKU ou código de barras"
+            placeholder="Referência (LAN…), nome, SKU ou código de barras"
+            aria-label="Buscar peça"
             className="h-10 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
@@ -114,7 +118,10 @@ export function VariantPicker({
                 />
                 <FotoPeca variantId={r.id} alt={r.produto} size="sm" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium">{r.produto}</span>
+                  <span className="block truncate font-medium">
+                    {r.referencia ? <span className="mr-1.5 font-semibold tabular-nums text-primary">{r.referencia}</span> : null}
+                    {r.produto}
+                  </span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {r.label}
                     {r.sku ? ` · ${r.sku}` : ""}

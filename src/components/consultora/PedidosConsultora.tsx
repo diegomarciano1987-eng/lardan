@@ -1,3 +1,4 @@
+import { comReferencia, useReferencias } from "@/lib/referencias-pecas";
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
@@ -61,6 +62,7 @@ function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, mu
   detalhe: { isLoading: boolean; isError: boolean; error: unknown; data: Awaited<ReturnType<typeof detalhePedido>> | null | undefined };
 }) {
   const links = useLinksPedidos(visiveis.filter((p) => p.status !== "cancelado").map((p) => p.id));
+  const refsPedido = useReferencias((detalhe.data?.itens ?? []).map((i) => i.variant_id));
   return <div className="space-y-7">
     <div role="tablist" aria-label="Situação dos pedidos" className="grid grid-cols-2 gap-3 lg:grid-cols-4">{GRUPOS.map((g) => {
       const itens = lista.filter((p) => grupo(p) === g);
@@ -97,7 +99,7 @@ function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, mu
     <Dialog open={!!aberto} onOpenChange={(v) => { if (!v) setAberto(null); }}><DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>Pedido {aberto?.code}</DialogTitle><DialogDescription>{aberto?.customer_name}</DialogDescription></DialogHeader>
       {detalhe.isLoading && <p>Carregando peças…</p>}{detalhe.isError && <p role="alert">{traduzir(detalhe.error)}</p>}
       <div className="flex flex-wrap items-baseline justify-between gap-3 border-y border-border py-4"><span className="text-lg text-muted-foreground">Valor do pedido</span><strong className="text-2xl font-semibold tabular-nums">{brl(Number(aberto?.subtotal_cents ?? 0))}</strong></div>
-      <ul className="divide-y divide-border">{detalhe.data?.itens.map((i) => <li key={i.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 py-4"><div className="min-w-0"><p className="font-semibold">{i.product_name}</p><p className="mt-1 text-muted-foreground">{i.quantity}× {i.variant_label}</p></div><strong className="pt-1 text-lg tabular-nums">{brl(i.unit_price_cents * i.quantity)}</strong></li>)}</ul>
+      <ul className="divide-y divide-border">{detalhe.data?.itens.map((i) => <li key={i.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 py-4"><div className="min-w-0"><p className="font-semibold">{comReferencia(refsPedido.data?.get(i.variant_id), i.product_name)}</p><p className="mt-1 text-muted-foreground">{i.quantity}× {i.variant_label}</p></div><strong className="pt-1 text-lg tabular-nums">{brl(i.unit_price_cents * i.quantity)}</strong></li>)}</ul>
       {aberto && !["cancelado"].includes(aberto.status) && aberto.payment_status !== "pago" && <PagamentoLardan pedido={aberto.id} total={aberto.subtotal_cents} cliente={aberto.customer_name} telefone={aberto.customer_phone ?? ""} />}
       {aberto?.payment_status === "pago" && <p className="text-lg font-semibold text-success">Pagamento confirmado</p>}
     </DialogContent></Dialog>

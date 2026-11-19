@@ -15,11 +15,18 @@ import {
   type ExpedicaoRetorno, type Recebido, type StatusItemRetorno,
 } from "@/lib/retorno-maletas";
 import { cn } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
+import { buscarMaletas, comCodigo, pareceCodigoMaleta } from "@/lib/busca-maletas";
 
 const TOM_ITEM: Record<StatusItemRetorno, StatusTone> = { a_caminho: "info", recebida: "success", nao_veio: "danger", retirado: "neutral" };
 const CONF: Record<string, string> = {
   aguardando_pagamento: "Conferir peças (Pix ainda não caiu)", aguardando_conferencia: "Conferir peças",
   encerrada: "Acerto encerrado", pendencia: "Acerto com pendência",
+};
+
+const SITUACAO: Record<string, string> = {
+  rascunho: "Rascunho", montagem: "Em montagem", conferida: "Conferida", expedida: "Expedida", transito: "Com o representante",
+  recebida: "Recebida pela consultora", operacao: "Em operação", acerto: "Em acerto", encerrada: "Encerrada",
 };
 
 export function RecebimentoMaletas() {
@@ -29,6 +36,14 @@ export function RecebimentoMaletas() {
   const [ultimo, setUltimo] = React.useState<Recebido | null>(null);
   const [conferindo, setConferindo] = React.useState<string | null>(null);
   const campo = React.useRef<HTMLInputElement>(null);
+  // 0340: além da etiqueta/número, acha a maleta pelo nome ou código da consultora
+  const [termo, setTermo] = React.useState("");
+  React.useEffect(() => {
+    const t = codigo.trim();
+    const h = setTimeout(() => setTermo(t.length >= 3 && !pareceCodigoMaleta(t) ? t : ""), 300);
+    return () => clearTimeout(h);
+  }, [codigo]);
+  const achadas = useQuery({ queryKey: ["qualidade", "recebimento", "busca", termo], queryFn: () => buscarMaletas(termo, 12), enabled: termo.length >= 3 });
   const atualizar = () => { void qc.invalidateQueries({ queryKey: ["qualidade", "recebimento"] }); void qc.invalidateQueries({ queryKey: ["maletas"] }); };
 
   const receber = useMutation({
@@ -63,17 +78,55 @@ export function RecebimentoMaletas() {
 
       {d.pode_receber && (
         <Panel title="Bipar maleta que chegou">
-          <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); const t = codigo.trim(); if (t) receber.mutate({ codigo: t }); }}>
+          <form className="flex flex-wrap gap-2" onSubmit={(e) => {
+            e.preventDefault();
+            const t = codigo.trim();
+            if (!t) return;
+            // etiqueta bipada ou "MAL-00467": confirma direto; nome/código da consultora: mostra as maletas dela
+            if (pareceCodigoMaleta(t)) receber.mutate({ codigo: t });
+            else setTermo(t);
+          }}>
             <label className="flex min-w-[18rem] flex-1 items-center gap-2 rounded-lg border border-line-soft px-3">
               <ScanBarcode aria-hidden className="size-5 text-ledger-muted" />
-              <span className="sr-only">Código da maleta</span>
+              <span className="sr-only">Maleta ou consultora</span>
               <input ref={campo} autoFocus value={codigo} onChange={(e) => setCodigo(e.target.value)} disabled={receber.isPending}
-                placeholder="Bipe a etiqueta da maleta ou digite o código (ex.: MAL-00454)" className="h-12 flex-1 bg-transparent text-base outline-none" />
+                placeholder="Bipe a etiqueta, digite a maleta (MAL-00454) ou o nome/código da consultora" className="h-12 flex-1 bg-transparent text-base outline-none" />
             </label>
             <button type="submit" className="admin-btn admin-btn-primary h-12" disabled={!codigo.trim() || receber.isPending}>
               <PackageCheck aria-hidden className="size-4" /> {receber.isPending ? "Confirmando…" : "Confirmar chegada"}
             </button>
           </form>
+          {termo && (
+            <div className="mt-3 rounded-xl border border-line-soft" aria-live="polite">
+              <p className="border-b border-line-soft px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-ledger-muted">
+                Maletas encontradas para “{termo}”
+              </p>
+              {achadas.isFetching && <p className="px-4 py-3 text-sm text-ledger-muted">Buscando…</p>}
+              {achadas.isError && <p className="px-4 py-3 text-sm text-danger">Falha ao buscar: {(achadas.error as Error).message}</p>}
+              {achadas.isSuccess && !achadas.isFetching && achadas.data.length === 0 && (
+                <p className="px-4 py-3 text-sm text-ledger-muted">Nenhuma maleta com esse nome, código de consultora ou número.</p>
+              )}
+              {achadas.isSuccess && !achadas.isFetching && achadas.data.length > 0 && (
+                <ul className="divide-y divide-line-soft">
+                  {achadas.data.map((m) => (
+                    <li key={m.cycle_id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
+                      <div className="min-w-0">
+                        <p className="font-semibold">{m.maleta} · {comCodigo(m.consultora, m.consultora_codigo) || "Sem consultora"}</p>
+                        <p className="text-ledger-muted">{[m.remessa ? `Remessa ${m.remessa}` : null, m.praca, m.representante, `${m.pecas ?? 0} peças`, SITUACAO[m.status] ?? m.status].filter(Boolean).join(" · ")}</p>
+                      </div>
+                      <span className="flex items-center gap-2">
+                        <Link to="/admin/maletas/$id" params={{ id: m.cycle_id }} className="admin-btn">Abrir maleta</Link>
+                        <button type="button" className="admin-btn admin-btn-primary" disabled={receber.isPending}
+                          onClick={() => { setTermo(""); receber.mutate({ codigo: m.maleta }); }}>
+                          <PackageCheck aria-hidden className="size-4" /> Confirmar chegada
+                        </button>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
           <p className="mt-2 text-xs text-ledger-muted">
             Se a maleta chegou sem o representante ter registrado a expedição (no balcão ou pelos Correios), ela é registrada aqui mesmo.
             A nota fiscal de devolução não sai automática: quando a maleta tinha nota de remessa, fica a pendência para a montagem.

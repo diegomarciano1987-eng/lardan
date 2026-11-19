@@ -24040,6 +24040,10 @@ export type Database = {
         Returns: Json
       }
       maleta_valor_cents: { Args: { _cycle: string }; Returns: number }
+      maletas_buscar: {
+        Args: { _limite?: number; _termo: string }
+        Returns: Json
+      }
       maletas_perdidas_smalldata_processar: {
         Args: { _aplicar?: boolean }
         Returns: Json
@@ -24426,6 +24430,17 @@ export type Database = {
       peca_referencia_etiqueta: {
         Args: { _produto: string; _variante: string }
         Returns: string
+      }
+      pecas_buscar: {
+        Args: { _limite?: number; _termo: string }
+        Returns: Json
+      }
+      pecas_referencias: {
+        Args: { _ids: string[] }
+        Returns: {
+          referencia: string
+          variant_id: string
+        }[]
       }
       pedido_cobranca_cancelada: {
         Args: { _erro: string; _ok: boolean; _order: string }

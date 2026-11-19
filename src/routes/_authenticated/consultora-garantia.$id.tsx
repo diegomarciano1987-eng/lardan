@@ -1,3 +1,4 @@
+import { NomePeca } from "@/components/NomePeca";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { FolhaA4, ModoDeUso } from "@/components/consultora/DocumentoLardan";
@@ -42,7 +43,7 @@ function Comprovante() {
       <table className="mb-5 w-full border-collapse text-[0.92rem]">
         <thead><tr className="border-b border-border text-left"><th className="py-2">Peça</th><th className="py-2 text-center">Qtd.</th><th className="py-2 text-right">Unitário</th><th className="py-2 text-right">Total</th></tr></thead>
         <tbody>{itens.map((i) => (
-          <tr key={i.id} className="border-b border-border/60"><td className="py-2">{i.product_name}{i.variant_label ? ` — ${i.variant_label}` : ""}</td><td className="py-2 text-center tabular-nums">{i.quantity}</td><td className="py-2 text-right tabular-nums">{brl(i.unit_price_cents)}</td><td className="py-2 text-right tabular-nums">{brl(i.unit_price_cents * i.quantity)}</td></tr>
+          <tr key={i.id} className="border-b border-border/60"><td className="py-2"><NomePeca variantId={i.variant_id} nome={i.product_name} />{i.variant_label ? ` — ${i.variant_label}` : ""}</td><td className="py-2 text-center tabular-nums">{i.quantity}</td><td className="py-2 text-right tabular-nums">{brl(i.unit_price_cents)}</td><td className="py-2 text-right tabular-nums">{brl(i.unit_price_cents * i.quantity)}</td></tr>
         ))}</tbody>
         <tfoot><tr><td colSpan={3} className="py-2 text-right font-semibold">Total</td><td className="py-2 text-right font-semibold tabular-nums">{brl(total)}</td></tr></tfoot>
       </table>

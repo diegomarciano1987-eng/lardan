@@ -1,3 +1,4 @@
+import { buscarMaletas, comCodigo } from "@/lib/busca-maletas";
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ import type { DateRange } from "react-day-picker";
 import { useCapabilities } from "@/lib/capabilities";
 import { useColabEscopo } from "@/lib/colab-escopo";
 import { supabase } from "@/integrations/supabase/client";
-import { brl, traduzir } from "@/lib/maletas";
+import { SITUACAO_MALETA, brl, traduzir } from "@/lib/maletas";
 import { remessasHistorico } from "@/lib/historico-jflex";
 import { RemessasHistorico } from "@/components/admin/historico/RemessasHistorico";
 import { MaletasNaRua } from "@/components/admin/maletas/MaletasNaRua";
@@ -227,6 +228,8 @@ function RemessasPage() {
   const lista = useQuery({ queryKey: ["remessas", "busca", filtros], queryFn: () => buscarRemessas(filtros) });
   // A mesma busca também consulta o Histórico SmallData (já escopado ao representante da colaboradora no servidor).
   const historico = useQuery({ queryKey: ["remessas", "busca-historico", busca], queryFn: () => remessasHistorico({ busca, limite: 30 }), enabled: busca.trim().length >= 2 });
+  // 0340: a mesma busca mostra as maletas direto (número, nome ou código da consultora), sem abrir a remessa
+  const maletasAchadas = useQuery({ queryKey: ["remessas", "busca-maletas", busca], queryFn: () => buscarMaletas(busca, 12), enabled: busca.trim().length >= 2 });
   const tot = (lista.data ?? []).reduce(
     (a, r) => ({ n: a.n + 1, m: a.m + Number(r.maletas), c: a.c + Number(r.maletas_conferidas), p: a.p + Number(r.pecas), v: a.v + Number(r.valor_cents) }),
     { n: 0, m: 0, c: 0, p: 0, v: 0 },
@@ -305,7 +308,7 @@ function RemessasPage() {
             <span className="relative">
               <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
               <input className="admin-input w-full pl-9" value={texto} onChange={(e) => setTexto(e.target.value)}
-                placeholder="Nº da remessa, praça, representante, consultora (código, nome ou CPF)" />
+                placeholder="Nº da remessa, maleta (MAL-00467), praça, representante, consultora (código, nome ou CPF)" />
             </span>
           </label>
           <label className="grid gap-1.5 text-sm lg:col-span-4">
@@ -361,6 +364,30 @@ function RemessasPage() {
           </div>
         ))}
       </div>
+
+      {busca.trim().length >= 2 && (
+        <Panel flush>
+          <div className="flex items-center justify-between gap-3 border-b border-line-soft px-6 py-4">
+            <p className="ledger-eyebrow">Maletas encontradas · “{busca.trim()}”</p>
+            {maletasAchadas.data && <span className="text-xs text-ledger-muted">{maletasAchadas.data.length} maleta(s)</span>}
+          </div>
+          {maletasAchadas.isLoading && <div className="space-y-2 p-6"><Skeleton className="h-12" /></div>}
+          {maletasAchadas.isError && <div className="px-6"><ErrorState message={traduzir(maletasAchadas.error)} onRetry={() => void maletasAchadas.refetch()} /></div>}
+          {maletasAchadas.data?.length === 0 && <div className="px-6 py-2"><EmptyState title="Nenhuma maleta" description="Nenhuma maleta com esse número, nome ou código de consultora." /></div>}
+          {maletasAchadas.data?.map((m) => (
+            <Link key={m.cycle_id} to="/admin/maletas/$id" params={{ id: m.cycle_id }}
+              className="grid w-full grid-cols-[110px_1fr_auto_auto] items-center gap-4 border-b border-line-soft px-6 py-3 text-left text-sm hover:bg-surface-muted">
+              <span className="font-semibold tabular-nums">{m.maleta}</span>
+              <span className="min-w-0">
+                <span className="block truncate font-medium">{comCodigo(m.consultora, m.consultora_codigo) || (m.abertura_numero ? `ABERTURA ${String(m.abertura_numero).padStart(2, "0")}` : "Sem consultora")}</span>
+                <span className="block truncate text-xs text-ledger-muted">{[m.remessa ? `Remessa ${m.remessa}` : "Sem remessa", m.praca, m.representante].filter(Boolean).join(" · ")}</span>
+              </span>
+              <span className="tabular-nums text-ledger-muted">{m.data_acerto ? `Acerto ${dataBR(m.data_acerto)}` : ""}</span>
+              <StatusBadge tone="neutral">{SITUACAO_MALETA[m.status]?.rotulo ?? m.status}</StatusBadge>
+            </Link>
+          ))}
+        </Panel>
+      )}
 
       <Panel flush>
         {lista.isLoading && <div className="space-y-2 p-6">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14" />)}</div>}

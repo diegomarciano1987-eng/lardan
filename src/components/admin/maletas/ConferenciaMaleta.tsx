@@ -1,3 +1,4 @@
+import { NomePeca } from "@/components/NomePeca";
 import * as React from "react";
 import { CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -112,7 +113,7 @@ export function ConferenciaMaleta({
                   <li key={c.variant_id} className="flex items-center gap-3 py-2">
                     <FotoPeca mediaId={c.media_id} variantId={c.variant_id} className="size-10 shrink-0 rounded-lg" />
                     <span className="min-w-0 flex-1 truncate">
-                      {c.produto}
+                      <NomePeca variantId={c.variant_id} referencia={c.referencia} nome={c.produto} />
                       {c.variante ? ` · ${c.variante}` : ""}
                       {c.sku ? <span className="text-ledger-muted"> · {c.sku}</span> : null}
                     </span>

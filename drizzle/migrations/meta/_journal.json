@@ -2381,6 +2381,27 @@
       "when": 1795101268818,
       "tag": "0339_0339_troca_corrigir_peca_devolvida",
       "breakpoints": true
+    },
+    {
+      "idx": 340,
+      "version": "7",
+      "when": 1795108594381,
+      "tag": "0340_0340_busca_maletas_e_pecas",
+      "breakpoints": true
+    },
+    {
+      "idx": 341,
+      "version": "7",
+      "when": 1795108973309,
+      "tag": "0341_pecas_referencias",
+      "breakpoints": true
+    },
+    {
+      "idx": 342,
+      "version": "7",
+      "when": 1795109761434,
+      "tag": "0342_estoque_busca_referencia",
+      "breakpoints": true
     }
   ]
 }

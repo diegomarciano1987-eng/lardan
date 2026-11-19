@@ -7,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Panel } from "@/components/admin/ui";
 import { indicadoresPreBaixa, painelPreBaixas, ROTULO_SITUACAO, type SituacaoPreBaixa } from "@/lib/pre-baixa";
+import { useCodigosPorMaleta } from "@/lib/codigos-consultoras";
+import { comCodigo } from "@/lib/busca-maletas";
 
 const brl = (c: number) => (Number(c) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const dataBR = (s: string | null) => (s ? s.slice(0, 10).split("-").reverse().join("/") : "—");
@@ -16,6 +18,7 @@ export function AcertosPainel() {
   const [filtro, setFiltro] = React.useState<SituacaoPreBaixa | "">("aguardando_conferencia");
   const lista = useQuery({ queryKey: ["maletas", "pre-baixas", filtro], queryFn: () => painelPreBaixas(filtro || undefined), retry: false });
   const ind = useQuery({ queryKey: ["maletas", "pre-baixas", "indicadores"], queryFn: indicadoresPreBaixa, retry: false });
+  const codigos = useCodigosPorMaleta((lista.data ?? []).map((p) => p.cycle_id));
   if (lista.isError) return null;
   const g = ind.data?.geral;
   return (
@@ -47,7 +50,7 @@ export function AcertosPainel() {
               <tbody>{lista.data!.map((p) => (
                 <tr key={p.cycle_id} className="border-t border-line-soft">
                   <td className="px-3 py-1.5"><Link to="/admin/maletas/$id" params={{ id: p.cycle_id }} className="admin-link">{p.maleta}</Link></td>
-                  <td className="px-3 py-1.5">{p.consultora}</td><td className="px-3 py-1.5">{p.remessa ?? "—"}</td><td className="px-3 py-1.5">{dataBR(p.prazo)}</td>
+                  <td className="px-3 py-1.5">{comCodigo(p.consultora, codigos.data?.get(p.cycle_id))}</td><td className="px-3 py-1.5">{p.remessa ?? "—"}</td><td className="px-3 py-1.5">{dataBR(p.prazo)}</td>
                   <td className="px-3 py-1.5">{ROTULO_SITUACAO[p.situacao]}{p.pendencia ? <span className="block text-destructive">{p.pendencia}</span> : null}</td>
                   <td className="px-3 py-1.5 text-right tabular-nums">{brl(p.valor_pagar_cents)}</td>
                 </tr>))}</tbody>

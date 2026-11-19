@@ -1,3 +1,4 @@
+import { comReferencia, useReferencias } from "@/lib/referencias-pecas";
 import { marcarAppConsultora } from "@/components/vitrine/VoltarAoApp";
 import { Biblioteca } from "@/components/consultora/Biblioteca";
 import { AcertoApp } from "@/components/consultora/AcertoApp";
@@ -179,6 +180,9 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
     onError: (e) => toast.error(traduzir(e)),
   });
 
+  // 0341: referência sempre junto do nome da peça
+  const refs = useReferencias([...(ficha.data?.composicao ?? []).map((c) => c.variant_id), ...(ficha.data?.saldos ?? []).map((b) => b.variant_id)]);
+  const refDe = (variantId: string) => (ficha.data?.composicao ?? []).find((c) => c.variant_id === variantId)?.referencia || refs.data?.get(variantId) || null;
   if (!cycleId) {
     return (
       <Cartao>
@@ -357,12 +361,12 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
       {!obrigatoria && d.saldos.length > 0 && (() => {
         const termo = semAcento(buscaPeca.trim());
         const lista = d.saldos.filter((b) => (!catPeca || catDe[b.variant_id] === catPeca) && (!soDisp || b.disponivel > 0)
-          && (!termo || semAcento(`${b.produto} ${b.variante ?? ""}`).includes(termo)));
+          && (!termo || semAcento(`${refDe(b.variant_id) ?? ""} ${b.produto} ${b.variante ?? ""}`).includes(termo)));
         const cats = Array.from(new Set(d.saldos.map((b) => catDe[b.variant_id]).filter((c): c is string => !!c)));
         return (
         <Cartao>
           <p className="font-semibold">Minhas peças <span className="font-normal text-ledger-muted">· {lista.length} de {d.saldos.length}</span></p>
-          <input type="search" aria-label="Buscar peça na maleta" placeholder="Buscar peça pelo nome" value={buscaPeca} onChange={(e) => setBuscaPeca(e.target.value)} className="admin-input mt-3 min-h-12 text-base" />
+          <input type="search" aria-label="Buscar peça na maleta" placeholder="Buscar peça pela referência ou nome" value={buscaPeca} onChange={(e) => setBuscaPeca(e.target.value)} className="admin-input mt-3 min-h-12 text-base" />
           <div role="radiogroup" aria-label="Categoria" className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">
             {["", ...cats].map((c) => (
               <button key={c || "todas"} type="button" role="radio" aria-checked={catPeca === c} onClick={() => setCatPeca(c)}
@@ -387,7 +391,7 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
                     : mini;
                 })()}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{b.produto}</p>
+                  <p className="truncate text-sm font-semibold">{comReferencia(refDe(b.variant_id), b.produto)}</p>
                   <p className="text-xs text-ledger-muted">
                     disponível {b.disponivel} · reservadas {b.reservado}
                     {b.divergente > 0 ? ` · divergentes ${b.divergente}` : ""}
@@ -410,8 +414,8 @@ function MinhaMaleta({ cycleId, obrigatoria = false }: { cycleId: string | null;
       {!obrigatoria && <Movimentacoes
         cycleId={cycleId}
         nomes={Object.fromEntries([
-          ...d.composicao.map((c) => [c.variant_id, `${c.produto}${c.variante ? ` · ${c.variante}` : ""}`] as const),
-          ...d.saldos.map((b) => [b.variant_id, `${b.produto}${b.variante ? ` · ${b.variante}` : ""}`] as const),
+          ...d.composicao.map((c) => [c.variant_id, `${comReferencia(c.referencia, c.produto)}${c.variante ? ` · ${c.variante}` : ""}`] as const),
+          ...d.saldos.map((b) => [b.variant_id, `${comReferencia(refDe(b.variant_id), b.produto)}${b.variante ? ` · ${b.variante}` : ""}`] as const),
         ])}
         podeGerir={false}
         podeAcrescentar={false}
@@ -556,7 +560,7 @@ function Historico({ cycleId }: { cycleId: string | null }) {
             .filter((b) => b.divergente > 0)
             .map((b) => (
               <p key={b.variant_id} className="mt-2 text-sm text-ledger-muted">
-                {b.produto} · {b.divergente} un em divergência
+                {comReferencia(d?.composicao.find((c) => c.variant_id === b.variant_id)?.referencia, b.produto)} · {b.divergente} un em divergência
               </p>
             ))
         )}

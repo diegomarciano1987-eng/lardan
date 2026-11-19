@@ -4,6 +4,7 @@
  * peça faltando = cobrada como vendida; peça declarada vendida que voltou = estorna. Bateu → encerra.
  * Também lista as peças que voltaram com preço antigo para imprimir a etiqueta nova.
  */
+import { NomePeca } from "@/components/NomePeca";
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -80,7 +81,7 @@ export function ConferenciaPreBaixa({ cycleId, podeConferir }: { cycleId: string
                   const deve = i.enviada - i.vendida; const lida = lidas[i.variant_id] ?? 0;
                   return (
                     <tr key={i.variant_id} className={`border-t border-line-soft ${lida === deve ? "" : "bg-warning/5"}`}>
-                      <td className="px-3 py-1.5">{i.produto}<span className="block text-ledger-muted">{i.sku ?? i.barcode ?? ""}</span></td>
+                      <td className="px-3 py-1.5"><NomePeca variantId={i.variant_id} nome={i.produto} /><span className="block text-ledger-muted">{i.sku ?? i.barcode ?? ""}</span></td>
                       <td className="px-3 py-1.5 text-center">{i.enviada}</td><td className="px-3 py-1.5 text-center">{i.vendida}</td>
                       <td className="px-3 py-1.5 text-center">{deve}</td>
                       <td className="px-3 py-1.5 text-center font-semibold">

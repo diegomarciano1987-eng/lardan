@@ -1,3 +1,4 @@
+import { NomePeca } from "@/components/NomePeca";
 import * as React from "react";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { useQuery } from "@tanstack/react-query";
@@ -57,7 +58,7 @@ export function StockItemPanel({
     <Sheet open={Boolean(variantId)} onOpenChange={(v) => !v && onClose()}>
       <SheetContent className="admin-scope w-full overflow-y-auto sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle className="text-xl">{d?.produto ?? "Item de estoque"}</SheetTitle>
+          <SheetTitle className="text-xl">{d ? <NomePeca variantId={variantId} nome={d.produto} /> : "Item de estoque"}</SheetTitle>
           <SheetDescription>
             {d ? `${d.variante}${d.sku ? ` · ${d.sku}` : ""}` : "Carregando…"}
           </SheetDescription>
@@ -89,7 +90,7 @@ export function StockItemPanel({
             </div>
 
             <div>
-              <Linha rotulo="Produto" valor={d.produto} />
+              <Linha rotulo="Produto" valor={<NomePeca variantId={variantId} nome={d.produto} />} />
               <Linha rotulo="Variação" valor={d.variante} />
               <Linha rotulo="SKU" valor={d.sku ?? "—"} />
               <Linha rotulo="Código de barras" valor={d.barcode ?? "—"} />

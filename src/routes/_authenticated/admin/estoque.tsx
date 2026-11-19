@@ -1,3 +1,4 @@
+import { NomePeca } from "@/components/NomePeca";
 import * as React from "react";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute } from "@tanstack/react-router";
@@ -214,7 +215,7 @@ function EstoquePage() {
       header: "Peça",
       render: (r) => (
         <div className="min-w-0">
-          <p className="truncate font-semibold text-ledger-text">{r.produto}</p>
+          <p className="truncate font-semibold text-ledger-text"><NomePeca variantId={r.variant_id} nome={r.produto} /></p>
           <p className="truncate text-xs text-ledger-muted">
             {r.variante}
             {r.sku ? ` · ${r.sku}` : ""}
@@ -281,7 +282,7 @@ function EstoquePage() {
             alt={r.produto ?? "Peça"}
           />
           <div className="min-w-0">
-            <p className="truncate font-semibold text-ledger-text">{r.produto ?? "—"}</p>
+            <p className="truncate font-semibold text-ledger-text"><NomePeca variantId={r.variant_id} nome={r.produto ?? "—"} /></p>
             <p className="truncate text-xs text-ledger-muted">
               {r.variante}
               {r.sku ? ` · ${r.sku}` : ""}
@@ -383,7 +384,7 @@ function EstoquePage() {
             alt={r.produto ?? "Peça"}
           />
           <div className="min-w-0">
-            <p className="truncate font-semibold text-ledger-text">{r.produto ?? "—"}</p>
+            <p className="truncate font-semibold text-ledger-text"><NomePeca variantId={r.variant_id} nome={r.produto ?? "—"} /></p>
             <p className="truncate text-xs text-ledger-muted">
               {r.variante}
               {r.sku ? ` · ${r.sku}` : ""}
@@ -579,7 +580,7 @@ function EstoquePage() {
               setBuscaSaldo(v);
               setPaginaSaldo(0);
             }}
-            searchPlaceholder="Buscar por produto, variação, SKU, código legado ou código de barras…"
+            searchPlaceholder="Buscar por referência (LAN…), produto, variação, SKU, código legado ou código de barras…"
             onRowClick={(r) => setItemAberto(r.variant_id)}
             filters={
               <div className="w-56">
@@ -617,7 +618,7 @@ function EstoquePage() {
             setBuscaMov(v);
             setPaginaMov(0);
           }}
-          searchPlaceholder="Buscar por produto, variação, SKU ou código de barras…"
+          searchPlaceholder="Buscar por referência (LAN…), produto, variação, SKU ou código de barras…"
           onRowClick={(r) => setItemAberto(r.variant_id)}
           filters={
             <div className="w-52">

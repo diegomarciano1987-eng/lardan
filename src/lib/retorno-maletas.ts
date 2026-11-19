@@ -53,9 +53,9 @@ export const marcarNaoVeio = (item: string, motivo: string) => chamar<{ expedica
 export const ROTULO_MOTIVO: Record<MotivoRetorno, string> = { acerto: "Acerto feito", nao_ficou: "Não ficou com a consultora" };
 export const ROTULO_ITEM: Record<StatusItemRetorno, string> = { a_caminho: "A caminho", recebida: "Recebida", nao_veio: "Não veio", retirado: "Tirada da expedição" };
 
-/** "ABERTURA 01 · Remessa 925" para maleta sem consultora; senão o nome dela. */
-export function quemEra(c: Pick<CicloInfo, "consultora" | "abertura_numero" | "remessa">): string {
-  if (c.consultora) return c.consultora;
+/** "ABERTURA 01 · Remessa 925" para maleta sem consultora; senão "[Cód. 7510] Nome" (0340). */
+export function quemEra(c: Pick<CicloInfo, "consultora" | "abertura_numero" | "remessa"> & { consultora_codigo?: string | null }): string {
+  if (c.consultora) return c.consultora_codigo ? `[Cód. ${c.consultora_codigo}] ${c.consultora}` : c.consultora;
   if (c.abertura_numero) return `ABERTURA ${String(c.abertura_numero).padStart(2, "0")}${c.remessa ? ` · Remessa ${c.remessa}` : ""}`;
   return "Sem consultora";
 }

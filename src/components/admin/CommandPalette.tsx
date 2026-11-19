@@ -1,3 +1,4 @@
+import { buscarMaletas, comCodigo, type MaletaEncontrada } from "@/lib/busca-maletas";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -50,7 +51,7 @@ async function search(term: string, caps: Capability[], escopo: Escopo): Promise
       escopo === "produtos" ? supabase
         .from("products")
         .select("id,name,slug,status")
-        .ilike("name", like)
+        .or(`name.ilike.%${term.replace(/[,()]/g, " ")}%,reference_code.ilike.%${term.replace(/[,()]/g, " ")}%`)
         .limit(LIMIT) : nada,
       escopo === "produtos" ? supabase
         .from("product_variants")
@@ -181,7 +182,8 @@ async function search(term: string, caps: Capability[], escopo: Escopo): Promise
       .limit(25)),
     emFin && podeFinPagar ? titulos("payable") : Promise.resolve(vazio),
     emFin && podeFinReceber ? titulos("receivable") : Promise.resolve(vazio),
-    !emKit ? Promise.resolve(vazio) : seguro(supabase.from("kits").select("id,code,label").or(`code.ilike.${likeSafe},label.ilike.${likeSafe}`).limit(LIMIT)),
+    // 0340: maleta pelo número, etiqueta, nome ou código da consultora
+    !emKit ? Promise.resolve({ data: [] as MaletaEncontrada[] }) : buscarMaletas(term, LIMIT).then((data) => ({ data })),
     !emFin ? Promise.resolve(vazio) : seguro(supabase.from("financial_accounts").select("id,nome,kind").ilike("nome", likeSafe).limit(LIMIT)),
     !emCad ? Promise.resolve(vazio) : seguro(supabase
       .from("suppliers")
@@ -238,7 +240,12 @@ async function search(term: string, caps: Capability[], escopo: Escopo): Promise
     }
   }
   for (const k of maletas.data ?? []) {
-    hits.push({ id: `kit-${k.id}`, group: "Maletas", icon: Boxes, title: k.code, context: k.label ?? "", to: "/admin/maletas" });
+    hits.push({
+      id: `kit-${k.cycle_id}`, group: "Maletas", icon: Boxes,
+      title: `${k.maleta} · ${comCodigo(k.consultora, k.consultora_codigo) || "Sem consultora"}`,
+      context: [k.remessa ? `Remessa ${k.remessa}` : null, k.praca, k.status].filter(Boolean).join(" · "),
+      to: `/admin/maletas/${k.cycle_id}`,
+    });
   }
   for (const c of contas.data ?? []) {
     hits.push({ id: `cta-${c.id}`, group: "Contas e caixas", icon: FileText, title: c.nome, context: String(c.kind), to: `/admin/financeiro/contas/${c.id}` });

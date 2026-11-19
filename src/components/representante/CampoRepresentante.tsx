@@ -5,6 +5,7 @@
  *  · Agenda de visitas com registro de cada visita (entra no histórico da consultora);
  *  · Dinheiro recebido (recibos) no período.
  */
+import { NomePeca } from "@/components/NomePeca";
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -130,7 +131,7 @@ function AcertoCampo({ rep, maleta, onClose }: { rep: string; maleta: MaletaCart
                 const l = lidas[i.variant_id] ?? 0;
                 return (
                   <li key={i.variant_id} className="flex items-center justify-between gap-2 px-3 py-2">
-                    <span className="min-w-0"><span className="block truncate">{i.produto}</span><span className="text-xs text-muted-foreground">{i.sku ?? i.barcode ?? ""} · {brl(i.preco_cents)}{i.app ? ` · ${i.app} paga(s) no app` : ""}</span></span>
+                    <span className="min-w-0"><NomePeca className="block truncate" variantId={i.variant_id} nome={i.produto} /><span className="text-xs text-muted-foreground">{i.sku ?? i.barcode ?? ""} · {brl(i.preco_cents)}{i.app ? ` · ${i.app} paga(s) no app` : ""}</span></span>
                     <span className="flex shrink-0 items-center gap-2 tabular-nums">
                       <button type="button" disabled={!l} onClick={() => { setLidas({ ...lidas, [i.variant_id]: l - 1 }); setCalc(null); }} className="grid size-8 place-items-center rounded-full border border-border disabled:opacity-30" aria-label="Tirar uma leitura">−</button>
                       <span className="w-14 text-center text-xs">voltou {l}/{i.enviada}</span>

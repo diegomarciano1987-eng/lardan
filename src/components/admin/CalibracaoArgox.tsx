@@ -3,6 +3,7 @@ import { Minus, Plus, Printer, RotateCcw, Save, Ruler } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LadosEtiqueta, useLadosEtiqueta } from "@/components/admin/LadosEtiqueta";
+import { voltarUmLado } from "@/lib/lados-etiqueta";
 import {
   AMOSTRA_ANEL, AMOSTRA_CALIBRACAO, CONFIG_ETIQUETA, ETIQUETA, LIMITES_CALIBRACAO, completarConfig, documentoTeste,
   lerCalibracao, textoEtiqueta, validarCalibracao, type EtiquetaConfig,
@@ -43,7 +44,7 @@ export function CalibracaoArgox() {
   };
   const testar = async (modo: "amostra" | "regua") => {
     try {
-      if (modo === "amostra") { const n = await imprimirDireto(comandosTeste(cfg, lerEstacao().linguagem, 3, { duplicar, anel })); toast.success(`3 amostras${duplicar ? " em 2 lados" : ""} enviadas direto para ${n}.`); }
+      if (modo === "amostra") { const n = await imprimirDireto(comandosTeste(cfg, lerEstacao().linguagem, 3, { duplicar, anel })); if (duplicar) voltarUmLado(); toast.success(`3 amostras${duplicar ? " em 2 lados" : ""} enviadas direto para ${n}.`); }
       else imprimirPdf(await pdfTeste("regua", cfg, 1));
     }
     catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir o teste."); }
@@ -87,7 +88,7 @@ export function CalibracaoArgox() {
           {duplicar && <div aria-hidden className="pointer-events-none absolute border border-dashed border-destructive/60" style={{ left: (cfg.margemEsquerda + cfg.segundoLado) * esc, top: cfg.margemSuperior * esc, width: cfg.areaLargura * esc, height: ETIQUETA.altura * esc }} />}
         </div>
       </div>
-      <p className="mt-2 text-xs text-ledger-muted">Amostra fixa: {amostra.nome}{amostra.aro ? ` · aro ${amostra.aro} no canto direito` : ""} · {textoEtiqueta(amostra.referencia, amostra.precoCents)}. Tracejado = área impressa{duplicar ? " (os dois lados)" : ""}. O modo 2 lados vale para todas as etiquetas de peça deste computador.</p>
+      <p className="mt-2 text-xs text-ledger-muted">Amostra fixa: {amostra.nome}{amostra.aro ? ` · aro ${amostra.aro} no canto direito` : ""} · {textoEtiqueta(amostra.referencia, amostra.precoCents)}. Tracejado = área impressa{duplicar ? " (os dois lados)" : ""}. 1 lado é sempre o padrão; 2 lados vale só para a próxima impressão.</p>
     </section>
 
     <section className="grid gap-3 sm:grid-cols-2">

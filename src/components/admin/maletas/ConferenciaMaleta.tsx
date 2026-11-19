@@ -3,6 +3,7 @@ import { CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
 import { FotoPeca } from "@/components/FotoPeca";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
+import { LadosEtiqueta } from "@/components/admin/LadosEtiqueta";
 import { brl, conferir, traduzir, type ItemComposicao } from "@/lib/maletas";
 import { TIPO_PECA_LABEL, type TipoPeca } from "@/lib/remessa";
 import { useTiposPeca } from "@/lib/tipo-peca";
@@ -99,7 +100,10 @@ export function ConferenciaMaleta({
 
         {/* Tudo que foi bipado */}
         <div className="ledger-panel p-6">
-          <p className="ledger-eyebrow mb-3">Tudo que foi bipado</p>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="ledger-eyebrow">Tudo que foi bipado</p>
+            <LadosEtiqueta />
+          </div>
           {composicao.length === 0 ? (
             <p className="text-sm text-ledger-muted">Sem dados.</p>
           ) : (

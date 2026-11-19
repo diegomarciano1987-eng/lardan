@@ -12,6 +12,7 @@ import { CalibracaoArgox } from "@/components/admin/CalibracaoArgox";
 import { buscarEtiquetas, lerItensEtiquetas, type EtiquetaBusca, type EtiquetaOrigem } from "@/lib/etiquetas-dados";
 import { toast } from "sonner";
 import { LadosEtiqueta } from "@/components/admin/LadosEtiqueta";
+import { ladosAtual, voltarUmLado } from "@/lib/lados-etiqueta";
 
 /**
  * Envio direto: a etiqueta é montada num quadro invisível da própria página e
@@ -26,15 +27,19 @@ export async function enviarParaImpressora(items: EtiquetaItem[]) {
     try { barrasEtiqueta(i.barcode ?? ""); } catch (e) { throw new Error(`${i.nome}: ${e instanceof Error ? e.message : "código inválido."}`); }
   }
   const est = lerEstacao();
-  await imprimirDireto(comandosEtiquetas(validos, await lerCalibracaoGlobal(), est.linguagem, { duplicar: est.duplicar === true }), est);
-  return validos.reduce((s, i) => s + i.quantidade, 0);
+  // 0341: 2 lados vale só para esta impressão; enviada, volta para 1 lado (falhou, mantém para tentar de novo).
+  const duplicar = ladosAtual();
+  await imprimirDireto(comandosEtiquetas(validos, await lerCalibracaoGlobal(), est.linguagem, { duplicar }), est);
+  if (duplicar) voltarUmLado();
+  return { n: validos.reduce((s, i) => s + i.quantidade, 0), duplicar };
 }
+const avisoLados = (duplicar: boolean) => (duplicar ? " em 2 lados. A próxima volta para 1 lado" : "");
 
 async function imprimirOrigens(origens: EtiquetaOrigem[], umaCada: boolean, copias = 1) {
   try {
     const items = (await lerItensEtiquetas(origens)).map((i) => (umaCada ? { ...i, quantidade: copias } : i));
-    const n = await enviarParaImpressora(items);
-    const lados = lerEstacao().duplicar ? " (2 lados)" : "";
+    const { n, duplicar } = await enviarParaImpressora(items);
+    const lados = avisoLados(duplicar);
     if (n) toast.success(n === 1 ? `Impressão de 1 etiqueta preparada${lados}.` : `Impressão de ${n} etiquetas preparada${lados}.`);
   } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir a etiqueta."); }
 }
@@ -87,7 +92,7 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
   useEffect(() => { const t = setTimeout(() => setDebounced(termo.trim()), 250); return () => clearTimeout(t); }, [termo]);
   const q = useQuery({ queryKey: ["etiquetas", "busca", debounced], queryFn: () => buscarEtiquetas(debounced), enabled: open && debounced.length >= 2 });
   async function imprimir(r: EtiquetaBusca) {
-    try { const n = await enviarParaImpressora([{ id: r.variantId, nome: r.nome, barcode: r.barcode, referencia: r.referencia, precoCents: r.precoCents, aro: r.aro, quantidade: 1 }]); if (n) { toast.success(`Impressão preparada: ${r.nome}${lerEstacao().duplicar ? " (2 lados)" : ""}`); setTermo(""); } }
+    try { const { n, duplicar } = await enviarParaImpressora([{ id: r.variantId, nome: r.nome, barcode: r.barcode, referencia: r.referencia, precoCents: r.precoCents, aro: r.aro, quantidade: 1 }]); if (n) { toast.success(`Impressão preparada: ${r.nome}${avisoLados(duplicar)}.`); setTermo(""); } }
     catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível imprimir."); }
   }
   async function enter() {
@@ -117,7 +122,7 @@ export function EtiquetasBusca({ label = "Imprimir etiquetas" }: { label?: strin
               <div className="min-w-0"><p className="truncate text-sm font-semibold">{r.nome}</p><p className="text-xs text-ledger-muted">Barras: {r.barcode || "sem código"} · {textoEtiqueta(r.referencia, r.precoCents) || "sem referência"}{r.aro ? ` · Aro ${r.aro}` : ""}</p></div>
               <Button size="sm" disabled={!r.barcode} onClick={() => imprimir(r)}><Printer aria-hidden />Imprimir 1</Button>
             </li>)}</ul>}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3"><span className="flex items-center gap-2 text-xs text-ledger-muted"><LadosEtiqueta />neste computador</span><AjustesEstacao /></div>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3"><span className="flex items-center gap-2 text-xs text-ledger-muted"><LadosEtiqueta />1 lado é o padrão</span><AjustesEstacao /></div>
       </DialogContent>
     </Dialog>
   </>;
@@ -136,6 +141,6 @@ export function EtiquetasImprimir({ origens, label = "Etiquetas", compact = fals
       {enviando ? <Loader2 aria-hidden className="animate-spin" /> : <Printer aria-hidden />}{compact ? null : label}
     </Button>
   );
-  // 0340: ao lado do botão grande, a escolha 1 lado / 2 lados (vale para todas as etiquetas de peça deste computador).
+  // 0341: ao lado do botão grande, 1 lado já marcado; 2 lados só para a próxima impressão.
   return compact ? botao : <span className="inline-flex flex-wrap items-center gap-2">{botao}<LadosEtiqueta /></span>;
 }

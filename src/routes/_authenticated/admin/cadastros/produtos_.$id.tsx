@@ -392,7 +392,7 @@ function ProdutoDetalhe() {
         <div className="space-y-6">
           <Panel title="Variantes vendáveis">
             <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
-              <span className="mr-auto flex items-center gap-2 text-xs text-ledger-muted"><LadosEtiqueta />etiquetas deste computador</span>
+              <span className="mr-auto flex items-center gap-2 text-xs text-ledger-muted"><LadosEtiqueta />1 lado é o padrão</span>
               {ehAnel && podeGradeAros ? (
                 <GradeAros productId={id} nome={p.name} arosExistentes={(variantes.data ?? []).filter((v) => v.is_active).map((v) => v.size)} />
               ) : null}

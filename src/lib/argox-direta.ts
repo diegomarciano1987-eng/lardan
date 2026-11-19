@@ -7,23 +7,21 @@ import type { LinguagemArgox } from "@/lib/etiquetas-raw";
  * Nome da impressora e linguagem ficam neste computador (cada estação tem a sua Argox).
  */
 const ESTACAO_KEY = "lardan.argox.estacao.v1";
-/** duplicar (0340): etiqueta de peça em 2 lados (a mesma impressão repetida ao lado), escolha deste computador. */
-export type EstacaoArgox = { impressora: string | null; linguagem: LinguagemArgox; duplicar?: boolean };
+/** 1 lado / 2 lados não fica guardado na estação (0341): veja lados-etiqueta.ts. */
+export type EstacaoArgox = { impressora: string | null; linguagem: LinguagemArgox };
 export const EVENTO_ESTACAO = "lardan:argox-estacao";
 export const QZ_DOWNLOAD = "https://qz.io/download/";
 
 export function lerEstacao(): EstacaoArgox {
   try {
     const v = JSON.parse(localStorage.getItem(ESTACAO_KEY) ?? "null") as Partial<EstacaoArgox> | null;
-    return { impressora: v?.impressora ?? null, linguagem: v?.linguagem === "pplz" || v?.linguagem === "ppla" ? v.linguagem : (/ppla/i.test(v?.impressora ?? "") ? "ppla" : "pplb"), duplicar: v?.duplicar === true };
-  } catch { return { impressora: null, linguagem: "pplb", duplicar: false }; }
+    return { impressora: v?.impressora ?? null, linguagem: v?.linguagem === "pplz" || v?.linguagem === "ppla" ? v.linguagem : (/ppla/i.test(v?.impressora ?? "") ? "ppla" : "pplb") };
+  } catch { return { impressora: null, linguagem: "pplb" }; }
 }
 export function salvarEstacao(e: EstacaoArgox) {
-  localStorage.setItem(ESTACAO_KEY, JSON.stringify(e));
+  localStorage.setItem(ESTACAO_KEY, JSON.stringify({ impressora: e.impressora, linguagem: e.linguagem }));
   try { window.dispatchEvent(new CustomEvent(EVENTO_ESTACAO)); } catch { /* fora do navegador */ }
 }
-/** Liga/desliga a etiqueta em 2 lados neste computador sem mexer na impressora/linguagem escolhidas. */
-export function salvarDuplicar(duplicar: boolean) { salvarEstacao({ ...lerEstacao(), duplicar }); }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Qz = any;

@@ -3,6 +3,7 @@
  * Números só do banco (central_vendas): totais, formas, dias, ranking, praças, representantes e últimas vendas.
  */
 import { useState } from "react";
+import { comCodigo } from "@/lib/busca-maletas";
 import { useQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Crown, Store, TrendingDown, TrendingUp } from "lucide-react";
@@ -20,7 +21,7 @@ interface Central {
   ranking: { party_id: string; nome: string; codigo: string | null; praca: string | null; representante: string | null; vendas: number; valor_cents: number; pecas: number; vitrine_cents: number }[];
   pracas: { praca: string; codigo: number | null; vendas: number; valor_cents: number; consultoras: number }[];
   representantes: { representante: string; vendas: number; valor_cents: number; consultoras: number }[];
-  ultimas: { codigo: string; data: string; consultora: string; cliente: string; valor_cents: number; pecas: number; forma: Forma; canal: string; pago: boolean }[];
+  ultimas: { codigo: string; data: string; consultora: string; consultora_codigo?: string | null; cliente: string; valor_cents: number; pecas: number; forma: Forma; canal: string; pago: boolean }[];
 }
 
 const FORMA: Record<Forma, string> = {
@@ -149,7 +150,7 @@ export function CentralVendas() {
                     <tbody>{d.ranking.slice(0, 20).map((c, i) => (
                       <tr key={c.party_id} className="border-b border-line-soft last:border-0">
                         <td className="px-4 py-2.5 text-ledger-muted">{i < 3 ? <Crown className={cn("size-4", i === 0 ? "text-bronze" : "text-ledger-muted")} aria-label={`${i + 1}º lugar`} /> : i + 1}</td>
-                        <td className="px-4 py-2.5"><span className="block font-semibold text-ledger-text">{c.nome}</span><span className="text-xs text-ledger-muted">{c.codigo ?? ""}{Number(c.vitrine_cents) > 0 && <span className="ml-1 inline-flex items-center gap-0.5 text-asaas"><Store className="size-3" aria-hidden />{formatBRLFromCents(Number(c.vitrine_cents))}</span>}</span></td>
+                        <td className="px-4 py-2.5"><span className="block font-semibold text-ledger-text">{comCodigo(c.nome, c.codigo)}</span><span className="text-xs text-ledger-muted">{Number(c.vitrine_cents) > 0 && <span className="ml-1 inline-flex items-center gap-0.5 text-asaas"><Store className="size-3" aria-hidden />{formatBRLFromCents(Number(c.vitrine_cents))}</span>}</span></td>
                         <td className="px-4 py-2.5 text-xs text-ledger-muted">{c.praca ?? "—"}<br />{c.representante ?? "sem representante"}</td>
                         <td className="num px-4 py-2.5 text-right">{formatInt(Number(c.vendas))}<span className="block text-xs text-ledger-muted">{formatInt(Number(c.pecas))} peças</span></td>
                         <td className="num px-4 py-2.5 text-right font-semibold text-ledger-text">{formatBRLFromCents(Number(c.valor_cents))}</td>
@@ -185,7 +186,7 @@ export function CentralVendas() {
             {d.ultimas.length === 0 ? <p className="px-6 py-5 text-sm text-ledger-muted">Sem vendas no período.</p> : (
               <ul className="divide-y divide-line-soft text-sm">{d.ultimas.map((v) => (
                 <li key={v.codigo} className="flex items-center justify-between gap-3 px-6 py-2.5">
-                  <span className="min-w-0"><span className="block truncate font-semibold text-ledger-text">{v.consultora} → {v.cliente}</span>
+                  <span className="min-w-0"><span className="block truncate font-semibold text-ledger-text">{comCodigo(v.consultora, v.consultora_codigo)} → {v.cliente}</span>
                     <span className="text-xs text-ledger-muted">{new Date(v.data).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })} · {v.codigo} · {FORMA[v.forma] ?? v.forma}{v.canal === "vitrine" ? " · vitrine" : ""}</span></span>
                   <span className="shrink-0 text-right"><span className="num block font-semibold">{formatBRLFromCents(Number(v.valor_cents))}</span>
                     <span className={cn("text-xs", v.pago ? "text-success" : "text-ledger-muted")}>{v.pago ? "pago" : "em aberto"}</span></span>

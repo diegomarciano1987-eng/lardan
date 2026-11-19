@@ -2423,6 +2423,34 @@
       "when": 1795110971442,
       "tag": "0345_0345_remessa_acerto_obrigatorio",
       "breakpoints": true
+    },
+    {
+      "idx": 346,
+      "version": "7",
+      "when": 1795111681836,
+      "tag": "0346_0346_indicacao_referencia_peca",
+      "breakpoints": true
+    },
+    {
+      "idx": 347,
+      "version": "7",
+      "when": 1795111739510,
+      "tag": "0347_0347_codigo_consultora_vendas_indicacao",
+      "breakpoints": true
+    },
+    {
+      "idx": 348,
+      "version": "7",
+      "when": 1795111809050,
+      "tag": "0348_0348_fiscal_codigo_consultora",
+      "breakpoints": true
+    },
+    {
+      "idx": 349,
+      "version": "7",
+      "when": 1795111863490,
+      "tag": "0349_0349_trocas_fiscais_codigo_consultora",
+      "breakpoints": true
     }
   ]
 }

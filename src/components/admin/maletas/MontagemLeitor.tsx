@@ -1,5 +1,7 @@
 import * as React from "react";
 import { FotoPeca } from "@/components/FotoPeca";
+import { NomePeca } from "@/components/NomePeca";
+import { comReferencia } from "@/lib/referencias-pecas";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { EtiquetaMaleta } from "./EtiquetaMaleta";
 import { BotaoTelaCheia } from "@/components/admin/TelaCheia";
@@ -26,7 +28,7 @@ import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPess
 import { LinhaTamanhosAnel, ehAnel, textoTamanhos, useAneisTamanhos, type AneisTamanhos } from "@/components/admin/historico/AneisTamanhos";
 import { GRADE_PADRAO, arosDaGrade, aroDaPeca, ehAnelAjustavel, ehNomeDeAnel, normalizarAro } from "@/lib/anel-aro";
 
-type Leitura = { id: string; codigo: string; ok: boolean; aviso?: boolean; texto: string; detalhe?: string; hora: string; variantId?: string };
+type Leitura = { id: string; codigo: string; ok: boolean; aviso?: boolean; texto: string; detalhe?: string; hora: string; variantId?: string; refId?: string };
 /** 0338: anel lido sem aro (pergunta o aro) ou código que cabe em dois anéis (pergunta qual). A bipagem não para. */
 type Pendente =
   | { id: string; tipo: "aro"; codigo: string; productId: string; produto: string; varianteBaseId: string; preco: number; aros: string[] }
@@ -113,7 +115,7 @@ async function buscarPecas(termo: string): Promise<Sugestao[]> {
   const partes = t.split(/\s+/).filter(Boolean);
   let q = supabase
     .from("products")
-    .select("id, name, internal_code, reference_code, product_variants(id, label, barcode, sku, size, is_default, is_active)")
+    .select("id, name, internal_code, reference_code, product_variants(id, label, barcode, sku, size, is_default, is_active, reference_code)")
     .limit(12);
   if (/^\d+$/.test(t)) {
     q = q.or(`internal_code.ilike.%${t}%,barcode.ilike.%${t}%,name.ilike.%${t}%`);
@@ -126,14 +128,14 @@ async function buscarPecas(termo: string): Promise<Sugestao[]> {
   const { data, error } = await q;
   if (error) throw error;
   const out: Sugestao[] = [];
-  type V = { id: string; label: string | null; barcode: string | null; sku: string | null; size: string | null; is_default: boolean; is_active: boolean };
+  type V = { id: string; label: string | null; barcode: string | null; sku: string | null; size: string | null; is_default: boolean; is_active: boolean; reference_code: string | null };
   for (const p of (data ?? []) as unknown as { id: string; name: string; internal_code: string | null; reference_code: string | null; product_variants: V[] }[]) {
     // 0338: anel com aro — uma linha só ("escolher aro"); o aro é escolhido no quadro amarelo, mesmo se ainda não existir
     if (ehNomeDeAnel(p.name) && !ehAnelAjustavel(p.name)) {
       const base = (p.product_variants ?? []).filter((v) => v.is_active && !v.size && v.barcode)
         .sort((a, b) => Number(b.is_default) - Number(a.is_default))[0];
       if (base?.barcode) {
-        out.push({ codigo: base.barcode, nome: `${p.name}${p.reference_code ? ` · ${p.reference_code}` : ""} · escolher aro` });
+        out.push({ codigo: base.barcode, nome: `${comReferencia(base.reference_code || p.reference_code, p.name)} · escolher aro` });
         continue;
       }
     }
@@ -141,7 +143,7 @@ async function buscarPecas(termo: string): Promise<Sugestao[]> {
       if (!v.is_active) continue;
       const codigo = v.barcode || v.sku || p.internal_code;
       if (!codigo) continue;
-      out.push({ codigo, nome: [p.name, v.label].filter(Boolean).join(" · ") });
+      out.push({ codigo, nome: comReferencia(v.reference_code || p.reference_code, [p.name, v.label && v.label.trim().toUpperCase() !== p.name.trim().toUpperCase() ? v.label : null].filter(Boolean).join(" · ")) });
     }
   }
   return out.slice(0, 12);
@@ -487,7 +489,7 @@ export function MontagemLeitor({
         varianteBaseId: r.variant_id_base, preco: r.preco_cents ?? 0, aros: r.aros_existentes ?? [],
       };
       setPendentesAro((l) => [p, ...l]);
-      registrar({ codigo: cod, ok: false, aviso: true, texto: r.produto ?? "Anel", detalhe: "Escolha o aro no quadro amarelo — pode continuar bipando." });
+      registrar({ codigo: cod, ok: false, aviso: true, texto: r.produto ?? "Anel", refId: r.variant_id_base, detalhe: "Escolha o aro no quadro amarelo — pode continuar bipando." });
       return;
     }
     if (r?.encontrado && r.ambiguo && r.opcoes?.length) {
@@ -897,7 +899,7 @@ export function MontagemLeitor({
               <div role="status" className={`mt-5 grid grid-cols-2 gap-5 rounded-2xl p-5 ${ultima.ok ? "bg-success/15 text-success" : ultima.aviso ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive"}`}>
                 <div className="min-w-0 self-center">
                   <p className="text-sm font-bold uppercase tracking-[0.12em]">{ultima.ok ? "✓ Na maleta" : ultima.aviso ? "● Falta o aro" : "✕ Recusado"}</p>
-                  <p className="mt-1 text-2xl font-bold leading-tight break-words">{ultima.texto}</p>
+                  <p className="mt-1 text-2xl font-bold leading-tight break-words">{ultima.variantId || ultima.refId ? <NomePeca variantId={ultima.variantId ?? ultima.refId} nome={ultima.texto} /> : ultima.texto}</p>
                   {ultima.detalhe && <p className="mt-2 text-lg font-semibold">{ultima.detalhe}</p>}
                   <p className="mt-2 text-sm opacity-70">Código {ultima.codigo}</p>
                 </div>
@@ -918,7 +920,7 @@ export function MontagemLeitor({
             <ul className="mt-5 max-h-48 divide-y divide-line overflow-auto text-sm">
               {leituras.slice(1).map((l) => (
                 <li key={l.id} className="flex justify-between gap-3 py-2">
-                  <span className={l.ok ? "text-ledger-text" : l.aviso ? "text-warning" : "text-destructive"}>{l.ok ? "✓" : l.aviso ? "●" : "✕"} {l.texto}{l.detalhe ? ` — ${l.detalhe}` : ""}</span>
+                  <span className={l.ok ? "text-ledger-text" : l.aviso ? "text-warning" : "text-destructive"}>{l.ok ? "✓" : l.aviso ? "●" : "✕"} {l.variantId || l.refId ? <NomePeca variantId={l.variantId ?? l.refId} nome={l.texto} /> : l.texto}{l.detalhe ? ` — ${l.detalhe}` : ""}</span>
                   <span className="shrink-0 text-ledger-muted">{l.codigo} · {l.hora}</span>
                 </li>
               ))}
@@ -978,7 +980,7 @@ export function MontagemLeitor({
                   {listaFiltrada.map(([id, p]) => (
                     <li key={id} className="flex items-center justify-between gap-2">
                       <FotoPeca variantId={id} alt={p.nome} size="xs" />
-                      <span className="flex-1 truncate">{p.nome}</span>
+                      <NomePeca className="flex-1 truncate" variantId={id} nome={p.nome} />
                       <span onClickCapture={() => window.setTimeout(() => campo.current?.focus(), 400)}><EtiquetasImprimir compact label={`Imprimir etiqueta de ${p.nome}`} origens={[{ variantId: id, quantidade: 1 }]} /></span>
                       <span className="flex items-center gap-2">
                         <span className="tabular-nums text-ledger-muted">{brl(p.preco * p.qtd)}</span>
@@ -1015,6 +1017,18 @@ function QuadroAros({ pendentes, maisVendidos, aoEscolher, aoSemAro, aoDescartar
   aoDescartar: (p: Pendente) => void;
 }) {
   const grade = arosDaGrade(GRADE_PADRAO.de, GRADE_PADRAO.ate);
+  // 0341: referência junto do anel também quando o código cabe em dois anéis
+  const idsProd = [...new Set(pendentes.flatMap((p) => (p.tipo === "ambiguo" ? p.opcoes.map((o) => o.product_id) : [])))].sort();
+  const refsProd = useQuery({
+    queryKey: ["referencias-produtos", idsProd],
+    enabled: idsProd.length > 0,
+    staleTime: 10 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("id, reference_code").in("id", idsProd);
+      if (error) throw error;
+      return new Map((data ?? []).map((r) => [r.id as string, (r.reference_code as string | null) ?? null]));
+    },
+  });
   const [outro, setOutro] = React.useState<Record<string, string>>({});
   return (
     <div className="mt-5 space-y-3 rounded-2xl border-2 border-warning/60 bg-warning/10 p-5" data-testid="quadro-aros" data-manter-foco>
@@ -1030,7 +1044,7 @@ function QuadroAros({ pendentes, maisVendidos, aoEscolher, aoSemAro, aoDescartar
                 {p.opcoes.map((o) => (
                   <button key={`${o.product_id}-${o.tamanho}`} type="button" className="admin-btn border-champagne"
                     onClick={() => aoEscolher(p, o.product_id, o.tamanho)}>
-                    {o.produto} · aro {o.tamanho}
+                    {comReferencia(refsProd.data?.get(o.product_id), o.produto)} · aro {o.tamanho}
                   </button>
                 ))}
                 <button type="button" className="admin-btn" onClick={() => aoDescartar(p)}>Descartar</button>
@@ -1039,7 +1053,7 @@ function QuadroAros({ pendentes, maisVendidos, aoEscolher, aoSemAro, aoDescartar
           ) : (
             <>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-base font-semibold text-ledger-text">{p.produto}</p>
+                <NomePeca className="text-base font-semibold text-ledger-text" variantId={p.varianteBaseId} nome={p.produto} />
                 <p className="text-sm text-ledger-muted">Código {p.codigo} · olhe o aro na peça e toque no número</p>
               </div>
               <div className="flex flex-wrap gap-1.5" role="group" aria-label={`Aro de ${p.produto}`}>

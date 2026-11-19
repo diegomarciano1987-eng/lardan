@@ -1,4 +1,5 @@
 import * as React from "react";
+import { comReferencia } from "@/lib/referencias-pecas";
 import { useQuery } from "@tanstack/react-query";
 import { Copy, MessageCircle, Share2, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -16,7 +17,7 @@ type Dados = {
   indicadas: { nome: string; cidade: string; uf: string; em: string; situacao: keyof typeof SIT }[];
   comissoes: {
     id: string; em: string; indicada: string; venda_cents: number; pecas: number; percentual: number; faixa: string;
-    comissao_cents: number; status: string; itens: { produto: string; qtd: number; preco_cents: number; total_cents: number }[];
+    comissao_cents: number; status: string; itens: { produto: string; referencia?: string | null; variante?: string | null; qtd: number; preco_cents: number; total_cents: number }[];
   }[];
 };
 
@@ -99,7 +100,7 @@ export function Indicacoes() {
                   <span className="text-lg font-semibold num">{brl(c.comissao_cents)}</span>
                 </summary>
                 <ul className="mt-3 space-y-1 border-t border-border pt-3 text-sm">{c.itens.map((it, k) => (
-                  <li key={k} className="flex justify-between gap-2"><span>{it.qtd}× {it.produto}</span><span className="num">{brl(it.total_cents)}</span></li>))}</ul>
+                  <li key={k} className="flex justify-between gap-2"><span>{it.qtd}× {comReferencia(it.referencia, [it.produto, it.variante].filter(Boolean).join(" · "))}</span><span className="num">{brl(it.total_cents)}</span></li>))}</ul>
               </details>
             </li>))}</ul>
         )}

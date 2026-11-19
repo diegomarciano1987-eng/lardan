@@ -23,6 +23,7 @@
 - [x] E2. Baixa no app só a partir de 10 dias antes do acerto; desfazer MAL-00607 e MAL-00545
 - [x] E2. Data de acerto obrigatória ao criar/editar remessa (tela e banco)
 - [x] E2. Gravar acerto 11/01/2027 nas remessas 930 e 932 (estavam sem data)
+- [x] E1b. Referência junto da peça: notas fiscais, Central de Vendas, indicações, escolha do aro
 - [ ] E3. Pedidos da consultora no app não entram no Contas a Receber até a cliente pagar
 - [ ] E3. "Nova maleta" direta (sem praça/representante): data de acerto + responsável
 - [ ] E4. Relatório de acertos por período (praça/representante), A4 com logo e linhas de anotação

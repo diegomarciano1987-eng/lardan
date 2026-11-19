@@ -4,6 +4,8 @@
  * com consultora e peças reais do cadastro. Emitir e cancelar: só Master.
  */
 import * as React from "react";
+import { comCodigo } from "@/lib/busca-maletas";
+import { comReferencia } from "@/lib/referencias-pecas";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -72,7 +74,7 @@ function BuscaConsultora({ onEscolher }: { onEscolher: (p: { id: string; nome: s
       if (error) throw error;
       return ((data ?? []) as unknown as { id: string; display_name: string; code?: string | null }[]).map((p) => ({
         value: p.id,
-        label: `${p.display_name}${p.code ? ` · ${p.code}` : ""}`,
+        label: comCodigo(p.display_name, p.code),
       }));
     },
     enabled: termo.trim().length >= 2,
@@ -113,16 +115,20 @@ function BuscaPeca({ onEscolher }: { onEscolher: (p: Omit<Peca, "quantidade">) =
     queryKey: ["focus", "pecas", termo],
     queryFn: async () => {
       const t = termo.trim().replace(/[%,()]/g, " ");
-      let consulta = supabase.from("products").select("id, name, internal_code, price_cents, product_variants(id, label, sku, price_cents, is_active)").limit(10);
-      consulta = /^\d+$/.test(t) ? consulta.or(`internal_code.ilike.%${t}%,name.ilike.%${t}%`) : consulta.ilike("name", `%${t}%`);
+      let consulta = supabase.from("products").select("id, name, internal_code, reference_code, price_cents, product_variants(id, label, sku, price_cents, is_active, reference_code)").limit(10);
+      const partes = t.split(/\s+/).filter(Boolean);
+      // 0341: busca também pela referência (LAN0353), como em todo buscador de peças
+      if (/^\d+$/.test(t)) consulta = consulta.or(`internal_code.ilike.%${t}%,name.ilike.%${t}%`);
+      else if (partes.length <= 1) consulta = consulta.or(`reference_code.ilike.%${t}%,name.ilike.%${t}%`);
+      else for (const parte of partes) consulta = consulta.ilike("name", `%${parte}%`);
       const { data, error } = await consulta;
       if (error) throw error;
-      type V = { id: string; label: string | null; sku: string | null; price_cents: number | null; is_active: boolean };
+      type V = { id: string; label: string | null; sku: string | null; price_cents: number | null; is_active: boolean; reference_code: string | null };
       const out: Omit<Peca, "quantidade">[] = [];
-      for (const p of (data ?? []) as unknown as { name: string; internal_code: string | null; price_cents: number | null; product_variants: V[] }[]) {
+      for (const p of (data ?? []) as unknown as { name: string; internal_code: string | null; reference_code: string | null; price_cents: number | null; product_variants: V[] }[]) {
         for (const v of p.product_variants ?? []) {
           if (!v.is_active) continue;
-          out.push({ variantId: v.id, nome: [p.name, v.label].filter(Boolean).join(" · "), codigo: v.sku ?? p.internal_code ?? "", precoCents: v.price_cents || p.price_cents || 0 });
+          out.push({ variantId: v.id, nome: comReferencia(v.reference_code || p.reference_code, [p.name, v.label && v.label.trim().toUpperCase() !== p.name.trim().toUpperCase() ? v.label : null].filter(Boolean).join(" · ")), codigo: v.sku ?? p.internal_code ?? "", precoCents: v.price_cents || p.price_cents || 0 });
         }
       }
       return out.slice(0, 15);
@@ -134,7 +140,7 @@ function BuscaPeca({ onEscolher }: { onEscolher: (p: Omit<Peca, "quantidade">) =
       <span className="ledger-eyebrow">Peças</span>
       <span className="relative">
         <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ledger-muted" />
-        <input className="admin-input w-full pl-9" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Nome ou código da peça" />
+        <input className="admin-input w-full pl-9" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Referência, nome ou código da peça" />
       </span>
       {(q.data?.length ?? 0) > 0 && (
         <ul className="max-h-48 divide-y divide-line-soft overflow-auto rounded-xl border border-line-soft">
@@ -272,7 +278,7 @@ function AcoesRemessa({ envio, aoEmitir, podeEmitir }: { envio: Envio; aoEmitir:
           <p className="text-ledger-muted">Quantas peças entram na {OPERACAO[modo].toLowerCase()} (0 = fica fora):</p>
           {(envio.itens ?? []).map((i) => (
             <label key={i.codigo} className="flex items-center justify-between gap-3">
-              <span className="truncate">{i.descricao} <span className="text-ledger-muted">{i.codigo}</span></span>
+              <span className="truncate">{comReferencia(i.codigo, i.descricao)}</span>
               <input type="number" min={0} max={i.quantidade} className="admin-input w-20 text-right" value={qtd[i.codigo] ?? i.quantidade}
                 onChange={(e) => setQtd((m) => ({ ...m, [i.codigo]: Math.min(i.quantidade, Math.max(0, Math.trunc(Number(e.target.value) || 0))) }))} />
             </label>

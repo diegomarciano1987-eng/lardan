@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { comReferencia } from "@/lib/referencias-pecas";
+import { comCodigo } from "@/lib/busca-maletas";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -15,8 +17,8 @@ export const Route = createFileRoute("/_authenticated/admin/candidaturas_/indica
 
 type Faixa = { id?: string; min_indicadas: number; percentual: number; titulo: string };
 type Painel = {
-  rede: { party_id: string; nome: string; codigo: string; aprovadas: number; candidaturas: number; madrinha: string | null; comissao_cents: number }[];
-  comissoes: { id: string; em: string; madrinha: string; indicada: string; venda_cents: number; pecas: number; aprovadas: number; percentual: number; faixa: string; comissao_cents: number; status: string; itens: { produto: string; qtd: number; preco_cents: number; total_cents: number }[] }[];
+  rede: { party_id: string; nome: string; consultora_codigo?: string | null; madrinha_codigo?: string | null; codigo: string; aprovadas: number; candidaturas: number; madrinha: string | null; comissao_cents: number }[];
+  comissoes: { id: string; em: string; madrinha: string; indicada: string; madrinha_codigo?: string | null; indicada_codigo?: string | null; venda_cents: number; pecas: number; aprovadas: number; percentual: number; faixa: string; comissao_cents: number; status: string; itens: { produto: string; referencia?: string | null; variante?: string | null; qtd: number; preco_cents: number; total_cents: number }[] }[];
 };
 const t = (n: string) => supabase.from(n as never);
 
@@ -103,7 +105,7 @@ function ConfigIndicacao() {
             <thead><tr className="text-left text-xs uppercase tracking-widest text-ledger-muted"><th className="py-2">Consultora</th><th>Link</th><th>Indicada por</th><th className="text-right">Candidaturas</th><th className="text-right">Aprovadas</th><th className="text-right">Comissão apurada</th></tr></thead>
             <tbody>{painel.data!.rede.map((r) => (
               <tr key={r.party_id} className="border-t border-line-soft">
-                <td className="py-2 font-semibold">{r.nome}</td><td className="font-mono text-xs">/indicacao/{r.codigo}</td><td>{r.madrinha ?? "—"}</td>
+                <td className="py-2 font-semibold">{comCodigo(r.nome, r.consultora_codigo)}</td><td className="font-mono text-xs">/indicacao/{r.codigo}</td><td>{r.madrinha ? comCodigo(r.madrinha, r.madrinha_codigo) : "—"}</td>
                 <td className="text-right num">{r.candidaturas}</td><td className="text-right num">{r.aprovadas}</td><td className="text-right num">{brl(r.comissao_cents)}</td>
               </tr>))}</tbody>
           </table>
@@ -114,8 +116,8 @@ function ConfigIndicacao() {
         {painel.data && painel.data.comissoes.length === 0 ? <p className="text-sm text-ledger-muted">Sem dados: nenhuma maleta de consultora indicada foi encerrada ainda.</p> : (
           <ul className="space-y-2">{painel.data?.comissoes.map((c) => (
             <li key={c.id} className="rounded-xl border border-line-soft p-3">
-              <details><summary className="flex cursor-pointer justify-between gap-3 text-sm"><span><strong>{c.madrinha}</strong> ← {c.indicada} · {new Date(c.em).toLocaleDateString("pt-BR")} · venda {brl(c.venda_cents)} · {c.aprovadas} aprovadas · {c.faixa} {Number(c.percentual)}%</span><strong className="num">{brl(c.comissao_cents)}</strong></summary>
-                <ul className="mt-2 space-y-1 text-xs">{c.itens.map((it, k) => <li key={k} className="flex justify-between"><span>{it.qtd}× {it.produto} ({brl(it.preco_cents)})</span><span className="num">{brl(it.total_cents)}</span></li>)}</ul>
+              <details><summary className="flex cursor-pointer justify-between gap-3 text-sm"><span><strong>{comCodigo(c.madrinha, c.madrinha_codigo)}</strong> ← {comCodigo(c.indicada, c.indicada_codigo)} · {new Date(c.em).toLocaleDateString("pt-BR")} · venda {brl(c.venda_cents)} · {c.aprovadas} aprovadas · {c.faixa} {Number(c.percentual)}%</span><strong className="num">{brl(c.comissao_cents)}</strong></summary>
+                <ul className="mt-2 space-y-1 text-xs">{c.itens.map((it, k) => <li key={k} className="flex justify-between"><span>{it.qtd}× {comReferencia(it.referencia, [it.produto, it.variante].filter(Boolean).join(" · "))} ({brl(it.preco_cents)})</span><span className="num">{brl(it.total_cents)}</span></li>)}</ul>
               </details>
             </li>))}</ul>
         )}

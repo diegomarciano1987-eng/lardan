@@ -15739,6 +15739,101 @@ export type Database = {
         }
         Relationships: []
       }
+      praca_transferencia_log: {
+        Row: {
+          antes: string | null
+          coluna: string
+          criado_em: string
+          depois: string | null
+          desfeito_em: string | null
+          id: string
+          lote: string
+          registro_id: string
+          tabela: string
+        }
+        Insert: {
+          antes?: string | null
+          coluna: string
+          criado_em?: string
+          depois?: string | null
+          desfeito_em?: string | null
+          id?: string
+          lote: string
+          registro_id: string
+          tabela: string
+        }
+        Update: {
+          antes?: string | null
+          coluna?: string
+          criado_em?: string
+          depois?: string | null
+          desfeito_em?: string | null
+          id?: string
+          lote?: string
+          registro_id?: string
+          tabela?: string
+        }
+        Relationships: []
+      }
+      praca_unificacoes: {
+        Row: {
+          criado_em: string
+          desfeita_em: string | null
+          destino_praca_id: string
+          id: string
+          lote: string
+          motivo: string
+          origem_praca_id: string
+        }
+        Insert: {
+          criado_em?: string
+          desfeita_em?: string | null
+          destino_praca_id: string
+          id?: string
+          lote: string
+          motivo: string
+          origem_praca_id: string
+        }
+        Update: {
+          criado_em?: string
+          desfeita_em?: string | null
+          destino_praca_id?: string
+          id?: string
+          lote?: string
+          motivo?: string
+          origem_praca_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "praca_unificacoes_destino_praca_id_fkey"
+            columns: ["destino_praca_id"]
+            isOneToOne: false
+            referencedRelation: "cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "praca_unificacoes_destino_praca_id_fkey"
+            columns: ["destino_praca_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "praca_unificacoes_origem_praca_id_fkey"
+            columns: ["origem_praca_id"]
+            isOneToOne: false
+            referencedRelation: "cob_pracas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "praca_unificacoes_origem_praca_id_fkey"
+            columns: ["origem_praca_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_cob_pracas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       preco_reajustes: {
         Row: {
           antes_cents: number
@@ -24589,6 +24684,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      praca_efetiva: { Args: { _id: string }; Returns: string }
       praca_pela_cidade: {
         Args: { _cidade: string; _uf: string }
         Returns: string
@@ -24602,6 +24698,22 @@ export type Database = {
           id: string
           nome: string
         }[]
+      }
+      pracas_unificar_desfazer: {
+        Args: { _lote: string; _motivo: string }
+        Returns: Json
+      }
+      pracas_unificar_transferir: {
+        Args: {
+          _aplicar?: boolean
+          _destino_codigo: number
+          _motivo: string
+          _origem_codigo: number
+          _remessas: number[]
+          _rep_de: string
+          _rep_para: string
+        }
+        Returns: Json
       }
       pre_baixa_abrir: { Args: { _cycle: string }; Returns: string }
       pre_baixa_asaas_preparar: {

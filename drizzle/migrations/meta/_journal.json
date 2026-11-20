@@ -2521,6 +2521,13 @@
       "when": 1795179956040,
       "tag": "0359_pracas_unificar_transferir_real",
       "breakpoints": true
+    },
+    {
+      "idx": 360,
+      "version": "7",
+      "when": 1795181197444,
+      "tag": "0360_asaas_pago_outra_forma_parcial",
+      "breakpoints": true
     }
   ]
 }

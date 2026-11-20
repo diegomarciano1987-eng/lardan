@@ -29,7 +29,7 @@ export const cancelarCobrancaAsaas = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<ResultadoCancelamento> => {
     const c = context as unknown as Ctx;
     // permissão conferida com a sessão da própria pessoa
-    const pode = await c.supabase.rpc("asaas_ator_pode", { _actor: c.userId, _cap: "finance.receivable.manage" });
+    const pode = await c.supabase.rpc("asaas_eu_posso", { _cap: "finance.receivable.manage" });
     if (pode.error || !pode.data) throw new Error("Sem acesso ao financeiro para cancelar cobrança.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

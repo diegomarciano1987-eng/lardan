@@ -42,3 +42,11 @@
 - [x] Relatório de acertos: modo "Geral" (maletas diretas, sem representante/praça)
 - [x] Relatório de acertos: escolher um representante ou praça específico (ex.: Daniel) e listar só os dele; poder trocar de representante
 - [x] Botão "Nova maleta" para todas as colaboradoras (inclusive as de carteira), com prova de abrir e montar
+
+# Baixa manual de cobrança Asaas (20/11)
+- [x] Botão "Pago por outra forma" na gaveta da cobrança Asaas em A Receber (total ou parcial)
+- [x] Cobrança sem título no Lardan (SmallData) ganha título oficial antes da baixa, só sem dívida antiga em aberto
+- [x] Parcial: cancela no Asaas, saldo fica no título, Larissa lança a nova cobrança (sem aviso falso de "excluída")
+- [x] Corrigir conferência de permissão das ações Asaas (bloqueava todos desde 0310)
+- [x] Provas em bancada + texto e imagens para a Larissa (Natalia total; Cristina parcial R$ 260,00, saldo R$ 242,10 p/ 25/11)
+- [ ] Lançar as baixas reais de Natalia (total) e Cristina (R$ 260,00) — aguarda a Larissa escolher conta e data na tela

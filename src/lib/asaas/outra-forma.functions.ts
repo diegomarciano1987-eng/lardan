@@ -23,9 +23,11 @@ export const marcarPagoOutraForma = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    const pode = await c.supabase.rpc("asaas_ator_pode", { _actor: c.userId, _cap: "finance.receivable.manage" });
+    const pode = await c.supabase.rpc("asaas_eu_posso", { _cap: "finance.receivable.manage" });
     if (pode.error || !pode.data) throw new Error("Sem acesso ao financeiro para dar baixa.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // 1º confere no Asaas: cobrança já paga lá nunca recebe baixa manual (seria dinheiro em dobro)
+    const remoto = await conferirNoAsaas(data.chargeId, c.userId);
     let caminho: string | null = null;
     if (data.arquivo) {
       const ext = data.arquivo.tipo === "application/pdf" ? "pdf" : data.arquivo.tipo.split("/")[1];
@@ -42,9 +44,41 @@ export const marcarPagoOutraForma = createServerFn({ method: "POST" })
       if (caminho) await supabaseAdmin.storage.from(BUCKET).remove([caminho]);
       throw new Error(r.error.message);
     }
-    const baixa = r.data as { id: string };
-    return { baixaId: baixa.id, ...(await cancelar(baixa.id, c.userId)) };
+    const baixa = r.data as { id: string; saldo_restante_cents: number; parcial: boolean; titulo_numero: string | null; title_id: string | null; criou_titulo: boolean };
+    const canc = remoto === "DELETED" ? await registrarJaExcluida(baixa.id) : await cancelar(baixa.id, c.userId);
+    return {
+      baixaId: baixa.id, ...canc,
+      saldoRestanteCents: Number(baixa.saldo_restante_cents ?? 0), parcial: !!baixa.parcial,
+      tituloNumero: baixa.titulo_numero ?? null, titleId: baixa.title_id ?? null, criouTitulo: !!baixa.criou_titulo,
+    };
   });
+
+const PAGAS = new Set(["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"]);
+
+/** Lê a cobrança no Asaas antes da baixa. Paga lá → recusa; excluída lá → segue sem pedir exclusão de novo. */
+async function conferirNoAsaas(chargeId: string, actor: string): Promise<string> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: ch } = await supabaseAdmin.from("asaas_charges").select("external_id").eq("id", chargeId).maybeSingle();
+  if (!ch?.external_id) throw new Error("Cobrança não encontrada.");
+  let status: string;
+  try {
+    const { transporteDaCobranca } = await import("./servidor.server");
+    const { transporte } = await transporteDaCobranca(chargeId, actor);
+    const r = await transporte.consultarCobranca(ch.external_id);
+    status = r?.status ?? "DELETED";
+  } catch {
+    throw new Error("Não consegui conferir esta cobrança no Asaas agora. Nada foi lançado — tente de novo em instantes.");
+  }
+  if (PAGAS.has(status)) throw new Error("Esta cobrança já consta como PAGA no Asaas. Nada foi lançado: a baixa entra sozinha pelo Asaas.");
+  return status;
+}
+
+async function registrarJaExcluida(baixaId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const rpc = supabaseAdmin.rpc as unknown as Rpc;
+  await rpc("asaas_outra_forma_cancelamento", { _id: baixaId, _ok: true, _erro: null });
+  return { cancelado: true, erro: null as string | null };
+}
 
 async function cancelar(baixaId: string, actor: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -64,7 +98,7 @@ export const retentarCancelamentoOutraForma = createServerFn({ method: "POST" })
   .inputValidator((d: { baixaId: string }) => { if (!/^[0-9a-f-]{36}$/i.test(d?.baixaId ?? "")) throw new Error("Baixa inválida."); return d; })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
-    const pode = await c.supabase.rpc("asaas_ator_pode", { _actor: c.userId, _cap: "finance.receivable.manage" });
+    const pode = await c.supabase.rpc("asaas_eu_posso", { _cap: "finance.receivable.manage" });
     if (pode.error || !pode.data) throw new Error("Sem acesso ao financeiro.");
     return cancelar(data.baixaId, c.userId);
   });

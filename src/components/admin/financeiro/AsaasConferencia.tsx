@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCapabilities } from "@/lib/capabilities";
 import { fetchUltimaSyncAsaas, type LinhaPR } from "@/lib/financeiro-unificado";
 import { sincronizarCobrancasAsaas } from "@/lib/asaas/espelho.functions";
+import { PagoOutraForma } from "./PagoOutraForma";
 
 const dataBR = (d?: string | null) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString("pt-BR") : "—");
 
@@ -20,8 +21,12 @@ const STATUS_ASAAS: Record<string, string> = {
   DUNNING_REQUESTED: "Negativação pedida",
 };
 
-/** Ficha de uma cobrança do Asaas (somente leitura: a baixa acontece no Asaas). */
-export function CobrancaAsaasSheet({ linha, onOpenChange }: { linha: LinhaPR | null; onOpenChange: (v: boolean) => void }) {
+/** Ficha de uma cobrança do Asaas. Recebimento pelo Asaas entra sozinho; pago direto na conta → "Pago por outra forma" (0360). */
+export function CobrancaAsaasSheet({ linha, onOpenChange, onAbrirTitulo }: {
+  linha: LinhaPR | null; onOpenChange: (v: boolean) => void; onAbrirTitulo?: ((titleId: string) => void) | undefined;
+}) {
+  const caps = useCapabilities();
+  const podeBaixar = caps.includes("finance.receivable.manage");
   return (
     <Sheet open={!!linha} onOpenChange={onOpenChange}>
       <SheetContent className="admin-scope w-full overflow-y-auto sm:max-w-lg">
@@ -51,9 +56,13 @@ export function CobrancaAsaasSheet({ linha, onOpenChange }: { linha: LinhaPR | n
               </div>
             </dl>
             <p className="text-sm text-ledger-muted">
-              O recebimento desta cobrança é registrado pelo próprio Asaas. Para não haver baixa em dobro, ela não tem botão de baixa
-              manual aqui: quando o cliente paga, a situação muda na próxima sincronização.
+              Pago pelo link do Asaas: a baixa entra sozinha na próxima sincronização. Pago direto na conta da Lardan (Pix, dinheiro,
+              transferência): use "Pago por outra forma" — total ou parcial — e a cobrança é cancelada no Asaas na hora.
             </p>
+            {podeBaixar ? (
+              <PagoOutraForma chargeId={linha.id} saldoCents={linha.saldo_cents > 0 ? linha.saldo_cents : linha.valor_cents}
+                status={linha.status_externo} onAbrirTitulo={onAbrirTitulo} />
+            ) : null}
             {linha.invoice_url ? (
               <a
                 href={linha.invoice_url}

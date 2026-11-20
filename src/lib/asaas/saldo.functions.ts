@@ -18,7 +18,7 @@ type Ctx = {
 };
 
 async function exigir(c: Ctx) {
-  const pode = await c.supabase.rpc("asaas_ator_pode", { _actor: c.userId, _cap: "finance.receivable.manage" });
+  const pode = await c.supabase.rpc("asaas_eu_posso", { _cap: "finance.receivable.manage" });
   if (pode.error || !pode.data) throw new Error("Sem acesso ao financeiro.");
 }
 

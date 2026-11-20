@@ -260,7 +260,19 @@ function ListaUnificada({
           }
         }}
       />
-      <CobrancaAsaasSheet linha={cobranca} onOpenChange={(v) => !v && setCobranca(null)} />
+      <CobrancaAsaasSheet
+        linha={cobranca}
+        onOpenChange={(v) => {
+          if (!v) {
+            setCobranca(null);
+            void q.refetch();
+          }
+        }}
+        onAbrirTitulo={(titleId) => {
+          setCobranca(null);
+          setAberto({ titulo: titleId, parcela: null, baixa: false });
+        }}
+      />
       <div className="flex flex-wrap items-center gap-3 px-5 pt-4">
         <input
           value={busca}

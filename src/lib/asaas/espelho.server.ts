@@ -70,6 +70,10 @@ export async function executarSyncAsaas(p: { actor: string; de: string; ate: str
             { "dateCreated[ge]": p.de, "dateCreated[le]": p.ate },
             { "paymentDate[ge]": p.de, "paymentDate[le]": p.ate },
             { "dueDate[ge]": p.de },
+            // 22/11: vencidas e em negativação de qualquer data voltam todo dia, então só sobram para a conferência
+            // uma a uma as que realmente mudaram (excluídas ou baixadas sem data no período)
+            { status: "OVERDUE" },
+            { status: "DUNNING_REQUESTED" },
           ];
     for (const filtro of passadas) {
       let offset = 0;
@@ -178,4 +182,30 @@ async function conferirAbertasSumidas(chave: string, db: Admin, vistas: Set<stri
     if (error) throw new Error(error.message);
   }
   return { pendentes: abertas.length, conferidas: atuais.length, excluidas };
+}
+
+export type CobrancaRelida = {
+  external_id: string;
+  status: string;
+  valor_cents: number;
+  pagamento: string | null;
+};
+
+/** 22/11: relê no Asaas (produção) cobranças específicas e atualiza o espelho. Só leitura no Asaas. */
+export async function releCobrancasProducao(ids: string[]): Promise<CobrancaRelida[]> {
+  const chave = process.env["ASAAS_PRODUCAO_LARDAN"];
+  if (!chave) throw new Error("Chave do Asaas de produção não configurada.");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const atuais: Record<string, unknown>[] = [];
+  for (const id of ids.slice(0, 30)) atuais.push(await getAsaas(chave, `/payments/${encodeURIComponent(id)}`));
+  if (atuais.length) {
+    const { error } = await supabaseAdmin.rpc("asaas_espelho_upsert" as never, { _account_id: CONTA_PRODUCAO, _rows: atuais } as never);
+    if (error) throw new Error(error.message);
+  }
+  return atuais.map((x) => ({
+    external_id: String(x["id"]),
+    status: x["deleted"] === true ? "DELETED" : String(x["status"] ?? ""),
+    valor_cents: Math.round(Number(x["value"] ?? 0) * 100),
+    pagamento: (x["paymentDate"] as string | null) ?? (x["clientPaymentDate"] as string | null) ?? null,
+  }));
 }

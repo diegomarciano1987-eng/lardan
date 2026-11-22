@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClassificarTituloDialog } from "@/components/admin/financeiro/ClassificacaoCampos";
 import { PedirDadosDialog } from "@/components/admin/financeiro/PedirDadosDialog";
 import { CobrarAsaas } from "@/components/admin/financeiro/CobrarAsaas";
+import { LiquidarDividaDialog, ReconferirAsaas } from "@/components/admin/financeiro/LiquidarDivida";
 import {
   cancelarTitulo,
   corrigirDataEstorno,
@@ -112,6 +113,7 @@ export function TituloSheet({
   const [editandoParcela, setEditandoParcela] = React.useState<FinInstallment | null>(null);
   const [reconhecendo, setReconhecendo] = React.useState(false);
   const [classificando, setClassificando] = React.useState(false);
+  const [liquidando, setLiquidando] = React.useState<{ installmentId: string | null; saldoCents: number; descricao: string } | null>(null);
 
   const t = detalhe.data;
   const baixaRef = React.useRef<HTMLElement>(null);
@@ -285,6 +287,8 @@ export function TituloSheet({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const podeLiquidar = caps.includes("finance.receivable.manage");
+  const saldoTitulo = (t?.parcelas ?? []).reduce((s, p) => s + Math.max(0, saldoParcela(p)), 0);
   const reconhecido = (t?.reconhecimentos ?? []).reduce((s, r) => s + r.reconhecido_cents, 0);
   const contestado = (t?.reconhecimentos ?? []).reduce((s, r) => s + r.contestado_cents, 0);
 
@@ -317,46 +321,39 @@ export function TituloSheet({
               )}
             </div>
 
-            <section className="rounded-[12px] border border-line-soft bg-cream-2 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="ledger-eyebrow">Classificação</p>
+            {t.titulo.direction === "receivable" && t.titulo.status !== "cancelado" && podeLiquidar && saldoTitulo > 0 ? (
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-[12px] border border-line-soft px-3 py-2">
+                <span className="text-sm text-ledger-muted">
+                  Em aberto: <b className="tabular-nums text-ledger-text">{formatBRLFromCents(saldoTitulo)}</b>
+                </span>
+                <button type="button" className="admin-btn min-h-9 px-3 text-xs text-destructive"
+                  onClick={() => setLiquidando({ installmentId: null, saldoCents: saldoTitulo, descricao: `${t.titulo.numero ? `Nº ${t.titulo.numero} · ` : ""}${t.titulo.contraparte}` })}>
+                  Liquidar dívida
+                </button>
+              </div>
+            ) : null}
+
+            {/* 22/11: classificação compacta — recebimento de consultora já vem 3.1.1 + Comercial, sem confirmar nada */}
+            <section className="rounded-[10px] border border-line-soft bg-cream-2 px-3 py-2">
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs">
+                <span className="min-w-0 text-ledger-muted">
+                  <span className="font-semibold text-ledger-text">{t.titulo.plano_label ?? "Sem conta contábil"}</span>
+                  {" · "}
+                  {t.titulo.centro_label ? t.titulo.centro_label.split(" · ").pop() : "sem centro de custo"}
+                  {t.titulo.pendente_classificacao ? <span className="font-semibold text-amber-700"> · falta classificar</span> : null}
+                </span>
                 {(t.pode_classificar ?? false) && t.titulo.status !== "cancelado" ? (
-                  <button
-                    type="button"
-                    className="admin-btn"
-                    onClick={() => setClassificando(true)}
-                  >
-                    Classificar
+                  <button type="button" className="text-xs font-semibold text-primary underline-offset-2 hover:underline" onClick={() => setClassificando(true)}>
+                    Alterar
                   </button>
                 ) : null}
               </div>
-              {t.titulo.pendente_classificacao ? (
-                <p className="mt-2 text-sm font-semibold text-amber-700">
-                  Pendente de classificação
+              <details className="mt-1 text-xs text-ledger-muted">
+                <summary className="cursor-pointer select-none">Mais detalhes</summary>
+                <p className="mt-1">
+                  Entidade: {t.titulo.entidade_label ?? "—"} · Forma: {t.titulo.forma_label ?? "—"} · Conta prevista: {t.titulo.conta_label ?? "—"}
                 </p>
-              ) : null}
-              <dl className="mt-2 grid gap-1 text-sm sm:grid-cols-2">
-                <div>
-                  <dt className="text-xs text-ledger-muted">Conta contábil</dt>
-                  <dd className="text-ledger-text">{t.titulo.plano_label ?? "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-ledger-muted">Centro de custo</dt>
-                  <dd className="text-ledger-text">{t.titulo.centro_label ?? "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-ledger-muted">Entidade</dt>
-                  <dd className="text-ledger-text">{t.titulo.entidade_label ?? "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-ledger-muted">Forma de pagamento</dt>
-                  <dd className="text-ledger-text">{t.titulo.forma_label ?? "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-ledger-muted">Conta ou caixa prevista</dt>
-                  <dd className="text-ledger-text">{t.titulo.conta_label ?? "—"}</dd>
-                </div>
-              </dl>
+              </details>
             </section>
 
             <ClassificarTituloDialog
@@ -390,6 +387,12 @@ export function TituloSheet({
                       caps.includes(t.titulo.direction === "payable" ? "finance.payable.manage" : "finance.receivable.manage") ? (
                         <button type="button" className="admin-btn min-h-9 px-3 text-xs" onClick={() => setEditandoParcela(p)}>
                           Editar
+                        </button>
+                      ) : null}
+                      {t.titulo.direction === "receivable" && t.titulo.status !== "cancelado" && podeLiquidar && saldoParcela(p) > 0 && t.parcelas.length > 1 ? (
+                        <button type="button" className="admin-btn min-h-9 px-3 text-xs text-destructive"
+                          onClick={() => setLiquidando({ installmentId: p.id, saldoCents: saldoParcela(p), descricao: `Parcela ${p.numero}/${p.total_parcelas} · ${t.titulo.contraparte}` })}>
+                          Liquidar
                         </button>
                       ) : null}
                     </span>
@@ -493,6 +496,8 @@ export function TituloSheet({
                 parcelas={t.parcelas.map((p) => ({ id: p.id, numero: p.numero, vencimento: p.vencimento, saldo: saldoParcela(p) }))}
               />
             )}
+
+            {t.titulo.direction === "receivable" && podeLiquidar && <ReconferirAsaas titleId={t.titulo.id} />}
 
             <section>
               <p className="ledger-eyebrow">Baixas</p>
@@ -607,6 +612,11 @@ export function TituloSheet({
             )}
           </div>
         )}
+        <LiquidarDividaDialog
+          alvo={liquidando && t ? { titleId: t.titulo.id, installmentId: liquidando.installmentId, descricao: liquidando.descricao, saldoCents: liquidando.saldoCents } : null}
+          onOpenChange={(v) => !v && setLiquidando(null)}
+        />
+
         <PedirDadosDialog
           open={!!estornando}
           titulo="Estornar baixa"

@@ -50,3 +50,11 @@
 - [x] Corrigir conferência de permissão das ações Asaas (bloqueava todos desde 0310)
 - [x] Provas em bancada + texto e imagens para a Larissa (Natalia total; Cristina parcial R$ 260,00, saldo R$ 242,10 p/ 25/11)
 - [ ] Lançar as baixas reais de Natalia (total) e Cristina (R$ 260,00) — aguarda a Larissa escolher conta e data na tela
+
+# Financeiro, remessas e captação (22/11, 4 etapas)
+- [x] E1. Recebimento de consultora já classificado (3.1.1 + centro de custo Comercial), sem aviso nem confirmação
+- [x] E1. Liquidar/cancelar dívida de consultora (Financeiro e cockpit), motivo obrigatório, registro de quem fez, cancela no Asaas na hora
+- [x] E1. Reconferir no Asaas: cobrança paga/excluída lá baixa no Lardan (caso Luciana Batista Saraiva)
+- [ ] E2. Remessas: aba "Maletas individuais" (sem remessa/representante) com buscador; saem da lista normal
+- [ ] E3. App do representante: reprovar candidata (motivo) + aba "Reprovadas"; vai para Reprovados no CRM
+- [ ] E4. Conciliação por CPF (Pix Asaas e OFX Santander): baixa parcial automática quando CPF único bate

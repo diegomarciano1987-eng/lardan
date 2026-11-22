@@ -4,6 +4,8 @@ import { Link } from "@tanstack/react-router";
 import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
 import { cockpitFinanceiro, notasEFechamentos, brl, dataBR, hojeSP, rotuloEtapa } from "@/lib/cobranca";
 import { CobrarParcelaAsaas } from "@/components/admin/financeiro/CobrarParcelaAsaas";
+import { LiquidarDividaDialog } from "@/components/admin/financeiro/LiquidarDivida";
+import { useCapabilities } from "@/lib/capabilities";
 import { FinanceiroSmallData, ResumoSmallData, useFinanceiroSmallData } from "./FinanceiroSmallData";
 
 type Aba = "abertas" | "fiado" | "recebimentos" | "comissoes" | "maletas" | "fechamentos" | "notas" | "smalldata";
@@ -21,6 +23,10 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
   const [aba, setAba] = React.useState<Aba | null>(null);
   // 0301: todo título do cockpit abre a ficha oficial (parcelas, baixas, Asaas e histórico)
   const [tituloAberto, setTituloAberto] = React.useState<{ id: string; parcela?: string | null | undefined } | null>(null);
+  // 22/11: liquidar dívida direto do cockpit (Larissa, Daniel, Master — quem gerencia contas a receber)
+  const caps = useCapabilities();
+  const podeLiquidar = caps.includes("finance.receivable.manage");
+  const [liquidando, setLiquidando] = React.useState<{ titleId: string; installmentId: string; descricao: string; saldoCents: number } | null>(null);
   if (q.isLoading) return <p className="p-5 text-sm text-muted-foreground">Carregando o financeiro…</p>;
   if (q.error) return <p className="p-5 text-sm text-destructive">{(q.error as Error).message}</p>;
   const d = q.data!;
@@ -81,12 +87,20 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
           <button key={k} onClick={() => setAba(k)} className={`border-b-2 px-4 py-2 text-sm ${abaAtual === k ? "border-primary text-foreground" : "border-transparent text-muted-foreground"}`}>{t}</button>
         ))}
       </div>
-      {abaAtual === "abertas" && (d.parcelas.length ? <Tabela cab={["Título", "Descrição", "Origem", "Vencimento", "Valor", "Saldo", "Atraso", "Asaas"]} linhas={d.parcelas.map((p) => [
+      {abaAtual === "abertas" && (d.parcelas.length ? <Tabela cab={["Título", "Descrição", "Origem", "Vencimento", "Valor", "Saldo", "Atraso", "Ações"]} linhas={d.parcelas.map((p) => [
         <AbrirTitulo id={p.title_id} numero={p.numero} parcela={p.installment_id} />, p.descricao, p.origem === "fiado_historico" ? "Fiado" : p.origem ?? "Manual",
         <span className={p.vencimento < hoje ? "text-destructive" : ""}>{dataBR(p.vencimento)}</span>,
         <span className="font-mono tabular-nums">{brl(Number(p.valor_cents))}</span>, <span className="font-mono tabular-nums">{brl(Number(p.saldo_cents))}</span>,
         p.atraso ? `${p.atraso} dias` : "—",
-        <CobrarParcelaAsaas installmentId={p.installment_id} saldoCents={Number(p.saldo_cents)} vencimento={p.vencimento} compacto />])} /> : vazio("Sem débitos em aberto."))}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <CobrarParcelaAsaas installmentId={p.installment_id} saldoCents={Number(p.saldo_cents)} vencimento={p.vencimento} compacto />
+          {podeLiquidar && p.title_id ? (
+            <button type="button" className="admin-btn min-h-8 px-2.5 text-xs text-destructive"
+              onClick={() => setLiquidando({ titleId: p.title_id as string, installmentId: p.installment_id, saldoCents: Number(p.saldo_cents), descricao: `${p.numero ?? "Título"} · ${p.descricao ?? ""}` })}>
+              Liquidar
+            </button>
+          ) : null}
+        </div>])} /> : vazio("Sem débitos em aberto."))}
       {abaAtual === "fiado" && (d.fiado.length ? <>
         <p className="text-xs text-muted-foreground">Cada linha é a linha original da planilha de fiados, guardada sem alteração e ligada ao título a receber que ela gerou.</p>
         <Tabela cab={["Lote / linha", "Título", "Data da cobrança", "Vencimento", "Parcela", "Valor", "Situação hoje"]} linhas={d.fiado.map((f) => [
@@ -134,6 +148,7 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
       {abaAtual === "maletas" && (d.maletas.length ? <Tabela cab={["Maleta", "Situação", "Peças", "Valor de referência", "Recebida", "Fechada"]} linhas={d.maletas.map((m) => [
         <AbrirMaleta cycleId={m.id} texto={m.codigo ? `${m.codigo} · ciclo ${m.ciclo}` : `Ciclo ${m.ciclo}`} />, m.status, String(m.pecas ?? "—"), <span className="font-mono tabular-nums">{m.valor_cents != null ? brl(Number(m.valor_cents)) : "—"}</span>,
         dataBR(m.recebida), dataBR(m.fechada)])} /> : vazio("Sem maletas."))}
+      <LiquidarDividaDialog alvo={liquidando} onOpenChange={(v) => !v && setLiquidando(null)} onFeito={() => void q.refetch()} />
       <TituloSheet id={tituloAberto?.id ?? null} parcelaInicial={tituloAberto?.parcela ?? null}
         onOpenChange={(v) => { if (!v) { setTituloAberto(null); void q.refetch(); } }} />
     </div>

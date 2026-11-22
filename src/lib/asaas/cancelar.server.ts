@@ -37,3 +37,45 @@ export async function encerrarAcordosVencidos(actor: string) {
   }
   return resultado;
 }
+
+const PAGAS_CANC = new Set(["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"]);
+const ABERTAS_CANC = new Set(["PENDING", "OVERDUE"]);
+
+export type ResultadoCancelamentoRegistrado = {
+  external_id: string | null;
+  resultado: "cancelada" | "ja_excluida" | "paga_no_asaas" | "falhou";
+  status: string | null;
+  erro: string | null;
+};
+
+/**
+ * 22/11: mesmo caminho do "Cancelar no Asaas" (0301) para uso de outras ações do servidor (ex.: liquidar dívida).
+ * Confere no Asaas antes (paga nunca é excluída) e registra a tentativa com motivo e quem fez.
+ */
+export async function cancelarCobrancaComRegistro(chargeId: string, actor: string, motivo: string): Promise<ResultadoCancelamentoRegistrado> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const rpc = supabaseAdmin.rpc as unknown as (f: string, a: object) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+  const prep = await rpc("asaas_cobranca_cancelar_preparar", { _charge: chargeId, _actor: actor });
+  if (prep.error) return { external_id: null, resultado: "falhou", status: null, erro: prep.error.message };
+  const { external_id } = prep.data as { external_id: string };
+  let r: Omit<ResultadoCancelamentoRegistrado, "external_id">;
+  try {
+    const { transporte } = await transporteDaCobranca(chargeId, actor);
+    const remoto = await transporte.consultarCobranca(external_id);
+    if (!remoto || remoto.status === "DELETED") r = { resultado: "ja_excluida", status: remoto?.status ?? null, erro: null };
+    else if (PAGAS_CANC.has(remoto.status)) r = { resultado: "paga_no_asaas", status: remoto.status, erro: null };
+    else if (!ABERTAS_CANC.has(remoto.status)) r = { resultado: "falhou", status: remoto.status, erro: `Situação no Asaas: ${remoto.status}` };
+    else if (!transporte.cancelarCobranca) r = { resultado: "falhou", status: remoto.status, erro: "Esta conta não permite cancelar pelo sistema." };
+    else {
+      await transporte.cancelarCobranca(external_id);
+      r = { resultado: "cancelada", status: remoto.status, erro: null };
+    }
+  } catch (e) {
+    r = { resultado: "falhou", status: null, erro: (e instanceof Error ? e.message : String(e)).replace(/\$aact_[A-Za-z0-9_]+/g, "[oculto]").slice(0, 400) };
+  }
+  const reg = await rpc("asaas_cobranca_cancelar_registrar", {
+    _charge: chargeId, _actor: actor, _motivo: motivo, _resultado: r.resultado, _status_remoto: r.status, _erro: r.erro,
+  });
+  if (reg.error) return { external_id, ...r, erro: r.erro ?? reg.error.message };
+  return { external_id, ...r };
+}

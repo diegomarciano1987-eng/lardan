@@ -22890,6 +22890,10 @@ export type Database = {
         Returns: undefined
       }
       fin_dfc: { Args: { _ate: string; _de: string }; Returns: Json }
+      fin_divida_liquidar: {
+        Args: { _installment: string; _motivo: string; _title: string }
+        Returns: Json
+      }
       fin_dre: { Args: { _filtros?: Json }; Returns: Json }
       fin_dre_base: {
         Args: {

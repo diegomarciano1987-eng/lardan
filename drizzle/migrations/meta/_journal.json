@@ -2528,6 +2528,13 @@
       "when": 1795181197444,
       "tag": "0360_asaas_pago_outra_forma_parcial",
       "breakpoints": true
+    },
+    {
+      "idx": 361,
+      "version": "7",
+      "when": 1795359036856,
+      "tag": "0361_divida_consultora_liquidar_centro_comercial",
+      "breakpoints": true
     }
   ]
 }

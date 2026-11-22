@@ -5,14 +5,14 @@
  *  • conversando: "Próximo: <etapa>";
  *  • aprovada pela Lardan: "Fazer abertura" e, ali mesmo, contrato e promissória;
  *  • com maleta: contrato e promissória;
- *  • não aprovada: só o contato.
+ *  • reprovada (0364: pelo representante, com motivo do CRM, ou pela Lardan): motivo, contato e "Desfazer" se foi ele.
  * A candidata que a Lardan aprovou deixa de ficar "travada": ela vira a próxima tarefa do representante.
  */
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronDown, Copy, MessageCircle, PackageOpen, Phone, Plus, Sparkles } from "lucide-react";
-import { DevolverLead } from "@/components/representante/AtendimentoPresencial";
+import { DesfazerReprovacao, DevolverLead, ReprovarLead } from "@/components/representante/AtendimentoPresencial";
 import { repCpfDefinir, repCrm, repCrmMover, repEtapaNova, type RepCrm } from "@/lib/representante";
 import { wa } from "@/components/representante/AcoesRepresentante";
 import { AberturaDaCandidata, AberturaNaRua } from "@/components/representante/AberturaNaRua";
@@ -24,13 +24,13 @@ type Card = RepCrm["cards"][number];
 type Passo = "chamar" | "conversando" | "abrir" | "maleta" | "fora";
 const FILTROS: { id: "agora" | Passo | "todas"; rotulo: string }[] = [
   { id: "agora", rotulo: "Fazer agora" }, { id: "conversando", rotulo: "Conversando" },
-  { id: "maleta", rotulo: "Com maleta" }, { id: "fora", rotulo: "Não aprovadas" }, { id: "todas", rotulo: "Todas" },
+  { id: "maleta", rotulo: "Com maleta" }, { id: "fora", rotulo: "Reprovadas" }, { id: "todas", rotulo: "Todas" },
 ];
 const ORIGEM: Record<string, string> = {
   encaminhada: "O Daniel passou para você (site)", rota: "Site · cidade da sua rota", link: "Veio pelo seu link", manual: "Você cadastrou", madrinha: "Indicação de consultora",
 };
 const STATUS: Record<string, string> = {
-  novo: "Nova", em_analise: "Em conversa", qualificado: "Qualificada", aprovado: "Aprovada", recusado: "Não aprovada",
+  novo: "Nova", em_analise: "Em conversa", qualificado: "Qualificada", aprovado: "Aprovada", recusado: "Reprovada",
 };
 const dias = (iso: string | null | undefined) => (iso ? Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000)) : 0);
 const primeiro = (n: string) => { const p = (n.split(" ")[0] ?? "").toLowerCase(); return p.charAt(0).toUpperCase() + p.slice(1); };
@@ -123,6 +123,16 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <AberturaDaCandidata rep={rep} card={c} />
                   <DevolverLead rep={rep} card={c} onFeito={recarregar} />
+                  <ReprovarLead rep={rep} card={c} onFeito={recarregar} />
+                </div>
+              )}
+              {p === "fora" && c.reprovacao && (
+                <div className="mt-3 rounded-xl bg-muted/60 p-3 text-xs">
+                  <p><span className="font-semibold">Motivo:</span> {c.reprovacao.motivo ?? "Não informado"}{c.reprovacao.nota ? ` — ${c.reprovacao.nota}` : ""}</p>
+                  <p className="mt-0.5 text-muted-foreground">
+                    {c.reprovacao.pelo_representante ? "Reprovada por você" : "Recusada pela equipe da Lardan"}
+                    {c.reprovacao.em ? ` em ${new Date(c.reprovacao.em).toLocaleDateString("pt-BR")}` : ""}
+                  </p>
                 </div>
               )}
 
@@ -165,6 +175,7 @@ export function CaptacaoInteligente({ rep, onAbertura }: { rep: string; onAbertu
                   <a href={wa(c.whatsapp, `Olá, ${primeiro(c.nome)}! `)} target="_blank" rel="noreferrer"
                     className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm"><MessageCircle className="size-4" /> WhatsApp</a>
                 )}
+                {p === "fora" && c.reprovacao?.pelo_representante && <DesfazerReprovacao rep={rep} card={c} onFeito={recarregar} />}
                 {p === "conversando" && livres.length > 2 && (
                   <select aria-label="Mudar etapa" value={c.etapa_id} onChange={(e) => mover.mutate({ lead: c.lead_id, etapa: e.target.value })}
                     className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-muted-foreground">

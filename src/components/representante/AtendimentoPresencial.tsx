@@ -3,10 +3,10 @@
  * Grava só por rep_lead_atendimento / rep_lead_devolver (carteira do representante, auditado).
  */
 import * as React from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ClipboardCheck, Undo2, X } from "lucide-react";
-import { repLeadAtendimento, repLeadDevolver, type RepCrm } from "@/lib/representante";
+import { ClipboardCheck, RotateCcw, Undo2, UserX, X } from "lucide-react";
+import { repLeadAtendimento, repLeadDevolver, repLeadMotivos, repLeadReabrir, repLeadReprovar, type RepCrm } from "@/lib/representante";
 
 type Card = RepCrm["cards"][number];
 
@@ -113,5 +113,62 @@ export function DevolverLead({ rep, card, onFeito }: { rep: string; card: Card; 
         </Folha>
       )}
     </>
+  );
+}
+
+/**
+ * 0364 (Diego, 22/11/2026): o representante reprova a candidata da carteira com um dos motivos do CRM.
+ * Ela continua com ele, mas vai para "Reprovadas" (no CRM da Lardan aparece em "Perdidas", com o histórico).
+ */
+export function ReprovarLead({ rep, card, onFeito }: { rep: string; card: Card; onFeito: () => void }) {
+  const [aberto, setAberto] = React.useState(false);
+  const [motivo, setMotivo] = React.useState("");
+  const [nota, setNota] = React.useState("");
+  const motivos = useQuery({ queryKey: ["rep-lead-motivos"], queryFn: repLeadMotivos, enabled: aberto, staleTime: 3_600_000 });
+  const escolhido = motivos.data?.find((m) => m.id === motivo);
+  const reprovar = useMutation({
+    mutationFn: () => repLeadReprovar(rep, card.lead_id, motivo, nota.trim() || null),
+    onSuccess: () => { toast.success(`${card.nome.split(" ")[0]} foi para Reprovadas.`); setAberto(false); setMotivo(""); setNota(""); onFeito(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <>
+      <button type="button" onClick={() => setAberto(true)} className="col-span-2 flex h-11 items-center justify-center gap-1.5 rounded-xl border border-destructive/40 text-sm text-destructive">
+        <UserX className="size-4" /> Reprovar candidata
+      </button>
+      {aberto && (
+        <Folha titulo="Reprovar candidata" onFechar={() => setAberto(false)}>
+          <p className="mb-3 text-sm text-muted-foreground">{card.nome} vai para <strong>Reprovadas</strong>. A Lardan vê o motivo no CRM. Você pode desfazer depois.</p>
+          {motivos.isLoading && <p className="text-sm text-muted-foreground">Carregando motivos…</p>}
+          {motivos.error && <p className="text-sm text-destructive">{(motivos.error as Error).message}</p>}
+          <div className="space-y-2" role="radiogroup" aria-label="Motivo da reprovação">
+            {(motivos.data ?? []).map((m) => (
+              <button key={m.id} type="button" role="radio" aria-checked={motivo === m.id} onClick={() => setMotivo(m.id)}
+                className={`h-12 w-full rounded-xl border px-3 text-left text-sm ${motivo === m.id ? "border-primary bg-primary/10 font-semibold" : "border-border"}`}>{m.label}</button>
+            ))}
+            <input className={campo} placeholder={escolhido?.requires_note ? "Escreva o motivo (obrigatório)" : "Observação (opcional)"} value={nota} onChange={(e) => setNota(e.target.value)} />
+          </div>
+          <button type="button" disabled={!motivo || (!!escolhido?.requires_note && nota.trim().length < 3) || reprovar.isPending} onClick={() => reprovar.mutate()}
+            className="mt-4 h-12 w-full rounded-xl bg-destructive text-sm font-semibold text-destructive-foreground disabled:opacity-50">
+            {reprovar.isPending ? "Reprovando…" : "Confirmar reprovação"}
+          </button>
+        </Folha>
+      )}
+    </>
+  );
+}
+
+/** Desfaz a reprovação feita pelo próprio representante (a recusa feita pela equipe da Lardan só a equipe reabre). */
+export function DesfazerReprovacao({ rep, card, onFeito }: { rep: string; card: Card; onFeito: () => void }) {
+  const desfazer = useMutation({
+    mutationFn: () => repLeadReabrir(rep, card.lead_id),
+    onSuccess: () => { toast.success(`${card.nome.split(" ")[0]} voltou para a sua lista.`); onFeito(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <button type="button" disabled={desfazer.isPending} onClick={() => desfazer.mutate()}
+      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm disabled:opacity-50">
+      <RotateCcw className="size-4" /> {desfazer.isPending ? "Desfazendo…" : "Desfazer reprovação"}
+    </button>
   );
 }

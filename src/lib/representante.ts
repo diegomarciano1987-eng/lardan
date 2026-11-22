@@ -61,8 +61,16 @@ export type RepCrm = {
     etapa_id: string; nota: string | null; travado: boolean;
     /** 0245: coluna do sistema, cadastro já criado pela Lardan, CPF informado na candidatura e quando o rep mexeu no card */
     sistema?: "aprovada" | "primeira_maleta" | "nao_aprovada" | null; party_id?: string | null; tem_cpf?: boolean; movido_em?: string | null;
+    /** 0364/0365: motivo da reprovação (mesmos motivos do CRM) e se foi o próprio representante que reprovou */
+    reprovacao?: { motivo: string | null; nota: string | null; em: string | null; pelo_representante: boolean } | null;
   }[];
 };
+/** 0364: reprovar candidata pelo app (vai para Reprovadas aqui e Perdidas no CRM); desfazer só a reprovação feita pelo representante. */
+export type MotivoReprovacao = { id: string; label: string; requires_note: boolean };
+export const repLeadMotivos = () => chamar<MotivoReprovacao[]>("rep_lead_motivos", {});
+export const repLeadReprovar = (rep: string, lead: string, motivo: string, nota: string | null) =>
+  chamar<{ ok: boolean; ja_estava: boolean }>("rep_lead_reprovar", { _rep: rep, _lead: lead, _motivo: motivo, _nota: nota });
+export const repLeadReabrir = (rep: string, lead: string) => chamar<{ ok: boolean; ja_estava: boolean }>("rep_lead_reabrir", { _rep: rep, _lead: lead });
 export const repCrm = (rep: string) => chamar<RepCrm>("rep_crm", { _rep: rep });
 export const repCrmMover = (lead: string, etapa: string, nota?: string | null) => chamar<null>("rep_crm_mover", { _lead: lead, _etapa: etapa, _nota: nota ?? null });
 export const repEtapaSalvar = (id: string | null, nome: string, ordem: number | null) => chamar<string>("rep_crm_etapa_salvar", { _id: id, _nome: nome, _ordem: ordem });

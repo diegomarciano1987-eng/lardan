@@ -2549,6 +2549,34 @@
       "when": 1795359774287,
       "tag": "0363_maletas_individuais_busca_tolerante",
       "breakpoints": true
+    },
+    {
+      "idx": 364,
+      "version": "7",
+      "when": 1795359939474,
+      "tag": "0364_rep_reprovar_candidata",
+      "breakpoints": true
+    },
+    {
+      "idx": 365,
+      "version": "7",
+      "when": 1795359982403,
+      "tag": "0365_rep_crm_motivo_reprovacao",
+      "breakpoints": true
+    },
+    {
+      "idx": 366,
+      "version": "7",
+      "when": 1795360023239,
+      "tag": "0366_rep_reprovacao_leitura_rapida",
+      "breakpoints": true
+    },
+    {
+      "idx": 367,
+      "version": "7",
+      "when": 1795360153995,
+      "tag": "0367_rep_reprovacao_marca_exata",
+      "breakpoints": true
     }
   ]
 }

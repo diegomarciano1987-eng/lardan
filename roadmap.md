@@ -56,5 +56,5 @@
 - [x] E1. Liquidar/cancelar dívida de consultora (Financeiro e cockpit), motivo obrigatório, registro de quem fez, cancela no Asaas na hora
 - [x] E1. Reconferir no Asaas: cobrança paga/excluída lá baixa no Lardan (caso Luciana Batista Saraiva)
 - [x] E2. Remessas: aba "Maletas individuais" (sem remessa/representante) com buscador; saem da lista normal
-- [ ] E3. App do representante: reprovar candidata (motivo) + aba "Reprovadas"; vai para Reprovados no CRM
+- [x] E3. App do representante: reprovar candidata (motivo) + aba "Reprovadas"; vai para Reprovados no CRM
 - [ ] E4. Conciliação por CPF (Pix Asaas e OFX Santander): baixa parcial automática quando CPF único bate

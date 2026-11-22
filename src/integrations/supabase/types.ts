@@ -25502,6 +25502,23 @@ export type Database = {
         Args: { _lead: string; _rep: string }
         Returns: undefined
       }
+      rep_lead_motivos: {
+        Args: never
+        Returns: {
+          id: string
+          label: string
+          requires_note: boolean
+        }[]
+      }
+      rep_lead_reabrir: { Args: { _lead: string; _rep: string }; Returns: Json }
+      rep_lead_reprovado_pelo_rep: {
+        Args: { _lead: string; _lost_at: string }
+        Returns: string
+      }
+      rep_lead_reprovar: {
+        Args: { _lead: string; _motivo: string; _nota?: string; _rep: string }
+        Returns: Json
+      }
       rep_maleta_destinatarias: {
         Args: { _busca?: string; _rep: string }
         Returns: Json

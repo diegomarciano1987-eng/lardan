@@ -2535,6 +2535,20 @@
       "when": 1795359036856,
       "tag": "0361_divida_consultora_liquidar_centro_comercial",
       "breakpoints": true
+    },
+    {
+      "idx": 362,
+      "version": "7",
+      "when": 1795359603565,
+      "tag": "0362_remessas_maletas_individuais",
+      "breakpoints": true
+    },
+    {
+      "idx": 363,
+      "version": "7",
+      "when": 1795359774287,
+      "tag": "0363_maletas_individuais_busca_tolerante",
+      "breakpoints": true
     }
   ]
 }

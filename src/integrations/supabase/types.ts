@@ -24197,6 +24197,25 @@ export type Database = {
         Args: { _limite?: number; _termo: string }
         Returns: Json
       }
+      maletas_individuais_buscar: {
+        Args: { _busca?: string; _situacao?: string }
+        Returns: {
+          consultora: string
+          consultora_codigo: string
+          consultora_party_id: string
+          cycle_id: string
+          data_acerto: string
+          data_emissao: string
+          maleta: string
+          pecas: number
+          praca: string
+          remessa_id: string
+          remessa_numero: number
+          responsavel: string
+          status: string
+          valor_cents: number
+        }[]
+      }
       maletas_perdidas_smalldata_processar: {
         Args: { _aplicar?: boolean }
         Returns: Json
@@ -25265,6 +25284,33 @@ export type Database = {
           _busca?: string
           _campo_data?: string
           _de?: string
+          _praca?: string
+          _representante?: string
+          _status?: string
+        }
+        Returns: {
+          consultoras_praca: number
+          data_acerto: string
+          data_emissao: string
+          id: string
+          maletas: number
+          maletas_conferidas: number
+          numero: number
+          pecas: number
+          praca: string
+          praca_id: string
+          representante: string
+          status: string
+          valor_cents: number
+        }[]
+      }
+      remessas_buscar2: {
+        Args: {
+          _ate?: string
+          _busca?: string
+          _campo_data?: string
+          _de?: string
+          _diretas?: boolean
           _praca?: string
           _representante?: string
           _status?: string

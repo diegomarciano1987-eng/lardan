@@ -22,7 +22,8 @@ import { ConfigurarImpressora } from "@/components/admin/maletas/ConfigurarImpre
 import { AcertosPainel } from "@/components/admin/maletas/AcertosPainel";
 import { NovaMaletaDireta } from "@/components/admin/maletas/NovaMaletaDireta";
 import { RelatorioAcertos } from "@/components/admin/maletas/RelatorioAcertos";
-import { STATUS_REMESSA, buscarRemessas, criarRemessa, dataBR, definirEnvioRemessa, isoDia, type RemessaCard, type TipoEnvio } from "@/lib/remessas";
+import { MaletasIndividuais } from "@/components/admin/maletas/MaletasIndividuais";
+import { STATUS_REMESSA, buscarMaletasIndividuais, buscarRemessas, criarRemessa, dataBR, definirEnvioRemessa, isoDia, type RemessaCard, type TipoEnvio } from "@/lib/remessas";
 
 export const Route = createFileRoute("/_authenticated/admin/maletas")({
   component: RemessasPage,
@@ -212,6 +213,9 @@ function RemessasPage() {
   const [rep, setRep] = React.useState("");
   const [buscaRep, setBuscaRep] = React.useState("");
   const [fonte, setFonte] = React.useState<"lardan" | "jflex">("lardan");
+  // 0362: maletas diretas (só responsável) ficam em aba própria, fora da lista de remessas
+  const [aba, setAba] = React.useState<"remessas" | "individuais">("remessas");
+  const individuais = useQuery({ queryKey: ["remessas", "individuais", "", "abertas"], queryFn: () => buscarMaletasIndividuais("", "abertas") });
   const [remessaAberta, setRemessaAberta] = React.useState<number | null>(null);
   const [periodo, setPeriodo] = React.useState<DateRange | undefined>();
   const [campoData, setCampoData] = React.useState<"emissao" | "acerto">("emissao");
@@ -309,8 +313,21 @@ function RemessasPage() {
       {escopo.isSuccess && !colab && <AcertosPainel />}
       {escopo.isSuccess && !colab && <MaletasNaRua />}
 
+      {fonte === "lardan" && (
+        <nav aria-label="Remessas ou maletas individuais" className="flex gap-1 border-b border-line-soft">
+          {([["remessas", "Remessas"], ["individuais", `Maletas individuais${individuais.data ? ` (${individuais.data.length})` : ""}`]] as const).map(([k, r]) => (
+            <button key={k} type="button" role="tab" aria-selected={aba === k} onClick={() => setAba(k)}
+              className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-semibold ${aba === k ? "border-primary text-ledger-text" : "border-transparent text-ledger-muted hover:text-ledger-text"}`}>
+              {r}
+            </button>
+          ))}
+        </nav>
+      )}
+
       {fonte === "jflex" ? (
         <RemessasHistorico abrir={remessaAberta} aoAbrir={setRemessaAberta} />
+      ) : aba === "individuais" ? (
+        <MaletasIndividuais />
       ) : (
         <>
       <Panel>

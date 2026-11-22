@@ -129,7 +129,9 @@ export interface FiltrosRemessa {
 }
 
 export const buscarRemessas = (f: FiltrosRemessa) =>
-  rpc<RemessaCard[]>("remessas_buscar", {
+  // 0362: a lista normal não mostra as maletas diretas (elas ficam na aba "Maletas individuais")
+  rpc<RemessaCard[]>("remessas_buscar2", {
+    _diretas: false,
     _busca: f.busca?.trim() || null,
     _status: f.status && f.status !== "todas" ? f.status : null,
     _praca: f.praca || null,
@@ -206,3 +208,24 @@ export const abrirMaletaDireta = (p: {
     _praca: p.praca ?? null,
     _tipo_envio: p.tipo_envio ?? "pessoal",
   });
+
+// ------------------------------------------------- 0362: aba "Maletas individuais" (remessa direta, só responsável)
+export interface MaletaIndividual {
+  cycle_id: string;
+  remessa_id: string;
+  remessa_numero: number;
+  maleta: string;
+  consultora_party_id: string | null;
+  consultora: string | null;
+  consultora_codigo: string | null;
+  responsavel: string;
+  praca: string;
+  data_emissao: string;
+  data_acerto: string | null;
+  status: string;
+  pecas: number;
+  valor_cents: number;
+}
+export type SituacaoIndividual = "abertas" | "encerradas" | "todas";
+export const buscarMaletasIndividuais = (busca: string, situacao: SituacaoIndividual) =>
+  rpc<MaletaIndividual[]>("maletas_individuais_buscar", { _busca: busca.trim() || null, _situacao: situacao });

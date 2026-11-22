@@ -22894,6 +22894,7 @@ export type Database = {
         Args: { _installment: string; _motivo: string; _title: string }
         Returns: Json
       }
+      fin_doc_mascarar: { Args: { _d: string }; Returns: string }
       fin_dre: { Args: { _filtros?: Json }; Returns: Json }
       fin_dre_base: {
         Args: {
@@ -23022,6 +23023,7 @@ export type Database = {
       }
       fin_mesa_novo_conciliar: { Args: { _payload: Json }; Returns: Json }
       fin_mesa_palpite: { Args: { _line: string }; Returns: Json }
+      fin_mesa_por_documento: { Args: { _line: string }; Returns: Json }
       fin_mesa_titulo_da_parcela: { Args: { _inst: string }; Returns: Json }
       fin_mesa_transferencias: {
         Args: { _busca?: string; _line_id: string }

@@ -76,6 +76,27 @@ export const centrosMesa = () => rpc<CentroMesa[]>("fin_mesa_centros");
 export const tituloDaParcela = (inst: string) =>
   rpc<TituloDaParcela>("fin_mesa_titulo_da_parcela", { _inst: inst });
 
+/**
+ * 0368: Pix com CPF/CNPJ no histórico (OFX Santander) → a pessoa (só com UM cadastro) e a distribuição
+ * do valor pelas dívidas em aberto, da mais antiga para a mais nova (baixa parcial na última). Só leitura.
+ */
+export type PlanoDocumento = {
+  situacao: "nao_se_aplica" | "sem_documento" | "sem_cadastro" | "varios_cadastros" | "sem_aberto" | "ok";
+  tipo?: "cpf" | "cnpj";
+  documento?: string;
+  party_id?: string;
+  party_nome?: string;
+  party_code?: string | null;
+  judicial?: boolean;
+  cadastros?: { id: string; nome: string; code: string | null }[];
+  valor_linha_cents?: number;
+  total_aberto_cents?: number;
+  distribuido_cents?: number;
+  sobra_cents?: number;
+  parcelas?: { installment_id: string; vencimento: string; titulo: string; titulo_numero: string | null; aberto_cents: number; aloc_cents: number; em_acordo: boolean; parcial: boolean }[];
+};
+export const planoPorDocumento = (line: string) => rpc<PlanoDocumento>("fin_mesa_por_documento", { _line: line });
+
 /** Novo lançamento + conciliação numa só transação no banco (sem título órfão, repetível). */
 export const novoLancamentoConciliar = (payload: {
   line_id: string;

@@ -57,4 +57,4 @@
 - [x] E1. Reconferir no Asaas: cobrança paga/excluída lá baixa no Lardan (caso Luciana Batista Saraiva)
 - [x] E2. Remessas: aba "Maletas individuais" (sem remessa/representante) com buscador; saem da lista normal
 - [x] E3. App do representante: reprovar candidata (motivo) + aba "Reprovadas"; vai para Reprovados no CRM
-- [ ] E4. Conciliação por CPF (Pix Asaas e OFX Santander): baixa parcial automática quando CPF único bate
+- [x] E4. Conciliação por CPF (OFX Santander): mesa já monta a baixa (parcial na última) quando o CPF é de um único cadastro; pessoa confirma

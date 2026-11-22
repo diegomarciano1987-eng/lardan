@@ -2,10 +2,10 @@ import * as React from "react";
 import { lancarPelaCobrancaAsaas, payDaLinha } from "@/lib/asaas-automatico";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowDownLeft, ArrowUpRight, Brain, Check, ChevronRight, FilePlus2, Link2, Scale, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, BadgeCheck, Brain, Check, ChevronRight, FilePlus2, Link2, Scale, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { fetchClassificacoes } from "@/lib/financeiro";
-import { centrosMesa, contrapartesMesa, ehMicrotarifa, microtarifasConciliar, microtarifasPrevia, faltaConciliar, novoLancamentoConciliar, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
+import { centrosMesa, contrapartesMesa, ehMicrotarifa, planoPorDocumento, type PlanoDocumento, microtarifasConciliar, microtarifasPrevia, faltaConciliar, novoLancamentoConciliar, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
 import { DateField } from "@/components/premium/DateField";
 import { formatBRLFromCents, Skeleton } from "@/components/admin/ui";
 import { reaisParaCentavos } from "@/lib/financeiro";
@@ -357,7 +357,7 @@ function Bancada({
   const [palpiteAplicado, setPalpiteAplicado] = React.useState(false);
   const classificacoesVinculadas = useQuery({
     queryKey: ["mesa-classificacao-titulos", bandeja.map((b) => b.c.installment_id)],
-    queryFn: () => Promise.all(bandeja.map((b) => tituloDaParcela(b.c.installment_id))),
+    queryFn: async () => (await Promise.all(bandeja.map((b) => tituloDaParcela(b.c.installment_id)))).filter((t): t is NonNullable<typeof t> => t != null),
     enabled: modo === "existente" && bandeja.length > 0,
   });
 
@@ -368,6 +368,9 @@ function Bancada({
 
   const sugestoes = useQuery({ queryKey: ["fin-sugestoes", linha.id], queryFn: () => sugerirCorrespondencias(linha.id) });
   const palpite = useQuery({ queryKey: ["mesa-palpite", linha.id], queryFn: () => palpiteDaLinha(linha.id) });
+  // 0368: Pix com CPF no histórico → dívidas da pessoa (só sugestão; a baixa só acontece quando a pessoa confirma)
+  const usaDocumento = !saida && !payAsaas;
+  const porDoc = useQuery({ queryKey: ["mesa-por-documento", linha.id], queryFn: () => planoPorDocumento(linha.id), enabled: usaDocumento });
   const centros = useQuery({ queryKey: ["mesa-centros"], queryFn: centrosMesa, staleTime: 60_000 });
   const classes = useQuery({
     queryKey: ["fin-classificacoes", direction, "", ""],
@@ -389,8 +392,15 @@ function Bancada({
   // Escolha inicial do caminho: com sugestão → "já existe"; sem sugestão → "novo lançamento".
   React.useEffect(() => {
     if (modo !== null || !sugestoes.data) return;
+    if (usaDocumento && porDoc.isLoading) return;
+    if (porDoc.data?.situacao === "ok") {
+      // CPF de um único cadastro com dívida em aberto: já monta o vínculo (mais antiga primeiro); a pessoa confere e confirma
+      setModo("existente");
+      setBandeja(bandejaDoPlano(porDoc.data));
+      return;
+    }
     setModo(sugestoes.data.length > 0 ? "existente" : "novo");
-  }, [sugestoes.data, modo]);
+  }, [sugestoes.data, modo, usaDocumento, porDoc.isLoading, porDoc.data]);
 
   // Aprendizado: preenche com o que foi usado nas vezes anteriores, sem sobrescrever escolha.
   React.useEffect(() => {
@@ -419,11 +429,13 @@ function Bancada({
     const p = palpite.data;
     if (party && !lista.some((o) => o.value === party) && p?.judicial?.party_id === party) {
       lista.unshift({ value: party, label: p.judicial.party_nome ?? "Devedora do processo", hint: "processo judicial" });
+    } else if (party && !lista.some((o) => o.value === party) && porDoc.data?.party_id === party) {
+      lista.unshift({ value: party, label: porDoc.data.party_nome ?? "Pessoa do CPF", hint: porDoc.data.party_code ? `Cód. ${porDoc.data.party_code} · pelo CPF` : "pelo CPF" });
     } else if (party && !lista.some((o) => o.value === party) && p?.party_id === party) {
       lista.unshift({ value: party, label: p.party_nome ?? "Contraparte sugerida", hint: "sugerida" });
     }
     return lista;
-  }, [contrapartes.data, party, palpite.data]);
+  }, [contrapartes.data, party, palpite.data, porDoc.data]);
   const partySel = (contrapartes.data ?? []).find((c) => c.id === party);
 
   const somaAloc = bandeja.reduce((t, b) => t + (reaisParaCentavos(b.texto) ?? 0), 0);
@@ -599,6 +611,14 @@ function Bancada({
             </button>
           ))}
         </div>
+
+        {usaDocumento && porDoc.data && (
+          <CartaoPorDocumento
+            plano={porDoc.data}
+            onDistribuir={() => { setModo("existente"); setBandeja(bandejaDoPlano(porDoc.data!)); }}
+            onNovoParaEla={() => { setModo("novo"); setParty(porDoc.data!.party_id ?? ""); }}
+          />
+        )}
 
         {pal?.judicial && (
           <div role="note" className="mt-4 flex items-start gap-3 rounded-[14px] border border-destructive/40 bg-destructive/5 p-3 text-sm">
@@ -999,6 +1019,70 @@ function Bancada({
         </section>
       )}
     </>
+  );
+}
+
+/** Bandeja inicial a partir da distribuição pelo CPF (só parcelas com valor; nunca as de acordo). */
+function bandejaDoPlano(p: PlanoDocumento): { c: Candidata; texto: string }[] {
+  return (p.parcelas ?? [])
+    .filter((x) => x.aloc_cents > 0 && !x.em_acordo)
+    .map((x) => ({
+      c: { installment_id: x.installment_id, titulo: x.titulo, contraparte: p.party_nome ?? null, vencimento: x.vencimento, aberto_cents: x.aberto_cents },
+      texto: centsParaTexto(x.aloc_cents),
+    }));
+}
+
+/** 0368: o que o CPF do Pix encontrou — pessoa, dívidas e como o valor se distribui (baixa parcial na última). */
+function CartaoPorDocumento({ plano, onDistribuir, onNovoParaEla }: { plano: PlanoDocumento; onDistribuir: () => void; onNovoParaEla: () => void }) {
+  const doc = `${plano.tipo === "cnpj" ? "CNPJ" : "CPF"} ${plano.documento ?? ""}`;
+  const nome = plano.party_nome ? `${plano.party_code ? `[Cód. ${plano.party_code}] ` : ""}${plano.party_nome}` : "";
+  if (plano.situacao === "nao_se_aplica" || plano.situacao === "sem_documento") return null;
+  if (plano.situacao === "sem_cadastro")
+    return <p role="note" className="mt-4 rounded-[14px] bg-cream-2 p-3 text-sm text-ledger-muted">{doc}: nenhum cadastro com este documento.</p>;
+  if (plano.situacao === "varios_cadastros")
+    return (
+      <div role="note" className="mt-4 rounded-[14px] border border-champagne/60 bg-cream-2 p-3 text-sm text-ledger-text">
+        <strong>{doc} aparece em {plano.cadastros?.length ?? 2} cadastros</strong> ({(plano.cadastros ?? []).map((c) => `${c.code ? `[Cód. ${c.code}] ` : ""}${c.nome}`).join(", ")}). Por segurança o sistema não escolhe: procure a conta certa ou unifique os cadastros.
+      </div>
+    );
+  if (plano.situacao === "sem_aberto")
+    return (
+      <div role="note" className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[14px] bg-cream-2 p-3 text-sm text-ledger-text">
+        <span><BadgeCheck aria-hidden className="mr-1.5 inline size-4 text-bronze" />{doc} é de <strong>{nome}</strong>, sem dívida em aberto.</span>
+        <button type="button" className="admin-btn" onClick={onNovoParaEla}>Lançar como novo para ela</button>
+      </div>
+    );
+  const parcelas = plano.parcelas ?? [];
+  return (
+    <div role="note" aria-label="Encontrado pelo CPF" className="mt-4 rounded-[14px] border-2 border-bronze/60 bg-surface p-4 text-sm">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="flex items-center gap-1.5 font-semibold text-ledger-text"><BadgeCheck aria-hidden className="size-5 text-bronze" /> Encontrado pelo {plano.tipo === "cnpj" ? "CNPJ" : "CPF"}: {nome}</p>
+          <p className="mt-0.5 text-xs text-ledger-muted">{doc} · um único cadastro · em aberto {formatBRLFromCents(plano.total_aberto_cents ?? 0)}</p>
+        </div>
+        <button type="button" className="admin-btn" onClick={onDistribuir}>Usar esta distribuição</button>
+      </div>
+      <ul className="mt-3 divide-y divide-line-soft">
+        {parcelas.map((x) => (
+          <li key={x.installment_id} className="flex items-center justify-between gap-3 py-2">
+            <span className="min-w-0">
+              <span className="block truncate font-medium text-ledger-text">{x.titulo}</span>
+              <span className="block text-xs text-ledger-muted">vence {dataBR(x.vencimento)} · em aberto {formatBRLFromCents(x.aberto_cents)}</span>
+            </span>
+            <span className="shrink-0 text-right text-xs font-semibold tabular-nums">
+              {x.em_acordo ? <span className="text-ledger-muted">em acordo · fica de fora</span>
+                : x.aloc_cents === 0 ? <span className="text-ledger-muted">não alcança</span>
+                : <span className="text-ledger-text">{formatBRLFromCents(x.aloc_cents)} {x.parcial ? `· parcial, sobra ${formatBRLFromCents(x.aberto_cents - x.aloc_cents)} em aberto` : "· quita"}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {(plano.sobra_cents ?? 0) > 0 && (
+        <p className="mt-2 text-xs font-semibold text-ledger-text">O Pix é maior que a dívida: sobram {formatBRLFromCents(plano.sobra_cents ?? 0)}. Ajuste o vínculo (juros) ou lance a diferença à parte.</p>
+      )}
+      {plano.judicial && <p className="mt-2 text-xs font-semibold text-destructive">Cliente no judicial: confira com o jurídico antes de confirmar.</p>}
+      <p className="mt-2 text-xs text-ledger-muted">Da mais antiga para a mais nova. Nada é baixado até você confirmar; cobranças do Asaas dessas parcelas passam a cobrar só o saldo.</p>
+    </div>
   );
 }
 

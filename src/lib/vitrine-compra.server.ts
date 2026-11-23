@@ -10,7 +10,7 @@ type Linha = { order_id: string; codigo: string; acao: "expirar" | "cancelar"; c
 
 export async function limparCobrancasDePedidos() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const rpc = supabaseAdmin.rpc as unknown as (f: string, a?: object) => Promise<{ data: unknown; error: { message: string } | null }>;
+  const rpc = supabaseAdmin.rpc.bind(supabaseAdmin) as unknown as (f: string, a?: object) => Promise<{ data: unknown; error: { message: string } | null }>;
   const { data, error } = await rpc("pedidos_cobranca_para_cancelar");
   if (error) throw new Error(error.message);
   const { data: cfg } = await supabaseAdmin.from("consultora_cobranca_config" as never).select("ator_user_id").maybeSingle();

@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/public/focus/webhook")({
 
         const dedupe = createHash("sha256").update(bruto).digest("hex");
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const rpc = supabaseAdmin.rpc as unknown as (fn: string, a: Record<string, unknown>) => Promise<{ error: unknown }>;
+        const rpc = supabaseAdmin.rpc.bind(supabaseAdmin) as unknown as (fn: string, a: Record<string, unknown>) => Promise<{ error: unknown }>;
         const r = await rpc("fiscal_focus_retorno", { _ref: ref, _fonte: "webhook", _resposta: corpo, _dedupe: dedupe });
         if (r.error) return new Response("Erro ao registrar.", { status: 500 });
         return new Response("ok", { status: 200 });

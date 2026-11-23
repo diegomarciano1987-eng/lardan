@@ -15,7 +15,7 @@ export async function cancelarNoAsaas(chargeId: string, externalId: string, acto
 /** Acordos aguardando 1º pagamento vencidos há mais de 5 dias: cancela cobranças, encerra e avisa quem fez o acordo. */
 export async function encerrarAcordosVencidos(actor: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const rpc = supabaseAdmin.rpc as unknown as (f: string, a?: object) => Promise<{ data: unknown; error: { message: string } | null }>;
+  const rpc = supabaseAdmin.rpc.bind(supabaseAdmin) as unknown as (f: string, a?: object) => Promise<{ data: unknown; error: { message: string } | null }>;
   const { data, error } = await rpc("cob_acordo_vencidos_listar");
   if (error) throw new Error(error.message);
   const porSim = new Map<string, { charge_id: string | null; external_id: string | null }[]>();
@@ -54,7 +54,7 @@ export type ResultadoCancelamentoRegistrado = {
  */
 export async function cancelarCobrancaComRegistro(chargeId: string, actor: string, motivo: string): Promise<ResultadoCancelamentoRegistrado> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const rpc = supabaseAdmin.rpc as unknown as (f: string, a: object) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+  const rpc = supabaseAdmin.rpc.bind(supabaseAdmin) as unknown as (f: string, a: object) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
   const prep = await rpc("asaas_cobranca_cancelar_preparar", { _charge: chargeId, _actor: actor });
   if (prep.error) return { external_id: null, resultado: "falhou", status: null, erro: prep.error.message };
   const { external_id } = prep.data as { external_id: string };

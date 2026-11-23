@@ -75,7 +75,7 @@ async function conferirNoAsaas(chargeId: string, actor: string): Promise<string>
 
 async function registrarJaExcluida(baixaId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const rpc = supabaseAdmin.rpc as unknown as Rpc;
+  const rpc = supabaseAdmin.rpc.bind(supabaseAdmin) as unknown as Rpc;
   await rpc("asaas_outra_forma_cancelamento", { _id: baixaId, _ok: true, _erro: null });
   return { cancelado: true, erro: null as string | null };
 }
@@ -88,7 +88,7 @@ async function cancelar(baixaId: string, actor: string) {
   const { data: ch } = await supabaseAdmin.from("asaas_charges").select("external_id").eq("id", b.charge_id).maybeSingle();
   const { cancelarNoAsaas } = await import("./cancelar.server");
   const r = await cancelarNoAsaas(b.charge_id, ch?.external_id ?? "", actor);
-  const rpc = supabaseAdmin.rpc as unknown as Rpc;
+  const rpc = supabaseAdmin.rpc.bind(supabaseAdmin) as unknown as Rpc;
   await rpc("asaas_outra_forma_cancelamento", { _id: baixaId, _ok: r.ok, _erro: r.erro });
   return { cancelado: r.ok, erro: r.erro };
 }

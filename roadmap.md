@@ -66,3 +66,8 @@
 - [x] Rastreio do espelho: transferências antigas conferidas (73 linhas, todas com lançamento); pendências restantes listadas ao Diego
 - [ ] 33 cobranças excluídas direto no Asaas com dívida aberta no Lardan — aguarda a Larissa decidir uma a uma (painel de diferenças)
 - [ ] 30 Pix recebidos no Asaas sem cadastro identificado (R$ 7,9 mil) — aguarda a Larissa indicar a pessoa
+
+## Cancelamento planilha FATURAS_A_CANCELAR (Daniel, 23/11)
+- [x] 62 cobranças antigas só no Asaas canceladas
+- [x] Cancelar abertas no Asaas e títulos no Lardan (pagas preservadas)
+- [ ] 2 com pagamento parcial (Melissa 8051, Benilde 5243) aguardam decisão

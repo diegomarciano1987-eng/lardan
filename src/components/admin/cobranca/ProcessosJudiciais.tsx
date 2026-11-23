@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { lerPlanilhaJuridico, type LinhaJuridico } from "@/lib/planilha-juridico";
 import { brl, dataBR } from "@/lib/cobranca";
+import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 
 type Previa = { lote: string | null; linhas: number; com_pessoa: number; sem_pessoa: number; ambiguos: number; novos: number; atualizados: number; mover_judicial: number; ja_judicial: number; sem_lista: { id: string; nome: string; cpf: string | null; motivo: string }[] };
 
 const DIAS_PROTOCOLO = 5;
 
 export function ProcessosJudiciais() {
+  const leitura = useCobrancaSomenteLeitura();
   const qc = useQueryClient();
   const qm = useQuery({ queryKey: ["eu-master"], queryFn: async () => {
     const { data: u } = await supabase.auth.getUser();
@@ -65,7 +67,7 @@ export function ProcessosJudiciais() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="flex items-center gap-2 font-display text-xl"><Gavel className="size-5 text-bronze" />Planilha do jurídico</h3>
           <input ref={arq} type="file" accept=".xlsx" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void escolher(f); e.target.value = ""; }} />
-          <Button variant="outline" disabled={ocupado} onClick={() => arq.current?.click()}><Upload className="size-4" />Ler planilha (.xlsx)</Button>
+          {!leitura && <Button variant="outline" disabled={ocupado} onClick={() => arq.current?.click()}><Upload className="size-4" />Ler planilha (.xlsx)</Button>}
         </div>
         <p className="text-sm text-muted-foreground">A leitura mostra uma prévia e não muda nada. Só o Master aplica. Pessoas são achadas pelo CPF; CPF repetido em dois cadastros fica de fora. Nada no financeiro é alterado.</p>
         {previa && (

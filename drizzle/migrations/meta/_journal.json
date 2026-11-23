@@ -2591,6 +2591,20 @@
       "when": 1795444950375,
       "tag": "0369_transferencia_contas_proprias_0369",
       "breakpoints": true
+    },
+    {
+      "idx": 370,
+      "version": "7",
+      "when": 1795460140032,
+      "tag": "0370_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 371,
+      "version": "7",
+      "when": 1795460184541,
+      "tag": "0371_migration",
+      "breakpoints": true
     }
   ]
 }

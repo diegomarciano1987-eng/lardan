@@ -212,7 +212,7 @@ export const ADMIN_MODULES: AdminModule[] = [
     label: "Cobrança",
     description: "Carteira de devedoras, promessas, régua D+1/3/7/15, agenda e BI de recuperação.",
     icon: BellRing,
-    roles: ["master", "diretoria", "cobranca", "financeiro"],
+    roles: ["master", "diretoria", "cobranca", "financeiro", "juridico"],
     state: "ativo",
   },
   // Diego, 13/11/2026: "Trocas e garantias" deixou de ser botão próprio — tudo dele agora fica dentro de Qualidade (abas).

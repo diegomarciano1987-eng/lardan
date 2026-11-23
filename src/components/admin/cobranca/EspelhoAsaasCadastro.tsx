@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { espelharClienteAgora } from "@/lib/asaas/cliente-espelho.functions";
 import { ROTULO, resumoEspelho, type Diferenca } from "@/lib/asaas/cliente-espelho";
 import { dataBR } from "@/lib/cobranca";
+import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 
 type Situacao = {
   vinculadas: number;
@@ -22,6 +23,7 @@ type Situacao = {
 const ACAO: Record<string, string> = { so_no_asaas: "Só no Asaas", conferir: "Conferir", recusado: "Asaas recusou", enviar: "Enviado do Lardan" };
 
 export function EspelhoAsaasCadastro({ partyId }: { partyId: string }) {
+  const leitura = useCobrancaSomenteLeitura();
   const qc = useQueryClient();
   const fn = useServerFn(espelharClienteAgora);
   const [rodando, setRodando] = React.useState(false);
@@ -71,7 +73,7 @@ export function EspelhoAsaasCadastro({ partyId }: { partyId: string }) {
           {ultimo && <span className="text-xs text-muted-foreground">· conferido em {dataBR(ultimo.slice(0, 10))}</span>}
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => rodar()} disabled={rodando}
+          <button type="button" onClick={() => rodar()} disabled={rodando} hidden={leitura}
             className="inline-flex h-9 items-center gap-2 rounded-lg bg-asaas px-3 text-xs font-semibold text-asaas-foreground disabled:opacity-60">
             <RefreshCw aria-hidden className={`size-3.5 ${rodando ? "animate-spin" : ""}`} />{rodando ? "Conferindo…" : "Atualizar cadastro no Asaas"}
           </button>

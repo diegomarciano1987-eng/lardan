@@ -8,11 +8,13 @@ import { zapsignConfissao } from "@/lib/zapsign/zapsign.functions";
 import { dataBR } from "@/lib/cobranca";
 import { rotuloTermo } from "@/lib/cobranca-historica";
 import { termosConfissao } from "@/lib/termo-confissao";
+import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 
 export const chaveTermo = (simId: string) => ["cob", "termo", simId] as const;
 
 /** Gera o termo de confissão de dívida do acordo e manda pela ZapSign (código + selfie + documento). */
 export function TermoConfissao({ simId, obrigatorio = false }: { simId: string; obrigatorio?: boolean }) {
+  const leitura = useCobrancaSomenteLeitura();
   const qc = useQueryClient();
   const enviar = useServerFn(zapsignConfissao);
   const situacao = useQuery({ queryKey: chaveTermo(simId), queryFn: async () => (await termosConfissao([simId])).get(simId) ?? null });
@@ -39,9 +41,9 @@ export function TermoConfissao({ simId, obrigatorio = false }: { simId: string; 
           : r.tipo === "pendente" ? `Termo aguardando assinatura desde ${dataBR(t!.criado_em)}${t!.enviado_whatsapp ? " (enviado no WhatsApp)" : ""}`
           : obrigatorio ? "Sem termo — obrigatório (dívida até 2025)" : "Sem termo de confissão"}
       </span>
-      {r.tipo === "sem" && <Button size="sm" variant="outline" disabled={ocupado} onClick={() => ir(false)}><FileSignature className="size-4" />Enviar termo de confissão (ZapSign)</Button>}
-      {r.tipo === "pendente" && url && <Button size="sm" variant="ghost" onClick={() => { void navigator.clipboard.writeText(url); toast.success("Link copiado."); }}><Copy className="size-4" />Copiar link</Button>}
-      {r.tipo === "pendente" && <Button size="sm" variant="ghost" disabled={ocupado} onClick={() => { if (confirm("Cancelar o termo pendente e mandar um novo?")) void ir(true); }}>Reenviar novo</Button>}
+      {!leitura && r.tipo === "sem" && <Button size="sm" variant="outline" disabled={ocupado} onClick={() => ir(false)}><FileSignature className="size-4" />Enviar termo de confissão (ZapSign)</Button>}
+      {!leitura && r.tipo === "pendente" && url && <Button size="sm" variant="ghost" onClick={() => { void navigator.clipboard.writeText(url); toast.success("Link copiado."); }}><Copy className="size-4" />Copiar link</Button>}
+      {!leitura && r.tipo === "pendente" && <Button size="sm" variant="ghost" disabled={ocupado} onClick={() => { if (confirm("Cancelar o termo pendente e mandar um novo?")) void ir(true); }}>Reenviar novo</Button>}
     </div>
   );
 }

@@ -22235,6 +22235,7 @@ export type Database = {
         }[]
       }
       cob_pode: { Args: { _u: string }; Returns: boolean }
+      cob_pode_ler: { Args: { _u: string }; Returns: boolean }
       cob_promessa_cancelar: {
         Args: { _id: string; _motivo: string }
         Returns: undefined
@@ -26147,6 +26148,7 @@ export type Database = {
         | "qualidade"
         | "representante"
         | "consultora"
+        | "juridico"
       contact_kind: "whatsapp" | "telefone" | "email"
       content_status: "rascunho" | "revisao" | "publicado" | "arquivado"
       fin_account_kind:
@@ -26424,6 +26426,7 @@ export const Constants = {
         "qualidade",
         "representante",
         "consultora",
+        "juridico",
       ],
       contact_kind: ["whatsapp", "telefone", "email"],
       content_status: ["rascunho", "revisao", "publicado", "arquivado"],

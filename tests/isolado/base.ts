@@ -35,7 +35,8 @@ export type Papel =
   | "marketing"
   | "suporte"
   | "cobranca"
-  | "montagem";
+  | "montagem"
+  | "juridico";
 
 export interface Conta {
   nome: string;

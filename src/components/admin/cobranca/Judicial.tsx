@@ -12,6 +12,7 @@ import { centavosDigitados, limparDinheiro } from "@/lib/dinheiro-digitado";
 import { AcordoAsaas } from "./AcordoAsaas";
 import { AlvaraJudicial } from "./AlvaraJudicial";
 import { AssinaturaAcordoJudicial } from "./AssinaturaAcordoJudicial";
+import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 
 const foneBR = (d: string | null) => { const x = (d ?? "").replace(/\D/g, "").replace(/^55(?=\d{10,11}$)/, ""); return x.length === 11 ? `(${x.slice(0, 2)}) ${x.slice(2, 7)}-${x.slice(7)}` : x.length === 10 ? `(${x.slice(0, 2)}) ${x.slice(2, 6)}-${x.slice(6)}` : x || null; };
 
@@ -59,6 +60,7 @@ export function FormProcesso({ partyId, inicial, onFim }: { partyId: string; ini
 }
 
 export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: Parcela[] }) {
+  const leitura = useCobrancaSomenteLeitura();
   const qc = useQueryClient();
   const proc = useQuery({ queryKey: ["cob", "jud", partyId], queryFn: () => judicial(partyId) });
   const docs = useQuery({ queryKey: ["cob", "jud-docs", partyId], queryFn: () => judicialDocs(partyId) });
@@ -157,7 +159,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
       <section className="rounded-2xl border border-line bg-surface p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <h3 className="flex items-center gap-2 font-display text-xl text-ledger-text"><Gavel className="size-5 text-bronze" />Processo</h3>
-          <button onClick={() => setEditProc(true)} className="h-9 rounded-lg border border-line px-4 text-sm">Editar dados</button>
+          {!leitura && <button onClick={() => setEditProc(true)} className="h-9 rounded-lg border border-line px-4 text-sm">Editar dados</button>}
         </div>
         <dl className="mt-4 grid gap-4 text-sm md:grid-cols-3">
           {([["Número do processo", p.processo], ["Advogado(a)", p.advogado], ["Vara", p.vara], ["Comarca", p.comarca], ["Ajuizamento", p.data_ajuizamento ? dataBR(p.data_ajuizamento) : null], ["Encaminhada em", dataBR(p.encaminhado_em)]] as const).map(([r, v]) => (
@@ -170,7 +172,7 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
       <section className="space-y-4 rounded-2xl border border-line bg-surface p-6">
         <h3 className="flex items-center gap-2 font-display text-xl text-ledger-text"><FileText className="size-5 text-bronze" />Documentos</h3>
         <p className="text-sm text-ledger-muted">Termos assinados, petições, certidões e tudo que comprova a judicialização. Arquivos privados, só a equipe de cobrança abre.</p>
-        <div className="flex flex-wrap items-end gap-3">
+        <div className={leitura ? "hidden" : "flex flex-wrap items-end gap-3"}>
           <label className="w-60 text-xs font-medium text-ledger-muted">Tipo<div className="mt-1"><SmartSelect value={docTipo} onChange={setDocTipo} options={TIPOS_DOC_JUDICIAL.map(([value, label]) => ({ value, label }))} /></div></label>
           <label className="min-w-60 flex-1 text-xs font-medium text-ledger-muted">Título (opcional)<input value={docTitulo} onChange={(e) => setDocTitulo(e.target.value)} placeholder="Ex.: Acordo assinado em audiência" className={`${inp} mt-1`} /></label>
           <input ref={arq} type="file" accept="application/pdf,image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void subir(f); }} />
@@ -183,14 +185,14 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
                 <span><b className="text-ledger-text">{d.titulo}</b> <span className="text-xs text-ledger-muted">· {TIPOS_DOC_JUDICIAL.find((t) => t[0] === d.tipo)?.[1]} · {dataBR(d.created_at)}</span></span>
                 <span className="flex gap-2">
                   <button onClick={() => ver(d.id)} className="h-9 rounded-lg border border-line px-4 text-xs font-semibold">Abrir</button>
-                  <button data-testid={`jud-doc-excluir-${d.id}`} onClick={() => void remover(d.id, d.titulo)} className="h-9 rounded-lg border border-danger/50 px-4 text-xs font-semibold text-danger hover:bg-danger/10">Excluir</button>
+                  {!leitura && <button data-testid={`jud-doc-excluir-${d.id}`} onClick={() => void remover(d.id, d.titulo)} className="h-9 rounded-lg border border-danger/50 px-4 text-xs font-semibold text-danger hover:bg-danger/10">Excluir</button>}
                 </span>
               </li>))}
           </ul>
         )}
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_1.1fr]">
+      <div className={leitura ? "hidden" : "grid gap-5 lg:grid-cols-[1fr_1.1fr]"}>
         <section className="space-y-3 rounded-2xl border border-line bg-surface p-6">
           <h3 className="font-semibold text-ledger-text">Parcelas incluídas na dívida</h3>
           {parcelas.length === 0 ? <p className="text-sm text-ledger-muted">Sem parcelas em aberto.</p> : (
@@ -246,12 +248,12 @@ export function AbaJudicial({ partyId, parcelas }: { partyId: string; parcelas: 
           <div key={a.id} className={`space-y-1 rounded-xl border border-line bg-surface p-4 text-sm ${a.status === "cancelado" ? "opacity-60" : ""}`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span>Acordo de <b>{dataBR(a.data_acordo)}</b> · total <b className="font-mono">{brl(Number(a.total_cents))}</b> · {a.plano.length}x · <b>{ROT_ST[a.status]}</b>{a.status_motivo && ` (${a.status_motivo})`}</span>
-              {a.status === "vigente" && <span className="flex gap-3 text-xs"><button className="underline" onClick={() => mudar(a.id, "cumprido")}>Cumprido</button><button className="underline" onClick={() => mudar(a.id, "descumprido")}>Descumprido</button><button className="text-danger underline" onClick={() => mudar(a.id, "cancelado")}>Cancelar</button></span>}
+              {!leitura && a.status === "vigente" && <span className="flex gap-3 text-xs"><button className="underline" onClick={() => mudar(a.id, "cumprido")}>Cumprido</button><button className="underline" onClick={() => mudar(a.id, "descumprido")}>Descumprido</button><button className="text-danger underline" onClick={() => mudar(a.id, "cancelado")}>Cancelar</button></span>}
             </div>
             <p className="text-xs text-ledger-muted">Dívida {brl(Number(a.principal_cents))} · honorários {brl(Number(a.honorarios_cents))} · cartório {brl(Number(a.cartorio_cents))} · custas {brl(Number(a.custas_cents))}{Number(a.outros_cents) > 0 && ` · ${a.outros_descricao ?? "outros"} ${brl(Number(a.outros_cents))}`}{Number(a.desconto_cents) > 0 && ` · desconto ${brl(Number(a.desconto_cents))}`}</p>
             <p className="text-xs text-ledger-muted">{a.plano.map((x) => `${x.numero}ª ${dataBR(x.data)} ${brl(x.valor_cents)}${x.asaas ? " (Asaas)" : " (alvará/judicial)"}`).join(" · ")}</p>
-            {(a.status === "vigente" || (assin.data ?? []).some((x) => x.acordo_id === a.id)) && <AssinaturaAcordoJudicial partyId={partyId} acordo={a} docs={docs.data ?? []} assinaturas={assin.data ?? []} advogadoPadrao={p.advogado} contato={{ whatsapp: foneBR(contato.data?.whatsapp ?? null), email: contato.data?.email ?? null }} />}
-            {a.simulacao_id && a.status === "vigente" && <AcordoAsaas simId={a.simulacao_id} temEntrada={false} />}
+            {!leitura && (a.status === "vigente" || (assin.data ?? []).some((x) => x.acordo_id === a.id)) && <AssinaturaAcordoJudicial partyId={partyId} acordo={a} docs={docs.data ?? []} assinaturas={assin.data ?? []} advogadoPadrao={p.advogado} contato={{ whatsapp: foneBR(contato.data?.whatsapp ?? null), email: contato.data?.email ?? null }} />}
+            {!leitura && a.simulacao_id && a.status === "vigente" && <AcordoAsaas simId={a.simulacao_id} temEntrada={false} />}
             <AlvaraJudicial acordo={a} />
             {!a.simulacao_id && <p className="text-xs text-bronze">Sem parcelas no Asaas: aguarda alvará / pagamento em juízo.</p>}
           </div>

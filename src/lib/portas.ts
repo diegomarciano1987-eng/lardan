@@ -23,7 +23,7 @@ const OPERACAO: AppRole[] = [
  * por isso só permissões não bastam (0136).
  */
 export function portaLiberada(porta: Porta, roles: AppRole[], caps: string[] = [], colab = false): boolean {
-  if (porta === "operacao") return roles.some((r) => OPERACAO.includes(r)) || (colab && caps.length > 0);
+  if (porta === "operacao") return roles.some((r) => OPERACAO.includes(r)) || somenteLeituraCobranca(roles) || (colab && caps.length > 0);
   if (porta === "consultora") return roles.includes("consultora" as AppRole);
   return roles.includes("representante" as AppRole);
 }
@@ -33,6 +33,24 @@ export const DESTINO: Record<Porta, "/admin" | "/consultora" | "/representante">
   consultora: "/consultora",
   representante: "/representante",
 };
+
+/** Quem escreve na Cobrança (espelha cob_pode no banco). */
+const COBRANCA_ESCRITA: AppRole[] = ["master", "diretoria", "cobranca", "financeiro"] as AppRole[];
+
+/**
+ * Jurídico (Dr. Danilo, 23/11/2026): só enxerga a Cobrança e não altera nada.
+ * Vale quando a pessoa tem o papel jurídico e nenhum papel que escreva na Cobrança.
+ * A trava de verdade é no banco (cob_pode_ler para ler, cob_pode para escrever).
+ */
+export function somenteLeituraCobranca(roles: AppRole[]): boolean {
+  return roles.includes("juridico" as AppRole) && !roles.some((r) => COBRANCA_ESCRITA.includes(r));
+}
+
+/** Caminhos do painel que o jurídico pode abrir: carteira, ficha da devedora e o próprio perfil. */
+export function caminhoLiberadoJuridico(pathname: string): boolean {
+  if (pathname.startsWith("/admin/cobranca/lote")) return false;
+  return pathname === "/admin/cobranca" || pathname.startsWith("/admin/cobranca/") || pathname.startsWith("/admin/perfil");
+}
 
 /** Colaboradora por código: sem papel de equipe, só módulos liberados. */
 export function soModulos(roles: AppRole[]): boolean {

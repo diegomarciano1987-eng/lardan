@@ -30,7 +30,7 @@ async function enviar(email: string, nome: string, link: string, chave: string) 
   }
 }
 
-type Papel = "master" | "diretoria" | "marketing" | "suporte" | "financeiro" | "cobranca" | "estoque" | "montagem" | "qualidade" | "representante" | "consultora";
+type Papel = "master" | "diretoria" | "marketing" | "suporte" | "financeiro" | "cobranca" | "estoque" | "montagem" | "qualidade" | "representante" | "consultora" | "juridico";
 
 /** Salva o conjunto completo de acessos de um colaborador em uma única operação auditada. */
 export const substituirPapeis = createServerFn({ method: "POST" })

@@ -7,6 +7,7 @@ import { CobrarParcelaAsaas } from "@/components/admin/financeiro/CobrarParcelaA
 import { LiquidarDividaDialog } from "@/components/admin/financeiro/LiquidarDivida";
 import { useCapabilities } from "@/lib/capabilities";
 import { FinanceiroSmallData, ResumoSmallData, useFinanceiroSmallData } from "./FinanceiroSmallData";
+import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 
 type Aba = "abertas" | "fiado" | "recebimentos" | "comissoes" | "maletas" | "fechamentos" | "notas" | "smalldata";
 const TIPO_NF: Record<string, string> = { remessa: "Remessa", devolucao: "Devolução", venda: "Venda", perda: "Perda", retorno: "Retorno", acrescimo: "Acréscimo", devolucao_simbolica: "Devolução simbólica" };
@@ -17,6 +18,7 @@ const SIT: Record<string, string> = { nao_liquidado: "Em aberto", parcial: "Parc
 
 /** Rastro financeiro completo da consultora: débitos, fiado (lastro da planilha), pagamentos, comissões e maletas. */
 export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
+  const leitura = useCobrancaSomenteLeitura();
   const q = useQuery({ queryKey: ["cob", "cockpit-fin", partyId], queryFn: () => cockpitFinanceiro(partyId) });
   const sd = useFinanceiroSmallData(partyId);
   const nf = useQuery({ queryKey: ["cob", "notas-fechamentos", partyId], queryFn: () => notasEFechamentos(partyId) });
@@ -45,7 +47,7 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
     </div>
   );
   const AbrirTitulo = ({ id, numero, parcela }: { id?: string | null | undefined; numero?: string | null | undefined; parcela?: string | null | undefined }) =>
-    id ? (
+    id && !leitura ? (
       <button type="button" onClick={() => setTituloAberto({ id, parcela })} title="Abrir a ficha do título"
         className="font-mono font-semibold text-primary underline-offset-2 hover:underline">{numero ?? "Abrir título"}</button>
     ) : <>{numero ?? "—"}</>;
@@ -92,7 +94,7 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
         <span className={p.vencimento < hoje ? "text-destructive" : ""}>{dataBR(p.vencimento)}</span>,
         <span className="font-mono tabular-nums">{brl(Number(p.valor_cents))}</span>, <span className="font-mono tabular-nums">{brl(Number(p.saldo_cents))}</span>,
         p.atraso ? `${p.atraso} dias` : "—",
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className={leitura ? "hidden" : "flex flex-wrap items-center gap-1.5"}>
           <CobrarParcelaAsaas installmentId={p.installment_id} saldoCents={Number(p.saldo_cents)} vencimento={p.vencimento} compacto />
           {podeLiquidar && p.title_id ? (
             <button type="button" className="admin-btn min-h-8 px-2.5 text-xs text-destructive"

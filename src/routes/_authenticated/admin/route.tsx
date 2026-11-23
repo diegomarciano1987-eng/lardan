@@ -5,7 +5,7 @@ import { AcessoNaoLiberado } from "@/components/site/AcessoNaoLiberado";
 import { ConexaoInstavel } from "@/components/site/ConexaoInstavel";
 import { estadoPermissao } from "@/lib/sessao-regras";
 import { fetchMyRoles } from "@/lib/session";
-import { inicioOperacao, portaLiberada, soModulos } from "@/lib/portas";
+import { caminhoLiberadoJuridico, inicioOperacao, portaLiberada, somenteLeituraCobranca, soModulos } from "@/lib/portas";
 import { fetchMyCapabilities, fetchSouColabEstrito } from "@/lib/capabilities";
 import { ALL_MODULES, moduleAllowed } from "@/lib/admin-modules";
 
@@ -37,6 +37,10 @@ function AdminLayout() {
     if (portaLiberada("representante", roles ?? [])) return <Navigate to="/representante" replace />;
     if (portaLiberada("consultora", roles ?? [])) return <Navigate to="/consultora" replace />;
     return <AcessoNaoLiberado />;
+  }
+  // Jurídico: só a Cobrança (carteira e ficha), sem nenhum outro módulo.
+  if (colabQ.data !== true && somenteLeituraCobranca(roles ?? []) && !caminhoLiberadoJuridico(pathname)) {
+    return <Navigate to="/admin/cobranca" replace />;
   }
   // Login continua abrindo Maletas; /admin oferece apenas o resumo pessoal à colaboradora.
   if (colabQ.data !== true && soModulos(roles ?? []) && (pathname === "/admin" || pathname === "/admin/")) {

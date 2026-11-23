@@ -13,4 +13,5 @@ export const ROLE_LABEL: Record<AppRole, string> = {
   qualidade: "Qualidade",
   representante: "Representante",
   consultora: "Consultora",
+  juridico: "Jurídico (só vê a Cobrança)",
 };

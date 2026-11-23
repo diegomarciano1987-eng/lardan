@@ -15,6 +15,8 @@ import { AbaJudicial, FormProcesso } from "@/components/admin/cobranca/Judicial"
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import { TituloSheet } from "@/components/admin/financeiro/TituloSheet";
 import { EspelhoAsaasCadastro } from "@/components/admin/cobranca/EspelhoAsaasCadastro";
+import { AvisoSomenteLeitura } from "@/components/admin/cobranca/AvisoSomenteLeitura";
+import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 import {
   devedor, registrar, moverEtapa, criarPromessa, cancelarPromessa, criarTarefa, concluirTarefa,
   brl, dataBR, hojeSP, suspensao, suspender, ETAPAS, rotuloEtapa, ROTULO_TIPO, ROTULO_PROMESSA, type Etapa,
@@ -30,6 +32,7 @@ type Aba = "judicial" | "acordos" | "resumo" | "maletas" | "financeiro" | "titul
 function Cockpit() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
+  const leitura = useCobrancaSomenteLeitura();
   const q = useQuery({ queryKey: ["cob", "devedor", id], queryFn: () => devedor(id) });
   const [aba, setAba] = React.useState<Aba>("resumo");
   const [acao, setAcao] = React.useState<null | "ligacao" | "negociacao" | "promessa" | "desconto_solicitado" | "retorno" | "negativacao_encaminhada">(null);
@@ -106,6 +109,7 @@ function Cockpit() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 p-6">
+      {leitura && <AvisoSomenteLeitura />}
       <LembretesGaveta />
       <EditarDadosDialog open={editar} onOpenChange={setEditar} partyId={id} onSalvo={recarregar} />
       {susp.data?.suspensa && (
@@ -120,13 +124,13 @@ function Cockpit() {
           <p className="text-sm text-muted-foreground">{pessoa.documento ?? "Documento não informado"} · {[d.endereco?.cidade, d.endereco?.uf].filter(Boolean).join("/") || "Região não informada"}</p>
           <p className="mt-1 text-sm">Responsável: {d.caso?.responsavel_nome ?? "Não informado"}{d.caso?.pausa_ate && ` · Régua pausada até ${dataBR(d.caso.pausa_ate)} (${d.caso.pausa_motivo})`}</p>
         </div>
-        <select value={d.caso?.etapa ?? "novo_atraso"} onChange={async (e) => { await moverEtapa(id, e.target.value as Etapa); recarregar(); }}
+        {leitura ? <p className="rounded-lg border border-border px-3 py-2 text-sm">Etapa: <b>{rotuloEtapa(d.caso?.etapa ?? "novo_atraso")}</b></p> : <select value={d.caso?.etapa ?? "novo_atraso"} onChange={async (e) => { await moverEtapa(id, e.target.value as Etapa); recarregar(); }}
           className="h-10 rounded-lg border border-border bg-background px-3 text-sm">
           {ETAPAS.map((e) => <option key={e.id} value={e.id}>{e.rotulo}</option>)}
-        </select>
+        </select>}
       </header>
 
-      <div className="flex flex-wrap gap-2">
+      <div className={leitura ? "hidden" : "flex flex-wrap gap-2"}>
         <button onClick={() => setEditar(true)} className="inline-flex h-10 items-center gap-2 rounded-lg border border-primary bg-primary/10 px-4 text-sm font-semibold"><UserPen className="h-4 w-4" />Editar dados</button>
         <button onClick={() => setAcao("ligacao")} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm"><Phone className="h-4 w-4" />Registrar ligação</button>
         <button onClick={abrirWhats} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm"><MessageCircle className="h-4 w-4" />Abrir WhatsApp</button>
@@ -144,8 +148,8 @@ function Cockpit() {
 
       <EspelhoAsaasCadastro partyId={id} />
 
-      {encaminhar && <FormProcesso partyId={id} onFim={() => { setEncaminhar(false); recarregar(); setAba("judicial"); }} />}
-      {acao && (
+      {!leitura && encaminhar && <FormProcesso partyId={id} onFim={() => { setEncaminhar(false); recarregar(); setAba("judicial"); }} />}
+      {!leitura && acao && (
         <section className="space-y-3 rounded-xl border border-primary/40 bg-primary/5 p-5">
           <h3 className="font-medium">{acao === "retorno" ? "Agendar retorno" : acao === "promessa" ? "Promessa de pagamento" : ROTULO_TIPO[acao]}</h3>
           {acao === "desconto_solicitado" && <p className="text-xs text-muted-foreground">Fica como proposta. O valor só muda depois da aprovação pela rotina oficial do financeiro.</p>}
@@ -176,7 +180,7 @@ function Cockpit() {
       )}
 
       <nav aria-label="Seções da devedora" className="flex flex-wrap gap-1.5 rounded-2xl border border-border bg-muted/50 p-1.5">
-        {(([["resumo", "Resumo", LayoutDashboard], ["maletas", "Maletas", Package], ...(ehJudicial ? [["judicial", "Judicial", Gavel]] : [["acordos", "Acordos e simulações", Calculator]]), ["financeiro", "Financeiro completo", Wallet], ["titulos", "Títulos e parcelas", ListOrdered], ["linha", "Linha do tempo", History], ["promessas", "Negociações e promessas", Handshake], ["agenda", "Agenda", CalendarClock], ["dados", "Dados cadastrais", IdCard], ["hist", "Histórico SmallData", Archive]]) as [Aba, string, typeof Gavel][]).map(([k, r, I]) => (
+        {(([["resumo", "Resumo", LayoutDashboard], ...(leitura ? [] : [["maletas", "Maletas", Package]]), ...(ehJudicial ? [["judicial", "Judicial", Gavel]] : [["acordos", "Acordos e simulações", Calculator]]), ["financeiro", "Financeiro completo", Wallet], ["titulos", "Títulos e parcelas", ListOrdered], ["linha", "Linha do tempo", History], ["promessas", "Negociações e promessas", Handshake], ["agenda", "Agenda", CalendarClock], ["dados", "Dados cadastrais", IdCard], ...(leitura ? [] : [["hist", "Histórico SmallData", Archive]])]) as [Aba, string, typeof Gavel][]).map(([k, r, I]) => (
           <button key={k} onClick={() => setAba(k)} aria-current={aba === k ? "page" : undefined}
             className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-medium transition ${aba === k ? (k === "judicial" ? "bg-bronze text-primary-foreground shadow-sm" : "bg-foreground text-background shadow-sm") : "text-foreground/70 hover:bg-background hover:text-foreground"}`}>
             <I className="h-4 w-4" />{r}
@@ -208,14 +212,14 @@ function Cockpit() {
             <tbody>{d.parcelas.map((p) => (
               <tr key={p.installment_id} className="border-t border-border">
                 <td className="px-4 py-3">
-                  <button type="button" onClick={() => setTituloAberto({ id: p.title_id, parcela: p.installment_id, baixa: false })} title="Abrir a ficha do título"
-                    className="font-mono font-semibold text-primary underline-offset-2 hover:underline">{p.numero ?? "Abrir título"}</button>
+                  {leitura ? <span className="font-mono font-semibold">{p.numero ?? "Título"}</span> : <button type="button" onClick={() => setTituloAberto({ id: p.title_id, parcela: p.installment_id, baixa: false })} title="Abrir a ficha do título"
+                    className="font-mono font-semibold text-primary underline-offset-2 hover:underline">{p.numero ?? "Abrir título"}</button>}
                 </td><td className="px-4 py-3">{dataBR(p.vencimento)}</td>
                 <td className="px-4 py-3 font-mono">{brl(Number(p.valor_cents))}</td><td className="px-4 py-3 font-mono">{brl(Number(p.saldo_cents))}</td>
                 <td className={`px-4 py-3 ${p.atraso > 0 ? "text-destructive" : ""}`}>{p.atraso} dias</td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">{d.interacoes.filter((i) => i.installment_ids.includes(p.installment_id)).length} interação(ões) · {d.recebimentos.filter((r) => r.installment_id === p.installment_id).length} baixa(s)</td>
                 <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className={leitura ? "hidden" : "flex flex-wrap gap-1.5"}>
                     <button type="button" onClick={() => setTituloAberto({ id: p.title_id, parcela: p.installment_id, baixa: true })}
                       className="h-8 rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground">Receber</button>
                     <button type="button" onClick={() => setTituloAberto({ id: p.title_id, parcela: p.installment_id, baixa: false })}
@@ -224,7 +228,7 @@ function Cockpit() {
                 </td>
               </tr>))}</tbody>
           </table>
-          <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground">Na ficha do título: receber total ou parcial, pago de outra forma, editar vencimento e valor da parcela, cobrar ou cancelar no Asaas, cancelar o título e estornar baixa.</p>
+          <p className={leitura ? "hidden" : "border-t border-border px-4 py-3 text-xs text-muted-foreground"}>Na ficha do título: receber total ou parcial, pago de outra forma, editar vencimento e valor da parcela, cobrar ou cancelar no Asaas, cancelar o título e estornar baixa.</p>
         </div>
       )}
       <TituloSheet id={tituloAberto?.id ?? null} parcelaInicial={tituloAberto?.parcela ?? null} focoBaixa={tituloAberto?.baixa ?? false}
@@ -248,7 +252,7 @@ function Cockpit() {
           {d.promessas.length === 0 ? <p className="text-sm text-muted-foreground">Sem promessas.</p> : d.promessas.map((p) => (
             <div key={p.id} className="flex items-center justify-between rounded-lg border border-border bg-card p-3 text-sm">
               <span><b className="font-mono">{brl(Number(p.valor_cents))}</b> para {dataBR(p.data_prometida)} · {p.installment_ids.length} parcela(s) · <span className={p.status === "descumprida" ? "text-destructive" : ""}>{ROTULO_PROMESSA[p.status]}</span>{p.cancel_motivo && ` (${p.cancel_motivo})`}</span>
-              {p.status === "vigente" && <button className="text-xs underline" onClick={async () => { const m = prompt("Motivo do cancelamento"); if (m) { await cancelarPromessa(p.id, m); recarregar(); } }}>Cancelar</button>}
+              {!leitura && p.status === "vigente" && <button className="text-xs underline" onClick={async () => { const m = prompt("Motivo do cancelamento"); if (m) { await cancelarPromessa(p.id, m); recarregar(); } }}>Cancelar</button>}
             </div>
           ))}
         </div>
@@ -257,7 +261,7 @@ function Cockpit() {
         <div className="space-y-2">{d.tarefas.length === 0 ? <p className="text-sm text-muted-foreground">Sem tarefas.</p> : d.tarefas.map((t) => (
           <div key={t.id} className="flex items-center justify-between rounded-lg border border-border bg-card p-3 text-sm">
             <span>{dataBR(t.vence_em)} · {t.titulo} <span className="text-xs text-muted-foreground">({t.origem === "regua" ? "régua" : t.origem}) · {t.status}{t.motivo_fim && ` — ${t.motivo_fim}`}</span></span>
-            {t.status === "aberta" && <button className="text-xs underline" onClick={async () => { await concluirTarefa(t.id); recarregar(); }}>Concluir</button>}
+            {!leitura && t.status === "aberta" && <button className="text-xs underline" onClick={async () => { await concluirTarefa(t.id); recarregar(); }}>Concluir</button>}
           </div>))}</div>
       )}
       {aba === "dados" && (

@@ -11,6 +11,7 @@ import { ComprovanteDialog } from "./ComprovanteDialog";
 import { TermoConfissao } from "./TermoConfissao";
 import { AcordoAsaas } from "./AcordoAsaas";
 import { ProntidaoAvisosAsaas } from "./ProntidaoAvisosAsaas";
+import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 
 const iso = (d?: Date) => (d ? d.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }) : "");
 const paraData = (s: string) => (s ? new Date(s + "T12:00:00") : undefined);
@@ -19,6 +20,7 @@ const txt = (c: number) => (c / 100).toFixed(2).replace(".", ",");
 type Linha = { numero: number; data: string; valor: string };
 
 export function SimuladorAcordo({ partyId, parcelas, selecaoInicial }: { partyId: string; parcelas: Parcela[]; selecaoInicial?: string[] }) {
+  const leitura = useCobrancaSomenteLeitura();
   const qc = useQueryClient();
   const abrir = useServerFn(abrirComprovante);
   const cfg = useQuery({ queryKey: ["cob", "config"], queryFn: cobConfig });
@@ -85,9 +87,9 @@ export function SimuladorAcordo({ partyId, parcelas, selecaoInicial }: { partyId
 
   return (
     <div className="space-y-5">
-      <ProntidaoAvisosAsaas partyId={partyId} />
+      {!leitura && <ProntidaoAvisosAsaas partyId={partyId} />}
       <p className="rounded-lg border border-line-soft bg-warm-ivory/60 p-3 text-xs text-ledger-muted">Simulação e acordo não mexem no financeiro. A dívida só muda pela baixa oficial quando o dinheiro entra.</p>
-      <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+      <div className={leitura ? "hidden" : "grid gap-5 lg:grid-cols-[1.4fr_1fr]"}>
         <section className="space-y-4 rounded-xl border border-line bg-surface p-5">
           <div className="flex flex-wrap items-end gap-3">
             <label className="text-xs text-ledger-muted">Calcular até<DateField value={paraData(base)} onChange={(d) => d && reset(setBase)(iso(d))} /></label>
@@ -140,12 +142,12 @@ export function SimuladorAcordo({ partyId, parcelas, selecaoInicial }: { partyId
       </div>
       <section className="space-y-2">
         <div className="flex items-center justify-between"><h3 className="text-sm font-semibold">Simulações e acordos</h3>
-          <button className="text-xs underline" onClick={() => setComp({ simId: null, valor: 0, ref: "parcela" })}>Anexar comprovante avulso</button></div>
+          {!leitura && <button className="text-xs underline" onClick={() => setComp({ simId: null, valor: 0, ref: "parcela" })}>Anexar comprovante avulso</button>}</div>
         {(hist.data ?? []).length === 0 ? <p className="text-sm text-ledger-muted">Nenhuma simulação salva.</p> : hist.data!.map((s) => (
           <div key={s.id} className={`space-y-1 rounded-lg border border-line bg-surface p-3 text-sm ${s.status === "excluida" ? "opacity-60" : ""}`}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span>{dataBR(s.created_at)} · total <b className="font-mono">{brl(Number(s.total_cents))}</b>{Number(s.desconto_cents) > 0 && ` (desc. ${brl(Number(s.desconto_cents))})`}{Number(s.entrada_cents) > 0 && ` · entrada ${brl(Number(s.entrada_cents))} em ${dataBR(s.entrada_data)}`} · {s.plano.length ? `${s.plano.length}x` : "à vista"} · <b>{ROTULO_SIMULACAO[s.status] ?? s.status}</b></span>
-              <span className="flex gap-3 text-xs">
+              <span className={leitura ? "hidden" : "flex gap-3 text-xs"}>
                 {(s.status === "simulada" || s.status === "aguardando_entrada") && <>
                   {Number(s.entrada_cents) > 0 && <button className="underline" onClick={() => setComp({ simId: s.id, valor: Number(s.entrada_cents), ref: "entrada" })}>Anexar comprovante da entrada</button>}
                   <button className="underline" onClick={() => mudar(s.id, "efetivada")}>Entrada recebida</button>
@@ -154,7 +156,7 @@ export function SimuladorAcordo({ partyId, parcelas, selecaoInicial }: { partyId
                 {s.status !== "efetivada" && s.status !== "excluida" && <button className="text-danger underline" onClick={() => excluir(s.id)}>Excluir acordo</button>}
               </span>
             </div>
-            {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <AcordoAsaas simId={s.id} partyId={partyId} temEntrada={Number(s.entrada_cents) > 0} termoObrigatorio={acordoPedeTermo(s, parcelas)} />}
+            {!leitura && s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <AcordoAsaas simId={s.id} partyId={partyId} temEntrada={Number(s.entrada_cents) > 0} termoObrigatorio={acordoPedeTermo(s, parcelas)} />}
             {s.plano.length > 0 && ["simulada", "aguardando_entrada", "efetivada"].includes(s.status) && <TermoConfissao simId={s.id} obrigatorio={acordoPedeTermo(s, parcelas)} />}
             {s.plano.length > 0 && <p className="text-xs text-ledger-muted">{s.plano.map((p) => `${p.numero}ª ${dataBR(p.data)} ${brl(p.valor_cents)}`).join(" · ")}</p>}
             {(comps.data ?? []).filter((c) => c.simulacao_id === s.id).map((c) => (

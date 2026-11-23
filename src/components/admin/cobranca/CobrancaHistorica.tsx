@@ -19,6 +19,7 @@ import { dispararLoteAsaas, type ResultadoItem } from "@/lib/cobranca-asaas.func
 import { situacaoHistorica, rotuloTermo, type DevedorHistorico } from "@/lib/cobranca-historica";
 import { termosConfissao } from "@/lib/termo-confissao";
 import { zapsignConfissao } from "@/lib/zapsign/zapsign.functions";
+import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 
 type Rpc = (f: string, a: object) => Promise<{ data: unknown; error: { message: string } | null }>;
 const rpc: Rpc = (f, a) => (supabase.rpc as unknown as Rpc).call(supabase, f, a);
@@ -27,6 +28,7 @@ type Contato = { party_id: string; email: string | null; celular: string | null;
 type Consolidacao = { lote: string | null; aplicado: boolean; criadas: number; total_cents: number; itens: Item[] };
 
 export function CobrancaHistorica() {
+  const leitura = useCobrancaSomenteLeitura();
   const qc = useQueryClient();
   const disparar = useServerFn(dispararLoteAsaas);
   const mandarTermo = useServerFn(zapsignConfissao);
@@ -183,13 +185,13 @@ export function CobrancaHistorica() {
                 className={`rounded px-3 py-1 text-sm ${filtro === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>{r}</button>
             ))}
           </div>
-          <div className="w-44">
+          {!leitura && <><div className="w-44">
             <p className="mb-1 text-xs text-muted-foreground">Vencimento da fatura</p>
             <DateField value={venc} onChange={setVenc} shortcuts={false} />
           </div>
           <Button type="button" variant="outline" onClick={marcarTodas}>Marcar prontas (até 200)</Button>
           <Button type="button" variant="outline" disabled={ocupado || !sel.length} onClick={() => consolidar(false)}>Prévia ({sel.length})</Button>
-          <Button type="button" disabled={ocupado || !sel.length} onClick={() => consolidar(true)}>Criar fatura única ({sel.length} · {brl(soma(selecionadas))})</Button>
+          <Button type="button" disabled={ocupado || !sel.length} onClick={() => consolidar(true)}>Criar fatura única ({sel.length} · {brl(soma(selecionadas))})</Button></>}
         </div>
 
         {previa && (
@@ -278,7 +280,7 @@ export function CobrancaHistorica() {
                       return <span data-termo-linha={t.tipo} className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 ${cor}`}><FileSignature aria-hidden className="size-3" />{t.tipo === "assinado" ? "assinado" : t.tipo === "pendente" ? "aguardando" : "sem termo"}</span>;
                     })()}</td>
                     <td className="px-3 py-2 text-right">
-                      {s.tipo === "judicial" ? <span className="text-xs text-muted-foreground">Jurídico</span> : (
+                      {s.tipo === "judicial" ? <span className="text-xs text-muted-foreground">Jurídico</span> : leitura ? <span className="text-xs text-muted-foreground">—</span> : (
                         <Button type="button" size="sm" variant={s.tipo === "apta" ? "default" : "outline"} onClick={() => setAcordoDe(d)} aria-label={`Gerar acordo de ${d.nome}`}>
                           <Handshake aria-hidden className="size-3.5" />{s.tipo === "acordo" || s.tipo === "faturada" ? "Ver acordo" : "Gerar acordo"}
                         </Button>

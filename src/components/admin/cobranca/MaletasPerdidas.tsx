@@ -7,6 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { brl, dataBr, listarPerdidas, mensagem, processarPerdidasSmallData, type MaletaPerdida } from "@/lib/maletas-perdidas";
+import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 
 const SITUACAO: Record<MaletaPerdida["situacao"], string> = {
   fiado_gerado: "Fiado gerado",
@@ -15,6 +16,7 @@ const SITUACAO: Record<MaletaPerdida["situacao"], string> = {
 };
 
 export function MaletasPerdidas() {
+  const leitura = useCobrancaSomenteLeitura();
   const [busca, setBusca] = React.useState("");
   const [termo, setTermo] = React.useState("");
   const [filtro, setFiltro] = React.useState("");
@@ -57,7 +59,7 @@ export function MaletasPerdidas() {
             className={`h-10 rounded-full border px-3 text-xs ${filtro === k ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}>{rot}</button>
         ))}
         <button onClick={() => processar.mutate()} disabled={processar.isPending}
-          className="ml-auto h-10 rounded-lg border border-border px-4 text-sm disabled:opacity-50">
+          className={leitura ? "hidden" : "ml-auto h-10 rounded-lg border border-border px-4 text-sm disabled:opacity-50"}>
           {processar.isPending ? "Conferindo…" : "Conferir perdidas do SmallData"}
         </button>
       </div>

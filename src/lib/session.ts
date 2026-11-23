@@ -13,7 +13,8 @@ export type AppRole =
   | "montagem"
   | "qualidade"
   | "representante"
-  | "consultora";
+  | "consultora"
+  | "juridico";
 
 /** Sessão do navegador. Nunca decide permissão sozinha: o banco valida tudo. */
 export function useSession() {

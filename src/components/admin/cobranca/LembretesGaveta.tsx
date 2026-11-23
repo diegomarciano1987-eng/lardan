@@ -34,7 +34,10 @@ export function LembretesGaveta() {
         <aside className="admin-scope fixed right-0 top-0 z-50 flex h-full w-96 flex-col border-l border-line bg-surface shadow-2xl" aria-label="Lembretes de cobrança">
           <header className="flex items-center justify-between border-b border-line bg-bronze px-5 py-4 text-primary-foreground">
             <div className="flex items-center gap-2"><BellRing className="size-4" /><h2 className="font-semibold">Lembretes</h2></div>
-            <button onClick={() => setAberta(false)} aria-label="Fechar lembretes"><X className="size-5" /></button>
+            <button type="button" onClick={() => setAberta(false)} aria-label="Fechar lembretes" data-testid="fechar-lembretes"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border-2 border-primary-foreground/70 bg-primary-foreground px-3 text-sm font-semibold text-bronze shadow-sm transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground">
+              <X className="size-4" strokeWidth={2.5} aria-hidden /> Fechar
+            </button>
           </header>
           <div className="flex-1 space-y-5 overflow-auto p-5">
             {itens.length === 0 && <p className="text-sm text-ledger-muted">Sem lembretes para hoje e amanhã.</p>}

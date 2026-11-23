@@ -24,7 +24,7 @@ const COLS: { id: Coluna; rotulo: string; ajuda: string; faixa: string; tom: str
   { id: "judicial", rotulo: "Judicial", ajuda: "Com o jurídico.", faixa: "bg-bronze", tom: "text-bronze", destino: "acompanhamento" },
 ];
 
-export function KanbanCobranca({ lista, onMover }: { lista: Devedor[]; onMover: (d: Devedor, e: Etapa) => void }) {
+export function KanbanCobranca({ lista, onMover, somenteLeitura = false }: { lista: Devedor[]; onMover: (d: Devedor, e: Etapa) => void; somenteLeitura?: boolean }) {
   const qc = useQueryClient();
   const qa = useQuery(acordosQuery);
   const sit = React.useMemo(() => new Map((qa.data ?? []).map((a) => [a.party_id, a])), [qa.data]);
@@ -53,8 +53,8 @@ export function KanbanCobranca({ lista, onMover }: { lista: Devedor[]; onMover: 
           const foraHist = todas.length - col.length;
           return (
             <section key={c.id} data-coluna={c.id}
-              onDragOver={(ev) => { if (c.destino) { ev.preventDefault(); setSobre(c.id); } }} onDragLeave={() => setSobre(null)}
-              onDrop={() => { if (arr && c.destino && arr.etapa !== c.destino) onMover(arr, c.destino); setArr(null); setSobre(null); }}
+              onDragOver={(ev) => { if (c.destino && !somenteLeitura) { ev.preventDefault(); setSobre(c.id); } }} onDragLeave={() => setSobre(null)}
+              onDrop={() => { if (!somenteLeitura && arr && c.destino && arr.etapa !== c.destino) onMover(arr, c.destino); setArr(null); setSobre(null); }}
               className={`flex min-h-96 flex-col overflow-hidden rounded-2xl border bg-card transition ${sobre === c.id ? "border-bronze ring-2 ring-bronze/30" : "border-border"}`}>
               <div className={`h-1.5 ${c.faixa}`} />
               <header className="px-3 py-3">
@@ -82,7 +82,7 @@ export function KanbanCobranca({ lista, onMover }: { lista: Devedor[]; onMover: 
                 {col.slice(0, 80).map((d) => {
                   const a = sit.get(d.party_id);
                   return (
-                    <article key={d.party_id} draggable onDragStart={() => setArr(d)} className="relative cursor-grab overflow-hidden rounded-xl border border-border bg-background p-3 pl-4 text-xs shadow-sm hover:shadow-md">
+                    <article key={d.party_id} draggable={!somenteLeitura} onDragStart={() => { if (!somenteLeitura) setArr(d); }} className={`relative ${somenteLeitura ? "" : "cursor-grab"} overflow-hidden rounded-xl border border-border bg-background p-3 pl-4 text-xs shadow-sm hover:shadow-md`}>
                       <span aria-hidden className={`absolute inset-y-0 left-0 w-1 ${c.faixa}`} />
                       <Link to="/admin/cobranca/$id" params={{ id: d.party_id }} className="block truncate text-sm font-semibold hover:text-bronze">{d.nome}</Link>
                       <p className="truncate text-muted-foreground">{d.codigo_legado ? `Cód. ${d.codigo_legado} · ` : ""}{d.praca_nome ?? [d.cidade, d.uf].filter(Boolean).join("/")}</p>
@@ -97,7 +97,7 @@ export function KanbanCobranca({ lista, onMover }: { lista: Devedor[]; onMover: 
                         {a?.prorrogado && <span className="rounded border border-border px-1.5 py-0.5 text-[0.625rem] uppercase text-muted-foreground">Já prorrogado</span>}
                         {d.proxima_acao && <span className="rounded border border-border px-1.5 py-0.5 text-[0.625rem] uppercase text-muted-foreground">Próx. {dataBR(d.proxima_acao)}</span>}
                       </div>
-                      {c.id === "atrasado" && a && (
+                      {!somenteLeitura && c.id === "atrasado" && a && (
                         !a.prorrogado
                           ? <Button size="sm" variant="outline" className="mt-2 h-7 w-full text-xs" onClick={() => setProrrogar(d)}>Prorrogar (única vez)</Button>
                           : a.dias_atraso > 5 && <Button size="sm" variant="outline" className="mt-2 h-7 w-full border-bronze text-xs text-bronze" onClick={() => onMover(d, "acompanhamento")}>Enviar ao Judicial</Button>

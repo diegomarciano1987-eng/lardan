@@ -11,6 +11,8 @@ import { ProcessosJudiciais } from "@/components/admin/cobranca/ProcessosJudicia
 import { CobrancaHistorica } from "@/components/admin/cobranca/CobrancaHistorica";
 import { ReativacoesPendentes } from "@/components/admin/cobranca/ReativacoesPendentes";
 import { AcordosAtrasados } from "@/components/admin/cobranca/AcordosAtrasados";
+import { AvisoSomenteLeitura } from "@/components/admin/cobranca/AvisoSomenteLeitura";
+import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 import { carteira, kpisCobranca, moverEtapa, cobConfig, salvarConfig, type CobConfig, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
 
 const busca = z.object({
@@ -41,6 +43,7 @@ function Cobranca() {
   const q = useQuery({ queryKey: ["cob", "carteira"], queryFn: carteira, staleTime: 60_000 });
   const qk = useQuery({ queryKey: ["cob", "kpis"], queryFn: kpisCobranca });
   const qc = useQueryClient();
+  const leitura = useCobrancaSomenteLeitura();
   const hoje = hojeSP();
   const todos = q.data ?? [];
 
@@ -72,6 +75,7 @@ function Cobranca() {
   ).sort((a, b) => Number(b.vencido_cents) - Number(a.vencido_cents));
 
   const mover = async (d: Devedor, e: Etapa) => {
+    if (leitura) { toast.error("Acesso somente para consulta."); return; }
     try { await moverEtapa(d.party_id, e); qc.invalidateQueries({ queryKey: ["cob"] }); toast.success(`${d.nome}: ${rotuloEtapa(e)}. O financeiro não muda.`); }
     catch (err) { toast.error(err instanceof Error ? err.message : "Não moveu."); }
   };
@@ -92,8 +96,8 @@ function Cobranca() {
           <h1 className="font-display text-3xl">Central de Cobrança</h1>
           <p className="text-sm text-muted-foreground">Valores vêm do financeiro oficial. Aqui só se registra o atendimento.</p>
         </div>
-        <div className="flex items-center gap-2"><ConfigEncargos />
-        <Link to="/admin/cobranca/lote" className="inline-flex h-10 items-center rounded-lg bg-asaas px-4 text-sm font-semibold text-asaas-foreground">Cobrança em lote Asaas</Link>
+        <div className="flex items-center gap-2">{!leitura && <><ConfigEncargos />
+        <Link to="/admin/cobranca/lote" className="inline-flex h-10 items-center rounded-lg bg-asaas px-4 text-sm font-semibold text-asaas-foreground">Cobrança em lote Asaas</Link></>}
         <div className="flex rounded-lg border border-border p-1">
           {(["lista", "kanban", "agenda", "bi", "perdidas", "processos", "historica"] as const).map((v) => (
             <button key={v} onClick={() => set({ v })} className={`rounded-md px-4 py-1.5 text-sm ${s.v === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
@@ -102,8 +106,9 @@ function Cobranca() {
           ))}
         </div></div>
       </header>
+      {leitura && <AvisoSomenteLeitura />}
       <LembretesGaveta />
-      <ReativacoesPendentes />
+      {!leitura && <ReativacoesPendentes />}
 
       <KpisCobranca filtro={s.f} onFiltro={(f) => set({ f })} />
 
@@ -127,7 +132,7 @@ function Cobranca() {
         : q.error ? <p className="text-sm text-destructive">{(q.error as Error).message}</p>
         : lista.length === 0 && s.v !== "bi" ? <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">Sem dados para estes filtros.</p>
         : s.v === "lista" ? <Lista lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
-        : s.v === "kanban" ? <KanbanCobranca lista={lista} onMover={mover} />
+        : s.v === "kanban" ? <KanbanCobranca lista={lista} onMover={mover} somenteLeitura={leitura} />
         : s.v === "agenda" ? <Agenda lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
         : <BI todos={todos} />}
       </>}

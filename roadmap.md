@@ -58,3 +58,11 @@
 - [x] E2. Remessas: aba "Maletas individuais" (sem remessa/representante) com buscador; saem da lista normal
 - [x] E3. App do representante: reprovar candidata (motivo) + aba "Reprovadas"; vai para Reprovados no CRM
 - [x] E4. Conciliação por CPF (OFX Santander): mesa já monta a baixa (parcial na última) quando o CPF é de um único cadastro; pessoa confirma
+
+# Transferências entre contas e espelho Asaas (23/11)
+- [x] Mesa: opção "Transferência entre contas" (cria a transferência e confere as duas linhas, sem conta a pagar/DRE)
+- [x] Pareamento automático Asaas × bancos a cada 10 min (CNPJ/razão social nos dois extratos, par único) + botão "Procurar agora"
+- [x] Quadro "Transferências entre contas da empresa" no extrato: feitas, aguardando a outra conta, desfazer com motivo
+- [x] Rastreio do espelho: transferências antigas conferidas (73 linhas, todas com lançamento); pendências restantes listadas ao Diego
+- [ ] 33 cobranças excluídas direto no Asaas com dívida aberta no Lardan — aguarda a Larissa decidir uma a uma (painel de diferenças)
+- [ ] 30 Pix recebidos no Asaas sem cadastro identificado (R$ 7,9 mil) — aguarda a Larissa indicar a pessoa

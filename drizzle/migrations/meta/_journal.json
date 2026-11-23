@@ -2584,6 +2584,13 @@
       "when": 1795360401285,
       "tag": "0368_mesa_conciliacao_por_cpf",
       "breakpoints": true
+    },
+    {
+      "idx": 369,
+      "version": "7",
+      "when": 1795444950375,
+      "tag": "0369_transferencia_contas_proprias_0369",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,7 @@ import * as React from "react";
 import { lancarPelaCobrancaAsaas, payDaLinha } from "@/lib/asaas-automatico";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowDownLeft, ArrowUpRight, BadgeCheck, Brain, Check, ChevronRight, FilePlus2, Link2, Scale, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, BadgeCheck, Brain, Check, ChevronRight, FilePlus2, Link2, Scale, Search, SkipForward, Sparkles, UserRound, X } from "lucide-react";
 import { SmartSelect } from "@/components/premium/SmartSelect";
 import { fetchClassificacoes } from "@/lib/financeiro";
 import { centrosMesa, contrapartesMesa, ehMicrotarifa, planoPorDocumento, type PlanoDocumento, microtarifasConciliar, microtarifasPrevia, faltaConciliar, novoLancamentoConciliar, palpiteDaLinha, papeisTexto, tituloDaParcela } from "@/lib/mesa-conciliacao";
@@ -13,6 +13,7 @@ import { listarParcelas, type ParcelaLinha } from "@/lib/financeiro-parcelas";
 import { conciliar, listarLinhasExtrato, marcarLinha, sugerirCorrespondencias, type LinhaExtratoRow } from "@/lib/conciliacao";
 import { useCapabilities } from "@/lib/capabilities";
 import { supabase } from "@/integrations/supabase/client";
+import { novaTransferenciaDoExtrato, sugestaoTransferencia, type SugestaoTransferencia } from "@/lib/transferencias-extrato";
 
 const dataBR = (d: string | null) =>
   d ? new Intl.DateTimeFormat("pt-BR").format(new Date(`${d}T12:00:00`)) : "—";
@@ -61,6 +62,7 @@ export function MesaConciliacao({
   const caps = useCapabilities();
   const podeConciliar = caps.includes("finance.reconcile");
   const podeMarcar = caps.includes("finance.statement.flag");
+  const podeTransferir = podeConciliar && podeMarcar && caps.includes("finance.bank.manage");
 
   const fila = useQuery({
     queryKey: ["mesa-fila", conta, de, ate],
@@ -179,6 +181,7 @@ export function MesaConciliacao({
             conta={conta}
             podeConciliar={podeConciliar}
             podeMarcar={podeMarcar}
+            podeTransferir={podeTransferir}
             onFeito={() => {
               onMudou();
               avancar(atual.id, "resolvida");
@@ -319,6 +322,7 @@ function Bancada({
   conta,
   podeConciliar,
   podeMarcar,
+  podeTransferir,
   onFeito,
   onPular,
 }: {
@@ -326,6 +330,7 @@ function Bancada({
   conta: string;
   podeConciliar: boolean;
   podeMarcar: boolean;
+  podeTransferir: boolean;
   onFeito: () => void;
   onPular: () => void;
 }) {
@@ -334,7 +339,7 @@ function Bancada({
   const valorLinha = (linha.valor_cents ?? 0) - linha.conciliado_cents;
   // 0285: recebimento de cobrança do Asaas (pay_) — o "novo" nasce preso à cobrança, nunca um segundo lançamento
   const payAsaas = payDaLinha(linha);
-  const [modo, setModo] = React.useState<"existente" | "novo" | null>(null);
+  const [modo, setModo] = React.useState<"existente" | "novo" | "transferencia" | null>(null);
   const [aba, setAba] = React.useState<"sugestoes" | "buscar" | "baixadas" | "transferencia">("sugestoes");
   const [busca, setBusca] = React.useState("");
   const [buscaLenta, setBuscaLenta] = React.useState("");
@@ -371,6 +376,8 @@ function Bancada({
   // 0368: Pix com CPF no histórico → dívidas da pessoa (só sugestão; a baixa só acontece quando a pessoa confirma)
   const usaDocumento = !saida && !payAsaas;
   const porDoc = useQuery({ queryKey: ["mesa-por-documento", linha.id], queryFn: () => planoPorDocumento(linha.id), enabled: usaDocumento });
+  // 0369: saída/entrada que cita o CNPJ/razão social da empresa é transferência entre contas, não pagamento
+  const transf = useQuery({ queryKey: ["mesa-transferencia-sugestao", linha.id], queryFn: () => sugestaoTransferencia(linha.id), enabled: podeConciliar && !payAsaas });
   const centros = useQuery({ queryKey: ["mesa-centros"], queryFn: centrosMesa, staleTime: 60_000 });
   const classes = useQuery({
     queryKey: ["fin-classificacoes", direction, "", ""],
@@ -393,6 +400,11 @@ function Bancada({
   React.useEffect(() => {
     if (modo !== null || !sugestoes.data) return;
     if (usaDocumento && porDoc.isLoading) return;
+    if (podeConciliar && !payAsaas && transf.isLoading) return;
+    if (transf.data?.propria && transf.data.livre) {
+      setModo("transferencia");
+      return;
+    }
     if (porDoc.data?.situacao === "ok") {
       // CPF de um único cadastro com dívida em aberto: já monta o vínculo (mais antiga primeiro); a pessoa confere e confirma
       setModo("existente");
@@ -400,7 +412,7 @@ function Bancada({
       return;
     }
     setModo(sugestoes.data.length > 0 ? "existente" : "novo");
-  }, [sugestoes.data, modo, usaDocumento, porDoc.isLoading, porDoc.data]);
+  }, [sugestoes.data, modo, usaDocumento, porDoc.isLoading, porDoc.data, podeConciliar, payAsaas, transf.isLoading, transf.data]);
 
   // Aprendizado: preenche com o que foi usado nas vezes anteriores, sem sobrescrever escolha.
   React.useEffect(() => {
@@ -528,10 +540,11 @@ function Bancada({
       if (e.key.toLowerCase() === "p") onPular();
       if (e.key === "1") setModo("existente");
       if (e.key === "2") setModo("novo");
+      if (e.key === "3" && !payAsaas) setModo("transferencia");
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [pronto, aplicar, onPular]);
+  }, [pronto, aplicar, onPular, payAsaas]);
 
   const candidatas: Candidata[] =
     aba === "sugestoes"
@@ -586,11 +599,12 @@ function Bancada({
         <p className="mt-6 mb-2 text-sm font-semibold text-ledger-text">
           Este {saida ? "pagamento" : "recebimento"} já está lançado no sistema?
         </p>
-        <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Caminho da conciliação">
+        <div className={`grid gap-2 ${payAsaas ? "sm:grid-cols-2" : "sm:grid-cols-3"}`} role="radiogroup" aria-label="Caminho da conciliação">
           {(
             [
               ["existente", Link2, "Sim, já existe", `Vincular a uma ${saida ? "conta a pagar" : "conta a receber"}`],
               ["novo", FilePlus2, "Não, é novo", payAsaas ? "Lançar preso à cobrança do Asaas" : "Criar o lançamento agora e conciliar"],
+              ...(payAsaas ? [] : ([["transferencia", ArrowLeftRight, "Transferência entre contas", saida ? "Foi para outra conta da empresa" : "Veio de outra conta da empresa"]] as const)),
             ] as const
           ).map(([m, Icone, t, d], i) => (
             <button
@@ -712,7 +726,17 @@ function Bancada({
           </div>
         )}
 
-        {modo !== null && (
+        {modo === "transferencia" && (
+          <TransferenciaNova
+            linha={linha}
+            sugestao={transf.data}
+            carregando={transf.isLoading}
+            pode={podeTransferir}
+            onFeito={onFeito}
+          />
+        )}
+
+        {(modo === "existente" || modo === "novo") && (
           <div className="mt-6 rounded-[14px] border border-line bg-surface p-4">
             <p className="ledger-eyebrow">Classificação para o DRE</p>
             <p className="mt-1 mb-3 text-xs text-ledger-muted">
@@ -816,7 +840,7 @@ function Bancada({
           </div>
         )}
 
-        <div
+        {modo !== "transferencia" && <div
           className={`mt-4 flex items-center justify-between rounded-[14px] p-4 transition ${
             pronto ? "bg-primary text-primary-foreground" : "bg-cream-2 text-ledger-text"
           }`}
@@ -837,10 +861,10 @@ function Bancada({
           <span className="flex items-center gap-2 text-2xl font-bold tabular-nums">
             {pronto ? <Check aria-hidden className="size-6" /> : modo === "novo" ? formatBRLFromCents(valorLinha) : formatBRLFromCents(Math.abs(falta))}
           </span>
-        </div>
+        </div>}
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {podeConciliar && (
+          {podeConciliar && modo !== "transferencia" && (
             <button type="button" className="admin-btn-primary h-12 flex-1 text-base" disabled={!pronto || aplicar.isPending} onClick={() => aplicar.mutate()}>
               <Check aria-hidden className="mr-1 inline size-5" />
               {aplicar.isPending ? "Gravando…" : modo === "novo" ? (payAsaas ? "Lançar pela cobrança do Asaas" : "Criar lançamento e conciliar") : "Conciliar"}
@@ -850,7 +874,7 @@ function Bancada({
             <SkipForward aria-hidden className="mr-1 inline size-4" /> Deixar para depois
           </button>
         </div>
-        <p className="mt-2 text-xs text-ledger-muted">Atalhos: 1 já existe · 2 é novo · Ctrl+Enter grava · P deixa para depois · Esc fecha</p>
+        <p className="mt-2 text-xs text-ledger-muted">Atalhos: 1 já existe · 2 é novo{payAsaas ? "" : " · 3 transferência"} · Ctrl+Enter grava · P deixa para depois · Esc fecha</p>
 
         {podeMarcar && (
           <div className="mt-6 border-t border-line pt-4">
@@ -876,7 +900,13 @@ function Bancada({
       </section>
 
       {/* Direita */}
-      {modo === "novo" ? (
+      {modo === "transferencia" ? (
+        <section className="flex min-h-0 flex-col p-6">
+          <p className="ledger-eyebrow">Já lançou esta transferência em Contas e caixas?</p>
+          <p className="mt-1 text-sm text-ledger-muted">Então ligue a linha a ela aqui, sem lançar de novo.</p>
+          <TransferenciaInterna linha={linha} valorLinha={valorLinha} podeLigar={podeConciliar && podeMarcar} onFeito={onFeito} />
+        </section>
+      ) : modo === "novo" ? (
         <section className="flex min-h-0 flex-col gap-4 overflow-y-auto p-6">
           <div className="ledger-panel p-6">
             <p className="ledger-eyebrow">Resumo do novo lançamento</p>
@@ -1220,6 +1250,110 @@ function TransferenciaInterna({ linha, valorLinha, podeLigar, onFeito }: {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+/** 0369 — lança a transferência entre contas da empresa a partir da linha (sem título, sem receita/despesa) e já confere a outra ponta. */
+function TransferenciaNova({ linha, sugestao, carregando, pode, onFeito }: {
+  linha: LinhaExtratoRow; sugestao: SugestaoTransferencia | undefined; carregando: boolean; pode: boolean; onFeito: () => void;
+}) {
+  const saida = linha.kind === "saida";
+  const contras = sugestao?.contras ?? [];
+  const [outra, setOutra] = React.useState("");
+  const [contra, setContra] = React.useState<string | null>(null);
+  const [obs, setObs] = React.useState("");
+  const iniciou = React.useRef(false);
+  React.useEffect(() => {
+    if (iniciou.current || !sugestao) return;
+    iniciou.current = true;
+    const unica = sugestao.contras.length === 1 ? sugestao.contras[0] : undefined;
+    if (unica) { setOutra(unica.financial_account_id); setContra(unica.line_id); }
+  }, [sugestao]);
+  const contrasDaConta = contras.filter((c) => !outra || c.financial_account_id === outra);
+  const contaNome = sugestao?.contas.find((c) => c.id === outra)?.nome;
+  const gravar = useMutation({
+    mutationFn: () => novaTransferenciaDoExtrato({ lineId: linha.id, outraConta: outra, contraLineId: contra, observacao: obs }),
+    onSuccess: (r) => {
+      toast.success(r.contra_ligada
+        ? "Transferência lançada e as duas linhas conferidas."
+        : "Transferência lançada. A linha da outra conta será conferida quando o extrato dela chegar.");
+      onFeito();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <div className="mt-6 rounded-[14px] border border-line bg-surface p-4">
+      <p className="ledger-eyebrow">Transferência entre contas da empresa</p>
+      {sugestao?.propria && (
+        <p className="mt-2 flex items-start gap-2 rounded-[10px] bg-cream-2 p-3 text-sm text-ledger-text">
+          <BadgeCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-bronze" />
+          O histórico cita o CNPJ ou a razão social da própria empresa: é dinheiro passando entre contas, não pagamento nem recebimento.
+        </p>
+      )}
+      <div className="mt-3">
+        <Rotulo>{saida ? "Foi para a conta" : "Veio da conta"} (obrigatório)</Rotulo>
+        <SmartSelect
+          options={(sugestao?.contas ?? []).map((c) => ({
+            value: c.id, label: c.nome,
+            ...(contras.some((x) => x.financial_account_id === c.id) ? { hint: "tem linha que casa" } : {}),
+          }))}
+          value={outra}
+          onChange={(v) => { setOutra(v); setContra((atual) => (contras.find((x) => x.line_id === atual)?.financial_account_id === v ? atual : null)); }}
+          loading={carregando}
+          placeholder="Escolha a outra conta"
+          searchPlaceholder="Nome da conta"
+        />
+      </div>
+      <div className="mt-4">
+        <Rotulo>Linha da outra conta</Rotulo>
+        {carregando ? <Skeleton className="h-16 w-full" /> : contrasDaConta.length === 0 ? (
+          <p className="rounded-[10px] bg-cream-2 p-3 text-sm text-ledger-muted">
+            {outra
+              ? `Nenhuma linha de mesmo valor no extrato de ${contaNome ?? "da outra conta"} (até 3 dias). Pode lançar assim: quando o extrato dela chegar, a linha é conferida sozinha.`
+              : "Nenhuma linha de mesmo valor em outra conta (até 3 dias)."}
+          </p>
+        ) : (
+          <ul className="space-y-2" role="radiogroup" aria-label="Linha da outra conta">
+            {contrasDaConta.map((c) => {
+              const sel = contra === c.line_id;
+              return (
+                <li key={c.line_id}>
+                  <button type="button" role="radio" aria-checked={sel}
+                    onClick={() => { setContra(sel ? null : c.line_id); setOutra(c.financial_account_id); }}
+                    className={`flex w-full items-center gap-3 rounded-[12px] border-2 p-3 text-left transition ${sel ? "border-bronze shadow-md" : "border-line hover:border-champagne"}`}>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-ledger-text">{c.conta} · {dataBR(c.data)}</p>
+                      <p className="truncate text-xs text-ledger-muted">{c.historico || "Sem histórico"}</p>
+                      {c.propria && <p className="text-[11px] font-semibold text-bronze">cita a empresa</p>}
+                    </div>
+                    <span className="font-bold tabular-nums text-ledger-text">{saida ? "+ " : "− "}{formatBRLFromCents(c.valor_cents)}</span>
+                    {sel && <Check aria-hidden className="size-5 text-bronze" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+      <label className="mt-4 block">
+        <Rotulo>Observação</Rotulo>
+        <input value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Ex.: resgate do saldo Asaas" className={campoCls} />
+      </label>
+      <dl className="mt-4 space-y-1 text-sm">
+        <div className="flex justify-between gap-3"><dt className="text-ledger-muted">De</dt><dd className="font-semibold text-ledger-text">{saida ? "Esta conta" : contaNome ?? "—"}</dd></div>
+        <div className="flex justify-between gap-3"><dt className="text-ledger-muted">Para</dt><dd className="font-semibold text-ledger-text">{saida ? contaNome ?? "—" : "Esta conta"}</dd></div>
+        <div className="flex justify-between gap-3"><dt className="text-ledger-muted">Valor</dt><dd className="font-semibold tabular-nums text-ledger-text">{formatBRLFromCents(linha.valor_cents ?? 0)}</dd></div>
+        <div className="flex justify-between gap-3"><dt className="text-ledger-muted">No resultado (DRE)</dt><dd className="font-semibold text-ledger-text">Não entra: nem receita nem despesa</dd></div>
+      </dl>
+      <button type="button" className="admin-btn-primary mt-4 h-12 w-full text-base" disabled={!pode || !outra || gravar.isPending || sugestao?.livre === false}
+        title={pode ? undefined : "Seu perfil precisa poder conciliar e movimentar contas"}
+        onClick={() => gravar.mutate()}>
+        <ArrowLeftRight aria-hidden className="mr-1 inline size-5" />
+        {gravar.isPending ? "Gravando…" : contra ? "Lançar transferência e conferir as duas linhas" : "Lançar transferência e conferir"}
+      </button>
+      {!pode && <p className="mt-2 text-xs text-ledger-muted">Seu perfil precisa poder conciliar e movimentar contas para lançar transferências.</p>}
+      <p className="mt-2 text-xs text-ledger-muted">Fica na auditoria e pode ser desfeita com motivo no quadro “Transferências entre contas da empresa”.</p>
     </div>
   );
 }

@@ -350,6 +350,7 @@ export type Database = {
           notificacao_cost_center_id: string | null
           tarifa_chart_id: string | null
           tarifa_cost_center_id: string | null
+          transferencias_ligado: boolean
           updated_at: string
           updated_by: string | null
         }
@@ -369,6 +370,7 @@ export type Database = {
           notificacao_cost_center_id?: string | null
           tarifa_chart_id?: string | null
           tarifa_cost_center_id?: string | null
+          transferencias_ligado?: boolean
           updated_at?: string
           updated_by?: string | null
         }
@@ -388,6 +390,7 @@ export type Database = {
           notificacao_cost_center_id?: string | null
           tarifa_chart_id?: string | null
           tarifa_cost_center_id?: string | null
+          transferencias_ligado?: boolean
           updated_at?: string
           updated_by?: string | null
         }
@@ -7439,6 +7442,86 @@ export type Database = {
             columns: ["business_entity_id"]
             isOneToOne: false
             referencedRelation: "business_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fin_transferencias_extrato: {
+        Row: {
+          actor_id: string | null
+          criado_em: string
+          desfeito_em: string | null
+          desfeito_motivo: string | null
+          desfeito_por: string | null
+          estorno_transfer_id: string | null
+          id: string
+          line_entrada: string | null
+          line_saida: string | null
+          modo: string
+          motivo: string
+          origem: string
+          transfer_id: string
+          valor_cents: number
+        }
+        Insert: {
+          actor_id?: string | null
+          criado_em?: string
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          estorno_transfer_id?: string | null
+          id?: string
+          line_entrada?: string | null
+          line_saida?: string | null
+          modo: string
+          motivo: string
+          origem: string
+          transfer_id: string
+          valor_cents: number
+        }
+        Update: {
+          actor_id?: string | null
+          criado_em?: string
+          desfeito_em?: string | null
+          desfeito_motivo?: string | null
+          desfeito_por?: string | null
+          estorno_transfer_id?: string | null
+          id?: string
+          line_entrada?: string | null
+          line_saida?: string | null
+          modo?: string
+          motivo?: string
+          origem?: string
+          transfer_id?: string
+          valor_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_transferencias_extrato_estorno_transfer_id_fkey"
+            columns: ["estorno_transfer_id"]
+            isOneToOne: false
+            referencedRelation: "financial_transfers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_transferencias_extrato_line_entrada_fkey"
+            columns: ["line_entrada"]
+            isOneToOne: false
+            referencedRelation: "financial_statement_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_transferencias_extrato_line_saida_fkey"
+            columns: ["line_saida"]
+            isOneToOne: false
+            referencedRelation: "financial_statement_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_transferencias_extrato_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "financial_transfers"
             referencedColumns: ["id"]
           },
         ]
@@ -22997,6 +23080,10 @@ export type Database = {
         Returns: Json
       }
       fin_judicial_por_historico: { Args: { _h: string }; Returns: Json }
+      fin_linha_livre_transferencia: {
+        Args: { _line: string }
+        Returns: boolean
+      }
       fin_liquidacoes_list: {
         Args: {
           _ate: string
@@ -23021,10 +23108,23 @@ export type Database = {
         Args: { _line_id: string; _observacao?: string; _transfer_id: string }
         Returns: Json
       }
+      fin_mesa_nova_transferencia: {
+        Args: {
+          _contra_line_id?: string
+          _line_id: string
+          _observacao?: string
+          _outra_conta: string
+        }
+        Returns: Json
+      }
       fin_mesa_novo_conciliar: { Args: { _payload: Json }; Returns: Json }
       fin_mesa_palpite: { Args: { _line: string }; Returns: Json }
       fin_mesa_por_documento: { Args: { _line: string }; Returns: Json }
       fin_mesa_titulo_da_parcela: { Args: { _inst: string }; Returns: Json }
+      fin_mesa_transferencia_sugestao: {
+        Args: { _line_id: string }
+        Returns: Json
+      }
       fin_mesa_transferencias: {
         Args: { _busca?: string; _line_id: string }
         Returns: Json
@@ -23144,6 +23244,7 @@ export type Database = {
         Args: { _ids: string[]; _marca: string }
         Returns: Json
       }
+      fin_texto_conta_propria: { Args: { _txt: string }; Returns: boolean }
       fin_title_approve: {
         Args: { _motivo?: string; _title: string }
         Returns: undefined
@@ -23182,13 +23283,55 @@ export type Database = {
         Args: { _limit?: number; _offset?: number }
         Returns: Json
       }
+      fin_transf_criar_interno: {
+        Args: {
+          _ator: string
+          _chave: string
+          _data: string
+          _from: string
+          _motivo: string
+          _ref: string
+          _to: string
+          _valor: number
+        }
+        Returns: string
+      }
+      fin_transf_ligar_interno: {
+        Args: { _ator: string; _line: string; _obs: string; _transfer: string }
+        Returns: string
+      }
       fin_transfer_create: { Args: { _payload: Json }; Returns: string }
       fin_transfer_reverse: {
         Args: { _motivo: string; _transfer: string }
         Returns: string
       }
+      fin_transferencia_contras: {
+        Args: { _line: string }
+        Returns: {
+          conta: string
+          data: string
+          financial_account_id: string
+          historico: string
+          line_id: string
+          propria: boolean
+          valor_cents: number
+        }[]
+      }
+      fin_transferencia_extrato_desfazer: {
+        Args: { _id: string; _motivo: string }
+        Returns: Json
+      }
+      fin_transferencias_extrato_painel: {
+        Args: { _dias?: number }
+        Returns: Json
+      }
       fin_transferencias_importar: {
         Args: { _lote: string; _rows: Json }
+        Returns: Json
+      }
+      fin_transferencias_parear_agora: { Args: never; Returns: Json }
+      fin_transferencias_parear_nucleo: {
+        Args: { _ator: string; _limite?: number }
         Returns: Json
       }
       fin_transfers_list: { Args: { _ate: string; _de: string }; Returns: Json }

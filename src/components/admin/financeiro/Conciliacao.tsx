@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { LayoutPanelLeft, Upload, X } from "lucide-react";
 import { faltaConciliar } from "@/lib/mesa-conciliacao";
 import { MesaConciliacao } from "@/components/admin/financeiro/MesaConciliacao";
+import { TransferenciasExtrato } from "@/components/admin/financeiro/TransferenciasExtrato";
 import {
   EmptyState,
   ErrorState,
@@ -933,6 +934,8 @@ export function Conciliacao({
         </div>
       )}
 
+      <TransferenciasExtrato onMudou={atualizar} />
+
       {mesa && conta && (
         <MesaConciliacao
           conta={conta}
@@ -940,7 +943,7 @@ export function Conciliacao({
           de={de}
           ate={ate}
           onFechar={() => setMesa(false)}
-          onMudou={atualizar}
+          onMudou={() => { atualizar(); void qc.invalidateQueries({ queryKey: ["fin-transferencias-extrato"] }); }}
         />
       )}
       <PedirDadosDialog

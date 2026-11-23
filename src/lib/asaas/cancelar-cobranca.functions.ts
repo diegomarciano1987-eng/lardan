@@ -33,7 +33,7 @@ export const cancelarCobrancaAsaas = createServerFn({ method: "POST" })
     if (pode.error || !pode.data) throw new Error("Sem acesso ao financeiro para cancelar cobrança.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const rpc = supabaseAdmin.rpc.bind(supabaseAdmin) as unknown as Rpc;
+    const rpc = ((supabaseAdmin as unknown as { rpc: Function }).rpc.bind(supabaseAdmin)) as unknown as Rpc;
     const prep = await rpc("asaas_cobranca_cancelar_preparar", { _charge: data.chargeId, _actor: c.userId });
     if (prep.error) throw new Error(prep.error.message);
     const { external_id } = prep.data as { external_id: string };

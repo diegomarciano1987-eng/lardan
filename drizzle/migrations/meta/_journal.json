@@ -2647,6 +2647,48 @@
       "when": 1795534911048,
       "tag": "0377_microtarifas_conta_configurada_0377",
       "breakpoints": true
+    },
+    {
+      "idx": 378,
+      "version": "7",
+      "when": 1795537742112,
+      "tag": "0378_busca_inteligente_cartao_confirmado_0378",
+      "breakpoints": true
+    },
+    {
+      "idx": 379,
+      "version": "7",
+      "when": 1795537819312,
+      "tag": "0379_cartao_confirmado_varrer_0379",
+      "breakpoints": true
+    },
+    {
+      "idx": 380,
+      "version": "7",
+      "when": 1795538275714,
+      "tag": "0380_mesa_identificar_rapido_0380",
+      "breakpoints": true
+    },
+    {
+      "idx": 381,
+      "version": "7",
+      "when": 1795538543975,
+      "tag": "0381_extrato_payment_id_indice_0381",
+      "breakpoints": true
+    },
+    {
+      "idx": 382,
+      "version": "7",
+      "when": 1795538589814,
+      "tag": "0382_clientes_da_rede_cockpit_0382",
+      "breakpoints": true
+    },
+    {
+      "idx": 383,
+      "version": "7",
+      "when": 1795538877598,
+      "tag": "0383_venda_cancelada_cancela_titulo_0383",
+      "breakpoints": true
     }
   ]
 }

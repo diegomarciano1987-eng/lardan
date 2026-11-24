@@ -592,6 +592,24 @@ export type Database = {
           },
         ]
       }
+      asaas_cartao_varredura_log: {
+        Row: {
+          created_at: string
+          id: string
+          resultado: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          resultado: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          resultado?: Json
+        }
+        Relationships: []
+      }
       asaas_charge_changes: {
         Row: {
           actor_user_id: string | null
@@ -5173,6 +5191,7 @@ export type Database = {
           nome: string
           observacoes: string
           origem: string
+          party_id: string | null
           preferencias: string
           proximo_retorno: string | null
           telefone: string
@@ -5192,6 +5211,7 @@ export type Database = {
           nome: string
           observacoes?: string
           origem?: string
+          party_id?: string | null
           preferencias?: string
           proximo_retorno?: string | null
           telefone?: string
@@ -5211,6 +5231,7 @@ export type Database = {
           nome?: string
           observacoes?: string
           origem?: string
+          party_id?: string | null
           preferencias?: string
           proximo_retorno?: string | null
           telefone?: string
@@ -5235,6 +5256,27 @@ export type Database = {
           {
             foreignKeyName: "consultant_clients_consultora_party_id_fkey"
             columns: ["consultora_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+          {
+            foreignKeyName: "consultant_clients_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_clients_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_clients_party_id_fkey"
+            columns: ["party_id"]
             isOneToOne: false
             referencedRelation: "v_network_consultants"
             referencedColumns: ["party_id"]
@@ -21367,6 +21409,7 @@ export type Database = {
         Args: { _base_cents: number; _parcelas: number }
         Returns: number
       }
+      asaas_cartao_confirmado_varrer: { Args: never; Returns: Json }
       asaas_cartao_creditar: { Args: { _charge: string }; Returns: Json }
       asaas_charge_vincular: {
         Args: {
@@ -21976,6 +22019,8 @@ export type Database = {
         Args: { _code: string; _criar?: boolean; _interativo?: boolean }
         Returns: Json
       }
+      busca_casa: { Args: { _alvo: string; _termo: string }; Returns: boolean }
+      busca_norm: { Args: { _t: string }; Returns: string }
       can_manage_catalog: { Args: { _user_id: string }; Returns: boolean }
       can_manage_content: { Args: { _user_id: string }; Returns: boolean }
       can_manage_kits: { Args: { _user_id: string }; Returns: boolean }
@@ -22018,6 +22063,8 @@ export type Database = {
         Args: { _autenticacao?: string; _modo: string }
         Returns: Json
       }
+      cliente_cockpit: { Args: { _party: string }; Returns: Json }
+      cliente_rede_garantir: { Args: { _client: string }; Returns: string }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }
       cob_acordo_baixa: {
         Args: { _charge: string; _intent: string }
@@ -24840,6 +24887,7 @@ export type Database = {
           variant_id: string
         }[]
       }
+      pedido_cancelado_titulo: { Args: { _order: string }; Returns: boolean }
       pedido_cobranca_cancelada: {
         Args: { _erro: string; _ok: boolean; _order: string }
         Returns: Json

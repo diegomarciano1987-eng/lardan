@@ -1,4 +1,5 @@
 import * as React from "react";
+import { normalizar } from "@/lib/busca-maletas";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin, Plus, Power } from "lucide-react";
@@ -67,7 +68,7 @@ function PracasPage() {
   });
 
   const filtradas = (pracas.data ?? []).filter((p) =>
-    busca.trim() ? p.nome.toLowerCase().includes(busca.trim().toLowerCase()) : true,
+    busca.trim() ? normalizar(p.nome).includes(normalizar(busca.trim())) : true,
   );
   const totalConsultoras = (pracas.data ?? []).reduce((s, p) => s + Number(p.consultoras ?? 0), 0);
 

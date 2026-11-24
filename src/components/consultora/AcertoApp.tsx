@@ -4,6 +4,7 @@
  * 2) Fecha a pré-baixa: o app mostra total vendido, comissão pela faixa e o valor exato a pagar, e gera o Pix.
  * 3) Depois do Pix: "aguardando conferência". A Lardan confere a maleta pelo código e encerra o acerto.
  */
+import { normalizar } from "@/lib/busca-maletas";
 import { comReferencia, useReferencias } from "@/lib/referencias-pecas";
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -87,7 +88,7 @@ export function AcertoApp({ cycleId, podeComecar = true }: { cycleId: string; po
   const recebido = Number(c.recebido_lardan_cents ?? 0);
   const aguardando = Number(c.aguardando_lardan_cents ?? 0);
   const adiantado = Number(c.adiantado_consultora_cents ?? 0);
-  const lista = d.itens.filter((i) => !busca.trim() || `${refs.data?.get(i.variant_id) ?? ""} ${i.produto} ${i.variante ?? ""} ${i.sku ?? ""}`.toLowerCase().includes(busca.trim().toLowerCase()));
+  const lista = d.itens.filter((i) => !busca.trim() || `${refs.data?.get(i.variant_id) ?? ""} ${i.produto} ${i.variante ?? ""} ${i.sku ?? ""}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(normalizar(busca.trim())));
   const editavel = d.status === "aberta";
   // 0343: baixa só a partir de 10 dias antes do acerto
   const travada = baixaTravada(d);

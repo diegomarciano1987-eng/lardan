@@ -1,4 +1,4 @@
-import { buscarMaletas, comCodigo, type MaletaEncontrada } from "@/lib/busca-maletas";
+import { buscarMaletas, comCodigo, type MaletaEncontrada, normalizar } from "@/lib/busca-maletas";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -304,7 +304,7 @@ export function CommandPalette({
       (m) =>
         m.path &&
         moduleAllowed(m, caps, roles) &&
-        (t.length < 2 || m.label.toLowerCase().includes(t)),
+        (t.length < 2 || normalizar(m.label).includes(normalizar(t))),
     ).map<SearchHit>((m) => ({
       id: `mod-${m.slug}`,
       group: "Páginas e ações",

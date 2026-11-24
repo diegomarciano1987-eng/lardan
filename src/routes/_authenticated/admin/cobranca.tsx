@@ -1,4 +1,5 @@
 import * as React from "react";
+import { normalizar } from "@/lib/busca-maletas";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -67,7 +68,7 @@ function Cobranca() {
   };
   const termo = s.q.trim().toLowerCase();
   const lista = todos.filter((d) =>
-    (!termo || termo.split(/\s+/).every((p) => [d.nome, d.documento, (d.documento ?? "").replace(/\D/g, ""), d.cidade, d.uf, d.responsavel_nome, d.praca_nome, d.representante_nome, d.codigo_legado].some((x) => x?.toLowerCase().includes(p)))) &&
+    (!termo || termo.split(/\s+/).every((p) => [d.nome, d.documento, (d.documento ?? "").replace(/\D/g, ""), d.cidade, d.uf, d.responsavel_nome, d.praca_nome, d.representante_nome, d.codigo_legado].some((x) => normalizar(String(x ?? "")).includes(normalizar(p))))) &&
     (!s.praca || d.praca_id === s.praca) && (!s.rep || (s.rep === "-" ? !d.representante_id : d.representante_id === s.rep)) &&
     (!s.f || (filtroKpi[s.f]?.(d) ?? true)) &&
     (!s.etapa || d.etapa === s.etapa) &&

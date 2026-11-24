@@ -1,4 +1,5 @@
 import * as React from "react";
+import { normalizar } from "@/lib/busca-maletas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Gavel, Upload, AlertTriangle, ExternalLink } from "lucide-react";
@@ -56,7 +57,7 @@ export function ProcessosJudiciais() {
   };
 
   const hoje = Date.now();
-  const lista = (q.data ?? []).filter((p) => !termo || termo.toLowerCase().split(/\s+/).every((t) => [p.nome, p.cpf, p.numero_processo, p.cidade, p.fase, p.praca, p.responsavel, p.status_citacao, p.proxima_acao, p.tipo, p.planilha_id].some((x) => String(x ?? "").toLowerCase().includes(t))));
+  const lista = (q.data ?? []).filter((p) => !termo || normalizar(termo).split(/\s+/).every((t) => [p.nome, p.cpf, p.numero_processo, p.cidade, p.fase, p.praca, p.responsavel, p.status_citacao, p.proxima_acao, p.tipo, p.planilha_id].some((x) => normalizar(String(x ?? "")).includes(t))));
   const pendentes = (q.data ?? []).filter((p) => /pendente/i.test(p.status ?? ""));
   const atrasoProtocolo = pendentes.filter((p) => hoje - new Date(p.created_at).getTime() > DIAS_PROTOCOLO * 86400000);
   const ativos = (q.data ?? []).filter((p) => !/extint/i.test(p.status ?? ""));

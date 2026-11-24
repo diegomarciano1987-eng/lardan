@@ -22,6 +22,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { CockpitFinanceiroConsultora } from "@/components/admin/cobranca/CockpitFinanceiroConsultora";
 import { DocumentosAssinados } from "@/components/admin/cadastros/DocumentosAssinados";
+import { ComprasCliente } from "@/components/admin/cadastros/ComprasCliente";
 import { HistoricoJFlexPessoa } from "@/components/admin/historico/HistoricoPessoa";
 import { SugestaoMontagem } from "@/components/admin/historico/SugestaoMontagem";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
@@ -307,6 +308,7 @@ function FichaPessoa() {
             ...(!colab && ehColabPapel ? [["pracas-reps", "Praças e representantes"] as [string, string]] : []),
             ...(!colab ? [["historico", "Histórico"] as [string, string]] : []),
             ["historico-jflex", "Histórico SmallData"],
+            ...(d.papeis.some((p) => p.role === "cliente") ? [["compras-cliente", "Compras da cliente"] as [string, string]] : []),
             ...(caps.includes("kit.manage") ? [["historico-vendas", "Histórico de vendas"] as [string, string]] : []),
           ];
           const meio = Math.ceil(abas.length / 2);
@@ -783,6 +785,11 @@ function FichaPessoa() {
             </div>
           </Panel>
         </TabsContent>
+        {d.papeis.some((p) => p.role === "cliente") && (
+          <TabsContent value="compras-cliente" className="mt-4">
+            <ComprasCliente partyId={id} />
+          </TabsContent>
+        )}
         <TabsContent value="historico-jflex" className="mt-4">
           <HistoricoJFlexPessoa partyId={id} />
         </TabsContent>

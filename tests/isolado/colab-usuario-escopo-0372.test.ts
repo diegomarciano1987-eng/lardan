@@ -95,3 +95,13 @@ test("Acesso suspenso perde a liberação extra", async () => {
     await adm.unsafe("update colab_acessos set ativo=true where user_id=$1", [colab.uid]);
   }
 });
+
+test("0374: com a rede toda liberada, a abertura de remessa lista as praças", async () => {
+  const conta = async () => Number((await ler<{ n: number }>(colab, "select count(*)::int n from public.pracas_resumo()")).linhas[0]!.n);
+  await rpcServico("colab_escopo_definir", { _user_id: colab.uid, _rede_toda: true, _reps: [], _pracas: [], _actor: master.uid });
+  expect(await conta()).toBeGreaterThan(0);
+  expect((await ler<{ r: boolean }>(colab, "select public.kit_ve_rede() r")).linhas[0]!.r).toBe(true);
+  await rpcServico("colab_escopo_definir", { _user_id: colab.uid, _rede_toda: false, _reps: [], _pracas: [praca], _actor: master.uid });
+  expect(await conta()).toBe(1);
+  await rpcServico("colab_escopo_definir", { _user_id: colab.uid, _rede_toda: false, _reps: [], _pracas: [], _actor: master.uid });
+});

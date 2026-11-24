@@ -105,3 +105,15 @@ test("0374: com a rede toda liberada, a abertura de remessa lista as praças", a
   expect(await conta()).toBe(1);
   await rpcServico("colab_escopo_definir", { _user_id: colab.uid, _rede_toda: false, _reps: [], _pracas: [], _actor: master.uid });
 });
+
+test("0375: com a rede toda liberada, anéis, banhos e histórico SmallData abrem para consultora de outro representante", async () => {
+  const chama = (fn: string) => ler(colab, `select public.${fn}($1) r`, [consB.partyId]).then((r) => r.erro);
+  await rpcServico("colab_escopo_definir", { _user_id: colab.uid, _rede_toda: false, _reps: [repA.partyId], _pracas: [], _actor: master.uid });
+  expect(await chama("consultora_banhos_categoria")).not.toBeNull();
+  await rpcServico("colab_escopo_definir", { _user_id: colab.uid, _rede_toda: true, _reps: [], _pracas: [], _actor: master.uid });
+  expect(await chama("consultora_banhos_categoria")).toBeNull();
+  expect(await chama("consultora_aneis_tamanhos")).toBeNull();
+  const h = await ler<{ r: Record<string, unknown> }>(colab, "select public.legado_consultora_historico($1) r", [consB.partyId]);
+  expect(h.linhas[0]!.r["filtro_representante"]).toBeUndefined();
+  await rpcServico("colab_escopo_definir", { _user_id: colab.uid, _rede_toda: false, _reps: [], _pracas: [], _actor: master.uid });
+});

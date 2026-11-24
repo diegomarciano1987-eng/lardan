@@ -77,3 +77,5 @@
 - [x] Abas da ficha em 2 linhas
 - [x] Thalia e Ketllin com toda a rede + aba "Praças e representantes"
 - [x] Ficha de cliente final só com abas de cliente
+- [x] Busca de clientes rápida (sem acento/maiúsculas)
+- [x] Aba Compras da cliente: erro + consultora

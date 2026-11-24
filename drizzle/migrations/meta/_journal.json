@@ -2689,6 +2689,13 @@
       "when": 1795538877598,
       "tag": "0383_venda_cancelada_cancela_titulo_0383",
       "breakpoints": true
+    },
+    {
+      "idx": 384,
+      "version": "7",
+      "when": 1795539912372,
+      "tag": "0384_busca_rapida_compras_cliente_0384",
+      "breakpoints": true
     }
   ]
 }

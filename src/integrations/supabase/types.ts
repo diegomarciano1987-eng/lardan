@@ -14252,6 +14252,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           birth_date: string | null
+          busca_txt: string | null
           code: string
           created_at: string
           created_by: string | null
@@ -14280,6 +14281,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           birth_date?: string | null
+          busca_txt?: string | null
           code?: string
           created_at?: string
           created_by?: string | null
@@ -14308,6 +14310,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           birth_date?: string | null
+          busca_txt?: string | null
           code?: string
           created_at?: string
           created_by?: string | null
@@ -22021,6 +22024,7 @@ export type Database = {
       }
       busca_casa: { Args: { _alvo: string; _termo: string }; Returns: boolean }
       busca_norm: { Args: { _t: string }; Returns: string }
+      busca_padroes: { Args: { _t: string }; Returns: string[] }
       can_manage_catalog: { Args: { _user_id: string }; Returns: boolean }
       can_manage_content: { Args: { _user_id: string }; Returns: boolean }
       can_manage_kits: { Args: { _user_id: string }; Returns: boolean }

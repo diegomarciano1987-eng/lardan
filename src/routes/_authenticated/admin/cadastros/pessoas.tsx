@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { PageHeader, StatusBadge } from "@/components/admin/ui";
 import { DataTable } from "@/components/admin/DataTable";
 import { SmartSelect } from "@/components/premium/SmartSelect";
@@ -59,6 +59,12 @@ function PessoasPage() {
   const { papel } = Route.useSearch();
 
   const [busca, setBusca] = useState("");
+  // Busca no servidor só depois de uma pausa curta na digitação (não dispara a cada letra)
+  const [buscaFeita, setBuscaFeita] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setBuscaFeita(busca.trim()), 300);
+    return () => clearTimeout(t);
+  }, [busca]);
   const [pagina, setPagina] = useState(0);
   const [kind, setKind] = useState<PartyKind | "todos">("todos");
   const [status, setStatus] = useState<PartyStatus | "todos">("todos");
@@ -75,9 +81,10 @@ function PessoasPage() {
   const cabecalho = colab ? TITULO_POR_PAPEL["consultora"] : papel ? TITULO_POR_PAPEL[papel] : undefined;
 
   const query = useQuery({
-    queryKey: ["registry", "parties", busca, pagina, kind, role, status],
+    queryKey: ["registry", "parties", buscaFeita, pagina, kind, role, status],
     enabled: escopo.isSuccess,
-    queryFn: () => listParties({ search: busca, page: pagina, pageSize: PAGE_SIZE, kind, role, status }),
+    placeholderData: keepPreviousData,
+    queryFn: () => listParties({ search: buscaFeita, page: pagina, pageSize: PAGE_SIZE, kind, role, status }),
   });
 
   const filtro = (

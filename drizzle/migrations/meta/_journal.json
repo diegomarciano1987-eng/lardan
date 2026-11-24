@@ -2640,6 +2640,13 @@
       "when": 1795533330551,
       "tag": "0376_asaas_auditoria_0376",
       "breakpoints": true
+    },
+    {
+      "idx": 377,
+      "version": "7",
+      "when": 1795534911048,
+      "tag": "0377_microtarifas_conta_configurada_0377",
+      "breakpoints": true
     }
   ]
 }

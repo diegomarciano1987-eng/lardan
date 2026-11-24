@@ -275,7 +275,7 @@ function Microtarifas({
             <p className="font-display text-2xl font-bold text-ledger-text">Microtarifas de notificação Asaas</p>
             <p className="mt-2 text-sm text-ledger-muted">
               Será criado um lançamento a pagar por mês para ASAAS - SISTEMA PAGAMENTO, classificado em
-              Tarifas Bancárias (5.1.1) / Administrativo, já conciliado com todas as linhas abaixo.
+              Taxas de Cartão, Site e Plataformas (4.1.3) / Administrativo, já conciliado com todas as linhas abaixo.
             </p>
             <table className="mt-4 w-full text-sm">
               <thead className="text-left text-ledger-muted">

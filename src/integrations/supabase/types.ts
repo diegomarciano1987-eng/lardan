@@ -4829,6 +4829,7 @@ export type Database = {
           party_id: string
           updated_at: string
           user_id: string
+          usuario: string | null
         }
         Insert: {
           ativo?: boolean
@@ -4840,6 +4841,7 @@ export type Database = {
           party_id: string
           updated_at?: string
           user_id: string
+          usuario?: string | null
         }
         Update: {
           ativo?: boolean
@@ -4851,6 +4853,7 @@ export type Database = {
           party_id?: string
           updated_at?: string
           user_id?: string
+          usuario?: string | null
         }
         Relationships: [
           {
@@ -4889,6 +4892,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      colab_escopos: {
+        Row: {
+          atualizado_por: string | null
+          pracas: string[]
+          rede_toda: boolean
+          representantes: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          atualizado_por?: string | null
+          pracas?: string[]
+          rede_toda?: boolean
+          representantes?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          atualizado_por?: string | null
+          pracas?: string[]
+          rede_toda?: boolean
+          representantes?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       collections: {
         Row: {
@@ -22310,12 +22340,43 @@ export type Database = {
         }
         Returns: undefined
       }
+      colab_acesso_usuario_definir: {
+        Args: { _actor: string; _user_id: string; _usuario: string }
+        Returns: undefined
+      }
       colab_caps_permitidas: { Args: never; Returns: string[] }
       colab_conta: { Args: never; Returns: boolean }
       colab_cycle_ids: { Args: never; Returns: string[] }
       colab_cycle_ok: { Args: { _id: string }; Returns: boolean }
       colab_direta_party_ids: { Args: never; Returns: string[] }
       colab_direta_pode: { Args: never; Returns: boolean }
+      colab_escopo_definir: {
+        Args: {
+          _actor: string
+          _pracas: string[]
+          _rede_toda: boolean
+          _reps: string[]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      colab_escopo_meu: {
+        Args: never
+        Returns: {
+          atualizado_por: string | null
+          pracas: string[]
+          rede_toda: boolean
+          representantes: string[]
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "colab_escopos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       colab_exigir_master: { Args: { _actor: string }; Returns: undefined }
       colab_kit_reserva_criar_interna: {
         Args: {
@@ -22345,6 +22406,7 @@ export type Database = {
       colab_legacy_rep_codigos: { Args: never; Returns: number[] }
       colab_legacy_rep_ok: { Args: { _codigo: number }; Returns: boolean }
       colab_login_ok: { Args: { _user: string }; Returns: undefined }
+      colab_login_par: { Args: { _t: string }; Returns: Json }
       colab_login_reservar: { Args: { _codigo: string }; Returns: string }
       colab_meu_escopo: { Args: never; Returns: Json }
       colab_modulos_definir: {
@@ -22360,12 +22422,19 @@ export type Database = {
       colab_party_ok: { Args: { _id: string }; Returns: boolean }
       colab_praca_ids: { Args: never; Returns: string[] }
       colab_praca_ok: { Args: { _id: string }; Returns: boolean }
+      colab_pracas_extra: { Args: never; Returns: string[] }
       colab_proximo_codigo: { Args: never; Returns: string }
       colab_rede_toda: { Args: never; Returns: boolean }
       colab_rem_ids: { Args: never; Returns: string[] }
       colab_rem_ok: { Args: { _id: string }; Returns: boolean }
       colab_rep: { Args: never; Returns: string }
+      colab_reps: { Args: never; Returns: string[] }
       colab_restrita: { Args: never; Returns: boolean }
+      colab_tem_carteira: { Args: never; Returns: boolean }
+      colab_usuario_sugerir: {
+        Args: { _nome: string; _user?: string }
+        Returns: string
+      }
       comissao_faixas_leitura: { Args: never; Returns: Json }
       comissao_pelas_faixas: { Args: { _vendido_cents: number }; Returns: Json }
       confirm_stock_reservation: {

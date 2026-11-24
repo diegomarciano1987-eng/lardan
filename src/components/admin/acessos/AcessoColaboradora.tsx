@@ -22,6 +22,7 @@ export function AcessoColaboradora({ partyId }: { partyId: string }) {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["colab-acesso", partyId], queryFn: () => colabAcessoLer({ data: { party_id: partyId } }) });
   const [codigo, setCodigo] = useState("");
+  const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
   const [escolha, setEscolha] = useState<Escolha>({});
   const [fin, setFin] = useState(false);
@@ -30,6 +31,7 @@ export function AcessoColaboradora({ partyId }: { partyId: string }) {
   useEffect(() => {
     if (!q.data) return;
     setCodigo(q.data.acesso?.codigo ?? q.data.proximo);
+    setUsuario(q.data.acesso?.usuario ?? q.data.sugestaoUsuario ?? "");
     setEscolha(escolhaDeCaps(q.data.caps));
     setFin(q.data.financeiro);
   }, [q.data]);
@@ -47,7 +49,7 @@ export function AcessoColaboradora({ partyId }: { partyId: string }) {
   async function salvarAcesso() {
     setBusy(true);
     try {
-      await colabAcessoSalvar({ data: { party_id: partyId, codigo, senha } });
+      await colabAcessoSalvar({ data: { party_id: partyId, codigo, usuario, senha } });
       setSenha("");
       toast.success(d.acesso ? "Acesso atualizado." : `Acesso criado. Código ${codigo}.`);
       await qc.invalidateQueries({ queryKey: ["colab-acesso", partyId] });
@@ -90,7 +92,7 @@ export function AcessoColaboradora({ partyId }: { partyId: string }) {
           <KeyRound className="h-4 w-4" /> Código e senha da operação
         </h3>
         <p className="text-sm text-ledger-muted">
-          Ela entra em Sistema Lardan → Operação → <strong>Entrar com código</strong>, sem precisar de e-mail.
+          Ela entra em Sistema Lardan → Operação → <strong>Entrar com código</strong>, sem precisar de e-mail. Ela pode digitar o <strong>código</strong> ou o <strong>nome de acesso</strong> — a senha é a mesma.
           {d.emailReal && " Ela já tem login com o e-mail dela: o código usa a mesma senha (ela troca em “Esqueci minha senha”)."}
         </p>
         <div className="grid max-w-xl gap-3 sm:grid-cols-2">
@@ -98,6 +100,12 @@ export function AcessoColaboradora({ partyId }: { partyId: string }) {
             Código da colaboradora
             <input className={inputCls + " mt-1"} inputMode="numeric" maxLength={8} value={codigo}
               onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))} />
+          </label>
+          <label className="text-sm font-medium text-ledger-text">
+            Nome de acesso (tudo junto)
+            <input className={inputCls + " mt-1"} autoComplete="off" maxLength={30} value={usuario} aria-label="Nome de acesso"
+              onChange={(e) => setUsuario(e.target.value.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, ""))} />
+            <span className="mt-1 block text-xs text-ledger-muted">Ex.: ketllindesouza. Sem espaço e sem acento.</span>
           </label>
           {!d.emailReal && (
             <label className="text-sm font-medium text-ledger-text">

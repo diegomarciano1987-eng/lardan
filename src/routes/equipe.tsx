@@ -7,7 +7,7 @@ import { fetchMyRoles } from "@/lib/session";
 import { DESTINO, PORTAS, inicioOperacao, portaLiberada, type Porta } from "@/lib/portas";
 import { PasswordInput } from "@/components/ui/password-input";
 import { fetchMyCapabilities, fetchSouColab } from "@/lib/capabilities";
-import { entrarPorCodigo } from "@/lib/colab-acesso.functions";
+import { colabLoginPar, entrarPorCodigo } from "@/lib/colab-acesso.functions";
 
 type Busca = { area?: Porta | undefined };
 
@@ -49,6 +49,18 @@ function EquipePage() {
   const [erro, setErro] = useState<string | null>(null);
   const [modo, setModo] = useState<"codigo" | "email">("codigo");
   const [codigo, setCodigo] = useState("");
+  const [par, setPar] = useState<{ codigo: string; usuario: string | null } | null>(null);
+
+  // 0372: enquanto digita o código aparece o nome de acesso, e vice-versa
+  useEffect(() => {
+    setPar(null);
+    const t = codigo.trim();
+    if (!(/^[0-9]{3,8}$/.test(t) || /^[a-z][a-z0-9]{3,29}$/.test(t))) return;
+    const id = setTimeout(() => {
+      void colabLoginPar({ data: { t } }).then((r) => setPar(r)).catch(() => setPar(null));
+    }, 350);
+    return () => clearTimeout(id);
+  }, [codigo]);
 
   async function seguir(porta: Porta) {
     const roles = await fetchMyRoles().catch(() => []);
@@ -158,9 +170,15 @@ function EquipePage() {
             )}
             {area === "operacao" && modo === "codigo" ? (
               <div>
-                <label htmlFor="codigo" className="mb-2 block text-base font-medium text-foreground">Código da colaboradora</label>
-                <input id="codigo" required inputMode="numeric" autoComplete="username" maxLength={8} value={codigo}
-                  onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))} className={inputClass} />
+                <label htmlFor="codigo" className="mb-2 block text-base font-medium text-foreground">Código ou nome de acesso</label>
+                <input id="codigo" required autoComplete="username" autoCapitalize="none" spellCheck={false} maxLength={30} value={codigo}
+                  placeholder="Ex.: 1001 ou ketllindesouza"
+                  onChange={(e) => setCodigo(e.target.value.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, ""))} className={inputClass} />
+                {par && (
+                  <p data-testid="par-acesso" className="mt-2 rounded-md border border-primary/25 bg-primary/5 px-3 py-2 text-sm text-foreground">
+                    Código <strong>{par.codigo}</strong>{par.usuario ? <> · nome de acesso <strong>{par.usuario}</strong></> : null}
+                  </p>
+                )}
               </div>
             ) : (
             <div>

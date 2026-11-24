@@ -2605,6 +2605,20 @@
       "when": 1795460184541,
       "tag": "0371_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 372,
+      "version": "7",
+      "when": 1795523531207,
+      "tag": "0372_colab_usuario_escopo_0372",
+      "breakpoints": true
+    },
+    {
+      "idx": 373,
+      "version": "7",
+      "when": 1795523828804,
+      "tag": "0373_colab_escopo_grants_0373",
+      "breakpoints": true
     }
   ]
 }

@@ -71,3 +71,8 @@
 - [x] 62 cobranças antigas só no Asaas canceladas
 - [x] Cancelar abertas no Asaas e títulos no Lardan (pagas preservadas)
 - [ ] 2 com pagamento parcial (Melissa 8051, Benilde 5243) aguardam decisão
+
+# Colaboradoras 24/11
+- [x] Login por código ou nome de acesso (par aparece ao digitar)
+- [x] Abas da ficha em 2 linhas
+- [x] Thalia e Ketllin com toda a rede + aba "Praças e representantes"

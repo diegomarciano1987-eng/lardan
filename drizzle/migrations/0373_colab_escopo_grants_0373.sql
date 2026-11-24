@@ -1,0 +1,2 @@
+REVOKE ALL ON FUNCTION public.colab_reps(), public.colab_pracas_extra(), public.colab_tem_carteira(), public.colab_escopo_meu() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.colab_reps(), public.colab_pracas_extra(), public.colab_tem_carteira(), public.colab_escopo_meu() TO authenticated, service_role;

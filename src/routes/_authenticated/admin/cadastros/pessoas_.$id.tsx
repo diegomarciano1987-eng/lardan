@@ -27,6 +27,7 @@ import { SugestaoMontagem } from "@/components/admin/historico/SugestaoMontagem"
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import { AcessoPortalBotao } from "@/components/admin/acessos/AcessoPortalBotao";
 import { AcessoColaboradora } from "@/components/admin/acessos/AcessoColaboradora";
+import { EscopoColaboradora } from "@/components/admin/acessos/EscopoColaboradora";
 import { VendedoraInternaForm } from "@/components/admin/cadastros/VendedoraInternaForm";
 import { VinculoConsultora } from "@/components/admin/cadastros/VinculoConsultora";
 import { useCapabilities } from "@/lib/capabilities";
@@ -229,6 +230,7 @@ function FichaPessoa() {
   }
 
   const d = query.data;
+  const ehColabPapel = d.papeis.some((p) => p.role === "colaborador");
   const nome = form.display_name?.trim() || form.legal_name?.trim() || "Cadastro sem nome";
 
   return (
@@ -294,22 +296,32 @@ function FichaPessoa() {
       )}
 
       <Tabs defaultValue="resumo">
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="resumo">Resumo</TabsTrigger>
-          <TabsTrigger value="identificacao">Identificação</TabsTrigger>
-          <TabsTrigger value="contatos">Contatos</TabsTrigger>
-          <TabsTrigger value="enderecos">Endereços</TabsTrigger>
-          <TabsTrigger value="comercial">Dados comerciais</TabsTrigger>
-          <TabsTrigger value="financeiro">Financeiro / PIX</TabsTrigger>
-          {podeVerFin && <TabsTrigger value="debitos">Débitos, fiado e comissões</TabsTrigger>}
-          <TabsTrigger value="documentos">Documentos assinados</TabsTrigger>
-          <TabsTrigger value="vinculos">Vínculos</TabsTrigger>
-          <TabsTrigger value="operacao">Estoque e maletas</TabsTrigger>
-          {!colab && <TabsTrigger value="acesso">Acesso</TabsTrigger>}
-          {!colab && <TabsTrigger value="historico">Histórico</TabsTrigger>}
-          <TabsTrigger value="historico-jflex">Histórico SmallData</TabsTrigger>
-          {caps.includes("kit.manage") && <TabsTrigger value="historico-vendas">Histórico de vendas</TabsTrigger>}
-        </TabsList>
+        {(() => {
+          // 0372: abas em duas linhas organizadas (metade em cima, metade embaixo), nenhuma aba solta
+          const abas: [string, string][] = [
+            ["resumo", "Resumo"], ["identificacao", "Identificação"], ["contatos", "Contatos"], ["enderecos", "Endereços"],
+            ["comercial", "Dados comerciais"], ["financeiro", "Financeiro / PIX"],
+            ...(podeVerFin ? [["debitos", "Débitos, fiado e comissões"] as [string, string]] : []),
+            ["documentos", "Documentos assinados"], ["vinculos", "Vínculos"], ["operacao", "Estoque e maletas"],
+            ...(!colab ? [["acesso", "Acesso"] as [string, string]] : []),
+            ...(!colab && ehColabPapel ? [["pracas-reps", "Praças e representantes"] as [string, string]] : []),
+            ...(!colab ? [["historico", "Histórico"] as [string, string]] : []),
+            ["historico-jflex", "Histórico SmallData"],
+            ...(caps.includes("kit.manage") ? [["historico-vendas", "Histórico de vendas"] as [string, string]] : []),
+          ];
+          const meio = Math.ceil(abas.length / 2);
+          return (
+            <div className="space-y-1.5" data-testid="abas-ficha">
+              {[abas.slice(0, meio), abas.slice(meio)].map((linha, i) => (
+                <TabsList key={i} className="grid h-auto w-full gap-1 p-1" style={{ gridTemplateColumns: `repeat(${meio}, minmax(0, 1fr))` }}>
+                  {linha.map(([v, t]) => (
+                    <TabsTrigger key={v} value={v} className="min-h-9 whitespace-normal px-2 text-center leading-tight">{t}</TabsTrigger>
+                  ))}
+                </TabsList>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* RESUMO */}
         <TabsContent value="resumo" className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
@@ -704,6 +716,12 @@ function FichaPessoa() {
         <TabsContent value="operacao" className="mt-4">
           <MaletasDaConsultora partyId={id} />
         </TabsContent>
+
+        {!colab && ehColabPapel && <TabsContent value="pracas-reps" className="mt-4">
+          <Panel title="Praças e representantes que ela pode ver" flush>
+            <EscopoColaboradora partyId={id} />
+          </Panel>
+        </TabsContent>}
 
         {!colab && <TabsContent value="acesso" className="mt-4">
           <Panel title="Acesso ao sistema" flush>

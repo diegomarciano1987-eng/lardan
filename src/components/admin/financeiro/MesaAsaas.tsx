@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { SmartSelect } from "@/components/premium/SmartSelect";
+import { contrapartesMesa } from "@/lib/mesa-conciliacao";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Panel } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
 
-type Pend = { id: string; external_id: string; value_cents: number; liquido_cents: number; payment_date: string | null; nome: string | null; doc: string | null; descricao: string | null; party_id: string | null };
+type Pend = { id: string; external_id: string; value_cents: number; liquido_cents: number; payment_date: string | null; nome: string | null; doc: string | null; descricao: string | null; party_id: string | null; nome_pix?: string | null };
 type Cand = { installment_id: string; numero: string; descricao: string; nome: string; parcela: number; vencimento: string; saldo_cents: number; mesma_pessoa: boolean };
 
 const brl = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -21,6 +23,12 @@ export function MesaAsaas() {
   const [busca, setBusca] = useState("");
   const [pag, setPag] = useState(0);
   const [aberta, setAberta] = useState<string | null>(null);
+  // 0376: ao abrir a Mesa, liga ao cadastro os Pix cujo pagador já foi cadastrado (CPF igual ou nome único igual)
+  useEffect(() => {
+    rpc<number>("asaas_mesa_identificar", {})
+      .then((n) => { if (n > 0) { toast.success(`${n} recebimento(s) ligados ao cadastro.`); qc.invalidateQueries({ queryKey: ["asaas-mesa"] }); } })
+      .catch(() => undefined);
+  }, [qc]);
   const q = useQuery({
     queryKey: ["asaas-mesa", busca, pag],
     queryFn: () => rpc<{ total: number; soma_cents: number; itens: Pend[] }>("asaas_mesa_pendentes", { _busca: busca || null, _offset: pag * 50 }),
@@ -43,7 +51,7 @@ export function MesaAsaas() {
             <div key={p.id} className="p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-semibold">{p.nome ?? "Cliente sem cadastro"} <span className="text-ledger-muted font-normal">{p.doc}</span></p>
+                  <p className="font-semibold">{p.nome ?? (p.nome_pix ? `${p.nome_pix} (sem cadastro)` : "Cliente sem cadastro")} <span className="text-ledger-muted font-normal">{p.doc}</span></p>
                   <p className="text-xs text-ledger-muted">Pago em {dt(p.payment_date)} · {p.external_id}{p.descricao ? ` · ${p.descricao}` : ""}</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -80,6 +88,7 @@ function Resolver({ p, onDone }: { p: Pend; onDone: () => void }) {
     onSuccess: (r) => { fim(r); onDone(); }, onError: (e) => toast.error((e as Error).message) });
   return (
     <div className="mt-4 space-y-3 rounded-xl bg-surface p-4">
+      {!p.party_id && <DefinirCliente p={p} onDone={onDone} />}
       <div className="flex flex-wrap items-center gap-3">
         <input className="admin-input min-h-10 flex-1" placeholder="Buscar título de outra pessoa (nome, número, descrição)" value={b} onChange={(e) => setB(e.target.value)} />
         <button type="button" className="admin-btn min-h-10" disabled={novo.isPending || !p.party_id}
@@ -112,6 +121,34 @@ function Resolver({ p, onDone }: { p: Pend; onDone: () => void }) {
           </tbody>
         </table>
       )}
+    </div>
+  );
+}
+
+/** 0376: aponta o cadastro do pagador quando o nome do Pix vem diferente; fica registrado quem fez e o motivo. */
+function DefinirCliente({ p, onDone }: { p: Pend; onDone: () => void }) {
+  const [busca, setBusca] = useState(p.nome_pix ?? "");
+  const [party, setParty] = useState("");
+  const [motivo, setMotivo] = useState("");
+  const lista = useQuery({ queryKey: ["asaas-mesa-pessoas", busca], queryFn: () => contrapartesMesa(busca) });
+  const salvar = useMutation({
+    mutationFn: () => rpc("asaas_mesa_definir_cliente", { _charge: p.id, _party: party, _motivo: motivo }),
+    onSuccess: () => { toast.success("Cliente definido. Agora é só vincular ou criar o título."); onDone(); },
+    onError: (e) => toast.error((e as Error).message),
+  });
+  return (
+    <div className="space-y-2 rounded-lg border border-line-soft p-3">
+      <p className="text-xs font-semibold">Definir cliente {p.nome_pix ? `(Pix em nome de ${p.nome_pix})` : ""}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="min-w-72 flex-1">
+          <SmartSelect options={(lista.data ?? []).map((c) => ({ value: c.id, label: c.nome, hint: c.code }))} value={party} onChange={setParty}
+            onSearch={setBusca} loading={lista.isFetching} placeholder="Buscar o cadastro" searchPlaceholder="Nome ou código" />
+        </div>
+        <input className="admin-input min-h-10 flex-1" placeholder="Motivo (ex.: Pix em nome do marido)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+        <button type="button" className="admin-btn min-h-10" disabled={!party || motivo.trim().length < 5 || salvar.isPending} onClick={() => salvar.mutate()}>
+          Definir cliente
+        </button>
+      </div>
     </div>
   );
 }

@@ -21785,6 +21785,15 @@ export type Database = {
         Args: { _busca?: string; _charge: string }
         Returns: Json
       }
+      asaas_mesa_definir_cliente: {
+        Args: { _charge: string; _motivo: string; _party: string }
+        Returns: Json
+      }
+      asaas_mesa_identificar: { Args: never; Returns: number }
+      asaas_mesa_identificar_nucleo: {
+        Args: { _party?: string }
+        Returns: number
+      }
       asaas_mesa_novo_titulo: {
         Args: { _charge: string; _descricao?: string }
         Returns: Json
@@ -21797,6 +21806,8 @@ export type Database = {
         Args: { _charge: string; _installment: string }
         Returns: Json
       }
+      asaas_nome_norm: { Args: { _t: string }; Returns: string }
+      asaas_nome_pix: { Args: { _charge_external: string }; Returns: string }
       asaas_origin_key: { Args: { _account: string }; Returns: string }
       asaas_outra_forma_cancelamento: {
         Args: { _erro: string; _id: string; _ok: boolean }

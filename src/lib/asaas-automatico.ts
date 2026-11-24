@@ -51,7 +51,7 @@ export const desfazerAuto = (decisao: string, motivo: string) =>
   rpc<{ ok: boolean; estornos: number; titulo_cancelado: boolean }>("asaas_auto_desfazer", { _decisao: decisao, _motivo: motivo });
 
 /** "Não, é novo" numa linha com pay_: o lançamento nasce preso à cobrança do Asaas (um pay_ = um lançamento). */
-export const lancarPelaCobrancaAsaas = (
+export const lancarPelaCobrancaAsaas = async (
   line_id: string,
   payload: {
     party_id: string;
@@ -63,7 +63,22 @@ export const lancarPelaCobrancaAsaas = (
     chart_account_id?: string;
     payment_method_id?: string;
   },
-) => rpc<{ acao: string; title_id: string; linha: string }>("asaas_extrato_lancar", { _line: line_id, _payload: payload });
+) => {
+  type R = { acao: string; title_id: string; linha: string };
+  try {
+    return await rpc<R>("asaas_extrato_lancar", { _line: line_id, _payload: payload });
+  } catch (e) {
+    const pay = precisaBuscarNoAsaas((e as Error).message);
+    if (!pay) throw e;
+    // 0376: a cobrança ainda não estava no espelho; busca no Asaas na hora e tenta de novo uma vez
+    const { trazerCobrancaAoEspelho } = await import("@/lib/asaas/espelho-linha.functions");
+    await trazerCobrancaAoEspelho({ data: { paymentId: pay } });
+    return rpc<R>("asaas_extrato_lancar", { _line: line_id, _payload: payload });
+  }
+};
+
+/** Código pay_… quando o erro é "ainda não chegou ao espelho do Asaas". */
+export const precisaBuscarNoAsaas = (msg: string) => /ainda não chegou ao espelho/.test(msg) ? (msg.match(/pay_[A-Za-z0-9]+/)?.[0] ?? null) : null;
 
 /** Pagamento de cobrança Asaas na linha do extrato (pay_…), quando houver. */
 export const payDaLinha = (linha: { kind: string | null; raw: Record<string, unknown> | null }) => {
@@ -77,7 +92,7 @@ export type TipoExtratoAuto = "identificacao" | "tarifa" | "notificacoes" | "tra
 export const ROTULO_TIPO_EXTRATO: Record<TipoExtratoAuto, string> = {
   identificacao: "Título da planilha identificado",
   tarifa: "Tarifa Pix (5.1.3) e boleto (4.1.2)",
-  notificacoes: "Notificações do mês (5.1.1)",
+  notificacoes: "Notificações do mês (4.1.3)",
   negativacao: "Negativação Serasa/SPC do mês (4.1.5)",
   fatura_baixa: "Ligada à baixa já importada (mesma fatura)",
   antecipacao_par: "Cartão antecipado: recebimento e baixa da antecipação (sem lançamento)",

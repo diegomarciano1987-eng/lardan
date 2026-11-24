@@ -299,7 +299,14 @@ function FichaPessoa() {
       <Tabs defaultValue="resumo">
         {(() => {
           // 0372: abas em duas linhas organizadas (metade em cima, metade embaixo), nenhuma aba solta
-          const abas: [string, string][] = [
+          // Cliente final (só papel cliente): somente abas de cliente, nada de comissões/maletas/acesso
+          const soCliente = d.papeis.length > 0 && d.papeis.every((p) => p.role === "cliente");
+          const abasCliente: [string, string][] = [
+            ["resumo", "Resumo"], ["identificacao", "Identificação"], ["contatos", "Contatos"], ["enderecos", "Endereços"],
+            ["compras-cliente", "Compras da cliente"],
+            ...(!colab ? [["historico", "Histórico"] as [string, string]] : []),
+          ];
+          const abas: [string, string][] = soCliente ? abasCliente : [
             ["resumo", "Resumo"], ["identificacao", "Identificação"], ["contatos", "Contatos"], ["enderecos", "Endereços"],
             ["comercial", "Dados comerciais"], ["financeiro", "Financeiro / PIX"],
             ...(podeVerFin ? [["debitos", "Débitos, fiado e comissões"] as [string, string]] : []),

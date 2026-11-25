@@ -196,15 +196,27 @@ function RemessaPage() {
     onError: (e) => toast.error(traduzir(e)),
   });
 
-  // 0130: maleta sem consultora, que sai para o representante passar a uma consultora ou candidata dele
+  // 0130: maleta sem consultora, que sai para o representante passar a uma consultora ou candidata dele.
+  // Abertura em lote: cada uma é numerada pelo banco (ABERTURA N · Remessa X) e a tela não sai da remessa.
+  const [destino, setDestino] = React.useState<"consultora" | "representante">("consultora");
+  const [qtdAbertura, setQtdAbertura] = React.useState(1);
   const abrirRep = useMutation({
-    mutationFn: () => abrirMaletaRepresentante(id),
-    onSuccess: (res) => {
-      toast.success("Maleta aberta para o representante.");
-      qc.invalidateQueries({ queryKey: ["remessas"] });
-      navigate({ to: "/admin/maletas/$id", params: { id: res.cycle_id } });
+    mutationFn: async (qtd: number) => {
+      const numeros: number[] = [];
+      for (let i = 0; i < qtd; i++) {
+        const res = await abrirMaletaRepresentante(id);
+        const n = (res as { abertura_numero?: number }).abertura_numero;
+        if (typeof n === "number") numeros.push(n);
+      }
+      return numeros;
     },
-    onError: (e) => toast.error(mensagem(e)),
+    onSuccess: (nums) => {
+      const faixa = nums.length > 1 ? `ABERTURA ${nums[0]} a ${nums[nums.length - 1]}` : nums.length === 1 ? `ABERTURA ${nums[0]}` : "";
+      toast.success(`${nums.length} ${nums.length === 1 ? "maleta de abertura aberta" : "maletas de abertura abertas"} em nome do representante${faixa ? ` (${faixa})` : ""}. Já aparecem na lista abaixo para montar.`);
+      setQtdAbertura(1);
+      qc.invalidateQueries({ queryKey: ["remessas"] });
+    },
+    onError: (e) => { toast.error(mensagem(e)); qc.invalidateQueries({ queryKey: ["remessas"] }); },
   });
   const comConsultora = (maletas.data ?? []).filter((m) => m.consultora_party_id).length;
   const comRepresentante = (maletas.data ?? []).length - comConsultora;
@@ -412,6 +424,58 @@ function RemessaPage() {
 
       {podeMontar && r.status !== "fechada" && r.status !== "cancelada" && (
         <Panel title="Abrir maleta nesta remessa">
+          {r.representante && (
+            <div className="mb-4 grid gap-2" role="radiogroup" aria-label="Para quem é a maleta">
+              <span className="ledger-eyebrow">Para quem é a maleta</span>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <button type="button" role="radio" aria-checked={destino === "consultora"} onClick={() => setDestino("consultora")}
+                  className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${destino === "consultora" ? "border-2 border-primary bg-primary/15" : "border-border opacity-80 hover:bg-muted/50 hover:opacity-100"}`}>
+                  <span aria-hidden className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2 ${destino === "consultora" ? "border-primary" : "border-ledger-muted/60"}`}>{destino === "consultora" && <span className="size-2.5 rounded-full bg-primary" />}</span>
+                  <span className="grid gap-0.5">
+                    <strong className="text-sm text-ledger-text">Consultora da praça</strong>
+                    <span className="text-xs text-ledger-muted">Maleta com nome de uma consultora já cadastrada.</span>
+                  </span>
+                </button>
+                <button type="button" role="radio" aria-checked={destino === "representante"} onClick={() => setDestino("representante")}
+                  className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${destino === "representante" ? "border-2 border-primary bg-primary/15" : "border-border opacity-80 hover:bg-muted/50 hover:opacity-100"}`}>
+                  <span aria-hidden className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2 ${destino === "representante" ? "border-primary" : "border-ledger-muted/60"}`}>{destino === "representante" && <span className="size-2.5 rounded-full bg-primary" />}</span>
+                  <span className="grid gap-0.5">
+                    <strong className="text-sm text-ledger-text">Representante · maletas de abertura</strong>
+                    <span className="text-xs text-ledger-muted">Sem consultora, em custódia de {r.representante}, para ele abrir novas consultoras.</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
+          {r.representante && destino === "representante" ? (
+            <div className="flex flex-wrap items-end gap-3" aria-label="Maletas de abertura do representante">
+              <div className="grid min-w-80 flex-1 gap-1.5 text-sm">
+                <span className="ledger-eyebrow">Representante</span>
+                <div className="flex h-10 items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 text-ledger-text">
+                  <UserRound aria-hidden className="size-4 text-primary" /> <strong>{r.representante}</strong>
+                </div>
+                <span className="text-xs text-ledger-muted">
+                  {comRepresentante > 0 ? `${comRepresentante} ${comRepresentante === 1 ? "maleta de abertura já aberta" : "maletas de abertura já abertas"} nesta remessa. ` : ""}
+                  Cada uma recebe o número ABERTURA 1, 2, 3… e depois ele passa para uma consultora ou candidata pelo app dele.
+                </span>
+              </div>
+              <div className="grid gap-1.5 text-sm">
+                <span className="ledger-eyebrow">Quantidade</span>
+                <div className="flex h-10 items-center overflow-hidden rounded-lg border border-border">
+                  <button type="button" className="h-full px-3 text-lg hover:bg-muted disabled:opacity-40" aria-label="Diminuir quantidade"
+                    disabled={qtdAbertura <= 1 || abrirRep.isPending} onClick={() => setQtdAbertura((q) => Math.max(1, q - 1))}>−</button>
+                  <span className="min-w-12 text-center text-base font-semibold tabular-nums" aria-live="polite" aria-label="Quantidade de maletas">{qtdAbertura}</span>
+                  <button type="button" className="h-full px-3 text-lg hover:bg-muted disabled:opacity-40" aria-label="Aumentar quantidade"
+                    disabled={qtdAbertura >= 30 || abrirRep.isPending} onClick={() => setQtdAbertura((q) => Math.min(30, q + 1))}>+</button>
+                </div>
+              </div>
+              <button type="button" className="admin-btn admin-btn-primary" disabled={abrirRep.isPending}
+                onClick={() => { if (qtdAbertura === 1 || window.confirm(`Abrir ${qtdAbertura} maletas de abertura em nome do representante ${r.representante}?`)) abrirRep.mutate(qtdAbertura); }}>
+                <UserRound aria-hidden className="size-4" />
+                {abrirRep.isPending ? "Abrindo…" : `Abrir ${qtdAbertura} ${qtdAbertura === 1 ? "maleta de abertura" : "maletas de abertura"}`}
+              </button>
+            </div>
+          ) : (
           <div className="flex flex-wrap items-end gap-3">
             <label className="grid min-w-80 flex-1 gap-1.5 text-sm">
               <span className="ledger-eyebrow">Consultora da praça {r.praca}</span>
@@ -448,13 +512,8 @@ function RemessaPage() {
                 <button type="button" className="admin-btn" disabled={liberar.isPending || motivoLib.trim().length < 5} onClick={() => liberar.mutate()}>Liberar e abrir</button>
               </div>
             )}
-            {r.representante && (
-              <button type="button" className="admin-btn" disabled={abrirRep.isPending} onClick={() => abrirRep.mutate()}
-                title="A maleta sai sem consultora para o representante; ele passa para uma consultora ou candidata da carteira dele.">
-                <UserRound aria-hidden className="size-4" /> {abrirRep.isPending ? "Abrindo…" : `Maleta para o representante ${r.representante}`}
-              </button>
-            )}
           </div>
+          )}
         </Panel>
       )}
 

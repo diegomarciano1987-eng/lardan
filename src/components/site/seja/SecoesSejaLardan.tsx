@@ -1,3 +1,4 @@
+import type { PaginaLocal } from "@/lib/revenda-local";
 import { Link } from "@tanstack/react-router";
 import heroAsset from "@/assets/lardan-mulher-caixa-seja.jpg.asset.json";
 import vidaRealAsset from "@/assets/lardan-consultora-vida-real.webp.asset.json";
@@ -18,7 +19,7 @@ import { CinematicTitle } from "./CinematicTitle";
 
 /* ---------------------------------- Hero --------------------------------- */
 
-export function SejaHero() {
+export function SejaHero({ local }: { local?: PaginaLocal | undefined }) {
   return (
     <section
       id="inicio"
@@ -32,7 +33,7 @@ export function SejaHero() {
           id="seja-lardan-titulo"
           className="text-4xl leading-[1.05] text-foreground md:text-6xl"
         >
-          Todo brilho começa em um lar.
+          {local?.heading ?? "Todo brilho começa em um lar."}
         </CinematicTitle>
         <div className="rose-rule mt-8 w-20" />
         <p className="seja-promise mt-7 font-display text-[clamp(1.375rem,2.6vw,2rem)] leading-[1.25] tracking-tight">
@@ -48,12 +49,10 @@ export function SejaHero() {
           <span>consultoras já brilharam com a Lardan.</span>
         </p>
         <p className="mt-7 max-w-lg text-base leading-relaxed text-muted-foreground">
-          Seja Consultora Lardan e tenha produto, tecnologia, treinamento e ferramentas para
-          transformar relacionamento em negócio.
+          {local?.intro ?? "Seja Consultora Lardan e tenha produto, tecnologia, treinamento e ferramentas para transformar relacionamento em negócio."}
         </p>
         <p className="mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
-          Você não precisa fazer tudo sozinha. A Lardan coloca uma estrutura inteira ao seu lado
-          para ajudar você a vender, organizar e crescer.
+          {local?.detail ?? "Você não precisa fazer tudo sozinha. A Lardan coloca uma estrutura inteira ao seu lado para ajudar você a vender, organizar e crescer."}
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-5">
           <a href="#candidatura" className="btn-premium">

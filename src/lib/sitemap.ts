@@ -1,3 +1,4 @@
+import { paginasLocais } from "./revenda-local";
 /**
  * LARDAN — construção do sitemap a partir da MESMA fonte de verdade de domínio.
  *
@@ -45,6 +46,7 @@ export const CABECALHOS_XML = {
 const ESTATICAS: UrlSitemap[] = [
   { loc: "/" },
   { loc: "/seja-lardan" },
+  ...paginasLocais.map(({ path }) => ({ loc: path })),
   { loc: "/a-lardan" },
   { loc: "/semijoias" },
   { loc: "/contato" },

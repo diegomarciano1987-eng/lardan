@@ -37,7 +37,14 @@ import { Route as PerguntasSobreRevendaDeSemijoiasRouteImport } from './routes/p
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PulseirasRouteImport } from './routes/pulseiras'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as RendaExtraComSemijoiasEmLondrinaRouteImport } from './routes/renda-extra-com-semijoias-em-londrina'
 import { Route as RendaExtraComVendasRouteImport } from './routes/renda-extra-com-vendas'
+import { Route as RevendaDeSemijoiasEmApucaranaRouteImport } from './routes/revenda-de-semijoias-em-apucarana'
+import { Route as RevendaDeSemijoiasEmArapongasRouteImport } from './routes/revenda-de-semijoias-em-arapongas'
+import { Route as RevendaDeSemijoiasEmCambeRouteImport } from './routes/revenda-de-semijoias-em-cambe'
+import { Route as RevendaDeSemijoiasEmIbiporaRouteImport } from './routes/revenda-de-semijoias-em-ibipora'
+import { Route as RevendaDeSemijoiasEmLondrinaRouteImport } from './routes/revenda-de-semijoias-em-londrina'
+import { Route as RevendaDeSemijoiasEmRolandiaRouteImport } from './routes/revenda-de-semijoias-em-rolandia'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
 import { Route as SemijoiaFolheadoOuBijuteriaRouteImport } from './routes/semijoia-folheado-ou-bijuteria'
@@ -289,11 +296,53 @@ const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   path: '/redefinir-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RendaExtraComSemijoiasEmLondrinaRoute =
+  RendaExtraComSemijoiasEmLondrinaRouteImport.update({
+    id: '/renda-extra-com-semijoias-em-londrina',
+    path: '/renda-extra-com-semijoias-em-londrina',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RendaExtraComVendasRoute = RendaExtraComVendasRouteImport.update({
   id: '/renda-extra-com-vendas',
   path: '/renda-extra-com-vendas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RevendaDeSemijoiasEmApucaranaRoute =
+  RevendaDeSemijoiasEmApucaranaRouteImport.update({
+    id: '/revenda-de-semijoias-em-apucarana',
+    path: '/revenda-de-semijoias-em-apucarana',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const RevendaDeSemijoiasEmArapongasRoute =
+  RevendaDeSemijoiasEmArapongasRouteImport.update({
+    id: '/revenda-de-semijoias-em-arapongas',
+    path: '/revenda-de-semijoias-em-arapongas',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const RevendaDeSemijoiasEmCambeRoute =
+  RevendaDeSemijoiasEmCambeRouteImport.update({
+    id: '/revenda-de-semijoias-em-cambe',
+    path: '/revenda-de-semijoias-em-cambe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const RevendaDeSemijoiasEmIbiporaRoute =
+  RevendaDeSemijoiasEmIbiporaRouteImport.update({
+    id: '/revenda-de-semijoias-em-ibipora',
+    path: '/revenda-de-semijoias-em-ibipora',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const RevendaDeSemijoiasEmLondrinaRoute =
+  RevendaDeSemijoiasEmLondrinaRouteImport.update({
+    id: '/revenda-de-semijoias-em-londrina',
+    path: '/revenda-de-semijoias-em-londrina',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const RevendaDeSemijoiasEmRolandiaRoute =
+  RevendaDeSemijoiasEmRolandiaRouteImport.update({
+    id: '/revenda-de-semijoias-em-rolandia',
+    path: '/revenda-de-semijoias-em-rolandia',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
@@ -938,7 +987,14 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof PrivacidadeRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/renda-extra-com-semijoias-em-londrina': typeof RendaExtraComSemijoiasEmLondrinaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
+  '/revenda-de-semijoias-em-apucarana': typeof RevendaDeSemijoiasEmApucaranaRoute
+  '/revenda-de-semijoias-em-arapongas': typeof RevendaDeSemijoiasEmArapongasRoute
+  '/revenda-de-semijoias-em-cambe': typeof RevendaDeSemijoiasEmCambeRoute
+  '/revenda-de-semijoias-em-ibipora': typeof RevendaDeSemijoiasEmIbiporaRoute
+  '/revenda-de-semijoias-em-londrina': typeof RevendaDeSemijoiasEmLondrinaRoute
+  '/revenda-de-semijoias-em-rolandia': typeof RevendaDeSemijoiasEmRolandiaRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoia-folheado-ou-bijuteria': typeof SemijoiaFolheadoOuBijuteriaRoute
@@ -1076,7 +1132,14 @@ export interface FileRoutesByTo {
   '/privacidade': typeof PrivacidadeRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/renda-extra-com-semijoias-em-londrina': typeof RendaExtraComSemijoiasEmLondrinaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
+  '/revenda-de-semijoias-em-apucarana': typeof RevendaDeSemijoiasEmApucaranaRoute
+  '/revenda-de-semijoias-em-arapongas': typeof RevendaDeSemijoiasEmArapongasRoute
+  '/revenda-de-semijoias-em-cambe': typeof RevendaDeSemijoiasEmCambeRoute
+  '/revenda-de-semijoias-em-ibipora': typeof RevendaDeSemijoiasEmIbiporaRoute
+  '/revenda-de-semijoias-em-londrina': typeof RevendaDeSemijoiasEmLondrinaRoute
+  '/revenda-de-semijoias-em-rolandia': typeof RevendaDeSemijoiasEmRolandiaRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoia-folheado-ou-bijuteria': typeof SemijoiaFolheadoOuBijuteriaRoute
@@ -1214,7 +1277,14 @@ export interface FileRoutesById {
   '/privacidade': typeof PrivacidadeRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/renda-extra-com-semijoias-em-londrina': typeof RendaExtraComSemijoiasEmLondrinaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
+  '/revenda-de-semijoias-em-apucarana': typeof RevendaDeSemijoiasEmApucaranaRoute
+  '/revenda-de-semijoias-em-arapongas': typeof RevendaDeSemijoiasEmArapongasRoute
+  '/revenda-de-semijoias-em-cambe': typeof RevendaDeSemijoiasEmCambeRoute
+  '/revenda-de-semijoias-em-ibipora': typeof RevendaDeSemijoiasEmIbiporaRoute
+  '/revenda-de-semijoias-em-londrina': typeof RevendaDeSemijoiasEmLondrinaRoute
+  '/revenda-de-semijoias-em-rolandia': typeof RevendaDeSemijoiasEmRolandiaRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoia-folheado-ou-bijuteria': typeof SemijoiaFolheadoOuBijuteriaRoute
@@ -1354,7 +1424,14 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/pulseiras'
     | '/redefinir-senha'
+    | '/renda-extra-com-semijoias-em-londrina'
     | '/renda-extra-com-vendas'
+    | '/revenda-de-semijoias-em-apucarana'
+    | '/revenda-de-semijoias-em-arapongas'
+    | '/revenda-de-semijoias-em-cambe'
+    | '/revenda-de-semijoias-em-ibipora'
+    | '/revenda-de-semijoias-em-londrina'
+    | '/revenda-de-semijoias-em-rolandia'
     | '/robots.txt'
     | '/seja-lardan'
     | '/semijoia-folheado-ou-bijuteria'
@@ -1492,7 +1569,14 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/pulseiras'
     | '/redefinir-senha'
+    | '/renda-extra-com-semijoias-em-londrina'
     | '/renda-extra-com-vendas'
+    | '/revenda-de-semijoias-em-apucarana'
+    | '/revenda-de-semijoias-em-arapongas'
+    | '/revenda-de-semijoias-em-cambe'
+    | '/revenda-de-semijoias-em-ibipora'
+    | '/revenda-de-semijoias-em-londrina'
+    | '/revenda-de-semijoias-em-rolandia'
     | '/robots.txt'
     | '/seja-lardan'
     | '/semijoia-folheado-ou-bijuteria'
@@ -1629,7 +1713,14 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/pulseiras'
     | '/redefinir-senha'
+    | '/renda-extra-com-semijoias-em-londrina'
     | '/renda-extra-com-vendas'
+    | '/revenda-de-semijoias-em-apucarana'
+    | '/revenda-de-semijoias-em-arapongas'
+    | '/revenda-de-semijoias-em-cambe'
+    | '/revenda-de-semijoias-em-ibipora'
+    | '/revenda-de-semijoias-em-londrina'
+    | '/revenda-de-semijoias-em-rolandia'
     | '/robots.txt'
     | '/seja-lardan'
     | '/semijoia-folheado-ou-bijuteria'
@@ -1769,7 +1860,14 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   PulseirasRoute: typeof PulseirasRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  RendaExtraComSemijoiasEmLondrinaRoute: typeof RendaExtraComSemijoiasEmLondrinaRoute
   RendaExtraComVendasRoute: typeof RendaExtraComVendasRoute
+  RevendaDeSemijoiasEmApucaranaRoute: typeof RevendaDeSemijoiasEmApucaranaRoute
+  RevendaDeSemijoiasEmArapongasRoute: typeof RevendaDeSemijoiasEmArapongasRoute
+  RevendaDeSemijoiasEmCambeRoute: typeof RevendaDeSemijoiasEmCambeRoute
+  RevendaDeSemijoiasEmIbiporaRoute: typeof RevendaDeSemijoiasEmIbiporaRoute
+  RevendaDeSemijoiasEmLondrinaRoute: typeof RevendaDeSemijoiasEmLondrinaRoute
+  RevendaDeSemijoiasEmRolandiaRoute: typeof RevendaDeSemijoiasEmRolandiaRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SejaLardanRoute: typeof SejaLardanRoute
   SemijoiaFolheadoOuBijuteriaRoute: typeof SemijoiaFolheadoOuBijuteriaRoute
@@ -2007,11 +2105,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RedefinirSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/renda-extra-com-semijoias-em-londrina': {
+      id: '/renda-extra-com-semijoias-em-londrina'
+      path: '/renda-extra-com-semijoias-em-londrina'
+      fullPath: '/renda-extra-com-semijoias-em-londrina'
+      preLoaderRoute: typeof RendaExtraComSemijoiasEmLondrinaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/renda-extra-com-vendas': {
       id: '/renda-extra-com-vendas'
       path: '/renda-extra-com-vendas'
       fullPath: '/renda-extra-com-vendas'
       preLoaderRoute: typeof RendaExtraComVendasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenda-de-semijoias-em-apucarana': {
+      id: '/revenda-de-semijoias-em-apucarana'
+      path: '/revenda-de-semijoias-em-apucarana'
+      fullPath: '/revenda-de-semijoias-em-apucarana'
+      preLoaderRoute: typeof RevendaDeSemijoiasEmApucaranaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenda-de-semijoias-em-arapongas': {
+      id: '/revenda-de-semijoias-em-arapongas'
+      path: '/revenda-de-semijoias-em-arapongas'
+      fullPath: '/revenda-de-semijoias-em-arapongas'
+      preLoaderRoute: typeof RevendaDeSemijoiasEmArapongasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenda-de-semijoias-em-cambe': {
+      id: '/revenda-de-semijoias-em-cambe'
+      path: '/revenda-de-semijoias-em-cambe'
+      fullPath: '/revenda-de-semijoias-em-cambe'
+      preLoaderRoute: typeof RevendaDeSemijoiasEmCambeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenda-de-semijoias-em-ibipora': {
+      id: '/revenda-de-semijoias-em-ibipora'
+      path: '/revenda-de-semijoias-em-ibipora'
+      fullPath: '/revenda-de-semijoias-em-ibipora'
+      preLoaderRoute: typeof RevendaDeSemijoiasEmIbiporaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenda-de-semijoias-em-londrina': {
+      id: '/revenda-de-semijoias-em-londrina'
+      path: '/revenda-de-semijoias-em-londrina'
+      fullPath: '/revenda-de-semijoias-em-londrina'
+      preLoaderRoute: typeof RevendaDeSemijoiasEmLondrinaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenda-de-semijoias-em-rolandia': {
+      id: '/revenda-de-semijoias-em-rolandia'
+      path: '/revenda-de-semijoias-em-rolandia'
+      fullPath: '/revenda-de-semijoias-em-rolandia'
+      preLoaderRoute: typeof RevendaDeSemijoiasEmRolandiaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -3020,7 +3167,14 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   PulseirasRoute: PulseirasRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
+  RendaExtraComSemijoiasEmLondrinaRoute: RendaExtraComSemijoiasEmLondrinaRoute,
   RendaExtraComVendasRoute: RendaExtraComVendasRoute,
+  RevendaDeSemijoiasEmApucaranaRoute: RevendaDeSemijoiasEmApucaranaRoute,
+  RevendaDeSemijoiasEmArapongasRoute: RevendaDeSemijoiasEmArapongasRoute,
+  RevendaDeSemijoiasEmCambeRoute: RevendaDeSemijoiasEmCambeRoute,
+  RevendaDeSemijoiasEmIbiporaRoute: RevendaDeSemijoiasEmIbiporaRoute,
+  RevendaDeSemijoiasEmLondrinaRoute: RevendaDeSemijoiasEmLondrinaRoute,
+  RevendaDeSemijoiasEmRolandiaRoute: RevendaDeSemijoiasEmRolandiaRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SejaLardanRoute: SejaLardanRoute,
   SemijoiaFolheadoOuBijuteriaRoute: SemijoiaFolheadoOuBijuteriaRoute,

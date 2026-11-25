@@ -2745,6 +2745,13 @@
       "when": 1795638979715,
       "tag": "0391_ativas_contam_aprovadas_0391",
       "breakpoints": true
+    },
+    {
+      "idx": 392,
+      "version": "7",
+      "when": 1795639837323,
+      "tag": "0392_variante_sku_sufixo_0392",
+      "breakpoints": true
     }
   ]
 }

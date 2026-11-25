@@ -25548,6 +25548,14 @@ export type Database = {
         Args: { _motivo: string; _remessa: string }
         Returns: Json
       }
+      remessa_rep_sugerido: {
+        Args: { _praca: string }
+        Returns: {
+          consultoras: number
+          nome: string
+          party_id: string
+        }[]
+      }
       remessa_tipo_envio_definir: {
         Args: { _remessa: string; _tipo: string }
         Returns: Json

@@ -23,7 +23,7 @@ import { AcertosPainel } from "@/components/admin/maletas/AcertosPainel";
 import { NovaMaletaDireta } from "@/components/admin/maletas/NovaMaletaDireta";
 import { RelatorioAcertos } from "@/components/admin/maletas/RelatorioAcertos";
 import { MaletasIndividuais } from "@/components/admin/maletas/MaletasIndividuais";
-import { STATUS_REMESSA, buscarMaletasIndividuais, buscarRemessas, criarRemessa, dataBR, definirEnvioRemessa, isoDia, type RemessaCard, type TipoEnvio } from "@/lib/remessas";
+import { STATUS_REMESSA, buscarMaletasIndividuais, buscarRemessas, criarRemessa, representanteSugerido, dataBR, definirEnvioRemessa, isoDia, type RemessaCard, type TipoEnvio } from "@/lib/remessas";
 
 export const Route = createFileRoute("/_authenticated/admin/maletas")({
   component: RemessasPage,
@@ -86,10 +86,15 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
   const [deposito, setDeposito] = React.useState("");
   const [envio, setEnvio] = React.useState<TipoEnvio>("pessoal");
   React.useEffect(() => { if (escopo.data?.carteira) setRepresentante(escopo.data.representante ?? ""); }, [escopo.data]);
+  // 0385: ao escolher a praça, sugere o representante que atende a maioria das consultoras dela.
+  const sugerido = useQuery({ queryKey: ["remessas", "rep-sugerido", praca], queryFn: () => representanteSugerido(praca), enabled: aberto && !!praca && !escopo.data?.carteira });
+  React.useEffect(() => { if (sugerido.data?.party_id) setRepresentante(sugerido.data.party_id); }, [sugerido.data]);
 
   const pracas = useQuery({ queryKey: ["remessas", "pracas"], queryFn: buscarPracas, enabled: aberto });
   const reps = useQuery({ queryKey: ["remessas", "reps", escopo.data?.carteira, escopo.data?.representante, buscaR], queryFn: () => buscarRepresentantes(buscaR), enabled: aberto && escopo.isSuccess });
-  const representantes = escopo.data?.carteira ? (escopo.data.representante ? [{ value: escopo.data.representante, label: escopo.data.nome ?? "Representante vinculado" }] : []) : reps.data ?? [];
+  const representantesBase = escopo.data?.carteira ? (escopo.data.representante ? [{ value: escopo.data.representante, label: escopo.data.nome ?? "Representante vinculado" }] : []) : reps.data ?? [];
+  const representantes = sugerido.data && !representantesBase.some((o) => o.value === sugerido.data?.party_id)
+    ? [{ value: sugerido.data.party_id, label: sugerido.data.nome, hint: "Representante da praça" }, ...representantesBase] : representantesBase;
   const depositos = useQuery({ queryKey: ["remessas", "depositos"], queryFn: buscarDepositos, enabled: aberto });
   React.useEffect(() => {
     const principal = depositos.data?.find((d) => d.label.startsWith("DEP-01")) ?? (depositos.data?.length === 1 ? depositos.data[0] : undefined);

@@ -229,3 +229,11 @@ export interface MaletaIndividual {
 export type SituacaoIndividual = "abertas" | "encerradas" | "todas";
 export const buscarMaletasIndividuais = (busca: string, situacao: SituacaoIndividual) =>
   rpc<MaletaIndividual[]>("maletas_individuais_buscar", { _busca: busca.trim() || null, _situacao: situacao });
+
+/** 0385: representante que atende a maioria das consultoras da praça (sugestão na Nova remessa). */
+export const representanteSugerido = async (praca: string) => {
+  const { data, error } = await supabase.rpc("remessa_rep_sugerido", { _praca: praca });
+  if (error) throw error;
+  const l = (data ?? []) as { party_id: string; nome: string; consultoras: number }[];
+  return l[0] ?? null;
+};

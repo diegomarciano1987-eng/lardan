@@ -2696,6 +2696,13 @@
       "when": 1795539912372,
       "tag": "0384_busca_rapida_compras_cliente_0384",
       "breakpoints": true
+    },
+    {
+      "idx": 385,
+      "version": "7",
+      "when": 1795614560315,
+      "tag": "0385_remessa_rep_sugerido_0385",
+      "breakpoints": true
     }
   ]
 }

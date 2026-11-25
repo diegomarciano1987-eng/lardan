@@ -24,8 +24,10 @@ import { Route as ChallengesRouteImport } from './routes/challenges'
 import { Route as ColaresRouteImport } from './routes/colares'
 import { Route as ColecoesRouteImport } from './routes/colecoes'
 import { Route as ComoComecarAVenderSemijoiasRouteImport } from './routes/como-comecar-a-vender-semijoias'
+import { Route as ComoComecarAVenderSemijoiasEmLondrinaRouteImport } from './routes/como-comecar-a-vender-semijoias-em-londrina'
 import { Route as ComoCuidarDeSemijoiasRouteImport } from './routes/como-cuidar-de-semijoias'
 import { Route as ComoVenderSemijoiasPeloWhatsappRouteImport } from './routes/como-vender-semijoias-pelo-whatsapp'
+import { Route as ComoVenderSemijoiasPeloWhatsappEmLondrinaRouteImport } from './routes/como-vender-semijoias-pelo-whatsapp-em-londrina'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as CuidadosRouteImport } from './routes/cuidados'
 import { Route as EquipeRouteImport } from './routes/equipe'
@@ -34,11 +36,13 @@ import { Route as LojaRouteImport } from './routes/loja'
 import { Route as MinhaContaRouteImport } from './routes/minha-conta'
 import { Route as PdvRouteImport } from './routes/pdv'
 import { Route as PerguntasSobreRevendaDeSemijoiasRouteImport } from './routes/perguntas-sobre-revenda-de-semijoias'
+import { Route as PerguntasSobreRevendaDeSemijoiasEmLondrinaRouteImport } from './routes/perguntas-sobre-revenda-de-semijoias-em-londrina'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PulseirasRouteImport } from './routes/pulseiras'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as RendaExtraComSemijoiasEmLondrinaRouteImport } from './routes/renda-extra-com-semijoias-em-londrina'
 import { Route as RendaExtraComVendasRouteImport } from './routes/renda-extra-com-vendas'
+import { Route as RendaExtraComVendasEmLondrinaRouteImport } from './routes/renda-extra-com-vendas-em-londrina'
 import { Route as RevendaDeSemijoiasEmApucaranaRouteImport } from './routes/revenda-de-semijoias-em-apucarana'
 import { Route as RevendaDeSemijoiasEmArapongasRouteImport } from './routes/revenda-de-semijoias-em-arapongas'
 import { Route as RevendaDeSemijoiasEmCambeRouteImport } from './routes/revenda-de-semijoias-em-cambe'
@@ -49,6 +53,7 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SejaLardanRouteImport } from './routes/seja-lardan'
 import { Route as SemijoiaFolheadoOuBijuteriaRouteImport } from './routes/semijoia-folheado-ou-bijuteria'
 import { Route as SemijoiasConsignadasParaRevendaRouteImport } from './routes/semijoias-consignadas-para-revenda'
+import { Route as SemijoiasConsignadasParaRevendaEmLondrinaRouteImport } from './routes/semijoias-consignadas-para-revenda-em-londrina'
 import { Route as SitemapPagesDotxmlRouteImport } from './routes/sitemap-pages[.]xml'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as WebinarRegistrationRouteImport } from './routes/webinar-registration'
@@ -60,6 +65,7 @@ import { Route as CandidaturaTokenRouteImport } from './routes/candidatura.$toke
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as DCodigoRouteImport } from './routes/d.$codigo'
 import { Route as GuiaSemijoiaFolheadoOuBijuteriaRouteImport } from './routes/guia.semijoia-folheado-ou-bijuteria'
+import { Route as GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRouteImport } from './routes/guia.semijoia-folheado-ou-bijuteria-em-londrina'
 import { Route as IndicacaoCodigoRouteImport } from './routes/indicacao.$codigo'
 import { Route as PedidoTokenRouteImport } from './routes/pedido.$token'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
@@ -229,6 +235,12 @@ const ComoComecarAVenderSemijoiasRoute =
     path: '/como-comecar-a-vender-semijoias',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ComoComecarAVenderSemijoiasEmLondrinaRoute =
+  ComoComecarAVenderSemijoiasEmLondrinaRouteImport.update({
+    id: '/como-comecar-a-vender-semijoias-em-londrina',
+    path: '/como-comecar-a-vender-semijoias-em-londrina',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ComoCuidarDeSemijoiasRoute = ComoCuidarDeSemijoiasRouteImport.update({
   id: '/como-cuidar-de-semijoias',
   path: '/como-cuidar-de-semijoias',
@@ -238,6 +250,12 @@ const ComoVenderSemijoiasPeloWhatsappRoute =
   ComoVenderSemijoiasPeloWhatsappRouteImport.update({
     id: '/como-vender-semijoias-pelo-whatsapp',
     path: '/como-vender-semijoias-pelo-whatsapp',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ComoVenderSemijoiasPeloWhatsappEmLondrinaRoute =
+  ComoVenderSemijoiasPeloWhatsappEmLondrinaRouteImport.update({
+    id: '/como-vender-semijoias-pelo-whatsapp-em-londrina',
+    path: '/como-vender-semijoias-pelo-whatsapp-em-londrina',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ContatoRoute = ContatoRouteImport.update({
@@ -281,6 +299,12 @@ const PerguntasSobreRevendaDeSemijoiasRoute =
     path: '/perguntas-sobre-revenda-de-semijoias',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PerguntasSobreRevendaDeSemijoiasEmLondrinaRoute =
+  PerguntasSobreRevendaDeSemijoiasEmLondrinaRouteImport.update({
+    id: '/perguntas-sobre-revenda-de-semijoias-em-londrina',
+    path: '/perguntas-sobre-revenda-de-semijoias-em-londrina',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
@@ -307,6 +331,12 @@ const RendaExtraComVendasRoute = RendaExtraComVendasRouteImport.update({
   path: '/renda-extra-com-vendas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RendaExtraComVendasEmLondrinaRoute =
+  RendaExtraComVendasEmLondrinaRouteImport.update({
+    id: '/renda-extra-com-vendas-em-londrina',
+    path: '/renda-extra-com-vendas-em-londrina',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RevendaDeSemijoiasEmApucaranaRoute =
   RevendaDeSemijoiasEmApucaranaRouteImport.update({
     id: '/revenda-de-semijoias-em-apucarana',
@@ -365,6 +395,12 @@ const SemijoiasConsignadasParaRevendaRoute =
     path: '/semijoias-consignadas-para-revenda',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SemijoiasConsignadasParaRevendaEmLondrinaRoute =
+  SemijoiasConsignadasParaRevendaEmLondrinaRouteImport.update({
+    id: '/semijoias-consignadas-para-revenda-em-londrina',
+    path: '/semijoias-consignadas-para-revenda-em-londrina',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const SitemapPagesDotxmlRoute = SitemapPagesDotxmlRouteImport.update({
   id: '/sitemap-pages.xml',
   path: '/sitemap-pages.xml',
@@ -421,6 +457,12 @@ const GuiaSemijoiaFolheadoOuBijuteriaRoute =
   GuiaSemijoiaFolheadoOuBijuteriaRouteImport.update({
     id: '/guia/semijoia-folheado-ou-bijuteria',
     path: '/guia/semijoia-folheado-ou-bijuteria',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute =
+  GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRouteImport.update({
+    id: '/guia/semijoia-folheado-ou-bijuteria-em-londrina',
+    path: '/guia/semijoia-folheado-ou-bijuteria-em-londrina',
     getParentRoute: () => rootRouteImport,
   } as any)
 const IndicacaoCodigoRoute = IndicacaoCodigoRouteImport.update({
@@ -974,8 +1016,10 @@ export interface FileRoutesByFullPath {
   '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
   '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
+  '/como-comecar-a-vender-semijoias-em-londrina': typeof ComoComecarAVenderSemijoiasEmLondrinaRoute
   '/como-cuidar-de-semijoias': typeof ComoCuidarDeSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
+  '/como-vender-semijoias-pelo-whatsapp-em-londrina': typeof ComoVenderSemijoiasPeloWhatsappEmLondrinaRoute
   '/contato': typeof ContatoRoute
   '/cuidados': typeof CuidadosRoute
   '/equipe': typeof EquipeRoute
@@ -984,11 +1028,13 @@ export interface FileRoutesByFullPath {
   '/minha-conta': typeof MinhaContaRoute
   '/pdv': typeof PdvRoute
   '/perguntas-sobre-revenda-de-semijoias': typeof PerguntasSobreRevendaDeSemijoiasRoute
+  '/perguntas-sobre-revenda-de-semijoias-em-londrina': typeof PerguntasSobreRevendaDeSemijoiasEmLondrinaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-semijoias-em-londrina': typeof RendaExtraComSemijoiasEmLondrinaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
+  '/renda-extra-com-vendas-em-londrina': typeof RendaExtraComVendasEmLondrinaRoute
   '/revenda-de-semijoias-em-apucarana': typeof RevendaDeSemijoiasEmApucaranaRoute
   '/revenda-de-semijoias-em-arapongas': typeof RevendaDeSemijoiasEmArapongasRoute
   '/revenda-de-semijoias-em-cambe': typeof RevendaDeSemijoiasEmCambeRoute
@@ -999,6 +1045,7 @@ export interface FileRoutesByFullPath {
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoia-folheado-ou-bijuteria': typeof SemijoiaFolheadoOuBijuteriaRoute
   '/semijoias-consignadas-para-revenda': typeof SemijoiasConsignadasParaRevendaRoute
+  '/semijoias-consignadas-para-revenda-em-londrina': typeof SemijoiasConsignadasParaRevendaEmLondrinaRoute
   '/sitemap-pages.xml': typeof SitemapPagesDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/webinar-registration': typeof WebinarRegistrationRoute
@@ -1010,6 +1057,7 @@ export interface FileRoutesByFullPath {
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
+  '/guia/semijoia-folheado-ou-bijuteria-em-londrina': typeof GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
   '/pedido/$token': typeof PedidoTokenRoute
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -1119,8 +1167,10 @@ export interface FileRoutesByTo {
   '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
   '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
+  '/como-comecar-a-vender-semijoias-em-londrina': typeof ComoComecarAVenderSemijoiasEmLondrinaRoute
   '/como-cuidar-de-semijoias': typeof ComoCuidarDeSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
+  '/como-vender-semijoias-pelo-whatsapp-em-londrina': typeof ComoVenderSemijoiasPeloWhatsappEmLondrinaRoute
   '/contato': typeof ContatoRoute
   '/cuidados': typeof CuidadosRoute
   '/equipe': typeof EquipeRoute
@@ -1129,11 +1179,13 @@ export interface FileRoutesByTo {
   '/minha-conta': typeof MinhaContaRoute
   '/pdv': typeof PdvRoute
   '/perguntas-sobre-revenda-de-semijoias': typeof PerguntasSobreRevendaDeSemijoiasRoute
+  '/perguntas-sobre-revenda-de-semijoias-em-londrina': typeof PerguntasSobreRevendaDeSemijoiasEmLondrinaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-semijoias-em-londrina': typeof RendaExtraComSemijoiasEmLondrinaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
+  '/renda-extra-com-vendas-em-londrina': typeof RendaExtraComVendasEmLondrinaRoute
   '/revenda-de-semijoias-em-apucarana': typeof RevendaDeSemijoiasEmApucaranaRoute
   '/revenda-de-semijoias-em-arapongas': typeof RevendaDeSemijoiasEmArapongasRoute
   '/revenda-de-semijoias-em-cambe': typeof RevendaDeSemijoiasEmCambeRoute
@@ -1144,6 +1196,7 @@ export interface FileRoutesByTo {
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoia-folheado-ou-bijuteria': typeof SemijoiaFolheadoOuBijuteriaRoute
   '/semijoias-consignadas-para-revenda': typeof SemijoiasConsignadasParaRevendaRoute
+  '/semijoias-consignadas-para-revenda-em-londrina': typeof SemijoiasConsignadasParaRevendaEmLondrinaRoute
   '/sitemap-pages.xml': typeof SitemapPagesDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/webinar-registration': typeof WebinarRegistrationRoute
@@ -1154,6 +1207,7 @@ export interface FileRoutesByTo {
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
+  '/guia/semijoia-folheado-ou-bijuteria-em-londrina': typeof GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
   '/pedido/$token': typeof PedidoTokenRoute
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -1264,8 +1318,10 @@ export interface FileRoutesById {
   '/colares': typeof ColaresRoute
   '/colecoes': typeof ColecoesRoute
   '/como-comecar-a-vender-semijoias': typeof ComoComecarAVenderSemijoiasRoute
+  '/como-comecar-a-vender-semijoias-em-londrina': typeof ComoComecarAVenderSemijoiasEmLondrinaRoute
   '/como-cuidar-de-semijoias': typeof ComoCuidarDeSemijoiasRoute
   '/como-vender-semijoias-pelo-whatsapp': typeof ComoVenderSemijoiasPeloWhatsappRoute
+  '/como-vender-semijoias-pelo-whatsapp-em-londrina': typeof ComoVenderSemijoiasPeloWhatsappEmLondrinaRoute
   '/contato': typeof ContatoRoute
   '/cuidados': typeof CuidadosRoute
   '/equipe': typeof EquipeRoute
@@ -1274,11 +1330,13 @@ export interface FileRoutesById {
   '/minha-conta': typeof MinhaContaRoute
   '/pdv': typeof PdvRoute
   '/perguntas-sobre-revenda-de-semijoias': typeof PerguntasSobreRevendaDeSemijoiasRoute
+  '/perguntas-sobre-revenda-de-semijoias-em-londrina': typeof PerguntasSobreRevendaDeSemijoiasEmLondrinaRoute
   '/privacidade': typeof PrivacidadeRoute
   '/pulseiras': typeof PulseirasRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/renda-extra-com-semijoias-em-londrina': typeof RendaExtraComSemijoiasEmLondrinaRoute
   '/renda-extra-com-vendas': typeof RendaExtraComVendasRoute
+  '/renda-extra-com-vendas-em-londrina': typeof RendaExtraComVendasEmLondrinaRoute
   '/revenda-de-semijoias-em-apucarana': typeof RevendaDeSemijoiasEmApucaranaRoute
   '/revenda-de-semijoias-em-arapongas': typeof RevendaDeSemijoiasEmArapongasRoute
   '/revenda-de-semijoias-em-cambe': typeof RevendaDeSemijoiasEmCambeRoute
@@ -1289,6 +1347,7 @@ export interface FileRoutesById {
   '/seja-lardan': typeof SejaLardanRoute
   '/semijoia-folheado-ou-bijuteria': typeof SemijoiaFolheadoOuBijuteriaRoute
   '/semijoias-consignadas-para-revenda': typeof SemijoiasConsignadasParaRevendaRoute
+  '/semijoias-consignadas-para-revenda-em-londrina': typeof SemijoiasConsignadasParaRevendaEmLondrinaRoute
   '/sitemap-pages.xml': typeof SitemapPagesDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/webinar-registration': typeof WebinarRegistrationRoute
@@ -1300,6 +1359,7 @@ export interface FileRoutesById {
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
+  '/guia/semijoia-folheado-ou-bijuteria-em-londrina': typeof GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
   '/pedido/$token': typeof PedidoTokenRoute
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -1411,8 +1471,10 @@ export interface FileRouteTypes {
     | '/colares'
     | '/colecoes'
     | '/como-comecar-a-vender-semijoias'
+    | '/como-comecar-a-vender-semijoias-em-londrina'
     | '/como-cuidar-de-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
+    | '/como-vender-semijoias-pelo-whatsapp-em-londrina'
     | '/contato'
     | '/cuidados'
     | '/equipe'
@@ -1421,11 +1483,13 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/pdv'
     | '/perguntas-sobre-revenda-de-semijoias'
+    | '/perguntas-sobre-revenda-de-semijoias-em-londrina'
     | '/privacidade'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-semijoias-em-londrina'
     | '/renda-extra-com-vendas'
+    | '/renda-extra-com-vendas-em-londrina'
     | '/revenda-de-semijoias-em-apucarana'
     | '/revenda-de-semijoias-em-arapongas'
     | '/revenda-de-semijoias-em-cambe'
@@ -1436,6 +1500,7 @@ export interface FileRouteTypes {
     | '/seja-lardan'
     | '/semijoia-folheado-ou-bijuteria'
     | '/semijoias-consignadas-para-revenda'
+    | '/semijoias-consignadas-para-revenda-em-londrina'
     | '/sitemap-pages.xml'
     | '/sitemap.xml'
     | '/webinar-registration'
@@ -1447,6 +1512,7 @@ export interface FileRouteTypes {
     | '/convite/$token'
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
+    | '/guia/semijoia-folheado-ou-bijuteria-em-londrina'
     | '/indicacao/$codigo'
     | '/pedido/$token'
     | '/produto/$slug'
@@ -1556,8 +1622,10 @@ export interface FileRouteTypes {
     | '/colares'
     | '/colecoes'
     | '/como-comecar-a-vender-semijoias'
+    | '/como-comecar-a-vender-semijoias-em-londrina'
     | '/como-cuidar-de-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
+    | '/como-vender-semijoias-pelo-whatsapp-em-londrina'
     | '/contato'
     | '/cuidados'
     | '/equipe'
@@ -1566,11 +1634,13 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/pdv'
     | '/perguntas-sobre-revenda-de-semijoias'
+    | '/perguntas-sobre-revenda-de-semijoias-em-londrina'
     | '/privacidade'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-semijoias-em-londrina'
     | '/renda-extra-com-vendas'
+    | '/renda-extra-com-vendas-em-londrina'
     | '/revenda-de-semijoias-em-apucarana'
     | '/revenda-de-semijoias-em-arapongas'
     | '/revenda-de-semijoias-em-cambe'
@@ -1581,6 +1651,7 @@ export interface FileRouteTypes {
     | '/seja-lardan'
     | '/semijoia-folheado-ou-bijuteria'
     | '/semijoias-consignadas-para-revenda'
+    | '/semijoias-consignadas-para-revenda-em-londrina'
     | '/sitemap-pages.xml'
     | '/sitemap.xml'
     | '/webinar-registration'
@@ -1591,6 +1662,7 @@ export interface FileRouteTypes {
     | '/convite/$token'
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
+    | '/guia/semijoia-folheado-ou-bijuteria-em-londrina'
     | '/indicacao/$codigo'
     | '/pedido/$token'
     | '/produto/$slug'
@@ -1700,8 +1772,10 @@ export interface FileRouteTypes {
     | '/colares'
     | '/colecoes'
     | '/como-comecar-a-vender-semijoias'
+    | '/como-comecar-a-vender-semijoias-em-londrina'
     | '/como-cuidar-de-semijoias'
     | '/como-vender-semijoias-pelo-whatsapp'
+    | '/como-vender-semijoias-pelo-whatsapp-em-londrina'
     | '/contato'
     | '/cuidados'
     | '/equipe'
@@ -1710,11 +1784,13 @@ export interface FileRouteTypes {
     | '/minha-conta'
     | '/pdv'
     | '/perguntas-sobre-revenda-de-semijoias'
+    | '/perguntas-sobre-revenda-de-semijoias-em-londrina'
     | '/privacidade'
     | '/pulseiras'
     | '/redefinir-senha'
     | '/renda-extra-com-semijoias-em-londrina'
     | '/renda-extra-com-vendas'
+    | '/renda-extra-com-vendas-em-londrina'
     | '/revenda-de-semijoias-em-apucarana'
     | '/revenda-de-semijoias-em-arapongas'
     | '/revenda-de-semijoias-em-cambe'
@@ -1725,6 +1801,7 @@ export interface FileRouteTypes {
     | '/seja-lardan'
     | '/semijoia-folheado-ou-bijuteria'
     | '/semijoias-consignadas-para-revenda'
+    | '/semijoias-consignadas-para-revenda-em-londrina'
     | '/sitemap-pages.xml'
     | '/sitemap.xml'
     | '/webinar-registration'
@@ -1736,6 +1813,7 @@ export interface FileRouteTypes {
     | '/convite/$token'
     | '/d/$codigo'
     | '/guia/semijoia-folheado-ou-bijuteria'
+    | '/guia/semijoia-folheado-ou-bijuteria-em-londrina'
     | '/indicacao/$codigo'
     | '/pedido/$token'
     | '/produto/$slug'
@@ -1847,8 +1925,10 @@ export interface RootRouteChildren {
   ColaresRoute: typeof ColaresRoute
   ColecoesRoute: typeof ColecoesRoute
   ComoComecarAVenderSemijoiasRoute: typeof ComoComecarAVenderSemijoiasRoute
+  ComoComecarAVenderSemijoiasEmLondrinaRoute: typeof ComoComecarAVenderSemijoiasEmLondrinaRoute
   ComoCuidarDeSemijoiasRoute: typeof ComoCuidarDeSemijoiasRoute
   ComoVenderSemijoiasPeloWhatsappRoute: typeof ComoVenderSemijoiasPeloWhatsappRoute
+  ComoVenderSemijoiasPeloWhatsappEmLondrinaRoute: typeof ComoVenderSemijoiasPeloWhatsappEmLondrinaRoute
   ContatoRoute: typeof ContatoRoute
   CuidadosRoute: typeof CuidadosRoute
   EquipeRoute: typeof EquipeRoute
@@ -1857,11 +1937,13 @@ export interface RootRouteChildren {
   MinhaContaRoute: typeof MinhaContaRoute
   PdvRoute: typeof PdvRoute
   PerguntasSobreRevendaDeSemijoiasRoute: typeof PerguntasSobreRevendaDeSemijoiasRoute
+  PerguntasSobreRevendaDeSemijoiasEmLondrinaRoute: typeof PerguntasSobreRevendaDeSemijoiasEmLondrinaRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   PulseirasRoute: typeof PulseirasRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   RendaExtraComSemijoiasEmLondrinaRoute: typeof RendaExtraComSemijoiasEmLondrinaRoute
   RendaExtraComVendasRoute: typeof RendaExtraComVendasRoute
+  RendaExtraComVendasEmLondrinaRoute: typeof RendaExtraComVendasEmLondrinaRoute
   RevendaDeSemijoiasEmApucaranaRoute: typeof RevendaDeSemijoiasEmApucaranaRoute
   RevendaDeSemijoiasEmArapongasRoute: typeof RevendaDeSemijoiasEmArapongasRoute
   RevendaDeSemijoiasEmCambeRoute: typeof RevendaDeSemijoiasEmCambeRoute
@@ -1872,6 +1954,7 @@ export interface RootRouteChildren {
   SejaLardanRoute: typeof SejaLardanRoute
   SemijoiaFolheadoOuBijuteriaRoute: typeof SemijoiaFolheadoOuBijuteriaRoute
   SemijoiasConsignadasParaRevendaRoute: typeof SemijoiasConsignadasParaRevendaRoute
+  SemijoiasConsignadasParaRevendaEmLondrinaRoute: typeof SemijoiasConsignadasParaRevendaEmLondrinaRoute
   SitemapPagesDotxmlRoute: typeof SitemapPagesDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WebinarRegistrationRoute: typeof WebinarRegistrationRoute
@@ -1879,6 +1962,7 @@ export interface RootRouteChildren {
   ConviteTokenRoute: typeof ConviteTokenRoute
   DCodigoRoute: typeof DCodigoRoute
   GuiaSemijoiaFolheadoOuBijuteriaRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
+  GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute
   IndicacaoCodigoRoute: typeof IndicacaoCodigoRoute
   PedidoTokenRoute: typeof PedidoTokenRoute
   ProdutoSlugRoute: typeof ProdutoSlugRoute
@@ -2014,6 +2098,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComoComecarAVenderSemijoiasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/como-comecar-a-vender-semijoias-em-londrina': {
+      id: '/como-comecar-a-vender-semijoias-em-londrina'
+      path: '/como-comecar-a-vender-semijoias-em-londrina'
+      fullPath: '/como-comecar-a-vender-semijoias-em-londrina'
+      preLoaderRoute: typeof ComoComecarAVenderSemijoiasEmLondrinaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/como-cuidar-de-semijoias': {
       id: '/como-cuidar-de-semijoias'
       path: '/como-cuidar-de-semijoias'
@@ -2026,6 +2117,13 @@ declare module '@tanstack/react-router' {
       path: '/como-vender-semijoias-pelo-whatsapp'
       fullPath: '/como-vender-semijoias-pelo-whatsapp'
       preLoaderRoute: typeof ComoVenderSemijoiasPeloWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-vender-semijoias-pelo-whatsapp-em-londrina': {
+      id: '/como-vender-semijoias-pelo-whatsapp-em-londrina'
+      path: '/como-vender-semijoias-pelo-whatsapp-em-londrina'
+      fullPath: '/como-vender-semijoias-pelo-whatsapp-em-londrina'
+      preLoaderRoute: typeof ComoVenderSemijoiasPeloWhatsappEmLondrinaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contato': {
@@ -2084,6 +2182,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PerguntasSobreRevendaDeSemijoiasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/perguntas-sobre-revenda-de-semijoias-em-londrina': {
+      id: '/perguntas-sobre-revenda-de-semijoias-em-londrina'
+      path: '/perguntas-sobre-revenda-de-semijoias-em-londrina'
+      fullPath: '/perguntas-sobre-revenda-de-semijoias-em-londrina'
+      preLoaderRoute: typeof PerguntasSobreRevendaDeSemijoiasEmLondrinaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacidade': {
       id: '/privacidade'
       path: '/privacidade'
@@ -2117,6 +2222,13 @@ declare module '@tanstack/react-router' {
       path: '/renda-extra-com-vendas'
       fullPath: '/renda-extra-com-vendas'
       preLoaderRoute: typeof RendaExtraComVendasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/renda-extra-com-vendas-em-londrina': {
+      id: '/renda-extra-com-vendas-em-londrina'
+      path: '/renda-extra-com-vendas-em-londrina'
+      fullPath: '/renda-extra-com-vendas-em-londrina'
+      preLoaderRoute: typeof RendaExtraComVendasEmLondrinaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/revenda-de-semijoias-em-apucarana': {
@@ -2187,6 +2299,13 @@ declare module '@tanstack/react-router' {
       path: '/semijoias-consignadas-para-revenda'
       fullPath: '/semijoias-consignadas-para-revenda'
       preLoaderRoute: typeof SemijoiasConsignadasParaRevendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/semijoias-consignadas-para-revenda-em-londrina': {
+      id: '/semijoias-consignadas-para-revenda-em-londrina'
+      path: '/semijoias-consignadas-para-revenda-em-londrina'
+      fullPath: '/semijoias-consignadas-para-revenda-em-londrina'
+      preLoaderRoute: typeof SemijoiasConsignadasParaRevendaEmLondrinaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap-pages.xml': {
@@ -2264,6 +2383,13 @@ declare module '@tanstack/react-router' {
       path: '/guia/semijoia-folheado-ou-bijuteria'
       fullPath: '/guia/semijoia-folheado-ou-bijuteria'
       preLoaderRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guia/semijoia-folheado-ou-bijuteria-em-londrina': {
+      id: '/guia/semijoia-folheado-ou-bijuteria-em-londrina'
+      path: '/guia/semijoia-folheado-ou-bijuteria-em-londrina'
+      fullPath: '/guia/semijoia-folheado-ou-bijuteria-em-londrina'
+      preLoaderRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/indicacao/$codigo': {
@@ -3154,8 +3280,12 @@ const rootRouteChildren: RootRouteChildren = {
   ColaresRoute: ColaresRoute,
   ColecoesRoute: ColecoesRoute,
   ComoComecarAVenderSemijoiasRoute: ComoComecarAVenderSemijoiasRoute,
+  ComoComecarAVenderSemijoiasEmLondrinaRoute:
+    ComoComecarAVenderSemijoiasEmLondrinaRoute,
   ComoCuidarDeSemijoiasRoute: ComoCuidarDeSemijoiasRoute,
   ComoVenderSemijoiasPeloWhatsappRoute: ComoVenderSemijoiasPeloWhatsappRoute,
+  ComoVenderSemijoiasPeloWhatsappEmLondrinaRoute:
+    ComoVenderSemijoiasPeloWhatsappEmLondrinaRoute,
   ContatoRoute: ContatoRoute,
   CuidadosRoute: CuidadosRoute,
   EquipeRoute: EquipeRoute,
@@ -3164,11 +3294,14 @@ const rootRouteChildren: RootRouteChildren = {
   MinhaContaRoute: MinhaContaRoute,
   PdvRoute: PdvRoute,
   PerguntasSobreRevendaDeSemijoiasRoute: PerguntasSobreRevendaDeSemijoiasRoute,
+  PerguntasSobreRevendaDeSemijoiasEmLondrinaRoute:
+    PerguntasSobreRevendaDeSemijoiasEmLondrinaRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   PulseirasRoute: PulseirasRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   RendaExtraComSemijoiasEmLondrinaRoute: RendaExtraComSemijoiasEmLondrinaRoute,
   RendaExtraComVendasRoute: RendaExtraComVendasRoute,
+  RendaExtraComVendasEmLondrinaRoute: RendaExtraComVendasEmLondrinaRoute,
   RevendaDeSemijoiasEmApucaranaRoute: RevendaDeSemijoiasEmApucaranaRoute,
   RevendaDeSemijoiasEmArapongasRoute: RevendaDeSemijoiasEmArapongasRoute,
   RevendaDeSemijoiasEmCambeRoute: RevendaDeSemijoiasEmCambeRoute,
@@ -3179,6 +3312,8 @@ const rootRouteChildren: RootRouteChildren = {
   SejaLardanRoute: SejaLardanRoute,
   SemijoiaFolheadoOuBijuteriaRoute: SemijoiaFolheadoOuBijuteriaRoute,
   SemijoiasConsignadasParaRevendaRoute: SemijoiasConsignadasParaRevendaRoute,
+  SemijoiasConsignadasParaRevendaEmLondrinaRoute:
+    SemijoiasConsignadasParaRevendaEmLondrinaRoute,
   SitemapPagesDotxmlRoute: SitemapPagesDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WebinarRegistrationRoute: WebinarRegistrationRoute,
@@ -3186,6 +3321,8 @@ const rootRouteChildren: RootRouteChildren = {
   ConviteTokenRoute: ConviteTokenRoute,
   DCodigoRoute: DCodigoRoute,
   GuiaSemijoiaFolheadoOuBijuteriaRoute: GuiaSemijoiaFolheadoOuBijuteriaRoute,
+  GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute:
+    GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute,
   IndicacaoCodigoRoute: IndicacaoCodigoRoute,
   PedidoTokenRoute: PedidoTokenRoute,
   ProdutoSlugRoute: ProdutoSlugRoute,

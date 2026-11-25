@@ -1,3 +1,4 @@
+import { GUIAS_LONDRINA } from "./guias-londrina";
 import type { Guia } from "./tipos";
 import { GUIA_RENDA_EXTRA } from "./guia-renda-extra";
 import { GUIA_COMECAR_VENDER } from "./guia-comecar-vender";
@@ -24,6 +25,7 @@ const GUIAS_CONSULTORA: Guia[] = [
 /** Todos os guias publicados (sitemap e llms.txt). */
 export const GUIAS: Guia[] = [
   ...GUIAS_CONSULTORA,
+  ...GUIAS_LONDRINA,
   GUIA_PERGUNTAS_REVENDA,
   GUIA_CUIDADOS,
   GUIA_COMPARATIVO_SEMIJOIAS,

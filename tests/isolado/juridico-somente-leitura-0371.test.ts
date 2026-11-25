@@ -47,7 +47,8 @@ describe("Jurídico somente leitura (0371)", () => {
 
   test("2. não move, não registra, não promete, não simula, não lança acordo judicial", async () => {
     const tentativas: [string, Record<string, unknown>][] = [
-      ["cob_mover_etapa", { _party: devedora, _etapa: "acompanhamento" }],
+      ["cob_mover_etapa", { _party: devedora, _etapa: "pausado" }],
+      ["cob_mover_etapa", { _party: devedora, _etapa: "acompanhamento", _responsavel: devedora }],
       ["cob_registrar", { _party: devedora, _tipo: "ligacao", _resultado: "sucesso", _obs: "x", _parcelas: [] }],
       ["cob_promessa_criar", { _party: devedora, _valor: 1000, _data: "2030-01-01", _parcelas: [], _obs: "x" }],
       ["cob_tarefa_criar", { _party: devedora, _titulo: "x", _vence: "2030-01-01" }],
@@ -65,6 +66,20 @@ describe("Jurídico somente leitura (0371)", () => {
     expect(casos[0]).toMatchObject({ etapa: "em_contato", suspensa: false });
     const inter = (await adm.unsafe("select count(*)::int n from cob_interacoes where party_id = $1", [devedora])) as { n: number }[];
     expect(inter[0]!.n).toBe(1);
+  });
+
+  test("2b. (0387) move o card do Kanban, com histórico e auditoria, e vê a lista de ações atrasadas", async () => {
+    const m = await rpc(jur, "cob_mover_etapa", { _party: devedora, _etapa: "acompanhamento" });
+    expect(m.erro).toBeNull();
+    const c = (await adm.unsafe("select etapa from cob_casos where party_id = $1", [devedora])) as { etapa: string }[];
+    expect(c[0]!.etapa).toBe("acompanhamento");
+    const au = (await adm.unsafe("select count(*)::int n from audit_logs where action='cob_mover_etapa_juridico' and entity_id = $1", [devedora])) as { n: number }[];
+    expect(au[0]!.n).toBe(1);
+    await rpc(jur, "cob_mover_etapa", { _party: devedora, _etapa: "em_contato" });
+    const l = await ler(jur, "select count(*)::int n from public.cob_acoes_atrasadas_lista()");
+    expect(l.erro).toBeNull();
+    const negado = await ler(nada, "select count(*)::int n from public.cob_acoes_atrasadas_lista()");
+    expect(negado.ok).toBe(false);
   });
 
   test("3. não ganha nenhum outro módulo", async () => {

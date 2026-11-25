@@ -14,6 +14,7 @@ import { ReativacoesPendentes } from "@/components/admin/cobranca/ReativacoesPen
 import { AcordosAtrasados } from "@/components/admin/cobranca/AcordosAtrasados";
 import { AvisoSomenteLeitura } from "@/components/admin/cobranca/AvisoSomenteLeitura";
 import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
+import { AcoesAtrasadas } from "@/components/admin/cobranca/AcoesAtrasadas";
 import { carteira, kpisCobranca, moverEtapa, cobConfig, salvarConfig, type CobConfig, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
 
 const busca = z.object({
@@ -76,7 +77,8 @@ function Cobranca() {
   ).sort((a, b) => Number(b.vencido_cents) - Number(a.vencido_cents));
 
   const mover = async (d: Devedor, e: Etapa) => {
-    if (leitura) { toast.error("Acesso somente para consulta."); return; }
+    // Jurídico (0387): só move o card entre as colunas do Kanban; o banco confere de novo.
+    if (leitura && !["em_contato", "em_negociacao", "acompanhamento"].includes(e)) { toast.error("Acesso somente para consulta."); return; }
     try { await moverEtapa(d.party_id, e); qc.invalidateQueries({ queryKey: ["cob"] }); toast.success(`${d.nome}: ${rotuloEtapa(e)}. O financeiro não muda.`); }
     catch (err) { toast.error(err instanceof Error ? err.message : "Não moveu."); }
   };
@@ -113,7 +115,8 @@ function Cobranca() {
 
       <KpisCobranca filtro={s.f} onFiltro={(f) => set({ f })} />
 
-      {s.f === "acordos_atrasados" ? <AcordosAtrasados onFechar={() => set({ f: "" })} /> : <>
+      {s.f === "acordos_atrasados" ? <AcordosAtrasados onFechar={() => set({ f: "" })} />
+        : s.f === "atrasadas" ? <AcoesAtrasadas onFechar={() => set({ f: "" })} /> : <>
       {s.v !== "bi" && s.v !== "perdidas" && s.v !== "processos" && s.v !== "historica" && (
         <div className="flex flex-wrap gap-2">
           <BuscaLocal valor={s.q} onBuscar={(q) => set({ q })} />
@@ -133,7 +136,7 @@ function Cobranca() {
         : q.error ? <p className="text-sm text-destructive">{(q.error as Error).message}</p>
         : lista.length === 0 && s.v !== "bi" ? <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">Sem dados para estes filtros.</p>
         : s.v === "lista" ? <Lista lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
-        : s.v === "kanban" ? <KanbanCobranca lista={lista} onMover={mover} somenteLeitura={leitura} />
+        : s.v === "kanban" ? <KanbanCobranca lista={lista} onMover={mover} somenteLeitura={leitura} podeMover />
         : s.v === "agenda" ? <Agenda lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
         : <BI todos={todos} />}
       </>}

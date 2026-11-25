@@ -87,6 +87,6 @@
 - [x] E1. Conciliar recebimento judicial com alvará do acordo, sem duplicar título/recebimento
 - [ ] E1. Jheniffer: R$ 302,63 + R$ 10,38 de juros prontos na Mesa — aguarda a confirmação final do Financeiro
 - [x] E1. Testes isolados, conferência autenticada e imagem com texto comercial
-- [ ] E2. Danilo mover cards somente; origem das ações vencidas; coluna de acordos atrasados
+- [x] E2. Danilo mover cards somente; origem das ações vencidas; coluna de acordos atrasados
 - [ ] E3. Banho na ficha, valores herdados de variantes e foto específica da variante
 - [ ] E4. Cadastros existentes aprovados e consultoras ativas somente com maleta em mãos, sem bloquear montagem

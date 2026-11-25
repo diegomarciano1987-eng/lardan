@@ -2710,6 +2710,27 @@
       "when": 1795636965989,
       "tag": "0386_conciliacao_judicial_estorno_0385",
       "breakpoints": true
+    },
+    {
+      "idx": 387,
+      "version": "7",
+      "when": 1795637962754,
+      "tag": "0387_cob_juridico_mover_e_acoes_atrasadas_0387",
+      "breakpoints": true
+    },
+    {
+      "idx": 388,
+      "version": "7",
+      "when": 1795638086606,
+      "tag": "0388_cob_juridico_mover_auditoria_0388",
+      "breakpoints": true
+    },
+    {
+      "idx": 389,
+      "version": "7",
+      "when": 1795638172571,
+      "tag": "0389_cob_acoes_atrasadas_resumo_0389",
+      "breakpoints": true
     }
   ]
 }

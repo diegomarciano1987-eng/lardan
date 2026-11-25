@@ -22070,6 +22070,25 @@ export type Database = {
       cliente_cockpit: { Args: { _party: string }; Returns: Json }
       cliente_rede_garantir: { Args: { _client: string }; Returns: string }
       cnpj_is_valid: { Args: { c: string }; Returns: boolean }
+      cob_acoes_atrasadas_lista: {
+        Args: never
+        Returns: {
+          codigo_legado: string
+          da_regua: number
+          dias: number
+          etapa: string
+          manuais: number
+          nome: string
+          party_id: string
+          praca_nome: string
+          proxima_acao: string
+          representante_nome: string
+          tarefas_vencidas: number
+          titulo: string
+          vencido_cents: number
+        }[]
+      }
+      cob_acoes_atrasadas_resumo: { Args: never; Returns: Json }
       cob_acordo_baixa: {
         Args: { _charge: string; _intent: string }
         Returns: Json

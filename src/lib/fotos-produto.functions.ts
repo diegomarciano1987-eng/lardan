@@ -58,13 +58,17 @@ export const capasDasPecas = createServerFn({ method: "POST" })
     if (!prods.length) return resultado;
     const { data: pm } = await supabaseAdmin
       .from("product_media")
-      .select("product_id, position, media_assets(storage_path)")
+      .select("product_id, variant_id, position, media_assets(storage_path)")
       .in("product_id", prods)
       .order("position", { ascending: true });
+    // Capa do produto = primeira foto; capa da variante = primeira foto ligada a ela (product_media.variant_id),
+    // senão a do produto. Chave "v:<id>" separa variantes de produtos.
     const capa: Record<string, string> = {};
     (pm ?? []).forEach((r) => {
       const ma = r.media_assets as unknown as { storage_path: string } | null;
-      if (ma?.storage_path && !capa[r.product_id]) capa[r.product_id] = ma.storage_path;
+      if (!ma?.storage_path) return;
+      if (!capa[r.product_id]) capa[r.product_id] = ma.storage_path;
+      if (r.variant_id && varParaProd[r.variant_id] && !capa[`v:${r.variant_id}`]) capa[`v:${r.variant_id}`] = ma.storage_path;
     });
     const caminhos = Array.from(new Set(Object.values(capa)));
     if (!caminhos.length) return resultado;
@@ -74,7 +78,11 @@ export const capasDasPecas = createServerFn({ method: "POST" })
       const c = caminhos[i];
       if (c && u.signedUrl) porCaminho[c] = u.signedUrl;
     });
-    for (const [p, c] of Object.entries(capa)) if (porCaminho[c]) resultado[p] = porCaminho[c];
-    for (const [v, p] of Object.entries(varParaProd)) if (resultado[p]) resultado[v] = resultado[p];
+    for (const [p, c] of Object.entries(capa)) if (!p.startsWith("v:") && porCaminho[c]) resultado[p] = porCaminho[c];
+    for (const [v, p] of Object.entries(varParaProd)) {
+      const propria = capa[`v:${v}`];
+      const url = (propria && porCaminho[propria]) || resultado[p];
+      if (url) resultado[v] = url;
+    }
     return resultado;
   });

@@ -177,6 +177,12 @@ function ProdutoDetalhe() {
   });
 
   /** Custos vigentes de uma variante, lidos pela consulta autorizada. */
+  /** Valor próprio da variante; se vazio, o herdado do produto com a marca "do produto" (nunca inventado). */
+  const herdado = (proprio: string | null | undefined, doProduto: string | null | undefined) =>
+    proprio ? proprio : doProduto ? (
+      <span title="Herdado do produto">{doProduto} <span className="text-[0.625rem] font-normal uppercase text-ledger-muted">do produto</span></span>
+    ) : "—";
+
   const custoDaVariante = (varianteId: string) =>
     (custosVigentes.data?.variantes ?? []).find((v) => v.id === varianteId) ?? null;
 
@@ -459,15 +465,15 @@ function ProdutoDetalhe() {
                               {v.label}
                             </span>
                           </td>
-                          <td className="num py-2 pr-4 font-semibold text-ledger-text">{v.reference_code ?? "—"}</td>
+                          <td className="num py-2 pr-4 font-semibold text-ledger-text">{herdado(v.reference_code, v.is_default ? produto.data?.reference_code : null)}</td>
                           <td className="num py-2 pr-4 font-semibold text-ledger-text">{v.barcode ?? "—"}</td>
-                          <td className="num py-2 pr-4">{v.ncm ?? "—"}</td>
+                          <td className="num py-2 pr-4">{herdado(v.ncm, produto.data?.ncm)}</td>
                           <td className="num py-2 pr-4 text-right">
-                            {v.price_cents == null ? "—" : formatBRLFromCents(v.price_cents)}
+                            {v.price_cents != null ? formatBRLFromCents(v.price_cents) : herdado(null, produto.data?.price_cents == null ? null : formatBRLFromCents(produto.data.price_cents))}
                           </td>
                           {podeVerCustos ? (
                             <td className="num py-2 pr-4 text-right">
-                              {custo ? formatBRLFromCents(custo.cost_cents) : "—"}
+                              {custo ? formatBRLFromCents(custo.cost_cents) : herdado(null, custosVigentes.data?.produto?.cost_price_cents == null ? null : formatBRLFromCents(custosVigentes.data.produto.cost_price_cents))}
                             </td>
                           ) : null}
                           <td className="py-2">

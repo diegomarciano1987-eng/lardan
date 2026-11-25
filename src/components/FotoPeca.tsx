@@ -94,13 +94,14 @@ export function FotoPeca({
   const [diretaFalhou, setDiretaFalhou] = React.useState(false);
   React.useEffect(() => setDiretaFalhou(false), [mediaId]);
   const direta = mediaId && !diretaFalhou ? `/api/public/midia/${mediaId}` : null;
-  // Se a foto pública falhar, busca pelo caminho interno seguro.
+  // Se a foto pública falhar, busca pelo caminho interno seguro. A variante vem primeiro:
+  // o servidor devolve a foto ligada a ela e, sem foto própria, a capa do produto.
   const chave: Chave | null = direta
     ? null
-    : productId
-      ? { tipo: "p", id: productId }
-      : variantId
-        ? { tipo: "v", id: variantId }
+    : variantId
+      ? { tipo: "v", id: variantId }
+      : productId
+        ? { tipo: "p", id: productId }
         : null;
   const lote = useCapa(chave);
   const url = direta ?? lote;

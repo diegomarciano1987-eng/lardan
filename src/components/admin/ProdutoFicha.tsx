@@ -84,7 +84,9 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
   const salvandoRef = useRef(false);
 
   const produto = useQuery({
-    queryKey: ["produto", id],
+    // Chave própria: a página do produto lê outras colunas com ["produto", id] e não pode
+    // entregar à ficha um registro sem banho (invalidar ["produto", id] atualiza as duas).
+    queryKey: ["produto", id, "ficha"],
     enabled: !!id,
     queryFn: async () => {
       const { data, error } = await supabase

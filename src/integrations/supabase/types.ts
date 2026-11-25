@@ -22257,6 +22257,18 @@ export type Database = {
         }
         Returns: Json
       }
+      cob_judicial_alvara_receber: {
+        Args: {
+          _acordo: string
+          _conta: string
+          _data: string
+          _juros_confirmados: number
+          _numero: number
+          _referencia: string
+          _valor_recebido: number
+        }
+        Returns: Json
+      }
       cob_judicial_alvaras: { Args: { _acordo: string }; Returns: Json }
       cob_judicial_assinatura_dados: {
         Args: { _acordo: string; _doc: string }
@@ -23224,6 +23236,19 @@ export type Database = {
           _limit?: number
           _offset?: number
         }
+        Returns: Json
+      }
+      fin_mesa_alvara_conciliar: {
+        Args: {
+          _acordo: string
+          _juros_confirmados?: number
+          _line: string
+          _numero: number
+        }
+        Returns: Json
+      }
+      fin_mesa_alvaras: {
+        Args: { _busca?: string; _line: string }
         Returns: Json
       }
       fin_mesa_baixas_existentes: {

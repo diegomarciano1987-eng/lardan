@@ -14,6 +14,9 @@ import { conciliar, listarLinhasExtrato, marcarLinha, sugerirCorrespondencias, t
 import { useCapabilities } from "@/lib/capabilities";
 import { supabase } from "@/integrations/supabase/client";
 import { novaTransferenciaDoExtrato, sugestaoTransferencia, type SugestaoTransferencia } from "@/lib/transferencias-extrato";
+import { AlvarasMesa } from "@/components/admin/financeiro/AlvarasMesa";
+import { sugerirFormaDoExtrato } from "@/lib/forma-extrato";
+import { Button } from "@/components/ui/button";
 
 const dataBR = (d: string | null) =>
   d ? new Intl.DateTimeFormat("pt-BR").format(new Date(`${d}T12:00:00`)) : "—";
@@ -335,11 +338,12 @@ function Bancada({
   onPular: () => void;
 }) {
   const saida = linha.kind === "saida";
+  const caps = useCapabilities();
   const direction = saida ? "payable" : "receivable";
   const valorLinha = (linha.valor_cents ?? 0) - linha.conciliado_cents;
   // 0285: recebimento de cobrança do Asaas (pay_) — o "novo" nasce preso à cobrança, nunca um segundo lançamento
   const payAsaas = payDaLinha(linha);
-  const [modo, setModo] = React.useState<"existente" | "novo" | "transferencia" | null>(null);
+  const [modo, setModo] = React.useState<"existente" | "novo" | "transferencia" | "judicial" | null>(null);
   const [aba, setAba] = React.useState<"sugestoes" | "buscar" | "baixadas" | "transferencia">("sugestoes");
   const [busca, setBusca] = React.useState("");
   const [buscaLenta, setBuscaLenta] = React.useState("");
@@ -355,6 +359,7 @@ function Bancada({
   const [centro, setCentro] = React.useState("");
   const [plano, setPlano] = React.useState("");
   const [forma, setForma] = React.useState("");
+  const [formaEditada, setFormaEditada] = React.useState(false);
   const [descricao, setDescricao] = React.useState(linha.historico ?? "");
   const [documento, setDocumento] = React.useState(linha.documento ?? "");
   const [observacao, setObservacao] = React.useState("");
@@ -384,6 +389,18 @@ function Bancada({
     queryFn: () => fetchClassificacoes({ direction }),
     staleTime: 60_000,
   });
+  const permissaoAlvara = useQuery({
+    queryKey: ["mesa-permissao-alvara"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+      const { data, error } = await supabase.rpc("cob_pode", { _u: user.id });
+      if (error) throw error;
+      return data === true;
+    },
+    enabled: !saida && podeConciliar,
+  });
+  const podeAlvara = !saida && podeConciliar && caps.includes("finance.settlement.create") && permissaoAlvara.data === true;
   const contrapartes = useQuery({
     queryKey: ["mesa-contrapartes", partyBusca],
     queryFn: () => contrapartesMesa(partyBusca),
@@ -401,8 +418,13 @@ function Bancada({
     if (modo !== null || !sugestoes.data) return;
     if (usaDocumento && porDoc.isLoading) return;
     if (podeConciliar && !payAsaas && transf.isLoading) return;
+    if (!saida && podeConciliar && (permissaoAlvara.isLoading || palpite.isLoading)) return;
     if (transf.data?.propria && transf.data.livre) {
       setModo("transferencia");
+      return;
+    }
+    if (podeAlvara && palpite.data?.judicial) {
+      setModo("judicial");
       return;
     }
     if (porDoc.data?.situacao === "ok") {
@@ -412,7 +434,7 @@ function Bancada({
       return;
     }
     setModo(sugestoes.data.length > 0 ? "existente" : "novo");
-  }, [sugestoes.data, modo, usaDocumento, porDoc.isLoading, porDoc.data, podeConciliar, payAsaas, transf.isLoading, transf.data]);
+  }, [sugestoes.data, modo, usaDocumento, porDoc.isLoading, porDoc.data, podeConciliar, payAsaas, transf.isLoading, transf.data, saida, permissaoAlvara.isLoading, palpite.isLoading, palpite.data, podeAlvara]);
 
   // Aprendizado: preenche com o que foi usado nas vezes anteriores, sem sobrescrever escolha.
   React.useEffect(() => {
@@ -424,16 +446,19 @@ function Bancada({
       setPlano((v) => v || p.judicial?.chart_account_id || "");
       setParty((v) => v || p.judicial?.party_id || p.party_id || "");
       setCentro((v) => v || p.judicial?.cost_center_id || p.cost_center_id || "");
-      setForma((v) => v || p.payment_method_id || "");
       return;
     }
     if (!p.vezes) return;
     setPalpiteAplicado(true);
     setCentro((v) => v || p.cost_center_id || "");
     setPlano((v) => v || p.chart_account_id || "");
-    setForma((v) => v || p.payment_method_id || "");
     setParty((v) => v || p.party_id || "");
   }, [palpite.data, palpiteAplicado, modo]);
+
+  React.useEffect(() => {
+    if (modo !== "novo" || formaEditada || !classes.data) return;
+    setForma(sugerirFormaDoExtrato(linha.historico, classes.data.formas, palpite.data?.payment_method_id));
+  }, [modo, formaEditada, classes.data, linha.historico, palpite.data?.payment_method_id]);
 
   const centroSel = (centros.data ?? []).find((c) => c.id === centro);
   const partyOpcoes = React.useMemo(() => {
@@ -456,7 +481,7 @@ function Bancada({
   const falta = faltaConciliar(valorLinha, somaAloc, tarifaCents, saida);
   const bateExistente = bandeja.length > 0 && falta === 0;
   const prontoNovo = !!party && descricao.trim().length > 0;
-  const pronto = modo === "novo" ? prontoNovo : bateExistente;
+  const pronto = modo === "novo" ? prontoNovo : modo === "existente" && bateExistente;
 
   const adicionar = (c: Candidata) => {
     if (bandeja.some((b) => b.c.installment_id === c.installment_id)) {
@@ -599,21 +624,23 @@ function Bancada({
         <p className="mt-6 mb-2 text-sm font-semibold text-ledger-text">
           Este {saida ? "pagamento" : "recebimento"} já está lançado no sistema?
         </p>
-        <div className={`grid gap-2 ${payAsaas ? "sm:grid-cols-2" : "sm:grid-cols-3"}`} role="radiogroup" aria-label="Caminho da conciliação">
+        <div className={`grid gap-2 ${payAsaas ? "sm:grid-cols-2" : podeAlvara ? "sm:grid-cols-2" : "sm:grid-cols-3"}`} role="radiogroup" aria-label="Caminho da conciliação">
           {(
             [
               ["existente", Link2, "Sim, já existe", `Vincular a uma ${saida ? "conta a pagar" : "conta a receber"}`],
               ["novo", FilePlus2, "Não, é novo", payAsaas ? "Lançar preso à cobrança do Asaas" : "Criar o lançamento agora e conciliar"],
               ...(payAsaas ? [] : ([["transferencia", ArrowLeftRight, "Transferência entre contas", saida ? "Foi para outra conta da empresa" : "Veio de outra conta da empresa"]] as const)),
+              ...(podeAlvara ? ([["judicial", Scale, "Acordo judicial / alvará", "Recebimento do acordo da devedora"]] as const) : []),
             ] as const
           ).map(([m, Icone, t, d], i) => (
-            <button
+            <Button
+              variant="outline"
               key={m}
               type="button"
               role="radio"
               aria-checked={modo === m}
               onClick={() => setModo(m)}
-              className={`flex items-start gap-3 rounded-[14px] border-2 p-4 text-left transition ${
+              className={`h-auto whitespace-normal flex items-start justify-start gap-3 rounded-lg border-2 p-4 text-left transition ${
                 modo === m ? "border-bronze bg-surface shadow-md" : "border-line bg-surface hover:border-champagne"
               }`}
             >
@@ -622,15 +649,15 @@ function Bancada({
                 <span className="block font-semibold text-ledger-text">{t} <span className="text-xs text-ledger-muted">({i + 1})</span></span>
                 <span className="block text-xs text-ledger-muted">{d}</span>
               </span>
-            </button>
+            </Button>
           ))}
         </div>
 
         {usaDocumento && porDoc.data && (
           <CartaoPorDocumento
             plano={porDoc.data}
-            onDistribuir={() => { setModo("existente"); setBandeja(bandejaDoPlano(porDoc.data!)); }}
-            onNovoParaEla={() => { setModo("novo"); setParty(porDoc.data!.party_id ?? ""); }}
+            onDistribuir={() => { const p = porDoc.data; if (!p) return; setModo("existente"); setBandeja(bandejaDoPlano(p)); }}
+            onNovoParaEla={() => { const p = porDoc.data; if (!p) return; setModo("novo"); setParty(p.party_id ?? ""); }}
           />
         )}
 
@@ -805,7 +832,7 @@ function Bancada({
                 <SmartSelect
                   options={[{ value: "", label: "Não informada" }, ...(classes.data?.formas ?? []).map((f) => ({ value: f.id, label: f.nome }))]}
                   value={forma}
-                  onChange={setForma}
+                  onChange={(v) => { setFormaEditada(true); setForma(v); }}
                   placeholder="Não informada"
                 />
               </div>
@@ -840,7 +867,7 @@ function Bancada({
           </div>
         )}
 
-        {modo !== "transferencia" && <div
+        {modo !== "transferencia" && modo !== "judicial" && <div
           className={`mt-4 flex items-center justify-between rounded-[14px] p-4 transition ${
             pronto ? "bg-primary text-primary-foreground" : "bg-cream-2 text-ledger-text"
           }`}
@@ -864,7 +891,7 @@ function Bancada({
         </div>}
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {podeConciliar && modo !== "transferencia" && (
+          {podeConciliar && modo !== "transferencia" && modo !== "judicial" && (
             <button type="button" className="admin-btn-primary h-12 flex-1 text-base" disabled={!pronto || aplicar.isPending} onClick={() => aplicar.mutate()}>
               <Check aria-hidden className="mr-1 inline size-5" />
               {aplicar.isPending ? "Gravando…" : modo === "novo" ? (payAsaas ? "Lançar pela cobrança do Asaas" : "Criar lançamento e conciliar") : "Conciliar"}
@@ -900,7 +927,9 @@ function Bancada({
       </section>
 
       {/* Direita */}
-      {modo === "transferencia" ? (
+      {modo === "judicial" ? (
+        <AlvarasMesa linha={linha} pode={podeAlvara} nomeSugerido={pal?.judicial?.party_nome ?? null} onFeito={onFeito} />
+      ) : modo === "transferencia" ? (
         <section className="flex min-h-0 flex-col p-6">
           <p className="ledger-eyebrow">Já lançou esta transferência em Contas e caixas?</p>
           <p className="mt-1 text-sm text-ledger-muted">Então ligue a linha a ela aqui, sem lançar de novo.</p>

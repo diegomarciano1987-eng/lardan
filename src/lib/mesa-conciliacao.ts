@@ -76,6 +76,11 @@ export const centrosMesa = () => rpc<CentroMesa[]>("fin_mesa_centros");
 export const tituloDaParcela = (inst: string) =>
   rpc<TituloDaParcela>("fin_mesa_titulo_da_parcela", { _inst: inst });
 
+export type AlvaraMesa = { acordo_id: string; party_id: string; party_nome: string; party_code: string | null; data_acordo: string; numero: number; data: string; valor_cents: number };
+export const alvarasMesa = (line: string, busca: string) => rpc<AlvaraMesa[]>("fin_mesa_alvaras", { _line: line, _busca: busca || null });
+export const conciliarAlvaraMesa = (line: string, acordo: string, numero: number, jurosConfirmados: number) =>
+  rpc<{ id: string; settlement_id: string; repetido: boolean }>("fin_mesa_alvara_conciliar", { _line: line, _acordo: acordo, _numero: numero, _juros_confirmados: jurosConfirmados });
+
 /**
  * 0368: Pix com CPF/CNPJ no histórico (OFX Santander) → a pessoa (só com UM cadastro) e a distribuição
  * do valor pelas dívidas em aberto, da mais antiga para a mais nova (baixa parcial na última). Só leitura.

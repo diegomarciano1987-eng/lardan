@@ -79,3 +79,14 @@
 - [x] Ficha de cliente final só com abas de cliente
 - [x] Busca de clientes rápida (sem acento/maiúsculas)
 - [x] Aba Compras da cliente: erro + consultora
+
+# Correções críticas aprovadas — 25/11 (execução por etapas)
+- [x] E1. Soltar linha Santander SANT20261028011 presa a baixa estornada; preservar caixa e histórico
+- [ ] E1. Ligar a linha Santander ao título 2026-027440 — aguarda o clique final do Financeiro em "Ligar"
+- [x] E1. Detectar Pix/TED na Mesa sem sobrescrever escolha manual ou classificação de título existente
+- [x] E1. Conciliar recebimento judicial com alvará do acordo, sem duplicar título/recebimento
+- [ ] E1. Jheniffer: R$ 302,63 + R$ 10,38 de juros prontos na Mesa — aguarda a confirmação final do Financeiro
+- [x] E1. Testes isolados, conferência autenticada e imagem com texto comercial
+- [ ] E2. Danilo mover cards somente; origem das ações vencidas; coluna de acordos atrasados
+- [ ] E3. Banho na ficha, valores herdados de variantes e foto específica da variante
+- [ ] E4. Cadastros existentes aprovados e consultoras ativas somente com maleta em mãos, sem bloquear montagem

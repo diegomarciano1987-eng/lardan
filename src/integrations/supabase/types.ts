@@ -5918,6 +5918,33 @@ export type Database = {
           },
         ]
       }
+      consultora_status_ajuste_0390: {
+        Row: {
+          acao: string
+          created_at: string
+          is_active_anterior: boolean
+          papel_status_anterior: string | null
+          party_id: string
+          status_anterior: string
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          is_active_anterior: boolean
+          papel_status_anterior?: string | null
+          party_id: string
+          status_anterior: string
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          is_active_anterior?: boolean
+          papel_status_anterior?: string | null
+          party_id?: string
+          status_anterior?: string
+        }
+        Relationships: []
+      }
       consultoras_vinculo_log: {
         Row: {
           antes: string | null

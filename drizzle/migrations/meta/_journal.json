@@ -2731,6 +2731,20 @@
       "when": 1795638172571,
       "tag": "0389_cob_acoes_atrasadas_resumo_0389",
       "breakpoints": true
+    },
+    {
+      "idx": 390,
+      "version": "7",
+      "when": 1795638745926,
+      "tag": "0390_consultoras_ativas_maleta_aprovadas_0390",
+      "breakpoints": true
+    },
+    {
+      "idx": 391,
+      "version": "7",
+      "when": 1795638979715,
+      "tag": "0391_ativas_contam_aprovadas_0391",
+      "breakpoints": true
     }
   ]
 }

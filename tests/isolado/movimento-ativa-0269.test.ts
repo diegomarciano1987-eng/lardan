@@ -12,7 +12,7 @@ const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
 let master: Conta, rep: Conta, repOutro: Conta;
 let praca = "", remessa = "";
 
-async function consultora(nome: string, status: "inativo" | "bloqueado" | "desligado", dono: string) {
+async function consultora(nome: string, status: "inativo" | "bloqueado" | "desligado" | "em_analise", dono: string) {
   const id = (await um<{ id: string }>(
     `insert into public.parties (kind, display_name, legal_name, status, is_active) values ('pessoa',$1,$1,$2,false) returning id`, [nome, status])).id;
   await adm.unsafe(`insert into public.party_roles (party_id, role, status) values ($1,'consultora','inativo')`, [id]);
@@ -32,6 +32,16 @@ beforeAll(async () => {
   praca = (await ler<{ id: string }>(master, `select (public.praca_criar($1)).id`, [`MV69 ${marca}`])).linhas[0]!.id;
   remessa = (await rpc<{ id: string }>(master, "remessa_criar", { _praca: praca, _representante: rep.partyId, _deposito: deposito,
     _data_acerto: new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10) })).dados.id;
+});
+
+describe("0390: cadastro em análise com movimento vira aprovada", () => {
+  test("convite para consultora em análise deixa a situação Aprovada", async () => {
+    const id = await consultora(`Analise Teste ${marca}`, "em_analise", rep.partyId);
+    const r = await rpc<{ ok: boolean }>(rep, "access_invite_create",
+      { _party: id, _email: `anal${marca}@teste.com`, _roles: ["consultora"], _token_hash: hash() });
+    expect(r.erro).toBeNull();
+    expect(await situacao(id)).toEqual({ p: "aprovado", r: "ativo", ativo: true });
+  });
 });
 
 describe("convite do representante (o caso do vídeo)", () => {

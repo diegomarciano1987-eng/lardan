@@ -2787,6 +2787,20 @@
       "when": 1795717363919,
       "tag": "0397_my_capabilities_individual",
       "breakpoints": true
+    },
+    {
+      "idx": 398,
+      "version": "7",
+      "when": 1795719001558,
+      "tag": "0398_captacao_aprovadas_0398",
+      "breakpoints": true
+    },
+    {
+      "idx": 399,
+      "version": "7",
+      "when": 1795719105610,
+      "tag": "0399_captacao_aprovadas_0398b",
+      "breakpoints": true
     }
   ]
 }

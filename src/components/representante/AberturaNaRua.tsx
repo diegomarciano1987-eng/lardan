@@ -16,17 +16,24 @@
  * 0334 (Diego 17/11, Paula/Marcelo): várias aberturas ao mesmo tempo, cada uma guardada separada; a que
  *   terminou de assinar (mesmo com o fluxo fechado) sai sozinha. A lista "Aguardando assinatura" da
  *   Captação vem do servidor, então não depende do aparelho.
+ *
+ * 0398 (Diego/Daniel 26/11): entra a etapa "Aprovação" entre o perfil e a maleta. Depois do cadastro ela faz o
+ *   teste de perfil (link no WhatsApp ou no celular do representante) e a Lardan decide (crédito + teste,
+ *   automático quando tudo passa, senão o Daniel). A maleta só libera com a aprovação; o servidor também trava
+ *   (rep_maleta_repassar). O representante nunca vê crédito nem motivos, só a situação.
  */
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, ChevronLeft, CircleCheckBig, Loader2, MapPin, PackageOpen, UserPlus, X } from "lucide-react";
+import { Check, ChevronLeft, CircleCheckBig, ClipboardCheck, Copy, Hourglass, Loader2, MapPin, MessageCircle, PackageOpen, UserPlus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { consultarCep } from "@/lib/br/lookup.functions";
 import { brl, maletasDoRepresentante, mensagem, receberMaleta, repassarMaleta, rotuloAbertura, trocarDestinoMaleta } from "@/lib/maletas-perdidas";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { TesteCandidatura } from "@/components/candidatura-teste/TesteCandidatura";
 import { CONTATOS_VAZIOS, CamposContatosRef, conferirContatos, contatosPreenchidos, salvarContatosRef, type ContatosRef } from "@/components/admin/ContatosRecado";
 
 export const ESTADOS_CIVIS = ["Solteira", "Casada", "União estável", "Divorciada", "Viúva"] as const;
@@ -37,7 +44,7 @@ const PERGUNTAS = [
   { id: "pontualidade", t: "Ela foi pontual e respondeu rápido até aqui?" },
 ];
 const NOTAS = [{ v: 1, r: "Pouco" }, { v: 2, r: "Mais ou menos" }, { v: 3, r: "Muito" }];
-const PASSOS = ["Dados", "Perfil", "Maleta", "Assinatura"];
+const PASSOS = ["Dados", "Perfil", "Aprovação", "Maleta", "Assinatura"];
 
 const so = (v: string, n: number) => v.replace(/\D/g, "").slice(0, n);
 const mCpf = (v: string) => so(v, 11).replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
@@ -90,7 +97,8 @@ export function faltando(f: Dados): string[] {
 type Feito = { lead_id: string; party_id: string; perfil: string };
 type MaletaEscolhida = { cycle_id: string; nome: string };
 export type Rascunho = {
-  v: 1; rep: string; chave: string; passo: number; f: Dados; perfil: Record<string, number>;
+  /** 2 (0398): etapas 0 dados, 1 perfil, 2 aprovação, 3 maleta, 4 assinatura. 1: sem a etapa de aprovação. */
+  v: 1 | 2; rep: string; chave: string; passo: number; f: Dados; perfil: Record<string, number>;
   feito: Feito | null; maleta: MaletaEscolhida | null; salvo_em: number;
 };
 const VALIDADE_MS = 24 * 60 * 60 * 1000;
@@ -119,11 +127,13 @@ function lerUm(rep: string, chave: string, agora: number): Rascunho | null {
     const raw = window.localStorage.getItem(chaveStorage(rep, chave));
     if (!raw) return null;
     const r = JSON.parse(raw) as Rascunho;
-    if (r?.v !== 1 || r.rep !== rep || typeof r.salvo_em !== "number" || agora - r.salvo_em > VALIDADE_MS) {
+    if ((r?.v !== 1 && r?.v !== 2) || r.rep !== rep || typeof r.salvo_em !== "number" || agora - r.salvo_em > VALIDADE_MS) {
       window.localStorage.removeItem(chaveStorage(rep, chave));
       return null;
     }
-    return { ...r, f: { ...VAZIO, ...r.f } };
+    // 0398: rascunho antigo (sem a etapa Aprovação) — maleta e assinatura andam uma casa
+    const passo = r.v === 1 && r.passo >= 2 ? r.passo + 1 : r.passo;
+    return { ...r, v: 2, passo, f: { ...VAZIO, ...r.f } };
   } catch { return null; }
 }
 /** Rascunho antigo (uma chave só por representante, até 0333) vira um item da lista. */
@@ -133,7 +143,7 @@ function migrarAntigo(rep: string) {
     if (!raw) return;
     window.localStorage.removeItem(prefixo(rep));
     const r = JSON.parse(raw) as Rascunho;
-    if (r?.v === 1 && r.rep === rep && r.chave) {
+    if ((r?.v === 1 || r?.v === 2) && r.rep === rep && r.chave) {
       window.localStorage.setItem(chaveStorage(rep, r.chave), raw);
       gravarIndice(rep, [...lerIndice(rep), r.chave]);
     }
@@ -241,7 +251,7 @@ export function AberturaHost({ rep }: { rep: string }) {
     const nome = primeiroNome(r.f.nome) || "candidata";
     if (window.confirm(`Descartar os dados guardados da abertura de ${nome}?${r.feito ? "\n\nO cadastro dela continua salvo na Lardan." : ""}`)) apagarRascunho(rep, r.chave);
   };
-  const etapa = (r: Rascunho) => `Etapa ${Math.min(r.passo, 3) + 1} de 4${r.passo >= 3 ? " · aguardando assinatura" : " · dados guardados"}`;
+  const etapa = (r: Rascunho) => `Etapa ${Math.min(r.passo, 4) + 1} de 5${r.passo >= 4 ? " · aguardando assinatura" : r.passo === 2 ? " · teste e aprovação da Lardan" : r.passo === 3 ? " · escolher a maleta" : " · dados guardados"}`;
   const um = rascunhos.length === 1 ? rascunhos[0]! : null;
   return (
     <div role="status" className="fixed inset-x-3 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-md space-y-2 rounded-2xl border border-primary/40 bg-card p-3 shadow-lg md:bottom-6 md:right-6 md:left-auto">
@@ -327,7 +337,7 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
   React.useEffect(() => {
     if (concluidaRef.current) return;
     const r = { passo, f, perfil, feito };
-    if (rascunhoTemConteudo(r, inicial)) gravarRascunho({ v: 1, rep, chave, passo, f, perfil, feito, maleta, salvo_em: Date.now() });
+    if (rascunhoTemConteudo(r, inicial)) gravarRascunho({ v: 2, rep, chave, passo, f, perfil, feito, maleta, salvo_em: Date.now() });
   }, [rep, chave, passo, f, perfil, feito, maleta, inicial]);
   const concluir = React.useCallback(() => { concluidaRef.current = true; apagarRascunho(rep, chave); }, [rep, chave]);
   const sair = () => {
@@ -369,7 +379,7 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
       }
       return r;
     },
-    onSuccess: (r) => { setFeito(r); setPasso(2); toast.success(`${primeiroNome(f.nome)} cadastrada. ${r.perfil}.`); void qc.invalidateQueries({ queryKey: ["rep", rep, "crm"] }); },
+    onSuccess: (r) => { setFeito(r); setPasso(2); toast.success(`${primeiroNome(f.nome)} cadastrada. Agora o teste de perfil.`); void qc.invalidateQueries({ queryKey: ["rep", rep, "crm"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -387,11 +397,11 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
           <p className="text-base font-semibold">{feito ? primeiroNome(f.nome) : "Nova candidata"}</p>
           <button type="button" aria-label="Fechar" onClick={sair} className="grid size-11 place-items-center rounded-full border border-border"><X className="size-4" /></button>
         </div>
-        <ol className="mt-4 grid grid-cols-4 gap-1.5" aria-label="Etapas">
+        <ol className="mt-4 grid grid-cols-5 gap-1" aria-label="Etapas">
           {PASSOS.map((p, i) => (
             <li key={p} className="space-y-1">
               <div className={`h-1.5 rounded-full ${i <= passo ? "bg-primary" : "bg-muted"}`} />
-              <p className={`text-center text-[0.7rem] ${i === passo ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{i + 1}. {p}</p>
+              <p className={`text-center text-[0.65rem] leading-tight ${i === passo ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{i + 1}. {p}</p>
             </li>
           ))}
         </ol>
@@ -467,8 +477,9 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
             </Bloco>
           )}
 
-          {passo === 2 && feito && <EscolherMaleta rep={rep} leadId={feito.lead_id} nome={f.nome} onEscolhida={(m) => { setMaleta(m); setPasso(3); }} />}
-          {passo === 3 && feito && <Assinaturas rep={rep} party={feito.party_id} maleta={maleta} nome={f.nome} telefone={f.whatsapp} onConcluida={concluir} />}
+          {passo === 2 && feito && <GateAprovacao rep={rep} leadId={feito.lead_id} nome={f.nome} whatsapp={f.whatsapp} onLiberada={() => setPasso(3)} onFechar={sair} />}
+          {passo === 3 && feito && <EscolherMaleta rep={rep} leadId={feito.lead_id} nome={f.nome} onEscolhida={(m) => { setMaleta(m); setPasso(4); }} />}
+          {passo === 4 && feito && <Assinaturas rep={rep} party={feito.party_id} maleta={maleta} nome={f.nome} telefone={f.whatsapp} onConcluida={concluir} />}
         </div>
       </main>
 
@@ -482,7 +493,7 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
             )}
             {passo === 1 && (
               <button type="button" disabled={!ok2 || cadastrar.isPending} onClick={() => cadastrar.mutate()} className="min-h-12 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50">
-                {cadastrar.isPending ? "Salvando…" : ok2 ? "Salvar e escolher a maleta" : "Responda as 4 perguntas"}
+                {cadastrar.isPending ? "Salvando…" : ok2 ? "Salvar e fazer o teste" : "Responda as 4 perguntas"}
               </button>
             )}
           </div>
@@ -514,6 +525,119 @@ function Bloco({ titulo, icone, children }: { titulo: string; icone?: React.Reac
       <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{icone}{titulo}</h3>
       {children}
     </section>
+  );
+}
+
+// ---------------------------------------------------------------- 0398: teste + aprovação da Lardan antes da maleta
+type Situacao = {
+  situacao: "sem_teste" | "teste_em_andamento" | "aguardando_decisao" | "analise" | "aprovada" | "reprovada";
+  liberada: boolean; isenta: boolean; teste_token: string | null; teste_parte: number | null; documentos_token: string | null; documentos_enviados: boolean;
+};
+const waLink = (fone: string, texto: string) => { const d = so(fone, 13); return `https://wa.me/${d.startsWith("55") ? d : `55${d}`}?text=${encodeURIComponent(texto)}`; };
+const linkTeste = (t: string) => `${window.location.origin}/candidatura/${t}`;
+const linkDocs = (t: string) => `${window.location.origin}/documentos/${t}`;
+
+export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFechar }: {
+  rep: string; leadId: string; nome: string; whatsapp: string; onLiberada: () => void; onFechar: () => void;
+}) {
+  const qc = useQueryClient();
+  const [testeAqui, setTesteAqui] = React.useState(false);
+  const chave = ["rep", rep, "situacao", leadId];
+  const q = useQuery({
+    queryKey: chave,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("rep_candidata_situacao" as never, { _rep: rep, _lead: leadId } as never);
+      if (error) throw new Error(error.message);
+      return data as unknown as Situacao;
+    },
+    // a decisão chega sozinha em poucos minutos (crédito + teste): confere a cada 20 s enquanto a tela está aberta
+    refetchInterval: (x) => (x.state.data?.liberada || x.state.data?.situacao === "reprovada" ? false : 20_000),
+  });
+  const gerar = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("candidatura_teste_gerar", { _lead: leadId });
+      if (error) throw new Error(error.message.includes("sem_permissao") ? "Esta candidata não está na sua carteira." : error.message);
+      return (data as unknown as { token: string }).token;
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: chave }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const s = q.data;
+  const primeiro = primeiroNome(nome);
+  const token = s?.teste_token ?? gerar.data ?? null;
+  const msgTeste = (t: string) => `Olá, ${primeiro}! Aqui é da Lardan Semijoias. O próximo passo é um teste rápido de perfil, de uns 10 minutos, que fica salvo a cada tela: ${linkTeste(t)}\n\nDepois do teste a Lardan consulta o seu CPF. Ter o nome com restrição não impede sozinho a sua aprovação.`;
+  const copiar = (t: string) => void navigator.clipboard.writeText(t).then(() => toast.success("Link copiado."), () => toast.error("Não consegui copiar."));
+
+  if (q.isLoading) return <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Conferindo a situação…</p>;
+  if (q.error || !s) return <p className="text-sm text-destructive">{(q.error as Error | null)?.message ?? "Não consegui ver a situação."}</p>;
+
+  if (s.liberada) {
+    return (
+      <Bloco titulo="Aprovada pela Lardan" icone={<CircleCheckBig className="size-4 text-primary" />}>
+        <p className="text-sm">{s.isenta ? `${primeiro} já estava aprovada antes da regra nova.` : `${primeiro} passou no teste e na análise. Pode escolher a maleta.`}</p>
+        {s.documentos_token && !s.documentos_enviados && (
+          <div className="rounded-xl border border-border p-3 text-sm">
+            <p className="font-medium">Documentos</p>
+            <p className="mt-1 text-muted-foreground">A Lardan pede 4 fotos: documento com foto, comprovante de residência, selfie com o documento e a frente da casa. Ela pode mandar agora pelo link (não trava a maleta).</p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <a href={waLink(whatsapp, `Olá, ${primeiro}! Seu cadastro na Lardan foi aprovado. Envie por este link as 4 fotos (documento com foto, comprovante de residência, selfie com o documento e a frente da sua casa): ${linkDocs(s.documentos_token)}`)}
+                target="_blank" rel="noreferrer" className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border px-2 text-sm"><MessageCircle className="size-4" /> WhatsApp</a>
+              <a href={linkDocs(s.documentos_token)} target="_blank" rel="noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-border px-2 text-sm">Fazer aqui com ela</a>
+            </div>
+          </div>
+        )}
+        <button type="button" onClick={onLiberada} className="min-h-12 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Escolher a maleta</button>
+      </Bloco>
+    );
+  }
+  if (s.situacao === "reprovada") {
+    return (
+      <Bloco titulo="Não aprovada">
+        <p className="text-sm">A candidatura de {primeiro} não foi aprovada pela Lardan, então ela não recebe maleta. Se achar que houve engano, fale com o Daniel.</p>
+        <button type="button" onClick={onFechar} className="min-h-12 w-full rounded-xl border border-border text-sm font-semibold">Fechar</button>
+      </Bloco>
+    );
+  }
+  if (s.situacao === "aguardando_decisao" || s.situacao === "analise") {
+    return (
+      <Bloco titulo="Teste concluído" icone={<Hourglass className="size-4" />}>
+        <p className="text-sm">
+          {s.situacao === "aguardando_decisao"
+            ? `${primeiro} terminou o teste. A Lardan está consultando o CPF e analisando o perfil; costuma sair em poucos minutos. Esta tela atualiza sozinha.`
+            : `O perfil de ${primeiro} está com o Daniel para análise. Quando ele aprovar, a maleta libera aqui e na sua lista de Captação.`}
+        </p>
+        <p className="text-xs text-muted-foreground">Pode fechar: os dados ficam guardados e você continua de onde parou.</p>
+        <button type="button" onClick={() => void q.refetch()} disabled={q.isFetching} className="min-h-11 w-full rounded-xl border border-border text-sm">{q.isFetching ? "Conferindo…" : "Conferir agora"}</button>
+      </Bloco>
+    );
+  }
+  return (
+    <Bloco titulo="Teste de perfil" icone={<ClipboardCheck className="size-4" />}>
+      <p className="text-sm">Antes da maleta, {primeiro} faz o teste de perfil (uns 10 minutos). Depois a Lardan consulta o CPF e decide: quando tudo passa, aprova na hora; senão, o Daniel analisa.</p>
+      {s.situacao === "teste_em_andamento" && <p className="text-xs text-muted-foreground">Ela já começou (parte {Math.min(s.teste_parte ?? 1, 3)} de 3). As respostas ficam salvas.</p>}
+      {token ? (
+        <div className="grid grid-cols-2 gap-2">
+          <a href={waLink(whatsapp, msgTeste(token))} target="_blank" rel="noreferrer" className="flex min-h-12 items-center justify-center gap-1.5 rounded-xl bg-primary px-2 text-sm font-semibold text-primary-foreground">
+            <MessageCircle className="size-4" /> Mandar no WhatsApp
+          </a>
+          <button type="button" onClick={() => setTesteAqui(true)} className="min-h-12 rounded-xl border border-border px-2 text-sm">Fazer aqui com ela</button>
+          <button type="button" onClick={() => copiar(linkTeste(token))} className="col-span-2 flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border text-sm"><Copy className="size-4" /> Copiar o link</button>
+        </div>
+      ) : (
+        <button type="button" disabled={gerar.isPending} onClick={() => gerar.mutate()} className="min-h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          {gerar.isPending ? "Preparando…" : "Preparar o teste"}
+        </button>
+      )}
+      {token && (
+        <Dialog open={testeAqui} onOpenChange={(v) => { setTesteAqui(v); if (!v) void qc.invalidateQueries({ queryKey: chave }); }}>
+          <DialogContent className="z-[260] h-[100dvh] max-h-[100dvh] w-full max-w-none overflow-y-auto rounded-none p-0 sm:h-[92dvh] sm:max-w-2xl sm:rounded-2xl">
+            <DialogTitle className="sr-only">Teste de candidatura de {nome}</DialogTitle>
+            <DialogDescription className="sr-only">A candidata responde no seu celular; as respostas são dela.</DialogDescription>
+            <TesteCandidatura token={token} />
+          </DialogContent>
+        </Dialog>
+      )}
+    </Bloco>
   );
 }
 

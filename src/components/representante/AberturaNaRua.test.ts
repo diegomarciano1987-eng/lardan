@@ -10,7 +10,7 @@ beforeEach(() => {
   };
 });
 const base = (over: Partial<Rascunho> = {}): Rascunho => ({
-  v: 1, rep: "rep-1", chave: "43999990000", passo: 3,
+  v: 2, rep: "rep-1", chave: "43999990000", passo: 4,
   f: { nome: "Maria da Silva", cpf: "529.982.247-25", nascimento: "01/01/1990", rg: "", rg_orgao: "", estado_civil: "Casada", whatsapp: "(43) 99999-0000", email: "m@x.com", cep: "86000-000", rua: "Rua A", numero: "10", complemento: "", bairro: "Centro", cidade: "Londrina", uf: "PR", ibge: "" },
   perfil: { metas: 3, comunicacao: 3, organizacao: 2, pontualidade: 3 },
   feito: { lead_id: "l1", party_id: "p1", perfil: "Forte" }, maleta: { cycle_id: "c1", nome: "MAL-1" }, salvo_em: Date.now(), ...over,
@@ -20,7 +20,7 @@ describe("rascunho da abertura na rua", () => {
   it("guarda e devolve tudo, inclusive a etapa da assinatura", () => {
     gravarRascunho(base());
     const r = lerRascunho("rep-1")!;
-    expect(r.passo).toBe(3);
+    expect(r.passo).toBe(4);
     expect(r.f.cpf).toBe("529.982.247-25");
     expect(r.feito?.party_id).toBe("p1");
     expect(r.maleta?.cycle_id).toBe("c1");
@@ -48,6 +48,21 @@ describe("rascunho da abertura na rua", () => {
   it("cada candidata tem sua chave", () => {
     expect(chaveCandidata()).toBe("nova");
     expect(chaveCandidata({ nome: "Ana", whatsapp: "(43) 99999-0000" })).toBe("43999990000");
+  });
+});
+
+describe("0398: etapa Aprovação entre o perfil e a maleta", () => {
+  it("rascunho antigo (v1) na maleta ou na assinatura anda uma casa; antes disso fica igual", () => {
+    gravarRascunho(base({ v: 1, passo: 3, chave: "assinando" }));
+    gravarRascunho(base({ v: 1, passo: 2, chave: "maleta" }));
+    gravarRascunho(base({ v: 1, passo: 1, chave: "perfil" }));
+    expect(lerRascunho("rep-1", "assinando")).toMatchObject({ v: 2, passo: 4 });
+    expect(lerRascunho("rep-1", "maleta")).toMatchObject({ v: 2, passo: 3 });
+    expect(lerRascunho("rep-1", "perfil")).toMatchObject({ v: 2, passo: 1 });
+  });
+  it("rascunho novo (v2) não muda", () => {
+    gravarRascunho(base({ passo: 2, chave: "aprovacao" }));
+    expect(lerRascunho("rep-1", "aprovacao")).toMatchObject({ v: 2, passo: 2 });
   });
 });
 

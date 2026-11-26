@@ -173,6 +173,8 @@ describe("4. maleta da remessa com o representante", () => {
     const op = await rpc<{ tipo: string; id: string }[]>(rep, "rep_maleta_destinatarias", { _rep: rep.partyId, _busca: `Candidata ${marca}` });
     expect(op.dados.some((x) => x.tipo === "candidata" && x.id === lead)).toBe(true);
     expect((await rpc(repOutro, "rep_maleta_repassar", { _rep: repOutro.partyId, _cycle: ciclo, _lead: lead })).ok).toBe(false);
+    // 0398: candidata só recebe maleta do representante depois de aprovada pela Lardan
+    await adm.unsafe(`update public.leads set outcome='ganha', won_at=now(), status='aprovado' where id=$1`, [lead]);
     const r = await rpc<{ consultora_party_id: string; nova_consultora: boolean }>(rep, "rep_maleta_repassar", { _rep: rep.partyId, _cycle: ciclo, _lead: lead });
     expect(r.erro).toBeNull();
     expect(r.dados.nova_consultora).toBe(true);

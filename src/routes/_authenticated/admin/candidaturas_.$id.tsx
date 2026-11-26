@@ -22,6 +22,7 @@ import { FollowupDialog } from "@/components/admin/candidaturas/FollowupDialog";
 import { EnvioRepresentante } from "@/components/admin/candidaturas/EnvioRepresentante";
 import { AnaliseTeste } from "@/components/admin/candidaturas/AnaliseTeste";
 import { CreditoAssertiva } from "@/components/admin/candidaturas/CreditoAssertiva";
+import { DocumentosCandidata } from "@/components/admin/candidaturas/Aprovadas";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import {
   Dialog,
@@ -552,6 +553,7 @@ function CockpitCandidata() {
             <TabsContent value="avaliacoes">
               <div className="space-y-5">
                 <CreditoAssertiva leadId={id} podeEditar={caps.includes("candidaturas.edit")} />
+                <DocumentosCandidata leadId={id} nome={c.nome} whatsapp={c.whatsapp_norm} podeEditar={caps.includes("candidaturas.edit")} />
                 <AnaliseTeste leadId={id} podeEditar={caps.includes("candidaturas.edit")} />
               </div>
             </TabsContent>

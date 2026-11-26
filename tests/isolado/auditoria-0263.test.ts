@@ -102,6 +102,8 @@ describe("maleta não vai para cadastro bloqueado, desligado ou suspenso", () =>
     const lead = await um<{ id: string }>(`insert into leads (full_name, whatsapp, city, uf, privacy_version, stage_id, representante_party_id, cpf, cpf_digits)
       values ($1,'43999990000','Ibiporã','PR','v1',(select id from candidatura_stages order by sort_order limit 1),$2,$3,$3) returning id`, [`Volta ${marca}`, rep.partyId, doc]);
     const c = await maletaComRep();
+    // 0398: candidata só recebe maleta do representante depois de aprovada pela Lardan
+    await adm.unsafe(`update public.leads set outcome='ganha', won_at=now(), status='aprovado' where id=$1`, [lead.id]);
     const r = await rpc<{ consultora_party_id: string }>(rep, "rep_maleta_repassar", { _rep: rep.partyId, _cycle: c, _lead: lead.id });
     expect(r.erro).toBeNull();
     expect(r.dados.consultora_party_id).toBe(antigo.id);

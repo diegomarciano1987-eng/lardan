@@ -3028,6 +3028,94 @@ export type Database = {
         }
         Relationships: []
       }
+      candidatura_documentos: {
+        Row: {
+          arquivo_path: string
+          bytes: number
+          conferido_em: string | null
+          conferido_por: string | null
+          enviado_em: string
+          id: string
+          lead_id: string
+          mime: string
+          motivo: string | null
+          situacao: string
+          substituido_em: string | null
+          tipo: string
+        }
+        Insert: {
+          arquivo_path: string
+          bytes: number
+          conferido_em?: string | null
+          conferido_por?: string | null
+          enviado_em?: string
+          id?: string
+          lead_id: string
+          mime: string
+          motivo?: string | null
+          situacao?: string
+          substituido_em?: string | null
+          tipo: string
+        }
+        Update: {
+          arquivo_path?: string
+          bytes?: number
+          conferido_em?: string | null
+          conferido_por?: string | null
+          enviado_em?: string
+          id?: string
+          lead_id?: string
+          mime?: string
+          motivo?: string | null
+          situacao?: string
+          substituido_em?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_documentos_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidatura_documentos_link: {
+        Row: {
+          criado_em: string
+          criado_por: string | null
+          expira_em: string
+          finalizado_em: string | null
+          lead_id: string
+          token: string
+        }
+        Insert: {
+          criado_em?: string
+          criado_por?: string | null
+          expira_em: string
+          finalizado_em?: string | null
+          lead_id: string
+          token: string
+        }
+        Update: {
+          criado_em?: string
+          criado_por?: string | null
+          expira_em?: string
+          finalizado_em?: string | null
+          lead_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_documentos_link_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidatura_followups: {
         Row: {
           assigned_to: string | null
@@ -3537,6 +3625,24 @@ export type Database = {
         }
         Relationships: []
       }
+      captacao_config: {
+        Row: {
+          atualizado_em: string
+          chave: string
+          valor: Json
+        }
+        Insert: {
+          atualizado_em?: string
+          chave: string
+          valor: Json
+        }
+        Update: {
+          atualizado_em?: string
+          chave?: string
+          valor?: Json
+        }
+        Relationships: []
+      }
       captacao_decisoes: {
         Row: {
           credito_id: string | null
@@ -3584,6 +3690,62 @@ export type Database = {
           },
         ]
       }
+      captacao_envios: {
+        Row: {
+          definido_em: string
+          definido_por: string | null
+          lead_id: string
+          modo: string
+          nota: string | null
+          representante_party_id: string | null
+        }
+        Insert: {
+          definido_em?: string
+          definido_por?: string | null
+          lead_id: string
+          modo: string
+          nota?: string | null
+          representante_party_id?: string | null
+        }
+        Update: {
+          definido_em?: string
+          definido_por?: string | null
+          lead_id?: string
+          modo?: string
+          nota?: string | null
+          representante_party_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "captacao_envios_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "captacao_envios_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "captacao_envios_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "captacao_envios_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       captacao_fila: {
         Row: {
           criado_em: string
@@ -3612,6 +3774,32 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "captacao_fila_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      captacao_gate_isentas: {
+        Row: {
+          criado_em: string
+          lead_id: string
+          motivo: string
+        }
+        Insert: {
+          criado_em?: string
+          lead_id: string
+          motivo: string
+        }
+        Update: {
+          criado_em?: string
+          lead_id?: string
+          motivo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "captacao_gate_isentas_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: true
             referencedRelation: "leads"
@@ -22270,6 +22458,55 @@ export type Database = {
         Returns: Json
       }
       candidatura_credito_ver: { Args: { _lead: string }; Returns: Json }
+      candidatura_documento_caminho: {
+        Args: { _ext: string; _tipo: string; _token: string }
+        Returns: string
+      }
+      candidatura_documento_conferir: {
+        Args: { _doc: string; _motivo?: string; _ok: boolean }
+        Returns: undefined
+      }
+      candidatura_documento_registrar: {
+        Args: {
+          _bytes: number
+          _mime: string
+          _path: string
+          _tipo: string
+          _token: string
+        }
+        Returns: Json
+      }
+      candidatura_documentos_abrir: { Args: { _token: string }; Returns: Json }
+      candidatura_documentos_finalizar: {
+        Args: { _token: string }
+        Returns: Json
+      }
+      candidatura_documentos_link_garantir: {
+        Args: { _lead: string }
+        Returns: string
+      }
+      candidatura_documentos_link_gerar: {
+        Args: { _lead: string }
+        Returns: string
+      }
+      candidatura_documentos_por_token: {
+        Args: { _token: string }
+        Returns: {
+          criado_em: string
+          criado_por: string | null
+          expira_em: string
+          finalizado_em: string | null
+          lead_id: string
+          token: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "candidatura_documentos_link"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      candidatura_documentos_ver: { Args: { _lead: string }; Returns: Json }
       candidatura_idade: {
         Args: { _em?: string; _nasc: string }
         Returns: number
@@ -22292,17 +22529,28 @@ export type Database = {
         Returns: Json
       }
       caps_individuais_permitidas: { Args: never; Returns: string[] }
+      captacao_aprovadas: { Args: { _canal?: string }; Returns: Json }
       captacao_canal: {
         Args: { _l: Database["public"]["Tables"]["leads"]["Row"] }
         Returns: string
       }
       captacao_decidir: { Args: { _lead: string }; Returns: Json }
       captacao_decisao_ver: { Args: { _lead: string }; Returns: Json }
+      captacao_envio_definir: {
+        Args: { _lead: string; _modo: string; _nota?: string; _rep?: string }
+        Returns: Json
+      }
       captacao_fila_concluir: {
         Args: { _erro?: string; _lead: string }
         Returns: undefined
       }
       captacao_fila_pegar: { Args: { _n?: number }; Returns: string[] }
+      captacao_lead_liberado: { Args: { _lead: string }; Returns: boolean }
+      captacao_mover_etapa: {
+        Args: { _key: string; _lead: string; _nota: string }
+        Returns: undefined
+      }
+      captacao_representantes: { Args: never; Returns: Json }
       captacao_revisar: {
         Args: { _lead: string; _motivo: string }
         Returns: undefined
@@ -25983,6 +26231,10 @@ export type Database = {
       }
       rep_candidata_ficha: { Args: { _lead: string }; Returns: Json }
       rep_candidata_perfil: { Args: { _lead: string }; Returns: Json }
+      rep_candidata_situacao: {
+        Args: { _lead: string; _rep: string }
+        Returns: Json
+      }
       rep_cheque_registrar: { Args: { _payload: Json }; Returns: string }
       rep_cob_historico: { Args: { _party: string }; Returns: Json }
       rep_cob_promessa: {

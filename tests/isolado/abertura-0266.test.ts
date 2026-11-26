@@ -102,6 +102,8 @@ describe("busca da maleta de abertura (rep_maleta_destinatarias)", () => {
     await rpc(master, "kit_expedir", { _cycle: c, _payload: { rota: "representante" } });
     const t = (await um<{ id: string }>(`select id from public.kit_transfers where cycle_id=$1 order by seq desc limit 1`, [c])).id;
     await rpc(rep, "kit_transfer_confirm", { _transfer: t, _payload: {} });
+    // 0398: candidata só recebe maleta do representante depois de aprovada pela Lardan
+    await adm.unsafe(`update public.leads set outcome='ganha', won_at=now(), status='aprovado' where id=$1`, [leadNova]);
     const passou = await rpc(rep, "rep_maleta_repassar", { _rep: rep.partyId, _cycle: c, _lead: leadNova });
     expect(passou.erro).toBeNull();
     const r = await rpc<{ tipo: string; id: string }[]>(rep, "rep_maleta_destinatarias", { _rep: rep.partyId, _busca: `zuleica ${marca}` });

@@ -13,6 +13,7 @@ import {
   ListOrdered,
   MapPinned,
   MessageCircle,
+  PackageCheck,
   Sparkles,
   UserRoundX,
   X,
@@ -25,6 +26,7 @@ import { Kanban, CardCandidatura } from "@/components/admin/candidaturas/Kanban"
 import { AvisosPush } from "@/components/admin/candidaturas/AvisosPush";
 import { FollowupDialog } from "@/components/admin/candidaturas/FollowupDialog";
 import { FilaAtendimento, MapaExpansao } from "@/components/admin/candidaturas/FilaAtendimento";
+import { Aprovadas } from "@/components/admin/candidaturas/Aprovadas";
 import {
   carregarAgenda,
   carregarBoard,
@@ -46,7 +48,7 @@ import { cn } from "@/lib/utils";
 
 /** Filtros vivem na URL: voltar do cockpit devolve o quadro exatamente como estava. */
 type Busca = {
-  vista?: "kanban" | "fila" | "lista" | "followups" | "concluidos" | "expansao";
+  vista?: "kanban" | "fila" | "aprovadas" | "lista" | "followups" | "concluidos" | "expansao";
   /** 0395: Site (Seja Lardan) ou Representantes (link e app). */
   canal?: "site" | "representante";
   q?: string;
@@ -295,6 +297,7 @@ function CandidaturasPage() {
             {(
               [
                 ["fila", "Fila", ListOrdered],
+                ["aprovadas", "Aprovadas", PackageCheck],
                 ["kanban", "Kanban", Columns3],
                 ["lista", "Lista", List],
                 ["followups", "Follow-ups", CalendarClock],
@@ -626,6 +629,8 @@ function CandidaturasPage() {
           </Panel>
         ) : busca.vista === "fila" ? (
           <FilaAtendimento filtros={filtros} />
+        ) : busca.vista === "aprovadas" ? (
+          <Aprovadas canal={busca.canal ?? "site"} podeEscolher={caps.includes("candidaturas.assign" as never)} />
         ) : busca.vista === "expansao" ? (
           <MapaExpansao />
         ) : busca.vista === "lista" ? (

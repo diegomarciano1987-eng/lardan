@@ -64,6 +64,7 @@ import { Route as AuthenticatedRepresentanteRouteImport } from './routes/_authen
 import { Route as CandidaturaTokenRouteImport } from './routes/candidatura.$token'
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as DCodigoRouteImport } from './routes/d.$codigo'
+import { Route as DocumentosTokenRouteImport } from './routes/documentos.$token'
 import { Route as GuiaSemijoiaFolheadoOuBijuteriaRouteImport } from './routes/guia.semijoia-folheado-ou-bijuteria'
 import { Route as GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRouteImport } from './routes/guia.semijoia-folheado-ou-bijuteria-em-londrina'
 import { Route as IndicacaoCodigoRouteImport } from './routes/indicacao.$codigo'
@@ -452,6 +453,11 @@ const ConviteTokenRoute = ConviteTokenRouteImport.update({
 const DCodigoRoute = DCodigoRouteImport.update({
   id: '/d/$codigo',
   path: '/d/$codigo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentosTokenRoute = DocumentosTokenRouteImport.update({
+  id: '/documentos/$token',
+  path: '/documentos/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuiaSemijoiaFolheadoOuBijuteriaRoute =
@@ -1063,6 +1069,7 @@ export interface FileRoutesByFullPath {
   '/candidatura/$token': typeof CandidaturaTokenRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
+  '/documentos/$token': typeof DocumentosTokenRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/guia/semijoia-folheado-ou-bijuteria-em-londrina': typeof GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
@@ -1214,6 +1221,7 @@ export interface FileRoutesByTo {
   '/candidatura/$token': typeof CandidaturaTokenRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
+  '/documentos/$token': typeof DocumentosTokenRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/guia/semijoia-folheado-ou-bijuteria-em-londrina': typeof GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
@@ -1367,6 +1375,7 @@ export interface FileRoutesById {
   '/candidatura/$token': typeof CandidaturaTokenRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/d/$codigo': typeof DCodigoRoute
+  '/documentos/$token': typeof DocumentosTokenRoute
   '/guia/semijoia-folheado-ou-bijuteria': typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   '/guia/semijoia-folheado-ou-bijuteria-em-londrina': typeof GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute
   '/indicacao/$codigo': typeof IndicacaoCodigoRoute
@@ -1521,6 +1530,7 @@ export interface FileRouteTypes {
     | '/candidatura/$token'
     | '/convite/$token'
     | '/d/$codigo'
+    | '/documentos/$token'
     | '/guia/semijoia-folheado-ou-bijuteria'
     | '/guia/semijoia-folheado-ou-bijuteria-em-londrina'
     | '/indicacao/$codigo'
@@ -1672,6 +1682,7 @@ export interface FileRouteTypes {
     | '/candidatura/$token'
     | '/convite/$token'
     | '/d/$codigo'
+    | '/documentos/$token'
     | '/guia/semijoia-folheado-ou-bijuteria'
     | '/guia/semijoia-folheado-ou-bijuteria-em-londrina'
     | '/indicacao/$codigo'
@@ -1824,6 +1835,7 @@ export interface FileRouteTypes {
     | '/candidatura/$token'
     | '/convite/$token'
     | '/d/$codigo'
+    | '/documentos/$token'
     | '/guia/semijoia-folheado-ou-bijuteria'
     | '/guia/semijoia-folheado-ou-bijuteria-em-londrina'
     | '/indicacao/$codigo'
@@ -1974,6 +1986,7 @@ export interface RootRouteChildren {
   CandidaturaTokenRoute: typeof CandidaturaTokenRoute
   ConviteTokenRoute: typeof ConviteTokenRoute
   DCodigoRoute: typeof DCodigoRoute
+  DocumentosTokenRoute: typeof DocumentosTokenRoute
   GuiaSemijoiaFolheadoOuBijuteriaRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaRoute
   GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute: typeof GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute
   IndicacaoCodigoRoute: typeof IndicacaoCodigoRoute
@@ -2390,6 +2403,13 @@ declare module '@tanstack/react-router' {
       path: '/d/$codigo'
       fullPath: '/d/$codigo'
       preLoaderRoute: typeof DCodigoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documentos/$token': {
+      id: '/documentos/$token'
+      path: '/documentos/$token'
+      fullPath: '/documentos/$token'
+      preLoaderRoute: typeof DocumentosTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guia/semijoia-folheado-ou-bijuteria': {
@@ -3341,6 +3361,7 @@ const rootRouteChildren: RootRouteChildren = {
   CandidaturaTokenRoute: CandidaturaTokenRoute,
   ConviteTokenRoute: ConviteTokenRoute,
   DCodigoRoute: DCodigoRoute,
+  DocumentosTokenRoute: DocumentosTokenRoute,
   GuiaSemijoiaFolheadoOuBijuteriaRoute: GuiaSemijoiaFolheadoOuBijuteriaRoute,
   GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute:
     GuiaSemijoiaFolheadoOuBijuteriaEmLondrinaRoute,

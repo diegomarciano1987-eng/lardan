@@ -38,8 +38,9 @@ function cpf(): string {
 async function lead(nome: string) {
   const doc = cpf();
   return (await um<{ id: string }>(
-    `insert into public.leads (full_name, whatsapp, city, uf, privacy_version, stage_id, representante_party_id, cpf, cpf_digits)
-     values ($1,'43999996666','Ibaiti','PR','v1',(select id from public.candidatura_stages order by sort_order limit 1),$2,$3,$3) returning id`,
+    // 0398: candidata só recebe maleta do representante depois de aprovada pela Lardan (aqui já aprovada)
+    `insert into public.leads (full_name, whatsapp, city, uf, privacy_version, stage_id, representante_party_id, cpf, cpf_digits, outcome, status, won_at)
+     values ($1,'43999996666','Ibaiti','PR','v1',(select id from public.candidatura_stages order by sort_order limit 1),$2,$3,$3,'ganha','aprovado',now()) returning id`,
     [nome, rep.partyId, doc])).id;
 }
 async function ok<T>(conta: Conta, fn: string, args: Record<string, unknown>) {

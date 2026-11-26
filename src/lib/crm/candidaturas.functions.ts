@@ -186,5 +186,19 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
       }
     }
 
+    // 0402: a Lara abre a conversa no WhatsApp (só candidatura nova, com o aceite; só se a Lara estiver ligada).
+    if (!r.duplicate && aceite_contato) {
+      try {
+        const ini = await (cliente as unknown as { rpc: (f: string, a: object) => PromiseLike<{ data: { iniciada?: boolean } | null; error: unknown }> })
+          .rpc("lara_iniciar_protocolo", { _protocolo: r.protocol });
+        if (ini.data?.iniciada) {
+          const { processarFila } = await import("@/lib/lara/fluxo.server");
+          await Promise.race([processarFila(3), new Promise((ok) => setTimeout(ok, 3000))]);
+        }
+      } catch (falha) {
+        console.error("[candidatura] Lara não iniciou:", (falha as Error).message);
+      }
+    }
+
     return { status: "ok" as const, protocolo: r.protocol, reenvio: r.duplicate, testeToken };
   });

@@ -146,10 +146,12 @@ import { Route as ApiPublicClicksignWebhookRouteImport } from './routes/api/publ
 import { Route as ApiPublicCorreiosRastrearRouteImport } from './routes/api/public/correios/rastrear'
 import { Route as ApiPublicFiscalProcessarRouteImport } from './routes/api/public/fiscal/processar'
 import { Route as ApiPublicFocusWebhookRouteImport } from './routes/api/public/focus/webhook'
+import { Route as ApiPublicLaraProcessarRouteImport } from './routes/api/public/lara/processar'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
 import { Route as ApiPublicRedeLocalizarRouteImport } from './routes/api/public/rede/localizar'
 import { Route as ApiPublicVitrineImgSplatRouteImport } from './routes/api/public/vitrine-img.$'
 import { Route as ApiPublicVitrineExpirarRouteImport } from './routes/api/public/vitrine/expirar'
+import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp/webhook'
 import { Route as ApiPublicZapsignConferirRouteImport } from './routes/api/public/zapsign/conferir'
 import { Route as ApiPublicZapsignWebhookRouteImport } from './routes/api/public/zapsign/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -930,6 +932,11 @@ const ApiPublicFocusWebhookRoute = ApiPublicFocusWebhookRouteImport.update({
   path: '/api/public/focus/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicLaraProcessarRoute = ApiPublicLaraProcessarRouteImport.update({
+  id: '/api/public/lara/processar',
+  path: '/api/public/lara/processar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMidiaIdRoute = ApiPublicMidiaIdRouteImport.update({
   id: '/api/public/midia/$id',
   path: '/api/public/midia/$id',
@@ -951,6 +958,12 @@ const ApiPublicVitrineExpirarRoute = ApiPublicVitrineExpirarRouteImport.update({
   path: '/api/public/vitrine/expirar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWhatsappWebhookRoute =
+  ApiPublicWhatsappWebhookRouteImport.update({
+    id: '/api/public/whatsapp/webhook',
+    path: '/api/public/whatsapp/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicZapsignConferirRoute =
   ApiPublicZapsignConferirRouteImport.update({
     id: '/api/public/zapsign/conferir',
@@ -1156,10 +1169,12 @@ export interface FileRoutesByFullPath {
   '/api/public/correios/rastrear': typeof ApiPublicCorreiosRastrearRoute
   '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
+  '/api/public/lara/processar': typeof ApiPublicLaraProcessarRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/api/public/vitrine/expirar': typeof ApiPublicVitrineExpirarRoute
+  '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/zapsign/conferir': typeof ApiPublicZapsignConferirRoute
   '/api/public/zapsign/webhook': typeof ApiPublicZapsignWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1308,10 +1323,12 @@ export interface FileRoutesByTo {
   '/api/public/correios/rastrear': typeof ApiPublicCorreiosRastrearRoute
   '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
+  '/api/public/lara/processar': typeof ApiPublicLaraProcessarRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/api/public/vitrine/expirar': typeof ApiPublicVitrineExpirarRoute
+  '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/zapsign/conferir': typeof ApiPublicZapsignConferirRoute
   '/api/public/zapsign/webhook': typeof ApiPublicZapsignWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1464,10 +1481,12 @@ export interface FileRoutesById {
   '/api/public/correios/rastrear': typeof ApiPublicCorreiosRastrearRoute
   '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
+  '/api/public/lara/processar': typeof ApiPublicLaraProcessarRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
   '/api/public/rede/localizar': typeof ApiPublicRedeLocalizarRoute
   '/api/public/vitrine-img/$': typeof ApiPublicVitrineImgSplatRoute
   '/api/public/vitrine/expirar': typeof ApiPublicVitrineExpirarRoute
+  '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/zapsign/conferir': typeof ApiPublicZapsignConferirRoute
   '/api/public/zapsign/webhook': typeof ApiPublicZapsignWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1620,10 +1639,12 @@ export interface FileRouteTypes {
     | '/api/public/correios/rastrear'
     | '/api/public/fiscal/processar'
     | '/api/public/focus/webhook'
+    | '/api/public/lara/processar'
     | '/api/public/midia/$id'
     | '/api/public/rede/localizar'
     | '/api/public/vitrine-img/$'
     | '/api/public/vitrine/expirar'
+    | '/api/public/whatsapp/webhook'
     | '/api/public/zapsign/conferir'
     | '/api/public/zapsign/webhook'
     | '/lovable/email/auth/preview'
@@ -1772,10 +1793,12 @@ export interface FileRouteTypes {
     | '/api/public/correios/rastrear'
     | '/api/public/fiscal/processar'
     | '/api/public/focus/webhook'
+    | '/api/public/lara/processar'
     | '/api/public/midia/$id'
     | '/api/public/rede/localizar'
     | '/api/public/vitrine-img/$'
     | '/api/public/vitrine/expirar'
+    | '/api/public/whatsapp/webhook'
     | '/api/public/zapsign/conferir'
     | '/api/public/zapsign/webhook'
     | '/lovable/email/auth/preview'
@@ -1927,10 +1950,12 @@ export interface FileRouteTypes {
     | '/api/public/correios/rastrear'
     | '/api/public/fiscal/processar'
     | '/api/public/focus/webhook'
+    | '/api/public/lara/processar'
     | '/api/public/midia/$id'
     | '/api/public/rede/localizar'
     | '/api/public/vitrine-img/$'
     | '/api/public/vitrine/expirar'
+    | '/api/public/whatsapp/webhook'
     | '/api/public/zapsign/conferir'
     | '/api/public/zapsign/webhook'
     | '/lovable/email/auth/preview'
@@ -2020,10 +2045,12 @@ export interface RootRouteChildren {
   ApiPublicCorreiosRastrearRoute: typeof ApiPublicCorreiosRastrearRoute
   ApiPublicFiscalProcessarRoute: typeof ApiPublicFiscalProcessarRoute
   ApiPublicFocusWebhookRoute: typeof ApiPublicFocusWebhookRoute
+  ApiPublicLaraProcessarRoute: typeof ApiPublicLaraProcessarRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
   ApiPublicRedeLocalizarRoute: typeof ApiPublicRedeLocalizarRoute
   ApiPublicVitrineImgSplatRoute: typeof ApiPublicVitrineImgSplatRoute
   ApiPublicVitrineExpirarRoute: typeof ApiPublicVitrineExpirarRoute
+  ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   ApiPublicZapsignConferirRoute: typeof ApiPublicZapsignConferirRoute
   ApiPublicZapsignWebhookRoute: typeof ApiPublicZapsignWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -2993,6 +3020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicFocusWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/lara/processar': {
+      id: '/api/public/lara/processar'
+      path: '/api/public/lara/processar'
+      fullPath: '/api/public/lara/processar'
+      preLoaderRoute: typeof ApiPublicLaraProcessarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/midia/$id': {
       id: '/api/public/midia/$id'
       path: '/api/public/midia/$id'
@@ -3019,6 +3053,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/vitrine/expirar'
       fullPath: '/api/public/vitrine/expirar'
       preLoaderRoute: typeof ApiPublicVitrineExpirarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/whatsapp/webhook': {
+      id: '/api/public/whatsapp/webhook'
+      path: '/api/public/whatsapp/webhook'
+      fullPath: '/api/public/whatsapp/webhook'
+      preLoaderRoute: typeof ApiPublicWhatsappWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/zapsign/conferir': {
@@ -3404,10 +3445,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCorreiosRastrearRoute: ApiPublicCorreiosRastrearRoute,
   ApiPublicFiscalProcessarRoute: ApiPublicFiscalProcessarRoute,
   ApiPublicFocusWebhookRoute: ApiPublicFocusWebhookRoute,
+  ApiPublicLaraProcessarRoute: ApiPublicLaraProcessarRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,
   ApiPublicRedeLocalizarRoute: ApiPublicRedeLocalizarRoute,
   ApiPublicVitrineImgSplatRoute: ApiPublicVitrineImgSplatRoute,
   ApiPublicVitrineExpirarRoute: ApiPublicVitrineExpirarRoute,
+  ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   ApiPublicZapsignConferirRoute: ApiPublicZapsignConferirRoute,
   ApiPublicZapsignWebhookRoute: ApiPublicZapsignWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

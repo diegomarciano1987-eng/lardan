@@ -2815,6 +2815,20 @@
       "when": 1795732382345,
       "tag": "0401_captacao_canal_encaminhada_0401",
       "breakpoints": true
+    },
+    {
+      "idx": 402,
+      "version": "7",
+      "when": 1795734342401,
+      "tag": "0402_lara_whatsapp_0402",
+      "breakpoints": true
+    },
+    {
+      "idx": 403,
+      "version": "7",
+      "when": 1795734462058,
+      "tag": "0403_lara_busca_nome_0402",
+      "breakpoints": true
     }
   ]
 }

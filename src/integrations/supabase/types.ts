@@ -3807,6 +3807,41 @@ export type Database = {
           },
         ]
       }
+      captacao_revisao_pedidos: {
+        Row: {
+          id: string
+          lead_id: string
+          pedido_em: string
+          resolvido_em: string | null
+          resolvido_por: string | null
+          texto: string | null
+        }
+        Insert: {
+          id?: string
+          lead_id: string
+          pedido_em?: string
+          resolvido_em?: string | null
+          resolvido_por?: string | null
+          texto?: string | null
+        }
+        Update: {
+          id?: string
+          lead_id?: string
+          pedido_em?: string
+          resolvido_em?: string | null
+          resolvido_por?: string | null
+          texto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "captacao_revisao_pedidos_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_defaults: {
         Row: {
           care_instructions: string | null
@@ -12428,6 +12463,183 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      lara_conversas: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          estado: string
+          humano: boolean
+          humano_desde: string | null
+          humano_motivo: string | null
+          humano_por: string | null
+          lead_id: string
+          nao_lidas: number
+          opt_out: boolean
+          proxima_acao_em: string | null
+          ultima_entrada_em: string | null
+          ultima_saida_em: string | null
+          wa_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          estado?: string
+          humano?: boolean
+          humano_desde?: string | null
+          humano_motivo?: string | null
+          humano_por?: string | null
+          lead_id: string
+          nao_lidas?: number
+          opt_out?: boolean
+          proxima_acao_em?: string | null
+          ultima_entrada_em?: string | null
+          ultima_saida_em?: string | null
+          wa_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          estado?: string
+          humano?: boolean
+          humano_desde?: string | null
+          humano_motivo?: string | null
+          humano_por?: string | null
+          lead_id?: string
+          nao_lidas?: number
+          opt_out?: boolean
+          proxima_acao_em?: string | null
+          ultima_entrada_em?: string | null
+          ultima_saida_em?: string | null
+          wa_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lara_conversas_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lara_fila: {
+        Row: {
+          autor: string
+          autor_id: string | null
+          cancelado_em: string | null
+          chave: string | null
+          conteudo: Json
+          criado_em: string
+          enviado_em: string | null
+          erro: string | null
+          id: string
+          lead_id: string | null
+          proxima_em: string
+          registro: string
+          tentativas: number
+          tipo: string
+          wa_id: string
+        }
+        Insert: {
+          autor?: string
+          autor_id?: string | null
+          cancelado_em?: string | null
+          chave?: string | null
+          conteudo: Json
+          criado_em?: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          lead_id?: string | null
+          proxima_em?: string
+          registro: string
+          tentativas?: number
+          tipo: string
+          wa_id: string
+        }
+        Update: {
+          autor?: string
+          autor_id?: string | null
+          cancelado_em?: string | null
+          chave?: string | null
+          conteudo?: Json
+          criado_em?: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          lead_id?: string | null
+          proxima_em?: string
+          registro?: string
+          tentativas?: number
+          tipo?: string
+          wa_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lara_fila_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lara_mensagens: {
+        Row: {
+          autor: string
+          autor_id: string | null
+          criado_em: string
+          direcao: string
+          erro: string | null
+          id: string
+          lead_id: string | null
+          status: string
+          template: string | null
+          texto: string | null
+          tipo: string
+          wa_id: string
+          wa_message_id: string | null
+        }
+        Insert: {
+          autor: string
+          autor_id?: string | null
+          criado_em?: string
+          direcao: string
+          erro?: string | null
+          id?: string
+          lead_id?: string | null
+          status?: string
+          template?: string | null
+          texto?: string | null
+          tipo: string
+          wa_id: string
+          wa_message_id?: string | null
+        }
+        Update: {
+          autor?: string
+          autor_id?: string | null
+          criado_em?: string
+          direcao?: string
+          erro?: string | null
+          id?: string
+          lead_id?: string | null
+          status?: string
+          template?: string | null
+          texto?: string | null
+          tipo?: string
+          wa_id?: string
+          wa_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lara_mensagens_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lead_events: {
         Row: {
@@ -22551,6 +22763,7 @@ export type Database = {
         Returns: undefined
       }
       captacao_representantes: { Args: never; Returns: Json }
+      captacao_revisao_resolver: { Args: { _id: string }; Returns: undefined }
       captacao_revisar: {
         Args: { _lead: string; _motivo: string }
         Returns: undefined
@@ -24610,6 +24823,85 @@ export type Database = {
         Returns: Json
       }
       kit_ve_rede: { Args: never; Returns: boolean }
+      lara_assumir: {
+        Args: { _assumir: boolean; _lead: string }
+        Returns: undefined
+      }
+      lara_ativa: { Args: never; Returns: boolean }
+      lara_conversa_ver: { Args: { _lead: string }; Returns: Json }
+      lara_conversas_lista: {
+        Args: { _busca?: string; _filtro?: string; _limite?: number }
+        Returns: Json
+      }
+      lara_enfileirar: {
+        Args: {
+          _autor?: string
+          _autor_id?: string
+          _chave?: string
+          _conteudo: Json
+          _lead: string
+          _quando?: string
+          _registro: string
+          _tipo: string
+          _wa: string
+        }
+        Returns: string
+      }
+      lara_entrada: {
+        Args: {
+          _em?: string
+          _texto: string
+          _tipo: string
+          _wa_id: string
+          _wamid: string
+        }
+        Returns: Json
+      }
+      lara_fila_concluir: {
+        Args: {
+          _definitivo?: boolean
+          _erro?: string
+          _id: string
+          _wamid: string
+        }
+        Returns: undefined
+      }
+      lara_fila_pegar: { Args: { _n?: number }; Returns: Json[] }
+      lara_iniciar: { Args: { _lead: string }; Returns: Json }
+      lara_iniciar_protocolo: { Args: { _protocolo: string }; Returns: Json }
+      lara_ligar: { Args: { _ativa: boolean }; Returns: boolean }
+      lara_prazos: { Args: never; Returns: Json }
+      lara_primeiro_nome: {
+        Args: { _l: Database["public"]["Tables"]["leads"]["Row"] }
+        Returns: string
+      }
+      lara_responder: {
+        Args: { _lead: string; _texto: string }
+        Returns: string
+      }
+      lara_revisao_pedir: {
+        Args: { _lead: string; _texto: string }
+        Returns: undefined
+      }
+      lara_status: {
+        Args: { _erro?: string; _status: string; _wamid: string }
+        Returns: undefined
+      }
+      lara_tel_chave: { Args: { _tel: string }; Returns: string }
+      lara_teste_token: { Args: { _lead: string }; Returns: string }
+      lara_transicao: {
+        Args: {
+          _como_conheceu?: string
+          _estado?: string
+          _humano_motivo?: string
+          _lead: string
+          _limpar_proxima?: boolean
+          _opt_out?: boolean
+          _proxima_em?: string
+        }
+        Returns: undefined
+      }
+      lara_wa: { Args: { _tel: string }; Returns: string }
       legado_acertos_distribuir: { Args: { _chaves: Json }; Returns: number }
       legado_bi_alertas: {
         Args: { _limite?: number; _praca?: number; _representante?: number }

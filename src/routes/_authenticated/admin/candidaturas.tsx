@@ -13,6 +13,7 @@ import {
   ListOrdered,
   MapPinned,
   MessageCircle,
+  MessagesSquare,
   PackageCheck,
   Sparkles,
   UserRoundX,
@@ -27,6 +28,7 @@ import { AvisosPush } from "@/components/admin/candidaturas/AvisosPush";
 import { FollowupDialog } from "@/components/admin/candidaturas/FollowupDialog";
 import { FilaAtendimento, MapaExpansao } from "@/components/admin/candidaturas/FilaAtendimento";
 import { Aprovadas } from "@/components/admin/candidaturas/Aprovadas";
+import { Conversas } from "@/components/admin/candidaturas/Conversas";
 import {
   carregarAgenda,
   carregarBoard,
@@ -48,7 +50,7 @@ import { cn } from "@/lib/utils";
 
 /** Filtros vivem na URL: voltar do cockpit devolve o quadro exatamente como estava. */
 type Busca = {
-  vista?: "kanban" | "fila" | "aprovadas" | "lista" | "followups" | "concluidos" | "expansao";
+  vista?: "kanban" | "fila" | "conversas" | "aprovadas" | "lista" | "followups" | "concluidos" | "expansao";
   /** 0395: Site (Seja Lardan) ou Representantes (link e app). */
   canal?: "site" | "representante";
   q?: string;
@@ -96,6 +98,11 @@ export const Route = createFileRoute("/_authenticated/admin/candidaturas")({
   head: () => ({
     meta: [
       { title: "Captação — Lardan Cloud" },
+      { name: "description", content: "Funil de captação, conversas e aprovação de candidatas Lardan." },
+      { property: "og:title", content: "Captação — Lardan Cloud" },
+      { property: "og:description", content: "Funil de captação, conversas e aprovação de candidatas Lardan." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -297,6 +304,7 @@ function CandidaturasPage() {
             {(
               [
                 ["fila", "Fila", ListOrdered],
+                ["conversas", "Conversas", MessagesSquare],
                 ["aprovadas", "Aprovadas", PackageCheck],
                 ["kanban", "Kanban", Columns3],
                 ["lista", "Lista", List],
@@ -629,6 +637,8 @@ function CandidaturasPage() {
           </Panel>
         ) : busca.vista === "fila" ? (
           <FilaAtendimento filtros={filtros} />
+        ) : busca.vista === "conversas" ? (
+          <Conversas podeEditar={caps.includes("candidaturas.edit" as never)} />
         ) : busca.vista === "aprovadas" ? (
           <Aprovadas canal={busca.canal ?? "site"} podeEscolher={caps.includes("candidaturas.assign" as never)} />
         ) : busca.vista === "expansao" ? (

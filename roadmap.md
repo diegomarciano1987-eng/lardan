@@ -92,8 +92,10 @@
 - [x] E4. Cadastros existentes aprovados e consultoras ativas somente com maleta em mãos, sem bloquear montagem
 
 # Lara no WhatsApp — pacote 0402_2 (26/11)
-- [ ] Aplicar banco, servidor e aba Conversas com a Lara desligada por padrão
-- [ ] Validar roteiro, fluxo, permissões e assinatura do webhook em testes isolados
-- [ ] Agendar /api/public/lara/processar a cada minuto e conferir a resposta após publicação
-- [ ] Solicitar credenciais da Meta pendentes; cadastro do webhook e ativação aguardam publicação
-- [ ] Não publicar sem aprovação do Diego
+- [x] Aplicar banco, servidor e aba Conversas com a Lara desligada por padrão
+- [x] Validar roteiro, fluxo, permissões, IA e recusa de chamadas sem autenticação
+- [x] Agendar /api/public/lara/processar a cada minuto
+- [ ] Confirmar {"ok":true} após publicação — aguarda aprovação do Diego
+- [ ] Credenciais da Meta: dois IDs salvos; token, chave do app e PIN aguardam o Diego; frase do webhook será gerada na etapa de publicação
+- [ ] Cadastrar webhook na Meta, ativar número e enviar modelos — aguarda publicação e credenciais
+- [x] Manter somente na prévia, sem publicação

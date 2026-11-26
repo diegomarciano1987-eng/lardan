@@ -182,6 +182,20 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
       setErro("Marque a autorização para a Lardan falar com você pelo WhatsApp.");
       return;
     }
+    // 0395: todas as perguntas são obrigatórias (o consentimento de novidades continua opcional)
+    const faltaCampo = !madrinha && !texto("quem_indicou") ? "Conte quem te indicou (se ninguém, escreva: ninguém)."
+      : !texto("email") ? "Informe o seu e-mail."
+      : !texto("street") ? "Informe a rua."
+      : !semNumero && !texto("street_number") ? "Informe o número (ou marque Sem número)."
+      : normalizarCep(cep).estado !== "valido" ? "Informe um CEP válido."
+      : !texto("dream") ? "Conte qual é o seu sonho."
+      : !(Number(centavosDoValor(sonhoValor) ?? 0) > 0) ? "Informe quanto custa o seu sonho."
+      : null;
+    if (faltaCampo) {
+      setBusy(false);
+      setErro(faltaCampo);
+      return;
+    }
     const nascimento = texto("data_nascimento");
     if (!nascimento) {
       setBusy(false);
@@ -317,7 +331,7 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
         {madrinha ? (
           <input id="quem_indicou" readOnly value={madrinha} className={field} />
         ) : (
-          <input id="quem_indicou" name="quem_indicou" maxLength={120} placeholder="Nome ou código da consultora (opcional)" className={field} />
+          <input id="quem_indicou" name="quem_indicou" required maxLength={120} placeholder="Nome ou código da consultora (se ninguém, escreva: ninguém)" className={field} />
         )}
         {madrinha && <p className="mt-1 text-xs text-muted-foreground">Preenchido pelo link de convite.</p>}
       </div>
@@ -392,8 +406,8 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
           />
         </div>
         <div>
-          <Label htmlFor="email">E-mail (opcional)</Label>
-          <input id="email" name="email" type="email" autoComplete="email" className={field} />
+          <Label htmlFor="email">E-mail</Label>
+          <input id="email" name="email" type="email" required autoComplete="email" className={field} />
         </div>
       </fieldset>
 
@@ -404,6 +418,7 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
           <input
             id="street"
             name="street"
+            required
             value={rua}
             onChange={(e) => setRua(e.target.value)}
             className={field}
@@ -415,6 +430,7 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
             <input
               id="street_number"
               name="street_number"
+              required={!semNumero}
               disabled={semNumero}
               className={`${field} disabled:opacity-50`}
             />
@@ -429,6 +445,7 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
               <input
                 id="postal_code"
                 name="postal_code"
+                required
                 inputMode="numeric"
                 placeholder="00000-000"
                 value={cep}
@@ -528,6 +545,7 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
           <input
             id="dream"
             name="dream"
+            required
             maxLength={300}
             placeholder="Uma moto, um carro, uma geladeira nova, uma viagem…"
             className={field}
@@ -537,6 +555,7 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
           <Label htmlFor="dream_value">Quanto custa esse sonho?</Label>
           <input
             id="dream_value"
+            required
             inputMode="numeric"
             value={sonhoValor}
             onChange={(e) => setSonhoValor(mascaraReais(e.target.value))}

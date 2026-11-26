@@ -12,7 +12,7 @@ export const COLAB_MODULOS: ColabModulo[] = [
   { id: "custos", nome: "Preço de custo", texto: "Mostra o custo das peças.", ver: ["catalog.cost.view"], alterar: [] },
   { id: "importacao", nome: "Importações", texto: "Importar planilhas com simulação.", ver: ["imports.run"], alterar: [] },
   { id: "cobranca", nome: "Cobrança", texto: "Carteira de devedoras, promessas e negociação.", ver: ["collection.view"], alterar: ["collection.operate", "collection.negotiate"] },
-  { id: "candidaturas", nome: "Candidaturas do Site", texto: "Funil das candidatas a consultora.", ver: ["candidaturas.view", "leads.view"], alterar: ["candidaturas.edit", "candidaturas.move", "candidaturas.notes", "candidaturas.followups", "candidaturas.tags", "candidaturas.assign"] },
+  { id: "candidaturas", nome: "Captação", texto: "Candidatas a consultora do site e dos representantes.", ver: ["candidaturas.view", "leads.view"], alterar: ["candidaturas.edit", "candidaturas.move", "candidaturas.notes", "candidaturas.followups", "candidaturas.tags", "candidaturas.assign"] },
   { id: "site", nome: "Site e vitrine", texto: "Curadoria e publicação do catálogo no site.", ver: ["showcase.view"], alterar: ["site.manage", "showcase.publish", "catalog.publish", "product.publish"] },
   { id: "rede", nome: "Inteligência da Rede", texto: "Mapa da rede (números agregados).", ver: ["network.aggregate.view"], alterar: [] },
   { id: "qualidade", nome: "Qualidade", texto: "Setor de Qualidade: maletas que voltam, trocas e garantias das consultoras e devolutiva.", ver: ["quality.view"], alterar: ["quality.manage"] },

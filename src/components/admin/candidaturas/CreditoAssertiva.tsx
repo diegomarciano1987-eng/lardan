@@ -2,7 +2,8 @@
  * 0394 — bloco "Crédito (Assertiva)" na análise da candidata.
  * Mostra a última consulta, a regra por idade aplicada e o histórico. Consultar custa (cobrado pela Assertiva), então
  * o botão pede confirmação e o servidor reaproveita a consulta dos últimos 30 dias, a não ser que peçam uma nova.
- * Nada aqui reprova: "revisar" vai para a decisão do Daniel.
+ * Nada aqui reprova: "revisar" vai para a análise do Daniel.
+ * 0395: mostra também a decisão da Captação (aprovada automaticamente ou foi para a análise, com os motivos).
  */
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -21,6 +22,11 @@ type Consulta = {
   debitos_valor: number | null; renda_presumida: number | null; idade: number | null; score_minimo: number | null;
   resultado: "aprovada_regra" | "revisar"; motivo: string; protocolo: string | null;
 };
+type Decisao = {
+  canal: "site" | "representante"; como_conheceu: string | null; na_fila: boolean; erro_fila: string | null;
+  ultima: { em: string; decisao: "aprovada_automatica" | "revisao"; motivos: string[]; semaforo: string | null; score: number | null; score_minimo: number | null } | null;
+};
+const COMO: Record<string, string> = { indicacao: "Indicação", instagram: "Instagram", google: "Google", outro: "Outro" };
 type Credito = { data_nascimento: string | null; idade: number | null; regras: { de: number; ate: number; score_min: number }[]; consultas: Consulta[] };
 
 const brl = (v: number | null | undefined) => (v == null ? "—" : v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }));
@@ -39,6 +45,14 @@ export function CreditoAssertiva({ leadId, podeEditar }: { leadId: string; podeE
       const { data, error } = await supabase.rpc("candidatura_credito_ver" as never, { _lead: leadId } as never);
       if (error) throw error;
       return data as unknown as Credito;
+    },
+  });
+  const dec = useQuery({
+    queryKey: ["crm", "captacao-decisao", leadId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("captacao_decisao_ver" as never, { _lead: leadId } as never);
+      if (error) throw error;
+      return data as unknown as Decisao;
     },
   });
   const atualizar = () => void qc.invalidateQueries({ queryKey: ["crm"] });
@@ -74,8 +88,35 @@ export function CreditoAssertiva({ leadId, podeEditar }: { leadId: string; podeE
   const regraAtual = c.idade != null ? c.regras.find((r) => c.idade! >= r.de && c.idade! <= r.ate) : undefined;
 
   return (
-    <Panel title="Crédito (Assertiva)">
+    <Panel title="Captação: crédito e decisão">
       <div className="space-y-4 text-sm">
+        {dec.data && (
+          <div className="rounded-xl border border-line-soft bg-surface p-4">
+            <p className="ledger-eyebrow mb-1">
+              Decisão da captação · {dec.data.canal === "representante" ? "captada pelo representante" : "veio pelo site"}
+              {dec.data.como_conheceu ? ` · conheceu por ${COMO[dec.data.como_conheceu] ?? dec.data.como_conheceu}` : ""}
+            </p>
+            {dec.data.ultima ? (
+              dec.data.ultima.decisao === "aprovada_automatica" ? (
+                <p className="font-semibold text-success">Aprovada automaticamente em {dataBR(dec.data.ultima.em)}: teste verde e crédito dentro da regra.</p>
+              ) : (
+                <>
+                  <p className="font-semibold text-warning">Foi para a análise do Daniel em {dataBR(dec.data.ultima.em)}</p>
+                  <ul className="mt-1 list-disc pl-5 text-xs text-ledger-muted">
+                    {dec.data.ultima.motivos.map((m) => <li key={m}>{m}</li>)}
+                  </ul>
+                </>
+              )
+            ) : dec.data.na_fila ? (
+              <p className="text-ledger-muted">
+                Teste concluído: consulta de crédito e decisão em andamento (em até alguns minutos).
+                {dec.data.erro_fila ? ` Última tentativa: ${dec.data.erro_fila}` : ""}
+              </p>
+            ) : (
+              <p className="text-ledger-muted">A decisão sai sozinha depois que a candidata concluir o teste.</p>
+            )}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <span>
             <span className="ledger-eyebrow mr-2">Nascimento</span>
@@ -162,7 +203,7 @@ export function CreditoAssertiva({ leadId, podeEditar }: { leadId: string; podeE
         )}
 
         <p className="text-[0.6875rem] text-ledger-muted">
-          Regra: {c.regras.map((r) => `${r.de}–${r.ate >= 100 ? "+" : r.ate} anos: mínimo ${r.score_min}`).join(" · ")}. A decisão final é sempre da equipe.
+          Regra: {c.regras.map((r) => `${r.de}–${r.ate >= 100 ? "+" : r.ate} anos: mínimo ${r.score_min}`).join(" · ")}. O sistema indica o resultado. Aprovação automática só quando todos os critérios passam; qualquer recusa é revisada por uma pessoa.
         </p>
       </div>
     </Panel>

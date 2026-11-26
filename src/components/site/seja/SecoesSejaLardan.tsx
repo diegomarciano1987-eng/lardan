@@ -371,8 +371,9 @@ export function SejaProcesso() {
           Como funciona para se tornar Consultora Lardan?
         </CinematicTitle>
         <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
-          Queremos construir uma rede forte. Por isso, cada candidatura passa por uma análise —
-          feita por pessoas, sem decisão automática.
+          Queremos construir uma rede forte. Por isso, cada candidatura passa por uma análise: um teste de
+          perfil e a consulta do CPF. Quando todos os critérios são atendidos, a aprovação é automática;
+          qualquer recusa é revisada por uma pessoa.
         </p>
         <ol className="mt-14 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {PROCESSO.map((p, i) => (

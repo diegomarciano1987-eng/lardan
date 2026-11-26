@@ -47,6 +47,8 @@ import { cn } from "@/lib/utils";
 /** Filtros vivem na URL: voltar do cockpit devolve o quadro exatamente como estava. */
 type Busca = {
   vista?: "kanban" | "fila" | "lista" | "followups" | "concluidos" | "expansao";
+  /** 0395: Site (Seja Lardan) ou Representantes (link e app). */
+  canal?: "site" | "representante";
   q?: string;
   etapa?: string;
   desfecho?: string;
@@ -74,6 +76,7 @@ export const Route = createFileRoute("/_authenticated/admin/candidaturas")({
   validateSearch: (s: Record<string, unknown>): Busca =>
     enxugar({
       vista: (s["vista"] as Busca["vista"]) ?? "kanban",
+      canal: s["canal"] === "representante" ? "representante" : "site",
       q: s["q"],
       etapa: s["etapa"],
       desfecho: s["desfecho"],
@@ -90,7 +93,7 @@ export const Route = createFileRoute("/_authenticated/admin/candidaturas")({
     }),
   head: () => ({
     meta: [
-      { title: "Candidaturas do Site — Lardan Cloud" },
+      { title: "Captação — Lardan Cloud" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -246,7 +249,7 @@ function CandidaturasPage() {
   if (!podeVer) {
     return (
       <div className="max-w-xl">
-        <PageHeader eyebrow="Comercial" title="Candidaturas do Site" />
+        <PageHeader eyebrow="Comercial" title="Captação" />
         <p className="mt-6 text-sm text-ledger-muted">
           Você não tem permissão para este módulo. Fale com a Diretoria.
         </p>
@@ -258,10 +261,34 @@ function CandidaturasPage() {
     <div className="min-w-0">
       <PageHeader
         eyebrow="Comercial"
-        title="Candidaturas do Site"
-        description="Todas as pessoas que se candidataram a Consultora Lardan pelo formulário Seja Lardan, com etapa, responsável, origem e próxima ação."
+        title="Captação"
+        description={busca.canal === "representante"
+          ? "Candidatas captadas pelos representantes (link e cadastro pelo app). Passam pelo mesmo teste e pela mesma consulta de crédito; aprovadas, voltam para o representante."
+          : "Candidatas que chegaram pelo site (Seja Lardan). Ficam só no CRM da Lardan: teste, consulta de crédito e, quando tudo passa, aprovação automática."}
         actions={
           <div className="flex flex-wrap items-center gap-2">
+          <div role="tablist" aria-label="Canal da captação" className="flex items-center gap-1 rounded-xl border border-line bg-surface p-1">
+            {(
+              [
+                ["site", "Site"],
+                ["representante", "Representantes"],
+              ] as const
+            ).map(([c, rotulo]) => (
+              <button
+                key={c}
+                type="button"
+                role="tab"
+                aria-selected={(busca.canal ?? "site") === c}
+                onClick={() => void navigate({ search: (s) => enxugar({ ...s, canal: c }) })}
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-[0.8125rem] font-semibold transition",
+                  (busca.canal ?? "site") === c ? "bg-champagne-soft text-bronze" : "text-ledger-muted hover:text-ledger-text",
+                )}
+              >
+                {rotulo}
+              </button>
+            ))}
+          </div>
           <AvisosPush />
           <Link to="/admin/candidaturas/indicacao" className="admin-btn">Indicação e comissão</Link>
           <div className="flex items-center gap-1 rounded-xl border border-line bg-surface p-1">
@@ -415,7 +442,7 @@ function CandidaturasPage() {
         {filtrosAtivos.length > 0 && (
           <button
             type="button"
-            onClick={() => void navigate({ search: enxugar({ vista: busca.vista }) })}
+            onClick={() => void navigate({ search: enxugar({ vista: busca.vista, canal: busca.canal }) })}
             className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2 text-[0.8125rem] font-semibold text-ledger-muted hover:border-danger hover:text-danger"
           >
             <X aria-hidden className="size-3.5" />

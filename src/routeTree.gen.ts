@@ -139,6 +139,7 @@ import { Route as ApiPublicAsaasExtratoHoraRouteImport } from './routes/api/publ
 import { Route as ApiPublicAsaasSaldoSyncRouteImport } from './routes/api/public/asaas/saldo-sync'
 import { Route as ApiPublicAsaasSyncMatinalRouteImport } from './routes/api/public/asaas/sync-matinal'
 import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/asaas/webhook'
+import { Route as ApiPublicCaptacaoProcessarRouteImport } from './routes/api/public/captacao/processar'
 import { Route as ApiPublicCentralLeadsEnviarRouteImport } from './routes/api/public/central-leads/enviar'
 import { Route as ApiPublicClicksignWebhookRouteImport } from './routes/api/public/clicksign/webhook'
 import { Route as ApiPublicFiscalProcessarRouteImport } from './routes/api/public/fiscal/processar'
@@ -887,6 +888,12 @@ const ApiPublicAsaasWebhookRoute = ApiPublicAsaasWebhookRouteImport.update({
   path: '/api/public/asaas/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCaptacaoProcessarRoute =
+  ApiPublicCaptacaoProcessarRouteImport.update({
+    id: '/api/public/captacao/processar',
+    path: '/api/public/captacao/processar',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicCentralLeadsEnviarRoute =
   ApiPublicCentralLeadsEnviarRouteImport.update({
     id: '/api/public/central-leads/enviar',
@@ -1129,6 +1136,7 @@ export interface FileRoutesByFullPath {
   '/api/public/asaas/saldo-sync': typeof ApiPublicAsaasSaldoSyncRoute
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
+  '/api/public/captacao/processar': typeof ApiPublicCaptacaoProcessarRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
@@ -1278,6 +1286,7 @@ export interface FileRoutesByTo {
   '/api/public/asaas/saldo-sync': typeof ApiPublicAsaasSaldoSyncRoute
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
+  '/api/public/captacao/processar': typeof ApiPublicCaptacaoProcessarRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
@@ -1431,6 +1440,7 @@ export interface FileRoutesById {
   '/api/public/asaas/saldo-sync': typeof ApiPublicAsaasSaldoSyncRoute
   '/api/public/asaas/sync-matinal': typeof ApiPublicAsaasSyncMatinalRoute
   '/api/public/asaas/webhook': typeof ApiPublicAsaasWebhookRoute
+  '/api/public/captacao/processar': typeof ApiPublicCaptacaoProcessarRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
   '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
@@ -1584,6 +1594,7 @@ export interface FileRouteTypes {
     | '/api/public/asaas/saldo-sync'
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
+    | '/api/public/captacao/processar'
     | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
     | '/api/public/fiscal/processar'
@@ -1733,6 +1744,7 @@ export interface FileRouteTypes {
     | '/api/public/asaas/saldo-sync'
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
+    | '/api/public/captacao/processar'
     | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
     | '/api/public/fiscal/processar'
@@ -1885,6 +1897,7 @@ export interface FileRouteTypes {
     | '/api/public/asaas/saldo-sync'
     | '/api/public/asaas/sync-matinal'
     | '/api/public/asaas/webhook'
+    | '/api/public/captacao/processar'
     | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
     | '/api/public/fiscal/processar'
@@ -1975,6 +1988,7 @@ export interface RootRouteChildren {
   ApiPublicAsaasSaldoSyncRoute: typeof ApiPublicAsaasSaldoSyncRoute
   ApiPublicAsaasSyncMatinalRoute: typeof ApiPublicAsaasSyncMatinalRoute
   ApiPublicAsaasWebhookRoute: typeof ApiPublicAsaasWebhookRoute
+  ApiPublicCaptacaoProcessarRoute: typeof ApiPublicCaptacaoProcessarRoute
   ApiPublicCentralLeadsEnviarRoute: typeof ApiPublicCentralLeadsEnviarRoute
   ApiPublicClicksignWebhookRoute: typeof ApiPublicClicksignWebhookRoute
   ApiPublicFiscalProcessarRoute: typeof ApiPublicFiscalProcessarRoute
@@ -2903,6 +2917,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAsaasWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/captacao/processar': {
+      id: '/api/public/captacao/processar'
+      path: '/api/public/captacao/processar'
+      fullPath: '/api/public/captacao/processar'
+      preLoaderRoute: typeof ApiPublicCaptacaoProcessarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/central-leads/enviar': {
       id: '/api/public/central-leads/enviar'
       path: '/api/public/central-leads/enviar'
@@ -3335,6 +3356,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAsaasSaldoSyncRoute: ApiPublicAsaasSaldoSyncRoute,
   ApiPublicAsaasSyncMatinalRoute: ApiPublicAsaasSyncMatinalRoute,
   ApiPublicAsaasWebhookRoute: ApiPublicAsaasWebhookRoute,
+  ApiPublicCaptacaoProcessarRoute: ApiPublicCaptacaoProcessarRoute,
   ApiPublicCentralLeadsEnviarRoute: ApiPublicCentralLeadsEnviarRoute,
   ApiPublicClicksignWebhookRoute: ApiPublicClicksignWebhookRoute,
   ApiPublicFiscalProcessarRoute: ApiPublicFiscalProcessarRoute,

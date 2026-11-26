@@ -1,5 +1,5 @@
 /**
- * LARDAN — botão "Avisos no aparelho" do módulo Candidaturas do Site.
+ * LARDAN — botão "Avisos no aparelho" do módulo Captação.
  *
  * Liga o aviso do navegador (computador e celular) para quem está logado. O
  * navegador só mostra o pedido de permissão com um clique e fora do quadro de

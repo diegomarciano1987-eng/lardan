@@ -2766,6 +2766,27 @@
       "when": 1795712649151,
       "tag": "0394_credito_assertiva_0394",
       "breakpoints": true
+    },
+    {
+      "idx": 395,
+      "version": "7",
+      "when": 1795717185172,
+      "tag": "0395_captacao_0395",
+      "breakpoints": true
+    },
+    {
+      "idx": 396,
+      "version": "7",
+      "when": 1795717324332,
+      "tag": "0396_permissao_exclusiva_mark_lost",
+      "breakpoints": true
+    },
+    {
+      "idx": 397,
+      "version": "7",
+      "when": 1795717363919,
+      "tag": "0397_my_capabilities_individual",
+      "breakpoints": true
     }
   ]
 }

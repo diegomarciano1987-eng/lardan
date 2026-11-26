@@ -178,12 +178,13 @@ describe("indicação", () => {
   const submeter = (lead: string, quem: string) => adm.unsafe(
     `insert into public.candidatura_submissions (lead_id, protocol, payload) values ($1,$2,$3::text::jsonb)`, [lead, `P-${lead.slice(0, 8)}`, JSON.stringify({ quem_indicou: quem })]);
 
-  test("'Quem te indicou?' com o código liga à madrinha e ao representante dela; texto livre só fica anotado", async () => {
+  test("'Quem te indicou?' com o código liga à madrinha (0395: sem representante); texto livre só fica anotado", async () => {
     const l1 = await novoLead(`Ana Indicada ${marca}`);
     await submeter(l1, codigo.toUpperCase());
     const a = await um<{ ref: string; txt: string; rep: string; orig: string }>(
       `select referred_by_party_id::text ref, indicado_por_texto txt, representante_party_id::text rep, representante_origem orig from public.leads where id=$1`, [l1]);
-    expect(a).toEqual({ ref: cons.partyId!, txt: codigo.toUpperCase(), rep: rep.partyId!, orig: "madrinha" });
+    // 0395: candidatura do site não vai mais para representante (nem pela madrinha); a indicação continua
+    expect(a).toEqual({ ref: cons.partyId!, txt: codigo.toUpperCase(), rep: null, orig: null });
     const l2 = await novoLead(`Bea Feira ${marca}`);
     await submeter(l2, "Maria da feira");
     const b = await um<{ ref: string | null; txt: string }>(`select referred_by_party_id::text ref, indicado_por_texto txt from public.leads where id=$1`, [l2]);

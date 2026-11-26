@@ -28,7 +28,7 @@ export const SITE = {
 } as const;
 
 export const ACEITE_TEXTO =
-  "Autorizo a Lardan a falar comigo pelo WhatsApp e a usar minhas respostas e a consulta do meu CPF em birô de crédito para avaliar meu cadastro.";
+  "Autorizo a Lardan a falar comigo pelo WhatsApp (inclusive pela assistente virtual Lara), a usar minhas respostas e o meu teste de perfil (DISC) e a consultar o meu CPF em birô de crédito para avaliar o meu cadastro. Sei que a análise é automatizada e que qualquer recusa é revisada por uma pessoa.";
 
 export const PARTE1 = {
   contatos_semana: {
@@ -150,7 +150,7 @@ export const DISC: { enunciado: string; frases: [string, string, string, string]
 ];
 
 export const FINAL_TEXTO =
-  "Recebemos suas respostas. O próximo passo é uma conversa por vídeo de uns 20 minutos: vamos combinar o melhor horário aqui pelo WhatsApp.";
+  "Recebemos suas respostas. Agora vamos analisar o seu perfil. Em breve a Lara te chama aqui no WhatsApp com o resultado e os próximos passos.";
 
 /** Respostas da candidata, como ficam gravadas (códigos, nunca pontos). */
 export interface Respostas {

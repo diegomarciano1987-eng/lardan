@@ -52,14 +52,16 @@ describe("link do teste", () => {
 });
 
 describe("conclusão e o que cada um vê", () => {
-  test("concluir marca a avaliação, move para Documentação; representante vê perfil e sonho, nunca o risco", async () => {
+  test("concluir marca a avaliação, move para Análise (0395); representante vê perfil e sonho, nunca o risco", async () => {
     const t = await um<{ id: string }>(`select id from public.candidatura_testes where lead_id=$1`, [lead]);
     await adm.unsafe(`update public.candidatura_testes set concluido_em=now(), versao_teste='2026-09-30',
       resultado='{"disc_perfil":"I+S","disc_principal":"I","disc_pct":{"D":40,"I":75,"S":60,"C":25},"rp_faixa":"alta","risco_acerto":"alto","ioa":30}'::jsonb where id=$1`, [t.id]);
     const s = await rpcServico("candidatura_teste_concluido", { _teste: t.id });
     expect(s.erro).toBeNull();
     const l = await um<{ key: string }>(`select s.key from public.leads l join public.candidatura_stages s on s.id=l.stage_id where l.id=$1`, [lead]);
-    expect(l.key).toBe("documentacao");
+    expect(l.key).toBe("avaliacao"); // 0395: teste concluído vai para "Análise" e entra na fila de crédito/decisão
+    const f = await um<{ n: number }>(`select count(*)::int n from public.captacao_fila where lead_id=$1 and feito_em is null`, [lead]);
+    expect(f.n).toBe(1);
     const a = await um<{ status: string }>(`select status from public.candidatura_assessments where lead_id=$1 and assessment_type='disc'`, [lead]);
     expect(a.status).toBe("concluido");
     const p = await rpc<Record<string, unknown>>(rep, "rep_candidata_perfil", { _lead: lead });

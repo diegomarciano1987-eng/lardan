@@ -132,9 +132,9 @@ export const ALERTA_TEXTO: Record<string, string> = {
 };
 
 export const O_QUE_FAZER: Record<Cor, string> = {
-  verde: "Entrevista normal, maleta padrão se nota ≥ 12.",
-  amarelo: "Entrevista com foco no público real, tendência a maleta menor.",
-  vermelho: "Entrevista curta de 10 min; sem público, recusar e guardar para recontato em 6 meses.",
+  verde: "Com o crédito dentro da regra e sem alertas, a aprovação é automática.",
+  amarelo: "Vai para a análise do Daniel, junto com a consulta de crédito.",
+  vermelho: "Vai para a análise do Daniel. Recusa só por uma pessoa.",
 };
 
 /** O que falta responder (todas obrigatórias na versão final). */

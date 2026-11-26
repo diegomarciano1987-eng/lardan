@@ -111,9 +111,9 @@ export const ADMIN_MODULES: AdminModule[] = [
   {
     slug: "crm-candidaturas",
     path: "/admin/candidaturas",
-    label: "Candidaturas do Site",
+    label: "Captação",
     description:
-      "CRM das candidatas a Consultora Lardan: funil, responsável, follow-ups, origem e histórico.",
+      "Captação de consultoras: candidatas do site (Seja Lardan) e as captadas pelos representantes, com teste, consulta de crédito, funil e histórico.",
     icon: UserRoundSearch,
     roles: ["master", "diretoria", "marketing", "suporte"],
     capability: "candidaturas.view",
@@ -320,9 +320,9 @@ export const ADMIN_SUBMODULES: AdminModule[] = [
   {
     slug: "candidaturas-site",
     path: "/admin/candidaturas",
-    label: "Candidaturas do Site",
+    label: "Captação",
     description:
-      "CRM das candidatas a Consultora Lardan: funil, responsável, follow-ups, origem e histórico.",
+      "Captação de consultoras: candidatas do site (Seja Lardan) e as captadas pelos representantes, com teste, consulta de crédito, funil e histórico.",
     icon: UserRoundSearch,
     roles: ["master", "diretoria", "marketing", "suporte"],
     capability: "candidaturas.view",

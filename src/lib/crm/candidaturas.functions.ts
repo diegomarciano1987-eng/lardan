@@ -33,7 +33,7 @@ const Entrada = z.object({
       .transform((v) => v.replace(/\D/g, ""))
       .refine((v) => v.length === 11, "cpf_invalido"),
     whatsapp: z.string().trim().min(10).max(32),
-    email: z.string().trim().max(200).optional(),
+    email: z.string().trim().min(5).max(200), // 0395: obrigatório
     city: z.string().trim().min(2).max(120),
     uf: z.string().trim().length(2),
     street: texto(200),
@@ -45,7 +45,7 @@ const Entrada = z.object({
     experience: texto(400),
     audience: texto(400),
     motivation: texto(2000),
-    dream: texto(300),
+    dream: z.string().trim().min(2).max(300), // 0395: obrigatório
     dream_value_cents: z.string().regex(/^\d{1,12}$/).optional(),
     source: texto(120),
     privacy_version: z.string().trim().min(1).max(60),
@@ -57,7 +57,7 @@ const Entrada = z.object({
     horas_semana: z.enum(["ate3", "3a6", "7a15", "mais15"]).optional(),
     aceite_contato: z.boolean().optional(),
     // 0394: data de nascimento (regra de crédito por idade). Opcional no servidor para não derrubar páginas antigas em cache.
-    data_nascimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    data_nascimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   }),
   tracking: z
     .object({
@@ -119,7 +119,7 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
     const { supabaseAdmin: cliente } = await import("@/integrations/supabase/client.server");
 
     const { experiencia_venda, horas_semana, aceite_contato, data_nascimento, ...payloadCadastro } = data.payload;
-    if (data_nascimento) {
+    {
       const idade = idadeEm(data_nascimento);
       if (idade === null || idade > 110) return { status: "erro" as const, codigo: "nascimento_invalido" };
       if (idade < 18) return { status: "erro" as const, codigo: "menor_idade" };

@@ -237,6 +237,8 @@ export interface Filtros {
   arquivadas?: boolean | undefined;
   /** 0301: true = só quem já tem maleta (aba Concluídos). */
   concluidas?: boolean | undefined;
+  /** 0395: Captação — "site" (Seja Lardan) ou "representante" (link e app do representante). */
+  canal?: "site" | "representante" | undefined;
 }
 
 /* -------------------------------------------------------- chamadas -- */

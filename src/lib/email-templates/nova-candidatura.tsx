@@ -84,7 +84,7 @@ const Email = ({
 
           <Hr style={risco} />
           <Text style={rodape}>
-            Aviso automático do painel Lardan · Candidaturas do Site. Os dados acima foram
+            Aviso automático do painel Lardan · Captação. Os dados acima foram
             informados pela própria candidata no formulário Seja Lardan.
           </Text>
         </Container>

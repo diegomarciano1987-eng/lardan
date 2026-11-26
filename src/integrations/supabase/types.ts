@@ -3537,6 +3537,88 @@ export type Database = {
         }
         Relationships: []
       }
+      captacao_decisoes: {
+        Row: {
+          credito_id: string | null
+          decidido_em: string
+          decisao: string
+          id: string
+          lead_id: string
+          motivos: string[]
+          score: number | null
+          score_minimo: number | null
+          semaforo: string | null
+          teste_id: string | null
+        }
+        Insert: {
+          credito_id?: string | null
+          decidido_em?: string
+          decisao: string
+          id?: string
+          lead_id: string
+          motivos?: string[]
+          score?: number | null
+          score_minimo?: number | null
+          semaforo?: string | null
+          teste_id?: string | null
+        }
+        Update: {
+          credito_id?: string | null
+          decidido_em?: string
+          decisao?: string
+          id?: string
+          lead_id?: string
+          motivos?: string[]
+          score?: number | null
+          score_minimo?: number | null
+          semaforo?: string | null
+          teste_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "captacao_decisoes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      captacao_fila: {
+        Row: {
+          criado_em: string
+          erro: string | null
+          feito_em: string | null
+          lead_id: string
+          proxima_em: string
+          tentativas: number
+        }
+        Insert: {
+          criado_em?: string
+          erro?: string | null
+          feito_em?: string | null
+          lead_id: string
+          proxima_em?: string
+          tentativas?: number
+        }
+        Update: {
+          criado_em?: string
+          erro?: string | null
+          feito_em?: string | null
+          lead_id?: string
+          proxima_em?: string
+          tentativas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "captacao_fila_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_defaults: {
         Row: {
           care_instructions: string | null
@@ -12209,6 +12291,7 @@ export type Database = {
           availability: string | null
           browser: string | null
           city: string
+          como_conheceu: string | null
           cpf: string | null
           cpf_digits: string | null
           created_at: string
@@ -12283,6 +12366,7 @@ export type Database = {
           availability?: string | null
           browser?: string | null
           city: string
+          como_conheceu?: string | null
           cpf?: string | null
           cpf_digits?: string | null
           created_at?: string
@@ -12357,6 +12441,7 @@ export type Database = {
           availability?: string | null
           browser?: string | null
           city?: string
+          como_conheceu?: string | null
           cpf?: string | null
           cpf_digits?: string | null
           created_at?: string
@@ -22201,6 +22286,26 @@ export type Database = {
       candidatura_teste_site: {
         Args: { _aceite: string; _protocolo: string; _site: Json }
         Returns: string
+      }
+      cap_exclusiva_definir: {
+        Args: { _actor: string; _cap: string; _motivo: string; _user: string }
+        Returns: Json
+      }
+      caps_individuais_permitidas: { Args: never; Returns: string[] }
+      captacao_canal: {
+        Args: { _l: Database["public"]["Tables"]["leads"]["Row"] }
+        Returns: string
+      }
+      captacao_decidir: { Args: { _lead: string }; Returns: Json }
+      captacao_decisao_ver: { Args: { _lead: string }; Returns: Json }
+      captacao_fila_concluir: {
+        Args: { _erro?: string; _lead: string }
+        Returns: undefined
+      }
+      captacao_fila_pegar: { Args: { _n?: number }; Returns: string[] }
+      captacao_revisar: {
+        Args: { _lead: string; _motivo: string }
+        Returns: undefined
       }
       catalog_markup_get: { Args: never; Returns: number }
       catalog_markup_set: { Args: { _percent: number }; Returns: number }

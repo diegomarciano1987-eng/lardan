@@ -2921,6 +2921,113 @@ export type Database = {
           },
         ]
       }
+      candidatura_credito_consultas: {
+        Row: {
+          classe: string | null
+          consultado_em: string
+          consultado_por: string | null
+          debitos_qtd: number | null
+          debitos_valor: number | null
+          faixa: string | null
+          http: number | null
+          id: string
+          idade: number | null
+          lead_id: string
+          motivo: string
+          origem: string
+          protestos_qtd: number | null
+          protestos_valor: number | null
+          protocolo: string | null
+          renda_presumida: number | null
+          resposta: Json
+          resultado: string
+          score: number | null
+          score_minimo: number | null
+          situacao: string
+        }
+        Insert: {
+          classe?: string | null
+          consultado_em?: string
+          consultado_por?: string | null
+          debitos_qtd?: number | null
+          debitos_valor?: number | null
+          faixa?: string | null
+          http?: number | null
+          id?: string
+          idade?: number | null
+          lead_id: string
+          motivo: string
+          origem: string
+          protestos_qtd?: number | null
+          protestos_valor?: number | null
+          protocolo?: string | null
+          renda_presumida?: number | null
+          resposta?: Json
+          resultado: string
+          score?: number | null
+          score_minimo?: number | null
+          situacao: string
+        }
+        Update: {
+          classe?: string | null
+          consultado_em?: string
+          consultado_por?: string | null
+          debitos_qtd?: number | null
+          debitos_valor?: number | null
+          faixa?: string | null
+          http?: number | null
+          id?: string
+          idade?: number | null
+          lead_id?: string
+          motivo?: string
+          origem?: string
+          protestos_qtd?: number | null
+          protestos_valor?: number | null
+          protocolo?: string | null
+          renda_presumida?: number | null
+          resposta?: Json
+          resultado?: string
+          score?: number | null
+          score_minimo?: number | null
+          situacao?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatura_credito_consultas_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidatura_credito_regras: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string | null
+          id: number
+          idade_max: number
+          idade_min: number
+          score_min: number
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: number
+          idade_max: number
+          idade_min: number
+          score_min: number
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: number
+          idade_max?: number
+          idade_min?: number
+          score_min?: number
+        }
+        Relationships: []
+      }
       candidatura_followups: {
         Row: {
           assigned_to: string | null
@@ -12105,6 +12212,7 @@ export type Database = {
           cpf: string | null
           cpf_digits: string | null
           created_at: string
+          data_nascimento: string | null
           device_type: string | null
           dream: string | null
           dream_value_cents: number | null
@@ -12178,6 +12286,7 @@ export type Database = {
           cpf?: string | null
           cpf_digits?: string | null
           created_at?: string
+          data_nascimento?: string | null
           device_type?: string | null
           dream?: string | null
           dream_value_cents?: number | null
@@ -12251,6 +12360,7 @@ export type Database = {
           cpf?: string | null
           cpf_digits?: string | null
           created_at?: string
+          data_nascimento?: string | null
           device_type?: string | null
           dream?: string | null
           dream_value_cents?: number | null
@@ -22060,6 +22170,29 @@ export type Database = {
       can_view_kits: { Args: { _user_id: string }; Returns: boolean }
       candidata_acesso_situacao: { Args: { _lead: string }; Returns: Json }
       candidata_preparar_acesso: { Args: { _lead: string }; Returns: string }
+      candidatura_credito_preparar: {
+        Args: { _forcar: boolean; _lead: string; _usuario: string }
+        Returns: Json
+      }
+      candidatura_credito_registrar: {
+        Args: {
+          _http: number
+          _lead: string
+          _origem: string
+          _resposta: Json
+          _usuario: string
+        }
+        Returns: Json
+      }
+      candidatura_credito_ver: { Args: { _lead: string }; Returns: Json }
+      candidatura_idade: {
+        Args: { _em?: string; _nasc: string }
+        Returns: number
+      }
+      candidatura_nascimento_definir: {
+        Args: { _data: string; _lead: string; _usuario: string }
+        Returns: undefined
+      }
       candidatura_teste_concluido: {
         Args: { _teste: string }
         Returns: undefined

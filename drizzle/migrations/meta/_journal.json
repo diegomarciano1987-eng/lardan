@@ -2759,6 +2759,13 @@
       "when": 1795707728953,
       "tag": "0393_fila_atendimento_expansao_0393",
       "breakpoints": true
+    },
+    {
+      "idx": 394,
+      "version": "7",
+      "when": 1795712649151,
+      "tag": "0394_credito_assertiva_0394",
+      "breakpoints": true
     }
   ]
 }

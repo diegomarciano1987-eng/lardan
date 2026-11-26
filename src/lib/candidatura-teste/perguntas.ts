@@ -28,7 +28,7 @@ export const SITE = {
 } as const;
 
 export const ACEITE_TEXTO =
-  "Autorizo a Lardan a falar comigo pelo WhatsApp e a usar minhas respostas para avaliar meu cadastro.";
+  "Autorizo a Lardan a falar comigo pelo WhatsApp e a usar minhas respostas e a consulta do meu CPF em birô de crédito para avaliar meu cadastro.";
 
 export const PARTE1 = {
   contatos_semana: {

@@ -11,6 +11,18 @@ import { z } from "zod";
 
 const texto = (max: number) => z.string().trim().max(max).optional();
 
+/** Idade completa em anos numa data ISO (AAAA-MM-DD), pelo calendário de São Paulo. */
+function idadeEm(iso: string): number | null {
+  const [a, m, d] = iso.split("-").map(Number);
+  if (!a || !m || !d) return null;
+  const nasc = new Date(Date.UTC(a, m - 1, d));
+  if (nasc.getUTCFullYear() !== a || nasc.getUTCMonth() !== m - 1 || nasc.getUTCDate() !== d) return null;
+  const hoje = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date()).split("-").map(Number);
+  let idade = hoje[0]! - a;
+  if (hoje[1]! < m || (hoje[1] === m && hoje[2]! < d)) idade -= 1;
+  return idade < 0 ? null : idade;
+}
+
 const Entrada = z.object({
   payload: z.object({
     first_name: z.string().trim().min(2).max(80),
@@ -44,6 +56,8 @@ const Entrada = z.object({
     experiencia_venda: z.enum(["vende_hoje", "ja_vendeu", "nunca"]).optional(),
     horas_semana: z.enum(["ate3", "3a6", "7a15", "mais15"]).optional(),
     aceite_contato: z.boolean().optional(),
+    // 0394: data de nascimento (regra de crédito por idade). Opcional no servidor para não derrubar páginas antigas em cache.
+    data_nascimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   }),
   tracking: z
     .object({
@@ -104,7 +118,12 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
     // 0326: a rotina do banco só aceita o servidor; o IP gravado é o da requisição real.
     const { supabaseAdmin: cliente } = await import("@/integrations/supabase/client.server");
 
-    const { experiencia_venda, horas_semana, aceite_contato, ...payloadCadastro } = data.payload;
+    const { experiencia_venda, horas_semana, aceite_contato, data_nascimento, ...payloadCadastro } = data.payload;
+    if (data_nascimento) {
+      const idade = idadeEm(data_nascimento);
+      if (idade === null || idade > 110) return { status: "erro" as const, codigo: "nascimento_invalido" };
+      if (idade < 18) return { status: "erro" as const, codigo: "menor_idade" };
+    }
     const { data: resultado, error } = await (cliente as unknown as { rpc: (f: string, a: object) => PromiseLike<{ data: unknown; error: { message: string } | null }> }).rpc("submit_candidatura", {
       _payload: payloadCadastro,
       _tracking: { ...data.tracking, ip, user_agent: userAgent },
@@ -121,6 +140,21 @@ export const enviarCandidatura = createServerFn({ method: "POST" })
       return { status: "erro" as const, codigo };
     }
     const r = resultado as { protocol: string; duplicate: boolean };
+
+    // 0394: grava a data de nascimento (nunca derruba o envio se falhar)
+    if (data_nascimento) {
+      try {
+        const { data: lead } = await (cliente as unknown as { from: (t: string) => { select: (c: string) => { eq: (k: string, v: string) => { maybeSingle: () => PromiseLike<{ data: { id: string } | null }> } } } })
+          .from("leads").select("id").eq("protocol", r.protocol).maybeSingle();
+        if (lead?.id) {
+          await (cliente as unknown as { rpc: (f: string, a: object) => PromiseLike<unknown> }).rpc("candidatura_nascimento_definir", {
+            _lead: lead.id, _data: data_nascimento, _usuario: null,
+          });
+        }
+      } catch (falha) {
+        console.error("[candidatura] data de nascimento não gravada:", falha);
+      }
+    }
 
     // Avisos internos: nunca derrubam o envio da candidata se falharem.
     try {

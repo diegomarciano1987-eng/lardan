@@ -21,6 +21,7 @@ import { useCapabilities } from "@/lib/capabilities";
 import { FollowupDialog } from "@/components/admin/candidaturas/FollowupDialog";
 import { EnvioRepresentante } from "@/components/admin/candidaturas/EnvioRepresentante";
 import { AnaliseTeste } from "@/components/admin/candidaturas/AnaliseTeste";
+import { CreditoAssertiva } from "@/components/admin/candidaturas/CreditoAssertiva";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import {
   Dialog,
@@ -549,7 +550,10 @@ function CockpitCandidata() {
 
             {/* AVALIAÇÕES — 0284: teste de candidatura (link, análise e semáforo) */}
             <TabsContent value="avaliacoes">
-              <AnaliseTeste leadId={id} podeEditar={caps.includes("candidaturas.edit")} />
+              <div className="space-y-5">
+                <CreditoAssertiva leadId={id} podeEditar={caps.includes("candidaturas.edit")} />
+                <AnaliseTeste leadId={id} podeEditar={caps.includes("candidaturas.edit")} />
+              </div>
             </TabsContent>
 
             {/* DADOS TÉCNICOS */}

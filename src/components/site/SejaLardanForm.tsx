@@ -70,6 +70,7 @@ function Label({ htmlFor, children }: { htmlFor: string; children: React.ReactNo
 
 export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: string | undefined; modo?: "site" | "indicacao" } = {}) {
   const [busy, setBusy] = useState(false);
+  const [nascBr, setNascBr] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);
   const [popupAberto, setPopupAberto] = useState(false);
@@ -181,6 +182,17 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
       setErro("Marque a autorização para a Lardan falar com você pelo WhatsApp.");
       return;
     }
+    const nascimento = texto("data_nascimento");
+    if (!nascimento) {
+      setBusy(false);
+      setErro("Informe a data de nascimento completa (dia, mês e ano).");
+      return;
+    }
+    if (idadeCompleta(nascimento) < 18) {
+      setBusy(false);
+      setErro("Para ser consultora Lardan é preciso ter 18 anos ou mais.");
+      return;
+    }
     if (!isValidCpf(cpf)) {
       setBusy(false);
       setErro("Confira o CPF informado.");
@@ -214,6 +226,7 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
             horas_semana: disponibilidade,
             aceite_contato: aceiteContato,
             dream: texto("dream"),
+            data_nascimento: texto("data_nascimento"),
             dream_value_cents: centavosDoValor(sonhoValor),
             source: modo === "indicacao" ? "indicacao/link" : "site/seja-lardan",
             privacy_version: PRIVACY_VERSION,
@@ -228,6 +241,10 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
         setErro(
           resposta.codigo === "limite_envios"
             ? "Recebemos vários envios seguidos deste acesso. Aguarde alguns minutos e tente novamente."
+            : resposta.codigo === "menor_idade"
+              ? "Para ser consultora Lardan é preciso ter 18 anos ou mais."
+              : resposta.codigo === "nascimento_invalido"
+                ? "Confira a data de nascimento."
             : resposta.codigo === "email_invalido"
               ? "Confira o e-mail informado."
               : "Não foi possível registrar a candidatura. Confira os dados obrigatórios e tente novamente.",
@@ -343,8 +360,23 @@ export function SejaLardanForm({ indicacao, modo = "site" }: { indicacao?: strin
             className={field}
           />
           <p className="mt-2 text-xs text-muted-foreground">
-            O CPF é usado apenas para identificar a candidata no cadastro da Lardan.
+            O CPF identifica você no cadastro e é usado na análise de crédito, necessária para receber a maleta consignada.
           </p>
+        </div>
+        <div>
+          <Label htmlFor="data_nascimento">Data de nascimento</Label>
+          <input
+            id="data_nascimento"
+            name="data_nascimento_br"
+            inputMode="numeric"
+            required
+            autoComplete="bday"
+            placeholder="DD/MM/AAAA"
+            value={nascBr}
+            onChange={(e) => setNascBr(mascaraData(e.target.value))}
+            className={field}
+          />
+          <input type="hidden" name="data_nascimento" value={brParaIso(nascBr) ?? ""} />
         </div>
         <div>
           <Label htmlFor="whatsapp">WhatsApp com DDD</Label>
@@ -599,4 +631,36 @@ function TesteNoSite({ token, aberto, onAbrir, onFechar }: { token: string | nul
       </Dialog>
     </>
   );
+}
+
+/** 0394: data de hoje (AAAA-MM-DD) para limitar o campo de nascimento. */
+function hojeIso() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+}
+/** 0394: idade completa a partir de AAAA-MM-DD. */
+function idadeCompleta(iso: string) {
+  const [a, m, d] = iso.split("-").map(Number);
+  const [ha, hm, hd] = hojeIso().split("-").map(Number);
+  let idade = ha! - a!;
+  if (hm! < m! || (hm === m && hd! < d!)) idade -= 1;
+  return idade;
+}
+
+/** 0394: máscara DD/MM/AAAA. */
+function mascaraData(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 8);
+  if (d.length <= 2) return d;
+  if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
+}
+/** 0394: DD/MM/AAAA → AAAA-MM-DD, só se for uma data real entre 1900 e hoje. */
+function brParaIso(br: string) {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(br);
+  if (!m) return null;
+  const [, d, mm, a] = m;
+  const dt = new Date(Date.UTC(Number(a), Number(mm) - 1, Number(d)));
+  if (dt.getUTCDate() !== Number(d) || dt.getUTCMonth() !== Number(mm) - 1) return null;
+  const iso = `${a}-${mm}-${d}`;
+  if (iso <= "1900-01-01" || iso > hojeIso()) return null;
+  return iso;
 }

@@ -143,6 +143,7 @@ import { Route as ApiPublicAsaasWebhookRouteImport } from './routes/api/public/a
 import { Route as ApiPublicCaptacaoProcessarRouteImport } from './routes/api/public/captacao/processar'
 import { Route as ApiPublicCentralLeadsEnviarRouteImport } from './routes/api/public/central-leads/enviar'
 import { Route as ApiPublicClicksignWebhookRouteImport } from './routes/api/public/clicksign/webhook'
+import { Route as ApiPublicCorreiosRastrearRouteImport } from './routes/api/public/correios/rastrear'
 import { Route as ApiPublicFiscalProcessarRouteImport } from './routes/api/public/fiscal/processar'
 import { Route as ApiPublicFocusWebhookRouteImport } from './routes/api/public/focus/webhook'
 import { Route as ApiPublicMidiaIdRouteImport } from './routes/api/public/midia.$id'
@@ -912,6 +913,12 @@ const ApiPublicClicksignWebhookRoute =
     path: '/api/public/clicksign/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCorreiosRastrearRoute =
+  ApiPublicCorreiosRastrearRouteImport.update({
+    id: '/api/public/correios/rastrear',
+    path: '/api/public/correios/rastrear',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicFiscalProcessarRoute =
   ApiPublicFiscalProcessarRouteImport.update({
     id: '/api/public/fiscal/processar',
@@ -1146,6 +1153,7 @@ export interface FileRoutesByFullPath {
   '/api/public/captacao/processar': typeof ApiPublicCaptacaoProcessarRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
+  '/api/public/correios/rastrear': typeof ApiPublicCorreiosRastrearRoute
   '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
@@ -1297,6 +1305,7 @@ export interface FileRoutesByTo {
   '/api/public/captacao/processar': typeof ApiPublicCaptacaoProcessarRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
+  '/api/public/correios/rastrear': typeof ApiPublicCorreiosRastrearRoute
   '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
@@ -1452,6 +1461,7 @@ export interface FileRoutesById {
   '/api/public/captacao/processar': typeof ApiPublicCaptacaoProcessarRoute
   '/api/public/central-leads/enviar': typeof ApiPublicCentralLeadsEnviarRoute
   '/api/public/clicksign/webhook': typeof ApiPublicClicksignWebhookRoute
+  '/api/public/correios/rastrear': typeof ApiPublicCorreiosRastrearRoute
   '/api/public/fiscal/processar': typeof ApiPublicFiscalProcessarRoute
   '/api/public/focus/webhook': typeof ApiPublicFocusWebhookRoute
   '/api/public/midia/$id': typeof ApiPublicMidiaIdRoute
@@ -1607,6 +1617,7 @@ export interface FileRouteTypes {
     | '/api/public/captacao/processar'
     | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
+    | '/api/public/correios/rastrear'
     | '/api/public/fiscal/processar'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
@@ -1758,6 +1769,7 @@ export interface FileRouteTypes {
     | '/api/public/captacao/processar'
     | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
+    | '/api/public/correios/rastrear'
     | '/api/public/fiscal/processar'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
@@ -1912,6 +1924,7 @@ export interface FileRouteTypes {
     | '/api/public/captacao/processar'
     | '/api/public/central-leads/enviar'
     | '/api/public/clicksign/webhook'
+    | '/api/public/correios/rastrear'
     | '/api/public/fiscal/processar'
     | '/api/public/focus/webhook'
     | '/api/public/midia/$id'
@@ -2004,6 +2017,7 @@ export interface RootRouteChildren {
   ApiPublicCaptacaoProcessarRoute: typeof ApiPublicCaptacaoProcessarRoute
   ApiPublicCentralLeadsEnviarRoute: typeof ApiPublicCentralLeadsEnviarRoute
   ApiPublicClicksignWebhookRoute: typeof ApiPublicClicksignWebhookRoute
+  ApiPublicCorreiosRastrearRoute: typeof ApiPublicCorreiosRastrearRoute
   ApiPublicFiscalProcessarRoute: typeof ApiPublicFiscalProcessarRoute
   ApiPublicFocusWebhookRoute: typeof ApiPublicFocusWebhookRoute
   ApiPublicMidiaIdRoute: typeof ApiPublicMidiaIdRoute
@@ -2958,6 +2972,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicClicksignWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/correios/rastrear': {
+      id: '/api/public/correios/rastrear'
+      path: '/api/public/correios/rastrear'
+      fullPath: '/api/public/correios/rastrear'
+      preLoaderRoute: typeof ApiPublicCorreiosRastrearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/fiscal/processar': {
       id: '/api/public/fiscal/processar'
       path: '/api/public/fiscal/processar'
@@ -3380,6 +3401,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCaptacaoProcessarRoute: ApiPublicCaptacaoProcessarRoute,
   ApiPublicCentralLeadsEnviarRoute: ApiPublicCentralLeadsEnviarRoute,
   ApiPublicClicksignWebhookRoute: ApiPublicClicksignWebhookRoute,
+  ApiPublicCorreiosRastrearRoute: ApiPublicCorreiosRastrearRoute,
   ApiPublicFiscalProcessarRoute: ApiPublicFiscalProcessarRoute,
   ApiPublicFocusWebhookRoute: ApiPublicFocusWebhookRoute,
   ApiPublicMidiaIdRoute: ApiPublicMidiaIdRoute,

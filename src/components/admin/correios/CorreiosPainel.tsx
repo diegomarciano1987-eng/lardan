@@ -16,6 +16,7 @@ interface Painel {
   indicadores: { em_transito: number; aguardando_postagem: number; entregues_90d: number; frete_90d_cents: number; prazo_medio_dias: number | null; volta_no_prazo_pct: number | null };
 }
 const brl = (c: number | null | undefined) => (c == null ? "—" : (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }));
+const SITUACAO: Record<string, string> = { pre_postada: "Etiqueta emitida", postada: "Postada", em_transito: "Em trânsito", entregue: "Entregue", erro: "Erro", cancelada: "Cancelada", expirada: "Expirada" };
 const dt = (s: string | null) => (s ? new Date(s.length === 10 ? `${s}T12:00:00` : s).toLocaleDateString("pt-BR") : "—");
 
 export function CorreiosPainel() {
@@ -36,6 +37,7 @@ export function CorreiosPainel() {
   return (
     <Panel title="Maletas nos Correios">
       <div className="space-y-4 text-sm">
+        <p className="text-xs text-ledger-muted">Rastreio automático nos Correios às 8h e às 15h: quando o objeto é entregue, a maleta é liberada para a consultora sozinha e os 30 dias começam a contar.</p>
         <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {[
             ["Em trânsito", String(i.em_transito)], ["Aguardando postagem", String(i.aguardando_postagem)],
@@ -62,16 +64,17 @@ export function CorreiosPainel() {
         {d.envios.length === 0 ? <p className="text-ledger-muted">Nenhuma maleta enviada pelos Correios ainda.</p> : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-xs text-ledger-muted"><tr><th className="py-1">Maleta</th><th>Consultora</th><th>Sentido</th><th>Código</th><th>Situação</th><th className="text-right">Frete</th></tr></thead>
+              <thead className="text-left text-xs text-ledger-muted"><tr><th className="py-1">Maleta</th><th>Consultora</th><th>Sentido</th><th>Código</th><th>Postada</th><th>Situação</th><th className="text-right">Frete</th></tr></thead>
               <tbody>
                 {d.envios.slice(0, 50).map((e) => (
                   <tr key={e.id} className="border-t border-line-soft">
                     <td className="py-1.5"><Link to="/admin/maletas/$id" params={{ id: e.cycle_id }} className="admin-link">{e.kit}</Link></td>
                     <td>{e.consultora ? comCodigo(e.consultora, codigos.data?.get(e.cycle_id)) : "—"}</td>
                     <td>{e.direcao === "ida" ? "Ida" : "Volta"}</td>
+                    <td className="text-xs tabular-nums">{dt(e.postado_em)}</td>
                     <td className="font-mono text-xs">{e.codigo_objeto ?? "—"}</td>
-                    <td><StatusBadge tone={e.status === "entregue" ? "success" : e.status === "erro" ? "danger" : "neutral"}>{e.status.replace("_", " ")}</StatusBadge>
-                      {e.entregue_em ? <span className="ml-1 text-xs text-ledger-muted">{dt(e.entregue_em)}</span> : null}</td>
+                    <td><StatusBadge tone={e.status === "entregue" ? "success" : e.status === "erro" ? "danger" : "neutral"}>{SITUACAO[e.status] ?? e.status}</StatusBadge>
+                      {e.entregue_em ? <span className="ml-1 text-xs text-ledger-muted">em {dt(e.entregue_em)}</span> : null}</td>
                     <td className="text-right tabular-nums">{brl(e.frete_cents)}</td>
                   </tr>
                 ))}

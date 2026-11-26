@@ -412,7 +412,8 @@ function FichaPessoa() {
                 </p>
               ) : (
                 <ul className="flex flex-wrap gap-2">
-                  {d.papeis.map((p) => (
+                  {/* Consultora não carrega mais o papel de candidata na ficha; o histórico fica na Captação. */}
+                  {d.papeis.filter((p) => !(p.role === "candidata" && d.papeis.some((x) => x.role === "consultora"))).map((p) => (
                     <li
                       key={p.id}
                       className="inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-2.5 py-1 text-xs font-semibold text-ledger-text shadow-sm"

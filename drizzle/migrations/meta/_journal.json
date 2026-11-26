@@ -2801,6 +2801,13 @@
       "when": 1795719105610,
       "tag": "0399_captacao_aprovadas_0398b",
       "breakpoints": true
+    },
+    {
+      "idx": 400,
+      "version": "7",
+      "when": 1795721376980,
+      "tag": "0400_captacao_canal_representante",
+      "breakpoints": true
     }
   ]
 }

@@ -2808,6 +2808,13 @@
       "when": 1795721376980,
       "tag": "0400_captacao_canal_representante",
       "breakpoints": true
+    },
+    {
+      "idx": 401,
+      "version": "7",
+      "when": 1795732382345,
+      "tag": "0401_captacao_canal_encaminhada_0401",
+      "breakpoints": true
     }
   ]
 }

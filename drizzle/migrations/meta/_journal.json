@@ -2752,6 +2752,13 @@
       "when": 1795639837323,
       "tag": "0392_variante_sku_sufixo_0392",
       "breakpoints": true
+    },
+    {
+      "idx": 393,
+      "version": "7",
+      "when": 1795707728953,
+      "tag": "0393_fila_atendimento_expansao_0393",
+      "breakpoints": true
     }
   ]
 }

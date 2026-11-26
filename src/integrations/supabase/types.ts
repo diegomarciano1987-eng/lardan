@@ -22934,6 +22934,11 @@ export type Database = {
         Returns: Json
       }
       crm_detail: { Args: { _lead: string }; Returns: Json }
+      crm_expansao_cidades: { Args: { _dias?: number }; Returns: Json }
+      crm_fila_atendimento: {
+        Args: { _f?: Json; _limite?: number }
+        Returns: Json
+      }
       crm_filtrar: {
         Args: { _f: Json }
         Returns: {
@@ -23014,6 +23019,7 @@ export type Database = {
         Args: { _aplicar: boolean; _lead: string; _tag: string }
         Returns: Json
       }
+      crm_teste_resumo: { Args: { _lead: string }; Returns: Json }
       crm_touch_contact: { Args: { _lead: string }; Returns: undefined }
       crm_whatsapp_click: { Args: { _lead: string }; Returns: Json }
       doc_canon: { Args: { v: string }; Returns: string }

@@ -282,6 +282,34 @@ const limpar = (f: Filtros) =>
 
 export const carregarBoard = (f: Filtros = {}) => rpc<Board>("crm_board", { _f: limpar(f) });
 export const carregarRadar = () => rpc<Radar>("crm_radar");
+
+/* 0393 — fila de atendimento (ordem pelo semáforo do teste) e mapa de expansão. */
+export interface TesteResumo {
+  situacao: "sem_teste" | "pendente" | "concluido";
+  semaforo?: "verde" | "amarelo" | "vermelho" | null;
+  ipl?: number | null;
+  risco_acerto?: string | null;
+  disc_perfil?: string | null;
+  serasa_confere?: boolean | null;
+}
+export interface FilaItem extends CandidaturaCard {
+  teste: TesteResumo;
+  posicao: number;
+  espera_horas: number;
+}
+export interface Fila {
+  resumo: {
+    total: number; verde: number; amarelo: number; vermelho: number; sem_teste: number;
+    com_representante: number; sem_representante: number; espera_media_horas: number | null;
+  };
+  itens: FilaItem[];
+}
+export interface CidadeExpansao {
+  cidade: string; uf: string; candidatas: number; ultimos_30_dias: number; verdes: number;
+  ultima: string; praca: string | null; motivo: "cidade_fora_das_pracas" | "praca_sem_representante_unico";
+}
+export const carregarFila = (f: Filtros = {}) => rpc<Fila>("crm_fila_atendimento", { _f: limpar(f), _limite: 200 });
+export const carregarExpansao = (dias = 180) => rpc<CidadeExpansao[]>("crm_expansao_cidades", { _dias: dias });
 export const carregarOpcoes = () => rpc<Opcoes>("crm_options");
 export const carregarLista = (f: Filtros = {}, limite = 50, offset = 0) =>
   rpc<{ total: number; itens: CandidaturaCard[] }>("crm_list", {

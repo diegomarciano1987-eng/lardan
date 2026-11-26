@@ -10,6 +10,8 @@ import {
   Columns3,
   Inbox,
   List,
+  ListOrdered,
+  MapPinned,
   MessageCircle,
   Sparkles,
   UserRoundX,
@@ -22,6 +24,7 @@ import { useCapabilities } from "@/lib/capabilities";
 import { Kanban, CardCandidatura } from "@/components/admin/candidaturas/Kanban";
 import { AvisosPush } from "@/components/admin/candidaturas/AvisosPush";
 import { FollowupDialog } from "@/components/admin/candidaturas/FollowupDialog";
+import { FilaAtendimento, MapaExpansao } from "@/components/admin/candidaturas/FilaAtendimento";
 import {
   carregarAgenda,
   carregarBoard,
@@ -43,7 +46,7 @@ import { cn } from "@/lib/utils";
 
 /** Filtros vivem na URL: voltar do cockpit devolve o quadro exatamente como estava. */
 type Busca = {
-  vista?: "kanban" | "lista" | "followups" | "concluidos";
+  vista?: "kanban" | "fila" | "lista" | "followups" | "concluidos" | "expansao";
   q?: string;
   etapa?: string;
   desfecho?: string;
@@ -181,7 +184,7 @@ function CandidaturasPage() {
   const board = useQuery({
     queryKey: ["crm", "board", filtros],
     queryFn: () => carregarBoard(filtros),
-    enabled: podeVer && busca.vista !== "lista" && busca.vista !== "followups" && !concluidos,
+    enabled: podeVer && busca.vista === "kanban",
   });
   const lista = useQuery({
     queryKey: ["crm", "lista", filtros, concluidos],
@@ -264,10 +267,12 @@ function CandidaturasPage() {
           <div className="flex items-center gap-1 rounded-xl border border-line bg-surface p-1">
             {(
               [
+                ["fila", "Fila", ListOrdered],
                 ["kanban", "Kanban", Columns3],
                 ["lista", "Lista", List],
                 ["followups", "Follow-ups", CalendarClock],
                 ["concluidos", `Concluídos${r?.concluidas ? ` · ${r.concluidas}` : ""}`, CheckCircle2],
+                ["expansao", "Sem representante", MapPinned],
               ] as const
             ).map(([v, rotulo, Icone]) => (
               <button
@@ -592,6 +597,10 @@ function CandidaturasPage() {
               </div>
             )}
           </Panel>
+        ) : busca.vista === "fila" ? (
+          <FilaAtendimento filtros={filtros} />
+        ) : busca.vista === "expansao" ? (
+          <MapaExpansao />
         ) : busca.vista === "lista" ? (
           <Panel
             title={`Lista${lista.data ? ` · ${lista.data.total} candidatura(s)` : ""}`}

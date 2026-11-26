@@ -27,6 +27,16 @@ export const capasDasPecas = createServerFn({ method: "POST" })
       if (u?.user) {
         const { count } = await supabaseAdmin.from("user_roles").select("user_id", { count: "exact", head: true }).eq("user_id", u.user.id);
         autorizado = (count ?? 0) > 0;
+        // Colaboradoras da Operação (entrada por código, 0130) não têm papel em user_roles.
+        if (!autorizado) {
+          const { data: ca } = await supabaseAdmin
+            .from("colab_acessos")
+            .select("user_id")
+            .eq("user_id", u.user.id)
+            .eq("ativo", true)
+            .maybeSingle();
+          autorizado = Boolean(ca);
+        }
       }
     }
     if (!autorizado) {

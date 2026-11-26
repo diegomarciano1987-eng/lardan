@@ -90,3 +90,10 @@
 - [x] E2. Danilo mover cards somente; origem das ações vencidas; coluna de acordos atrasados
 - [x] E3. Banho na ficha, valores herdados de variantes e foto específica da variante
 - [x] E4. Cadastros existentes aprovados e consultoras ativas somente com maleta em mãos, sem bloquear montagem
+
+# Lara no WhatsApp — pacote 0402_2 (26/11)
+- [ ] Aplicar banco, servidor e aba Conversas com a Lara desligada por padrão
+- [ ] Validar roteiro, fluxo, permissões e assinatura do webhook em testes isolados
+- [ ] Agendar /api/public/lara/processar a cada minuto e conferir a resposta após publicação
+- [ ] Solicitar credenciais da Meta pendentes; cadastro do webhook e ativação aguardam publicação
+- [ ] Não publicar sem aprovação do Diego

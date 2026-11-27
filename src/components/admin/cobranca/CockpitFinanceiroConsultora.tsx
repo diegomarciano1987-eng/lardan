@@ -9,7 +9,7 @@ import { useCapabilities } from "@/lib/capabilities";
 import { FinanceiroSmallData, ResumoSmallData, useFinanceiroSmallData } from "./FinanceiroSmallData";
 import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 
-type Aba = "abertas" | "fiado" | "recebimentos" | "comissoes" | "maletas" | "fechamentos" | "notas" | "smalldata";
+type Aba = "abertas" | "recebimentos" | "comissoes" | "maletas" | "fechamentos" | "notas" | "smalldata";
 const TIPO_NF: Record<string, string> = { remessa: "Remessa", devolucao: "Devolução", venda: "Venda", perda: "Perda", retorno: "Retorno", acrescimo: "Acréscimo", devolucao_simbolica: "Devolução simbólica" };
 const SIT_FECH: Record<string, string> = { fechada: "Fechada", aberta: "Na rua", perdida: "Perdida", encerrada: "Acerto encerrado", pendencia: "Com pendência",
   aguardando_pagamento: "Fechada · falta pagar", aguardando_conferencia: "Paga · falta conferir", aberta_app: "Lançando", operacao: "Na rua", recebida: "Na rua", acerto: "Em acerto", expedida: "Enviada", transito: "Em trânsito" };
@@ -59,6 +59,10 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
   // maleta Lardan → ciclo (para as notas, que trazem só o código da maleta)
   const cicloDaMaleta = new Map<string, string>();
   for (const f of nf.data?.fechamentos ?? []) if (f.origem === "lardan" && f.maleta) cicloDaMaleta.set(`${f.remessa ?? ""}|${f.maleta}`, f.id);
+  // Débito e fiado são a mesma dívida: cada parcela aberta mostra de qual linha do fiado veio
+  const lastroPorTitulo = new Map<string, string>();
+  for (const f of d.fiado) if (f.title_id) lastroPorTitulo.set(f.title_id, `Lote ${f.lote} · linha ${f.linha}`);
+  const fiadoSemAberto = d.fiado.filter((f) => !f.title_id || !d.parcelas.some((p) => p.title_id === f.title_id));
   const vazio = (t: string) => <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">{t}</p>;
   const Tabela = ({ cab, linhas }: { cab: string[]; linhas: React.ReactNode[][] }) => (
     <div className="overflow-auto rounded-xl border border-border bg-card">
@@ -79,18 +83,19 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
         <Kpi t="Já pagou (baixas reais)" v={brl(Number(r.recebido_cents))} />
         <Kpi t="Comissões de indicação" v={brl(Number(r.comissao_cents))} />
       </div>
-      {sd.data && <ResumoSmallData d={sd.data} />}
+      {sd.data && (sd.data.acertos.length > 0 || Number(sd.data.resumo.fiado_aberto_cents) > 0 || Number(sd.data.resumo.venda_bruta_cents) > 0) && <ResumoSmallData d={sd.data} />}
       <p className="text-xs text-muted-foreground">
         Praça: <b>{r.praca ? `${r.praca.codigo} · ${r.praca.nome}` : "Não informada"}</b> · Representante: <b>{r.representante ?? "Não informado"}</b> · Código do cliente: <b>{r.codigo_legado ?? "Não informado"}</b>
         {r.etapa_cobranca && <> · Cobrança: <b>{rotuloEtapa(r.etapa_cobranca)}</b></>}
       </p>
       <div className="flex flex-wrap gap-1 border-b border-border">
-        {([["abertas", `Débitos em aberto (${d.parcelas.length})`], ["fiado", `Fiado — lastro (${d.fiado.length})`], ["recebimentos", `Pagamentos (${d.recebimentos.length})`], ["comissoes", `Comissões (${d.comissoes.length})`], ["maletas", `Maletas (${d.maletas.length})`], ["fechamentos", `Fechamentos (${nf.data ? nf.data.fechamentos.length : "…"})`], ["notas", `Notas fiscais (${nf.data ? nf.data.notas.length : "…"})`], ["smalldata", `SmallData (${sd.data ? sd.data.acertos.length + sd.data.fiados.length : "…"})`]] as const).map(([k, t]) => (
+        {([["abertas", `Débitos e fiados (${d.parcelas.length})`], ["recebimentos", `Pagamentos (${d.recebimentos.length})`], ["comissoes", `Comissões (${d.comissoes.length})`], ["maletas", `Maletas (${d.maletas.length})`], ["fechamentos", `Fechamentos (${nf.data ? nf.data.fechamentos.length : "…"})`], ["notas", `Notas fiscais (${nf.data ? nf.data.notas.length : "…"})`], ["smalldata", `SmallData (${sd.data ? sd.data.acertos.length + sd.data.fiados.length : "…"})`]] as const).map(([k, t]) => (
           <button key={k} onClick={() => setAba(k)} className={`border-b-2 px-4 py-2 text-sm ${abaAtual === k ? "border-primary text-foreground" : "border-transparent text-muted-foreground"}`}>{t}</button>
         ))}
       </div>
       {abaAtual === "abertas" && (d.parcelas.length ? <Tabela cab={["Título", "Descrição", "Origem", "Vencimento", "Valor", "Saldo", "Atraso", "Ações"]} linhas={d.parcelas.map((p) => [
-        <AbrirTitulo id={p.title_id} numero={p.numero} parcela={p.installment_id} />, p.descricao, p.origem === "fiado_historico" ? "Fiado" : p.origem ?? "Manual",
+        <AbrirTitulo id={p.title_id} numero={p.numero} parcela={p.installment_id} />, p.descricao,
+        p.origem === "fiado_historico" ? <span>Fiado SmallData{p.title_id && lastroPorTitulo.get(p.title_id) ? <span className="block text-xs text-muted-foreground">{lastroPorTitulo.get(p.title_id)}</span> : null}</span> : p.origem ?? "Manual",
         <span className={p.vencimento < hoje ? "text-destructive" : ""}>{dataBR(p.vencimento)}</span>,
         <span className="font-mono tabular-nums">{brl(Number(p.valor_cents))}</span>, <span className="font-mono tabular-nums">{brl(Number(p.saldo_cents))}</span>,
         p.atraso ? `${p.atraso} dias` : "—",
@@ -103,12 +108,14 @@ export function CockpitFinanceiroConsultora({ partyId }: { partyId: string }) {
             </button>
           ) : null}
         </div>])} /> : vazio("Sem débitos em aberto."))}
-      {abaAtual === "fiado" && (d.fiado.length ? <>
-        <p className="text-xs text-muted-foreground">Cada linha é a linha original da planilha de fiados, guardada sem alteração e ligada ao título a receber que ela gerou.</p>
-        <Tabela cab={["Lote / linha", "Título", "Data da cobrança", "Vencimento", "Parcela", "Valor", "Situação hoje"]} linhas={d.fiado.map((f) => [
-          `${f.lote} · ${f.linha}`, <AbrirTitulo id={f.title_id} numero={f.titulo ?? (f.title_id ? "Abrir título" : null)} />, dataBR(f.data_cobranca), dataBR(f.vencimento), String(f.parcela),
-          <span className="font-mono tabular-nums">{brl(Number(f.valor_cents))}</span>, SIT[f.situacao_titulo ?? ""] ?? "—"])} />
-      </> : vazio("Sem fiado importado para esta pessoa."))}
+      {abaAtual === "abertas" && fiadoSemAberto.length > 0 && (
+        <details className="rounded-xl border border-border bg-card p-4">
+          <summary className="cursor-pointer text-sm font-medium">Fiados já quitados ou sem título ({fiadoSemAberto.length})</summary>
+          <div className="mt-3"><Tabela cab={["Lote / linha", "Título", "Data da cobrança", "Vencimento", "Parcela", "Valor", "Situação hoje"]} linhas={fiadoSemAberto.map((f) => [
+            `${f.lote} · ${f.linha}`, <AbrirTitulo id={f.title_id} numero={f.titulo ?? (f.title_id ? "Abrir título" : null)} />, dataBR(f.data_cobranca), dataBR(f.vencimento), String(f.parcela),
+            <span className="font-mono tabular-nums">{brl(Number(f.valor_cents))}</span>, SIT[f.situacao_titulo ?? ""] ?? "—"])} /></div>
+        </details>
+      )}
       {abaAtual === "recebimentos" && (d.recebimentos.length ? <Tabela cab={["Data", "Título", "Referência", "Valor"]} linhas={d.recebimentos.map((x) => [
         dataBR(x.data), <AbrirTitulo id={x.title_id} numero={x.titulo} />, x.referencia ?? "—",
         <span className={`font-mono tabular-nums ${x.estorno ? "text-destructive" : ""}`}>{x.estorno ? "− " : ""}{brl(Number(x.valor_cents))}</span>])} /> : vazio("Sem pagamentos registrados."))}

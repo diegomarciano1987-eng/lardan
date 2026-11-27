@@ -2850,6 +2850,27 @@
       "when": 1795784737272,
       "tag": "0406_asaas_aceita_parcelamento_0405",
       "breakpoints": true
+    },
+    {
+      "idx": 407,
+      "version": "7",
+      "when": 1795794435826,
+      "tag": "0407_correios_maleta_individual_0408",
+      "breakpoints": true
+    },
+    {
+      "idx": 408,
+      "version": "7",
+      "when": 1795794513105,
+      "tag": "0408_visao_unificada_mensal_0409",
+      "breakpoints": true
+    },
+    {
+      "idx": 409,
+      "version": "7",
+      "when": 1795794879783,
+      "tag": "0409_acertos_representantes_0410",
+      "breakpoints": true
     }
   ]
 }

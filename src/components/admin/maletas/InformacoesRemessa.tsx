@@ -19,21 +19,58 @@ export function useInformacoesRemessa(remessaId: string) {
 /** Quantas consultoras da praça ficaram sem maleta e sem motivo anotado. */
 export const semAnotacao = (l: InformacaoRemessa[] | undefined) => (l ?? []).filter((i) => !i.tem_maleta && !i.sem_maleta_motivo).length;
 
+/** Informações para o acerto dentro do cartão da maleta (uma por consultora). */
+export function InfoAcertoInline({ remessaId, partyId, podeEditar }: { remessaId: string; partyId: string; podeEditar: boolean }) {
+  const q = useInformacoesRemessa(remessaId);
+  const i = (q.data ?? []).find((x) => x.party_id === partyId && x.tem_maleta);
+  if (!i) return null;
+  return <InfoAcertoCampo remessaId={remessaId} i={i} podeEditar={podeEditar} />;
+}
+
+function InfoAcertoCampo({ remessaId, i, podeEditar }: { remessaId: string; i: InformacaoRemessa; podeEditar: boolean }) {
+  const qc = useQueryClient();
+  const [info, setInfo] = React.useState(i.info_acerto ?? "");
+  React.useEffect(() => setInfo(i.info_acerto ?? ""), [i.info_acerto]);
+  const mudou = info.trim() !== (i.info_acerto ?? "");
+  const salvar = useMutation({
+    mutationFn: () => salvarInformacaoRemessa(remessaId, i.party_id, null, info),
+    onSuccess: () => { toast.success(`Salvo: ${i.nome}`); void qc.invalidateQueries({ queryKey: ["remessas", "informacoes", remessaId] }); },
+    onError: (e) => toast.error(traduzir(e)),
+  });
+  return (
+    <div className="flex w-full flex-wrap items-center gap-2" data-info-acerto="">
+      <span className="w-40 shrink-0 text-xs font-semibold text-ledger-muted">
+        Informação para o acerto
+        {i.debito_vencido_cents > 0 && <span className="block text-destructive">Débito vencido {brl(i.debito_vencido_cents)}</span>}
+      </span>
+      <input className="admin-input h-9 min-w-64 flex-1 text-sm" maxLength={2000} disabled={!podeEditar} value={info} onChange={(e) => setInfo(e.target.value)}
+        aria-label={`Informações para o acerto de ${i.nome}`}
+        placeholder="Ex.: cobrar parcela atrasada, trocar brinco com defeito (vai para o representante)" />
+      {podeEditar && mudou && (
+        <button type="button" className="admin-btn admin-btn-primary h-9 px-4 text-xs" disabled={salvar.isPending} onClick={() => salvar.mutate()}>
+          {salvar.isPending ? "Salvando…" : "Salvar"}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Lista só quem ficou sem maleta nesta remessa (o motivo). Quem tem maleta anota dentro do cartão da maleta. */
 export function InformacoesRemessa({ remessaId, podeEditar }: { remessaId: string; podeEditar: boolean }) {
   const q = useInformacoesRemessa(remessaId);
-  const [filtro, setFiltro] = React.useState<"todas" | "com" | "sem" | "pendentes">("todas");
-  const l = q.data ?? [];
+  const [filtro, setFiltro] = React.useState<"sem" | "pendentes">("sem");
+  const l = (q.data ?? []).filter((i) => !i.tem_maleta);
+  if (q.isSuccess && l.length === 0) return null;
   const pend = semAnotacao(l);
-  const vis = l.filter((i) => filtro === "todas" || (filtro === "com" ? i.tem_maleta : filtro === "sem" ? !i.tem_maleta : !i.tem_maleta && !i.sem_maleta_motivo));
+  const vis = l.filter((i) => filtro === "sem" || !i.sem_maleta_motivo);
   return (
-    <Panel title="Informações da remessa (vão para o representante)">
+    <Panel title="Consultoras da praça sem maleta nesta remessa">
       <div className="space-y-4 text-sm">
         <p className="text-ledger-muted">
-          Para cada consultora da praça: quem tem maleta recebe as <strong>informações para o acerto</strong>; quem ficou sem maleta nesta remessa
-          precisa do <strong>motivo</strong>. O representante vê tudo no app e marca cada acerto feito.
+          Anote por que cada uma ficou sem maleta. As informações para o acerto de quem tem maleta ficam no próprio cartão da maleta, acima.
         </p>
         <div className="flex flex-wrap gap-2">
-          {([["todas", `Todas (${l.length})`], ["com", `Com maleta (${l.filter((i) => i.tem_maleta).length})`], ["sem", `Sem maleta (${l.filter((i) => !i.tem_maleta).length})`], ["pendentes", `Sem motivo (${pend})`]] as const).map(([id, r]) => (
+          {([["sem", `Sem maleta (${l.length})`], ["pendentes", `Sem motivo (${pend})`]] as const).map(([id, r]) => (
             <button key={id} type="button" onClick={() => setFiltro(id)} className={`admin-btn h-9 px-3 text-xs ${filtro === id ? "admin-btn-primary" : ""}`}>{r}</button>
           ))}
         </div>

@@ -105,3 +105,11 @@
 - [x] Testar decisão imediata, reserva de 3 minutos e retorno à rotina (61 testes; sem consulta real)
 - [x] Conferir e documentar todos os agendamentos existentes (13 ativos)
 - [x] Registrar provas e limitações da validação (tela real isolada; consulta externa completa não verificada)
+
+## 27/11 — Plano do Daniel (prévia, não publicado)
+- [x] Visão geral sem atalhos/catálogo/auditoria + histórico unificado SmallData + Lardan
+- [x] Canceladas somem das listas (ficam na auditoria)
+- [x] Remessa: informação do acerto dentro da maleta; painel só para quem ficou sem maleta
+- [x] Cobrança: Débitos e fiados juntos
+- [x] Correios: maleta vira individual e acerto = entrega + 30 dias
+- [x] Financeiro: Acertos dos representantes (histórico 2026 carregado)

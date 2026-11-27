@@ -35,6 +35,12 @@ export const AREAS_FINANCEIRAS: AreaFinanceira[] = [
     capacidade: "finance.bank.view",
   },
   {
+    to: "/admin/financeiro/acertos-representantes",
+    label: "Acertos dos representantes",
+    descricao: "Comissão, recebimento, gastos e retenção por praça",
+    capacidade: "finance.view",
+  },
+  {
     to: "/admin/financeiro/cheques",
     label: "Cheques",
     descricao: "Carteira: em mãos, repassados e depositados",
@@ -123,6 +129,7 @@ const PRINCIPAIS = new Set([
   "/admin/financeiro/contas",
   "/admin/financeiro/conciliacao",
   "/admin/financeiro/dre",
+  "/admin/financeiro/acertos-representantes",
 ]);
 
 const manterPeriodo = (prev: Record<string, unknown>) => ({

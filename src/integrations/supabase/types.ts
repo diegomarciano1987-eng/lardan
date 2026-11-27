@@ -18317,6 +18317,166 @@ export type Database = {
           },
         ]
       }
+      rep_acerto_config: {
+        Row: {
+          id: boolean
+          retencao_desde: string | null
+          retencao_pct: number
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          retencao_desde?: string | null
+          retencao_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          retencao_desde?: string | null
+          retencao_pct?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rep_acerto_tabelas: {
+        Row: {
+          created_at: string
+          faixas: Json
+          id: string
+          nome: string
+          vigente_de: string
+        }
+        Insert: {
+          created_at?: string
+          faixas: Json
+          id?: string
+          nome: string
+          vigente_de: string
+        }
+        Update: {
+          created_at?: string
+          faixas?: Json
+          id?: string
+          nome?: string
+          vigente_de?: string
+        }
+        Relationships: []
+      }
+      rep_acertos: {
+        Row: {
+          aberturas: number | null
+          alimentacao_cents: number
+          atualizado_por: string | null
+          clientes_atendidas: number | null
+          combustivel_cents: number
+          cortes: number | null
+          created_at: string
+          criado_por: string | null
+          data: string
+          desconto_pessoal_cents: number
+          estoque_enviado_cents: number | null
+          excluido_em: string | null
+          excluido_motivo: string | null
+          hotel_cents: number
+          id: string
+          nao_atendidas: number | null
+          observacao: string | null
+          origem: string
+          outros_cents: number
+          praca: string
+          recebimento_cents: number | null
+          representante_party_id: string
+          responsavel_nome: string | null
+          retido_cents: number | null
+          total_pago_cents: number | null
+          updated_at: string
+          venda_bruta_cents: number | null
+          venda_liquida_cents: number | null
+        }
+        Insert: {
+          aberturas?: number | null
+          alimentacao_cents?: number
+          atualizado_por?: string | null
+          clientes_atendidas?: number | null
+          combustivel_cents?: number
+          cortes?: number | null
+          created_at?: string
+          criado_por?: string | null
+          data: string
+          desconto_pessoal_cents?: number
+          estoque_enviado_cents?: number | null
+          excluido_em?: string | null
+          excluido_motivo?: string | null
+          hotel_cents?: number
+          id?: string
+          nao_atendidas?: number | null
+          observacao?: string | null
+          origem?: string
+          outros_cents?: number
+          praca: string
+          recebimento_cents?: number | null
+          representante_party_id: string
+          responsavel_nome?: string | null
+          retido_cents?: number | null
+          total_pago_cents?: number | null
+          updated_at?: string
+          venda_bruta_cents?: number | null
+          venda_liquida_cents?: number | null
+        }
+        Update: {
+          aberturas?: number | null
+          alimentacao_cents?: number
+          atualizado_por?: string | null
+          clientes_atendidas?: number | null
+          combustivel_cents?: number
+          cortes?: number | null
+          created_at?: string
+          criado_por?: string | null
+          data?: string
+          desconto_pessoal_cents?: number
+          estoque_enviado_cents?: number | null
+          excluido_em?: string | null
+          excluido_motivo?: string | null
+          hotel_cents?: number
+          id?: string
+          nao_atendidas?: number | null
+          observacao?: string | null
+          origem?: string
+          outros_cents?: number
+          praca?: string
+          recebimento_cents?: number | null
+          representante_party_id?: string
+          responsavel_nome?: string | null
+          retido_cents?: number | null
+          total_pago_cents?: number | null
+          updated_at?: string
+          venda_bruta_cents?: number | null
+          venda_liquida_cents?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_acertos_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "colab_v_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_acertos_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_acertos_representante_party_id_fkey"
+            columns: ["representante_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_network_consultants"
+            referencedColumns: ["party_id"]
+          },
+        ]
+      }
       rep_cobrancas_parciais: {
         Row: {
           chave: string
@@ -23569,6 +23729,10 @@ export type Database = {
         Args: { _cycle: string; _direcao: string }
         Returns: Json
       }
+      correios_maleta_individualizar: {
+        Args: { _cycle: string }
+        Returns: string
+      }
       correios_painel: { Args: { _cycle?: string }; Returns: Json }
       correios_para_rastrear: {
         Args: { _limite?: number }
@@ -26504,9 +26668,17 @@ export type Database = {
         Returns: Json
       }
       rep_aberturas_assinatura: { Args: { _rep: string }; Returns: Json }
+      rep_acerto_calculo: {
+        Args: { a: Database["public"]["Tables"]["rep_acertos"]["Row"] }
+        Returns: Json
+      }
       rep_acerto_campo_devolucao: {
         Args: { _cycle: string; _leituras: Json }
         Returns: Json
+      }
+      rep_acerto_excluir: {
+        Args: { _id: string; _motivo: string }
+        Returns: undefined
       }
       rep_acerto_marcar: {
         Args: {
@@ -26517,8 +26689,18 @@ export type Database = {
         }
         Returns: Json
       }
+      rep_acerto_operacao: {
+        Args: { _data: string; _rep: string }
+        Returns: Json
+      }
+      rep_acerto_pode_editar: { Args: { _uid: string }; Returns: boolean }
+      rep_acerto_salvar: { Args: { _d: Json }; Returns: string }
       rep_acertos: {
         Args: { _ate: string; _de: string; _rep: string }
+        Returns: Json
+      }
+      rep_acertos_lista: {
+        Args: { _ano?: number; _rep?: string }
         Returns: Json
       }
       rep_agenda: {
@@ -27120,6 +27302,7 @@ export type Database = {
         Args: { _motivo: string; _order: string }
         Returns: Json
       }
+      visao_unificada_mensal: { Args: { _meses?: number }; Returns: Json }
       vitrine_comprar: {
         Args: {
           _chave: string

@@ -51,8 +51,11 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-export const listarRemessas = (status?: string) =>
-  rpc<RemessaCard[]>("remessas_lista", { _status: status && status !== "todas" ? status : null });
+/** Remessas canceladas (testes, criadas por engano) saem das listas; ficam só na auditoria. */
+export const listarRemessas = async (status?: string, opcoes?: { comCanceladas?: boolean }) => {
+  const l = await rpc<RemessaCard[]>("remessas_lista", { _status: status && status !== "todas" ? status : null });
+  return opcoes?.comCanceladas || status === "cancelada" ? l : l.filter((r) => r.status !== "cancelada");
+};
 
 export const maletasDaRemessa = (id: string) => rpc<MaletaDaRemessa[]>("remessa_maletas", { _remessa: id });
 
@@ -128,7 +131,7 @@ export interface FiltrosRemessa {
   campoData?: "emissao" | "acerto";
 }
 
-export const buscarRemessas = (f: FiltrosRemessa) =>
+export const buscarRemessas = async (f: FiltrosRemessa) => semCanceladas(f.status, await
   // 0362: a lista normal não mostra as maletas diretas (elas ficam na aba "Maletas individuais")
   rpc<RemessaCard[]>("remessas_buscar2", {
     _diretas: false,
@@ -139,7 +142,10 @@ export const buscarRemessas = (f: FiltrosRemessa) =>
     _de: f.de ?? null,
     _ate: f.ate ?? null,
     _campo_data: f.campoData ?? "emissao",
-  });
+  }));
+/** Limpeza (ordem do Daniel): o que foi cancelado/excluído some das telas e fica só na auditoria, exceto quando o filtro pede "cancelada". */
+export const semCanceladas = <T extends { status: string }>(filtro: string | undefined, l: T[]) =>
+  filtro === "cancelada" ? l : l.filter((r) => r.status !== "cancelada");
 
 // ------------------------------------------------- 0157: tipo de envio (pessoal | correio)
 export type TipoEnvio = "pessoal" | "correio";

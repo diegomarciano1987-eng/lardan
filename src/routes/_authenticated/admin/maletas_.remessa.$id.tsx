@@ -1,5 +1,5 @@
 import * as React from "react";
-import { InformacoesRemessa, semAnotacao, useInformacoesRemessa } from "@/components/admin/maletas/InformacoesRemessa";
+import { InfoAcertoInline, InformacoesRemessa, semAnotacao, useInformacoesRemessa } from "@/components/admin/maletas/InformacoesRemessa";
 import { EtiquetasImprimir } from "@/components/admin/EtiquetasImprimir";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -82,7 +82,7 @@ function RemessaPage() {
 
   const remessa = useQuery({
     queryKey: ["remessas", "lista", "todas"],
-    queryFn: () => listarRemessas(),
+    queryFn: () => listarRemessas(undefined, { comCanceladas: true }),
     select: (l) => l.find((r) => r.id === id) ?? null,
   });
   const maletas = useQuery({ queryKey: ["remessas", "maletas", id], queryFn: () => maletasDaRemessa(id) });
@@ -387,6 +387,9 @@ function RemessaPage() {
                 <span className="tabular-nums font-semibold text-ledger-text">{brl(Number(m.valor_cents ?? 0))}</span>
                 <StatusBadge tone={TOM[st.tom]}>{st.rotulo}</StatusBadge>
               </div>
+              {podeMontar && m.consultora_party_id && m.status !== "cancelada" && r.status !== "cancelada" && (
+                <InfoAcertoInline remessaId={r.id} partyId={m.consultora_party_id} podeEditar={podeMontar} />
+              )}
             </div>
           );
   };

@@ -114,6 +114,7 @@ import { Route as AuthenticatedAdminCandidaturasIndicacaoRouteImport } from './r
 import { Route as AuthenticatedAdminCobrancaIdRouteImport } from './routes/_authenticated/admin/cobranca_.$id'
 import { Route as AuthenticatedAdminCobrancaLoteRouteImport } from './routes/_authenticated/admin/cobranca_.lote'
 import { Route as AuthenticatedAdminFinanceiroIndexRouteImport } from './routes/_authenticated/admin/financeiro/index'
+import { Route as AuthenticatedAdminFinanceiroAcertosRepresentantesRouteImport } from './routes/_authenticated/admin/financeiro/acertos-representantes'
 import { Route as AuthenticatedAdminFinanceiroAprovacoesRouteImport } from './routes/_authenticated/admin/financeiro/aprovacoes'
 import { Route as AuthenticatedAdminFinanceiroAsaasRouteImport } from './routes/_authenticated/admin/financeiro/asaas'
 import { Route as AuthenticatedAdminFinanceiroAsaasExtratoRouteImport } from './routes/_authenticated/admin/financeiro/asaas-extrato'
@@ -743,6 +744,12 @@ const AuthenticatedAdminFinanceiroIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
   } as any)
+const AuthenticatedAdminFinanceiroAcertosRepresentantesRoute =
+  AuthenticatedAdminFinanceiroAcertosRepresentantesRouteImport.update({
+    id: '/acertos-representantes',
+    path: '/acertos-representantes',
+    getParentRoute: () => AuthenticatedAdminFinanceiroRouteRoute,
+  } as any)
 const AuthenticatedAdminFinanceiroAprovacoesRoute =
   AuthenticatedAdminFinanceiroAprovacoesRouteImport.update({
     id: '/aprovacoes',
@@ -1137,6 +1144,7 @@ export interface FileRoutesByFullPath {
   '/admin/candidaturas/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   '/admin/cobranca/$id': typeof AuthenticatedAdminCobrancaIdRoute
   '/admin/cobranca/lote': typeof AuthenticatedAdminCobrancaLoteRoute
+  '/admin/financeiro/acertos-representantes': typeof AuthenticatedAdminFinanceiroAcertosRepresentantesRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -1291,6 +1299,7 @@ export interface FileRoutesByTo {
   '/admin/candidaturas/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   '/admin/cobranca/$id': typeof AuthenticatedAdminCobrancaIdRoute
   '/admin/cobranca/lote': typeof AuthenticatedAdminCobrancaLoteRoute
+  '/admin/financeiro/acertos-representantes': typeof AuthenticatedAdminFinanceiroAcertosRepresentantesRoute
   '/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -1449,6 +1458,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/candidaturas_/indicacao': typeof AuthenticatedAdminCandidaturasIndicacaoRoute
   '/_authenticated/admin/cobranca_/$id': typeof AuthenticatedAdminCobrancaIdRoute
   '/_authenticated/admin/cobranca_/lote': typeof AuthenticatedAdminCobrancaLoteRoute
+  '/_authenticated/admin/financeiro/acertos-representantes': typeof AuthenticatedAdminFinanceiroAcertosRepresentantesRoute
   '/_authenticated/admin/financeiro/aprovacoes': typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   '/_authenticated/admin/financeiro/asaas': typeof AuthenticatedAdminFinanceiroAsaasRoute
   '/_authenticated/admin/financeiro/asaas-extrato': typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -1607,6 +1617,7 @@ export interface FileRouteTypes {
     | '/admin/candidaturas/indicacao'
     | '/admin/cobranca/$id'
     | '/admin/cobranca/lote'
+    | '/admin/financeiro/acertos-representantes'
     | '/admin/financeiro/aprovacoes'
     | '/admin/financeiro/asaas'
     | '/admin/financeiro/asaas-extrato'
@@ -1761,6 +1772,7 @@ export interface FileRouteTypes {
     | '/admin/candidaturas/indicacao'
     | '/admin/cobranca/$id'
     | '/admin/cobranca/lote'
+    | '/admin/financeiro/acertos-representantes'
     | '/admin/financeiro/aprovacoes'
     | '/admin/financeiro/asaas'
     | '/admin/financeiro/asaas-extrato'
@@ -1918,6 +1930,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/candidaturas_/indicacao'
     | '/_authenticated/admin/cobranca_/$id'
     | '/_authenticated/admin/cobranca_/lote'
+    | '/_authenticated/admin/financeiro/acertos-representantes'
     | '/_authenticated/admin/financeiro/aprovacoes'
     | '/_authenticated/admin/financeiro/asaas'
     | '/_authenticated/admin/financeiro/asaas-extrato'
@@ -2796,6 +2809,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceiroIndexRouteImport
       parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
     }
+    '/_authenticated/admin/financeiro/acertos-representantes': {
+      id: '/_authenticated/admin/financeiro/acertos-representantes'
+      path: '/acertos-representantes'
+      fullPath: '/admin/financeiro/acertos-representantes'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceiroAcertosRepresentantesRouteImport
+      parentRoute: typeof AuthenticatedAdminFinanceiroRouteRoute
+    }
     '/_authenticated/admin/financeiro/aprovacoes': {
       id: '/_authenticated/admin/financeiro/aprovacoes'
       path: '/aprovacoes'
@@ -3150,6 +3170,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminFinanceiroRouteRouteChildren {
+  AuthenticatedAdminFinanceiroAcertosRepresentantesRoute: typeof AuthenticatedAdminFinanceiroAcertosRepresentantesRoute
   AuthenticatedAdminFinanceiroAprovacoesRoute: typeof AuthenticatedAdminFinanceiroAprovacoesRoute
   AuthenticatedAdminFinanceiroAsaasRoute: typeof AuthenticatedAdminFinanceiroAsaasRoute
   AuthenticatedAdminFinanceiroAsaasExtratoRoute: typeof AuthenticatedAdminFinanceiroAsaasExtratoRoute
@@ -3174,6 +3195,8 @@ interface AuthenticatedAdminFinanceiroRouteRouteChildren {
 
 const AuthenticatedAdminFinanceiroRouteRouteChildren: AuthenticatedAdminFinanceiroRouteRouteChildren =
   {
+    AuthenticatedAdminFinanceiroAcertosRepresentantesRoute:
+      AuthenticatedAdminFinanceiroAcertosRepresentantesRoute,
     AuthenticatedAdminFinanceiroAprovacoesRoute:
       AuthenticatedAdminFinanceiroAprovacoesRoute,
     AuthenticatedAdminFinanceiroAsaasRoute:

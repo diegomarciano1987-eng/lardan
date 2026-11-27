@@ -244,124 +244,81 @@ function VisaoGeralAdministrativa() {
         />
       ) : null}
 
-          <Panel title="Atalhos operacionais" flush>
-        <ul className="grid gap-2 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SHORTCUTS.map((s) => {
-            const mod = ADMIN_MODULES.find((m) => m.slug === s.module);
-            if (!mod || !moduleAllowed(mod, caps, roles)) return null;
-            const Icon = s.icon;
-            const disponivel = mod.state === "ativo";
-            const conteudo = (
-              <span className="flex items-center gap-2.5">
-                <Icon aria-hidden className="size-4 text-bronze" />
-                <span className="min-w-0 flex-1 truncate">{s.label}</span>
-              </span>
-            );
-            return (
-              <li key={s.label}>
-                {disponivel && mod.path ? (
-                  <Link
-                    to={s.to ?? mod.path}
-                    className="block rounded-[10px] border border-line bg-surface px-3.5 py-3 text-sm font-semibold text-ledger-text shadow-sm transition-all hover:-translate-y-px hover:bg-surface-muted hover:shadow"
-                  >
-                    {conteudo}
-                  </Link>
-                ) : (
-                  <span
-                    aria-disabled="true"
-                    title={`${s.label} — ${mod.state === "em_construcao" ? "em construção" : "em breve"}`}
-                    className="block cursor-not-allowed rounded-[10px] border border-dashed border-line px-3.5 py-3 text-sm font-medium text-ledger-muted"
-                  >
-                    {conteudo}
-                    <span className="mt-1 block text-[0.625rem] font-semibold uppercase tracking-[0.1em]">
-                      {mod.state === "em_construcao" ? "Em construção" : "Em breve"}
-                    </span>
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </Panel>
-        
-      {/* Faixa secundária: o que já é real hoje */}
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <Panel title="Catálogo e site">
-          {podeConteudo ? (
-            <dl className="grid grid-cols-2 gap-px bg-line-soft">
-              {[
-                ["Produtos cadastrados", counts.data?.produtos],
-                ["Páginas do site", counts.data?.paginas],
-                ["Candidaturas", counts.data?.leads],
-                ["Mensagens de contato", counts.data?.mensagens],
-              ].map(([label, value]) => (
-                <div key={String(label)} className="bg-surface px-5 py-5">
-                  <dt className="text-[0.78rem] font-semibold tracking-wide text-ledger-muted">
-                    {label}
-                  </dt>
-                  <dd className="num mt-1.5 font-display text-[1.75rem] font-semibold leading-none text-ledger-text">
-                    {typeof value === "number" ? formatInt(value) : "—"}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          ) : (
-            <EmptyState
-              title="Sem autorização"
-              description="O seu perfil não tem acesso aos números de catálogo e site."
-            />
-          )}
-        </Panel>
-
-        <Panel title="Trilha de auditoria recente" flush>
-          {!podeAuditoria ? (
-            <EmptyState
-              title="Restrito"
-              description="A trilha de auditoria é visível apenas para Master e Diretoria."
-            />
-          ) : trilha.isError ? (
-            <ErrorState
-              message="Não foi possível carregar a trilha."
-              onRetry={() => void trilha.refetch()}
-            />
-          ) : trilha.isPending ? (
-            <div className="space-y-2 px-5 py-4">
-              <Skeleton className="h-5 w-full" />
-              <Skeleton className="h-5 w-4/5" />
-              <Skeleton className="h-5 w-3/5" />
-            </div>
-          ) : trilha.data.length === 0 ? (
-            <EmptyState
-              title="Nenhum registro ainda"
-              description="Toda alteração em produtos, páginas, usuários, papéis e configurações é gravada aqui automaticamente."
-            />
-          ) : (
-            <div className="overflow-x-auto"><table className="w-full text-left text-sm">
-              <thead className="sticky top-0 bg-surface">
-                <tr className="border-b border-line text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-bronze">
-                  <th className="px-5 py-2.5">Data</th>
-                  <th className="px-3 py-2.5">Ação</th>
-                  <th className="px-3 py-2.5">Entidade</th>
-                </tr>
-              </thead>
-              <tbody>
-                {trilha.data.map((r) => (
-                  <tr key={r.id} className="border-b border-line-soft last:border-b-0">
-                    <td className="num whitespace-nowrap px-5 py-2 text-ledger-muted">
-                      {formatDateTime(r.created_at)}
-                    </td>
-                    <td className="px-3 py-2">
-                      <StatusBadge tone="neutral">{r.action}</StatusBadge>
-                    </td>
-                    <td className="truncate px-3 py-2 text-ledger-text">{r.entity}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table></div>
-          )}
-        </Panel>
-      </div>
+      <HistoricoUnificado />
     </div>
+  );
+}
+
+type MesUnificado = { mes: string; sd_maletas: number; sd_enviado_cents: number; sd_vendido_cents: number; ld_maletas: number; ld_enviado_cents: number; ld_vendido_cents: number };
+
+/** SmallData + Lardan mês a mês: o histórico que ficou para trás somado à operação atual. Dados só do banco. */
+function HistoricoUnificado() {
+  const q = useQuery({
+    queryKey: ["visao-unificada-mensal", 12],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("visao_unificada_mensal" as never, { _meses: 12 } as never);
+      if (error) throw error;
+      return (data ?? []) as unknown as MesUnificado[];
+    },
+  });
+  if (q.isError && (q.error as { code?: string }).code === "42501") return null;
+  if (q.isError) return <Panel title="Histórico unificado · SmallData + Lardan"><ErrorState message="Não foi possível carregar o histórico unificado." onRetry={() => void q.refetch()} /></Panel>;
+  const l = q.data ?? [];
+  const tot = l.reduce((t, m) => ({
+    maletas: t.maletas + m.sd_maletas + m.ld_maletas,
+    enviado: t.enviado + Number(m.sd_enviado_cents) + Number(m.ld_enviado_cents),
+    vendido: t.vendido + Number(m.sd_vendido_cents) + Number(m.ld_vendido_cents),
+  }), { maletas: 0, enviado: 0, vendido: 0 });
+  const max = Math.max(1, ...l.map((m) => Number(m.sd_enviado_cents) + Number(m.ld_enviado_cents)));
+  const mesBR = (m: string) => { const [a, mm] = m.split("-"); return `${mm}/${a?.slice(2)}`; };
+  return (
+    <Panel title="Histórico unificado · SmallData + Lardan (12 meses)">
+      {q.isPending ? <Skeleton className="h-40" /> : l.length === 0 ? (
+        <EmptyState title="Sem dados" description="Nenhuma maleta enviada ou acertada nos últimos 12 meses." />
+      ) : (
+        <div className="space-y-5">
+          <dl className="grid gap-3 sm:grid-cols-3">
+            {[["Maletas enviadas", formatInt(tot.maletas)], ["Valor enviado", formatBRLFromCents(tot.enviado)], ["Vendido nos acertos", formatBRLFromCents(tot.vendido)]].map(([t, v]) => (
+              <div key={t} className="rounded-xl border border-line-soft bg-surface px-4 py-3">
+                <dt className="text-[0.78rem] font-semibold text-ledger-muted">{t}</dt>
+                <dd className="num mt-1 font-display text-2xl font-semibold text-ledger-text">{v}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="flex items-center gap-4 text-xs text-ledger-muted">
+            <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-bronze/60" /> SmallData</span>
+            <span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-sm bg-primary" /> Lardan</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead><tr className="border-b border-line text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-bronze">
+                <th className="py-2 pr-3">Mês</th><th className="px-3 py-2">Valor enviado</th><th className="px-3 py-2 text-right">Maletas SD / Lardan</th><th className="px-3 py-2 text-right">Enviado</th><th className="py-2 pl-3 text-right">Vendido</th>
+              </tr></thead>
+              <tbody>
+                {l.map((m) => {
+                  const sd = Number(m.sd_enviado_cents), ld = Number(m.ld_enviado_cents);
+                  return (
+                    <tr key={m.mes} className="border-b border-line-soft last:border-b-0">
+                      <td className="num py-2 pr-3 font-semibold text-ledger-text">{mesBR(m.mes)}</td>
+                      <td className="w-[40%] px-3 py-2">
+                        <div className="flex h-3 overflow-hidden rounded-full bg-surface-muted" aria-hidden>
+                          <span className="bg-bronze/60" style={{ width: `${(sd / max) * 100}%` }} />
+                          <span className="bg-primary" style={{ width: `${(ld / max) * 100}%` }} />
+                        </div>
+                      </td>
+                      <td className="num px-3 py-2 text-right text-ledger-muted">{formatInt(m.sd_maletas)} / {formatInt(m.ld_maletas)}</td>
+                      <td className="num px-3 py-2 text-right">{formatBRLFromCents(sd + ld)}</td>
+                      <td className="num py-2 pl-3 text-right font-semibold">{formatBRLFromCents(Number(m.sd_vendido_cents) + Number(m.ld_vendido_cents))}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </Panel>
   );
 }
 

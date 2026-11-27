@@ -233,7 +233,7 @@ export const GUIA_COMECAR_VENDER: Guia = {
         { tipo: "paragrafo", texto: "Por isso, qualidade e garantia importam." },
         {
           tipo: "paragrafo",
-          texto: "A Lardan oferece 2 anos de garantia em suas semijoias, conforme as condições oficiais.",
+          texto: "A Lardan oferece 2 anos de garantia em suas semijoias, conforme as condições oficiais. Para quem quer vender, o modelo é consignado: sem um real de investimento para iniciar.",
         },
         {
           tipo: "paragrafo",

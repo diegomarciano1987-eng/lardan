@@ -125,7 +125,7 @@ export const GUIA_PERGUNTAS_REVENDA: Guia = {
         {
           tipo: "paragrafo",
           texto:
-            "Com honestidade: o banho de qualquer semijoia sofre com atrito, perfume, suor, cloro e água do mar. Com os cuidados certos, a peça dura muito mais, e a garantia mostra o quanto a marca confia na qualidade do banho. As peças Lardan têm 2 anos de garantia, conforme as condições oficiais da marca.",
+            "Com honestidade: o banho de qualquer semijoia sofre com atrito, perfume, suor, cloro e água do mar. Com os cuidados certos, a peça dura muito mais, e a garantia mostra o quanto a marca confia na qualidade do banho. As peças Lardan têm 2 anos de garantia, conforme as condições oficiais da marca. Para quem quer vender, o modelo é consignado: sem um real de investimento para iniciar.",
         },
         { tipo: "subtitulo", texto: "Como fazer pós-venda de semijoias?" },
         {

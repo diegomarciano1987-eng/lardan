@@ -153,7 +153,7 @@ export const GUIA_CUIDADOS: Guia = {
         {
           tipo: "paragrafo",
           texto:
-            "Além dela, a marca pode oferecer uma garantia contratual, que complementa a legal e precisa ser informada por escrito (art. 50). As semijoias Lardan têm 2 anos de garantia, conforme as condições oficiais informadas pela marca no momento da compra, algo raro no mercado de semijoias.",
+            "Além dela, a marca pode oferecer uma garantia contratual, que complementa a legal e precisa ser informada por escrito (art. 50). As semijoias Lardan têm 2 anos de garantia, conforme as condições oficiais informadas pela marca no momento da compra, algo raro no mercado de semijoias. Para quem quer vender, o modelo é consignado: sem um real de investimento para iniciar.",
         },
         { tipo: "subtitulo", texto: "Se a peça apresentar algum problema" },
         {

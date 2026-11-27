@@ -324,7 +324,7 @@ export const GUIA_WHATSAPP: Guia = {
     {
       pergunta: "Como fazer pós-venda?",
       resposta:
-        "Alguns dias após a entrega, entre em contato para perguntar se deu tudo certo e se a cliente gostou da peça. Aproveite para relembrar os cuidados com a semijoia e deixar clara a garantia, que na Lardan é de 2 anos. Registre também as preferências que ela demonstrou, como cor de metal ou estilo, para facilitar futuros atendimentos. O pós-venda não deve ser usado apenas para tentar emplacar outra venda de imediato; o foco é cuidado com quem já comprou.",
+        "Alguns dias após a entrega, entre em contato para perguntar se deu tudo certo e se a cliente gostou da peça. Aproveite para relembrar os cuidados com a semijoia e deixar clara a garantia, que na Lardan é de 2 anos. Para quem quer vender, o modelo é consignado: sem um real de investimento para iniciar. Registre também as preferências que ela demonstrou, como cor de metal ou estilo, para facilitar futuros atendimentos. O pós-venda não deve ser usado apenas para tentar emplacar outra venda de imediato; o foco é cuidado com quem já comprou.",
     },
     {
       pergunta: "Como conseguir indicações?",

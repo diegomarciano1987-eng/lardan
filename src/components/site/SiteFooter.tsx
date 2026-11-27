@@ -66,6 +66,20 @@ export function SiteFooter() {
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
               Semijoias, relacionamento e tecnologia conectando pessoas a novas histórias.
             </p>
+            <ul className="mt-5 space-y-2 text-sm text-foreground" aria-label="Diferenciais Lardan">
+              <li className="flex items-center gap-2.5">
+                <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-primary" />
+                Semijoias com dois anos de garantia
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-primary" />
+                Consignado, sem um real de investimento para iniciar
+              </li>
+              <li className="flex items-center gap-2.5">
+                <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-primary" />
+                A única do Brasil a oferecer uma página própria para cada revendedora
+              </li>
+            </ul>
             <SocialLinks suave className="mt-6" />
           </div>
 

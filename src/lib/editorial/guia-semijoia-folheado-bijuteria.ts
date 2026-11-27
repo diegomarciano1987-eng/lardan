@@ -124,7 +124,7 @@ export const GUIA_SEMIJOIA_BIJUTERIA: Guia = {
         {
           tipo: "paragrafo",
           texto:
-            "As peças Lardan são desenvolvidas com fabricação própria e curadoria de importação, com um banho de qualidade extrema. Por isso a marca oferece 2 anos de garantia, conforme as condições oficiais informadas no momento da compra, algo raro no mercado de semijoias.",
+            "As peças Lardan são desenvolvidas com fabricação própria e curadoria de importação, com um banho de qualidade extrema. Por isso a marca oferece 2 anos de garantia, conforme as condições oficiais informadas no momento da compra, algo raro no mercado de semijoias. Para quem quer vender, o modelo é consignado: sem um real de investimento para iniciar.",
         },
       ],
     },

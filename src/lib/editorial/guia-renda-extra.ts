@@ -238,7 +238,7 @@ export const GUIA_RENDA_EXTRA: Guia = {
             "ferramentas de relacionamento",
           ],
         },
-        { tipo: "paragrafo", texto: "As semijoias Lardan possuem 2 anos de garantia, conforme as condições oficiais da marca." },
+        { tipo: "paragrafo", texto: "As semijoias Lardan possuem 2 anos de garantia, conforme as condições oficiais da marca. Para quem quer vender, o modelo é consignado: sem um real de investimento para iniciar." },
       ],
     },
     {

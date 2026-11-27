@@ -218,7 +218,7 @@ export const GUIA_CONSIGNADO: Guia = {
       blocos: [
         {
           tipo: "paragrafo",
-          texto: "Na Lardan, sim. As semijoias Lardan possuem 2 anos de garantia, conforme as condições oficiais da marca.",
+          texto: "Na Lardan, sim. As semijoias Lardan possuem 2 anos de garantia, conforme as condições oficiais da marca. Para quem quer vender, o modelo é consignado: sem um real de investimento para iniciar.",
         },
         {
           tipo: "paragrafo",

@@ -383,7 +383,7 @@ Informações específicas sobre material, banho, dimensões, preço e demais ca
 
 Garantia
 
-As semijoias Lardan possuem garantia de 2 anos, conforme as condições oficiais da marca.
+As semijoias Lardan possuem garantia de 2 anos, conforme as condições oficiais da marca. Consignado, sem um real de investimento.
 
 A existência da garantia não significa cobertura irrestrita de qualquer dano ou situação.
 

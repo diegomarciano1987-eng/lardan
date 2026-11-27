@@ -43,6 +43,10 @@ export function SejaHero({ local }: { local?: PaginaLocal | undefined }) {
           <span aria-hidden className="seja-garantia-dot" />
           Semijoias com dois anos de garantia
         </p>
+        <p className="seja-garantia mt-3 inline-flex items-center gap-2.5">
+          <span aria-hidden className="seja-garantia-dot" />
+          Consignado, sem um real de investimento para iniciar
+        </p>
         <p className="seja-proof mt-6 flex max-w-lg flex-wrap items-baseline gap-x-3 gap-y-1 text-base leading-snug text-muted-foreground">
           <span>Mais de</span>
           <strong className="seja-proof-number">2.500</strong>

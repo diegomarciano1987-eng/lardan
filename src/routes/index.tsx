@@ -169,7 +169,7 @@ function HomePage() {
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
             A Consultora Lardan vende semijoias da marca e conta com produto, garantia de 2 anos,
-            treinamento e tecnologia para organizar clientes, vendas e recebimentos. Cada
+            peças em consignado — sem um real de investimento para iniciar —, treinamento e tecnologia para organizar clientes, vendas e recebimentos. Cada
             candidatura passa por análise — sem promessa de renda garantida.
           </p>
           <Link to="/seja-lardan" className="btn-premium mt-10">

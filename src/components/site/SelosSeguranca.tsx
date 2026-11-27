@@ -1,4 +1,4 @@
-import { ShieldCheck, LockKeyhole, BadgeCheck, FileCheck2, ServerCog } from "lucide-react";
+import { HandCoins, ShieldCheck, LockKeyhole, BadgeCheck, FileCheck2, ServerCog } from "lucide-react";
 
 /**
  * Selos de segurança exibidos no rodapé do site, junto à marca da SmallData.
@@ -23,6 +23,12 @@ const SELOS = [
     // do site estiver desligado. A garantia é fato oficial da marca.
     titulo: "Garantia de 2 anos",
     descricao: "Semijoias Lardan",
+  },
+  {
+    icone: HandCoins,
+    // Fato informado pela diretoria (26/11/2026): modelo consignado sem investimento inicial.
+    titulo: "Consignado",
+    descricao: "Sem um real de investimento para iniciar",
   },
   {
     icone: ServerCog,
@@ -59,11 +65,11 @@ export function SelosSeguranca() {
           <span className="h-px w-8 bg-trust-accent/45 md:w-12" aria-hidden />
         </div>
 
-        <ul className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 md:grid-cols-5 md:gap-4">
+        <ul className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 lg:grid-cols-6 md:gap-4">
           {SELOS.map((selo) => (
             <li
               key={selo.titulo}
-              className="group flex min-w-0 flex-col items-center text-center last:col-span-2 sm:last:col-span-1"
+              className="group flex min-w-0 flex-col items-center text-center"
             >
               <div className="relative flex size-[4.5rem] items-center justify-center rounded-full border border-trust-accent/65 bg-trust-surface shadow-[inset_0_1px_0_var(--color-trust-foreground),inset_0_-8px_14px_var(--color-trust-background),0_8px_18px_-8px_var(--color-trust-accent)] transition-transform duration-500 group-hover:-translate-y-1 md:size-20">
                 <span className="absolute inset-[5px] rounded-full border border-trust-accent/35 shadow-[inset_0_0_0_2px_var(--color-trust-background)]" aria-hidden />

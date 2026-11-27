@@ -63,7 +63,7 @@ export const EMPRESA = {
   anoFundacao: "2021",
   paragrafos: [
     "A LARDAN é uma marca de semijoias exclusivas e de altíssima qualidade que transforma vidas, não apenas de quem usa, mas de quem vende. Através do modelo de maletas em consignação, oferecemos a consultoras parceiras a estrutura completa para construir seus próprios negócios com independência, levando elegância, brilho e autoestima diretamente até a cliente final.",
-    "Cada peça é desenvolvida com fabricação própria e curadoria de importação, com um banho de qualidade extrema. Por isso oferecemos 2 anos de garantia, algo raro no mercado de semijoias.",
+    "Cada peça é desenvolvida com fabricação própria e curadoria de importação, com um banho de qualidade extrema. Por isso oferecemos 2 anos de garantia, algo raro no mercado de semijoias. E para quem quer vender, o modelo é consignado: sem um real de investimento para iniciar.",
     "Mas o que realmente nos diferencia não são só as peças: é a estrutura por trás delas. Tecnologia de ponta para gestão de estoque e comissões, aliada a um atendimento humano e único para cada consultora, porque acreditamos que negócio de verdade se constrói com proximidade, não só com sistema.",
     "Hoje presente em Paraná e São Paulo, a LARDAN já se prepara para expandir para todo o Brasil.",
     'E se você reparar bem, vai notar algo: não nos chamamos apenas de "semijoias". Somos LARDAN. Porque nosso propósito vai além do produto: queremos ser lembrados pelo que representamos, não só pelo que vendemos.',

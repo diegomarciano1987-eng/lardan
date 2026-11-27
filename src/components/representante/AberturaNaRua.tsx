@@ -44,7 +44,7 @@ const PERGUNTAS = [
   { id: "pontualidade", t: "Ela foi pontual e respondeu rápido até aqui?" },
 ];
 const NOTAS = [{ v: 1, r: "Pouco" }, { v: 2, r: "Mais ou menos" }, { v: 3, r: "Muito" }];
-const PASSOS = ["Dados", "Perfil", "Aprovação", "Maleta", "Assinatura"];
+const PASSOS = ["Dados", "Sua opinião", "Teste DISC", "Maleta", "Assinatura"];
 
 const so = (v: string, n: number) => v.replace(/\D/g, "").slice(0, n);
 const mCpf = (v: string) => so(v, 11).replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
@@ -251,7 +251,7 @@ export function AberturaHost({ rep }: { rep: string }) {
     const nome = primeiroNome(r.f.nome) || "candidata";
     if (window.confirm(`Descartar os dados guardados da abertura de ${nome}?${r.feito ? "\n\nO cadastro dela continua salvo na Lardan." : ""}`)) apagarRascunho(rep, r.chave);
   };
-  const etapa = (r: Rascunho) => `Etapa ${Math.min(r.passo, 4) + 1} de 5${r.passo >= 4 ? " · aguardando assinatura" : r.passo === 2 ? " · teste e aprovação da Lardan" : r.passo === 3 ? " · escolher a maleta" : " · dados guardados"}`;
+  const etapa = (r: Rascunho) => `Etapa ${Math.min(r.passo, 4) + 1} de 5${r.passo >= 4 ? " · aguardando assinatura" : r.passo === 2 ? " · teste DISC e aprovação da Lardan" : r.passo === 3 ? " · escolher a maleta" : " · dados guardados"}`;
   const um = rascunhos.length === 1 ? rascunhos[0]! : null;
   return (
     <div role="status" className="fixed inset-x-3 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-md space-y-2 rounded-2xl border border-primary/40 bg-card p-3 shadow-lg md:bottom-6 md:right-6 md:left-auto">
@@ -379,7 +379,7 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
       }
       return r;
     },
-    onSuccess: (r) => { setFeito(r); setPasso(2); toast.success(`${primeiroNome(f.nome)} cadastrada. Agora o teste de perfil.`); void qc.invalidateQueries({ queryKey: ["rep", rep, "crm"] }); },
+    onSuccess: (r) => { setFeito(r); setPasso(2); toast.success(`${primeiroNome(f.nome)} cadastrada. Agora o teste DISC.`); void qc.invalidateQueries({ queryKey: ["rep", rep, "crm"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -461,8 +461,8 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
           )}
 
           {passo === 1 && (
-            <Bloco titulo={`Perfil de ${primeiroNome(f.nome)}`}>
-              <p className="-mt-1 text-sm text-muted-foreground">Responda pelo que você viu na conversa. Quem decide é você.</p>
+            <Bloco titulo={`Sua opinião sobre ${primeiroNome(f.nome)}`}>
+              <p className="-mt-1 text-sm text-muted-foreground">Responda pelo que você viu na conversa. Isto ainda não é o teste dela: o teste DISC vem no próximo passo, logo depois de salvar.</p>
               {PERGUNTAS.map((p, i) => (
                 <div key={p.id} className="rounded-2xl border border-border p-4">
                   <p className="text-sm font-medium"><span className="text-muted-foreground">{i + 1}.</span> {p.t}</p>
@@ -488,12 +488,12 @@ function Fluxo({ rep, chave, onFechar, inicial }: { rep: string; chave: string; 
           <div className="mx-auto max-w-md">
             {passo === 0 && (
               <button type="button" disabled={!ok1} onClick={() => setPasso(1)} className="h-13 min-h-12 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50">
-                {ok1 ? "Continuar para o perfil" : `Falta: ${falta.slice(0, 3).join(", ")}${falta.length > 3 ? "…" : ""}`}
+                {ok1 ? "Continuar" : `Falta: ${falta.slice(0, 3).join(", ")}${falta.length > 3 ? "…" : ""}`}
               </button>
             )}
             {passo === 1 && (
               <button type="button" disabled={!ok2 || cadastrar.isPending} onClick={() => cadastrar.mutate()} className="min-h-12 w-full rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50">
-                {cadastrar.isPending ? "Salvando…" : ok2 ? "Salvar e fazer o teste" : "Responda as 4 perguntas"}
+                {cadastrar.isPending ? "Salvando…" : ok2 ? "Salvar e ir para o teste DISC" : "Responda as 4 perguntas"}
               </button>
             )}
           </div>
@@ -563,6 +563,13 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
     onError: (e: Error) => toast.error(e.message),
   });
   const s = q.data;
+  // 0407: o link do teste já fica pronto ao chegar aqui (antes dependia de tocar em "Preparar o teste" e muita gente parava)
+  const pediu = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (pediu.current === leadId || !s || s.liberada || s.teste_token || s.situacao !== "sem_teste") return;
+    pediu.current = leadId;
+    gerar.mutate();
+  }, [s, gerar, leadId]);
   const primeiro = primeiroNome(nome);
   const token = s?.teste_token ?? gerar.data ?? null;
   const msgTeste = (t: string) => `Olá, ${primeiro}! Aqui é da Lardan Semijoias. O próximo passo é um teste rápido de perfil, de uns 10 minutos, que fica salvo a cada tela: ${linkTeste(t)}\n\nDepois do teste a Lardan consulta o seu CPF. Ter o nome com restrição não impede sozinho a sua aprovação.`;
@@ -612,8 +619,9 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
     );
   }
   return (
-    <Bloco titulo="Teste de perfil" icone={<ClipboardCheck className="size-4" />}>
-      <p className="text-sm">Antes da maleta, {primeiro} faz o teste de perfil (uns 10 minutos). Depois a Lardan consulta o CPF e decide: quando tudo passa, aprova na hora; senão, o Daniel analisa.</p>
+    <Bloco titulo="Teste DISC" icone={<ClipboardCheck className="size-4" />}>
+      <p className="text-sm">Antes da maleta, {primeiro} faz o teste de perfil, que inclui o DISC: 3 partes, uns 10 minutos, e quem responde é ela. Depois a Lardan consulta o CPF e decide: quando tudo passa, aprova na hora; senão, o Daniel analisa.</p>
+      <p className="text-xs text-muted-foreground">Mande o link no WhatsApp ou entregue o seu celular para ela responder agora. A maleta só libera depois do resultado.</p>
       {s.situacao === "teste_em_andamento" && <p className="text-xs text-muted-foreground">Ela já começou (parte {Math.min(s.teste_parte ?? 1, 3)} de 3). As respostas ficam salvas.</p>}
       {token ? (
         <div className="grid grid-cols-2 gap-2">
@@ -625,7 +633,7 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
         </div>
       ) : (
         <button type="button" disabled={gerar.isPending} onClick={() => gerar.mutate()} className="min-h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-50">
-          {gerar.isPending ? "Preparando…" : "Preparar o teste"}
+          {gerar.isPending ? "Preparando o link…" : "Preparar o link do teste"}
         </button>
       )}
       {token && (

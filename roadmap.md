@@ -99,3 +99,9 @@
 - [ ] Credenciais da Meta: dois IDs salvos; token, chave do app e PIN aguardam o Diego; frase do webhook será gerada na etapa de publicação
 - [ ] Cadastrar webhook na Meta, ativar número e enviar modelos — aguarda publicação e credenciais
 - [x] Manter somente na prévia, sem publicação
+
+# Pacote 0407 — decisão imediata e DISC (27/11)
+- [x] Aplicar as quatro alterações, sem migração e sem publicação
+- [x] Testar decisão imediata, reserva de 3 minutos e retorno à rotina (61 testes; sem consulta real)
+- [x] Conferir e documentar todos os agendamentos existentes (13 ativos)
+- [x] Registrar provas e limitações da validação (tela real isolada; consulta externa completa não verificada)

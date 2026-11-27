@@ -126,6 +126,15 @@ export const testeConcluir = createServerFn({ method: "POST" })
     if (error) throw new Error("Não foi possível concluir. Tente de novo.");
     const { error: e2 } = await sb.rpc("candidatura_teste_concluido", { _teste: t.id });
     if (e2) console.error("[teste] pós-conclusão falhou:", e2.message);
+    // O teste está salvo; uma falha na decisão não desfaz as respostas.
+    if (!e2) {
+      try {
+        const { processarLeadAoConcluir } = await import("@/lib/captacao/processar.server");
+        await processarLeadAoConcluir(t.lead_id);
+      } catch {
+        console.error("[teste] decisão imediata indisponível; a rotina retoma pela fila.");
+      }
+    }
     return { devolutiva: p.textos.devolutiva[resultado.disc_principal] || null };
   });
 

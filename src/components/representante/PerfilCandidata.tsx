@@ -184,7 +184,7 @@ function PerfilESonho({ lead, nome, whatsapp }: { lead: string; nome: string; wh
                     </div>
                   ) : (
                     <button type="button" disabled={gerar.isPending} onClick={() => gerar.mutate()} className="min-h-11 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-50">
-                      {gerar.isPending ? "Preparando…" : "Preparar o teste de perfil"}
+                      {gerar.isPending ? "Preparando…" : "Preparar o teste DISC"}
                     </button>
                   )}
                 </div>

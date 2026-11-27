@@ -120,7 +120,9 @@ export function PageHeader({
   actions,
   icon,
   tabs,
+  aside,
 }: {
+  aside?: ReactNode;
   eyebrow: string;
   title: string;
   description?: string;
@@ -132,7 +134,8 @@ export function PageHeader({
   const Icon = icon ?? auto;
   return (
     <header className="admin-deck px-6 py-5 md:px-7">
-      <div className="relative flex flex-wrap items-center justify-between gap-5">
+      <div className="relative flex items-center gap-5">
+      <div className="relative flex min-w-0 flex-1 flex-wrap items-center justify-between gap-5">
         <div className="flex min-w-0 items-center gap-4">
           <BackButton className="border-warm-ivory/15 bg-warm-ivory/5 text-warm-ivory hover:border-champagne hover:text-champagne" />
           <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-champagne/40 bg-champagne/10 text-champagne shadow-inner">
@@ -154,6 +157,8 @@ export function PageHeader({
             {actions}
           </div>
         )}
+      </div>
+      {aside ? <div className="hidden shrink-0 md:block">{aside}</div> : null}
       </div>
     </header>
   );

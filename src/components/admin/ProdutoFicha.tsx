@@ -35,6 +35,8 @@ interface Props {
   children?: React.ReactNode;
   contagemVariantes?: number;
   temImagem?: boolean;
+  /** fotos exibidas no topo, ao lado do título */
+  fotos?: React.ReactNode;
 }
 
 type Form = Record<string, string | boolean>;
@@ -70,7 +72,7 @@ const VAZIO: Form = {
   is_featured: false,
 };
 
-export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = false }: Props) {
+export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = false, fotos }: Props) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const caps = useCapabilities();
@@ -480,6 +482,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
   return (
     <div className="space-y-6">
       <PageHeader
+        aside={fotos}
         eyebrow={id ? "Produto" : "Novo produto"}
         title={String(form["name"] || "") || "Novo produto"}
         description={`Código interno: ${p?.internal_code ?? "gerado no primeiro salvamento"} · Endereço: /${slugPrevia || "—"} · ${contagemVariantes} variante(s) · ${pct}% concluído`}

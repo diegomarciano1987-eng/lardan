@@ -390,6 +390,16 @@ function ProdutoDetalhe() {
         id={id}
         contagemVariantes={variantes.data?.length ?? 0}
         temImagem={(imagens.data?.length ?? 0) > 0}
+        fotos={
+          (imagens.data?.length ?? 0) > 0 ? (
+            <FotosTopo
+              fotos={(imagens.data ?? []).map((m) => {
+                const media = m.media as { alt: string; storage_path: string | null } | null;
+                return { id: m.id, path: media?.storage_path ?? null, alt: media?.alt ?? "Foto do produto" };
+              })}
+            />
+          ) : undefined
+        }
       >
 
 
@@ -882,5 +892,59 @@ function MiniFoto({ path, alt }: { path: string; alt: string }) {
     <img src={url} alt={alt} className="size-10 rounded object-cover" />
   ) : (
     <span className="block size-10 animate-pulse rounded bg-surface-muted" />
+  );
+}
+
+/** Fotos no topo da ficha: principal pequena + miniaturas clicáveis, sem aumentar o cabeçalho. */
+function FotosTopo({ fotos }: { fotos: { id: string; path: string | null; alt: string }[] }) {
+  const [urls, setUrls] = useState<Record<string, string>>({});
+  const [ativa, setAtiva] = useState(0);
+  useEffect(() => {
+    let vivo = true;
+    void Promise.all(
+      fotos.map(async (f) => [f.id, f.path ? await signedMediaUrl(f.path) : null] as const),
+    ).then((pares) => {
+      if (!vivo) return;
+      const m: Record<string, string> = {};
+      for (const [k, u] of pares) if (u) m[k] = u;
+      setUrls(m);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [fotos.map((f) => f.path).join("|")]);
+  const idx = Math.min(ativa, fotos.length - 1);
+  const atual = fotos[idx];
+  const mostrar = fotos.slice(0, 5);
+  return (
+    <div className="flex items-center gap-2">
+      {fotos.length > 1 ? (
+        <div className="flex flex-col gap-1.5">
+          {mostrar.map((f, i) => (
+            <button
+              key={f.id}
+              type="button"
+              aria-label={`Ver foto ${i + 1}`}
+              onClick={() => setAtiva(i)}
+              className={`size-6 overflow-hidden rounded-md border transition ${i === idx ? "border-champagne ring-2 ring-champagne/40" : "border-warm-ivory/20 opacity-70 hover:opacity-100"}`}
+            >
+              {urls[f.id] ? <img src={urls[f.id]} alt="" className="size-full object-cover" /> : <span className="block size-full animate-pulse bg-warm-ivory/10" />}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <div className="relative size-36 overflow-hidden rounded-2xl border border-champagne/40 bg-warm-ivory/5 shadow-inner">
+        {atual && urls[atual.id] ? (
+          <img src={urls[atual.id]} alt={atual.alt} className="size-full object-cover" />
+        ) : (
+          <div className="size-full animate-pulse bg-warm-ivory/10" />
+        )}
+        {fotos.length > 1 ? (
+          <span className="absolute right-1.5 bottom-1.5 rounded-full bg-black/55 px-2 py-0.5 text-[0.6875rem] font-semibold text-white">
+            {idx + 1}/{fotos.length}
+          </span>
+        ) : null}
+      </div>
+    </div>
   );
 }

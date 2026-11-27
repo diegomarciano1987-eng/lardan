@@ -267,3 +267,23 @@ export async function rpcServico<T = unknown>(fn: string, args: Record<string, u
     conexao.release();
   }
 }
+
+/** 0412: a candidata envia as 4 fotos pelo link (como a página /documentos faria pelo servidor). */
+export async function enviarDocumentosCandidata(lead: string): Promise<{ ja_enviado: boolean; aprovada?: boolean }> {
+  const t = await rpcServico<string>("candidatura_documentos_link_garantir", { _lead: lead });
+  if (t.erro) throw new Error(t.erro);
+  for (const tipo of ["documento", "comprovante", "selfie", "fachada"]) {
+    const c = await rpcServico<string>("candidatura_documento_caminho", { _token: t.dados, _tipo: tipo, _ext: "jpg" });
+    if (c.erro) throw new Error(c.erro);
+    const r = await rpcServico("candidatura_documento_registrar", { _token: t.dados, _tipo: tipo, _path: c.dados, _mime: "image/jpeg", _bytes: 1000 });
+    if (r.erro) throw new Error(r.erro);
+  }
+  const f = await rpcServico<{ ja_enviado: boolean; aprovada?: boolean }>("candidatura_documentos_finalizar", { _token: t.dados });
+  if (f.erro) throw new Error(f.erro);
+  return f.dados;
+}
+
+/** 0412: cenário de teste que precisa de uma candidata já aprovada antes da regra (fora da trava da captação). */
+export async function isentarDaCaptacao(lead: string) {
+  await adm.unsafe(`insert into public.captacao_gate_isentas (lead_id, motivo) values ($1,'cenário de teste: aprovada fora da captação') on conflict do nothing`, [lead]);
+}

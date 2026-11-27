@@ -22891,6 +22891,10 @@ export type Database = {
         Args: { _teste: string }
         Returns: undefined
       }
+      candidatura_teste_documentos_token: {
+        Args: { _teste_token: string }
+        Returns: string
+      }
       candidatura_teste_gerar: { Args: { _lead: string }; Returns: Json }
       candidatura_teste_site: {
         Args: { _aceite: string; _protocolo: string; _site: Json }
@@ -22902,6 +22906,10 @@ export type Database = {
       }
       caps_individuais_permitidas: { Args: never; Returns: string[] }
       captacao_aprovadas: { Args: { _canal?: string }; Returns: Json }
+      captacao_aprovar_interno: {
+        Args: { _auto: boolean; _lead: string; _nota: string; _por: string }
+        Returns: undefined
+      }
       captacao_canal: {
         Args: { _l: Database["public"]["Tables"]["leads"]["Row"] }
         Returns: string
@@ -22923,6 +22931,8 @@ export type Database = {
         Returns: undefined
       }
       captacao_representantes: { Args: never; Returns: Json }
+      captacao_requisitos: { Args: { _lead: string }; Returns: Json }
+      captacao_requisitos_falta: { Args: { _r: Json }; Returns: string[] }
       captacao_revisao_resolver: { Args: { _id: string }; Returns: undefined }
       captacao_revisar: {
         Args: { _lead: string; _motivo: string }
@@ -25052,6 +25062,7 @@ export type Database = {
       lara_iniciar_protocolo: { Args: { _protocolo: string }; Returns: Json }
       lara_ligar: { Args: { _ativa: boolean }; Returns: boolean }
       lara_prazos: { Args: never; Returns: Json }
+      lara_pre_aprovada: { Args: { _lead: string }; Returns: undefined }
       lara_primeiro_nome: {
         Args: { _l: Database["public"]["Tables"]["leads"]["Row"] }
         Returns: string
@@ -26460,6 +26471,10 @@ export type Database = {
         Args: { _consultora: string; _remessa: string }
         Returns: Json
       }
+      remessa_abrir_maleta_busca: {
+        Args: { _consultora: string; _remessa: string }
+        Returns: Json
+      }
       remessa_abrir_maleta_representante: {
         Args: { _remessa: string }
         Returns: Json
@@ -26482,6 +26497,17 @@ export type Database = {
       remessa_cancelar_vazia: {
         Args: { _motivo: string; _remessa: string }
         Returns: Json
+      }
+      remessa_consultoras_buscar: {
+        Args: { _remessa: string; _search: string }
+        Returns: {
+          code: string
+          cpf: string
+          display_name: string
+          mesma_praca: boolean
+          party_id: string
+          praca: string
+        }[]
       }
       remessa_consultoras_sem_praca: {
         Args: { _remessa: string; _search?: string }
@@ -26724,6 +26750,10 @@ export type Database = {
       }
       rep_asaas_preparar: {
         Args: { _actor: string; _payload: Json; _rep_user: string }
+        Returns: Json
+      }
+      rep_candidata_aprovar: {
+        Args: { _lead: string; _nota?: string; _rep: string }
         Returns: Json
       }
       rep_candidata_ficha: { Args: { _lead: string }; Returns: Json }

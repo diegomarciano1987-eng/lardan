@@ -150,7 +150,10 @@ export const DISC: { enunciado: string; frases: [string, string, string, string]
 ];
 
 export const FINAL_TEXTO =
-  "Recebemos suas respostas. Agora vamos analisar o seu perfil. Em breve a Lara te chama aqui no WhatsApp com o resultado e os próximos passos.";
+  "Recebemos suas respostas e a Lardan já está analisando o seu perfil. Falta só um passo: enviar seus documentos. Sem eles a candidatura não pode ser aprovada.";
+/** 0412: quando o link dos documentos não está disponível (ex.: candidatura encerrada). */
+export const FINAL_TEXTO_SEM_DOCUMENTOS =
+  "Recebemos suas respostas. Agora vamos analisar o seu perfil e a Lardan te dá o retorno pelo WhatsApp.";
 
 /** Respostas da candidata, como ficam gravadas (códigos, nunca pontos). */
 export interface Respostas {

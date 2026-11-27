@@ -23,6 +23,7 @@ import { EnvioRepresentante } from "@/components/admin/candidaturas/EnvioReprese
 import { AnaliseTeste } from "@/components/admin/candidaturas/AnaliseTeste";
 import { CreditoAssertiva } from "@/components/admin/candidaturas/CreditoAssertiva";
 import { DocumentosCandidata } from "@/components/admin/candidaturas/Aprovadas";
+import { RequisitosAprovacao, useRequisitosAprovacao } from "@/components/admin/candidaturas/RequisitosAprovacao";
 import { ConviteConsultora } from "@/components/admin/acessos/ConviteConsultora";
 import {
   Dialog,
@@ -123,6 +124,7 @@ function CockpitCandidata() {
   const [abrirFollowup, setAbrirFollowup] = useState(false);
   const [abrirPerda, setAbrirPerda] = useState(false);
   const [abrirGanho, setAbrirGanho] = useState(false);
+  const requisitos = useRequisitosAprovacao(id, pode("candidaturas.view"));
   const [motivoPerda, setMotivoPerda] = useState("");
   const [obsPerda, setObsPerda] = useState("");
   const [obsGanho, setObsGanho] = useState("");
@@ -319,6 +321,7 @@ function CockpitCandidata() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
         {/* CORPO */}
         <div className="min-w-0">
+          {c.desfecho === "aberta" && <div className="mb-4"><RequisitosAprovacao leadId={id} /></div>}
           <Tabs defaultValue="resumo">
             <TabsList>
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
@@ -789,6 +792,7 @@ function CockpitCandidata() {
               automaticamente.
             </DialogDescription>
           </DialogHeader>
+          <RequisitosAprovacao leadId={id} compacto />
           <textarea
             rows={3}
             value={obsGanho}
@@ -803,7 +807,7 @@ function CockpitCandidata() {
             <button
               type="button"
               className="admin-btn admin-btn-primary"
-              disabled={ganho.isPending}
+              disabled={ganho.isPending || requisitos.isPending || !!requisitos.error || !requisitos.data?.requisitos || (requisitos.data.falta?.length ?? 0) > 0}
               onClick={() => ganho.mutate(obsGanho, { onSuccess: () => setAbrirGanho(false) })}
             >
               Confirmar aprovação

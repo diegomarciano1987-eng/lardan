@@ -3,7 +3,7 @@
  * Banco ISOLADO, dados sintéticos. A API da Assertiva não é chamada: a consulta entra pelo banco no formato da documentação.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, rpc, rpcServico, type Conta } from "./base";
+import { adm, criarConta, rpc, rpcServico, type Conta, enviarDocumentosCandidata } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
@@ -59,7 +59,8 @@ beforeAll(async () => {
 describe("0395: funil e canal", () => {
   test("etapas na ordem nova; Primeiro contato e Perfil saem do funil", async () => {
     const e = (await adm.unsafe(`select key from public.candidatura_stages where is_active order by sort_order`)) as { key: string }[];
-    expect(e.map((x) => x.key)).toEqual(["nova", "conversa", "teste", "avaliacao", "aprovada", "documentacao", "onboarding", "reprovada"]);
+    // 0412: Documentação vem antes de Aprovada (sem documentos não aprova)
+    expect(e.map((x) => x.key)).toEqual(["nova", "conversa", "teste", "avaliacao", "documentacao", "aprovada", "onboarding", "reprovada"]);
   });
 
   test("Site e Representantes separados pelo filtro do quadro", async () => {
@@ -76,7 +77,7 @@ describe("0395: funil e canal", () => {
 });
 
 describe("0395: decisão depois do teste e do crédito", () => {
-  test("verde + score dentro da regra + sem alertas + dados completos → aprovada sozinha (Aprovada, ganha)", async () => {
+  test("verde + score dentro da regra + sem alertas + dados completos → pré-aprovada; aprova sozinha quando os documentos chegam", async () => {
     const l = await lead({ idade: 28 });
     await testeConcluido(l, "verde");
     expect((await estado(l)).etapa).toBe("avaliacao");
@@ -84,6 +85,22 @@ describe("0395: decisão depois do teste e do crédito", () => {
     await credito(l, 720);
     const d = await decidir(l);
     expect(d.dados!.decisao).toBe("aprovada_automatica");
+    // 0412: sem os documentos ainda não aprova; espera na Documentação
+    expect(await estado(l)).toEqual({ etapa: "documentacao", status: "em_analise", outcome: "aberta" });
+    const antes = await rpc<{ ganhas: number; em_atendimento: number }>(master, "crm_metrics", { _canal: "site" });
+    expect((await enviarDocumentosCandidata(l)).aprovada).toBe(true);
+    expect(await estado(l)).toEqual({ etapa: "aprovada", status: "aprovado", outcome: "ganha" });
+    const depois = await rpc<{ ganhas: number; em_atendimento: number }>(master, "crm_metrics", { _canal: "site" });
+    expect(Number(depois.dados.ganhas) - Number(antes.dados.ganhas)).toBe(1);
+    expect(Number(antes.dados.em_atendimento) - Number(depois.dados.em_atendimento)).toBe(1);
+  });
+
+  test("documentos enviados antes da consulta: a decisão já aprova direto", async () => {
+    const l = await lead({ idade: 30 });
+    await testeConcluido(l, "verde");
+    expect((await enviarDocumentosCandidata(l)).aprovada).toBe(false);
+    await credito(l, 720);
+    expect((await decidir(l)).dados!.decisao).toBe("aprovada_automatica");
     expect(await estado(l)).toEqual({ etapa: "aprovada", status: "aprovado", outcome: "ganha" });
   });
 
@@ -130,6 +147,8 @@ describe("0395: decisão depois do teste e do crédito", () => {
   test("fila: teste concluído entra; pegar marca tentativa; concluir tira da fila", async () => {
     const l = await lead();
     await testeConcluido(l, "verde");
+    // Dá prioridade somente ao cenário deste teste; execuções anteriores podem deixar mais de 50 pendentes.
+    await adm.unsafe(`update captacao_fila set proxima_em=now()-interval '10 years',criado_em=now()-interval '10 years' where lead_id=$1`, [l]);
     const pegar = async () => ((await adm.begin(async (tx) => {
       await tx.unsafe(`set local role service_role`);
       return tx.unsafe(`select public.captacao_fila_pegar(50) id`);
@@ -168,6 +187,10 @@ describe("0395: permissões e site sem representante", () => {
     await testeConcluido(l, "amarelo");
     await credito(l, 800);
     await decidir(l);
+    // 0412: sem documentos ninguém aprova, nem o Daniel
+    expect((await rpc(master, "crm_mark_won", { _lead: l, _nota: "revisado" })).erro).toContain("os documentos");
+    expect((await enviarDocumentosCandidata(l)).aprovada).toBe(false); // revisão: continua com o Daniel
+    expect((await estado(l)).outcome).toBe("aberta");
     const r = await rpc(master, "crm_mark_won", { _lead: l, _nota: "revisado" });
     expect(r.erro).toBeNull();
     expect(await estado(l)).toEqual({ etapa: "aprovada", status: "aprovado", outcome: "ganha" });

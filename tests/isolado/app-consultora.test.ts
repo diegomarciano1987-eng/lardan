@@ -4,7 +4,7 @@
  * situação da indicada), caminho para líder e Liga. Banco ISOLADO, dados sintéticos.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, criarDeposito, criarVariante, ler, porEstoque, rpc, type Conta } from "./base";
+import { adm, criarConta, criarDeposito, criarVariante, ler, porEstoque, rpc, type Conta, isentarDaCaptacao } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
@@ -206,6 +206,7 @@ describe("indicação", () => {
 
   test("situação da indicada acompanha a jornada: aprovada → 1ª maleta", async () => {
     const l = await novoLead(`Indicada Cadastro ${marca}`);
+    await isentarDaCaptacao(l); // 0412: aprovada fora da captação (cenário de outra regra)
     await adm.unsafe(`update public.leads set referred_by_party_id=$2, party_id=$3, outcome='ganha' where id=$1`, [l, cons.partyId, indicada.partyId]);
     const sit = async () => (await um<{ s: string }>(`select public.indicada_situacao(l) s from public.leads l where id=$1`, [l])).s;
     expect(await sit()).toBe("aprovada");

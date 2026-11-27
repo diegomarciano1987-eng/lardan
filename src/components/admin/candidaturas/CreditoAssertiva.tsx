@@ -23,6 +23,7 @@ type Consulta = {
   resultado: "aprovada_regra" | "revisar"; motivo: string; protocolo: string | null;
 };
 type Decisao = {
+  requisitos?: { documentos: boolean };
   canal: "site" | "representante"; como_conheceu: string | null; na_fila: boolean; erro_fila: string | null;
   ultima: { em: string; decisao: "aprovada_automatica" | "revisao"; motivos: string[]; semaforo: string | null; score: number | null; score_minimo: number | null } | null;
 };
@@ -98,10 +99,10 @@ export function CreditoAssertiva({ leadId, podeEditar }: { leadId: string; podeE
             </p>
             {dec.data.ultima ? (
               dec.data.ultima.decisao === "aprovada_automatica" ? (
-                <p className="font-semibold text-success">Aprovada automaticamente em {dataBR(dec.data.ultima.em)}: teste verde e crédito dentro da regra.</p>
+                <p className="font-semibold text-success">{dec.data.requisitos?.documentos ? `Teste, crédito e documentos completos (${dataBR(dec.data.ultima.em)}).` : `Teste verde e crédito dentro da regra (${dataBR(dec.data.ultima.em)}): aprova sozinha assim que os documentos chegam.`}</p>
               ) : (
                 <>
-                  <p className="font-semibold text-warning">Foi para a análise do Daniel em {dataBR(dec.data.ultima.em)}</p>
+                  <p className="font-semibold text-warning">Foi para a análise em {dataBR(dec.data.ultima.em)} (Daniel ou o representante dela, com os documentos)</p>
                   <ul className="mt-1 list-disc pl-5 text-xs text-ledger-muted">
                     {dec.data.ultima.motivos.map((m) => <li key={m}>{m}</li>)}
                   </ul>

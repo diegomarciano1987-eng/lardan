@@ -26,10 +26,11 @@ export async function consultarCreditoDaCandidata(lead: string, origem: "manual"
     throw new Error(p.motivo ?? "Não foi possível consultar.");
   }
   const { consultarCreditoPF, ErroAssertiva } = await import("./assertiva.server");
+  if (!p.cpf) throw new Error("Candidatura sem CPF válido.");
   let http = 0;
   let corpo: Record<string, unknown> = {};
   try {
-    ({ http, corpo } = await consultarCreditoPF(p.cpf!));
+    ({ http, corpo } = await consultarCreditoPF(p.cpf));
   } catch (e) {
     // chave ausente/recusada, sem permissão ou consulta repetida (429): nada foi cobrado; avisa a equipe sem gravar
     if (e instanceof ErroAssertiva) throw new Error(e.message);
@@ -45,7 +46,20 @@ export const creditoConsultar = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ lead: z.string().uuid(), forcar: z.boolean().default(false) }).parse(d))
   .handler(async ({ data, context }) => {
     const c = context as unknown as { userId: string };
-    return consultarCreditoDaCandidata(data.lead, "manual", c.userId, data.forcar);
+    const r = await consultarCreditoDaCandidata(data.lead, "manual", c.userId, data.forcar);
+    if (!r.reaproveitada && r.situacao === "erro") return r;
+    // 0412: a consulta feita pela tela também aplica a decisão (antes ficava parada até a rotina)
+    try {
+      const sb = await admin();
+      const d = await sb.rpc("captacao_decidir", { _lead: data.lead });
+      if (d.error) throw new Error("Não foi possível aplicar a decisão.");
+      if (!d.error && (d.data as { decisao?: string } | null)?.decisao !== "aguardando") {
+        await sb.rpc("captacao_fila_concluir", { _lead: data.lead, _erro: null });
+      }
+    } catch {
+      console.error("[credito] decisão depois da consulta manual não rodou; a rotina retoma pela fila.");
+    }
+    return r;
   });
 
 export const nascimentoDefinir = createServerFn({ method: "POST" })

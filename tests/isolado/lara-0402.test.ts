@@ -3,7 +3,7 @@
  * Banco ISOLADO, dados sintéticos. A Meta não é chamada: o teste faz o papel do servidor.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, rpc, rpcServico, type Conta } from "./base";
+import { adm, criarConta, isentarDaCaptacao, rpc, rpcServico, type Conta } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
@@ -163,7 +163,13 @@ describe("0402: roteiro gravado pelo servidor", () => {
     await ligar(true);
     const a = await lead();
     await rpcServico("lara_iniciar", { _lead: a.id });
+    // 0412: o modelo com o link dos documentos sai na pré-aprovação (teste + crédito ok); a aprovação final vem depois dos documentos
+    await rpcServico("candidatura_documentos_link_garantir", { _lead: a.id });
+    await rpcServico("lara_pre_aprovada", { _lead: a.id });
+    expect((await fila(a.id)).filter((f) => f.chave === `aprovada:${a.id}`)).toHaveLength(1);
+    await isentarDaCaptacao(a.id);
     await adm.unsafe(`update public.leads set outcome='ganha', won_at=now(), status='aprovado' where id=$1`, [a.id]);
+    expect((await fila(a.id)).filter((f) => f.chave === `aprovada:${a.id}`)).toHaveLength(1); // não manda de novo
     const ap = (await fila(a.id)).find((f) => f.chave === `aprovada:${a.id}`)!;
     const doc = await um<{ t: string }>(`select token t from public.candidatura_documentos_link where lead_id=$1`, [a.id]);
     expect(ap.conteudo).toMatchObject({ template: "lara_aprovada_documentos", params: ["Maria"], url: doc.t });
@@ -180,6 +186,7 @@ describe("0402: roteiro gravado pelo servidor", () => {
 
     // quem não falou com a Lara não recebe aviso de resultado
     const sem = await lead();
+    await isentarDaCaptacao(sem.id);
     await adm.unsafe(`update public.leads set outcome='ganha' where id=$1`, [sem.id]);
     expect(await fila(sem.id)).toHaveLength(0);
   });

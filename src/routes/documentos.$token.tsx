@@ -8,6 +8,10 @@ export const Route = createFileRoute("/documentos/$token")({
     meta: [
       { title: "Lardan — seus documentos" },
       { name: "description", content: "Envie as fotos dos documentos para seguir com a sua maleta Lardan." },
+      { property: "og:title", content: "Lardan — seus documentos" },
+      { property: "og:description", content: "Envio privado dos documentos da candidatura LARDAN." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
       { name: "referrer", content: "no-referrer" },
     ],

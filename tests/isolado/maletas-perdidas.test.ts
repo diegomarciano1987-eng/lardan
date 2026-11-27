@@ -3,7 +3,7 @@
  * Banco ISOLADO, dados sintéticos.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, criarDeposito, criarVariante, ler, porEstoque, rpc, type Conta } from "./base";
+import { adm, criarConta, criarDeposito, criarVariante, ler, porEstoque, rpc, type Conta, isentarDaCaptacao } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const base = 900000 + Math.floor(Math.random() * 90000);
@@ -174,6 +174,7 @@ describe("4. maleta da remessa com o representante", () => {
     expect(op.dados.some((x) => x.tipo === "candidata" && x.id === lead)).toBe(true);
     expect((await rpc(repOutro, "rep_maleta_repassar", { _rep: repOutro.partyId, _cycle: ciclo, _lead: lead })).ok).toBe(false);
     // 0398: candidata só recebe maleta do representante depois de aprovada pela Lardan
+    await isentarDaCaptacao(lead); // 0412: aprovada fora da captação (cenário de outra regra)
     await adm.unsafe(`update public.leads set outcome='ganha', won_at=now(), status='aprovado' where id=$1`, [lead]);
     const r = await rpc<{ consultora_party_id: string; nova_consultora: boolean }>(rep, "rep_maleta_repassar", { _rep: rep.partyId, _cycle: ciclo, _lead: lead });
     expect(r.erro).toBeNull();

@@ -8,7 +8,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Check, Loader2 } from "lucide-react";
 import { testeAbrir, testeConcluir, testeSalvar } from "@/lib/candidatura-teste/teste.functions";
 import {
-  ACEITE_TEXTO, DISC, DISC_ABERTURA, ESCALA, FATORES, FINAL_TEXTO, FRASES, ORGANIZACAO, PARTE1, PARTE2_ABERTURA, RESTRICAO, SITE,
+  ACEITE_TEXTO, DISC, DISC_ABERTURA, ESCALA, FATORES, FINAL_TEXTO, FINAL_TEXTO_SEM_DOCUMENTOS, FRASES, ORGANIZACAO, PARTE1, PARTE2_ABERTURA, RESTRICAO, SITE,
   type Fator, type Opcao, type RespostaDisc, type Respostas,
 } from "@/lib/candidatura-teste/perguntas";
 
@@ -45,7 +45,8 @@ function primeiraTela(e: Estado): Tela {
   return { tipo: "disc", grupo: g < 0 ? DISC.length - 1 : g };
 }
 
-export function TesteCandidatura({ token }: { token: string }) {
+/** `novaAba`: dentro do app do representante o link dos documentos abre em outra aba, para não sair do app. */
+export function TesteCandidatura({ token, novaAba = false }: { token: string; novaAba?: boolean }) {
   const abrirFn = useServerFn(testeAbrir);
   const salvarFn = useServerFn(testeSalvar);
   const concluirFn = useServerFn(testeConcluir);
@@ -57,11 +58,12 @@ export function TesteCandidatura({ token }: { token: string }) {
   const [aceite, setAceite] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [devolutiva, setDevolutiva] = React.useState<string | null>(null);
+  const [documentos, setDocumentos] = React.useState<string | null>(null);
   const topo = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     abrirFn({ data: { token } })
-      .then((e) => { setEstado(e); setR(e.respostas as Respostas); setDisc(e.disc_respostas as (RespostaDisc | null)[]); setDevolutiva(e.devolutiva); setTela(primeiraTela(e)); })
+      .then((e) => { setEstado(e); setR(e.respostas as Respostas); setDisc(e.disc_respostas as (RespostaDisc | null)[]); setDevolutiva(e.devolutiva); setDocumentos(e.documentos ?? null); setTela(primeiraTela(e)); })
       .catch((x: Error) => setErro(x.message));
   }, [token, abrirFn]);
   React.useEffect(() => { topo.current?.scrollIntoView({ block: "start", behavior: "smooth" }); }, [tela]);
@@ -188,7 +190,7 @@ export function TesteCandidatura({ token }: { token: string }) {
         if (prox >= 0) { setTela({ tipo: "disc", grupo: prox }); return; }
         if (falta >= 0) { setTela({ tipo: "disc", grupo: falta }); return; }
         setBusy(true);
-        try { const f = await concluirFn({ data: { token } }); setDevolutiva(f.devolutiva); setTela({ tipo: "final" }); }
+        try { const f = await concluirFn({ data: { token } }); setDevolutiva(f.devolutiva); setDocumentos(f.documentos ?? null); setTela({ tipo: "final" }); }
         catch (x) { setErro((x as Error).message); }
         finally { setBusy(false); }
       }} />;
@@ -198,7 +200,15 @@ export function TesteCandidatura({ token }: { token: string }) {
         <span className="mx-auto grid size-14 place-items-center rounded-full bg-primary/10 text-primary"><Check className="size-7" /></span>
         <h1 className="text-2xl text-foreground">Obrigada{estado.nome ? `, ${estado.nome}` : ""}!</h1>
         {devolutiva && <p className="text-base leading-relaxed text-foreground">{devolutiva}</p>}
-        <p className="text-base leading-relaxed text-muted-foreground">{FINAL_TEXTO}</p>
+        <p className="text-base leading-relaxed text-muted-foreground">{documentos ? FINAL_TEXTO : FINAL_TEXTO_SEM_DOCUMENTOS}</p>
+        {documentos && (
+          <div className="space-y-2">
+            <a href={`/documentos/${documentos}`} {...(novaAba ? { target: "_blank", rel: "noreferrer" } : {})} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-primary px-4 text-base font-semibold text-primary-foreground">
+              Enviar meus documentos
+            </a>
+            <p className="text-xs text-muted-foreground">4 fotos: documento com foto, comprovante de residência, selfie com o documento e a frente da casa. Leva uns 5 minutos.</p>
+          </div>
+        )}
       </div>
     );
   }

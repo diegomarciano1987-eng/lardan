@@ -28,7 +28,8 @@ import {
   STATUS_REMESSA,
   abrirMaletaNaRemessa,
   abrirSegundaMaletaNaRemessa,
-  consultorasDaPraca,
+  buscarConsultorasDaRemessa,
+  abrirMaletaPelaBusca,
   consultorasSemPraca,
   dataBR,
   finalizarRemessa,
@@ -135,9 +136,9 @@ function RemessaPage() {
   });
   const r = remessa.data;
   const consultoras = useQuery({
-    queryKey: ["remessas", "consultoras", r?.praca_id, busca],
-    queryFn: () => consultorasDaPraca(r!.praca_id, busca),
-    enabled: !!r,
+    queryKey: ["remessas", "consultoras-busca-unica", id, busca],
+    queryFn: () => buscarConsultorasDaRemessa(id, busca),
+    enabled: !!r && podeMontar,
   });
   const jaTem = new Set((maletas.data ?? []).map((m) => m.consultora_party_id));
   const opcoes = (consultoras.data ?? []).map((o) => (jaTem.has(o.value) ? { ...o, label: `${o.label} · já tem maleta` } : o));
@@ -145,7 +146,7 @@ function RemessaPage() {
   const abrir = useMutation({
     mutationFn: () => {
       if (!consultora) throw new Error("Escolha a consultora.");
-      return abrirMaletaNaRemessa(id, consultora);
+      return abrirMaletaPelaBusca(id, consultora);
     },
     onSuccess: (res) => {
       toast.success(res.repetida ? "Esta consultora já tem maleta nesta remessa." : "Maleta aberta para montagem.");
@@ -481,11 +482,11 @@ function RemessaPage() {
           ) : (
           <div className="flex flex-wrap items-end gap-3">
             <label className="grid min-w-80 flex-1 gap-1.5 text-sm">
-              <span className="ledger-eyebrow">Consultora da praça {r.praca}</span>
+              <span className="ledger-eyebrow">{escopo.data?.carteira ? `Consultora da praça ${r.praca}` : "Consultora"}</span>
               <SmartSelect value={consultora} onChange={setConsultora} options={opcoes} onSearch={setBusca}
-                loading={consultoras.isFetching} searchPlaceholder="Buscar por nome ou CPF" placeholder="Escolher consultora" />
+                loading={consultoras.isFetching} searchPlaceholder="Nome, código ou CPF" placeholder="Escolher consultora" />
               <span className="text-xs text-ledger-muted">
-                {consultoras.data ? `${consultoras.data.length} consultora(s) encontradas nesta praça` : "Carregando consultoras…"}
+                {consultoras.error ? "Não foi possível buscar agora. Tente novamente." : consultoras.data ? `${consultoras.data.length} consultora(s) encontradas${consultoras.data.length === 100 ? " · refine a busca" : ""}` : "Carregando consultoras…"}
               </span>
             </label>
             <button type="button" className="admin-btn admin-btn-primary" disabled={abrir.isPending} onClick={() => abrir.mutate()}>
@@ -520,7 +521,7 @@ function RemessaPage() {
         </Panel>
       )}
 
-      {podeMontar && r.status !== "fechada" && r.status !== "cancelada" && (
+      {podeMontar && escopo.data?.carteira && r.status !== "fechada" && r.status !== "cancelada" && (
         <Panel title="Consultora não aparece na lista?">
           <div className="flex flex-wrap items-end gap-3">
             <label className="grid min-w-80 flex-1 gap-1.5 text-sm">

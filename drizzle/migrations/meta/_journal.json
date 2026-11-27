@@ -2899,6 +2899,34 @@
       "when": 1795803629462,
       "tag": "0413_captacao_metricas_por_etapa",
       "breakpoints": true
+    },
+    {
+      "idx": 414,
+      "version": "7",
+      "when": 1795804781352,
+      "tag": "0414_montagem_busca_unica_rede_toda",
+      "breakpoints": true
+    },
+    {
+      "idx": 415,
+      "version": "7",
+      "when": 1795804907280,
+      "tag": "0415_montagem_compatibilidade_busca_publicada",
+      "breakpoints": true
+    },
+    {
+      "idx": 416,
+      "version": "7",
+      "when": 1795804993017,
+      "tag": "0416_captacao_obrigatoria_0412",
+      "breakpoints": true
+    },
+    {
+      "idx": 417,
+      "version": "7",
+      "when": 1795805148746,
+      "tag": "0417_captacao_documentacao_indicadores_coerentes",
+      "breakpoints": true
     }
   ]
 }

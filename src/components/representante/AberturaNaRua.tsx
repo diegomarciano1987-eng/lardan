@@ -29,6 +29,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Check, ChevronLeft, CircleCheckBig, ClipboardCheck, Copy, Hourglass, Loader2, MapPin, MessageCircle, PackageOpen, UserPlus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import { consultarCep } from "@/lib/br/lookup.functions";
 import { brl, maletasDoRepresentante, mensagem, receberMaleta, repassarMaleta, rotuloAbertura, trocarDestinoMaleta } from "@/lib/maletas-perdidas";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
@@ -530,9 +531,37 @@ function Bloco({ titulo, icone, children }: { titulo: string; icone?: React.Reac
 
 // ---------------------------------------------------------------- 0398: teste + aprovação da Lardan antes da maleta
 type Situacao = {
-  situacao: "sem_teste" | "teste_em_andamento" | "aguardando_decisao" | "analise" | "aprovada" | "reprovada";
+  situacao: "sem_teste" | "teste_em_andamento" | "aguardando_decisao" | "documentos" | "analise" | "aprovada" | "reprovada";
   liberada: boolean; isenta: boolean; teste_token: string | null; teste_parte: number | null; documentos_token: string | null; documentos_enviados: boolean;
+  /** 0412 */
+  falta?: string[];
+  pode_aprovar?: boolean;
+  resumo?: { semaforo: string | null; perfil_disc: string | null; ipl: number | null; credito: "dentro" | "fora" | "sem_consulta"; score: number | null; score_minimo: number | null; motivos: string[] } | null;
 };
+const COR_SEMAFORO: Record<string, string> = { verde: "Verde", amarelo: "Amarelo", vermelho: "Vermelho" };
+
+/** 0412: o que o representante vê para decidir (teste DISC + crédito), sem o relatório completo do bureau. */
+function ResumoCandidata({ s }: { s: Situacao }) {
+  const r = s.resumo;
+  if (!r) return null;
+  return (
+    <dl className="grid grid-cols-2 gap-2 rounded-xl bg-muted/50 p-3 text-sm">
+      <div><dt className="text-xs text-muted-foreground">Teste DISC</dt><dd className="font-medium">{COR_SEMAFORO[r.semaforo ?? ""] ?? "—"}{r.perfil_disc ? ` · perfil ${r.perfil_disc}` : ""}</dd></div>
+      <div><dt className="text-xs text-muted-foreground">Nota do teste (IPL)</dt><dd className="font-medium tabular-nums">{r.ipl ?? "—"}</dd></div>
+      <div className="col-span-2"><dt className="text-xs text-muted-foreground">Assertiva</dt>
+        <dd className="font-medium">
+          {r.credito === "sem_consulta" ? "Consultando…" : r.credito === "dentro" ? "Dentro da regra" : "Fora da regra"}
+          {r.score != null && <span className="font-normal text-muted-foreground"> · score {r.score}{r.score_minimo != null ? ` (mínimo ${r.score_minimo})` : ""}</span>}
+        </dd>
+      </div>
+      {r.motivos.length > 0 && (
+        <div className="col-span-2"><dt className="text-xs text-muted-foreground">Por que não aprovou sozinha</dt>
+          <dd><ul className="list-disc pl-4 text-xs">{r.motivos.map((m) => <li key={m}>{m}</li>)}</ul></dd>
+        </div>
+      )}
+    </dl>
+  );
+}
 const waLink = (fone: string, texto: string) => { const d = so(fone, 13); return `https://wa.me/${d.startsWith("55") ? d : `55${d}`}?text=${encodeURIComponent(texto)}`; };
 const linkTeste = (t: string) => `${window.location.origin}/candidatura/${t}`;
 const linkDocs = (t: string) => `${window.location.origin}/documentos/${t}`;
@@ -562,6 +591,14 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
     onSuccess: () => void qc.invalidateQueries({ queryKey: chave }),
     onError: (e: Error) => toast.error(e.message),
   });
+  const aprovar = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("rep_candidata_aprovar" as never, { _rep: rep, _lead: leadId, _nota: null } as never);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => { toast.success("Aprovada. Pode escolher a maleta."); void qc.invalidateQueries({ queryKey: chave }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
   const s = q.data;
   // 0407: o link do teste já fica pronto ao chegar aqui (antes dependia de tocar em "Preparar o teste" e muita gente parava)
   const pediu = React.useRef<string | null>(null);
@@ -585,7 +622,7 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
         {s.documentos_token && !s.documentos_enviados && (
           <div className="rounded-xl border border-border p-3 text-sm">
             <p className="font-medium">Documentos</p>
-            <p className="mt-1 text-muted-foreground">A Lardan pede 4 fotos: documento com foto, comprovante de residência, selfie com o documento e a frente da casa. Ela pode mandar agora pelo link (não trava a maleta).</p>
+            <p className="mt-1 text-muted-foreground">A Lardan pede 4 fotos: documento com foto, comprovante de residência, selfie com o documento e a frente da casa. Ela pode mandar agora pelo link.</p>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <a href={waLink(whatsapp, `Olá, ${primeiro}! Seu cadastro na Lardan foi aprovado. Envie por este link as 4 fotos (documento com foto, comprovante de residência, selfie com o documento e a frente da sua casa): ${linkDocs(s.documentos_token)}`)}
                 target="_blank" rel="noreferrer" className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border px-2 text-sm"><MessageCircle className="size-4" /> WhatsApp</a>
@@ -605,14 +642,43 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
       </Bloco>
     );
   }
-  if (s.situacao === "aguardando_decisao" || s.situacao === "analise") {
+  if (s.situacao === "aguardando_decisao" || s.situacao === "analise" || s.situacao === "documentos") {
+    const docs = s.documentos_token && !s.documentos_enviados ? s.documentos_token : null;
     return (
-      <Bloco titulo="Teste concluído" icone={<Hourglass className="size-4" />}>
+      <Bloco titulo={s.situacao === "documentos" ? "Pré-aprovada: faltam os documentos" : s.situacao === "analise" ? "Pronta para decidir" : "Teste concluído"} icone={<Hourglass className="size-4" />}>
         <p className="text-sm">
           {s.situacao === "aguardando_decisao"
-            ? `${primeiro} terminou o teste. A Lardan está consultando o CPF e analisando o perfil; costuma sair em poucos minutos. Esta tela atualiza sozinha.`
-            : `O perfil de ${primeiro} está com o Daniel para análise. Quando ele aprovar, a maleta libera aqui e na sua lista de Captação.`}
+            ? `${primeiro} terminou o teste. A Lardan está consultando o CPF na Assertiva; costuma sair em poucos minutos. Esta tela atualiza sozinha.`
+            : s.situacao === "documentos"
+              ? `Teste e crédito de ${primeiro} passaram. Assim que ela mandar os documentos, a aprovação sai sozinha e a maleta libera.`
+              : `Teste e consulta de ${primeiro} prontos. Veja o resumo: com os documentos enviados, você pode aprovar (crédito dentro da regra) ou deixar para o Daniel.`}
         </p>
+        <ResumoCandidata s={s} />
+        {docs && (
+          <div className="rounded-xl border border-border p-3 text-sm">
+            <p className="font-medium">Documentos (obrigatórios para aprovar)</p>
+            <p className="mt-1 text-muted-foreground">4 fotos: documento com foto, comprovante de residência, selfie com o documento e a frente da casa.</p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <a href={waLink(whatsapp, `Olá, ${primeiro}! Falta só um passo na Lardan: envie por este link as 4 fotos (documento com foto, comprovante de residência, selfie com o documento e a frente da sua casa): ${linkDocs(docs)}`)}
+                target="_blank" rel="noreferrer" className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border px-2 text-sm"><MessageCircle className="size-4" /> WhatsApp</a>
+              <a href={linkDocs(docs)} target="_blank" rel="noreferrer" className="flex min-h-11 items-center justify-center rounded-xl border border-border px-2 text-sm">Fazer aqui com ela</a>
+            </div>
+          </div>
+        )}
+        {s.documentos_enviados && <p className="text-xs text-muted-foreground">Documentos recebidos.</p>}
+        {s.situacao === "analise" && (
+          s.pode_aprovar ? (
+            <Button type="button" disabled={aprovar.isPending} onClick={() => aprovar.mutate()} className="min-h-12 w-full rounded-xl text-sm font-semibold">
+              {aprovar.isPending ? "Aprovando…" : `Aprovar ${primeiro}`}
+            </Button>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {(s.falta ?? []).length > 0
+                ? `Para aprovar ainda falta ${(s.falta ?? []).join(", ")}.`
+                : "O crédito dela ficou fora da regra: só a Lardan (Daniel) pode aprovar."}
+            </p>
+          )
+        )}
         <p className="text-xs text-muted-foreground">Pode fechar: os dados ficam guardados e você continua de onde parou.</p>
         <button type="button" onClick={() => void q.refetch()} disabled={q.isFetching} className="min-h-11 w-full rounded-xl border border-border text-sm">{q.isFetching ? "Conferindo…" : "Conferir agora"}</button>
       </Bloco>
@@ -620,8 +686,8 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
   }
   return (
     <Bloco titulo="Teste DISC" icone={<ClipboardCheck className="size-4" />}>
-      <p className="text-sm">Antes da maleta, {primeiro} faz o teste de perfil, que inclui o DISC: 3 partes, uns 10 minutos, e quem responde é ela. Depois a Lardan consulta o CPF e decide: quando tudo passa, aprova na hora; senão, o Daniel analisa.</p>
-      <p className="text-xs text-muted-foreground">Mande o link no WhatsApp ou entregue o seu celular para ela responder agora. A maleta só libera depois do resultado.</p>
+      <p className="text-sm">Obrigatório: {primeiro} faz o teste de perfil, que inclui o DISC (3 partes, uns 10 minutos, quem responde é ela). Ao terminar, a Lardan consulta o CPF na Assertiva na hora e ela envia os documentos. Sem esses três passos não há aprovação nem maleta.</p>
+      <p className="text-xs text-muted-foreground">Mande o link no WhatsApp ou entregue o seu celular para ela responder agora.</p>
       {s.situacao === "teste_em_andamento" && <p className="text-xs text-muted-foreground">Ela já começou (parte {Math.min(s.teste_parte ?? 1, 3)} de 3). As respostas ficam salvas.</p>}
       {token ? (
         <div className="grid grid-cols-2 gap-2">
@@ -641,7 +707,7 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
           <DialogContent className="z-[260] h-[100dvh] max-h-[100dvh] w-full max-w-none overflow-y-auto rounded-none p-0 sm:h-[92dvh] sm:max-w-2xl sm:rounded-2xl">
             <DialogTitle className="sr-only">Teste de candidatura de {nome}</DialogTitle>
             <DialogDescription className="sr-only">A candidata responde no seu celular; as respostas são dela.</DialogDescription>
-            <TesteCandidatura token={token} />
+            <TesteCandidatura token={token} novaAba />
           </DialogContent>
         </Dialog>
       )}

@@ -4,7 +4,7 @@
  * Banco ISOLADO, dados sintéticos. Nenhum arquivo é enviado ao Storage: o banco recebe só os caminhos.
  */
 import { beforeAll, describe, expect, test } from "bun:test";
-import { adm, criarConta, criarDeposito, criarVariante, ler, porEstoque, rpc, rpcServico, type Conta } from "./base";
+import { adm, criarConta, criarDeposito, criarVariante, ler, porEstoque, rpc, rpcServico, type Conta, enviarDocumentosCandidata, isentarDaCaptacao } from "./base";
 
 const um = async <T>(sql: string, p: unknown[] = []) => ((await adm.unsafe(sql, p)) as T[])[0]!;
 const marca = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
@@ -67,11 +67,13 @@ async function leadSite(o: { aprovada?: boolean; repOrigem?: string | null } = {
     `insert into public.leads (full_name, first_name, whatsapp, city, uf, privacy_version, stage_id, protocol, cpf, email, dream, representante_party_id, representante_origem)
      values ($1,'Site',$2,'Maringá','PR','v1',$3,$4,$5,'s@ex.com','Casa', $6, $7) returning id`,
     [`Site ${marca} ${seq}`, zap(), st.id, `CAP-${marca}-S${seq}`, cpfValido(), o.repOrigem ? rep.partyId : null, o.repOrigem ?? null]);
-  if (o.aprovada !== false) await adm.unsafe(`update public.leads set outcome='ganha', won_at=now(), status='aprovado' where id=$1`, [r.id]);
+  if (o.aprovada !== false) {
+    await isentarDaCaptacao(r.id); // cenário da tela Aprovadas: já aprovada
+    await adm.unsafe(`update public.leads set outcome='ganha', won_at=now(), status='aprovado' where id=$1`, [r.id]);
+  }
   return r.id;
 }
 const token = async (l: string) => (await um<{ t: string | null }>(`select token t from public.candidatura_documentos_link where lead_id=$1`, [l]))?.t ?? null;
-const etapa = async (l: string) => (await um<{ k: string }>(`select s.key k from public.leads l join public.candidatura_stages s on s.id=l.stage_id where l.id=$1`, [l])).k;
 
 beforeAll(async () => {
   master = await criarConta({ nome: `c96-master-${marca}`, papeis: ["master"], comParty: true });
@@ -95,7 +97,7 @@ describe("0398: app do representante — teste e aprovação antes da maleta", (
     expect(l).toEqual({ status: "em_analise", nasc: "1990-05-10", col: null });
   });
 
-  test("fluxo completo: sem teste → teste em andamento → aguardando → análise → Daniel aprova → maleta", async () => {
+  test("fluxo completo: sem teste → teste em andamento → aguardando → análise → documentos → representante aprova → maleta", async () => {
     const { lead_id } = await cadastroNaRua();
     const maleta = await maletaComRep();
     const negado = await rpc(rep, "rep_maleta_repassar", { _rep: rep.partyId, _cycle: maleta, _lead: lead_id });
@@ -114,13 +116,21 @@ describe("0398: app do representante — teste e aprovação antes da maleta", (
     expect(d.dados!.decisao).toBe("revisao");
     const s2 = (await situacao(lead_id)).dados!;
     expect(s2.situacao).toBe("analise");
-    // o representante nunca vê crédito nem motivos
-    expect(Object.keys(s2).some((k) => /score|credito|motivo/.test(k))).toBe(false);
+    // 0412: o representante vê o resumo (teste e crédito) para poder decidir; sem documentos ainda não aprova
+    expect(s2.resumo).toMatchObject({ semaforo: "amarelo", credito: "dentro", score: 800 });
+    expect(s2).toMatchObject({ pode_aprovar: false, falta: ["os documentos (4 fotos)"] });
+    expect(String(s2.documentos_token)).toMatch(/^[a-f0-9]{64}$/);
+    expect((await rpc(rep, "rep_candidata_aprovar", { _rep: rep.partyId, _lead: lead_id, _nota: null })).erro).toContain("os documentos");
+    expect((await rpc(master, "crm_mark_won", { _lead: lead_id, _nota: "ok" })).erro).toContain("os documentos");
 
-    expect((await rpc(master, "crm_mark_won", { _lead: lead_id, _nota: "ok" })).erro).toBeNull();
+    expect((await enviarDocumentosCandidata(lead_id)).aprovada).toBe(false);
+    expect((await situacao(lead_id)).dados).toMatchObject({ situacao: "analise", pode_aprovar: true, documentos_enviados: true });
+    expect((await rpc(repOutro, "rep_candidata_aprovar", { _rep: repOutro.partyId, _lead: lead_id, _nota: null })).erro).toContain("não é sua");
+    expect((await rpc(rep, "rep_candidata_aprovar", { _rep: rep.partyId, _lead: lead_id, _nota: "conheço a família" })).erro).toBeNull();
     const s3 = (await situacao(lead_id)).dados!;
     expect(s3).toMatchObject({ situacao: "aprovada", liberada: true });
-    expect(String(s3.documentos_token)).toMatch(/^[a-f0-9]{64}$/);
+    const aud = await um<{ n: number }>(`select count(*)::int n from public.audit_logs where action='captacao.aprovada_representante' and entity_id=$1`, [lead_id]);
+    expect(aud.n).toBe(1);
     const col = await um<{ c: string }>(`select public.rep_crm_coluna_sistema(l) c from public.leads l where id=$1`, [lead_id]);
     expect(col.c).toBe("aprovada");
 
@@ -133,6 +143,11 @@ describe("0398: app do representante — teste e aprovação antes da maleta", (
     await testeConcluido(a.lead_id, "verde");
     await credito(a.lead_id, 750);
     expect((await rpcServico<{ decisao: string }>("captacao_decidir", { _lead: a.lead_id })).dados!.decisao).toBe("aprovada_automatica");
+    // 0412: pré-aprovada; a maleta só libera quando os documentos chegam (e aí aprova sozinha)
+    expect((await situacao(a.lead_id)).dados).toMatchObject({ situacao: "documentos", liberada: false });
+    const mPre = await maletaComRep();
+    expect((await rpc(rep, "rep_maleta_repassar", { _rep: rep.partyId, _cycle: mPre, _lead: a.lead_id })).erro).toContain("ainda não foi aprovada");
+    expect((await enviarDocumentosCandidata(a.lead_id)).aprovada).toBe(true);
     expect((await situacao(a.lead_id)).dados).toMatchObject({ situacao: "aprovada", liberada: true });
 
     const b = await cadastroNaRua();
@@ -148,6 +163,24 @@ describe("0398: app do representante — teste e aprovação antes da maleta", (
     expect((await situacao(lead_id)).dados).toMatchObject({ situacao: "aprovada", liberada: true, isenta: true });
     const m = await maletaComRep();
     expect((await rpc(rep, "rep_maleta_repassar", { _rep: rep.partyId, _cycle: m, _lead: lead_id })).erro).toBeNull();
+  });
+
+  test("crédito fora da regra: o representante não aprova, só a Lardan", async () => {
+    const { lead_id } = await cadastroNaRua();
+    await testeConcluido(lead_id, "verde");
+    await credito(lead_id, 300);
+    expect((await rpcServico<{ decisao: string }>("captacao_decidir", { _lead: lead_id })).dados!.decisao).toBe("revisao");
+    await enviarDocumentosCandidata(lead_id);
+    expect((await situacao(lead_id)).dados).toMatchObject({ situacao: "analise", pode_aprovar: false });
+    expect((await rpc(rep, "rep_candidata_aprovar", { _rep: rep.partyId, _lead: lead_id, _nota: null })).erro).toContain("só a Lardan");
+    expect((await rpc(master, "crm_mark_won", { _lead: lead_id, _nota: "Daniel conferiu" })).erro).toBeNull();
+  });
+
+  test("sem teste não tem como aprovar, nem pelo quadro (etapa Aprovada/Maleta)", async () => {
+    const { lead_id } = await cadastroNaRua();
+    expect((await rpc(master, "crm_mark_won", { _lead: lead_id, _nota: "na confiança" })).erro).toContain("o teste DISC");
+    const ap = await um<{ id: string }>(`select id from public.candidatura_stages where key='aprovada'`);
+    await expect(adm.unsafe(`update public.leads set stage_id=$2 where id=$1`, [lead_id, ap.id])).rejects.toThrow("Ainda não dá para aprovar");
   });
 
   test("situação só para o dono da carteira", async () => {
@@ -166,10 +199,10 @@ describe("0398: app do representante — teste e aprovação antes da maleta", (
 });
 
 describe("0398: documentos da aprovada", () => {
-  test("link nasce na aprovação; página mostra só o primeiro nome; caminhos, envio, conferência e reenvio", async () => {
+  test("link nasce quando ela conclui o teste; página mostra só o primeiro nome; caminhos, envio, conferência e reenvio", async () => {
     const l = await leadSite({ aprovada: false });
     expect(await token(l)).toBeNull();
-    await adm.unsafe(`update public.leads set outcome='ganha', won_at=now(), status='aprovado' where id=$1`, [l]);
+    await testeConcluido(l, "amarelo"); // 0412: os documentos vêm antes da aprovação
     const t = (await token(l))!;
     expect(t).toMatch(/^[a-f0-9]{64}$/);
 
@@ -191,7 +224,8 @@ describe("0398: documentos da aprovada", () => {
     const cf = await rpcServico<string>("candidatura_documento_caminho", { _token: t, _tipo: "fachada", _ext: "jpg" });
     await rpcServico("candidatura_documento_registrar", { _token: t, _tipo: "fachada", _path: cf.dados, _mime: "image/jpeg", _bytes: 3000 });
     expect((await rpcServico("candidatura_documentos_finalizar", { _token: t })).erro).toBeNull();
-    expect(await etapa(l)).toBe("documentacao");
+    // sem decisão automática ninguém aprova sozinho: os documentos chegam e ela continua aberta para a análise
+    expect((await um<{ o: string }>(`select outcome o from public.leads where id=$1`, [l])).o).toBe("aberta");
 
     // equipe confere: selfie ok, comprovante pedido de novo (motivo obrigatório) reabre a página
     expect((await rpc(master, "candidatura_documento_conferir", { _doc: ids.selfie, _ok: true, _motivo: null })).erro).toBeNull();

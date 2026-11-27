@@ -1,5 +1,14 @@
 # Roadmap — correções imediatas 17/11
 
+## Pacote 0412 — captação obrigatória (27/11; sem publicação)
+- [x] Prioridade: Isabella 9234 no campo principal e Nova maleta; correção compatível com tela publicada, perfis equivalentes de Ketllin/Thalia testados.
+- [x] Aplicar teste, crédito e documentos obrigatórios, preservando isenções e carteiras.
+- [x] Integrar checklist, documentos após DISC e aprovação do representante; Documentação não conta como aprovação.
+- [x] Validar duas aplicações da migração e testes na bancada isolada.
+- [x] Conferir 13 agendamentos e segredos; Lara desligada; provas e texto comercial entregues.
+- [ ] Consulta real bem-sucedida na Assertiva — fornecedor ainda retorna recusa de acesso; cinco pendências com erro de crédito.
+- [ ] Publicar novas telas do 0412 — aguarda aprovação do Diego; correção de compatibilidade da montagem já aplicada no Cloud.
+
 - [x] 1. Asaas: celular sem 55 (envio + conferência diária + varredura + reenvio de avisos)
 - [x] 2. Abertura: várias aberturas guardadas, lista "Aguardando assinatura" do servidor, faixa some quando assina
 - [x] 3. Representante: 2ª maleta para a mesma consultora

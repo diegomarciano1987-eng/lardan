@@ -1,5 +1,6 @@
 /**
- * 0398 — Página da candidata aprovada para enviar os documentos (Diego/Daniel, 26/11).
+ * 0398 — Página da candidata para enviar os documentos (Diego/Daniel, 26/11).
+ * 0412: abre logo depois do teste DISC; sem os 4 documentos a candidatura não é aprovada.
  * 4 itens, cada um com imagem de exemplo: documento com foto, comprovante de residência,
  * selfie segurando o documento ao lado do rosto e foto da frente da casa que vai receber as maletas.
  * A foto é reduzida no próprio celular (até 1600 px, JPEG) antes de subir; PDF só no comprovante.
@@ -124,7 +125,7 @@ export function DocumentosAprovada({ token }: { token: string }) {
         <CheckCircle2 className="mx-auto size-12 text-primary" aria-hidden />
         <h1 className="font-display text-2xl">Pronto, {p.primeiro_nome}!</h1>
         <p className="text-muted-foreground">
-          Recebemos os seus documentos. A equipe da Lardan confere e, em seguida, prepara a sua maleta.
+          Recebemos os seus documentos. A Lardan confere tudo e te dá o retorno pelo WhatsApp.
           Se precisarmos de alguma foto de novo, avisamos você pelo WhatsApp e este mesmo link volta a funcionar.
         </p>
       </div>
@@ -134,9 +135,9 @@ export function DocumentosAprovada({ token }: { token: string }) {
   return (
     <div className="mx-auto max-w-md space-y-5 px-5 py-6">
       <section className="space-y-2">
-        <h1 className="font-display text-2xl leading-tight">Parabéns, {p.primeiro_nome}! Seu cadastro foi aprovado.</h1>
+        <h1 className="font-display text-2xl leading-tight">Falta pouco, {p.primeiro_nome}! Agora são os seus documentos.</h1>
         <p className="text-sm text-muted-foreground">
-          Para seguir com a sua maleta, precisamos de 4 fotos. Leva uns 5 minutos. Veja o exemplo de cada uma antes de tirar.
+          Para a Lardan aprovar o seu cadastro, precisamos de 4 fotos. Leva uns 5 minutos. Veja o exemplo de cada uma antes de tirar.
         </p>
         <p className="flex items-start gap-2 rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground">
           <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />

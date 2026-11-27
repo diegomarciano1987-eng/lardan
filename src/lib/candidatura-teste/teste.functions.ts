@@ -61,6 +61,18 @@ function embaralhar(): number[][] {
   });
 }
 
+/** 0412: link dos documentos (4 fotos) da candidata deste teste — o passo seguinte, obrigatório para a aprovação. */
+async function tokenDocumentos(testeToken: string): Promise<string | null> {
+  try {
+    const sb = await admin();
+    const { data, error } = await (sb as unknown as { rpc: (f: string, a: Record<string, unknown>) => PromiseLike<{ data: unknown; error: unknown }> })
+      .rpc("candidatura_teste_documentos_token", { _teste_token: testeToken });
+    return !error && typeof data === "string" && /^[a-f0-9]{64}$/.test(data) ? data : null;
+  } catch {
+    return null;
+  }
+}
+
 export const testeAbrir = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: Token }).parse(d))
   .handler(async ({ data }) => {
@@ -78,9 +90,10 @@ export const testeAbrir = createServerFn({ method: "POST" })
       const p = await parametros();
       devolutiva = p.textos.devolutiva[t.resultado.disc_principal] || null;
     }
+    const documentos = t.concluido_em ? await tokenDocumentos(data.token) : null;
     return {
       nome, parte: t.parte, respostas: t.respostas ?? {}, disc_ordem: ordem ?? [], disc_respostas: t.disc_respostas ?? [],
-      precisa_aceite: !t.aceite_em, concluido: !!t.concluido_em, devolutiva,
+      precisa_aceite: !t.aceite_em, concluido: !!t.concluido_em, devolutiva, documentos,
     };
   });
 
@@ -135,7 +148,7 @@ export const testeConcluir = createServerFn({ method: "POST" })
         console.error("[teste] decisão imediata indisponível; a rotina retoma pela fila.");
       }
     }
-    return { devolutiva: p.textos.devolutiva[resultado.disc_principal] || null };
+    return { devolutiva: p.textos.devolutiva[resultado.disc_principal] || null, documentos: await tokenDocumentos(data.token) };
   });
 
 // ——— Equipe (com login) ———

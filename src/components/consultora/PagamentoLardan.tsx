@@ -134,7 +134,11 @@ export function PagamentoLardan({ pedido, total, cliente, telefone, parcelasInic
         {whats && (
           <a className="admin-btn min-h-13 w-full justify-center text-base" href={whats} target="_blank" rel="noreferrer"><MessageCircle className="size-5" aria-hidden /> Enviar para {primeiro} no WhatsApp</a>
         )}
+        {res.trocada && <p className="rounded-2xl bg-primary/10 p-3 text-center text-[0.95rem]">O link anterior foi cancelado. Envie este novo para {primeiro}.</p>}
         <p className="text-center text-[0.95rem] text-muted-foreground">Aguardando pagamento… a tela avisa sozinha quando o Asaas confirmar.</p>
+        <button type="button" className="admin-btn min-h-13 w-full justify-center text-base" onClick={() => setRes(null)}>
+          <CreditCard className="size-5" aria-hidden /> Trocar parcelas ou forma de pagamento
+        </button>
       </div>
     );
   }

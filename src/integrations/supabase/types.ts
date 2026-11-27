@@ -23342,6 +23342,14 @@ export type Database = {
       }
       consultora_cliente_compras: { Args: { _cliente: string }; Returns: Json }
       consultora_clientes_resumo: { Args: never; Returns: Json }
+      consultora_cobranca_troca_concluir: {
+        Args: { _forma: string; _order: string }
+        Returns: Json
+      }
+      consultora_cobranca_troca_preparar: {
+        Args: { _forma: string; _order: string; _parcelas: number }
+        Returns: Json
+      }
       consultora_cockpit_financeiro: { Args: { _party: string }; Returns: Json }
       consultora_codigo_proximo: { Args: never; Returns: string }
       consultora_comissao_tabela: { Args: never; Returns: Json }

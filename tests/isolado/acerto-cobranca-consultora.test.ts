@@ -260,11 +260,26 @@ describe("0353 — editar venda antes do pagamento", () => {
     expect(e.dados).toMatchObject({ total_cents: 20000, pecas: 2, cobranca_cancelada: true });
   });
 
+  // 0404 (Diego, 27/11/2026): a consultora gera novo link (outra forma ou parcelas) enquanto a cliente não pagou.
+  test("0404 — troca de forma libera novo link; outra consultora não troca", async () => {
+    expect((await rpc(bia, "consultora_pagamento_titulo", { _order: pedido, _forma: "depois", _doc: novoCpf(), _venc: null })).erro).toBeNull();
+    const p = await rpc<{ precisa_trocar: boolean; cobrancas: string[] }>(bia, "consultora_cobranca_troca_preparar", { _order: pedido, _forma: "pix", _parcelas: 1 });
+    expect(p.erro).toBeNull();
+    expect(p.dados).toMatchObject({ precisa_trocar: true, cobrancas: [] });
+    expect((await rpc(bia, "consultora_cobranca_troca_preparar", { _order: pedido, _forma: "depois", _parcelas: 1 })).dados).toMatchObject({ precisa_trocar: false });
+    expect((await rpc(ana, "consultora_cobranca_troca_preparar", { _order: pedido, _forma: "pix", _parcelas: 1 })).erro).toContain("Pedido não encontrado");
+    expect((await rpc(bia, "consultora_cobranca_troca_concluir", { _order: pedido, _forma: "pix" })).erro).toBeNull();
+    expect((await um<{ m: string }>(`select pay_method m from public.sales_orders where id=$1`, [pedido])).m).toBe("pix");
+    expect((await rpc(bia, "consultora_pagamento_titulo", { _order: pedido, _forma: "pix", _doc: novoCpf(), _venc: null })).erro).toBeNull();
+    expect((await editar(bia, null)).erro).toBeNull(); // volta ao estado sem cobrança para o próximo teste
+  });
+
   test("não passa do que tem na maleta, outra consultora não edita, e paga fica fechada", async () => {
     expect((await editar(bia, [{ cycle_id: cicloBia, variant_id: vA, quantidade: 4 }])).erro).toContain("Restam 3");
     expect((await editar(ana, [{ cycle_id: cicloBia, variant_id: vA, quantidade: 1 }])).erro).toContain("Pedido não encontrado");
     expect((await editar(bia, [])).erro).toContain("pelo menos uma peça");
     expect((await rpc(bia, "consultora_pedido_pago_dinheiro", { _order: pedido })).erro).toBeNull();
     expect((await editar(bia, [{ cycle_id: cicloBia, variant_id: vA, quantidade: 1 }])).erro).toContain("já foi paga");
+    expect((await rpc(bia, "consultora_cobranca_troca_preparar", { _order: pedido, _forma: "cartao", _parcelas: 3 })).erro).toContain("já foi paga");
   });
 });

@@ -29,6 +29,23 @@ export const consultoraCobrancaGerar = createServerFn({ method: "POST" })
     return { pedido: String(d.pedido).slice(0, 40), forma: d.forma, cpf: String(d.cpf ?? "").replace(/\D/g, "").slice(0, 11), vencimento: d.vencimento && /^\d{4}-\d{2}-\d{2}$/.test(d.vencimento) ? d.vencimento : null, parcelas };
   })
   .handler(async ({ data, context }) => {
+    // 27/11: a consultora pode trocar parcelas ou forma enquanto a cliente não pagou.
+    // O link antigo é conferido e cancelado no Asaas (rotina oficial 0301) antes do novo.
+    let trocada = false;
+    const { data: tp, error: te } = await (context.supabase as any).rpc("consultora_cobranca_troca_preparar", { _order: data.pedido, _forma: data.forma, _parcelas: data.parcelas });
+    if (te) throw new Error(te.message);
+    const troca = tp as { precisa_trocar: boolean; actor?: string; cobrancas?: string[] };
+    if (troca.precisa_trocar) {
+      const { cancelarCobrancaComRegistro } = await import("./asaas/cancelar.server");
+      for (const id of troca.cobrancas ?? []) {
+        const r = await cancelarCobrancaComRegistro(id, troca.actor!, "Consultora gerou novo link (troca de forma ou parcelas)");
+        if (r.resultado === "paga_no_asaas") throw new Error("A cliente já pagou este link. A venda será baixada sozinha.");
+        if (r.resultado === "falhou") throw new Error(`Não consegui cancelar o link anterior no Asaas: ${r.erro ?? "tente de novo"}`);
+      }
+      const { error: ce } = await (context.supabase as any).rpc("consultora_cobranca_troca_concluir", { _order: data.pedido, _forma: data.forma });
+      if (ce) throw new Error(ce.message);
+      trocada = true;
+    }
     const { data: t, error } = await (context.supabase as any).rpc("consultora_pagamento_titulo", { _order: data.pedido, _forma: data.forma, _doc: data.cpf, _venc: data.vencimento });
     if (error) throw new Error(error.message);
     const tt = t as { installment_id: string; actor: string; forma: Forma; vencimento: string };
@@ -51,5 +68,5 @@ export const consultoraCobrancaGerar = createServerFn({ method: "POST" })
         copia = px?.payload ?? null; qr = px?.encodedImage ? `data:image/png;base64,${px.encodedImage}` : null;
       } catch (e) { console.error("pix qrcode consultora", (e as Error).message); }
     }
-    return { forma: tt.forma, vencimento: tt.vencimento, url: rr.invoice_url ?? null, copia, qr, parcelas: tt.forma === "cartao" ? data.parcelas : 1 };
+    return { forma: tt.forma, vencimento: tt.vencimento, url: rr.invoice_url ?? null, copia, qr, parcelas: tt.forma === "cartao" ? data.parcelas : 1, trocada };
   });

@@ -10,7 +10,7 @@ import { FileDown, RefreshCw, Truck, Undo2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { trocaCorreiosCancelar, trocaCorreiosEnviar, trocaCorreiosEtiqueta, trocaCorreiosPrevia, trocaCorreiosRastrear } from "@/lib/correios/troca.functions";
-import type { StatusTroca } from "@/lib/qualidade-trocas";
+import { protocoloTroca, STATUS_TROCA, type StatusTroca } from "@/lib/qualidade-trocas";
 
 type Envio = { id: string; direcao: "volta" | "ida"; status: string; codigo_objeto: string | null; erro: string | null; created_at: string; entregue_em: string | null };
 const ROTULO: Record<string, string> = { criando: "Gerando", pre_postada: "Código gerado, aguardando postagem", postada: "Postada", em_transito: "Em trânsito", entregue: "Entregue", erro: "Erro", cancelada: "Cancelada" };
@@ -31,9 +31,8 @@ export function TrocaCorreios({ trocaId, status }: { trocaId: string; status: St
   const atualizar = () => { void qc.invalidateQueries({ queryKey: chave }); void qc.invalidateQueries({ queryKey: ["qualidade", "eventos", trocaId] }); };
   const rastrearFn = useServerFn(trocaCorreiosRastrear);
   const rastrear = useMutation({ mutationFn: () => rastrearFn({ data: { trocaId } }), onSuccess: (r) => { toast.success(`Rastreio atualizado (${r.consultados}).`); atualizar(); }, onError: (e: Error) => toast.error(e.message) });
-  if (status === "resolvida" || status === "recusada") {
-    if (!lista.data?.length) return null;
-  }
+  // finalizada: a seção fica visível para mandar a peça nova; recusada só mostra envios antigos
+  if (status === "recusada" && !lista.data?.length) return null;
   return (
     <section className="space-y-3 rounded-2xl border border-line p-4">
       <div className="flex items-center justify-between gap-2">
@@ -54,12 +53,22 @@ export function TrocaCorreios({ trocaId, status }: { trocaId: string; status: St
 
 function NovoEnvio({ trocaId, direcao, onFeito }: { trocaId: string; direcao: "volta" | "ida"; onFeito: () => void }) {
   const [aberto, setAberto] = React.useState(false);
+  const [juntar, setJuntar] = React.useState<string[]>([]);
+  const juntaveis = useQuery({
+    queryKey: ["qualidade", "correios-juntaveis", trocaId],
+    enabled: aberto && direcao === "ida",
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("qualidade_trocas_juntaveis", { _troca: trocaId });
+      if (error) throw error;
+      return (data ?? []) as { id: string; protocolo: string; status: string; peca: string }[];
+    },
+  });
   const previaFn = useServerFn(trocaCorreiosPrevia);
   const enviarFn = useServerFn(trocaCorreiosEnviar);
   const previa = useQuery({ queryKey: ["qualidade", "correios-previa", trocaId, direcao], queryFn: () => previaFn({ data: { trocaId, direcao } }), enabled: aberto });
   const enviar = useMutation({
-    mutationFn: () => enviarFn({ data: { trocaId, direcao } }),
-    onSuccess: (r) => { toast.success(`Código ${r.codigoObjeto} gerado e enviado para a consultora na conversa.`); if (r.rotulo) window.open(r.rotulo, "_blank"); setAberto(false); onFeito(); },
+    mutationFn: () => enviarFn({ data: { trocaId, direcao, juntar } }),
+    onSuccess: (r) => { toast.success(r.juntas > 1 ? `Código ${r.codigoObjeto} gerado para ${r.juntas} trocas no mesmo pacote. A consultora recebeu em cada conversa.` : `Código ${r.codigoObjeto} gerado e enviado para a consultora na conversa.`); setJuntar([]); if (r.rotulo) window.open(r.rotulo, "_blank"); setAberto(false); onFeito(); },
     onError: (e: Error) => toast.error(e.message),
   });
   const D = DIRECAO[direcao];
@@ -79,11 +88,26 @@ function NovoEnvio({ trocaId, direcao, onFeito }: { trocaId: string; direcao: "v
           <p><span className="text-ledger-muted">Valor declarado:</span> {(p.valor_declarado_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} · PAC {direcao === "volta" ? "reverso (sem custo para ela)" : "contrato"}</p>
           {p.pendencias.length > 0 && <p className="text-danger">Falta: {p.pendencias.join("; ")}. Corrija no cadastro da consultora.</p>}
           {!p.configurado && <p className="text-danger">Correios não configurado.</p>}
+          {direcao === "ida" && !!juntaveis.data?.length && (
+            <div className="space-y-1.5 rounded-lg border border-line bg-cream/60 p-2.5">
+              <p className="font-semibold">Juntar no mesmo pacote</p>
+              <p className="text-xs text-ledger-muted">Outras trocas desta consultora ainda sem envio. Marque as que vão junto: sai um código só.</p>
+              {juntaveis.data.map((j) => (
+                <label key={j.id} className="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 hover:bg-cream-2">
+                  <input type="checkbox" className="size-4 accent-current" checked={juntar.includes(j.id)}
+                    onChange={(ev) => setJuntar((a) => ev.target.checked ? [...a, j.id] : a.filter((x) => x !== j.id))} />
+                  <span className="font-mono tabular-nums">{protocoloTroca(j.protocolo)}</span>
+                  <span className="min-w-0 truncate text-ledger-muted">{j.peca}</span>
+                  <span className="ml-auto shrink-0 text-xs text-ledger-muted">{STATUS_TROCA[j.status as StatusTroca] ?? j.status}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </>
       )}
       <div className="flex gap-2">
         <Button variant="outline" onClick={() => setAberto(false)}>Voltar</Button>
-        <Button disabled={!p || p.pendencias.length > 0 || !p.configurado || enviar.isPending} onClick={() => enviar.mutate()} className="flex-1">{enviar.isPending ? "Gerando…" : "Confirmar"}</Button>
+        <Button disabled={!p || p.pendencias.length > 0 || !p.configurado || enviar.isPending} onClick={() => enviar.mutate()} className="flex-1">{enviar.isPending ? "Gerando…" : juntar.length ? `Confirmar ${juntar.length + 1} trocas juntas` : "Confirmar"}</Button>
       </div>
     </div>
   );

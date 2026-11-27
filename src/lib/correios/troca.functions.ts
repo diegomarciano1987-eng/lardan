@@ -43,9 +43,11 @@ export const trocaCorreiosPrevia = createServerFn({ method: "POST" })
 
 export const trocaCorreiosEnviar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { trocaId: string; direcao: Direcao }) => {
+  .inputValidator((d: { trocaId: string; direcao: Direcao; juntar?: string[] }) => {
     if (!uuid(d?.trocaId) || !DIR.includes(d?.direcao)) throw new Error("Pedido inválido.");
-    return d;
+    const juntar = [...new Set((d.juntar ?? []).filter((x) => x !== d.trocaId))];
+    if (juntar.length > 9 || !juntar.every(uuid) || (juntar.length && d.direcao !== "ida")) throw new Error("Pedido inválido.");
+    return { trocaId: d.trocaId, direcao: d.direcao, juntar };
   })
   .handler(async ({ data, context }) => {
     const c = context as unknown as Ctx;
@@ -53,34 +55,65 @@ export const trocaCorreiosEnviar = createServerFn({ method: "POST" })
     const cfg = api.configCorreios();
     if (!cfg.pronto) throw new Error(`Correios não configurado: falta ${cfg.faltando.join(", ")}.`);
     const d = await dados(c, data.trocaId, data.direcao);
+    // trocas juntas no mesmo pacote: só da mesma consultora, sem envio de ida vivo
+    const extras: { id: string; valor: number }[] = [];
+    if (data.juntar.length) {
+      const { data: ok, error } = await c.supabase.rpc("qualidade_trocas_juntaveis", { _troca: data.trocaId });
+      if (error) throw new Error(error.message);
+      const permitidas = new Set(((ok ?? []) as { id: string }[]).map((x) => x.id));
+      for (const id of data.juntar) {
+        if (!permitidas.has(id)) throw new Error("Uma das trocas escolhidas não pode ir junto (outra consultora ou já enviada).");
+        const x = await dados(c, id, "ida");
+        if (x.envio_vivo) throw new Error("Uma das trocas escolhidas já tem envio.");
+        extras.push({ id, valor: x.valor_declarado_cents });
+      }
+      d.valor_declarado_cents += extras.reduce((a, x) => a + x.valor, 0);
+    }
+    const qtd = 1 + extras.length;
     // volta da troca = reversa (consultora → Lardan); ida = peça nova (Lardan → consultora)
     const corpo = api.corpoPrePostagem({
       direcao: data.direcao, remetente: d.remetente, destinatario: d.destinatario,
       valorDeclaradoCents: d.valor_declarado_cents, referencia: `Troca ${data.trocaId.slice(0, 8)} ${data.direcao}`,
     });
     const { valorDeclaradoAceito } = await import("./valor-declarado");
-    corpo.itensDeclaracaoConteudo = [{ conteudo: "Semijoia (troca/garantia)", quantidade: "1", valor: (valorDeclaradoAceito(d.valor_declarado_cents) / 100).toFixed(2) }];
+    corpo.itensDeclaracaoConteudo = [{ conteudo: "Semijoia (troca/garantia)", quantidade: String(qtd), valor: (valorDeclaradoAceito(d.valor_declarado_cents) / 100).toFixed(2) }];
     const envioId = await servidor<string>("qualidade_correios_abrir", {
       _troca: data.trocaId, _direcao: data.direcao, _ambiente: cfg.ambiente, _servico: corpo.codigoServico,
       _valor_cents: d.valor_declarado_cents, _payload: corpo, _ator: c.userId,
     });
+    const extraIds: string[] = [];
+    for (const x of extras) {
+      extraIds.push(await servidor<string>("qualidade_correios_abrir", {
+        _troca: x.id, _direcao: "ida", _ambiente: cfg.ambiente, _servico: corpo.codigoServico,
+        _valor_cents: x.valor, _payload: { agrupado_com: envioId }, _ator: c.userId,
+      }));
+    }
+    if (extraIds.length) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("qualidade_correios_envios").update({ agrupado_com: envioId }).in("id", extraIds);
+    }
+    const todos = [envioId, ...extraIds];
     let r: { http: number; dados: unknown };
     try { r = await api.criarPrePostagem(corpo); }
     catch (e) {
-      await servidor("qualidade_correios_resultado", { _id: envioId, _ok: false, _resposta: null, _codigo: null, _prepostagem: null, _frete_cents: null, _erro: (e as Error).message });
+      for (const id of todos) await servidor("qualidade_correios_resultado", { _id: id, _ok: false, _resposta: null, _codigo: null, _prepostagem: null, _frete_cents: null, _erro: (e as Error).message });
       throw new Error((e as Error).message);
     }
     const o = (r.dados ?? {}) as Record<string, unknown>;
     const ok = r.http < 300 && typeof o["codigoObjeto"] === "string" && typeof o["id"] === "string";
     const frete = typeof o["precoPrePostagem"] === "number" ? Math.round((o["precoPrePostagem"] as number) * 100) : null;
-    await servidor("qualidade_correios_resultado", {
-      _id: envioId, _ok: ok, _resposta: o, _codigo: ok ? o["codigoObjeto"] : null, _prepostagem: ok ? o["id"] : null,
-      _frete_cents: frete, _erro: ok ? null : String(o["erro"] ?? "Os Correios recusaram a pré-postagem."),
+    for (const id of todos) await servidor("qualidade_correios_resultado", {
+      _id: id, _ok: ok, _resposta: o, _codigo: ok ? o["codigoObjeto"] : null, _prepostagem: ok ? o["id"] : null,
+      _frete_cents: id === envioId ? frete : null, _erro: ok ? null : String(o["erro"] ?? "Os Correios recusaram a pré-postagem."),
     });
     if (!ok) throw new Error(String(o["erro"] ?? "Os Correios recusaram a pré-postagem."));
     let rotulo: string | null = null;
     try { rotulo = await guardarRotulo(envioId, data.trocaId, String(o["id"])); } catch { rotulo = null; }
-    return { envioId, codigoObjeto: String(o["codigoObjeto"]), rotulo };
+    if (rotulo && extraIds.length) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("qualidade_correios_envios").update({ rotulo_path: `trocas/${data.trocaId}/${envioId}.pdf` }).in("id", extraIds);
+    }
+    return { envioId, codigoObjeto: String(o["codigoObjeto"]), rotulo, juntas: qtd };
   });
 
 async function guardarRotulo(envioId: string, trocaId: string, idPre: string): Promise<string> {
@@ -168,5 +201,11 @@ export const trocaCorreiosCancelar = createServerFn({ method: "POST" })
       if (r.http >= 300) throw new Error(String((r.dados as Record<string, unknown> | null)?.["erro"] ?? "Os Correios não cancelaram."));
     }
     await servidor("qualidade_correios_cancelar", { _id: e.id, _motivo: data.motivo, _ator: c.userId });
+    // mesmo pacote: cancela as outras trocas que iam juntas
+    if (e.codigo_objeto) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: irmas } = await supabaseAdmin.from("qualidade_correios_envios").select("id").eq("codigo_objeto", e.codigo_objeto).neq("id", e.id).in("status", ["criando", "pre_postada", "erro"]);
+      for (const x of irmas ?? []) await servidor("qualidade_correios_cancelar", { _id: x.id, _motivo: data.motivo, _ator: c.userId });
+    }
     return { ok: true };
   });

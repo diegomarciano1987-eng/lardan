@@ -17446,6 +17446,7 @@ export type Database = {
       }
       qualidade_correios_envios: {
         Row: {
+          agrupado_com: string | null
           ambiente: string
           codigo_objeto: string | null
           created_at: string
@@ -17469,6 +17470,7 @@ export type Database = {
           valor_declarado_cents: number
         }
         Insert: {
+          agrupado_com?: string | null
           ambiente: string
           codigo_objeto?: string | null
           created_at?: string
@@ -17492,6 +17494,7 @@ export type Database = {
           valor_declarado_cents?: number
         }
         Update: {
+          agrupado_com?: string | null
           ambiente?: string
           codigo_objeto?: string | null
           created_at?: string
@@ -26421,6 +26424,16 @@ export type Database = {
         Returns: Json
       }
       qualidade_troca_resumo: { Args: never; Returns: Json }
+      qualidade_trocas_juntaveis: {
+        Args: { _troca: string }
+        Returns: {
+          created_at: string
+          id: string
+          peca: string
+          protocolo: string
+          status: string
+        }[]
+      }
       rede_auditoria_sem_representante: {
         Args: never
         Returns: {

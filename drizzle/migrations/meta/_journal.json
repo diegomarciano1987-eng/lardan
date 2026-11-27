@@ -2843,6 +2843,13 @@
       "when": 1795737905571,
       "tag": "0405_consultora_troca_link_pago_0404b",
       "breakpoints": true
+    },
+    {
+      "idx": 406,
+      "version": "7",
+      "when": 1795784737272,
+      "tag": "0406_asaas_aceita_parcelamento_0405",
+      "breakpoints": true
     }
   ]
 }

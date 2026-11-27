@@ -58,6 +58,7 @@ export const consultoraCobrancaGerar = createServerFn({ method: "POST" })
     if ((r as { state: string }).state === "indisponivel") throw new Error((r as { aviso?: string }).aviso || "Cobrança indisponível no momento.");
     const rr = r as { charge_id?: string | null; invoice_url?: string | null; external_id?: string | null; simulado?: boolean };
     await rpcAdmin("consultora_pagamento_registrar", { _order: data.pedido, _charge: rr.charge_id ?? null, _url: rr.invoice_url ?? null });
+    if (!rr.invoice_url && tt.forma !== "pix") throw new Error("O Asaas ainda está preparando o link. Aguarde alguns segundos e toque em Gerar link de novo.");
     let copia: string | null = null; let qr: string | null = null;
     if (tt.forma === "pix" && rr.external_id && !rr.simulado) {
       try {

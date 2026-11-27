@@ -84,7 +84,7 @@ export function PagamentoLardan({ pedido, total, cliente, telefone, parcelasInic
         ? `Olá, ${primeiro}! Segue o link seguro da Lardan Semijoias para pagar no cartão em ${res.parcelas}x de ${brl(simularParcelas(total, res.parcelas ?? 1).parcelaCents)}${(res.parcelas ?? 1) <= 3 ? " sem juros" : ` (total ${brl(simularParcelas(total, res.parcelas ?? 1).totalCents)})`}:\n${res.url ?? ""}`
         : `Olá, ${primeiro}! Segue o link seguro da Lardan Semijoias para pagar ${brl(total)}:\n${res.url ?? ""}`
     : "";
-  const whats = res ? linkWhats(telefone, textoWhats) : null;
+  const whats = res && (res.url || (res.forma === "pix" && res.copia)) ? linkWhats(telefone, textoWhats) : null;
   const copiar = async (t: string) => { await navigator.clipboard.writeText(t); toast.success("Copiado!"); };
 
   if (lembrete) {

@@ -23,13 +23,19 @@ import {
 import { avisosTransferencia } from "@/lib/transferencia-avisos";
 import { DevolverEmpresaRep, useDevolucoesRep } from "@/components/representante/DevolverEmpresaRep";
 import { AssinaturaDigital } from "@/components/representante/AssinaturaDigital";
-import { maletaJaTemNaRemessa } from "@/lib/rep-assinaturas";
+import { maletaJaTemNaRemessa, promissoriasPendentesRep } from "@/lib/rep-assinaturas";
 
 export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepasse?: (r: { partyId: string; nome: string; nova: boolean }) => void }) {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["rep", rep, "maletas"], queryFn: () => maletasDoRepresentante(rep) });
-  const recarregar = () => void qc.invalidateQueries({ queryKey: ["rep", rep, "maletas"] });
+  const recarregar = () => {
+    void qc.invalidateQueries({ queryKey: ["rep", rep, "maletas"] });
+    void qc.invalidateQueries({ queryKey: ["rep", rep, "promissorias-pendentes"] });
+    void qc.invalidateQueries({ queryKey: ["assinaturas"] });
+  };
   const [trocando, setTrocando] = React.useState<string | null>(null);
+  // maleta que acabou de mudar de consultora: a promissória dela abre em destaque no topo
+  const [destaque, setDestaque] = React.useState<string | null>(null);
   const devol = useDevolucoesRep(rep);
   const pedidaDe = (cycle: string) => devol.data?.find((x) => x.cycle_id === cycle) ?? null;
   const receber = useMutation({
@@ -63,6 +69,8 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
 
   return (
     <div className="space-y-6">
+      {/* 0421: maleta repassada nunca perde a promissória — fica aqui, com o nome da nova consultora, até assinar */}
+      <PromissoriasPendentes rep={rep} destaque={destaque} />
       {vazio && (
         <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
           Nenhuma maleta com você agora. Quando a empresa enviar uma maleta da remessa para você, ela aparece aqui.
@@ -128,7 +136,7 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
                   <p className="text-xs text-muted-foreground">{m.consultora} fica sem esta maleta. Escolha a candidata da abertura (ou outra consultora da sua carteira).</p>
                   <Repasse rep={rep} trocarDe={m.consultora}
                     maleta={{ cycle_id: m.cycle_id, maleta: m.maleta, remessa: m.remessa, praca: null, abertura_numero: m.abertura_numero ?? null, pecas: m.pecas, valor_cents: m.valor_cents, acerto: null }}
-                    onFeito={(r) => { setTrocando(null); recarregar(); if (r) onRepasse?.(r); }} />
+                    onFeito={(r) => { setTrocando(null); if (r) setDestaque(m.cycle_id); recarregar(); if (r) onRepasse?.(r); }} />
                 </div>
               ) : (
                 <button className="h-10 w-full rounded-lg border border-dashed border-border px-4 text-sm text-muted-foreground"
@@ -146,7 +154,7 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
           <p className="text-sm text-muted-foreground">Em ordem de número: é o mesmo "ABERTURA 01, 02…" impresso no pedido que vai dentro da maleta.</p>
           {d.sem_consultora.map((m) => (
             <div key={m.cycle_id} className="space-y-2">
-              <Repasse rep={rep} maleta={m} onFeito={(r) => { recarregar(); if (r) onRepasse?.(r); }} />
+              <Repasse rep={rep} maleta={m} onFeito={(r) => { if (r) setDestaque(m.cycle_id); recarregar(); if (r) onRepasse?.(r); }} />
               <DevolverEmpresaRep rep={rep} cycleId={m.cycle_id} maleta={m.maleta} pedida={pedidaDe(m.cycle_id)} />
             </div>
           ))}
@@ -173,7 +181,7 @@ export function MaletasRepresentante({ rep, onRepasse }: { rep: string; onRepass
                   <p className="text-xs text-muted-foreground">A entrega para {m.consultora} é cancelada. Se ela já tinha promissória, a antiga é cancelada e a nova vai para quem ficar com a maleta.</p>
                   <Repasse rep={rep} trocarDe={m.consultora}
                     maleta={{ cycle_id: m.cycle_id, maleta: m.maleta, remessa: m.remessa, praca: null, abertura_numero: m.abertura_numero ?? null, pecas: m.pecas, valor_cents: 0, acerto: null }}
-                    onFeito={(r) => { setTrocando(null); recarregar(); if (r) onRepasse?.(r); }} />
+                    onFeito={(r) => { setTrocando(null); if (r) setDestaque(m.cycle_id); recarregar(); if (r) onRepasse?.(r); }} />
                 </div>
               ) : (
                 <button className="h-10 w-full rounded-lg border border-dashed border-border px-4 text-sm text-muted-foreground"
@@ -308,5 +316,50 @@ function PromissoriaDaMaleta({ party, rep, telefone, cycleId }: { party: string;
       className="h-11 w-full rounded-lg border border-border px-4 text-sm font-medium">
       Promissória: assinar no celular ou no papel
     </button>
+  );
+}
+
+/**
+ * 0421 (Diego, 27/11): depois de transferir/repassar, a promissória da NOVA consultora fica fixa aqui até ela
+ * assinar (ZapSign ou papel) — mesmo depois que ela confirma o recebimento e a maleta sai das outras listas.
+ */
+function PromissoriasPendentes({ rep, destaque }: { rep: string; destaque: string | null }) {
+  const q = useQuery({ queryKey: ["rep", rep, "promissorias-pendentes"], queryFn: () => promissoriasPendentesRep(rep) });
+  const [aberta, setAberta] = React.useState<string | null>(null);
+  const ref = React.useRef<HTMLElement>(null);
+  React.useEffect(() => {
+    if (!destaque) return;
+    setAberta(destaque);
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [destaque]);
+  const lista = q.data ?? [];
+  if (!lista.length) return null;
+  return (
+    <section ref={ref} className="space-y-2 rounded-2xl border border-amber-300 bg-amber-50/60 p-4 dark:border-amber-500/40 dark:bg-amber-500/10">
+      <h3 className="text-base font-semibold">Promissórias para assinar ({lista.length})</h3>
+      <p className="text-sm text-muted-foreground">Maletas que você passou para outra consultora. A promissória sai no nome de quem ficou com a maleta e só sai daqui quando ela assinar, no celular ou no papel.</p>
+      <ul className="space-y-2">
+        {lista.map((m) => {
+          const aberto = aberta === m.cycle_id;
+          return (
+            <li key={m.cycle_id} className={`rounded-xl border bg-card p-3 ${destaque === m.cycle_id ? "border-primary ring-2 ring-primary/30" : "border-border"}`}>
+              <button type="button" onClick={() => setAberta(aberto ? null : m.cycle_id)}
+                className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-left">
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium">{m.consultora}{m.codigo ? <span className="text-muted-foreground"> · cód. {m.codigo}</span> : null}</span>
+                  <span className="block text-xs text-muted-foreground">
+                    {[`Maleta ${m.maleta}`, m.remessa ? `remessa ${m.remessa}` : null, m.anterior ? `era de ${m.anterior}` : null, `passada em ${dataBr(m.movida_em)}`].filter(Boolean).join(" · ")}
+                  </span>
+                </span>
+                <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${m.digital === "pendente" ? "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300" : "bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-300"}`}>
+                  {m.digital === "pendente" ? "Link enviado" : "Falta assinar"}
+                </span>
+              </button>
+              {aberto && <div className="mt-3"><AssinaturaDigital party={m.party_id} rep={rep} telefone={m.telefone} soMaleta={m.cycle_id} /></div>}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

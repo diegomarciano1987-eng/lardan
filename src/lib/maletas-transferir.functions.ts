@@ -80,7 +80,9 @@ export const maletaTransferir = createServerFn({ method: "POST" })
       promissoria.antiga_pendente_fila = x.falhas;
     }
     const nova = (r["consultora_party_id"] as string | null) ?? null;
-    if (r["tinha_promissoria"] === true && nova) {
+    // Diego (27/11): no app do representante a maleta transferida SEMPRE ganha a promissória da nova consultora
+    // (mesmo que a anterior não tivesse assinado nenhuma); na equipe, só quando a anterior tinha uma.
+    if (nova && (r["tinha_promissoria"] === true || data.modo === "representante")) {
       try {
         const { enviarAssinatura } = await import("@/lib/zapsign/enviar.server");
         const e = await enviarAssinatura(c, { tipo: "promissoria", partyId: nova, cycleId: data.cycleId, rep: data.modo === "representante" ? data.rep : null });

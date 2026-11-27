@@ -26987,6 +26987,23 @@ export type Database = {
         Args: { _consultora?: string; _rep: string }
         Returns: Json
       }
+      rep_promissorias_pendentes: {
+        Args: { _rep: string }
+        Returns: {
+          anterior: string
+          codigo: string
+          consultora: string
+          cycle_id: string
+          digital: string
+          maleta: string
+          movida_em: string
+          party_id: string
+          remessa: number
+          sign_url: string
+          status: string
+          telefone: string
+        }[]
+      }
       rep_publico: { Args: { _code: string }; Returns: Json }
       rep_reativacao_decidir: {
         Args: { _aprovar: boolean; _id: string; _motivo?: string }

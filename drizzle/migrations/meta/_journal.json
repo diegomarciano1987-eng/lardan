@@ -2927,6 +2927,34 @@
       "when": 1795805148746,
       "tag": "0417_captacao_documentacao_indicadores_coerentes",
       "breakpoints": true
+    },
+    {
+      "idx": 418,
+      "version": "7",
+      "when": 1795807988694,
+      "tag": "0418_busca_consultoras_rapida",
+      "breakpoints": true
+    },
+    {
+      "idx": 419,
+      "version": "7",
+      "when": 1795808024259,
+      "tag": "0419_busca_consultoras_rapida_ajuste_uf",
+      "breakpoints": true
+    },
+    {
+      "idx": 420,
+      "version": "7",
+      "when": 1795808103624,
+      "tag": "0420_busca_consultoras_rapida_demais",
+      "breakpoints": true
+    },
+    {
+      "idx": 421,
+      "version": "7",
+      "when": 1795808360163,
+      "tag": "0421_promissoria_segue_transferencia",
+      "breakpoints": true
     }
   ]
 }

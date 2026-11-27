@@ -48,3 +48,10 @@ export interface FichaCandidata {
   perfil_presencial: { em: string | null; resultado: Record<string, unknown> | null } | null;
 }
 export const fichaCandidata = (lead: string) => rpc<FichaCandidata>("rep_candidata_ficha", { _lead: lead });
+
+/** 0421: maletas repassadas (60 dias) em que a consultora atual ainda não assinou a promissória (celular ou papel). */
+export interface PromissoriaPendente {
+  cycle_id: string; maleta: string; remessa: number | null; status: string; party_id: string; consultora: string; codigo: string | null;
+  telefone: string | null; anterior: string | null; movida_em: string; digital: string | null; sign_url: string | null;
+}
+export const promissoriasPendentesRep = (rep: string) => rpc<PromissoriaPendente[]>("rep_promissorias_pendentes", { _rep: rep });

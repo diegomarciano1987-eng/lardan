@@ -113,7 +113,7 @@ export function AssinaturaDigital({ party, rep, telefone, soMaleta }: { party: s
     onSuccess: (r) => {
       if (r.jaExistia) toast.info("Já existe um documento aguardando assinatura. Copie o link ou use 'Reenviar'.");
       else toast.success(r.whatsapp ? "Enviado pelo WhatsApp da consultora." : "Documento criado. Copie o link e mande para ela.");
-      void qc.invalidateQueries({ queryKey: chave });
+      void qc.invalidateQueries({ queryKey: chave }); void qc.invalidateQueries({ queryKey: ["rep"] });
     },
     onError: (e) => toast.error(msg(e)),
   });
@@ -207,7 +207,7 @@ export function AssinaturaDigital({ party, rep, telefone, soMaleta }: { party: s
                 </div>
                 {p && (!papel || p.status === "assinado") && <Linha d={p} />}
                 {p?.status !== "assinado" && (
-                  <PromissoriaNoPapel party={party} rep={rep} cycleId={m.cycle_id} papel={papel} aoMudar={() => void qc.invalidateQueries({ queryKey: chave })} />
+                  <PromissoriaNoPapel party={party} rep={rep} cycleId={m.cycle_id} papel={papel} aoMudar={() => { void qc.invalidateQueries({ queryKey: chave }); void qc.invalidateQueries({ queryKey: ["rep"] }); }} />
                 )}
               </div>
             );

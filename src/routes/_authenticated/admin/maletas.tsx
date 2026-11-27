@@ -177,7 +177,7 @@ function NovaRemessa({ aoCriar }: { aoCriar: (id: string) => void }) {
   );
 }
 
-function Linha({ r }: { r: RemessaCard }) {
+function Linha({ r, consultoras }: { r: RemessaCard; consultoras: number | null }) {
   const s = STATUS_REMESSA[r.status] ?? { rotulo: r.status, tom: "neutral" as const };
   return (
     <Link to="/admin/maletas/remessa/$id" params={{ id: r.id }}
@@ -192,7 +192,7 @@ function Linha({ r }: { r: RemessaCard }) {
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-6 text-sm">
-        <span className="tabular-nums text-ledger-muted">{r.maletas} maletas · {r.maletas_conferidas} conferidas</span>
+        <span className="tabular-nums text-ledger-muted">{consultoras != null ? `${consultoras} ${consultoras === 1 ? "consultora" : "consultoras"} · ` : ""}{r.maletas} maletas · {r.maletas_conferidas} conferidas</span>
         <span className="tabular-nums text-ledger-muted">{r.pecas} peças</span>
         <span className="tabular-nums font-semibold text-ledger-text">{brl(Number(r.valor_cents ?? 0))}</span>
         <StatusBadge tone={s.tom}>{s.rotulo}</StatusBadge>
@@ -247,6 +247,17 @@ function RemessasPage() {
     (a, r) => ({ n: a.n + 1, m: a.m + Number(r.maletas), c: a.c + Number(r.maletas_conferidas), p: a.p + Number(r.pecas), v: a.v + Number(r.valor_cents) }),
     { n: 0, m: 0, c: 0, p: 0, v: 0 },
   );
+  // 0422: consultoras diferentes com maleta (quem tem 2 maletas conta uma vez)
+  const idsRemessas = (lista.data ?? []).map((r) => r.id);
+  const consultorasQ = useQuery({
+    queryKey: ["remessas", "consultoras-com-maleta", idsRemessas],
+    enabled: idsRemessas.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("remessas_consultoras_com_maleta", { _remessas: idsRemessas });
+      if (error) throw error;
+      return data as unknown as { total: number; por_remessa: Record<string, number> };
+    },
+  });
   const temFiltro = !!(texto || praca || rep || periodo || situacao !== "todas");
   function limpar() {
     setTexto(""); setPraca(""); setRep(carteira ? escopo.data?.representante ?? "" : ""); setPeriodo(undefined); setSituacao("todas");
@@ -386,7 +397,7 @@ function RemessasPage() {
 
       <div className="grid gap-3 md:grid-cols-5">
         {[
-          ["Remessas", tot.n],
+          ["Consultoras com maleta", consultorasQ.data ? consultorasQ.data.total : idsRemessas.length ? "…" : 0],
           ["Maletas", tot.m],
           ["Conferidas", tot.c],
           ["Peças", tot.p],
@@ -434,7 +445,7 @@ function RemessasPage() {
               description="Abra uma nova remessa escolhendo a praça; depois as maletas das consultoras são abertas dentro dela." />
           </div>
         )}
-        {lista.data?.map((r) => <Linha key={r.id} r={r} />)}
+        {lista.data?.map((r) => <Linha key={r.id} r={r} consultoras={consultorasQ.data?.por_remessa[r.id] ?? null} />)}
       </Panel>
 
       {busca.trim().length >= 2 && (

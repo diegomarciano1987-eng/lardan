@@ -2,7 +2,7 @@ import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowRight, Camera, Clock3, Lock, MessageSquare, PackageCheck, Plus, Repeat2, Search, Send, ShieldCheck, Store, Smartphone, History } from "lucide-react";
+import { AlertTriangle, ArrowRight, Undo2, Camera, Clock3, Lock, MessageSquare, PackageCheck, Plus, Repeat2, Search, Send, ShieldCheck, Store, Smartphone, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageHeader, Panel, EmptyState, ErrorState, StatusBadge, type StatusTone } from "@/components/admin/ui";
@@ -279,7 +279,8 @@ function Detalhe({ t, gerir, onMovido }: { t: Troca; gerir: boolean; onMovido: (
       </dl>
       {fotosAbertura.length > 0 && <div><p className="flex items-center gap-1.5 text-sm font-semibold"><Camera className="size-4" aria-hidden /> Fotos da abertura</p><Fotos paths={fotosAbertura} /></div>}
 
-      {gerir && (
+      {gerir && ["resolvida", "recusada"].includes(t.status) && t.origem !== "legado_smalldata" && <RetornarAcao t={t} onMovido={onMovido} />}
+      {gerir && !["resolvida", "recusada"].includes(t.status) && (
         <section className="space-y-3 rounded-2xl border border-line bg-cream-2/60 p-4">
           <h3 className="flex items-center gap-2 font-semibold"><PackageCheck className="size-4" aria-hidden /> Devolutiva para a consultora</h3>
           <div className="grid gap-3 md:grid-cols-2">
@@ -474,5 +475,40 @@ function NovaTroca({ aberto, onClose, onCriada }: { aberto: boolean; onClose: ()
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * 0422 (Diego, 27/11): troca finalizada por engano (peça errada) volta para "Em análise" com justificativa
+ * registrada no histórico; aí a peça devolvida/enviada pode ser corrigida e a troca finalizada de novo.
+ */
+function RetornarAcao({ t, onMovido }: { t: Troca; onMovido: (s: StatusTroca) => void }) {
+  const qc = useQueryClient();
+  const [aberto, setAberto] = React.useState(false);
+  const [motivo, setMotivo] = React.useState("");
+  const voltar = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("qualidade_troca_mover", { _id: t.id, _status: "em_analise", _texto: `Ação retornada: ${motivo.trim()}`, _dados: {} });
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success(`${protocoloTroca(t.protocolo)} voltou para Em análise. Corrija a peça e finalize de novo.`); setAberto(false); setMotivo(""); onMovido("em_analise"); void qc.invalidateQueries({ queryKey: ["qualidade"] }); },
+    onError: (e) => toast.error(traduzir(e)),
+  });
+  if (!aberto) return (
+    <Button variant="outline" className="w-full gap-2" onClick={() => setAberto(true)}><Undo2 className="size-4" aria-hidden /> Retornar ação</Button>
+  );
+  return (
+    <section className="space-y-3 rounded-2xl border border-line bg-cream-2/60 p-4">
+      <h3 className="flex items-center gap-2 font-semibold"><Undo2 className="size-4" aria-hidden /> Retornar ação</h3>
+      <p className="text-sm text-ledger-muted">A troca volta para "Em análise". Depois corrija a peça e finalize de novo. O motivo fica no histórico.</p>
+      <label htmlFor={`retornar-${t.id}`} className="block text-xs font-semibold text-ledger-muted">Por que está retornando?</label>
+      <textarea id={`retornar-${t.id}`} className="admin-input min-h-20 w-full" maxLength={500} value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ex.: escolhi a peça errada ao finalizar" />
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setAberto(false)}>Cancelar</Button>
+        <Button className="flex-1 gap-2" disabled={voltar.isPending || motivo.trim().length < 5} onClick={() => voltar.mutate()}>
+          {voltar.isPending ? "Retornando…" : "Confirmar retorno"}
+        </Button>
+      </div>
+    </section>
   );
 }

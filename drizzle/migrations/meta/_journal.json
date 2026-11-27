@@ -2955,6 +2955,20 @@
       "when": 1795808360163,
       "tag": "0421_promissoria_segue_transferencia",
       "breakpoints": true
+    },
+    {
+      "idx": 422,
+      "version": "7",
+      "when": 1795808875882,
+      "tag": "0422_trocas_correios_ida_e_consultoras_remessa",
+      "breakpoints": true
+    },
+    {
+      "idx": 423,
+      "version": "7",
+      "when": 1795808941921,
+      "tag": "0423_consultora_links_cobranca",
+      "breakpoints": true
     }
   ]
 }

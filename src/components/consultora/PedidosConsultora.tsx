@@ -67,6 +67,17 @@ function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, se
   detalhe: { isLoading: boolean; isError: boolean; error: unknown; data: Awaited<ReturnType<typeof detalhePedido>> | null | undefined };
 }) {
   const links = useLinksPedidos(visiveis.filter((p) => p.status !== "cancelado").map((p) => p.id));
+  // 0423: link de pagamento já gerado (Pix ou cartão) → "Reenviar cobrança pelo Whats" mesmo depois de fechar a tela
+  const idsPendentes = visiveis.filter((p) => p.payment_status === "pendente" && p.status !== "cancelado").map((p) => p.id);
+  const cobrancas = useQuery({
+    queryKey: ["consultora", "links-cobranca", idsPendentes],
+    enabled: idsPendentes.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("consultora_links_cobranca", { _orders: idsPendentes });
+      if (error) throw error;
+      return new Map((data ?? []).map((c) => [c.order_id, c] as const));
+    },
+  });
   const refsPedido = useReferencias((detalhe.data?.itens ?? []).map((i) => i.variant_id));
   return <div className="space-y-7">
     <div role="tablist" aria-label="Situação dos pedidos" className="grid grid-cols-2 gap-3 lg:grid-cols-4">{GRUPOS.map((g) => {
@@ -80,6 +91,8 @@ function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, se
       const dias = idadePedido(p.created_at); const tom = tomIdade(dias);
       const cor = tom === "success" ? "bg-success/15 text-success" : tom === "warning" ? "bg-warning/15 text-warning" : "bg-destructive/15 text-destructive";
       const fotos = links.get(p.id);
+      const cob = cobrancas.data?.get(p.id);
+      const whatsCobranca = cob && p.customer_phone ? linkWhats(p.customer_phone, `Olá, ${p.customer_name.split(" ")[0]}! Segue o link para pagar ${brl(Number(p.subtotal_cents))} da Lardan Semijoias${cob.forma === "pix" ? " (Pix)" : cob.forma === "cartao" ? " (cartão)" : ""}: ${cob.url}`) : null;
       const whats = p.customer_phone ? linkWhats(p.customer_phone, `${mensagemPedido(p)}${fotos ? `\nVeja as fotos e referências das suas peças: ${fotos}` : ""}`) : null;
       return <li key={p.id} className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card">
         <div className="flex-1 p-5 sm:p-6">
@@ -95,7 +108,8 @@ function ListaPedidos({ lista, visiveis, aba, setAba, setCancelar, setAberto, se
           {p.status === "em_atendimento" && <Button className="h-auto min-h-12 justify-between px-4 py-3" disabled={mudar.isPending} onClick={() => mudar.mutate({ id: p.id, status: "aguardando_pagamento" })}>Combinar pagamento<ArrowRight aria-hidden /></Button>}
           {podeEditarVenda(p) && <Button variant="outline" className="h-auto min-h-12 justify-between px-4 py-3 shadow-none" onClick={() => setEditando(p)}>Editar venda (peças ou pagamento)<Pencil aria-hidden /></Button>}
           <div className={`grid gap-2 ${whats ? "sm:grid-cols-[minmax(0,1fr)_auto]" : "grid-cols-1"}`}><Button variant="outline" className="h-auto min-h-12 min-w-0 whitespace-normal px-3 py-3 shadow-none" onClick={() => setAberto(p)}><ShoppingBag aria-hidden />Ver peças e pagamento</Button><Button asChild variant="outline" className="h-auto min-h-12 min-w-0 whitespace-normal px-3 py-3 shadow-none"><Link to="/consultora-garantia/$id" params={{ id: p.id }} target="_blank"><FileText aria-hidden />Comprovante e garantia</Link></Button>
-          {whats && <Button asChild variant="ghost" className="h-auto min-h-12 px-3 py-3"><a href={whats} target="_blank" rel="noreferrer"><MessageCircle aria-hidden />WhatsApp</a></Button>}</div>
+          {whats && !whatsCobranca && <Button asChild variant="ghost" className="h-auto min-h-12 px-3 py-3"><a href={whats} target="_blank" rel="noreferrer"><MessageCircle aria-hidden />WhatsApp</a></Button>}</div>
+          {whatsCobranca && <Button asChild className="h-auto min-h-12 justify-between bg-success px-4 py-3 text-white hover:bg-success/90"><a href={whatsCobranca} target="_blank" rel="noreferrer">Reenviar cobrança pelo Whats<MessageCircle aria-hidden /></a></Button>}
           {p.payment_status === "pago" && p.status !== "cancelado" && p.delivery_status !== "entregue" && <Button className="h-auto min-h-12 justify-between px-4 py-3" disabled={entregar.isPending} onClick={() => entregar.mutate(p.id)}>{p.channel === "vitrine" ? "Pago pela vitrine · marcar como entregue" : "Marcar como entregue"}<CheckCircle2 aria-hidden /></Button>}
           {p.payment_status === "pago" && p.status !== "cancelado" && <AbrirPosVenda pedido={p.id} />}
         </div>

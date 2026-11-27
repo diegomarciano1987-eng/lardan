@@ -3,10 +3,10 @@
 ## 27/11 tarde
 - [x] URGENTE: busca de consultoras da montagem lenta (10–12 s, tela desistia) para Ketllin/Thalia — reescrita rápida no Cloud.
 - [x] Representante: ao transferir maleta, promissória ZapSign some; precisa nova promissória com o nome da nova consultora.
-- [ ] Qualidade › Finalizadas: botão Retornar ação.
-- [ ] App consultora: "Reenviar cobrança pelo Whats" em vendas aguardando pagamento.
-- [ ] Remessas: consultoras com maleta + maletas no topo.
-- [ ] Qualidade › Trocas: envio pelos Correios (ida) igual à maleta.
+- [x] Qualidade › Finalizadas: botão Retornar ação.
+- [x] App consultora: "Reenviar cobrança pelo Whats" em vendas aguardando pagamento.
+- [x] Remessas: consultoras com maleta + maletas no topo.
+- [x] Qualidade › Trocas: envio pelos Correios (ida) igual à maleta.
 
 ## Pacote 0412 — captação obrigatória (27/11; sem publicação)
 - [x] Prioridade: Isabella 9234 no campo principal e Nova maleta; correção compatível com tela publicada, perfis equivalentes de Ketllin/Thalia testados.

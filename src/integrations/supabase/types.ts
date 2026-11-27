@@ -23587,6 +23587,15 @@ export type Database = {
         }
         Returns: Json
       }
+      consultora_links_cobranca: {
+        Args: { _orders: string[] }
+        Returns: {
+          forma: string
+          order_id: string
+          url: string
+          vencimento: string
+        }[]
+      }
       consultora_madrinha_definir: {
         Args: { _madrinha: string; _party: string }
         Returns: undefined
@@ -26684,6 +26693,10 @@ export type Database = {
           status: string
           valor_cents: number
         }[]
+      }
+      remessas_consultoras_com_maleta: {
+        Args: { _remessas: string[] }
+        Returns: Json
       }
       remessas_destino_lista: { Args: { _cycle: string }; Returns: Json }
       remessas_lista: {

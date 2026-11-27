@@ -46,7 +46,6 @@ export function TrocaCorreios({ trocaId, status }: { trocaId: string; status: St
       {status !== "resolvida" && status !== "recusada" && (["volta", "ida"] as const).map((d) => {
         const vivo = lista.data?.find((e) => e.direcao === d && !["erro", "cancelada"].includes(e.status));
         if (vivo) return null;
-        if (d === "ida" && status !== "aguardando_envio") return <p key={d} className="text-xs text-ledger-muted">A peça nova vai pelos Correios depois que a troca estiver em "Aguardando envio".</p>;
         return <NovoEnvio key={d} trocaId={trocaId} direcao={d} onFeito={atualizar} />;
       })}
     </section>

@@ -210,8 +210,8 @@ function CandidaturasPage() {
     enabled: podeVer,
   });
   const metricas = useQuery({
-    queryKey: ["crm", "metricas"],
-    queryFn: () => carregarMetricas(),
+    queryKey: ["crm", "metricas", busca.canal ?? "site"],
+    queryFn: () => carregarMetricas(undefined, undefined, busca.canal ?? "site"),
     enabled: podeVer,
   });
   const agenda = useQuery({

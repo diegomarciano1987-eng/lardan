@@ -2885,6 +2885,20 @@
       "when": 1795796793013,
       "tag": "0411_sem_praca_busca_livre_chefes",
       "breakpoints": true
+    },
+    {
+      "idx": 412,
+      "version": "7",
+      "when": 1795803540931,
+      "tag": "0412_montagem_busca_consultora_livre_chefes",
+      "breakpoints": true
+    },
+    {
+      "idx": 413,
+      "version": "7",
+      "when": 1795803629462,
+      "tag": "0413_captacao_metricas_por_etapa",
+      "breakpoints": true
     }
   ]
 }

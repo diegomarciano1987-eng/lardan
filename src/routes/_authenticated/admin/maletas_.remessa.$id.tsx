@@ -524,10 +524,10 @@ function RemessaPage() {
         <Panel title="Consultora não aparece na lista?">
           <div className="flex flex-wrap items-end gap-3">
             <label className="grid min-w-80 flex-1 gap-1.5 text-sm">
-              <span className="ledger-eyebrow">Consultoras ativas ainda sem praça{r.representante ? ` (sem representante ou de ${r.representante})` : ""}</span>
+              <span className="ledger-eyebrow">Trazer consultora de fora desta praça</span>
               <SmartSelect value={semPraca} onChange={setSemPraca} options={semPracaOpcoes.data ?? []} onSearch={setBuscaSemPraca}
-                loading={semPracaOpcoes.isFetching} searchPlaceholder="Digite nome ou CPF (2 letras ou mais)" placeholder="Buscar consultora sem praça"
-                emptyLabel={buscaSemPraca.trim().length < 2 ? "Digite ao menos 2 letras" : "Nenhuma consultora sem praça com esse nome"} />
+                loading={semPracaOpcoes.isFetching} searchPlaceholder="Digite nome ou CPF (2 letras ou mais)" placeholder="Buscar consultora (nome, código ou CPF)"
+                emptyLabel={buscaSemPraca.trim().length < 2 ? "Digite ao menos 2 letras" : "Nenhuma consultora encontrada com esse nome"} />
               <span className="text-xs text-ledger-muted">Ela passa para a praça {r.praca} (fica registrado quem fez). Quem já tem outra praça não muda por aqui.</span>
             </label>
             <button type="button" className="admin-btn admin-btn-primary" disabled={!semPraca || vincular.isPending} onClick={() => vincular.mutate()}>

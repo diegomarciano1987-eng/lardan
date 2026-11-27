@@ -1,2 +1,3 @@
 # CRM
 - Individual capabilities (0396–0397): caps listed in caps_individuais_permitidas() (today candidaturas.mark_lost) are honored from user_capabilities for any active user by has_capability/my_capabilities; they are set only via service-only cap_exclusiva_definir (Master actor, reason, audit before/after), which grants the user first then removes the cap from every role and other user. Why: one person holds the refusal decision without a new role.
+- Captação metrics (0413): crm_metrics groups by stage key (nova / conversa-teste-avaliacao / aprovada-documentacao-onboarding or ganha / reprovada or perdida) and filters by captacao_canal of the active tab. Why: first_response_at/outcome were rarely set.

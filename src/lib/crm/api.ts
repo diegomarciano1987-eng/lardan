@@ -322,8 +322,8 @@ export const carregarLista = (f: Filtros = {}, limite = 50, offset = 0) =>
 export const carregarDetalhe = (id: string) => rpc<Detalhe>("crm_detail", { _lead: id });
 export const carregarAgenda = (escopo: string, somenteMeus = false) =>
   rpc<FollowupAgenda[]>("crm_followups_list", { _escopo: escopo, _somente_meus: somenteMeus });
-export const carregarMetricas = (de?: string, ate?: string) =>
-  rpc<Metricas>("crm_metrics", { _de: de ?? null, _ate: ate ?? null });
+export const carregarMetricas = (de?: string, ate?: string, canal?: "site" | "representante") =>
+  rpc<Metricas>("crm_metrics", { _de: de ?? null, _ate: ate ?? null, _canal: canal ?? null });
 
 export const moverEtapa = (lead: string, etapa: string, nota?: string) =>
   rpc("crm_move_stage", { _lead: lead, _stage: etapa, _note: nota ?? null });

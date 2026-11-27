@@ -23868,7 +23868,10 @@ export type Database = {
         Returns: Json
       }
       crm_mark_won: { Args: { _lead: string; _nota?: string }; Returns: Json }
-      crm_metrics: { Args: { _ate?: string; _de?: string }; Returns: Json }
+      crm_metrics: {
+        Args: { _ate?: string; _canal?: string; _de?: string }
+        Returns: Json
+      }
       crm_move_stage: {
         Args: { _lead: string; _note?: string; _stage: string }
         Returns: Json
@@ -26495,6 +26498,7 @@ export type Database = {
           cpf: string
           display_name: string
           party_id: string
+          praca: string
           representante: string
         }[]
       }

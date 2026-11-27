@@ -68,13 +68,14 @@ function useDebounce<T>(valor: T, ms = 350) {
   return saida;
 }
 
-function Indicador({ rotulo, valor }: { rotulo: string; valor: number | undefined }) {
+function Indicador({ rotulo, valor, dica, detalhe }: { rotulo: string; valor: number | undefined; dica?: string | undefined; detalhe?: string | undefined }) {
   return (
-    <div className="ledger-panel px-5 py-4">
-      <p className="ledger-eyebrow">{rotulo}</p>
+    <div className="ledger-panel px-5 py-4" title={dica}>
+      <p className="ledger-eyebrow">{rotulo}{dica ? " ⓘ" : ""}</p>
       <p className="mt-1 font-display text-3xl font-bold text-ledger-text tabular-nums">
         {valor === undefined ? "—" : formatInt(valor)}
       </p>
+      {detalhe && <p className="mt-1 text-xs text-ledger-muted">{detalhe}</p>}
     </div>
   );
 }
@@ -527,9 +528,13 @@ function EstoquePage() {
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <Indicador rotulo="Locais ativos" valor={resumo.data?.locais} />
-            <Indicador rotulo="Peças com saldo" valor={resumo.data?.pecas_com_saldo} />
-            <Indicador rotulo="Unidades em estoque" valor={resumo.data?.unidades} />
-            <Indicador rotulo="Saldos negativos" valor={resumo.data?.negativos} />
+            <Indicador rotulo="Peças com saldo" valor={resumo.data?.pecas_com_saldo}
+              dica="Quantas combinações de peça + local têm saldo maior que zero." />
+            <Indicador rotulo="Unidades em estoque" valor={resumo.data?.unidades}
+              dica="Soma só dos saldos positivos. Antes este card somava também os negativos e por isso mostrava um número bem menor." />
+            <Indicador rotulo="Saldos negativos" valor={resumo.data?.negativos}
+              dica="Peça que saiu de um local que ainda não foi contado (ex.: maleta montada do Depósito Principal antes do inventário). O sistema deixa sair e registra; o saldo volta ao normal quando o local é inventariado."
+              detalhe={resumo.data?.faltam_contar ? `${formatInt(resumo.data.faltam_contar)} unidades a acertar · ${(resumo.data.negativos_por_local ?? []).slice(0, 2).map((l) => `${l.local}: ${formatInt(l.saldos)}`).join(" · ")}` : undefined} />
             <Indicador rotulo="Movimentos (7 dias)" valor={resumo.data?.movimentos_7d} />
           </div>
 

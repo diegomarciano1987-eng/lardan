@@ -15,6 +15,8 @@ import { AcordosAtrasados } from "@/components/admin/cobranca/AcordosAtrasados";
 import { AvisoSomenteLeitura } from "@/components/admin/cobranca/AvisoSomenteLeitura";
 import { useCobrancaSomenteLeitura } from "@/lib/cobranca-leitura";
 import { AcoesAtrasadas } from "@/components/admin/cobranca/AcoesAtrasadas";
+import { CarteiraVencida } from "@/components/admin/CarteiraVencida";
+import { supabase } from "@/integrations/supabase/client";
 import { carteira, kpisCobranca, moverEtapa, cobConfig, salvarConfig, type CobConfig, brl, dataBR, hojeSP, ETAPAS, rotuloEtapa, type Devedor, type Etapa } from "@/lib/cobranca";
 
 const busca = z.object({
@@ -114,6 +116,7 @@ function Cobranca() {
       {!leitura && <ReativacoesPendentes />}
 
       <KpisCobranca filtro={s.f} onFiltro={(f) => set({ f })} />
+      {s.v !== "historica" && <CarteiraVencida compacto />}
 
       {s.f === "acordos_atrasados" ? <AcordosAtrasados onFechar={() => set({ f: "" })} />
         : s.f === "atrasadas" ? <AcoesAtrasadas onFechar={() => set({ f: "" })} /> : <>
@@ -137,7 +140,7 @@ function Cobranca() {
         : lista.length === 0 && s.v !== "bi" ? <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">Sem dados para estes filtros.</p>
         : s.v === "lista" ? <Lista lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
         : s.v === "kanban" ? <KanbanCobranca lista={lista} onMover={mover} somenteLeitura={leitura} podeMover />
-        : s.v === "agenda" ? <Agenda lista={lista} hoje={hoje} pagina={s.p} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
+        : s.v === "agenda" ? <Agenda lista={lista} hoje={hoje} pagina={s.p} podeReorganizar={!leitura} onPagina={(p) => nav({ search: (o) => ({ ...o, p }), replace: true })} />
         : <BI todos={todos} />}
       </>}
     </div>
@@ -288,14 +291,58 @@ function ConfigEncargos() {
   );
 }
 
-function Agenda({ lista, hoje, pagina, onPagina }: { lista: Devedor[]; hoje: string; pagina: number; onPagina: (p: number) => void }) {
-  const comAcao = lista.filter((d) => d.proxima_acao).sort((a, b) => a.proxima_acao!.localeCompare(b.proxima_acao!) || Number(b.vencido_cents) - Number(a.vencido_cents));
+/** 0408: prioridade = valor vencido × recência (igual a cob_prioridade no banco). */
+const prioridade = (d: Devedor) => Number(d.vencido_cents) * (d.maior_atraso <= 30 ? 1 : d.maior_atraso <= 90 ? 0.6 : d.maior_atraso <= 180 ? 0.3 : 0.1);
+
+/** 0408: espalha as tarefas atrasadas da régua pelos próximos dias úteis, as mais importantes primeiro. */
+function ReorganizarAtrasadas({ atrasadas }: { atrasadas: number }) {
+  const qc = useQueryClient();
+  const [porDia, setPorDia] = React.useState(40);
+  const [enviando, setEnviando] = React.useState(false);
+  if (atrasadas === 0) return null;
+  const rodar = async () => {
+    setEnviando(true);
+    try {
+      const { data, error } = await supabase.rpc("cob_agenda_reorganizar" as never, { _por_dia: porDia } as never);
+      if (error) throw error;
+      const r = data as unknown as { reorganizadas: number; ate: string | null };
+      toast.success(r.reorganizadas ? `${r.reorganizadas} tarefa(s) da régua redistribuídas até ${r.ate ? dataBR(r.ate) : "—"}.` : "Nenhuma tarefa da régua estava atrasada.");
+      void qc.invalidateQueries({ queryKey: ["cob"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível reorganizar.");
+    } finally {
+      setEnviando(false);
+    }
+  };
+  return (
+    <section className="flex flex-wrap items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
+      <p className="min-w-0 flex-1">
+        <b>{atrasadas}</b> devedora(s) com a próxima ação atrasada. Reorganize para distribuir as tarefas automáticas da régua pelos próximos dias úteis,
+        começando pelas de maior valor e atraso mais recente. Follow-ups marcados por pessoa e promessas não mudam.
+      </p>
+      <label className="flex items-center gap-2 text-xs text-muted-foreground">
+        Por dia
+        <input type="number" min={5} max={500} value={porDia} onChange={(e) => setPorDia(Math.max(5, Math.min(500, Number(e.target.value) || 40)))}
+          className="h-9 w-20 rounded-lg border border-border bg-background px-2 text-sm text-foreground" />
+      </label>
+      <button type="button" disabled={enviando} onClick={() => void rodar()} className="h-9 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+        {enviando ? "Reorganizando…" : "Reorganizar atrasadas"}
+      </button>
+    </section>
+  );
+}
+
+function Agenda({ lista, hoje, pagina, onPagina, podeReorganizar }: { lista: Devedor[]; hoje: string; pagina: number; onPagina: (p: number) => void; podeReorganizar: boolean }) {
+  const grupo = (d: Devedor) => (d.proxima_acao! < hoje ? hoje : d.proxima_acao!);
+  const comAcao = lista.filter((d) => d.proxima_acao).sort((a, b) => grupo(a).localeCompare(grupo(b)) || prioridade(b) - prioridade(a));
+  const atrasadas = comAcao.filter((d) => d.proxima_acao! < hoje).length;
   const atual = Math.min(pagina, Math.max(1, Math.ceil(comAcao.length / POR_PAGINA)));
   const grupos = new Map<string, Devedor[]>();
   comAcao.slice((atual - 1) * POR_PAGINA, atual * POR_PAGINA).forEach((d) => { const k = d.proxima_acao! < hoje ? "Atrasadas" : d.proxima_acao === hoje ? "Hoje" : dataBR(d.proxima_acao); grupos.set(k, [...(grupos.get(k) ?? []), d]); });
   if (!comAcao.length) return <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">Nenhuma ação agendada. A régua cria as tarefas todo dia.</p>;
   return (
     <div className="space-y-4">
+      {podeReorganizar && <ReorganizarAtrasadas atrasadas={atrasadas} />}
       {[...grupos].map(([k, ds]) => (
         <section key={k} className="rounded-xl border border-border bg-card p-4">
           <h3 className={`mb-2 text-sm font-medium ${k === "Atrasadas" ? "text-destructive" : ""}`}>{k} · {ds.length}</h3>

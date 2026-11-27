@@ -44,6 +44,8 @@ const ABAS: { id: string; label: string }[] = [
   { id: "em_analise", label: "Em análise" },
   { id: "aguardando_envio", label: "Aguardando envio" },
   { id: "novidades", label: "Novidades das consultoras" },
+  { id: "paradas15", label: "Paradas +15 dias" },
+  { id: "paradas30", label: "Paradas +30 dias" },
   { id: "resolvida", label: "Finalizadas" },
   { id: "recusada", label: "Recusadas" },
   { id: "todas", label: "Todas" },
@@ -122,7 +124,8 @@ function TrocasGarantias() {
         <Kpi rotulo="Em análise" valor={n("em_analise")} />
         <Kpi rotulo="Aguardando envio" valor={n("aguardando_envio")} />
         <Kpi rotulo="Novidades" valor={n("novidades")} destaque={n("novidades") > 0} dica="Mensagens e pedidos novos das consultoras" />
-        <Kpi rotulo="Paradas +30 dias" valor={n("abertas_mais_30d")} alerta={n("abertas_mais_30d") > 0} />
+        <Kpi rotulo="Paradas +30 dias" valor={r["paradas30"] == null ? n("abertas_mais_30d") : n("paradas30")} alerta={n("paradas30") > 0}
+          dica={`Abertas, em análise ou aguardando envio há mais de 30 dias. Há mais de 15 dias: ${n("paradas15")}.`} />
         <Kpi rotulo="Consultoras pendentes" valor={n("consultoras_pendentes")} />
         <Kpi rotulo="Finalizadas 30 dias" valor={n("resolvidas_30d")} />
         <Kpi rotulo="Tempo médio" valor={r["dias_medios_resolucao"] == null ? "—" : `${String(r["dias_medios_resolucao"]).replace(".", ",")} dias`} dica="Abertura até finalização, últimos 180 dias" />

@@ -16,6 +16,12 @@ export interface StockOverview {
   unidades?: number;
   negativos?: number;
   movimentos_7d?: number;
+  /** 0408: soma com os negativos (o número antigo de "unidades"). */
+  unidades_liquidas?: number;
+  /** 0408: unidades que saíram sem ter sido contadas (soma dos saldos negativos, em positivo). */
+  faltam_contar?: number;
+  locais_com_negativo?: number;
+  negativos_por_local?: { local: string; saldos: number; unidades: number }[];
 }
 
 export interface BalanceRow {

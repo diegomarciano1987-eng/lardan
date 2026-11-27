@@ -60,7 +60,7 @@ const GRUPOS: { titulo: string; nota: string; itens: Card[] }[] = [
     nota: "Uma identidade só. A mesma pessoa pode acumular papéis sem virar cadastro repetido.",
     itens: [
       { label: "Pessoas", icon: Users, texto: "Base canônica de pessoas físicas e empresas.", to: "/admin/cadastros/pessoas", contador: "pessoas" },
-      { label: "Candidaturas", icon: UserPlus, texto: "Quem veio do Seja LARDAN ou foi cadastrada por um representante.", to: "/admin/leads", contador: "candidaturas" },
+      { label: "Candidaturas", icon: UserPlus, texto: "Quem veio do Seja LARDAN ou foi cadastrada por um representante.", to: "/admin/candidaturas", contador: "candidaturas" },
       { label: "Consultoras", icon: Gem, texto: "Pessoas aprovadas que trabalham com maletas LARDAN.", to: "/admin/cadastros/pessoas", papel: "consultora", contador: "consultoras" },
       { label: "Representantes", icon: Handshake, texto: "Quem leva, acompanha e recolhe as maletas.", to: "/admin/cadastros/pessoas", papel: "representante", contador: "representantes" },
       { label: "Colaboradores", icon: IdCard, texto: "Time interno da LARDAN.", to: "/admin/cadastros/pessoas", papel: "colaborador", contador: "colaboradores" },
@@ -142,7 +142,7 @@ function CentralDeCadastros() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
           { rotulo: "Cadastros de pessoas e empresas", to: undefined as string | undefined, valor: (c["pessoas"] ?? 0) + (c["organizacoes"] ?? 0) },
-          { rotulo: "Cadastros incompletos", valor: c["incompletos"] ?? 0 },
+          { rotulo: "Cadastros incompletos", valor: c["incompletos"] ?? 0, to: "/admin/cadastros/incompletos" },
           { rotulo: "Possíveis duplicidades", valor: c["duplicidades"] ?? 0, to: "/admin/cadastros/duplicidades" },
           { rotulo: "Atualizados nos últimos 7 dias", valor: c["atualizados_7d"] ?? 0 },
         ].map((k) => (

@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { PulsoCards } from "@/components/admin/PulsoCards";
 import { CentralVendas } from "@/components/admin/CentralVendas";
 import { Previsibilidade } from "@/components/admin/Previsibilidade";
+import { CarteiraVencida } from "@/components/admin/CarteiraVencida";
 
 interface Painel {
   fluxo: { mes: string; entradas: number; saidas: number }[];
@@ -156,6 +157,7 @@ export function VisaoGeralPainel({ saldoContas, vencidoReceber, vencidoPagar }: 
       ) : aba === "pulso" ? (
         <>
           <PulsoCards />
+          <CarteiraVencida />
 
           <div className="grid gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
             <Panel title="Fluxo de caixa realizado · últimos 12 meses">
@@ -198,6 +200,7 @@ export function VisaoGeralPainel({ saldoContas, vencidoReceber, vencidoPagar }: 
               </div>
               <p className="mt-2 text-xs text-ledger-muted">
                 A receber {formatBRLFromCents(receber6)} · a pagar {formatBRLFromCents(pagar6)} em aberto no período.
+                {" "}Só entram parcelas já lançadas: os acertos das maletas que estão na rua ainda não aparecem aqui (a estimativa deles fica em Previsibilidade).
               </p>
             </Panel>
           </div>

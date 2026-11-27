@@ -37,6 +37,36 @@ export function useDockModules(roles: AppRole[]) {
   return { permitted, colab };
 }
 
+/**
+ * 0408 (plano do Daniel): os módulos agrupados em 7 áreas + Administração. As rotas e as permissões não mudam;
+ * muda só a organização da gaveta e a ordem do menu fixo.
+ */
+export const AREAS_MENU: { titulo: string; slugs: string[] }[] = [
+  { titulo: "Início", slugs: ["visao-geral"] },
+  { titulo: "Dinheiro", slugs: ["financeiro", "cobranca", "bi"] },
+  { titulo: "Maletas", slugs: ["maletas", "qualidade"] },
+  { titulo: "Produto e estoque", slugs: ["produtos", "estoque", "importacao", "site"] },
+  { titulo: "Rede", slugs: ["crm-candidaturas", "rede", "pracas", "acessos-consultoras"] },
+  { titulo: "Comunicação", slugs: ["biblioteca", "ajuda", "academy"] },
+  { titulo: "Loja física", slugs: ["pdv"] },
+  { titulo: "Administração", slugs: ["cadastros", "usuarios", "configuracoes", "integracoes", "auditoria"] },
+];
+/** Ordem do menu fixo: um destino por área, os mais usados primeiro. */
+const PRIORIDADE_DOCK = ["visao-geral", "financeiro", "maletas", "produtos", "crm-candidaturas", "cobranca", "estoque", "rede"];
+const ordemDock = (slug: string) => { const i = PRIORIDADE_DOCK.indexOf(slug); return i < 0 ? 100 : i; };
+
+export function agruparPorArea<T extends { slug: string }>(mods: T[]) {
+  const usados = new Set<string>();
+  const grupos = AREAS_MENU.map((a) => {
+    const itens = a.slugs.map((sl) => mods.find((m) => m.slug === sl)).filter((m): m is T => !!m);
+    itens.forEach((m) => usados.add(m.slug));
+    return { titulo: a.titulo, itens };
+  });
+  const resto = mods.filter((m) => !usados.has(m.slug));
+  if (resto.length) grupos.push({ titulo: "Outros", itens: resto });
+  return grupos.filter((g) => g.itens.length > 0);
+}
+
 /** Menu principal flutuante inferior: única navegação global do sistema. */
 export function BottomDock({ roles }: { roles: AppRole[] }) {
   const caps = useCapabilities();
@@ -46,8 +76,10 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
   const [submenu, setSubmenu] = useState<"modulos" | "financeiro">("modulos");
   const [theme, setTheme] = useOperationalTheme();
 
-  const primary = permitted.slice(0, 6);
-  const primaryMobile = permitted.slice(0, 5);
+  const porPrioridade = [...permitted].sort((a, b) => ordemDock(a.slug) - ordemDock(b.slug));
+  const primary = porPrioridade.slice(0, 6);
+  const primaryMobile = porPrioridade.slice(0, 5);
+  const grupos = agruparPorArea(permitted);
   const areasFinanceiras = AREAS_FINANCEIRAS.filter((a) => caps.includes(a.capacidade));
   const fecharGaveta = () => {
     setDrawer(false);
@@ -126,8 +158,12 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
                 })}
               </ul>
             ) : (
-              <ul className="grid gap-1 sm:mx-auto sm:w-fit sm:grid-cols-2 lg:grid-cols-3">
-                {permitted.map((m) => {
+              <div className="max-h-[60vh] space-y-4 overflow-y-auto">
+              {grupos.map((g) => (
+              <section key={g.titulo} aria-label={g.titulo}>
+              <p className="mb-1 px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ledger-muted">{g.titulo}</p>
+              <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+                {g.itens.map((m) => {
                   const active = isActive(pathname, m.path);
                   const Icon = m.icon;
                   const body = (
@@ -187,6 +223,9 @@ export function BottomDock({ roles }: { roles: AppRole[] }) {
                   );
                 })}
               </ul>
+              </section>
+              ))}
+              </div>
             )}
           </div>
         </div>

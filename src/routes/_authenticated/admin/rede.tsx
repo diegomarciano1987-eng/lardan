@@ -211,9 +211,10 @@ function RedePage() {
         </p>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Indicador rotulo="Consultoras cadastradas" valor={ind?.total} />
-        <Indicador rotulo="Ativas" valor={ind?.ativas} />
+        <Indicador rotulo="Ativas" valor={ind?.ativas} dica="Ativa = cadastro com situação Ativo ou Aprovado no painel do território (regra 0391)." />
+        <Indicador rotulo="Com maleta em 90 dias" valor={ind?.com_maleta_90d} dica="Consultoras com maleta na mão agora ou com acerto fechado nos últimos 90 dias. É a atividade de verdade da rede." />
         <Indicador rotulo="Estados alcançados" valor={ind?.estados} />
         <Indicador rotulo="Municípios alcançados" valor={ind?.municipios} />
       </div>
@@ -400,10 +401,10 @@ function Campo({ rotulo, children }: { rotulo: string; children: React.ReactNode
   );
 }
 
-function Indicador({ rotulo, valor }: { rotulo: string; valor?: number | undefined }) {
+function Indicador({ rotulo, valor, dica }: { rotulo: string; valor?: number | undefined; dica?: string }) {
   return (
-    <div className="ledger-panel px-5 py-4">
-      <p className="text-xs uppercase tracking-[0.08em] text-ledger-muted">{rotulo}</p>
+    <div className="ledger-panel px-5 py-4" title={dica}>
+      <p className="text-xs uppercase tracking-[0.08em] text-ledger-muted">{rotulo}{dica ? " ⓘ" : ""}</p>
       <p className="mt-1.5 text-3xl font-semibold text-ledger-text [font-variant-numeric:tabular-nums]">
         {valor === undefined ? "—" : formatInt(valor)}
       </p>

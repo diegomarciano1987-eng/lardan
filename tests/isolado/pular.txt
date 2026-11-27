@@ -14,3 +14,5 @@
 # (mesmo conteúdo registrado de novo pela ferramenta de banco; reaplicar falharia por política duplicada).
 0026_clicksign_termo_maleta_estrutura.sql
 0180_demo_maleta_videos.sql
+# Exceção provisória: semeia acertos históricos com IDs reais de representantes (FK em parties); nenhuma bateria usa rep_acertos.
+0409_acertos_representantes_0410.sql

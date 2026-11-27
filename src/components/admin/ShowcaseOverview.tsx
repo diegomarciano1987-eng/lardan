@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, Home } from "lucide-react";
 import { EmptyState, Panel, StatusBadge, formatInt } from "@/components/admin/ui";
-import { fetchShowcaseCounts, listTaxonomia } from "@/lib/showcase";
+import { fetchShowcaseCounts, listTaxonomia, type ShowcaseCounts } from "@/lib/showcase";
 
 /** Números vindos do banco + atalhos para ver o site como o público vê. */
 export function ShowcaseOverview({
@@ -48,6 +48,8 @@ export function ShowcaseOverview({
           onClick={onIrParaProdutos}
         />
       </section>
+
+      <PendenciasMaisComuns c={contadores.data} />
 
       <Panel title="Ver como o público vê">
         <div className="flex flex-wrap gap-3">
@@ -116,5 +118,36 @@ function Cartao({
       </p>
       <p className="mt-1 text-xs text-ledger-muted">{descricao}</p>
     </button>
+  );
+}
+
+/** 0408: o que mais trava a publicação, do maior para o menor. Um produto pode ter mais de uma pendência. */
+function PendenciasMaisComuns({ c }: { c: ShowcaseCounts | undefined }) {
+  if (!c) return null;
+  const itens = ([
+    ["Sem descrição", c.sem_descricao],
+    ["Sem foto", c.sem_imagem],
+    ["Sem categoria", c.sem_categoria],
+    ["Sem preço", c.sem_preco],
+    ["Sem estoque (não aparece para compra)", c.sem_estoque],
+  ] as [string, number | undefined][]).filter((x): x is [string, number] => typeof x[1] === "number").sort((a, b) => b[1] - a[1]);
+  const total = Math.max(c.total, 1);
+  return (
+    <Panel title="Pendências mais comuns">
+      <p className="mb-3 text-sm text-ledger-muted">
+        Para publicar, o produto precisa de foto, categoria e descrição. Um mesmo produto pode aparecer em mais de uma linha.
+      </p>
+      <ul className="space-y-2.5">
+        {itens.map(([rotulo, n]) => (
+          <li key={rotulo} className="text-sm">
+            <div className="flex justify-between gap-3">
+              <span className="text-ledger-text">{rotulo}</span>
+              <span className="num font-semibold text-ledger-text">{formatInt(n)} <span className="font-normal text-ledger-muted">de {formatInt(c.total)}</span></span>
+            </div>
+            <div className="mt-1 h-1.5 rounded bg-surface-muted"><div className="h-1.5 rounded bg-bronze" style={{ width: `${(n / total) * 100}%` }} /></div>
+          </li>
+        ))}
+      </ul>
+    </Panel>
   );
 }

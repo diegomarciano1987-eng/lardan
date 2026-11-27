@@ -115,7 +115,7 @@ async function search(term: string, caps: Capability[], escopo: Escopo): Promise
         icon: ContactRound,
         title: l.full_name,
         context: `${l.protocol} — ${l.status}`,
-        to: "/admin/leads",
+        to: `/admin/candidaturas/${l.id}`,
       });
     }
     for (const c of contatos.data ?? []) {

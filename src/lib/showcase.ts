@@ -70,6 +70,8 @@ export interface ShowcaseCounts {
   publicados: number;
   aguardando: number;
   incompletos: number;
+  /** 0408 */
+  sem_descricao?: number;
   sem_imagem: number;
   sem_preco: number;
   sem_categoria: number;

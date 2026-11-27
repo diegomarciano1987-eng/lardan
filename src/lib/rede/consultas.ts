@@ -31,6 +31,8 @@ export function contarFiltrosAtivos(f: FiltrosRede) {
 export interface IndicadoresRede {
   total: number;
   ativas: number;
+  /** 0408: com maleta na mão ou acerto nos últimos 90 dias. */
+  com_maleta_90d?: number;
   inativas: number;
   localizadas: number;
   incompletas: number;

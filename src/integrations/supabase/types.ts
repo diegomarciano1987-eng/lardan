@@ -23045,6 +23045,7 @@ export type Database = {
           total_cents: number
         }[]
       }
+      cob_agenda_reorganizar: { Args: { _por_dia?: number }; Returns: Json }
       cob_cadastro_ler: { Args: { _party: string }; Returns: Json }
       cob_cadastro_salvar: {
         Args: { _d: Json; _party: string }
@@ -23121,6 +23122,7 @@ export type Database = {
         }[]
       }
       cob_devedor: { Args: { _party: string }; Returns: Json }
+      cob_dia_util: { Args: { _base: string; _n: number }; Returns: string }
       cob_fiado_importar: {
         Args: { _linhas: Json; _lote: string }
         Returns: Json
@@ -23245,6 +23247,10 @@ export type Database = {
       }
       cob_pode: { Args: { _u: string }; Returns: boolean }
       cob_pode_ler: { Args: { _u: string }; Returns: boolean }
+      cob_prioridade: {
+        Args: { _maior_atraso: number; _vencido_cents: number }
+        Returns: number
+      }
       cob_promessa_cancelar: {
         Args: { _id: string; _motivo: string }
         Returns: undefined
@@ -25647,6 +25653,7 @@ export type Database = {
         Returns: Json
       }
       orders_list: { Args: { _filtros?: Json }; Returns: Json }
+      painel_carteira_vencida: { Args: never; Returns: Json }
       painel_visao_geral: { Args: never; Returns: Json }
       parse_cents_any: { Args: { _v: string }; Returns: number }
       parse_decimal_any: { Args: { _v: string }; Returns: number }
@@ -26432,6 +26439,10 @@ export type Database = {
           motivo: string
           quantidade: number
         }[]
+      }
+      registry_incompletos: {
+        Args: { _falta?: string; _limite?: number; _offset?: number }
+        Returns: Json
       }
       release_stock_reservation: {
         Args: {

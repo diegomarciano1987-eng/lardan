@@ -43,7 +43,7 @@ export function TrocaCorreios({ trocaId, status }: { trocaId: string; status: St
         )}
       </div>
       {lista.data?.map((e) => <EnvioLinha key={e.id} e={e} onFeito={atualizar} />)}
-      {status !== "resolvida" && status !== "recusada" && (["volta", "ida"] as const).map((d) => {
+      {status !== "recusada" && (status === "resolvida" ? (["ida"] as const) : (["volta", "ida"] as const)).map((d) => {
         const vivo = lista.data?.find((e) => e.direcao === d && !["erro", "cancelada"].includes(e.status));
         if (vivo) return null;
         return <NovoEnvio key={d} trocaId={trocaId} direcao={d} onFeito={atualizar} />;

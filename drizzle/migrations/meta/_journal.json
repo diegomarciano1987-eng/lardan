@@ -2969,6 +2969,13 @@
       "when": 1795808941921,
       "tag": "0423_consultora_links_cobranca",
       "breakpoints": true
+    },
+    {
+      "idx": 424,
+      "version": "7",
+      "when": 1795809787624,
+      "tag": "0424_trocas_correios_ida_finalizada",
+      "breakpoints": true
     }
   ]
 }

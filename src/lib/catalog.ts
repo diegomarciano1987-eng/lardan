@@ -105,7 +105,53 @@ export async function saveRecord<T>(
 }
 
 /** Sobe uma imagem para o balde privado e registra na biblioteca de mídias. */
-export async function uploadMedia(file: File, alt: string) {
+/** Limite de peso das fotos do catálogo (40 KB). */
+export const LIMITE_FOTO_BYTES = 40 * 1024;
+
+/**
+ * Converte a foto no navegador para WebP de até 40 KB, mantendo a melhor qualidade possível:
+ * reduz a qualidade em passos e, se preciso, o tamanho (lado maior começa em 1200 px).
+ * Arquivos que não são imagem (ou já leves) passam sem mudança.
+ */
+export async function comprimirFoto(file: File, limite = LIMITE_FOTO_BYTES): Promise<File> {
+  if (typeof window === "undefined" || !file.type.startsWith("image/") || file.type === "image/svg+xml") return file;
+  if (file.size <= limite && file.type === "image/webp") return file;
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    return file;
+  }
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return file;
+  let lado = Math.min(1200, Math.max(bitmap.width, bitmap.height));
+  let melhor: Blob | null = null;
+  while (lado >= 320) {
+    const escala = lado / Math.max(bitmap.width, bitmap.height);
+    canvas.width = Math.round(bitmap.width * escala);
+    canvas.height = Math.round(bitmap.height * escala);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    for (const q of [0.85, 0.78, 0.7, 0.62, 0.55, 0.48]) {
+      const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/webp", q));
+      if (!blob) continue;
+      melhor = blob;
+      if (blob.size <= limite) {
+        bitmap.close();
+        return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" });
+      }
+    }
+    lado = Math.round(lado * 0.8);
+  }
+  bitmap.close();
+  if (!melhor || melhor.type !== "image/webp") return file;
+  return new File([melhor], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" });
+}
+
+export async function uploadMedia(original: File, alt: string) {
+  const file = await comprimirFoto(original);
   const { data: userData } = await supabase.auth.getUser();
   const extensao = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
   const caminho = `catalogo/${crypto.randomUUID()}.${extensao}`;

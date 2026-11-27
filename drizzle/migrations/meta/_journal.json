@@ -2878,6 +2878,13 @@
       "when": 1795796015134,
       "tag": "0410_plano_daniel_rodada1_0408",
       "breakpoints": true
+    },
+    {
+      "idx": 411,
+      "version": "7",
+      "when": 1795796793013,
+      "tag": "0411_sem_praca_busca_livre_chefes",
+      "breakpoints": true
     }
   ]
 }

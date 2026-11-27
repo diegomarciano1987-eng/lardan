@@ -113,3 +113,4 @@
 - [x] Cobrança: Débitos e fiados juntos
 - [x] Correios: maleta vira individual e acerto = entrega + 30 dias
 - [x] Financeiro: Acertos dos representantes (histórico 2026 carregado)
+- Conversão das fotos do catálogo para até 40 KB em andamento (lote em segundo plano; refazer `node /tmp/conv/conv.mjs` se parar)

@@ -6,6 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, StatusBadge } from "@/components/admin/ui";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ProdutosVisaoGeral } from "@/components/admin/ProdutosVisaoGeral";
 import { ProdutosPendencias } from "@/components/admin/ProdutosPendencias";
 import { DataTable, type Column } from "@/components/admin/DataTable";
@@ -233,7 +239,7 @@ function ProdutosPage() {
         );
       },
     },
-    { key: "foto", header: "Foto", render: (r) => <FotoPeca productId={r.id} variantId={r.variantId} alt={r.name} /> },
+    { key: "foto", header: "Foto", render: (r) => <FotoProdutoLista produto={r} /> },
     {
       key: "name",
       header: "Produto",
@@ -350,53 +356,92 @@ function ProdutosPage() {
       {aba === "corrigir" && escopo.isSuccess && !colab && <ProdutosPendencias key={pendenciaTipo} tipoInicial={pendenciaTipo} />}
 
       {aba === "lista" && (
-      <DataTable<LinhaLista>
-        columns={columns}
-        rows={linhas}
-        rowKey={(r) => r.chave}
-        total={query.data?.total ?? 0}
-        page={pagina}
-        pageSize={PAGE_SIZE}
-        onPageChange={setPagina}
-        search={busca}
-        onSearchChange={(v) => {
-          setBusca(v);
-          setPagina(0);
-        }}
-        searchPlaceholder="Leia o código de barras ou busque por nome, referência ou material…"
-        isLoading={query.isLoading || aguardandoLeitura}
-        error={query.error}
-        onRetry={() => void query.refetch()}
-        onRowClick={(row) => void navigate({ to: "/admin/cadastros/produtos/$id", params: { id: row.id } })}
-        filters={
-          <div className="flex flex-wrap items-center gap-3">
-            <SmartSelect
-              value={status}
-              onChange={(v) => {
-                setStatus(v);
-                setPagina(0);
-              }}
-              options={[{ value: "todos", label: "Todas as situações" }, ...STATUS_OPTIONS]}
-              placeholder="Situação"
-              className="w-52"
-            />
-            <SmartSelect
-              value={categoria}
-              onChange={(v) => {
-                setCategoria(v);
-                setPagina(0);
-              }}
-              options={[
-                { value: "todos", label: "Todas as categorias" },
-                ...(categorias.data ?? []).map((c) => ({ value: c.id, label: c.name })),
-              ]}
-              placeholder="Categoria"
-              className="w-60"
-            />
-          </div>
-        }
-      />
+        <TooltipProvider delayDuration={120}>
+          <DataTable<LinhaLista>
+            columns={columns}
+            rows={linhas}
+            rowKey={(r) => r.chave}
+            total={query.data?.total ?? 0}
+            page={pagina}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPagina}
+            search={busca}
+            onSearchChange={(v) => {
+              setBusca(v);
+              setPagina(0);
+            }}
+            searchPlaceholder="Leia o código de barras ou busque por nome, referência ou material…"
+            isLoading={query.isLoading || aguardandoLeitura}
+            error={query.error}
+            onRetry={() => void query.refetch()}
+            onRowClick={(row) => void navigate({ to: "/admin/cadastros/produtos/$id", params: { id: row.id } })}
+            filters={
+              <div className="flex flex-wrap items-center gap-3">
+                <SmartSelect
+                  value={status}
+                  onChange={(v) => {
+                    setStatus(v);
+                    setPagina(0);
+                  }}
+                  options={[{ value: "todos", label: "Todas as situações" }, ...STATUS_OPTIONS]}
+                  placeholder="Situação"
+                  className="w-52"
+                />
+                <SmartSelect
+                  value={categoria}
+                  onChange={(v) => {
+                    setCategoria(v);
+                    setPagina(0);
+                  }}
+                  options={[
+                    { value: "todos", label: "Todas as categorias" },
+                    ...(categorias.data ?? []).map((c) => ({ value: c.id, label: c.name })),
+                  ]}
+                  placeholder="Categoria"
+                  className="w-60"
+                />
+              </div>
+            }
+          />
+        </TooltipProvider>
       )}
     </div>
+  );
+}
+
+/** Amplia a foto sem mudar a altura da linha nem ser cortada pela rolagem da tabela. */
+function FotoProdutoLista({ produto }: { produto: LinhaLista }) {
+  const referencia =
+    produto.referencia ?? produto.reference_code ?? produto.legacy_code ?? "Sem referência";
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="block w-fit cursor-zoom-in rounded-lg outline-hidden focus-visible:ring-2 focus-visible:ring-champagne">
+          <FotoPeca productId={produto.id} variantId={produto.variantId} alt={produto.name} />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent
+        side="right"
+        align="center"
+        sideOffset={16}
+        collisionPadding={16}
+        className="w-80 rounded-xl border border-line bg-ledger-panel p-3 text-ledger-text shadow-xl"
+      >
+        <FotoPeca
+          productId={produto.id}
+          variantId={produto.variantId}
+          alt={produto.name}
+          className="aspect-square w-full rounded-lg border border-line-soft bg-surface-muted object-contain"
+          vazio={
+            <div className="grid aspect-square w-full place-items-center rounded-lg bg-surface-muted text-sm text-ledger-muted">
+              Sem foto cadastrada
+            </div>
+          }
+        />
+        <p className="mt-2 text-center text-xs font-semibold">
+          {referencia} · {produto.name}
+        </p>
+      </TooltipContent>
+    </Tooltip>
   );
 }

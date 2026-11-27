@@ -485,7 +485,7 @@ export function ProdutoFicha({ id, children, contagemVariantes = 0, temImagem = 
         aside={fotos}
         eyebrow={id ? "Produto" : "Novo produto"}
         title={String(form["name"] || "") || "Novo produto"}
-        description={`Código interno: ${p?.internal_code ?? "gerado no primeiro salvamento"} · Endereço: /${slugPrevia || "—"} · ${contagemVariantes} variante(s) · ${pct}% concluído`}
+        description={`Referência: ${String(form["reference_code"] || "").trim() || p?.reference_code || (id ? "Sem referência" : "gerada após categoria e banho")} · Endereço: /${slugPrevia || "—"} · ${contagemVariantes} variante(s) · ${pct}% concluído`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {id && <EtiquetasImprimir origens={[{ productId: id }]} />}

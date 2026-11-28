@@ -87,6 +87,8 @@ describe("0395: decisão depois do teste e do crédito", () => {
     expect(d.dados!.decisao).toBe("aprovada_automatica");
     // 0412: sem os documentos ainda não aprova; espera na Documentação
     expect(await estado(l)).toEqual({ etapa: "documentacao", status: "em_analise", outcome: "aberta" });
+    // 0427: passou na regra → o link dos documentos nasce agora
+    expect((await um<{ n: number }>(`select count(*)::int n from public.candidatura_documentos_link where lead_id=$1 and expira_em > now()`, [l])).n).toBe(1);
     const antes = await rpc<{ ganhas: number; em_atendimento: number }>(master, "crm_metrics", { _canal: "site" });
     expect((await enviarDocumentosCandidata(l)).aprovada).toBe(true);
     expect(await estado(l)).toEqual({ etapa: "aprovada", status: "aprovado", outcome: "ganha" });
@@ -95,7 +97,7 @@ describe("0395: decisão depois do teste e do crédito", () => {
     expect(Number(antes.dados.em_atendimento) - Number(depois.dados.em_atendimento)).toBe(1);
   });
 
-  test("documentos enviados antes da consulta: a decisão já aprova direto", async () => {
+  test("documentos já recebidos quando a decisão sai (ex.: pedidos antes pela equipe): aprova direto", async () => {
     const l = await lead({ idade: 30 });
     await testeConcluido(l, "verde");
     expect((await enviarDocumentosCandidata(l)).aprovada).toBe(false);
@@ -187,6 +189,8 @@ describe("0395: permissões e site sem representante", () => {
     await testeConcluido(l, "amarelo");
     await credito(l, 800);
     await decidir(l);
+    // 0427: caiu na Análise → ninguém recebe pedido de documentos sozinho
+    expect((await um<{ n: number }>(`select count(*)::int n from public.candidatura_documentos_link where lead_id=$1`, [l])).n).toBe(0);
     // 0412: sem documentos ninguém aprova, nem o Daniel
     expect((await rpc(master, "crm_mark_won", { _lead: l, _nota: "revisado" })).erro).toContain("os documentos");
     expect((await enviarDocumentosCandidata(l)).aprovada).toBe(false); // revisão: continua com o Daniel

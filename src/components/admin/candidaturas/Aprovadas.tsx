@@ -6,6 +6,7 @@
  * Nada é enviado sozinho: o WhatsApp abre com a mensagem pronta para a pessoa conferir e enviar.
  */
 import * as React from "react";
+import { useRequisitosAprovacao } from "@/components/admin/candidaturas/RequisitosAprovacao";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -30,7 +31,7 @@ type Rep = { id: string; nome: string; whatsapp: string | null };
 const dataBR = (iso: string) => new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 export const linkDocumentos = (token: string) => `${window.location.origin}/documentos/${token}`;
 export const mensagemDocumentos = (nome: string, token: string) =>
-  `Oi, ${nome.split(" ")[0]}! Aqui é da Lardan Semijoias. Seu cadastro foi aprovado! Para seguir com a sua maleta, ` +
+  `Oi, ${nome.split(" ")[0]}! Aqui é da Lardan Semijoias. Para seguir com a sua candidatura, ` +
   `envie por este link 4 fotos: documento com foto, comprovante de residência, uma selfie com o documento e a frente da sua casa. ` +
   `Leva uns 5 minutos: ${linkDocumentos(token)}`;
 
@@ -149,9 +150,12 @@ export function DocumentosCandidata({ leadId, nome, whatsapp, podeEditar }: { le
   const ver = useServerFn(documentosDaCandidata);
   const chave = ["crm", "documentos", leadId];
   const q = useQuery({ queryKey: chave, queryFn: () => ver({ data: { lead: leadId } }), staleTime: 240_000 });
+  // 0427: na Análise, os documentos só são pedidos quando alguém decide seguir (e sempre depois da Assertiva)
+  const req = useRequisitosAprovacao(leadId);
+  const consultou = !!req.data?.requisitos?.credito;
   const gerar = useMutation({
     mutationFn: () => rpc<string>("candidatura_documentos_link_gerar", { _lead: leadId }),
-    onSuccess: () => { toast.success("Link pronto."); void qc.invalidateQueries({ queryKey: chave }); },
+    onSuccess: () => { toast.success("Link dos documentos pronto. Mande para ela."); void qc.invalidateQueries({ queryKey: chave }); void qc.invalidateQueries({ queryKey: ["crm"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
   const conferir = useMutation({
@@ -163,15 +167,16 @@ export function DocumentosCandidata({ leadId, nome, whatsapp, podeEditar }: { le
   if (q.isLoading) return <Skeleton className="h-40 w-full" />;
   if (q.error) return <ErrorState message={(q.error as Error).message} onRetry={() => void q.refetch()} />;
   const d = q.data as DocumentosEquipe;
-  if (!d.aprovada && !d.link) return null;
+  if (!d.aprovada && !d.link && !consultou) return null;
   const por = new Map(d.itens.map((i) => [i.tipo, i]));
   const token = d.link && !d.link.vencido ? d.link.token : null;
   return (
-    <Panel title="Documentos da aprovada">
+    <Panel title="Documentos">
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {d.link?.finalizado_em ? <span className="text-success">Enviados por ela em {new Date(d.link.finalizado_em).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}.</span>
-            : <span className="text-ledger-muted">{d.itens.length ? `${d.itens.filter((i) => i.situacao !== "refazer").length} de 4 enviados, ainda sem terminar.` : "Ela ainda não enviou nada."}</span>}
+            : <span className="text-ledger-muted">{d.itens.length ? `${d.itens.filter((i) => i.situacao !== "refazer").length} de 4 enviados, ainda sem terminar.`
+                : token ? "Ela ainda não enviou nada." : "Ainda não pedidos. Na Análise, peça só se for seguir com ela."}</span>}
           {token && whatsapp && (
             <a href={linkWhatsapp(whatsapp, mensagemDocumentos(nome, token))} target="_blank" rel="noopener noreferrer" className="admin-btn inline-flex items-center gap-1.5">
               <MessageCircle aria-hidden className="size-4" /> Mandar o link
@@ -182,8 +187,8 @@ export function DocumentosCandidata({ leadId, nome, whatsapp, podeEditar }: { le
               <Copy aria-hidden className="size-4" /> Copiar link
             </button>
           )}
-          {podeEditar && d.aprovada && (!d.link || d.link.vencido) && (
-            <button type="button" disabled={gerar.isPending} onClick={() => gerar.mutate()} className="admin-btn">{d.link ? "Renovar link vencido" : "Gerar link dos documentos"}</button>
+          {podeEditar && (d.aprovada || consultou) && !d.link?.finalizado_em && (!d.link || d.link.vencido) && (
+            <button type="button" disabled={gerar.isPending} onClick={() => gerar.mutate()} className="admin-btn">{gerar.isPending ? "Gerando…" : "Pedir documentos"}</button>
           )}
         </div>
         <div className="grid gap-3 sm:grid-cols-2">

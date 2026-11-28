@@ -149,11 +149,12 @@ export const DISC: { enunciado: string; frases: [string, string, string, string]
   { enunciado: "No trabalho, prefiro que…", frases: ["Me deem liberdade para fazer do meu jeito", "Tenha gente animada ao redor", "As coisas sejam estáveis e previsíveis", "Tudo seja bem explicado e organizado"] },
 ];
 
+/** 0427: só aparece para quem passou na análise automática (teste + Assertiva) — o link dos documentos já existe. */
 export const FINAL_TEXTO =
-  "Recebemos suas respostas e a Lardan já está analisando o seu perfil. Falta só um passo: enviar seus documentos. Sem eles a candidatura não pode ser aprovada.";
-/** 0412: quando o link dos documentos não está disponível (ex.: candidatura encerrada). */
+  "Boa notícia: o seu perfil passou na primeira análise da Lardan! Falta só um passo: enviar seus documentos. Sem eles a candidatura não pode ser aprovada.";
+/** 0427: sem o link (foi para a análise de uma pessoa, ou a consulta ainda não terminou). */
 export const FINAL_TEXTO_SEM_DOCUMENTOS =
-  "Recebemos suas respostas. Agora vamos analisar o seu perfil e a Lardan te dá o retorno pelo WhatsApp.";
+  "Recebemos suas respostas. Agora a Lardan analisa o seu perfil e te dá o retorno pelo WhatsApp.";
 
 /** Respostas da candidata, como ficam gravadas (códigos, nunca pontos). */
 export interface Respostas {

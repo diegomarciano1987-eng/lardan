@@ -119,7 +119,12 @@ describe("0398: app do representante — teste e aprovação antes da maleta", (
     // 0412: o representante vê o resumo (teste e crédito) para poder decidir; sem documentos ainda não aprova
     expect(s2.resumo).toMatchObject({ semaforo: "amarelo", credito: "dentro", score: 800 });
     expect(s2).toMatchObject({ pode_aprovar: false, falta: ["os documentos (4 fotos)"] });
-    expect(String(s2.documentos_token)).toMatch(/^[a-f0-9]{64}$/);
+    // 0427: na Análise ninguém recebe pedido de documentos sozinho; o representante pede se for seguir (crédito dentro da regra)
+    expect(s2.documentos_token).toBeNull();
+    expect(s2.pode_pedir_documentos).toBe(true);
+    expect((await rpc(repOutro, "rep_candidata_pedir_documentos", { _rep: repOutro.partyId, _lead: lead_id })).erro).toContain("não é sua");
+    expect((await rpc(rep, "rep_candidata_pedir_documentos", { _rep: rep.partyId, _lead: lead_id })).erro).toBeNull();
+    expect(String((await situacao(lead_id)).dados!.documentos_token)).toMatch(/^[a-f0-9]{64}$/);
     expect((await rpc(rep, "rep_candidata_aprovar", { _rep: rep.partyId, _lead: lead_id, _nota: null })).erro).toContain("os documentos");
     expect((await rpc(master, "crm_mark_won", { _lead: lead_id, _nota: "ok" })).erro).toContain("os documentos");
 
@@ -171,7 +176,8 @@ describe("0398: app do representante — teste e aprovação antes da maleta", (
     await credito(lead_id, 300);
     expect((await rpcServico<{ decisao: string }>("captacao_decidir", { _lead: lead_id })).dados!.decisao).toBe("revisao");
     await enviarDocumentosCandidata(lead_id);
-    expect((await situacao(lead_id)).dados).toMatchObject({ situacao: "analise", pode_aprovar: false });
+    expect((await situacao(lead_id)).dados).toMatchObject({ situacao: "analise", pode_aprovar: false, pode_pedir_documentos: false });
+    expect((await rpc(rep, "rep_candidata_pedir_documentos", { _rep: rep.partyId, _lead: lead_id })).erro).toContain("decide se pede");
     expect((await rpc(rep, "rep_candidata_aprovar", { _rep: rep.partyId, _lead: lead_id, _nota: null })).erro).toContain("só a Lardan");
     expect((await rpc(master, "crm_mark_won", { _lead: lead_id, _nota: "Daniel conferiu" })).erro).toBeNull();
   });
@@ -199,10 +205,14 @@ describe("0398: app do representante — teste e aprovação antes da maleta", (
 });
 
 describe("0398: documentos da aprovada", () => {
-  test("link nasce quando ela conclui o teste; página mostra só o primeiro nome; caminhos, envio, conferência e reenvio", async () => {
+  test("link só depois da Assertiva (0427): teste sozinho não pede; a equipe pede depois da consulta; página, envio, conferência e reenvio", async () => {
     const l = await leadSite({ aprovada: false });
     expect(await token(l)).toBeNull();
-    await testeConcluido(l, "amarelo"); // 0412: os documentos vêm antes da aprovação
+    await testeConcluido(l, "amarelo");
+    expect(await token(l)).toBeNull(); // concluir o teste não pede documentos
+    expect((await rpc(master, "candidatura_documentos_link_gerar", { _lead: l })).erro).toContain("depois da consulta");
+    await credito(l, 800);
+    expect((await rpc(master, "candidatura_documentos_link_gerar", { _lead: l })).erro).toBeNull();
     const t = (await token(l))!;
     expect(t).toMatch(/^[a-f0-9]{64}$/);
 

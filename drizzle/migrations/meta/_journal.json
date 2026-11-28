@@ -2990,6 +2990,13 @@
       "when": 1795810894414,
       "tag": "0426_trocas_juntaveis_protocolo",
       "breakpoints": true
+    },
+    {
+      "idx": 427,
+      "version": "7",
+      "when": 1795878926756,
+      "tag": "0427_0427_captacao_documentos_depois_da_assertiva",
+      "breakpoints": true
     }
   ]
 }

@@ -26783,6 +26783,10 @@ export type Database = {
         Returns: Json
       }
       rep_candidata_ficha: { Args: { _lead: string }; Returns: Json }
+      rep_candidata_pedir_documentos: {
+        Args: { _lead: string; _rep: string }
+        Returns: string
+      }
       rep_candidata_perfil: { Args: { _lead: string }; Returns: Json }
       rep_candidata_situacao: {
         Args: { _lead: string; _rep: string }

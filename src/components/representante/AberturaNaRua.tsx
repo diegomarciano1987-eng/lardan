@@ -536,6 +536,8 @@ type Situacao = {
   /** 0412 */
   falta?: string[];
   pode_aprovar?: boolean;
+  /** 0427: na Análise, com o crédito dentro da regra, o representante decide se pede os documentos */
+  pode_pedir_documentos?: boolean;
   resumo?: { semaforo: string | null; perfil_disc: string | null; ipl: number | null; credito: "dentro" | "fora" | "sem_consulta"; score: number | null; score_minimo: number | null; motivos: string[] } | null;
 };
 const COR_SEMAFORO: Record<string, string> = { verde: "Verde", amarelo: "Amarelo", vermelho: "Vermelho" };
@@ -589,6 +591,14 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
       return (data as unknown as { token: string }).token;
     },
     onSuccess: () => void qc.invalidateQueries({ queryKey: chave }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const pedirDocs = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("rep_candidata_pedir_documentos" as never, { _rep: rep, _lead: leadId } as never);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => { toast.success("Link dos documentos pronto. Mande para ela."); void qc.invalidateQueries({ queryKey: chave }); },
     onError: (e: Error) => toast.error(e.message),
   });
   const aprovar = useMutation({
@@ -651,7 +661,9 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
             ? `${primeiro} terminou o teste. A Lardan está consultando o CPF na Assertiva; costuma sair em poucos minutos. Esta tela atualiza sozinha.`
             : s.situacao === "documentos"
               ? `Teste e crédito de ${primeiro} passaram. Assim que ela mandar os documentos, a aprovação sai sozinha e a maleta libera.`
-              : `Teste e consulta de ${primeiro} prontos. Veja o resumo: com os documentos enviados, você pode aprovar (crédito dentro da regra) ou deixar para o Daniel.`}
+              : s.resumo?.credito === "dentro"
+                ? `${primeiro} não passou direto na análise automática. Veja o resumo: se você quiser seguir com ela, peça os documentos e, quando chegarem, aprove.`
+                : `O crédito de ${primeiro} ficou fora da regra. A Lardan (Daniel) decide se segue e se pede os documentos.`}
         </p>
         <ResumoCandidata s={s} />
         {docs && (
@@ -666,6 +678,11 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
           </div>
         )}
         {s.documentos_enviados && <p className="text-xs text-muted-foreground">Documentos recebidos.</p>}
+        {s.situacao === "analise" && s.pode_pedir_documentos && !docs && (
+          <button type="button" disabled={pedirDocs.isPending} onClick={() => pedirDocs.mutate()} className="min-h-11 w-full rounded-xl border border-border text-sm font-medium">
+            {pedirDocs.isPending ? "Preparando…" : `Pedir os documentos de ${primeiro}`}
+          </button>
+        )}
         {s.situacao === "analise" && (
           s.pode_aprovar ? (
             <Button type="button" disabled={aprovar.isPending} onClick={() => aprovar.mutate()} className="min-h-12 w-full rounded-xl text-sm font-semibold">
@@ -673,9 +690,9 @@ export function GateAprovacao({ rep, leadId, nome, whatsapp, onLiberada, onFecha
             </Button>
           ) : (
             <p className="text-xs text-muted-foreground">
-              {(s.falta ?? []).length > 0
-                ? `Para aprovar ainda falta ${(s.falta ?? []).join(", ")}.`
-                : "O crédito dela ficou fora da regra: só a Lardan (Daniel) pode aprovar."}
+              {s.resumo?.credito !== "dentro"
+                ? "O crédito dela ficou fora da regra: só a Lardan (Daniel) pode aprovar."
+                : (s.falta ?? []).length > 0 ? `Para aprovar ainda falta ${(s.falta ?? []).join(", ")}.` : ""}
             </p>
           )
         )}

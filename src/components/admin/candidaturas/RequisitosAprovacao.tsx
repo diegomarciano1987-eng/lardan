@@ -37,7 +37,7 @@ export function RequisitosAprovacao({ leadId, compacto = false }: { leadId: stri
   const itens: [string, boolean, string][] = [
     ["Teste DISC", r.teste, "a candidata responde pelo link do teste"],
     ["Consulta Assertiva", r.credito, "sai sozinha quando ela conclui o teste"],
-    ["Documentos (4 fotos)", r.documentos, "o link aparece logo depois do teste"],
+    ["Documentos (4 fotos)", r.documentos, "pedidos sozinhos só para quem passa na Assertiva; na Análise, use \"Pedir documentos\""],
   ];
   const ok = itens.every((i) => i[1]);
   return (

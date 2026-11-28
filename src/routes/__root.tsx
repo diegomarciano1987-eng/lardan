@@ -19,7 +19,11 @@ import { deveRecarregarSessao } from "@/lib/sessao-regras";
 import { esquecerSessao } from "@/lib/sessao-estavel";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SITE_URL } from "@/lib/seo";
-import { setAnalyticsRoute, trackPageView } from "@/lib/analytics";
+import { isPublicAnalyticsPath, setAnalyticsRoute, trackPageView } from "@/lib/analytics";
+import consentDefaults from "@/lib/consent-defaults.js?raw";
+import { CookieConsent } from "@/components/site/CookieConsent";
+import { onConsentChange } from "@/lib/consent";
+import { initGoogleTagManager, refreshGoogleTagPermission, setGoogleTagRoute } from "@/lib/google-tag-manager";
 
 function NotFoundComponent() {
   return (
@@ -84,6 +88,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
+    scripts: [{ children: consentDefaults }],
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -165,18 +170,26 @@ function RootComponent() {
   useEffect(() => {
     return router.subscribe("onBeforeNavigate", ({ toLocation }) => {
       setAnalyticsRoute(toLocation.pathname);
+      setGoogleTagRoute(toLocation.href);
     });
   }, [router]);
   // Números grandes nunca vazam dos cards (reduz a fonte até caber).
   useEffect(() => iniciarNumerosCabem(), []);
   useEffect(() => {
     void trackPageView(location.pathname);
+    void initGoogleTagManager(location.pathname);
+    return onConsentChange(() => {
+      setAnalyticsRoute(location.pathname);
+      void refreshGoogleTagPermission(location.pathname);
+      void trackPageView(location.pathname);
+    });
   }, [location.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      {isPublicAnalyticsPath(location.pathname) && <CookieConsent />}
     </QueryClientProvider>
   );
 }

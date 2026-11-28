@@ -1,5 +1,9 @@
 # Roadmap — correções imediatas 17/11
 
+## 28/11 — Google Tag Manager público
+- [x] Instalar GTM-WK8WWR2R com escolhas regionais separadas e manter áreas privadas isoladas.
+- [x] Validar aceite, recusa, retirada e navegação; atualizar aviso de privacidade, sem publicar.
+
 ## 27/11 tarde
 - [x] URGENTE: busca de consultoras da montagem lenta (10–12 s, tela desistia) para Ketllin/Thalia — reescrita rápida no Cloud.
 - [x] Representante: ao transferir maleta, promissória ZapSign some; precisa nova promissória com o nome da nova consultora.

@@ -3,7 +3,7 @@
  * esta versão junto do registro, para provar sob qual texto o consentimento
  * foi dado. Ao publicar um novo aviso, incrementar aqui.
  */
-export const PRIVACY_VERSION = "2026-09-05.v1";
+export const PRIVACY_VERSION = "2026-11-28.v2";
 
 export type Utm = Record<string, string>;
 

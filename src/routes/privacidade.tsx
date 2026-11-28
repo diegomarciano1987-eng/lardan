@@ -12,8 +12,8 @@ import { breadcrumbLd, canonical, jsonLdScript, organizationLd, pageMeta, webPag
  * Qualquer mudança de texto aprovada pela marca exige nova versão em
  * src/lib/privacy.ts e nova data de publicação abaixo.
  */
-const PUBLICADO_EM = "2026-10-05";
-const PUBLICADO_EXTENSO = "5 de outubro de 2026";
+const PUBLICADO_EM = "2026-11-28";
+const PUBLICADO_EXTENSO = "28 de novembro de 2026";
 
 const TITULO = "Aviso de Privacidade | Lardan Semijoias";
 const DESCRICAO =
@@ -121,6 +121,13 @@ function PrivacidadePage() {
             WhatsApp, quando você escolhe conversar por lá, e a plataforma de cobrança usada com
             consultoras aprovadas. Também podem ser informados a autoridades quando a lei exigir.
           </p>
+        </Secao>
+
+        <Secao id="cookies" titulo="Cookies, audiência e anúncios">
+          <p>A hospedagem usa um cookie estritamente necessário para manter a versão do site durante sua visita. A contagem de visitas da Lovable não usa cookies nem identifica você; visitas, tempo de permanência, desempenho e erros continuam sendo contados antes da escolha. Cliques seguem sua preferência de análise de visitas.</p>
+          <p>Nas páginas públicas, usamos Google Analytics e Google Tag Manager para permitir a medição e a personalização de anúncios pelo Google. Esses serviços podem receber páginas visitadas, endereço da página, origem da visita, informações do navegador e dispositivo e identificadores de cookies e anúncios, para medir resultados e otimizar campanhas. Não enviamos CPF, informações financeiras nem dados das áreas internas por esta instalação.</p>
+          <p>Pedimos escolhas separadas para análise de visitas e publicidade na União Europeia e no Espaço Econômico Europeu, Reino Unido, Suíça e Canadá, e quando não conseguimos determinar a localização. Nessas situações, os serviços opcionais do Google aguardam sua permissão. Fora dessas regiões, a medição pode iniciar sem esse aviso, respeitando recusas e o sinal de privacidade do navegador.</p>
+          <p>Você pode aceitar, recusar ou alterar cada finalidade em “Configurações de cookies”, no rodapé. Guardamos a escolha, a data e a versão do aviso no navegador; a recusa interrompe novas transmissões opcionais. Para remover serviços já carregados, a página pode ser recarregada ao retirar a permissão. Consulte também <a href="https://business.safety.google/privacy/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">como o Google trata esses dados</a>.</p>
         </Secao>
 
         <Secao id="retencao" titulo="Por quanto tempo guardamos">

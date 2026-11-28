@@ -4,6 +4,7 @@ import smalldataAsset from "@/assets/smalldata-logo.png.asset.json";
 import { SocialLinks } from "./SocialLinks";
 import { SelosSeguranca } from "./SelosSeguranca";
 import { EMPRESA, ENDERECO_LINHAS, MAPA_URL } from "@/lib/institucional";
+import { CookieSettingsButton } from "./CookieConsent";
 
 /**
  * Rodapé institucional.
@@ -128,6 +129,7 @@ export function SiteFooter() {
 
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center">
           <span>© {new Date().getFullYear()} Lardan. Todos os direitos reservados.</span>
+          <CookieSettingsButton />
           <Link
             to="/equipe"
             className="tracking-[0.18em] uppercase transition-colors hover:text-foreground"

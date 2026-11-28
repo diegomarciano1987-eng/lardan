@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("../../src/lib/consent", () => ({ canTrack: vi.fn(async () => true), readChoice: vi.fn(() => "granted") }));
+
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe("Public Analytics isolation", () => {
@@ -49,10 +51,42 @@ describe("Public Analytics isolation", () => {
     vi.stubGlobal("document", { querySelector: () => null, createElement: () => ({ dataset: {} }), head: { appendChild } });
     const { trackPageView, setAnalyticsRoute } = await import("../../src/lib/analytics");
     const pending = trackPageView("/seja-lardan");
+    await vi.waitFor(() => expect(complete).toBeTypeOf("function"));
     setAnalyticsRoute("/admin");
     if (!complete) throw new Error("Expected config request");
     complete({ ok: true, json: async () => ({ id: "G-PUBLIC-TEST" }) });
     await pending;
     expect(appendChild).not.toHaveBeenCalled();
+  });
+
+  it("does not duplicate a public view when only advertising preferences change", async () => {
+    vi.resetModules();
+    const browser: Record<string, unknown> = { location: { href: "https://www.lardan.com.br/contato" } };
+    vi.stubGlobal("window", browser);
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ id: "G-PUBLIC-TEST" }) })));
+    vi.stubGlobal("document", { querySelector: () => null, createElement: () => ({ dataset: {} }), head: { appendChild: vi.fn() }, title: "Lardan", referrer: "" });
+    const { trackPageView } = await import("../../src/lib/analytics");
+    await trackPageView("/contato");
+    await trackPageView("/contato");
+    const commands = (browser["dataLayer"] as IArguments[]).map(args => Array.from(args));
+    expect(commands.filter(c => c[1] === "page_view")).toHaveLength(1);
+  });
+
+  it("withdrawal disables GA automatic events and prevents further page views", async () => {
+    vi.resetModules();
+    const browser: Record<string, unknown> = { location: { href: "https://www.lardan.com.br/contato" } };
+    vi.stubGlobal("window", browser);
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ id: "G-PUBLIC-TEST" }) })));
+    vi.stubGlobal("document", { querySelector: () => null, createElement: () => ({ dataset: {} }), head: { appendChild: vi.fn() }, title: "Lardan", referrer: "" });
+    const { trackPageView, setAnalyticsRoute } = await import("../../src/lib/analytics");
+    await trackPageView("/contato");
+    const { readChoice, canTrack } = await import("../../src/lib/consent");
+    vi.mocked(readChoice).mockReturnValue("denied");
+    vi.mocked(canTrack).mockResolvedValue(false);
+    setAnalyticsRoute("/contato");
+    await trackPageView("/seja-lardan");
+    expect(browser["ga-disable-G-PUBLIC-TEST"]).toBe(true);
+    const commands = (browser["dataLayer"] as IArguments[]).map(args => Array.from(args));
+    expect(commands.filter(c => c[1] === "page_view")).toHaveLength(1);
   });
 });
